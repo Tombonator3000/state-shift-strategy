@@ -53,8 +53,19 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
-  }
 
+    /* Shadow Government Theme Colors */
+    --government-blue: 220 100% 25%;
+    --government-dark: 220 100% 8%;
+    --truth-red: 0 85% 55%;
+    --secret-red: 0 100% 40%;
+    
+    /* Newspaper colors */
+    --newspaper-bg: 45 20% 95%;
+    --newspaper-text: 0 0% 10%;
+    --newspaper-header: 0 0% 85%;
+    --newspaper-border: 0 0% 60%;
+  }
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -91,6 +102,18 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Dark mode Shadow Government colors */
+    --government-blue: 220 100% 35%;
+    --government-dark: 220 100% 12%;
+    --truth-red: 0 85% 65%;
+    --secret-red: 0 100% 50%;
+    
+    /* Dark newspaper colors */
+    --newspaper-bg: 0 0% 15%;
+    --newspaper-text: 0 0% 90%;
+    --newspaper-header: 0 0% 20%;
+    --newspaper-border: 0 0% 40%;
   }
 }
 
