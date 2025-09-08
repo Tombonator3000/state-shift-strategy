@@ -33,6 +33,7 @@ interface GameState {
     progress: number;
     target: number;
     completed: boolean;
+    revealed: boolean;
   };
 }
 
@@ -112,7 +113,8 @@ export const useGameState = () => {
       description: 'Control 3 coastal states',
       progress: 2,
       target: 3,
-      completed: false
+      completed: false,
+      revealed: false
     }
   });
 

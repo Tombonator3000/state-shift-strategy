@@ -6,6 +6,7 @@ import GameHand from '@/components/game/GameHand';
 import TruthMeter from '@/components/game/TruthMeter';
 import Newspaper from '@/components/game/Newspaper';
 import GameMenu from '@/components/game/GameMenu';
+import SecretAgenda from '@/components/game/SecretAgenda';
 import { useGameState } from '@/hooks/useGameState';
 
 const Index = () => {
@@ -71,23 +72,41 @@ const Index = () => {
       {/* Main game area */}
       <div className="flex h-[calc(100vh-6rem)]">
         {/* Left sidebar - Victory conditions & log */}
-        <div className="w-64 bg-card border-r p-4">
-          <Card className="mb-4 p-3">
-            <h3 className="font-bold text-sm mb-2">Victory Conditions</h3>
-            <div className="text-xs space-y-1 font-mono">
-              <div>Truth ≥90% or ≤10%</div>
-              <div>Control 10 states</div>
-              <div>Accumulate 200 IP</div>
-              <div className="text-secret-red">Secret Agenda: [REDACTED]</div>
+        <div className="w-72 bg-government-dark border-r border-secret-red/30 p-4">
+          <Card className="mb-4 p-4 bg-yellow-500/90 text-black border-2 border-black">
+            <h3 className="font-bold text-sm mb-3 text-center">VICTORY CONDITIONS</h3>
+            <div className="text-xs space-y-2 font-mono">
+              <div className="flex justify-between">
+                <span>States:</span>
+                <span className="font-bold">{gameState.controlledStates.length}/10</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Truth:</span>
+                <span className="font-bold">{gameState.truth}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span>IP:</span>
+                <span className="font-bold">{gameState.ip}/200</span>
+              </div>
+              <div className="border-t border-black/20 pt-2 text-center">
+                <div className="text-xs">The government opposes you</div>
+                <div className="text-xs">You are the OPPOSITION</div>
+                <div className="text-xs font-bold text-red-600">SHADOW GOVERNMENT ACTIVATED!</div>
+              </div>
             </div>
           </Card>
+
+          {/* Secret Agenda */}
+          <div className="mb-4">
+            <SecretAgenda agenda={gameState.secretAgenda} />
+          </div>
           
-          <Card className="p-3 h-64">
-            <h3 className="font-bold text-sm mb-2">Game Log</h3>
-            <div className="text-xs font-mono space-y-1 max-h-48 overflow-y-auto">
+          <Card className="p-3 bg-card/50 border border-secret-red/30">
+            <h3 className="font-bold text-sm mb-2 text-secret-red font-mono">CLASSIFIED INTEL</h3>
+            <div className="text-xs font-mono space-y-1 max-h-40 overflow-y-auto">
               {gameState.log.map((entry, i) => (
-                <div key={i} className="text-muted-foreground">
-                  {entry}
+                <div key={i} className="text-muted-foreground animate-fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
+                  • {entry}
                 </div>
               ))}
             </div>

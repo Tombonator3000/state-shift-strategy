@@ -88,10 +88,67 @@ export default {
             height: "0",
           },
         },
+        "glitch": {
+          "0%": { transform: "translate(0)" },
+          "20%": { transform: "translate(-2px, 2px)" },
+          "40%": { transform: "translate(-2px, -2px)" },
+          "60%": { transform: "translate(2px, 2px)" },
+          "80%": { transform: "translate(2px, -2px)" },
+          "100%": { transform: "translate(0)" }
+        },
+        "redacted-reveal": {
+          "0%": { opacity: "0", filter: "blur(10px)" },
+          "50%": { opacity: "0.5", filter: "blur(5px)" },
+          "100%": { opacity: "1", filter: "blur(0)" }
+        },
+        "card-deal": {
+          "0%": { 
+            transform: "translateY(-100px) rotate(15deg)",
+            opacity: "0"
+          },
+          "100%": { 
+            transform: "translateY(0) rotate(0deg)",
+            opacity: "1"
+          }
+        },
+        "card-play": {
+          "0%": { 
+            transform: "scale(1) translateY(0)",
+            opacity: "1"
+          },
+          "50%": { 
+            transform: "scale(1.1) translateY(-20px)",
+            opacity: "0.8"
+          },
+          "100%": { 
+            transform: "scale(0.8) translateY(-100px)",
+            opacity: "0"
+          }
+        },
+        "truth-pulse": {
+          "0%, 100%": { 
+            transform: "scale(1)",
+            filter: "brightness(1)"
+          },
+          "50%": { 
+            transform: "scale(1.05)",
+            filter: "brightness(1.2)"
+          }
+        },
+        "conspiracy-float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" }
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "glitch": "glitch 0.3s ease-in-out",
+        "redacted-reveal": "redacted-reveal 0.8s ease-out",
+        "card-deal": "card-deal 0.6s ease-out",
+        "card-play": "card-play 0.8s ease-in",
+        "truth-pulse": "truth-pulse 2s ease-in-out infinite",
+        "conspiracy-float": "conspiracy-float 3s ease-in-out infinite"
       },
     },
   },

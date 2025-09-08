@@ -49,31 +49,50 @@ const GameHand = ({ cards, onPlayCard, disabled }: GameHandProps) => {
         {cards.map((card, index) => (
           <Card 
             key={card.id} 
-            className={`p-3 cursor-pointer transition-all hover:scale-105 ${getTypeColor(card.type)} ${
+            className={`relative p-0 cursor-pointer transition-all hover:scale-105 hover:-translate-y-2 ${getTypeColor(card.type)} ${
               disabled ? 'opacity-50' : ''
-            }`}
+            } overflow-hidden animate-card-deal`}
+            style={{ animationDelay: `${index * 0.1}s` }}
           >
-            <div className="flex items-start justify-between">
+            {/* TCG Card Layout */}
+            <div className="relative">
               {/* Rarity stripe */}
-              <div className={`w-1 h-full absolute left-0 top-0 ${getRarityColor(card.rarity)}`}></div>
+              <div className={`absolute left-0 top-0 w-2 h-full ${getRarityColor(card.rarity)} z-10`}></div>
               
-              <div className="flex-1 ml-3">
-                <div className="flex items-center justify-between mb-1">
-                  <h4 className="font-bold text-sm font-mono">{card.name}</h4>
-                  <Badge variant="outline" className="text-xs">
-                    {card.cost} IP
+              {/* Cost pip */}
+              <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center z-10">
+                {card.cost}
+              </div>
+              
+              {/* Card header */}
+              <div className="p-3 pb-2 bg-gradient-to-r from-card to-card/80">
+                <h4 className="font-bold text-sm font-mono text-center">{card.name}</h4>
+              </div>
+              
+              {/* Art box placeholder */}
+              <div className="h-24 bg-muted/20 flex items-center justify-center text-xs text-muted-foreground border-y">
+                [CLASSIFIED IMAGE]
+              </div>
+              
+              {/* Card content */}
+              <div className="p-3">
+                <div className="flex justify-center mb-2">
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs font-mono ${card.type === 'MEDIA' ? 'bg-truth-red/20 border-truth-red text-truth-red' : 
+                      card.type === 'ZONE' ? 'bg-government-blue/20 border-government-blue text-government-blue' :
+                      card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
+                      'bg-accent/20 border-accent text-accent-foreground'}`}
+                  >
+                    [{card.type}]
                   </Badge>
                 </div>
                 
-                <Badge variant="secondary" className="text-xs mb-2">
-                  {card.type}
-                </Badge>
-                
-                <p className="text-xs text-muted-foreground mb-2">
+                <div className="text-xs text-center mb-3 min-h-8 flex items-center justify-center font-medium">
                   {card.text}
-                </p>
+                </div>
                 
-                <div className="text-xs italic text-muted-foreground mb-2">
+                <div className="text-xs italic text-muted-foreground text-center mb-3 min-h-6 border-t pt-2">
                   "{card.flavorTruth}"
                 </div>
                 
@@ -81,9 +100,9 @@ const GameHand = ({ cards, onPlayCard, disabled }: GameHandProps) => {
                   size="sm"
                   onClick={() => onPlayCard(card.id)}
                   disabled={disabled}
-                  className="w-full"
+                  className="w-full text-xs animate-on-hover"
                 >
-                  Play Card
+                  Deploy Asset
                 </Button>
               </div>
             </div>
