@@ -11,137 +11,150 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
   const [glitching, setGlitching] = useState(false);
   const [redactedText, setRedactedText] = useState('SHADOW GOVERNMENT');
   const [showCredits, setShowCredits] = useState(false);
+  const [showFactionSelect, setShowFactionSelect] = useState(false);
+  const [subtitleText, setSubtitleText] = useState('ULTIMATE HUMOR EDITION');
+  const [quoteText, setQuoteText] = useState('"Where conspiracy theories go to become policy"');
+  const [descriptionText, setDescriptionText] = useState('Control the narrative. Manipulate the truth.');
+  const [description2Text, setDescription2Text] = useState('Convince people birds are real (or aren\'t).');
+  const [promoText, setPromoText] = useState('NOW WITH 420% MORE SATIRE!');
 
   useEffect(() => {
-    const glitchInterval = setInterval(() => {
-      if (Math.random() < 0.1) { // 10% chance every 3 seconds
-        setGlitching(true);
-        const glitchTexts = ['SHEEPLE TIMES', 'THE TRUTH DAILY', 'CONSPIRACY NEWS', 'SHADOW GOVERNMENT'];
-        setRedactedText(glitchTexts[Math.floor(Math.random() * glitchTexts.length)]);
-        setTimeout(() => {
-          setGlitching(false);
-          setRedactedText('SHADOW GOVERNMENT');
-        }, 200);
-      }
-    }, 3000);
+    const glitchTexts = {
+      title: ['SHEEPLE TIMES', 'THE TRUTH DAILY', 'CONSPIRACY NEWS', 'SHADOW GOVERNMENT', 'DEEP STATE WEEKLY', 'LIZARD PEOPLE POST'],
+      subtitle: ['ULTIMATE HUMOR EDITION', 'CLASSIFIED EDITION', 'REDACTED DAILY', 'TOP SECRET TIMES', 'CONSPIRACY WEEKLY'],
+      quote: [
+        '"Where conspiracy theories go to become policy"',
+        '"All your base are belong to us"',
+        '"The cake is a lie"',
+        '"Birds aren\'t real and neither are we"',
+        '"Trust no one, especially us"',
+        '"Making Atlantis Great Again"'
+      ],
+      description: [
+        'Control the narrative. Manipulate the truth.',
+        'Expose the lies. Reveal the secrets.',
+        'Question everything. Believe nothing.',
+        'Wake up the sheeple. Join the resistance.',
+        'The truth is out there. Probably.'
+      ],
+      description2: [
+        'Convince people birds are real (or aren\'t).',
+        'Prove that Finland actually exists.',
+        'Debate whether the moon is made of cheese.',
+        'Investigate if Australia is upside down.',
+        'Confirm that cats are government spies.'
+      ],
+      promo: [
+        'NOW WITH 420% MORE SATIRE!',
+        'NEW! EXTRA CONSPIRACY FLAVORING!',
+        'APPROVED BY THE ILLUMINATI!',
+        'BANNED IN 47 DIMENSIONS!',
+        'NOW WITH REAL LIZARD PEOPLE!'
+      ]
+    };
 
-    return () => clearInterval(glitchInterval);
+    // Multiple glitch intervals for different elements
+    const intervals = [
+      // Title glitch
+      setInterval(() => {
+        if (Math.random() < 0.15) {
+          setGlitching(true);
+          setRedactedText(glitchTexts.title[Math.floor(Math.random() * glitchTexts.title.length)]);
+          setTimeout(() => {
+            setGlitching(false);
+            setRedactedText('SHADOW GOVERNMENT');
+          }, 300);
+        }
+      }, Math.random() * 2000 + 2000), // 2-4 seconds
+
+      // Subtitle glitch
+      setInterval(() => {
+        if (Math.random() < 0.12) {
+          setSubtitleText(glitchTexts.subtitle[Math.floor(Math.random() * glitchTexts.subtitle.length)]);
+          setTimeout(() => setSubtitleText('ULTIMATE HUMOR EDITION'), 400);
+        }
+      }, Math.random() * 3000 + 3000), // 3-6 seconds
+
+      // Quote glitch
+      setInterval(() => {
+        if (Math.random() < 0.08) {
+          setQuoteText(glitchTexts.quote[Math.floor(Math.random() * glitchTexts.quote.length)]);
+          setTimeout(() => setQuoteText('"Where conspiracy theories go to become policy"'), 600);
+        }
+      }, Math.random() * 4000 + 4000), // 4-8 seconds
+
+      // Description glitch
+      setInterval(() => {
+        if (Math.random() < 0.1) {
+          setDescriptionText(glitchTexts.description[Math.floor(Math.random() * glitchTexts.description.length)]);
+          setTimeout(() => setDescriptionText('Control the narrative. Manipulate the truth.'), 500);
+        }
+      }, Math.random() * 3500 + 3500),
+
+      // Description2 glitch
+      setInterval(() => {
+        if (Math.random() < 0.09) {
+          setDescription2Text(glitchTexts.description2[Math.floor(Math.random() * glitchTexts.description2.length)]);
+          setTimeout(() => setDescription2Text('Convince people birds are real (or aren\'t).'), 500);
+        }
+      }, Math.random() * 4000 + 3000),
+
+      // Promo glitch
+      setInterval(() => {
+        if (Math.random() < 0.11) {
+          setPromoText(glitchTexts.promo[Math.floor(Math.random() * glitchTexts.promo.length)]);
+          setTimeout(() => setPromoText('NOW WITH 420% MORE SATIRE!'), 700);
+        }
+      }, Math.random() * 5000 + 4000)
+    ];
+
+    return () => intervals.forEach(clearInterval);
   }, []);
 
   if (showCredits) {
     return <Credits onClose={() => setShowCredits(false)} />;
   }
 
-  return (
-    <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
-      {/* Redacted background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        {Array.from({ length: 30 }).map((_, i) => (
-          <div 
-            key={i}
-            className="absolute bg-newspaper-text h-6"
-            style={{
-              width: `${Math.random() * 300 + 100}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              transform: `rotate(${Math.random() * 4 - 2}deg)`
-            }}
-          />
-        ))}
-      </div>
-
-      <Card className="max-w-4xl w-full p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal relative" style={{ fontFamily: 'serif' }}>
-        {/* Classified stamps */}
-        <div className="absolute top-4 right-4 text-newspaper-text font-mono text-xs transform rotate-12 border-2 border-newspaper-text p-2">
-          TOP SECRET
-        </div>
-        <div className="absolute bottom-4 left-4 text-newspaper-text font-mono text-xs transform -rotate-12 border-2 border-newspaper-text p-2">
-          EYES ONLY
+  if (showFactionSelect) {
+    return (
+      <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
+        {/* Redacted background pattern */}
+        <div className="absolute inset-0 opacity-5">
+          {Array.from({ length: 30 }).map((_, i) => (
+            <div 
+              key={i}
+              className="absolute bg-newspaper-text h-6"
+              style={{
+                width: `${Math.random() * 300 + 100}px`,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                transform: `rotate(${Math.random() * 4 - 2}deg)`
+              }}
+            />
+          ))}
         </div>
 
-        <div className="text-center mb-8">
-          <h1 className={`text-5xl font-bold text-newspaper-text mb-2 ${glitching ? 'animate-glitch' : ''}`}>
-            {redactedText}
-          </h1>
-          <div className="text-xl font-medium text-newspaper-text/80 mb-2">
-            ULTIMATE HUMOR EDITION
-          </div>
-          <div className="text-sm font-italic text-newspaper-text/60 mb-4">
-            "Where conspiracy theories go to become policy"
-          </div>
-          <div className="text-sm text-newspaper-text/80">
-            Control the narrative. Manipulate the truth.
-          </div>
-          <div className="text-sm text-newspaper-text/80">
-            Convince people birds are real (or aren't).
-          </div>
-          <div className="text-lg font-bold text-secret-red mt-4">
-            NOW WITH 420% MORE SATIRE!
-          </div>
-        </div>
+        <Card className="max-w-4xl w-full p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal relative" style={{ fontFamily: 'serif' }}>
+          {/* Back button */}
+          <Button 
+            onClick={() => setShowFactionSelect(false)}
+            variant="outline" 
+            className="absolute top-4 left-4 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+          >
+            ← BACK
+          </Button>
 
-        <div className="space-y-6">
-          <div className="text-center space-y-2 mb-6">
-            <div className="text-sm font-mono text-newspaper-text">Record: 8W / 0L</div>
-            <div className="text-sm font-mono text-newspaper-text">Win Streak: 8</div>
-            <div className="text-xs font-mono text-newspaper-text/60 mt-4">
-              HOTKEYS:
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-newspaper-text mb-4">
+              SELECT YOUR CONSPIRACY
+            </h1>
+            <div className="text-sm text-newspaper-text/80 mb-4">
+              Choose your side in the ultimate battle for truth
             </div>
-            <div className="text-xs font-mono text-newspaper-text/60">
-              Space = End Turn | T = Select Card
-            </div>
-            <div className="text-xs font-mono text-newspaper-text/60">
-              U = Upgrades | S = Stats | Q/L = Save/Load
-            </div>
-          </div>
-
-          {/* Menu Options */}
-          <div className="grid md:grid-cols-2 gap-4 mb-8">
-            <Button 
-              onClick={() => onStartGame('government')}
-              className="w-full py-4 text-lg bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80"
-            >
-              NEW GAME
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
-              disabled
-            >
-              MANAGE EXPANSIONS
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
-              disabled
-            >
-              HOW TO PLAY
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
-              disabled
-            >
-              CONTINUE
-            </Button>
-            <Button 
-              onClick={() => setShowCredits(true)}
-              variant="outline" 
-              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
-            >
-              CREDITS
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
-              disabled
-            >
-              OPTIONS
-            </Button>
           </div>
 
           {/* Faction Selection */}
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 mt-8">
             <Card className="p-6 border-2 border-newspaper-text hover:border-newspaper-text transition-all hover:scale-105 cursor-pointer group bg-newspaper-bg">
               <div className="flex items-center mb-4">
                 <div className="text-3xl mr-3 animate-conspiracy-float">🦎</div>
@@ -209,6 +222,118 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
                 Expose the Conspiracy
               </Button>
             </Card>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
+      {/* Redacted background pattern */}
+      <div className="absolute inset-0 opacity-5">
+        {Array.from({ length: 30 }).map((_, i) => (
+          <div 
+            key={i}
+            className="absolute bg-newspaper-text h-6"
+            style={{
+              width: `${Math.random() * 300 + 100}px`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              transform: `rotate(${Math.random() * 4 - 2}deg)`
+            }}
+          />
+        ))}
+      </div>
+
+      <Card className="max-w-4xl w-full p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal relative" style={{ fontFamily: 'serif' }}>
+        {/* Classified stamps */}
+        <div className="absolute top-4 right-4 text-newspaper-text font-mono text-xs transform rotate-12 border-2 border-newspaper-text p-2">
+          TOP SECRET
+        </div>
+        <div className="absolute bottom-4 left-4 text-newspaper-text font-mono text-xs transform -rotate-12 border-2 border-newspaper-text p-2">
+          EYES ONLY
+        </div>
+
+        <div className="text-center mb-8">
+          <h1 className={`text-5xl font-bold text-newspaper-text mb-2 ${glitching ? 'animate-glitch' : ''}`}>
+            {redactedText}
+          </h1>
+          <div className="text-xl font-medium text-newspaper-text/80 mb-2">
+            {subtitleText}
+          </div>
+          <div className="text-sm font-italic text-newspaper-text/60 mb-4">
+            {quoteText}
+          </div>
+          <div className="text-sm text-newspaper-text/80">
+            {descriptionText}
+          </div>
+          <div className="text-sm text-newspaper-text/80">
+            {description2Text}
+          </div>
+          <div className="text-lg font-bold text-secret-red mt-4">
+            {promoText}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="text-center space-y-2 mb-6">
+            <div className="text-sm font-mono text-newspaper-text">Record: 8W / 0L</div>
+            <div className="text-sm font-mono text-newspaper-text">Win Streak: 8</div>
+            <div className="text-xs font-mono text-newspaper-text/60 mt-4">
+              HOTKEYS:
+            </div>
+            <div className="text-xs font-mono text-newspaper-text/60">
+              Space = End Turn | T = Select Card
+            </div>
+            <div className="text-xs font-mono text-newspaper-text/60">
+              U = Upgrades | S = Stats | Q/L = Save/Load
+            </div>
+          </div>
+
+          {/* Menu Options */}
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            <Button 
+              onClick={() => setShowFactionSelect(true)}
+              className="w-full py-4 text-lg bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80"
+            >
+              START CONSPIRACY
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
+              disabled
+            >
+              MANAGE EXPANSIONS
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
+              disabled
+            >
+              HOW TO PLAY
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
+              disabled
+            >
+              CONTINUE
+            </Button>
+            <Button 
+              onClick={() => setShowCredits(true)}
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+            >
+              CREDITS
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
+              disabled
+            >
+              OPTIONS
+            </Button>
           </div>
         </div>
 
