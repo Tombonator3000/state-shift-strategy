@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { GameCard } from '@/components/game/GameHand';
+import { CARD_DATABASE, generateRandomDeck, getRandomCards } from '@/data/cardDatabase';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -8,6 +9,7 @@ interface GameState {
   truth: number;
   ip: number;
   hand: GameCard[];
+  deck: GameCard[];
   cardsPlayedThisTurn: number;
   cardsPlayedThisRound: Array<{ card: GameCard; player: 'human' | 'ai' }>;
   controlledStates: string[];
@@ -38,50 +40,6 @@ interface GameState {
   };
 }
 
-// Sample cards for the game
-const sampleCards: GameCard[] = [
-  {
-    id: 'media_1',
-    name: 'Leak Documents',
-    type: 'MEDIA',
-    rarity: 'common',
-    text: 'Increase Truth by 10%',
-    flavorGov: 'Another security breach to contain...',
-    flavorTruth: 'The people deserve to know!',
-    cost: 4
-  },
-  {
-    id: 'zone_1',
-    name: 'Infiltrate Capitol',
-    type: 'ZONE',
-    rarity: 'uncommon',
-    text: 'Add 1 Pressure to target state',
-    flavorGov: 'Expand our network of influence',
-    flavorTruth: 'Expose corruption at the source',
-    cost: 5
-  },
-  {
-    id: 'attack_1',
-    name: 'Discredit Whistleblower',
-    type: 'ATTACK',
-    rarity: 'rare',
-    text: 'Target loses 8 IP and discards a card',
-    flavorGov: 'Make them disappear from the headlines',
-    flavorTruth: 'Another truth-teller silenced',
-    cost: 6
-  },
-  {
-    id: 'defensive_1',
-    name: 'Counter-Intelligence',
-    type: 'DEFENSIVE',
-    rarity: 'common',
-    text: 'Block one ATTACK card',
-    flavorGov: 'Our security is impenetrable',
-    flavorTruth: 'We saw that coming a mile away',
-    cost: 3
-  }
-];
-
 const generateRandomEvents = () => [
   {
     id: 'event_1',
@@ -98,7 +56,8 @@ export const useGameState = () => {
     turn: 1,
     truth: 60,
     ip: 15,
-    hand: sampleCards.slice(0, 3),
+    hand: getRandomCards(3),
+    deck: generateRandomDeck(40),
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
     controlledStates: ['CA', 'NY', 'TX'],
@@ -124,13 +83,16 @@ export const useGameState = () => {
     const startingTruth = faction === 'government' ? 40 : 60;
     const startingIP = faction === 'government' ? 20 : 10;
     const handSize = faction === 'truth' ? 4 : 3;
+    const newDeck = generateRandomDeck(40);
+    const startingHand = newDeck.slice(0, handSize);
 
     setGameState(prev => ({
       ...prev,
       faction,
       truth: startingTruth,
       ip: startingIP,
-      hand: sampleCards.slice(0, handSize),
+      hand: startingHand,
+      deck: newDeck.slice(handSize),
       log: [
         `Game started - ${faction} faction selected`,
         `Starting Truth: ${startingTruth}%`,
@@ -182,16 +144,23 @@ export const useGameState = () => {
   }, []);
 
   const endTurn = useCallback(() => {
-    setGameState(prev => ({
-      ...prev,
-      turn: prev.turn + 1,
-      phase: 'newspaper',
-      showNewspaper: true,
-      cardsPlayedThisTurn: 0,
-      ip: prev.ip + 5 + prev.controlledStates.length * 2, // Income phase
-      hand: [...prev.hand, ...sampleCards.slice(0, Math.max(0, 5 - prev.hand.length))], // Draw to 5
-      log: [...prev.log, `Turn ${prev.turn} ended`, `Income: +${5 + prev.controlledStates.length * 2} IP`, `Cards drawn to hand`]
-    }));
+    setGameState(prev => {
+      const cardsToDraw = Math.max(0, 5 - prev.hand.length);
+      const drawnCards = prev.deck.slice(0, cardsToDraw);
+      const remainingDeck = prev.deck.slice(cardsToDraw);
+      
+      return {
+        ...prev,
+        turn: prev.turn + 1,
+        phase: 'newspaper',
+        showNewspaper: true,
+        cardsPlayedThisTurn: 0,
+        ip: prev.ip + 5 + prev.controlledStates.length * 2, // Income phase
+        hand: [...prev.hand, ...drawnCards],
+        deck: remainingDeck,
+        log: [...prev.log, `Turn ${prev.turn} ended`, `Income: +${5 + prev.controlledStates.length * 2} IP`, `Cards drawn: ${cardsToDraw}`]
+      };
+    });
   }, []);
 
   const closeNewspaper = useCallback(() => {
