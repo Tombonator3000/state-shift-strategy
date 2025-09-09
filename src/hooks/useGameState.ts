@@ -202,7 +202,11 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           break;
         case 'ZONE':
           if (prev.targetState) {
-            const stateIndex = newStates.findIndex(s => s.abbreviation === prev.targetState);
+            const stateIndex = newStates.findIndex(s => 
+              s.abbreviation === prev.targetState || 
+              s.id === prev.targetState ||
+              s.name === prev.targetState
+            );
             if (stateIndex !== -1) {
               const pressureGain = 2; // Base pressure from zone cards
               newStates[stateIndex] = {
@@ -217,8 +221,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
                 
                 // Update controlled states list
                 const newControlledStates = [...prev.controlledStates];
-                if (!newControlledStates.includes(prev.targetState)) {
-                  newControlledStates.push(prev.targetState);
+                const stateKey = newStates[stateIndex].abbreviation;
+                if (!newControlledStates.includes(stateKey)) {
+                  newControlledStates.push(stateKey);
                 }
                 return {
                   ...prev,
@@ -230,6 +235,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
                   cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
                   cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
                   targetState: null, // Clear selection after use
+                  selectedCard: null, // Clear card selection
                   log: [...prev.log, ...newLog]
                 };
               } else {

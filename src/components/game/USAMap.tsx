@@ -185,9 +185,9 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick, selectedCard, aud
                 </div>
               </div>
               {getHoveredStateInfo()?.specialBonus && (
-                <div className="text-truth-red text-sm mt-2 p-2 bg-truth-red/10 border border-truth-red/20 rounded">
-                  <span className="font-bold">🎯 Special Bonus</span><br />
-                  {getHoveredStateInfo()?.specialBonus}
+                <div className="text-truth-red text-base mt-2 p-3 bg-truth-red/10 border border-truth-red/20 rounded">
+                  <span className="font-bold text-lg">🎯 Special Bonus</span><br />
+                  <span className="font-mono text-lg">{getHoveredStateInfo()?.specialBonus}</span>
                   {getHoveredStateInfo()?.bonusValue && ` (+${getHoveredStateInfo()?.bonusValue} IP)`}
                 </div>
               )}

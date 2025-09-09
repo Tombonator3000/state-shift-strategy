@@ -313,15 +313,15 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
               </div>
             </div>
             
-            {stateInfo.specialBonus && (
-              <div className="pt-2 border-t border-border">
-                <div className="text-xs text-muted-foreground">Special Bonus</div>
-                <div className="text-sm font-mono text-accent">
-                  {stateInfo.specialBonus}
-                  {stateInfo.bonusValue && ` (+${stateInfo.bonusValue} IP)`}
+              {stateInfo.specialBonus && (
+                <div className="pt-2 border-t border-border">
+                  <div className="text-sm font-bold text-foreground mb-1">🎯 Special Bonus</div>
+                  <div className="text-base font-mono text-accent bg-accent/10 p-2 rounded">
+                    {stateInfo.specialBonus}
+                    {stateInfo.bonusValue && ` (+${stateInfo.bonusValue} IP)`}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
       )}

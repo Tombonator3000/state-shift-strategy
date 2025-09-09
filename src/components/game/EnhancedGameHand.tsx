@@ -180,7 +180,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           onClick={() => setExaminedCard(null)}
         >
           <div 
-            className={`bg-card border-2 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto transform scale-110 animate-fade-in ${(() => {
+            className={`bg-card border-2 rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto transform animate-fade-in ${(() => {
               const card = cards.find(c => c.id === examinedCard);
               return card ? `${getRarityBorder(card.rarity)} ${getRarityGlow(card.rarity)}` : 'border-border';
             })()}`}
@@ -193,98 +193,92 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               
               return (
                 <>
-                  {/* Landscape card layout */}
-                  <div className="flex gap-6">
-                    {/* Left side - Card art and info */}
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold ${
-                          canAffordCard(card) ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'
-                        }`}>
-                          {card.cost}
-                        </div>
-                        <button 
-                          onClick={() => {
-                            audio.playSFX('click');
-                            setExaminedCard(null);
-                          }}
-                          className="text-muted-foreground hover:text-foreground text-2xl font-bold"
-                        >
-                          ×
-                        </button>
+                  {/* Portrait card layout */}
+                  <div className="space-y-4">
+                    {/* Header with cost and close button */}
+                    <div className="flex justify-between items-start">
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${
+                        canAffordCard(card) ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'
+                      }`}>
+                        {card.cost}
                       </div>
+                      <button 
+                        onClick={() => {
+                          audio.playSFX('click');
+                          setExaminedCard(null);
+                        }}
+                        className="text-muted-foreground hover:text-foreground text-3xl font-bold w-8 h-8 flex items-center justify-center"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    
+                    {/* Card title and type */}
+                    <div className="text-center">
+                      <h3 className="text-3xl font-bold mb-3 text-foreground">{card.name}</h3>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-base px-4 py-2 ${
+                          card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth-red/20 border-truth-red text-truth-red' :
+                          card.type === 'MEDIA' && faction === 'government' ? 'bg-government-blue/20 border-government-blue text-government-blue' :
+                          card.type === 'ZONE' ? 'bg-accent/20 border-accent text-accent-foreground' :
+                          card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
+                          'bg-muted/20 border-muted text-muted-foreground'
+                        }`}
+                      >
+                        {card.type}
+                      </Badge>
+                    </div>
+                    
+                    {/* Card art */}
+                    <div className="h-48 bg-muted/20 flex items-center justify-center text-xl text-muted-foreground border rounded-lg">
+                      [CLASSIFIED IMAGE]
+                    </div>
+                    
+                    {/* Card effect */}
+                    <div>
+                      <h4 className="text-xl font-bold mb-3 text-foreground">Effect</h4>
+                      <p className="text-lg font-medium text-foreground bg-muted/20 p-4 rounded-lg border">{card.text}</p>
                       
-                      <div className="mb-4">
-                        <h3 className="text-2xl font-bold mb-2 text-foreground">{card.name}</h3>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-sm px-3 py-1 ${
-                            card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth-red/20 border-truth-red text-truth-red' :
-                            card.type === 'MEDIA' && faction === 'government' ? 'bg-government-blue/20 border-government-blue text-government-blue' :
-                            card.type === 'ZONE' ? 'bg-accent/20 border-accent text-accent-foreground' :
-                            card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
-                            'bg-muted/20 border-muted text-muted-foreground'
-                          }`}
-                        >
-                          {card.type}
-                        </Badge>
-                      </div>
-                      
-                      <div className="h-40 bg-muted/20 flex items-center justify-center text-lg text-muted-foreground border rounded mb-4">
-                        [CLASSIFIED IMAGE]
+                      {/* Enhanced card effect description */}
+                      <div className="mt-4 text-base text-muted-foreground bg-accent/10 p-4 rounded-lg">
+                        <span className="font-bold">Gameplay:</span> {
+                          card.type === 'MEDIA' && faction === 'truth' ? 'Increases Truth meter by exposing lies and corruption.' :
+                          card.type === 'MEDIA' && faction === 'government' ? 'Decreases Truth meter through disinformation campaigns.' :
+                          card.type === 'ZONE' ? 'Adds pressure to target state. States with pressure ≥ defense are captured.' :
+                          card.type === 'ATTACK' ? 'Deals direct IP damage to enemy operations and resources.' :
+                          card.type === 'DEFENSIVE' ? 'Reduces pressure on your controlled states to prevent capture.' :
+                          'Special effect card with unique strategic abilities.'
+                        }
+                        {card.type === 'ZONE' && (
+                          <div className="mt-3 text-warning font-bold text-lg">
+                            🎯 Click on a state after selecting this card to target it
+                          </div>
+                        )}
                       </div>
                     </div>
                     
-                    {/* Right side - Card details */}
-                    <div className="flex-1">
-                  
-                      <div className="space-y-6">
-                        {/* Card effect */}
-                        <div>
-                          <h4 className="text-lg font-bold mb-3 text-foreground">Effect</h4>
-                          <p className="text-base font-medium text-foreground bg-muted/20 p-3 rounded border">{card.text}</p>
-                          
-                          {/* Enhanced card effect description */}
-                          <div className="mt-3 text-sm text-muted-foreground bg-accent/10 p-3 rounded">
-                            <span className="font-medium">Gameplay:</span> {
-                              card.type === 'MEDIA' && faction === 'truth' ? 'Increases Truth meter by exposing lies and corruption.' :
-                              card.type === 'MEDIA' && faction === 'government' ? 'Decreases Truth meter through disinformation campaigns.' :
-                              card.type === 'ZONE' ? 'Adds pressure to target state. States with pressure ≥ defense are captured.' :
-                              card.type === 'ATTACK' ? 'Deals direct IP damage to enemy operations and resources.' :
-                              card.type === 'DEFENSIVE' ? 'Reduces pressure on your controlled states to prevent capture.' :
-                              'Special effect card with unique strategic abilities.'
-                            }
-                            {card.type === 'ZONE' && (
-                              <div className="mt-2 text-warning font-medium">
-                                ⚠️ Requires target selection on the map
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Flavor text */}
-                        <div>
-                          <h4 className="text-sm font-bold mb-2 text-muted-foreground">CLASSIFIED INTELLIGENCE</h4>
-                          <div className="text-sm italic text-muted-foreground border-l-4 border-truth-red pl-4">
-                            "{card.flavorTruth}"
-                          </div>
-                        </div>
-                        
-                        {/* Deploy button */}
-                        <Button
-                          onClick={() => {
-                            audio.playSFX('click');
-                            setExaminedCard(null);
-                            handlePlayCard(card.id);
-                          }}
-                          disabled={disabled || !canAffordCard(card)}
-                          className="w-full text-lg py-3"
-                          size="lg"
-                        >
-                          {card.type === 'ZONE' ? 'SELECT & TARGET STATE' : 'DEPLOY ASSET'}
-                        </Button>
+                    {/* Flavor text */}
+                    <div>
+                      <h4 className="text-base font-bold mb-2 text-muted-foreground">CLASSIFIED INTELLIGENCE</h4>
+                      <div className="text-base italic text-muted-foreground border-l-4 border-truth-red pl-4 bg-truth-red/5 p-3 rounded-r">
+                        "{card.flavorTruth}"
                       </div>
                     </div>
+                    
+                    {/* Deploy button */}
+                    <Button
+                      onClick={() => {
+                        audio.playSFX('click');
+                        setExaminedCard(null);
+                        handlePlayCard(card.id);
+                      }}
+                      disabled={disabled || !canAffordCard(card)}
+                      className="w-full text-xl py-4"
+                      size="lg"
+                    >
+                      {card.type === 'ZONE' ? 'SELECT & TARGET STATE' : 'DEPLOY ASSET'}
+                    </Button>
                   </div>
                 </>
               );
