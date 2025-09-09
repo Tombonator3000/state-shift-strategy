@@ -3,12 +3,11 @@ import { Progress } from '@/components/ui/progress';
 import { Eye, Lock, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
+import { SecretAgenda as AgendaType } from '@/data/agendaDatabase';
+
 interface SecretAgendaProps {
-  agenda: {
-    id: string;
-    description: string;
+  agenda: AgendaType & {
     progress: number;
-    target: number;
     completed: boolean;
     revealed: boolean;
   };
@@ -80,14 +79,32 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
         ) : (
           // Expanded view - full details
           <div className="space-y-3">
-            <div className="text-xs font-mono">
-              {agenda.description}
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-secret-red/90 uppercase tracking-wider">
+                {agenda.title}
+              </div>
+              <div className="text-xs font-mono text-gray-300">
+                {agenda.description}
+              </div>
+              <div className="text-xs text-gray-500 italic">
+                "{agenda.flavorText}"
+              </div>
             </div>
             
             <div className="space-y-1">
-              <div className="flex justify-between text-xs">
+              <div className="flex justify-between items-center text-xs">
                 <span>Progress:</span>
-                <span>{agenda.progress}/{agenda.target}</span>
+                <div className="flex items-center gap-2">
+                  <span>{agenda.progress}/{agenda.target}</span>
+                  <span className={`px-1 py-0.5 rounded text-xs font-bold ${
+                    agenda.difficulty === 'easy' ? 'bg-green-900/50 text-green-400' :
+                    agenda.difficulty === 'medium' ? 'bg-yellow-900/50 text-yellow-400' :
+                    agenda.difficulty === 'hard' ? 'bg-red-900/50 text-red-400' :
+                    'bg-purple-900/50 text-purple-400'
+                  }`}>
+                    {agenda.difficulty.toUpperCase()}
+                  </span>
+                </div>
               </div>
               <Progress 
                 value={progressPercent} 

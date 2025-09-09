@@ -4,6 +4,7 @@ import { CARD_DATABASE } from '@/data/cardDatabase';
 import { TRUTH_SEEKERS_CARDS, GOVERNMENT_CARDS } from '@/data/factionCards';
 import { generateRandomDeck, getRandomCards } from '@/data/cardDatabase';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
+import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -35,11 +36,8 @@ interface GameState {
   }>;
   showNewspaper: boolean;
   log: string[];
-  secretAgenda: {
-    id: string;
-    description: string;
+  secretAgenda: SecretAgenda & {
     progress: number;
-    target: number;
     completed: boolean;
     revealed: boolean;
   };
@@ -90,10 +88,8 @@ export const useGameState = () => {
       'Cards drawn: 3'
     ],
     secretAgenda: {
-      id: 'agenda_1',
-      description: 'Control 3 coastal states',
+      ...getRandomAgenda('truth'),
       progress: 0,
-      target: 3,
       completed: false,
       revealed: false
     },

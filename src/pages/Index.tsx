@@ -15,6 +15,7 @@ import { useAudio } from '@/hooks/useAudio';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import { Maximize, Minimize } from 'lucide-react';
+import { getRandomAgenda } from '@/data/agendaDatabase';
 
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
@@ -234,10 +235,8 @@ const Index = () => {
           <div className="mb-3">
             <SecretAgenda 
               agenda={{
-                id: 'ai-agenda',
-                description: 'Hidden AI objective',
+                ...getRandomAgenda('government'),
                 progress: 3,
-                target: 10,
                 completed: false,
                 revealed: false
               }} 
