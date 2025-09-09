@@ -12,9 +12,10 @@ interface GameMenuProps {
   audio?: any;
   onBackToMainMenu?: () => void;
   onSaveGame?: () => void;
+  onShowCardCollection?: () => void;
 }
 
-const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSaveGame }: GameMenuProps) => {
+const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSaveGame, onShowCardCollection }: GameMenuProps) => {
   const [glitching, setGlitching] = useState(false);
   const [redactedText, setRedactedText] = useState('SHADOW GOVERNMENT');
   const [showCredits, setShowCredits] = useState(false);
@@ -379,6 +380,16 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
               className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
             >
               CREDITS
+            </Button>
+            <Button 
+              onClick={() => {
+                audio?.playSFX?.('click');
+                onShowCardCollection?.();
+              }}
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+            >
+              📚 CARD COLLECTION
             </Button>
             <Button 
               variant="outline" 

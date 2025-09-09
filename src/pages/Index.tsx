@@ -28,8 +28,10 @@ import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
 import ContextualHelp from '@/components/game/ContextualHelp';
 import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
 import MechanicsTooltip from '@/components/game/MechanicsTooltip';
+import CardCollection from '@/components/game/CardCollection';
 import { Maximize, Minimize } from 'lucide-react';
 import { getRandomAgenda } from '@/data/agendaDatabase';
+import { useCardCollection } from '@/hooks/useCardCollection';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
@@ -51,10 +53,12 @@ const Index = () => {
   const [victoryState, setVictoryState] = useState<{ isVictory: boolean; type: 'states' | 'ip' | 'truth' | 'agenda' | null }>({ isVictory: false, type: null });
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showInGameOptions, setShowInGameOptions] = useState(false);
+  const [showCardCollection, setShowCardCollection] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
+  const cardCollection = useCardCollection();
 
   // Handle AI turns
   useEffect(() => {
@@ -95,6 +99,13 @@ const Index = () => {
       setVictoryState({ isVictory: true, type: 'truth' });
     }
   }, [gameState.controlledStates.length, gameState.ip, gameState.truth]);
+
+  // Track cards being drawn to hand for collection discovery
+  useEffect(() => {
+    gameState.hand.forEach(card => {
+      cardCollection.discoverCard(card.id);
+    });
+  }, [gameState.hand, cardCollection]);
 
   // Check if first-time player
   useEffect(() => {
@@ -199,6 +210,10 @@ const Index = () => {
     try {
       // Use animated card play
       await playCardAnimated(cardId, animatePlayCard, targetState);
+      
+      // Track card in collection
+      cardCollection.playCard(cardId);
+      
       toast.success(`✅ ${card.name} deployed successfully!`, {
         duration: 2000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
@@ -313,6 +328,7 @@ const Index = () => {
         }
       }} 
       audio={audio}
+      onShowCardCollection={() => setShowCardCollection(true)}
       onBackToMainMenu={() => {
         setShowMenu(true);
         // Reset any game state if needed
@@ -428,6 +444,16 @@ const Index = () => {
                   title="Achievements"
                 >
                   🏆
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCardCollection(true);
+                    audio.playSFX('click');
+                  }}
+                  className="bg-indigo-600 text-white p-1 rounded hover:bg-indigo-700 transition-colors"
+                  title="Card Collection"
+                >
+                  📚
                 </button>
                 <button
                   onClick={() => {
@@ -679,6 +705,12 @@ const Index = () => {
         onComplete={() => setShowOnboarding(false)}
         onSkip={() => setShowOnboarding(false)}
         gameState={gameState}
+      />
+
+      {/* Card Collection */}
+      <CardCollection 
+        open={showCardCollection}
+        onOpenChange={setShowCardCollection}
       />
 
       {/* Newspaper overlay */}
