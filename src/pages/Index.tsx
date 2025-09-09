@@ -21,6 +21,7 @@ import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import { Maximize, Minimize } from 'lucide-react';
 import { getRandomAgenda } from '@/data/agendaDatabase';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
@@ -30,6 +31,8 @@ const Index = () => {
   const [showEvents, setShowEvents] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
+  const [loadingCard, setLoadingCard] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
@@ -64,6 +67,7 @@ const Index = () => {
         selectTargetState(stateId);
         audio.playSFX('click');
         // Auto-play the card once target is selected
+        setLoadingCard(gameState.selectedCard);
         handlePlayCard(gameState.selectedCard);
       }
     } else {
@@ -80,19 +84,57 @@ const Index = () => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || isAnimating()) return;
 
+    // Check if player can afford the card
+    if (gameState.ip < card.cost) {
+      toast.error(`💰 Insufficient IP! Need ${card.cost}, have ${gameState.ip}`, {
+        duration: 3000,
+        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+      });
+      audio.playSFX('error');
+      return;
+    }
+
+    // Check if max cards played this turn
+    if (gameState.cardsPlayedThisTurn >= 3) {
+      toast.error('📋 Maximum 3 cards per turn!', {
+        duration: 3000,
+        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+      });
+      audio.playSFX('error');
+      return;
+    }
+
     // If it's a ZONE card that requires targeting
     if (card.type === 'ZONE' && !gameState.targetState) {
       selectCard(cardId);
       audio.playSFX('hover');
-      // Show targeting instruction
-      console.log('Zone card selected - click on a state to target it');
+      toast('🎯 Zone card selected - click a state to target it!', {
+        duration: 4000,
+        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
+      });
       return;
     }
 
+    // Show loading state
+    setLoadingCard(cardId);
     audio.playSFX('cardPlay');
     
-    // Use animated card play
-    await playCardAnimated(cardId, animatePlayCard);
+    try {
+      // Use animated card play
+      await playCardAnimated(cardId, animatePlayCard);
+      toast.success(`✅ ${card.name} deployed successfully!`, {
+        duration: 2000,
+        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+      });
+    } catch (error) {
+      toast.error('❌ Card deployment failed!', {
+        duration: 3000,
+        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+      });
+      audio.playSFX('error');
+    } finally {
+      setLoadingCard(null);
+    }
   };
 
   const handleEndTurn = () => {
@@ -346,11 +388,17 @@ const Index = () => {
 
         {/* Center - Map */}
         <div className="flex-1 p-1 relative bg-newspaper-bg border-x-2 border-newspaper-border" id="map-container">
-          {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-            <div className="absolute top-4 left-4 z-10 bg-newspaper-text text-newspaper-bg p-2 border border-newspaper-border font-mono text-sm">
-              Click a state to target with zone card
+        {/* Enhanced targeting overlay for ZONE cards */}
+        {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
+          <div className="absolute inset-0 bg-black/20 z-10 flex items-center justify-center pointer-events-none">
+            <div className="bg-newspaper-text text-newspaper-bg p-4 border-2 border-newspaper-border font-mono text-lg shadow-2xl animate-pulse">
+              🎯 ZONE CARD ACTIVE - Click any state to target
+              <div className="text-sm mt-2 text-center">
+                Card will deploy automatically when target is selected
+              </div>
             </div>
-          )}
+          </div>
+        )}
           <div className="h-full border-2 border-newspaper-border bg-white/80 relative overflow-hidden">
             <div className="w-full h-full">
               <EnhancedUSAMap 
@@ -396,6 +444,7 @@ const Index = () => {
               selectedCard={gameState.selectedCard}
               disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
               currentIP={gameState.ip}
+              loadingCard={loadingCard}
             />
           </div>
 
@@ -403,10 +452,17 @@ const Index = () => {
           <div className="space-y-2 flex-shrink-0">
             <Button 
               onClick={handleEndTurn}
-              className="w-full bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80 h-8 text-xs"
+              className="w-full bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80 hover:scale-105 transition-all duration-200 h-8 text-xs font-bold"
               disabled={gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human'}
             >
-              {gameState.currentPlayer === 'ai' ? 'AI Turn...' : 'End Turn'}
+              {gameState.currentPlayer === 'ai' ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-current rounded-full animate-pulse"></div>
+                  AI Thinking...
+                </div>
+              ) : (
+                'End Turn'
+              )}
             </Button>
           </div>
 
@@ -425,6 +481,20 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Toast notifications */}
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#1f2937',
+            color: '#f3f4f6',
+            border: '1px solid #374151',
+            fontFamily: 'monospace'
+          }
+        }}
+      />
 
       {/* Card Animation Layer */}
       <CardAnimationLayer />

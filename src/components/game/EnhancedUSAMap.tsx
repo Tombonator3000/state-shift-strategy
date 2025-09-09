@@ -359,10 +359,22 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         }
         
         .state-path.targeting {
-          stroke: hsl(var(--warning, 45 93% 58%));
-          stroke-width: 3;
+          stroke: #ffd700;
+          stroke-width: 4;
           stroke-dasharray: 8,4;
-          animation: dash 1s linear infinite;
+          animation: dash 1s linear infinite, targetPulse 2s ease-in-out infinite;
+          filter: brightness(1.3) drop-shadow(0 0 15px #ffd700);
+        }
+        
+        @keyframes targetPulse {
+          0%, 100% { 
+            stroke-width: 4;
+            filter: brightness(1.3) drop-shadow(0 0 15px #ffd700);
+          }
+          50% { 
+            stroke-width: 6;
+            filter: brightness(1.6) drop-shadow(0 0 25px #ffd700) drop-shadow(0 0 35px #ffd700);
+          }
         }
         
         .state-path.selected {

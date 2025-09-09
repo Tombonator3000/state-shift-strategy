@@ -13,6 +13,7 @@ interface EnhancedGameHandProps {
   onSelectCard?: (cardId: string) => void;
   maxCards?: number;
   currentIP: number;
+  loadingCard?: string | null;
 }
 
 const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({ 
@@ -22,7 +23,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   selectedCard,
   onSelectCard,
   maxCards = 7,
-  currentIP
+  currentIP,
+  loadingCard
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
@@ -90,6 +92,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
         {cards.map((card, index) => {
           const isSelected = selectedCard === card.id;
           const isPlaying = playingCard === card.id;
+          const isLoading = loadingCard === card.id;
           const canAfford = canAffordCard(card);
           const faction = getCardFaction(card);
           
@@ -101,7 +104,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 group relative p-2 cursor-pointer transition-all duration-200
                 bg-card border-2 rounded-lg flex items-center gap-2
                 ${isSelected ? 'ring-2 ring-yellow-400 scale-105 z-10' : ''}
-                ${isPlaying ? 'animate-pulse scale-105 z-50' : 'hover:scale-[1.02]'}
+                ${isPlaying || isLoading ? 'animate-pulse scale-105 z-50' : 'hover:scale-[1.02]'}
                 ${!canAfford && !disabled ? 'opacity-60 saturate-50' : ''}
                 ${getRarityBorder(card.rarity)}
                 ${getRarityGlow(card.rarity)}
@@ -109,8 +112,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               `}
               style={{ 
                 animationDelay: `${index * 0.05}s`,
-                transform: isPlaying ? 'scale(1.05) translateY(-2px)' : undefined,
-                zIndex: isPlaying ? 1000 : undefined
+                transform: (isPlaying || isLoading) ? 'scale(1.05) translateY(-2px)' : undefined,
+                zIndex: (isPlaying || isLoading) ? 1000 : undefined
               }}
               onClick={(e) => {
                 e.preventDefault();
@@ -126,6 +129,13 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 audio.playSFX('hover');
               }}
             >
+               {/* Loading overlay */}
+              {isLoading && (
+                <div className="absolute inset-0 bg-black/20 rounded-lg flex items-center justify-center z-20">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
+              
               {/* Cost Badge */}
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 border-2 ${
                 canAfford ? 'bg-primary text-primary-foreground border-primary' : 'bg-destructive text-destructive-foreground border-destructive'
