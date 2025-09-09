@@ -6,9 +6,13 @@ import { geoAlbersUsa, geoPath } from 'd3-geo';
 interface State {
   id: string;
   name: string;
+  abbreviation: string;
+  baseIP: number;
   defense: number;
   pressure: number;
   owner: 'player' | 'ai' | 'neutral';
+  specialBonus?: string;
+  bonusValue?: number;
 }
 
 interface USAMapProps {
@@ -83,7 +87,8 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick }) => {
       const gameState = states.find(s => 
         s.id === stateId || 
         s.name === feature.properties.name ||
-        s.id === feature.properties.STUSPS // Handle different ID formats
+        s.abbreviation === feature.properties.STUSPS || // Handle different ID formats
+        s.id === feature.properties.STUSPS
       );
 
       const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -101,13 +106,13 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick }) => {
       // Add state labels and indicators
       const centroid = path.centroid(feature);
       if (centroid && !isNaN(centroid[0]) && !isNaN(centroid[1])) {
-        // State name/ID label
+        // State name/abbreviation label
         const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         label.setAttribute('x', centroid[0].toString());
         label.setAttribute('y', centroid[1].toString());
         label.setAttribute('text-anchor', 'middle');
         label.setAttribute('class', 'state-label');
-        label.textContent = stateId;
+        label.textContent = gameState?.abbreviation || stateId;
         labelsGroup.appendChild(label);
 
         // Pressure indicators
@@ -155,7 +160,7 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick }) => {
 
         {/* Tooltip */}
         {hoveredState && getHoveredStateInfo() && (
-          <div className="absolute top-2 left-2 bg-popover border border-border rounded p-2 shadow-lg z-10">
+          <div className="absolute top-2 left-2 bg-popover border border-border rounded p-2 shadow-lg z-10 max-w-xs">
             <div className="text-sm">
               <div className="font-semibold text-foreground">{getHoveredStateInfo()?.name}</div>
               <div className="text-muted-foreground">
@@ -163,8 +168,15 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick }) => {
                   {getHoveredStateInfo()?.owner}
                 </span>
               </div>
+              <div className="text-muted-foreground">Base IP: {getHoveredStateInfo()?.baseIP}</div>
               <div className="text-muted-foreground">Defense: {getHoveredStateInfo()?.defense}</div>
               <div className="text-muted-foreground">Pressure: {getHoveredStateInfo()?.pressure}</div>
+              {getHoveredStateInfo()?.specialBonus && (
+                <div className="text-truth text-xs mt-1">
+                  🎯 {getHoveredStateInfo()?.specialBonus}
+                  {getHoveredStateInfo()?.bonusValue && ` (+${getHoveredStateInfo()?.bonusValue} IP)`}
+                </div>
+              )}
             </div>
           </div>
         )}

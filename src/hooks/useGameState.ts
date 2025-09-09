@@ -3,6 +3,7 @@ import type { GameCard } from '@/components/game/GameHand';
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import { TRUTH_SEEKERS_CARDS, GOVERNMENT_CARDS } from '@/data/factionCards';
 import { generateRandomDeck, getRandomCards } from '@/data/cardDatabase';
+import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -18,11 +19,13 @@ interface GameState {
   states: Array<{
     id: string;
     name: string;
-    x: number;
-    y: number;
+    abbreviation: string;
+    baseIP: number;
     defense: number;
     pressure: number;
     owner: 'player' | 'ai' | 'neutral';
+    specialBonus?: string;
+    bonusValue?: number;
   }>;
   currentEvents: Array<{
     id: string;
@@ -58,23 +61,30 @@ export const useGameState = () => {
     turn: 1,
     truth: 60,
     ip: 15,
-  hand: getRandomCards(3),
+    hand: getRandomCards(3),
     deck: generateRandomDeck(40),
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
-    controlledStates: ['CA', 'NY', 'TX'],
-    states: [
-      { id: 'CA', name: 'California', x: 50, y: 250, defense: 2, pressure: 0, owner: 'player' },
-      { id: 'NY', name: 'New York', x: 650, y: 150, defense: 2, pressure: 1, owner: 'player' },
-      { id: 'TX', name: 'Texas', x: 300, y: 350, defense: 3, pressure: 0, owner: 'player' },
-      { id: 'FL', name: 'Florida', x: 600, y: 400, defense: 1, pressure: 2, owner: 'neutral' },
-      { id: 'NV', name: 'Nevada', x: 150, y: 200, defense: 1, pressure: 0, owner: 'neutral' },
-      { id: 'WA', name: 'Washington', x: 100, y: 50, defense: 2, pressure: 1, owner: 'ai' },
-      { id: 'DC', name: 'Washington DC', x: 650, y: 200, defense: 5, pressure: 3, owner: 'ai' },
-      { id: 'AK', name: 'Alaska', x: 50, y: 350, defense: 1, pressure: 0, owner: 'neutral' },
-      { id: 'HI', name: 'Hawaii', x: 200, y: 400, defense: 1, pressure: 0, owner: 'neutral' },
-      { id: 'CO', name: 'Colorado', x: 250, y: 200, defense: 2, pressure: 0, owner: 'neutral' }
-    ],
+    controlledStates: ['CA', 'OR', 'FL', 'NV'],
+    states: USA_STATES.map(state => {
+      const initialControl = getInitialStateControl('truth');
+      let owner: 'player' | 'ai' | 'neutral' = 'neutral';
+      
+      if (initialControl.player.includes(state.abbreviation)) owner = 'player';
+      else if (initialControl.ai.includes(state.abbreviation)) owner = 'ai';
+      
+      return {
+        id: state.id,
+        name: state.name,
+        abbreviation: state.abbreviation,
+        baseIP: state.baseIP,
+        defense: state.defense,
+        pressure: 0,
+        owner,
+        specialBonus: state.specialBonus,
+        bonusValue: state.bonusValue
+      };
+    }),
     currentEvents: generateRandomEvents(),
     showNewspaper: false,
     log: [
@@ -98,6 +108,7 @@ export const useGameState = () => {
     const handSize = faction === 'truth' ? 4 : 3;
     const newDeck = generateRandomDeck(40);
     const startingHand = newDeck.slice(0, handSize);
+    const initialControl = getInitialStateControl(faction);
 
     setGameState(prev => ({
       ...prev,
@@ -106,11 +117,31 @@ export const useGameState = () => {
       ip: startingIP,
       hand: startingHand,
       deck: newDeck.slice(handSize),
+      controlledStates: initialControl.player,
+      states: USA_STATES.map(state => {
+        let owner: 'player' | 'ai' | 'neutral' = 'neutral';
+        
+        if (initialControl.player.includes(state.abbreviation)) owner = 'player';
+        else if (initialControl.ai.includes(state.abbreviation)) owner = 'ai';
+        
+        return {
+          id: state.id,
+          name: state.name,
+          abbreviation: state.abbreviation,
+          baseIP: state.baseIP,
+          defense: state.defense,
+          pressure: 0,
+          owner,
+          specialBonus: state.specialBonus,
+          bonusValue: state.bonusValue
+        };
+      }),
       log: [
         `Game started - ${faction} faction selected`,
         `Starting Truth: ${startingTruth}%`,
         `Starting IP: ${startingIP}`,
-        `Cards drawn: ${handSize}`
+        `Cards drawn: ${handSize}`,
+        `Controlled states: ${initialControl.player.join(', ')}`
       ]
     }));
   }, []);
@@ -162,16 +193,27 @@ export const useGameState = () => {
       const drawnCards = prev.deck.slice(0, cardsToDraw);
       const remainingDeck = prev.deck.slice(cardsToDraw);
       
+      // Calculate IP income from controlled states
+      const stateIncome = getTotalIPFromStates(prev.controlledStates);
+      const baseIncome = 5;
+      const totalIncome = baseIncome + stateIncome;
+      
       return {
         ...prev,
         turn: prev.turn + 1,
         phase: 'newspaper',
         showNewspaper: true,
         cardsPlayedThisTurn: 0,
-        ip: prev.ip + 5 + prev.controlledStates.length * 2, // Income phase
+        ip: prev.ip + totalIncome,
         hand: [...prev.hand, ...drawnCards],
         deck: remainingDeck,
-        log: [...prev.log, `Turn ${prev.turn} ended`, `Income: +${5 + prev.controlledStates.length * 2} IP`, `Cards drawn: ${cardsToDraw}`]
+        log: [...prev.log, 
+          `Turn ${prev.turn} ended`, 
+          `Base income: ${baseIncome} IP`,
+          `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
+          `Total income: ${totalIncome} IP`, 
+          `Cards drawn: ${cardsToDraw}`
+        ]
       };
     });
   }, []);
