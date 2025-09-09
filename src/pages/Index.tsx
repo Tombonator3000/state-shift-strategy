@@ -12,6 +12,8 @@ import SecretAgenda from '@/components/game/SecretAgenda';
 import AIStatus from '@/components/game/AIStatus';
 import BalancingDashboard from '@/components/game/BalancingDashboard';
 import EventViewer from '@/components/game/EventViewer';
+import TutorialOverlay from '@/components/game/TutorialOverlay';
+import AchievementPanel from '@/components/game/AchievementPanel';
 import { AudioControls } from '@/components/ui/audio-controls';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudio } from '@/hooks/useAudio';
@@ -26,6 +28,8 @@ const Index = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showBalancing, setShowBalancing] = useState(false);
   const [showEvents, setShowEvents] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
@@ -153,6 +157,14 @@ const Index = () => {
     );
   }
 
+  if (showAchievements) {
+    return <AchievementPanel onClose={() => setShowAchievements(false)} />;
+  }
+
+  if (showTutorial) {
+    return <TutorialOverlay onClose={() => setShowTutorial(false)} />;
+  }
+
   if (showEvents) {
     return <EventViewer onClose={() => setShowEvents(false)} />;
   }
@@ -225,6 +237,20 @@ const Index = () => {
                   title="Event Database"
                 >
                   📰
+                </button>
+                <button
+                  onClick={() => setShowTutorial(true)}
+                  className="bg-green-600 text-white p-1 rounded hover:bg-green-700 transition-colors"
+                  title="Tutorial & Training"
+                >
+                  🎓
+                </button>
+                <button
+                  onClick={() => setShowAchievements(true)}
+                  className="bg-yellow-600 text-white p-1 rounded hover:bg-yellow-700 transition-colors"
+                  title="Achievements"
+                >
+                  🏆
                 </button>
                 <AudioControls
                   volume={audio.config.volume}
