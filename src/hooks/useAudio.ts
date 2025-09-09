@@ -49,6 +49,16 @@ export const useAudio = () => {
       musicTracks.current.theme.push(audio);
     }
 
+    // Add background-music.mp3 as additional theme track
+    try {
+      const backgroundAudio = new Audio(`/audio/background-music.mp3`);
+      backgroundAudio.loop = false;
+      backgroundAudio.volume = config.volume * 0.3;
+      musicTracks.current.theme.push(backgroundAudio);
+    } catch (error) {
+      console.log('Background music file not found, using existing tracks');
+    }
+
     // Create government faction music tracks
     for (let i = 1; i <= 3; i++) {
       const audio = new Audio(`/muzak/Government-${i}.mp3`);
