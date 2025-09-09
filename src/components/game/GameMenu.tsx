@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
+import Credits from './Credits';
 
 interface GameMenuProps {
   onStartGame: (faction: 'government' | 'truth') => void;
@@ -9,6 +10,7 @@ interface GameMenuProps {
 const GameMenu = ({ onStartGame }: GameMenuProps) => {
   const [glitching, setGlitching] = useState(false);
   const [redactedText, setRedactedText] = useState('SHADOW GOVERNMENT');
+  const [showCredits, setShowCredits] = useState(false);
 
   useEffect(() => {
     const glitchInterval = setInterval(() => {
@@ -26,57 +28,129 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
     return () => clearInterval(glitchInterval);
   }, []);
 
+  if (showCredits) {
+    return <Credits onClose={() => setShowCredits(false)} />;
+  }
+
   return (
-    <div className="min-h-screen bg-government-dark flex items-center justify-center p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
       {/* Redacted background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        {Array.from({ length: 20 }).map((_, i) => (
+      <div className="absolute inset-0 opacity-5">
+        {Array.from({ length: 30 }).map((_, i) => (
           <div 
             key={i}
-            className="absolute bg-secret-red h-4"
+            className="absolute bg-newspaper-text h-6"
             style={{
-              width: `${Math.random() * 200 + 50}px`,
+              width: `${Math.random() * 300 + 100}px`,
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              transform: `rotate(${Math.random() * 10 - 5}deg)`
+              transform: `rotate(${Math.random() * 4 - 2}deg)`
             }}
           />
         ))}
       </div>
 
-      <Card className="max-w-4xl w-full p-8 bg-card/90 border-2 border-secret-red/50 animate-redacted-reveal relative">
+      <Card className="max-w-4xl w-full p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal relative" style={{ fontFamily: 'serif' }}>
         {/* Classified stamps */}
-        <div className="absolute top-4 right-4 text-secret-red font-mono text-xs transform rotate-12 border-2 border-secret-red p-2">
+        <div className="absolute top-4 right-4 text-newspaper-text font-mono text-xs transform rotate-12 border-2 border-newspaper-text p-2">
           TOP SECRET
         </div>
-        <div className="absolute bottom-4 left-4 text-secret-red font-mono text-xs transform -rotate-12 border-2 border-secret-red p-2">
+        <div className="absolute bottom-4 left-4 text-newspaper-text font-mono text-xs transform -rotate-12 border-2 border-newspaper-text p-2">
           EYES ONLY
         </div>
 
         <div className="text-center mb-8">
-          <h1 className={`text-5xl font-bold font-mono text-secret-red mb-2 ${glitching ? 'animate-glitch' : ''}`}>
+          <h1 className={`text-5xl font-bold text-newspaper-text mb-2 ${glitching ? 'animate-glitch' : ''}`}>
             {redactedText}
           </h1>
-          <div className="text-sm font-mono text-muted-foreground mb-4">
-            [CLASSIFIED DOSSIER - CLEARANCE LEVEL: ███████]
+          <div className="text-xl font-medium text-newspaper-text/80 mb-2">
+            ULTIMATE HUMOR EDITION
           </div>
-          <div className="text-xs font-mono text-muted-foreground italic">
-            "The truth is out there... but so are the lies"
+          <div className="text-sm font-italic text-newspaper-text/60 mb-4">
+            "Where conspiracy theories go to become policy"
+          </div>
+          <div className="text-sm text-newspaper-text/80">
+            Control the narrative. Manipulate the truth.
+          </div>
+          <div className="text-sm text-newspaper-text/80">
+            Convince people birds are real (or aren't).
+          </div>
+          <div className="text-lg font-bold text-secret-red mt-4">
+            NOW WITH 420% MORE SATIRE!
           </div>
         </div>
 
         <div className="space-y-6">
+          <div className="text-center space-y-2 mb-6">
+            <div className="text-sm font-mono text-newspaper-text">Record: 8W / 0L</div>
+            <div className="text-sm font-mono text-newspaper-text">Win Streak: 8</div>
+            <div className="text-xs font-mono text-newspaper-text/60 mt-4">
+              HOTKEYS:
+            </div>
+            <div className="text-xs font-mono text-newspaper-text/60">
+              Space = End Turn | T = Select Card
+            </div>
+            <div className="text-xs font-mono text-newspaper-text/60">
+              U = Upgrades | S = Stats | Q/L = Save/Load
+            </div>
+          </div>
+
+          {/* Menu Options */}
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            <Button 
+              onClick={() => onStartGame('government')}
+              className="w-full py-4 text-lg bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80"
+            >
+              NEW GAME
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
+              disabled
+            >
+              MANAGE EXPANSIONS
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
+              disabled
+            >
+              HOW TO PLAY
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
+              disabled
+            >
+              CONTINUE
+            </Button>
+            <Button 
+              onClick={() => setShowCredits(true)}
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+            >
+              CREDITS
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
+              disabled
+            >
+              OPTIONS
+            </Button>
+          </div>
+
           {/* Faction Selection */}
           <div className="grid md:grid-cols-2 gap-8">
-            <Card className="p-6 border-2 border-government-blue/50 hover:border-government-blue transition-all hover:scale-105 cursor-pointer group bg-government-blue/5">
+            <Card className="p-6 border-2 border-newspaper-text hover:border-newspaper-text transition-all hover:scale-105 cursor-pointer group bg-newspaper-bg">
               <div className="flex items-center mb-4">
                 <div className="text-3xl mr-3 animate-conspiracy-float">🦎</div>
-                <h3 className="font-bold text-xl text-government-blue font-mono">
+                <h3 className="font-bold text-xl text-government-blue">
                   DEEP STATE
                 </h3>
               </div>
               
-              <div className="space-y-2 text-sm mb-4 font-mono">
+              <div className="space-y-2 text-sm mb-4">
                 <div className="flex justify-between">
                   <span>Start Truth:</span>
                   <span className="text-government-blue font-bold">40%</span>
@@ -85,39 +159,32 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
                   <span>Bonus IP:</span>
                   <span className="text-government-blue font-bold">+10</span>
                 </div>
-                <div className="text-xs text-muted-foreground mt-2">
+                <div className="text-xs text-newspaper-text/60 mt-2">
                   Access to Lizard People
                 </div>
               </div>
               
-              <div className="bg-government-blue/10 p-3 rounded mb-4 text-xs italic">
-                "Control the narrative with black helicopters, weather machines, and surprisingly comfortable underground bunkers. The Illuminati has dental."
-              </div>
-
-              <div className="bg-yellow-500/90 text-black p-2 rounded mb-4 text-xs font-mono">
-                <div className="font-bold text-center mb-1">PERKS</div>
-                <div>+10 Starting IP</div>
-                <div>+2 Income Bonus</div>
-                <div>Access to Lizard People</div>
+              <div className="bg-newspaper-text/10 p-3 mb-4 text-xs italic text-newspaper-text">
+                "Control the narrative with black helicopters, weather machines, and surprisingly comfortable underground bunkers."
               </div>
               
               <Button 
                 onClick={() => onStartGame('government')}
-                className="w-full bg-government-blue hover:bg-government-blue/80 group-hover:animate-pulse"
+                className="w-full bg-government-blue hover:bg-government-blue/80 text-white group-hover:animate-pulse"
               >
                 Join the Shadow Cabinet
               </Button>
             </Card>
 
-            <Card className="p-6 border-2 border-truth-red/50 hover:border-truth-red transition-all hover:scale-105 cursor-pointer group bg-truth-red/5">
+            <Card className="p-6 border-2 border-newspaper-text hover:border-newspaper-text transition-all hover:scale-105 cursor-pointer group bg-newspaper-bg">
               <div className="flex items-center mb-4">
                 <div className="text-3xl mr-3 animate-conspiracy-float" style={{ animationDelay: '1s' }}>👁️</div>
-                <h3 className="font-bold text-xl text-truth-red font-mono">
+                <h3 className="font-bold text-xl text-truth-red">
                   TRUTH SEEKERS
                 </h3>
               </div>
               
-              <div className="space-y-2 text-sm mb-4 font-mono">
+              <div className="space-y-2 text-sm mb-4">
                 <div className="flex justify-between">
                   <span>Start Truth:</span>
                   <span className="text-truth-red font-bold">60%</span>
@@ -126,53 +193,30 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
                   <span>Bonus Truth:</span>
                   <span className="text-truth-red font-bold">+10%</span>
                 </div>
-                <div className="text-xs text-muted-foreground mt-2">
+                <div className="text-xs text-newspaper-text/60 mt-2">
                   Tinfoil Hat Immunity
                 </div>
               </div>
               
-              <div className="bg-truth-red/10 p-3 rounded mb-4 text-xs italic">
-                "Wake up the sheeple with essential oils, healing crystals, and really long YouTube videos. Your aunt on Facebook was right all along."
-              </div>
-
-              <div className="bg-yellow-500/90 text-black p-2 rounded mb-4 text-xs font-mono">
-                <div className="font-bold text-center mb-1">PERKS</div>
-                <div>+10% Starting Truth</div>
-                <div>+1 Card Draw Bonus</div>
-                <div>Tinfoil Hat Immunity</div>
+              <div className="bg-newspaper-text/10 p-3 mb-4 text-xs italic text-newspaper-text">
+                "Wake up the sheeple with essential oils, healing crystals, and really long YouTube videos."
               </div>
               
               <Button 
                 onClick={() => onStartGame('truth')}
-                className="w-full bg-truth-red hover:bg-truth-red/80 group-hover:animate-pulse"
+                className="w-full bg-truth-red hover:bg-truth-red/80 text-white group-hover:animate-pulse"
               >
                 Expose the Conspiracy
               </Button>
             </Card>
           </div>
-
-          {/* Menu Options */}
-          <div className="border-t pt-6 space-y-3">
-            <Button variant="outline" className="w-full" disabled>
-              Continue Game
-            </Button>
-            <Button variant="outline" className="w-full" disabled>
-              Manage Expansions
-            </Button>
-            <Button variant="outline" className="w-full" disabled>
-              Options
-            </Button>
-            <Button variant="ghost" className="w-full" disabled>
-              Credits
-            </Button>
-          </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-xs font-mono text-muted-foreground">
+        <div className="mt-8 text-center text-xs text-newspaper-text/60">
           <div className="mb-2">WARNING: This game contains satirical content</div>
           <div>Any resemblance to actual conspiracies is purely coincidental</div>
-          <div className="mt-2 text-secret-red">
+          <div className="mt-2 text-newspaper-text">
             [REDACTED] - Classification Level: FOR YOUR EYES ONLY
           </div>
         </div>

@@ -115,88 +115,104 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Responsive Header */}
-      <div className="h-16 md:h-24 bg-card border-b">
-        <div className="container mx-auto px-2 md:px-4 py-2">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-lg md:text-2xl font-bold font-mono text-secret-red">
-              THE SHADOW TIMES
+    <div className="min-h-screen bg-newspaper-bg">
+      {/* Newspaper Header */}
+      <div className="bg-newspaper-bg border-b-4 border-newspaper-border">
+        <div className="container mx-auto px-4 py-4">
+          <div className="text-center border-b-2 border-newspaper-border pb-4 mb-4">
+            <h1 className="text-4xl md:text-6xl font-bold text-newspaper-text" style={{ fontFamily: 'serif' }}>
+              THE PARANOID TIMES
             </h1>
-            <AudioControls
-              volume={audio.config.volume}
-              muted={audio.config.muted}
-              musicEnabled={audio.config.musicEnabled}
-              sfxEnabled={audio.config.sfxEnabled}
-              onVolumeChange={audio.setVolume}
-              onToggleMute={audio.toggleMute}
-              onToggleMusic={audio.toggleMusic}
-              onToggleSFX={audio.toggleSFX}
-            />
+            <div className="text-sm md:text-base font-medium text-newspaper-text mt-2">
+              Truth Seeker Operative
+            </div>
           </div>
-          <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-2">
-            <TruthMeter value={gameState.truth} />
-            <div className="flex gap-2 md:gap-4 text-xs md:text-sm font-mono">
-              <span>IP: {gameState.ip}</span>
-              <span>States: {gameState.controlledStates.length}/50</span>
-              <span>Turn: {gameState.turn}</span>
+          <div className="bg-newspaper-text text-newspaper-bg p-2 rounded">
+            <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8 text-xs md:text-sm font-mono">
+              <div className="text-center">
+                <div className="font-bold">ROUND</div>
+                <div className="text-lg">{gameState.turn}</div>
+              </div>
+              <div className="text-center">
+                <div className="font-bold">YOUR IP</div>
+                <div className="text-lg">{gameState.ip}</div>
+              </div>
+              <div className="text-center">
+                <div className="font-bold">TRUTH</div>
+                <div className="text-lg">{gameState.truth}%</div>
+              </div>
+              <div className="text-center">
+                <div className="font-bold">YOUR STATES</div>
+                <div className="text-lg">{gameState.controlledStates.length}</div>
+              </div>
+              <div className="text-center">
+                <div className="font-bold">AI IP</div>
+                <div className="text-lg">3</div>
+              </div>
+              <div className="text-center">
+                <div className="font-bold">AI STATES</div>
+                <div className="text-lg">{50 - gameState.controlledStates.length}</div>
+              </div>
+              <div className="absolute top-4 right-4">
+                <AudioControls
+                  volume={audio.config.volume}
+                  muted={audio.config.muted}
+                  musicEnabled={audio.config.musicEnabled}
+                  sfxEnabled={audio.config.sfxEnabled}
+                  onVolumeChange={audio.setVolume}
+                  onToggleMute={audio.toggleMute}
+                  onToggleMusic={audio.toggleMusic}
+                  onToggleSFX={audio.toggleSFX}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Responsive Main Game Area */}
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] md:h-[calc(100vh-6rem)]">
-        {/* Left sidebar - Hidden on mobile, shown on desktop */}
-        <div className="hidden lg:block w-72 bg-government-dark border-r border-secret-red/30 p-4 overflow-y-auto">
-          <Card className="mb-4 p-4 bg-yellow-500/90 text-black border-2 border-black">
+      {/* Main Game Area */}
+      <div className="flex flex-col lg:flex-row min-h-[calc(100vh-200px)]">
+        {/* Left sidebar - Victory Conditions & Classified Intel */}
+        <div className="hidden lg:block w-64 bg-newspaper-bg border-r-2 border-newspaper-border p-4 overflow-y-auto">
+          <div className="bg-newspaper-text text-newspaper-bg p-3 mb-4 border border-newspaper-border">
             <h3 className="font-bold text-sm mb-3 text-center">VICTORY CONDITIONS</h3>
-            <div className="text-xs space-y-2 font-mono">
-              <div className="flex justify-between">
-                <span>States:</span>
-                <span className="font-bold">{gameState.controlledStates.length}/10</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Truth:</span>
-                <span className="font-bold">{gameState.truth}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>IP:</span>
-                <span className="font-bold">{gameState.ip}/200</span>
-              </div>
-              <div className="border-t border-black/20 pt-2 text-center">
-                <div className="text-xs">The government opposes you</div>
-                <div className="text-xs">You are the OPPOSITION</div>
-                <div className="text-xs font-bold text-red-600">SHADOW GOVERNMENT ACTIVATED!</div>
+            <div className="text-xs space-y-1 font-mono">
+              <div>• Control 10 states</div>
+              <div>• Reach 200 IP</div>
+              <div>• Truth ≥90%</div>
+              <div className="border-t border-newspaper-bg/30 pt-2 mt-2">
+                <div className="text-center text-xs">States: {gameState.controlledStates.length}/10</div>
+                <div className="text-center text-xs">Truth: {gameState.truth}%</div>
+                <div className="text-center text-xs">IP: {gameState.ip}/200</div>
               </div>
             </div>
-          </Card>
+          </div>
 
           {/* Secret Agenda */}
           <div className="mb-4">
             <SecretAgenda agenda={gameState.secretAgenda} />
           </div>
           
-          <Card className="p-3 bg-card/50 border border-secret-red/30">
-            <h3 className="font-bold text-sm mb-2 text-secret-red font-mono">CLASSIFIED INTEL</h3>
-            <div className="text-xs font-mono space-y-1 max-h-40 overflow-y-auto">
+          <div className="bg-newspaper-bg border-2 border-newspaper-border p-3">
+            <h3 className="font-bold text-sm mb-2 text-newspaper-text">CLASSIFIED INTEL</h3>
+            <div className="text-xs space-y-1 max-h-40 overflow-y-auto">
               {gameState.log.map((entry, i) => (
-                <div key={i} className="text-muted-foreground animate-fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
-                  • {entry}
+                <div key={i} className="text-newspaper-text/80 animate-fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
+                  <span className="font-mono">▲</span> {entry}
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         </div>
 
-        {/* Center - Map (responsive) */}
-        <div className="flex-1 p-2 md:p-4 relative min-h-0" id="map-container">
+        {/* Center - Map */}
+        <div className="flex-1 p-4 relative bg-newspaper-bg border-x-2 border-newspaper-border" id="map-container">
           {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-            <div className="absolute top-2 md:top-4 left-2 md:left-4 z-10 bg-secret-red text-white p-2 rounded font-mono text-xs md:text-sm">
+            <div className="absolute top-4 left-4 z-10 bg-newspaper-text text-newspaper-bg p-2 border border-newspaper-border font-mono text-sm">
               Click a state to target with zone card
             </div>
           )}
-          <div className="h-full">
+          <div className="h-full border-2 border-newspaper-border bg-white/80">
             <EnhancedUSAMap 
               states={gameState.states} 
               onStateClick={handleStateClick}
@@ -205,47 +221,46 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Right sidebar - Mobile: Bottom sheet, Desktop: Fixed sidebar */}
-        <div className="lg:w-80 bg-card border-l p-2 md:p-4 lg:overflow-y-auto">
+        {/* Right sidebar - AI Intel & Your Hand */}
+        <div className="lg:w-80 bg-newspaper-bg border-l-2 border-newspaper-border p-4 lg:overflow-y-auto">
           {/* Mobile victory conditions - shown at top on mobile */}
           <div className="lg:hidden mb-4">
-            <Card className="p-3 bg-yellow-500/90 text-black border-2 border-black">
+            <div className="bg-newspaper-text text-newspaper-bg p-3 border border-newspaper-border">
               <h3 className="font-bold text-xs mb-2 text-center">VICTORY CONDITIONS</h3>
-              <div className="text-xs space-y-1 font-mono">
-                <div className="flex justify-between">
-                  <span>States: {gameState.controlledStates.length}/10</span>
-                  <span>Truth: {gameState.truth}%</span>
-                  <span>IP: {gameState.ip}/200</span>
-                </div>
+              <div className="text-xs font-mono">
+                States: {gameState.controlledStates.length}/10 | Truth: {gameState.truth}% | IP: {gameState.ip}/200
               </div>
-            </Card>
+            </div>
           </div>
 
-          {/* AI Opponent */}
-          <Card className="mb-4 p-3">
-            <h3 className="font-bold text-sm mb-2">AI Opponent</h3>
-            <div className="text-xs font-mono">
-              <div>Faction: Deep State</div>
-              <div>States: {50 - gameState.controlledStates.length}</div>
-              <div className="text-government-blue">Plotting...</div>
+          {/* AI Intel */}
+          <div className="bg-newspaper-text text-newspaper-bg p-3 mb-4 border border-newspaper-border">
+            <h3 className="font-bold text-sm mb-2">AI INTEL</h3>
+            <div className="text-xs font-mono space-y-1">
+              <div>Hand Size: 5</div>
+              <div>Strategy: Suppressing Truth</div>
+              <div>Threat Level: LOW</div>
             </div>
-          </Card>
+          </div>
 
-          {/* Game Hand */}
-          <EnhancedGameHand 
-            cards={gameState.hand}
-            onPlayCard={handlePlayCard}
-            onSelectCard={handleSelectCard}
-            selectedCard={gameState.selectedCard}
-            disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
-            currentIP={gameState.ip}
-          />
+          {/* Your Hand */}
+          <div className="bg-newspaper-text text-newspaper-bg p-3 mb-4 border border-newspaper-border">
+            <h3 className="font-bold text-sm mb-2">YOUR HAND</h3>
+            <EnhancedGameHand 
+              cards={gameState.hand}
+              onPlayCard={handlePlayCard}
+              onSelectCard={handleSelectCard}
+              selectedCard={gameState.selectedCard}
+              disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
+              currentIP={gameState.ip}
+            />
+          </div>
 
           {/* Controls */}
-          <div className="mt-4 space-y-2">
+          <div className="space-y-2">
             <Button 
               onClick={handleEndTurn}
-              className="w-full"
+              className="w-full bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80"
               disabled={gameState.phase !== 'action' || gameState.animating}
             >
               End Turn
@@ -254,16 +269,16 @@ const Index = () => {
 
           {/* Mobile Log - Collapsible */}
           <div className="lg:hidden mt-4">
-            <Card className="p-3 bg-card/50 border border-secret-red/30">
-              <h3 className="font-bold text-xs mb-2 text-secret-red font-mono">INTEL LOG</h3>
-              <div className="text-xs font-mono space-y-1 max-h-20 overflow-y-auto">
+            <div className="bg-newspaper-bg border-2 border-newspaper-border p-3">
+              <h3 className="font-bold text-xs mb-2 text-newspaper-text">INTEL LOG</h3>
+              <div className="text-xs space-y-1 max-h-20 overflow-y-auto">
                 {gameState.log.slice(-3).map((entry, i) => (
-                  <div key={i} className="text-muted-foreground">
-                    • {entry}
+                  <div key={i} className="text-newspaper-text/80">
+                    <span className="font-mono">▲</span> {entry}
                   </div>
                 ))}
               </div>
-            </Card>
+            </div>
           </div>
         </div>
       </div>
