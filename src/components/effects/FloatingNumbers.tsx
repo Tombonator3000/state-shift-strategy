@@ -54,25 +54,27 @@ const FloatingNumbers = ({ trigger }: FloatingNumbersProps) => {
 
   useEffect(() => {
     if (trigger) {
-      const position = getSmartPosition(numbers);
-      const newNumber: FloatingNumber = {
-        id: `${Date.now()}-${Math.random()}`,
-        value: trigger.value,
-        x: position.x,
-        y: position.y,
-        color: getNumberColor(trigger.type),
-        timestamp: Date.now()
-      };
+      setNumbers(prev => {
+        const position = getSmartPosition(prev);
+        const newNumber: FloatingNumber = {
+          id: `${Date.now()}-${Math.random()}`,
+          value: trigger.value,
+          x: position.x,
+          y: position.y,
+          color: getNumberColor(trigger.type),
+          timestamp: Date.now()
+        };
 
-      setNumbers(prev => [...prev, newNumber]);
+        // Remove after animation completes (longer for special types)
+        const duration = ['synergy', 'combo', 'chain'].includes(trigger.type) ? 3000 : 2000;
+        setTimeout(() => {
+          setNumbers(current => current.filter(n => n.id !== newNumber.id));
+        }, duration);
 
-      // Remove after animation completes (longer for special types)
-      const duration = ['synergy', 'combo', 'chain'].includes(trigger.type) ? 3000 : 2000;
-      setTimeout(() => {
-        setNumbers(prev => prev.filter(n => n.id !== newNumber.id));
-      }, duration);
+        return [...prev, newNumber];
+      });
     }
-  }, [trigger, numbers]);
+  }, [trigger]);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50">
