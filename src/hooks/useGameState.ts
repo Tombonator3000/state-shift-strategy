@@ -6,6 +6,7 @@ import { generateRandomDeck, getRandomCards } from '@/data/cardDatabase';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
 import { AIStrategist, type AIDifficulty } from '@/data/aiStrategy';
+import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -34,12 +35,8 @@ interface GameState {
     specialBonus?: string;
     bonusValue?: number;
   }>;
-  currentEvents: Array<{
-    id: string;
-    headline: string;
-    content: string;
-    type: 'conspiracy' | 'government' | 'truth' | 'random';
-  }>;
+  currentEvents: GameEvent[];
+  eventManager?: EventManager;
   showNewspaper: boolean;
   log: string[];
   secretAgenda: SecretAgenda & {
@@ -58,16 +55,18 @@ interface GameState {
   aiStrategist?: AIStrategist;
 }
 
-const generateRandomEvents = () => [
-  {
-    id: 'event_1',
-    headline: 'BREAKING: UFO Spotted Over Washington D.C.',
-    content: 'Multiple witnesses report seeing strange lights performing impossible maneuvers above the Capitol building. Government officials claim it was just weather balloons, but experts disagree...',
-    type: 'conspiracy' as const
-  }
-];
+const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
+  // Start with some common events for the first newspaper
+  const initialEvents = EVENT_DATABASE.filter(event => 
+    event.rarity === 'common' && !event.conditions
+  ).slice(0, 3);
+  
+  return initialEvents;
+};
 
 export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
+  const [eventManager] = useState(() => new EventManager());
+  
   const [gameState, setGameState] = useState<GameState>({
     faction: 'truth',
     phase: 'action',
@@ -96,7 +95,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         bonusValue: state.bonusValue
       };
     }),
-    currentEvents: generateRandomEvents(),
+    currentEvents: generateInitialEvents(eventManager),
+    eventManager,
     showNewspaper: false,
     log: [
       'Game started - Truth Seekers faction selected',
@@ -296,6 +296,41 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         const stateIncome = getTotalIPFromStates(prev.controlledStates);
         const baseIncome = 5;
         const totalIncome = baseIncome + stateIncome;
+
+        // Update event manager with current turn
+        prev.eventManager?.updateTurn(prev.turn);
+
+        // Trigger random event (30% chance)
+        let newEvents = [...prev.currentEvents];
+        let eventEffectLog: string[] = [];
+        let truthModifier = 0;
+        let ipModifier = 0;
+        let bonusCardDraw = 0;
+        
+        if (Math.random() < 0.3 && prev.eventManager) {
+          const triggeredEvent = prev.eventManager.selectRandomEvent(prev);
+          if (triggeredEvent) {
+            newEvents = [triggeredEvent];
+            
+            // Apply event effects
+            if (triggeredEvent.effects) {
+              const effects = triggeredEvent.effects;
+              if (effects.truth) truthModifier = effects.truth;
+              if (effects.ip) ipModifier = effects.ip;
+              if (effects.cardDraw) bonusCardDraw = effects.cardDraw;
+              
+              eventEffectLog.push(`EVENT: ${triggeredEvent.title} triggered!`);
+              if (effects.truth) eventEffectLog.push(`Truth ${effects.truth > 0 ? '+' : ''}${effects.truth}%`);
+              if (effects.ip) eventEffectLog.push(`IP ${effects.ip > 0 ? '+' : ''}${effects.ip}`);
+              if (effects.cardDraw) eventEffectLog.push(`Draw ${effects.cardDraw} extra cards`);
+            }
+          }
+        }
+
+        // Draw bonus cards from events
+        const totalCardsToDraw = cardsToDraw + bonusCardDraw;
+        const finalDrawnCards = prev.deck.slice(0, totalCardsToDraw);
+        const finalRemainingDeck = prev.deck.slice(totalCardsToDraw);
         
         return {
           ...prev,
@@ -304,15 +339,18 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           currentPlayer: 'ai',
           showNewspaper: false,
           cardsPlayedThisTurn: 0,
-          ip: prev.ip + totalIncome,
-          hand: [...prev.hand, ...drawnCards],
-          deck: remainingDeck,
+          truth: Math.max(0, Math.min(100, prev.truth + truthModifier)),
+          ip: prev.ip + totalIncome + ipModifier,
+          hand: [...prev.hand, ...finalDrawnCards],
+          deck: finalRemainingDeck,
+          currentEvents: newEvents,
           log: [...prev.log, 
             `Turn ${prev.turn} ended`, 
             `Base income: ${baseIncome} IP`,
             `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
-            `Total income: ${totalIncome} IP`, 
-            `Cards drawn: ${cardsToDraw}`,
+            `Total income: ${totalIncome + ipModifier} IP`, 
+            `Cards drawn: ${totalCardsToDraw}`,
+            ...eventEffectLog,
             `AI ${prev.aiStrategist?.personality.name} is thinking...`
           ]
         };

@@ -8,7 +8,7 @@ interface NewsEvent {
   id: string;
   headline: string;
   content: string;
-  type: 'conspiracy' | 'government' | 'truth' | 'random';
+  type: 'conspiracy' | 'government' | 'truth' | 'random' | 'crisis' | 'opportunity';
   imageType?: string;
 }
 

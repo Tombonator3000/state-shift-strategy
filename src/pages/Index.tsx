@@ -11,6 +11,7 @@ import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
 import AIStatus from '@/components/game/AIStatus';
 import BalancingDashboard from '@/components/game/BalancingDashboard';
+import EventViewer from '@/components/game/EventViewer';
 import { AudioControls } from '@/components/ui/audio-controls';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudio } from '@/hooks/useAudio';
@@ -24,6 +25,7 @@ const Index = () => {
   const [showIntro, setShowIntro] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showBalancing, setShowBalancing] = useState(false);
+  const [showEvents, setShowEvents] = useState(false);
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
@@ -151,6 +153,10 @@ const Index = () => {
     );
   }
 
+  if (showEvents) {
+    return <EventViewer onClose={() => setShowEvents(false)} />;
+  }
+
   if (showBalancing) {
     return <BalancingDashboard onClose={() => setShowBalancing(false)} />;
   }
@@ -212,6 +218,13 @@ const Index = () => {
                   title="Card Balancing Dashboard"
                 >
                   ⚖️
+                </button>
+                <button
+                  onClick={() => setShowEvents(true)}
+                  className="bg-purple-600 text-white p-1 rounded hover:bg-purple-700 transition-colors"
+                  title="Event Database"
+                >
+                  📰
                 </button>
                 <AudioControls
                   volume={audio.config.volume}
