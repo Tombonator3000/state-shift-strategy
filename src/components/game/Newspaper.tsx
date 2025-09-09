@@ -51,24 +51,31 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
     };
   }, []);
 
-  // Glitch masthead system - 5% chance
+  // Glitch masthead system - one-time 10% chance on load
   useEffect(() => {
-    if (Math.random() < 0.05) {
-      setGlitching(true);
-      const glitchMastheads = [
-        'THE SHEEPLE DAILY',
-        'AREA 51 DIGEST',
-        'BAT BOY BULLETIN', 
-        'CHEMTRAIL COURIER',
-        'ILLUMINATI LEDGER',
-        'BLACK HELICOPTER GAZETTE'
-      ];
-      setMasthead(glitchMastheads[Math.floor(Math.random() * glitchMastheads.length)]);
+    const shouldGlitch = Math.random() < 0.1;
+    if (shouldGlitch) {
+      const timer = setTimeout(() => {
+        setGlitching(true);
+        const glitchMastheads = [
+          'THE SHEEPLE DAILY',
+          'AREA 51 DIGEST',
+          'BAT BOY BULLETIN', 
+          'CHEMTRAIL COURIER',
+          'ILLUMINATI LEDGER',
+          'BLACK HELICOPTER GAZETTE'
+        ];
+        setMasthead(glitchMastheads[Math.floor(Math.random() * glitchMastheads.length)]);
+        
+        const resetTimer = setTimeout(() => {
+          setGlitching(false);
+          setMasthead('THE PARANOID TIMES');
+        }, 800);
+        
+        return () => clearTimeout(resetTimer);
+      }, 500);
       
-      setTimeout(() => {
-        setGlitching(false);
-        setMasthead('THE PARANOID TIMES');
-      }, 300);
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -172,8 +179,8 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
 
   return (
     <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-[100] p-4 animate-fade-in">
-      <Card className={`max-w-6xl w-full max-h-[90vh] overflow-y-auto bg-newspaper-bg border-4 border-newspaper-border transform transition-all duration-300 ${
-        glitching ? 'animate-glitch filter hue-rotate-180' : 'animate-scale-in'
+      <Card className={`max-w-6xl w-full max-h-[90vh] overflow-y-auto bg-newspaper-bg border-4 border-newspaper-border ${
+        glitching ? 'animate-glitch' : 'animate-scale-in'
       }`}>
         {/* Header */}
         <div className="bg-newspaper-header p-6 border-b-4 border-double border-newspaper-border relative">
@@ -189,8 +196,8 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
           </div>
           
           <div className="text-center space-y-3">
-            <div className={`text-5xl font-bold font-serif tracking-wide ${
-              glitching ? 'text-red-500 animate-pulse' : 'text-newspaper-text'
+            <div className={`text-5xl font-bold font-serif tracking-wide transition-colors duration-300 ${
+              glitching ? 'text-secret-red' : 'text-newspaper-text'
             }`}>
               {masthead}
             </div>
@@ -300,13 +307,13 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
 
             {/* Conspiracy Corner */}
             <Card className="p-3 bg-red-900/20 border-4 border-secret-red relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-secret-red animate-pulse"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-secret-red opacity-75"></div>
               <h4 className="font-bold mb-2 font-mono text-secret-red text-center text-sm">
                 📡 CONSPIRACY CORNER 📡
               </h4>
               <div className="text-xs space-y-1 font-mono">
                 {selectedConspiracies.map((item, i) => (
-                  <div key={i} className="text-newspaper-text animate-fade-in" style={{ animationDelay: `${i * 0.2}s` }}>
+                  <div key={i} className="text-newspaper-text opacity-90">
                     {item}
                   </div>
                 ))}
