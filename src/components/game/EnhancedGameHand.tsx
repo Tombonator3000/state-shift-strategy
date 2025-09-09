@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GameCard } from '@/components/game/GameHand';
 import { useAudio } from '@/hooks/useAudio';
+import { toast } from '@/hooks/use-toast';
+import { Loader2, Zap, Shield, Target } from 'lucide-react';
 
 interface EnhancedGameHandProps {
   cards: GameCard[];
@@ -68,10 +70,38 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   };
 
   const handlePlayCard = async (cardId: string) => {
+    const card = cards.find(c => c.id === cardId);
+    if (!card) return;
+    
+    if (!canAffordCard(card)) {
+      audio.playSFX('hover'); // Error sound
+      toast({
+        title: "❌ Insufficient IP",
+        description: `Need ${card.cost} IP to deploy "${card.name}". You have ${currentIP} IP.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     audio.playSFX('cardPlay');
     setPlayingCard(cardId);
-    onPlayCard(cardId);
-    setPlayingCard(null);
+    
+    toast({
+      title: "🚀 Asset Deployed",
+      description: `"${card.name}" is now active.`,
+    });
+    
+    try {
+      onPlayCard(cardId);
+    } catch (error) {
+      toast({
+        title: "❌ Deployment Failed",
+        description: "Asset deployment was interrupted. Try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setPlayingCard(null);
+    }
   };
 
   const canAffordCard = (card: GameCard) => currentIP >= card.cost;
@@ -101,14 +131,14 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               key={`${card.id}-${index}`}
               data-card-id={card.id}
               className={`
-                group relative p-2 cursor-pointer transition-all duration-200
+                enhanced-button card-hover-glow group relative p-2 cursor-pointer transition-all duration-300
                 bg-card border-2 rounded-lg flex items-center gap-2
-                ${isSelected ? 'ring-2 ring-yellow-400 scale-105 z-10' : ''}
-                ${isPlaying || isLoading ? 'animate-pulse scale-105 z-50' : 'hover:scale-[1.02]'}
-                ${!canAfford && !disabled ? 'opacity-60 saturate-50' : ''}
+                ${isSelected ? 'ring-2 ring-warning scale-105 z-10 shadow-lg shadow-warning/50' : ''}
+                ${isPlaying || isLoading ? 'animate-pulse scale-105 z-50 ring-2 ring-primary shadow-lg shadow-primary/50' : 'hover:scale-[1.03] hover:shadow-md'}
+                ${!canAfford && !disabled ? 'opacity-60 saturate-50 cursor-not-allowed' : 'hover:bg-accent/20'}
                 ${getRarityBorder(card.rarity)}
                 ${getRarityGlow(card.rarity)}
-                hover:bg-accent/20 active:scale-95
+                active:scale-95 hover:-translate-y-0.5
               `}
               style={{ 
                 animationDelay: `${index * 0.05}s`,
@@ -129,16 +159,19 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 audio.playSFX('hover');
               }}
             >
-               {/* Loading overlay */}
-              {isLoading && (
-                <div className="absolute inset-0 bg-black/20 rounded-lg flex items-center justify-center z-20">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+               {/* Enhanced loading overlay */}
+              {(isLoading || isPlaying) && (
+                <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center z-20">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary mb-1" />
+                  <span className="text-xs font-mono text-primary font-bold">
+                    {isPlaying ? 'DEPLOYING' : 'PROCESSING'}
+                  </span>
                 </div>
               )}
               
-              {/* Cost Badge */}
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 border-2 ${
-                canAfford ? 'bg-primary text-primary-foreground border-primary' : 'bg-destructive text-destructive-foreground border-destructive'
+              {/* Enhanced Cost Badge */}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 border-2 transition-all duration-200 ${
+                canAfford ? 'bg-primary text-primary-foreground border-primary shadow-md shadow-primary/30' : 'bg-destructive text-destructive-foreground border-destructive shadow-md shadow-destructive/30 animate-pulse'
               }`}>
                 {card.cost}
               </div>
@@ -154,17 +187,20 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 <div className="text-xs text-muted-foreground truncate">{card.text}</div>
               </div>
               
-              {/* Type Badge */}
+              {/* Enhanced Type Badge */}
               <Badge 
                 variant="outline" 
-                className={`text-xs px-2 py-0 flex-shrink-0 ${
-                  card.type === 'MEDIA' && faction === 'truth' ? 'bg-emerald-500/20 border-emerald-500 text-emerald-700' :
-                  card.type === 'MEDIA' && faction === 'government' ? 'bg-blue-500/20 border-blue-500 text-blue-700' :
-                  card.type === 'ZONE' ? 'bg-amber-500/20 border-amber-500 text-amber-700' :
-                  card.type === 'ATTACK' ? 'bg-red-500/20 border-red-500 text-red-700' :
-                  'bg-zinc-500/20 border-zinc-500 text-zinc-700'
+                className={`text-xs px-2 py-1 flex-shrink-0 flex items-center gap-1 transition-all duration-200 ${
+                  card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth-red/20 border-truth-red text-truth-red shadow-sm' :
+                  card.type === 'MEDIA' && faction === 'government' ? 'bg-government-blue/20 border-government-blue text-government-blue shadow-sm' :
+                  card.type === 'ZONE' ? 'bg-warning/20 border-warning text-warning shadow-sm' :
+                  card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive shadow-sm' :
+                  'bg-muted/20 border-muted text-muted-foreground shadow-sm'
                 }`}
               >
+                {card.type === 'ZONE' && <Target className="w-3 h-3" />}
+                {card.type === 'ATTACK' && <Zap className="w-3 h-3" />}
+                {card.type === 'DEFENSIVE' && <Shield className="w-3 h-3" />}
                 {card.type}
               </Badge>
 
@@ -276,18 +312,33 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                       </div>
                     </div>
                     
-                    {/* Deploy button */}
+                    {/* Enhanced Deploy button */}
                     <Button
                       onClick={() => {
+                        if (!canAffordCard(card)) {
+                          toast({
+                            title: "❌ Insufficient IP",
+                            description: `Need ${card.cost} IP to deploy this asset.`,
+                            variant: "destructive",
+                          });
+                          return;
+                        }
                         audio.playSFX('click');
                         setExaminedCard(null);
                         handlePlayCard(card.id);
                       }}
-                      disabled={disabled || !canAffordCard(card)}
-                      className="w-full text-xl py-4"
+                      disabled={disabled}
+                      className={`enhanced-button w-full text-xl py-4 font-mono relative overflow-hidden transition-all duration-300 ${
+                        !canAffordCard(card) ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
+                      }`}
                       size="lg"
                     >
-                      {card.type === 'ZONE' ? 'SELECT & TARGET STATE' : 'DEPLOY ASSET'}
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        {card.type === 'ZONE' && <Target className="w-5 h-5" />}
+                        {card.type === 'ATTACK' && <Zap className="w-5 h-5" />}
+                        {card.type === 'DEFENSIVE' && <Shield className="w-5 h-5" />}
+                        {card.type === 'ZONE' ? 'SELECT & TARGET STATE' : 'DEPLOY ASSET'}
+                      </span>
                     </Button>
                   </div>
                 </>
@@ -297,15 +348,28 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
         </div>
       )}
 
-      {/* Card playing overlay */}
+      {/* Enhanced Card playing overlay */}
       {playingCard && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white mb-4 animate-pulse">
-              DEPLOYING ASSET
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-[9999]">
+          <Card className="p-8 text-center bg-card/90 backdrop-blur-md border-primary shadow-2xl shadow-primary/50">
+            <div className="space-y-6">
+              <div className="text-3xl font-bold text-foreground mb-2 font-mono">
+                🚀 DEPLOYING ASSET
+              </div>
+              <div className="text-lg text-muted-foreground font-mono">
+                Operation in progress...
+              </div>
+              <div className="flex items-center justify-center">
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+              </div>
+              <div className="text-sm text-muted-foreground font-mono">
+                {(() => {
+                  const card = cards.find(c => c.id === playingCard);
+                  return card ? `"${card.name}"` : 'Unknown Asset';
+                })()}
+              </div>
             </div>
-            <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto" />
-          </div>
+          </Card>
         </div>
       )}
     </div>

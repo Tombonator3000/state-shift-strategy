@@ -275,11 +275,78 @@ All colors MUST be HSL.
     }
   }
 
-  /* Button Enhancements */
+  /* Loading Pulse Effects */
+  .loading-pulse {
+    background: linear-gradient(90deg, 
+      hsl(var(--muted)), 
+      hsl(var(--accent)), 
+      hsl(var(--muted))
+    );
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes loading-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Interactive Hover States */
+  .interactive-hover {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .interactive-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .interactive-hover:active {
+    transform: translateY(0);
+    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Error State Animations */
+  .error-shake {
+    animation: error-shake 0.5s ease-in-out;
+  }
+
+  @keyframes error-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* Enhanced Button System */
   .enhanced-button {
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .enhanced-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .enhanced-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  .enhanced-button:hover::before {
+    left: 100%;
   }
 
   .enhanced-button::after {
@@ -295,9 +362,45 @@ All colors MUST be HSL.
     transition: width 0.6s, height 0.6s;
   }
 
+  .enhanced-button:active {
+    transform: translateY(0);
+    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   .enhanced-button:active::after {
     width: 300px;
     height: 300px;
+  }
+
+  /* Micro-interaction Enhancements */
+  .micro-bounce:hover {
+    animation: micro-bounce 0.6s ease-in-out;
+  }
+
+  @keyframes micro-bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  /* Success/Error Feedback */
+  .success-glow {
+    box-shadow: 0 0 20px hsl(var(--success) / 0.5);
+    animation: success-pulse 1s ease-in-out;
+  }
+
+  .error-glow {
+    box-shadow: 0 0 20px hsl(var(--destructive) / 0.5);
+    animation: error-pulse 1s ease-in-out;
+  }
+
+  @keyframes success-pulse {
+    0%, 100% { box-shadow: 0 0 20px hsl(var(--success) / 0.5); }
+    50% { box-shadow: 0 0 30px hsl(var(--success) / 0.8); }
+  }
+
+  @keyframes error-pulse {
+    0%, 100% { box-shadow: 0 0 20px hsl(var(--destructive) / 0.5); }
+    50% { box-shadow: 0 0 30px hsl(var(--destructive) / 0.8); }
   }
 
   @media (prefers-reduced-motion: reduce) {

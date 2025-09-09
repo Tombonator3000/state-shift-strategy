@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { toast } from '@/hooks/use-toast';
 import * as topojson from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
+import { AlertTriangle, Target, Shield } from 'lucide-react';
 
 interface EnhancedState {
   id: string;
@@ -117,15 +119,26 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       pathElement.setAttribute('data-state-id', stateId);
       pathElement.setAttribute('data-state-abbr', gameState?.abbreviation || stateId);
       
-      // Add event listeners
+      // Enhanced event listeners with better feedback
       pathElement.addEventListener('click', () => {
         if (selectedZoneCard && gameState) {
           if (gameState.owner === 'player') {
-            // Can't target own states - show feedback
-            audio?.playSFX?.('error');
+            // Can't target own states - enhanced feedback
+            audio?.playSFX?.('hover');
+            toast({
+              title: "❌ Invalid Target",
+              description: `Cannot target ${gameState.name} - you already control this state!`,
+              variant: "destructive",
+            });
             return;
           }
+          
+          // Valid target - success feedback
           audio?.playSFX?.('click');
+          toast({
+            title: "🎯 Target Acquired",
+            description: `Deploying zone asset to ${gameState.name}...`,
+          });
           onStateClick(gameState?.abbreviation || stateId);
         } else {
           audio?.playSFX?.('hover');
@@ -223,8 +236,10 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             SHADOW GOVERNMENT: USA CONTROL GRID
           </h3>
           {selectedZoneCard && (
-            <Badge variant="destructive" className="animate-pulse font-mono">
+            <Badge variant="destructive" className="animate-pulse font-mono flex items-center gap-2 shadow-lg">
+              <Target className="w-4 h-4" />
               🎯 ZONE TARGETING: Click neutral/enemy states only
+              <AlertTriangle className="w-4 h-4" />
             </Badge>
           )}
         </div>
@@ -242,33 +257,36 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         </div>
 
         {/* Legend */}
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-blue-500 border border-border rounded"></div>
-            <span className="text-foreground font-mono">Truth Seekers</span>
+        {/* Enhanced Legend */}
+        <div className="mt-4 space-y-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <div className="w-4 h-4 bg-blue-500 border border-border rounded shadow-sm"></div>
+              <span className="text-foreground font-mono font-medium">Truth Seekers</span>
+            </div>
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+              <div className="w-4 h-4 bg-red-500 border border-border rounded shadow-sm"></div>
+              <span className="text-foreground font-mono font-medium">Government</span>
+            </div>
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-gray-400/10 border border-gray-400/20">
+              <div className="w-4 h-4 bg-gray-400 border border-border rounded shadow-sm"></div>
+              <span className="text-foreground font-mono font-medium">Neutral</span>
+            </div>
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
+              <div className="w-4 h-4 bg-orange-500 border border-border rounded shadow-sm animate-pulse"></div>
+              <span className="text-foreground font-mono font-medium">Contested</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-500 border border-border rounded"></div>
-            <span className="text-foreground font-mono">Government</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-400 border border-border rounded"></div>
-            <span className="text-foreground font-mono">Neutral</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-orange-500 border border-border rounded"></div>
-            <span className="text-foreground font-mono">Contested</span>
-          </div>
-        </div>
 
-        <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-destructive rounded-full"></div>
-            <span className="text-foreground font-mono">Pressure</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-accent border border-accent-foreground transform rotate-45"></div>
-            <span className="text-foreground font-mono">Defense</span>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-destructive/10 border border-destructive/20">
+              <div className="w-3 h-3 bg-destructive rounded-full shadow-sm animate-pulse"></div>
+              <span className="text-foreground font-mono font-medium">Pressure Indicators</span>
+            </div>
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-accent/10 border border-accent/20">
+              <Shield className="w-4 h-4 text-accent" />
+              <span className="text-foreground font-mono font-medium">Defense Points</span>
+            </div>
           </div>
         </div>
       </Card>
