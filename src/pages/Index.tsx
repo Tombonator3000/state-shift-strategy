@@ -270,6 +270,7 @@ const Index = () => {
                 states={gameState.states} 
                 onStateClick={handleStateClick}
                 selectedZoneCard={gameState.selectedCard}
+                selectedState={gameState.targetState}
               />
             </div>
           </div>

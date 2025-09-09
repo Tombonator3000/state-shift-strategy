@@ -22,13 +22,15 @@ interface EnhancedUSAMapProps {
   onStateClick: (stateId: string) => void;
   selectedZoneCard?: string | null;
   hoveredStateId?: string | null;
+  selectedState?: string | null;
 }
 
 const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({ 
   states, 
   onStateClick, 
   selectedZoneCard,
-  hoveredStateId 
+  hoveredStateId,
+  selectedState
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [geoData, setGeoData] = useState<any>(null);
@@ -99,7 +101,15 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
       const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       pathElement.setAttribute('d', path(feature) || '');
-      pathElement.setAttribute('class', `state-path ${getStateOwnerClass(gameState)}`);
+      
+      // Determine classes based on state
+      const isSelected = selectedState === (gameState?.abbreviation || stateId);
+      const isTargeting = selectedZoneCard && !isSelected;
+      let classes = `state-path ${getStateOwnerClass(gameState)}`;
+      if (isSelected) classes += ' selected';
+      if (isTargeting) classes += ' targeting';
+      
+      pathElement.setAttribute('class', classes);
       pathElement.setAttribute('data-state-id', stateId);
       pathElement.setAttribute('data-state-abbr', gameState?.abbreviation || stateId);
       
@@ -169,7 +179,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       }
     });
 
-  }, [geoData, states, onStateClick]);
+  }, [geoData, states, onStateClick, selectedZoneCard, selectedState]);
 
   const getStateOwnerClass = (state?: EnhancedState) => {
     if (!state) return 'neutral';
@@ -349,8 +359,26 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           animation: dash 1s linear infinite;
         }
         
+        .state-path.selected {
+          stroke: #ffffff;
+          stroke-width: 4;
+          filter: brightness(1.4) drop-shadow(0 0 10px #ffffff);
+          animation: pulseGlow 1.5s ease-in-out infinite;
+        }
+        
         @keyframes dash {
           to { stroke-dashoffset: -12; }
+        }
+        
+        @keyframes pulseGlow {
+          0%, 100% { 
+            filter: brightness(1.4) drop-shadow(0 0 10px #ffffff);
+            stroke-width: 4;
+          }
+          50% { 
+            filter: brightness(1.8) drop-shadow(0 0 20px #ffffff) drop-shadow(0 0 40px #ffffff);
+            stroke-width: 6;
+          }
         }
         
         .state-label {
