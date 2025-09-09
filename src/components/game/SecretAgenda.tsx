@@ -11,11 +11,41 @@ interface SecretAgendaProps {
     completed: boolean;
     revealed: boolean;
   };
+  isPlayer?: boolean;
 }
 
-const SecretAgenda = ({ agenda }: SecretAgendaProps) => {
+const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
   const progressPercent = (agenda.progress / agenda.target) * 100;
 
+  // Opponent view - just a progress bar
+  if (!isPlayer) {
+    return (
+      <Card className="p-2 bg-black text-white border border-secret-red/50 relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-secret-red/5 to-transparent"></div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-2">
+            <Lock size={12} className="text-secret-red/70" />
+            <h3 className="font-bold text-xs font-mono text-secret-red/70">
+              AI OBJECTIVE
+            </h3>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-2 bg-gray-800 rounded">
+              <div 
+                className="h-full bg-secret-red/70 rounded transition-all"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            <div className="text-xs text-gray-400 font-mono">
+              {Math.floor(progressPercent)}%
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  // Player view - full display
   return (
     <Card className="p-4 bg-black text-white border-2 border-secret-red relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-secret-red/10 to-transparent"></div>
@@ -28,7 +58,7 @@ const SecretAgenda = ({ agenda }: SecretAgendaProps) => {
             <Lock size={16} className="text-secret-red" />
           )}
           <h3 className="font-bold text-sm font-mono text-secret-red">
-            {agenda.revealed ? 'SECRET AGENDA' : 'CLASSIFIED OBJECTIVE'}
+            {agenda.revealed ? 'YOUR SECRET AGENDA' : 'CLASSIFIED OBJECTIVE'}
           </h3>
         </div>
 

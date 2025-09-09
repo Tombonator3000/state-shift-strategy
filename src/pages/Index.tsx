@@ -171,9 +171,9 @@ const Index = () => {
       </div>
 
       {/* Main Game Area */}
-      <div className="flex flex-col lg:flex-row min-h-[calc(100vh-200px)]">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-180px)] overflow-hidden">
         {/* Left sidebar - Victory Conditions & Classified Intel */}
-        <div className="hidden lg:block w-64 bg-newspaper-bg border-r-2 border-newspaper-border p-4 overflow-y-auto">
+        <div className="hidden lg:block w-60 bg-newspaper-bg border-r-2 border-newspaper-border p-3 overflow-y-auto">
           <div className="bg-newspaper-text text-newspaper-bg p-3 mb-4 border border-newspaper-border">
             <h3 className="font-bold text-sm mb-3 text-center">VICTORY CONDITIONS</h3>
             <div className="text-xs space-y-1 font-mono">
@@ -188,9 +188,24 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Secret Agenda */}
+          {/* Player Secret Agenda */}
           <div className="mb-4">
-            <SecretAgenda agenda={gameState.secretAgenda} />
+            <SecretAgenda agenda={gameState.secretAgenda} isPlayer={true} />
+          </div>
+
+          {/* AI Secret Agenda */}
+          <div className="mb-4">
+            <SecretAgenda 
+              agenda={{
+                id: 'ai-agenda',
+                description: 'Hidden AI objective',
+                progress: 3,
+                target: 10,
+                completed: false,
+                revealed: false
+              }} 
+              isPlayer={false} 
+            />
           </div>
           
           <div className="bg-newspaper-bg border-2 border-newspaper-border p-3">
@@ -206,23 +221,25 @@ const Index = () => {
         </div>
 
         {/* Center - Map */}
-        <div className="flex-1 p-4 relative bg-newspaper-bg border-x-2 border-newspaper-border" id="map-container">
+        <div className="flex-1 p-3 relative bg-newspaper-bg border-x-2 border-newspaper-border" id="map-container">
           {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
             <div className="absolute top-4 left-4 z-10 bg-newspaper-text text-newspaper-bg p-2 border border-newspaper-border font-mono text-sm">
               Click a state to target with zone card
             </div>
           )}
-          <div className="h-full border-2 border-newspaper-border bg-white/80">
+          <div className="h-[calc(100%-8rem)] border-2 border-newspaper-border bg-white/80 relative">
             <EnhancedUSAMap 
               states={gameState.states} 
               onStateClick={handleStateClick}
               selectedZoneCard={gameState.selectedCard}
             />
+            {/* Space for played cards under map */}
+            <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" />
           </div>
         </div>
 
         {/* Right sidebar - AI Intel & Your Hand */}
-        <div className="lg:w-80 bg-newspaper-bg border-l-2 border-newspaper-border p-4 lg:overflow-y-auto">
+        <div className="lg:w-72 bg-newspaper-bg border-l-2 border-newspaper-border p-3 lg:overflow-y-auto">
           {/* Mobile victory conditions - shown at top on mobile */}
           <div className="lg:hidden mb-4">
             <div className="bg-newspaper-text text-newspaper-bg p-3 border border-newspaper-border">
