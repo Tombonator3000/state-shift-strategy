@@ -86,7 +86,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       </div>
       
       {/* Minimized hand cards - Compact List */}
-      <div className="space-y-1 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+      <div className="space-y-1">
         {cards.map((card, index) => {
           const isSelected = selectedCard === card.id;
           const isPlaying = playingCard === card.id;
@@ -180,7 +180,10 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           onClick={() => setExaminedCard(null)}
         >
           <div 
-            className="bg-card border-2 border-border rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto transform scale-110 animate-fade-in"
+            className={`bg-card border-2 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto transform scale-110 animate-fade-in ${(() => {
+              const card = cards.find(c => c.id === examinedCard);
+              return card ? `${getRarityBorder(card.rarity)} ${getRarityGlow(card.rarity)}` : 'border-border';
+            })()}`}
             onClick={(e) => e.stopPropagation()}
           >
             {(() => {
