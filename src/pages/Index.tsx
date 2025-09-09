@@ -9,6 +9,7 @@ import TruthMeter from '@/components/game/TruthMeter';
 import Newspaper from '@/components/game/Newspaper';
 import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
+import AIStatus from '@/components/game/AIStatus';
 import { AudioControls } from '@/components/ui/audio-controls';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudio } from '@/hooks/useAudio';
@@ -21,9 +22,16 @@ const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper } = useGameState();
+  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
+
+  // Handle AI turns
+  useEffect(() => {
+    if (gameState.phase === 'ai_turn' && gameState.currentPlayer === 'ai') {
+      executeAITurn();
+    }
+  }, [gameState.phase, gameState.currentPlayer, executeAITurn]);
 
   const startNewGame = (faction: 'government' | 'truth') => {
     initGame(faction);
@@ -231,14 +239,26 @@ const Index = () => {
             <SecretAgenda agenda={gameState.secretAgenda} isPlayer={true} />
           </div>
 
+          {/* AI Status */}
+          <div className="mb-3">
+            <AIStatus 
+              difficulty={gameState.aiDifficulty}
+              personalityName={gameState.aiStrategist?.personality.name}
+              isThinking={gameState.phase === 'ai_turn'}
+              currentPlayer={gameState.currentPlayer}
+              aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
+              assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
+            />
+          </div>
+
           {/* AI Secret Agenda */}
           <div className="mb-3">
             <SecretAgenda 
               agenda={{
-                ...getRandomAgenda('government'),
-                progress: 3,
-                completed: false,
-                revealed: false
+                ...gameState.aiSecretAgenda,
+                progress: gameState.aiSecretAgenda.progress,
+                completed: gameState.aiSecretAgenda.completed,
+                revealed: gameState.aiSecretAgenda.revealed
               }} 
               isPlayer={false} 
             />
@@ -315,9 +335,9 @@ const Index = () => {
             <Button 
               onClick={handleEndTurn}
               className="w-full bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80 h-8 text-xs"
-              disabled={gameState.phase !== 'action' || gameState.animating}
+              disabled={gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human'}
             >
-              End Turn
+              {gameState.currentPlayer === 'ai' ? 'AI Turn...' : 'End Turn'}
             </Button>
           </div>
 

@@ -5,15 +5,21 @@ import { TRUTH_SEEKERS_CARDS, GOVERNMENT_CARDS } from '@/data/factionCards';
 import { generateRandomDeck, getRandomCards } from '@/data/cardDatabase';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
+import { AIStrategist, type AIDifficulty } from '@/data/aiStrategy';
 
 interface GameState {
   faction: 'government' | 'truth';
-  phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory';
+  phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory' | 'ai_turn';
   turn: number;
+  currentPlayer: 'human' | 'ai';
+  aiDifficulty: AIDifficulty;
+  aiPersonality?: string;
   truth: number;
   ip: number;
   hand: GameCard[];
+  aiHand: GameCard[];
   deck: GameCard[];
+  aiDeck: GameCard[];
   cardsPlayedThisTurn: number;
   cardsPlayedThisRound: Array<{ card: GameCard; player: 'human' | 'ai' }>;
   controlledStates: string[];
@@ -41,9 +47,15 @@ interface GameState {
     completed: boolean;
     revealed: boolean;
   };
+  aiSecretAgenda: SecretAgenda & {
+    progress: number;
+    completed: boolean;
+    revealed: boolean;
+  };
   animating: boolean;
   selectedCard: string | null;
   targetState: string | null;
+  aiStrategist?: AIStrategist;
 }
 
 const generateRandomEvents = () => [
@@ -55,15 +67,19 @@ const generateRandomEvents = () => [
   }
 ];
 
-export const useGameState = () => {
+export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   const [gameState, setGameState] = useState<GameState>({
     faction: 'truth',
     phase: 'action',
     turn: 1,
+    currentPlayer: 'human',
+    aiDifficulty,
     truth: 60,
     ip: 15,
     hand: getRandomCards(3),
+    aiHand: getRandomCards(3),
     deck: generateRandomDeck(40),
+    aiDeck: generateRandomDeck(40),
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
     controlledStates: [],
@@ -85,7 +101,8 @@ export const useGameState = () => {
     log: [
       'Game started - Truth Seekers faction selected',
       'Starting Truth: 60%',
-      'Cards drawn: 3'
+      'Cards drawn: 3',
+      `AI Difficulty: ${aiDifficulty}`
     ],
     secretAgenda: {
       ...getRandomAgenda('truth'),
@@ -93,9 +110,16 @@ export const useGameState = () => {
       completed: false,
       revealed: false
     },
+    aiSecretAgenda: {
+      ...getRandomAgenda('government'),
+      progress: 0,
+      completed: false,
+      revealed: false
+    },
     animating: false,
     selectedCard: null,
-    targetState: null
+    targetState: null,
+    aiStrategist: new AIStrategist(aiDifficulty)
   });
 
   const initGame = useCallback((faction: 'government' | 'truth') => {
@@ -262,34 +286,187 @@ export const useGameState = () => {
 
   const endTurn = useCallback(() => {
     setGameState(prev => {
-      const cardsToDraw = Math.max(0, 5 - prev.hand.length);
-      const drawnCards = prev.deck.slice(0, cardsToDraw);
-      const remainingDeck = prev.deck.slice(cardsToDraw);
-      
-      // Calculate IP income from controlled states
-      const stateIncome = getTotalIPFromStates(prev.controlledStates);
-      const baseIncome = 5;
-      const totalIncome = baseIncome + stateIncome;
-      
-      return {
-        ...prev,
-        turn: prev.turn + 1,
-        phase: 'newspaper',
-        showNewspaper: true,
-        cardsPlayedThisTurn: 0,
-        ip: prev.ip + totalIncome,
-        hand: [...prev.hand, ...drawnCards],
-        deck: remainingDeck,
-        log: [...prev.log, 
-          `Turn ${prev.turn} ended`, 
-          `Base income: ${baseIncome} IP`,
-          `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
-          `Total income: ${totalIncome} IP`, 
-          `Cards drawn: ${cardsToDraw}`
-        ]
-      };
+      if (prev.currentPlayer === 'human') {
+        // Human player ending turn - switch to AI
+        const cardsToDraw = Math.max(0, 5 - prev.hand.length);
+        const drawnCards = prev.deck.slice(0, cardsToDraw);
+        const remainingDeck = prev.deck.slice(cardsToDraw);
+        
+        // Calculate IP income from controlled states
+        const stateIncome = getTotalIPFromStates(prev.controlledStates);
+        const baseIncome = 5;
+        const totalIncome = baseIncome + stateIncome;
+        
+        return {
+          ...prev,
+          turn: prev.turn + 1,
+          phase: 'ai_turn',
+          currentPlayer: 'ai',
+          showNewspaper: false,
+          cardsPlayedThisTurn: 0,
+          ip: prev.ip + totalIncome,
+          hand: [...prev.hand, ...drawnCards],
+          deck: remainingDeck,
+          log: [...prev.log, 
+            `Turn ${prev.turn} ended`, 
+            `Base income: ${baseIncome} IP`,
+            `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
+            `Total income: ${totalIncome} IP`, 
+            `Cards drawn: ${cardsToDraw}`,
+            `AI ${prev.aiStrategist?.personality.name} is thinking...`
+          ]
+        };
+      } else {
+        // AI turn ending - switch back to human
+        return {
+          ...prev,
+          phase: 'newspaper',
+          currentPlayer: 'human',
+          showNewspaper: true,
+          log: [...prev.log, `AI turn completed`]
+        };
+      }
     });
   }, []);
+
+  // AI Turn Management
+  const executeAITurn = useCallback(async () => {
+    if (!gameState.aiStrategist || gameState.currentPlayer !== 'ai') return;
+
+    const currentGameState = gameState; // Capture current state
+    
+    // AI income phase
+    const aiControlledStates = currentGameState.states
+      .filter(state => state.owner === 'ai')
+      .map(state => state.abbreviation);
+      
+    const aiStateIncome = getTotalIPFromStates(aiControlledStates);
+    const aiBaseIncome = 5;
+    const aiTotalIncome = aiBaseIncome + aiStateIncome;
+
+    // AI draws cards
+    const aiCardsToDraw = Math.max(0, 5 - currentGameState.aiHand.length);
+    const aiDrawnCards = currentGameState.aiDeck.slice(0, aiCardsToDraw);
+    const aiRemainingDeck = currentGameState.aiDeck.slice(aiCardsToDraw);
+
+    // Update state with AI income and cards
+    setGameState(prev => ({
+      ...prev,
+      aiHand: [...prev.aiHand, ...aiDrawnCards],
+      aiDeck: aiRemainingDeck,
+      // AI IP is tracked negatively to differentiate from player IP
+      ip: prev.ip - aiTotalIncome,
+      log: [...prev.log,
+        `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStates.length} states = ${aiTotalIncome} IP`,
+        `AI drew ${aiCardsToDraw} cards`
+      ]
+    }));
+
+    // Give AI time to "think" (for better UX)
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+
+    // AI plays cards
+    let cardsPlayed = 0;
+    const maxCardsPerTurn = 3;
+
+    for (let i = 0; i < maxCardsPerTurn; i++) {
+      // Get fresh game state for each card play
+      const freshState = await new Promise<GameState>(resolve => {
+        setGameState(prev => {
+          resolve(prev);
+          return prev;
+        });
+      });
+      
+      if (!freshState.aiStrategist || freshState.aiHand.length === 0) break;
+
+      const bestPlay = freshState.aiStrategist.selectBestPlay({
+        ...freshState,
+        hand: freshState.aiHand,
+        controlledStates: freshState.states
+          .filter(state => state.owner === 'ai')
+          .map(state => state.abbreviation)
+      });
+
+      if (!bestPlay || bestPlay.priority < 0.3) break; // AI decides not to play more cards
+
+      await playAICard(bestPlay.cardId, bestPlay.targetState, bestPlay.reasoning);
+      cardsPlayed++;
+      
+      // Brief pause between AI card plays
+      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
+    }
+
+    // End AI turn
+    setTimeout(() => {
+      endTurn();
+    }, 1000);
+  }, [gameState]);
+
+  const playAICard = useCallback(async (cardId: string, targetState?: string, reasoning?: string) => {
+    const card = gameState.aiHand.find(c => c.id === cardId);
+    if (!card) return;
+
+    setGameState(prev => {
+      let newTruth = prev.truth;
+      let newStates = [...prev.states];
+      const newLog = [...prev.log];
+
+      // Apply card effects
+      switch (card.type) {
+        case 'MEDIA':
+          // AI government faction tries to lower truth
+          newTruth = Math.max(0, prev.truth - 12);
+          newLog.push(`AI played ${card.name}: Truth manipulation (${prev.truth}% → ${newTruth}%)`);
+          break;
+        case 'ZONE':
+          if (targetState) {
+            const stateIndex = newStates.findIndex(s => s.abbreviation === targetState);
+            if (stateIndex !== -1) {
+              newStates[stateIndex] = {
+                ...newStates[stateIndex],
+                pressure: newStates[stateIndex].pressure + 2,
+                owner: newStates[stateIndex].pressure + 2 >= newStates[stateIndex].defense ? 'ai' : newStates[stateIndex].owner
+              };
+              newLog.push(`AI played ${card.name} on ${targetState}: Added pressure (+2)`);
+              if (newStates[stateIndex].owner === 'ai') {
+                newLog.push(`🚨 AI captured ${newStates[stateIndex].name}!`);
+              }
+            }
+          }
+          break;
+        case 'ATTACK':
+          const damage = 15 + Math.floor(Math.random() * 10);
+          newLog.push(`AI played ${card.name}: Attack for ${damage} IP damage`);
+          // Player loses IP (which is positive), so we subtract
+          const newIP = Math.max(0, prev.ip - damage);
+          if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
+          return {
+            ...prev,
+            truth: newTruth,
+            states: newStates,
+            ip: newIP,
+            aiHand: prev.aiHand.filter(c => c.id !== cardId),
+            cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
+            log: newLog
+          };
+        case 'DEFENSIVE':
+          newLog.push(`AI played ${card.name}: Defensive preparations`);
+          break;
+      }
+
+      if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
+
+      return {
+        ...prev,
+        truth: newTruth,
+        states: newStates,
+        aiHand: prev.aiHand.filter(c => c.id !== cardId),
+        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
+        log: newLog
+      };
+    });
+  }, [gameState]);
 
   const closeNewspaper = useCallback(() => {
     setGameState(prev => ({
@@ -308,6 +485,7 @@ export const useGameState = () => {
     selectCard,
     selectTargetState,
     endTurn,
-    closeNewspaper
+    closeNewspaper,
+    executeAITurn
   };
 };
