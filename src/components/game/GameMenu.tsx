@@ -20,7 +20,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio }: GameMenuProps) => {
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showManageExpansions, setShowManageExpansions] = useState(false);
-  const [subtitleText, setSubtitleText] = useState('ULTIMATE HUMOR EDITION');
+  const [subtitleText, setSubtitleText] = useState('PARANOID TIMES EDITION');
   const [quoteText, setQuoteText] = useState('"Where conspiracy theories go to become policy"');
   const [descriptionText, setDescriptionText] = useState('Control the narrative. Manipulate the truth.');
   const [description2Text, setDescription2Text] = useState('Convince people birds are real (or aren\'t).');
@@ -29,7 +29,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio }: GameMenuProps) => {
   useEffect(() => {
     const glitchTexts = {
       title: ['SHEEPLE TIMES', 'THE TRUTH DAILY', 'CONSPIRACY NEWS', 'SHADOW GOVERNMENT', 'DEEP STATE WEEKLY', 'LIZARD PEOPLE POST'],
-      subtitle: ['ULTIMATE HUMOR EDITION', 'CLASSIFIED EDITION', 'REDACTED DAILY', 'TOP SECRET TIMES', 'CONSPIRACY WEEKLY'],
+      subtitle: ['PARANOID TIMES EDITION', 'CLASSIFIED EDITION', 'REDACTED DAILY', 'TOP SECRET TIMES', 'CONSPIRACY WEEKLY'],
       quote: [
         '"Where conspiracy theories go to become policy"',
         '"All your base are belong to us"',
@@ -79,7 +79,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio }: GameMenuProps) => {
       setInterval(() => {
         if (Math.random() < 0.12) {
           setSubtitleText(glitchTexts.subtitle[Math.floor(Math.random() * glitchTexts.subtitle.length)]);
-          setTimeout(() => setSubtitleText('ULTIMATE HUMOR EDITION'), 400);
+          setTimeout(() => setSubtitleText('PARANOID TIMES EDITION'), 400);
         }
       }, Math.random() * 3000 + 3000), // 3-6 seconds
 
