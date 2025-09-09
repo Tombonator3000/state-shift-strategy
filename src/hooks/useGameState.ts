@@ -300,7 +300,11 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     });
   }, []);
 
-  const playCardAnimated = useCallback(async (cardId: string, animateCard: (cardId: string, card: any, options?: any) => Promise<any>) => {
+  const playCardAnimated = useCallback(async (
+    cardId: string,
+    animateCard: (cardId: string, card: any, options?: any) => Promise<any>,
+    explicitTargetState?: string
+  ) => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || gameState.ip < card.cost || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
       return;
@@ -310,12 +314,16 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     setGameState(prev => ({ ...prev, animating: true }));
 
     try {
-      // Pay cost upfront
-      setGameState(prev => ({ ...prev, ip: prev.ip - card.cost }));
+      // Pay cost upfront and set target state if provided
+      setGameState(prev => ({ 
+        ...prev, 
+        ip: prev.ip - card.cost, 
+        ...(explicitTargetState ? { targetState: explicitTargetState } : {})
+      }));
 
       // Run animation with resolve callback
       await animateCard(cardId, card, {
-        targetState: gameState.targetState,
+        targetState: explicitTargetState ?? gameState.targetState,
         onResolve: async (resolveCard: any) => {
             // Apply card effects during animation
             setGameState(prev => {

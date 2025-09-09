@@ -61,7 +61,7 @@ const Index = () => {
     }
   };
 
-  const handleStateClick = (stateId: string) => {
+  const handleStateClick = async (stateId: string) => {
     if (gameState.selectedCard && !isAnimating()) {
       const card = gameState.hand.find(c => c.id === gameState.selectedCard);
       if (card?.type === 'ZONE') {
@@ -77,19 +77,16 @@ const Index = () => {
           return;
         }
         
-        selectTargetState(stateId);
+        selectTargetState(stateId); // keep state in store for logs/UX
         audio.playSFX('click');
         toast.success(`🎯 Targeting ${targetState?.name}! Deploying zone card...`, {
           duration: 2000,
           style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
         });
         
-        // Auto-play the card once target is selected
+        // Play immediately with explicit target (no extra clicks)
         setLoadingCard(gameState.selectedCard);
-        // Use setTimeout to ensure state update has occurred
-        setTimeout(() => {
-          handlePlayCard(gameState.selectedCard);
-        }, 50);
+        await handlePlayCard(gameState.selectedCard, stateId);
       }
     } else {
       audio.playSFX('hover');
@@ -101,7 +98,7 @@ const Index = () => {
     audio.playSFX('hover');
   };
 
-  const handlePlayCard = async (cardId: string) => {
+  const handlePlayCard = async (cardId: string, targetState?: string) => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || isAnimating()) return;
 
@@ -126,7 +123,7 @@ const Index = () => {
     }
 
     // If it's a ZONE card that requires targeting
-    if (card.type === 'ZONE' && !gameState.targetState) {
+    if (card.type === 'ZONE' && !gameState.targetState && !targetState) {
       selectCard(cardId);
       audio.playSFX('hover');
       toast('🎯 Zone card selected - click a state to target it!', {
@@ -142,7 +139,7 @@ const Index = () => {
     
     try {
       // Use animated card play
-      await playCardAnimated(cardId, animatePlayCard);
+      await playCardAnimated(cardId, animatePlayCard, targetState);
       toast.success(`✅ ${card.name} deployed successfully!`, {
         duration: 2000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
