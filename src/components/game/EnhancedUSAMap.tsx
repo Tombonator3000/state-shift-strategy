@@ -101,9 +101,10 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       pathElement.setAttribute('d', path(feature) || '');
       pathElement.setAttribute('class', `state-path ${getStateOwnerClass(gameState)}`);
       pathElement.setAttribute('data-state-id', stateId);
+      pathElement.setAttribute('data-state-abbr', gameState?.abbreviation || stateId);
       
       // Add event listeners
-      pathElement.addEventListener('click', () => onStateClick(stateId));
+      pathElement.addEventListener('click', () => onStateClick(gameState?.abbreviation || stateId));
       pathElement.addEventListener('mouseenter', (e) => {
         setHoveredState(stateId);
         setMousePosition({ x: e.clientX, y: e.clientY });
@@ -194,8 +195,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             SHADOW GOVERNMENT: USA CONTROL GRID
           </h3>
           {selectedZoneCard && (
-            <Badge variant="destructive" className="animate-pulse">
-              TARGET MODE: Select State
+            <Badge variant="destructive" className="animate-pulse font-mono">
+              🎯 TARGET MODE: Click State to Apply Zone Card
             </Badge>
           )}
         </div>
@@ -339,6 +340,17 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           stroke-width: 3;
           filter: brightness(1.2);
           stroke: hsl(var(--foreground));
+        }
+        
+        .state-path.targeting {
+          stroke: hsl(var(--warning, 45 93% 58%));
+          stroke-width: 3;
+          stroke-dasharray: 8,4;
+          animation: dash 1s linear infinite;
+        }
+        
+        @keyframes dash {
+          to { stroke-dashoffset: -12; }
         }
         
         .state-label {

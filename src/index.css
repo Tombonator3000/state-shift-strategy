@@ -126,3 +126,46 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  /* Card Animation System */
+  .play-card-clone {
+    position: absolute;
+    will-change: transform, opacity, filter;
+    transform-origin: center center;
+    z-index: 1601;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+    transition: transform 220ms cubic-bezier(0.2,0.8,0.2,1), opacity 150ms linear;
+    pointer-events: none;
+  }
+
+  .play-card-clone.play-card-fullsize {
+    border-width: 3px;
+    filter: drop-shadow(0 16px 40px rgba(0,0,0,0.5));
+  }
+
+  .played-card {
+    width: 120px;
+    height: 168px;
+    overflow: hidden;
+    border: 2px solid hsl(var(--border));
+    background: hsl(var(--card));
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  }
+
+  .state-highlight {
+    outline: 3px dashed hsl(var(--warning, 45 93% 58%));
+    outline-offset: 2px;
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .play-card-clone {
+      transition: none !important;
+    }
+    
+    .state-highlight {
+      animation: none !important;
+    }
+  }
+}

@@ -54,12 +54,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 
   const handlePlayCard = async (cardId: string) => {
     setPlayingCard(cardId);
-    
-    // Magic-style animation delay
-    setTimeout(() => {
-      onPlayCard(cardId);
-      setPlayingCard(null);
-    }, 800);
+    onPlayCard(cardId);
+    setPlayingCard(null);
   };
 
   const canAffordCard = (card: GameCard) => currentIP >= card.cost;
@@ -85,6 +81,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           return (
             <Card 
               key={card.id}
+              data-card-id={card.id}
               className={`
                 relative p-0 cursor-pointer transition-all duration-300 
                 ${isSelected ? 'ring-2 ring-yellow-400 ring-offset-2' : ''}

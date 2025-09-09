@@ -12,14 +12,15 @@ import SecretAgenda from '@/components/game/SecretAgenda';
 import { AudioControls } from '@/components/ui/audio-controls';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudio } from '@/hooks/useAudio';
+import { useCardAnimation } from '@/hooks/useCardAnimation';
+import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
-  const [selectedZoneCard, setSelectedZoneCard] = useState<string | null>(null);
-  const [selectedCard, setSelectedCard] = useState<string | null>(null);
-  const { gameState, initGame, playCard, endTurn, closeNewspaper } = useGameState();
+  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper } = useGameState();
   const audio = useAudio();
+  const { animatePlayCard, isAnimating } = useCardAnimation();
 
   const startNewGame = (faction: 'government' | 'truth') => {
     initGame(faction);
@@ -32,44 +33,45 @@ const Index = () => {
   const handleZoneCardSelect = (cardId: string) => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (card?.type === 'ZONE') {
-      setSelectedZoneCard(cardId);
+      selectCard(cardId);
       audio.playSFX('click');
     }
   };
 
   const handleStateClick = (stateId: string) => {
-    if (selectedZoneCard) {
-      // Apply zone card to selected state
-      playCard(selectedZoneCard);
-      setSelectedZoneCard(null);
-      audio.playSFX('stateCapture');
-      console.log(`Applied zone card ${selectedZoneCard} to ${stateId}`);
+    if (gameState.selectedCard && !isAnimating()) {
+      const card = gameState.hand.find(c => c.id === gameState.selectedCard);
+      if (card?.type === 'ZONE') {
+        selectTargetState(stateId);
+        audio.playSFX('click');
+        // Auto-play the card once target is selected
+        handlePlayCard(gameState.selectedCard);
+      }
     } else {
       audio.playSFX('hover');
     }
   };
 
   const handleSelectCard = (cardId: string) => {
-    setSelectedCard(selectedCard === cardId ? null : cardId);
+    selectCard(cardId);
     audio.playSFX('hover');
   };
 
-  const handlePlayCard = (cardId: string) => {
+  const handlePlayCard = async (cardId: string) => {
     const card = gameState.hand.find(c => c.id === cardId);
-    if (!card) return;
+    if (!card || isAnimating()) return;
 
-    // If it's a ZONE card, set it as selected for targeting
-    if (card.type === 'ZONE') {
-      setSelectedZoneCard(cardId);
-      setSelectedCard(null);
-      audio.playSFX('cardPlay');
+    // If it's a ZONE card that requires targeting
+    if (card.type === 'ZONE' && !gameState.targetState) {
+      selectCard(cardId);
+      audio.playSFX('hover');
       return;
     }
 
-    // Play the card
-    playCard(cardId);
-    setSelectedCard(null);
     audio.playSFX('cardPlay');
+    
+    // Use animated card play
+    await playCardAnimated(cardId, animatePlayCard);
   };
 
   const handleEndTurn = () => {
@@ -188,17 +190,17 @@ const Index = () => {
         </div>
 
         {/* Center - Map (responsive) */}
-        <div className="flex-1 p-2 md:p-4 relative min-h-0">
-          {selectedZoneCard && (
+        <div className="flex-1 p-2 md:p-4 relative min-h-0" id="map-container">
+          {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
             <div className="absolute top-2 md:top-4 left-2 md:left-4 z-10 bg-secret-red text-white p-2 rounded font-mono text-xs md:text-sm">
-              Click a state to apply zone card
+              Click a state to target with zone card
             </div>
           )}
           <div className="h-full">
             <EnhancedUSAMap 
               states={gameState.states} 
               onStateClick={handleStateClick}
-              selectedZoneCard={selectedZoneCard}
+              selectedZoneCard={gameState.selectedCard}
             />
           </div>
         </div>
@@ -234,8 +236,8 @@ const Index = () => {
             cards={gameState.hand}
             onPlayCard={handlePlayCard}
             onSelectCard={handleSelectCard}
-            selectedCard={selectedCard}
-            disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action'}
+            selectedCard={gameState.selectedCard}
+            disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
             currentIP={gameState.ip}
           />
 
@@ -244,7 +246,7 @@ const Index = () => {
             <Button 
               onClick={handleEndTurn}
               className="w-full"
-              disabled={gameState.phase !== 'action'}
+              disabled={gameState.phase !== 'action' || gameState.animating}
             >
               End Turn
             </Button>
@@ -265,6 +267,9 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Card Animation Layer */}
+      <CardAnimationLayer />
 
       {/* Newspaper overlay */}
       {gameState.showNewspaper && (

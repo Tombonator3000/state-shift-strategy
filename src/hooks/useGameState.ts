@@ -43,6 +43,9 @@ interface GameState {
     completed: boolean;
     revealed: boolean;
   };
+  animating: boolean;
+  selectedCard: string | null;
+  targetState: string | null;
 }
 
 const generateRandomEvents = () => [
@@ -99,7 +102,10 @@ export const useGameState = () => {
       target: 3,
       completed: false,
       revealed: false
-    }
+    },
+    animating: false,
+    selectedCard: null,
+    targetState: null
   });
 
   const initGame = useCallback((faction: 'government' | 'truth') => {
@@ -149,7 +155,7 @@ export const useGameState = () => {
   const playCard = useCallback((cardId: string) => {
     setGameState(prev => {
       const card = prev.hand.find(c => c.id === cardId);
-      if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= 3) {
+      if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
         return prev;
       }
 
@@ -185,6 +191,83 @@ export const useGameState = () => {
         log: newLog
       };
     });
+  }, []);
+
+  const playCardAnimated = useCallback(async (cardId: string, animateCard: (cardId: string, card: any, options?: any) => Promise<any>) => {
+    const card = gameState.hand.find(c => c.id === cardId);
+    if (!card || gameState.ip < card.cost || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
+      return;
+    }
+
+    // Set animating state
+    setGameState(prev => ({ ...prev, animating: true }));
+
+    try {
+      // Pay cost upfront
+      setGameState(prev => ({ ...prev, ip: prev.ip - card.cost }));
+
+      // Run animation with resolve callback
+      await animateCard(cardId, card, {
+        targetState: gameState.targetState,
+        onResolve: async (resolveCard: any) => {
+          // Apply card effects during animation
+          setGameState(prev => {
+            let newTruth = prev.truth;
+            const newLog = [...prev.log];
+
+            switch (resolveCard.type) {
+              case 'MEDIA':
+                newTruth = Math.min(100, prev.truth + 10);
+                newLog.push(`${resolveCard.name} played: Truth +10% (now ${newTruth}%)`);
+                break;
+              case 'ZONE':
+                newLog.push(`${resolveCard.name} played: Added pressure to target state`);
+                break;
+              case 'ATTACK':
+                newLog.push(`${resolveCard.name} played: Attack launched`);
+                break;
+              case 'DEFENSIVE':
+                newLog.push(`${resolveCard.name} played: Defense prepared`);
+                break;
+            }
+
+            return {
+              ...prev,
+              truth: newTruth,
+              log: newLog
+            };
+          });
+        }
+      });
+
+      // Remove from hand and cleanup
+      setGameState(prev => ({
+        ...prev,
+        hand: prev.hand.filter(c => c.id !== cardId),
+        cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
+        selectedCard: null,
+        targetState: null,
+        animating: false
+      }));
+
+    } catch (error) {
+      console.error('Card animation failed:', error);
+      // Fallback to regular card play
+      playCard(cardId);
+      setGameState(prev => ({ ...prev, animating: false }));
+    }
+  }, [gameState, playCard]);
+
+  const selectCard = useCallback((cardId: string | null) => {
+    setGameState(prev => ({ 
+      ...prev, 
+      selectedCard: prev.selectedCard === cardId ? null : cardId 
+    }));
+  }, []);
+
+  const selectTargetState = useCallback((stateId: string | null) => {
+    setGameState(prev => ({ ...prev, targetState: stateId }));
   }, []);
 
   const endTurn = useCallback(() => {
@@ -231,6 +314,9 @@ export const useGameState = () => {
     gameState,
     initGame,
     playCard,
+    playCardAnimated,
+    selectCard,
+    selectTargetState,
     endTurn,
     closeNewspaper
   };
