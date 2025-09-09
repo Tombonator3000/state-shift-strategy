@@ -153,8 +153,10 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick }) => {
           ref={svgRef}
           width="800" 
           height="500" 
-          className="w-full h-auto border border-border rounded"
+          className="w-full h-full border border-border rounded"
           style={{ backgroundColor: 'hsl(var(--muted))' }}
+          viewBox="0 0 800 500"
+          preserveAspectRatio="xMidYMid meet"
         >
         </svg>
 
