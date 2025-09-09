@@ -19,6 +19,7 @@ interface EnhancedGameHandProps {
   maxCards?: number;
   currentIP: number;
   loadingCard?: string | null;
+  onCardHover?: (card: GameCard | null) => void;
 }
 
 const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({ 
@@ -29,7 +30,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   onSelectCard,
   maxCards = 7,
   currentIP,
-  loadingCard
+  loadingCard,
+  onCardHover
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
@@ -196,6 +198,12 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               onMouseEnter={() => {
                 if (!isMobile) {
                   audio.playSFX('lightClick'); // Very quiet button sound
+                  onCardHover?.(card);
+                }
+              }}
+              onMouseLeave={() => {
+                if (!isMobile) {
+                  onCardHover?.(null);
                 }
               }}
             >

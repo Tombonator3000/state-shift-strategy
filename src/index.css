@@ -46,7 +46,13 @@ All colors MUST be HSL.
 
     --sidebar-primary-foreground: 0 0% 98%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+  --sidebar-accent: 240 4.8% 95.9%;
+
+  /* Visual juice animations */
+  --float-up: float-up 2s ease-out forwards;
+  --phase-enter: phase-enter 2.5s ease-out;
+  --confetti: confetti 3s ease-out infinite;
+  --victory-bounce: victory-bounce 5s ease-out;
 
     --sidebar-accent-foreground: 240 5.9% 10%;
 
@@ -417,5 +423,62 @@ All colors MUST be HSL.
     .synergy-unlock {
       animation: none !important;
     }
+  }
+}
+
+/* Visual juice keyframes */
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-20px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-80px) scale(0.8);
+  }
+}
+
+@keyframes phase-enter {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotateY(-90deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotateY(0deg);
+  }
+  80% {
+    transform: scale(1) rotateY(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+  }
+}
+
+@keyframes confetti {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes victory-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-30px) scale(1.05);
+  }
+  60% {
+    transform: translateY(-15px) scale(1.02);
   }
 }

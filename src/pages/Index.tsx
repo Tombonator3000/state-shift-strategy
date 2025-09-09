@@ -20,6 +20,10 @@ import { useGameState } from '@/hooks/useGameState';
 import { useAudio } from '@/hooks/useAudio';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
+import FloatingNumbers from '@/components/effects/FloatingNumbers';
+import PhaseTransition from '@/components/effects/PhaseTransition';
+import VictoryAnimation from '@/components/effects/VictoryAnimation';
+import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
 import { Maximize, Minimize } from 'lucide-react';
 import { getRandomAgenda } from '@/data/agendaDatabase';
 import toast, { Toaster } from 'react-hot-toast';
@@ -34,6 +38,14 @@ const Index = () => {
   const [showAchievements, setShowAchievements] = useState(false);
   const [loadingCard, setLoadingCard] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Visual effects state
+  const [floatingNumbers, setFloatingNumbers] = useState<{ value: number; type: 'ip' | 'truth' | 'damage' } | null>(null);
+  const [previousPhase, setPreviousPhase] = useState('');
+  const [showPhaseTransition, setShowPhaseTransition] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState<any>(null);
+  const [victoryState, setVictoryState] = useState<{ isVictory: boolean; type: 'states' | 'ip' | 'truth' | 'agenda' | null }>({ isVictory: false, type: null });
+  
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
@@ -44,6 +56,39 @@ const Index = () => {
       executeAITurn();
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
+
+  // Track IP changes for floating numbers
+  useEffect(() => {
+    const currentIP = gameState.ip;
+    const prevIP = parseInt(localStorage.getItem('prevIP') || '0');
+    
+    if (currentIP !== prevIP && prevIP > 0) {
+      const change = currentIP - prevIP;
+      setFloatingNumbers({ value: change, type: 'ip' });
+      setTimeout(() => setFloatingNumbers(null), 100);
+    }
+    
+    localStorage.setItem('prevIP', currentIP.toString());
+  }, [gameState.ip]);
+
+  // Track phase changes
+  useEffect(() => {
+    if (gameState.phase !== previousPhase && previousPhase) {
+      setShowPhaseTransition(true);
+    }
+    setPreviousPhase(gameState.phase);
+  }, [gameState.phase, previousPhase]);
+
+  // Check victory conditions
+  useEffect(() => {
+    if (gameState.controlledStates.length >= 10) {
+      setVictoryState({ isVictory: true, type: 'states' });
+    } else if (gameState.ip >= 200) {
+      setVictoryState({ isVictory: true, type: 'ip' });
+    } else if (gameState.truth >= 90) {
+      setVictoryState({ isVictory: true, type: 'truth' });
+    }
+  }, [gameState.controlledStates.length, gameState.ip, gameState.truth]);
 
   const startNewGame = (faction: 'government' | 'truth') => {
     initGame(faction);
@@ -424,6 +469,9 @@ const Index = () => {
           </div>
         )}
           <div className="h-full border-2 border-newspaper-border bg-white/80 relative overflow-hidden">
+            {/* Card preview overlay */}
+            <CardPreviewOverlay card={hoveredCard} />
+            
             <div className="w-full h-full">
               <EnhancedUSAMap 
                 states={gameState.states} 
@@ -469,6 +517,7 @@ const Index = () => {
               disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
               currentIP={gameState.ip}
               loadingCard={loadingCard}
+              onCardHover={setHoveredCard}
             />
           </div>
 
@@ -535,6 +584,23 @@ const Index = () => {
 
       {/* Card Animation Layer */}
       <CardAnimationLayer />
+
+      {/* Visual Effects */}
+      <FloatingNumbers trigger={floatingNumbers} />
+      
+      {showPhaseTransition && (
+        <PhaseTransition 
+          phase={gameState.phase}
+          previousPhase={previousPhase}
+          onComplete={() => setShowPhaseTransition(false)}
+        />
+      )}
+      
+      <VictoryAnimation 
+        isVictory={victoryState.isVictory}
+        victoryType={victoryState.type}
+        onComplete={() => setVictoryState({ isVictory: false, type: null })}
+      />
 
       {/* Newspaper overlay */}
       {gameState.showNewspaper && (
