@@ -118,42 +118,42 @@ const Index = () => {
     <div className="min-h-screen bg-newspaper-bg">
       {/* Newspaper Header */}
       <div className="bg-newspaper-bg border-b-4 border-newspaper-border">
-        <div className="container mx-auto px-4 py-4">
-          <div className="text-center border-b-2 border-newspaper-border pb-4 mb-4">
-            <h1 className="text-4xl md:text-6xl font-bold text-newspaper-text" style={{ fontFamily: 'serif' }}>
+        <div className="container mx-auto px-4 py-2">
+          <div className="text-center border-b-2 border-newspaper-border pb-2 mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-newspaper-text" style={{ fontFamily: 'serif' }}>
               THE PARANOID TIMES
             </h1>
-            <div className="text-sm md:text-base font-medium text-newspaper-text mt-2">
+            <div className="text-xs md:text-sm font-medium text-newspaper-text mt-1">
               Truth Seeker Operative
             </div>
           </div>
-          <div className="bg-newspaper-text text-newspaper-bg p-2 rounded">
-            <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8 text-xs md:text-sm font-mono">
+          <div className="bg-newspaper-text text-newspaper-bg p-1 rounded">
+            <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 text-xs font-mono">
               <div className="text-center">
                 <div className="font-bold">ROUND</div>
-                <div className="text-lg">{gameState.turn}</div>
+                <div className="text-sm">{gameState.turn}</div>
               </div>
               <div className="text-center">
                 <div className="font-bold">YOUR IP</div>
-                <div className="text-lg">{gameState.ip}</div>
+                <div className="text-sm">{gameState.ip}</div>
               </div>
               <div className="text-center">
                 <div className="font-bold">TRUTH</div>
-                <div className="text-lg">{gameState.truth}%</div>
+                <div className="text-sm">{gameState.truth}%</div>
               </div>
               <div className="text-center">
                 <div className="font-bold">YOUR STATES</div>
-                <div className="text-lg">{gameState.controlledStates.length}</div>
+                <div className="text-sm">{gameState.controlledStates.length}</div>
               </div>
               <div className="text-center">
                 <div className="font-bold">AI IP</div>
-                <div className="text-lg">3</div>
+                <div className="text-sm">3</div>
               </div>
               <div className="text-center">
                 <div className="font-bold">AI STATES</div>
-                <div className="text-lg">{50 - gameState.controlledStates.length}</div>
+                <div className="text-sm">{50 - gameState.controlledStates.length}</div>
               </div>
-              <div className="absolute top-4 right-4">
+              <div className="absolute top-2 right-2">
                 <AudioControls
                   volume={audio.config.volume}
                   muted={audio.config.muted}
@@ -171,7 +171,7 @@ const Index = () => {
       </div>
 
       {/* Main Game Area */}
-      <div className="flex flex-col xl:flex-row h-[calc(100vh-180px)] overflow-hidden">
+      <div className="flex flex-col xl:flex-row h-[calc(100vh-140px)] overflow-hidden">
         {/* Left sidebar - Victory Conditions & Classified Intel */}
         <div className="hidden xl:block w-52 bg-newspaper-bg border-r-2 border-newspaper-border p-2 overflow-y-auto">
           <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border">
@@ -221,18 +221,20 @@ const Index = () => {
         </div>
 
         {/* Center - Map */}
-        <div className="flex-1 p-2 relative bg-newspaper-bg border-x-2 border-newspaper-border" id="map-container">
+        <div className="flex-1 p-1 relative bg-newspaper-bg border-x-2 border-newspaper-border" id="map-container">
           {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
             <div className="absolute top-4 left-4 z-10 bg-newspaper-text text-newspaper-bg p-2 border border-newspaper-border font-mono text-sm">
               Click a state to target with zone card
             </div>
           )}
-          <div className="h-full border-2 border-newspaper-border bg-white/80 relative">
-            <EnhancedUSAMap 
-              states={gameState.states} 
-              onStateClick={handleStateClick}
-              selectedZoneCard={gameState.selectedCard}
-            />
+          <div className="h-full border-2 border-newspaper-border bg-white/80 relative overflow-hidden">
+            <div className="w-full h-full">
+              <EnhancedUSAMap 
+                states={gameState.states} 
+                onStateClick={handleStateClick}
+                selectedZoneCard={gameState.selectedCard}
+              />
+            </div>
           </div>
         </div>
 

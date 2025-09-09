@@ -222,7 +222,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 animate-fade-in">
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-4 animate-fade-in">
       <Card className={`max-w-6xl w-full max-h-[90vh] overflow-y-auto bg-newspaper-bg border-4 border-newspaper-border transform transition-all duration-300 ${
         glitching ? 'animate-glitch filter hue-rotate-180' : 'animate-scale-in'
       }`}>

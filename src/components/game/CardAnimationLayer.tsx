@@ -10,7 +10,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       {/* Full-screen overlay for card animations */}
       <div 
         id="card-play-layer" 
-        className="fixed inset-0 pointer-events-none z-[1600]"
+        className="fixed inset-0 pointer-events-none z-[40]"
         aria-hidden="true"
       >
         {children}

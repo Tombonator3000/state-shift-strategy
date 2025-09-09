@@ -68,14 +68,8 @@ export const useGameState = () => {
     deck: generateRandomDeck(40),
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
-    controlledStates: ['CA', 'OR', 'FL', 'NV'],
+    controlledStates: [],
     states: USA_STATES.map(state => {
-      const initialControl = getInitialStateControl('truth');
-      let owner: 'player' | 'ai' | 'neutral' = 'neutral';
-      
-      if (initialControl.player.includes(state.abbreviation)) owner = 'player';
-      else if (initialControl.ai.includes(state.abbreviation)) owner = 'ai';
-      
       return {
         id: state.id,
         name: state.name,
@@ -83,7 +77,7 @@ export const useGameState = () => {
         baseIP: state.baseIP,
         defense: state.defense,
         pressure: 0,
-        owner,
+        owner: 'neutral' as const,
         specialBonus: state.specialBonus,
         bonusValue: state.bonusValue
       };
