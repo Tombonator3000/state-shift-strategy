@@ -439,16 +439,6 @@ const Index = () => {
                 >
                   ⚙️
                 </button>
-                <AudioControls
-                  volume={audio.config.volume}
-                  muted={audio.config.muted}
-                  musicEnabled={audio.config.musicEnabled}
-                  sfxEnabled={audio.config.sfxEnabled}
-                  onVolumeChange={audio.setVolume}
-                  onToggleMute={audio.toggleMute}
-                  onToggleMusic={audio.toggleMusic}
-                  onToggleSFX={audio.toggleSFX}
-                />
               </div>
             </div>
           </div>
