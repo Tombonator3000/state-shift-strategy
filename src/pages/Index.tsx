@@ -14,6 +14,7 @@ import BalancingDashboard from '@/components/game/BalancingDashboard';
 import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
+import ZoneTargetingHelper from '@/components/game/ZoneTargetingHelper';
 import { AudioControls } from '@/components/ui/audio-controls';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudio } from '@/hooks/useAudio';
@@ -64,8 +65,25 @@ const Index = () => {
     if (gameState.selectedCard && !isAnimating()) {
       const card = gameState.hand.find(c => c.id === gameState.selectedCard);
       if (card?.type === 'ZONE') {
+        const targetState = gameState.states.find(s => s.abbreviation === stateId || s.id === stateId);
+        
+        // Validate target - cannot target own states with zone cards
+        if (targetState?.owner === 'player') {
+          toast.error('🚫 Cannot target your own states with zone cards!', {
+            duration: 3000,
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+          });
+          audio.playSFX('error');
+          return;
+        }
+        
         selectTargetState(stateId);
         audio.playSFX('click');
+        toast.success(`🎯 Targeting ${targetState?.name}! Deploying zone card...`, {
+          duration: 2000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+        });
+        
         // Auto-play the card once target is selected
         setLoadingCard(gameState.selectedCard);
         handlePlayCard(gameState.selectedCard);
@@ -390,11 +408,17 @@ const Index = () => {
         <div className="flex-1 p-1 relative bg-newspaper-bg border-x-2 border-newspaper-border" id="map-container">
         {/* Enhanced targeting overlay for ZONE cards */}
         {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-          <div className="absolute inset-0 bg-black/20 z-10 flex items-center justify-center pointer-events-none">
-            <div className="bg-newspaper-text text-newspaper-bg p-4 border-2 border-newspaper-border font-mono text-lg shadow-2xl animate-pulse">
-              🎯 ZONE CARD ACTIVE - Click any state to target
-              <div className="text-sm mt-2 text-center">
+          <div className="absolute inset-0 bg-black/30 z-10 flex items-center justify-center pointer-events-none">
+            <div className="bg-newspaper-text text-newspaper-bg p-6 border-2 border-newspaper-border font-mono text-xl shadow-2xl animate-pulse max-w-md text-center">
+              <div className="text-2xl mb-2">🎯 ZONE CARD ACTIVE</div>
+              <div className="text-base mb-4">
+                Click any <span className="text-yellow-400 font-bold">NEUTRAL</span> or <span className="text-red-500 font-bold">ENEMY</span> state to target
+              </div>
+              <div className="text-sm bg-black/20 p-2 rounded">
                 Card will deploy automatically when target is selected
+              </div>
+              <div className="text-xs mt-2 text-yellow-400">
+                ⚠️ Cannot target your own states
               </div>
             </div>
           </div>
@@ -481,6 +505,19 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Zone Targeting Helper */}
+      <ZoneTargetingHelper 
+        selectedZoneCard={gameState.selectedCard}
+        onCancel={() => {
+          selectCard(null);
+          audio.playSFX('click');
+          toast('🚫 Zone targeting canceled', {
+            duration: 2000,
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #6b7280' }
+          });
+        }}
+      />
 
       {/* Toast notifications */}
       <Toaster 

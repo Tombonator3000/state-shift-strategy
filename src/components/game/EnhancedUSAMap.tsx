@@ -107,9 +107,11 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       // Determine classes based on state
       const isSelected = selectedState === (gameState?.abbreviation || stateId);
       const isTargeting = selectedZoneCard && !isSelected;
+      const canTarget = selectedZoneCard && gameState && gameState.owner !== 'player'; // Can't target own states
       let classes = `state-path ${getStateOwnerClass(gameState)}`;
       if (isSelected) classes += ' selected';
-      if (isTargeting) classes += ' targeting';
+      if (isTargeting && canTarget) classes += ' targeting';
+      if (isTargeting && !canTarget) classes += ' invalid-target';
       
       pathElement.setAttribute('class', classes);
       pathElement.setAttribute('data-state-id', stateId);
@@ -117,8 +119,18 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       
       // Add event listeners
       pathElement.addEventListener('click', () => {
-        audio?.playSFX?.('click');
-        onStateClick(gameState?.abbreviation || stateId);
+        if (selectedZoneCard && gameState) {
+          if (gameState.owner === 'player') {
+            // Can't target own states - show feedback
+            audio?.playSFX?.('error');
+            return;
+          }
+          audio?.playSFX?.('click');
+          onStateClick(gameState?.abbreviation || stateId);
+        } else {
+          audio?.playSFX?.('hover');
+          onStateClick(gameState?.abbreviation || stateId);
+        }
       });
       pathElement.addEventListener('mouseenter', (e) => {
         audio?.playSFX?.('hover');
@@ -212,7 +224,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           </h3>
           {selectedZoneCard && (
             <Badge variant="destructive" className="animate-pulse font-mono">
-              🎯 TARGET MODE: Click State to Apply Zone Card
+              🎯 ZONE TARGETING: Click neutral/enemy states only
             </Badge>
           )}
         </div>
@@ -364,6 +376,16 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           stroke-dasharray: 8,4;
           animation: dash 1s linear infinite, targetPulse 2s ease-in-out infinite;
           filter: brightness(1.3) drop-shadow(0 0 15px #ffd700);
+          cursor: crosshair;
+        }
+        
+        .state-path.invalid-target {
+          stroke: #ef4444;
+          stroke-width: 3;
+          stroke-dasharray: 4,4;
+          animation: dash 0.5s linear infinite;
+          filter: brightness(0.7) saturate(0.5);
+          cursor: not-allowed;
         }
         
         @keyframes targetPulse {
