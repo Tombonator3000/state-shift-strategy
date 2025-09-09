@@ -301,13 +301,29 @@ const Index = () => {
   }
 
   if (showMenu) {
-    return <GameMenu onStartGame={startNewGame} onFactionHover={(faction) => {
-      if (faction) {
-        audio.setFactionMusic(faction);
-      } else {
-        audio.setMenuMusic();
-      }
-    }} audio={audio} />;
+    return <GameMenu 
+      onStartGame={startNewGame} 
+      onFactionHover={(faction) => {
+        if (faction) {
+          audio.setFactionMusic(faction);
+        } else {
+          audio.setMenuMusic();
+        }
+      }} 
+      audio={audio}
+      onBackToMainMenu={() => {
+        setShowMenu(true);
+        // Reset any game state if needed
+      }}
+      onSaveGame={() => {
+        // Save current game state to localStorage
+        const gameStateToSave = {
+          ...gameState,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('shadowgov-saved-game', JSON.stringify(gameStateToSave));
+      }}
+    />;
   }
 
   return (

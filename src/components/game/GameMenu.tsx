@@ -10,9 +10,11 @@ interface GameMenuProps {
   onStartGame: (faction: 'government' | 'truth') => Promise<void>;
   onFactionHover?: (faction: 'government' | 'truth' | null) => void;
   audio?: any;
+  onBackToMainMenu?: () => void;
+  onSaveGame?: () => void;
 }
 
-const GameMenu = ({ onStartGame, onFactionHover, audio }: GameMenuProps) => {
+const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSaveGame }: GameMenuProps) => {
   const [glitching, setGlitching] = useState(false);
   const [redactedText, setRedactedText] = useState('SHADOW GOVERNMENT');
   const [showCredits, setShowCredits] = useState(false);
@@ -128,7 +130,13 @@ const GameMenu = ({ onStartGame, onFactionHover, audio }: GameMenuProps) => {
   }
 
   if (showOptions) {
-    return <Options onClose={() => setShowOptions(false)} />;
+    return (
+      <Options 
+        onClose={() => setShowOptions(false)} 
+        onBackToMainMenu={onBackToMainMenu}
+        onSaveGame={onSaveGame}
+      />
+    );
   }
 
   if (showManageExpansions) {
