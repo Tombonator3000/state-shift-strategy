@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CardImage from './CardImage';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -362,8 +363,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       {/* Scrollable middle content - ENHANCED RESPONSIVENESS */}
       <div className="flex-1 overflow-y-auto space-y-2 sm:space-y-3 min-h-0 pr-1">
         {/* Card art - RESPONSIVE */}
-        <div className="h-16 sm:h-20 md:h-24 bg-muted/20 flex items-center justify-center text-xs sm:text-sm text-muted-foreground border rounded-lg flex-shrink-0">
-          [CLASSIFIED IMAGE]
+        <div className="h-16 sm:h-20 md:h-24 border rounded-lg flex-shrink-0 overflow-hidden">
+          <CardImage cardId={examinedCard} className="w-full h-full" />
         </div>
         
         {/* Card effect - ENHANCED MOBILE TEXT */}

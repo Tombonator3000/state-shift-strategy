@@ -218,8 +218,8 @@ export const useCardAnimation = () => {
         <div class="p-3 pb-2 bg-gradient-to-r from-card to-card/80">
           <h4 class="font-bold text-sm font-mono text-center">${cardData.name || 'Unknown'}</h4>
         </div>
-        <div class="h-32 bg-muted/20 flex items-center justify-center text-xs text-muted-foreground border-y">
-          [CLASSIFIED IMAGE]
+        <div class="h-32 border-y overflow-hidden">
+          <img src="/lovable-uploads/e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png" alt="Card art" class="w-full h-full object-cover" />
         </div>
         <div class="p-3 space-y-2">
           <div class="flex justify-center">

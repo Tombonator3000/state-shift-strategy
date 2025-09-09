@@ -1,3 +1,5 @@
+import React from 'react';
+import CardImage from './CardImage';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -70,8 +72,8 @@ const GameHand = ({ cards, onPlayCard, disabled }: GameHandProps) => {
               </div>
               
               {/* Art box placeholder */}
-              <div className="h-24 bg-muted/20 flex items-center justify-center text-xs text-muted-foreground border-y">
-                [CLASSIFIED IMAGE]
+              <div className="h-24 border-y overflow-hidden">
+                <CardImage cardId={card.id} className="w-full h-full" />
               </div>
               
               {/* Card content */}
