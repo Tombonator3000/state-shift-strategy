@@ -210,11 +210,11 @@ const Index = () => {
               </div>
               <div className="text-center">
                 <div className="font-bold">AI IP</div>
-                <div className="text-sm">3</div>
+                <div className="text-sm">{gameState.aiIP}</div>
               </div>
               <div className="text-center">
                 <div className="font-bold">AI STATES</div>
-                <div className="text-sm">{50 - gameState.controlledStates.length}</div>
+                <div className="text-sm">{gameState.states.filter(s => s.owner === 'ai').length}</div>
               </div>
               <div className="absolute top-2 right-2 flex gap-2">
                 <button
@@ -363,7 +363,7 @@ const Index = () => {
           <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border flex-shrink-0">
             <h3 className="font-bold text-xs mb-1">AI INTEL</h3>
             <div className="text-xs font-mono space-y-1">
-              <div>Hand Size: 5</div>
+              <div>Hand Size: {gameState.aiHand.length}</div>
               <div>Strategy: Suppressing Truth</div>
               <div>Threat Level: LOW</div>
             </div>

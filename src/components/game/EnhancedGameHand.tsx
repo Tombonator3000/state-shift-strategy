@@ -82,7 +82,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           
           return (
             <div 
-              key={card.id}
+              key={`${card.id}-${index}`}
               data-card-id={card.id}
               className={`
                 relative p-2 cursor-pointer transition-all duration-300 

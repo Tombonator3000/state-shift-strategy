@@ -16,7 +16,8 @@ interface GameState {
   aiDifficulty: AIDifficulty;
   aiPersonality?: string;
   truth: number;
-  ip: number;
+  ip: number; // Player IP
+  aiIP: number; // AI IP
   hand: GameCard[];
   aiHand: GameCard[];
   deck: GameCard[];
@@ -75,6 +76,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     aiDifficulty,
     truth: 60,
     ip: 15,
+    aiIP: 15,
     hand: getRandomCards(3),
     aiHand: getRandomCards(3),
     deck: generateRandomDeck(40),
@@ -124,7 +126,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
   const initGame = useCallback((faction: 'government' | 'truth') => {
     const startingTruth = faction === 'government' ? 40 : 60;
-    const startingIP = faction === 'government' ? 20 : 10;
+    const startingIP = faction === 'government' ? 20 : 10; // Player IP
+    const aiStartingIP = faction === 'government' ? 10 : 20; // AI starts as the opposite faction
     const handSize = faction === 'truth' ? 4 : 3;
     const newDeck = generateRandomDeck(40);
     const startingHand = newDeck.slice(0, handSize);
@@ -135,6 +138,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       faction,
       truth: startingTruth,
       ip: startingIP,
+      aiIP: aiStartingIP,
       hand: startingHand,
       deck: newDeck.slice(handSize),
       controlledStates: initialControl.player,
@@ -392,8 +396,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       ...prev,
       aiHand: [...prev.aiHand, ...aiDrawnCards],
       aiDeck: aiRemainingDeck,
-      // AI IP is tracked negatively to differentiate from player IP
-      ip: prev.ip - aiTotalIncome,
+      // AI IP income
+      aiIP: prev.aiIP + aiTotalIncome,
       log: [...prev.log,
         `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStates.length} states = ${aiTotalIncome} IP`,
         `AI drew ${aiCardsToDraw} cards`
@@ -420,6 +424,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
       const bestPlay = freshState.aiStrategist.selectBestPlay({
         ...freshState,
+        // Provide AI-relative IP metric expected by strategist (negative = player advantage)
+        ip: -freshState.ip,
         hand: freshState.aiHand,
         controlledStates: freshState.states
           .filter(state => state.owner === 'ai')
@@ -427,6 +433,10 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       });
 
       if (!bestPlay || bestPlay.priority < 0.3) break; // AI decides not to play more cards
+
+      const cardToPlay = freshState.aiHand.find(c => c.id === bestPlay.cardId);
+      if (!cardToPlay) break;
+      if (freshState.aiIP < cardToPlay.cost) continue; // Can't afford, try next
 
       await playAICard(bestPlay.cardId, bestPlay.targetState, bestPlay.reasoning);
       cardsPlayed++;
@@ -484,6 +494,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
             truth: newTruth,
             states: newStates,
             ip: newIP,
+            aiIP: Math.max(0, prev.aiIP - card.cost),
             aiHand: prev.aiHand.filter(c => c.id !== cardId),
             cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
             log: newLog
@@ -499,6 +510,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         ...prev,
         truth: newTruth,
         states: newStates,
+        aiIP: Math.max(0, prev.aiIP - card.cost),
         aiHand: prev.aiHand.filter(c => c.id !== cardId),
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
         log: newLog
