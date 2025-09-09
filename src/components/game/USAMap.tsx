@@ -18,9 +18,11 @@ interface State {
 interface USAMapProps {
   states: State[];
   onStateClick: (stateId: string) => void;
+  selectedCard?: string | null;
+  audio?: any;
 }
 
-const USAMap: React.FC<USAMapProps> = ({ states, onStateClick }) => {
+const USAMap: React.FC<USAMapProps> = ({ states, onStateClick, selectedCard, audio }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [geoData, setGeoData] = useState<any>(null);
   const [hoveredState, setHoveredState] = useState<string | null>(null);
@@ -97,7 +99,10 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick }) => {
       pathElement.setAttribute('data-state-id', stateId);
       
       // Add event listeners
-      pathElement.addEventListener('click', () => onStateClick(stateId));
+      pathElement.addEventListener('click', () => {
+        audio?.playSFX?.('stateCapture');
+        onStateClick(stateId);
+      });
       pathElement.addEventListener('mouseenter', () => setHoveredState(stateId));
       pathElement.addEventListener('mouseleave', () => setHoveredState(null));
 

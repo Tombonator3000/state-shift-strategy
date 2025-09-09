@@ -9,9 +9,10 @@ import ManageExpansions from './ManageExpansions';
 interface GameMenuProps {
   onStartGame: (faction: 'government' | 'truth') => void;
   onFactionHover?: (faction: 'government' | 'truth' | null) => void;
+  audio?: any;
 }
 
-const GameMenu = ({ onStartGame, onFactionHover }: GameMenuProps) => {
+const GameMenu = ({ onStartGame, onFactionHover, audio }: GameMenuProps) => {
   const [glitching, setGlitching] = useState(false);
   const [redactedText, setRedactedText] = useState('SHADOW GOVERNMENT');
   const [showCredits, setShowCredits] = useState(false);
@@ -156,7 +157,10 @@ const GameMenu = ({ onStartGame, onFactionHover }: GameMenuProps) => {
         <Card className="max-w-4xl w-full p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal relative" style={{ fontFamily: 'serif' }}>
           {/* Back button */}
           <Button 
-            onClick={() => setShowFactionSelect(false)}
+            onClick={() => {
+              audio?.playSFX?.('click');
+              setShowFactionSelect(false);
+            }}
             variant="outline" 
             className="absolute top-4 left-4 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
           >
@@ -203,7 +207,10 @@ const GameMenu = ({ onStartGame, onFactionHover }: GameMenuProps) => {
               </div>
               
               <Button 
-                onClick={() => onStartGame('government')}
+                onClick={() => {
+                  audio?.playSFX?.('click');
+                  onStartGame('government');
+                }}
                 className="w-full bg-government-blue hover:bg-government-blue/80 text-white group-hover:animate-pulse"
               >
                 Join the Shadow Cabinet
@@ -239,7 +246,10 @@ const GameMenu = ({ onStartGame, onFactionHover }: GameMenuProps) => {
               </div>
               
               <Button 
-                onClick={() => onStartGame('truth')}
+                onClick={() => {
+                  audio?.playSFX?.('click');
+                  onStartGame('truth');
+                }}
                 className="w-full bg-truth-red hover:bg-truth-red/80 text-white group-hover:animate-pulse"
               >
                 Expose the Conspiracy
@@ -317,7 +327,10 @@ const GameMenu = ({ onStartGame, onFactionHover }: GameMenuProps) => {
           {/* Menu Options */}
           <div className="grid md:grid-cols-2 gap-4 mb-8">
             <Button 
-              onClick={() => setShowFactionSelect(true)}
+              onClick={() => {
+                audio?.playSFX?.('click');
+                setShowFactionSelect(true);
+              }}
               className="w-full py-4 text-lg bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80"
             >
               START CONSPIRACY
@@ -325,14 +338,20 @@ const GameMenu = ({ onStartGame, onFactionHover }: GameMenuProps) => {
             <Button 
               variant="outline" 
               className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
-              onClick={() => setShowManageExpansions(true)}
+              onClick={() => {
+                audio?.playSFX?.('click');
+                setShowManageExpansions(true);
+              }}
             >
               MANAGE EXPANSIONS
             </Button>
             <Button 
               variant="outline" 
               className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
-              onClick={() => setShowHowToPlay(true)}
+              onClick={() => {
+                audio?.playSFX?.('click');
+                setShowHowToPlay(true);
+              }}
             >
               HOW TO PLAY
             </Button>
@@ -344,7 +363,10 @@ const GameMenu = ({ onStartGame, onFactionHover }: GameMenuProps) => {
               CONTINUE
             </Button>
             <Button 
-              onClick={() => setShowCredits(true)}
+              onClick={() => {
+                audio?.playSFX?.('click');
+                setShowCredits(true);
+              }}
               variant="outline" 
               className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
             >
@@ -353,7 +375,10 @@ const GameMenu = ({ onStartGame, onFactionHover }: GameMenuProps) => {
             <Button 
               variant="outline" 
               className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
-              onClick={() => setShowOptions(true)}
+              onClick={() => {
+                audio?.playSFX?.('click');
+                setShowOptions(true);
+              }}
             >
               OPTIONS
             </Button>

@@ -23,6 +23,7 @@ interface EnhancedUSAMapProps {
   selectedZoneCard?: string | null;
   hoveredStateId?: string | null;
   selectedState?: string | null;
+  audio?: any;
 }
 
 const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({ 
@@ -30,7 +31,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   onStateClick, 
   selectedZoneCard,
   hoveredStateId,
-  selectedState
+  selectedState,
+  audio
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [geoData, setGeoData] = useState<any>(null);
@@ -114,8 +116,12 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       pathElement.setAttribute('data-state-abbr', gameState?.abbreviation || stateId);
       
       // Add event listeners
-      pathElement.addEventListener('click', () => onStateClick(gameState?.abbreviation || stateId));
+      pathElement.addEventListener('click', () => {
+        audio?.playSFX?.('click');
+        onStateClick(gameState?.abbreviation || stateId);
+      });
       pathElement.addEventListener('mouseenter', (e) => {
+        audio?.playSFX?.('hover');
         setHoveredState(stateId);
         setMousePosition({ x: e.clientX, y: e.clientY });
       });

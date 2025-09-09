@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GameCard } from '@/components/game/GameHand';
+import { useAudio } from '@/hooks/useAudio';
 
 interface EnhancedGameHandProps {
   cards: GameCard[];
@@ -25,24 +26,35 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
+  const audio = useAudio();
 
   const getRarityGlow = (rarity: string) => {
     switch (rarity) {
-      case 'common': return 'shadow-lg';
-      case 'uncommon': return 'shadow-lg shadow-green-500/20';
-      case 'rare': return 'shadow-lg shadow-blue-500/20';
-      case 'legendary': return 'shadow-lg shadow-orange-500/30';
-      default: return 'shadow-lg';
+      case 'common': return 'shadow-md';
+      case 'uncommon': return 'shadow-md shadow-emerald-400/40';
+      case 'rare': return 'shadow-lg shadow-blue-400/50';
+      case 'legendary': return 'shadow-xl shadow-amber-400/60 animate-pulse';
+      default: return 'shadow-md';
     }
   };
 
   const getRarityBorder = (rarity: string) => {
     switch (rarity) {
-      case 'common': return 'border-muted';
-      case 'uncommon': return 'border-green-500';
-      case 'rare': return 'border-blue-500';
-      case 'legendary': return 'border-orange-500';
-      default: return 'border-muted';
+      case 'common': return 'border-zinc-600';
+      case 'uncommon': return 'border-emerald-400';
+      case 'rare': return 'border-blue-400';
+      case 'legendary': return 'border-amber-400';
+      default: return 'border-zinc-600';
+    }
+  };
+
+  const getRarityAccent = (rarity: string) => {
+    switch (rarity) {
+      case 'common': return 'bg-zinc-100 text-zinc-800';
+      case 'uncommon': return 'bg-emerald-100 text-emerald-800';
+      case 'rare': return 'bg-blue-100 text-blue-800';
+      case 'legendary': return 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 font-bold';
+      default: return 'bg-zinc-100 text-zinc-800';
     }
   };
 
@@ -54,6 +66,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   };
 
   const handlePlayCard = async (cardId: string) => {
+    audio.playSFX('cardPlay');
     setPlayingCard(cardId);
     onPlayCard(cardId);
     setPlayingCard(null);
@@ -64,16 +77,16 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h3 className="font-bold text-xs font-mono text-foreground">
-          Hand ({cards.length}/{maxCards})
+        <h3 className="font-bold text-sm font-mono text-foreground">
+          YOUR HAND
         </h3>
         <div className="text-xs font-mono text-muted-foreground">
           IP: {currentIP}
         </div>
       </div>
       
-      {/* Minimized hand cards */}
-      <div className="space-y-1 max-h-48 overflow-y-auto">
+      {/* Minimized hand cards - Compact List */}
+      <div className="space-y-1 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
         {cards.map((card, index) => {
           const isSelected = selectedCard === card.id;
           const isPlaying = playingCard === card.id;
@@ -85,24 +98,23 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               key={`${card.id}-${index}`}
               data-card-id={card.id}
               className={`
-                group relative p-2 cursor-pointer transition-all duration-300 
-                bg-card border rounded-md flex items-center gap-2
-                ${isSelected ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-lg shadow-yellow-400/25' : ''}
-                ${isPlaying ? 'animate-pulse scale-105 z-50 ring-2 ring-primary ring-offset-2' : 'hover:scale-[1.02] hover:shadow-lg hover:border-primary/50'}
-                ${!canAfford && !disabled ? 'opacity-50 saturate-50' : ''}
+                group relative p-2 cursor-pointer transition-all duration-200
+                bg-card border-2 rounded-lg flex items-center gap-2
+                ${isSelected ? 'ring-2 ring-yellow-400 scale-105 z-10' : ''}
+                ${isPlaying ? 'animate-pulse scale-105 z-50' : 'hover:scale-[1.02]'}
+                ${!canAfford && !disabled ? 'opacity-60 saturate-50' : ''}
                 ${getRarityBorder(card.rarity)}
                 ${getRarityGlow(card.rarity)}
-                border overflow-hidden text-xs
-                animate-fade-in hover:bg-card/90
-                before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent
-                before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700
+                hover:bg-accent/20 active:scale-95
               `}
               style={{ 
                 animationDelay: `${index * 0.05}s`,
                 transform: isPlaying ? 'scale(1.05) translateY(-2px)' : undefined,
                 zIndex: isPlaying ? 1000 : undefined
               }}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
+                audio.playSFX('click');
                 if (examinedCard === card.id) {
                   setExaminedCard(null);
                 } else {
@@ -111,71 +123,45 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 }
               }}
               onMouseEnter={() => {
-                // Add subtle hover sound effect here if needed
+                audio.playSFX('hover');
               }}
             >
-              {/* Cost */}
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                canAfford ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'
+              {/* Cost Badge */}
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 border-2 ${
+                canAfford ? 'bg-primary text-primary-foreground border-primary' : 'bg-destructive text-destructive-foreground border-destructive'
               }`}>
                 {card.cost}
               </div>
               
-              {/* Card info - Enhanced readability */}
+              {/* Card Name and Rarity */}
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm text-foreground leading-tight">{card.name}</div>
-                <div className="text-sm text-foreground/80 leading-tight mt-0.5 max-w-full break-words">{card.text}</div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-sm text-foreground truncate">{card.name}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${getRarityAccent(card.rarity)}`}>
+                    {card.rarity.toUpperCase()}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground truncate">{card.text}</div>
               </div>
               
-              {/* Type badge and targeting info */}
-              <div className="flex flex-col gap-1 flex-shrink-0">
-                <Badge 
-                  variant="outline" 
-                  className={`text-xs py-0 px-1 ${
-                    card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth/20 border-truth text-truth' :
-                    card.type === 'MEDIA' && faction === 'government' ? 'bg-government/20 border-government text-government' :
-                    card.type === 'ZONE' ? 'bg-accent/20 border-accent text-accent-foreground' :
-                    card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
-                    'bg-muted/20 border-muted text-muted-foreground'
-                  }`}
-                >
-                  {card.type}
-                </Badge>
-                {card.type === 'ZONE' && (
-                  <div className="text-xs text-foreground font-medium">
-                    {isSelected ? 'Click state' : 'Target req.'}
-                  </div>
-                )}
-              </div>
-              
+              {/* Type Badge */}
+              <Badge 
+                variant="outline" 
+                className={`text-xs px-2 py-0 flex-shrink-0 ${
+                  card.type === 'MEDIA' && faction === 'truth' ? 'bg-emerald-500/20 border-emerald-500 text-emerald-700' :
+                  card.type === 'MEDIA' && faction === 'government' ? 'bg-blue-500/20 border-blue-500 text-blue-700' :
+                  card.type === 'ZONE' ? 'bg-amber-500/20 border-amber-500 text-amber-700' :
+                  card.type === 'ATTACK' ? 'bg-red-500/20 border-red-500 text-red-700' :
+                  'bg-zinc-500/20 border-zinc-500 text-zinc-700'
+                }`}
+              >
+                {card.type}
+              </Badge>
+
               {/* Selection indicator */}
               {isSelected && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-yellow-400" />
+                <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-yellow-400 ring-2 ring-yellow-400/50" />
               )}
-              
-              {/* Deploy button */}
-              <Button
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePlayCard(card.id);
-                }}
-                disabled={disabled || !canAfford || isPlaying || (card.type === 'ZONE' && !isSelected)}
-                className={`text-xs px-2 py-1 h-6 flex-shrink-0 transition-all duration-200 ${
-                  isPlaying ? 'animate-pulse bg-primary/80' : 
-                  (card.type === 'ZONE' && !isSelected) ? 'bg-muted text-muted-foreground cursor-default' :
-                  canAfford ? 'hover:bg-primary hover:scale-105 hover:shadow-md group-hover:bg-primary/90' : 
-                  'cursor-not-allowed'
-                }`}
-                title={card.type === 'ZONE' ? 'Select card first, then click a state on the map' : 'Deploy this card immediately'}
-              >
-                {isPlaying ? (
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-current rounded-full animate-ping"></div>
-                    <span>...</span>
-                  </div>
-                ) : card.type === 'ZONE' && !isSelected ? 'SELECT' : 'DEPLOY'}
-              </Button>
             </div>
           );
         })}
@@ -215,7 +201,10 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                           {card.cost}
                         </div>
                         <button 
-                          onClick={() => setExaminedCard(null)}
+                          onClick={() => {
+                            audio.playSFX('click');
+                            setExaminedCard(null);
+                          }}
                           className="text-muted-foreground hover:text-foreground text-2xl font-bold"
                         >
                           ×
@@ -281,6 +270,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                         {/* Deploy button */}
                         <Button
                           onClick={() => {
+                            audio.playSFX('click');
                             setExaminedCard(null);
                             handlePlayCard(card.id);
                           }}

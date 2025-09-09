@@ -190,7 +190,7 @@ const Index = () => {
       } else {
         audio.setMenuMusic();
       }
-    }} />;
+    }} audio={audio} />;
   }
 
   return (
@@ -358,6 +358,7 @@ const Index = () => {
                 onStateClick={handleStateClick}
                 selectedZoneCard={gameState.selectedCard}
                 selectedState={gameState.targetState}
+                audio={audio}
               />
             </div>
           </div>
