@@ -51,6 +51,7 @@ interface GameState {
     revealed: boolean;
   };
   animating: boolean;
+  aiTurnInProgress: boolean;
   selectedCard: string | null;
   targetState: string | null;
   aiStrategist?: AIStrategist;
@@ -119,6 +120,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       revealed: false
     },
     animating: false,
+    aiTurnInProgress: false,
     selectedCard: null,
     targetState: null,
     aiStrategist: new AIStrategist(aiDifficulty)
@@ -167,6 +169,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         `Cards drawn: ${handSize}`,
         `Controlled states: ${initialControl.player.join(', ')}`
       ]
+      ,
+      aiTurnInProgress: false
     }));
   }, []);
 
@@ -373,7 +377,11 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
   // AI Turn Management
   const executeAITurn = useCallback(async () => {
-    if (!gameState.aiStrategist || gameState.currentPlayer !== 'ai') return;
+    // Prevent re-entrancy or accidental multiple triggers
+    if (!gameState.aiStrategist || gameState.currentPlayer !== 'ai' || gameState.aiTurnInProgress) return;
+
+    // Mark AI turn as in progress
+    setGameState(prev => ({ ...prev, aiTurnInProgress: true }));
 
     const currentGameState = gameState; // Capture current state
     
@@ -448,6 +456,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     // End AI turn
     setTimeout(() => {
       endTurn();
+      // Clear in-progress flag after AI ends turn
+      setGameState(prev => ({ ...prev, aiTurnInProgress: false }));
     }, 1000);
   }, [gameState]);
 

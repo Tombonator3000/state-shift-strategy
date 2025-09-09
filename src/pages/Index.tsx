@@ -36,10 +36,10 @@ const Index = () => {
 
   // Handle AI turns
   useEffect(() => {
-    if (gameState.phase === 'ai_turn' && gameState.currentPlayer === 'ai') {
+    if (gameState.phase === 'ai_turn' && gameState.currentPlayer === 'ai' && !gameState.aiTurnInProgress) {
       executeAITurn();
     }
-  }, [gameState.phase, gameState.currentPlayer, executeAITurn]);
+  }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
 
   const startNewGame = (faction: 'government' | 'truth') => {
     initGame(faction);

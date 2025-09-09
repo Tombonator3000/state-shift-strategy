@@ -233,8 +233,8 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
                   <h3 className="font-bold text-government-blue mb-2">YOUR ACTIONS</h3>
                   {playedCards.filter(pc => pc.player === 'human').length > 0 ? (
                     <ul className="space-y-1">
-                      {playedCards.filter(pc => pc.player === 'human').map(pc => (
-                        <li key={`human-${pc.card.id}`} className="flex justify-between">
+                      {playedCards.filter(pc => pc.player === 'human').map((pc, idx) => (
+                        <li key={`human-${pc.card.id}-${idx}`} className="flex justify-between">
                           <span>• {pc.card.name}</span>
                           <span className="text-government-blue font-mono">[{pc.card.type}]</span>
                         </li>
@@ -249,8 +249,8 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
                   <h3 className="font-bold text-secret-red mb-2">AI ACTIONS</h3>
                   {playedCards.filter(pc => pc.player === 'ai').length > 0 ? (
                     <ul className="space-y-1">
-                      {playedCards.filter(pc => pc.player === 'ai').map(pc => (
-                        <li key={`ai-${pc.card.id}`} className="flex justify-between">
+                      {playedCards.filter(pc => pc.player === 'ai').map((pc, idx) => (
+                        <li key={`ai-${pc.card.id}-${idx}`} className="flex justify-between">
                           <span>• {pc.card.name}</span>
                           <span className="text-secret-red font-mono">[{pc.card.type}]</span>
                         </li>
