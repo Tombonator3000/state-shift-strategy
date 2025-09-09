@@ -3,14 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import type { GameCard } from './GameHand';
-
-interface NewsEvent {
-  id: string;
-  headline: string;
-  content: string;
-  type: 'conspiracy' | 'government' | 'truth' | 'random' | 'crisis' | 'opportunity';
-  imageType?: string;
-}
+import type { GameEvent } from '@/data/eventDatabase';
 
 interface PlayedCard {
   card: GameCard;
@@ -18,7 +11,7 @@ interface PlayedCard {
 }
 
 interface NewspaperProps {
-  events: NewsEvent[];
+  events: GameEvent[];
   playedCards: PlayedCard[];
   faction: 'government' | 'truth';
   onClose: () => void;
@@ -80,7 +73,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
   }, []);
 
   // Generate headlines from played cards
-  const generateHeadline = (card: GameCard, player: 'human' | 'ai'): NewsEvent => {
+  const generateHeadline = (card: GameCard, player: 'human' | 'ai'): GameEvent => {
     const isAI = player === 'ai';
     const playerName = isAI ? 'AI OPERATIVE' : 'SHADOW AGENT';
     
@@ -129,10 +122,13 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
 
     return {
       id: `${card.id}-${player}`,
+      title: card.name,
       headline,
       content,
       type: isAI ? 'government' : 'conspiracy',
-      imageType: card.type.toLowerCase()
+      rarity: 'common' as const,
+      weight: 1,
+      effects: {}
     };
   };
 
@@ -164,17 +160,16 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
   const selectedAds = ads.slice(0, 2);
   const selectedConspiracies = conspiracies.sort(() => 0.5 - Math.random()).slice(0, 4);
 
-  const getImagePlaceholder = (imageType?: string) => {
+  const getImagePlaceholder = (event: GameEvent) => {
     const placeholders = {
-      media: '[PHOTO: CLASSIFIED MEDIA BRIEFING]',
-      zone: '[SATELLITE IMAGE: REDACTED LOCATION]',
-      attack: '[PHOTO: OPERATION IN PROGRESS - CLASSIFIED]',
-      tech: '[DIAGRAM: EXPERIMENTAL TECHNOLOGY - TOP SECRET]',
-      development: '[AERIAL VIEW: CONSTRUCTION SITE - UNAUTHORIZED ACCESS PROHIBITED]',
-      defensive: '[PHOTO: SECURITY INSTALLATION - EYES ONLY]',
-      instant: '[LIVE FEED: EMERGENCY RESPONSE - SIGNAL INTERCEPTED]'
+      conspiracy: '[LEAKED PHOTO: CLASSIFIED OPERATIONS]',
+      government: '[OFFICIAL PHOTO: PRESS BRIEFING]',
+      truth: '[SURVEILLANCE FOOTAGE: WHISTLEBLOWER EVIDENCE]',
+      crisis: '[BREAKING NEWS: EMERGENCY SITUATION]',
+      opportunity: '[EXCLUSIVE: INSIDER ACCESS]',
+      random: '[PHOTO: CLASSIFIED BY ORDER OF █████████]'
     };
-    return placeholders[imageType as keyof typeof placeholders] || '[PHOTO: CLASSIFIED BY ORDER OF █████████]';
+    return placeholders[event.type as keyof typeof placeholders] || '[PHOTO: CLASSIFIED BY ORDER OF █████████]';
   };
 
   return (
@@ -271,7 +266,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
                 </h2>
                 
                 <div className="w-full h-24 bg-gray-300 mb-3 flex items-center justify-center text-gray-600 text-sm border-2 border-gray-400 font-mono">
-                  {getImagePlaceholder(headline.imageType)}
+                  {getImagePlaceholder(headline)}
                 </div>
                 
                 <p className="text-newspaper-text leading-relaxed font-serif">
