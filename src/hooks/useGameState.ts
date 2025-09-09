@@ -6,6 +6,7 @@ import { generateRandomDeck, getRandomCards } from '@/data/cardDatabase';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
 import { AIStrategist, type AIDifficulty } from '@/data/aiStrategy';
+import { AIFactory } from '@/data/aiFactory';
 import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
 
 interface GameState {
@@ -123,7 +124,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     aiTurnInProgress: false,
     selectedCard: null,
     targetState: null,
-    aiStrategist: new AIStrategist(aiDifficulty)
+    aiStrategist: AIFactory.createStrategist(aiDifficulty)
   });
 
   const initGame = useCallback((faction: 'government' | 'truth') => {

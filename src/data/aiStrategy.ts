@@ -1,7 +1,6 @@
 import type { GameCard } from '@/components/game/GameHand';
 import { CARD_DATABASE } from './cardDatabase';
 import { USA_STATES } from './usaStates';
-import { EnhancedAIStrategist } from './enhancedAIStrategy';
 
 export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'legendary';
 
@@ -86,14 +85,7 @@ export class AIStrategist {
     this.personality = AI_PERSONALITIES[difficulty];
   }
 
-  // Factory method to create appropriate AI strategist based on difficulty
-  public static createStrategist(difficulty: AIDifficulty): AIStrategist {
-    // Use enhanced AI for hard+ difficulties
-    if (difficulty === 'hard' || difficulty === 'legendary') {
-      return new EnhancedAIStrategist(difficulty);
-    }
-    return new AIStrategist(difficulty);
-  }
+  // Factory method moved to AIFactory to avoid circular dependencies
 
   // Evaluate the current game state from AI perspective
   evaluateGameState(gameState: any): GameStateEvaluation {
