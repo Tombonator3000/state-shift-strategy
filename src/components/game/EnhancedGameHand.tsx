@@ -184,7 +184,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     {card.rarity.toUpperCase()}
                   </span>
                 </div>
-                <div className="text-xs text-muted-foreground truncate">{card.text}</div>
+                <div className="text-xs text-muted-foreground truncate max-w-[200px]">{card.text}</div>
               </div>
               
               {/* Enhanced Type Badge */}
@@ -226,7 +226,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           onClick={() => setExaminedCard(null)}
         >
           <div 
-            className={`bg-card border-2 rounded-lg p-4 max-w-sm w-full max-h-[80vh] transform animate-fade-in ${(() => {
+            className={`bg-card border-2 rounded-lg p-4 max-w-md w-full max-h-[70vh] overflow-y-auto transform animate-fade-in ${(() => {
               const card = cards.find(c => c.id === examinedCard);
               return card ? `${getRarityBorder(card.rarity)} ${getRarityGlow(card.rarity)}` : 'border-border';
             })()}`}
@@ -286,21 +286,16 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                       <h4 className="text-lg font-bold mb-2 text-foreground">Effect</h4>
                       <p className="text-sm font-medium text-foreground bg-card/80 p-3 rounded-lg border border-border shadow-sm">{card.text}</p>
                       
-                      {/* Enhanced card effect description */}
+                     {/* Card effect description */}
                       <div className="mt-3 text-sm text-foreground bg-accent/10 p-3 rounded-lg border border-accent/20">
-                        <span className="font-bold text-accent">Gameplay:</span> {
-                          card.type === 'MEDIA' && faction === 'truth' ? 'Increases Truth meter by exposing lies and corruption.' :
-                          card.type === 'MEDIA' && faction === 'government' ? 'Decreases Truth meter through disinformation campaigns.' :
-                          card.type === 'ZONE' ? 'Adds pressure to target state. States with pressure ≥ defense are captured.' :
-                          card.type === 'ATTACK' ? 'Deals direct IP damage to enemy operations and resources.' :
-                          card.type === 'DEFENSIVE' ? 'Reduces pressure on your controlled states to prevent capture.' :
-                          'Special effect card with unique strategic abilities.'
+                        <span className="font-bold text-accent">Effect:</span> {
+                          card.type === 'MEDIA' && faction === 'truth' ? 'Increases Truth meter.' :
+                          card.type === 'MEDIA' && faction === 'government' ? 'Decreases Truth meter.' :
+                          card.type === 'ZONE' ? 'Adds pressure to target state.' :
+                          card.type === 'ATTACK' ? 'Deals IP damage.' :
+                          card.type === 'DEFENSIVE' ? 'Reduces pressure.' :
+                          'Special strategic ability.'
                         }
-                        {card.type === 'ZONE' && (
-                          <div className="mt-2 text-warning font-bold text-sm bg-warning/10 p-2 rounded border border-warning/30">
-                            🎯 Click on a state after selecting this card to target it
-                          </div>
-                        )}
                       </div>
                     </div>
                     

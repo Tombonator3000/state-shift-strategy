@@ -231,17 +231,10 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   return (
     <div className="relative">
       <Card className="p-4 bg-card border-border relative">
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4">
           <h3 className="text-lg font-semibold text-foreground font-mono">
             SHADOW GOVERNMENT: USA CONTROL GRID
           </h3>
-          {selectedZoneCard && (
-            <Badge variant="destructive" className="animate-pulse font-mono flex items-center gap-2 shadow-lg">
-              <Target className="w-4 h-4" />
-              🎯 ZONE TARGETING: Click neutral/enemy states only
-              <AlertTriangle className="w-4 h-4" />
-            </Badge>
-          )}
         </div>
         
         <div className="relative">
@@ -440,14 +433,12 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         }
         
         .state-label {
-          font-size: 11px;
+          font-size: 12px;
           font-weight: bold;
-          fill: white;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8);
+          fill: #000000;
           pointer-events: none;
           font-family: monospace;
-          stroke: rgba(0,0,0,0.8);
-          stroke-width: 0.5px;
+          text-anchor: middle;
         }
         
         .pressure-indicator {
