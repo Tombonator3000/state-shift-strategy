@@ -45,7 +45,7 @@ const Index = () => {
     initGame(faction);
     setShowMenu(false);
     setShowIntro(false);
-    audio.playMusic();
+    audio.setGameplayMusic(faction);
     audio.playSFX('click');
   };
 
@@ -133,11 +133,19 @@ const Index = () => {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  // Start menu music when component first mounts
+  useEffect(() => {
+    audio.setMenuMusic();
+  }, [audio]);
+
   if (showIntro) {
     return (
       <div 
         className="min-h-screen bg-government-dark flex items-center justify-center cursor-pointer"
-        onClick={() => setShowIntro(false)}
+        onClick={() => {
+          setShowIntro(false);
+          audio.setMenuMusic();
+        }}
       >
         <div className="text-center space-y-8">
           <div className="bg-secret-red/20 border-2 border-secret-red p-8 transform -rotate-2">
@@ -176,7 +184,13 @@ const Index = () => {
   }
 
   if (showMenu) {
-    return <GameMenu onStartGame={startNewGame} />;
+    return <GameMenu onStartGame={startNewGame} onFactionHover={(faction) => {
+      if (faction) {
+        audio.setFactionMusic(faction);
+      } else {
+        audio.setMenuMusic();
+      }
+    }} />;
   }
 
   return (

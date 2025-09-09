@@ -8,9 +8,10 @@ import ManageExpansions from './ManageExpansions';
 
 interface GameMenuProps {
   onStartGame: (faction: 'government' | 'truth') => void;
+  onFactionHover?: (faction: 'government' | 'truth' | null) => void;
 }
 
-const GameMenu = ({ onStartGame }: GameMenuProps) => {
+const GameMenu = ({ onStartGame, onFactionHover }: GameMenuProps) => {
   const [glitching, setGlitching] = useState(false);
   const [redactedText, setRedactedText] = useState('SHADOW GOVERNMENT');
   const [showCredits, setShowCredits] = useState(false);
@@ -173,7 +174,9 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
 
           {/* Faction Selection */}
           <div className="grid md:grid-cols-2 gap-8 mt-8">
-            <Card className="p-6 border-2 border-newspaper-text hover:border-newspaper-text transition-all hover:scale-105 cursor-pointer group bg-newspaper-bg">
+            <Card className="p-6 border-2 border-newspaper-text hover:border-newspaper-text transition-all hover:scale-105 cursor-pointer group bg-newspaper-bg"
+                  onMouseEnter={() => onFactionHover?.('government')}
+                  onMouseLeave={() => onFactionHover?.(null)}>
               <div className="flex items-center mb-4">
                 <div className="text-3xl mr-3 animate-conspiracy-float">🦎</div>
                 <h3 className="font-bold text-xl text-government-blue">
@@ -207,7 +210,9 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
               </Button>
             </Card>
 
-            <Card className="p-6 border-2 border-newspaper-text hover:border-newspaper-text transition-all hover:scale-105 cursor-pointer group bg-newspaper-bg">
+            <Card className="p-6 border-2 border-newspaper-text hover:border-newspaper-text transition-all hover:scale-105 cursor-pointer group bg-newspaper-bg"
+                  onMouseEnter={() => onFactionHover?.('truth')}
+                  onMouseLeave={() => onFactionHover?.(null)}>
               <div className="flex items-center mb-4">
                 <div className="text-3xl mr-3 animate-conspiracy-float" style={{ animationDelay: '1s' }}>👁️</div>
                 <h3 className="font-bold text-xl text-truth-red">
