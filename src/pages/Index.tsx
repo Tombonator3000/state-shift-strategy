@@ -86,7 +86,10 @@ const Index = () => {
         
         // Auto-play the card once target is selected
         setLoadingCard(gameState.selectedCard);
-        handlePlayCard(gameState.selectedCard);
+        // Use setTimeout to ensure state update has occurred
+        setTimeout(() => {
+          handlePlayCard(gameState.selectedCard);
+        }, 50);
       }
     } else {
       audio.playSFX('hover');
