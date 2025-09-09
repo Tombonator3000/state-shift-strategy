@@ -160,23 +160,35 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick }) => {
         >
         </svg>
 
-        {/* Tooltip */}
+        {/* Enhanced Tooltip */}
         {hoveredState && getHoveredStateInfo() && (
-          <div className="absolute top-2 left-2 bg-popover border border-border rounded p-2 shadow-lg z-10 max-w-xs">
-            <div className="text-sm">
-              <div className="font-semibold text-foreground">{getHoveredStateInfo()?.name}</div>
-              <div className="text-muted-foreground">
-                Owner: <span className={`capitalize text-${getHoveredStateInfo()?.owner === 'player' ? 'truth' : getHoveredStateInfo()?.owner === 'ai' ? 'government' : 'muted-foreground'}`}>
-                  {getHoveredStateInfo()?.owner}
-                </span>
+          <div className="absolute top-2 left-2 bg-card border-2 border-border rounded-lg p-4 shadow-xl z-10 max-w-sm backdrop-blur-sm bg-card/95">
+            <div className="space-y-2">
+              <div className="font-bold text-lg text-foreground">{getHoveredStateInfo()?.name}</div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="space-y-1">
+                  <div className="text-foreground font-medium">
+                    Owner: <span className={`capitalize font-bold ${getHoveredStateInfo()?.owner === 'player' ? 'text-truth-red' : getHoveredStateInfo()?.owner === 'ai' ? 'text-government-blue' : 'text-muted-foreground'}`}>
+                      {getHoveredStateInfo()?.owner === 'neutral' ? 'NEUTRAL' : getHoveredStateInfo()?.owner?.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="text-foreground">Base IP: <span className="font-mono font-bold">{getHoveredStateInfo()?.baseIP}</span></div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-foreground">Defense: <span className="font-mono font-bold">{getHoveredStateInfo()?.defense}</span></div>
+                  <div className="text-foreground">Pressure: <span className="font-mono font-bold text-destructive">{getHoveredStateInfo()?.pressure}</span></div>
+                </div>
               </div>
-              <div className="text-muted-foreground">Base IP: {getHoveredStateInfo()?.baseIP}</div>
-              <div className="text-muted-foreground">Defense: {getHoveredStateInfo()?.defense}</div>
-              <div className="text-muted-foreground">Pressure: {getHoveredStateInfo()?.pressure}</div>
               {getHoveredStateInfo()?.specialBonus && (
-                <div className="text-truth text-xs mt-1">
-                  🎯 {getHoveredStateInfo()?.specialBonus}
+                <div className="text-truth-red text-sm mt-2 p-2 bg-truth-red/10 border border-truth-red/20 rounded">
+                  <span className="font-bold">🎯 Special Bonus</span><br />
+                  {getHoveredStateInfo()?.specialBonus}
                   {getHoveredStateInfo()?.bonusValue && ` (+${getHoveredStateInfo()?.bonusValue} IP)`}
+                </div>
+              )}
+              {getHoveredStateInfo()?.pressure >= getHoveredStateInfo()?.defense && (
+                <div className="text-destructive text-sm font-bold bg-destructive/10 border border-destructive/20 rounded p-2">
+                  ⚠️ Capture {getHoveredStateInfo()?.pressure}/{getHoveredStateInfo()?.defense} needed
                 </div>
               )}
             </div>

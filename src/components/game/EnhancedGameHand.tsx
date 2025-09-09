@@ -121,10 +121,10 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 {card.cost}
               </div>
               
-              {/* Card info */}
+              {/* Card info - Enhanced readability */}
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-xs truncate">{card.name}</div>
-                <div className="text-xs text-muted-foreground truncate">{card.text}</div>
+                <div className="font-bold text-sm text-foreground leading-tight">{card.name}</div>
+                <div className="text-sm text-foreground/80 leading-tight mt-0.5 max-w-full break-words">{card.text}</div>
               </div>
               
               {/* Type badge and targeting info */}
@@ -142,7 +142,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   {card.type}
                 </Badge>
                 {card.type === 'ZONE' && (
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs text-foreground font-medium">
                     {isSelected ? 'Click state' : 'Target req.'}
                   </div>
                 )}
@@ -187,14 +187,14 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
         </div>
       )}
 
-      {/* Card examination overlay */}
+      {/* Card examination overlay - Landscape format */}
       {examinedCard && (
         <div 
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4"
           onClick={() => setExaminedCard(null)}
         >
           <div 
-            className="bg-card border-2 border-border rounded-lg p-6 max-w-md w-full transform scale-110 animate-fade-in"
+            className="bg-card border-2 border-border rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto transform scale-110 animate-fade-in"
             onClick={(e) => e.stopPropagation()}
           >
             {(() => {
@@ -204,69 +204,95 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               
               return (
                 <>
-                  <div className="flex justify-between items-start mb-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${
-                      canAffordCard(card) ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'
-                    }`}>
-                      {card.cost}
-                    </div>
-                    <button 
-                      onClick={() => setExaminedCard(null)}
-                      className="text-muted-foreground hover:text-foreground text-xl"
-                    >
-                      ×
-                    </button>
-                  </div>
-                  
-                  <div className="text-center mb-4">
-                    <h3 className="text-xl font-bold mb-2">{card.name}</h3>
-                    <Badge 
-                      variant="outline" 
-                      className={`${
-                        card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth/20 border-truth text-truth' :
-                        card.type === 'MEDIA' && faction === 'government' ? 'bg-government/20 border-government text-government' :
-                        card.type === 'ZONE' ? 'bg-accent/20 border-accent text-accent-foreground' :
-                        card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
-                        'bg-muted/20 border-muted text-muted-foreground'
-                      }`}
-                    >
-                      {card.type}
-                    </Badge>
-                  </div>
-                  
-                  <div className="h-32 bg-muted/20 flex items-center justify-center text-sm text-muted-foreground border rounded mb-4">
-                    [CLASSIFIED IMAGE]
-                  </div>
-                  
-                    <div className="space-y-4">
-                      <div className="text-center">
-                        <p className="text-sm font-medium">{card.text}</p>
-                        
-                        {/* Enhanced card effect description */}
-                        <div className="mt-2 text-xs text-muted-foreground">
-                          {card.type === 'MEDIA' && faction === 'truth' && 'Increases Truth meter by exposing lies'}
-                          {card.type === 'MEDIA' && faction === 'government' && 'Decreases Truth meter through disinformation'}
-                          {card.type === 'ZONE' && 'Adds pressure to target state. High enough pressure captures the state.'}
-                          {card.type === 'ATTACK' && 'Deals direct IP damage to enemy operations'}
-                          {card.type === 'DEFENSIVE' && 'Reduces pressure on your controlled states'}
+                  {/* Landscape card layout */}
+                  <div className="flex gap-6">
+                    {/* Left side - Card art and info */}
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold ${
+                          canAffordCard(card) ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'
+                        }`}>
+                          {card.cost}
                         </div>
+                        <button 
+                          onClick={() => setExaminedCard(null)}
+                          className="text-muted-foreground hover:text-foreground text-2xl font-bold"
+                        >
+                          ×
+                        </button>
                       </div>
                       
-                      <div className="text-center text-xs italic text-muted-foreground border-t border-border pt-4">
-                        "{card.flavorTruth}"
+                      <div className="mb-4">
+                        <h3 className="text-2xl font-bold mb-2 text-foreground">{card.name}</h3>
+                        <Badge 
+                          variant="outline" 
+                          className={`text-sm px-3 py-1 ${
+                            card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth-red/20 border-truth-red text-truth-red' :
+                            card.type === 'MEDIA' && faction === 'government' ? 'bg-government-blue/20 border-government-blue text-government-blue' :
+                            card.type === 'ZONE' ? 'bg-accent/20 border-accent text-accent-foreground' :
+                            card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
+                            'bg-muted/20 border-muted text-muted-foreground'
+                          }`}
+                        >
+                          {card.type}
+                        </Badge>
                       </div>
                       
-                      <Button
-                        onClick={() => {
-                          setExaminedCard(null);
-                          handlePlayCard(card.id);
-                        }}
-                        disabled={disabled || !canAffordCard(card)}
-                        className="w-full"
-                      >
-                        {card.type === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
-                      </Button>
+                      <div className="h-40 bg-muted/20 flex items-center justify-center text-lg text-muted-foreground border rounded mb-4">
+                        [CLASSIFIED IMAGE]
+                      </div>
                     </div>
+                    
+                    {/* Right side - Card details */}
+                    <div className="flex-1">
+                  
+                      <div className="space-y-6">
+                        {/* Card effect */}
+                        <div>
+                          <h4 className="text-lg font-bold mb-3 text-foreground">Effect</h4>
+                          <p className="text-base font-medium text-foreground bg-muted/20 p-3 rounded border">{card.text}</p>
+                          
+                          {/* Enhanced card effect description */}
+                          <div className="mt-3 text-sm text-muted-foreground bg-accent/10 p-3 rounded">
+                            <span className="font-medium">Gameplay:</span> {
+                              card.type === 'MEDIA' && faction === 'truth' ? 'Increases Truth meter by exposing lies and corruption.' :
+                              card.type === 'MEDIA' && faction === 'government' ? 'Decreases Truth meter through disinformation campaigns.' :
+                              card.type === 'ZONE' ? 'Adds pressure to target state. States with pressure ≥ defense are captured.' :
+                              card.type === 'ATTACK' ? 'Deals direct IP damage to enemy operations and resources.' :
+                              card.type === 'DEFENSIVE' ? 'Reduces pressure on your controlled states to prevent capture.' :
+                              'Special effect card with unique strategic abilities.'
+                            }
+                            {card.type === 'ZONE' && (
+                              <div className="mt-2 text-warning font-medium">
+                                ⚠️ Requires target selection on the map
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Flavor text */}
+                        <div>
+                          <h4 className="text-sm font-bold mb-2 text-muted-foreground">CLASSIFIED INTELLIGENCE</h4>
+                          <div className="text-sm italic text-muted-foreground border-l-4 border-truth-red pl-4">
+                            "{card.flavorTruth}"
+                          </div>
+                        </div>
+                        
+                        {/* Deploy button */}
+                        <Button
+                          onClick={() => {
+                            setExaminedCard(null);
+                            handlePlayCard(card.id);
+                          }}
+                          disabled={disabled || !canAffordCard(card)}
+                          className="w-full text-lg py-3"
+                          size="lg"
+                        >
+                          {card.type === 'ZONE' ? 'SELECT & TARGET STATE' : 'DEPLOY ASSET'}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 </>
               );
             })()}
