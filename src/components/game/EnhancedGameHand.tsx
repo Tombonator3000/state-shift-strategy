@@ -294,7 +294,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           <div 
             className={`bg-card border-2 rounded-lg transform animate-fade-in flex flex-col ${
               isMobile 
-                ? 'w-full max-w-sm h-[90vh]' 
+                ? 'w-full max-w-xs max-h-[70vh]' 
                 : 'w-full max-w-sm h-[85vh] sm:h-[80vh] md:h-[75vh] lg:h-[70vh]'
             } ${(() => {
               const card = cards.find(c => c.id === examinedCard);
@@ -309,12 +309,12 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               
               return (
                 <>
-                  {/* Portrait card layout - Enhanced mobile */}
-                  <div className="flex flex-col h-full p-4">
+                  {/* Portrait card layout - Compact mobile */}
+                  <div className="flex flex-col h-full p-3">
                     {/* Header - Fixed */}
-                    <div className="flex justify-between items-start flex-shrink-0 mb-4">
+                    <div className="flex justify-between items-start flex-shrink-0 mb-3">
                       <div className={`rounded-full flex items-center justify-center font-bold ${
-                        isMobile ? 'w-16 h-16 text-2xl' : 'w-12 h-12 sm:w-14 sm:h-14 text-lg sm:text-xl'
+                        isMobile ? 'w-10 h-10 text-sm' : 'w-12 h-12 sm:w-14 sm:h-14 text-lg sm:text-xl'
                       } ${
                         canAffordCard(card) ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'
                       }`}>
@@ -335,20 +335,20 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     </div>
                     
                     {/* Title and type - Fixed */}
-                    <div className="text-center flex-shrink-0 mb-4">
+                    <div className="text-center flex-shrink-0 mb-3">
                       <h3 className={`font-bold mb-2 text-foreground leading-tight ${
-                        isMobile ? 'text-xl' : 'text-base sm:text-lg'
+                        isMobile ? 'text-base' : 'text-base sm:text-lg'
                       }`}>
                         {card.name}
                         {isMobile && cards.length > 1 && (
-                          <div className="text-sm text-muted-foreground mt-1">
+                          <div className="text-xs text-muted-foreground mt-1">
                             Swipe to browse other cards
                           </div>
                         )}
                       </h3>
                       <Badge 
                         variant="outline" 
-                        className={`${isMobile ? 'text-sm px-3 py-2' : 'text-xs sm:text-sm px-2 py-1'} ${
+                        className={`${isMobile ? 'text-xs px-2 py-1' : 'text-xs sm:text-sm px-2 py-1'} ${
                           card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth-red/20 border-truth-red text-truth-red' :
                           card.type === 'MEDIA' && faction === 'government' ? 'bg-government-blue/20 border-government-blue text-government-blue' :
                           card.type === 'ZONE' ? 'bg-accent/20 border-accent text-accent-foreground' :
@@ -360,19 +360,25 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                       </Badge>
                     </div>
                     
-      {/* Scrollable middle content - ENHANCED RESPONSIVENESS */}
-      <div className="flex-1 overflow-y-auto space-y-2 sm:space-y-3 min-h-0 pr-1">
-        {/* Card art - RESPONSIVE */}
-        <div className="h-16 sm:h-20 md:h-24 border rounded-lg flex-shrink-0 overflow-hidden">
+      {/* Scrollable middle content - Compact mobile */}
+      <div className="flex-1 overflow-y-auto space-y-2 min-h-0 pr-1">
+        {/* Card art - Compact */}
+        <div className={`border rounded-lg flex-shrink-0 overflow-hidden ${
+          isMobile ? 'h-12' : 'h-16 sm:h-20 md:h-24'
+        }`}>
           <CardImage cardId={examinedCard} className="w-full h-full" />
         </div>
         
-        {/* Card effect - ENHANCED MOBILE TEXT */}
+        {/* Card effect - Compact mobile */}
         <div>
-          <h4 className="text-xs sm:text-sm font-bold mb-1 text-foreground">Effect</h4>
-          <p className="text-xs sm:text-sm font-medium text-foreground bg-card/80 p-2 sm:p-3 rounded-lg border border-border leading-relaxed">{card.text}</p>
+          <h4 className="text-xs font-bold mb-1 text-foreground">Effect</h4>
+          <p className={`font-medium text-foreground bg-card/80 rounded-lg border border-border leading-relaxed ${
+            isMobile ? 'text-xs p-2' : 'text-xs sm:text-sm p-2 sm:p-3'
+          }`}>{card.text}</p>
           
-          <div className="mt-2 text-xs sm:text-sm text-foreground bg-accent/10 p-2 sm:p-3 rounded-lg border border-accent/20">
+          <div className={`mt-2 text-foreground bg-accent/10 rounded-lg border border-accent/20 ${
+            isMobile ? 'text-xs p-2' : 'text-xs sm:text-sm p-2 sm:p-3'
+          }`}>
             <span className="font-bold text-accent">Type:</span> {
               card.type === 'MEDIA' && faction === 'truth' ? 'Increases Truth meter.' :
               card.type === 'MEDIA' && faction === 'government' ? 'Decreases Truth meter.' :
@@ -384,17 +390,19 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           </div>
         </div>
         
-        {/* Flavor text - RESPONSIVE */}
+        {/* Flavor text - Compact mobile */}
         <div>
           <h4 className="text-xs font-bold mb-1 text-muted-foreground">CLASSIFIED INTELLIGENCE</h4>
-          <div className="text-xs sm:text-sm italic text-foreground border-l-4 border-truth-red pl-2 sm:pl-3 bg-truth-red/10 p-2 sm:p-3 rounded-r border border-truth-red/20 leading-relaxed">
+          <div className={`italic text-foreground border-l-4 border-truth-red bg-truth-red/10 rounded-r border border-truth-red/20 leading-relaxed ${
+            isMobile ? 'text-xs pl-2 p-2' : 'text-xs sm:text-sm pl-2 sm:pl-3 p-2 sm:p-3'
+          }`}>
             "{card.flavorTruth}"
           </div>
         </div>
       </div>
                     
-                    {/* Deploy button - Enhanced mobile */}
-                    <div className="flex-shrink-0 pt-4 border-t border-border">
+                    {/* Deploy button - Compact mobile */}
+                    <div className="flex-shrink-0 pt-3 border-t border-border">
                       <Button
                         onClick={() => {
                           if (!canAffordCard(card)) {
