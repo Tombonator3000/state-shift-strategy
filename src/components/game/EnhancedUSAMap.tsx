@@ -124,7 +124,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         if (selectedZoneCard && gameState) {
           if (gameState.owner === 'player') {
             // Can't target own states - enhanced feedback
-            audio?.playSFX?.('hover');
+            audio?.playSFX?.('lightClick');
             toast({
               title: "❌ Invalid Target",
               description: `Cannot target ${gameState.name} - you already control this state!`,
@@ -141,12 +141,12 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           });
           onStateClick(gameState?.abbreviation || stateId);
         } else {
-          audio?.playSFX?.('hover');
+          audio?.playSFX?.('lightClick');
           onStateClick(gameState?.abbreviation || stateId);
         }
       });
       pathElement.addEventListener('mouseenter', (e) => {
-        audio?.playSFX?.('hover');
+        audio?.playSFX?.('lightClick'); // Very quiet hover sound
         setHoveredState(stateId);
         setMousePosition({ x: e.clientX, y: e.clientY });
       });
@@ -346,9 +346,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
               {stateInfo.specialBonus && (
                 <div className="pt-2 border-t border-border">
                   <div className="text-sm font-bold text-foreground mb-1">🎯 Special Bonus</div>
-                  <div className="text-base font-mono text-accent bg-accent/10 p-2 rounded">
-                    {stateInfo.specialBonus}
-                    {stateInfo.bonusValue && ` (+${stateInfo.bonusValue} IP)`}
+                  <div className="text-sm font-mono text-foreground bg-accent/20 border border-accent/30 p-3 rounded shadow-sm">
+                    <span className="font-bold text-accent">{stateInfo.specialBonus}</span>
+                    {stateInfo.bonusValue && <span className="text-primary"> (+{stateInfo.bonusValue} IP)</span>}
                   </div>
                 </div>
               )}
@@ -440,12 +440,14 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         }
         
         .state-label {
-          font-size: 10px;
+          font-size: 11px;
           font-weight: bold;
           fill: white;
-          text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8);
           pointer-events: none;
           font-family: monospace;
+          stroke: rgba(0,0,0,0.8);
+          stroke-width: 0.5px;
         }
         
         .pressure-indicator {

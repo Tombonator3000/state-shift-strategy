@@ -76,7 +76,8 @@ export const useAudio = () => {
       defeat: '/audio/defeat.mp3',
       hover: '/audio/hover.mp3',
       click: '/audio/click.mp3',
-      typewriter: '/audio/typewriter.mp3'
+      typewriter: '/audio/typewriter.mp3',
+      lightClick: '/audio/click.mp3' // Very light sound for buttons
     };
 
     Object.entries(sfxFiles).forEach(([key, src]) => {
@@ -211,8 +212,20 @@ export const useAudio = () => {
     
     const audio = sfxRefs.current[soundName];
     if (audio) {
-      audio.currentTime = 0;
-      audio.play().catch(console.error);
+      // Reduce volume for light click specifically
+      if (soundName === 'lightClick') {
+        const originalVolume = audio.volume;
+        audio.volume = originalVolume * 0.3; // Very quiet
+        audio.currentTime = 0;
+        audio.play().catch(console.error);
+        // Reset volume after playing
+        setTimeout(() => {
+          audio.volume = originalVolume;
+        }, 100);
+      } else {
+        audio.currentTime = 0;
+        audio.play().catch(console.error);
+      }
     }
   }, [config.sfxEnabled, config.muted]);
 

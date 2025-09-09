@@ -74,7 +74,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     if (!card) return;
     
     if (!canAffordCard(card)) {
-      audio.playSFX('hover'); // Error sound
+      audio.playSFX('lightClick'); // Error sound - light click
       toast({
         title: "❌ Insufficient IP",
         description: `Need ${card.cost} IP to deploy "${card.name}". You have ${currentIP} IP.`,
@@ -156,7 +156,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 }
               }}
               onMouseEnter={() => {
-                audio.playSFX('hover');
+                audio.playSFX('lightClick'); // Very quiet button sound
               }}
             >
                {/* Enhanced loading overlay */}
@@ -226,7 +226,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           onClick={() => setExaminedCard(null)}
         >
           <div 
-            className={`bg-card border-2 rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto transform animate-fade-in ${(() => {
+            className={`bg-card border-2 rounded-lg p-4 max-w-sm w-full max-h-[80vh] transform animate-fade-in ${(() => {
               const card = cards.find(c => c.id === examinedCard);
               return card ? `${getRarityBorder(card.rarity)} ${getRarityGlow(card.rarity)}` : 'border-border';
             })()}`}
@@ -261,7 +261,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     
                     {/* Card title and type */}
                     <div className="text-center">
-                      <h3 className="text-3xl font-bold mb-3 text-foreground">{card.name}</h3>
+                      <h3 className="text-xl font-bold mb-2 text-foreground">{card.name}</h3>
                       <Badge 
                         variant="outline" 
                         className={`text-base px-4 py-2 ${
@@ -277,18 +277,18 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     </div>
                     
                     {/* Card art */}
-                    <div className="h-48 bg-muted/20 flex items-center justify-center text-xl text-muted-foreground border rounded-lg">
+                    <div className="h-32 bg-muted/20 flex items-center justify-center text-lg text-muted-foreground border rounded-lg">
                       [CLASSIFIED IMAGE]
                     </div>
                     
                     {/* Card effect */}
                     <div>
-                      <h4 className="text-xl font-bold mb-3 text-foreground">Effect</h4>
-                      <p className="text-lg font-medium text-foreground bg-muted/20 p-4 rounded-lg border">{card.text}</p>
+                      <h4 className="text-lg font-bold mb-2 text-foreground">Effect</h4>
+                      <p className="text-sm font-medium text-foreground bg-card/80 p-3 rounded-lg border border-border shadow-sm">{card.text}</p>
                       
                       {/* Enhanced card effect description */}
-                      <div className="mt-4 text-base text-muted-foreground bg-accent/10 p-4 rounded-lg">
-                        <span className="font-bold">Gameplay:</span> {
+                      <div className="mt-3 text-sm text-foreground bg-accent/10 p-3 rounded-lg border border-accent/20">
+                        <span className="font-bold text-accent">Gameplay:</span> {
                           card.type === 'MEDIA' && faction === 'truth' ? 'Increases Truth meter by exposing lies and corruption.' :
                           card.type === 'MEDIA' && faction === 'government' ? 'Decreases Truth meter through disinformation campaigns.' :
                           card.type === 'ZONE' ? 'Adds pressure to target state. States with pressure ≥ defense are captured.' :
@@ -297,7 +297,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                           'Special effect card with unique strategic abilities.'
                         }
                         {card.type === 'ZONE' && (
-                          <div className="mt-3 text-warning font-bold text-lg">
+                          <div className="mt-2 text-warning font-bold text-sm bg-warning/10 p-2 rounded border border-warning/30">
                             🎯 Click on a state after selecting this card to target it
                           </div>
                         )}
@@ -306,8 +306,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     
                     {/* Flavor text */}
                     <div>
-                      <h4 className="text-base font-bold mb-2 text-muted-foreground">CLASSIFIED INTELLIGENCE</h4>
-                      <div className="text-base italic text-muted-foreground border-l-4 border-truth-red pl-4 bg-truth-red/5 p-3 rounded-r">
+                      <h4 className="text-sm font-bold mb-2 text-muted-foreground">CLASSIFIED INTELLIGENCE</h4>
+                      <div className="text-sm italic text-foreground border-l-4 border-truth-red pl-3 bg-truth-red/10 p-2 rounded-r border border-truth-red/20">
                         "{card.flavorTruth}"
                       </div>
                     </div>
@@ -325,18 +325,29 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                         }
                         audio.playSFX('click');
                         setExaminedCard(null);
-                        handlePlayCard(card.id);
+                        
+                        if (card.type === 'ZONE') {
+                          // For zone cards, trigger selection mode
+                          onSelectCard?.(card.id);
+                          toast({
+                            title: "🎯 Zone Card Selected",
+                            description: "Click on a neutral or enemy state to target it with this zone asset.",
+                          });
+                        } else {
+                          // For other cards, deploy immediately
+                          handlePlayCard(card.id);
+                        }
                       }}
                       disabled={disabled}
-                      className={`enhanced-button w-full text-xl py-4 font-mono relative overflow-hidden transition-all duration-300 ${
+                      className={`enhanced-button w-full text-lg py-3 font-mono relative overflow-hidden transition-all duration-300 ${
                         !canAffordCard(card) ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
                       }`}
                       size="lg"
                     >
                       <span className="relative z-10 flex items-center justify-center gap-2">
-                        {card.type === 'ZONE' && <Target className="w-5 h-5" />}
-                        {card.type === 'ATTACK' && <Zap className="w-5 h-5" />}
-                        {card.type === 'DEFENSIVE' && <Shield className="w-5 h-5" />}
+                        {card.type === 'ZONE' && <Target className="w-4 h-4" />}
+                        {card.type === 'ATTACK' && <Zap className="w-4 h-4" />}
+                        {card.type === 'DEFENSIVE' && <Shield className="w-4 h-4" />}
                         {card.type === 'ZONE' ? 'SELECT & TARGET STATE' : 'DEPLOY ASSET'}
                       </span>
                     </Button>
