@@ -321,16 +321,20 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                             });
                             return;
                           }
+                          
                           audio.playSFX('click');
                           setExaminedCard(null);
                           
+                          // Direct deployment - no extra steps
                           if (card.type === 'ZONE') {
+                            // For zone cards, immediately select and show targeting instructions
                             onSelectCard?.(card.id);
                             toast({
-                              title: "🎯 Zone Card Selected",
-                              description: "Click on a neutral or enemy state to target it with this zone asset.",
+                              title: "🎯 Zone Card Active",
+                              description: "Now click on a neutral or enemy state to deploy this zone asset!",
                             });
                           } else {
+                            // For all other cards, deploy immediately
                             handlePlayCard(card.id);
                           }
                         }}
