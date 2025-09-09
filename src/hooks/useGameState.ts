@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { GameCard } from '@/components/game/GameHand';
-import { CARD_DATABASE, generateRandomDeck, getRandomCards } from '@/data/cardDatabase';
+import { CARD_DATABASE, TRUTH_SEEKERS_CARDS, GOVERNMENT_CARDS } from '@/data/cardDatabase';
+import { generateRandomDeck, getRandomCards } from '@/data/cardDatabase';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -56,7 +57,7 @@ export const useGameState = () => {
     turn: 1,
     truth: 60,
     ip: 15,
-    hand: getRandomCards(3),
+  hand: getRandomCards(3),
     deck: generateRandomDeck(40),
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],

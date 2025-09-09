@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import GameMap from '@/components/game/GameMap';
+import USAMap from '@/components/game/USAMap';
 import GameHand from '@/components/game/GameHand';
 import TruthMeter from '@/components/game/TruthMeter';
 import Newspaper from '@/components/game/Newspaper';
@@ -115,7 +115,7 @@ const Index = () => {
 
         {/* Center - Map */}
         <div className="flex-1 p-4">
-          <GameMap 
+          <USAMap 
             states={gameState.states}
             onStateClick={(stateId) => console.log('State clicked:', stateId)}
           />
