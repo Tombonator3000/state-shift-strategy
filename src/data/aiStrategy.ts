@@ -19,42 +19,42 @@ export const AI_PERSONALITIES: Record<AIDifficulty, AIPersonality> = {
   easy: {
     name: "Intern Agent",
     description: "New to the conspiracy, makes obvious mistakes",
-    aggressiveness: 0.3,
-    defensiveness: 0.2,
-    territorial: 0.4,
-    economical: 0.6,
-    riskTolerance: 0.3,
+    aggressiveness: 0.2,
+    defensiveness: 0.1,
+    territorial: 0.3,
+    economical: 0.5,
+    riskTolerance: 0.2,
     planningDepth: 1
   },
   medium: {
     name: "Field Operative",
     description: "Experienced agent with solid tactical understanding",
     aggressiveness: 0.5,
-    defensiveness: 0.6,
-    territorial: 0.6,
-    economical: 0.5,
-    riskTolerance: 0.5,
+    defensiveness: 0.5,
+    territorial: 0.5,
+    economical: 0.6,
+    riskTolerance: 0.4,
     planningDepth: 2
   },
   hard: {
     name: "Senior Handler",
     description: "Veteran strategist with deep understanding of the game",
-    aggressiveness: 0.7,
+    aggressiveness: 0.8,
     defensiveness: 0.8,
     territorial: 0.7,
-    economical: 0.6,
-    riskTolerance: 0.6,
-    planningDepth: 2
+    economical: 0.7,
+    riskTolerance: 0.3,
+    planningDepth: 3
   },
   legendary: {
     name: "Shadow Director",
     description: "Master manipulator who sees all angles",
-    aggressiveness: 0.8,
-    defensiveness: 0.9,
-    territorial: 0.8,
-    economical: 0.8,
-    riskTolerance: 0.7,
-    planningDepth: 3
+    aggressiveness: 1.0,
+    defensiveness: 0.95,
+    territorial: 0.85,
+    economical: 0.9,
+    riskTolerance: 0.1,
+    planningDepth: 4
   }
 };
 
@@ -137,10 +137,10 @@ export class AIStrategist {
 
     if (possiblePlays.length === 0) return null;
 
-    // Sort by priority and add some randomness based on difficulty
-    const randomnessFactor = this.difficulty === 'easy' ? 0.4 : 
-                           this.difficulty === 'medium' ? 0.2 : 
-                           this.difficulty === 'hard' ? 0.1 : 0.05;
+    // Sort by priority and add some randomness based on difficulty - ENHANCED DIFFICULTY SCALING
+    const randomnessFactor = this.difficulty === 'easy' ? 0.5 : 
+                           this.difficulty === 'medium' ? 0.25 : 
+                           this.difficulty === 'hard' ? 0.1 : 0.02; // Legendary almost no randomness
 
     possiblePlays.sort((a, b) => {
       const randomA = a.priority + (Math.random() * randomnessFactor);
@@ -176,17 +176,39 @@ export class AIStrategist {
   private calculateThreatLevel(gameState: any): number {
     let threat = 0;
     
-    // Player state control threat
+    // Enhanced threat assessment based on difficulty
+    const threatMultiplier = this.difficulty === 'legendary' ? 1.5 : 
+                           this.difficulty === 'hard' ? 1.2 : 
+                           this.difficulty === 'medium' ? 1.0 : 0.8;
+    
+    // Player state control threat - more aggressive on higher difficulties
     const playerStates = gameState.states.filter((s: any) => s.owner === 'player');
-    if (playerStates.length >= 7) threat += 0.3;
-    if (playerStates.length >= 9) threat += 0.4;
+    if (playerStates.length >= 5) threat += 0.2 * threatMultiplier;
+    if (playerStates.length >= 7) threat += 0.3 * threatMultiplier;
+    if (playerStates.length >= 9) threat += 0.4 * threatMultiplier;
     
-    // Player IP threat
-    if (gameState.ip <= -150) threat += 0.5; // Player has high IP (our IP is negative)
+    // Player IP threat - better resource awareness on higher difficulties
+    if (gameState.ip <= -100) threat += 0.3 * threatMultiplier;
+    if (gameState.ip <= -150) threat += 0.4 * threatMultiplier;
+    if (gameState.ip <= -200) threat += 0.6 * threatMultiplier;
     
-    // Truth level threat (depends on player faction)
-    if (gameState.faction === 'truth' && gameState.truth >= 85) threat += 0.4;
-    if (gameState.faction === 'government' && gameState.truth <= 15) threat += 0.4;
+    // Truth level threat (depends on player faction) - enhanced awareness
+    if (gameState.faction === 'truth' && gameState.truth >= 70) threat += 0.3 * threatMultiplier;
+    if (gameState.faction === 'truth' && gameState.truth >= 85) threat += 0.5 * threatMultiplier;
+    if (gameState.faction === 'government' && gameState.truth <= 30) threat += 0.3 * threatMultiplier;
+    if (gameState.faction === 'government' && gameState.truth <= 15) threat += 0.5 * threatMultiplier;
+    
+    // Advanced threats only on hard+ difficulties
+    if (this.difficulty === 'hard' || this.difficulty === 'legendary') {
+      // Combo threat detection
+      if (playerStates.length >= 6 && gameState.ip <= -100) threat += 0.3;
+      
+      // Card synergy threat
+      const dangerousCards = gameState.lastPlayedCards?.filter(
+        (card: any) => card.rarity === 'rare' || card.rarity === 'legendary'
+      );
+      if (dangerousCards && dangerousCards.length > 0) threat += 0.2;
+    }
     
     return Math.min(1, threat);
   }

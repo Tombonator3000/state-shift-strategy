@@ -1,18 +1,42 @@
-import type { GameCard } from '@/components/game/GameHand';
+// Card Balancing System for Shadow Government
+// Analyzes and provides feedback on card balance
+
 import { CARD_DATABASE } from './cardDatabase';
 
+export interface CardBalance {
+  cardId: string;
+  name: string;
+  type: string;
+  rarity: string;
+  cost: number;
+  effectValue: number;
+  costEfficiencyRatio: number;
+  balanceStatus: 'balanced' | 'undercosted' | 'overcosted';
+  recommendations: string[];
+}
+
+export interface BalanceReport {
+  timestamp: string;
+  totalCards: number;
+  balancedCards: number;
+  undercostCards: number;
+  overcostCards: number;
+  cardAnalysis: CardBalance[];
+  recommendations: string[];
+}
+
+// For compatibility with existing dashboard
 export interface CardMetrics {
   id: string;
   name: string;
   type: string;
   rarity: string;
   currentCost: number;
-  powerScore: number;
   recommendedCost: number;
-  costAdjustment: number;
+  powerScore: number;
+  balanceStatus: 'balanced' | 'underpowered' | 'overpowered';
   usageRate: number;
   winRateWhenPlayed: number;
-  balanceStatus: 'balanced' | 'underpowered' | 'overpowered';
   issues: string[];
 }
 
@@ -24,307 +48,265 @@ export interface BalancingReport {
   averageCostByType: Record<string, number>;
   averageCostByRarity: Record<string, number>;
   recommendations: string[];
-  mostProblematicCards: CardMetrics[];
 }
 
 export class CardBalancer {
-  private usageStats: Map<string, { timesPlayed: number; wins: number; games: number }>;
-  
-  constructor() {
-    this.usageStats = new Map();
-    this.initializeUsageStats();
-  }
+  private cards = CARD_DATABASE;
 
-  private initializeUsageStats() {
-    // Initialize with some baseline stats (would come from actual gameplay data)
-    CARD_DATABASE.forEach(card => {
-      this.usageStats.set(card.id, {
-        timesPlayed: Math.floor(Math.random() * 100) + 10,
-        wins: Math.floor(Math.random() * 50) + 5,
-        games: Math.floor(Math.random() * 200) + 50
-      });
-    });
-  }
-
-  // Calculate power score based on card effects and properties
-  calculatePowerScore(card: GameCard): number {
-    let powerScore = 0;
-
-    // Base power by type
-    const typePowerBase: Record<string, number> = {
-      'MEDIA': 3.0,     // Affects truth meter
-      'ZONE': 3.5,      // Territory control
-      'ATTACK': 4.0,    // Direct damage/disruption
-      'DEFENSIVE': 2.5  // Reactive/protective
-    };
-
-    powerScore += typePowerBase[card.type] || 2.0;
-
-    // Rarity multiplier
-    const rarityMultiplier: Record<string, number> = {
-      'common': 1.0,
-      'uncommon': 1.3,
-      'rare': 1.7,
-      'legendary': 2.2
-    };
-
-    powerScore *= rarityMultiplier[card.rarity] || 1.0;
-
-    // Text analysis for additional effects
-    const text = card.text.toLowerCase();
-    
-    // Positive effects
-    if (text.includes('draw')) powerScore += 0.8;
-    if (text.includes('truth +')) powerScore += 1.2;
-    if (text.includes('ip +') || text.includes('gain')) powerScore += 1.0;
-    if (text.includes('control') || text.includes('capture')) powerScore += 1.5;
-    if (text.includes('destroy') || text.includes('remove')) powerScore += 1.8;
-    if (text.includes('all') || text.includes('every')) powerScore += 1.0;
-    if (text.includes('opponent')) powerScore += 0.7;
-    
-    // Card selection/tutoring effects
-    if (text.includes('search') || text.includes('choose')) powerScore += 1.2;
-    if (text.includes('hand') && text.includes('return')) powerScore += 0.6;
-    
-    // Permanent effects
-    if (text.includes('permanent') || text.includes('ongoing')) powerScore += 1.5;
-    if (text.includes('each turn') || text.includes('every turn')) powerScore += 2.0;
-
-    // Conditional effects (generally weaker)
-    if (text.includes('if') || text.includes('when')) powerScore *= 0.85;
-    if (text.includes('may') || text.includes('can')) powerScore *= 0.9;
-
-    // Multiple targets
-    const targetCount = (text.match(/target/g) || []).length;
-    powerScore += targetCount * 0.3;
-
-    // Numerical values in text (damage, IP, etc.)
-    const numbers = text.match(/\d+/g);
-    if (numbers) {
-      const maxNumber = Math.max(...numbers.map(n => parseInt(n)));
-      powerScore += maxNumber * 0.1;
-    }
-
-    return Math.round(powerScore * 10) / 10;
-  }
-
-  // Calculate recommended cost based on power score
-  calculateRecommendedCost(powerScore: number, rarity: string): number {
-    // Base cost curve
-    let baseCost = Math.max(1, Math.round(powerScore * 1.2));
-
-    // Rarity adjustments
-    const rarityAdjustment: Record<string, number> = {
-      'common': 0,
-      'uncommon': 0.5,
-      'rare': 1.0,
-      'legendary': 1.5
-    };
-
-    baseCost += rarityAdjustment[rarity] || 0;
-
-    // Ensure reasonable cost range
-    return Math.max(1, Math.min(12, Math.round(baseCost)));
-  }
-
-  // Get usage statistics for a card
-  getCardUsageStats(cardId: string) {
-    const stats = this.usageStats.get(cardId);
-    if (!stats) return { usageRate: 0, winRate: 0 };
-
-    const usageRate = (stats.timesPlayed / stats.games) * 100;
-    const winRate = stats.wins > 0 ? (stats.wins / stats.timesPlayed) * 100 : 0;
-
-    return { usageRate, winRate };
-  }
-
-  // Analyze a single card
-  analyzeCard(card: GameCard): CardMetrics {
-    const powerScore = this.calculatePowerScore(card);
-    const recommendedCost = this.calculateRecommendedCost(powerScore, card.rarity);
-    const costAdjustment = recommendedCost - card.cost;
-    const { usageRate, winRate } = this.getCardUsageStats(card.id);
-
-    const issues: string[] = [];
-    let balanceStatus: 'balanced' | 'underpowered' | 'overpowered' = 'balanced';
-
-    // Determine balance status
-    if (Math.abs(costAdjustment) <= 1) {
-      balanceStatus = 'balanced';
-    } else if (costAdjustment > 1) {
-      balanceStatus = 'underpowered';
-      issues.push(`Cost too low (should be ${recommendedCost} instead of ${card.cost})`);
-    } else {
-      balanceStatus = 'overpowered';
-      issues.push(`Cost too high (should be ${recommendedCost} instead of ${card.cost})`);
-    }
-
-    // Check usage rates
-    if (usageRate < 20) {
-      issues.push(`Low usage rate (${usageRate.toFixed(1)}%)`);
-      if (balanceStatus === 'balanced') balanceStatus = 'underpowered';
-    } else if (usageRate > 80) {
-      issues.push(`Very high usage rate (${usageRate.toFixed(1)}%)`);
-      if (balanceStatus === 'balanced') balanceStatus = 'overpowered';
-    }
-
-    // Check win rates
-    if (winRate < 35) {
-      issues.push(`Low win rate when played (${winRate.toFixed(1)}%)`);
-    } else if (winRate > 70) {
-      issues.push(`High win rate when played (${winRate.toFixed(1)}%)`);
-      if (balanceStatus === 'balanced') balanceStatus = 'overpowered';
-    }
-
-    // Type-specific issues
-    if (card.type === 'MEDIA' && card.cost !== 4) {
-      issues.push('Media cards should generally cost 4 for consistency');
-    }
-
-    return {
-      id: card.id,
-      name: card.name,
-      type: card.type,
-      rarity: card.rarity,
-      currentCost: card.cost,
-      powerScore,
-      recommendedCost,
-      costAdjustment,
-      usageRate,
-      winRateWhenPlayed: winRate,
-      balanceStatus,
-      issues
-    };
-  }
-
-  // Generate comprehensive balancing report
   generateBalancingReport(): BalancingReport {
-    const allMetrics = CARD_DATABASE.map(card => this.analyzeCard(card));
+    const analysis = analyzeCardBalance(this.cards);
     
-    const balanced = allMetrics.filter(m => m.balanceStatus === 'balanced').length;
-    const underpowered = allMetrics.filter(m => m.balanceStatus === 'underpowered').length;
-    const overpowered = allMetrics.filter(m => m.balanceStatus === 'overpowered').length;
+    // Calculate averages by type and rarity
+    const costsByType: Record<string, number[]> = {};
+    const costsByRarity: Record<string, number[]> = {};
 
-    // Calculate average costs by type and rarity
-    const avgCostByType: Record<string, number> = {};
-    const avgCostByRarity: Record<string, number> = {};
-
-    ['MEDIA', 'ZONE', 'ATTACK', 'DEFENSIVE'].forEach(type => {
-      const typeCards = allMetrics.filter(m => m.type === type);
-      avgCostByType[type] = typeCards.length > 0 
-        ? typeCards.reduce((sum, card) => sum + card.currentCost, 0) / typeCards.length 
-        : 0;
+    this.cards.forEach(card => {
+      if (!costsByType[card.type]) costsByType[card.type] = [];
+      if (!costsByRarity[card.rarity]) costsByRarity[card.rarity] = [];
+      
+      costsByType[card.type].push(card.cost);
+      costsByRarity[card.rarity].push(card.cost);
     });
 
-    ['common', 'uncommon', 'rare', 'legendary'].forEach(rarity => {
-      const rarityCards = allMetrics.filter(m => m.rarity === rarity);
-      avgCostByRarity[rarity] = rarityCards.length > 0 
-        ? rarityCards.reduce((sum, card) => sum + card.currentCost, 0) / rarityCards.length 
-        : 0;
+    const averageCostByType: Record<string, number> = {};
+    Object.entries(costsByType).forEach(([type, costs]) => {
+      averageCostByType[type] = costs.reduce((a, b) => a + b, 0) / costs.length;
     });
 
-    // Generate recommendations
-    const recommendations: string[] = [];
-    
-    if (underpowered > overpowered * 1.5) {
-      recommendations.push('Many cards appear underpowered - consider reducing costs or buffing effects');
-    } else if (overpowered > underpowered * 1.5) {
-      recommendations.push('Many cards appear overpowered - consider increasing costs or reducing effects');
-    }
-
-    if (avgCostByType['ATTACK'] < avgCostByType['DEFENSIVE']) {
-      recommendations.push('Attack cards should generally cost more than defensive cards');
-    }
-
-    if (avgCostByRarity['legendary'] < avgCostByRarity['rare'] + 1) {
-      recommendations.push('Legendary cards should have significantly higher costs than rare cards');
-    }
-
-    const highUsageCards = allMetrics.filter(m => m.usageRate > 80);
-    if (highUsageCards.length > allMetrics.length * 0.1) {
-      recommendations.push(`${highUsageCards.length} cards have usage rates >80% - consider nerfing`);
-    }
-
-    const lowUsageCards = allMetrics.filter(m => m.usageRate < 20);
-    if (lowUsageCards.length > allMetrics.length * 0.2) {
-      recommendations.push(`${lowUsageCards.length} cards have usage rates <20% - consider buffing`);
-    }
-
-    // Find most problematic cards
-    const mostProblematic = allMetrics
-      .filter(m => m.balanceStatus !== 'balanced')
-      .sort((a, b) => {
-        const aScore = Math.abs(a.costAdjustment) + (a.issues.length * 0.5);
-        const bScore = Math.abs(b.costAdjustment) + (b.issues.length * 0.5);
-        return bScore - aScore;
-      })
-      .slice(0, 10);
+    const averageCostByRarity: Record<string, number> = {};
+    Object.entries(costsByRarity).forEach(([rarity, costs]) => {
+      averageCostByRarity[rarity] = costs.reduce((a, b) => a + b, 0) / costs.length;
+    });
 
     return {
-      totalCards: allMetrics.length,
-      balancedCards: balanced,
-      underpoweredCards: underpowered,
-      overpoweredCards: overpowered,
-      averageCostByType: avgCostByType,
-      averageCostByRarity: avgCostByRarity,
-      recommendations,
-      mostProblematicCards: mostProblematic
+      totalCards: analysis.totalCards,
+      balancedCards: analysis.balancedCards,
+      underpoweredCards: analysis.undercostCards, // Map to dashboard naming
+      overpoweredCards: analysis.overcostCards,
+      averageCostByType,
+      averageCostByRarity,
+      recommendations: analysis.recommendations
     };
   }
 
-  // Generate balanced card costs (returns updated card database)
-  generateBalancedCards(): GameCard[] {
-    return CARD_DATABASE.map(card => {
-      const metrics = this.analyzeCard(card);
-      
-      // Apply cost adjustments for significantly imbalanced cards
-      if (Math.abs(metrics.costAdjustment) > 1) {
-        return {
-          ...card,
-          cost: metrics.recommendedCost
-        };
-      }
-      
-      return card;
-    });
-  }
-
-  // Record card play for statistics
-  recordCardPlay(cardId: string, won: boolean) {
-    const stats = this.usageStats.get(cardId);
-    if (stats) {
-      stats.timesPlayed++;
-      if (won) stats.wins++;
-      stats.games++;
-      this.usageStats.set(cardId, stats);
-    }
-  }
-
-  // Get cards that need attention
   getCardsNeedingAttention(): CardMetrics[] {
-    return CARD_DATABASE
-      .map(card => this.analyzeCard(card))
-      .filter(metrics => 
-        metrics.balanceStatus !== 'balanced' || 
-        metrics.issues.length > 0
-      )
-      .sort((a, b) => {
-        const aPriority = Math.abs(a.costAdjustment) + a.issues.length;
-        const bPriority = Math.abs(b.costAdjustment) + b.issues.length;
-        return bPriority - aPriority;
+    const analysis = analyzeCardBalance(this.cards);
+    
+    return analysis.cardAnalysis
+      .filter(card => card.balanceStatus !== 'balanced')
+      .map(card => {
+        const optimalCost = calculateOptimalCost(card.type, card.rarity, card.effectValue);
+        
+        return {
+          id: card.cardId,
+          name: card.name,
+          type: card.type,
+          rarity: card.rarity,
+          currentCost: card.cost,
+          recommendedCost: optimalCost,
+          powerScore: Math.min(10, card.effectValue / (card.cost || 1)),
+          balanceStatus: card.balanceStatus === 'undercosted' ? 'underpowered' : 
+                        card.balanceStatus === 'overcosted' ? 'overpowered' : 'balanced',
+          usageRate: Math.random() * 100, // Mock data - would come from game analytics
+          winRateWhenPlayed: 45 + Math.random() * 20, // Mock data
+          issues: card.recommendations
+        };
       });
   }
 
-  // Export balancing data for analysis
   exportBalancingData() {
     const report = this.generateBalancingReport();
-    const cardAnalysis = CARD_DATABASE.map(card => this.analyzeCard(card));
+    const cardsNeedingAttention = this.getCardsNeedingAttention();
     
     return {
       report,
-      cardAnalysis,
+      cardsNeedingAttention,
       timestamp: new Date().toISOString(),
-      version: "1.0"
+      version: '1.0'
     };
   }
+}
+
+// Base cost curves for different rarities and effects
+const COST_CURVES = {
+  MEDIA: {
+    common: { baseCost: 4, effectMultiplier: 1.0 }, // Truth ±10 = 4 cost
+    uncommon: { baseCost: 6, effectMultiplier: 1.5 }, // Truth ±20 = 6 cost  
+    rare: { baseCost: 8, effectMultiplier: 2.0 }, // Truth ±30 = 8 cost
+    legendary: { baseCost: 12, effectMultiplier: 3.0 } // Truth ±50+ = 12+ cost
+  },
+  ZONE: {
+    common: { baseCost: 5, effectMultiplier: 1.0 }, // +1 Pressure = 5 cost
+    uncommon: { baseCost: 7, effectMultiplier: 1.4 },
+    rare: { baseCost: 9, effectMultiplier: 1.8 },
+    legendary: { baseCost: 12, effectMultiplier: 2.2 }
+  },
+  ATTACK: {
+    common: { baseCost: 6, effectMultiplier: 1.0 },
+    uncommon: { baseCost: 8, effectMultiplier: 1.3 },
+    rare: { baseCost: 11, effectMultiplier: 1.6 },
+    legendary: { baseCost: 15, effectMultiplier: 2.0 }
+  },
+  DEFENSIVE: {
+    common: { baseCost: 5, effectMultiplier: 1.0 },
+    uncommon: { baseCost: 7, effectMultiplier: 1.3 },
+    rare: { baseCost: 9, effectMultiplier: 1.6 },
+    legendary: { baseCost: 13, effectMultiplier: 2.0 }
+  }
+};
+
+export function extractEffectValue(cardText: string, cardType: string): number {
+  // Extract numerical values from card text
+  const truthMatch = cardText.match(/Truth ([+-])(\d+)/);
+  if (truthMatch) {
+    return parseInt(truthMatch[2]);
+  }
+  
+  const pressureMatch = cardText.match(/\+(\d+) Pressure/);
+  if (pressureMatch) {
+    return parseInt(pressureMatch[1]);
+  }
+  
+  const damageMatch = cardText.match(/(\d+) (?:damage|IP)/i);
+  if (damageMatch) {
+    return parseInt(damageMatch[1]);
+  }
+  
+  // Default values for complex effects
+  if (cardType === 'ZONE') return 1;
+  if (cardType === 'MEDIA') return 10;
+  if (cardType === 'ATTACK') return 15;
+  if (cardType === 'DEFENSIVE') return 10;
+  
+  return 10; // Default
+}
+
+export function calculateOptimalCost(
+  cardType: string, 
+  rarity: string, 
+  effectValue: number
+): number {
+  const curve = COST_CURVES[cardType as keyof typeof COST_CURVES];
+  if (!curve) return 4;
+  
+  const rarityData = curve[rarity as keyof typeof curve];
+  if (!rarityData) return 4;
+  
+  // Calculate cost based on effect value and rarity multiplier
+  const baseEffect = cardType === 'MEDIA' ? 10 : cardType === 'ZONE' ? 1 : 15;
+  const effectRatio = effectValue / baseEffect;
+  const optimalCost = Math.round(rarityData.baseCost * effectRatio);
+  
+  return Math.max(1, optimalCost);
+}
+
+export function analyzeCardBalance(cards: any[]): BalanceReport {
+  const cardAnalysis: CardBalance[] = [];
+  let balancedCount = 0;
+  let undercostCount = 0;
+  let overcostCount = 0;
+  
+  for (const card of cards) {
+    const effectValue = extractEffectValue(card.text, card.type);
+    const optimalCost = calculateOptimalCost(card.type, card.rarity, effectValue);
+    const costDifference = card.cost - optimalCost;
+    const costEfficiencyRatio = effectValue / card.cost;
+    
+    let balanceStatus: CardBalance['balanceStatus'];
+    const recommendations: string[] = [];
+    
+    if (Math.abs(costDifference) <= 1) {
+      balanceStatus = 'balanced';
+      balancedCount++;
+    } else if (costDifference < -1) {
+      balanceStatus = 'undercosted';
+      undercostCount++;
+      recommendations.push(`Increase cost from ${card.cost} to ${optimalCost}`);
+      recommendations.push(`Currently ${Math.abs(costDifference)} IP too cheap`);
+    } else {
+      balanceStatus = 'overcosted';
+      overcostCount++;
+      recommendations.push(`Decrease cost from ${card.cost} to ${optimalCost}`);
+      recommendations.push(`Currently ${costDifference} IP too expensive`);
+    }
+    
+    cardAnalysis.push({
+      cardId: card.id,
+      name: card.name,
+      type: card.type,
+      rarity: card.rarity,
+      cost: card.cost,
+      effectValue,
+      costEfficiencyRatio,
+      balanceStatus,
+      recommendations
+    });
+  }
+  
+  // Generate overall recommendations
+  const overallRecommendations: string[] = [];
+  
+  const balancePercentage = (balancedCount / cards.length) * 100;
+  if (balancePercentage < 70) {
+    overallRecommendations.push("Major rebalancing needed - less than 70% of cards are balanced");
+  } else if (balancePercentage < 85) {
+    overallRecommendations.push("Minor rebalancing needed - fine-tune underperforming cards");
+  } else {
+    overallRecommendations.push("Card balance is healthy - only minor adjustments needed");
+  }
+  
+  if (undercostCount > cards.length * 0.15) {
+    overallRecommendations.push("Too many undercosted cards - players may find game too easy");
+  }
+  
+  if (overcostCount > cards.length * 0.15) {
+    overallRecommendations.push("Too many overcosted cards - some cards may never be played");
+  }
+  
+  return {
+    timestamp: new Date().toISOString(),
+    totalCards: cards.length,
+    balancedCards: balancedCount,
+    undercostCards: undercostCount,
+    overcostCards: overcostCount,
+    cardAnalysis,
+    recommendations: overallRecommendations
+  };
+}
+
+export function generateBalanceReport(cards: any[]): string {
+  const report = analyzeCardBalance(cards);
+  
+  let output = `# SHADOW GOVERNMENT CARD BALANCE REPORT\n`;
+  output += `Generated: ${new Date(report.timestamp).toLocaleString()}\n\n`;
+  
+  output += `## OVERVIEW\n`;
+  output += `Total Cards Analyzed: ${report.totalCards}\n`;
+  output += `Balanced Cards: ${report.balancedCards} (${Math.round((report.balancedCards/report.totalCards)*100)}%)\n`;
+  output += `Undercosted Cards: ${report.undercostCards} (${Math.round((report.undercostCards/report.totalCards)*100)}%)\n`;
+  output += `Overcosted Cards: ${report.overcostCards} (${Math.round((report.overcostCards/report.totalCards)*100)}%)\n\n`;
+  
+  output += `## RECOMMENDATIONS\n`;
+  for (const rec of report.recommendations) {
+    output += `- ${rec}\n`;
+  }
+  output += `\n`;
+  
+  // Group by balance status
+  const unbalanced = report.cardAnalysis.filter(c => c.balanceStatus !== 'balanced');
+  if (unbalanced.length > 0) {
+    output += `## CARDS NEEDING ATTENTION\n\n`;
+    
+    for (const card of unbalanced) {
+      output += `### ${card.name} (${card.type} - ${card.rarity})\n`;
+      output += `Current Cost: ${card.cost} | Effect Value: ${card.effectValue} | Status: ${card.balanceStatus.toUpperCase()}\n`;
+      output += `Efficiency Ratio: ${card.costEfficiencyRatio.toFixed(2)} effect per IP\n`;
+      for (const rec of card.recommendations) {
+        output += `- ${rec}\n`;
+      }
+      output += `\n`;
+    }
+  }
+  
+  return output;
 }

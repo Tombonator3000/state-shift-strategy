@@ -428,7 +428,7 @@ export const CARD_DATABASE: GameCard[] = [
     cost: 4
   },
 
-  // MEDIA Uncommons (12 cards)
+  // MEDIA Uncommons (12 cards) - BALANCED COSTS
   {
     id: 'media_043',
     name: 'Secret Email Dump',
@@ -437,7 +437,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: 'Truth +20',
     flavorGov: 'National security risk.',
     flavorTruth: 'Undeniable evidence!',
-    cost: 4
+    cost: 6
   },
   {
     id: 'media_044',
@@ -447,7 +447,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: 'Truth -20',
     flavorGov: 'Flood the zone with nonsense.',
     flavorTruth: 'Propaganda overload!',
-    cost: 4
+    cost: 6
   },
   {
     id: 'media_045',
@@ -457,7 +457,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: 'Truth -20',
     flavorGov: 'All networks on message.',
     flavorTruth: 'Suspiciously synchronized silence!',
-    cost: 4
+    cost: 6
   },
   {
     id: 'media_046',
@@ -550,7 +550,7 @@ export const CARD_DATABASE: GameCard[] = [
     cost: 4
   },
 
-  // MEDIA Rares (5 cards)
+  // MEDIA Rares (5 cards) - BALANCED COSTS
   {
     id: 'media_055',
     name: 'Viral Hashtag Campaign',
@@ -559,7 +559,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: 'Truth +30',
     flavorGov: 'Astroturf movement successful.',
     flavorTruth: 'Organic uprising!',
-    cost: 4
+    cost: 8
   },
   {
     id: 'media_056',
@@ -569,7 +569,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: 'Truth -30',
     flavorGov: 'Perfect copy, perfect lie.',
     flavorTruth: 'Something is off with their eyes.',
-    cost: 4
+    cost: 8
   },
   {
     id: 'media_057',
@@ -579,7 +579,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: 'Truth +30',
     flavorGov: 'Containment breach detected.',
     flavorTruth: 'The people are waking up!',
-    cost: 4
+    cost: 8
   },
   {
     id: 'media_058',
@@ -589,7 +589,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: 'Truth -30',
     flavorGov: 'All channels synchronized.',
     flavorTruth: 'They own every station!',
-    cost: 4
+    cost: 8
   },
   {
     id: 'media_059',
@@ -599,10 +599,10 @@ export const CARD_DATABASE: GameCard[] = [
     text: 'Truth +30',
     flavorGov: 'This leak is catastrophic.',
     flavorTruth: 'History repeats with digital receipts!',
-    cost: 4
+    cost: 8
   },
 
-  // MEDIA Legendary (2 cards)
+  // MEDIA Legendary (2 cards) - BALANCED COSTS
   {
     id: 'media_060',
     name: 'Moon Landing Re-Debate',
@@ -611,7 +611,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: 'Truth +50 or -50 (coin flip)',
     flavorGov: 'We staged it well enough.',
     flavorTruth: 'The shadows prove everything!',
-    cost: 4
+    cost: 12
   },
   {
     id: 'media_061',
@@ -621,7 +621,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: 'Truth +60',
     flavorGov: 'Wasn\'t supposed to happen yet!',
     flavorTruth: 'Finally, the UFO files are open!',
-    cost: 4
+    cost: 15
   },
 
   // ZONE CARDS (60 cards, cost 5)

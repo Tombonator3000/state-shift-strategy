@@ -276,38 +276,38 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                       </Badge>
                     </div>
                     
-                    {/* Scrollable middle content */}
-                    <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
-                      {/* Card art */}
-                      <div className="h-20 sm:h-24 bg-muted/20 flex items-center justify-center text-sm text-muted-foreground border rounded-lg flex-shrink-0">
-                        [CLASSIFIED IMAGE]
-                      </div>
-                      
-                      {/* Card effect */}
-                      <div>
-                        <h4 className="text-sm font-bold mb-1 text-foreground">Effect</h4>
-                        <p className="text-xs sm:text-sm font-medium text-foreground bg-card/80 p-2 rounded-lg border border-border">{card.text}</p>
-                        
-                        <div className="mt-2 text-xs text-foreground bg-accent/10 p-2 rounded-lg border border-accent/20">
-                          <span className="font-bold text-accent">Type:</span> {
-                            card.type === 'MEDIA' && faction === 'truth' ? 'Increases Truth meter.' :
-                            card.type === 'MEDIA' && faction === 'government' ? 'Decreases Truth meter.' :
-                            card.type === 'ZONE' ? 'Adds pressure to target state.' :
-                            card.type === 'ATTACK' ? 'Deals IP damage.' :
-                            card.type === 'DEFENSIVE' ? 'Reduces pressure.' :
-                            'Special strategic ability.'
-                          }
-                        </div>
-                      </div>
-                      
-                      {/* Flavor text */}
-                      <div>
-                        <h4 className="text-xs font-bold mb-1 text-muted-foreground">CLASSIFIED INTELLIGENCE</h4>
-                        <div className="text-xs italic text-foreground border-l-4 border-truth-red pl-2 bg-truth-red/10 p-2 rounded-r border border-truth-red/20">
-                          "{card.flavorTruth}"
-                        </div>
-                      </div>
-                    </div>
+      {/* Scrollable middle content - ENHANCED RESPONSIVENESS */}
+      <div className="flex-1 overflow-y-auto space-y-2 sm:space-y-3 min-h-0 pr-1">
+        {/* Card art - RESPONSIVE */}
+        <div className="h-16 sm:h-20 md:h-24 bg-muted/20 flex items-center justify-center text-xs sm:text-sm text-muted-foreground border rounded-lg flex-shrink-0">
+          [CLASSIFIED IMAGE]
+        </div>
+        
+        {/* Card effect - ENHANCED MOBILE TEXT */}
+        <div>
+          <h4 className="text-xs sm:text-sm font-bold mb-1 text-foreground">Effect</h4>
+          <p className="text-xs sm:text-sm font-medium text-foreground bg-card/80 p-2 sm:p-3 rounded-lg border border-border leading-relaxed">{card.text}</p>
+          
+          <div className="mt-2 text-xs sm:text-sm text-foreground bg-accent/10 p-2 sm:p-3 rounded-lg border border-accent/20">
+            <span className="font-bold text-accent">Type:</span> {
+              card.type === 'MEDIA' && faction === 'truth' ? 'Increases Truth meter.' :
+              card.type === 'MEDIA' && faction === 'government' ? 'Decreases Truth meter.' :
+              card.type === 'ZONE' ? 'Adds pressure to target state.' :
+              card.type === 'ATTACK' ? 'Deals IP damage.' :
+              card.type === 'DEFENSIVE' ? 'Reduces pressure.' :
+              'Special strategic ability.'
+            }
+          </div>
+        </div>
+        
+        {/* Flavor text - RESPONSIVE */}
+        <div>
+          <h4 className="text-xs font-bold mb-1 text-muted-foreground">CLASSIFIED INTELLIGENCE</h4>
+          <div className="text-xs sm:text-sm italic text-foreground border-l-4 border-truth-red pl-2 sm:pl-3 bg-truth-red/10 p-2 sm:p-3 rounded-r border border-truth-red/20 leading-relaxed">
+            "{card.flavorTruth}"
+          </div>
+        </div>
+      </div>
                     
                     {/* Deploy button - Fixed at bottom */}
                     <div className="flex-shrink-0 pt-3 border-t border-border">

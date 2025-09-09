@@ -19,7 +19,11 @@ import {
   LineChart,
   Line
 } from 'recharts';
-import { CardBalancer, type CardMetrics, type BalancingReport } from '@/data/cardBalancing';
+import { 
+  CardBalancer, 
+  CardMetrics,
+  BalancingReport 
+} from '@/data/cardBalancing';
 import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 interface BalancingDashboardProps {

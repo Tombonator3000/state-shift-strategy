@@ -433,12 +433,16 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         }
         
         .state-label {
-          font-size: 12px;
+          font-size: 14px;
           font-weight: bold;
           fill: #000000;
+          stroke: #ffffff;
+          stroke-width: 2;
+          paint-order: stroke fill;
           pointer-events: none;
           font-family: monospace;
           text-anchor: middle;
+          text-shadow: 0 0 4px rgba(255,255,255,0.8);
         }
         
         .pressure-indicator {
