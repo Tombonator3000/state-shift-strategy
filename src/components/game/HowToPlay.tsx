@@ -34,14 +34,14 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-      <div className="bg-newspaper-bg border-4 border-secret-red max-w-4xl w-full max-h-[90vh] mx-4 relative">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-card border border-border max-w-4xl w-full max-h-[90vh] mx-4 relative rounded-lg shadow-lg">
         {/* Header */}
-        <div className="p-6 border-b-2 border-secret-red bg-black text-center">
-          <h1 className="text-4xl font-bold text-secret-red font-mono mb-2">
+        <div className="p-6 border-b border-border text-center">
+          <h1 className="text-4xl font-bold text-foreground mb-2">
             HOW TO PLAY — SHADOW GOVERNMENT
           </h1>
-          <p className="text-sm text-newspaper-text">
+          <p className="text-sm text-muted-foreground">
             A satirical cat-and-mouse battle for power, truth, and very suspicious pigeons. Learn the rules quickly, play smart, and let the "newspaper" summarize the chaos after each round.
           </p>
         </div>
@@ -52,9 +52,9 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
           onScrollCapture={handleScroll}
         >
           <div className="space-y-6 pr-4 p-6">
-            <Card className="p-6 bg-card border-secret-red/20">
-              <h2 className="text-2xl font-bold text-secret-red mb-4">Quick Start</h2>
-              <ul className="space-y-2 text-sm">
+            <Card className="p-6 bg-card border-border">
+              <h2 className="text-2xl font-bold text-foreground mb-4">Quick Start</h2>
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>• Draw a card at the start of your turn (max 7 in hand). Gain +5 IP plus state income.</li>
                 <li>• Play up to 3 cards by paying IP (Influence Points). Choose targets if the card requires it.</li>
                 <li>• Press Space to end your turn. There's a 25% chance for a random event.</li>
@@ -63,20 +63,20 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
               </ul>
             </Card>
 
-            <Card className="p-6 bg-card border-secret-red/20">
-              <h2 className="text-2xl font-bold text-secret-red mb-4">1) Quick Overview</h2>
-              <p className="text-sm">
+            <Card className="p-6 bg-card border-border">
+              <h2 className="text-2xl font-bold text-foreground mb-4">1) Quick Overview</h2>
+              <p className="text-sm text-muted-foreground">
                 Shadow Government is a turn-based strategy card game for two parties: Government (Deep State) and Truth Seekers. You collect IP (Influence Points), manipulate Truth, and fight for control of the USA map. Cards give direct effects, lasting benefits, or press states toward your side. After each round, a newspaper overlay rolls in with headlines, ads, and events - which any respectable truth seeker naturally takes with a grain of salt.
               </p>
-              <p className="text-sm mt-2">
+              <p className="text-sm mt-2 text-muted-foreground">
                 Your goal is to secure dominance: either through broad state control, massive resource advantage, total truth victory, or completing a secret agenda. Meanwhile, your opponent plays by exactly the same rules. Stand firm. Assume everyone lies - except you (of course).
               </p>
             </Card>
 
-            <Card className="p-6 bg-card border-secret-red/20">
-              <h2 className="text-2xl font-bold text-secret-red mb-4">2) How to Win</h2>
-              <p className="text-sm mb-2">You win immediately when one of these happens:</p>
-              <ul className="space-y-1 text-sm ml-4">
+            <Card className="p-6 bg-card border-border">
+              <h2 className="text-2xl font-bold text-foreground mb-4">2) How to Win</h2>
+              <p className="text-sm mb-2 text-muted-foreground">You win immediately when one of these happens:</p>
+              <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
                 <li>• Control 10 states</li>
                 <li>• Reach 200 IP</li>
                 <li>• Truth Victory:
@@ -89,9 +89,9 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
               </ul>
             </Card>
 
-            <Card className="p-6 bg-card border-secret-red/20">
-              <h2 className="text-2xl font-bold text-secret-red mb-4">3) Setup and Starting Bonuses</h2>
-              <ul className="space-y-1 text-sm ml-4">
+            <Card className="p-6 bg-card border-border">
+              <h2 className="text-2xl font-bold text-foreground mb-4">3) Setup and Starting Bonuses</h2>
+              <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
                 <li>• Baseline Truth: 50%</li>
                 <li>• Choose Government: you start with +10 IP and Truth is set to 40-50% (depending on variant)</li>
                 <li>• Choose Truth: Truth starts at 60%; you get one extra card draw on first deal</li>
@@ -99,14 +99,14 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
               </ul>
             </Card>
 
-            <Card className="p-6 bg-card border-secret-red/20">
-              <h2 className="text-2xl font-bold text-secret-red mb-4">5) Turn Step-by-Step</h2>
-              <p className="text-sm font-bold mb-2">TURN LOOP: Draw → Play up to 3 cards → Effects → 25% Event → End turn → Opponent</p>
+            <Card className="p-6 bg-card border-border">
+              <h2 className="text-2xl font-bold text-foreground mb-4">5) Turn Step-by-Step</h2>
+              <p className="text-sm font-bold mb-2 text-muted-foreground">TURN LOOP: Draw → Play up to 3 cards → Effects → 25% Event → End turn → Opponent</p>
               
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-secret-red">Income</h3>
-                  <ul className="space-y-1 text-sm ml-4">
+                  <h3 className="text-lg font-semibold text-foreground">Income</h3>
+                  <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
                     <li>• Gain +5 IP base income</li>
                     <li>• State income: each state gives IP equal to its defense (2/3/4)</li>
                     <li>• Any developments (Development cards)</li>
@@ -115,16 +115,16 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-secret-red">Action</h3>
-                  <ul className="space-y-1 text-sm ml-4">
+                  <h3 className="text-lg font-semibold text-foreground">Action</h3>
+                  <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
                     <li>• Play up to 3 cards. Pay IP cost</li>
                     <li>• Target if card requires it (state/player/global). Click a state on the map for state targets</li>
                   </ul>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-secret-red">Reaction Window</h3>
-                  <ul className="space-y-1 text-sm ml-4">
+                  <h3 className="text-lg font-semibold text-foreground">Reaction Window</h3>
+                  <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
                     <li>• When you hit opponent with ATTACK/MEDIA, defender can play one DEFENSIVE/INSTANT</li>
                     <li>• Then attacker can play one INSTANT in response</li>
                     <li>• LIFO: Last card out resolves first. Stop when no one plays response</li>
@@ -133,54 +133,54 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
               </div>
             </Card>
 
-            <Card className="p-6 bg-card border-secret-red/20">
-              <h2 className="text-2xl font-bold text-secret-red mb-4">6) Card Types and Targeting</h2>
+            <Card className="p-6 bg-card border-border">
+              <h2 className="text-2xl font-bold text-foreground mb-4">6) Card Types and Targeting</h2>
               <div className="space-y-3 text-sm">
                 <div>
-                  <h3 className="font-semibold text-secret-red">MEDIA</h3>
-                  <p>Moves Truth up/down. Example: Moon Landing Hoax: +15% Truth in your favor</p>
+                  <h3 className="font-semibold text-foreground">MEDIA</h3>
+                  <p className="text-muted-foreground">Moves Truth up/down. Example: Moon Landing Hoax: +15% Truth in your favor</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-secret-red">ZONE</h3>
-                  <p>Places Press in chosen state. Example: Local Influence: +1 Press in selected state</p>
+                  <h3 className="font-semibold text-foreground">ZONE</h3>
+                  <p className="text-muted-foreground">Places Press in chosen state. Example: Local Influence: +1 Press in selected state</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-secret-red">ATTACK</h3>
-                  <p>Targets opponent's IP/cards/economy. Example: Leaked Documents: opponent −8 IP</p>
+                  <h3 className="font-semibold text-foreground">ATTACK</h3>
+                  <p className="text-muted-foreground">Targets opponent's IP/cards/economy. Example: Leaked Documents: opponent −8 IP</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-secret-red">TECH</h3>
-                  <p>Advanced tools/one-time power. California gives −2 IP on TECH</p>
+                  <h3 className="font-semibold text-foreground">TECH</h3>
+                  <p className="text-muted-foreground">Advanced tools/one-time power. California gives −2 IP on TECH</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-secret-red">DEVELOPMENT</h3>
-                  <p>Lasting bonuses (e.g., +1 IP/turn, max 3 active)</p>
+                  <h3 className="font-semibold text-foreground">DEVELOPMENT</h3>
+                  <p className="text-muted-foreground">Lasting bonuses (e.g., +1 IP/turn, max 3 active)</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-secret-red">DEFENSIVE</h3>
-                  <p>Shields and counters. Example: Bunker: immune to attacks this round</p>
+                  <h3 className="font-semibold text-foreground">DEFENSIVE</h3>
+                  <p className="text-muted-foreground">Shields and counters. Example: Bunker: immune to attacks this round</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-secret-red">INSTANT</h3>
-                  <p>Immediate response playable in reaction window</p>
+                  <h3 className="font-semibold text-foreground">INSTANT</h3>
+                  <p className="text-muted-foreground">Immediate response playable in reaction window</p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6 bg-card border-secret-red/20">
-              <h2 className="text-2xl font-bold text-secret-red mb-4">7) Map & States</h2>
+            <Card className="p-6 bg-card border-border">
+              <h2 className="text-2xl font-bold text-foreground mb-4">7) Map & States</h2>
               <div className="space-y-3 text-sm">
                 <div>
-                  <h3 className="font-semibold text-secret-red">Defense Levels</h3>
-                  <ul className="ml-4">
+                  <h3 className="font-semibold text-foreground">Defense Levels</h3>
+                  <ul className="ml-4 text-muted-foreground">
                     <li>• Most states: 2 defense</li>
                     <li>• CA/NY/TX/FL/PA/IL (etc.): 3 defense</li>
                     <li>• DC/AK/HI: 4 defense</li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-secret-red">State Bonuses</h3>
-                  <ul className="ml-4">
+                  <h3 className="font-semibold text-foreground">State Bonuses</h3>
+                  <ul className="ml-4 text-muted-foreground">
                     <li>• Texas: +2 IP per turn (economy)</li>
                     <li>• New York: −2 IP on MEDIA cards</li>
                     <li>• California: −2 IP on TECH cards</li>
@@ -188,15 +188,15 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
                   </ul>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-secret-red">Conquest</h3>
-                  <p>When your Press ≥ Defense in a state during Resolution, you take control. Both sides' Press resets to 0 there.</p>
+                  <h3 className="font-semibold text-foreground">Conquest</h3>
+                  <p className="text-muted-foreground">When your Press ≥ Defense in a state during Resolution, you take control. Both sides' Press resets to 0 there.</p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6 bg-card border-secret-red/20">
-              <h2 className="text-2xl font-bold text-secret-red mb-4">Tips</h2>
-              <ul className="space-y-1 text-sm ml-4">
+            <Card className="p-6 bg-card border-border">
+              <h2 className="text-2xl font-bold text-foreground mb-4">Tips</h2>
+              <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
                 <li>• Secure an economic base: Texas, plus 2-3 mid-states with defense 2 gives steady IP</li>
                 <li>• Synchronize MEDIA cards with D.C. for big truth swings</li>
                 <li>• Press broad border states to open multiple fronts</li>
@@ -211,7 +211,7 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
           <Button
             size="sm"
             variant="outline"
-            className={`h-8 w-8 p-0 bg-black/80 border-secret-red text-secret-red hover:bg-secret-red hover:text-black transition-all ${
+            className={`h-8 w-8 p-0 ${
               !canScrollUp ? 'opacity-30 cursor-not-allowed' : ''
             }`}
             onClick={() => scrollTo('up')}
@@ -223,7 +223,7 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
           <Button
             size="sm"
             variant="outline"
-            className={`h-8 w-8 p-0 bg-black/80 border-secret-red text-secret-red hover:bg-secret-red hover:text-black transition-all ${
+            className={`h-8 w-8 p-0 ${
               !canScrollDown ? 'opacity-30 cursor-not-allowed' : ''
             }`}
             onClick={() => scrollTo('down')}
@@ -238,7 +238,6 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
           <Button 
             onClick={onClose}
             variant="outline"
-            className="bg-black/80 border-secret-red text-secret-red hover:bg-secret-red hover:text-black"
           >
             Close
           </Button>
