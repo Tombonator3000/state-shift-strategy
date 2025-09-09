@@ -1,4 +1,5 @@
 import type { GameCard } from '@/components/game/GameHand';
+import { extensionManager } from './extensionSystem';
 
 // Complete Shadow Government Card Database (200 cards)
 export const CARD_DATABASE: GameCard[] = [
@@ -2101,6 +2102,9 @@ export const RARITY_WEIGHTS = {
 
 export const generateRandomDeck = (size: number = 40): GameCard[] => {
   const deck: GameCard[] = [];
+  
+  // Combine core cards with extension cards
+  const allCards = [...CARD_DATABASE, ...extensionManager.getAllExtensionCards()];
   
   for (let i = 0; i < size; i++) {
     const rand = Math.random();
