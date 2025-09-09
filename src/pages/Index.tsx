@@ -24,6 +24,9 @@ import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import PhaseTransition from '@/components/effects/PhaseTransition';
 import VictoryAnimation from '@/components/effects/VictoryAnimation';
 import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
+import ContextualHelp from '@/components/game/ContextualHelp';
+import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
+import MechanicsTooltip from '@/components/game/MechanicsTooltip';
 import { Maximize, Minimize } from 'lucide-react';
 import { getRandomAgenda } from '@/data/agendaDatabase';
 import toast, { Toaster } from 'react-hot-toast';
@@ -45,6 +48,7 @@ const Index = () => {
   const [showPhaseTransition, setShowPhaseTransition] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<any>(null);
   const [victoryState, setVictoryState] = useState<{ isVictory: boolean; type: 'states' | 'ip' | 'truth' | 'agenda' | null }>({ isVictory: false, type: null });
+  const [showOnboarding, setShowOnboarding] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn } = useGameState();
   const audio = useAudio();
@@ -89,6 +93,14 @@ const Index = () => {
       setVictoryState({ isVictory: true, type: 'truth' });
     }
   }, [gameState.controlledStates.length, gameState.ip, gameState.truth]);
+
+  // Check if first-time player
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('shadowgov-onboarding-complete') || localStorage.getItem('shadowgov-onboarding-skipped');
+    if (!hasSeenOnboarding && !showMenu && !showIntro) {
+      setShowOnboarding(true);
+    }
+  }, [showMenu, showIntro]);
 
   const startNewGame = (faction: 'government' | 'truth') => {
     initGame(faction);
@@ -317,18 +329,24 @@ const Index = () => {
                 <div className="font-bold">ROUND</div>
                 <div className="text-sm">{gameState.turn}</div>
               </div>
-              <div className="text-center">
-                <div className="font-bold">YOUR IP</div>
-                <div className="text-sm">{gameState.ip}</div>
-              </div>
-              <div className="text-center">
-                <div className="font-bold">TRUTH</div>
-                <div className="text-sm">{gameState.truth}%</div>
-              </div>
-              <div className="text-center">
-                <div className="font-bold">YOUR STATES</div>
-                <div className="text-sm">{gameState.controlledStates.length}</div>
-              </div>
+              <MechanicsTooltip mechanic="ip">
+                <div className="text-center">
+                  <div className="font-bold">YOUR IP</div>
+                  <div className="text-sm">{gameState.ip}</div>
+                </div>
+              </MechanicsTooltip>
+              <MechanicsTooltip mechanic="truth">
+                <div className="text-center">
+                  <div className="font-bold">TRUTH</div>
+                  <div className="text-sm">{gameState.truth}%</div>
+                </div>
+              </MechanicsTooltip>
+              <MechanicsTooltip mechanic="zone">
+                <div className="text-center">
+                  <div className="font-bold">YOUR STATES</div>
+                  <div className="text-sm">{gameState.controlledStates.length}</div>
+                </div>
+              </MechanicsTooltip>
               <div className="text-center">
                 <div className="font-bold">AI IP</div>
                 <div className="text-sm">{gameState.aiIP}</div>
@@ -600,6 +618,29 @@ const Index = () => {
         isVictory={victoryState.isVictory}
         victoryType={victoryState.type}
         onComplete={() => setVictoryState({ isVictory: false, type: null })}
+      />
+
+      {/* Contextual Help System */}
+      <ContextualHelp
+        gamePhase={gameState.phase}
+        currentPlayer={gameState.currentPlayer}
+        selectedCard={gameState.selectedCard}
+        playerIP={gameState.ip}
+        controlledStates={gameState.controlledStates.length}
+        onSuggestMove={(suggestion) => {
+          toast(suggestion, {
+            duration: 4000,
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+          });
+        }}
+      />
+
+      {/* Interactive Onboarding */}
+      <InteractiveOnboarding
+        isActive={showOnboarding}
+        onComplete={() => setShowOnboarding(false)}
+        onSkip={() => setShowOnboarding(false)}
+        gameState={gameState}
       />
 
       {/* Newspaper overlay */}
