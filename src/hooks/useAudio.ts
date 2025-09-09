@@ -41,39 +41,63 @@ export const useAudio = () => {
 
   // Initialize audio context
   useEffect(() => {
-    // Create theme music tracks
-    for (let i = 1; i <= 4; i++) {
-      const audio = new Audio(`/muzak/Theme-${i}.mp3`);
-      audio.loop = false;
-      audio.volume = config.volume * 0.3;
-      musicTracks.current.theme.push(audio);
-    }
+    // Robust audio loader that checks for existing files
+    const loadAudioTrack = async (src: string): Promise<HTMLAudioElement | null> => {
+      return new Promise((resolve) => {
+        const audio = new Audio();
+        audio.addEventListener('canplaythrough', () => {
+          audio.loop = false;
+          audio.volume = config.volume * 0.3;
+          resolve(audio);
+        }, { once: true });
+        audio.addEventListener('error', () => {
+          console.log(`Audio file not found: ${src}`);
+          resolve(null);
+        }, { once: true });
+        audio.src = src;
+      });
+    };
 
-    // Add background-music.mp3 as additional theme track
-    try {
-      const backgroundAudio = new Audio(`/audio/background-music.mp3`);
-      backgroundAudio.loop = false;
-      backgroundAudio.volume = config.volume * 0.3;
-      musicTracks.current.theme.push(backgroundAudio);
-    } catch (error) {
-      console.log('Background music file not found, using existing tracks');
-    }
+    const loadMusicTracks = async () => {
+      // Load theme music tracks (1-4)
+      const themePromises = [];
+      for (let i = 1; i <= 4; i++) {
+        themePromises.push(loadAudioTrack(`/muzak/Theme-${i}.mp3`));
+      }
+      
+      // Try both case variations for background music
+      themePromises.push(
+        loadAudioTrack(`/audio/background-music.mp3`),
+        loadAudioTrack(`/audio/Background-music.mp3`)
+      );
+      
+      const themeResults = await Promise.all(themePromises);
+      musicTracks.current.theme = themeResults.filter(audio => audio !== null) as HTMLAudioElement[];
 
-    // Create government faction music tracks
-    for (let i = 1; i <= 3; i++) {
-      const audio = new Audio(`/muzak/Government-${i}.mp3`);
-      audio.loop = false;
-      audio.volume = config.volume * 0.3;
-      musicTracks.current.government.push(audio);
-    }
+      // Load government faction music tracks (1-3)
+      const govPromises = [];
+      for (let i = 1; i <= 3; i++) {
+        govPromises.push(loadAudioTrack(`/muzak/Government-${i}.mp3`));
+      }
+      const govResults = await Promise.all(govPromises);
+      musicTracks.current.government = govResults.filter(audio => audio !== null) as HTMLAudioElement[];
 
-    // Create truth faction music tracks
-    for (let i = 1; i <= 3; i++) {
-      const audio = new Audio(`/muzak/Truth-${i}.mp3`);
-      audio.loop = false;
-      audio.volume = config.volume * 0.3;
-      musicTracks.current.truth.push(audio);
-    }
+      // Load truth faction music tracks (1-3)
+      const truthPromises = [];
+      for (let i = 1; i <= 3; i++) {
+        truthPromises.push(loadAudioTrack(`/muzak/Truth-${i}.mp3`));
+      }
+      const truthResults = await Promise.all(truthPromises);
+      musicTracks.current.truth = truthResults.filter(audio => audio !== null) as HTMLAudioElement[];
+
+      console.log('Loaded music tracks:', {
+        theme: musicTracks.current.theme.length,
+        government: musicTracks.current.government.length,
+        truth: musicTracks.current.truth.length
+      });
+    };
+
+    loadMusicTracks();
 
     // Create sound effects
     const sfxFiles = {
