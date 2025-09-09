@@ -147,27 +147,28 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               }}
               onClick={(e) => {
                 e.preventDefault();
+                // Only open examination modal, don't select for targeting
                 audio.playSFX('click');
                 if (examinedCard === card.id) {
                   setExaminedCard(null);
                 } else {
                   setExaminedCard(card.id);
-                  onSelectCard?.(card.id);
+                  // Don't auto-select the card for targeting when opening modal
                 }
               }}
               onMouseEnter={() => {
                 audio.playSFX('lightClick'); // Very quiet button sound
               }}
             >
-               {/* Enhanced loading overlay */}
-              {(isLoading || isPlaying) && (
-                <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center z-20">
-                  <Loader2 className="w-5 h-5 animate-spin text-primary mb-1" />
-                  <span className="text-xs font-mono text-primary font-bold">
-                    {isPlaying ? 'DEPLOYING' : 'PROCESSING'}
-                  </span>
-                </div>
-              )}
+               {/* Enhanced loading/targeting overlay */}
+               {(isLoading || isPlaying || isSelected) && (
+                 <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center z-20">
+                   <Loader2 className={`w-5 h-5 ${isSelected ? 'animate-pulse' : 'animate-spin'} text-primary mb-1`} />
+                   <span className="text-xs font-mono text-primary font-bold">
+                     {isPlaying ? 'DEPLOYING' : isSelected && card.type === 'ZONE' ? 'TARGETING' : 'PROCESSING'}
+                   </span>
+                 </div>
+               )}
               
               {/* Enhanced Cost Badge */}
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 border-2 transition-all duration-200 ${
@@ -204,8 +205,14 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 {card.type}
               </Badge>
 
-              {/* Selection indicator */}
-              {isSelected && (
+              {/* Selection indicator for zone targeting */}
+              {isSelected && card.type === 'ZONE' && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-warning text-warning-foreground text-xs font-bold flex items-center justify-center ring-2 ring-warning/50 animate-pulse">
+                  🎯
+                </div>
+              )}
+              {/* Regular selection indicator */}
+              {isSelected && card.type !== 'ZONE' && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-yellow-400 ring-2 ring-yellow-400/50" />
               )}
             </div>
@@ -322,19 +329,25 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                             return;
                           }
                           
-                          audio.playSFX('click');
-                          setExaminedCard(null);
-                          
-                          // Direct deployment - no extra steps
+                          // Zone card targeting - direct activation
                           if (card.type === 'ZONE') {
-                            // For zone cards, immediately select and show targeting instructions
+                            // Immediately activate targeting without closing modal
+                            audio.playSFX('click');
                             onSelectCard?.(card.id);
+                            
+                            // Close modal after setting up targeting
+                            setTimeout(() => {
+                              setExaminedCard(null);
+                            }, 100);
+                            
                             toast({
-                              title: "🎯 Zone Card Active",
-                              description: "Now click on a neutral or enemy state to deploy this zone asset!",
+                              title: "🎯 Zone Targeting Active",
+                              description: "Click on a neutral or enemy state to deploy!",
                             });
                           } else {
                             // For all other cards, deploy immediately
+                            audio.playSFX('click');
+                            setExaminedCard(null);
                             handlePlayCard(card.id);
                           }
                         }}
