@@ -20,7 +20,7 @@ const Credits = ({ onClose }: CreditsProps) => {
             </div>
             
             <div className="space-y-2 text-base">
-              <div><strong>Game Design:</strong> Definitely Not The Illuminati</div>
+              <div><strong>Game Design:</strong> Tom Husby and Definitely Not The Illuminati</div>
               <div><strong>Programming:</strong> A Very Smart AI (Trust Us)</div>
               <div><strong>Humor Consultant:</strong> Your Conspiracy Theory Uncle</div>
               <div><strong>Quality Assurance:</strong> Actual Lizard People</div>
