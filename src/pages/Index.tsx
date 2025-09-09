@@ -84,6 +84,8 @@ const Index = () => {
     if (card.type === 'ZONE' && !gameState.targetState) {
       selectCard(cardId);
       audio.playSFX('hover');
+      // Show targeting instruction
+      console.log('Zone card selected - click on a state to target it');
       return;
     }
 

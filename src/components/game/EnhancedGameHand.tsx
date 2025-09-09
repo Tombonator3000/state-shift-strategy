@@ -127,19 +127,26 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 <div className="text-xs text-muted-foreground truncate">{card.text}</div>
               </div>
               
-              {/* Type badge */}
-              <Badge 
-                variant="outline" 
-                className={`text-xs py-0 px-1 flex-shrink-0 ${
-                  card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth/20 border-truth text-truth' :
-                  card.type === 'MEDIA' && faction === 'government' ? 'bg-government/20 border-government text-government' :
-                  card.type === 'ZONE' ? 'bg-accent/20 border-accent text-accent-foreground' :
-                  card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
-                  'bg-muted/20 border-muted text-muted-foreground'
-                }`}
-              >
-                {card.type}
-              </Badge>
+              {/* Type badge and targeting info */}
+              <div className="flex flex-col gap-1 flex-shrink-0">
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs py-0 px-1 ${
+                    card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth/20 border-truth text-truth' :
+                    card.type === 'MEDIA' && faction === 'government' ? 'bg-government/20 border-government text-government' :
+                    card.type === 'ZONE' ? 'bg-accent/20 border-accent text-accent-foreground' :
+                    card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
+                    'bg-muted/20 border-muted text-muted-foreground'
+                  }`}
+                >
+                  {card.type}
+                </Badge>
+                {card.type === 'ZONE' && (
+                  <div className="text-xs text-muted-foreground">
+                    {isSelected ? 'Click state' : 'Target req.'}
+                  </div>
+                )}
+              </div>
               
               {/* Selection indicator */}
               {isSelected && (
@@ -153,19 +160,21 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   e.stopPropagation();
                   handlePlayCard(card.id);
                 }}
-                disabled={disabled || !canAfford || isPlaying}
+                disabled={disabled || !canAfford || isPlaying || (card.type === 'ZONE' && !isSelected)}
                 className={`text-xs px-2 py-1 h-6 flex-shrink-0 transition-all duration-200 ${
                   isPlaying ? 'animate-pulse bg-primary/80' : 
+                  (card.type === 'ZONE' && !isSelected) ? 'bg-muted text-muted-foreground cursor-default' :
                   canAfford ? 'hover:bg-primary hover:scale-105 hover:shadow-md group-hover:bg-primary/90' : 
                   'cursor-not-allowed'
                 }`}
+                title={card.type === 'ZONE' ? 'Select card first, then click a state on the map' : 'Deploy this card immediately'}
               >
                 {isPlaying ? (
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-current rounded-full animate-ping"></div>
                     <span>...</span>
                   </div>
-                ) : 'DEPLOY'}
+                ) : card.type === 'ZONE' && !isSelected ? 'SELECT' : 'DEPLOY'}
               </Button>
             </div>
           );
@@ -229,26 +238,35 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     [CLASSIFIED IMAGE]
                   </div>
                   
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <p className="text-sm font-medium">{card.text}</p>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <p className="text-sm font-medium">{card.text}</p>
+                        
+                        {/* Enhanced card effect description */}
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          {card.type === 'MEDIA' && faction === 'truth' && 'Increases Truth meter by exposing lies'}
+                          {card.type === 'MEDIA' && faction === 'government' && 'Decreases Truth meter through disinformation'}
+                          {card.type === 'ZONE' && 'Adds pressure to target state. High enough pressure captures the state.'}
+                          {card.type === 'ATTACK' && 'Deals direct IP damage to enemy operations'}
+                          {card.type === 'DEFENSIVE' && 'Reduces pressure on your controlled states'}
+                        </div>
+                      </div>
+                      
+                      <div className="text-center text-xs italic text-muted-foreground border-t border-border pt-4">
+                        "{card.flavorTruth}"
+                      </div>
+                      
+                      <Button
+                        onClick={() => {
+                          setExaminedCard(null);
+                          handlePlayCard(card.id);
+                        }}
+                        disabled={disabled || !canAffordCard(card)}
+                        className="w-full"
+                      >
+                        {card.type === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
+                      </Button>
                     </div>
-                    
-                    <div className="text-center text-xs italic text-muted-foreground border-t border-border pt-4">
-                      "{card.flavorTruth}"
-                    </div>
-                    
-                    <Button
-                      onClick={() => {
-                        setExaminedCard(null);
-                        handlePlayCard(card.id);
-                      }}
-                      disabled={disabled || !canAffordCard(card)}
-                      className="w-full"
-                    >
-                      DEPLOY ASSET
-                    </Button>
-                  </div>
                 </>
               );
             })()}

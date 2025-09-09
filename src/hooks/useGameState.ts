@@ -187,19 +187,95 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       const newLog = [...prev.log];
 
       // Apply card effects
+      let newStates = [...prev.states];
+      
       switch (card.type) {
         case 'MEDIA':
-          newTruth = Math.min(100, prev.truth + 10);
-          newLog.push(`${card.name} played: Truth +10% (now ${newTruth}%)`);
+          // Truth Seekers gain truth, Government loses enemy truth
+          if (prev.faction === 'truth') {
+            newTruth = Math.min(100, prev.truth + 12);
+            newLog.push(`${card.name} played: Truth +12% (now ${newTruth}%)`);
+          } else {
+            newTruth = Math.max(0, prev.truth - 10);
+            newLog.push(`${card.name} played: Truth manipulation (now ${newTruth}%)`);
+          }
           break;
         case 'ZONE':
-          newLog.push(`${card.name} played: Added pressure to target state`);
+          if (prev.targetState) {
+            const stateIndex = newStates.findIndex(s => s.abbreviation === prev.targetState);
+            if (stateIndex !== -1) {
+              const pressureGain = 2; // Base pressure from zone cards
+              newStates[stateIndex] = {
+                ...newStates[stateIndex],
+                pressure: newStates[stateIndex].pressure + pressureGain
+              };
+              
+              // Check if state is captured
+              if (newStates[stateIndex].pressure >= newStates[stateIndex].defense) {
+                newStates[stateIndex].owner = 'player';
+                newLog.push(`🚨 ${card.name} captured ${newStates[stateIndex].name}! (+${pressureGain} pressure)`);
+                
+                // Update controlled states list
+                const newControlledStates = [...prev.controlledStates];
+                if (!newControlledStates.includes(prev.targetState)) {
+                  newControlledStates.push(prev.targetState);
+                }
+                return {
+                  ...prev,
+                  hand: newHand,
+                  ip: newIP,
+                  truth: newTruth,
+                  states: newStates,
+                  controlledStates: newControlledStates,
+                  cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+                  cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
+                  targetState: null, // Clear selection after use
+                  log: [...prev.log, ...newLog]
+                };
+              } else {
+                newLog.push(`${card.name} added pressure to ${newStates[stateIndex].name} (+${pressureGain}, ${newStates[stateIndex].pressure}/${newStates[stateIndex].defense})`);
+              }
+            } else {
+              newLog.push(`${card.name} played: No valid target selected`);
+            }
+          } else {
+            newLog.push(`${card.name} played: Select a target state first!`);
+          }
           break;
         case 'ATTACK':
-          newLog.push(`${card.name} played: Attack launched`);
-          break;
+          // Attack cards damage AI IP
+          const damage = 8 + Math.floor(Math.random() * 6); // 8-13 damage
+          const newAIIP = Math.max(0, prev.aiIP - damage);
+          newLog.push(`${card.name} played: Attack dealt ${damage} IP damage to AI (${prev.aiIP} → ${newAIIP})`);
+          return {
+            ...prev,
+            hand: newHand,
+            ip: newIP,
+            truth: newTruth,
+            states: newStates,
+            aiIP: newAIIP,
+            cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+            cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
+            log: [...prev.log, ...newLog]
+          };
         case 'DEFENSIVE':
-          newLog.push(`${card.name} played: Defense prepared`);
+          // Defensive cards reduce pressure on player-controlled states
+          const playerStates = newStates.filter(s => s.owner === 'player' && s.pressure > 0);
+          if (playerStates.length > 0) {
+            const randomState = playerStates[Math.floor(Math.random() * playerStates.length)];
+            const stateIndex = newStates.findIndex(s => s.id === randomState.id);
+            const pressureReduction = 1;
+            newStates[stateIndex] = {
+              ...newStates[stateIndex],
+              pressure: Math.max(0, newStates[stateIndex].pressure - pressureReduction)
+            };
+            newLog.push(`${card.name} played: Reduced pressure on ${randomState.name} (-${pressureReduction})`);
+          } else {
+            newLog.push(`${card.name} played: Defense prepared (no active threats)`);
+          }
+          break;
+        default:
+          newLog.push(`${card.name} played: Effect activated`);
           break;
       }
 
@@ -208,9 +284,11 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         hand: newHand,
         ip: newIP,
         truth: newTruth,
+        states: newStates,
         cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
-        log: newLog
+        targetState: card.type === 'ZONE' ? prev.targetState : null, // Keep target for zone cards, clear for others
+        log: [...prev.log, ...newLog]
       };
     });
   }, []);
@@ -232,33 +310,78 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       await animateCard(cardId, card, {
         targetState: gameState.targetState,
         onResolve: async (resolveCard: any) => {
-          // Apply card effects during animation
-          setGameState(prev => {
-            let newTruth = prev.truth;
-            const newLog = [...prev.log];
+            // Apply card effects during animation
+            setGameState(prev => {
+              let newTruth = prev.truth;
+              let newStates = [...prev.states];
+              let newControlledStates = [...prev.controlledStates];
+              let newAIIP = prev.aiIP;
+              const newLog = [...prev.log];
 
-            switch (resolveCard.type) {
-              case 'MEDIA':
-                newTruth = Math.min(100, prev.truth + 10);
-                newLog.push(`${resolveCard.name} played: Truth +10% (now ${newTruth}%)`);
-                break;
-              case 'ZONE':
-                newLog.push(`${resolveCard.name} played: Added pressure to target state`);
-                break;
-              case 'ATTACK':
-                newLog.push(`${resolveCard.name} played: Attack launched`);
-                break;
-              case 'DEFENSIVE':
-                newLog.push(`${resolveCard.name} played: Defense prepared`);
-                break;
-            }
+              switch (resolveCard.type) {
+                case 'MEDIA':
+                  if (prev.faction === 'truth') {
+                    newTruth = Math.min(100, prev.truth + 12);
+                    newLog.push(`${resolveCard.name} played: Truth +12% (now ${newTruth}%)`);
+                  } else {
+                    newTruth = Math.max(0, prev.truth - 10);
+                    newLog.push(`${resolveCard.name} played: Truth manipulation (now ${newTruth}%)`);
+                  }
+                  break;
+                case 'ZONE':
+                  if (prev.targetState) {
+                    const stateIndex = newStates.findIndex(s => s.abbreviation === prev.targetState);
+                    if (stateIndex !== -1) {
+                      const pressureGain = 2;
+                      newStates[stateIndex] = {
+                        ...newStates[stateIndex],
+                        pressure: newStates[stateIndex].pressure + pressureGain
+                      };
+                      
+                      if (newStates[stateIndex].pressure >= newStates[stateIndex].defense) {
+                        newStates[stateIndex].owner = 'player';
+                        if (!newControlledStates.includes(prev.targetState)) {
+                          newControlledStates.push(prev.targetState);
+                        }
+                        newLog.push(`🚨 ${resolveCard.name} captured ${newStates[stateIndex].name}! (+${pressureGain} pressure)`);
+                      } else {
+                        newLog.push(`${resolveCard.name} added pressure to ${newStates[stateIndex].name} (+${pressureGain}, ${newStates[stateIndex].pressure}/${newStates[stateIndex].defense})`);
+                      }
+                    }
+                  } else {
+                    newLog.push(`${resolveCard.name} played: Select a target state first!`);
+                  }
+                  break;
+                case 'ATTACK':
+                  const damage = 8 + Math.floor(Math.random() * 6);
+                  newAIIP = Math.max(0, prev.aiIP - damage);
+                  newLog.push(`${resolveCard.name} played: Attack dealt ${damage} IP damage to AI`);
+                  break;
+                case 'DEFENSIVE':
+                  const playerStates = newStates.filter(s => s.owner === 'player' && s.pressure > 0);
+                  if (playerStates.length > 0) {
+                    const randomState = playerStates[Math.floor(Math.random() * playerStates.length)];
+                    const stateIndex = newStates.findIndex(s => s.id === randomState.id);
+                    newStates[stateIndex] = {
+                      ...newStates[stateIndex],
+                      pressure: Math.max(0, newStates[stateIndex].pressure - 1)
+                    };
+                    newLog.push(`${resolveCard.name} played: Reduced pressure on ${randomState.name}`);
+                  } else {
+                    newLog.push(`${resolveCard.name} played: Defense prepared`);
+                  }
+                  break;
+              }
 
-            return {
-              ...prev,
-              truth: newTruth,
-              log: newLog
-            };
-          });
+              return {
+                ...prev,
+                truth: newTruth,
+                states: newStates,
+                controlledStates: newControlledStates,
+                aiIP: newAIIP,
+                log: newLog
+              };
+            });
         }
       });
 
