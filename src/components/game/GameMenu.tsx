@@ -2,6 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import Credits from './Credits';
+import HowToPlay from './HowToPlay';
 
 interface GameMenuProps {
   onStartGame: (faction: 'government' | 'truth') => void;
@@ -12,6 +13,7 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
   const [redactedText, setRedactedText] = useState('SHADOW GOVERNMENT');
   const [showCredits, setShowCredits] = useState(false);
   const [showFactionSelect, setShowFactionSelect] = useState(false);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [subtitleText, setSubtitleText] = useState('ULTIMATE HUMOR EDITION');
   const [quoteText, setQuoteText] = useState('"Where conspiracy theories go to become policy"');
   const [descriptionText, setDescriptionText] = useState('Control the narrative. Manipulate the truth.');
@@ -113,6 +115,10 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
 
   if (showCredits) {
     return <Credits onClose={() => setShowCredits(false)} />;
+  }
+
+  if (showHowToPlay) {
+    return <HowToPlay onBack={() => setShowHowToPlay(false)} />;
   }
 
   if (showFactionSelect) {
@@ -308,8 +314,8 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
             </Button>
             <Button 
               variant="outline" 
-              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
-              disabled
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+              onClick={() => setShowHowToPlay(true)}
             >
               HOW TO PLAY
             </Button>

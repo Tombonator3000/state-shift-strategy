@@ -92,7 +92,7 @@ export const useGameState = () => {
     secretAgenda: {
       id: 'agenda_1',
       description: 'Control 3 coastal states',
-      progress: 2,
+      progress: 0,
       target: 3,
       completed: false,
       revealed: false

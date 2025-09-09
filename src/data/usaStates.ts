@@ -99,21 +99,11 @@ export const getTotalIPFromStates = (controlledStates: string[]): number => {
   }, 0);
 };
 
-// Initial game state - some states start neutral, player gets a few, AI gets some key ones
+// Initial game state - all states start neutral, no pre-controlled states
 export const getInitialStateControl = (playerFaction: 'government' | 'truth') => {
-  const playerStates = playerFaction === 'truth' 
-    ? ['CA', 'OR', 'FL', 'NV'] // Truth Seekers start with conspiracy-friendly states
-    : ['DC', 'VA', 'MD', 'TX']; // Government starts with power centers
-    
-  const aiStates = playerFaction === 'truth'
-    ? ['DC', 'VA', 'NY', 'IL'] // AI government controls establishment
-    : ['CA', 'WA', 'MA', 'CO']; // AI truth seekers in liberal states
-    
   return {
-    player: playerStates,
-    ai: aiStates,
-    neutral: USA_STATES.map(s => s.abbreviation).filter(
-      abbr => !playerStates.includes(abbr) && !aiStates.includes(abbr)
-    )
+    player: [], // No states controlled at start
+    ai: [],     // No states controlled at start
+    neutral: USA_STATES.map(s => s.abbreviation) // All states start neutral
   };
 };
