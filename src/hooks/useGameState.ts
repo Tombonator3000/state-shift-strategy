@@ -210,7 +210,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
               s.name === prev.targetState
             );
             if (stateIndex !== -1) {
-              const pressureGain = 2; // Base pressure from zone cards
+              // Parse pressure value from card text
+              const pressureMatch = card.text.match(/\+(\d+) Pressure/);
+              const pressureGain = pressureMatch ? parseInt(pressureMatch[1]) : 1;
               newStates[stateIndex] = {
                 ...newStates[stateIndex],
                 pressure: newStates[stateIndex].pressure + pressureGain
@@ -348,7 +350,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
                   if (prev.targetState) {
                     const stateIndex = newStates.findIndex(s => s.abbreviation === prev.targetState);
                     if (stateIndex !== -1) {
-                      const pressureGain = 2;
+                      // Parse pressure value from card text
+                      const pressureMatch = resolveCard.text.match(/\+(\d+) Pressure/);
+                      const pressureGain = pressureMatch ? parseInt(pressureMatch[1]) : 1;
                       newStates[stateIndex] = {
                         ...newStates[stateIndex],
                         pressure: newStates[stateIndex].pressure + pressureGain
@@ -620,12 +624,16 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           if (targetState) {
             const stateIndex = newStates.findIndex(s => s.abbreviation === targetState);
             if (stateIndex !== -1) {
+              // Parse pressure value from card text
+              const pressureMatch = card.text.match(/\+(\d+) Pressure/);
+              const pressureGain = pressureMatch ? parseInt(pressureMatch[1]) : 1;
+              
               newStates[stateIndex] = {
                 ...newStates[stateIndex],
-                pressure: newStates[stateIndex].pressure + 2,
-                owner: newStates[stateIndex].pressure + 2 >= newStates[stateIndex].defense ? 'ai' : newStates[stateIndex].owner
+                pressure: newStates[stateIndex].pressure + pressureGain,
+                owner: newStates[stateIndex].pressure + pressureGain >= newStates[stateIndex].defense ? 'ai' : newStates[stateIndex].owner
               };
-              newLog.push(`AI played ${card.name} on ${targetState}: Added pressure (+2)`);
+              newLog.push(`AI played ${card.name} on ${targetState}: Added pressure (+${pressureGain})`);
               if (newStates[stateIndex].owner === 'ai') {
                 newLog.push(`🚨 AI captured ${newStates[stateIndex].name}!`);
               }
