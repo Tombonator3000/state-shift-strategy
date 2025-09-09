@@ -17,7 +17,7 @@ interface ParticleSystemProps {
   active: boolean;
   x: number;
   y: number;
-  type: 'deploy' | 'capture' | 'counter' | 'victory';
+  type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain';
   onComplete?: () => void;
 }
 
@@ -47,7 +47,7 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
     canvas.height = window.innerHeight;
 
     // Initialize particles based on effect type
-    const particleCount = type === 'victory' ? 50 : type === 'deploy' ? 30 : 20;
+    const particleCount = getParticleCount(type);
     const particles: Particle[] = [];
     
     for (let i = 0; i < particleCount; i++) {
@@ -87,40 +87,99 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
     };
   }, [active, x, y, type, onComplete]);
 
+  const getParticleCount = (type: string): number => {
+    switch (type) {
+      case 'victory': case 'bigwin': return 60;
+      case 'synergy': return 40;
+      case 'chain': return 35;
+      case 'deploy': case 'stateloss': return 30;
+      case 'capture': case 'counter': return 20;
+      default: return 20;
+    }
+  };
+
   const createParticle = (id: number, centerX: number, centerY: number, effectType: string): Particle => {
     const angle = (Math.PI * 2 * id) / 20 + Math.random() * 0.5;
-    const speed = effectType === 'victory' ? 3 + Math.random() * 4 : 2 + Math.random() * 3;
+    const speed = getParticleSpeed(effectType);
     
-    let color: string;
-    switch (effectType) {
-      case 'deploy':
-        color = `hsl(${142 + Math.random() * 20}, 76%, ${36 + Math.random() * 20}%)`; // Success green variants
-        break;
-      case 'capture':
-        color = `hsl(${0 + Math.random() * 30}, 85%, ${55 + Math.random() * 15}%)`; // Red variants
-        break;
-      case 'counter':
-        color = `hsl(${45 + Math.random() * 20}, 93%, ${58 + Math.random() * 15}%)`; // Warning orange variants
-        break;
-      case 'victory':
-        color = `hsl(${25 + Math.random() * 40}, 95%, ${53 + Math.random() * 20}%)`; // Gold variants
-        break;
-      default:
-        color = `hsl(${Math.random() * 360}, 70%, 60%)`;
-    }
+    const color = getParticleColor(effectType);
+
+    const spread = getParticleSpread(effectType);
+    const lifespan = getParticleLifespan(effectType);
 
     return {
       id,
-      x: centerX + (Math.random() - 0.5) * 50,
-      y: centerY + (Math.random() - 0.5) * 50,
+      x: centerX + (Math.random() - 0.5) * spread,
+      y: centerY + (Math.random() - 0.5) * spread,
       vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - Math.random() * 2, // Slight upward bias
-      life: 120 + Math.random() * 60,
-      maxLife: 120 + Math.random() * 60,
-      size: effectType === 'victory' ? 4 + Math.random() * 4 : 2 + Math.random() * 3,
+      vy: Math.sin(angle) * speed - Math.random() * 2,
+      life: lifespan,
+      maxLife: lifespan,
+      size: getParticleSize(effectType),
       color,
       opacity: 1
     };
+  };
+
+  const getParticleSpeed = (type: string): number => {
+    switch (type) {
+      case 'victory': case 'bigwin': return 4 + Math.random() * 5;
+      case 'synergy': return 3 + Math.random() * 4;
+      case 'chain': return 2.5 + Math.random() * 3;
+      case 'stateloss': return 1.5 + Math.random() * 2;
+      default: return 2 + Math.random() * 3;
+    }
+  };
+
+  const getParticleColor = (type: string): string => {
+    switch (type) {
+      case 'deploy':
+        return `hsl(${142 + Math.random() * 20}, 76%, ${36 + Math.random() * 20}%)`;
+      case 'capture':
+        return `hsl(${0 + Math.random() * 30}, 85%, ${55 + Math.random() * 15}%)`;
+      case 'counter':
+        return `hsl(${45 + Math.random() * 20}, 93%, ${58 + Math.random() * 15}%)`;
+      case 'victory': case 'bigwin':
+        return `hsl(${25 + Math.random() * 40}, 95%, ${53 + Math.random() * 20}%)`;
+      case 'synergy':
+        return `hsl(${270 + Math.random() * 30}, 85%, ${65 + Math.random() * 15}%)`;
+      case 'chain':
+        return `hsl(${180 + Math.random() * 40}, 90%, ${50 + Math.random() * 20}%)`;
+      case 'stateloss':
+        return `hsl(${0 + Math.random() * 20}, 95%, ${40 + Math.random() * 15}%)`;
+      default:
+        return `hsl(${Math.random() * 360}, 70%, 60%)`;
+    }
+  };
+
+  const getParticleSpread = (type: string): number => {
+    switch (type) {
+      case 'victory': case 'bigwin': return 80;
+      case 'synergy': return 70;
+      case 'chain': return 60;
+      default: return 50;
+    }
+  };
+
+  const getParticleLifespan = (type: string): number => {
+    const base = 120 + Math.random() * 60;
+    switch (type) {
+      case 'victory': case 'bigwin': return base * 1.5;
+      case 'synergy': return base * 1.3;
+      case 'chain': return base * 1.1;
+      case 'stateloss': return base * 0.8;
+      default: return base;
+    }
+  };
+
+  const getParticleSize = (type: string): number => {
+    switch (type) {
+      case 'victory': case 'bigwin': return 5 + Math.random() * 5;
+      case 'synergy': return 4 + Math.random() * 4;
+      case 'chain': return 3 + Math.random() * 3;
+      case 'stateloss': return 2 + Math.random() * 2;
+      default: return 2 + Math.random() * 3;
+    }
   };
 
   const updateParticle = (particle: Particle) => {

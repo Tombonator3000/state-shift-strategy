@@ -138,6 +138,37 @@ export default {
         "conspiracy-float": {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-10px)" }
+        },
+        "synergy-pulse": {
+          "0%, 100%": { 
+            transform: "scale(1)",
+            filter: "brightness(1) saturate(1)"
+          },
+          "50%": { 
+            transform: "scale(1.05)",
+            filter: "brightness(1.2) saturate(1.3)"
+          }
+        },
+        "combo-burst": {
+          "0%": { 
+            transform: "scale(0.5) rotate(0deg)",
+            opacity: "0"
+          },
+          "50%": { 
+            transform: "scale(1.2) rotate(180deg)",
+            opacity: "1"
+          },
+          "100%": { 
+            transform: "scale(1) rotate(360deg)",
+            opacity: "1"
+          }
+        },
+        "chain-reaction": {
+          "0%": { transform: "translateX(-10px)", opacity: "0" },
+          "25%": { transform: "translateX(10px)", opacity: "0.7" },
+          "50%": { transform: "translateX(-5px)", opacity: "1" },
+          "75%": { transform: "translateX(5px)", opacity: "0.7" },
+          "100%": { transform: "translateX(0px)", opacity: "0" }
         }
       },
       animation: {
@@ -148,7 +179,10 @@ export default {
         "card-deal": "card-deal 0.6s ease-out",
         "card-play": "card-play 0.8s ease-in",
         "truth-pulse": "truth-pulse 2s ease-in-out infinite",
-        "conspiracy-float": "conspiracy-float 3s ease-in-out infinite"
+        "conspiracy-float": "conspiracy-float 3s ease-in-out infinite",
+        "synergy-pulse": "synergy-pulse 1.5s ease-in-out infinite",
+        "combo-burst": "combo-burst 0.8s ease-out",
+        "chain-reaction": "chain-reaction 1.2s ease-in-out"
       },
     },
   },

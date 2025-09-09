@@ -32,6 +32,8 @@ import CardCollection from '@/components/game/CardCollection';
 import { Maximize, Minimize } from 'lucide-react';
 import { getRandomAgenda } from '@/data/agendaDatabase';
 import { useCardCollection } from '@/hooks/useCardCollection';
+import { useSynergyDetection } from '@/hooks/useSynergyDetection';
+import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
@@ -46,7 +48,12 @@ const Index = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   // Visual effects state
-  const [floatingNumbers, setFloatingNumbers] = useState<{ value: number; type: 'ip' | 'truth' | 'damage' } | null>(null);
+  const [floatingNumbers, setFloatingNumbers] = useState<{ 
+    value: number; 
+    type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain';
+    x?: number;
+    y?: number;
+  } | null>(null);
   const [previousPhase, setPreviousPhase] = useState('');
   const [showPhaseTransition, setShowPhaseTransition] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<any>(null);
@@ -59,6 +66,7 @@ const Index = () => {
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
+  const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
 
   // Handle AI turns
   useEffect(() => {
@@ -99,6 +107,45 @@ const Index = () => {
       setVictoryState({ isVictory: true, type: 'truth' });
     }
   }, [gameState.controlledStates.length, gameState.ip, gameState.truth]);
+
+  // Enhanced synergy detection with coordinated visual effects
+  useEffect(() => {
+    if (gameState.controlledStates.length > 0) {
+      const newCombinations = checkSynergies(
+        gameState.controlledStates,
+        (combo, position) => {
+          // Synergy activation callback
+          console.log(`🔗 New synergy activated: ${combo.name} (+${combo.bonusIP} IP)`);
+          
+          // Play audio feedback
+          audio?.playSFX?.('state-capture');
+          
+          // Toast notification for synergy activation
+          toast.success(`🔗 Synergy Activated: ${combo.name} (+${combo.bonusIP} IP)`, {
+            duration: 3000,
+            position: 'top-center'
+          });
+        },
+        (type, x, y) => {
+          // Particle effect callback
+          VisualEffectsCoordinator.triggerParticleEffect(type as any, { x, y });
+        },
+        (value, type, x, y) => {
+          // Floating number callback
+          if (x && y) {
+            VisualEffectsCoordinator.showFloatingNumber(value, type as any, { x, y });
+          }
+        }
+      );
+
+      // Log active combinations for debugging
+      const activeCombos = getActiveCombinations();
+      if (activeCombos.length > 0) {
+        console.log('🎯 Active synergies:', activeCombos.map(c => `${c.name} (+${c.bonusIP})`).join(', '));
+        console.log('💰 Total bonus IP:', getTotalBonusIP());
+      }
+    }
+  }, [gameState.controlledStates, checkSynergies, getActiveCombinations, getTotalBonusIP, audio]);
 
   // Track cards being drawn to hand for collection discovery
   useEffect(() => {
@@ -213,6 +260,23 @@ const Index = () => {
       
       // Track card in collection
       recordCardPlay(cardId);
+      
+      // Enhanced visual effects for successful card play
+      const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+      if (cardElement) {
+        const position = VisualEffectsCoordinator.getElementCenter(cardElement);
+        
+        // Trigger deploy particle effect
+        VisualEffectsCoordinator.triggerParticleEffect('deploy', position);
+        
+        // Show floating number for IP cost
+        if (card.cost > 0) {
+          VisualEffectsCoordinator.showFloatingNumber(-card.cost, 'ip', {
+            x: position.x - 30,
+            y: position.y - 20
+          });
+        }
+      }
       
       toast.success(`✅ ${card.name} deployed successfully!`, {
         duration: 2000,
@@ -664,11 +728,8 @@ const Index = () => {
         }}
       />
 
-      {/* Card Animation Layer */}
+      {/* Card Animation Layer with integrated effects */}
       <CardAnimationLayer />
-
-      {/* Visual Effects */}
-      <FloatingNumbers trigger={floatingNumbers} />
       
       {showPhaseTransition && (
         <PhaseTransition 
