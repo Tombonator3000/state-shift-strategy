@@ -3,6 +3,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import USAMap from '@/components/game/USAMap';
 import GameHand from '@/components/game/GameHand';
+import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
+import EnhancedGameHand from '@/components/game/EnhancedGameHand';
 import TruthMeter from '@/components/game/TruthMeter';
 import Newspaper from '@/components/game/Newspaper';
 import GameMenu from '@/components/game/GameMenu';
@@ -15,6 +17,7 @@ const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
   const [selectedZoneCard, setSelectedZoneCard] = useState<string | null>(null);
+  const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const { gameState, initGame, playCard, endTurn, closeNewspaper } = useGameState();
   const audio = useAudio();
 
@@ -46,14 +49,27 @@ const Index = () => {
     }
   };
 
+  const handleSelectCard = (cardId: string) => {
+    setSelectedCard(selectedCard === cardId ? null : cardId);
+    audio.playSFX('hover');
+  };
+
   const handlePlayCard = (cardId: string) => {
     const card = gameState.hand.find(c => c.id === cardId);
-    if (card?.type === 'ZONE') {
-      handleZoneCardSelect(cardId);
-    } else {
-      playCard(cardId);
+    if (!card) return;
+
+    // If it's a ZONE card, set it as selected for targeting
+    if (card.type === 'ZONE') {
+      setSelectedZoneCard(cardId);
+      setSelectedCard(null);
       audio.playSFX('cardPlay');
+      return;
     }
+
+    // Play the card
+    playCard(cardId);
+    setSelectedCard(null);
+    audio.playSFX('cardPlay');
   };
 
   const handleEndTurn = () => {
@@ -179,9 +195,10 @@ const Index = () => {
             </div>
           )}
           <div className="h-full">
-            <USAMap 
-              states={gameState.states}
+            <EnhancedUSAMap 
+              states={gameState.states} 
               onStateClick={handleStateClick}
+              selectedZoneCard={selectedZoneCard}
             />
           </div>
         </div>
@@ -213,10 +230,13 @@ const Index = () => {
           </Card>
 
           {/* Game Hand */}
-          <GameHand 
+          <EnhancedGameHand 
             cards={gameState.hand}
             onPlayCard={handlePlayCard}
-            disabled={gameState.phase !== 'action'}
+            onSelectCard={handleSelectCard}
+            selectedCard={selectedCard}
+            disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action'}
+            currentIP={gameState.ip}
           />
 
           {/* Controls */}
