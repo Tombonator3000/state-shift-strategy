@@ -19,10 +19,10 @@ export const USA_STATES: StateData[] = [
   
   // High Value States
   { id: '17', name: 'Illinois', abbreviation: 'IL', baseIP: 5, defense: 3, specialBonus: 'Transport Hub', bonusValue: 2, population: 'high' },
-  { id: '42', name: 'Pennsylvania', abbreviation: 'PA', baseIP: 5, defense: 3, population: 'high' },
-  { id: '39', name: 'Ohio', abbreviation: 'OH', baseIP: 4, defense: 3, population: 'high' },
-  { id: '13', name: 'Georgia', abbreviation: 'GA', baseIP: 4, defense: 3, population: 'high' },
-  { id: '37', name: 'North Carolina', abbreviation: 'NC', baseIP: 4, defense: 3, population: 'high' },
+  { id: '42', name: 'Pennsylvania', abbreviation: 'PA', baseIP: 5, defense: 3, specialBonus: 'Steel Industry Legacy', bonusValue: 2, population: 'high' },
+  { id: '39', name: 'Ohio', abbreviation: 'OH', baseIP: 4, defense: 3, specialBonus: 'Industrial Midwest', bonusValue: 1, population: 'high' },
+  { id: '13', name: 'Georgia', abbreviation: 'GA', baseIP: 4, defense: 3, specialBonus: 'CDC Headquarters', bonusValue: 2, population: 'high' },
+  { id: '37', name: 'North Carolina', abbreviation: 'NC', baseIP: 4, defense: 3, specialBonus: 'Research Triangle', bonusValue: 2, population: 'high' },
   { id: '26', name: 'Michigan', abbreviation: 'MI', baseIP: 4, defense: 3, specialBonus: 'Auto Industry', bonusValue: 2, population: 'high' },
   
   // Strategic States
@@ -35,47 +35,47 @@ export const USA_STATES: StateData[] = [
   { id: '51', name: 'Virginia', abbreviation: 'VA', baseIP: 4, defense: 3, specialBonus: 'CIA Headquarters', bonusValue: 3, population: 'high' },
   { id: '24', name: 'Maryland', abbreviation: 'MD', baseIP: 3, defense: 3, specialBonus: 'NSA Access', bonusValue: 2, population: 'medium' },
   { id: '22', name: 'Louisiana', abbreviation: 'LA', baseIP: 3, defense: 2, specialBonus: 'Voodoo Protection', bonusValue: 1, population: 'medium' },
-  { id: '47', name: 'Tennessee', abbreviation: 'TN', baseIP: 3, defense: 2, population: 'medium' },
-  { id: '01', name: 'Alabama', abbreviation: 'AL', baseIP: 3, defense: 2, population: 'medium' },
-  { id: '21', name: 'Kentucky', abbreviation: 'KY', baseIP: 3, defense: 2, population: 'medium' },
-  { id: '45', name: 'South Carolina', abbreviation: 'SC', baseIP: 3, defense: 2, population: 'medium' },
-  { id: '05', name: 'Arkansas', abbreviation: 'AR', baseIP: 2, defense: 2, population: 'medium' },
-  { id: '28', name: 'Mississippi', abbreviation: 'MS', baseIP: 2, defense: 2, population: 'medium' },
+  { id: '47', name: 'Tennessee', abbreviation: 'TN', baseIP: 3, defense: 2, specialBonus: 'Music Industry', bonusValue: 1, population: 'medium' },
+  { id: '01', name: 'Alabama', abbreviation: 'AL', baseIP: 3, defense: 2, specialBonus: 'Space Program', bonusValue: 2, population: 'medium' },
+  { id: '21', name: 'Kentucky', abbreviation: 'KY', baseIP: 3, defense: 2, specialBonus: 'Coal Reserves', bonusValue: 1, population: 'medium' },
+  { id: '45', name: 'South Carolina', abbreviation: 'SC', baseIP: 3, defense: 2, specialBonus: 'Military Bases', bonusValue: 2, population: 'medium' },
+  { id: '05', name: 'Arkansas', abbreviation: 'AR', baseIP: 2, defense: 2, specialBonus: 'Walmart Empire', bonusValue: 1, population: 'medium' },
+  { id: '28', name: 'Mississippi', abbreviation: 'MS', baseIP: 2, defense: 2, specialBonus: 'River Control', bonusValue: 1, population: 'medium' },
   { id: '04', name: 'Arizona', abbreviation: 'AZ', baseIP: 3, defense: 2, specialBonus: 'Desert Bases', bonusValue: 1, population: 'medium' },
   { id: '49', name: 'Utah', abbreviation: 'UT', baseIP: 2, defense: 2, specialBonus: 'NSA Data Center', bonusValue: 2, population: 'medium' },
   { id: '35', name: 'New Mexico', abbreviation: 'NM', baseIP: 2, defense: 2, specialBonus: 'Alien Activity', bonusValue: 2, population: 'low' },
   
   // Swing States
-  { id: '55', name: 'Wisconsin', abbreviation: 'WI', baseIP: 3, defense: 2, population: 'medium' },
-  { id: '27', name: 'Minnesota', abbreviation: 'MN', baseIP: 3, defense: 2, population: 'medium' },
-  { id: '29', name: 'Missouri', abbreviation: 'MO', baseIP: 3, defense: 2, population: 'medium' },
-  { id: '18', name: 'Indiana', abbreviation: 'IN', baseIP: 3, defense: 2, population: 'medium' },
-  { id: '09', name: 'Connecticut', abbreviation: 'CT', baseIP: 3, defense: 3, population: 'medium' },
+  { id: '55', name: 'Wisconsin', abbreviation: 'WI', baseIP: 3, defense: 2, specialBonus: 'Dairy Industry', bonusValue: 1, population: 'medium' },
+  { id: '27', name: 'Minnesota', abbreviation: 'MN', baseIP: 3, defense: 2, specialBonus: 'Mining Wealth', bonusValue: 2, population: 'medium' },
+  { id: '29', name: 'Missouri', abbreviation: 'MO', baseIP: 3, defense: 2, specialBonus: 'Gateway Control', bonusValue: 1, population: 'medium' },
+  { id: '18', name: 'Indiana', abbreviation: 'IN', baseIP: 3, defense: 2, specialBonus: 'Crossroads', bonusValue: 1, population: 'medium' },
+  { id: '09', name: 'Connecticut', abbreviation: 'CT', baseIP: 3, defense: 3, specialBonus: 'Insurance Capital', bonusValue: 2, population: 'medium' },
   { id: '41', name: 'Oregon', abbreviation: 'OR', baseIP: 3, defense: 2, specialBonus: 'Conspiracy Theorists', bonusValue: 1, population: 'medium' },
   
   // Low Population States
   { id: '02', name: 'Alaska', abbreviation: 'AK', baseIP: 1, defense: 1, specialBonus: 'Oil Reserves', bonusValue: 3, population: 'low' },
   { id: '15', name: 'Hawaii', abbreviation: 'HI', baseIP: 1, defense: 1, specialBonus: 'Pacific Base', bonusValue: 2, population: 'low' },
   { id: '56', name: 'Wyoming', abbreviation: 'WY', baseIP: 1, defense: 1, specialBonus: 'Nuclear Silos', bonusValue: 2, population: 'low' },
-  { id: '50', name: 'Vermont', abbreviation: 'VT', baseIP: 1, defense: 1, population: 'low' },
+  { id: '50', name: 'Vermont', abbreviation: 'VT', baseIP: 1, defense: 1, specialBonus: 'Maple Syrup Monopoly', bonusValue: 1, population: 'low' },
   { id: '10', name: 'Delaware', abbreviation: 'DE', baseIP: 1, defense: 2, specialBonus: 'Corporate Haven', bonusValue: 2, population: 'low' },
-  { id: '33', name: 'New Hampshire', abbreviation: 'NH', baseIP: 2, defense: 1, population: 'low' },
-  { id: '44', name: 'Rhode Island', abbreviation: 'RI', baseIP: 1, defense: 1, population: 'low' },
-  { id: '23', name: 'Maine', abbreviation: 'ME', baseIP: 2, defense: 1, population: 'low' },
+  { id: '33', name: 'New Hampshire', abbreviation: 'NH', baseIP: 2, defense: 1, specialBonus: 'First Primary', bonusValue: 1, population: 'low' },
+  { id: '44', name: 'Rhode Island', abbreviation: 'RI', baseIP: 1, defense: 1, specialBonus: 'Organized Crime', bonusValue: 1, population: 'low' },
+  { id: '23', name: 'Maine', abbreviation: 'ME', baseIP: 2, defense: 1, specialBonus: 'Lobster Cartel', bonusValue: 1, population: 'low' },
   { id: '25', name: 'Massachusetts', abbreviation: 'MA', baseIP: 4, defense: 3, specialBonus: 'Elite Universities', bonusValue: 2, population: 'high' },
-  { id: '34', name: 'New Jersey', abbreviation: 'NJ', baseIP: 4, defense: 3, population: 'high' },
+  { id: '34', name: 'New Jersey', abbreviation: 'NJ', baseIP: 4, defense: 3, specialBonus: 'Pharmaceutical Giants', bonusValue: 2, population: 'high' },
   
   // Plains States
-  { id: '31', name: 'Nebraska', abbreviation: 'NE', baseIP: 2, defense: 1, population: 'low' },
-  { id: '20', name: 'Kansas', abbreviation: 'KS', baseIP: 2, defense: 1, population: 'low' },
+  { id: '31', name: 'Nebraska', abbreviation: 'NE', baseIP: 2, defense: 1, specialBonus: 'Corn Empire', bonusValue: 1, population: 'low' },
+  { id: '20', name: 'Kansas', abbreviation: 'KS', baseIP: 2, defense: 1, specialBonus: 'Wheat Fields', bonusValue: 1, population: 'low' },
   { id: '38', name: 'North Dakota', abbreviation: 'ND', baseIP: 1, defense: 1, specialBonus: 'Oil Boom', bonusValue: 2, population: 'low' },
-  { id: '46', name: 'South Dakota', abbreviation: 'SD', baseIP: 1, defense: 1, population: 'low' },
+  { id: '46', name: 'South Dakota', abbreviation: 'SD', baseIP: 1, defense: 1, specialBonus: 'Gold Mines', bonusValue: 2, population: 'low' },
   { id: '19', name: 'Iowa', abbreviation: 'IA', baseIP: 2, defense: 1, specialBonus: 'Alien Corn Circles', bonusValue: 1, population: 'low' },
   { id: '40', name: 'Oklahoma', abbreviation: 'OK', baseIP: 2, defense: 2, specialBonus: 'Oil Wells', bonusValue: 1, population: 'medium' },
   
   // Mountain States  
   { id: '30', name: 'Montana', abbreviation: 'MT', baseIP: 1, defense: 1, specialBonus: 'Militia Groups', bonusValue: 1, population: 'low' },
-  { id: '16', name: 'Idaho', abbreviation: 'ID', baseIP: 1, defense: 1, population: 'low' },
+  { id: '16', name: 'Idaho', abbreviation: 'ID', baseIP: 1, defense: 1, specialBonus: 'Potato Cartel', bonusValue: 1, population: 'low' },
   { id: '54', name: 'West Virginia', abbreviation: 'WV', baseIP: 2, defense: 1, specialBonus: 'Underground Bunkers', bonusValue: 1, population: 'low' }
 ];
 

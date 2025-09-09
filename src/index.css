@@ -65,6 +65,18 @@ All colors MUST be HSL.
     --newspaper-text: 0 0% 10%;
     --newspaper-header: 0 0% 85%;
     --newspaper-border: 0 0% 60%;
+    
+    /* Enhanced animation colors */
+    --warning: 45 93% 58%;
+    --warning-foreground: 0 0% 9%;
+    --success: 142 76% 36%;
+    --success-foreground: 355 7% 97%;
+    
+    /* Card rarity colors */
+    --rarity-common: 0 0% 60%;
+    --rarity-uncommon: 142 76% 36%;
+    --rarity-rare: 221 83% 53%;
+    --rarity-legendary: 25 95% 53%;
   }
   .dark {
     --background: 222.2 84% 4.9%;
@@ -114,6 +126,18 @@ All colors MUST be HSL.
     --newspaper-text: 0 0% 90%;
     --newspaper-header: 0 0% 20%;
     --newspaper-border: 0 0% 40%;
+    
+    /* Enhanced dark animation colors */
+    --warning: 45 93% 58%;
+    --warning-foreground: 0 0% 9%;
+    --success: 142 84% 44%;
+    --success-foreground: 355 7% 97%;
+    
+    /* Dark card rarity colors */
+    --rarity-common: 0 0% 70%;
+    --rarity-uncommon: 142 84% 44%;
+    --rarity-rare: 221 83% 63%;
+    --rarity-legendary: 25 95% 63%;
   }
 }
 
@@ -128,7 +152,7 @@ All colors MUST be HSL.
 }
 
 @layer components {
-  /* Card Animation System */
+  /* Enhanced Card Animation System */
   .play-card-clone {
     position: absolute;
     will-change: transform, opacity, filter;
@@ -159,12 +183,135 @@ All colors MUST be HSL.
     animation: pulse 1s ease-in-out infinite;
   }
 
+  /* Enhanced Card Hover Effects */
+  .card-hover-glow {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-hover-glow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  .card-hover-glow:hover::before {
+    left: 100%;
+  }
+
+  /* Rarity Glows */
+  .rarity-common {
+    box-shadow: 0 0 10px hsl(var(--rarity-common) / 0.3);
+  }
+
+  .rarity-uncommon {
+    box-shadow: 0 0 15px hsl(var(--rarity-uncommon) / 0.4);
+  }
+
+  .rarity-rare {
+    box-shadow: 0 0 20px hsl(var(--rarity-rare) / 0.5);
+  }
+
+  .rarity-legendary {
+    box-shadow: 0 0 25px hsl(var(--rarity-legendary) / 0.6);
+    animation: legendary-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes legendary-pulse {
+    0%, 100% { 
+      box-shadow: 0 0 25px hsl(var(--rarity-legendary) / 0.6);
+    }
+    50% { 
+      box-shadow: 0 0 35px hsl(var(--rarity-legendary) / 0.8);
+    }
+  }
+
+  /* State Combination Animations */
+  .synergy-unlock {
+    animation: synergy-activation 1s ease-out;
+  }
+
+  @keyframes synergy-activation {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Enhanced Tooltips */
+  .enhanced-tooltip {
+    background: hsl(var(--popover));
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    animation: tooltip-appear 0.2s ease-out;
+  }
+
+  @keyframes tooltip-appear {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Button Enhancements */
+  .enhanced-button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .enhanced-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .enhanced-button:active::after {
+    width: 300px;
+    height: 300px;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .play-card-clone {
+    .play-card-clone,
+    .card-hover-glow::before,
+    .enhanced-tooltip,
+    .enhanced-button::after {
       transition: none !important;
+      animation: none !important;
     }
     
-    .state-highlight {
+    .state-highlight,
+    .rarity-legendary,
+    .synergy-unlock {
       animation: none !important;
     }
   }

@@ -85,14 +85,17 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               key={`${card.id}-${index}`}
               data-card-id={card.id}
               className={`
-                relative p-2 cursor-pointer transition-all duration-300 
+                group relative p-2 cursor-pointer transition-all duration-300 
                 bg-card border rounded-md flex items-center gap-2
-                ${isSelected ? 'ring-2 ring-yellow-400 ring-offset-1' : ''}
-                ${isPlaying ? 'animate-pulse scale-105 z-50' : 'hover:scale-102'}
-                ${!canAfford && !disabled ? 'opacity-50' : ''}
+                ${isSelected ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-lg shadow-yellow-400/25' : ''}
+                ${isPlaying ? 'animate-pulse scale-105 z-50 ring-2 ring-primary ring-offset-2' : 'hover:scale-[1.02] hover:shadow-lg hover:border-primary/50'}
+                ${!canAfford && !disabled ? 'opacity-50 saturate-50' : ''}
                 ${getRarityBorder(card.rarity)}
+                ${getRarityGlow(card.rarity)}
                 border overflow-hidden text-xs
-                animate-fade-in
+                animate-fade-in hover:bg-card/90
+                before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent
+                before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700
               `}
               style={{ 
                 animationDelay: `${index * 0.05}s`,
@@ -106,6 +109,9 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   setExaminedCard(card.id);
                   onSelectCard?.(card.id);
                 }
+              }}
+              onMouseEnter={() => {
+                // Add subtle hover sound effect here if needed
               }}
             >
               {/* Cost */}
@@ -148,11 +154,18 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   handlePlayCard(card.id);
                 }}
                 disabled={disabled || !canAfford || isPlaying}
-                className={`text-xs px-2 py-1 h-6 flex-shrink-0 ${
-                  isPlaying ? 'animate-pulse' : ''
+                className={`text-xs px-2 py-1 h-6 flex-shrink-0 transition-all duration-200 ${
+                  isPlaying ? 'animate-pulse bg-primary/80' : 
+                  canAfford ? 'hover:bg-primary hover:scale-105 hover:shadow-md group-hover:bg-primary/90' : 
+                  'cursor-not-allowed'
                 }`}
               >
-                {isPlaying ? '...' : 'DEPLOY'}
+                {isPlaying ? (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-current rounded-full animate-ping"></div>
+                    <span>...</span>
+                  </div>
+                ) : 'DEPLOY'}
               </Button>
             </div>
           );
