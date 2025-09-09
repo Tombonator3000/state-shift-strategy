@@ -171,16 +171,16 @@ const Index = () => {
       </div>
 
       {/* Main Game Area */}
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-180px)] overflow-hidden">
+      <div className="flex flex-col xl:flex-row h-[calc(100vh-180px)] overflow-hidden">
         {/* Left sidebar - Victory Conditions & Classified Intel */}
-        <div className="hidden lg:block w-60 bg-newspaper-bg border-r-2 border-newspaper-border p-3 overflow-y-auto">
-          <div className="bg-newspaper-text text-newspaper-bg p-3 mb-4 border border-newspaper-border">
-            <h3 className="font-bold text-sm mb-3 text-center">VICTORY CONDITIONS</h3>
+        <div className="hidden xl:block w-52 bg-newspaper-bg border-r-2 border-newspaper-border p-2 overflow-y-auto">
+          <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border">
+            <h3 className="font-bold text-xs mb-2 text-center">VICTORY CONDITIONS</h3>
             <div className="text-xs space-y-1 font-mono">
               <div>• Control 10 states</div>
               <div>• Reach 200 IP</div>
               <div>• Truth ≥90%</div>
-              <div className="border-t border-newspaper-bg/30 pt-2 mt-2">
+              <div className="border-t border-newspaper-bg/30 pt-1 mt-1">
                 <div className="text-center text-xs">States: {gameState.controlledStates.length}/10</div>
                 <div className="text-center text-xs">Truth: {gameState.truth}%</div>
                 <div className="text-center text-xs">IP: {gameState.ip}/200</div>
@@ -189,12 +189,12 @@ const Index = () => {
           </div>
 
           {/* Player Secret Agenda */}
-          <div className="mb-4">
+          <div className="mb-3">
             <SecretAgenda agenda={gameState.secretAgenda} isPlayer={true} />
           </div>
 
           {/* AI Secret Agenda */}
-          <div className="mb-4">
+          <div className="mb-3">
             <SecretAgenda 
               agenda={{
                 id: 'ai-agenda',
@@ -208,9 +208,9 @@ const Index = () => {
             />
           </div>
           
-          <div className="bg-newspaper-bg border-2 border-newspaper-border p-3">
-            <h3 className="font-bold text-sm mb-2 text-newspaper-text">CLASSIFIED INTEL</h3>
-            <div className="text-xs space-y-1 max-h-40 overflow-y-auto">
+          <div className="bg-newspaper-bg border-2 border-newspaper-border p-2">
+            <h3 className="font-bold text-xs mb-1 text-newspaper-text">CLASSIFIED INTEL</h3>
+            <div className="text-xs space-y-1 max-h-32 overflow-y-auto">
               {gameState.log.map((entry, i) => (
                 <div key={i} className="text-newspaper-text/80 animate-fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
                   <span className="font-mono">▲</span> {entry}
@@ -221,29 +221,27 @@ const Index = () => {
         </div>
 
         {/* Center - Map */}
-        <div className="flex-1 p-3 relative bg-newspaper-bg border-x-2 border-newspaper-border" id="map-container">
+        <div className="flex-1 p-2 relative bg-newspaper-bg border-x-2 border-newspaper-border" id="map-container">
           {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
             <div className="absolute top-4 left-4 z-10 bg-newspaper-text text-newspaper-bg p-2 border border-newspaper-border font-mono text-sm">
               Click a state to target with zone card
             </div>
           )}
-          <div className="h-[calc(100%-8rem)] border-2 border-newspaper-border bg-white/80 relative">
+          <div className="h-full border-2 border-newspaper-border bg-white/80 relative">
             <EnhancedUSAMap 
               states={gameState.states} 
               onStateClick={handleStateClick}
               selectedZoneCard={gameState.selectedCard}
             />
-            {/* Space for played cards under map */}
-            <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" />
           </div>
         </div>
 
         {/* Right sidebar - AI Intel & Your Hand */}
-        <div className="lg:w-72 bg-newspaper-bg border-l-2 border-newspaper-border p-3 lg:overflow-y-auto">
+        <div className="w-full xl:w-64 bg-newspaper-bg border-l-2 border-newspaper-border p-2 flex flex-col max-h-full">
           {/* Mobile victory conditions - shown at top on mobile */}
-          <div className="lg:hidden mb-4">
-            <div className="bg-newspaper-text text-newspaper-bg p-3 border border-newspaper-border">
-              <h3 className="font-bold text-xs mb-2 text-center">VICTORY CONDITIONS</h3>
+          <div className="xl:hidden mb-3">
+            <div className="bg-newspaper-text text-newspaper-bg p-2 border border-newspaper-border">
+              <h3 className="font-bold text-xs mb-1 text-center">VICTORY CONDITIONS</h3>
               <div className="text-xs font-mono">
                 States: {gameState.controlledStates.length}/10 | Truth: {gameState.truth}% | IP: {gameState.ip}/200
               </div>
@@ -251,8 +249,8 @@ const Index = () => {
           </div>
 
           {/* AI Intel */}
-          <div className="bg-newspaper-text text-newspaper-bg p-3 mb-4 border border-newspaper-border">
-            <h3 className="font-bold text-sm mb-2">AI INTEL</h3>
+          <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border flex-shrink-0">
+            <h3 className="font-bold text-xs mb-1">AI INTEL</h3>
             <div className="text-xs font-mono space-y-1">
               <div>Hand Size: 5</div>
               <div>Strategy: Suppressing Truth</div>
@@ -260,9 +258,9 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Your Hand */}
-          <div className="bg-newspaper-text text-newspaper-bg p-3 mb-4 border border-newspaper-border">
-            <h3 className="font-bold text-sm mb-2">YOUR HAND</h3>
+          {/* Your Hand - Takes remaining space */}
+          <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border flex-1 min-h-0">
+            <h3 className="font-bold text-xs mb-2">YOUR HAND</h3>
             <EnhancedGameHand 
               cards={gameState.hand}
               onPlayCard={handlePlayCard}
@@ -274,10 +272,10 @@ const Index = () => {
           </div>
 
           {/* Controls */}
-          <div className="space-y-2">
+          <div className="space-y-2 flex-shrink-0">
             <Button 
               onClick={handleEndTurn}
-              className="w-full bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80"
+              className="w-full bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80 h-8 text-xs"
               disabled={gameState.phase !== 'action' || gameState.animating}
             >
               End Turn
@@ -285,10 +283,10 @@ const Index = () => {
           </div>
 
           {/* Mobile Log - Collapsible */}
-          <div className="lg:hidden mt-4">
-            <div className="bg-newspaper-bg border-2 border-newspaper-border p-3">
-              <h3 className="font-bold text-xs mb-2 text-newspaper-text">INTEL LOG</h3>
-              <div className="text-xs space-y-1 max-h-20 overflow-y-auto">
+          <div className="xl:hidden mt-2 flex-shrink-0">
+            <div className="bg-newspaper-bg border-2 border-newspaper-border p-2">
+              <h3 className="font-bold text-xs mb-1 text-newspaper-text">INTEL LOG</h3>
+              <div className="text-xs space-y-1 max-h-16 overflow-y-auto">
                 {gameState.log.slice(-3).map((entry, i) => (
                   <div key={i} className="text-newspaper-text/80">
                     <span className="font-mono">▲</span> {entry}

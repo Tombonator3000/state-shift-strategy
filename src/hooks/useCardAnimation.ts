@@ -136,16 +136,16 @@ export const useCardAnimation = () => {
 
     const pileRect = playedPile.getBoundingClientRect();
     const pileCards = playedPile.children.length;
-    const cardWidth = 120;
-    const cardHeight = 168;
-    const cols = 3;
+    const cardWidth = 200;
+    const cardHeight = 280;
+    const cols = 5;
     
     const col = pileCards % cols;
     const row = Math.floor(pileCards / cols);
     
     const destRect: AnimationRect = {
-      x: pileRect.left + col * (cardWidth + 8),
-      y: pileRect.top + row * (cardHeight + 8),
+      x: pileRect.left + col * (cardWidth + 4),
+      y: pileRect.top + row * (cardHeight + 4),
       width: cardWidth,
       height: cardHeight
     };
@@ -153,12 +153,41 @@ export const useCardAnimation = () => {
     const currentRect = getBoundingRect(element);
     await tweenTransform(element, currentRect, destRect, { duration: 400 });
 
-    // Create permanent played card element
+    // Create permanent large played card element with full details
     const playedCard = document.createElement('div');
-    playedCard.className = 'played-card bg-card border-2 border-border rounded-lg shadow-lg overflow-hidden';
+    playedCard.className = 'played-card bg-card border-2 border-border rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-transform';
     playedCard.style.width = `${cardWidth}px`;
     playedCard.style.height = `${cardHeight}px`;
-    playedCard.innerHTML = element.innerHTML;
+    
+    // Enhanced played card with full details
+    const cardData = JSON.parse(element.dataset.cardData || '{}');
+    playedCard.innerHTML = `
+      <div class="relative h-full">
+        <div class="absolute top-2 right-2 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold z-10">
+          ${cardData.cost || '?'}
+        </div>
+        <div class="p-3 pb-2 bg-gradient-to-r from-card to-card/80">
+          <h4 class="font-bold text-sm font-mono text-center">${cardData.name || 'Unknown'}</h4>
+        </div>
+        <div class="h-32 bg-muted/20 flex items-center justify-center text-xs text-muted-foreground border-y">
+          [CLASSIFIED IMAGE]
+        </div>
+        <div class="p-3 space-y-2">
+          <div class="flex justify-center">
+            <span class="text-xs font-mono px-2 py-1 bg-accent/20 border border-accent rounded">${cardData.type || 'UNKNOWN'}</span>
+          </div>
+          <div class="text-xs text-center font-medium min-h-8 flex items-center justify-center">
+            ${cardData.text || 'Effect unknown'}
+          </div>
+          <div class="text-xs italic text-muted-foreground text-center min-h-6 border-t border-border pt-2">
+            "${cardData.flavorTruth || 'No flavor text'}"
+          </div>
+          <div class="text-xs text-center font-bold text-primary">
+            DEPLOYED
+          </div>
+        </div>
+      </div>
+    `;
     
     playedPile.appendChild(playedCard);
   };
@@ -201,13 +230,16 @@ export const useCardAnimation = () => {
         return { cancelled: true, countered: false };
       }
 
-      // Create clone for animation
+      // Create clone for animation and store card data
       const clone = cardElement.cloneNode(true) as HTMLElement;
       clone.classList.add('play-card-clone');
       clone.setAttribute('aria-hidden', 'true');
       clone.style.willChange = 'transform, opacity, filter';
       clone.style.filter = 'drop-shadow(0 8px 24px rgba(0,0,0,0.35))';
       clone.style.transition = 'transform 220ms cubic-bezier(0.2,0.8,0.2,1), opacity 150ms linear';
+      
+      // Store card data for played pile display
+      clone.dataset.cardData = JSON.stringify(card);
       
       layer.appendChild(clone);
       positionElementFromRect(clone, startRect);
