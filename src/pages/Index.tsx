@@ -16,6 +16,7 @@ import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
 import ZoneTargetingHelper from '@/components/game/ZoneTargetingHelper';
 import { AudioControls } from '@/components/ui/audio-controls';
+import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudio } from '@/hooks/useAudio';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
@@ -49,6 +50,7 @@ const Index = () => {
   const [hoveredCard, setHoveredCard] = useState<any>(null);
   const [victoryState, setVictoryState] = useState<{ isVictory: boolean; type: 'states' | 'ip' | 'truth' | 'agenda' | null }>({ isVictory: false, type: null });
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showInGameOptions, setShowInGameOptions] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn } = useGameState();
   const audio = useAudio();
@@ -326,6 +328,26 @@ const Index = () => {
     />;
   }
 
+  if (showInGameOptions) {
+    return (
+      <Options
+        onClose={() => setShowInGameOptions(false)}
+        onBackToMainMenu={() => {
+          setShowInGameOptions(false);
+          setShowMenu(true);
+          audio.setMenuMusic();
+        }}
+        onSaveGame={() => {
+          const gameStateToSave = {
+            ...gameState,
+            timestamp: Date.now()
+          };
+          localStorage.setItem('shadowgov-saved-game', JSON.stringify(gameStateToSave));
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-newspaper-bg">
       {/* Newspaper Header */}
@@ -406,6 +428,16 @@ const Index = () => {
                   title="Achievements"
                 >
                   🏆
+                </button>
+                <button
+                  onClick={() => {
+                    setShowInGameOptions(true);
+                    audio.playSFX('click');
+                  }}
+                  className="bg-gray-600 text-white p-1 rounded hover:bg-gray-700 transition-colors"
+                  title="Options & Settings"
+                >
+                  ⚙️
                 </button>
                 <AudioControls
                   volume={audio.config.volume}
