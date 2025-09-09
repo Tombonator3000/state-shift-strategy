@@ -9,8 +9,7 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '' }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Try to load the specific card image first, fallback to PARANOID TIMES placeholder
-  const specificImagePath = `/card-art/${cardId}.png`;
+  // Always use PARANOID TIMES placeholder for now
   const placeholderImagePath = '/lovable-uploads/e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png';
 
   const handleImageError = () => {
@@ -30,12 +29,10 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '' }) => {
       )}
       
       <img
-        src={imageError ? placeholderImagePath : specificImagePath}
-        alt={`Card art for ${cardId}`}
+        src={placeholderImagePath}
+        alt={`PARANOID TIMES - Card art for ${cardId}`}
         className="w-full h-full object-cover"
-        onError={handleImageError}
         onLoad={handleImageLoad}
-        style={{ display: imageLoaded ? 'block' : 'none' }}
       />
     </div>
   );
