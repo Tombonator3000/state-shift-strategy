@@ -7,7 +7,7 @@ import Options from './Options';
 import ManageExpansions from './ManageExpansions';
 
 interface GameMenuProps {
-  onStartGame: (faction: 'government' | 'truth') => void;
+  onStartGame: (faction: 'government' | 'truth') => Promise<void>;
   onFactionHover?: (faction: 'government' | 'truth' | null) => void;
   audio?: any;
 }
@@ -207,9 +207,9 @@ const GameMenu = ({ onStartGame, onFactionHover, audio }: GameMenuProps) => {
               </div>
               
               <Button 
-                onClick={() => {
+                onClick={async () => {
                   audio?.playSFX?.('click');
-                  onStartGame('government');
+                  await onStartGame('government');
                 }}
                 className="w-full bg-government-blue hover:bg-government-blue/80 text-white group-hover:animate-pulse"
               >
@@ -246,9 +246,9 @@ const GameMenu = ({ onStartGame, onFactionHover, audio }: GameMenuProps) => {
               </div>
               
               <Button 
-                onClick={() => {
+                onClick={async () => {
                   audio?.playSFX?.('click');
-                  onStartGame('truth');
+                  await onStartGame('truth');
                 }}
                 className="w-full bg-truth-red hover:bg-truth-red/80 text-white group-hover:animate-pulse"
               >

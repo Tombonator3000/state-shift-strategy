@@ -9,6 +9,7 @@ import { Loader2, Zap, Shield, Target, X, Eye } from 'lucide-react';
 import { useHapticFeedback } from '@/hooks/useHapticFeedback';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ExtensionCardBadge } from './ExtensionCardBadge';
 
 interface EnhancedGameHandProps {
   cards: GameCard[];
@@ -227,15 +228,16 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                </div>
                
                {/* Card Name and Rarity */}
-               <div className="flex-1 min-w-0">
-                 <div className="flex items-center gap-2">
-                   <span className={`font-bold text-foreground truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{card.name}</span>
-                   <span className={`px-1.5 py-0.5 rounded-full ${isMobile ? 'text-xs' : 'text-xs'} ${getRarityAccent(card.rarity)}`}>
-                     {card.rarity.toUpperCase()}
-                   </span>
-                 </div>
-                 <div className={`text-muted-foreground truncate max-w-[200px] ${isMobile ? 'text-sm' : 'text-xs'}`}>{card.text}</div>
-               </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className={`font-bold text-foreground truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{card.name}</span>
+                    <span className={`px-1.5 py-0.5 rounded-full ${isMobile ? 'text-xs' : 'text-xs'} ${getRarityAccent(card.rarity)}`}>
+                      {card.rarity.toUpperCase()}
+                    </span>
+                    <ExtensionCardBadge cardId={card.id} />
+                  </div>
+                  <div className={`text-muted-foreground truncate max-w-[200px] ${isMobile ? 'text-sm' : 'text-xs'}`}>{card.text}</div>
+                </div>
               
               {/* Enhanced Type Badge */}
               <Badge 
@@ -254,16 +256,19 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 {card.type}
               </Badge>
 
-              {/* Selection indicator for zone targeting */}
-              {isSelected && card.type === 'ZONE' && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-warning text-warning-foreground text-xs font-bold flex items-center justify-center ring-2 ring-warning/50 animate-pulse">
-                  🎯
-                </div>
-              )}
-              {/* Regular selection indicator */}
-              {isSelected && card.type !== 'ZONE' && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-yellow-400 ring-2 ring-yellow-400/50" />
-              )}
+               {/* Selection indicator for zone targeting */}
+               {isSelected && card.type === 'ZONE' && (
+                 <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-warning text-warning-foreground text-xs font-bold flex items-center justify-center ring-2 ring-warning/50 animate-pulse">
+                   🎯
+                 </div>
+               )}
+               {/* Regular selection indicator */}
+               {isSelected && card.type !== 'ZONE' && (
+                 <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-yellow-400 ring-2 ring-yellow-400/50" />
+               )}
+               
+               {/* Extension badge overlay */}
+               <ExtensionCardBadge cardId={card.id} variant="overlay" />
             </div>
           );
         })}

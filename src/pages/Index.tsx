@@ -102,8 +102,8 @@ const Index = () => {
     }
   }, [showMenu, showIntro]);
 
-  const startNewGame = (faction: 'government' | 'truth') => {
-    initGame(faction);
+  const startNewGame = async (faction: 'government' | 'truth') => {
+    await initGame(faction);
     setShowMenu(false);
     setShowIntro(false);
     audio.setGameplayMusic(faction);

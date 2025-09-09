@@ -2068,14 +2068,17 @@ export const CARD_DATABASE: GameCard[] = [
 export const getCardsByType = (type: GameCard['type']) => 
   CARD_DATABASE.filter(card => card.type === type);
 
-export const getCardsByRarity = (rarity: GameCard['rarity']) => 
-  CARD_DATABASE.filter(card => card.rarity === rarity);
+export const getCardsByRarity = (rarity: GameCard['rarity']) => {
+  const allCards = [...CARD_DATABASE, ...extensionManager.getAllExtensionCards()];
+  return allCards.filter(card => card.rarity === rarity);
+};
 
 export const getRandomCards = (count: number, filters?: {
   type?: GameCard['type'];
   rarity?: GameCard['rarity'];
 }): GameCard[] => {
-  let pool = CARD_DATABASE;
+  const allCards = [...CARD_DATABASE, ...extensionManager.getAllExtensionCards()];
+  let pool = allCards;
   
   if (filters?.type) {
     pool = pool.filter(card => card.type === filters.type);
@@ -2089,8 +2092,10 @@ export const getRandomCards = (count: number, filters?: {
   return shuffled.slice(0, count);
 };
 
-export const getCardById = (id: string): GameCard | undefined => 
-  CARD_DATABASE.find(card => card.id === id);
+export const getCardById = (id: string): GameCard | undefined => {
+  const allCards = [...CARD_DATABASE, ...extensionManager.getAllExtensionCards()];
+  return allCards.find(card => card.id === id);
+};
 
 // Rarity distribution for deck building
 export const RARITY_WEIGHTS = {
@@ -2120,7 +2125,7 @@ export const generateRandomDeck = (size: number = 40): GameCard[] => {
       rarity = 'legendary';
     }
     
-    const cardsOfRarity = getCardsByRarity(rarity);
+    const cardsOfRarity = allCards.filter(card => card.rarity === rarity);
     if (cardsOfRarity.length > 0) {
       const randomCard = cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)];
       deck.push(randomCard);
