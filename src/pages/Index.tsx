@@ -12,12 +12,29 @@ import { useGameState } from '@/hooks/useGameState';
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
+  const [selectedZoneCard, setSelectedZoneCard] = useState<string | null>(null);
   const { gameState, initGame, playCard, endTurn, closeNewspaper } = useGameState();
 
   const startNewGame = (faction: 'government' | 'truth') => {
     initGame(faction);
     setShowMenu(false);
     setShowIntro(false);
+  };
+
+  const handleZoneCardSelect = (cardId: string) => {
+    const card = gameState.hand.find(c => c.id === cardId);
+    if (card?.type === 'ZONE') {
+      setSelectedZoneCard(cardId);
+    }
+  };
+
+  const handleStateClick = (stateId: string) => {
+    if (selectedZoneCard) {
+      // Apply zone card to selected state
+      playCard(selectedZoneCard);
+      setSelectedZoneCard(null);
+      console.log(`Applied zone card ${selectedZoneCard} to ${stateId}`);
+    }
   };
 
   if (showIntro) {
@@ -114,10 +131,15 @@ const Index = () => {
         </div>
 
         {/* Center - Map */}
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 relative">
+          {selectedZoneCard && (
+            <div className="absolute top-4 left-4 z-10 bg-secret-red text-white p-2 rounded font-mono text-sm">
+              Click a state to apply zone card
+            </div>
+          )}
           <USAMap 
             states={gameState.states}
-            onStateClick={(stateId) => console.log('State clicked:', stateId)}
+            onStateClick={handleStateClick}
           />
         </div>
 
@@ -134,7 +156,14 @@ const Index = () => {
 
           <GameHand 
             cards={gameState.hand}
-            onPlayCard={playCard}
+            onPlayCard={(cardId) => {
+              const card = gameState.hand.find(c => c.id === cardId);
+              if (card?.type === 'ZONE') {
+                handleZoneCardSelect(cardId);
+              } else {
+                playCard(cardId);
+              }
+            }}
             disabled={gameState.phase !== 'action'}
           />
 

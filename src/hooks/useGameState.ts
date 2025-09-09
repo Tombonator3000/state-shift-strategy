@@ -63,7 +63,18 @@ export const useGameState = () => {
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
     controlledStates: ['CA', 'NY', 'TX'],
-    states: [],
+    states: [
+      { id: 'CA', name: 'California', x: 50, y: 250, defense: 2, pressure: 0, owner: 'player' },
+      { id: 'NY', name: 'New York', x: 650, y: 150, defense: 2, pressure: 1, owner: 'player' },
+      { id: 'TX', name: 'Texas', x: 300, y: 350, defense: 3, pressure: 0, owner: 'player' },
+      { id: 'FL', name: 'Florida', x: 600, y: 400, defense: 1, pressure: 2, owner: 'neutral' },
+      { id: 'NV', name: 'Nevada', x: 150, y: 200, defense: 1, pressure: 0, owner: 'neutral' },
+      { id: 'WA', name: 'Washington', x: 100, y: 50, defense: 2, pressure: 1, owner: 'ai' },
+      { id: 'DC', name: 'Washington DC', x: 650, y: 200, defense: 5, pressure: 3, owner: 'ai' },
+      { id: 'AK', name: 'Alaska', x: 50, y: 350, defense: 1, pressure: 0, owner: 'neutral' },
+      { id: 'HI', name: 'Hawaii', x: 200, y: 400, defense: 1, pressure: 0, owner: 'neutral' },
+      { id: 'CO', name: 'Colorado', x: 250, y: 200, defense: 2, pressure: 0, owner: 'neutral' }
+    ],
     currentEvents: generateRandomEvents(),
     showNewspaper: false,
     log: [
