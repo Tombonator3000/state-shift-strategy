@@ -77,6 +77,10 @@ const Index = () => {
   const handleEndTurn = () => {
     endTurn();
     audio.playSFX('turnEnd');
+    // Play card draw sound after a short delay
+    setTimeout(() => {
+      audio.playSFX('cardDraw');
+    }, 500);
   };
 
   const handleCloseNewspaper = () => {
