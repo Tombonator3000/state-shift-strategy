@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { GameCard } from '@/components/game/GameHand';
-import { CARD_DATABASE, TRUTH_SEEKERS_CARDS, GOVERNMENT_CARDS } from '@/data/cardDatabase';
+import { CARD_DATABASE } from '@/data/cardDatabase';
+import { TRUTH_SEEKERS_CARDS, GOVERNMENT_CARDS } from '@/data/factionCards';
 import { generateRandomDeck, getRandomCards } from '@/data/cardDatabase';
 
 interface GameState {
