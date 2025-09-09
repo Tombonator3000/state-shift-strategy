@@ -12,7 +12,7 @@ import { useGameState } from '@/hooks/useGameState';
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
-  const { gameState, initGame, playCard, endTurn } = useGameState();
+  const { gameState, initGame, playCard, endTurn, closeNewspaper } = useGameState();
 
   const startNewGame = (faction: 'government' | 'truth') => {
     initGame(faction);
@@ -154,7 +154,9 @@ const Index = () => {
       {gameState.showNewspaper && (
         <Newspaper 
           events={gameState.currentEvents}
-          onClose={() => {/* handle close */}}
+          playedCards={gameState.cardsPlayedThisRound}
+          faction={gameState.faction}
+          onClose={closeNewspaper}
         />
       )}
     </div>

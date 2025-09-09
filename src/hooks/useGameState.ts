@@ -9,6 +9,7 @@ interface GameState {
   ip: number;
   hand: GameCard[];
   cardsPlayedThisTurn: number;
+  cardsPlayedThisRound: Array<{ card: GameCard; player: 'human' | 'ai' }>;
   controlledStates: string[];
   states: Array<{
     id: string;
@@ -99,6 +100,7 @@ export const useGameState = () => {
     ip: 15,
     hand: sampleCards.slice(0, 3),
     cardsPlayedThisTurn: 0,
+    cardsPlayedThisRound: [],
     controlledStates: ['CA', 'NY', 'TX'],
     states: [],
     currentEvents: generateRandomEvents(),
@@ -173,6 +175,7 @@ export const useGameState = () => {
         ip: newIP,
         truth: newTruth,
         cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
         log: newLog
       };
     });
@@ -182,7 +185,8 @@ export const useGameState = () => {
     setGameState(prev => ({
       ...prev,
       turn: prev.turn + 1,
-      phase: 'income',
+      phase: 'newspaper',
+      showNewspaper: true,
       cardsPlayedThisTurn: 0,
       ip: prev.ip + 5 + prev.controlledStates.length * 2, // Income phase
       hand: [...prev.hand, ...sampleCards.slice(0, Math.max(0, 5 - prev.hand.length))], // Draw to 5
@@ -190,10 +194,20 @@ export const useGameState = () => {
     }));
   }, []);
 
+  const closeNewspaper = useCallback(() => {
+    setGameState(prev => ({
+      ...prev,
+      showNewspaper: false,
+      cardsPlayedThisRound: [], // Clear played cards for next round
+      phase: 'action'
+    }));
+  }, []);
+
   return {
     gameState,
     initGame,
     playCard,
-    endTurn
+    endTurn,
+    closeNewspaper
   };
 };

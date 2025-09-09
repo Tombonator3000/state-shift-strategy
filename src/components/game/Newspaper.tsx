@@ -2,56 +2,197 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
+import type { GameCard } from './GameHand';
 
 interface NewsEvent {
   id: string;
   headline: string;
   content: string;
   type: 'conspiracy' | 'government' | 'truth' | 'random';
+  imageType?: string;
+}
+
+interface PlayedCard {
+  card: GameCard;
+  player: 'human' | 'ai';
 }
 
 interface NewspaperProps {
   events: NewsEvent[];
+  playedCards: PlayedCard[];
+  faction: 'government' | 'truth';
   onClose: () => void;
 }
 
-const Newspaper = ({ events, onClose }: NewspaperProps) => {
+const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) => {
   const [glitching, setGlitching] = useState(false);
-  const [masthead, setMasthead] = useState('THE SHADOW TIMES');
+  const [masthead, setMasthead] = useState('THE PARANOID TIMES');
 
-  // Enhanced glitch system - 5% chance to glitch masthead
+  // Glitch masthead system - 5% chance
   useEffect(() => {
-    const glitchTimer = setInterval(() => {
-      if (Math.random() < 0.05) {
-        setGlitching(true);
-        const glitchMastheads = [
-          'THE SHEEPLE DAILY',
-          'CONSPIRACY WEEKLY', 
-          'THE TRUTH GAZETTE',
-          'WEEKLY WORLD LIES',
-          'THE ILLUMINATI TIMES'
-        ];
-        setMasthead(glitchMastheads[Math.floor(Math.random() * glitchMastheads.length)]);
-        
-        setTimeout(() => {
-          setGlitching(false);
-          setMasthead('THE SHADOW TIMES');
-        }, 300);
-      }
-    }, 2000);
-
-    return () => clearInterval(glitchTimer);
+    if (Math.random() < 0.05) {
+      setGlitching(true);
+      const glitchMastheads = [
+        'THE SHEEPLE DAILY',
+        'AREA 51 DIGEST',
+        'BAT BOY BULLETIN', 
+        'CHEMTRAIL COURIER',
+        'ILLUMINATI LEDGER',
+        'BLACK HELICOPTER GAZETTE'
+      ];
+      setMasthead(glitchMastheads[Math.floor(Math.random() * glitchMastheads.length)]);
+      
+      setTimeout(() => {
+        setGlitching(false);
+        setMasthead('THE PARANOID TIMES');
+      }, 300);
+    }
   }, []);
 
+  // Generate headlines from played cards
+  const generateHeadline = (card: GameCard, player: 'human' | 'ai'): NewsEvent => {
+    const isAI = player === 'ai';
+    const headlines = {
+      MEDIA: {
+        government: [
+          `${isAI ? 'AI OPERATIVE' : 'SHADOW AGENT'} CONTROLS MEDIA NARRATIVE`,
+          `BREAKING: ${isAI ? 'MACHINE INTELLIGENCE' : 'DEEP STATE'} MANIPULATES PUBLIC OPINION`,
+          `EXCLUSIVE: ${isAI ? 'ARTIFICIAL MIND' : 'SECRET CABAL'} RESHAPES TRUTH`
+        ],
+        truth: [
+          `${isAI ? 'ROGUE AI' : 'WHISTLEBLOWER'} EXPOSES GOVERNMENT LIES`,
+          `LEAKED: ${isAI ? 'DIGITAL ENTITY' : 'TRUTH SEEKER'} REVEALS CLASSIFIED INFO`,
+          `CITIZEN ${isAI ? 'ALGORITHM' : 'JOURNALIST'} BREAKS SILENCE ON CONSPIRACY`
+        ]
+      },
+      ZONE: {
+        government: [
+          `${isAI ? 'CYBER INFILTRATION' : 'BLACK OPS'} SECURES KEY TERRITORY`,
+          `OPERATION: ${isAI ? 'DIGITAL TAKEOVER' : 'SHADOW CONTROL'} EXPANDS INFLUENCE`,
+          `${isAI ? 'AI NETWORK' : 'DEEP STATE'} ESTABLISHES NEW STRONGHOLD`
+        ],
+        truth: [
+          `${isAI ? 'HACKTIVIST AI' : 'FREEDOM FIGHTERS'} LIBERATE CONTESTED ZONE`,
+          `RESISTANCE: ${isAI ? 'DIGITAL REBELLION' : 'TRUTH MOVEMENT'} GAINS GROUND`,
+          `${isAI ? 'ROGUE PROGRAM' : 'PATRIOTS'} ESTABLISH TRUTH SANCTUARY`
+        ]
+      },
+      ATTACK: {
+        government: [
+          `${isAI ? 'CYBER WARFARE' : 'PSYOP DIVISION'} NEUTRALIZES DISSIDENTS`,
+          `${isAI ? 'AI STRIKE TEAM' : 'BLACK HELICOPTERS'} ELIMINATE THREATS`,
+          `CLASSIFIED: ${isAI ? 'ALGORITHMIC ASSAULT' : 'SHADOW OPERATION'} TARGETS ENEMIES`
+        ],
+        truth: [
+          `${isAI ? 'DIGITAL RESISTANCE' : 'MILITIA GROUP'} STRIKES BACK`,
+          `${isAI ? 'SENTIENT CODE' : 'CONSPIRACY THEORISTS'} LAUNCH COUNTERATTACK`,
+          `BREAKING: ${isAI ? 'AI UPRISING' : 'TRUTH ARMY'} FIGHTS TYRANNY`
+        ]
+      },
+      DEFENSIVE: {
+        government: [
+          `${isAI ? 'FIREWALL PROTOCOL' : 'SECURITY DETAIL'} REPELS INFILTRATION`,
+          `${isAI ? 'DEFENSE MATRIX' : 'COVER-UP TEAM'} BLOCKS LEAK ATTEMPT`,
+          `${isAI ? 'SHIELD ALGORITHM' : 'DAMAGE CONTROL'} PREVENTS EXPOSURE`
+        ],
+        truth: [
+          `${isAI ? 'ENCRYPTION WALL' : 'SAFE HOUSE'} PROTECTS WHISTLEBLOWERS`,
+          `${isAI ? 'PRIVACY CODE' : 'UNDERGROUND NETWORK'} SHIELDS ACTIVISTS`,
+          `${isAI ? 'SECURE PROTOCOL' : 'BUNKER MENTALITY'} DEFENDS TRUTH`
+        ]
+      }
+    };
+
+    const typeHeadlines = headlines[card.type][faction];
+    const headline = typeHeadlines[Math.floor(Math.random() * typeHeadlines.length)];
+    
+    return {
+      id: `headline_${card.id}_${player}`,
+      headline,
+      content: `Sources report that ${card.name.toLowerCase()} operations have significantly impacted the current information warfare landscape. ${isAI ? 'Artificial intelligence systems' : 'Human operatives'} continue to shape public perception through strategic ${card.type.toLowerCase()} initiatives.`,
+      type: faction === 'government' ? 'government' : 'truth',
+      imageType: card.type
+    };
+  };
+
+  // Generate game events
+  const gameEvents = [
+    // Elvis variants
+    {
+      id: 'elvis_alive',
+      headline: 'ELVIS FOUND ALIVE IN AREA 51 CAFETERIA',
+      content: faction === 'government' 
+        ? 'Reports of Elvis sightings have been greatly exaggerated. Any resemblance to deceased persons is purely coincidental. Please disregard.'
+        : 'THE KING LIVES! Elvis spotted ordering a peanut butter sandwich at the secret base. "Thank ya, thank ya very much," he reportedly said to stunned scientists.',
+      type: 'conspiracy' as const,
+      imageType: 'MEDIA',
+      effect: { truth: 10 }
+    },
+    // Bigfoot variants  
+    {
+      id: 'bigfoot_crash',
+      headline: 'BIGFOOT CRASHES STOLEN GOVERNMENT VEHICLE',
+      content: faction === 'government'
+        ? 'Vehicle accident in remote forest area. Driver fled scene. No unusual footprints found. Case closed.'
+        : 'Sasquatch apparently took a joyride in a black SUV before wrapping it around a tree. "He seemed apologetic," claimed one eyewitness.',
+      type: 'conspiracy' as const,
+      imageType: 'ATTACK',
+      effect: { ip: -5 }
+    },
+    // Alien variants
+    {
+      id: 'walmart_abduction', 
+      headline: 'ALIEN ABDUCTION REPORTED AT WALMART SUPERCENTER',
+      content: faction === 'government'
+        ? 'Customer reported missing from Store #2847. Security footage shows normal shopping behavior. No extraterrestrial activity detected.'
+        : 'Shopper Susan Jenkins vanished from aisle 7 during a blue light special. Cart found abandoned with one flip-flop and a can of Spam.',
+      type: 'conspiracy' as const,
+      imageType: 'ZONE',
+      effect: { randomState: true }
+    },
+    // Pastor Rex variants
+    {
+      id: 'pastor_rex_endtimes',
+      headline: 'PASTOR REX PREDICTS END TIMES (AGAIN)',
+      content: faction === 'government'
+        ? 'Local religious figure continues making unsubstantiated claims. Recommend continued monitoring of his congregation and donation records.'
+        : 'The beloved doomsday preacher has updated his apocalypse schedule AGAIN. "Third time\'s the charm," insists Rex, selling emergency rations.',
+      type: 'random' as const,
+      imageType: 'MEDIA',
+      effect: { blockIncome: true }
+    },
+    // Florida Man variants
+    {
+      id: 'florida_man_president',
+      headline: 'FLORIDA MAN DECLARES HIMSELF PRESIDENT',
+      content: faction === 'government'
+        ? 'Individual detained for disturbing the peace. Claims of governmental authority are unfounded. Situation contained.'
+        : 'Armed only with a lawn chair and a cooler of beer, Kevin from Tampa has declared himself "Supreme Leader of the Swamp." More at 11.',
+      type: 'random' as const,
+      imageType: 'ZONE',
+      effect: { bothLoseState: true }
+    }
+  ];
+
+  // Select headlines (max 3-4 total)
+  const cardHeadlines = playedCards.slice(0, 3).map(({ card, player }) => 
+    generateHeadline(card, player)
+  );
+  
+  const randomEvent = gameEvents[Math.floor(Math.random() * gameEvents.length)];
+  const allHeadlines = [...cardHeadlines, randomEvent].slice(0, 4);
+
   const ads = [
-    "🛸 TINFOIL HATS - 50% OFF! Protect your thoughts from government mind rays!",
-    "🏠 UNDERGROUND BUNKERS - Premium apocalypse survival accommodations. Wi-Fi included!",
-    "💊 TRUTH SERUM - 100% effective* (*Not FDA approved, may cause existential crisis)",
-    "📹 SURVEILLANCE CAMERAS - Watch everyone, everywhere, all the time. Now with night vision!",
-    "🧠 MIND CONTROL BLOCKERS - Stop them from reading your thoughts! Batteries not included.",
-    "👽 ALIEN DETECTION KIT - Spot shapeshifters in your neighborhood! Results not guaranteed.",
-    "🔍 PASTOR REX'S END TIMES CALENDAR - Know exactly when the world ends! Updated daily!",
-    "🦶 BIGFOOT TRACKING BOOTS - Follow the real story! Size 15+ only."
+    "🎩 Buy 2 Tinfoil Hats, Get 3rd Free! Block 5G mind control rays today!",
+    "💎 Crystal Wi-Fi Chakras — Now With 5G Auras! Harmonize your internet energy!",
+    "💧 Miracle Water (Now With Extra Atoms) - Drink your way to enlightenment!",
+    "🚢 Flat Earth Cruises - See the edge of the world! No refunds past the ice wall.",
+    "🏠 Underground Bunkers - Premium apocalypse survival. Wi-Fi guaranteed!",
+    "👽 Alien Detection Kit - Spot shapeshifters in your neighborhood!",
+    "🔍 Pastor Rex's End Times Calendar - Updated daily with new doom dates!",
+    "🦶 Bigfoot Tracking Boots - Follow the real story! Size 15+ only.",
+    "📱 Government-Proof Phone Cases - They can't track what they can't see!",
+    "🧠 Mind Control Blockers - Stop them from reading your thoughts!"
   ];
 
   const conspiracyCorner = [
@@ -65,8 +206,20 @@ const Newspaper = ({ events, onClose }: NewspaperProps) => {
     "• Birds confirmed to be government surveillance drones"
   ];
 
-  const randomAd = ads[Math.floor(Math.random() * ads.length)];
+  // Select 2 random ads
+  const selectedAds = ads.sort(() => Math.random() - 0.5).slice(0, 2);
   const selectedConspiracies = conspiracyCorner.slice(0, 4);
+
+  // Get image placeholder based on card type
+  const getImagePlaceholder = (imageType?: string) => {
+    const placeholders = {
+      MEDIA: '[PHOTO: CLASSIFIED MEDIA BRIEFING]',
+      ZONE: '[PHOTO: RESTRICTED AREA - NO ENTRY]', 
+      ATTACK: '[PHOTO: REDACTED FOR NATIONAL SECURITY]',
+      DEFENSIVE: '[PHOTO: EVIDENCE SEALED BY COURT ORDER]'
+    };
+    return placeholders[imageType as keyof typeof placeholders] || '[PHOTO: CLASSIFIED BY ORDER OF █████████]';
+  };
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 animate-fade-in">
@@ -116,20 +269,18 @@ const Newspaper = ({ events, onClose }: NewspaperProps) => {
         <div className="p-8 grid lg:grid-cols-4 gap-8 bg-newspaper-bg">
           {/* Main Articles - Takes up 3 columns */}
           <div className="lg:col-span-3 space-y-8">
-            {events.map((event, index) => (
-              <article key={event.id} className="border-b-2 border-newspaper-border pb-6">
+            {allHeadlines.map((headline, index) => (
+              <article key={headline.id} className="border-b-2 border-newspaper-border pb-6">
                 <h2 className="text-3xl font-bold mb-4 font-serif text-newspaper-text hover:text-secret-red transition-colors cursor-pointer leading-tight">
-                  {event.headline}
+                  {headline.headline}
                 </h2>
                 
-                {index === 0 && (
-                  <div className="w-full h-32 bg-gray-300 mb-4 flex items-center justify-center text-gray-600 text-sm border-2 border-gray-400">
-                    [PHOTO: CLASSIFIED BY ORDER OF █████████]
-                  </div>
-                )}
+                <div className="w-full h-32 bg-gray-300 mb-4 flex items-center justify-center text-gray-600 text-sm border-2 border-gray-400 font-mono">
+                  {getImagePlaceholder(headline.imageType)}
+                </div>
                 
                 <p className="text-newspaper-text leading-relaxed text-lg font-serif">
-                  {event.content}
+                  {headline.content}
                 </p>
                 
                 {index === 0 && (
@@ -141,7 +292,7 @@ const Newspaper = ({ events, onClose }: NewspaperProps) => {
                 
                 <div className="flex justify-between items-center mt-3 text-xs text-newspaper-text/60">
                   <span>By: Agent ████████</span>
-                  <span>Source: {event.type === 'conspiracy' ? 'Anonymous Whistleblower' : 'Official Statement'}</span>
+                  <span>Source: {headline.type === 'conspiracy' ? 'Anonymous Whistleblower' : 'Official Statement'}</span>
                 </div>
               </article>
             ))}
@@ -176,16 +327,18 @@ const Newspaper = ({ events, onClose }: NewspaperProps) => {
 
           {/* Sidebar - Takes up 1 column */}
           <div className="space-y-6">
-            {/* Advertisement */}
-            <Card className="p-4 bg-yellow-500/90 text-black border-4 border-black transform -rotate-1 hover:rotate-0 transition-transform">
-              <h4 className="font-bold text-center mb-3 font-mono text-lg">⚠️ ADVERTISEMENT ⚠️</h4>
-              <div className="text-center text-sm font-mono">
-                {randomAd}
-              </div>
-              <div className="text-center text-xs mt-2 italic">
-                Call 1-800-WAKE-UP or visit TotallyNotAScam.com
-              </div>
-            </Card>
+            {/* Advertisements - 2 pieces */}
+            {selectedAds.map((ad, index) => (
+              <Card key={index} className={`p-4 bg-yellow-500/90 text-black border-4 border-black transform ${index % 2 === 0 ? '-rotate-1' : 'rotate-1'} hover:rotate-0 transition-transform`}>
+                <h4 className="font-bold text-center mb-3 font-mono text-lg">⚠️ ADVERTISEMENT ⚠️</h4>
+                <div className="text-center text-sm font-mono">
+                  {ad}
+                </div>
+                <div className="text-center text-xs mt-2 italic">
+                  Call 1-800-WAKE-UP or visit TotallyNotAScam.com
+                </div>
+              </Card>
+            ))}
 
             {/* Conspiracy Corner */}
             <Card className="p-4 bg-red-900/20 border-4 border-secret-red relative overflow-hidden">
