@@ -1,0 +1,3476 @@
+{
+  "report": {
+    "totalCards": 202,
+    "balancedCards": 67,
+    "underpoweredCards": 97,
+    "overpoweredCards": 38,
+    "averageCostByType": {
+      "MEDIA": 4,
+      "ZONE": 5,
+      "ATTACK": 6,
+      "DEFENSIVE": 3
+    },
+    "averageCostByRarity": {
+      "common": 4.65,
+      "uncommon": 4.65,
+      "rare": 4.6875,
+      "legendary": 4.5
+    },
+    "recommendations": [
+      "Many cards appear underpowered - consider reducing costs or buffing effects",
+      "Legendary cards should have significantly higher costs than rare cards",
+      "33 cards have usage rates >80% - consider nerfing"
+    ],
+    "mostProblematicCards": [
+      {
+        "id": "media_055",
+        "name": "Viral Hashtag Campaign",
+        "type": "MEDIA",
+        "rarity": "rare",
+        "currentCost": 4,
+        "powerScore": 9.3,
+        "recommendedCost": 12,
+        "costAdjustment": 8,
+        "usageRate": 87.8048780487805,
+        "winRateWhenPlayed": 46.2962962962963,
+        "balanceStatus": "underpowered",
+        "issues": [
+          "Cost too low (should be 12 instead of 4)",
+          "Very high usage rate (87.8%)"
+        ]
+      },
+      {
+        "id": "media_057",
+        "name": "Mass Awakening Event",
+        "type": "MEDIA",
+        "rarity": "rare",
+        "currentCost": 4,
+        "powerScore": 9.3,
+        "recommendedCost": 12,
+        "costAdjustment": 8,
+        "usageRate": 22.608695652173914,
+        "winRateWhenPlayed": 69.23076923076923,
+        "balanceStatus": "underpowered",
+        "issues": [
+          "Cost too low (should be 12 instead of 4)"
+        ]
+      },
+      {
+        "id": "media_059",
+        "name": "The Pentagon Papers 2.0",
+        "type": "MEDIA",
+        "rarity": "rare",
+        "currentCost": 4,
+        "powerScore": 9.3,
+        "recommendedCost": 12,
+        "costAdjustment": 8,
+        "usageRate": 49.685534591194966,
+        "winRateWhenPlayed": 63.29113924050633,
+        "balanceStatus": "underpowered",
+        "issues": [
+          "Cost too low (should be 12 instead of 4)"
+        ]
+      },
+      {
+        "id": "media_060",
+        "name": "Moon Landing Re-Debate",
+        "type": "MEDIA",
+        "rarity": "legendary",
+        "currentCost": 4,
+        "powerScore": 12.8,
+        "recommendedCost": 12,
+        "costAdjustment": 8,
+        "usageRate": 54.47154471544715,
+        "winRateWhenPlayed": 41.7910447761194,
+        "balanceStatus": "underpowered",
+        "issues": [
+          "Cost too low (should be 12 instead of 4)"
+        ]
+      },
+      {
+        "id": "media_061",
+        "name": "Disclosure Event",
+        "type": "MEDIA",
+        "rarity": "legendary",
+        "currentCost": 4,
+        "powerScore": 13.8,
+        "recommendedCost": 12,
+        "costAdjustment": 8,
+        "usageRate": 76.5625,
+        "winRateWhenPlayed": 38.775510204081634,
+        "balanceStatus": "underpowered",
+        "issues": [
+          "Cost too low (should be 12 instead of 4)"
+        ]
+      },
+      {
+        "id": "media_058",
+        "name": "Total Media Control",
+        "type": "MEDIA",
+        "rarity": "rare",
+        "currentCost": 4,
+        "powerScore": 8.1,
+        "recommendedCost": 11,
+        "costAdjustment": 7,
+        "usageRate": 77.66990291262135,
+        "winRateWhenPlayed": 6.25,
+        "balanceStatus": "underpowered",
+        "issues": [
+          "Cost too low (should be 11 instead of 4)",
+          "Low win rate when played (6.3%)"
+        ]
+      },
+      {
+        "id": "zone_060",
+        "name": "The Lost City Under Denver Airport",
+        "type": "ZONE",
+        "rarity": "legendary",
+        "currentCost": 5,
+        "powerScore": 9.2,
+        "recommendedCost": 12,
+        "costAdjustment": 7,
+        "usageRate": 21.052631578947366,
+        "winRateWhenPlayed": 15,
+        "balanceStatus": "underpowered",
+        "issues": [
+          "Cost too low (should be 12 instead of 5)",
+          "Low win rate when played (15.0%)"
+        ]
+      },
+      {
+        "id": "zone_061",
+        "name": "Hollow Earth Entrance",
+        "type": "ZONE",
+        "rarity": "legendary",
+        "currentCost": 5,
+        "powerScore": 9.2,
+        "recommendedCost": 12,
+        "costAdjustment": 7,
+        "usageRate": 33.54430379746836,
+        "winRateWhenPlayed": 92.45283018867924,
+        "balanceStatus": "underpowered",
+        "issues": [
+          "Cost too low (should be 12 instead of 5)",
+          "High win rate when played (92.5%)"
+        ]
+      },
+      {
+        "id": "media_048",
+        "name": "Banned Documentary",
+        "type": "MEDIA",
+        "rarity": "uncommon",
+        "currentCost": 4,
+        "powerScore": 7.1,
+        "recommendedCost": 10,
+        "costAdjustment": 6,
+        "usageRate": 129.41176470588235,
+        "winRateWhenPlayed": 17.045454545454543,
+        "balanceStatus": "underpowered",
+        "issues": [
+          "Cost too low (should be 10 instead of 4)",
+          "Very high usage rate (129.4%)",
+          "Low win rate when played (17.0%)"
+        ]
+      },
+      {
+        "id": "media_054",
+        "name": "Deathbed Confession",
+        "type": "MEDIA",
+        "rarity": "uncommon",
+        "currentCost": 4,
+        "powerScore": 7.1,
+        "recommendedCost": 10,
+        "costAdjustment": 6,
+        "usageRate": 7.344632768361582,
+        "winRateWhenPlayed": 376.9230769230769,
+        "balanceStatus": "underpowered",
+        "issues": [
+          "Cost too low (should be 10 instead of 4)",
+          "Low usage rate (7.3%)",
+          "High win rate when played (376.9%)"
+        ]
+      }
+    ]
+  },
+  "cardAnalysis": [
+    {
+      "id": "media_001",
+      "name": "Cable News Spin",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 37.43016759776536,
+      "winRateWhenPlayed": 17.91044776119403,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (17.9%)"
+      ]
+    },
+    {
+      "id": "media_002",
+      "name": "Leaked Memo",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 111.53846153846155,
+      "winRateWhenPlayed": 77.58620689655173,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Very high usage rate (111.5%)",
+        "High win rate when played (77.6%)"
+      ]
+    },
+    {
+      "id": "media_003",
+      "name": "Anonymous Blog Post",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 120.83333333333333,
+      "winRateWhenPlayed": 37.93103448275862,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Very high usage rate (120.8%)"
+      ]
+    },
+    {
+      "id": "media_004",
+      "name": "Late Night Talk Show",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 32.53012048192771,
+      "winRateWhenPlayed": 111.11111111111111,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (111.1%)"
+      ]
+    },
+    {
+      "id": "media_005",
+      "name": "Press Conference",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 30.601092896174865,
+      "winRateWhenPlayed": 83.92857142857143,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (83.9%)"
+      ]
+    },
+    {
+      "id": "media_006",
+      "name": "Conspiracy Podcast",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 46.2962962962963,
+      "winRateWhenPlayed": 40,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)"
+      ]
+    },
+    {
+      "id": "media_007",
+      "name": "Photoshop Hoax",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 23.18840579710145,
+      "winRateWhenPlayed": 287.5,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (287.5%)"
+      ]
+    },
+    {
+      "id": "media_008",
+      "name": "Tabloid Headline",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 48.38709677419355,
+      "winRateWhenPlayed": 8.88888888888889,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Low win rate when played (8.9%)"
+      ]
+    },
+    {
+      "id": "media_009",
+      "name": "Censored Report",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 24.725274725274726,
+      "winRateWhenPlayed": 57.77777777777777,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "media_010",
+      "name": "YouTube Rant",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 48.93617021276596,
+      "winRateWhenPlayed": 35.869565217391305,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)"
+      ]
+    },
+    {
+      "id": "media_011",
+      "name": "Blurry Bigfoot Photo",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 25.882352941176475,
+      "winRateWhenPlayed": 18.181818181818183,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Low win rate when played (18.2%)"
+      ]
+    },
+    {
+      "id": "media_012",
+      "name": "Weather Balloon Excuse",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 43.65079365079365,
+      "winRateWhenPlayed": 87.27272727272727,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (87.3%)"
+      ]
+    },
+    {
+      "id": "media_013",
+      "name": "Fact Check Article",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 11.48936170212766,
+      "winRateWhenPlayed": 37.03703703703704,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (11.5%)"
+      ]
+    },
+    {
+      "id": "media_014",
+      "name": "Twitter Whistleblower",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 13.733905579399142,
+      "winRateWhenPlayed": 78.125,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Low usage rate (13.7%)",
+        "High win rate when played (78.1%)"
+      ]
+    },
+    {
+      "id": "media_015",
+      "name": "Government PSA",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 8.415841584158416,
+      "winRateWhenPlayed": 235.29411764705884,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (8.4%)",
+        "High win rate when played (235.3%)"
+      ]
+    },
+    {
+      "id": "media_016",
+      "name": "Meme Campaign",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 15.5,
+      "winRateWhenPlayed": 167.74193548387098,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Low usage rate (15.5%)",
+        "High win rate when played (167.7%)"
+      ]
+    },
+    {
+      "id": "media_017",
+      "name": "Documentary Expose",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 28.985507246376812,
+      "winRateWhenPlayed": 55.00000000000001,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)"
+      ]
+    },
+    {
+      "id": "media_018",
+      "name": "Expert Testimony",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 86.1788617886179,
+      "winRateWhenPlayed": 50,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (86.2%)"
+      ]
+    },
+    {
+      "id": "media_019",
+      "name": "Leaked Audio",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 8.47457627118644,
+      "winRateWhenPlayed": 246.66666666666669,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Low usage rate (8.5%)",
+        "High win rate when played (246.7%)"
+      ]
+    },
+    {
+      "id": "media_020",
+      "name": "Crisis Actor Claims",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 19.402985074626866,
+      "winRateWhenPlayed": 92.3076923076923,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Low usage rate (19.4%)",
+        "High win rate when played (92.3%)"
+      ]
+    },
+    {
+      "id": "media_021",
+      "name": "Staged Interview",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 22.48062015503876,
+      "winRateWhenPlayed": 68.96551724137932,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "media_022",
+      "name": "Whistleblower Protection",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 184.6153846153846,
+      "winRateWhenPlayed": 42.70833333333333,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Very high usage rate (184.6%)"
+      ]
+    },
+    {
+      "id": "media_023",
+      "name": "Conspiracy Theory Label",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 6.289308176100629,
+      "winRateWhenPlayed": 220.00000000000003,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (6.3%)",
+        "High win rate when played (220.0%)"
+      ]
+    },
+    {
+      "id": "media_024",
+      "name": "Alternative News Site",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 65.38461538461539,
+      "winRateWhenPlayed": 41.17647058823529,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)"
+      ]
+    },
+    {
+      "id": "media_025",
+      "name": "AI Deepfake Denial",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 53.672316384180796,
+      "winRateWhenPlayed": 42.10526315789473,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "media_026",
+      "name": "Forum Post Evidence",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 35.75757575757576,
+      "winRateWhenPlayed": 33.89830508474576,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Low win rate when played (33.9%)"
+      ]
+    },
+    {
+      "id": "media_027",
+      "name": "Celebrity Endorsement",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 98.80952380952381,
+      "winRateWhenPlayed": 48.19277108433735,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (98.8%)"
+      ]
+    },
+    {
+      "id": "media_028",
+      "name": "Classified Leak",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 42.07920792079208,
+      "winRateWhenPlayed": 35.294117647058826,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)"
+      ]
+    },
+    {
+      "id": "media_029",
+      "name": "Social Media Ban",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 27.309236947791167,
+      "winRateWhenPlayed": 7.352941176470589,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (7.4%)"
+      ]
+    },
+    {
+      "id": "media_030",
+      "name": "Streisand Effect",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 20.73170731707317,
+      "winRateWhenPlayed": 23.52941176470588,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Low win rate when played (23.5%)"
+      ]
+    },
+    {
+      "id": "media_031",
+      "name": "Official Statement",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 19.607843137254903,
+      "winRateWhenPlayed": 67.5,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (19.6%)"
+      ]
+    },
+    {
+      "id": "media_032",
+      "name": "Investigative Report",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 68.18181818181817,
+      "winRateWhenPlayed": 34.44444444444444,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Low win rate when played (34.4%)"
+      ]
+    },
+    {
+      "id": "media_033",
+      "name": "Damage Control",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 37.07865168539326,
+      "winRateWhenPlayed": 27.27272727272727,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (27.3%)"
+      ]
+    },
+    {
+      "id": "media_034",
+      "name": "Data Dump",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 55.00000000000001,
+      "winRateWhenPlayed": 21.21212121212121,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Low win rate when played (21.2%)"
+      ]
+    },
+    {
+      "id": "media_035",
+      "name": "Think Tank Study",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 14.485981308411214,
+      "winRateWhenPlayed": 116.12903225806453,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (14.5%)",
+        "High win rate when played (116.1%)"
+      ]
+    },
+    {
+      "id": "media_036",
+      "name": "Citizen Journalist",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 39.795918367346935,
+      "winRateWhenPlayed": 16.666666666666664,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Low win rate when played (16.7%)"
+      ]
+    },
+    {
+      "id": "media_037",
+      "name": "Gaslighting Campaign",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 56.81818181818182,
+      "winRateWhenPlayed": 9,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (9.0%)"
+      ]
+    },
+    {
+      "id": "media_038",
+      "name": "FOIA Request",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 23.728813559322035,
+      "winRateWhenPlayed": 73.80952380952381,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "High win rate when played (73.8%)"
+      ]
+    },
+    {
+      "id": "media_039",
+      "name": "Planted Story",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 23.809523809523807,
+      "winRateWhenPlayed": 130,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (130.0%)"
+      ]
+    },
+    {
+      "id": "media_040",
+      "name": "Anonymous Tip",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 91.75257731958763,
+      "winRateWhenPlayed": 26.96629213483146,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)",
+        "Very high usage rate (91.8%)",
+        "Low win rate when played (27.0%)"
+      ]
+    },
+    {
+      "id": "media_041",
+      "name": "Viral Video",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 2,
+      "usageRate": 71.1864406779661,
+      "winRateWhenPlayed": 45.23809523809524,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 4)"
+      ]
+    },
+    {
+      "id": "media_042",
+      "name": "Memory Hole",
+      "type": "MEDIA",
+      "rarity": "common",
+      "currentCost": 4,
+      "powerScore": 4,
+      "recommendedCost": 5,
+      "costAdjustment": 1,
+      "usageRate": 44.776119402985074,
+      "winRateWhenPlayed": 81.66666666666667,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (81.7%)"
+      ]
+    },
+    {
+      "id": "media_043",
+      "name": "Secret Email Dump",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 7.1,
+      "recommendedCost": 10,
+      "costAdjustment": 6,
+      "usageRate": 22.285714285714285,
+      "winRateWhenPlayed": 105.12820512820514,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 10 instead of 4)",
+        "High win rate when played (105.1%)"
+      ]
+    },
+    {
+      "id": "media_044",
+      "name": "24/7 News Cycle",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 5.9,
+      "recommendedCost": 8,
+      "costAdjustment": 4,
+      "usageRate": 95.23809523809523,
+      "winRateWhenPlayed": 40,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 4)",
+        "Very high usage rate (95.2%)"
+      ]
+    },
+    {
+      "id": "media_045",
+      "name": "Coordinated Blackout",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 5.9,
+      "recommendedCost": 8,
+      "costAdjustment": 4,
+      "usageRate": 29.84293193717277,
+      "winRateWhenPlayed": 78.94736842105263,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 4)",
+        "High win rate when played (78.9%)"
+      ]
+    },
+    {
+      "id": "media_046",
+      "name": "Wikileaks Release",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 7.1,
+      "recommendedCost": 10,
+      "costAdjustment": 6,
+      "usageRate": 71.96261682242991,
+      "winRateWhenPlayed": 32.467532467532465,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 10 instead of 4)",
+        "Low win rate when played (32.5%)"
+      ]
+    },
+    {
+      "id": "media_047",
+      "name": "Operation Mockingbird",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 5.9,
+      "recommendedCost": 8,
+      "costAdjustment": 4,
+      "usageRate": 176.36363636363637,
+      "winRateWhenPlayed": 9.278350515463918,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 4)",
+        "Very high usage rate (176.4%)",
+        "Low win rate when played (9.3%)"
+      ]
+    },
+    {
+      "id": "media_048",
+      "name": "Banned Documentary",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 7.1,
+      "recommendedCost": 10,
+      "costAdjustment": 6,
+      "usageRate": 129.41176470588235,
+      "winRateWhenPlayed": 17.045454545454543,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 10 instead of 4)",
+        "Very high usage rate (129.4%)",
+        "Low win rate when played (17.0%)"
+      ]
+    },
+    {
+      "id": "media_049",
+      "name": "Astroturfing Campaign",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 5.9,
+      "recommendedCost": 8,
+      "costAdjustment": 4,
+      "usageRate": 142,
+      "winRateWhenPlayed": 54.929577464788736,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 4)",
+        "Very high usage rate (142.0%)"
+      ]
+    },
+    {
+      "id": "media_050",
+      "name": "Insider Confession",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 7.1,
+      "recommendedCost": 10,
+      "costAdjustment": 6,
+      "usageRate": 36.809815950920246,
+      "winRateWhenPlayed": 53.333333333333336,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 10 instead of 4)"
+      ]
+    },
+    {
+      "id": "media_051",
+      "name": "Information Warfare",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 5.9,
+      "recommendedCost": 8,
+      "costAdjustment": 4,
+      "usageRate": 26.89075630252101,
+      "winRateWhenPlayed": 84.375,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 4)",
+        "High win rate when played (84.4%)"
+      ]
+    },
+    {
+      "id": "media_052",
+      "name": "Truth Bomb",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 7.1,
+      "recommendedCost": 10,
+      "costAdjustment": 6,
+      "usageRate": 46.62576687116564,
+      "winRateWhenPlayed": 18.421052631578945,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 10 instead of 4)",
+        "Low win rate when played (18.4%)"
+      ]
+    },
+    {
+      "id": "media_053",
+      "name": "Controlled Opposition",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 5.9,
+      "recommendedCost": 8,
+      "costAdjustment": 4,
+      "usageRate": 46.51162790697674,
+      "winRateWhenPlayed": 12,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 4)",
+        "Low win rate when played (12.0%)"
+      ]
+    },
+    {
+      "id": "media_054",
+      "name": "Deathbed Confession",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "currentCost": 4,
+      "powerScore": 7.1,
+      "recommendedCost": 10,
+      "costAdjustment": 6,
+      "usageRate": 7.344632768361582,
+      "winRateWhenPlayed": 376.9230769230769,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 10 instead of 4)",
+        "Low usage rate (7.3%)",
+        "High win rate when played (376.9%)"
+      ]
+    },
+    {
+      "id": "media_055",
+      "name": "Viral Hashtag Campaign",
+      "type": "MEDIA",
+      "rarity": "rare",
+      "currentCost": 4,
+      "powerScore": 9.3,
+      "recommendedCost": 12,
+      "costAdjustment": 8,
+      "usageRate": 87.8048780487805,
+      "winRateWhenPlayed": 46.2962962962963,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 12 instead of 4)",
+        "Very high usage rate (87.8%)"
+      ]
+    },
+    {
+      "id": "media_056",
+      "name": "Deepfake Broadcast",
+      "type": "MEDIA",
+      "rarity": "rare",
+      "currentCost": 4,
+      "powerScore": 8.1,
+      "recommendedCost": 11,
+      "costAdjustment": 7,
+      "usageRate": 73,
+      "winRateWhenPlayed": 61.64383561643836,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 11 instead of 4)"
+      ]
+    },
+    {
+      "id": "media_057",
+      "name": "Mass Awakening Event",
+      "type": "MEDIA",
+      "rarity": "rare",
+      "currentCost": 4,
+      "powerScore": 9.3,
+      "recommendedCost": 12,
+      "costAdjustment": 8,
+      "usageRate": 22.608695652173914,
+      "winRateWhenPlayed": 69.23076923076923,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 12 instead of 4)"
+      ]
+    },
+    {
+      "id": "media_058",
+      "name": "Total Media Control",
+      "type": "MEDIA",
+      "rarity": "rare",
+      "currentCost": 4,
+      "powerScore": 8.1,
+      "recommendedCost": 11,
+      "costAdjustment": 7,
+      "usageRate": 77.66990291262135,
+      "winRateWhenPlayed": 6.25,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 11 instead of 4)",
+        "Low win rate when played (6.3%)"
+      ]
+    },
+    {
+      "id": "media_059",
+      "name": "The Pentagon Papers 2.0",
+      "type": "MEDIA",
+      "rarity": "rare",
+      "currentCost": 4,
+      "powerScore": 9.3,
+      "recommendedCost": 12,
+      "costAdjustment": 8,
+      "usageRate": 49.685534591194966,
+      "winRateWhenPlayed": 63.29113924050633,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 12 instead of 4)"
+      ]
+    },
+    {
+      "id": "media_060",
+      "name": "Moon Landing Re-Debate",
+      "type": "MEDIA",
+      "rarity": "legendary",
+      "currentCost": 4,
+      "powerScore": 12.8,
+      "recommendedCost": 12,
+      "costAdjustment": 8,
+      "usageRate": 54.47154471544715,
+      "winRateWhenPlayed": 41.7910447761194,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 12 instead of 4)"
+      ]
+    },
+    {
+      "id": "media_061",
+      "name": "Disclosure Event",
+      "type": "MEDIA",
+      "rarity": "legendary",
+      "currentCost": 4,
+      "powerScore": 13.8,
+      "recommendedCost": 12,
+      "costAdjustment": 8,
+      "usageRate": 76.5625,
+      "winRateWhenPlayed": 38.775510204081634,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 12 instead of 4)"
+      ]
+    },
+    {
+      "id": "zone_001",
+      "name": "Black Helicopter Patrol",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 20.454545454545457,
+      "winRateWhenPlayed": 28.888888888888886,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (28.9%)"
+      ]
+    },
+    {
+      "id": "zone_002",
+      "name": "Cornfield Abduction",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 22.093023255813954,
+      "winRateWhenPlayed": 221.0526315789474,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (221.1%)"
+      ]
+    },
+    {
+      "id": "zone_003",
+      "name": "Haunted Walmart",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 76.81159420289855,
+      "winRateWhenPlayed": 28.30188679245283,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (28.3%)"
+      ]
+    },
+    {
+      "id": "zone_004",
+      "name": "FEMA Camp Setup",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 14.883720930232558,
+      "winRateWhenPlayed": 15.625,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (14.9%)",
+        "Low win rate when played (15.6%)"
+      ]
+    },
+    {
+      "id": "zone_005",
+      "name": "Chemtrail Grid",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 20.48780487804878,
+      "winRateWhenPlayed": 114.28571428571428,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (114.3%)"
+      ]
+    },
+    {
+      "id": "zone_006",
+      "name": "Cell Tower Installation",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 98.7012987012987,
+      "winRateWhenPlayed": 39.473684210526315,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (98.7%)"
+      ]
+    },
+    {
+      "id": "zone_007",
+      "name": "Secret Underground Base",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 23.11320754716981,
+      "winRateWhenPlayed": 106.12244897959184,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (106.1%)"
+      ]
+    },
+    {
+      "id": "zone_008",
+      "name": "Surveillance Network",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 134,
+      "winRateWhenPlayed": 79.1044776119403,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (134.0%)",
+        "High win rate when played (79.1%)"
+      ]
+    },
+    {
+      "id": "zone_009",
+      "name": "Crop Circle Appearance",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 44.67005076142132,
+      "winRateWhenPlayed": 56.81818181818182,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_010",
+      "name": "Mysterious Military Exercise",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 132.69230769230768,
+      "winRateWhenPlayed": 68.11594202898551,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (132.7%)"
+      ]
+    },
+    {
+      "id": "zone_011",
+      "name": "Bigfoot Sighting",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 31.521739130434785,
+      "winRateWhenPlayed": 186.20689655172413,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (186.2%)"
+      ]
+    },
+    {
+      "id": "zone_012",
+      "name": "Weather Station Anomaly",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 42.3728813559322,
+      "winRateWhenPlayed": 52,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_013",
+      "name": "Abandoned Government Facility",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 27.27272727272727,
+      "winRateWhenPlayed": 52.77777777777778,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_014",
+      "name": "UFO Landing Site",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 61.33333333333333,
+      "winRateWhenPlayed": 56.52173913043478,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_015",
+      "name": "Cattle Mutilation",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 24.615384615384617,
+      "winRateWhenPlayed": 153.125,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (153.1%)"
+      ]
+    },
+    {
+      "id": "zone_016",
+      "name": "Illuminati Lodge",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 16.818181818181817,
+      "winRateWhenPlayed": 45.94594594594595,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (16.8%)"
+      ]
+    },
+    {
+      "id": "zone_017",
+      "name": "Masonic Temple",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 50.467289719626166,
+      "winRateWhenPlayed": 39.81481481481482,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_018",
+      "name": "Shadow Figure Sightings",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 9.090909090909092,
+      "winRateWhenPlayed": 384.61538461538464,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (9.1%)",
+        "High win rate when played (384.6%)"
+      ]
+    },
+    {
+      "id": "zone_019",
+      "name": "Fracking Operation",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 5.729166666666666,
+      "winRateWhenPlayed": 118.18181818181819,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (5.7%)",
+        "High win rate when played (118.2%)"
+      ]
+    },
+    {
+      "id": "zone_020",
+      "name": "Bohemian Grove Gathering",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 27.27272727272727,
+      "winRateWhenPlayed": 80.95238095238095,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (81.0%)"
+      ]
+    },
+    {
+      "id": "zone_021",
+      "name": "GPS Jamming Zone",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 72.91666666666666,
+      "winRateWhenPlayed": 31.428571428571427,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (31.4%)"
+      ]
+    },
+    {
+      "id": "zone_022",
+      "name": "Vaccine Distribution Center",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 69.92481203007519,
+      "winRateWhenPlayed": 44.086021505376344,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_023",
+      "name": "Data Collection Hub",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 32.075471698113205,
+      "winRateWhenPlayed": 88.23529411764706,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (88.2%)"
+      ]
+    },
+    {
+      "id": "zone_024",
+      "name": "Homeless Encampment Raid",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 56.05095541401274,
+      "winRateWhenPlayed": 10.227272727272728,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (10.2%)"
+      ]
+    },
+    {
+      "id": "zone_025",
+      "name": "Tesla Coil Installation",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 6.481481481481481,
+      "winRateWhenPlayed": 314.2857142857143,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (6.5%)",
+        "High win rate when played (314.3%)"
+      ]
+    },
+    {
+      "id": "zone_026",
+      "name": "Pyramid Discovery",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 49.26108374384236,
+      "winRateWhenPlayed": 32,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (32.0%)"
+      ]
+    },
+    {
+      "id": "zone_027",
+      "name": "Mind Control Testing",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 45.13274336283185,
+      "winRateWhenPlayed": 50.98039215686274,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_028",
+      "name": "Fluoride Plant",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 57.36434108527132,
+      "winRateWhenPlayed": 6.756756756756757,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (6.8%)"
+      ]
+    },
+    {
+      "id": "zone_029",
+      "name": "Smart City Pilot",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 46.236559139784944,
+      "winRateWhenPlayed": 123.25581395348837,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (123.3%)"
+      ]
+    },
+    {
+      "id": "zone_030",
+      "name": "Drone Surveillance",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 43.037974683544306,
+      "winRateWhenPlayed": 27.450980392156865,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (27.5%)"
+      ]
+    },
+    {
+      "id": "zone_031",
+      "name": "Seed Bank Facility",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 28.251121076233183,
+      "winRateWhenPlayed": 25.396825396825395,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (25.4%)"
+      ]
+    },
+    {
+      "id": "zone_032",
+      "name": "Quantum Computer Lab",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 31.818181818181817,
+      "winRateWhenPlayed": 97.95918367346938,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (98.0%)"
+      ]
+    },
+    {
+      "id": "zone_033",
+      "name": "Alien Artifact Storage",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 72.8395061728395,
+      "winRateWhenPlayed": 54.23728813559322,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_034",
+      "name": "Electromagnetic Pulse Test",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 75.75757575757575,
+      "winRateWhenPlayed": 61.33333333333333,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_035",
+      "name": "Genetic Engineering Lab",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 63.86554621848739,
+      "winRateWhenPlayed": 69.73684210526315,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_036",
+      "name": "Time Travel Experiment",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 32.142857142857146,
+      "winRateWhenPlayed": 103.7037037037037,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (103.7%)"
+      ]
+    },
+    {
+      "id": "zone_037",
+      "name": "Interdimensional Portal",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 120.58823529411764,
+      "winRateWhenPlayed": 60.97560975609756,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (120.6%)"
+      ]
+    },
+    {
+      "id": "zone_038",
+      "name": "Reptilian Shapeshifter Base",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 52.20125786163522,
+      "winRateWhenPlayed": 18.072289156626507,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (18.1%)"
+      ]
+    },
+    {
+      "id": "zone_039",
+      "name": "Hollow Earth Entrance",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 16.853932584269664,
+      "winRateWhenPlayed": 23.333333333333332,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (16.9%)",
+        "Low win rate when played (23.3%)"
+      ]
+    },
+    {
+      "id": "zone_040",
+      "name": "Atlantis Ruins",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 13.872832369942195,
+      "winRateWhenPlayed": 175,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (13.9%)",
+        "High win rate when played (175.0%)"
+      ]
+    },
+    {
+      "id": "zone_041",
+      "name": "MIB Headquarters",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 28.502415458937197,
+      "winRateWhenPlayed": 10.16949152542373,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (10.2%)"
+      ]
+    },
+    {
+      "id": "zone_042",
+      "name": "Phantom Social Security",
+      "type": "ZONE",
+      "rarity": "common",
+      "currentCost": 5,
+      "powerScore": 3.6,
+      "recommendedCost": 4,
+      "costAdjustment": -1,
+      "usageRate": 59.876543209876544,
+      "winRateWhenPlayed": 52.57731958762887,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_043",
+      "name": "Area 51 Security Perimeter",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.1,
+      "recommendedCost": 6,
+      "costAdjustment": 1,
+      "usageRate": 33.198380566801625,
+      "winRateWhenPlayed": 19.51219512195122,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (19.5%)"
+      ]
+    },
+    {
+      "id": "zone_044",
+      "name": "Denver Airport Secrets",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.1,
+      "recommendedCost": 6,
+      "costAdjustment": 1,
+      "usageRate": 21.80094786729858,
+      "winRateWhenPlayed": 36.95652173913043,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "zone_045",
+      "name": "Bermuda Triangle Portal",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.1,
+      "recommendedCost": 6,
+      "costAdjustment": 1,
+      "usageRate": 21.608040201005025,
+      "winRateWhenPlayed": 16.27906976744186,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (16.3%)"
+      ]
+    },
+    {
+      "id": "zone_046",
+      "name": "HAARP Weather Control",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.1,
+      "recommendedCost": 6,
+      "costAdjustment": 1,
+      "usageRate": 17.391304347826086,
+      "winRateWhenPlayed": 17.857142857142858,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (17.4%)",
+        "Low win rate when played (17.9%)"
+      ]
+    },
+    {
+      "id": "zone_047",
+      "name": "Dulce Base Operations",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.1,
+      "recommendedCost": 6,
+      "costAdjustment": 1,
+      "usageRate": 40.55555555555556,
+      "winRateWhenPlayed": 34.24657534246575,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (34.2%)"
+      ]
+    },
+    {
+      "id": "zone_048",
+      "name": "CERN Dimension Breach",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.9,
+      "recommendedCost": 7,
+      "costAdjustment": 2,
+      "usageRate": 42.4,
+      "winRateWhenPlayed": 26.41509433962264,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 7 instead of 5)",
+        "Low win rate when played (26.4%)"
+      ]
+    },
+    {
+      "id": "zone_049",
+      "name": "Mount Rushmore Bunker",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.1,
+      "recommendedCost": 6,
+      "costAdjustment": 1,
+      "usageRate": 143.28358208955223,
+      "winRateWhenPlayed": 17.708333333333336,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (143.3%)",
+        "Low win rate when played (17.7%)"
+      ]
+    },
+    {
+      "id": "zone_050",
+      "name": "Cheyenne Mountain Complex",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.1,
+      "recommendedCost": 6,
+      "costAdjustment": 1,
+      "usageRate": 17.105263157894736,
+      "winRateWhenPlayed": 369.2307692307692,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (17.1%)",
+        "High win rate when played (369.2%)"
+      ]
+    },
+    {
+      "id": "zone_051",
+      "name": "Project Blue Beam Array",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.9,
+      "recommendedCost": 7,
+      "costAdjustment": 2,
+      "usageRate": 32.972972972972975,
+      "winRateWhenPlayed": 22.950819672131146,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 7 instead of 5)",
+        "Low win rate when played (23.0%)"
+      ]
+    },
+    {
+      "id": "zone_052",
+      "name": "Antarctic Research Station",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.9,
+      "recommendedCost": 7,
+      "costAdjustment": 2,
+      "usageRate": 10.967741935483872,
+      "winRateWhenPlayed": 300,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 7 instead of 5)",
+        "Low usage rate (11.0%)",
+        "High win rate when played (300.0%)"
+      ]
+    },
+    {
+      "id": "zone_053",
+      "name": "Silicon Valley Mind Lab",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.1,
+      "recommendedCost": 6,
+      "costAdjustment": 1,
+      "usageRate": 134.7826086956522,
+      "winRateWhenPlayed": 49.46236559139785,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (134.8%)"
+      ]
+    },
+    {
+      "id": "zone_054",
+      "name": "Yellowstone Caldera Tap",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "currentCost": 5,
+      "powerScore": 4.1,
+      "recommendedCost": 6,
+      "costAdjustment": 1,
+      "usageRate": 15.686274509803921,
+      "winRateWhenPlayed": 225,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (15.7%)",
+        "High win rate when played (225.0%)"
+      ]
+    },
+    {
+      "id": "zone_055",
+      "name": "Underground Bunker Network",
+      "type": "ZONE",
+      "rarity": "rare",
+      "currentCost": 5,
+      "powerScore": 6.2,
+      "recommendedCost": 8,
+      "costAdjustment": 3,
+      "usageRate": 8.92018779342723,
+      "winRateWhenPlayed": 189.4736842105263,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 5)",
+        "Low usage rate (8.9%)",
+        "High win rate when played (189.5%)"
+      ]
+    },
+    {
+      "id": "zone_056",
+      "name": "Global Surveillance Grid",
+      "type": "ZONE",
+      "rarity": "rare",
+      "currentCost": 5,
+      "powerScore": 7.1,
+      "recommendedCost": 10,
+      "costAdjustment": 5,
+      "usageRate": 69.81132075471697,
+      "winRateWhenPlayed": 132.43243243243242,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 10 instead of 5)",
+        "High win rate when played (132.4%)"
+      ]
+    },
+    {
+      "id": "zone_057",
+      "name": "Dimensional Anchor Point",
+      "type": "ZONE",
+      "rarity": "rare",
+      "currentCost": 5,
+      "powerScore": 7.5,
+      "recommendedCost": 10,
+      "costAdjustment": 5,
+      "usageRate": 11.403508771929824,
+      "winRateWhenPlayed": 119.23076923076923,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 10 instead of 5)",
+        "Low usage rate (11.4%)",
+        "High win rate when played (119.2%)"
+      ]
+    },
+    {
+      "id": "zone_058",
+      "name": "Reptilian Command Center",
+      "type": "ZONE",
+      "rarity": "rare",
+      "currentCost": 5,
+      "powerScore": 6.3,
+      "recommendedCost": 9,
+      "costAdjustment": 4,
+      "usageRate": 55.00000000000001,
+      "winRateWhenPlayed": 41.55844155844156,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 9 instead of 5)"
+      ]
+    },
+    {
+      "id": "zone_059",
+      "name": "New World Order Staging",
+      "type": "ZONE",
+      "rarity": "rare",
+      "currentCost": 5,
+      "powerScore": 7.7,
+      "recommendedCost": 10,
+      "costAdjustment": 5,
+      "usageRate": 77.53623188405797,
+      "winRateWhenPlayed": 48.598130841121495,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 10 instead of 5)"
+      ]
+    },
+    {
+      "id": "zone_060",
+      "name": "The Lost City Under Denver Airport",
+      "type": "ZONE",
+      "rarity": "legendary",
+      "currentCost": 5,
+      "powerScore": 9.2,
+      "recommendedCost": 12,
+      "costAdjustment": 7,
+      "usageRate": 21.052631578947366,
+      "winRateWhenPlayed": 15,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 12 instead of 5)",
+        "Low win rate when played (15.0%)"
+      ]
+    },
+    {
+      "id": "zone_061",
+      "name": "Hollow Earth Entrance",
+      "type": "ZONE",
+      "rarity": "legendary",
+      "currentCost": 5,
+      "powerScore": 9.2,
+      "recommendedCost": 12,
+      "costAdjustment": 7,
+      "usageRate": 33.54430379746836,
+      "winRateWhenPlayed": 92.45283018867924,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 12 instead of 5)",
+        "High win rate when played (92.5%)"
+      ]
+    },
+    {
+      "id": "attack_001",
+      "name": "IRS Audit",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 160,
+      "winRateWhenPlayed": 5.681818181818182,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (160.0%)",
+        "Low win rate when played (5.7%)"
+      ]
+    },
+    {
+      "id": "attack_002",
+      "name": "Internet Blackout",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 53.74149659863946,
+      "winRateWhenPlayed": 13.924050632911392,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (13.9%)"
+      ]
+    },
+    {
+      "id": "attack_003",
+      "name": "Power Grid Failure",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 70.22900763358778,
+      "winRateWhenPlayed": 36.95652173913043,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "attack_004",
+      "name": "Hacked Servers",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 45.94594594594595,
+      "winRateWhenPlayed": 16.470588235294116,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (16.5%)"
+      ]
+    },
+    {
+      "id": "attack_005",
+      "name": "Cancel Culture Storm",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 28.57142857142857,
+      "winRateWhenPlayed": 173.33333333333334,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (173.3%)"
+      ]
+    },
+    {
+      "id": "attack_006",
+      "name": "Data Leak",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 31.343283582089555,
+      "winRateWhenPlayed": 34.92063492063492,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (34.9%)"
+      ]
+    },
+    {
+      "id": "attack_007",
+      "name": "FBI Raid",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 117.91044776119404,
+      "winRateWhenPlayed": 16.455696202531644,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (117.9%)",
+        "Low win rate when played (16.5%)"
+      ]
+    },
+    {
+      "id": "attack_008",
+      "name": "Bot Swarm",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 71.15384615384616,
+      "winRateWhenPlayed": 14.864864864864865,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (14.9%)"
+      ]
+    },
+    {
+      "id": "attack_009",
+      "name": "Economic Sanctions",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 35.13513513513514,
+      "winRateWhenPlayed": 64.61538461538461,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "attack_010",
+      "name": "False Flag Operation",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 39.89637305699482,
+      "winRateWhenPlayed": 7.792207792207792,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (7.8%)"
+      ]
+    },
+    {
+      "id": "attack_011",
+      "name": "Media Assassination",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 23.595505617977526,
+      "winRateWhenPlayed": 28.57142857142857,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (28.6%)"
+      ]
+    },
+    {
+      "id": "attack_012",
+      "name": "Supply Chain Disruption",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 67.79661016949152,
+      "winRateWhenPlayed": 130,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (130.0%)"
+      ]
+    },
+    {
+      "id": "attack_013",
+      "name": "Social Credit Punishment",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 79.64601769911505,
+      "winRateWhenPlayed": 15.555555555555555,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (15.6%)"
+      ]
+    },
+    {
+      "id": "attack_014",
+      "name": "Satellite Interference",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 48.818897637795274,
+      "winRateWhenPlayed": 56.451612903225815,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "attack_015",
+      "name": "Drone Strike",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 129.5774647887324,
+      "winRateWhenPlayed": 42.391304347826086,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (129.6%)"
+      ]
+    },
+    {
+      "id": "attack_016",
+      "name": "Psyop Campaign",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 102.06185567010309,
+      "winRateWhenPlayed": 52.52525252525253,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (102.1%)"
+      ]
+    },
+    {
+      "id": "attack_017",
+      "name": "Bank Account Freeze",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 50,
+      "winRateWhenPlayed": 38.15789473684211,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "attack_018",
+      "name": "Honeypot Trap",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 47.368421052631575,
+      "winRateWhenPlayed": 20.833333333333336,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (20.8%)"
+      ]
+    },
+    {
+      "id": "attack_019",
+      "name": "Vaccine Mandate",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 12.5,
+      "winRateWhenPlayed": 28.57142857142857,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (12.5%)",
+        "Low win rate when played (28.6%)"
+      ]
+    },
+    {
+      "id": "attack_020",
+      "name": "Travel Restrictions",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 41.62162162162162,
+      "winRateWhenPlayed": 40.25974025974026,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "attack_021",
+      "name": "Blackmail Campaign",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 11.650485436893204,
+      "winRateWhenPlayed": 175,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (11.7%)",
+        "High win rate when played (175.0%)"
+      ]
+    },
+    {
+      "id": "attack_022",
+      "name": "Engineered Crisis",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 20.96069868995633,
+      "winRateWhenPlayed": 25,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (25.0%)"
+      ]
+    },
+    {
+      "id": "attack_023",
+      "name": "Coordinated Takedown",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 51.20772946859904,
+      "winRateWhenPlayed": 32.075471698113205,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (32.1%)"
+      ]
+    },
+    {
+      "id": "attack_024",
+      "name": "Deep State Activation",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 79.8507462686567,
+      "winRateWhenPlayed": 30.8411214953271,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (30.8%)"
+      ]
+    },
+    {
+      "id": "attack_025",
+      "name": "Astroturfing Mob",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 156.66666666666666,
+      "winRateWhenPlayed": 8.51063829787234,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (156.7%)",
+        "Low win rate when played (8.5%)"
+      ]
+    },
+    {
+      "id": "attack_026",
+      "name": "Digital Currency Control",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 50,
+      "winRateWhenPlayed": 4.62962962962963,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (4.6%)"
+      ]
+    },
+    {
+      "id": "attack_027",
+      "name": "Manufactured Shortage",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 144.2622950819672,
+      "winRateWhenPlayed": 29.545454545454547,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (144.3%)",
+        "Low win rate when played (29.5%)"
+      ]
+    },
+    {
+      "id": "attack_028",
+      "name": "Character Assassination",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 91.25,
+      "winRateWhenPlayed": 39.726027397260275,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (91.3%)"
+      ]
+    },
+    {
+      "id": "attack_029",
+      "name": "Regulatory Capture",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 128.3783783783784,
+      "winRateWhenPlayed": 27.368421052631582,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (128.4%)",
+        "Low win rate when played (27.4%)"
+      ]
+    },
+    {
+      "id": "attack_030",
+      "name": "Information Overload",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 55.75221238938053,
+      "winRateWhenPlayed": 41.269841269841265,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "attack_031",
+      "name": "Targeted Harassment",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 13.86861313868613,
+      "winRateWhenPlayed": 63.1578947368421,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (13.9%)"
+      ]
+    },
+    {
+      "id": "attack_032",
+      "name": "Professional Destruction",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 47.05882352941176,
+      "winRateWhenPlayed": 48.07692307692308,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "attack_033",
+      "name": "Legal Lawfare",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 29.943502824858758,
+      "winRateWhenPlayed": 66.0377358490566,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "attack_034",
+      "name": "Mind Control Signal",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 4.8,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 21.818181818181817,
+      "winRateWhenPlayed": 45.83333333333333,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "attack_035",
+      "name": "Weather Weapon",
+      "type": "ATTACK",
+      "rarity": "common",
+      "currentCost": 6,
+      "powerScore": 5.2,
+      "recommendedCost": 6,
+      "costAdjustment": 0,
+      "usageRate": 48.734177215189874,
+      "winRateWhenPlayed": 9.090909090909092,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (9.1%)"
+      ]
+    },
+    {
+      "id": "attack_036",
+      "name": "Meme Warfare",
+      "type": "ATTACK",
+      "rarity": "uncommon",
+      "currentCost": 6,
+      "powerScore": 6,
+      "recommendedCost": 8,
+      "costAdjustment": 2,
+      "usageRate": 49.03846153846153,
+      "winRateWhenPlayed": 17.647058823529413,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 6)",
+        "Low win rate when played (17.6%)"
+      ]
+    },
+    {
+      "id": "attack_037",
+      "name": "Project Mockingbird",
+      "type": "ATTACK",
+      "rarity": "uncommon",
+      "currentCost": 6,
+      "powerScore": 6.9,
+      "recommendedCost": 9,
+      "costAdjustment": 3,
+      "usageRate": 9.090909090909092,
+      "winRateWhenPlayed": 161.9047619047619,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 9 instead of 6)",
+        "Low usage rate (9.1%)",
+        "High win rate when played (161.9%)"
+      ]
+    },
+    {
+      "id": "attack_038",
+      "name": "False Memory Implant",
+      "type": "ATTACK",
+      "rarity": "uncommon",
+      "currentCost": 6,
+      "powerScore": 6.1,
+      "recommendedCost": 8,
+      "costAdjustment": 2,
+      "usageRate": 121.24999999999999,
+      "winRateWhenPlayed": 49.48453608247423,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 6)",
+        "Very high usage rate (121.2%)"
+      ]
+    },
+    {
+      "id": "attack_039",
+      "name": "Targeted Individual Program",
+      "type": "ATTACK",
+      "rarity": "uncommon",
+      "currentCost": 6,
+      "powerScore": 6.9,
+      "recommendedCost": 9,
+      "costAdjustment": 3,
+      "usageRate": 47.57709251101321,
+      "winRateWhenPlayed": 25.925925925925924,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 9 instead of 6)",
+        "Low win rate when played (25.9%)"
+      ]
+    },
+    {
+      "id": "attack_040",
+      "name": "Operation Chaos",
+      "type": "ATTACK",
+      "rarity": "uncommon",
+      "currentCost": 6,
+      "powerScore": 6,
+      "recommendedCost": 8,
+      "costAdjustment": 2,
+      "usageRate": 67.17557251908397,
+      "winRateWhenPlayed": 21.59090909090909,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 6)",
+        "Low win rate when played (21.6%)"
+      ]
+    },
+    {
+      "id": "attack_041",
+      "name": "MK-Ultra Activation",
+      "type": "ATTACK",
+      "rarity": "uncommon",
+      "currentCost": 6,
+      "powerScore": 6.1,
+      "recommendedCost": 8,
+      "costAdjustment": 2,
+      "usageRate": 28.35820895522388,
+      "winRateWhenPlayed": 24.561403508771928,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 6)",
+        "Low win rate when played (24.6%)"
+      ]
+    },
+    {
+      "id": "attack_042",
+      "name": "Electromagnetic Pulse",
+      "type": "ATTACK",
+      "rarity": "uncommon",
+      "currentCost": 6,
+      "powerScore": 6.9,
+      "recommendedCost": 9,
+      "costAdjustment": 3,
+      "usageRate": 50,
+      "winRateWhenPlayed": 56.16438356164384,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 9 instead of 6)"
+      ]
+    },
+    {
+      "id": "attack_043",
+      "name": "Subliminal Programming",
+      "type": "ATTACK",
+      "rarity": "uncommon",
+      "currentCost": 6,
+      "powerScore": 6.1,
+      "recommendedCost": 8,
+      "costAdjustment": 2,
+      "usageRate": 13.692946058091287,
+      "winRateWhenPlayed": 112.12121212121211,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 6)",
+        "Low usage rate (13.7%)",
+        "High win rate when played (112.1%)"
+      ]
+    },
+    {
+      "id": "attack_044",
+      "name": "Social Engineering Attack",
+      "type": "ATTACK",
+      "rarity": "uncommon",
+      "currentCost": 6,
+      "powerScore": 6.9,
+      "recommendedCost": 9,
+      "costAdjustment": 3,
+      "usageRate": 44.44444444444444,
+      "winRateWhenPlayed": 46.42857142857143,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 9 instead of 6)"
+      ]
+    },
+    {
+      "id": "attack_045",
+      "name": "Controlled Opposition Reveal",
+      "type": "ATTACK",
+      "rarity": "uncommon",
+      "currentCost": 6,
+      "powerScore": 6,
+      "recommendedCost": 8,
+      "costAdjustment": 2,
+      "usageRate": 18.421052631578945,
+      "winRateWhenPlayed": 121.42857142857142,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 8 instead of 6)",
+        "Low usage rate (18.4%)",
+        "High win rate when played (121.4%)"
+      ]
+    },
+    {
+      "id": "attack_046",
+      "name": "Directed Energy Attack",
+      "type": "ATTACK",
+      "rarity": "rare",
+      "currentCost": 6,
+      "powerScore": 8.5,
+      "recommendedCost": 11,
+      "costAdjustment": 5,
+      "usageRate": 21.951219512195124,
+      "winRateWhenPlayed": 100,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 11 instead of 6)",
+        "High win rate when played (100.0%)"
+      ]
+    },
+    {
+      "id": "attack_047",
+      "name": "Mass Mind Control Event",
+      "type": "ATTACK",
+      "rarity": "rare",
+      "currentCost": 6,
+      "powerScore": 7.8,
+      "recommendedCost": 10,
+      "costAdjustment": 4,
+      "usageRate": 19.900497512437813,
+      "winRateWhenPlayed": 107.5,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 10 instead of 6)",
+        "Low usage rate (19.9%)",
+        "High win rate when played (107.5%)"
+      ]
+    },
+    {
+      "id": "attack_048",
+      "name": "Digital Assassination",
+      "type": "ATTACK",
+      "rarity": "rare",
+      "currentCost": 6,
+      "powerScore": 9,
+      "recommendedCost": 12,
+      "costAdjustment": 6,
+      "usageRate": 132.3943661971831,
+      "winRateWhenPlayed": 25.53191489361702,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 12 instead of 6)",
+        "Very high usage rate (132.4%)",
+        "Low win rate when played (25.5%)"
+      ]
+    },
+    {
+      "id": "attack_049",
+      "name": "Revelation of the Method",
+      "type": "ATTACK",
+      "rarity": "rare",
+      "currentCost": 6,
+      "powerScore": 7.7,
+      "recommendedCost": 10,
+      "costAdjustment": 4,
+      "usageRate": 8.771929824561402,
+      "winRateWhenPlayed": 166.66666666666669,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 10 instead of 6)",
+        "Low usage rate (8.8%)",
+        "High win rate when played (166.7%)"
+      ]
+    },
+    {
+      "id": "attack_050",
+      "name": "Project Blue Beam",
+      "type": "ATTACK",
+      "rarity": "legendary",
+      "currentCost": 6,
+      "powerScore": 9.6,
+      "recommendedCost": 12,
+      "costAdjustment": 6,
+      "usageRate": 50.23923444976076,
+      "winRateWhenPlayed": 18.095238095238095,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 12 instead of 6)",
+        "Low win rate when played (18.1%)"
+      ]
+    },
+    {
+      "id": "defense_001",
+      "name": "Tinfoil Hat",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 38.13559322033898,
+      "winRateWhenPlayed": 80,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "High win rate when played (80.0%)"
+      ]
+    },
+    {
+      "id": "defense_002",
+      "name": "Firewall",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 27.027027027027028,
+      "winRateWhenPlayed": 18,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (18.0%)"
+      ]
+    },
+    {
+      "id": "defense_003",
+      "name": "Faraday Cage",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 37.30569948186528,
+      "winRateWhenPlayed": 19.444444444444446,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (19.4%)"
+      ]
+    },
+    {
+      "id": "defense_004",
+      "name": "Burner Phone",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 50.24390243902439,
+      "winRateWhenPlayed": 37.86407766990291,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "defense_005",
+      "name": "Safe House",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 23.236514522821576,
+      "winRateWhenPlayed": 10.714285714285714,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (10.7%)"
+      ]
+    },
+    {
+      "id": "defense_006",
+      "name": "Dead Man's Switch",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 208,
+      "winRateWhenPlayed": 22.115384615384613,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (208.0%)",
+        "Low win rate when played (22.1%)"
+      ]
+    },
+    {
+      "id": "defense_007",
+      "name": "Encrypted Communications",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 6.289308176100629,
+      "winRateWhenPlayed": 130,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (6.3%)",
+        "High win rate when played (130.0%)"
+      ]
+    },
+    {
+      "id": "defense_008",
+      "name": "Anonymous Proxy",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 57.2463768115942,
+      "winRateWhenPlayed": 67.08860759493672,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "defense_009",
+      "name": "Loyal Bodyguard",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 17.289719626168225,
+      "winRateWhenPlayed": 56.75675675675676,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (17.3%)"
+      ]
+    },
+    {
+      "id": "defense_010",
+      "name": "Emergency Broadcast",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 3.4,
+      "recommendedCost": 4,
+      "costAdjustment": 1,
+      "usageRate": 82.25806451612904,
+      "winRateWhenPlayed": 72.54901960784314,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (82.3%)",
+        "High win rate when played (72.5%)"
+      ]
+    },
+    {
+      "id": "defense_011",
+      "name": "Legal Immunity",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 45.56962025316456,
+      "winRateWhenPlayed": 50,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "defense_012",
+      "name": "Public Sympathy",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 9.67741935483871,
+      "winRateWhenPlayed": 346.6666666666667,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (9.7%)",
+        "High win rate when played (346.7%)"
+      ]
+    },
+    {
+      "id": "defense_013",
+      "name": "Backup Server",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 61.76470588235294,
+      "winRateWhenPlayed": 8.333333333333332,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (8.3%)"
+      ]
+    },
+    {
+      "id": "defense_014",
+      "name": "Foreign Asylum",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 10.416666666666668,
+      "winRateWhenPlayed": 160,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Low usage rate (10.4%)",
+        "High win rate when played (160.0%)"
+      ]
+    },
+    {
+      "id": "defense_015",
+      "name": "Crowd Funding",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 35.390946502057616,
+      "winRateWhenPlayed": 38.372093023255815,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "defense_016",
+      "name": "Martyrdom Threat",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 47.15025906735752,
+      "winRateWhenPlayed": 25.274725274725274,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (25.3%)"
+      ]
+    },
+    {
+      "id": "defense_017",
+      "name": "Media Attention",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 69.11764705882352,
+      "winRateWhenPlayed": 23.404255319148938,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (23.4%)"
+      ]
+    },
+    {
+      "id": "defense_018",
+      "name": "Plausible Deniability",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 42.38683127572017,
+      "winRateWhenPlayed": 43.689320388349515,
+      "balanceStatus": "balanced",
+      "issues": []
+    },
+    {
+      "id": "defense_019",
+      "name": "Digital Redundancy",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 137.73584905660377,
+      "winRateWhenPlayed": 68.4931506849315,
+      "balanceStatus": "overpowered",
+      "issues": [
+        "Very high usage rate (137.7%)"
+      ]
+    },
+    {
+      "id": "defense_020",
+      "name": "Underground Network",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 54.54545454545454,
+      "winRateWhenPlayed": 19.791666666666664,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (19.8%)"
+      ]
+    },
+    {
+      "id": "defense_021",
+      "name": "Counter-Intelligence",
+      "type": "DEFENSIVE",
+      "rarity": "common",
+      "currentCost": 3,
+      "powerScore": 2.6,
+      "recommendedCost": 3,
+      "costAdjustment": 0,
+      "usageRate": 35.46099290780142,
+      "winRateWhenPlayed": 12,
+      "balanceStatus": "balanced",
+      "issues": [
+        "Low win rate when played (12.0%)"
+      ]
+    },
+    {
+      "id": "defense_022",
+      "name": "Counter-Surveillance",
+      "type": "DEFENSIVE",
+      "rarity": "uncommon",
+      "currentCost": 3,
+      "powerScore": 4.1,
+      "recommendedCost": 6,
+      "costAdjustment": 3,
+      "usageRate": 45.21739130434783,
+      "winRateWhenPlayed": 19.230769230769234,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 3)",
+        "Low win rate when played (19.2%)"
+      ]
+    },
+    {
+      "id": "defense_023",
+      "name": "Information Compartmentalization",
+      "type": "DEFENSIVE",
+      "rarity": "uncommon",
+      "currentCost": 3,
+      "powerScore": 3.5,
+      "recommendedCost": 5,
+      "costAdjustment": 2,
+      "usageRate": 80.8695652173913,
+      "winRateWhenPlayed": 21.50537634408602,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 5 instead of 3)",
+        "Very high usage rate (80.9%)",
+        "Low win rate when played (21.5%)"
+      ]
+    },
+    {
+      "id": "defense_024",
+      "name": "Double Agent",
+      "type": "DEFENSIVE",
+      "rarity": "uncommon",
+      "currentCost": 3,
+      "powerScore": 3.8,
+      "recommendedCost": 6,
+      "costAdjustment": 3,
+      "usageRate": 53.03867403314917,
+      "winRateWhenPlayed": 19.791666666666664,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 3)",
+        "Low win rate when played (19.8%)"
+      ]
+    },
+    {
+      "id": "defense_025",
+      "name": "Conspiracy of Silence",
+      "type": "DEFENSIVE",
+      "rarity": "uncommon",
+      "currentCost": 3,
+      "powerScore": 4.3,
+      "recommendedCost": 6,
+      "costAdjustment": 3,
+      "usageRate": 48.38709677419355,
+      "winRateWhenPlayed": 55.55555555555556,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 3)"
+      ]
+    },
+    {
+      "id": "defense_026",
+      "name": "Quantum Encryption",
+      "type": "DEFENSIVE",
+      "rarity": "uncommon",
+      "currentCost": 3,
+      "powerScore": 4.3,
+      "recommendedCost": 6,
+      "costAdjustment": 3,
+      "usageRate": 143.66197183098592,
+      "winRateWhenPlayed": 48.03921568627451,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 3)",
+        "Very high usage rate (143.7%)"
+      ]
+    },
+    {
+      "id": "defense_027",
+      "name": "Distributed Network",
+      "type": "DEFENSIVE",
+      "rarity": "uncommon",
+      "currentCost": 3,
+      "powerScore": 3.5,
+      "recommendedCost": 5,
+      "costAdjustment": 2,
+      "usageRate": 10.619469026548673,
+      "winRateWhenPlayed": 183.33333333333331,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 5 instead of 3)",
+        "Low usage rate (10.6%)",
+        "High win rate when played (183.3%)"
+      ]
+    },
+    {
+      "id": "defense_028",
+      "name": "Underground Safehouse",
+      "type": "DEFENSIVE",
+      "rarity": "rare",
+      "currentCost": 3,
+      "powerScore": 4.5,
+      "recommendedCost": 6,
+      "costAdjustment": 3,
+      "usageRate": 73.86363636363636,
+      "winRateWhenPlayed": 46.15384615384615,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 3)"
+      ]
+    },
+    {
+      "id": "defense_029",
+      "name": "Mirror Shield Protocol",
+      "type": "DEFENSIVE",
+      "rarity": "rare",
+      "currentCost": 3,
+      "powerScore": 4.4,
+      "recommendedCost": 6,
+      "costAdjustment": 3,
+      "usageRate": 81.05263157894737,
+      "winRateWhenPlayed": 22.07792207792208,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 6 instead of 3)",
+        "Very high usage rate (81.1%)",
+        "Low win rate when played (22.1%)"
+      ]
+    },
+    {
+      "id": "defense_030",
+      "name": "Divine Prophecy",
+      "type": "DEFENSIVE",
+      "rarity": "legendary",
+      "currentCost": 3,
+      "powerScore": 5.6,
+      "recommendedCost": 9,
+      "costAdjustment": 6,
+      "usageRate": 51.5625,
+      "winRateWhenPlayed": 66.66666666666666,
+      "balanceStatus": "underpowered",
+      "issues": [
+        "Cost too low (should be 9 instead of 3)"
+      ]
+    }
+  ],
+  "timestamp": "2025-09-09T10:42:06.721Z",
+  "version": "1.0"
+}
