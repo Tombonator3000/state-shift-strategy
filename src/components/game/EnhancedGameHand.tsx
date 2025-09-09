@@ -5,7 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { GameCard } from '@/components/game/GameHand';
 import { useAudio } from '@/hooks/useAudio';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Zap, Shield, Target } from 'lucide-react';
+import { Loader2, Zap, Shield, Target, X, Eye } from 'lucide-react';
+import { useHapticFeedback } from '@/hooks/useHapticFeedback';
+import { useSwipeGestures } from '@/hooks/useSwipeGestures';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface EnhancedGameHandProps {
   cards: GameCard[];
@@ -31,6 +34,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
   const audio = useAudio();
+  const { triggerHaptic } = useHapticFeedback();
+  const isMobile = useIsMobile();
 
   const getRarityGlow = (rarity: string) => {
     switch (rarity) {
@@ -75,6 +80,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     
     if (!canAffordCard(card)) {
       audio.playSFX('lightClick'); // Error sound - light click
+      triggerHaptic('error');
       toast({
         title: "❌ Insufficient IP",
         description: `Need ${card.cost} IP to deploy "${card.name}". You have ${currentIP} IP.`,
@@ -84,6 +90,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     }
     
     audio.playSFX('cardPlay');
+    triggerHaptic('medium');
     setPlayingCard(cardId);
     
     toast({
@@ -93,7 +100,9 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     
     try {
       onPlayCard(cardId);
+      triggerHaptic('success');
     } catch (error) {
+      triggerHaptic('error');
       toast({
         title: "❌ Deployment Failed",
         description: "Asset deployment was interrupted. Try again.",
@@ -105,6 +114,32 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   };
 
   const canAffordCard = (card: GameCard) => currentIP >= card.cost;
+
+  // Swipe handlers for card examination
+  const swipeHandlers = useSwipeGestures({
+    onSwipeLeft: () => {
+      if (examinedCard) {
+        const currentIndex = cards.findIndex(c => c.id === examinedCard);
+        const nextIndex = (currentIndex + 1) % cards.length;
+        setExaminedCard(cards[nextIndex].id);
+        triggerHaptic('selection');
+      }
+    },
+    onSwipeRight: () => {
+      if (examinedCard) {
+        const currentIndex = cards.findIndex(c => c.id === examinedCard);
+        const prevIndex = currentIndex === 0 ? cards.length - 1 : currentIndex - 1;
+        setExaminedCard(cards[prevIndex].id);
+        triggerHaptic('selection');
+      }
+    },
+    onSwipeDown: () => {
+      if (examinedCard) {
+        setExaminedCard(null);
+        triggerHaptic('light');
+      }
+    }
+  });
 
   return (
     <div className="space-y-2">
@@ -131,8 +166,9 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               key={`${card.id}-${index}`}
               data-card-id={card.id}
               className={`
-                enhanced-button card-hover-glow group relative p-2 cursor-pointer transition-all duration-300
+                enhanced-button card-hover-glow group relative cursor-pointer transition-all duration-300
                 bg-card border-2 rounded-lg flex items-center gap-2
+                ${isMobile ? 'p-4 min-h-[80px]' : 'p-2'}
                 ${isSelected ? 'ring-2 ring-warning scale-105 z-10 shadow-lg shadow-warning/50' : ''}
                 ${isPlaying || isLoading ? 'animate-pulse scale-105 z-50 ring-2 ring-primary shadow-lg shadow-primary/50' : 'hover:scale-[1.03] hover:shadow-md'}
                 ${!canAfford && !disabled ? 'opacity-60 saturate-50 cursor-not-allowed' : 'hover:bg-accent/20'}
@@ -149,6 +185,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 e.preventDefault();
                 // Only open examination modal, don't select for targeting
                 audio.playSFX('click');
+                triggerHaptic('selection');
                 if (examinedCard === card.id) {
                   setExaminedCard(null);
                 } else {
@@ -157,7 +194,9 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 }
               }}
               onMouseEnter={() => {
-                audio.playSFX('lightClick'); // Very quiet button sound
+                if (!isMobile) {
+                  audio.playSFX('lightClick'); // Very quiet button sound
+                }
               }}
             >
                {/* Enhanced loading/targeting overlay */}
@@ -170,23 +209,25 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                  </div>
                )}
               
-              {/* Enhanced Cost Badge */}
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 border-2 transition-all duration-200 ${
-                canAfford ? 'bg-primary text-primary-foreground border-primary shadow-md shadow-primary/30' : 'bg-destructive text-destructive-foreground border-destructive shadow-md shadow-destructive/30 animate-pulse'
-              }`}>
-                {card.cost}
-              </div>
-              
-              {/* Card Name and Rarity */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm text-foreground truncate">{card.name}</span>
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${getRarityAccent(card.rarity)}`}>
-                    {card.rarity.toUpperCase()}
-                  </span>
-                </div>
-                <div className="text-xs text-muted-foreground truncate max-w-[200px]">{card.text}</div>
-              </div>
+               {/* Enhanced Cost Badge */}
+               <div className={`rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 border-2 transition-all duration-200 ${
+                 isMobile ? 'w-12 h-12 text-sm' : 'w-8 h-8'
+               } ${
+                 canAfford ? 'bg-primary text-primary-foreground border-primary shadow-md shadow-primary/30' : 'bg-destructive text-destructive-foreground border-destructive shadow-md shadow-destructive/30 animate-pulse'
+               }`}>
+                 {card.cost}
+               </div>
+               
+               {/* Card Name and Rarity */}
+               <div className="flex-1 min-w-0">
+                 <div className="flex items-center gap-2">
+                   <span className={`font-bold text-foreground truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{card.name}</span>
+                   <span className={`px-1.5 py-0.5 rounded-full ${isMobile ? 'text-xs' : 'text-xs'} ${getRarityAccent(card.rarity)}`}>
+                     {card.rarity.toUpperCase()}
+                   </span>
+                 </div>
+                 <div className={`text-muted-foreground truncate max-w-[200px] ${isMobile ? 'text-sm' : 'text-xs'}`}>{card.text}</div>
+               </div>
               
               {/* Enhanced Type Badge */}
               <Badge 
@@ -226,14 +267,22 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
         </div>
       )}
 
-      {/* Card examination overlay - Landscape format */}
+      {/* Card examination overlay - Mobile optimized */}
       {examinedCard && (
         <div 
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4"
-          onClick={() => setExaminedCard(null)}
+          onClick={() => {
+            setExaminedCard(null);
+            triggerHaptic('light');
+          }}
+          {...(isMobile ? swipeHandlers : {})}
         >
           <div 
-            className={`bg-card border-2 rounded-lg p-3 w-full max-w-sm mx-auto h-[85vh] sm:h-[80vh] md:h-[75vh] lg:h-[70vh] transform animate-fade-in flex flex-col ${(() => {
+            className={`bg-card border-2 rounded-lg transform animate-fade-in flex flex-col ${
+              isMobile 
+                ? 'w-full max-w-sm h-[90vh]' 
+                : 'w-full max-w-sm h-[85vh] sm:h-[80vh] md:h-[75vh] lg:h-[70vh]'
+            } ${(() => {
               const card = cards.find(c => c.id === examinedCard);
               return card ? `${getRarityBorder(card.rarity)} ${getRarityGlow(card.rarity)}` : 'border-border';
             })()}`}
@@ -246,32 +295,46 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               
               return (
                 <>
-                  {/* Portrait card layout - Flexbox no scroll */}
-                  <div className="flex flex-col h-full">
+                  {/* Portrait card layout - Enhanced mobile */}
+                  <div className="flex flex-col h-full p-4">
                     {/* Header - Fixed */}
-                    <div className="flex justify-between items-start flex-shrink-0 mb-3">
-                      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold ${
+                    <div className="flex justify-between items-start flex-shrink-0 mb-4">
+                      <div className={`rounded-full flex items-center justify-center font-bold ${
+                        isMobile ? 'w-16 h-16 text-2xl' : 'w-12 h-12 sm:w-14 sm:h-14 text-lg sm:text-xl'
+                      } ${
                         canAffordCard(card) ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'
                       }`}>
                         {card.cost}
                       </div>
-                      <button 
+                      <Button
+                        variant="ghost"
+                        size={isMobile ? "default" : "sm"}
                         onClick={() => {
                           audio.playSFX('click');
+                          triggerHaptic('light');
                           setExaminedCard(null);
                         }}
-                        className="text-muted-foreground hover:text-foreground text-2xl font-bold w-6 h-6 flex items-center justify-center"
+                        className={isMobile ? 'p-3' : 'p-2'}
                       >
-                        ×
-                      </button>
+                        <X className={isMobile ? 'w-6 h-6' : 'w-4 h-4'} />
+                      </Button>
                     </div>
                     
                     {/* Title and type - Fixed */}
-                    <div className="text-center flex-shrink-0 mb-3">
-                      <h3 className="text-base sm:text-lg font-bold mb-1 text-foreground leading-tight">{card.name}</h3>
+                    <div className="text-center flex-shrink-0 mb-4">
+                      <h3 className={`font-bold mb-2 text-foreground leading-tight ${
+                        isMobile ? 'text-xl' : 'text-base sm:text-lg'
+                      }`}>
+                        {card.name}
+                        {isMobile && cards.length > 1 && (
+                          <div className="text-sm text-muted-foreground mt-1">
+                            Swipe to browse other cards
+                          </div>
+                        )}
+                      </h3>
                       <Badge 
                         variant="outline" 
-                        className={`text-xs sm:text-sm px-2 py-1 ${
+                        className={`${isMobile ? 'text-sm px-3 py-2' : 'text-xs sm:text-sm px-2 py-1'} ${
                           card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth-red/20 border-truth-red text-truth-red' :
                           card.type === 'MEDIA' && faction === 'government' ? 'bg-government-blue/20 border-government-blue text-government-blue' :
                           card.type === 'ZONE' ? 'bg-accent/20 border-accent text-accent-foreground' :
@@ -316,11 +379,12 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
         </div>
       </div>
                     
-                    {/* Deploy button - Fixed at bottom */}
-                    <div className="flex-shrink-0 pt-3 border-t border-border">
+                    {/* Deploy button - Enhanced mobile */}
+                    <div className="flex-shrink-0 pt-4 border-t border-border">
                       <Button
                         onClick={() => {
                           if (!canAffordCard(card)) {
+                            triggerHaptic('error');
                             toast({
                               title: "❌ Insufficient IP",
                               description: `Need ${card.cost} IP to deploy this asset.`,
@@ -333,6 +397,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                           if (card.type === 'ZONE') {
                             // Immediately activate targeting without closing modal
                             audio.playSFX('click');
+                            triggerHaptic('medium');
                             onSelectCard?.(card.id);
                             
                             // Close modal after setting up targeting
@@ -347,20 +412,23 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                           } else {
                             // For all other cards, deploy immediately
                             audio.playSFX('click');
+                            triggerHaptic('success');
                             setExaminedCard(null);
                             handlePlayCard(card.id);
                           }
                         }}
                         disabled={disabled}
-                        className={`enhanced-button w-full text-sm py-2 font-mono relative overflow-hidden transition-all duration-300 ${
+                        className={`enhanced-button w-full font-mono relative overflow-hidden transition-all duration-300 ${
+                          isMobile ? 'text-base py-4' : 'text-sm py-2'
+                        } ${
                           !canAffordCard(card) ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
                         }`}
-                        size="sm"
+                        size={isMobile ? "default" : "sm"}
                       >
-                        <span className="relative z-10 flex items-center justify-center gap-1">
-                          {card.type === 'ZONE' && <Target className="w-3 h-3" />}
-                          {card.type === 'ATTACK' && <Zap className="w-3 h-3" />}
-                          {card.type === 'DEFENSIVE' && <Shield className="w-3 h-3" />}
+                        <span className="relative z-10 flex items-center justify-center gap-2">
+                          {card.type === 'ZONE' && <Target className={isMobile ? 'w-5 h-5' : 'w-3 h-3'} />}
+                          {card.type === 'ATTACK' && <Zap className={isMobile ? 'w-5 h-5' : 'w-3 h-3'} />}
+                          {card.type === 'DEFENSIVE' && <Shield className={isMobile ? 'w-5 h-5' : 'w-3 h-3'} />}
                           {card.type === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
                         </span>
                       </Button>
