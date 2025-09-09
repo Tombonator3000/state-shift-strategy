@@ -69,6 +69,9 @@ class ExtensionManager {
               if (this.validateExtension(extension)) {
                 extension.cards = extension.cards.map((card: ExtensionCard) => ({
                   ...card,
+                  // Map single flavor field to faction-specific flavor fields
+                  flavorGov: (card as any).flavor || '',
+                  flavorTruth: (card as any).flavor || '',
                   extId: extension.id
                 }));
                 extensions.push(extension);
@@ -89,6 +92,9 @@ class ExtensionManager {
               if (this.validateExtension(extension)) {
                 extension.cards = extension.cards.map((card: ExtensionCard) => ({
                   ...card,
+                  // Map single flavor field to faction-specific flavor fields
+                  flavorGov: (card as any).flavor || '',
+                  flavorTruth: (card as any).flavor || '',
                   extId: extension.id
                 }));
                 extensions.push(extension);
@@ -127,6 +133,9 @@ class ExtensionManager {
               if (this.validateExtension(extension)) {
                 extension.cards = extension.cards.map((card: ExtensionCard) => ({
                   ...card,
+                  // Map single flavor field to faction-specific flavor fields
+                  flavorGov: (card as any).flavor || '',
+                  flavorTruth: (card as any).flavor || '',
                   extId: extension.id
                 }));
                 extensions.push(extension);
@@ -164,6 +173,9 @@ class ExtensionManager {
             if (this.validateExtension(extension)) {
               extension.cards = extension.cards.map((card: ExtensionCard) => ({
                 ...card,
+                // Map single flavor field to faction-specific flavor fields
+                flavorGov: (card as any).flavor || '',
+                flavorTruth: (card as any).flavor || '',
                 extId: extension.id
               }));
               extensions.push(extension);
@@ -239,7 +251,15 @@ class ExtensionManager {
     for (const enabled of this.enabledExtensions) {
       const extension = this.extensions.get(enabled.id);
       if (extension) {
-        cards.push(...extension.cards);
+        // Map extension cards to match GameCard interface
+        const mappedCards = extension.cards.map(card => ({
+          ...card,
+          // Map single flavor field to faction-specific flavor fields
+          flavorGov: (card as any).flavor || '',
+          flavorTruth: (card as any).flavor || '',
+          extId: extension.id
+        }));
+        cards.push(...mappedCards);
       }
     }
     
