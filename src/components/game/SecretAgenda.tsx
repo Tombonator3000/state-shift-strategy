@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Eye, Lock } from 'lucide-react';
+import { Eye, Lock, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
 
 interface SecretAgendaProps {
   agenda: {
@@ -16,6 +17,7 @@ interface SecretAgendaProps {
 
 const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
   const progressPercent = (agenda.progress / agenda.target) * 100;
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Opponent view - just a progress bar
   if (!isPlayer) {
@@ -45,24 +47,38 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
     );
   }
 
-  // Player view - full display
+  // Player view - expandable display
   return (
-    <Card className="p-4 bg-black text-white border-2 border-secret-red relative overflow-hidden">
+    <Card 
+      className={`bg-black text-white border-2 border-secret-red relative overflow-hidden cursor-pointer transition-all duration-300 ${
+        isExpanded ? 'p-4' : 'p-2'
+      }`}
+      onClick={() => setIsExpanded(!isExpanded)}
+    >
       <div className="absolute inset-0 bg-gradient-to-br from-secret-red/10 to-transparent"></div>
       
       <div className="relative z-10">
-        <div className="flex items-center gap-2 mb-3">
-          {agenda.revealed ? (
-            <Eye size={16} className="text-secret-red" />
+        <div className={`flex items-center justify-between ${isExpanded ? 'mb-3' : 'mb-0'}`}>
+          <div className="flex items-center gap-2">
+            <Eye size={isExpanded ? 16 : 12} className="text-secret-red" />
+            <h3 className={`font-bold font-mono text-secret-red ${isExpanded ? 'text-sm' : 'text-xs'}`}>
+              SECRET AGENDA
+            </h3>
+          </div>
+          {isExpanded ? (
+            <ChevronUp size={14} className="text-secret-red" />
           ) : (
-            <Lock size={16} className="text-secret-red" />
+            <ChevronDown size={14} className="text-secret-red" />
           )}
-          <h3 className="font-bold text-sm font-mono text-secret-red">
-            {agenda.revealed ? 'YOUR SECRET AGENDA' : 'CLASSIFIED OBJECTIVE'}
-          </h3>
         </div>
 
-        {agenda.revealed ? (
+        {!isExpanded ? (
+          // Minimized view - just show truncated description
+          <div className="text-xs font-mono text-gray-300 truncate">
+            {agenda.description}
+          </div>
+        ) : (
+          // Expanded view - full details
           <div className="space-y-3">
             <div className="text-xs font-mono">
               {agenda.description}
@@ -85,54 +101,26 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
               </div>
             )}
           </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="text-xs font-mono text-gray-400">
-              ███████████████████████
-            </div>
-            <div className="text-xs font-mono text-gray-400">
-              ████████████ █████████
-            </div>
-            <div className="text-xs font-mono text-gray-400">
-              ███████ ████████████████
-            </div>
-            
-            <div className="text-xs text-center text-secret-red mt-3">
-              [SECURITY CLEARANCE INSUFFICIENT]
-            </div>
-            
-            {agenda.progress > 0 && (
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex-1 h-1 bg-gray-800 rounded">
-                  <div 
-                    className="h-full bg-secret-red rounded transition-all"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-                <div className="text-xs text-gray-400">
-                  {Math.floor(progressPercent)}%
-                </div>
-              </div>
-            )}
-          </div>
         )}
       </div>
 
-      {/* Glitch effect overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-20">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div 
-            key={i}
-            className="absolute bg-secret-red h-px"
-            style={{
-              width: '100%',
-              top: `${30 + i * 20}%`,
-              animation: `glitch ${0.5 + i * 0.2}s infinite alternate`,
-              animationDelay: `${i * 0.1}s`
-            }}
-          />
-        ))}
-      </div>
+      {/* Glitch effect overlay - only when expanded */}
+      {isExpanded && (
+        <div className="absolute inset-0 pointer-events-none opacity-20">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div 
+              key={i}
+              className="absolute bg-secret-red h-px"
+              style={{
+                width: '100%',
+                top: `${30 + i * 20}%`,
+                animation: `glitch ${0.5 + i * 0.2}s infinite alternate`,
+                animationDelay: `${i * 0.1}s`
+              }}
+            />
+          ))}
+        </div>
+      )}
     </Card>
   );
 };
