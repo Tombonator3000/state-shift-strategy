@@ -118,7 +118,7 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
   }
 
   if (showHowToPlay) {
-    return <HowToPlay onBack={() => setShowHowToPlay(false)} />;
+    return <HowToPlay onClose={() => setShowHowToPlay(false)} />;
   }
 
   if (showFactionSelect) {
