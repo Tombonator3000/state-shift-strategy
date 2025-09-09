@@ -46,6 +46,7 @@ const Index = () => {
   const [showAchievements, setShowAchievements] = useState(false);
   const [loadingCard, setLoadingCard] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [subtitle, setSubtitle] = useState('Truth Seeker Operative');
   
   // Visual effects state
   const [floatingNumbers, setFloatingNumbers] = useState<{ 
@@ -161,6 +162,32 @@ const Index = () => {
       setShowOnboarding(true);
     }
   }, [showMenu, showIntro]);
+
+  // Update subtitle based on faction and add glitching effect
+  useEffect(() => {
+    if (gameState.faction) {
+      const baseSubtitle = gameState.faction === 'truth' ? 'Truth Seeker Operative' : 'Deep State Agent';
+      setSubtitle(baseSubtitle);
+
+      // Add glitching effect
+      const glitchInterval = setInterval(() => {
+        if (Math.random() < 0.1) { // 10% chance to glitch
+          const glitchTexts = [
+            'CLASSIFIED AGENT',
+            'REDACTED OPERATIVE', 
+            'SHADOW OPERATIVE',
+            '[DATA EXPUNGED]',
+            'UNKNOWN ENTITY',
+            'CONSPIRACY THEORIST'
+          ];
+          setSubtitle(glitchTexts[Math.floor(Math.random() * glitchTexts.length)]);
+          setTimeout(() => setSubtitle(baseSubtitle), 600);
+        }
+      }, 3000);
+
+      return () => clearInterval(glitchInterval);
+    }
+  }, [gameState.faction]);
 
   const startNewGame = async (faction: 'government' | 'truth') => {
     await initGame(faction);
@@ -438,7 +465,7 @@ const Index = () => {
               THE PARANOID TIMES
             </h1>
             <div className="text-xs md:text-sm font-medium text-newspaper-text mt-1">
-              Truth Seeker Operative
+              {subtitle}
             </div>
           </div>
           <div className="bg-newspaper-text text-newspaper-bg p-1 rounded">
