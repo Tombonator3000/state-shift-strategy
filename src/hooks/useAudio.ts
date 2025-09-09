@@ -20,6 +20,7 @@ export const useAudio = () => {
 
   const [currentMusicType, setCurrentMusicType] = useState<MusicType>('theme');
   const [gameState, setGameState] = useState<GameState>('menu');
+  const [tracksLoaded, setTracksLoaded] = useState(false);
   
   const currentMusicRef = useRef<HTMLAudioElement | null>(null);
   const nextMusicRef = useRef<HTMLAudioElement | null>(null);
@@ -95,6 +96,8 @@ export const useAudio = () => {
         government: musicTracks.current.government.length,
         truth: musicTracks.current.truth.length
       });
+
+      setTracksLoaded(true);
     };
 
     loadMusicTracks();
@@ -154,8 +157,12 @@ export const useAudio = () => {
   }, [config.volume, config.muted]);
 
   // Get next track for the current music type
-  const getNextTrack = useCallback((musicType: MusicType): HTMLAudioElement => {
+  const getNextTrack = useCallback((musicType: MusicType): HTMLAudioElement | null => {
     const tracks = musicTracks.current[musicType];
+    if (!tracks || tracks.length === 0) {
+      console.warn(`No tracks available for music type: ${musicType}`);
+      return null;
+    }
     const currentIndex = currentTrackIndex.current[musicType];
     const nextIndex = (currentIndex + 1) % tracks.length;
     currentTrackIndex.current[musicType] = nextIndex;
@@ -163,7 +170,12 @@ export const useAudio = () => {
   }, []);
 
   // Fade between two audio elements
-  const crossFade = useCallback((fromAudio: HTMLAudioElement | null, toAudio: HTMLAudioElement, duration: number = 2000) => {
+  const crossFade = useCallback((fromAudio: HTMLAudioElement | null, toAudio: HTMLAudioElement | null, duration: number = 2000) => {
+    if (!toAudio) {
+      console.warn('Cannot crossfade: toAudio is null');
+      return;
+    }
+
     if (fadeIntervalRef.current) {
       clearInterval(fadeIntervalRef.current);
     }
@@ -190,7 +202,7 @@ export const useAudio = () => {
         fromAudio.volume = initialFromVolume * (1 - progress);
       }
       
-      if (config.musicEnabled && !config.muted) {
+      if (config.musicEnabled && !config.muted && toAudio) {
         toAudio.volume = targetToVolume * progress;
       }
 
@@ -208,10 +220,15 @@ export const useAudio = () => {
 
   // Play music based on current state
   const playMusic = useCallback((musicType?: MusicType) => {
-    if (!config.musicEnabled || config.muted) return;
+    if (!config.musicEnabled || config.muted || !tracksLoaded) return;
 
     const typeToPlay = musicType || currentMusicType;
     const nextTrack = getNextTrack(typeToPlay);
+    
+    if (!nextTrack) {
+      console.warn(`No available track for music type: ${typeToPlay}`);
+      return;
+    }
     
     crossFade(currentMusicRef.current, nextTrack);
     currentMusicRef.current = nextTrack;
@@ -229,7 +246,7 @@ export const useAudio = () => {
         playMusic(typeToPlay);
       }
     });
-  }, [config.musicEnabled, config.muted, currentMusicType, gameState, getNextTrack, crossFade]);
+  }, [config.musicEnabled, config.muted, currentMusicType, gameState, getNextTrack, crossFade, tracksLoaded]);
 
   const stopMusic = useCallback(() => {
     if (fadeIntervalRef.current) {
