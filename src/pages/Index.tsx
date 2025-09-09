@@ -58,7 +58,7 @@ const Index = () => {
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
-  const cardCollection = useCardCollection();
+  const { discoverCard, playCard: recordCardPlay } = useCardCollection();
 
   // Handle AI turns
   useEffect(() => {
@@ -103,9 +103,9 @@ const Index = () => {
   // Track cards being drawn to hand for collection discovery
   useEffect(() => {
     gameState.hand.forEach(card => {
-      cardCollection.discoverCard(card.id);
+      discoverCard(card.id);
     });
-  }, [gameState.hand, cardCollection]);
+  }, [gameState.hand]);
 
   // Check if first-time player
   useEffect(() => {
@@ -212,7 +212,7 @@ const Index = () => {
       await playCardAnimated(cardId, animatePlayCard, targetState);
       
       // Track card in collection
-      cardCollection.playCard(cardId);
+      recordCardPlay(cardId);
       
       toast.success(`✅ ${card.name} deployed successfully!`, {
         duration: 2000,

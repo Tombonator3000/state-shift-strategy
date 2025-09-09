@@ -5,6 +5,7 @@ import Credits from './Credits';
 import HowToPlay from './HowToPlay';
 import Options from './Options';
 import ManageExpansions from './ManageExpansions';
+import CardCollection from './CardCollection';
 
 interface GameMenuProps {
   onStartGame: (faction: 'government' | 'truth') => Promise<void>;
@@ -28,6 +29,13 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
   const [descriptionText, setDescriptionText] = useState('Control the narrative. Manipulate the truth.');
   const [description2Text, setDescription2Text] = useState('Convince people birds are real (or aren\'t).');
   const [promoText, setPromoText] = useState('NOW WITH 420% MORE SATIRE!');
+  const [bgLines] = useState(() => Array.from({ length: 30 }, () => ({
+    width: Math.random() * 300 + 100,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    rotate: Math.random() * 4 - 2,
+  })));
+  const [showCollection, setShowCollection] = useState(false);
 
   useEffect(() => {
     const glitchTexts = {
@@ -274,15 +282,15 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
     <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
       {/* Redacted background pattern */}
       <div className="absolute inset-0 opacity-5">
-        {Array.from({ length: 30 }).map((_, i) => (
+        {bgLines.map((line, i) => (
           <div 
             key={i}
             className="absolute bg-newspaper-text h-6"
             style={{
-              width: `${Math.random() * 300 + 100}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              transform: `rotate(${Math.random() * 4 - 2}deg)`
+              width: `${line.width}px`,
+              top: `${line.top}%`,
+              left: `${line.left}%`,
+              transform: `rotate(${line.rotate}deg)`
             }}
           />
         ))}
@@ -384,7 +392,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
             <Button 
               onClick={() => {
                 audio?.playSFX?.('click');
-                onShowCardCollection?.();
+                setShowCollection(true);
               }}
               variant="outline" 
               className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
@@ -413,6 +421,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
           </div>
         </div>
       </Card>
+      <CardCollection open={showCollection} onOpenChange={setShowCollection} />
     </div>
   );
 };
