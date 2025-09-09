@@ -12,7 +12,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         id="card-play-layer" 
         className="fixed inset-0 pointer-events-none z-[40]"
         aria-hidden="true"
-        style={{ display: 'none' }} // Hide during newspaper phase
       >
         {children}
       </div>
@@ -24,7 +23,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         role="region" 
         aria-label="Played cards"
         aria-live="polite"
-        style={{ width: 'min(600px, 90vw)', display: 'none' }} // Hide during newspaper phase
+        style={{ width: 'min(600px, 90vw)' }}
       />
     </>
   );

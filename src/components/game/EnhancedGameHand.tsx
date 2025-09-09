@@ -24,6 +24,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   currentIP
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
+  const [examinedCard, setExaminedCard] = useState<string | null>(null);
 
   const getRarityGlow = (rarity: string) => {
     switch (rarity) {
@@ -98,7 +99,14 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 transform: isPlaying ? 'scale(1.05) translateY(-2px)' : undefined,
                 zIndex: isPlaying ? 1000 : undefined
               }}
-              onClick={() => onSelectCard?.(card.id)}
+              onClick={() => {
+                if (examinedCard === card.id) {
+                  setExaminedCard(null);
+                } else {
+                  setExaminedCard(card.id);
+                  onSelectCard?.(card.id);
+                }
+              }}
             >
               {/* Cost */}
               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
@@ -154,6 +162,84 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       {cards.length === 0 && (
         <div className="text-center text-muted-foreground text-sm font-mono py-8 border border-dashed border-muted rounded-lg">
           No assets available
+        </div>
+      )}
+
+      {/* Card examination overlay */}
+      {examinedCard && (
+        <div 
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4"
+          onClick={() => setExaminedCard(null)}
+        >
+          <div 
+            className="bg-card border-2 border-border rounded-lg p-6 max-w-md w-full transform scale-110 animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {(() => {
+              const card = cards.find(c => c.id === examinedCard);
+              if (!card) return null;
+              const faction = getCardFaction(card);
+              
+              return (
+                <>
+                  <div className="flex justify-between items-start mb-4">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${
+                      canAffordCard(card) ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'
+                    }`}>
+                      {card.cost}
+                    </div>
+                    <button 
+                      onClick={() => setExaminedCard(null)}
+                      className="text-muted-foreground hover:text-foreground text-xl"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  
+                  <div className="text-center mb-4">
+                    <h3 className="text-xl font-bold mb-2">{card.name}</h3>
+                    <Badge 
+                      variant="outline" 
+                      className={`${
+                        card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth/20 border-truth text-truth' :
+                        card.type === 'MEDIA' && faction === 'government' ? 'bg-government/20 border-government text-government' :
+                        card.type === 'ZONE' ? 'bg-accent/20 border-accent text-accent-foreground' :
+                        card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
+                        'bg-muted/20 border-muted text-muted-foreground'
+                      }`}
+                    >
+                      {card.type}
+                    </Badge>
+                  </div>
+                  
+                  <div className="h-32 bg-muted/20 flex items-center justify-center text-sm text-muted-foreground border rounded mb-4">
+                    [CLASSIFIED IMAGE]
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <p className="text-sm font-medium">{card.text}</p>
+                    </div>
+                    
+                    <div className="text-center text-xs italic text-muted-foreground border-t border-border pt-4">
+                      "{card.flavorTruth}"
+                    </div>
+                    
+                    <Button
+                      onClick={() => {
+                        setExaminedCard(null);
+                        handlePlayCard(card.id);
+                      }}
+                      disabled={disabled || !canAffordCard(card)}
+                      className="w-full"
+                    >
+                      DEPLOY ASSET
+                    </Button>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
         </div>
       )}
 

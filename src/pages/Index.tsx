@@ -14,10 +14,12 @@ import { useGameState } from '@/hooks/useGameState';
 import { useAudio } from '@/hooks/useAudio';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
+import { Maximize, Minimize } from 'lucide-react';
 
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
@@ -88,6 +90,30 @@ const Index = () => {
     audio.playSFX('newspaper');
   };
 
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+      audio.playSFX('click');
+    } catch (error) {
+      console.error('Fullscreen error:', error);
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
   if (showIntro) {
     return (
       <div 
@@ -157,7 +183,14 @@ const Index = () => {
                 <div className="font-bold">AI STATES</div>
                 <div className="text-sm">{50 - gameState.controlledStates.length}</div>
               </div>
-              <div className="absolute top-2 right-2">
+              <div className="absolute top-2 right-2 flex gap-2">
+                <button
+                  onClick={toggleFullscreen}
+                  className="bg-newspaper-text text-newspaper-bg p-1 rounded hover:bg-newspaper-text/80 transition-colors"
+                  title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                >
+                  {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+                </button>
                 <AudioControls
                   volume={audio.config.volume}
                   muted={audio.config.muted}
