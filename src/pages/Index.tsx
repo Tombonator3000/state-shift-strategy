@@ -10,6 +10,7 @@ import Newspaper from '@/components/game/Newspaper';
 import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
 import AIStatus from '@/components/game/AIStatus';
+import BalancingDashboard from '@/components/game/BalancingDashboard';
 import { AudioControls } from '@/components/ui/audio-controls';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudio } from '@/hooks/useAudio';
@@ -22,6 +23,7 @@ const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showBalancing, setShowBalancing] = useState(false);
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
@@ -149,6 +151,10 @@ const Index = () => {
     );
   }
 
+  if (showBalancing) {
+    return <BalancingDashboard onClose={() => setShowBalancing(false)} />;
+  }
+
   if (showMenu) {
     return <GameMenu onStartGame={startNewGame} />;
   }
@@ -199,6 +205,13 @@ const Index = () => {
                   title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
                 >
                   {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+                </button>
+                <button
+                  onClick={() => setShowBalancing(true)}
+                  className="bg-blue-600 text-white p-1 rounded hover:bg-blue-700 transition-colors"
+                  title="Card Balancing Dashboard"
+                >
+                  ⚖️
                 </button>
                 <AudioControls
                   volume={audio.config.volume}
