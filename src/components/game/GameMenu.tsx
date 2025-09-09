@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import Credits from './Credits';
 import HowToPlay from './HowToPlay';
+import Options from './Options';
+import ManageExpansions from './ManageExpansions';
 
 interface GameMenuProps {
   onStartGame: (faction: 'government' | 'truth') => void;
@@ -14,6 +16,8 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
   const [showCredits, setShowCredits] = useState(false);
   const [showFactionSelect, setShowFactionSelect] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [showManageExpansions, setShowManageExpansions] = useState(false);
   const [subtitleText, setSubtitleText] = useState('ULTIMATE HUMOR EDITION');
   const [quoteText, setQuoteText] = useState('"Where conspiracy theories go to become policy"');
   const [descriptionText, setDescriptionText] = useState('Control the narrative. Manipulate the truth.');
@@ -119,6 +123,14 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
 
   if (showHowToPlay) {
     return <HowToPlay onClose={() => setShowHowToPlay(false)} />;
+  }
+
+  if (showOptions) {
+    return <Options onClose={() => setShowOptions(false)} />;
+  }
+
+  if (showManageExpansions) {
+    return <ManageExpansions onClose={() => setShowManageExpansions(false)} />;
   }
 
   if (showFactionSelect) {
@@ -254,10 +266,10 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
 
       <Card className="max-w-4xl w-full p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal relative" style={{ fontFamily: 'serif' }}>
         {/* Classified stamps */}
-        <div className="absolute top-4 right-4 text-newspaper-text font-mono text-xs transform rotate-12 border-2 border-newspaper-text p-2">
+        <div className="absolute top-4 right-4 text-red-600 font-mono text-xs transform rotate-12 border-2 border-red-600 p-2">
           TOP SECRET
         </div>
-        <div className="absolute bottom-4 left-4 text-newspaper-text font-mono text-xs transform -rotate-12 border-2 border-newspaper-text p-2">
+        <div className="absolute bottom-4 left-4 text-red-600 font-mono text-xs transform -rotate-12 border-2 border-red-600 p-2">
           EYES ONLY
         </div>
 
@@ -307,8 +319,8 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
             </Button>
             <Button 
               variant="outline" 
-              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
-              disabled
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+              onClick={() => setShowManageExpansions(true)}
             >
               MANAGE EXPANSIONS
             </Button>
@@ -335,8 +347,8 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
             </Button>
             <Button 
               variant="outline" 
-              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
-              disabled
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+              onClick={() => setShowOptions(true)}
             >
               OPTIONS
             </Button>
@@ -347,7 +359,7 @@ const GameMenu = ({ onStartGame }: GameMenuProps) => {
         <div className="mt-8 text-center text-xs text-newspaper-text/60">
           <div className="mb-2">WARNING: This game contains satirical content</div>
           <div>Any resemblance to actual conspiracies is purely coincidental</div>
-          <div className="mt-2 text-newspaper-text">
+          <div className="mt-2 text-red-600 font-bold">
             [REDACTED] - Classification Level: FOR YOUR EYES ONLY
           </div>
         </div>
