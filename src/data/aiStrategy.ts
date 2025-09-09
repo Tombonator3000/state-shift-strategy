@@ -1,6 +1,7 @@
 import type { GameCard } from '@/components/game/GameHand';
 import { CARD_DATABASE } from './cardDatabase';
 import { USA_STATES } from './usaStates';
+import { EnhancedAIStrategist } from './enhancedAIStrategy';
 
 export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'legendary';
 
@@ -74,6 +75,8 @@ interface CardPlay {
   reasoning: string;
 }
 
+export type { CardPlay };
+
 export class AIStrategist {
   public personality: AIPersonality;
   private difficulty: AIDifficulty;
@@ -81,6 +84,15 @@ export class AIStrategist {
   constructor(difficulty: AIDifficulty = 'medium') {
     this.difficulty = difficulty;
     this.personality = AI_PERSONALITIES[difficulty];
+  }
+
+  // Factory method to create appropriate AI strategist based on difficulty
+  public static createStrategist(difficulty: AIDifficulty): AIStrategist {
+    // Use enhanced AI for hard+ difficulties
+    if (difficulty === 'hard' || difficulty === 'legendary') {
+      return new EnhancedAIStrategist(difficulty);
+    }
+    return new AIStrategist(difficulty);
   }
 
   // Evaluate the current game state from AI perspective
@@ -213,7 +225,7 @@ export class AIStrategist {
     return Math.min(1, threat);
   }
 
-  private generateCardPlays(card: GameCard, gameState: any, evaluation: GameStateEvaluation): CardPlay[] {
+  protected generateCardPlays(card: GameCard, gameState: any, evaluation: GameStateEvaluation): CardPlay[] {
     const plays: CardPlay[] = [];
     
     switch (card.type) {
