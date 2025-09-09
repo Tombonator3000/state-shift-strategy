@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 import type { GameCard } from '@/components/game/GameHand';
+import { useScreenShake } from '@/components/effects/ScreenShake';
 
 interface AnimationRect {
   x: number;
@@ -21,6 +22,7 @@ interface AnimationOptions {
 
 export const useCardAnimation = () => {
   const animatingRef = useRef(false);
+  const { shake } = useScreenShake();
 
   const getBoundingRect = (element: Element): AnimationRect => {
     const rect = element.getBoundingClientRect();
@@ -50,11 +52,46 @@ export const useCardAnimation = () => {
     element.style.transform = 'translate3d(0, 0, 0)';
   };
 
+  const createTrailEffect = (element: HTMLElement, fromRect: AnimationRect, toRect: AnimationRect) => {
+    const trail = document.createElement('div');
+    trail.className = 'fixed pointer-events-none z-[1500]';
+    trail.style.cssText = `
+      position: fixed;
+      left: ${fromRect.x + fromRect.width / 2}px;
+      top: ${fromRect.y + fromRect.height / 2}px;
+      width: 4px;
+      height: 4px;
+      background: linear-gradient(45deg, hsl(var(--primary)), transparent);
+      border-radius: 50%;
+      box-shadow: 0 0 10px hsl(var(--primary) / 0.8);
+      transform: translate(-50%, -50%);
+    `;
+    
+    document.body.appendChild(trail);
+    
+    // Animate trail to target
+    const animate = () => {
+      const targetX = toRect.x + toRect.width / 2;
+      const targetY = toRect.y + toRect.height / 2;
+      
+      trail.style.left = `${targetX}px`;
+      trail.style.top = `${targetY}px`;
+      trail.style.transition = 'all 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      
+      setTimeout(() => {
+        trail.style.opacity = '0';
+        setTimeout(() => trail.remove(), 200);
+      }, 300);
+    };
+    
+    requestAnimationFrame(animate);
+  };
+
   const tweenTransform = (
     element: HTMLElement, 
     fromRect: AnimationRect, 
     toRect: AnimationRect, 
-    options: { duration: number }
+    options: { duration: number; withTrail?: boolean }
   ): Promise<void> => {
     return new Promise((resolve) => {
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -65,17 +102,25 @@ export const useCardAnimation = () => {
         return;
       }
 
+      // Add trail effect for dramatic card movement
+      if (options.withTrail) {
+        createTrailEffect(element, fromRect, toRect);
+      }
+
       const startTime = performance.now();
       const scaleX = toRect.width / fromRect.width;
       const scaleY = toRect.height / fromRect.height;
       const translateX = toRect.x - fromRect.x;
       const translateY = toRect.y - fromRect.y;
 
+      // Enhanced shadow and glow during animation
+      const originalFilter = element.style.filter;
+      
       const animate = (currentTime: number) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / options.duration, 1);
         
-        // Cubic bezier easing
+        // Enhanced easing with bounce effect
         const easeProgress = progress < 0.5 
           ? 2 * progress * progress 
           : 1 - Math.pow(-2 * progress + 2, 2) / 2;
@@ -85,11 +130,15 @@ export const useCardAnimation = () => {
         const currentScaleX = 1 + (scaleX - 1) * easeProgress;
         const currentScaleY = 1 + (scaleY - 1) * easeProgress;
 
+        // Dynamic glow intensity
+        const glowIntensity = Math.sin(progress * Math.PI) * 30;
         element.style.transform = `translate3d(${currentTranslateX}px, ${currentTranslateY}px, 0) scale(${currentScaleX}, ${currentScaleY})`;
+        element.style.filter = `drop-shadow(0 ${8 + glowIntensity}px ${24 + glowIntensity}px rgba(0,0,0,0.35)) drop-shadow(0 0 ${10 + glowIntensity}px hsl(var(--primary) / 0.4))`;
 
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
+          element.style.filter = originalFilter;
           resolve();
         }
       };
@@ -256,8 +305,8 @@ export const useCardAnimation = () => {
       const fullsizeHeight = Math.min(620, window.innerHeight * 0.9);
       const destRect = centerRect(mapRect, { width: fullsizeWidth, height: fullsizeHeight });
 
-      // Animate to full size
-      await tweenTransform(clone, startRect, destRect, { duration: 220 });
+      // Animate to full size with dramatic trail
+      await tweenTransform(clone, startRect, destRect, { duration: 220, withTrail: true });
       
       // Add fullsize styling
       clone.classList.add('play-card-fullsize');
@@ -280,13 +329,26 @@ export const useCardAnimation = () => {
         return { cancelled: false, countered: true };
       }
 
-      // Resolve card effects
+      // Resolve card effects with screen shake for zone cards
       if (options.onResolve) {
+        if (card.type === 'ZONE') {
+          shake({ intensity: 'medium', duration: 200 });
+        }
         await options.onResolve(card);
       }
 
-      // Fly to played pile
+      // Fly to played pile with particle effect
       await flyToPlayedPile(clone);
+      
+      // Trigger particle effect at final position
+      const event = new CustomEvent('cardDeployed', {
+        detail: {
+          x: destRect.x + destRect.width / 2,
+          y: destRect.y + destRect.height / 2,
+          type: 'deploy'
+        }
+      });
+      window.dispatchEvent(event);
       clone.remove();
       highlightState(); // Remove highlight
 
