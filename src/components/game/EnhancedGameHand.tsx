@@ -170,10 +170,10 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               key={`${card.id}-${index}`}
               data-card-id={card.id}
               className={`
-                enhanced-button card-hover-glow group relative cursor-pointer transition-all duration-300
+                enhanced-button card-hover-glow group relative cursor-pointer transition-all duration-700 ease-out
                 bg-card border-2 rounded-lg flex items-center gap-2
                 ${isMobile ? 'p-4 min-h-[80px]' : 'p-2'}
-                ${isSelected ? 'ring-2 ring-warning scale-105 z-10 shadow-lg shadow-warning/50' : ''}
+                ${isSelected ? 'ring-4 ring-warning scale-125 z-30 shadow-2xl shadow-warning/80 -translate-y-4 bg-gradient-to-r from-warning/10 via-card to-warning/10 animate-pulse border-warning' : ''}
                 ${isPlaying || isLoading ? 'animate-pulse scale-105 z-50 ring-2 ring-primary shadow-lg shadow-primary/50' : 'hover:scale-[1.03] hover:shadow-md'}
                 ${!canAfford && !disabled ? 'opacity-60 saturate-50 cursor-not-allowed' : 'hover:bg-accent/20'}
                 ${getRarityBorder(card.rarity)}
@@ -187,14 +187,19 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               }}
               onClick={(e) => {
                 e.preventDefault();
-                // Only open examination modal, don't select for targeting
                 audio.playSFX('click');
                 triggerHaptic('selection');
-                if (examinedCard === card.id) {
-                  setExaminedCard(null);
+                
+                // If card is already selected, open examination modal
+                if (selectedCard === card.id) {
+                  if (examinedCard === card.id) {
+                    setExaminedCard(null);
+                  } else {
+                    setExaminedCard(card.id);
+                  }
                 } else {
-                  setExaminedCard(card.id);
-                  // Don't auto-select the card for targeting when opening modal
+                  // Select the card (with expansion animation)
+                  onSelectCard?.(card.id);
                 }
               }}
               onMouseEnter={() => {
@@ -210,11 +215,21 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               }}
             >
                {/* Enhanced loading/targeting overlay */}
-               {(isLoading || isPlaying || isSelected) && (
+               {(isLoading || isPlaying) && (
                  <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center z-20">
-                   <Loader2 className={`w-5 h-5 ${isSelected ? 'animate-pulse' : 'animate-spin'} text-primary mb-1`} />
+                   <Loader2 className="w-5 h-5 animate-spin text-primary mb-1" />
                    <span className="text-xs font-mono text-primary font-bold">
-                     {isPlaying ? 'DEPLOYING' : isSelected && card.type === 'ZONE' ? 'TARGETING' : 'PROCESSING'}
+                     {isPlaying ? 'DEPLOYING' : 'PROCESSING'}
+                   </span>
+                 </div>
+               )}
+               
+               {/* Selection overlay for zone targeting */}
+               {isSelected && !isLoading && !isPlaying && (
+                 <div className="absolute inset-0 bg-warning/15 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center z-20 animate-pulse">
+                   <Target className="w-6 h-6 text-warning mb-1 animate-bounce" />
+                   <span className="text-xs font-mono text-warning font-bold">
+                     {card.type === 'ZONE' ? 'SELECT TARGET' : 'READY TO DEPLOY'}
                    </span>
                  </div>
                )}
