@@ -17,6 +17,12 @@ import AchievementPanel from '@/components/game/AchievementPanel';
 import ZoneTargetingHelper from '@/components/game/ZoneTargetingHelper';
 import { AudioControls } from '@/components/ui/audio-controls';
 import Options from '@/components/game/Options';
+import GameLayout from '@/components/layout/GameLayout';
+import StatusBar from '@/components/layout/StatusBar';
+import LeftRail from '@/components/layout/LeftRail';
+import RightRail from '@/components/layout/RightRail';
+import PlayResolutionDock from '@/components/layout/PlayResolutionDock';
+import HandTray from '@/components/layout/HandTray';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudio } from '@/hooks/useAudio';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
@@ -67,6 +73,12 @@ const Index = () => {
   const [gameOverReport, setGameOverReport] = useState<any>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   
+  // Play/Resolution Dock state
+  const [playedCards, setPlayedCards] = useState<any[]>([]);
+  const [activeEffects, setActiveEffects] = useState<any[]>([]);
+  const [resolutionStack, setResolutionStack] = useState<any[]>([]);
+  const [selectedDockCard, setSelectedDockCard] = useState<any>(null);
+  
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
@@ -80,7 +92,34 @@ const Index = () => {
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
 
-  // Track IP changes for floating numbers
+  // Track played cards for dock display
+  useEffect(() => {
+    // Add new played cards to dock
+    if (gameState.cardsPlayedThisRound.length > playedCards.length) {
+      const newCards = gameState.cardsPlayedThisRound.slice(playedCards.length).map(play => ({
+        card: play.card,
+        player: play.player || 'player',
+        timestamp: Date.now(),
+        effects: [], // Will be populated by game logic
+        targetState: undefined // Will be set if applicable
+      }));
+      setPlayedCards(prev => [...prev, ...newCards]);
+    }
+  }, [gameState.cardsPlayedThisRound]);
+
+  // Clear dock when new round starts
+  useEffect(() => {
+    if (gameState.phase === 'income' && gameState.round > 1) {
+      // Move played cards to classified intel log (handled by game state)
+      const completedCards = playedCards;
+      if (completedCards.length > 0) {
+        setPlayedCards([]);
+        setActiveEffects([]);
+        setResolutionStack([]);
+        setSelectedDockCard(null);
+      }
+    }
+  }, [gameState.round, gameState.phase]);
   useEffect(() => {
     const currentIP = gameState.ip;
     const prevIP = parseInt(localStorage.getItem('prevIP') || '0');
