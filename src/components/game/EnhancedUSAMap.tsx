@@ -59,69 +59,46 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const lastPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const frameRef = useRef<number | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const tooltipStableRef = useRef<{ timeout: NodeJS.Timeout | null; lastUpdate: number }>({ 
+    timeout: null, 
+    lastUpdate: 0 
+  });
 
   const getTooltipPosition = () => {
-    const offset = 12; // cursor offset in px (closer to pointer)
-    const margin = 8;  // viewport/container margin
-
-    const tooltipWidth = tooltipRef.current?.offsetWidth ?? 300;
-    const tooltipHeight = tooltipRef.current?.offsetHeight ?? 160;
+    const tooltipWidth = tooltipRef.current?.offsetWidth ?? 384;
+    const tooltipHeight = tooltipRef.current?.offsetHeight ?? 200;
 
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-
-    const containerRect = containerRef.current?.getBoundingClientRect();
-    const tray = document.querySelector('[data-right-sidebar="true"]') as HTMLElement | null;
-    const trayRect = tray?.getBoundingClientRect();
-
-    // Horizontal limits (avoid right docking tray)
-    const rightLimit = trayRect ? Math.min(vw - margin, trayRect.left - margin) : vw - margin;
-    const leftMinPreferred = containerRect ? Math.max(margin, containerRect.left + margin) : margin;
-
-    // Vertical limits based on container/viewport
-    const topMinPreferred = containerRect ? Math.max(margin, containerRect.top + margin) : margin;
-    const topMaxPreferred = containerRect ? Math.min(vh - margin, containerRect.bottom - margin) : vh - margin;
-
-    // Prefer left side when hovering near the right side of the map/tray
-    const preferLeft = trayRect
-      ? mousePosition.x > (trayRect.left - tooltipWidth - 24)
-      : mousePosition.x > vw * 0.66;
-
-    // Base position anchored to cursor with offset
-    let left = preferLeft
-      ? mousePosition.x - tooltipWidth - offset
-      : mousePosition.x + offset;
-
-    let top = mousePosition.y + offset;
-
-    // If base position would exceed right boundary, force left
-    if (!preferLeft && left + tooltipWidth > rightLimit) {
-      left = mousePosition.x - tooltipWidth - offset;
-    }
-
-    // Hard clamp horizontally inside allowed area
-    if (rightLimit - tooltipWidth <= leftMinPreferred) {
-      left = Math.max(margin, rightLimit - tooltipWidth);
+    
+    const margin = 20;
+    const rightSideThreshold = vw * 0.6; // Consider right side when mouse is past 60% of screen width
+    
+    // Calculate base position with more stable positioning for right side
+    let left: number;
+    if (mousePosition.x > rightSideThreshold) {
+      // On right side: always place tooltip to the left of cursor for stability
+      left = mousePosition.x - tooltipWidth - 20;
     } else {
-      left = Math.min(Math.max(left, leftMinPreferred), rightLimit - tooltipWidth);
+      // On left side: place tooltip to the right of cursor
+      left = mousePosition.x + 15;
+    }
+    
+    let top = mousePosition.y - tooltipHeight / 2;
+
+    // Final boundary checks
+    if (left + tooltipWidth > vw - margin) {
+      left = vw - tooltipWidth - margin;
+    }
+    if (left < margin) {
+      left = margin;
     }
 
-    // Prefer above when close to bottom edge
-    const preferAbove = mousePosition.y > (topMaxPreferred - tooltipHeight - 24);
-    if (preferAbove) {
-      top = mousePosition.y - tooltipHeight - offset;
+    if (top + tooltipHeight > vh - margin) {
+      top = vh - tooltipHeight - margin;
     }
-
-    // If still exceeding bottom, flip above
-    if (top + tooltipHeight > topMaxPreferred) {
-      top = mousePosition.y - tooltipHeight - offset;
-    }
-
-    // Clamp vertically inside allowed area
-    if (topMaxPreferred - tooltipHeight <= topMinPreferred) {
-      top = Math.max(margin, vh - margin - tooltipHeight);
-    } else {
-      top = Math.min(Math.max(top, topMinPreferred), topMaxPreferred - tooltipHeight);
+    if (top < margin) {
+      top = margin;
     }
 
     return { left, top };
@@ -232,32 +209,46 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       });
       pathElement.addEventListener('pointerenter', (e: PointerEvent) => {
         audio?.playSFX?.('lightClick'); // Very quiet hover sound
+        
+        // Clear any pending hide timeout
+        if (tooltipStableRef.current.timeout) {
+          clearTimeout(tooltipStableRef.current.timeout);
+          tooltipStableRef.current.timeout = null;
+        }
+        
         setHoveredState(stateId);
-        // Accessibility link to tooltip
         pathElement.setAttribute('aria-describedby', 'map-state-tooltip');
-        // Throttled position update
+        
+        // Initial position update without throttling for better responsiveness
         const { clientX, clientY } = e;
         lastPosRef.current = { x: clientX, y: clientY };
-        if (frameRef.current == null) {
-          frameRef.current = requestAnimationFrame(() => {
-            setMousePosition(lastPosRef.current);
-            frameRef.current = null;
-          });
-        }
+        setMousePosition({ x: clientX, y: clientY });
+        tooltipStableRef.current.lastUpdate = Date.now();
       });
+      
       pathElement.addEventListener('pointermove', (e: PointerEvent) => {
         const { clientX, clientY } = e;
         lastPosRef.current = { x: clientX, y: clientY };
-        if (frameRef.current == null) {
-          frameRef.current = requestAnimationFrame(() => {
-            setMousePosition(lastPosRef.current);
-            frameRef.current = null;
-          });
+        
+        // Throttle position updates more aggressively to prevent flickering
+        const now = Date.now();
+        if (now - tooltipStableRef.current.lastUpdate > 50) { // 50ms throttle
+          if (frameRef.current == null) {
+            frameRef.current = requestAnimationFrame(() => {
+              setMousePosition(lastPosRef.current);
+              tooltipStableRef.current.lastUpdate = Date.now();
+              frameRef.current = null;
+            });
+          }
         }
       });
+      
       pathElement.addEventListener('pointerleave', () => {
-        setHoveredState(null);
-        pathElement.removeAttribute('aria-describedby');
+        // Add small delay before hiding to prevent flicker from micro-movements
+        tooltipStableRef.current.timeout = setTimeout(() => {
+          setHoveredState(null);
+          pathElement.removeAttribute('aria-describedby');
+        }, 50);
       });
 
       statesGroup.appendChild(pathElement);
