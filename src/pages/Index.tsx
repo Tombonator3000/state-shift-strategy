@@ -686,18 +686,20 @@ const Index = () => {
 
         {/* Center - Map */}
         <div className="flex-1 p-1 relative bg-newspaper-bg border-x-2 border-newspaper-border" id="map-container">
-        {/* Enhanced targeting overlay for ZONE cards */}
+        {/* Enhanced targeting overlay for ZONE cards - repositioned to upper right */}
         {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-          <div className="absolute inset-0 bg-black/30 z-10 flex items-center justify-center pointer-events-none">
-            <div className="bg-newspaper-text text-newspaper-bg p-6 border-2 border-newspaper-border font-mono text-xl shadow-2xl animate-pulse max-w-md text-center">
-              <div className="text-2xl mb-2">🎯 ZONE CARD ACTIVE</div>
-              <div className="text-base mb-4">
+          <div className="absolute top-4 right-4 z-20 pointer-events-none">
+            <div className="bg-newspaper-text text-newspaper-bg p-4 border-2 border-newspaper-border font-mono shadow-2xl animate-pulse max-w-sm">
+              <div className="text-lg mb-2 flex items-center gap-2">
+                🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
+              </div>
+              <div className="text-sm mb-3">
                 Click any <span className="text-yellow-400 font-bold">NEUTRAL</span> or <span className="text-red-500 font-bold">ENEMY</span> state to target
               </div>
-              <div className="text-sm bg-black/20 p-2 rounded">
+              <div className="text-xs bg-black/20 p-2 rounded mb-2">
                 Card will deploy automatically when target is selected
               </div>
-              <div className="text-xs mt-2 text-yellow-400">
+              <div className="text-xs text-yellow-400 flex items-center gap-1">
                 ⚠️ Cannot target your own states
               </div>
             </div>
