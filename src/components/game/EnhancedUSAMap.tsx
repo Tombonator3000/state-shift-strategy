@@ -372,11 +372,11 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       {(hoveredState || pinnedState) && stateInfo && (
         <div 
           ref={tooltipRef}
+          id="state-tooltip"
           className={`absolute bg-popover border border-border rounded-lg p-4 shadow-2xl z-[100] max-w-sm transition-opacity duration-200 ${
             pinnedState ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
           style={{ 
-            transform: 'translate(-9999px, -9999px)',
             willChange: 'transform',
             backfaceVisibility: 'hidden',
             opacity: hoveredState || pinnedState ? 1 : 0,
