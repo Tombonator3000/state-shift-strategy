@@ -47,6 +47,41 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  // Calculate smart tooltip position
+  const getTooltipPosition = () => {
+    const tooltipWidth = 320; // max-w-sm is approximately 320px
+    const tooltipHeight = 200; // estimated height
+    const padding = 15;
+    
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    let left = mousePosition.x + padding;
+    let top = mousePosition.y - padding;
+    
+    // Check right edge collision
+    if (left + tooltipWidth > screenWidth) {
+      left = mousePosition.x - tooltipWidth - padding;
+    }
+    
+    // Check bottom edge collision
+    if (top + tooltipHeight > screenHeight) {
+      top = mousePosition.y - tooltipHeight + padding;
+    }
+    
+    // Check top edge collision
+    if (top < 0) {
+      top = mousePosition.y + padding;
+    }
+    
+    // Check left edge collision
+    if (left < 0) {
+      left = mousePosition.x + padding;
+    }
+    
+    return { left, top };
+  };
+
   useEffect(() => {
     const loadUSData = async () => {
       try {
@@ -294,11 +329,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       {hoveredState && stateInfo && (
         <div 
           className="fixed bg-popover border border-border rounded-lg p-4 shadow-2xl z-50 max-w-sm"
-          style={{ 
-            left: mousePosition.x + 10, 
-            top: mousePosition.y - 10,
-            transform: 'translateY(-100%)'
-          }}
+          style={getTooltipPosition()}
         >
           <div className="space-y-2">
             <div className="flex items-center justify-between">
