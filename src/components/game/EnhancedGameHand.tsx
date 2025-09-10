@@ -165,6 +165,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
             <div 
               key={`${card.id}-${index}`}
               data-card-id={card.id}
+              aria-describedby={`hand-tooltip-${card.id}`}
               className={`
                 enhanced-button card-hover-glow group relative cursor-pointer transition-all duration-300
                 bg-card border-2 rounded-lg flex items-center gap-2 overflow-visible
@@ -179,7 +180,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               style={{ 
                 animationDelay: `${index * 0.05}s`,
                 transform: (isPlaying || isLoading) ? 'scale(1.05) translateY(-2px)' : undefined,
-                zIndex: (isPlaying || isLoading) ? 1000 : undefined
+                zIndex: (isPlaying || isLoading) ? 1000 : undefined,
+                overflow: 'visible'
               }}
               onClick={(e) => {
                 e.preventDefault();
@@ -271,7 +273,11 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                <ExtensionCardBadge cardId={card.id} variant="overlay" />
 
                {/* Inline hover tooltip right of the card */}
-               <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-[99999]">
+               <div
+                 id={`hand-tooltip-${card.id}`}
+                 role="tooltip"
+                 className="absolute left-full top-1/2 -translate-y-1/2 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-[99999] pointer-events-none"
+               >
                  <div className="bg-popover border border-border rounded-lg p-3 shadow-xl max-w-xs">
                    <div className="font-bold text-sm text-foreground mb-1">{card.name}</div>
                    <div className="text-xs text-muted-foreground mb-2">{card.type} • Cost: {card.cost}</div>
