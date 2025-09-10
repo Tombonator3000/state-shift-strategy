@@ -35,6 +35,7 @@ import { getRandomAgenda } from '@/data/agendaDatabase';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
+import ExtraEditionNewspaper from '@/components/game/ExtraEditionNewspaper';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
@@ -63,8 +64,10 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showInGameOptions, setShowInGameOptions] = useState(false);
   const [showCardCollection, setShowCardCollection] = useState(false);
+  const [gameOverReport, setGameOverReport] = useState<any>(null);
+  const [showExtraEdition, setShowExtraEdition] = useState(false);
   
-  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards } = useGameState();
+  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -99,16 +102,71 @@ const Index = () => {
     setPreviousPhase(gameState.phase);
   }, [gameState.phase, previousPhase]);
 
-  // Check victory conditions
+  // Check victory conditions and trigger game over
   useEffect(() => {
+    // Don't check victory if game is already over
+    if (gameState.isGameOver) return;
+
+    let winner: "government" | "truth" | "draw" | null = null;
+    let victoryType: 'states' | 'ip' | 'truth' | 'agenda' | null = null;
+
+    // Check player victory conditions
     if (gameState.controlledStates.length >= 10) {
-      setVictoryState({ isVictory: true, type: 'states' });
+      winner = gameState.faction;
+      victoryType = 'states';
     } else if (gameState.ip >= 200) {
-      setVictoryState({ isVictory: true, type: 'ip' });
-    } else if (gameState.truth >= 90) {
-      setVictoryState({ isVictory: true, type: 'truth' });
+      winner = gameState.faction;
+      victoryType = 'ip';
+    } else if (gameState.truth >= 90 && gameState.faction === 'truth') {
+      winner = 'truth';
+      victoryType = 'truth';
+    } else if (gameState.truth <= 10 && gameState.faction === 'government') {
+      winner = 'government';
+      victoryType = 'truth';
     }
-  }, [gameState.controlledStates.length, gameState.ip, gameState.truth]);
+
+    // Check AI victory conditions
+    const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
+    if (aiControlledStates >= 10) {
+      winner = gameState.faction === 'government' ? 'truth' : 'government';
+      victoryType = 'states';
+    } else if (gameState.aiIP >= 200) {
+      winner = gameState.faction === 'government' ? 'truth' : 'government';
+      victoryType = 'ip';
+    }
+
+    // Check agenda victory
+    if (gameState.agenda?.complete) {
+      winner = gameState.agenda.faction === 'truth' ? 'truth' : 'government';
+      victoryType = 'agenda';
+    }
+
+    if (winner && victoryType) {
+      // Stop the game immediately
+      setGameState(prev => ({ ...prev, isGameOver: true }));
+      
+      // Build game over report
+      const report = {
+        winner,
+        rounds: gameState.round,
+        finalTruth: Math.round(gameState.truth),
+        ipPlayer: gameState.ip,
+        ipAI: gameState.aiIP,
+        statesGov: gameState.states.filter(s => s.owner === (gameState.faction === 'government' ? 'player' : 'ai')).length,
+        statesTruth: gameState.states.filter(s => s.owner === (gameState.faction === 'truth' ? 'player' : 'ai')).length,
+        agenda: gameState.agenda ? {
+          side: gameState.agenda.faction === 'truth' ? 'truth' : 'government',
+          name: gameState.agenda.title,
+          success: gameState.agenda.complete
+        } : undefined,
+        mvpCard: gameState.cardsPlayedThisRound.length > 0 ? gameState.cardsPlayedThisRound[gameState.cardsPlayedThisRound.length - 1]?.card?.name : undefined,
+        legendaryUsed: gameState.cardsPlayedThisRound.filter(c => c.card.rarity === 'legendary').map(c => c.card.name)
+      };
+
+      setGameOverReport(report);
+      setVictoryState({ isVictory: true, type: victoryType });
+    }
+  }, [gameState.controlledStates.length, gameState.ip, gameState.aiIP, gameState.truth, gameState.agenda?.complete, gameState.states, gameState.faction, gameState.isGameOver]);
 
   // Enhanced synergy detection with coordinated visual effects
   useEffect(() => {
@@ -773,8 +831,29 @@ const Index = () => {
       <VictoryAnimation 
         isVictory={victoryState.isVictory}
         victoryType={victoryState.type}
-        onComplete={() => setVictoryState({ isVictory: false, type: null })}
+        onComplete={() => {
+          setVictoryState({ isVictory: false, type: null });
+          // Show Extra Edition after victory animation
+          if (gameOverReport) {
+            setShowExtraEdition(true);
+          }
+        }}
       />
+
+      {/* Extra Edition Newspaper */}
+      {showExtraEdition && gameOverReport && (
+        <ExtraEditionNewspaper
+          report={gameOverReport}
+          onClose={() => {
+            setShowExtraEdition(false);
+            setGameOverReport(null);
+            // Reset to start screen
+            setShowMenu(true);
+            setGameState(prev => ({ ...prev, isGameOver: false }));
+            audio.playMusic('theme');
+          }}
+        />
+      )}
 
       {/* Contextual Help System */}
       <ContextualHelp

@@ -15,6 +15,7 @@ interface GameState {
   faction: 'government' | 'truth';
   phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory' | 'ai_turn' | 'card_presentation';
   turn: number;
+  round: number;
   currentPlayer: 'human' | 'ai';
   aiDifficulty: AIDifficulty;
   aiPersonality?: string;
@@ -23,6 +24,7 @@ interface GameState {
   aiIP: number; // AI IP
   hand: GameCard[];
   aiHand: GameCard[];
+  isGameOver: boolean;
   deck: GameCard[];
   aiDeck: GameCard[];
   cardsPlayedThisTurn: number;
@@ -49,12 +51,17 @@ interface GameState {
   eventManager?: EventManager;
   showNewspaper: boolean;
   log: string[];
-  secretAgenda: SecretAgenda & {
+  agenda?: SecretAgenda & {
+    progress?: number;
+    complete?: boolean;
+    revealed?: boolean;
+  };
+  secretAgenda?: SecretAgenda & {
     progress: number;
     completed: boolean;
     revealed: boolean;
   };
-  aiSecretAgenda: SecretAgenda & {
+  aiSecretAgenda?: SecretAgenda & {
     progress: number;
     completed: boolean;
     revealed: boolean;
@@ -85,6 +92,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     faction: 'truth',
     phase: 'action',
     turn: 1,
+    round: 1,
     currentPlayer: 'human',
     aiDifficulty,
     truth: 60,
@@ -92,6 +100,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     aiIP: 15,
     hand: getRandomCards(3),
     aiHand: getRandomCards(3),
+    isGameOver: false,
     deck: generateRandomDeck(40),
     aiDeck: generateRandomDeck(40),
     cardsPlayedThisTurn: 0,
@@ -119,6 +128,12 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       'Cards drawn: 3',
       `AI Difficulty: ${aiDifficulty}`
     ],
+    agenda: {
+      ...getRandomAgenda('truth'),
+      progress: 0,
+      complete: false,
+      revealed: false
+    },
     secretAgenda: {
       ...getRandomAgenda('truth'),
       progress: 0,
@@ -456,6 +471,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
   const endTurn = useCallback(() => {
     setGameState(prev => {
+      // Don't allow turn ending if game is over
+      if (prev.isGameOver) return prev;
+      
       if (prev.currentPlayer === 'human') {
         // Human player ending turn - switch to AI (no card draw here anymore)
         // Card drawing will happen after newspaper at start of new turn
@@ -745,6 +763,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     endTurn,
     closeNewspaper,
     executeAITurn,
-    confirmNewCards
+    confirmNewCards,
+    setGameState
   };
 };
