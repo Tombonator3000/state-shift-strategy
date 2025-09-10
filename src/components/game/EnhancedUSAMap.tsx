@@ -5,7 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import * as topojson from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
-import PlayedCardsDock from './PlayedCardsDock';
+
 
 interface EnhancedState {
   id: string;
@@ -292,10 +292,6 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
       </Card>
 
-      {/* Played Cards Dock - Fixed positioning for fullscreen compatibility */}
-      <div className="relative z-50">
-        <PlayedCardsDock playedCards={playedCards} />
-      </div>
 
       {/* Enhanced Tooltip */}
       {hoveredState && stateInfo && (

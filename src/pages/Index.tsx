@@ -5,6 +5,7 @@ import USAMap from '@/components/game/USAMap';
 import GameHand from '@/components/game/GameHand';
 import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
 import EnhancedGameHand from '@/components/game/EnhancedGameHand';
+import PlayedCardsDock from '@/components/game/PlayedCardsDock';
 import TruthMeter from '@/components/game/TruthMeter';
 import Newspaper from '@/components/game/Newspaper';
 import GameMenu from '@/components/game/GameMenu';
@@ -726,8 +727,12 @@ const Index = () => {
                 selectedZoneCard={gameState.selectedCard}
                 selectedState={gameState.targetState}
                 audio={audio}
-                playedCards={gameState.cardsPlayedThisRound}
               />
+            </div>
+
+            {/* Played Cards Dock - anchored to bottom of map area */}
+            <div className="absolute left-0 right-0 bottom-0 z-50">
+              <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} />
             </div>
           </div>
         </div>
