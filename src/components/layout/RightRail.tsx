@@ -11,14 +11,29 @@ import {
   Bot, 
   HelpCircle, 
   Eye,
-  Target
+  Target,
+  Trophy,
+  BarChart3,
+  Calendar,
+  BookOpen
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface RightRailProps {
   gameState: any;
+  onShowAchievements?: () => void;
+  onShowBalancing?: () => void;
+  onShowEvents?: () => void;
+  onShowCardCollection?: () => void;
 }
 
-const RightRail: React.FC<RightRailProps> = ({ gameState }) => {
+const RightRail: React.FC<RightRailProps> = ({ 
+  gameState, 
+  onShowAchievements,
+  onShowBalancing,
+  onShowEvents,
+  onShowCardCollection 
+}) => {
   const [openSection, setOpenSection] = useState<string>('ai-intel');
 
   return (
@@ -149,6 +164,53 @@ const RightRail: React.FC<RightRailProps> = ({ gameState }) => {
                 )}
               </div>
             </div>
+          </AccordionContent>
+        </AccordionItem>
+        {/* Game Tools & Collections */}
+        <AccordionItem value="tools" className="border-b border-newspaper-border">
+          <AccordionTrigger className="px-3 py-2 text-newspaper-text hover:bg-newspaper-text/10">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-blue-400" />
+              <span className="font-mono text-xs font-bold">TOOLS & COLLECTIONS</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-3 pb-3 space-y-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-xs font-mono"
+              onClick={onShowAchievements}
+            >
+              <Trophy className="w-4 h-4 mr-2" />
+              Achievements
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-xs font-mono"
+              onClick={onShowBalancing}
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Card Balancing
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-xs font-mono"
+              onClick={onShowEvents}
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Event Database
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-xs font-mono"
+              onClick={onShowCardCollection}
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Card Collection
+            </Button>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

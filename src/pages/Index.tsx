@@ -602,7 +602,15 @@ const Index = () => {
             </div>
           </div>
         }
-        rightRail={<RightRail gameState={gameState} />}
+        rightRail={
+          <RightRail 
+            gameState={gameState}
+            onShowAchievements={() => setShowAchievements(true)}
+            onShowBalancing={() => setShowBalancing(true)}
+            onShowEvents={() => setShowEvents(true)}
+            onShowCardCollection={() => setShowCardCollection(true)}
+          />
+        }
         playDock={
           <PlayResolutionDock
             playedCards={playedCards}
