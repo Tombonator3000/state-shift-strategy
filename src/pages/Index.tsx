@@ -254,6 +254,16 @@ const Index = () => {
     setShowIntro(false);
     audio.setGameplayMusic(faction);
     audio.playSFX('click');
+    
+    // Auto-enter fullscreen when game starts
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+      }
+    } catch (error) {
+      console.log('Fullscreen auto-entry failed (user may need to interact first):', error);
+    }
   };
 
   const handleZoneCardSelect = (cardId: string) => {
