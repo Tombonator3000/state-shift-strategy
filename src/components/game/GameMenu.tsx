@@ -97,7 +97,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
           setTimeout(() => {
             setGlitching(false);
             setRedactedText('SHADOW GOVERNMENT');
-          }, 300);
+          }, 1500);
         }
       }, Math.random() * 2000 + 2000), // 2-4 seconds
 
@@ -105,7 +105,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
       setInterval(() => {
         if (Math.random() < 0.12) {
           setSubtitleText(glitchTexts.subtitle[Math.floor(Math.random() * glitchTexts.subtitle.length)]);
-          setTimeout(() => setSubtitleText('PARANOID TIMES EDITION'), 400);
+          setTimeout(() => setSubtitleText('PARANOID TIMES EDITION'), 1200);
         }
       }, Math.random() * 3000 + 3000), // 3-6 seconds
 
@@ -113,7 +113,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
       setInterval(() => {
         if (Math.random() < 0.08) {
           setQuoteText(glitchTexts.quote[Math.floor(Math.random() * glitchTexts.quote.length)]);
-          setTimeout(() => setQuoteText('"Where conspiracy theories go to become policy"'), 600);
+          setTimeout(() => setQuoteText('"Where conspiracy theories go to become policy"'), 1800);
         }
       }, Math.random() * 4000 + 4000), // 4-8 seconds
 
@@ -121,7 +121,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
       setInterval(() => {
         if (Math.random() < 0.1) {
           setDescriptionText(glitchTexts.description[Math.floor(Math.random() * glitchTexts.description.length)]);
-          setTimeout(() => setDescriptionText('Control the narrative. Manipulate the truth.'), 500);
+          setTimeout(() => setDescriptionText('Control the narrative. Manipulate the truth.'), 1400);
         }
       }, Math.random() * 3500 + 3500),
 
@@ -129,7 +129,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
       setInterval(() => {
         if (Math.random() < 0.09) {
           setDescription2Text(glitchTexts.description2[Math.floor(Math.random() * glitchTexts.description2.length)]);
-          setTimeout(() => setDescription2Text('Convince people birds are real (or aren\'t).'), 500);
+          setTimeout(() => setDescription2Text('Convince people birds are real (or aren\'t).'), 1600);
         }
       }, Math.random() * 4000 + 3000),
 
@@ -137,7 +137,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
       setInterval(() => {
         if (Math.random() < 0.11) {
           setPromoText(glitchTexts.promo[Math.floor(Math.random() * glitchTexts.promo.length)]);
-          setTimeout(() => setPromoText('NOW WITH 420% MORE SATIRE!'), 700);
+          setTimeout(() => setPromoText('NOW WITH 420% MORE SATIRE!'), 2000);
         }
       }, Math.random() * 5000 + 4000)
     ];
