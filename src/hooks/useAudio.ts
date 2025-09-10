@@ -27,7 +27,7 @@ export const useAudio = () => {
   const nextMusicRef = useRef<HTMLAudioElement | null>(null);
   const sfxRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  
+  const hasAutoStartedRef = useRef(false);
   // Music track arrays
   const musicTracks = useRef<{ [key in MusicType]: HTMLAudioElement[] }>({
     theme: [],
@@ -44,31 +44,23 @@ export const useAudio = () => {
   // Initialize audio context
   useEffect(() => {
     // Mobile audio context unlock function
-    const unlockAudioContext = async () => {
+    const unlockAudioContext = () => {
       if (audioContextUnlocked) return;
-      
-      try {
-        // Create a silent audio to unlock audio context on mobile
-        const silentAudio = new Audio();
-        silentAudio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+L...';
-        silentAudio.volume = 0;
-        await silentAudio.play();
-        setAudioContextUnlocked(true);
-        console.log('Audio context unlocked for mobile');
-      } catch (error) {
-        console.log('Audio context unlock failed:', error);
-      }
+      setAudioContextUnlocked(true);
+      console.log('Audio context unlocked via user interaction');
     };
 
-    // Add click/touch event listener to unlock audio
+    // Add click/tap/pointer event listener to unlock audio once
     const handleUserInteraction = () => {
       unlockAudioContext();
       document.removeEventListener('click', handleUserInteraction);
       document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('pointerdown', handleUserInteraction);
     };
 
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('touchstart', handleUserInteraction);
+    document.addEventListener('click', handleUserInteraction, { once: true });
+    document.addEventListener('touchstart', handleUserInteraction, { once: true });
+    document.addEventListener('pointerdown', handleUserInteraction, { once: true });
     // Robust audio loader that checks for existing files
     const loadAudioTrack = async (src: string): Promise<HTMLAudioElement | null> => {
       return new Promise((resolve) => {
@@ -289,19 +281,22 @@ export const useAudio = () => {
     currentMusicRef.current = nextTrack;
     
     // Set up event listener for when track ends
-    nextTrack.addEventListener('ended', () => {
-      if (gameState === 'playing') {
-        // Alternate between faction music and theme music during gameplay
-        const nextType = currentMusicType === 'theme' ? 
-          (typeToPlay === 'government' ? 'government' : 'truth') : 'theme';
-        setCurrentMusicType(nextType);
-        playMusic(nextType);
-      } else {
-        // Continue with same type during menu/faction select
-        playMusic(typeToPlay);
-      }
-    });
+    if (currentMusicRef.current) {
+      currentMusicRef.current.onended = null;
+    }
+    nextTrack.onended = () => {
+      // Keep playing the same category of music
+      playMusic(typeToPlay);
+    };
   }, [config.musicEnabled, config.muted, currentMusicType, gameState, getNextTrack, crossFade, tracksLoaded, audioContextUnlocked]);
+
+  // Auto-start theme music on menu after unlock and tracks loaded (once)
+  useEffect(() => {
+    if (!hasAutoStartedRef.current && audioContextUnlocked && tracksLoaded && config.musicEnabled && !config.muted && gameState === 'menu') {
+      hasAutoStartedRef.current = true;
+      playMusic('theme');
+    }
+  }, [audioContextUnlocked, tracksLoaded, config.musicEnabled, config.muted, gameState, playMusic]);
 
   const stopMusic = useCallback(() => {
     if (fadeIntervalRef.current) {
