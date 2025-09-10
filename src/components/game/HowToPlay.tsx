@@ -171,6 +171,38 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
               <h2 className="text-2xl font-bold text-foreground mb-4">7) Map & States</h2>
               <div className="space-y-3 text-sm">
                 <div>
+                  <h3 className="font-semibold text-foreground">Map Colors & Indicators</h3>
+                  <div className="grid grid-cols-2 gap-3 mt-2">
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                      <div className="w-4 h-4 bg-blue-500 border border-border rounded shadow-sm"></div>
+                      <span className="text-foreground font-mono font-medium text-xs">Truth Seekers</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                      <div className="w-4 h-4 bg-red-500 border border-border rounded shadow-sm"></div>
+                      <span className="text-foreground font-mono font-medium text-xs">Government</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-gray-400/10 border border-gray-400/20">
+                      <div className="w-4 h-4 bg-gray-400 border border-border rounded shadow-sm"></div>
+                      <span className="text-foreground font-mono font-medium text-xs">Neutral</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                      <div className="w-4 h-4 bg-orange-500 border border-border rounded shadow-sm animate-pulse"></div>
+                      <span className="text-foreground font-mono font-medium text-xs">Contested</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mt-2">
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-destructive/10 border border-destructive/20">
+                      <div className="w-3 h-3 bg-destructive rounded-full shadow-sm animate-pulse"></div>
+                      <span className="text-foreground font-mono font-medium text-xs">Pressure Indicators</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-accent/10 border border-accent/20">
+                      <div className="w-4 h-4 text-accent">♦</div>
+                      <span className="text-foreground font-mono font-medium text-xs">Defense Points</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
                   <h3 className="font-semibold text-foreground">Defense Levels</h3>
                   <ul className="ml-4 text-muted-foreground">
                     <li>• Most states: 2 defense</li>
