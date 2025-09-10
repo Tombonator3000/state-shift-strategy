@@ -68,7 +68,7 @@ const Index = () => {
   const [gameOverReport, setGameOverReport] = useState<any>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   
-  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState } = useGameState();
+  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -497,13 +497,14 @@ const Index = () => {
         setShowMenu(true);
         // Reset any game state if needed
       }}
-      onSaveGame={() => {
-        // Save current game state to localStorage
-        const gameStateToSave = {
-          ...gameState,
-          timestamp: Date.now()
-        };
-        localStorage.setItem('shadowgov-saved-game', JSON.stringify(gameStateToSave));
+        onSaveGame={saveGame}
+      getSaveInfo={getSaveInfo}
+      onLoadGame={() => {
+        const success = loadGame();
+        if (success) {
+          setShowMenu(false);
+        }
+        return success;
       }}
     />;
   }

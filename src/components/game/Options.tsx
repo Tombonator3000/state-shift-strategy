@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 interface OptionsProps {
   onClose: () => void;
   onBackToMainMenu?: () => void;
-  onSaveGame?: () => void;
+  onSaveGame?: () => boolean;
 }
 
 interface GameSettings {
@@ -73,13 +73,22 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   };
 
   const handleSaveGame = () => {
-    onSaveGame?.();
-    // Show confirmation
-    const savedIndicator = document.createElement('div');
-    savedIndicator.textContent = '✓ GAME SAVED';
-    savedIndicator.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded z-[60] animate-fade-in';
-    document.body.appendChild(savedIndicator);
-    setTimeout(() => savedIndicator.remove(), 2000);
+    const success = onSaveGame?.();
+    if (success) {
+      // Show confirmation
+      const savedIndicator = document.createElement('div');
+      savedIndicator.textContent = '✓ GAME SAVED';
+      savedIndicator.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded z-[60] animate-fade-in';
+      document.body.appendChild(savedIndicator);
+      setTimeout(() => savedIndicator.remove(), 2000);
+    } else {
+      // Show error
+      const errorIndicator = document.createElement('div');
+      errorIndicator.textContent = '❌ SAVE FAILED';
+      errorIndicator.className = 'fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded z-[60] animate-fade-in';
+      document.body.appendChild(errorIndicator);
+      setTimeout(() => errorIndicator.remove(), 2000);
+    }
   };
 
   return (

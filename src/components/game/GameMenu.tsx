@@ -14,9 +14,11 @@ interface GameMenuProps {
   onBackToMainMenu?: () => void;
   onSaveGame?: () => void;
   onShowCardCollection?: () => void;
+  getSaveInfo?: () => any;
+  onLoadGame?: () => boolean;
 }
 
-const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSaveGame, onShowCardCollection }: GameMenuProps) => {
+const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSaveGame, onShowCardCollection, getSaveInfo, onLoadGame }: GameMenuProps) => {
   const [glitching, setGlitching] = useState(false);
   const [redactedText, setRedactedText] = useState('SHADOW GOVERNMENT');
   const [showCredits, setShowCredits] = useState(false);
@@ -388,11 +390,26 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
               HOW TO PLAY
             </Button>
             <Button 
+              onClick={() => {
+                audio?.playSFX?.('click');
+                const saveInfo = getSaveInfo?.();
+                if (saveInfo && onLoadGame) {
+                  // Load the saved game
+                  const success = onLoadGame();
+                  if (success) {
+                    const indicator = document.createElement('div');
+                    indicator.textContent = '✓ GAME LOADED';
+                    indicator.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded z-[60] animate-fade-in';
+                    document.body.appendChild(indicator);
+                    setTimeout(() => indicator.remove(), 2000);
+                  }
+                }
+              }}
               variant="outline" 
-              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10" 
-              disabled
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+              disabled={!getSaveInfo?.()}
             >
-              CONTINUE
+              {getSaveInfo?.() ? `CONTINUE (Turn ${getSaveInfo?.()?.turn})` : 'NO SAVED GAME'}
             </Button>
             <Button 
               onClick={() => {

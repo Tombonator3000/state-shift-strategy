@@ -753,6 +753,81 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     }));
   }, []);
 
+  const saveGame = useCallback(() => {
+    const saveData = {
+      ...gameState,
+      timestamp: Date.now(),
+      version: '1.0'
+    };
+    
+    try {
+      localStorage.setItem('shadowgov-savegame', JSON.stringify(saveData));
+      return true;
+    } catch (error) {
+      console.error('Failed to save game:', error);
+      return false;
+    }
+  }, [gameState]);
+
+  const loadGame = useCallback(() => {
+    try {
+      const savedData = localStorage.getItem('shadowgov-savegame');
+      if (!savedData) return false;
+      
+      const saveData = JSON.parse(savedData);
+      
+      // Validate save data structure
+      if (!saveData.faction || !saveData.phase || saveData.version !== '1.0') {
+        console.warn('Invalid or incompatible save data');
+        return false;
+      }
+      
+      // Reconstruct the game state
+      setGameState(prev => ({
+        ...prev,
+        ...saveData,
+        // Ensure objects are properly reconstructed
+        eventManager: prev.eventManager, // Keep the current event manager
+        aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium')
+      }));
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to load game:', error);
+      return false;
+    }
+  }, []);
+
+  const getSaveInfo = useCallback(() => {
+    try {
+      const savedData = localStorage.getItem('shadowgov-savegame');
+      if (!savedData) return null;
+      
+      const saveData = JSON.parse(savedData);
+      return {
+        faction: saveData.faction,
+        turn: saveData.turn,
+        round: saveData.round,
+        phase: saveData.phase,
+        truth: saveData.truth,
+        timestamp: saveData.timestamp,
+        exists: true
+      };
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const deleteSave = useCallback(() => {
+    try {
+      localStorage.removeItem('shadowgov-savegame');
+      return true;
+    } catch (error) {
+      console.error('Failed to delete save:', error);
+      return false;
+    }
+  }, []);
+
   return {
     gameState,
     initGame,
@@ -764,6 +839,10 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     closeNewspaper,
     executeAITurn,
     confirmNewCards,
-    setGameState
+    setGameState,
+    saveGame,
+    loadGame,
+    getSaveInfo,
+    deleteSave
   };
 };
