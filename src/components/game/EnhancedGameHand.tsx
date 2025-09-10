@@ -196,19 +196,56 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 }
               }}
               onPointerEnter={(e) => {
-                audio.playSFX('lightClick');
+                // Only trigger hover if mouse is precisely within the card content area (not just the margin/padding)
                 const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                const tooltipWidth = 300; // ~max-w-xs incl. padding
-                let left = rect.right + 10;
-                if (left + tooltipWidth > window.innerWidth) {
-                  left = Math.max(16, rect.left - tooltipWidth - 10);
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                
+                // Create a smaller inner rectangle for more precise hover detection
+                const margin = 8; // Reduce hover area by 8px on all sides
+                const innerRect = {
+                  left: rect.left + margin,
+                  right: rect.right - margin,
+                  top: rect.top + margin,
+                  bottom: rect.bottom - margin
+                };
+                
+                // Only show tooltip if mouse is within the inner area
+                if (mouseX >= innerRect.left && mouseX <= innerRect.right && 
+                    mouseY >= innerRect.top && mouseY <= innerRect.bottom) {
+                  audio.playSFX('lightClick');
+                  const tooltipWidth = 300; // ~max-w-xs incl. padding
+                  let left = rect.right + 10;
+                  if (left + tooltipWidth > window.innerWidth) {
+                    left = Math.max(16, rect.left - tooltipWidth - 10);
+                  }
+                  let top = rect.top + rect.height / 2;
+                  top = Math.min(window.innerHeight - 16, Math.max(16, top));
+                  onCardHover?.({
+                    ...card,
+                    _hoverPosition: { x: left, y: top }
+                  });
                 }
-                let top = rect.top + rect.height / 2;
-                top = Math.min(window.innerHeight - 16, Math.max(16, top));
-                onCardHover?.({
-                  ...card,
-                  _hoverPosition: { x: left, y: top }
-                });
+              }}
+              onPointerMove={(e) => {
+                // Continuously check if mouse is still within precise area during movement
+                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                
+                const margin = 8;
+                const innerRect = {
+                  left: rect.left + margin,
+                  right: rect.right - margin,
+                  top: rect.top + margin,
+                  bottom: rect.bottom - margin
+                };
+                
+                // Hide tooltip if mouse moves outside the precise area
+                if (mouseX < innerRect.left || mouseX > innerRect.right || 
+                    mouseY < innerRect.top || mouseY > innerRect.bottom) {
+                  onCardHover?.(null);
+                }
               }}
               onPointerLeave={() => {
                 onCardHover?.(null);
