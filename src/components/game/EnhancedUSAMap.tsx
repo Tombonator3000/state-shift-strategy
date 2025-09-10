@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import * as topojson from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
+import PlayedCardsDock from './PlayedCardsDock';
 
 interface EnhancedState {
   id: string;
@@ -25,6 +26,11 @@ interface EnhancedState {
   occupierUpdatedAt?: number;
 }
 
+interface PlayedCard {
+  card: any;
+  player: 'human' | 'ai';
+}
+
 interface EnhancedUSAMapProps {
   states: EnhancedState[];
   onStateClick: (stateId: string) => void;
@@ -32,6 +38,7 @@ interface EnhancedUSAMapProps {
   hoveredStateId?: string | null;
   selectedState?: string | null;
   audio?: any;
+  playedCards?: PlayedCard[];
 }
 
 const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({ 
@@ -40,7 +47,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   selectedZoneCard,
   hoveredStateId,
   selectedState,
-  audio
+  audio,
+  playedCards = []
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [geoData, setGeoData] = useState<any>(null);
@@ -283,6 +291,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         </div>
 
       </Card>
+
+      {/* Played Cards Dock */}
+      <PlayedCardsDock playedCards={playedCards} />
 
       {/* Enhanced Tooltip */}
       {hoveredState && stateInfo && (

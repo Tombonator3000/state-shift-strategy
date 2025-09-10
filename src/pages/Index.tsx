@@ -726,6 +726,7 @@ const Index = () => {
                 selectedZoneCard={gameState.selectedCard}
                 selectedState={gameState.targetState}
                 audio={audio}
+                playedCards={gameState.cardsPlayedThisRound}
               />
             </div>
           </div>
