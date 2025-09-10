@@ -738,7 +738,7 @@ const Index = () => {
         </div>
 
         {/* Right sidebar - AI Intel & Your Hand */}
-        <div className="w-full xl:w-64 bg-newspaper-bg border-l-2 border-newspaper-border p-2 flex flex-col max-h-full">
+        <div className="w-full xl:w-64 bg-newspaper-bg border-l-2 border-newspaper-border p-2 flex flex-col max-h-full" data-right-sidebar="true">
           {/* Mobile victory conditions - shown at top on mobile */}
           <div className="xl:hidden mb-3">
             <div className="bg-newspaper-text text-newspaper-bg p-2 border border-newspaper-border">

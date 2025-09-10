@@ -51,38 +51,59 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   playedCards = []
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [geoData, setGeoData] = useState<any>(null);
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const lastPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const frameRef = useRef<number | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const getTooltipPosition = () => {
-    const margin = 8; // keep close to cursor
-    const offset = 8; // distance from cursor
+    const offset = 14; // cursor offset in px
+    const margin = 8;  // viewport/container margin
 
-    const tooltipWidth = tooltipRef.current?.offsetWidth ?? 300; // fallback estimate
-    const tooltipHeight = tooltipRef.current?.offsetHeight ?? 160; // fallback estimate
+    const tooltipWidth = tooltipRef.current?.offsetWidth ?? 300;
+    const tooltipHeight = tooltipRef.current?.offsetHeight ?? 160;
 
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
 
-    // Default position: right and below the cursor
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    const tray = document.querySelector('[data-right-sidebar="true"]') as HTMLElement | null;
+    const trayRect = tray?.getBoundingClientRect();
+
+    // Base position: to the right and below the cursor
     let left = mousePosition.x + offset;
     let top = mousePosition.y + offset;
 
-    // Horizontal flip if near right edge
-    if (left + tooltipWidth > screenWidth - margin) {
+    // Prevent overlap with right docking tray (sidebar)
+    if (trayRect) {
+      const trayLeft = trayRect.left;
+      if (left + tooltipWidth > trayLeft - margin) {
+        left = trayLeft - tooltipWidth - margin;
+      }
+    }
+
+    // Horizontal flip if exceeding viewport/tray boundary
+    const rightLimit = trayRect ? Math.min(vw - margin, trayRect.left - margin) : vw - margin;
+    if (left + tooltipWidth > rightLimit) {
       left = mousePosition.x - tooltipWidth - offset;
     }
 
-    // Vertical flip if near bottom edge
-    if (top + tooltipHeight > screenHeight - margin) {
+    // Clamp horizontally within viewport/map container
+    const leftMin = containerRect ? Math.max(margin, containerRect.left + margin) : margin;
+    left = Math.max(leftMin, Math.min(left, rightLimit - tooltipWidth));
+
+    // Vertical flip if exceeding bottom
+    if (top + tooltipHeight > vh - margin) {
       top = mousePosition.y - tooltipHeight - offset;
     }
 
-    // Clamp to viewport so it never goes off-screen
-    left = Math.max(margin, Math.min(left, screenWidth - tooltipWidth - margin));
-    top = Math.max(margin, Math.min(top, screenHeight - tooltipHeight - margin));
+    // Clamp vertically within viewport/map container
+    const topMin = containerRect ? Math.max(margin, containerRect.top + margin) : margin;
+    const topMax = containerRect ? Math.min(vh - margin, containerRect.bottom - margin) : vh - margin;
+    top = Math.max(topMin, Math.min(top, topMax - tooltipHeight));
 
     return { left, top };
   };
@@ -187,16 +208,34 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           onStateClick(gameState?.abbreviation || stateId);
         }
       });
-      pathElement.addEventListener('mouseenter', (e) => {
+      pathElement.addEventListener('pointerenter', (e: PointerEvent) => {
         audio?.playSFX?.('lightClick'); // Very quiet hover sound
         setHoveredState(stateId);
-        setMousePosition({ x: e.clientX, y: e.clientY });
+        // Accessibility link to tooltip
+        pathElement.setAttribute('aria-describedby', 'map-state-tooltip');
+        // Throttled position update
+        const { clientX, clientY } = e;
+        lastPosRef.current = { x: clientX, y: clientY };
+        if (frameRef.current == null) {
+          frameRef.current = requestAnimationFrame(() => {
+            setMousePosition(lastPosRef.current);
+            frameRef.current = null;
+          });
+        }
       });
-      pathElement.addEventListener('mousemove', (e) => {
-        setMousePosition({ x: e.clientX, y: e.clientY });
+      pathElement.addEventListener('pointermove', (e: PointerEvent) => {
+        const { clientX, clientY } = e;
+        lastPosRef.current = { x: clientX, y: clientY };
+        if (frameRef.current == null) {
+          frameRef.current = requestAnimationFrame(() => {
+            setMousePosition(lastPosRef.current);
+            frameRef.current = null;
+          });
+        }
       });
-      pathElement.addEventListener('mouseleave', () => {
+      pathElement.addEventListener('pointerleave', () => {
         setHoveredState(null);
+        pathElement.removeAttribute('aria-describedby');
       });
 
       statesGroup.appendChild(pathElement);
@@ -271,7 +310,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const stateInfo = getHoveredStateInfo();
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <Card className="p-4 bg-card border-border relative">
         
         <div className="relative">
@@ -293,7 +332,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       {hoveredState && stateInfo && (
         <div 
           ref={tooltipRef}
-          className="fixed pointer-events-none select-none bg-popover border border-border rounded-lg p-4 shadow-2xl z-50 max-w-sm"
+          id="map-state-tooltip"
+          role="tooltip"
+          className="fixed pointer-events-none select-none bg-popover border border-border rounded-lg p-4 shadow-2xl z-[99999] max-w-sm"
           style={getTooltipPosition()}
         >
           <div className="space-y-2">
