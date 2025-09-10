@@ -47,42 +47,34 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const getTooltipPosition = () => {
-    const margin = 6; // keep very close to cursor but never off the map
-    const offset = 6; // distance from cursor
+    const margin = 8; // keep close to cursor
+    const offset = 8; // distance from cursor
 
     const tooltipWidth = tooltipRef.current?.offsetWidth ?? 300; // fallback estimate
     const tooltipHeight = tooltipRef.current?.offsetHeight ?? 160; // fallback estimate
 
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return { left: mousePosition.x + offset, top: mousePosition.y + offset };
-
-    // Position relative to the map container
-    const relX = mousePosition.x - rect.left;
-    const relY = mousePosition.y - rect.top;
-
-    const containerWidth = rect.width;
-    const containerHeight = rect.height;
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
 
     // Default position: right and below the cursor
-    let left = relX + offset;
-    let top = relY + offset;
+    let left = mousePosition.x + offset;
+    let top = mousePosition.y + offset;
 
-    // Horizontal flip if near right edge of map container
-    if (left + tooltipWidth > containerWidth - margin) {
-      left = relX - tooltipWidth - offset;
+    // Horizontal flip if near right edge
+    if (left + tooltipWidth > screenWidth - margin) {
+      left = mousePosition.x - tooltipWidth - offset;
     }
 
-    // Vertical flip if near bottom edge of map container
-    if (top + tooltipHeight > containerHeight - margin) {
-      top = relY - tooltipHeight - offset;
+    // Vertical flip if near bottom edge
+    if (top + tooltipHeight > screenHeight - margin) {
+      top = mousePosition.y - tooltipHeight - offset;
     }
 
-    // Clamp to the map container so it never overflows
-    left = Math.max(margin, Math.min(left, containerWidth - tooltipWidth - margin));
-    top = Math.max(margin, Math.min(top, containerHeight - tooltipHeight - margin));
+    // Clamp to viewport so it never goes off-screen
+    left = Math.max(margin, Math.min(left, screenWidth - tooltipWidth - margin));
+    top = Math.max(margin, Math.min(top, screenHeight - tooltipHeight - margin));
 
     return { left, top };
   };
@@ -283,12 +275,12 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           </h3>
         </div>
         
-        <div className="relative isolate" ref={containerRef}>
+        <div className="relative">
           <svg 
             ref={svgRef}
             width="800" 
             height="500" 
-            className="w-full h-full border border-border rounded bg-black/5 z-10"
+            className="w-full h-full border border-border rounded bg-black/5"
             viewBox="0 0 800 500"
             preserveAspectRatio="xMidYMid meet"
           >
@@ -330,6 +322,84 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         </div>
       </Card>
 
+      {/* Enhanced Tooltip */}
+      {hoveredState && stateInfo && (
+        <div 
+          ref={tooltipRef}
+          className="fixed pointer-events-none select-none bg-popover border border-border rounded-lg p-4 shadow-2xl z-50 max-w-sm"
+          style={getTooltipPosition()}
+        >
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h4 className="font-bold text-foreground font-mono">{stateInfo.name}</h4>
+              <Badge 
+                variant="outline" 
+                className={`${
+                  stateInfo.owner === 'player' ? 'border-blue-500 text-blue-500' :
+                  stateInfo.owner === 'ai' ? 'border-red-500 text-red-500' :
+                  stateInfo.contested ? 'border-orange-500 text-orange-500' :
+                  'border-gray-400 text-gray-400'
+                }`}
+              >
+                {stateInfo.contested ? 'CONTESTED' : 
+                 stateInfo.owner === 'player' ? 'TRUTH' : 
+                 stateInfo.owner === 'ai' ? 'GOVERNMENT' : 'NEUTRAL'}
+              </Badge>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <div className="text-muted-foreground">Base IP</div>
+                <div className="font-mono text-foreground">{stateInfo.baseIP}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground">Defense</div>
+                <div className="font-mono text-foreground">{stateInfo.defense}</div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <div className="text-muted-foreground">Pressure</div>
+                <div className="font-mono text-destructive">{stateInfo.pressure}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground">Capture</div>
+                <div className="font-mono text-foreground">
+                  {stateInfo.pressure >= stateInfo.defense ? 'READY' : `${stateInfo.defense - stateInfo.pressure} needed`}
+                </div>
+              </div>
+            </div>
+            
+            {stateInfo.specialBonus && (
+              <div className="pt-2 border-t border-border">
+                <div className="text-sm font-bold text-foreground mb-1">🎯 Special Bonus</div>
+                <div className="text-sm font-mono bg-accent/20 border border-accent/40 p-3 rounded shadow-sm">
+                  <span className="font-bold text-foreground">{stateInfo.specialBonus}</span>
+                  {stateInfo.bonusValue && <span className="text-primary font-bold"> (+{stateInfo.bonusValue} IP)</span>}
+                </div>
+                
+                {/* Occupation Info */}
+                {stateInfo.occupierLabel && stateInfo.owner && stateInfo.owner !== null && (
+                  <div className="mt-2 text-sm font-mono bg-card/60 border border-border/40 p-2 rounded shadow-sm opacity-95">
+                    <span className="font-bold text-foreground">{stateInfo.occupierLabel}</span>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Show occupation info even when no special bonus */}
+            {!stateInfo.specialBonus && stateInfo.occupierLabel && stateInfo.owner && stateInfo.owner !== null && (
+              <div className="pt-2 border-t border-border">
+                <div className="text-sm font-bold text-foreground mb-1">Control</div>
+                <div className="text-sm font-mono bg-card/60 border border-border/40 p-2 rounded shadow-sm opacity-95">
+                  <span className="font-bold text-foreground">{stateInfo.occupierLabel}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <style>
         {`
