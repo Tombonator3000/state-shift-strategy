@@ -21,6 +21,7 @@ export const useAudio = () => {
   const [currentMusicType, setCurrentMusicType] = useState<MusicType>('theme');
   const [gameState, setGameState] = useState<GameState>('menu');
   const [tracksLoaded, setTracksLoaded] = useState(false);
+  const [audioContextUnlocked, setAudioContextUnlocked] = useState(false);
   
   const currentMusicRef = useRef<HTMLAudioElement | null>(null);
   const nextMusicRef = useRef<HTMLAudioElement | null>(null);
@@ -42,6 +43,32 @@ export const useAudio = () => {
 
   // Initialize audio context
   useEffect(() => {
+    // Mobile audio context unlock function
+    const unlockAudioContext = async () => {
+      if (audioContextUnlocked) return;
+      
+      try {
+        // Create a silent audio to unlock audio context on mobile
+        const silentAudio = new Audio();
+        silentAudio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+L...';
+        silentAudio.volume = 0;
+        await silentAudio.play();
+        setAudioContextUnlocked(true);
+        console.log('Audio context unlocked for mobile');
+      } catch (error) {
+        console.log('Audio context unlock failed:', error);
+      }
+    };
+
+    // Add click/touch event listener to unlock audio
+    const handleUserInteraction = () => {
+      unlockAudioContext();
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+    };
+
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('touchstart', handleUserInteraction);
     // Robust audio loader that checks for existing files
     const loadAudioTrack = async (src: string): Promise<HTMLAudioElement | null> => {
       return new Promise((resolve) => {
@@ -177,8 +204,8 @@ export const useAudio = () => {
 
   // Fade between two audio elements
   const crossFade = useCallback((fromAudio: HTMLAudioElement | null, toAudio: HTMLAudioElement | null, duration: number = 2000) => {
-    if (!toAudio) {
-      console.warn('Cannot crossfade: toAudio is null');
+    if (!toAudio || !audioContextUnlocked) {
+      console.warn('Cannot crossfade: toAudio is null or audio context not unlocked');
       return;
     }
 
@@ -193,23 +220,30 @@ export const useAudio = () => {
     const initialFromVolume = fromAudio ? fromAudio.volume : 0;
     const targetToVolume = config.muted ? 0 : config.volume;
 
-    // Start playing the new audio
+    // Start playing the new audio with proper mobile handling
     if (config.musicEnabled && !config.muted) {
       toAudio.volume = 0;
       toAudio.currentTime = 0;
-      toAudio.play().catch(console.error);
+      
+      // Use a promise to handle mobile audio play restrictions
+      const playPromise = toAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log('Audio play prevented by browser policy:', error);
+        });
+      }
     }
 
     fadeIntervalRef.current = setInterval(() => {
       step++;
       const progress = step / steps;
 
-      if (fromAudio) {
-        fromAudio.volume = initialFromVolume * (1 - progress);
+      if (fromAudio && fromAudio.volume !== undefined) {
+        fromAudio.volume = Math.max(0, initialFromVolume * (1 - progress));
       }
       
-      if (config.musicEnabled && !config.muted && toAudio) {
-        toAudio.volume = targetToVolume * progress;
+      if (config.musicEnabled && !config.muted && toAudio && toAudio.volume !== undefined) {
+        toAudio.volume = Math.min(targetToVolume, targetToVolume * progress);
       }
 
       if (step >= steps) {
@@ -222,11 +256,20 @@ export const useAudio = () => {
         }
       }
     }, stepDuration);
-  }, [config.musicEnabled, config.muted, config.volume]);
+  }, [config.musicEnabled, config.muted, config.volume, audioContextUnlocked]);
 
   // Play music based on current state
   const playMusic = useCallback((musicType?: MusicType) => {
-    if (!config.musicEnabled || config.muted || !tracksLoaded) return;
+    // Don't play music until tracks are loaded and audio context is unlocked (mobile requirement)
+    if (!config.musicEnabled || config.muted || !tracksLoaded || !audioContextUnlocked) {
+      console.log('Music playback blocked:', { 
+        musicEnabled: config.musicEnabled, 
+        muted: config.muted, 
+        tracksLoaded, 
+        audioContextUnlocked 
+      });
+      return;
+    }
 
     const typeToPlay = musicType || currentMusicType;
     const nextTrack = getNextTrack(typeToPlay);
@@ -234,6 +277,12 @@ export const useAudio = () => {
     if (!nextTrack) {
       console.warn(`No available track for music type: ${typeToPlay}`);
       return;
+    }
+    
+    // Stop current music before starting new track
+    if (currentMusicRef.current && currentMusicRef.current !== nextTrack) {
+      currentMusicRef.current.pause();
+      currentMusicRef.current.currentTime = 0;
     }
     
     crossFade(currentMusicRef.current, nextTrack);
@@ -252,7 +301,7 @@ export const useAudio = () => {
         playMusic(typeToPlay);
       }
     });
-  }, [config.musicEnabled, config.muted, currentMusicType, gameState, getNextTrack, crossFade, tracksLoaded]);
+  }, [config.musicEnabled, config.muted, currentMusicType, gameState, getNextTrack, crossFade, tracksLoaded, audioContextUnlocked]);
 
   const stopMusic = useCallback(() => {
     if (fadeIntervalRef.current) {

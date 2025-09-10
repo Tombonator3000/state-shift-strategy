@@ -358,10 +358,13 @@ const Index = () => {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Start menu music when component first mounts
+  // Start menu music after user interaction
   useEffect(() => {
-    audio.setMenuMusic();
-  }, [audio]);
+    // Only start music when user clicks to dismiss intro
+    if (!showIntro && showMenu) {
+      audio.setMenuMusic();
+    }
+  }, [showIntro, showMenu, audio]);
 
   if (showIntro) {
     return (
