@@ -105,41 +105,56 @@ const Index = () => {
 
   // Check victory conditions and trigger game over
   useEffect(() => {
-    // Don't check victory if game is already over
-    if (gameState.isGameOver) return;
+    // Don't check victory if game is already over or during animations
+    if (gameState.isGameOver || gameState.animating) return;
 
     let winner: "government" | "truth" | "draw" | null = null;
     let victoryType: 'states' | 'ip' | 'truth' | 'agenda' | null = null;
 
-    // Check player victory conditions
-    if (gameState.controlledStates.length >= 10) {
-      winner = gameState.faction;
-      victoryType = 'states';
-    } else if (gameState.ip >= 200) {
-      winner = gameState.faction;
-      victoryType = 'ip';
-    } else if (gameState.truth >= 90 && gameState.faction === 'truth') {
+    // Only evaluate victory conditions at proper timing:
+    // - After card effects are fully resolved
+    // - After AI turn completion
+    // - After round end (newspaper phase)
+    const shouldEvaluate = gameState.phase === 'action' || 
+                          gameState.phase === 'newspaper' ||
+                          (gameState.phase === 'ai_turn' && !gameState.aiTurnInProgress);
+
+    if (!shouldEvaluate) return;
+
+    // Priority 1: Secret Agenda (highest priority)
+    if (gameState.agenda?.complete) {
+      winner = gameState.agenda.faction === 'truth' ? 'truth' : 'government';
+      victoryType = 'agenda';
+    }
+    
+    // Priority 2: Truth thresholds (Truth ≥ 90% for Truth Seekers, Truth ≤ 10% for Government)
+    else if (gameState.truth >= 90 && gameState.faction === 'truth') {
       winner = 'truth';
       victoryType = 'truth';
     } else if (gameState.truth <= 10 && gameState.faction === 'government') {
       winner = 'government';
       victoryType = 'truth';
     }
-
-    // Check AI victory conditions
-    const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
-    if (aiControlledStates >= 10) {
-      winner = gameState.faction === 'government' ? 'truth' : 'government';
-      victoryType = 'states';
+    
+    // Priority 3: IP victory (200 IP)
+    else if (gameState.ip >= 200) {
+      winner = gameState.faction;
+      victoryType = 'ip';
     } else if (gameState.aiIP >= 200) {
       winner = gameState.faction === 'government' ? 'truth' : 'government';
       victoryType = 'ip';
     }
-
-    // Check agenda victory
-    if (gameState.agenda?.complete) {
-      winner = gameState.agenda.faction === 'truth' ? 'truth' : 'government';
-      victoryType = 'agenda';
+    
+    // Priority 4: State control (10 states)
+    else if (gameState.controlledStates.length >= 10) {
+      winner = gameState.faction;
+      victoryType = 'states';
+    } else {
+      const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
+      if (aiControlledStates >= 10) {
+        winner = gameState.faction === 'government' ? 'truth' : 'government';
+        victoryType = 'states';
+      }
     }
 
     if (winner && victoryType) {
