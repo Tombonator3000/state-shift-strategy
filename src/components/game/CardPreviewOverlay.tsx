@@ -4,8 +4,10 @@ interface CardPreviewOverlayProps {
   card: {
     id: string;
     name: string;
-    type: 'ZONE' | 'INFLUENCE' | 'TRUTH';
-    effect: string;
+    type: string;
+    text: string;
+    cost: number;
+    rarity?: string;
   } | null;
   targetStates?: string[];
 }
@@ -14,7 +16,7 @@ const CardPreviewOverlay = ({ card, targetStates = [] }: CardPreviewOverlayProps
   if (!card) return null;
 
   return (
-    <div className="absolute inset-0 bg-black/20 pointer-events-none z-10">
+    <div className="absolute inset-0 pointer-events-none z-10">
       {/* Highlight potential target states */}
       {card.type === 'ZONE' && targetStates.map(stateId => (
         <div
@@ -29,17 +31,25 @@ const CardPreviewOverlay = ({ card, targetStates = [] }: CardPreviewOverlayProps
         />
       ))}
 
-      {/* Card preview tooltip */}
-      <div className="absolute bottom-4 left-4 bg-newspaper-text text-newspaper-bg p-4 border-2 border-truth-red font-mono max-w-xs animate-fade-in">
-        <div className="font-bold text-lg mb-2">{card.name}</div>
-        <div className="text-sm mb-2">Type: {card.type}</div>
-        <div className="text-xs opacity-90">{card.effect}</div>
-        
-        {card.type === 'ZONE' && (
-          <div className="mt-2 text-xs text-truth-red">
-            💥 Hover over states to see targeting preview
+      {/* Card preview tooltip - matching docking tray style */}
+      <div className="absolute bottom-4 left-4 animate-fade-in">
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl max-w-xs">
+          <div className="font-bold text-sm text-foreground mb-1">
+            {card.name}
           </div>
-        )}
+          <div className="text-xs text-muted-foreground mb-2">
+            {card.type} • Cost: {card.cost}
+          </div>
+          <div className="text-xs text-foreground">
+            {card.text}
+          </div>
+          
+          {card.type === 'ZONE' && (
+            <div className="mt-2 text-xs text-accent">
+              🎯 Click on a neutral or enemy state to deploy
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
