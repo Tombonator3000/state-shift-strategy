@@ -97,10 +97,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     triggerHaptic('medium');
     setPlayingCard(cardId);
     
-    toast({
-      title: "🚀 Asset Deployed",
-      description: `"${card.name}" is now active.`,
-    });
     
     try {
       onPlayCard(cardId);
