@@ -283,12 +283,12 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           </h3>
         </div>
         
-        <div className="relative" ref={containerRef}>
+        <div className="relative isolate" ref={containerRef}>
           <svg 
             ref={svgRef}
             width="800" 
             height="500" 
-            className="w-full h-full border border-border rounded bg-black/5"
+            className="w-full h-full border border-border rounded bg-black/5 z-10"
             viewBox="0 0 800 500"
             preserveAspectRatio="xMidYMid meet"
           >
