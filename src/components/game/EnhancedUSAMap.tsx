@@ -181,10 +181,6 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           
           // Valid target - success feedback
           audio?.playSFX?.('click');
-          toast({
-            title: "🎯 Target Acquired",
-            description: `Deploying zone asset to ${gameState.name}...`,
-          });
           onStateClick(gameState?.abbreviation || stateId);
         } else {
           audio?.playSFX?.('lightClick');
