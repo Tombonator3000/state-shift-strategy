@@ -292,8 +292,10 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
       </Card>
 
-      {/* Played Cards Dock */}
-      <PlayedCardsDock playedCards={playedCards} />
+      {/* Played Cards Dock - Fixed positioning for fullscreen compatibility */}
+      <div className="relative z-50">
+        <PlayedCardsDock playedCards={playedCards} />
+      </div>
 
       {/* Enhanced Tooltip */}
       {hoveredState && stateInfo && (
