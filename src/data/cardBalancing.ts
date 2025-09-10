@@ -2,6 +2,7 @@
 // Analyzes and provides feedback on card balance
 
 import { CARD_DATABASE } from './cardDatabase';
+import { extensionManager } from './extensionSystem';
 
 export interface CardBalance {
   cardId: string;
@@ -55,8 +56,6 @@ export class CardBalancer {
 
   constructor(includeExtensions: boolean = true) {
     if (includeExtensions) {
-      // Import extensionManager here to avoid circular dependencies
-      const { extensionManager } = require('./extensionSystem');
       const extensionCards = extensionManager.getAllExtensionCards();
       this.cards = [...CARD_DATABASE, ...extensionCards];
     } else {
