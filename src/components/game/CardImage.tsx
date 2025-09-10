@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { isExtensionCard, getCardExtensionInfo } from '@/data/extensionIntegration';
 
 interface CardImageProps {
   cardId: string;
@@ -9,8 +10,19 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '' }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Always use PARANOID TIMES placeholder for now
-  const placeholderImagePath = '/lovable-uploads/e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png';
+  // Check if this is a Halloween Spooktacular extension card
+  const getImagePath = () => {
+    if (isExtensionCard(cardId)) {
+      const extensionInfo = getCardExtensionInfo(cardId);
+      if (extensionInfo?.id === 'halloween_spooktacular') {
+        return '/card-art/halloween_spooktacular-Temp-Image.png';
+      }
+    }
+    // Default PARANOID TIMES placeholder
+    return '/lovable-uploads/e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png';
+  };
+
+  const imagePath = getImagePath();
 
   const handleImageError = () => {
     setImageError(true);
@@ -29,10 +41,11 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '' }) => {
       )}
       
       <img
-        src={placeholderImagePath}
-        alt={`PARANOID TIMES - Card art for ${cardId}`}
+        src={imagePath}
+        alt={`Card art for ${cardId}`}
         className="w-full h-full object-cover"
         onLoad={handleImageLoad}
+        onError={handleImageError}
       />
     </div>
   );
