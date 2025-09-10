@@ -715,7 +715,7 @@ const Index = () => {
             </div>
           </div>
         )}
-          <div className="h-full border-2 border-newspaper-border bg-white/80 relative overflow-hidden">
+          <div className="h-full border-2 border-newspaper-border bg-white/80 relative overflow-visible">
             {/* Card preview overlay */}
             <CardPreviewOverlay card={hoveredCard} />
             
