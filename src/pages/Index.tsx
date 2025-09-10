@@ -256,14 +256,15 @@ const Index = () => {
     audio.setGameplayMusic(faction);
     audio.playSFX('click');
     
-    // Auto-enter fullscreen when game starts
+    // Auto-enter fullscreen when game starts (skip in iframes or when not allowed)
     try {
-      if (!document.fullscreenElement) {
+      const canFullscreen = document.fullscreenEnabled && window.top === window.self;
+      if (canFullscreen && !document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
         setIsFullscreen(true);
       }
     } catch (error) {
-      console.log('Fullscreen auto-entry failed (user may need to interact first):', error);
+      console.log('Fullscreen auto-entry skipped or failed:', error);
     }
   };
 
@@ -406,6 +407,12 @@ const Index = () => {
 
   const toggleFullscreen = async () => {
     try {
+      const canFullscreen = document.fullscreenEnabled && window.top === window.self;
+      if (!canFullscreen) {
+        console.log('Fullscreen not permitted in this environment (likely in iframe).');
+        audio.playSFX('click');
+        return;
+      }
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
         setIsFullscreen(true);
