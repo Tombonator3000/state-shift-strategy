@@ -12,7 +12,7 @@ type GameState = 'menu' | 'factionSelect' | 'playing';
 
 export const useAudio = () => {
   const [config, setConfig] = useState<AudioConfig>({
-    volume: 0.7,
+    volume: 0.3, // Start at 30% volume
     muted: false,
     musicEnabled: true,
     sfxEnabled: true
@@ -48,7 +48,7 @@ export const useAudio = () => {
         const audio = new Audio();
         audio.addEventListener('canplaythrough', () => {
           audio.loop = false;
-          audio.volume = config.volume * 0.3;
+          audio.volume = config.volume;
           resolve(audio);
         }, { once: true });
         audio.addEventListener('error', () => {
@@ -66,14 +66,20 @@ export const useAudio = () => {
         themePromises.push(loadAudioTrack(`/muzak/Theme-${i}.mp3`));
       }
       
-      // Try both case variations for background music
-      themePromises.push(
-        loadAudioTrack(`/audio/background-music.mp3`),
-        loadAudioTrack(`/audio/Background-music.mp3`)
-      );
-      
       const themeResults = await Promise.all(themePromises);
-      musicTracks.current.theme = themeResults.filter(audio => audio !== null) as HTMLAudioElement[];
+      const validThemeTracks = themeResults.filter(audio => audio !== null) as HTMLAudioElement[];
+      
+      // Only use background music as fallback if no theme tracks found
+      if (validThemeTracks.length === 0) {
+        const backgroundPromises = [
+          loadAudioTrack(`/audio/background-music.mp3`),
+          loadAudioTrack(`/audio/Background-music.mp3`)
+        ];
+        const backgroundResults = await Promise.all(backgroundPromises);
+        musicTracks.current.theme = backgroundResults.filter(audio => audio !== null) as HTMLAudioElement[];
+      } else {
+        musicTracks.current.theme = validThemeTracks;
+      }
 
       // Load government faction music tracks (1-3)
       const govPromises = [];
@@ -146,10 +152,10 @@ export const useAudio = () => {
   // Update volumes when config changes
   useEffect(() => {
     if (currentMusicRef.current) {
-      currentMusicRef.current.volume = config.muted ? 0 : config.volume * 0.3;
+      currentMusicRef.current.volume = config.muted ? 0 : config.volume;
     }
     Object.values(musicTracks.current).flat().forEach(audio => {
-      audio.volume = config.muted ? 0 : config.volume * 0.3;
+      audio.volume = config.muted ? 0 : config.volume;
     });
     Object.values(sfxRefs.current).forEach(audio => {
       audio.volume = config.muted ? 0 : config.volume;
@@ -185,7 +191,7 @@ export const useAudio = () => {
     let step = 0;
 
     const initialFromVolume = fromAudio ? fromAudio.volume : 0;
-    const targetToVolume = config.muted ? 0 : config.volume * 0.3;
+    const targetToVolume = config.muted ? 0 : config.volume;
 
     // Start playing the new audio
     if (config.musicEnabled && !config.muted) {
