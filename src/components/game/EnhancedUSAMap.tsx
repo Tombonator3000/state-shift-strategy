@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
@@ -73,36 +74,50 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     const tray = document.querySelector('[data-right-sidebar="true"]') as HTMLElement | null;
     const trayRect = tray?.getBoundingClientRect();
 
-    // Base position: to the right and below the cursor
-    let left = mousePosition.x + offset;
-    let top = mousePosition.y + offset;
-
-    // Calculate horizontal limits
+    // Horizontal limits (avoid right docking tray)
     const rightLimit = trayRect ? Math.min(vw - margin, trayRect.left - margin) : vw - margin;
     const leftMinPreferred = containerRect ? Math.max(margin, containerRect.left + margin) : margin;
 
-    // Prevent overlap with right docking tray (sidebar) / viewport
-    if (left + tooltipWidth > rightLimit) {
-      // Flip to the left of the cursor
+    // Vertical limits based on container/viewport
+    const topMinPreferred = containerRect ? Math.max(margin, containerRect.top + margin) : margin;
+    const topMaxPreferred = containerRect ? Math.min(vh - margin, containerRect.bottom - margin) : vh - margin;
+
+    // Prefer left side when hovering near the right side of the map/tray
+    const preferLeft = trayRect
+      ? mousePosition.x > (trayRect.left - tooltipWidth - 24)
+      : mousePosition.x > vw * 0.66;
+
+    // Base position anchored to cursor with offset
+    let left = preferLeft
+      ? mousePosition.x - tooltipWidth - offset
+      : mousePosition.x + offset;
+
+    let top = mousePosition.y + offset;
+
+    // If base position would exceed right boundary, force left
+    if (!preferLeft && left + tooltipWidth > rightLimit) {
       left = mousePosition.x - tooltipWidth - offset;
     }
 
-    // If there is not enough space between container left and tray, clamp to viewport hard limit
+    // Hard clamp horizontally inside allowed area
     if (rightLimit - tooltipWidth <= leftMinPreferred) {
       left = Math.max(margin, rightLimit - tooltipWidth);
     } else {
       left = Math.min(Math.max(left, leftMinPreferred), rightLimit - tooltipWidth);
     }
 
-    // Vertical limits based on container/viewport
-    const topMinPreferred = containerRect ? Math.max(margin, containerRect.top + margin) : margin;
-    const topMaxPreferred = containerRect ? Math.min(vh - margin, containerRect.bottom - margin) : vh - margin;
-
-    if (top + tooltipHeight > topMaxPreferred) {
-      // Flip above the cursor
+    // Prefer above when close to bottom edge
+    const preferAbove = mousePosition.y > (topMaxPreferred - tooltipHeight - 24);
+    if (preferAbove) {
       top = mousePosition.y - tooltipHeight - offset;
     }
 
+    // If still exceeding bottom, flip above
+    if (top + tooltipHeight > topMaxPreferred) {
+      top = mousePosition.y - tooltipHeight - offset;
+    }
+
+    // Clamp vertically inside allowed area
     if (topMaxPreferred - tooltipHeight <= topMinPreferred) {
       top = Math.max(margin, vh - margin - tooltipHeight);
     } else {
@@ -335,12 +350,13 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       </Card>
 
 
-      {/* Enhanced Tooltip */}
-      {hoveredState && stateInfo && (
+      {/* Enhanced Tooltip (Portal) */}
+      {hoveredState && stateInfo && createPortal(
         <div 
           ref={tooltipRef}
           id="map-state-tooltip"
           role="tooltip"
+          aria-live="polite"
           className="fixed pointer-events-none select-none bg-popover border border-border rounded-lg p-4 shadow-2xl z-[99999] max-w-sm"
           style={getTooltipPosition()}
         >
@@ -413,7 +429,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <style>
