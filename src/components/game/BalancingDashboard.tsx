@@ -24,7 +24,7 @@ import {
   CardMetrics,
   BalancingReport 
 } from '@/data/cardBalancing';
-import FactionBalanceAnalyzer, { CardAnalysisResult, BalanceReport } from '@/data/factionBalanceAnalyzer';
+import FactionBalanceAnalyzer, { CardAnalysisResult, BalanceReport as FactionBalanceReport } from '@/data/factionBalanceAnalyzer';
 import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 interface BalancingDashboardProps {
@@ -44,7 +44,7 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
   const cardsNeedingAttention = useMemo(() => balancer.getCardsNeedingAttention(), [balancer]);
   
   // Faction balance analysis
-  const factionReport = useMemo(() => factionAnalyzer.generateBalanceReport(), [factionAnalyzer]);
+  const factionReport: FactionBalanceReport = useMemo(() => factionAnalyzer.generateBalanceReport(), [factionAnalyzer]);
   const simulationResult = useMemo(() => factionAnalyzer.runBalanceSimulation(), [factionAnalyzer]);
 
   const getStatusColor = (status: string) => {
