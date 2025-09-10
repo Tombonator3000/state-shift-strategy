@@ -21,7 +21,7 @@ interface EnhancedGameHandProps {
   maxCards?: number;
   currentIP: number;
   loadingCard?: string | null;
-  onCardHover?: (card: GameCard | null) => void;
+  onCardHover?: (card: (GameCard & { _hoverPosition?: { x: number; y: number } }) | null) => void;
 }
 
 const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({ 
@@ -193,10 +193,17 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   // Don't auto-select the card for targeting when opening modal
                 }
               }}
-              onMouseEnter={() => {
+              onMouseEnter={(e) => {
                 if (!isMobile) {
                   audio.playSFX('lightClick'); // Very quiet button sound
-                  onCardHover?.(card);
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  onCardHover?.({
+                    ...card,
+                    _hoverPosition: {
+                      x: rect.right + 10, // 10px to the right of the card
+                      y: rect.top + rect.height / 2 // Center vertically
+                    }
+                  });
                 }
               }}
               onMouseLeave={() => {
