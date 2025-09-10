@@ -12,7 +12,7 @@ interface GameMenuProps {
   onFactionHover?: (faction: 'government' | 'truth' | null) => void;
   audio?: any;
   onBackToMainMenu?: () => void;
-  onSaveGame?: () => void;
+  onSaveGame?: () => boolean;
   onShowCardCollection?: () => void;
   getSaveInfo?: () => any;
   onLoadGame?: () => boolean;

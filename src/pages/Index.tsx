@@ -518,13 +518,7 @@ const Index = () => {
           setShowMenu(true);
           audio.setMenuMusic();
         }}
-        onSaveGame={() => {
-          const gameStateToSave = {
-            ...gameState,
-            timestamp: Date.now()
-          };
-          localStorage.setItem('shadowgov-saved-game', JSON.stringify(gameStateToSave));
-        }}
+        onSaveGame={() => saveGame()}
       />
     );
   }
