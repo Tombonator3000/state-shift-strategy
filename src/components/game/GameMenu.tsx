@@ -39,36 +39,51 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
 
   useEffect(() => {
     const glitchTexts = {
-      title: ['SHEEPLE TIMES', 'THE TRUTH DAILY', 'CONSPIRACY NEWS', 'SHADOW GOVERNMENT', 'DEEP STATE WEEKLY', 'LIZARD PEOPLE POST'],
-      subtitle: ['PARANOID TIMES EDITION', 'CLASSIFIED EDITION', 'REDACTED DAILY', 'TOP SECRET TIMES', 'CONSPIRACY WEEKLY'],
+      title: ['SHEEPLE TIMES', 'THE TRUTH DAILY', 'CONSPIRACY NEWS', 'SHADOW GOVERNMENT', 'DEEP STATE WEEKLY', 'LIZARD PEOPLE POST', 'WEEKLY WORLD NEWS', 'TABLOID TRUTH', 'PARANOID PLANET'],
+      subtitle: ['PARANOID TIMES EDITION', 'CLASSIFIED EDITION', 'REDACTED DAILY', 'TOP SECRET TIMES', 'CONSPIRACY WEEKLY', 'BIGFOOT WEEKLY', 'ALIEN EDITION', 'CRYPTID CHRONICLES'],
       quote: [
         '"Where conspiracy theories go to become policy"',
         '"All your base are belong to us"',
         '"The cake is a lie"',
         '"Birds aren\'t real and neither are we"',
         '"Trust no one, especially us"',
-        '"Making Atlantis Great Again"'
+        '"Making Atlantis Great Again"',
+        '"Elvis lever fremdeles"',
+        '"Bat Boy seen again in Area 51"',
+        '"Bigfoot spotted buying groceries"',
+        '"UFO parked illegally downtown"'
       ],
       description: [
         'Control the narrative. Manipulate the truth.',
         'Expose the lies. Reveal the secrets.',
         'Question everything. Believe nothing.',
         'Wake up the sheeple. Join the resistance.',
-        'The truth is out there. Probably.'
+        'The truth is out there. Probably.',
+        'Elvis lever og jobber på McDonald\'s.',
+        'Bat Boy elected as local mayor.',
+        'Bigfoot runs successful Youtube channel.',
+        'Aliens prefer Earth\'s pizza over home food.'
       ],
       description2: [
         'Convince people birds are real (or aren\'t).',
         'Prove that Finland actually exists.',
         'Debate whether the moon is made of cheese.',
         'Investigate if Australia is upside down.',
-        'Confirm that cats are government spies.'
+        'Confirm that cats are government spies.',
+        'Woman gives birth to 200-pound baby.',
+        'Man marries his own reflection.',
+        'Scientists discover portal to Nebraska.',
+        'Local dog learns to play piano.'
       ],
       promo: [
         'NOW WITH 420% MORE SATIRE!',
         'NEW! EXTRA CONSPIRACY FLAVORING!',
         'APPROVED BY THE ILLUMINATI!',
         'BANNED IN 47 DIMENSIONS!',
-        'NOW WITH REAL LIZARD PEOPLE!'
+        'NOW WITH REAL LIZARD PEOPLE!',
+        'AS SEEN ON ALIEN TV!',
+        'BIGFOOT APPROVED!',
+        'ELVIS RECOMMENDS THIS GAME!'
       ]
     };
 
