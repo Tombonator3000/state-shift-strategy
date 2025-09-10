@@ -171,6 +171,16 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       hand: startingHand,
       deck: newDeck.slice(handSize),
       controlledStates: initialControl.player,
+      isGameOver: false, // CRITICAL: Reset game over state
+      phase: 'action', // Reset to proper starting phase
+      turn: 1,
+      round: 1,
+      cardsPlayedThisTurn: 0,
+      cardsPlayedThisRound: [],
+      animating: false,
+      aiTurnInProgress: false,
+      selectedCard: null,
+      targetState: null,
       states: USA_STATES.map(state => {
         let owner: 'player' | 'ai' | 'neutral' = 'neutral';
         
@@ -195,8 +205,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         `Starting IP: ${startingIP}`,
         `Cards drawn: ${handSize}`,
         `Controlled states: ${initialControl.player.join(', ')}`
-      ],
-      aiTurnInProgress: false
+      ]
     }));
   }, []);
 

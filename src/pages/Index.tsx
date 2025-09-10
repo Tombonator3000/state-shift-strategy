@@ -24,7 +24,7 @@ import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import PhaseTransition from '@/components/effects/PhaseTransition';
-import VictoryAnimation from '@/components/effects/VictoryAnimation';
+import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
 import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
 import ContextualHelp from '@/components/game/ContextualHelp';
 import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
@@ -863,15 +863,29 @@ const Index = () => {
         />
       )}
       
-      <VictoryAnimation 
-        isVictory={victoryState.isVictory}
+      <TabloidVictoryScreen 
+        isVisible={victoryState.isVictory}
+        isVictory={gameState.faction === (gameOverReport?.winner || 'truth')}
         victoryType={victoryState.type}
-        onComplete={() => {
+        playerFaction={gameState.faction}
+        gameStats={{
+          rounds: gameState.round,
+          finalTruth: Math.round(gameState.truth),
+          playerIP: gameState.ip,
+          aiIP: gameState.aiIP,
+          playerStates: gameState.states.filter(s => s.owner === 'player').length,
+          aiStates: gameState.states.filter(s => s.owner === 'ai').length,
+          mvpCard: gameOverReport?.mvpCard,
+          agenda: gameState.agenda ? {
+            name: gameState.agenda.title,
+            complete: gameState.agenda.complete || false
+          } : undefined
+        }}
+        onClose={() => {
           setVictoryState({ isVictory: false, type: null });
-          // Show Extra Edition after victory animation
-          if (gameOverReport) {
-            setShowExtraEdition(true);
-          }
+          setGameOverReport(null);
+          setShowMenu(true);
+          setShowIntro(true);
         }}
       />
 
