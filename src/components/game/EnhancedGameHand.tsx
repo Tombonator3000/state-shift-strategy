@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import CardImage from './CardImage';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const audio = useAudio();
   const { triggerHaptic } = useHapticFeedback();
   const isMobile = useIsMobile();
+  const handRef = useRef<HTMLDivElement>(null);
 
   const getRarityGlow = (rarity: string) => {
     switch (rarity) {
@@ -142,7 +143,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   });
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" ref={handRef} onPointerLeave={() => onCardHover?.(null)}>
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-sm font-mono text-foreground">
           YOUR HAND
@@ -196,6 +197,15 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 }
               }}
               onPointerEnter={(e) => {
+                const handEl = handRef.current;
+                if (handEl) {
+                  const hb = handEl.getBoundingClientRect();
+                  const mx = e.clientX;
+                  const my = e.clientY;
+                  if (mx < hb.left || mx > hb.right || my < hb.top || my > hb.bottom) {
+                    return;
+                  }
+                }
                 audio.playSFX('lightClick');
                 const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                 const tooltipWidth = 300; // ~max-w-xs incl. padding
