@@ -45,42 +45,41 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const svgRef = useRef<SVGSVGElement>(null);
   const [geoData, setGeoData] = useState<any>(null);
   const [hoveredState, setHoveredState] = useState<string | null>(null);
+  const [pinnedState, setPinnedState] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
-  // Smart tooltip positioning function
-  const getTooltipPosition = (mouseX: number, mouseY: number) => {
-    const tooltipWidth = 300; // Approximate tooltip width
-    const tooltipHeight = 200; // Approximate tooltip height
-    const offset = 15;
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
+  // Smart tooltip positioning function with container-relative positioning
+  const updateTooltipPosition = (clientX: number, clientY: number) => {
+    if (!tooltipRef.current || !mapContainerRef.current) return;
+
+    const mapRect = mapContainerRef.current.getBoundingClientRect();
+    const tooltip = tooltipRef.current;
     
-    let left = mouseX + offset;
-    let top = mouseY - offset;
-    let transform = 'translateY(-100%)';
+    // Get actual tooltip dimensions after content is rendered
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const tooltipWidth = tooltipRect.width || 300;
+    const tooltipHeight = tooltipRect.height || 200;
     
-    // Check if tooltip would go off the right edge
-    if (left + tooltipWidth > screenWidth) {
-      left = mouseX - tooltipWidth - offset; // Position to the left of cursor
+    const OFFSET = 14;
+    const MARGIN = 10;
+    
+    // Calculate position relative to map container
+    let x = clientX - mapRect.left + OFFSET;
+    let y = clientY - mapRect.top - OFFSET;
+    
+    // Smart collision detection - flip to left if not enough space on right
+    if (x + tooltipWidth + MARGIN > mapRect.width) {
+      x = clientX - mapRect.left - tooltipWidth - OFFSET;
     }
     
-    // Check if tooltip would go off the top edge
-    if (top - tooltipHeight < 0) {
-      top = mouseY + offset;
-      transform = 'translateY(0)'; // Position below cursor instead
-    }
+    // Clamp within container bounds with margin
+    x = Math.max(MARGIN, Math.min(x, mapRect.width - tooltipWidth - MARGIN));
+    y = Math.max(MARGIN, Math.min(y, mapRect.height - tooltipHeight - MARGIN));
     
-    // Check if tooltip would go off the bottom edge
-    if (top + tooltipHeight > screenHeight) {
-      top = mouseY - tooltipHeight - offset;
-      transform = 'translateY(0)';
-    }
-    
-    // Ensure minimum distances from screen edges
-    left = Math.max(10, Math.min(left, screenWidth - tooltipWidth - 10));
-    top = Math.max(10, Math.min(top, screenHeight - tooltipHeight - 10));
-    
-    return { left, top, transform };
+    // Use transform for better performance
+    tooltip.style.transform = `translate(${x}px, ${y}px)`;
   };
 
   useEffect(() => {
@@ -162,7 +161,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       pathElement.setAttribute('data-state-abbr', gameState?.abbreviation || stateId);
       
       // Enhanced event listeners with better feedback
-      pathElement.addEventListener('click', () => {
+      pathElement.addEventListener('click', (e) => {
+        const targetStateId = gameState?.abbreviation || stateId;
+        
         if (selectedZoneCard && gameState) {
           if (gameState.owner === 'player') {
             // Can't target own states - enhanced feedback
@@ -181,25 +182,38 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             title: "🎯 Target Acquired",
             description: `Deploying zone asset to ${gameState.name}...`,
           });
-          onStateClick(gameState?.abbreviation || stateId);
+          onStateClick(targetStateId);
         } else {
+          // Pin tooltip on click
+          setPinnedState(pinnedState === targetStateId ? null : targetStateId);
+          setHoveredState(targetStateId);
+          updateTooltipPosition(e.clientX, e.clientY);
           audio?.playSFX?.('lightClick');
-          onStateClick(gameState?.abbreviation || stateId);
+          onStateClick(targetStateId);
         }
       });
+      
       pathElement.addEventListener('mouseenter', (e) => {
-        audio?.playSFX?.('lightClick'); // Very quiet hover sound
-        setHoveredState(stateId);
-        setMousePosition({ x: e.clientX, y: e.clientY });
+        if (!pinnedState) {
+          audio?.playSFX?.('lightClick');
+          setHoveredState(stateId);
+          updateTooltipPosition(e.clientX, e.clientY);
+        }
       });
+      
       pathElement.addEventListener('mousemove', (e) => {
-        // Throttle mouse move updates to improve performance
-        requestAnimationFrame(() => {
-          setMousePosition({ x: e.clientX, y: e.clientY });
-        });
+        if (!pinnedState) {
+          // Throttle mouse move updates for performance
+          requestAnimationFrame(() => {
+            updateTooltipPosition(e.clientX, e.clientY);
+          });
+        }
       });
+      
       pathElement.addEventListener('mouseleave', () => {
-        setHoveredState(null);
+        if (!pinnedState) {
+          setHoveredState(null);
+        }
       });
 
       statesGroup.appendChild(pathElement);
@@ -257,6 +271,31 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
   }, [geoData, states, onStateClick, selectedZoneCard, selectedState]);
 
+  // Add keyboard and click-outside handlers for unpinning
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && pinnedState) {
+        setPinnedState(null);
+        setHoveredState(null);
+      }
+    };
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (pinnedState && tooltipRef.current && !tooltipRef.current.contains(e.target as Node)) {
+        setPinnedState(null);
+        setHoveredState(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('pointerdown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('pointerdown', handleClickOutside);
+    };
+  }, [pinnedState]);
+
   const getStateOwnerClass = (state?: EnhancedState) => {
     if (!state) return 'neutral';
     if (state.contested) return 'contested';
@@ -274,7 +313,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const stateInfo = getHoveredStateInfo();
 
   return (
-    <div className="relative">
+    <div className="relative" ref={mapContainerRef}>
       <Card className="p-4 bg-card border-border relative">
         <div className="mb-4">
           <h3 className="text-lg font-semibold text-foreground font-mono">
@@ -330,13 +369,17 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       </Card>
 
       {/* Enhanced Tooltip with Smart Positioning */}
-      {hoveredState && stateInfo && (
+      {(hoveredState || pinnedState) && stateInfo && (
         <div 
-          className="fixed bg-popover border border-border rounded-lg p-4 shadow-2xl z-[100] max-w-sm pointer-events-none"
+          ref={tooltipRef}
+          className={`absolute bg-popover border border-border rounded-lg p-4 shadow-2xl z-[100] max-w-sm transition-opacity duration-200 ${
+            pinnedState ? 'pointer-events-auto' : 'pointer-events-none'
+          }`}
           style={{ 
-            ...getTooltipPosition(mousePosition.x, mousePosition.y),
+            transform: 'translate(-9999px, -9999px)',
             willChange: 'transform',
             backfaceVisibility: 'hidden',
+            opacity: hoveredState || pinnedState ? 1 : 0,
           }}
         >
           <div className="space-y-2">
