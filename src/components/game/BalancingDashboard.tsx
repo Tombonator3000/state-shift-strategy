@@ -102,12 +102,27 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
   }));
 
   const exportData = () => {
-    const data = balancer.exportBalancingData();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const cardBalanceData = balancer.exportBalancingData();
+    const factionBalanceData = factionAnalyzer.exportBalanceData();
+    
+    const completeData = {
+      timestamp: new Date().toISOString(),
+      includeExtensions,
+      cardBalance: cardBalanceData,
+      factionBalance: factionBalanceData,
+      summary: {
+        totalCards: report.totalCards,
+        cardBalanceHealth: Math.round((report.balancedCards / report.totalCards) * 100),
+        factionAlignmentHealth: Math.round(((factionReport.truthSeekerStats.aligned + factionReport.governmentStats.aligned) / factionReport.totalCards) * 100),
+        severeIssues: factionReport.severeIssues
+      }
+    };
+    
+    const blob = new Blob([JSON.stringify(completeData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `card-balancing-report-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `complete-balance-report-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };
