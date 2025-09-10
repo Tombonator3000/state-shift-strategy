@@ -265,11 +265,12 @@ export function analyzeCardBalance(cards: any[]): BalanceReport {
     overallRecommendations.push("Card balance is healthy - only minor adjustments needed");
   }
   
-  if (undercostCount > cards.length * 0.15) {
+  const threshold = cards.length * 0.15;
+  if (undercostCount > threshold && overcostCount > threshold) {
+    overallRecommendations.push(`Balance polarization detected: ${undercostCount} overpowered and ${overcostCount} underpowered cards. Tighten cost curve and review outliers.`);
+  } else if (undercostCount > threshold) {
     overallRecommendations.push("Too many overpowered cards - players may find game too easy");
-  }
-  
-  if (overcostCount > cards.length * 0.15) {
+  } else if (overcostCount > threshold) {
     overallRecommendations.push("Too many underpowered cards - some cards may never be played");
   }
   
