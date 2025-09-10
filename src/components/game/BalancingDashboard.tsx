@@ -20,13 +20,12 @@ import {
   Line
 } from 'recharts';
 import { 
-  CardBalancer, 
-  CardMetrics,
-  BalancingReport,
-  generateBalanceReport 
-} from '@/data/cardBalancing';
-import FactionBalanceAnalyzer, { CardAnalysisResult, BalanceReport as FactionBalanceReport } from '@/data/factionBalanceAnalyzer';
-import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
+  EnhancedCardBalancer, 
+  EnhancedCardAnalysis,
+  EnhancedBalanceReport,
+  SimulationReport
+} from '@/data/enhancedCardBalancing';
+import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle, ChevronDown, Info } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface BalancingDashboardProps {
@@ -36,38 +35,37 @@ interface BalancingDashboardProps {
 const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
   const [includeExtensions, setIncludeExtensions] = useState(true);
   
-  const balancer = useMemo(() => new CardBalancer(includeExtensions), [includeExtensions]);
-  const factionAnalyzer = useMemo(() => new FactionBalanceAnalyzer(includeExtensions), [includeExtensions]);
+  const enhancedBalancer = useMemo(() => new EnhancedCardBalancer(includeExtensions), [includeExtensions]);
   
-  const [selectedCard, setSelectedCard] = useState<CardMetrics | null>(null);
-  const [selectedFactionCard, setSelectedFactionCard] = useState<CardAnalysisResult | null>(null);
+  const [selectedCard, setSelectedCard] = useState<EnhancedCardAnalysis | null>(null);
   
-  const report = useMemo(() => balancer.generateBalancingReport(), [balancer]);
-  const cardsNeedingAttention = useMemo(() => balancer.getCardsNeedingAttention(), [balancer]);
+  const report: EnhancedBalanceReport = useMemo(() => enhancedBalancer.generateEnhancedReport(), [enhancedBalancer]);
+  const simulationResult: SimulationReport = useMemo(() => enhancedBalancer.runEnhancedSimulation(), [enhancedBalancer]);
   
-  // Faction balance analysis
-  const factionReport: FactionBalanceReport = useMemo(() => factionAnalyzer.generateBalanceReport(), [factionAnalyzer]);
-  const simulationResult = useMemo(() => factionAnalyzer.runBalanceSimulation(), [factionAnalyzer]);
+  // Get cards that need attention (undercosted or overcosted)
+  const cardsNeedingAttention = useMemo(() => 
+    report.cardAnalysis.filter(card => card.classification !== 'On Curve')
+      .sort((a, b) => (b.severity === 'Severe' ? 2 : 1) - (a.severity === 'Severe' ? 2 : 1))
+  , [report]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'balanced': return 'text-green-400 bg-green-900/20';
-      case 'underpowered': return 'text-yellow-400 bg-yellow-900/20';
-      case 'overpowered': return 'text-red-400 bg-red-900/20';
+  const getClassificationColor = (classification: string) => {
+    switch (classification) {
+      case 'On Curve': return 'text-green-400 bg-green-900/20';
+      case 'Undercosted': return 'text-red-400 bg-red-900/20';
+      case 'Overcosted': return 'text-yellow-400 bg-yellow-900/20';
       default: return 'text-gray-400 bg-gray-900/20';
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'balanced': return <CheckCircle size={16} />;
-      case 'underpowered': return <AlertTriangle size={16} />;
-      case 'overpowered': return <XCircle size={16} />;
+  const getClassificationIcon = (classification: string) => {
+    switch (classification) {
+      case 'On Curve': return <CheckCircle size={16} />;
+      case 'Undercosted': return <XCircle size={16} />;
+      case 'Overcosted': return <AlertTriangle size={16} />;
       default: return null;
     }
   };
 
-  // Faction-specific helpers
   const getFactionAlignmentColor = (alignment: string) => {
     switch (alignment) {
       case 'Aligned': return 'text-green-400 bg-green-900/20';
@@ -88,9 +86,16 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
   };
 
   const balanceDistributionData = [
-    { name: 'Balanced', value: report.balancedCards, color: '#10b981' },
-    { name: 'Underpowered', value: report.underpoweredCards, color: '#f59e0b' },
-    { name: 'Overpowered', value: report.overpoweredCards, color: '#ef4444' }
+    { name: 'On Curve', value: report.onCurve, color: '#10b981' },
+    { name: 'Undercosted', value: report.undercosted, color: '#ef4444' },
+    { name: 'Overcosted', value: report.overcosted, color: '#f59e0b' }
+  ];
+
+  const alignmentDistributionData = [
+    { name: 'Truth Cards', value: report.truthCards, color: '#10b981' },
+    { name: 'Government Cards', value: report.governmentCards, color: '#3b82f6' },
+    { name: 'Neutral Cards', value: report.neutralCards, color: '#6b7280' },
+    { name: 'Misaligned', value: report.misalignedCards, color: '#ef4444' }
   ];
 
   const costByTypeData = Object.entries(report.averageCostByType).map(([type, cost]) => ({
@@ -104,58 +109,37 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
   }));
 
   const exportDataAsJSON = () => {
-    const cardBalanceData = balancer.exportBalancingData();
-    const factionBalanceData = factionAnalyzer.exportBalanceData();
-    
-    const completeData = {
-      timestamp: new Date().toISOString(),
-      includeExtensions,
-      cardBalance: cardBalanceData,
-      factionBalance: factionBalanceData,
-      summary: {
-        totalCards: report.totalCards,
-        cardBalanceHealth: Math.round((report.balancedCards / report.totalCards) * 100),
-        factionAlignmentHealth: Math.round(((factionReport.truthSeekerStats.aligned + factionReport.governmentStats.aligned) / factionReport.totalCards) * 100),
-        severeIssues: factionReport.severeIssues
-      }
-    };
+    const completeData = enhancedBalancer.exportFullAnalysis();
     
     const blob = new Blob([JSON.stringify(completeData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `complete-balance-report-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `enhanced-balance-report-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPatchesAsCSV = () => {
+    const csvData = enhancedBalancer.generatePatchExport('csv');
+    
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `balance-patches-${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
 
   const exportDataAsTXT = () => {
-    const cards = includeExtensions ? 
-      [...balancer['cards']] : 
-      balancer['cards'].filter((card: any) => !card.extension);
+    const reportText = enhancedBalancer.generatePatchExport('txt');
     
-    const reportText = generateBalanceReport(cards);
-    
-    // Add faction analysis to the text report
-    const factionSection = `\n\n## FACTION BALANCE ANALYSIS\n\n` +
-      `Truth Seekers: ${factionReport.truthSeekerStats.total} cards (Avg NUS: ${factionReport.truthSeekerStats.averageNUS.toFixed(1)})\n` +
-      `- Aligned: ${factionReport.truthSeekerStats.aligned}\n` +
-      `- Mixed: ${factionReport.truthSeekerStats.mixed}\n` +
-      `- Misaligned: ${factionReport.truthSeekerStats.misaligned}\n\n` +
-      `Government: ${factionReport.governmentStats.total} cards (Avg NUS: ${factionReport.governmentStats.averageNUS.toFixed(1)})\n` +
-      `- Aligned: ${factionReport.governmentStats.aligned}\n` +
-      `- Mixed: ${factionReport.governmentStats.mixed}\n` +
-      `- Misaligned: ${factionReport.governmentStats.misaligned}\n\n` +
-      `Severe Issues: ${factionReport.severeIssues}\n` +
-      `Simulation Results: Truth ${simulationResult.truthWinRate.toFixed(1)}% vs Government ${simulationResult.governmentWinRate.toFixed(1)}%\n`;
-    
-    const completeReport = reportText + factionSection;
-    
-    const blob = new Blob([completeReport], { type: 'text/plain' });
+    const blob = new Blob([reportText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `balance-report-${new Date().toISOString().split('T')[0]}.txt`;
+    link.download = `enhanced-balance-report-${new Date().toISOString().split('T')[0]}.txt`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -164,7 +148,12 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
       <Card className="w-full max-w-7xl h-[90vh] bg-gray-900 border-gray-700 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 border-b border-gray-700">
-          <h2 className="text-xl font-bold text-white font-mono">CARD BALANCING DASHBOARD</h2>
+          <div>
+            <h2 className="text-xl font-bold text-white font-mono">ENHANCED CARD BALANCING DASHBOARD</h2>
+            <div className="text-xs text-green-400 mt-1 font-mono">
+              Analyzer v2.0 — Cost cap: 15 | Max step: ±3 | Truth weighting: 2.0x | Threshold scaling: 1.0-2.0x
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             <Button
               onClick={() => setIncludeExtensions(!includeExtensions)}
@@ -172,7 +161,7 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
               size="sm"
               className={includeExtensions ? "bg-green-600 hover:bg-green-700" : "text-gray-400 border-gray-600"}
             >
-              {includeExtensions ? "Expert Mode" : "Base Cards"}
+              {includeExtensions ? "With Extensions" : "Base Cards Only"}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -193,6 +182,13 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                 >
                   <Download size={14} className="mr-2" />
                   Export as JSON
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={exportPatchesAsCSV}
+                  className="text-gray-200 hover:bg-gray-700 cursor-pointer focus:bg-gray-700"
+                >
+                  <Download size={14} className="mr-2" />
+                  Export Patches (CSV)
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={exportDataAsTXT}
@@ -219,8 +215,8 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
             <TabsList className="w-full flex flex-wrap gap-1 bg-gray-800">
               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="overview">Overview</TabsTrigger>
               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="cards">Card Analysis</TabsTrigger>
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="faction">Faction Balance</TabsTrigger>
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="recommendations">Recommendations</TabsTrigger>
+              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="simulation">Simulation</TabsTrigger>
+              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="outliers">Top Outliers</TabsTrigger>
               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="charts">Charts</TabsTrigger>
             </TabsList>
 
@@ -231,16 +227,19 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                   <div className="text-sm text-gray-400">Total Cards</div>
                 </Card>
                 <Card className="p-4 bg-gray-800 border-gray-700">
-                  <div className="text-2xl font-bold text-green-400">{report.balancedCards}</div>
-                  <div className="text-sm text-gray-400">Balanced</div>
+                  <div className="text-2xl font-bold text-green-400">{report.onCurve}</div>
+                  <div className="text-sm text-gray-400">On Curve</div>
+                  <div className="text-xs text-gray-500">{Math.round((report.onCurve / report.totalCards) * 100)}%</div>
                 </Card>
                 <Card className="p-4 bg-gray-800 border-gray-700">
-                  <div className="text-2xl font-bold text-yellow-400">{report.underpoweredCards}</div>
-                  <div className="text-sm text-gray-400">Underpowered</div>
+                  <div className="text-2xl font-bold text-red-400">{report.undercosted}</div>
+                  <div className="text-sm text-gray-400">Undercosted</div>
+                  <div className="text-xs text-gray-500">{Math.round((report.undercosted / report.totalCards) * 100)}%</div>
                 </Card>
                 <Card className="p-4 bg-gray-800 border-gray-700">
-                  <div className="text-2xl font-bold text-red-400">{report.overpoweredCards}</div>
-                  <div className="text-sm text-gray-400">Overpowered</div>
+                  <div className="text-2xl font-bold text-yellow-400">{report.overcosted}</div>
+                  <div className="text-sm text-gray-400">Overcosted</div>
+                  <div className="text-xs text-gray-500">{Math.round((report.overcosted / report.totalCards) * 100)}%</div>
                 </Card>
               </div>
 
@@ -267,11 +266,34 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                 </Card>
 
                 <Card className="p-4 bg-gray-800 border-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-4">Cards Needing Attention</h3>
+                  <h3 className="text-lg font-semibold text-white mb-4">Faction Alignment</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={alignmentDistributionData}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {alignmentDistributionData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <Card className="p-4 bg-gray-800 border-gray-700">
+                  <h3 className="text-lg font-semibold text-white mb-4">Priority Issues</h3>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {cardsNeedingAttention.slice(0, 8).map(card => (
                       <div 
-                        key={card.id}
+                        key={card.cardId}
                         className="flex items-center justify-between p-2 bg-gray-700 rounded cursor-pointer hover:bg-gray-600"
                         onClick={() => setSelectedCard(card)}
                       >
@@ -280,11 +302,26 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                           <div className="text-xs text-gray-400">{card.type} • {card.rarity}</div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge className={getStatusColor(card.balanceStatus)}>
-                            {getStatusIcon(card.balanceStatus)}
-                            <span className="ml-1">{card.balanceStatus}</span>
+                          <Badge className={getClassificationColor(card.classification)}>
+                            {getClassificationIcon(card.classification)}
+                            <span className="ml-1">{card.classification}</span>
+                          </Badge>
+                          <Badge className={getSeverityColor(card.severity)}>
+                            {card.severity}
                           </Badge>
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                <Card className="p-4 bg-gray-800 border-gray-700">
+                  <h3 className="text-lg font-semibold text-white mb-4">Global Recommendations</h3>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {report.globalRecommendations.slice(0, 6).map((recommendation, index) => (
+                      <div key={index} className="flex items-start gap-2 p-2 bg-gray-700 rounded">
+                        <Info size={16} className="text-blue-400 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-gray-300">{recommendation}</div>
                       </div>
                     ))}
                   </div>
@@ -300,9 +337,9 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                     <div className="space-y-2 max-h-96 overflow-y-auto">
                       {cardsNeedingAttention.map(card => (
                         <div 
-                          key={card.id}
+                          key={card.cardId}
                           className={`p-3 rounded cursor-pointer transition-colors ${
-                            selectedCard?.id === card.id 
+                            selectedCard?.cardId === card.cardId 
                               ? 'bg-blue-900/30 border border-blue-600' 
                               : 'bg-gray-700 hover:bg-gray-600'
                           }`}
@@ -310,20 +347,23 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                         >
                           <div className="flex items-center justify-between mb-2">
                             <div className="text-sm font-medium text-white">{card.name}</div>
-                            <Badge className={getStatusColor(card.balanceStatus)}>
-                              {card.balanceStatus}
-                            </Badge>
+                            <div className="flex gap-1">
+                              <Badge className={getClassificationColor(card.classification)}>
+                                {card.classification}
+                              </Badge>
+                              <Badge className={getFactionAlignmentColor(card.alignment)}>
+                                {card.alignment}
+                              </Badge>
+                            </div>
                           </div>
                           <div className="flex items-center justify-between text-xs text-gray-400">
-                            <span>{card.type} • {card.rarity}</span>
-                            <span>Current: {card.currentCost} → Recommended: {card.recommendedCost}</span>
+                            <span>{card.type} • {card.rarity} • {card.faction}</span>
+                            <span>Current: {card.currentCost} → Rec: {card.costRecommendation || card.currentCost}</span>
                           </div>
                           <div className="mt-1">
-                            <Progress 
-                              value={Math.min(100, card.powerScore * 10)} 
-                              className="h-2"
-                            />
-                            <div className="text-xs text-gray-500 mt-1">Power Score: {card.powerScore}</div>
+                            <div className="text-xs text-gray-500">
+                              Utility: {card.totalUtilityScore.toFixed(1)} • {card.reasoning}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -340,7 +380,7 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                       <div className="space-y-4">
                         <div>
                           <div className="text-lg font-bold text-white">{selectedCard.name}</div>
-                          <div className="text-sm text-gray-400">{selectedCard.type} • {selectedCard.rarity}</div>
+                          <div className="text-sm text-gray-400">{selectedCard.type} • {selectedCard.rarity} • {selectedCard.faction}</div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -350,293 +390,192 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                           </div>
                           <div>
                             <div className="text-xs text-gray-400">Recommended</div>
-                            <div className="text-lg font-bold text-blue-400">{selectedCard.recommendedCost}</div>
+                            <div className={`text-lg font-bold ${selectedCard.costRecommendation ? 'text-blue-400' : 'text-gray-400'}`}>
+                              {selectedCard.costRecommendation || 'No change'}
+                            </div>
                           </div>
                         </div>
 
                         <div>
-                          <div className="text-xs text-gray-400 mb-1">Power Score</div>
-                          <Progress value={Math.min(100, selectedCard.powerScore * 10)} className="h-3" />
-                          <div className="text-sm text-white mt-1">{selectedCard.powerScore}/10</div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="text-xs text-gray-400">Usage Rate</div>
-                            <div className="text-sm text-white">{selectedCard.usageRate.toFixed(1)}%</div>
-                          </div>
-                          <div>
-                            <div className="text-xs text-gray-400">Win Rate</div>
-                            <div className="text-sm text-white">{selectedCard.winRateWhenPlayed.toFixed(1)}%</div>
+                          <div className="text-xs text-gray-400 mb-2">Total Utility Score</div>
+                          <div className="text-lg text-white">{selectedCard.totalUtilityScore.toFixed(1)} IP-equiv</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Budget: {selectedCard.expectedCostRange.min}-{selectedCard.expectedCostRange.max}
                           </div>
                         </div>
 
-                        {selectedCard.issues.length > 0 && (
+                        <div>
+                          <div className="text-xs text-gray-400 mb-2">Effect Breakdown</div>
+                          <div className="space-y-1">
+                            {Object.entries(selectedCard.effectBreakdown).map(([key, value]) => (
+                              <div key={key} className="flex justify-between text-xs">
+                                <span className="text-gray-400 capitalize">{key}:</span>
+                                <span className="text-white">{value.toFixed(1)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="text-xs text-gray-400 mb-1">Status</div>
+                          <div className="flex gap-2">
+                            <Badge className={getClassificationColor(selectedCard.classification)}>
+                              {selectedCard.classification}
+                            </Badge>
+                            <Badge className={getFactionAlignmentColor(selectedCard.alignment)}>
+                              {selectedCard.alignment}
+                            </Badge>
+                            <Badge className={getSeverityColor(selectedCard.severity)}>
+                              {selectedCard.severity}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {selectedCard.alignmentReason && (
                           <div>
-                            <div className="text-xs text-gray-400 mb-2">Issues</div>
-                            <div className="space-y-1">
-                              {selectedCard.issues.map((issue, index) => (
-                                <div key={index} className="text-xs text-yellow-400 flex items-start gap-1">
-                                  <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
-                                  {issue}
-                                </div>
-                              ))}
+                            <div className="text-xs text-gray-400 mb-1">Alignment Reason</div>
+                            <div className="text-xs text-gray-300 bg-gray-700 p-2 rounded">
+                              {selectedCard.alignmentReason}
                             </div>
                           </div>
                         )}
+
+                        <div>
+                          <div className="text-xs text-gray-400 mb-1">Reasoning</div>
+                          <div className="text-xs text-gray-300 bg-gray-700 p-2 rounded">
+                            {selectedCard.reasoning}
+                          </div>
+                        </div>
                       </div>
                     ) : (
-                      <div className="text-gray-500 text-center">
-                        Click on a card to view detailed analysis
-                      </div>
+                      <p className="text-gray-400">Click on a card from the list to see detailed analysis.</p>
                     )}
                   </Card>
                 </div>
               </div>
             </TabsContent>
 
-            {/* NEW: Faction Balance Tab */}
-            <TabsContent value="faction" className="mt-4 space-y-4">
+            <TabsContent value="simulation" className="mt-4 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card className="p-4 bg-gray-800 border-gray-700">
-                  <div className="text-2xl font-bold text-blue-400">{factionReport.truthSeekerStats.total}</div>
-                  <div className="text-sm text-gray-400">Truth Seekers</div>
-                  <div className="text-xs text-blue-300">Avg NUS: {factionReport.truthSeekerStats.averageNUS.toFixed(1)}</div>
-                </Card>
-                <Card className="p-4 bg-gray-800 border-gray-700">
-                  <div className="text-2xl font-bold text-red-400">{factionReport.governmentStats.total}</div>
-                  <div className="text-sm text-gray-400">Government</div>
-                  <div className="text-xs text-red-300">Avg NUS: {factionReport.governmentStats.averageNUS.toFixed(1)}</div>
-                </Card>
-                <Card className="p-4 bg-gray-800 border-gray-700">
-                  <div className="text-2xl font-bold text-red-400">{factionReport.severeIssues}</div>
-                  <div className="text-sm text-gray-400">Severe Issues</div>
-                  <div className="text-xs text-red-300">Faction Misalignment</div>
-                </Card>
-                <Card className="p-4 bg-gray-800 border-gray-700">
-                  <div className="text-2xl font-bold text-blue-400">{simulationResult.truthWinRate.toFixed(0)}%</div>
+                  <div className="text-2xl font-bold text-blue-400">{simulationResult.truthWinRate.toFixed(1)}%</div>
                   <div className="text-sm text-gray-400">Truth Win Rate</div>
-                  <div className="text-xs text-red-300">{simulationResult.governmentWinRate.toFixed(0)}% Gov</div>
+                </Card>
+                <Card className="p-4 bg-gray-800 border-gray-700">
+                  <div className="text-2xl font-bold text-red-400">{simulationResult.governmentWinRate.toFixed(1)}%</div>
+                  <div className="text-sm text-gray-400">Government Win Rate</div>
+                </Card>
+                <Card className="p-4 bg-gray-800 border-gray-700">
+                  <div className="text-2xl font-bold text-gray-400">{simulationResult.drawRate.toFixed(1)}%</div>
+                  <div className="text-sm text-gray-400">Draw Rate</div>
+                </Card>
+                <Card className="p-4 bg-gray-800 border-gray-700">
+                  <div className="text-2xl font-bold text-white">{simulationResult.averageGameLength.toFixed(1)}</div>
+                  <div className="text-sm text-gray-400">Avg Game Length</div>
                 </Card>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
-                  <Card className="p-4 bg-gray-800 border-gray-700 h-96">
-                    <h3 className="text-lg font-semibold text-white mb-4">Faction Alignment Issues</h3>
-                    <div className="space-y-2 max-h-80 overflow-y-auto">
-                      {factionReport.cardAnalysis
-                        .filter(card => card.severity === 'Severe' || card.severity === 'High')
-                        .map(card => (
-                          <div 
-                            key={card.cardId}
-                            className={`p-3 rounded cursor-pointer transition-colors ${
-                              selectedFactionCard?.cardId === card.cardId 
-                                ? 'bg-blue-900/30 border border-blue-600' 
-                                : 'bg-gray-700 hover:bg-gray-600'
-                            }`}
-                            onClick={() => setSelectedFactionCard(card)}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="text-sm font-medium text-white">{card.name}</div>
-                              <div className="flex gap-1">
-                                <Badge className={getFactionAlignmentColor(card.alignment)}>
-                                  {card.alignment}
-                                </Badge>
-                                <Badge className={getSeverityColor(card.severity)}>
-                                  {card.severity}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between text-xs text-gray-400">
-                              <span>{card.type} • {card.rarity} • {card.faction}</span>
-                              <span>NUS: {card.netUtilityScore.total.toFixed(1)}</span>
-                            </div>
-                            <div className="text-xs text-gray-300 mt-1">{card.alignmentReason}</div>
-                          </div>
-                        ))}
-                      
-                      {factionReport.cardAnalysis.filter(card => card.severity === 'Severe' || card.severity === 'High').length === 0 && (
-                        <div className="text-center text-gray-500 py-8">
-                          <CheckCircle size={48} className="mx-auto mb-2 text-green-400" />
-                          <div>No critical faction alignment issues!</div>
-                          <div className="text-xs mt-1">All cards appear aligned with their factions.</div>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                </div>
-
-                <div>
-                  <Card className="p-4 bg-gray-800 border-gray-700 h-96">
-                    <h3 className="text-lg font-semibold text-white mb-4">
-                      {selectedFactionCard ? 'Faction Card Details' : 'Select a Card'}
-                    </h3>
-                    {selectedFactionCard ? (
-                      <div className="space-y-3 overflow-y-auto max-h-80">
-                        <div>
-                          <div className="text-lg font-bold text-white">{selectedFactionCard.name}</div>
-                          <div className="text-sm text-gray-400">{selectedFactionCard.type} • {selectedFactionCard.rarity}</div>
-                          <div className="text-sm text-blue-400">Faction: {selectedFactionCard.faction}</div>
-                        </div>
-
-                        <div>
-                          <div className="text-xs text-gray-400 mb-1">Net Utility Score</div>
-                          <div className="text-2xl font-bold text-white">{selectedFactionCard.netUtilityScore.total.toFixed(1)}</div>
-                          <div className="text-xs text-gray-300">
-                            Truth: {selectedFactionCard.netUtilityScore.breakdown.truth.toFixed(1)} • 
-                            IP: {selectedFactionCard.netUtilityScore.breakdown.ip.toFixed(1)} • 
-                            Pressure: {selectedFactionCard.netUtilityScore.breakdown.pressure.toFixed(1)}
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="text-xs text-gray-400 mb-1">Alignment</div>
-                          <Badge className={getFactionAlignmentColor(selectedFactionCard.alignment)}>
-                            {selectedFactionCard.alignment}
-                          </Badge>
-                          <div className="text-xs text-gray-300 mt-1">{selectedFactionCard.alignmentReason}</div>
-                        </div>
-
-                        {selectedFactionCard.issues.length > 0 && (
-                          <div>
-                            <div className="text-xs text-gray-400 mb-2">Issues</div>
-                            <div className="space-y-1">
-                              {selectedFactionCard.issues.map((issue, index) => (
-                                <div key={index} className="text-xs text-red-400 flex items-start gap-1">
-                                  <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
-                                  {issue}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {selectedFactionCard.recommendations.length > 0 && (
-                          <div>
-                            <div className="text-xs text-gray-400 mb-2">Recommendations</div>
-                            <div className="space-y-1">
-                              {selectedFactionCard.recommendations.map((rec, index) => (
-                                <div key={index} className="text-xs text-blue-400 flex items-start gap-1">
-                                  <CheckCircle size={12} className="mt-0.5 flex-shrink-0" />
-                                  {rec}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-gray-500 text-center">
-                        Click on a card to view faction analysis
-                      </div>
-                    )}
-                  </Card>
-                </div>
-              </div>
-
-              {/* Simulation Results */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <Card className="p-4 bg-gray-800 border-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-4">Balance Simulation</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-blue-400">Truth Seekers Win Rate</span>
-                      <span className="font-mono text-white">{simulationResult.truthWinRate.toFixed(1)}%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-red-400">Government Win Rate</span>
-                      <span className="font-mono text-white">{simulationResult.governmentWinRate.toFixed(1)}%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">Avg Cards/Turn</span>
-                      <span className="font-mono text-white">{simulationResult.averageCardsPerTurn.toFixed(1)}</span>
-                    </div>
-                    
-                    {Math.abs(simulationResult.truthWinRate - 50) > 10 && (
-                      <div className="mt-4 p-3 bg-orange-900/20 border-l-4 border-orange-500 rounded-r">
-                        <div className="text-orange-400 text-sm font-medium">Balance Warning</div>
-                        <div className="text-xs text-gray-300">
-                          {simulationResult.truthWinRate > 50 ? 'Truth Seekers' : 'Government'} have a {Math.abs(simulationResult.truthWinRate - 50).toFixed(1)}% advantage
+                  <h3 className="text-lg font-semibold text-white mb-4">Top Overpowered Cards</h3>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {simulationResult.cardPerformance.topOverpowered.map((card, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-red-900/20 rounded">
+                        <div>
+                          <div className="text-sm font-medium text-white">{card.name}</div>
+                          <div className="text-xs text-gray-400">Impact: {card.impactScore.toFixed(2)}</div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-
-                <Card className="p-4 bg-gray-800 border-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-4">Global Recommendations</h3>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {factionReport.globalRecommendations.map((rec, index) => (
-                      <div key={index} className="text-xs text-yellow-400 flex items-start gap-1 p-2 bg-yellow-900/10 rounded">
-                        <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
-                        {rec}
+                        <div className="text-xs text-gray-300">{card.recommendedFix}</div>
                       </div>
                     ))}
-                    
-                    {factionReport.globalRecommendations.length === 0 && (
-                      <div className="text-center text-gray-500 py-4">
-                        <CheckCircle size={24} className="mx-auto mb-1 text-green-400" />
-                        <div className="text-xs">Faction balance looks good!</div>
+                  </div>
+                </Card>
+
+                <Card className="p-4 bg-gray-800 border-gray-700">
+                  <h3 className="text-lg font-semibold text-white mb-4">Top Underpowered Cards</h3>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {simulationResult.cardPerformance.topUnderpowered.map((card, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-yellow-900/20 rounded">
+                        <div>
+                          <div className="text-sm font-medium text-white">{card.name}</div>
+                          <div className="text-xs text-gray-400">Usage: {card.usageRate.toFixed(1)}%</div>
+                        </div>
+                        <div className="text-xs text-gray-300">{card.recommendedFix}</div>
                       </div>
-                    )}
+                    ))}
                   </div>
                 </Card>
               </div>
             </TabsContent>
 
-            <TabsContent value="recommendations" className="mt-4">
-              <Card className="p-4 bg-gray-800 border-gray-700">
-                <h3 className="text-lg font-semibold text-white mb-4">Balancing Recommendations</h3>
-                <div className="space-y-4">
-                  {report.recommendations.map((rec, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3 bg-gray-700 rounded">
-                      <AlertTriangle size={16} className="text-yellow-400 mt-0.5 flex-shrink-0" />
-                      <div className="text-sm text-gray-300">{rec}</div>
-                    </div>
-                  ))}
-                  
-                  {report.recommendations.length === 0 && (
-                    <div className="text-center text-gray-500 py-8">
-                      <CheckCircle size={48} className="mx-auto mb-2 text-green-400" />
-                      <div>No major balancing issues detected!</div>
-                      <div className="text-xs mt-1">The card set appears well-balanced overall.</div>
-                    </div>
-                  )}
-                </div>
-              </Card>
+            <TabsContent value="outliers" className="mt-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <Card className="p-4 bg-gray-800 border-gray-700">
+                  <h3 className="text-lg font-semibold text-white mb-4">Top Undercosted Cards</h3>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {report.topOutliers.undercosted.map((card, index) => (
+                      <div key={index} className="p-3 bg-red-900/20 rounded">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-sm font-medium text-white">{card.name}</div>
+                          <Badge className="text-red-400 bg-red-900/20">
+                            {card.costRecommendation ? `${card.currentCost} → ${card.costRecommendation}` : 'Rarity change'}
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-gray-400 mb-1">
+                          {card.type} • {card.rarity} • Utility: {card.totalUtilityScore.toFixed(1)}
+                        </div>
+                        <div className="text-xs text-gray-300">{card.reasoning}</div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                <Card className="p-4 bg-gray-800 border-gray-700">
+                  <h3 className="text-lg font-semibold text-white mb-4">Top Overcosted Cards</h3>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {report.topOutliers.overcosted.map((card, index) => (
+                      <div key={index} className="p-3 bg-yellow-900/20 rounded">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-sm font-medium text-white">{card.name}</div>
+                          <Badge className="text-yellow-400 bg-yellow-900/20">
+                            {card.costRecommendation ? `${card.currentCost} → ${card.costRecommendation}` : 'Rarity change'}
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-gray-400 mb-1">
+                          {card.type} • {card.rarity} • Utility: {card.totalUtilityScore.toFixed(1)}
+                        </div>
+                        <div className="text-xs text-gray-300">{card.reasoning}</div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
             </TabsContent>
 
-            <TabsContent value="charts" className="mt-4">
+            <TabsContent value="charts" className="mt-4 space-y-4">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <Card className="p-4 bg-gray-800 border-gray-700">
                   <h3 className="text-lg font-semibold text-white mb-4">Average Cost by Type</h3>
-                  <ResponsiveContainer width="100%" height={250}>
+                  <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={costByTypeData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="type" stroke="#9ca3af" />
-                      <YAxis stroke="#9ca3af" />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                        labelStyle={{ color: '#f3f4f6' }}
-                      />
-                      <Bar dataKey="cost" fill="#3b82f6" />
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="type" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="cost" fill="#10b981" />
                     </BarChart>
                   </ResponsiveContainer>
                 </Card>
 
                 <Card className="p-4 bg-gray-800 border-gray-700">
                   <h3 className="text-lg font-semibold text-white mb-4">Average Cost by Rarity</h3>
-                  <ResponsiveContainer width="100%" height={250}>
+                  <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={costByRarityData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="rarity" stroke="#9ca3af" />
-                      <YAxis stroke="#9ca3af" />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                        labelStyle={{ color: '#f3f4f6' }}
-                      />
-                      <Bar dataKey="cost" fill="#10b981" />
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="rarity" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="cost" fill="#3b82f6" />
                     </BarChart>
                   </ResponsiveContainer>
                 </Card>
