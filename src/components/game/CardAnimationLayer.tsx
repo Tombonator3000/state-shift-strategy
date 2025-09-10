@@ -115,15 +115,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         {children}
       </div>
       
-      {/* Played cards pile under map */}
-      <div 
-        id="played-pile" 
-        className="absolute left-1/2 transform -translate-x-1/2 bottom-4 z-[400] grid grid-cols-5 gap-1"
-        role="region" 
-        aria-label="Played cards"
-        aria-live="polite"
-        style={{ width: 'min(600px, 90vw)' }}
-      />
 
       {/* Particle Effects */}
       <ParticleSystem
