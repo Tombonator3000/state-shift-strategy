@@ -60,7 +60,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const getTooltipPosition = () => {
-    const offset = 14; // cursor offset in px
+    const offset = 12; // cursor offset in px (closer to pointer)
     const margin = 8;  // viewport/container margin
 
     const tooltipWidth = tooltipRef.current?.offsetWidth ?? 300;
@@ -77,33 +77,37 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     let left = mousePosition.x + offset;
     let top = mousePosition.y + offset;
 
-    // Prevent overlap with right docking tray (sidebar)
-    if (trayRect) {
-      const trayLeft = trayRect.left;
-      if (left + tooltipWidth > trayLeft - margin) {
-        left = trayLeft - tooltipWidth - margin;
-      }
-    }
-
-    // Horizontal flip if exceeding viewport/tray boundary
+    // Calculate horizontal limits
     const rightLimit = trayRect ? Math.min(vw - margin, trayRect.left - margin) : vw - margin;
+    const leftMinPreferred = containerRect ? Math.max(margin, containerRect.left + margin) : margin;
+
+    // Prevent overlap with right docking tray (sidebar) / viewport
     if (left + tooltipWidth > rightLimit) {
+      // Flip to the left of the cursor
       left = mousePosition.x - tooltipWidth - offset;
     }
 
-    // Clamp horizontally within viewport/map container
-    const leftMin = containerRect ? Math.max(margin, containerRect.left + margin) : margin;
-    left = Math.max(leftMin, Math.min(left, rightLimit - tooltipWidth));
+    // If there is not enough space between container left and tray, clamp to viewport hard limit
+    if (rightLimit - tooltipWidth <= leftMinPreferred) {
+      left = Math.max(margin, rightLimit - tooltipWidth);
+    } else {
+      left = Math.min(Math.max(left, leftMinPreferred), rightLimit - tooltipWidth);
+    }
 
-    // Vertical flip if exceeding bottom
-    if (top + tooltipHeight > vh - margin) {
+    // Vertical limits based on container/viewport
+    const topMinPreferred = containerRect ? Math.max(margin, containerRect.top + margin) : margin;
+    const topMaxPreferred = containerRect ? Math.min(vh - margin, containerRect.bottom - margin) : vh - margin;
+
+    if (top + tooltipHeight > topMaxPreferred) {
+      // Flip above the cursor
       top = mousePosition.y - tooltipHeight - offset;
     }
 
-    // Clamp vertically within viewport/map container
-    const topMin = containerRect ? Math.max(margin, containerRect.top + margin) : margin;
-    const topMax = containerRect ? Math.min(vh - margin, containerRect.bottom - margin) : vh - margin;
-    top = Math.max(topMin, Math.min(top, topMax - tooltipHeight));
+    if (topMaxPreferred - tooltipHeight <= topMinPreferred) {
+      top = Math.max(margin, vh - margin - tooltipHeight);
+    } else {
+      top = Math.min(Math.max(top, topMinPreferred), topMaxPreferred - tooltipHeight);
+    }
 
     return { left, top };
   };
@@ -142,6 +146,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     const svg = svgRef.current;
     const width = 800;
     const height = 500;
+
+    // Global pointerleave to hide tooltip when exiting the map
+    svg.addEventListener('pointerleave', () => setHoveredState(null));
 
     const projection = geoAlbersUsa()
       .scale(1000)
