@@ -47,6 +47,42 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  // Smart tooltip positioning function
+  const getTooltipPosition = (mouseX: number, mouseY: number) => {
+    const tooltipWidth = 300; // Approximate tooltip width
+    const tooltipHeight = 200; // Approximate tooltip height
+    const offset = 15;
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    let left = mouseX + offset;
+    let top = mouseY - offset;
+    let transform = 'translateY(-100%)';
+    
+    // Check if tooltip would go off the right edge
+    if (left + tooltipWidth > screenWidth) {
+      left = mouseX - tooltipWidth - offset; // Position to the left of cursor
+    }
+    
+    // Check if tooltip would go off the top edge
+    if (top - tooltipHeight < 0) {
+      top = mouseY + offset;
+      transform = 'translateY(0)'; // Position below cursor instead
+    }
+    
+    // Check if tooltip would go off the bottom edge
+    if (top + tooltipHeight > screenHeight) {
+      top = mouseY - tooltipHeight - offset;
+      transform = 'translateY(0)';
+    }
+    
+    // Ensure minimum distances from screen edges
+    left = Math.max(10, Math.min(left, screenWidth - tooltipWidth - 10));
+    top = Math.max(10, Math.min(top, screenHeight - tooltipHeight - 10));
+    
+    return { left, top, transform };
+  };
+
   useEffect(() => {
     const loadUSData = async () => {
       try {
@@ -157,7 +193,10 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         setMousePosition({ x: e.clientX, y: e.clientY });
       });
       pathElement.addEventListener('mousemove', (e) => {
-        setMousePosition({ x: e.clientX, y: e.clientY });
+        // Throttle mouse move updates to improve performance
+        requestAnimationFrame(() => {
+          setMousePosition({ x: e.clientX, y: e.clientY });
+        });
       });
       pathElement.addEventListener('mouseleave', () => {
         setHoveredState(null);
@@ -290,14 +329,14 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         </div>
       </Card>
 
-      {/* Enhanced Tooltip */}
+      {/* Enhanced Tooltip with Smart Positioning */}
       {hoveredState && stateInfo && (
         <div 
-          className="fixed bg-popover border border-border rounded-lg p-4 shadow-2xl z-50 max-w-sm"
+          className="fixed bg-popover border border-border rounded-lg p-4 shadow-2xl z-[100] max-w-sm pointer-events-none"
           style={{ 
-            left: mousePosition.x + 10, 
-            top: mousePosition.y - 10,
-            transform: 'translateY(-100%)'
+            ...getTooltipPosition(mousePosition.x, mousePosition.y),
+            willChange: 'transform',
+            backfaceVisibility: 'hidden',
           }}
         >
           <div className="space-y-2">
