@@ -215,20 +215,63 @@ All colors MUST be HSL.
     left: 100%;
   }
 
+  /* Rarity Frame System */
+  .rarity-frame-common {
+    border: 2px solid hsl(var(--rarity-common));
+  }
+  
+  .rarity-frame-uncommon {
+    border: 2px solid hsl(var(--rarity-uncommon));
+  }
+  
+  .rarity-frame-rare {
+    border: 2px solid hsl(var(--rarity-rare));
+  }
+  
+  .rarity-frame-legendary {
+    border: 3px solid hsl(var(--rarity-legendary));
+    background: linear-gradient(135deg, 
+      hsl(var(--rarity-legendary) / 0.1), 
+      hsl(25 95% 63% / 0.1)
+    );
+  }
+  
+  /* Maximized rarity frames */
+  .rarity-frame-maximized-common {
+    border: 3px solid hsl(var(--rarity-common));
+  }
+  
+  .rarity-frame-maximized-uncommon {
+    border: 4px solid hsl(var(--rarity-uncommon));
+  }
+  
+  .rarity-frame-maximized-rare {
+    border: 4px solid hsl(var(--rarity-rare));
+  }
+  
+  .rarity-frame-maximized-legendary {
+    border: 4px solid hsl(var(--rarity-legendary));
+    box-shadow: 0 0 30px hsl(var(--rarity-legendary) / 0.5);
+    background: linear-gradient(135deg, 
+      hsl(var(--rarity-legendary) / 0.15), 
+      hsl(25 95% 63% / 0.15)
+    );
+  }
+
   /* Rarity Glows */
-  .rarity-common {
+  .rarity-glow-common {
     box-shadow: 0 0 10px hsl(var(--rarity-common) / 0.3);
   }
 
-  .rarity-uncommon {
+  .rarity-glow-uncommon {
     box-shadow: 0 0 15px hsl(var(--rarity-uncommon) / 0.4);
   }
 
-  .rarity-rare {
+  .rarity-glow-rare {
     box-shadow: 0 0 20px hsl(var(--rarity-rare) / 0.5);
   }
 
-  .rarity-legendary {
+  .rarity-glow-legendary {
     box-shadow: 0 0 25px hsl(var(--rarity-legendary) / 0.6);
     animation: legendary-pulse 2s ease-in-out infinite;
   }
