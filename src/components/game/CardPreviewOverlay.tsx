@@ -19,9 +19,9 @@ const CardPreviewOverlay = ({ card, targetStates = [] }: CardPreviewOverlayProps
   const tooltipStyle = card._hoverPosition ? {
     position: 'fixed' as const,
     left: `${card._hoverPosition.x}px`,
-    top: `${card._hoverPosition.y - 50}px`, // Center vertically with offset
+    top: `${card._hoverPosition.y}px`,
     transform: 'translateY(-50%)',
-    zIndex: 1000
+    zIndex: 99999
   } : {
     position: 'absolute' as const,
     bottom: '1rem',
@@ -29,7 +29,7 @@ const CardPreviewOverlay = ({ card, targetStates = [] }: CardPreviewOverlayProps
   };
 
   return (
-    <div className="absolute inset-0 pointer-events-none z-10">
+    <div className="fixed inset-0 pointer-events-none z-[99999]">
       {/* Highlight potential target states */}
       {card.type === 'ZONE' && targetStates.map(stateId => (
         <div
