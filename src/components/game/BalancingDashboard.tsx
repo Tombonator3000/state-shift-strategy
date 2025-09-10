@@ -130,7 +130,7 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
       <Card className="w-full max-w-7xl h-[90vh] bg-gray-900 border-gray-700 overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 border-b border-gray-700">
           <h2 className="text-xl font-bold text-white font-mono">CARD BALANCING DASHBOARD</h2>
           <div className="flex items-center gap-2">
             <Button
@@ -163,12 +163,12 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
 
         <div className="p-4 h-full overflow-auto">
           <Tabs defaultValue="overview" className="h-full">
-            <TabsList className="grid w-full grid-cols-5 bg-gray-800">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="cards">Card Analysis</TabsTrigger>
-              <TabsTrigger value="faction">Faction Balance</TabsTrigger>
-              <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
-              <TabsTrigger value="charts">Charts</TabsTrigger>
+            <TabsList className="w-full flex flex-wrap gap-1 bg-gray-800">
+              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="overview">Overview</TabsTrigger>
+              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="cards">Card Analysis</TabsTrigger>
+              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="faction">Faction Balance</TabsTrigger>
+              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="recommendations">Recommendations</TabsTrigger>
+              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="charts">Charts</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-4 space-y-4">
