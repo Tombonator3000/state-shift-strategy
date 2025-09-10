@@ -66,7 +66,7 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
             <Card className="p-6 bg-card border-border">
               <h2 className="text-2xl font-bold text-foreground mb-4">1) Quick Overview</h2>
               <p className="text-sm text-muted-foreground">
-                Shadow Government is a turn-based strategy card game for two parties: Government (Deep State) and Truth Seekers. You collect IP (Influence Points), manipulate Truth, and fight for control of the USA map. Cards give direct effects, lasting benefits, or press states toward your side. After each round, a newspaper overlay rolls in with headlines, ads, and events - which any respectable truth seeker naturally takes with a grain of salt.
+                Shadow Government is a turn-based strategy card game for two parties: Government (Deep State) and Truth Seekers. You choose your faction and collect IP (Influence Points), manipulate Truth, and fight for control of the USA map. Cards give direct effects, lasting benefits, or press states toward your side. After each round, a newspaper overlay rolls in with headlines, ads, and events - which every player naturally takes with a grain of salt.
               </p>
               <p className="text-sm mt-2 text-muted-foreground">
                 Your goal is to secure dominance: either through broad state control, massive resource advantage, total truth victory, or completing a secret agenda. Meanwhile, your opponent plays by exactly the same rules. Stand firm. Assume everyone lies - except you (of course).

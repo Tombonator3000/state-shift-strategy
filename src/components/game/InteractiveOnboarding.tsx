@@ -30,7 +30,7 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     {
       id: 'welcome',
       title: '🎯 Welcome to Shadow Government!',
-      description: 'You\'re a Truth Seeker fighting to expose the conspiracy. Your goal is to control 10 states, reach 200 IP, or achieve 90% truth.',
+      description: 'You are a player choosing between Government or Truth Seekers. Win by controlling 10 states, reaching 200 IP, or achieving your faction\'s truth threshold.',
       target: '#game-header',
       skipable: true
     },

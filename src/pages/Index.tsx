@@ -29,6 +29,7 @@ import ContextualHelp from '@/components/game/ContextualHelp';
 import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
 import MechanicsTooltip from '@/components/game/MechanicsTooltip';
 import CardCollection from '@/components/game/CardCollection';
+import NewCardsPresentation from '@/components/game/NewCardsPresentation';
 import { Maximize, Minimize } from 'lucide-react';
 import { getRandomAgenda } from '@/data/agendaDatabase';
 import { useCardCollection } from '@/hooks/useCardCollection';
@@ -63,7 +64,7 @@ const Index = () => {
   const [showInGameOptions, setShowInGameOptions] = useState(false);
   const [showCardCollection, setShowCardCollection] = useState(false);
   
-  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn } = useGameState();
+  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards } = useGameState();
   const audio = useAudio();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -802,6 +803,13 @@ const Index = () => {
       <CardCollection 
         open={showCardCollection}
         onOpenChange={setShowCardCollection}
+      />
+
+      {/* New Cards Presentation */}
+      <NewCardsPresentation
+        cards={gameState.newCards || []}
+        isVisible={gameState.showNewCardsPresentation || false}
+        onConfirm={confirmNewCards}
       />
 
       {/* Newspaper overlay */}

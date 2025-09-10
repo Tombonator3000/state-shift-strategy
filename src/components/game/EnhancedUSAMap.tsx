@@ -351,11 +351,21 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
       <style>
         {`
+        /* Firefox/LibreWolf flickering fix */
+        #map-container, svg {
+          will-change: transform;
+          transform: translateZ(0);
+          backface-visibility: hidden;
+          contain: paint;
+        }
+        
         .state-path {
           stroke: hsl(var(--border));
           stroke-width: 1;
           cursor: pointer;
           transition: all 0.2s ease;
+          will-change: transform;
+          transform: translateZ(0);
         }
         
         .state-path.player {
@@ -377,8 +387,15 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         
         .state-path:hover {
           stroke-width: 3;
-          filter: brightness(1.2);
           stroke: hsl(var(--foreground));
+        }
+        
+        /* Firefox-specific: reduce costly filter effects */
+        @-moz-document url-prefix() {
+          .state-path:hover {
+            filter: none;
+            opacity: 0.9;
+          }
         }
         
         .state-path.targeting {

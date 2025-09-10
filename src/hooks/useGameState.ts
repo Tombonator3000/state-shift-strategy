@@ -12,7 +12,7 @@ import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDataba
 
 interface GameState {
   faction: 'government' | 'truth';
-  phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory' | 'ai_turn';
+  phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory' | 'ai_turn' | 'card_presentation';
   turn: number;
   currentPlayer: 'human' | 'ai';
   aiDifficulty: AIDifficulty;
@@ -57,6 +57,9 @@ interface GameState {
   selectedCard: string | null;
   targetState: string | null;
   aiStrategist?: AIStrategist;
+  pendingCardDraw?: number;
+  newCards?: GameCard[];
+  showNewCardsPresentation?: boolean;
 }
 
 const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
@@ -438,10 +441,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   const endTurn = useCallback(() => {
     setGameState(prev => {
       if (prev.currentPlayer === 'human') {
-        // Human player ending turn - switch to AI
-        const cardsToDraw = Math.max(0, 5 - prev.hand.length);
-        const drawnCards = prev.deck.slice(0, cardsToDraw);
-        const remainingDeck = prev.deck.slice(cardsToDraw);
+        // Human player ending turn - switch to AI (no card draw here anymore)
+        // Card drawing will happen after newspaper at start of new turn
         
         // Calculate IP income from controlled states
         const stateIncome = getTotalIPFromStates(prev.controlledStates);
@@ -478,10 +479,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           }
         }
 
-        // Draw bonus cards from events
-        const totalCardsToDraw = cardsToDraw + bonusCardDraw;
-        const finalDrawnCards = prev.deck.slice(0, totalCardsToDraw);
-        const finalRemainingDeck = prev.deck.slice(totalCardsToDraw);
+        // Store pending card draw for after newspaper
+        const pendingCardDraw = bonusCardDraw;
         
         return {
           ...prev,
@@ -492,15 +491,13 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           cardsPlayedThisTurn: 0,
           truth: Math.max(0, Math.min(100, prev.truth + truthModifier)),
           ip: prev.ip + totalIncome + ipModifier,
-          hand: [...prev.hand, ...finalDrawnCards],
-          deck: finalRemainingDeck,
+          pendingCardDraw,
           currentEvents: newEvents,
           log: [...prev.log, 
             `Turn ${prev.turn} ended`, 
             `Base income: ${baseIncome} IP`,
             `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
             `Total income: ${totalIncome + ipModifier} IP`, 
-            `Cards drawn: ${totalCardsToDraw}`,
             ...eventEffectLog,
             `AI ${prev.aiStrategist?.personality.name} is thinking...`
           ]
@@ -537,8 +534,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     const aiBaseIncome = 5;
     const aiTotalIncome = aiBaseIncome + aiStateIncome;
 
-    // AI draws cards
-    const aiCardsToDraw = Math.max(0, 5 - currentGameState.aiHand.length);
+    // AI draws cards (correct hand limit of 7)
+    const aiCardsToDraw = Math.max(0, Math.min(1, 7 - currentGameState.aiHand.length)); // Draw 1 card if under limit
     const aiDrawnCards = currentGameState.aiDeck.slice(0, aiCardsToDraw);
     const aiRemainingDeck = currentGameState.aiDeck.slice(aiCardsToDraw);
 
@@ -676,11 +673,49 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   }, [gameState]);
 
   const closeNewspaper = useCallback(() => {
+    setGameState(prev => {
+      // Draw cards after newspaper closes (proper timing)
+      const maxHandSize = 7; // Correct hand limit as per rules
+      const currentHandSize = prev.hand.length;
+      const baseCardDraw = Math.max(0, Math.min(1, maxHandSize - currentHandSize)); // Draw 1 card if under limit
+      const bonusCardDraw = prev.pendingCardDraw || 0;
+      const totalCardsToDraw = baseCardDraw + bonusCardDraw;
+      
+      if (totalCardsToDraw > 0) {
+        const drawnCards = prev.deck.slice(0, totalCardsToDraw);
+        const remainingDeck = prev.deck.slice(totalCardsToDraw);
+        
+        return {
+          ...prev,
+          showNewspaper: false,
+          cardsPlayedThisRound: [], // Clear played cards for next round
+          phase: 'card_presentation',
+          newCards: drawnCards,
+          showNewCardsPresentation: true,
+          deck: remainingDeck,
+          pendingCardDraw: 0,
+          log: [...prev.log, `Drawing ${totalCardsToDraw} new cards...`]
+        };
+      } else {
+        return {
+          ...prev,
+          showNewspaper: false,
+          cardsPlayedThisRound: [], // Clear played cards for next round
+          phase: 'action',
+          pendingCardDraw: 0
+        };
+      }
+    });
+  }, []);
+
+  const confirmNewCards = useCallback(() => {
     setGameState(prev => ({
       ...prev,
-      showNewspaper: false,
-      cardsPlayedThisRound: [], // Clear played cards for next round
-      phase: 'action'
+      phase: 'action',
+      hand: [...prev.hand, ...(prev.newCards || [])],
+      showNewCardsPresentation: false,
+      newCards: [],
+      log: [...prev.log, `Added ${prev.newCards?.length || 0} cards to hand`]
     }));
   }, []);
 
@@ -693,6 +728,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     selectTargetState,
     endTurn,
     closeNewspaper,
-    executeAITurn
+    executeAITurn,
+    confirmNewCards
   };
 };
