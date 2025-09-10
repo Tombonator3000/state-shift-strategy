@@ -533,10 +533,7 @@ const Index = () => {
     <div className="min-h-screen bg-newspaper-bg text-newspaper-text overflow-hidden">
       <Toaster position="top-right" />
       <FloatingNumbers 
-        value={floatingNumbers?.value || 0}
-        type={floatingNumbers?.type || 'ip'}
-        x={floatingNumbers?.x}
-        y={floatingNumbers?.y}
+        trigger={floatingNumbers}
       />
       
       {/* NEW CCG-STYLE LAYOUT - SPILTE KORT ALDRI OVER KARTET */}
@@ -548,7 +545,16 @@ const Index = () => {
               <div className="text-sm font-mono animate-pulse">{subtitle}</div>
             </div>
             <div className="flex items-center gap-2">
-              <AudioControls audio={audio} />
+              <AudioControls 
+                volume={audio.config.volume}
+                muted={audio.config.muted}
+                musicEnabled={audio.config.musicEnabled}
+                sfxEnabled={audio.config.sfxEnabled}
+                onVolumeChange={(volume) => audio.setVolume(volume)}
+                onToggleMute={() => audio.toggleMute()}
+                onToggleMusic={() => audio.toggleMusic()}
+                onToggleSFX={() => audio.toggleSFX()}
+              />
               <button onClick={toggleFullscreen} className="p-2 hover:bg-newspaper-bg/20 rounded">
                 {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
               </button>
@@ -565,7 +571,7 @@ const Index = () => {
             aiStates={gameState.states.filter(s => s.owner === 'ai').length}
             faction={gameState.faction}
             phase={gameState.phase}
-            currentPlayer={gameState.currentPlayer === 'player' ? 'player' : 'ai'}
+            currentPlayer={gameState.currentPlayer === 'human' ? 'player' : 'ai'}
           />
         }
         leftRail={<LeftRail gameState={gameState} />}
