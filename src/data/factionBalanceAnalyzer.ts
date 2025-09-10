@@ -320,7 +320,9 @@ export class FactionBalanceAnalyzer {
   private analyzeCard(card: GameCard): CardAnalysisResult {
     const faction = this.determineFaction(card);
     const alignment = this.analyzeFactionAlignment(card);
-    const nus = this.calculateNUS(card, faction);
+    // Convert neutral faction to truth for NUS calculation (default assumption)
+    const nusTarget: 'truth' | 'government' = faction === 'neutral' ? 'truth' : faction;
+    const nus = this.calculateNUS(card, nusTarget);
     
     // Cost analysis
     const expectedRange = COST_CURVES[card.rarity as keyof typeof COST_CURVES];
