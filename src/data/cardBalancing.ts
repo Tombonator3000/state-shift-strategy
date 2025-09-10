@@ -91,8 +91,8 @@ export class CardBalancer {
     return {
       totalCards: analysis.totalCards,
       balancedCards: analysis.balancedCards,
-      underpoweredCards: analysis.undercostCards, // Map to dashboard naming
-      overpoweredCards: analysis.overcostCards,
+      underpoweredCards: analysis.overcostCards, // Overcosted -> underpowered
+      overpoweredCards: analysis.undercostCards, // Undercosted -> overpowered
       averageCostByType,
       averageCostByRarity,
       recommendations: analysis.recommendations
@@ -115,8 +115,8 @@ export class CardBalancer {
           currentCost: card.cost,
           recommendedCost: optimalCost,
           powerScore: Math.min(10, card.effectValue / (card.cost || 1)),
-          balanceStatus: card.balanceStatus === 'undercosted' ? 'underpowered' : 
-                        card.balanceStatus === 'overcosted' ? 'overpowered' : 'balanced',
+          balanceStatus: card.balanceStatus === 'undercosted' ? 'overpowered' : 
+                        card.balanceStatus === 'overcosted' ? 'underpowered' : 'balanced',
           usageRate: Math.random() * 100, // Mock data - would come from game analytics
           winRateWhenPlayed: 45 + Math.random() * 20, // Mock data
           issues: card.recommendations
