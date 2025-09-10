@@ -51,7 +51,18 @@ export interface BalancingReport {
 }
 
 export class CardBalancer {
-  private cards = CARD_DATABASE;
+  private cards: any[];
+
+  constructor(includeExtensions: boolean = true) {
+    if (includeExtensions) {
+      // Import extensionManager here to avoid circular dependencies
+      const { extensionManager } = require('./extensionSystem');
+      const extensionCards = extensionManager.getAllExtensionCards();
+      this.cards = [...CARD_DATABASE, ...extensionCards];
+    } else {
+      this.cards = CARD_DATABASE;
+    }
+  }
 
   generateBalancingReport(): BalancingReport {
     const analysis = analyzeCardBalance(this.cards);

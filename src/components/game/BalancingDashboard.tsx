@@ -32,8 +32,11 @@ interface BalancingDashboardProps {
 }
 
 const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
-  const [balancer] = useState(() => new CardBalancer());
-  const [factionAnalyzer] = useState(() => new FactionBalanceAnalyzer());
+  const [includeExtensions, setIncludeExtensions] = useState(true);
+  
+  const balancer = useMemo(() => new CardBalancer(includeExtensions), [includeExtensions]);
+  const factionAnalyzer = useMemo(() => new FactionBalanceAnalyzer(includeExtensions), [includeExtensions]);
+  
   const [selectedCard, setSelectedCard] = useState<CardMetrics | null>(null);
   const [selectedFactionCard, setSelectedFactionCard] = useState<CardAnalysisResult | null>(null);
   
@@ -115,6 +118,14 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h2 className="text-xl font-bold text-white font-mono">CARD BALANCING DASHBOARD</h2>
           <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setIncludeExtensions(!includeExtensions)}
+              variant={includeExtensions ? "default" : "outline"}
+              size="sm"
+              className={includeExtensions ? "bg-green-600 hover:bg-green-700" : "text-gray-400 border-gray-600"}
+            >
+              {includeExtensions ? "Expert Mode" : "Base Cards"}
+            </Button>
             <Button
               onClick={exportData}
               variant="outline"
