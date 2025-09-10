@@ -22,10 +22,12 @@ import {
 import { 
   CardBalancer, 
   CardMetrics,
-  BalancingReport 
+  BalancingReport,
+  generateBalanceReport 
 } from '@/data/cardBalancing';
 import FactionBalanceAnalyzer, { CardAnalysisResult, BalanceReport as FactionBalanceReport } from '@/data/factionBalanceAnalyzer';
-import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface BalancingDashboardProps {
   onClose: () => void;
@@ -101,7 +103,7 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
     cost: Math.round(cost * 10) / 10
   }));
 
-  const exportData = () => {
+  const exportDataAsJSON = () => {
     const cardBalanceData = balancer.exportBalancingData();
     const factionBalanceData = factionAnalyzer.exportBalanceData();
     
@@ -127,6 +129,37 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
     URL.revokeObjectURL(url);
   };
 
+  const exportDataAsTXT = () => {
+    const cards = includeExtensions ? 
+      [...balancer['cards']] : 
+      balancer['cards'].filter((card: any) => !card.extension);
+    
+    const reportText = generateBalanceReport(cards);
+    
+    // Add faction analysis to the text report
+    const factionSection = `\n\n## FACTION BALANCE ANALYSIS\n\n` +
+      `Truth Seekers: ${factionReport.truthSeekerStats.total} cards (Avg NUS: ${factionReport.truthSeekerStats.averageNUS.toFixed(1)})\n` +
+      `- Aligned: ${factionReport.truthSeekerStats.aligned}\n` +
+      `- Mixed: ${factionReport.truthSeekerStats.mixed}\n` +
+      `- Misaligned: ${factionReport.truthSeekerStats.misaligned}\n\n` +
+      `Government: ${factionReport.governmentStats.total} cards (Avg NUS: ${factionReport.governmentStats.averageNUS.toFixed(1)})\n` +
+      `- Aligned: ${factionReport.governmentStats.aligned}\n` +
+      `- Mixed: ${factionReport.governmentStats.mixed}\n` +
+      `- Misaligned: ${factionReport.governmentStats.misaligned}\n\n` +
+      `Severe Issues: ${factionReport.severeIssues}\n` +
+      `Simulation Results: Truth ${simulationResult.truthWinRate.toFixed(1)}% vs Government ${simulationResult.governmentWinRate.toFixed(1)}%\n`;
+    
+    const completeReport = reportText + factionSection;
+    
+    const blob = new Blob([completeReport], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `balance-report-${new Date().toISOString().split('T')[0]}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
       <Card className="w-full max-w-7xl h-[90vh] bg-gray-900 border-gray-700 overflow-hidden">
@@ -141,15 +174,35 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
             >
               {includeExtensions ? "Expert Mode" : "Base Cards"}
             </Button>
-            <Button
-              onClick={exportData}
-              variant="outline"
-              size="sm"
-              className="text-green-400 border-green-600 hover:bg-green-900/20"
-            >
-              <Download size={16} className="mr-1" />
-              Export
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-green-400 border-green-600 hover:bg-green-900/20"
+                >
+                  <Download size={16} className="mr-1" />
+                  Export
+                  <ChevronDown size={14} className="ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-600">
+                <DropdownMenuItem 
+                  onClick={exportDataAsJSON}
+                  className="text-gray-200 hover:bg-gray-700 cursor-pointer"
+                >
+                  <Download size={14} className="mr-2" />
+                  Export as JSON
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={exportDataAsTXT}
+                  className="text-gray-200 hover:bg-gray-700 cursor-pointer"
+                >
+                  <Download size={14} className="mr-2" />
+                  Export as TXT
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               onClick={onClose}
               variant="outline"
