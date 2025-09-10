@@ -195,8 +195,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         `Starting IP: ${startingIP}`,
         `Cards drawn: ${handSize}`,
         `Controlled states: ${initialControl.player.join(', ')}`
-      ]
-      ,
+      ],
       aiTurnInProgress: false
     }));
   }, []);
