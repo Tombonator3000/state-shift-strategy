@@ -197,7 +197,10 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         if (!pinnedState) {
           audio?.playSFX?.('lightClick');
           setHoveredState(stateId);
-          updateTooltipPosition(e.clientX, e.clientY);
+          setMousePosition({ x: e.clientX, y: e.clientY });
+          requestAnimationFrame(() => {
+            updateTooltipPosition(e.clientX, e.clientY);
+          });
         }
       });
       
@@ -205,6 +208,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         if (!pinnedState) {
           // Throttle mouse move updates for performance
           requestAnimationFrame(() => {
+            setMousePosition({ x: e.clientX, y: e.clientY });
             updateTooltipPosition(e.clientX, e.clientY);
           });
         }
@@ -296,6 +300,13 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     };
   }, [pinnedState]);
 
+  // Ensure tooltip positions correctly right after it mounts or pins
+  useEffect(() => {
+    if ((hoveredState || pinnedState) && tooltipRef.current) {
+      updateTooltipPosition(mousePosition.x, mousePosition.y);
+    }
+  }, [hoveredState, pinnedState]);
+  
   const getStateOwnerClass = (state?: EnhancedState) => {
     if (!state) return 'neutral';
     if (state.contested) return 'contested';
@@ -313,7 +324,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const stateInfo = getHoveredStateInfo();
 
   return (
-    <div className="relative" ref={mapContainerRef}>
+    <div id="map-container" className="relative" ref={mapContainerRef}>
       <Card className="p-4 bg-card border-border relative">
         <div className="mb-4">
           <h3 className="text-lg font-semibold text-foreground font-mono">
