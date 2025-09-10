@@ -186,17 +186,17 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                   <ChevronDown size={14} className="ml-1" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-600">
+              <DropdownMenuContent align="end" className="z-50 bg-gray-800 border-gray-600 shadow-lg">
                 <DropdownMenuItem 
                   onClick={exportDataAsJSON}
-                  className="text-gray-200 hover:bg-gray-700 cursor-pointer"
+                  className="text-gray-200 hover:bg-gray-700 cursor-pointer focus:bg-gray-700"
                 >
                   <Download size={14} className="mr-2" />
                   Export as JSON
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={exportDataAsTXT}
-                  className="text-gray-200 hover:bg-gray-700 cursor-pointer"
+                  className="text-gray-200 hover:bg-gray-700 cursor-pointer focus:bg-gray-700"
                 >
                   <Download size={14} className="mr-2" />
                   Export as TXT
