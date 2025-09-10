@@ -27,7 +27,7 @@ export const useAudio = () => {
   const nextMusicRef = useRef<HTMLAudioElement | null>(null);
   const sfxRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const hasAutoStartedRef = useRef(false);
+  const playTokenRef = useRef(0);
   // Music track arrays
   const musicTracks = useRef<{ [key in MusicType]: HTMLAudioElement[] }>({
     theme: [],
@@ -195,29 +195,21 @@ export const useAudio = () => {
   }, []);
 
   // Fade between two audio elements
-  const crossFade = useCallback((fromAudio: HTMLAudioElement | null, toAudio: HTMLAudioElement | null, duration: number = 2000) => {
+  const switchTrack = useCallback((fromAudio: HTMLAudioElement | null, toAudio: HTMLAudioElement | null) => {
     if (!toAudio || !audioContextUnlocked) {
-      console.warn('Cannot crossfade: toAudio is null or audio context not unlocked');
+      console.warn('Cannot play: toAudio is null or audio context not unlocked');
       return;
     }
-
     if (fadeIntervalRef.current) {
       clearInterval(fadeIntervalRef.current);
     }
-
-    const steps = 50;
-    const stepDuration = duration / steps;
-    let step = 0;
-
-    const initialFromVolume = fromAudio ? fromAudio.volume : 0;
-    const targetToVolume = config.muted ? 0 : config.volume;
-
-    // Start playing the new audio with proper mobile handling
-    if (config.musicEnabled && !config.muted) {
-      toAudio.volume = 0;
+    if (fromAudio) {
+      fromAudio.pause();
+      fromAudio.currentTime = 0;
+    }
+    if (config.musicEnabled) {
+      toAudio.volume = config.muted ? 0 : config.volume;
       toAudio.currentTime = 0;
-      
-      // Use a promise to handle mobile audio play restrictions
       const playPromise = toAudio.play();
       if (playPromise !== undefined) {
         playPromise.catch(error => {
@@ -225,29 +217,6 @@ export const useAudio = () => {
         });
       }
     }
-
-    fadeIntervalRef.current = setInterval(() => {
-      step++;
-      const progress = step / steps;
-
-      if (fromAudio && fromAudio.volume !== undefined) {
-        fromAudio.volume = Math.max(0, initialFromVolume * (1 - progress));
-      }
-      
-      if (config.musicEnabled && !config.muted && toAudio && toAudio.volume !== undefined) {
-        toAudio.volume = Math.min(targetToVolume, targetToVolume * progress);
-      }
-
-      if (step >= steps) {
-        if (fromAudio) {
-          fromAudio.pause();
-          fromAudio.currentTime = 0;
-        }
-        if (fadeIntervalRef.current) {
-          clearInterval(fadeIntervalRef.current);
-        }
-      }
-    }, stepDuration);
   }, [config.musicEnabled, config.muted, config.volume, audioContextUnlocked]);
 
   // Play music based on current state
@@ -271,32 +240,22 @@ export const useAudio = () => {
       return;
     }
     
-    // Stop current music before starting new track
+    // Ensure only one track plays at a time
     if (currentMusicRef.current && currentMusicRef.current !== nextTrack) {
-      currentMusicRef.current.pause();
-      currentMusicRef.current.currentTime = 0;
-    }
-    
-    crossFade(currentMusicRef.current, nextTrack);
-    currentMusicRef.current = nextTrack;
-    
-    // Set up event listener for when track ends
-    if (currentMusicRef.current) {
       currentMusicRef.current.onended = null;
     }
+
+    const token = ++playTokenRef.current;
+
+    switchTrack(currentMusicRef.current, nextTrack);
+    currentMusicRef.current = nextTrack;
+
     nextTrack.onended = () => {
-      // Keep playing the same category of music
+      if (playTokenRef.current !== token) return;
       playMusic(typeToPlay);
     };
-  }, [config.musicEnabled, config.muted, currentMusicType, gameState, getNextTrack, crossFade, tracksLoaded, audioContextUnlocked]);
+  }, [config.musicEnabled, config.muted, currentMusicType, gameState, getNextTrack, switchTrack, tracksLoaded, audioContextUnlocked]);
 
-  // Auto-start theme music on menu after unlock and tracks loaded (once)
-  useEffect(() => {
-    if (!hasAutoStartedRef.current && audioContextUnlocked && tracksLoaded && config.musicEnabled && !config.muted && gameState === 'menu') {
-      hasAutoStartedRef.current = true;
-      playMusic('theme');
-    }
-  }, [audioContextUnlocked, tracksLoaded, config.musicEnabled, config.muted, gameState, playMusic]);
 
   const stopMusic = useCallback(() => {
     if (fadeIntervalRef.current) {
@@ -342,7 +301,9 @@ export const useAudio = () => {
     setConfig(prev => {
       const newMusicEnabled = !prev.musicEnabled;
       if (!newMusicEnabled && currentMusicRef.current) {
+        currentMusicRef.current.onended = null;
         currentMusicRef.current.pause();
+        currentMusicRef.current.currentTime = 0;
       } else if (newMusicEnabled) {
         playMusic();
       }
@@ -356,22 +317,25 @@ export const useAudio = () => {
 
   // New functions for game state management
   const setMenuMusic = useCallback(() => {
+    if (gameState === 'menu' && currentMusicType === 'theme' && currentMusicRef.current && !currentMusicRef.current.paused) return;
     setGameState('menu');
     setCurrentMusicType('theme');
     playMusic('theme');
-  }, [playMusic]);
+  }, [gameState, currentMusicType, playMusic]);
 
   const setFactionMusic = useCallback((faction: 'government' | 'truth') => {
+    if (gameState === 'factionSelect' && currentMusicType === faction && currentMusicRef.current && !currentMusicRef.current.paused) return;
     setGameState('factionSelect');
     setCurrentMusicType(faction);
     playMusic(faction);
-  }, [playMusic]);
+  }, [gameState, currentMusicType, playMusic]);
 
   const setGameplayMusic = useCallback((faction: 'government' | 'truth') => {
+    if (gameState === 'playing' && currentMusicType === faction && currentMusicRef.current && !currentMusicRef.current.paused) return;
     setGameState('playing');
     setCurrentMusicType(faction);
     playMusic(faction);
-  }, [playMusic]);
+  }, [gameState, currentMusicType, playMusic]);
 
   return {
     config,
