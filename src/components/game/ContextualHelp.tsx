@@ -147,6 +147,37 @@ const ContextualHelp = ({
               </div>
             )}
 
+            {/* Map Legend */}
+            <div className="mt-3 pt-2 border-t border-newspaper-bg/30">
+              <div className="font-bold text-xs mb-2">🗺️ MAP LEGEND:</div>
+              <div className="space-y-1 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-500 border border-border rounded"></div>
+                  <span>Truth Seekers (Player)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-500 border border-border rounded"></div>
+                  <span>Government (AI)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-gray-400 border border-border rounded"></div>
+                  <span>Neutral States</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-orange-500 border border-border rounded animate-pulse"></div>
+                  <span>Contested Territory</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-destructive rounded-full animate-pulse"></div>
+                  <span>Pressure Indicators</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Target size={10} />
+                  <span>Defense Points (shields)</span>
+                </div>
+              </div>
+            </div>
+
             {/* Quick Tips */}
             <div className="mt-3 pt-2 border-t border-newspaper-bg/30">
               <div className="font-bold text-xs mb-2">🎯 QUICK TIPS:</div>

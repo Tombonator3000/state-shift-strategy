@@ -287,39 +287,6 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           </svg>
         </div>
 
-        {/* Legend */}
-        {/* Enhanced Legend */}
-        <div className="mt-4 space-y-3">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <div className="w-4 h-4 bg-blue-500 border border-border rounded shadow-sm"></div>
-              <span className="text-foreground font-mono font-medium">Truth Seekers</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-              <div className="w-4 h-4 bg-red-500 border border-border rounded shadow-sm"></div>
-              <span className="text-foreground font-mono font-medium">Government</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-gray-400/10 border border-gray-400/20">
-              <div className="w-4 h-4 bg-gray-400 border border-border rounded shadow-sm"></div>
-              <span className="text-foreground font-mono font-medium">Neutral</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
-              <div className="w-4 h-4 bg-orange-500 border border-border rounded shadow-sm animate-pulse"></div>
-              <span className="text-foreground font-mono font-medium">Contested</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-destructive/10 border border-destructive/20">
-              <div className="w-3 h-3 bg-destructive rounded-full shadow-sm animate-pulse"></div>
-              <span className="text-foreground font-mono font-medium">Pressure Indicators</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-accent/10 border border-accent/20">
-              <Shield className="w-4 h-4 text-accent" />
-              <span className="text-foreground font-mono font-medium">Defense Points</span>
-            </div>
-          </div>
-        </div>
       </Card>
 
       {/* Enhanced Tooltip */}
