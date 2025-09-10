@@ -21,7 +21,7 @@ const CardPreviewOverlay = ({ card, targetStates = [] }: CardPreviewOverlayProps
     left: `${card._hoverPosition.x}px`,
     top: `${card._hoverPosition.y}px`,
     transform: 'translateY(-50%)',
-    zIndex: 99999
+    zIndex: 98999
   } : {
     position: 'absolute' as const,
     bottom: '1rem',
@@ -29,7 +29,7 @@ const CardPreviewOverlay = ({ card, targetStates = [] }: CardPreviewOverlayProps
   };
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[99999]">
+    <div className="fixed inset-0 pointer-events-none z-[98999]">
       {/* Highlight potential target states */}
       {card.type === 'ZONE' && targetStates.map(stateId => (
         <div
