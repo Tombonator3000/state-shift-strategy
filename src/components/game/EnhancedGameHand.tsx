@@ -195,18 +195,22 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   // Don't auto-select the card for targeting when opening modal
                 }
               }}
-              onMouseEnter={(e) => {
-                audio.playSFX('lightClick'); // Very quiet button sound
-                const rect = e.currentTarget.getBoundingClientRect();
+              onPointerEnter={(e) => {
+                audio.playSFX('lightClick');
+                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                const tooltipWidth = 300; // ~max-w-xs incl. padding
+                let left = rect.right + 10;
+                if (left + tooltipWidth > window.innerWidth) {
+                  left = Math.max(16, rect.left - tooltipWidth - 10);
+                }
+                let top = rect.top + rect.height / 2;
+                top = Math.min(window.innerHeight - 16, Math.max(16, top));
                 onCardHover?.({
                   ...card,
-                  _hoverPosition: {
-                    x: rect.right + 10, // 10px to the right of the card
-                    y: rect.top + rect.height / 2 // Center vertically
-                  }
+                  _hoverPosition: { x: left, y: top }
                 });
               }}
-              onMouseLeave={() => {
+              onPointerLeave={() => {
                 onCardHover?.(null);
               }}
             >
