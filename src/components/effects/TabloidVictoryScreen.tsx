@@ -165,20 +165,34 @@ const TabloidVictoryScreen = ({
         />
       ))}
 
-      <Card className="bg-newspaper-bg text-newspaper-text p-8 max-w-4xl max-h-[90vh] overflow-y-auto border-8 border-truth-red transform animate-[newspaper-spin_0.8s_ease-out] shadow-2xl">
-        {/* Header */}
-        <div className="text-center border-b-4 border-newspaper-text pb-6 mb-6">
-          <h1 className={`text-6xl font-black tracking-wider mb-2 animate-pulse ${
-            isVictory ? 'text-green-400' : 'text-red-500'
-          } ${glitching ? 'animate-pulse text-truth-red' : ''}`}>
-            {isVictory ? '🏆 VICTORY!' : '💀 DEFEAT!'}
-          </h1>
-          <div className="text-2xl font-bold mb-2">
-            {isVictory ? 'EXTRA EDITION' : 'FINAL EDITION'}
+      <Card className="bg-newspaper-bg text-newspaper-text p-0 max-w-5xl max-h-[95vh] overflow-y-auto border-4 border-newspaper-border transform animate-[newspaper-spin_0.8s_ease-out] shadow-2xl font-serif">
+        {/* Newspaper Header */}
+        <div className="bg-newspaper-header p-6 border-b-8 border-newspaper-border relative">
+          {/* Masthead */}
+          <div className="text-center mb-4">
+            <div className="text-xs font-bold tracking-widest mb-1 opacity-60">ESTABLISHED 1947 • CIRCULATION: CLASSIFIED</div>
+            <h1 className="text-5xl font-black tracking-tighter font-serif mb-1" style={{fontFamily: 'serif'}}>
+              THE WEEKLY PARANOID NEWS
+            </h1>
+            <div className="flex justify-between items-center text-xs font-bold border-t border-b border-newspaper-border py-1">
+              <span>Vol. 77, No. {gameStats.rounds}</span>
+              <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              <span>Price: YOUR SOUL</span>
+            </div>
           </div>
-          <div className="text-lg font-mono opacity-80">
-            THE PARANOID TIMES • {new Date().toLocaleDateString()} • "TRUST NO ONE"
+          
+          {/* Main Headline */}
+          <div className="text-center py-4 border-y-4 border-newspaper-border bg-newspaper-bg/50">
+            <div className={`text-7xl font-black tracking-tight font-serif leading-none ${
+              isVictory ? 'text-newspaper-accent' : 'text-red-600'
+            } ${glitching ? 'animate-pulse text-truth-red' : ''}`}>
+              {isVictory ? 'VICTORY!' : 'DEFEAT!'}
+            </div>
+            <div className="text-2xl font-bold mt-2 tracking-wide">
+              {isVictory ? 'SHADOW OPERATIVE SUCCEEDS' : 'CONSPIRACY EXPOSED'}
+            </div>
           </div>
+          
           <Button
             variant="ghost"
             size="sm"
@@ -186,133 +200,202 @@ const TabloidVictoryScreen = ({
               e.stopPropagation();
               onClose();
             }}
-            className="absolute top-4 right-4 text-newspaper-text hover:text-truth-red"
+            className="absolute top-2 right-2 text-newspaper-text hover:text-truth-red bg-white/80 hover:bg-white"
           >
             <X className="w-6 h-6" />
           </Button>
         </div>
 
-        <div className="grid grid-cols-3 gap-8">
-          {/* Main Headlines */}
-          <div className="col-span-2 space-y-6">
-            {headlines.map((headline, index) => (
-              <article key={index} className={`${index === 0 ? 'text-2xl font-black' : 'text-lg font-bold'} mb-4`}>
-                <h2 className="mb-2 leading-tight">{headline}</h2>
-                {index === 0 && (
-                  <div className="text-sm font-normal opacity-80 leading-relaxed">
-                    <p>
-                      In a {isVictory ? 'stunning victory' : 'devastating defeat'}, the {playerFaction === 'truth' ? 'Truth Seekers' : 'Government'} have {isVictory ? 'emerged triumphant' : 'suffered catastrophic losses'} after {gameStats.rounds} rounds of intense shadow warfare.
-                    </p>
-                    <p className="mt-2">
-                      Sources report unprecedented {isVictory ? 'celebration' : 'chaos'} as the truth meter reached {gameStats.finalTruth}% and influence networks {isVictory ? 'solidified' : 'crumbled'} across the continental United States.
-                    </p>
-                  </div>
-                )}
-                {index > 0 && (
-                  <div className="w-full h-16 bg-gray-300 flex items-center justify-center text-xs opacity-60 mt-2">
-                    📰 [{isVictory ? 'Celebration' : 'Classified'} Photo]
-                  </div>
-                )}
-              </article>
-            ))}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Final Score */}
-            <div className={`bg-black/20 p-4 rounded border-2 ${isVictory ? 'border-green-400' : 'border-red-500'}`}>
-              <h3 className={`text-lg font-bold mb-3 text-center ${isVictory ? 'text-green-400' : 'text-red-500'}`}>
-                📊 FINAL SCORE
-              </h3>
-              <div className="space-y-2 text-sm font-mono">
-                <div className="flex justify-between">
-                  <span>Result:</span>
-                  <span className={`font-bold ${isVictory ? 'text-green-400' : 'text-red-500'}`}>
-                    {isVictory ? 'VICTORY' : 'DEFEAT'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Rounds:</span>
-                  <span className="font-bold">{gameStats.rounds}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Final Truth:</span>
-                  <span className="font-bold">{gameStats.finalTruth}%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Your IP:</span>
-                  <span className="font-bold">{gameStats.playerIP}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>AI IP:</span>
-                  <span className="font-bold">{gameStats.aiIP}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>States:</span>
-                  <span className="font-bold">{playerStates} vs {aiStates}</span>
-                </div>
-                {gameStats.mvpCard && (
-                  <div className="border-t border-newspaper-text/20 pt-2 mt-2">
-                    <div className="text-center">
-                      <div className="text-xs opacity-80">MVP CARD</div>
-                      <div className="font-bold text-government-blue">{gameStats.mvpCard}</div>
+        <div className="p-6">
+          <div className="grid grid-cols-4 gap-6">
+            {/* Main Article */}
+            <div className="col-span-3">
+              {headlines.map((headline, index) => (
+                <article key={index} className={`${index === 0 ? 'mb-6' : 'mb-4'} ${index > 0 ? 'border-t border-newspaper-border pt-4' : ''}`}>
+                  <h2 className={`font-black font-serif leading-tight mb-2 ${
+                    index === 0 ? 'text-3xl' : index === 1 ? 'text-xl' : 'text-lg'
+                  }`}>
+                    {headline}
+                  </h2>
+                  {index === 0 && (
+                    <div className="columns-2 gap-6 text-sm leading-relaxed text-justify">
+                      <p className="mb-3">
+                        <span className="float-left text-6xl font-black leading-none mr-2 mt-1">{isVictory ? 'I' : 'I'}</span>
+                        n a {isVictory ? 'stunning victory that has shocked the intelligence community' : 'devastating defeat that will echo through classified corridors'}, 
+                        the {playerFaction === 'truth' ? 'Truth Seekers resistance movement' : 'Government shadow operations'} have {isVictory ? 'emerged triumphant' : 'suffered catastrophic losses'} 
+                        after {gameStats.rounds} rounds of intense psychological warfare.
+                      </p>
+                      <p className="mb-3">
+                        Leaked sources from within the Pentagon report unprecedented {isVictory ? 'celebration in underground bunkers' : 'emergency protocols activated'} as 
+                        the national truth awareness meter reached a critical {gameStats.finalTruth}% threshold. Military analysts confirm that influence networks have 
+                        {isVictory ? ' successfully solidified control' : ' catastrophically crumbled'} across strategic nodes in the continental United States.
+                      </p>
+                      <p className="mb-3">
+                        "This changes everything," whispered a high-ranking official who requested anonymity while adjusting their tin foil hat. 
+                        "The simulation parameters have been permanently altered. We're not in Kansas anymore."
+                      </p>
+                      <p>
+                        Emergency sessions have been called at locations that officially don't exist, while citizens remain blissfully unaware that their reality 
+                        has been fundamentally restructured during their morning coffee.
+                      </p>
                     </div>
-                  </div>
-                )}
-                {gameStats.agenda && (
-                  <div className="border-t border-newspaper-text/20 pt-2 mt-2">
-                    <div className="text-center">
-                      <div className="text-xs opacity-80">SECRET AGENDA</div>
-                      <div className={`font-bold ${gameStats.agenda.complete ? 'text-green-400' : 'text-red-400'}`}>
-                        {gameStats.agenda.name}
-                      </div>
-                      <div className="text-xs">
-                        {gameStats.agenda.complete ? '✅ COMPLETE' : '❌ FAILED'}
+                  )}
+                  {index === 1 && (
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <div className="w-full h-20 bg-newspaper-header border border-newspaper-border flex items-center justify-center text-xs font-bold mb-2">
+                          📸 CLASSIFIED SURVEILLANCE PHOTO
+                        </div>
+                        <p className="text-sm leading-relaxed text-justify">
+                          Exclusive footage captured by our network of citizen journalists reveals the exact moment when 
+                          the balance of power shifted. Government sources neither confirm nor deny the authenticity of these images.
+                        </p>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Fake Ads */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-center text-government-blue">📢 CLASSIFIED ADS</h3>
-              {fakeAds.map((ad, index) => (
-                <div key={index} className="bg-government-blue/10 p-3 rounded text-center text-sm border border-government-blue/30">
-                  {ad}
-                </div>
+                  )}
+                  {index > 1 && (
+                    <p className="text-sm opacity-80 italic">
+                      Developing story... More classified details on page 7 (if you have proper clearance level).
+                    </p>
+                  )}
+                </article>
               ))}
             </div>
 
-            {/* Conspiracy Corner */}
-            <div className="bg-truth-red/10 p-4 rounded border border-truth-red/30">
-              <h3 className="text-lg font-bold mb-2 text-truth-red text-center">🕵️ CONSPIRACY CORNER</h3>
-              <div className="text-sm italic text-center">
-                {getConspiracyTheory()}
+            {/* Sidebar */}
+            <div className="space-y-4">
+              {/* Final Intel Report */}
+              <div className={`bg-newspaper-header/50 p-4 border-2 ${isVictory ? 'border-newspaper-accent' : 'border-red-500'}`}>
+                <h3 className="text-lg font-black text-center mb-3 font-serif border-b border-newspaper-border pb-2">
+                  📊 FINAL INTEL REPORT
+                </h3>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between border-b border-newspaper-border/30 py-1">
+                    <span className="font-bold">OPERATION STATUS:</span>
+                    <span className={`font-black ${isVictory ? 'text-newspaper-accent' : 'text-red-600'}`}>
+                      {isVictory ? 'SUCCESS' : 'COMPROMISED'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-b border-newspaper-border/30 py-1">
+                    <span>Rounds Executed:</span>
+                    <span className="font-bold">{gameStats.rounds}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-newspaper-border/30 py-1">
+                    <span>Truth Level:</span>
+                    <span className="font-bold">{gameStats.finalTruth}%</span>
+                  </div>
+                  <div className="flex justify-between border-b border-newspaper-border/30 py-1">
+                    <span>Your Network:</span>
+                    <span className="font-bold">{gameStats.playerIP} IP</span>
+                  </div>
+                  <div className="flex justify-between border-b border-newspaper-border/30 py-1">
+                    <span>Enemy Network:</span>
+                    <span className="font-bold">{gameStats.aiIP} IP</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span>Territories:</span>
+                    <span className="font-bold">{playerStates} vs {aiStates}</span>
+                  </div>
+                  {gameStats.mvpCard && (
+                    <div className="border-t border-newspaper-border pt-2 mt-2 text-center">
+                      <div className="text-xs font-bold opacity-80">ASSET OF THE DAY</div>
+                      <div className="font-black text-government-blue text-sm">{gameStats.mvpCard}</div>
+                    </div>
+                  )}
+                  {gameStats.agenda && (
+                    <div className="border-t border-newspaper-border pt-2 mt-2 text-center">
+                      <div className="text-xs font-bold opacity-80">SECRET MISSION</div>
+                      <div className={`font-bold text-sm ${gameStats.agenda.complete ? 'text-newspaper-accent' : 'text-red-600'}`}>
+                        {gameStats.agenda.name}
+                      </div>
+                      <div className="text-xs font-bold">
+                        {gameStats.agenda.complete ? '✓ ACCOMPLISHED' : '✗ FAILED'}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Weather & Classified Ads */}
+              <div className="bg-newspaper-header/30 p-3 border border-newspaper-border">
+                <h4 className="font-black text-sm text-center mb-2 border-b border-newspaper-border pb-1">
+                  TODAY'S WEATHER
+                </h4>
+                <div className="text-xs text-center">
+                  <div>🌫️ Fog of War: Heavy</div>
+                  <div>🔍 Visibility: Classified</div>
+                  <div>🎭 Chance of Deception: 99%</div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-black text-sm text-center border-b border-newspaper-border pb-1">
+                  📢 CLASSIFIED MARKETPLACE
+                </h4>
+                {fakeAds.map((ad, index) => (
+                  <div key={index} className="bg-newspaper-header/20 p-2 text-xs text-center border border-newspaper-border/50">
+                    {ad}
+                  </div>
+                ))}
+              </div>
+
+              {/* Conspiracy Corner */}
+              <div className="bg-truth-red/10 p-3 border-2 border-truth-red/40">
+                <h4 className="font-black text-sm text-center mb-2 text-truth-red border-b border-truth-red/30 pb-1">
+                  🔻 DEEP STATE UPDATE
+                </h4>
+                <div className="text-xs italic text-center leading-relaxed">
+                  {getConspiracyTheory()}
+                </div>
+              </div>
+
+              {/* Stock Market Ticker */}
+              <div className="bg-newspaper-header/30 p-2 border border-newspaper-border">
+                <h4 className="font-black text-xs text-center mb-1">📈 SHADOW MARKETS</h4>
+                <div className="text-xs space-y-1">
+                  <div className="flex justify-between">
+                    <span>Aluminum Foil:</span>
+                    <span className="text-green-600">↗ +420%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Trust Index:</span>
+                    <span className="text-red-600">↘ -{100 - gameStats.finalTruth}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Paranoia Futures:</span>
+                    <span className="text-green-600">↗ +∞%</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="border-t-4 border-newspaper-text pt-6 mt-8 text-center">
-          <div className="text-sm opacity-60 mb-4">
-            © 2024 The Paranoid Times • All Conspiracies Reserved • "The Truth Is Out There (Somewhere)"
+        <div className="bg-newspaper-header border-t-4 border-newspaper-border p-4">
+          <div className="flex justify-between items-center text-xs border-b border-newspaper-border pb-2 mb-3">
+            <div>© 2024 The Weekly Paranoid News</div>
+            <div>All Rights Reserved Under Alien Treaty 4B7</div>
+            <div>Printed on Recycled Surveillance Reports</div>
           </div>
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              onClose();
-            }}
-            className={`font-bold text-lg px-8 py-3 text-white ${
-              isVictory 
-                ? 'bg-green-500 hover:bg-green-600' 
-                : 'bg-red-500 hover:bg-red-600'
-            }`}
-          >
-            Return to Main Menu
-          </Button>
+          <div className="text-center">
+            <div className="text-xs mb-3 italic opacity-80">
+              "Remember: They're Watching, But So Are We" • Established When Truth Mattered
+            </div>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              className={`font-bold text-lg px-8 py-3 ${
+                isVictory 
+                  ? 'bg-newspaper-accent hover:bg-newspaper-accent/80 text-white' 
+                  : 'bg-red-600 hover:bg-red-700 text-white'
+              } border-2 border-newspaper-border shadow-lg transform hover:scale-105 transition-all`}
+            >
+              📰 Return to Base Operations
+            </Button>
+          </div>
         </div>
       </Card>
     </div>

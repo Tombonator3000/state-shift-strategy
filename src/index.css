@@ -67,10 +67,12 @@ All colors MUST be HSL.
     --secret-red: 0 100% 40%;
     
     /* Newspaper colors */
-    --newspaper-bg: 45 20% 95%;
-    --newspaper-text: 0 0% 10%;
-    --newspaper-header: 0 0% 85%;
-    --newspaper-border: 0 0% 60%;
+    --newspaper-bg: 45 15% 98%;
+    --newspaper-text: 0 0% 5%;
+    --newspaper-header: 0 0% 20%;
+    --newspaper-border: 0 0% 30%;
+    --newspaper-accent: 0 75% 45%;
+    --newspaper-headline: 0 0% 0%;
     
     /* Enhanced animation colors */
     --warning: 45 93% 58%;
@@ -128,10 +130,12 @@ All colors MUST be HSL.
     --secret-red: 0 100% 50%;
     
     /* Dark newspaper colors */
-    --newspaper-bg: 0 0% 15%;
-    --newspaper-text: 0 0% 90%;
-    --newspaper-header: 0 0% 20%;
-    --newspaper-border: 0 0% 40%;
+    --newspaper-bg: 0 0% 12%;
+    --newspaper-text: 0 0% 95%;
+    --newspaper-header: 0 0% 80%;
+    --newspaper-border: 0 0% 50%;
+    --newspaper-accent: 0 75% 65%;
+    --newspaper-headline: 0 0% 100%;
     
     /* Enhanced dark animation colors */
     --warning: 45 93% 58%;

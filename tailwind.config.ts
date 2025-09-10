@@ -65,6 +65,8 @@ export default {
         "newspaper-text": "hsl(var(--newspaper-text))",
         "newspaper-header": "hsl(var(--newspaper-header))",
         "newspaper-border": "hsl(var(--newspaper-border))",
+        "newspaper-accent": "hsl(var(--newspaper-accent))",
+        "newspaper-headline": "hsl(var(--newspaper-headline))",
       },
       borderRadius: {
         lg: "var(--radius)",
