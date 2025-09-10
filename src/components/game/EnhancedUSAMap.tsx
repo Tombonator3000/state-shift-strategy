@@ -46,39 +46,36 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const [geoData, setGeoData] = useState<any>(null);
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
-  // Calculate smart tooltip position
   const getTooltipPosition = () => {
-    const tooltipWidth = 320; // max-w-sm is approximately 320px
-    const tooltipHeight = 200; // estimated height
-    const padding = 15;
-    
+    const margin = 8; // keep close to cursor
+    const offset = 8; // distance from cursor
+
+    const tooltipWidth = tooltipRef.current?.offsetWidth ?? 300; // fallback estimate
+    const tooltipHeight = tooltipRef.current?.offsetHeight ?? 160; // fallback estimate
+
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
-    
-    let left = mousePosition.x + padding;
-    let top = mousePosition.y - padding;
-    
-    // Check right edge collision
-    if (left + tooltipWidth > screenWidth) {
-      left = mousePosition.x - tooltipWidth - padding;
+
+    // Default position: right and below the cursor
+    let left = mousePosition.x + offset;
+    let top = mousePosition.y + offset;
+
+    // Horizontal flip if near right edge
+    if (left + tooltipWidth > screenWidth - margin) {
+      left = mousePosition.x - tooltipWidth - offset;
     }
-    
-    // Check bottom edge collision
-    if (top + tooltipHeight > screenHeight) {
-      top = mousePosition.y - tooltipHeight + padding;
+
+    // Vertical flip if near bottom edge
+    if (top + tooltipHeight > screenHeight - margin) {
+      top = mousePosition.y - tooltipHeight - offset;
     }
-    
-    // Check top edge collision
-    if (top < 0) {
-      top = mousePosition.y + padding;
-    }
-    
-    // Check left edge collision
-    if (left < 0) {
-      left = mousePosition.x + padding;
-    }
-    
+
+    // Clamp to viewport so it never goes off-screen
+    left = Math.max(margin, Math.min(left, screenWidth - tooltipWidth - margin));
+    top = Math.max(margin, Math.min(top, screenHeight - tooltipHeight - margin));
+
     return { left, top };
   };
 
@@ -328,7 +325,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       {/* Enhanced Tooltip */}
       {hoveredState && stateInfo && (
         <div 
-          className="fixed bg-popover border border-border rounded-lg p-4 shadow-2xl z-50 max-w-sm"
+          ref={tooltipRef}
+          className="fixed pointer-events-none select-none bg-popover border border-border rounded-lg p-4 shadow-2xl z-50 max-w-sm"
           style={getTooltipPosition()}
         >
           <div className="space-y-2">
