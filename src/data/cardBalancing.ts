@@ -266,11 +266,11 @@ export function analyzeCardBalance(cards: any[]): BalanceReport {
   }
   
   if (undercostCount > cards.length * 0.15) {
-    overallRecommendations.push("Too many undercosted cards - players may find game too easy");
+    overallRecommendations.push("Too many overpowered cards - players may find game too easy");
   }
   
   if (overcostCount > cards.length * 0.15) {
-    overallRecommendations.push("Too many overcosted cards - some cards may never be played");
+    overallRecommendations.push("Too many underpowered cards - some cards may never be played");
   }
   
   return {
