@@ -61,20 +61,44 @@ export const useAudio = () => {
     document.addEventListener('click', handleUserInteraction, { once: true });
     document.addEventListener('touchstart', handleUserInteraction, { once: true });
     document.addEventListener('pointerdown', handleUserInteraction, { once: true });
-    // Robust audio loader that checks for existing files
+    // Robust audio loader with better error handling
     const loadAudioTrack = async (src: string): Promise<HTMLAudioElement | null> => {
       return new Promise((resolve) => {
         const audio = new Audio();
-        audio.addEventListener('canplaythrough', () => {
+        
+        const onLoad = () => {
           audio.loop = false;
           audio.volume = config.volume;
+          cleanup();
           resolve(audio);
-        }, { once: true });
-        audio.addEventListener('error', () => {
-          console.log(`Audio file not found: ${src}`);
+        };
+        
+        const onError = (e: ErrorEvent | Event) => {
+          console.warn(`Audio file failed to load: ${src}`, e);
+          cleanup();
           resolve(null);
-        }, { once: true });
-        audio.src = src;
+        };
+        
+        const cleanup = () => {
+          audio.removeEventListener('canplaythrough', onLoad);
+          audio.removeEventListener('error', onError);
+          audio.removeEventListener('loadeddata', onLoad);
+        };
+        
+        // Add timeout to prevent hanging
+        setTimeout(() => {
+          onError(new Event('timeout'));
+        }, 5000);
+        
+        audio.addEventListener('canplaythrough', onLoad, { once: true });
+        audio.addEventListener('loadeddata', onLoad, { once: true });
+        audio.addEventListener('error', onError, { once: true });
+        
+        try {
+          audio.src = src;
+        } catch (error) {
+          onError(new ErrorEvent('source-error', { error }));
+        }
       });
     };
 
@@ -127,7 +151,7 @@ export const useAudio = () => {
 
     loadMusicTracks();
 
-    // Create sound effects
+    // Create sound effects with fallback handling
     const sfxFiles = {
       cardPlay: '/audio/card-play.mp3',
       cardDraw: '/audio/card-draw.mp3',
@@ -139,14 +163,30 @@ export const useAudio = () => {
       hover: '/audio/hover.mp3',
       click: '/audio/click.mp3',
       typewriter: '/audio/typewriter.mp3',
-      lightClick: '/audio/click.mp3' // Very light sound for buttons
+      lightClick: '/audio/click.mp3', // Very light sound for buttons
+      error: '/audio/click.mp3' // Fallback for error sound
     };
 
-    Object.entries(sfxFiles).forEach(([key, src]) => {
-      const audio = new Audio(src);
-      audio.volume = config.volume;
-      sfxRefs.current[key] = audio;
-    });
+    // Load SFX asynchronously with error handling
+    const loadSFX = async () => {
+      const loadPromises = Object.entries(sfxFiles).map(async ([key, src]) => {
+        const audio = await loadAudioTrack(src);
+        if (audio) {
+          audio.volume = config.volume;
+          sfxRefs.current[key] = audio;
+        } else {
+          // Create silent audio element as fallback
+          const silentAudio = new Audio();
+          silentAudio.volume = 0;
+          sfxRefs.current[key] = silentAudio;
+        }
+      });
+      
+      await Promise.all(loadPromises);
+      console.log('SFX loaded:', Object.keys(sfxRefs.current).length, 'sounds');
+    };
+
+    loadSFX();
 
     return () => {
       // Cleanup
@@ -268,26 +308,33 @@ export const useAudio = () => {
   }, []);
 
   const playSFX = useCallback((soundName: string) => {
-    if (!config.sfxEnabled || config.muted) return;
+    if (!config.sfxEnabled || config.muted || !audioContextUnlocked) return;
     
     const audio = sfxRefs.current[soundName];
     if (audio) {
-      // Reduce volume for light click specifically
-      if (soundName === 'lightClick') {
-        const originalVolume = audio.volume;
-        audio.volume = originalVolume * 0.3; // Very quiet
-        audio.currentTime = 0;
-        audio.play().catch(console.error);
-        // Reset volume after playing
-        setTimeout(() => {
-          audio.volume = originalVolume;
-        }, 100);
-      } else {
-        audio.currentTime = 0;
-        audio.play().catch(console.error);
+      try {
+        // Reduce volume for light click specifically
+        if (soundName === 'lightClick') {
+          const originalVolume = audio.volume;
+          audio.volume = originalVolume * 0.3; // Very quiet
+          audio.currentTime = 0;
+          audio.play().catch(() => {}); // Silently fail
+          // Reset volume after playing
+          setTimeout(() => {
+            audio.volume = originalVolume;
+          }, 100);
+        } else {
+          audio.currentTime = 0;
+          audio.play().catch(() => {}); // Silently fail
+        }
+      } catch (error) {
+        // Silently ignore audio errors in production
+        console.debug('SFX play failed:', soundName, error);
       }
+    } else {
+      console.debug('SFX not found:', soundName);
     }
-  }, [config.sfxEnabled, config.muted]);
+  }, [config.sfxEnabled, config.muted, audioContextUnlocked]);
 
   const setVolume = useCallback((volume: number) => {
     setConfig(prev => ({ ...prev, volume: Math.max(0, Math.min(1, volume)) }));
