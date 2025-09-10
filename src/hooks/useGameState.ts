@@ -9,6 +9,7 @@ import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
 import { AIStrategist, type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
+import { setStateOccupation } from '@/data/usaStates';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -37,6 +38,12 @@ interface GameState {
     owner: 'player' | 'ai' | 'neutral';
     specialBonus?: string;
     bonusValue?: number;
+    // Occupation data for ZONE takeovers
+    occupierCardId?: string | null;
+    occupierCardName?: string | null;
+    occupierLabel?: string | null;
+    occupierIcon?: string | null;
+    occupierUpdatedAt?: number;
   }>;
   currentEvents: GameEvent[];
   eventManager?: EventManager;
@@ -363,6 +370,15 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
                       
                       if (newStates[stateIndex].pressure >= newStates[stateIndex].defense) {
                         newStates[stateIndex].owner = 'player';
+                        
+                        // Set occupation data for ZONE takeover
+                        setStateOccupation(
+                          newStates[stateIndex], 
+                          prev.faction, 
+                          { id: resolveCard.id, name: resolveCard.name },
+                          false // No tabloid mode flag for now
+                        );
+                        
                         if (!newControlledStates.includes(prev.targetState)) {
                           newControlledStates.push(prev.targetState);
                         }

@@ -10,6 +10,19 @@ export interface StateData {
   population: 'low' | 'medium' | 'high' | 'mega'; // Affects various mechanics
 }
 
+// Extended state interface for runtime game state
+export interface EnhancedStateData extends StateData {
+  owner?: 'player' | 'ai' | null;
+  pressure?: number;
+  contested?: boolean;
+  // Occupation data for ZONE takeovers
+  occupierCardId?: string | null;
+  occupierCardName?: string | null;
+  occupierLabel?: string | null;
+  occupierIcon?: string | null;
+  occupierUpdatedAt?: number;
+}
+
 export const USA_STATES: StateData[] = [
   // Mega States (High IP, High Defense)
   { id: '06', name: 'California', abbreviation: 'CA', baseIP: 8, defense: 4, specialBonus: 'Tech Hub', bonusValue: 2, population: 'mega' },
@@ -97,6 +110,62 @@ export const getTotalIPFromStates = (controlledStates: string[]): number => {
     const state = getStateByAbbreviation(stateAbbr);
     return total + (state?.baseIP || 0) + (state?.bonusValue || 0);
   }, 0);
+};
+
+// Occupation label generation
+const GOV_LABELS = [
+  "Black Site: ${cardName}",
+  "Containment Zone: ${cardName}",
+  "Federal Custody: ${cardName}",
+  "Narrative Lockdown: ${cardName}",
+  "Deep-State Node: ${cardName}",
+];
+
+const TRUTH_LABELS = [
+  "Truth Beacon: ${cardName}",
+  "Liberated by: ${cardName}",
+  "Safehouse: ${cardName}",
+  "Leak Hub: ${cardName}",
+  "Leyline Anchor: ${cardName}",
+  "Sanctum: ${cardName}",
+];
+
+const TABLOID_LABELS = [
+  "Under New Management: ${cardName}",
+  "They Live HQ: ${cardName}",
+  "Haunted Ops: ${cardName}",
+  "Lizard VIP Lounge: ${cardName}",
+  "Paranormal Annex: ${cardName}",
+];
+
+export const buildOccupierLabel = (params: {
+  faction: 'government' | 'truth';
+  cardName: string;
+  useTabloid?: boolean;
+}): string => {
+  const { faction, cardName, useTabloid } = params;
+  const pool = useTabloid ? TABLOID_LABELS : (faction === 'government' ? GOV_LABELS : TRUTH_LABELS);
+  const template = pool[0]; // Use first entry for consistency
+  return template.replace('${cardName}', cardName);
+};
+
+export const setStateOccupation = (state: any, faction: 'government' | 'truth', card: { id: string; name: string }, useTabloid = false) => {
+  const icon = faction === 'government' ? '🦎' : '👁️';
+  const label = buildOccupierLabel({ faction, cardName: card.name, useTabloid });
+  
+  state.occupierCardId = card.id;
+  state.occupierCardName = card.name;
+  state.occupierLabel = `${icon} ${label}`;
+  state.occupierIcon = icon;
+  state.occupierUpdatedAt = Date.now();
+};
+
+export const clearStateOccupation = (state: any) => {
+  state.occupierCardId = null;
+  state.occupierCardName = null;
+  state.occupierLabel = null;
+  state.occupierIcon = null;
+  state.occupierUpdatedAt = undefined;
 };
 
 // Initial game state - all states start neutral, no pre-controlled states
