@@ -73,7 +73,7 @@ const Index = () => {
   const [gameOverReport, setGameOverReport] = useState<any>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   
-  // Play/Resolution Dock state
+  // Play/Resolution Dock state - CRITICAL: ensures played cards never render over map
   const [playedCards, setPlayedCards] = useState<any[]>([]);
   const [activeEffects, setActiveEffects] = useState<any[]>([]);
   const [resolutionStack, setResolutionStack] = useState<any[]>([]);
@@ -84,13 +84,6 @@ const Index = () => {
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
-
-  // Handle AI turns
-  useEffect(() => {
-    if (gameState.phase === 'ai_turn' && gameState.currentPlayer === 'ai' && !gameState.aiTurnInProgress) {
-      executeAITurn();
-    }
-  }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
 
   // Track played cards for dock display
   useEffect(() => {
@@ -120,6 +113,15 @@ const Index = () => {
       }
     }
   }, [gameState.round, gameState.phase]);
+
+  // Handle AI turns
+  useEffect(() => {
+    if (gameState.phase === 'ai_turn' && gameState.currentPlayer === 'ai' && !gameState.aiTurnInProgress) {
+      executeAITurn();
+    }
+  }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
+
+  // Track IP changes for floating numbers
   useEffect(() => {
     const currentIP = gameState.ip;
     const prevIP = parseInt(localStorage.getItem('prevIP') || '0');
@@ -507,258 +509,83 @@ const Index = () => {
     return <AchievementPanel onClose={() => setShowAchievements(false)} />;
   }
 
-  if (showTutorial) {
-    return <TutorialOverlay onClose={() => setShowTutorial(false)} />;
+  if (showBalancing) {
+    return <BalancingDashboard onClose={() => setShowBalancing(false)} />;
   }
 
   if (showEvents) {
     return <EventViewer onClose={() => setShowEvents(false)} />;
   }
 
-  if (showBalancing) {
-    return <BalancingDashboard onClose={() => setShowBalancing(false)} />;
-  }
-
-  if (showMenu) {
-    return <GameMenu 
-      onStartGame={startNewGame} 
-      onFactionHover={(faction) => {
-        if (faction) {
-          audio.setFactionMusic(faction);
-        } else {
-          audio.setMenuMusic();
-        }
-      }} 
-      audio={audio}
-      onShowCardCollection={() => setShowCardCollection(true)}
-      onBackToMainMenu={() => {
-        setShowMenu(true);
-        // Reset any game state if needed
-      }}
-      onSaveGame={() => {
-        // Save current game state to localStorage
-        const gameStateToSave = {
-          ...gameState,
-          timestamp: Date.now()
-        };
-        localStorage.setItem('shadowgov-saved-game', JSON.stringify(gameStateToSave));
-      }}
-    />;
+  if (showTutorial) {
+    return <TutorialOverlay onClose={() => setShowTutorial(false)} />;
   }
 
   if (showInGameOptions) {
-    return (
-      <Options
-        onClose={() => setShowInGameOptions(false)}
-        onBackToMainMenu={() => {
-          setShowInGameOptions(false);
-          setShowMenu(true);
-          audio.setMenuMusic();
-        }}
-        onSaveGame={() => {
-          const gameStateToSave = {
-            ...gameState,
-            timestamp: Date.now()
-          };
-          localStorage.setItem('shadowgov-saved-game', JSON.stringify(gameStateToSave));
-        }}
-      />
-    );
+    return <Options onClose={() => setShowInGameOptions(false)} />;
+  }
+
+  if (showMenu) {
+    return <GameMenu onStartGame={startNewGame} />;
   }
 
   return (
-    <div className="min-h-screen bg-newspaper-bg">
-      {/* Newspaper Header */}
-      <div className="bg-newspaper-bg border-b-4 border-newspaper-border">
-        <div className="container mx-auto px-4 py-2">
-          <div className="text-center border-b-2 border-newspaper-border pb-2 mb-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-newspaper-text" style={{ fontFamily: 'serif' }}>
-              THE PARANOID TIMES
-            </h1>
-            <div className="text-xs md:text-sm font-medium text-newspaper-text mt-1">
-              {subtitle}
+    <div className="min-h-screen bg-newspaper-bg text-newspaper-text overflow-hidden">
+      <Toaster position="top-right" />
+      <FloatingNumbers 
+        value={floatingNumbers?.value || 0}
+        type={floatingNumbers?.type || 'ip'}
+        x={floatingNumbers?.x}
+        y={floatingNumbers?.y}
+      />
+      
+      {/* NEW CCG-STYLE LAYOUT - SPILTE KORT ALDRI OVER KARTET */}
+      <GameLayout
+        header={
+          <div className="bg-newspaper-text text-newspaper-bg px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-mono font-bold">SHADOW GOVERNMENT</h1>
+              <div className="text-sm font-mono animate-pulse">{subtitle}</div>
+            </div>
+            <div className="flex items-center gap-2">
+              <AudioControls audio={audio} />
+              <button onClick={toggleFullscreen} className="p-2 hover:bg-newspaper-bg/20 rounded">
+                {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+              </button>
             </div>
           </div>
-          <div className="bg-newspaper-text text-newspaper-bg p-1 rounded">
-            <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 text-xs font-mono">
-              <div className="text-center">
-                <div className="font-bold">ROUND</div>
-                <div className="text-sm">{gameState.turn}</div>
-              </div>
-              <MechanicsTooltip mechanic="ip">
-                <div className="text-center">
-                  <div className="font-bold">YOUR IP</div>
-                  <div className="text-sm">{gameState.ip}</div>
+        }
+        statusBar={
+          <StatusBar
+            round={gameState.round}
+            playerIP={gameState.ip}
+            aiIP={gameState.aiIP}
+            truth={gameState.truth}
+            playerStates={gameState.controlledStates.length}
+            aiStates={gameState.states.filter(s => s.owner === 'ai').length}
+            faction={gameState.faction}
+            phase={gameState.phase}
+            currentPlayer={gameState.currentPlayer === 'player' ? 'player' : 'ai'}
+          />
+        }
+        leftRail={<LeftRail gameState={gameState} />}
+        mapArea={
+          <div className="h-full relative">
+            {/* Zone targeting overlay - positioned in corner, NOT over map */}
+            {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
+              <div className="absolute top-4 right-4 z-20 pointer-events-none">
+                <div className="bg-newspaper-text text-newspaper-bg p-4 border-2 border-newspaper-border font-mono shadow-2xl animate-pulse max-w-sm">
+                  <div className="text-lg mb-2 flex items-center gap-2">
+                    🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
+                  </div>
+                  <div className="text-sm mb-3">
+                    Click any <span className="text-yellow-400 font-bold">NEUTRAL</span> or <span className="text-red-500 font-bold">ENEMY</span> state to target
+                  </div>
                 </div>
-              </MechanicsTooltip>
-              <MechanicsTooltip mechanic="truth">
-                <div className="text-center">
-                  <div className="font-bold">TRUTH</div>
-                  <div className="text-sm">{gameState.truth}%</div>
-                </div>
-              </MechanicsTooltip>
-              <MechanicsTooltip mechanic="zone">
-                <div className="text-center">
-                  <div className="font-bold">YOUR STATES</div>
-                  <div className="text-sm">{gameState.controlledStates.length}</div>
-                </div>
-              </MechanicsTooltip>
-              <div className="text-center">
-                <div className="font-bold">AI IP</div>
-                <div className="text-sm">{gameState.aiIP}</div>
               </div>
-              <div className="text-center">
-                <div className="font-bold">AI STATES</div>
-                <div className="text-sm">{gameState.states.filter(s => s.owner === 'ai').length}</div>
-              </div>
-              <div className="absolute top-2 right-2 flex gap-2">
-                <button
-                  onClick={toggleFullscreen}
-                  className="bg-newspaper-text text-newspaper-bg p-1 rounded hover:bg-newspaper-text/80 transition-colors"
-                  title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-                >
-                  {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
-                </button>
-                <button
-                  onClick={() => setShowBalancing(true)}
-                  className="bg-blue-600 text-white p-1 rounded hover:bg-blue-700 transition-colors"
-                  title="Card Balancing Dashboard"
-                >
-                  ⚖️
-                </button>
-                <button
-                  onClick={() => setShowEvents(true)}
-                  className="bg-purple-600 text-white p-1 rounded hover:bg-purple-700 transition-colors"
-                  title="Event Database"
-                >
-                  📰
-                </button>
-                <button
-                  onClick={() => setShowTutorial(true)}
-                  className="bg-green-600 text-white p-1 rounded hover:bg-green-700 transition-colors"
-                  title="Tutorial & Training"
-                >
-                  🎓
-                </button>
-                <button
-                  onClick={() => setShowAchievements(true)}
-                  className="bg-yellow-600 text-white p-1 rounded hover:bg-yellow-700 transition-colors"
-                  title="Achievements"
-                >
-                  🏆
-                </button>
-                <button
-                  onClick={() => {
-                    setShowCardCollection(true);
-                    audio.playSFX('click');
-                  }}
-                  className="bg-indigo-600 text-white p-1 rounded hover:bg-indigo-700 transition-colors"
-                  title="Card Collection"
-                >
-                  📚
-                </button>
-                <button
-                  onClick={() => {
-                    setShowInGameOptions(true);
-                    audio.playSFX('click');
-                  }}
-                  className="bg-gray-600 text-white p-1 rounded hover:bg-gray-700 transition-colors"
-                  title="Options & Settings"
-                >
-                  ⚙️
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Game Area */}
-      <div className="flex flex-col xl:flex-row h-[calc(100vh-140px)] overflow-hidden">
-        {/* Left sidebar - Victory Conditions & Classified Intel */}
-        <div className="hidden xl:block w-52 bg-newspaper-bg border-r-2 border-newspaper-border p-2 overflow-y-auto">
-          <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border">
-            <h3 className="font-bold text-xs mb-2 text-center">VICTORY CONDITIONS</h3>
-            <div className="text-xs space-y-1 font-mono">
-              <div>• Control 10 states</div>
-              <div>• Reach 200 IP</div>
-              <div>• Truth ≥90%</div>
-              <div className="border-t border-newspaper-bg/30 pt-1 mt-1">
-                <div className="text-center text-xs">States: {gameState.controlledStates.length}/10</div>
-                <div className="text-center text-xs">Truth: {gameState.truth}%</div>
-                <div className="text-center text-xs">IP: {gameState.ip}/200</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Player Secret Agenda */}
-          <div className="mb-3">
-            <SecretAgenda agenda={gameState.secretAgenda} isPlayer={true} />
-          </div>
-
-          {/* AI Status */}
-          <div className="mb-3">
-            <AIStatus 
-              difficulty={gameState.aiDifficulty}
-              personalityName={gameState.aiStrategist?.personality.name}
-              isThinking={gameState.phase === 'ai_turn'}
-              currentPlayer={gameState.currentPlayer}
-              aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
-              assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
-            />
-          </div>
-
-          {/* AI Secret Agenda */}
-          <div className="mb-3">
-            <SecretAgenda 
-              agenda={{
-                ...gameState.aiSecretAgenda,
-                progress: gameState.aiSecretAgenda.progress,
-                completed: gameState.aiSecretAgenda.completed,
-                revealed: gameState.aiSecretAgenda.revealed
-              }} 
-              isPlayer={false} 
-            />
-          </div>
-          
-          <div className="bg-newspaper-bg border-2 border-newspaper-border p-2">
-            <h3 className="font-bold text-xs mb-1 text-newspaper-text">CLASSIFIED INTEL</h3>
-            <div className="text-xs space-y-1 max-h-32 overflow-y-auto">
-              {gameState.log.map((entry, i) => (
-                <div key={i} className="text-newspaper-text/80 animate-fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
-                  <span className="font-mono">▲</span> {entry}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Center - Map */}
-        <div className="flex-1 p-1 relative bg-newspaper-bg border-x-2 border-newspaper-border" id="map-container">
-        {/* Enhanced targeting overlay for ZONE cards - repositioned to upper right */}
-        {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-          <div className="absolute top-4 right-4 z-20 pointer-events-none">
-            <div className="bg-newspaper-text text-newspaper-bg p-4 border-2 border-newspaper-border font-mono shadow-2xl animate-pulse max-w-sm">
-              <div className="text-lg mb-2 flex items-center gap-2">
-                🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
-              </div>
-              <div className="text-sm mb-3">
-                Click any <span className="text-yellow-400 font-bold">NEUTRAL</span> or <span className="text-red-500 font-bold">ENEMY</span> state to target
-              </div>
-              <div className="text-xs bg-black/20 p-2 rounded mb-2">
-                Card will deploy automatically when target is selected
-              </div>
-              <div className="text-xs text-yellow-400 flex items-center gap-1">
-                ⚠️ Cannot target your own states
-              </div>
-            </div>
-          </div>
-        )}
-          <div className="h-full border-2 border-newspaper-border bg-white/80 relative overflow-hidden">
-            {/* Card preview overlay */}
+            )}
             <CardPreviewOverlay card={hoveredCard} />
-            
-            <div className="w-full h-full">
+            <div className="h-full border-2 border-newspaper-border bg-white/80 overflow-hidden">
               <EnhancedUSAMap 
                 states={gameState.states} 
                 onStateClick={handleStateClick}
@@ -768,104 +595,33 @@ const Index = () => {
               />
             </div>
           </div>
-        </div>
-
-        {/* Right sidebar - AI Intel & Your Hand */}
-        <div className="w-full xl:w-64 bg-newspaper-bg border-l-2 border-newspaper-border p-2 flex flex-col max-h-full">
-          {/* Mobile victory conditions - shown at top on mobile */}
-          <div className="xl:hidden mb-3">
-            <div className="bg-newspaper-text text-newspaper-bg p-2 border border-newspaper-border">
-              <h3 className="font-bold text-xs mb-1 text-center">VICTORY CONDITIONS</h3>
-              <div className="text-xs font-mono">
-                States: {gameState.controlledStates.length}/10 | Truth: {gameState.truth}% | IP: {gameState.ip}/200
-              </div>
-            </div>
-          </div>
-
-          {/* AI Intel */}
-          <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border flex-shrink-0">
-            <h3 className="font-bold text-xs mb-1">AI INTEL</h3>
-            <div className="text-xs font-mono space-y-1">
-              <div>Hand Size: {gameState.aiHand.length}</div>
-              <div>Strategy: Suppressing Truth</div>
-              <div>Threat Level: LOW</div>
-            </div>
-          </div>
-
-          {/* Your Hand - Takes remaining space */}
-          <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border flex-1 min-h-0">
-            <h3 className="font-bold text-xs mb-2">YOUR HAND</h3>
-            <EnhancedGameHand 
-              cards={gameState.hand}
-              onPlayCard={handlePlayCard}
-              onSelectCard={handleSelectCard}
-              selectedCard={gameState.selectedCard}
-              disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
-              currentIP={gameState.ip}
-              loadingCard={loadingCard}
-              onCardHover={setHoveredCard}
-            />
-          </div>
-
-          {/* Controls */}
-          <div className="space-y-2 flex-shrink-0">
-            <Button 
-              onClick={handleEndTurn}
-              className="w-full bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80 hover:scale-105 transition-all duration-200 h-8 text-xs font-bold"
-              disabled={gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human'}
-            >
-              {gameState.currentPlayer === 'ai' ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-current rounded-full animate-pulse"></div>
-                  AI Thinking...
-                </div>
-              ) : (
-                'End Turn'
-              )}
-            </Button>
-          </div>
-
-          {/* Mobile Log - Collapsible */}
-          <div className="xl:hidden mt-2 flex-shrink-0">
-            <div className="bg-newspaper-bg border-2 border-newspaper-border p-2">
-              <h3 className="font-bold text-xs mb-1 text-newspaper-text">INTEL LOG</h3>
-              <div className="text-xs space-y-1 max-h-16 overflow-y-auto">
-                {gameState.log.slice(-3).map((entry, i) => (
-                  <div key={i} className="text-newspaper-text/80">
-                    <span className="font-mono">▲</span> {entry}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Zone Targeting Helper */}
-      <ZoneTargetingHelper 
-        selectedZoneCard={gameState.selectedCard}
-        onCancel={() => {
-          selectCard(null);
-          audio.playSFX('click');
-          toast('🚫 Zone targeting canceled', {
-            duration: 2000,
-            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #6b7280' }
-          });
-        }}
-      />
-
-      {/* Toast notifications */}
-      <Toaster 
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#1f2937',
-            color: '#f3f4f6',
-            border: '1px solid #374151',
-            fontFamily: 'monospace'
-          }
-        }}
+        }
+        rightRail={<RightRail gameState={gameState} />}
+        playDock={
+          <PlayResolutionDock
+            playedCards={playedCards}
+            activeEffects={activeEffects}
+            resolutionStack={resolutionStack}
+            selectedCard={selectedDockCard}
+            onCardSelect={setSelectedDockCard}
+            onClearDock={() => {
+              setPlayedCards([]);
+              setActiveEffects([]);
+              setResolutionStack([]);
+              setSelectedDockCard(null);
+            }}
+          />
+        }
+        handTray={
+          <HandTray
+            cards={gameState.hand}
+            selectedCard={gameState.selectedCard}
+            onCardSelect={handleSelectCard}
+            onCardPlay={handlePlayCard}
+            onCardHover={setHoveredCard}
+            disabled={gameState.currentPlayer === 'ai'}
+          />
+        }
       />
 
       {/* Card Animation Layer with integrated effects */}
@@ -905,21 +661,6 @@ const Index = () => {
           }}
         />
       )}
-
-      {/* Contextual Help System */}
-      <ContextualHelp
-        gamePhase={gameState.phase}
-        currentPlayer={gameState.currentPlayer}
-        selectedCard={gameState.selectedCard}
-        playerIP={gameState.ip}
-        controlledStates={gameState.controlledStates.length}
-        onSuggestMove={(suggestion) => {
-          toast(suggestion, {
-            duration: 4000,
-            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
-          });
-        }}
-      />
 
       {/* Interactive Onboarding */}
       <InteractiveOnboarding
