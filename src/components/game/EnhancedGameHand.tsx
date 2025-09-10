@@ -423,10 +423,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                               setExaminedCard(null);
                             }, 100);
                             
-                            toast({
-                              title: "🎯 Zone Targeting Active",
-                              description: "Click on a neutral or enemy state to deploy!",
-                            });
                           } else {
                             // For all other cards, deploy immediately
                             audio.playSFX('click');
