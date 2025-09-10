@@ -95,6 +95,7 @@ export interface PatchEntry {
   recommendedRarity: string | null;
   reasoning: string;
   severity: string;
+  step?: number;
 }
 
 // New Weight System (IP-equivalents)
@@ -380,51 +381,58 @@ export class EnhancedCardBalancer {
     const utilityDifference = totalUtility - currentBudget.baseline;
     const percentageDiff = Math.abs(utilityDifference) / currentBudget.baseline;
 
-    // Within acceptable range
+    // Within acceptable range (±15%)
     if (percentageDiff <= BALANCING_CONSTRAINTS.onCurveThreshold) {
       return { cost: null, rarity: null, reasoning: 'Card is balanced within acceptable range' };
     }
 
-    // Try cost adjustment first (within limits)
+    // Calculate optimal cost but apply ±3 step limit
     const optimalCost = this.calculateOptimalCost(totalUtility, card.rarity);
     const costDiff = optimalCost - card.cost;
     
-    if (Math.abs(costDiff) <= BALANCING_CONSTRAINTS.maxStepChange && optimalCost <= BALANCING_CONSTRAINTS.maxCost) {
-      return { 
-        cost: optimalCost, 
-        rarity: null, 
-        reasoning: `Adjust cost by ${costDiff > 0 ? '+' : ''}${costDiff} IP to match utility of ${totalUtility.toFixed(1)}` 
-      };
+    // Apply ±3 step limit for initial recommendation
+    let stepCostChange = costDiff;
+    if (Math.abs(costDiff) > BALANCING_CONSTRAINTS.maxStepChange) {
+      stepCostChange = Math.sign(costDiff) * BALANCING_CONSTRAINTS.maxStepChange;
     }
-
-    // If cost adjustment isn't sufficient, suggest rarity change
-    const rarities = ['common', 'uncommon', 'rare', 'legendary'];
-    const currentIndex = rarities.indexOf(card.rarity);
     
-    if (utilityDifference > 0 && currentIndex < rarities.length - 1) {
-      // Card is too powerful for current rarity
-      const newRarity = rarities[currentIndex + 1];
-      const newOptimalCost = this.calculateOptimalCost(totalUtility, newRarity);
+    const suggestedCost = Math.min(Math.max(card.cost + stepCostChange, 1), BALANCING_CONSTRAINTS.maxCost);
+    
+    // If large adjustment needed, suggest rarity change as well
+    if (Math.abs(costDiff) > 5) {
+      const rarities = ['common', 'uncommon', 'rare', 'legendary'];
+      const currentIndex = rarities.indexOf(card.rarity);
+      
+      if (utilityDifference > 0 && currentIndex < rarities.length - 1) {
+        // Card is overpowered - promote rarity
+        return { 
+          cost: suggestedCost, 
+          rarity: rarities[currentIndex + 1],
+          reasoning: `Step 1: ${stepCostChange > 0 ? '+' : ''}${stepCostChange} IP (utility ${totalUtility.toFixed(1)} vs ${currentBudget.baseline}), then promote to ${rarities[currentIndex + 1]}`
+        };
+      } else if (utilityDifference < 0 && currentIndex > 0) {
+        // Card is underpowered - demote rarity
+        return { 
+          cost: suggestedCost, 
+          rarity: rarities[currentIndex - 1],
+          reasoning: `Step 1: ${stepCostChange > 0 ? '+' : ''}${stepCostChange} IP (utility ${totalUtility.toFixed(1)} vs ${currentBudget.baseline}), then demote to ${rarities[currentIndex - 1]}`
+        };
+      }
+    }
+    
+    // Simple cost adjustment within ±3 limit
+    if (suggestedCost !== card.cost) {
       return { 
-        cost: newOptimalCost <= BALANCING_CONSTRAINTS.maxCost ? newOptimalCost : null, 
-        rarity: newRarity,
-        reasoning: `Utility ${totalUtility.toFixed(1)} exceeds ${card.rarity} budget. Promote to ${newRarity}` 
-      };
-    } else if (utilityDifference < 0 && currentIndex > 0) {
-      // Card is too weak for current rarity
-      const newRarity = rarities[currentIndex - 1];
-      const newOptimalCost = this.calculateOptimalCost(totalUtility, newRarity);
-      return { 
-        cost: newOptimalCost, 
-        rarity: newRarity,
-        reasoning: `Utility ${totalUtility.toFixed(1)} below ${card.rarity} budget. Demote to ${newRarity}` 
+        cost: suggestedCost, 
+        rarity: null, 
+        reasoning: `Adjust cost by ${stepCostChange > 0 ? '+' : ''}${stepCostChange} IP (utility ${totalUtility.toFixed(1)} vs expected ${currentBudget.baseline})` 
       };
     }
 
     return { 
       cost: null, 
       rarity: null, 
-      reasoning: `Card needs major rebalancing - utility ${totalUtility.toFixed(1)} vs expected ${currentBudget.baseline}` 
+      reasoning: `Card balanced within constraints - utility ${totalUtility.toFixed(1)} vs expected ${currentBudget.baseline}` 
     };
   }
 
@@ -735,43 +743,104 @@ export class EnhancedCardBalancer {
 
     report.cardAnalysis.forEach(analysis => {
       if (analysis.costRecommendation !== null || analysis.rarityRecommendation !== null) {
-        patches.push({
-          cardId: analysis.cardId,
-          name: analysis.name,
-          currentCost: analysis.currentCost,
-          currentRarity: analysis.rarity,
-          recommendedCost: analysis.costRecommendation,
-          recommendedRarity: analysis.rarityRecommendation,
-          reasoning: analysis.reasoning,
-          severity: analysis.severity
+        // Generate stepwise patches for large changes
+        const costDiff = (analysis.costRecommendation || analysis.currentCost) - analysis.currentCost;
+        const steps: Array<{step: number, recCost: number, recRarity: string, reason: string}> = [];
+        
+        if (Math.abs(costDiff) <= 3) {
+          // Single step change
+          steps.push({
+            step: 1,
+            recCost: analysis.costRecommendation || analysis.currentCost,
+            recRarity: analysis.rarityRecommendation || analysis.rarity,
+            reason: analysis.reasoning
+          });
+        } else {
+          // Multi-step change
+          const direction = costDiff > 0 ? 1 : -1;
+          let currentCost = analysis.currentCost;
+          let stepNum = 1;
+          
+          // First step: ±3 IP
+          currentCost += direction * 3;
+          steps.push({
+            step: stepNum++,
+            recCost: currentCost,
+            recRarity: analysis.rarity,
+            reason: `Step ${stepNum - 1}: ${direction > 0 ? '+' : ''}${direction * 3} IP (${analysis.reasoning})`
+          });
+          
+          // If rarity change needed, add as separate step
+          if (analysis.rarityRecommendation && analysis.rarityRecommendation !== analysis.rarity) {
+            steps.push({
+              step: stepNum++,
+              recCost: currentCost,
+              recRarity: analysis.rarityRecommendation,
+              reason: `Step ${stepNum - 1}: Promote to ${analysis.rarityRecommendation} rarity`
+            });
+          }
+          
+          // Additional cost adjustments if needed (rare case)
+          const remainingCostDiff = (analysis.costRecommendation || analysis.currentCost) - currentCost;
+          if (Math.abs(remainingCostDiff) > 0) {
+            const finalStep = Math.min(Math.abs(remainingCostDiff), 3) * (remainingCostDiff > 0 ? 1 : -1);
+            steps.push({
+              step: stepNum,
+              recCost: currentCost + finalStep,
+              recRarity: analysis.rarityRecommendation || analysis.rarity,
+              reason: `Step ${stepNum}: Final adjustment ${finalStep > 0 ? '+' : ''}${finalStep} IP`
+            });
+          }
+        }
+        
+        // Add each step as a separate patch entry
+        steps.forEach((step, index) => {
+          patches.push({
+            cardId: analysis.cardId,
+            name: analysis.name,
+            currentCost: index === 0 ? analysis.currentCost : steps[index - 1].recCost,
+            currentRarity: index === 0 ? analysis.rarity : steps[index - 1].recRarity,
+            recommendedCost: step.recCost,
+            recommendedRarity: step.recRarity,
+            reasoning: step.reason,
+            severity: analysis.severity,
+            step: step.step
+          });
         });
       }
     });
 
     switch (format) {
       case 'csv':
-        const csvHeader = 'Card ID,Name,Current Cost,Current Rarity,Recommended Cost,Recommended Rarity,Reasoning,Severity\n';
+        const csvHeader = 'cardId,name,currentCost,currentRarity,step,recCost,recRarity,reason,severity\n';
         const csvRows = patches.map(p => 
-          `${p.cardId},"${p.name}",${p.currentCost},${p.currentRarity},${p.recommendedCost || ''},${p.recommendedRarity || ''},"${p.reasoning}",${p.severity}`
+          `${p.cardId},"${p.name}",${p.currentCost},${p.currentRarity},${p.step || 1},${p.recommendedCost || ''},${p.recommendedRarity || ''},"${p.reasoning}",${p.severity}`
         ).join('\n');
         return csvHeader + csvRows;
 
       case 'txt':
         let txtOutput = '# SHADOW GOVERNMENT CARD BALANCE PATCH RECOMMENDATIONS\n\n';
+        txtOutput += `Analyzer v2.0 — Cost cap: 15 | Max step: ±3 | Truth weighting: 2.0x | Threshold scaling: 1.0-2.0x\n`;
         txtOutput += `Generated: ${new Date().toLocaleString()}\n`;
-        txtOutput += `Total patches: ${patches.length}\n\n`;
+        txtOutput += `Total patch steps: ${patches.length}\n\n`;
         
-        patches.forEach(patch => {
-          txtOutput += `## ${patch.name} (${patch.cardId})\n`;
-          txtOutput += `Current: ${patch.currentCost} IP, ${patch.currentRarity}\n`;
-          if (patch.recommendedCost !== null) {
-            txtOutput += `Recommended Cost: ${patch.recommendedCost} IP\n`;
-          }
-          if (patch.recommendedRarity !== null) {
-            txtOutput += `Recommended Rarity: ${patch.recommendedRarity}\n`;
-          }
-          txtOutput += `Reasoning: ${patch.reasoning}\n`;
-          txtOutput += `Severity: ${patch.severity}\n\n`;
+        // Group patches by card
+        const patchesByCard = patches.reduce((acc, patch) => {
+          if (!acc[patch.cardId]) acc[patch.cardId] = [];
+          acc[patch.cardId].push(patch);
+          return acc;
+        }, {} as Record<string, typeof patches>);
+        
+        Object.values(patchesByCard).forEach(cardPatches => {
+          const firstPatch = cardPatches[0];
+          txtOutput += `## ${firstPatch.name} (${firstPatch.cardId})\n`;
+          txtOutput += `Initial: ${firstPatch.currentCost} IP, ${firstPatch.currentRarity}\n`;
+          
+          cardPatches.forEach(patch => {
+            txtOutput += `${patch.step ? `Step ${patch.step}: ` : ''}${patch.recommendedCost} IP, ${patch.recommendedRarity} - ${patch.reasoning}\n`;
+          });
+          
+          txtOutput += `Severity: ${firstPatch.severity}\n\n`;
         });
         
         return txtOutput;
@@ -781,7 +850,8 @@ export class EnhancedCardBalancer {
           metadata: {
             timestamp: new Date().toISOString(),
             version: '2.0-enhanced',
-            totalPatches: patches.length
+            analyzer: 'Cost cap: 15 | Max step: ±3 | Truth weighting: 2.0x | Threshold scaling: 1.0-2.0x',
+            totalPatchSteps: patches.length
           },
           patches
         }, null, 2);
