@@ -19,7 +19,7 @@ import ZoneTargetingHelper from '@/components/game/ZoneTargetingHelper';
 import { AudioControls } from '@/components/ui/audio-controls';
 import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
-import { useAudio } from '@/hooks/useAudio';
+import { useAudioManager } from '@/hooks/useAudioManager';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
@@ -71,7 +71,7 @@ const Index = () => {
   const [showActionPhase, setShowActionPhase] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
-  const audio = useAudio();
+  const audio = useAudioManager();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
@@ -196,7 +196,7 @@ const Index = () => {
           console.log(`🔗 New synergy activated: ${combo.name} (+${combo.bonusIP} IP)`);
           
           // Play audio feedback
-          audio?.playSFX?.('state-capture');
+          audio?.playSfx?.('state-capture');
           
           // Toast notification for synergy activation
           toast.success(`🔗 Synergy Activated: ${combo.name} (+${combo.bonusIP} IP)`, {
@@ -270,8 +270,8 @@ const Index = () => {
     await initGame(faction);
     setShowMenu(false);
     setShowIntro(false);
-    audio.setGameplayMusic(faction);
-    audio.playSFX('click');
+    audio.startGameplay(faction);
+    audio.playSfx('click');
     
     // Auto-enter fullscreen when game starts (skip in iframes or when not allowed)
     try {
@@ -289,7 +289,7 @@ const Index = () => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (card?.type === 'ZONE') {
       selectCard(cardId);
-      audio.playSFX('click');
+      audio.playSfx('click');
     }
   };
 
@@ -305,12 +305,12 @@ const Index = () => {
             duration: 3000,
             style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
           });
-          audio.playSFX('error');
+          audio.playSfx('error');
           return;
         }
         
         selectTargetState(stateId); // keep state in store for logs/UX
-        audio.playSFX('click');
+        audio.playSfx('click');
         toast.success(`🎯 Targeting ${targetState?.name}! Deploying zone card...`, {
           duration: 2000,
           style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
@@ -321,13 +321,13 @@ const Index = () => {
         await handlePlayCard(gameState.selectedCard, stateId);
       }
     } else {
-      audio.playSFX('hover');
+      audio.playSfx('hover');
     }
   };
 
   const handleSelectCard = (cardId: string) => {
     selectCard(cardId);
-    audio.playSFX('hover');
+    audio.playSfx('hover');
   };
 
   const handlePlayCard = async (cardId: string, targetState?: string) => {
@@ -340,7 +340,7 @@ const Index = () => {
         duration: 3000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
       });
-      audio.playSFX('error');
+      audio.playSfx('error');
       return;
     }
 
@@ -350,14 +350,14 @@ const Index = () => {
         duration: 3000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
       });
-      audio.playSFX('error');
+      audio.playSfx('error');
       return;
     }
 
     // If it's a ZONE card that requires targeting
     if (card.type === 'ZONE' && !gameState.targetState && !targetState) {
       selectCard(cardId);
-      audio.playSFX('hover');
+      audio.playSfx('hover');
       toast('🎯 Zone card selected - click a state to target it!', {
         duration: 4000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
@@ -367,7 +367,7 @@ const Index = () => {
 
     // Show loading state
     setLoadingCard(cardId);
-    audio.playSFX('cardPlay');
+    audio.playSfx('card-play');
     
     try {
       // Use animated card play
@@ -402,7 +402,7 @@ const Index = () => {
         duration: 3000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
       });
-      audio.playSFX('error');
+      audio.playSfx('error');
     } finally {
       setLoadingCard(null);
     }
@@ -410,16 +410,16 @@ const Index = () => {
 
   const handleEndTurn = () => {
     endTurn();
-    audio.playSFX('turnEnd');
+    audio.playSfx('turn-end');
     // Play card draw sound after a short delay
     setTimeout(() => {
-      audio.playSFX('cardDraw');
+      audio.playSfx('card-draw');
     }, 500);
   };
 
   const handleCloseNewspaper = () => {
     closeNewspaper();
-    audio.playSFX('newspaper');
+    audio.playSfx('newspaper');
   };
 
   const toggleFullscreen = async () => {
@@ -427,7 +427,7 @@ const Index = () => {
       const canFullscreen = document.fullscreenEnabled && window.top === window.self;
       if (!canFullscreen) {
         console.log('Fullscreen not permitted in this environment (likely in iframe).');
-        audio.playSFX('click');
+        audio.playSfx('click');
         return;
       }
       if (!document.fullscreenElement) {
@@ -437,7 +437,7 @@ const Index = () => {
         await document.exitFullscreen();
         setIsFullscreen(false);
       }
-      audio.playSFX('click');
+      audio.playSfx('click');
     } catch (error) {
       console.error('Fullscreen error:', error);
     }
@@ -456,7 +456,7 @@ const Index = () => {
   useEffect(() => {
     // Only start music when user clicks to dismiss intro
     if (!showIntro && showMenu) {
-      audio.setMenuMusic();
+      audio.setScene('start-menu');
     }
   }, [showIntro, showMenu, audio]);
 
@@ -466,7 +466,8 @@ const Index = () => {
         className="min-h-screen bg-government-dark flex items-center justify-center cursor-pointer"
         onClick={() => {
           setShowIntro(false);
-          audio.setMenuMusic();
+          audio.enableAudio();
+          audio.setScene('start-menu');
         }}
       >
         <div className="text-center space-y-8">
@@ -511,7 +512,7 @@ const Index = () => {
       onFactionHover={(faction) => {
         // Play light hover sound effect instead of changing music
         if (faction) {
-          audio.playSFX('hover');
+          audio.playSfx('hover');
         }
       }}
       audio={audio}
@@ -539,7 +540,7 @@ const Index = () => {
         onBackToMainMenu={() => {
           setShowInGameOptions(false);
           setShowMenu(true);
-          audio.setMenuMusic();
+          audio.setScene('start-menu');
         }}
         onSaveGame={() => saveGame()}
       />
@@ -630,7 +631,7 @@ const Index = () => {
                 <button
                   onClick={() => {
                     setShowCardCollection(true);
-                    audio.playSFX('click');
+                    audio.playSfx('click');
                   }}
                   className="bg-indigo-600 text-white p-1 rounded hover:bg-indigo-700 transition-colors"
                   title="Card Collection"
@@ -642,7 +643,7 @@ const Index = () => {
                     console.log('In-game options button clicked');
                     setShowInGameOptions(true);
                     console.log('showInGameOptions set to true');
-                    audio.playSFX('click');
+                    audio.playSfx('click');
                   }}
                   className="bg-gray-600 text-white p-1 rounded hover:bg-gray-700 transition-colors"
                   title="Options & Settings"
@@ -835,7 +836,7 @@ const Index = () => {
         selectedZoneCard={gameState.selectedCard}
         onCancel={() => {
           selectCard(null);
-          audio.playSFX('click');
+          audio.playSfx('click');
           toast('🚫 Zone targeting canceled', {
             duration: 2000,
             style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #6b7280' }
@@ -913,7 +914,7 @@ const Index = () => {
             // Reset to start screen
             setShowMenu(true);
             setGameState(prev => ({ ...prev, isGameOver: false }));
-            audio.playMusic('theme');
+            audio.setScene('start-menu');
           }}
         />
       )}
