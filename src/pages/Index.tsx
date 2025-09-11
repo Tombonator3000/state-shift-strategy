@@ -735,7 +735,7 @@ const Index = () => {
           )}
           
           {/* Map Area - flex-1 takes remaining space above card dock */}
-          <div className="flex-1 border-2 border-newspaper-border bg-white/80 relative overflow-hidden min-h-[360px]">
+          <div className="flex-1 border-2 border-newspaper-border bg-white/80 relative overflow-auto min-h-[360px]">
             {/* Card preview overlay */}
             <CardPreviewOverlay card={hoveredCard} />
             
@@ -751,7 +751,7 @@ const Index = () => {
           </div>
 
           {/* Played Cards Dock - fixed height at bottom */}
-          <div className="flex-shrink-0 h-20 md:h-16 bg-newspaper-bg border-t-2 border-newspaper-border relative z-50">
+          <div className="flex-shrink-0 h-[200px] md:h-[220px] lg:h-[240px] xl:h-[260px] bg-newspaper-bg border-t-2 border-newspaper-border relative z-50">
             <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} />
           </div>
         </div>
