@@ -42,6 +42,7 @@ import InGameOptions from '@/components/game/InGameOptions';
 import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
 import EnhancedExpansionManager from '@/components/game/EnhancedExpansionManager';
 import MinimizedHand from '@/components/game/MinimizedHand';
+import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
@@ -735,19 +736,11 @@ const Index = () => {
       <div className="flex flex-col xl:flex-row h-[calc(100vh-140px)] overflow-hidden">
         {/* Left sidebar - Victory Conditions & Classified Intel */}
         <div className="hidden xl:block w-52 bg-newspaper-bg border-r-2 border-newspaper-border p-2 overflow-y-auto">
-          <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border">
-            <h3 className="font-bold text-xs mb-2 text-center">VICTORY CONDITIONS</h3>
-            <div className="text-xs space-y-1 font-mono">
-              <div>• Control 10 states</div>
-              <div>• Reach 200 IP</div>
-              <div>• Truth ≥90%</div>
-              <div className="border-t border-newspaper-bg/30 pt-1 mt-1">
-                <div className="text-center text-xs">States: {gameState.controlledStates.length}/10</div>
-                <div className="text-center text-xs">Truth: {gameState.truth}%</div>
-                <div className="text-center text-xs">IP: {gameState.ip}/200</div>
-              </div>
-            </div>
-          </div>
+          <VictoryConditions
+            controlledStates={gameState.controlledStates.length}
+            truth={gameState.truth}
+            ip={gameState.ip}
+          />
 
           {/* Player Secret Agenda */}
           <div className="mb-3">
@@ -831,12 +824,12 @@ const Index = () => {
         <div className="w-full xl:w-64 bg-newspaper-bg border-l-2 border-newspaper-border p-2 flex flex-col max-h-full" data-right-sidebar="true">
           {/* Mobile victory conditions - shown at top on mobile */}
           <div className="xl:hidden mb-3">
-            <div className="bg-newspaper-text text-newspaper-bg p-2 border border-newspaper-border">
-              <h3 className="font-bold text-xs mb-1 text-center">VICTORY CONDITIONS</h3>
-              <div className="text-xs font-mono">
-                States: {gameState.controlledStates.length}/10 | Truth: {gameState.truth}% | IP: {gameState.ip}/200
-              </div>
-            </div>
+            <VictoryConditions
+              controlledStates={gameState.controlledStates.length}
+              truth={gameState.truth}
+              ip={gameState.ip}
+              isMobile={true}
+            />
           </div>
 
           {/* AI Intel - Now integrated into AIStatus component */}
