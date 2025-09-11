@@ -46,7 +46,17 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   useEffect(() => {
     const savedSettings = localStorage.getItem('gameSettings');
     if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+      try {
+        const parsed = JSON.parse(savedSettings);
+        // Validate drawMode to ensure it exists in DRAW_MODE_CONFIGS
+        if (parsed.drawMode && !DRAW_MODE_CONFIGS[parsed.drawMode as DrawMode]) {
+          parsed.drawMode = 'standard'; // fallback to default
+        }
+        setSettings({ ...settings, ...parsed });
+      } catch (error) {
+        console.error('Failed to parse saved settings:', error);
+        // Keep default settings if parsing fails
+      }
     }
   }, []);
 
@@ -297,7 +307,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   ))}
                 </select>
                 <div className="text-xs text-newspaper-text/70 space-y-1">
-                  {DRAW_MODE_CONFIGS[settings.drawMode].specialRules.map((rule, i) => (
+                  {(DRAW_MODE_CONFIGS[settings.drawMode] || DRAW_MODE_CONFIGS.standard).specialRules.map((rule, i) => (
                     <div key={i}>• {rule}</div>
                   ))}
                 </div>
