@@ -212,14 +212,13 @@ const TabloidVictoryScreen = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 animate-fade-in cursor-pointer"
-      onClick={onClose}
+      className="fixed inset-0 bg-slate-900/70 flex items-center justify-center z-50 animate-fade-in"
       role="dialog"
       aria-label={isVictory ? "Victory - Extra Edition" : "Defeat - Extra Edition"}
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
-          onClose();
+        if (e.key === 'Escape') {
+          e.preventDefault(); // Prevent closing with ESC - must use buttons
         }
       }}
     >
@@ -236,7 +235,8 @@ const TabloidVictoryScreen = ({
         />
       ))}
 
-      <Card className={`bg-newspaper-bg text-newspaper-text p-0 max-w-6xl max-h-[95vh] overflow-y-auto border-4 ${factionColors} transform animate-[newspaper-spin_0.8s_ease-out] shadow-2xl font-serif`}>
+      <Card className="bg-newspaper-bg text-newspaper-text p-0 max-w-6xl max-h-[95vh] overflow-y-auto border-4 border-newspaper-border transform animate-[newspaper-spin_0.8s_ease-out] shadow-2xl font-serif"
+        onClick={(e) => e.stopPropagation()}>
         {/* Newspaper Header */}
         <div className="bg-newspaper-header p-4 sm:p-6 border-b-8 border-newspaper-border relative">
           {/* Faction Badge */}
@@ -272,17 +272,6 @@ const TabloidVictoryScreen = ({
             </div>
           </div>
           
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClose();
-            }}
-            className="absolute top-2 right-2 text-newspaper-text hover:text-truth-red bg-white/80 hover:bg-white"
-          >
-            <X className="w-6 h-6" />
-          </Button>
         </div>
 
         <div className="p-4 sm:p-6">
@@ -458,28 +447,40 @@ const TabloidVictoryScreen = ({
 
         {/* Footer */}
         <div className="bg-newspaper-header border-t-4 border-newspaper-border p-4">
-          <div className="flex justify-between items-center text-xs border-b border-newspaper-border pb-2 mb-3">
+          <div className="flex justify-between items-center text-xs text-newspaper-bg border-b border-newspaper-border pb-2 mb-3">
             <div>© 2024 The Weekly Paranoid News</div>
             <div>All Rights Reserved Under Alien Treaty 4B7</div>
             <div>Printed on Recycled Surveillance Reports</div>
           </div>
           <div className="text-center">
-            <div className="text-xs mb-3 italic opacity-80">
+            <div className="text-xs mb-4 italic text-newspaper-bg/80">
               "Remember: They're Watching, But So Are We" • Established When Truth Mattered
             </div>
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className={`font-bold text-lg px-8 py-3 ${
-                isVictory 
-                  ? 'bg-newspaper-accent hover:bg-newspaper-accent/80 text-white' 
-                  : 'bg-red-600 hover:bg-red-700 text-white'
-              } border-2 border-newspaper-border shadow-lg transform hover:scale-105 transition-all`}
-            >
-              📰 Return to Base Operations
-            </Button>
+            <div className="flex gap-4 justify-center">
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMainMenu();
+                }}
+                variant="outline"
+                className="font-bold text-lg px-8 py-3 bg-newspaper-bg hover:bg-newspaper-bg/90 text-newspaper-text border-2 border-newspaper-border shadow-lg transform hover:scale-105 transition-all"
+              >
+                📰 Return to Main Menu
+              </Button>
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowCredits(true);
+                }}
+                className={`font-bold text-lg px-8 py-3 ${
+                  isVictory 
+                    ? 'bg-newspaper-accent hover:bg-newspaper-accent/80 text-white' 
+                    : 'bg-red-600 hover:bg-red-700 text-white'
+                } border-2 border-newspaper-border shadow-lg transform hover:scale-105 transition-all`}
+              >
+                🎬 End Credits
+              </Button>
+            </div>
           </div>
         </div>
       </Card>

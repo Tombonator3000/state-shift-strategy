@@ -80,8 +80,25 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
   useEffect(() => {
     if (isVisible) {
       // Start credits music after first user interaction
-      setTimeout(() => {
-        audio.playSFX('typewriter');
+      const startMusic = () => {
+        // Try to load and play endcredits-theme.mp3
+        const creditsAudio = new Audio('/muzak/endcredits-theme.mp3');
+        creditsAudio.volume = 0.3; // 30% volume
+        creditsAudio.loop = true;
+        creditsAudio.play().catch(() => {
+          // Fallback to typewriter sound if credits music fails
+          audio.playSFX('typewriter');
+        });
+        
+        // Store reference for cleanup
+        return creditsAudio;
+      };
+      
+      const creditsMusic = setTimeout(() => {
+        const musicRef = startMusic();
+        
+        // Store music reference for cleanup
+        (window as any)._creditsMusic = musicRef;
       }, 500);
 
       const slideInterval = setInterval(() => {
@@ -94,14 +111,20 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
         });
       }, 4000);
 
-      // Auto-exit after 90 seconds
+      // Auto-exit after 60 seconds
       const exitTimeout = setTimeout(() => {
         onClose();
-      }, 90000);
+      }, 60000);
 
       return () => {
+        clearTimeout(creditsMusic);
         clearInterval(slideInterval);
         clearTimeout(exitTimeout);
+        // Stop credits music if it exists
+        if ((window as any)._creditsMusic) {
+          (window as any)._creditsMusic.pause();
+          (window as any)._creditsMusic = null;
+        }
       };
     }
   }, [isVisible, audio, onClose]);
@@ -109,11 +132,25 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
   useEffect(() => {
     if (autoExit) {
       const exitTimeout = setTimeout(() => {
+        // Stop music before closing
+        if ((window as any)._creditsMusic) {
+          (window as any)._creditsMusic.pause();
+          (window as any)._creditsMusic = null;
+        }
         onClose();
       }, 3000);
       return () => clearTimeout(exitTimeout);
     }
   }, [autoExit, onClose]);
+
+  const handleClose = () => {
+    // Stop music when manually closing
+    if ((window as any)._creditsMusic) {
+      (window as any)._creditsMusic.pause();
+      (window as any)._creditsMusic = null;
+    }
+    onClose();
+  };
 
   if (!isVisible) return null;
 
@@ -180,7 +217,7 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
             </Button>
             
             <Button
-              onClick={onClose}
+              onClick={handleClose}
               className="font-mono text-sm bg-newspaper-accent hover:bg-newspaper-accent/80 text-white"
             >
               Skip Credits
@@ -188,7 +225,7 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
             
             <Button
               variant="outline"
-              onClick={onClose}
+              onClick={handleClose}
               className="font-mono text-sm"
             >
               Return to Main Menu
