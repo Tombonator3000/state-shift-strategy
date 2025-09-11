@@ -31,43 +31,47 @@ interface GameSettings {
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const audio = useAudioContext();
 
-  const [settings, setSettings] = useState<GameSettings>({
-    masterVolume: Math.round(audio.config.volume * 100),
-    musicVolume: 50,
-    sfxVolume: 80,
-    enableAnimations: true,
-    autoEndTurn: false,
-    fastMode: false,
-    showTooltips: true,
-    enableKeyboardShortcuts: true,
-    difficulty: 'normal',
-    screenShake: true,
-    confirmActions: true,
-    drawMode: 'standard',
-  });
-
-  // Load settings from localStorage on component mount
-  useEffect(() => {
+  const [settings, setSettings] = useState<GameSettings>(() => {
+    // Initialize settings from audio system and localStorage
     const savedSettings = localStorage.getItem('gameSettings');
+    const baseSettings = {
+      masterVolume: Math.round(audio.config.volume * 100),
+      musicVolume: 50,
+      sfxVolume: 80,
+      enableAnimations: true,
+      autoEndTurn: false,
+      fastMode: false,
+      showTooltips: true,
+      enableKeyboardShortcuts: true,
+      difficulty: 'normal' as const,
+      screenShake: true,
+      confirmActions: true,
+      drawMode: 'standard' as const,
+    };
+    
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
-        // Validate drawMode to ensure it exists in DRAW_MODE_CONFIGS
-        if (parsed.drawMode && !DRAW_MODE_CONFIGS[parsed.drawMode as DrawMode]) {
-          parsed.drawMode = 'standard'; // fallback to default
-        }
-        setSettings({ ...settings, ...parsed });
+        return { ...baseSettings, ...parsed };
       } catch (error) {
         console.error('Failed to parse saved settings:', error);
-        // Keep default settings if parsing fails
       }
     }
-  }, []);
+    
+    return baseSettings;
+  });
 
-  // Update audio volume when master volume changes
+  // Load settings from localStorage on component mount - remove to prevent re-initialization
+  // Settings are now loaded in useState initializer above
+
+  // Update audio volume when master volume changes - but avoid infinite loops
   useEffect(() => {
-    audio.setVolume(settings.masterVolume / 100);
-  }, [settings.masterVolume, audio]);
+    const currentAudioVolume = Math.round(audio.config.volume * 100);
+    if (currentAudioVolume !== settings.masterVolume) {
+      console.log('🎵 Options: Syncing volume from', currentAudioVolume, 'to', settings.masterVolume);
+      audio.setVolume(settings.masterVolume / 100);
+    }
+  }, [settings.masterVolume]); // Remove 'audio' from dependencies to prevent loops
 
   // Save settings to localStorage whenever they change
   const updateSettings = (newSettings: Partial<GameSettings>) => {

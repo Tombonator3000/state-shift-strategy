@@ -240,9 +240,9 @@ export const useAudio = () => {
     };
   }, []);
 
-  // Update volumes when config changes and sync to localStorage
+  // Update volumes when config changes and sync to localStorage - but prevent excessive calls
   useEffect(() => {
-    console.log('🎵 Volume updated:', { volume: config.volume, muted: config.muted });
+    console.log('🎵 Volume update triggered:', { volume: config.volume, muted: config.muted });
     
     if (currentMusicRef.current) {
       currentMusicRef.current.volume = config.muted ? 0 : config.volume;
@@ -254,13 +254,17 @@ export const useAudio = () => {
       audio.volume = config.muted ? 0 : config.volume;
     });
 
-    // Sync volume to localStorage (gameSettings)
+    // Sync volume to localStorage (gameSettings) - but only if it actually changed
     const saved = localStorage.getItem('gameSettings');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        parsed.masterVolume = Math.round(config.volume * 100);
-        localStorage.setItem('gameSettings', JSON.stringify(parsed));
+        const newMasterVolume = Math.round(config.volume * 100);
+        if (parsed.masterVolume !== newMasterVolume) {
+          parsed.masterVolume = newMasterVolume;
+          localStorage.setItem('gameSettings', JSON.stringify(parsed));
+          console.log('🎵 Synced volume to localStorage:', newMasterVolume);
+        }
       } catch (e) {
         console.warn('🎵 Failed to sync audio settings to localStorage');
       }
@@ -470,9 +474,15 @@ export const useAudio = () => {
 
   const setVolume = useCallback((volume: number) => {
     const clampedVolume = Math.max(0, Math.min(1, volume));
-    console.log('🎵 Setting volume to:', Math.round(clampedVolume * 100) + '%');
-    setConfig(prev => ({ ...prev, volume: clampedVolume }));
-  }, []);
+    const currentVolumePercent = Math.round(config.volume * 100);
+    const newVolumePercent = Math.round(clampedVolume * 100);
+    
+    // Only update if volume actually changed to prevent spam
+    if (currentVolumePercent !== newVolumePercent) {
+      console.log('🎵 Setting volume from', currentVolumePercent + '%', 'to:', newVolumePercent + '%');
+      setConfig(prev => ({ ...prev, volume: clampedVolume }));
+    }
+  }, [config.volume]);
 
   const toggleMute = useCallback(() => {
     setConfig(prev => ({ ...prev, muted: !prev.muted }));

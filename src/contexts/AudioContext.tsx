@@ -6,22 +6,17 @@ type AudioContextType = ReturnType<typeof useAudio>;
 const AudioContext = createContext<AudioContextType | null>(null);
 
 export const AudioProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const initializeRef = useRef(false);
-  
-  // Only initialize once using a ref to prevent multiple initializations
-  useEffect(() => {
-    if (!initializeRef.current) {
-      console.log('🎵 AudioProvider: First-time initialization');
-      initializeRef.current = true;
-    }
-  }, []);
+  const initCountRef = useRef(0);
   
   // Always call useAudio - hooks must be called consistently
   const audioSystem = useAudio();
   
-  // Only log after first initialization to reduce noise
-  if (initializeRef.current) {
-    console.log('🎵 AudioProvider: Using stable audio system');
+  // Track initialization count but don't affect the hook call
+  initCountRef.current++;
+  
+  // Only log on first few calls to reduce noise
+  if (initCountRef.current <= 2) {
+    console.log(`🎵 AudioProvider: Render #${initCountRef.current} - audio system ready`);
   }
   
   return (
