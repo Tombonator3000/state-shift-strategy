@@ -32,6 +32,7 @@ class AudioManagerClass {
       settings: loadAudioSettings()
     };
 
+    console.log('AudioManager initialized with settings:', this.state.settings);
     this.setupVisibilityHandling();
     this.preloadSFX();
   }
@@ -86,6 +87,7 @@ class AudioManagerClass {
   }
 
   public async playBgm(trackId: BGMTrackId, options: CrossfadeOptions = {}): Promise<void> {
+    console.log('playBgm called:', trackId, 'canPlay:', this.state.canPlay, 'currentTrackId:', this.state.currentTrackId);
     if (!this.state.canPlay) return;
     
     const track = BGM_TRACKS[trackId];
@@ -96,6 +98,7 @@ class AudioManagerClass {
 
     // Don't restart the same track
     if (this.state.currentTrackId === trackId && this.currentBgm && this.state.isPlaying) {
+      console.log('Same track already playing, skipping');
       return;
     }
 
@@ -196,26 +199,34 @@ class AudioManagerClass {
   }
 
   public playSfx(soundId: SFXTrackId): void {
+    console.log('playSfx called:', soundId, 'canPlay:', this.state.canPlay, 'muted:', this.state.settings.isMuted);
     if (!this.state.canPlay || this.state.settings.isMuted) return;
 
     const audio = this.sfxPool.get(soundId);
     if (audio) {
       const track = SFX_TRACKS[soundId];
-      audio.volume = this.calculateVolume(track.volume, 'sfx');
+      const volume = this.calculateVolume(track.volume, 'sfx');
+      console.log('Playing SFX with volume:', volume);
+      audio.volume = volume;
       audio.currentTime = 0;
       audio.play().catch(console.warn);
+    } else {
+      console.warn('SFX not found in pool:', soundId);
     }
   }
 
   public setVolumes(volumes: Partial<AudioSettings>): void {
     const newSettings = { ...this.state.settings, ...volumes };
+    console.log('AudioManager setVolumes called:', volumes, 'new settings:', newSettings);
     this.updateState({ settings: newSettings });
     saveAudioSettings(newSettings);
 
     // Update current BGM volume
     if (this.currentBgm && this.state.currentTrackId) {
       const track = BGM_TRACKS[this.state.currentTrackId];
-      this.currentBgm.volume = this.calculateVolume(track.volume, 'bgm');
+      const newVolume = this.calculateVolume(track.volume, 'bgm');
+      console.log('Updating BGM volume to:', newVolume);
+      this.currentBgm.volume = newVolume;
     }
   }
 
