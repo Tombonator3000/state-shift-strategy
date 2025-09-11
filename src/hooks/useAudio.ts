@@ -11,12 +11,16 @@ type MusicType = 'theme' | 'government' | 'truth';
 type GameState = 'menu' | 'factionSelect' | 'playing';
 
 export const useAudio = () => {
+  console.log('🎵 useAudio: Hook called - initializing...');
+  
   // Load initial config from localStorage or defaults
   const [config, setConfig] = useState<AudioConfig>(() => {
+    console.log('🎵 useAudio: Loading initial config...');
     const saved = localStorage.getItem('gameSettings');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        console.log('🎵 useAudio: Loaded saved audio config');
         return {
           volume: (parsed.masterVolume || 70) / 100,
           muted: false,
@@ -24,9 +28,10 @@ export const useAudio = () => {
           sfxEnabled: true
         };
       } catch {
-        console.log('🎵 Failed to parse saved audio settings, using defaults');
+        console.log('🎵 useAudio: Failed to parse saved audio settings, using defaults');
       }
     }
+    console.log('🎵 useAudio: Using default audio config');
     return {
       volume: 0.7, // Default to 70%
       muted: false,
@@ -42,6 +47,8 @@ export const useAudio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackName, setCurrentTrackName] = useState<string>('');
   const [audioStatus, setAudioStatus] = useState<string>('Initializing...');
+  
+  console.log('🎵 useAudio: State initialized');
   
   const currentMusicRef = useRef<HTMLAudioElement | null>(null);
   const nextMusicRef = useRef<HTMLAudioElement | null>(null);
@@ -547,6 +554,8 @@ export const useAudio = () => {
     playMusic(faction);
   }, [gameState, currentMusicType, playMusic]);
 
+  console.log('🎵 useAudio: Returning audio system object');
+  
   return {
     config,
     playMusic,
