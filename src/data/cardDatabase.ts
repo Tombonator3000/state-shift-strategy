@@ -9,7 +9,7 @@ import { extensionManager } from './extensionSystem';
 // Batch 1 (Truth Seekers 1-50): ✅ Complete
 // Batch 2 (Truth Seekers 51-100): ✅ Complete  
 // Batch 3 (Truth Seekers 101-150): ✅ Complete
-// Batch 4 (Truth Seekers 151-200): ⏳ Pending
+// Batch 4 (Truth Seekers 151-200): ✅ Complete
 // Batch 5 (Government 1-50): ⏳ Pending
 // Batch 6 (Government 51-100): ⏳ Pending
 // Batch 7 (Government 101-150): ⏳ Pending
@@ -1853,18 +1853,622 @@ export const CARD_DATABASE: GameCard[] = [
     target: { scope: "global" },
     effects: { truthDelta: +15, randomStateEffect: { pressure: 2 } }
   },
+
+  // ===== BATCH 4: TRUTH SEEKERS (151-200) =====
+  // MEDIA (22)
   {
-    id: "TS-150",
+    id: "TS-151",
     faction: "Truth",
-    name: "Elvis: The Immortal King",
+    name: "Elvis Volunteers at Animal Shelter",
+    type: "MEDIA",
+    rarity: "uncommon",
+    cost: 9,
+    text: "+6% Truth. Gain +1 IP.",
+    flavor: "Hound dogs approved.",
+    target: { scope: "global" },
+    effects: { truthDelta: +6, ipDelta: { self: +1 } }
+  },
+  {
+    id: "TS-152",
+    faction: "Truth",
+    name: "Bat Boy Hosts the Evening News",
+    type: "MEDIA",
+    rarity: "rare",
+    cost: 14,
+    text: "+9% Truth.",
+    flavor: "Top story: screamingly credible.",
+    target: { scope: "global" },
+    effects: { truthDelta: +9 }
+  },
+  {
+    id: "TS-153",
+    faction: "Truth",
+    name: "Florida Man's Meteor Fragment",
+    type: "MEDIA",
+    rarity: "common",
+    cost: 5,
+    text: "+4% Truth. Draw 1.",
+    flavor: "Hot rock, hotter takes.",
+    target: { scope: "global" },
+    effects: { truthDelta: +4, draw: 1 }
+  },
+  {
+    id: "TS-154",
+    faction: "Truth",
+    name: "Pastor Rex Declares Open Files Week",
+    type: "MEDIA",
+    rarity: "uncommon",
+    cost: 10,
+    text: "+7% Truth. If Truth ≥ 60%, gain +1 IP.",
+    flavor: "Bring your own highlighter.",
+    target: { scope: "global" },
+    effects: { truthDelta: +7, conditional: { ifTruthAtLeast: 60, ipDelta: { self: +1 } } }
+  },
+  {
+    id: "TS-155",
+    faction: "Truth",
+    name: "Agent Smitherson Leaves a Voicemail",
+    type: "MEDIA",
+    rarity: "rare",
+    cost: 13,
+    text: "+8% Truth. Opponent discards 1 card.",
+    flavor: "'Do not call back.' *Beep.*",
+    target: { scope: "opponent" },
+    effects: { truthDelta: +8, discardOpponent: 1 }
+  },
+  {
+    id: "TS-156",
+    faction: "Truth",
+    name: "Crowd Spots Triangle Craft",
+    type: "MEDIA",
+    rarity: "common",
+    cost: 6,
+    text: "+5% Truth.",
+    flavor: "Geometry class finally pays off.",
+    target: { scope: "global" },
+    effects: { truthDelta: +5 }
+  },
+  {
+    id: "TS-157",
+    faction: "Truth",
+    name: "Elvis Charity Telethon",
+    type: "MEDIA",
+    rarity: "uncommon",
+    cost: 9,
+    text: "+6% Truth. Opponent -1 IP.",
+    flavor: "All donations tax-deductible from reality.",
+    target: { scope: "opponent" },
+    effects: { truthDelta: +6, ipDelta: { opponent: -1 } }
+  },
+  {
+    id: "TS-158",
+    faction: "Truth",
+    name: "UFO Traffic Cam Compilation",
+    type: "MEDIA",
+    rarity: "common",
+    cost: 6,
+    text: "+5% Truth.",
+    flavor: "Please merge truthfully.",
+    target: { scope: "global" },
+    effects: { truthDelta: +5 }
+  },
+  {
+    id: "TS-159",
+    faction: "Truth",
+    name: "Bat Boy Op-Ed: 'I Was There'",
+    type: "MEDIA",
+    rarity: "uncommon",
+    cost: 9,
+    text: "+6% Truth. Draw 1 if you control any Zone.",
+    flavor: "Has the receipts, keeps the screams.",
+    target: { scope: "global" },
+    effects: { truthDelta: +6, conditional: { ifControlAnyZone: true, draw: 1 } }
+  },
+  {
+    id: "TS-160",
+    faction: "Truth",
+    name: "Grandma's Séance Transcript",
+    type: "MEDIA",
+    rarity: "common",
+    cost: 5,
+    text: "+4% Truth.",
+    flavor: "Meeting minutes by planchette.",
+    target: { scope: "global" },
+    effects: { truthDelta: +4 }
+  },
+  {
+    id: "TS-161",
+    faction: "Truth",
+    name: "Elvis Delivers FOIA Request",
+    type: "MEDIA",
+    rarity: "rare",
+    cost: 14,
+    text: "+9% Truth. Draw 1.",
+    flavor: "Return address: The Heartbreak Hotel.",
+    target: { scope: "global" },
+    effects: { truthDelta: +9, draw: 1 }
+  },
+  {
+    id: "TS-162",
+    faction: "Truth",
+    name: "MIB Parking Ticket Goes Viral",
+    type: "MEDIA",
+    rarity: "uncommon",
+    cost: 9,
+    text: "+6% Truth. Opponent reveals hand.",
+    flavor: "Violation: obvious saucer.",
+    target: { scope: "opponent" },
+    effects: { truthDelta: +6, revealOpponentHand: true }
+  },
+  {
+    id: "TS-163",
+    faction: "Truth",
+    name: "Florida Man's Paranormal BBQ",
+    type: "MEDIA",
+    rarity: "common",
+    cost: 6,
+    text: "+5% Truth.",
+    flavor: "Ribs and revelations.",
+    target: { scope: "global" },
+    effects: { truthDelta: +5 }
+  },
+  {
+    id: "TS-164",
+    faction: "Truth",
+    name: "Bat Boy Wins Journalism Award",
+    type: "MEDIA",
+    rarity: "rare",
+    cost: 13,
+    text: "+8% Truth. Opponent -2 IP.",
+    flavor: "Accepted with a polite shriek.",
+    target: { scope: "opponent" },
+    effects: { truthDelta: +8, ipDelta: { opponent: -2 } }
+  },
+  {
+    id: "TS-165",
+    faction: "Truth",
+    name: "Elvis Bus Tour to Area 51",
+    type: "MEDIA",
+    rarity: "uncommon",
+    cost: 10,
+    text: "+7% Truth. If you own any Nevada Zone, gain +1 IP.",
+    flavor: "No cameras, only camcorders.",
+    target: { scope: "global" },
+    effects: { truthDelta: +7, conditional: { ifOwnsZoneInState: "Nevada", ipDelta: { self: +1 } } }
+  },
+  {
+    id: "TS-166",
+    faction: "Truth",
+    name: "Community Leak Drop",
+    type: "MEDIA",
+    rarity: "common",
+    cost: 6,
+    text: "+5% Truth.",
+    flavor: "The cloud is just a sky hard drive.",
+    target: { scope: "global" },
+    effects: { truthDelta: +5 }
+  },
+  {
+    id: "TS-167",
+    faction: "Truth",
+    name: "Paranormal Bake Sale",
+    type: "MEDIA",
+    rarity: "common",
+    cost: 5,
+    text: "+4% Truth. Gain +1 IP.",
+    flavor: "Cupcakes with classified sprinkles.",
+    target: { scope: "global" },
+    effects: { truthDelta: +4, ipDelta: { self: +1 } }
+  },
+  {
+    id: "TS-168",
+    faction: "Truth",
+    name: "Elvis Hologram Town Hall",
+    type: "MEDIA",
+    rarity: "uncommon",
+    cost: 10,
+    text: "+7% Truth.",
+    flavor: "Questions answered, hips simulated.",
+    target: { scope: "global" },
+    effects: { truthDelta: +7 }
+  },
+  {
+    id: "TS-169",
+    faction: "Truth",
+    name: "Blurry Angel Over Courthouse",
+    type: "MEDIA",
+    rarity: "common",
+    cost: 6,
+    text: "+5% Truth.",
+    flavor: "Attached wings, unattached verdict.",
+    target: { scope: "global" },
+    effects: { truthDelta: +5 }
+  },
+  {
+    id: "TS-170",
+    faction: "Truth",
+    name: "Agent Smitherson Misplaces Briefcase",
+    type: "MEDIA",
+    rarity: "rare",
+    cost: 14,
+    text: "+9% Truth. Opponent discards 1 at random.",
+    flavor: "Contents: oops, everything.",
+    target: { scope: "opponent" },
+    effects: { truthDelta: +9, discardOpponent: 1, random: true }
+  },
+  {
+    id: "TS-171",
+    faction: "Truth",
+    name: "Crowdfunded Telescope Network",
+    type: "MEDIA",
+    rarity: "uncommon",
+    cost: 9,
+    text: "+6% Truth. Look at the top 3 of your deck; keep 1, discard 2.",
+    flavor: "Eyes everywhere, budget nowhere.",
+    target: { scope: "self" },
+    effects: { truthDelta: +6, scryPick: { self: 3, keep: 1, discard: 2 } }
+  },
+  {
+    id: "TS-172",
+    faction: "Truth",
+    name: "Tabloid 'Truth or Dare' Special",
+    type: "MEDIA",
+    rarity: "uncommon",
+    cost: 9,
+    text: "+6% Truth. If you control any Zone, gain +1 IP.",
+    flavor: "Dares accepted by democracy.",
+    target: { scope: "global" },
+    effects: { truthDelta: +6, conditional: { ifControlAnyZone: true, ipDelta: { self: +1 } } }
+  },
+
+  // ZONE (10)
+  {
+    id: "TS-173",
+    faction: "Truth",
+    name: "Elvis Roadhouse",
+    type: "ZONE",
+    rarity: "uncommon",
+    cost: 13,
+    text: "Place in a state. If owned, +2 IP/turn.",
+    flavor: "Open late, secrets later.",
+    target: { scope: "state" },
+    effects: { pressure: { state: "target", amount: 1 }, zone: { perTurn: { ip: { self: +2 } } } }
+  },
+  {
+    id: "TS-174",
+    faction: "Truth",
+    name: "Bat Boy Youth Center",
+    type: "ZONE",
+    rarity: "uncommon",
+    cost: 12,
+    text: "Place in a state. If owned, draw +1/turn.",
+    flavor: "Homework: screaming practice.",
+    target: { scope: "state" },
+    effects: { pressure: { state: "target", amount: 1 }, zone: { perTurn: { draw: 1 } } }
+  },
+  {
+    id: "TS-175",
+    faction: "Truth",
+    name: "Haunted Subway Platform",
+    type: "ZONE",
+    rarity: "uncommon",
+    cost: 12,
+    text: "Place in a state. +1 Pressure. On capture: +3% Truth.",
+    flavor: "Next arrival: transparency.",
+    target: { scope: "state" },
+    effects: { pressure: { state: "target", amount: 1 }, capture: { state: "target", onCapture: { truthDelta: +3 } } }
+  },
+  {
+    id: "TS-176",
+    faction: "Truth",
+    name: "Community Print Shop",
+    type: "ZONE",
+    rarity: "uncommon",
+    cost: 13,
+    text: "Place in a state. MEDIA you play cost -1 IP (min 4).",
+    flavor: "Ink smudges improve credibility.",
+    target: { scope: "state" },
+    effects: { pressure: { state: "target", amount: 1 }, zone: { aura: { mediaCostDelta: -1, mediaCostFloor: 4 } } }
+  },
+  {
+    id: "TS-177",
+    faction: "Truth",
+    name: "Lake Monster Boardwalk",
+    type: "ZONE",
+    rarity: "rare",
+    cost: 18,
+    text: "Place in a state with water. Counts as +2 Pressure.",
+    flavor: "Souvenir shops sell periscopes.",
+    target: { scope: "state", requireTag: "coastal_or_lake" },
+    effects: { pressure: { state: "target", amount: 2 } }
+  },
+  {
+    id: "TS-178",
+    faction: "Truth",
+    name: "Paranormal Podcast Studio",
+    type: "ZONE",
+    rarity: "uncommon",
+    cost: 13,
+    text: "Place in a state. If owned, +1 IP/turn and +1% Truth/turn.",
+    flavor: "Recorded live in an undisclosed basement.",
+    target: { scope: "state" },
+    effects: { pressure: { state: "target", amount: 1 }, zone: { perTurn: { ip: { self: +1 }, truthDelta: +1 } } }
+  },
+  {
+    id: "TS-179",
+    faction: "Truth",
+    name: "Conspiracy Flea Market",
+    type: "ZONE",
+    rarity: "uncommon",
+    cost: 12,
+    text: "Place in a state. On capture: draw 1. If owned, +1 IP/turn.",
+    flavor: "Gently used evidence.",
+    target: { scope: "state" },
+    effects: { pressure: { state: "target", amount: 1 }, capture: { state: "target", onCapture: { draw: 1 } }, zone: { perTurn: { ip: { self: +1 } } } }
+  },
+  {
+    id: "TS-180",
+    faction: "Truth",
+    name: "Ghost-Lit Lighthouse",
+    type: "ZONE",
+    rarity: "uncommon",
+    cost: 12,
+    text: "Place in a coastal state. +1 Pressure.",
+    flavor: "Beam bends around secrets.",
+    target: { scope: "state", requireTag: "coastal" },
+    effects: { pressure: { state: "target", amount: 1 } }
+  },
+  {
+    id: "TS-181",
+    faction: "Truth",
+    name: "Elvis Chapel of Revelations",
+    type: "ZONE",
+    rarity: "rare",
+    cost: 17,
+    text: "Place in a state. On capture: +6% Truth.",
+    flavor: "Choir hums suspiciously familiar melodies.",
+    target: { scope: "state" },
+    effects: { pressure: { state: "target", amount: 1 }, capture: { state: "target", onCapture: { truthDelta: +6 } } }
+  },
+  {
+    id: "TS-182",
+    faction: "Truth",
+    name: "Bat Boy Archives",
+    type: "ZONE",
+    rarity: "uncommon",
+    cost: 13,
+    text: "Place in a state. If owned, your ATTACK cards cost -1 (min 4).",
+    flavor: "Files arranged by shriek pitch.",
+    target: { scope: "state" },
+    effects: { pressure: { state: "target", amount: 1 }, zone: { aura: { attackCostDelta: -1, attackCostFloor: 4 } } }
+  },
+
+  // ATTACK / OPS (9)
+  {
+    id: "TS-183",
+    faction: "Truth",
+    name: "Open Mic Press Briefing",
+    type: "ATTACK",
+    rarity: "uncommon",
+    cost: 10,
+    text: "Cancel a Government MEDIA. Draw 1.",
+    flavor: "Mic check, lie wreck.",
+    target: { scope: "stack", type: "MEDIA", faction: "Government" },
+    effects: { cancel: { type: "MEDIA", faction: "Government" }, draw: 1 }
+  },
+  {
+    id: "TS-184",
+    faction: "Truth",
+    name: "Neighborhood Drone Surge",
+    type: "ATTACK",
+    rarity: "uncommon",
+    cost: 10,
+    text: "Target state: +1 Pressure this turn. Scry 2.",
+    flavor: "Eyes in the sky, pies on the porch.",
+    target: { scope: "state" },
+    effects: { pressure: { state: "target", amount: 1, duration: "turn" }, scry: 2 }
+  },
+  {
+    id: "TS-185",
+    faction: "Truth",
+    name: "Leaks to Local Paper",
+    type: "ATTACK",
+    rarity: "uncommon",
+    cost: 9,
+    text: "Opponent reveals hand. Discard 1 ATTACK from it.",
+    flavor: "Ink beats intimidation.",
+    target: { scope: "opponent" },
+    effects: { revealOpponentHand: true, discardOpponentType: { type: "ATTACK", amount: 1 } }
+  },
+  {
+    id: "TS-186",
+    faction: "Truth",
+    name: "Citizen Audit",
+    type: "ATTACK",
+    rarity: "rare",
+    cost: 12,
+    text: "Opponent -3 IP. If they have ≥10 IP, they lose -5 IP instead.",
+    flavor: "Receipts stapled to reality.",
+    target: { scope: "opponent" },
+    effects: { ipDelta: { opponent: -3 }, conditional: { ifOpponentIpAtLeast: 10, ipDelta: { opponent: -5 } } }
+  },
+  {
+    id: "TS-187",
+    faction: "Truth",
+    name: "Midnight Signal Boost",
+    type: "ATTACK",
+    rarity: "uncommon",
+    cost: 9,
+    text: "+4% Truth. Opponent skips next draw.",
+    flavor: "Static speaks volumes.",
+    target: { scope: "opponent" },
+    effects: { truthDelta: +4, skipNextDraw: { opponent: true } }
+  },
+  {
+    id: "TS-188",
+    faction: "Truth",
+    name: "Counter-Spin Workshop",
+    type: "ATTACK",
+    rarity: "uncommon",
+    cost: 9,
+    text: "Cancel a Government MEDIA that reduces Truth. Gain +1 IP.",
+    flavor: "Spin class for facts.",
+    target: { scope: "stack", type: "MEDIA", faction: "Government" },
+    effects: { cancel: { type: "MEDIA", faction: "Government", onlyIf: { reducesTruth: true } }, ipDelta: { self: +1 } }
+  },
+  {
+    id: "TS-189",
+    faction: "Truth",
+    name: "FOIA Blitz Marathon",
+    type: "ATTACK",
+    rarity: "rare",
+    cost: 12,
+    text: "Draw 2. Opponent -2 IP.",
+    flavor: "Paper cuts to the narrative.",
+    target: { scope: "opponent" },
+    effects: { draw: 2, ipDelta: { opponent: -2 } }
+  },
+  {
+    id: "TS-190",
+    faction: "Truth",
+    name: "Flash Mob Fact-Check",
+    type: "ATTACK",
+    rarity: "uncommon",
+    cost: 10,
+    text: "Target state: -1 Defense this turn. Draw 1.",
+    flavor: "Synchronised citations.",
+    target: { scope: "state" },
+    effects: { defenseDelta: { state: "target", amount: -1, duration: "turn" }, draw: 1 }
+  },
+  {
+    id: "TS-191",
+    faction: "Truth",
+    name: "Mothman Siren",
+    type: "ATTACK",
+    rarity: "uncommon",
+    cost: 10,
+    text: "Cancel a Government ZONE capture this turn.",
+    flavor: "Wings over weak points.",
+    target: { scope: "state" },
+    effects: { cancelCapture: { faction: "Government", duration: "turn" } }
+  },
+
+  // DEFENSIVE (4)
+  {
+    id: "TS-192",
+    faction: "Truth",
+    name: "Copier Jam of Destiny",
+    type: "DEFENSIVE",
+    rarity: "common",
+    cost: 6,
+    text: "Prevent the next effect that would make you discard this turn.",
+    flavor: "Paper wins this round.",
+    target: { scope: "self" },
+    effects: { cancelIncomingDiscard: true }
+  },
+  {
+    id: "TS-193",
+    faction: "Truth",
+    name: "Neighborhood Witness Net",
+    type: "DEFENSIVE",
+    rarity: "uncommon",
+    cost: 7,
+    text: "Cancel a Government ATTACK.",
+    flavor: "We saw that coming.",
+    target: { scope: "stack", type: "ATTACK", faction: "Government" },
+    effects: { cancel: { type: "ATTACK", faction: "Government" } }
+  },
+  {
+    id: "TS-194",
+    faction: "Truth",
+    name: "Courthouse Candlelight Vigil",
+    type: "DEFENSIVE",
+    rarity: "uncommon",
+    cost: 8,
+    text: "Prevent up to 2 IP loss to you this turn. +1% Truth.",
+    flavor: "Light pierces ledger lines.",
+    target: { scope: "self" },
+    effects: { protectIpLossUpTo: { amount: 2, duration: "turn" }, truthDelta: +1 }
+  },
+  {
+    id: "TS-195",
+    faction: "Truth",
+    name: "Ghost Jury Nullification",
+    type: "DEFENSIVE",
+    rarity: "rare",
+    cost: 10,
+    text: "Cancel an effect that would remove your Zone.",
+    flavor: "Overruled by the afterlife.",
+    target: { scope: "state" },
+    effects: { cancelZoneRemoval: true }
+  },
+
+  // DEVELOPMENT (3)
+  {
+    id: "TS-196",
+    faction: "Truth",
+    name: "Open Source Investigators",
+    type: "DEVELOPMENT",
+    rarity: "uncommon",
+    cost: 10,
+    text: "At start of your turn: draw +1 if you control any Zone.",
+    flavor: "Threads that pull threads.",
+    target: { scope: "self" },
+    effects: { ongoing: { ifControlAnyZone: true, perTurn: { draw: 1 } } }
+  },
+  {
+    id: "TS-197",
+    faction: "Truth",
+    name: "Community Legal Hotline",
+    type: "DEVELOPMENT",
+    rarity: "uncommon",
+    cost: 10,
+    text: "Your ATTACK and DEFENSIVE cards cost -1 (min 4).",
+    flavor: "Pro bono; anti baloney.",
+    target: { scope: "self" },
+    effects: { ongoing: { attackCostDelta: -1, defensiveCostDelta: -1, floor: 4 } }
+  },
+  {
+    id: "TS-198",
+    faction: "Truth",
+    name: "Citizen Signal Repeaters",
+    type: "DEVELOPMENT",
+    rarity: "rare",
+    cost: 12,
+    text: "At start of your turn: +1 IP and +1% Truth.",
+    flavor: "Boosters for both bandwidth and belief.",
+    target: { scope: "self" },
+    effects: { ongoing: { perTurn: { ip: { self: +1 }, truthDelta: +1 } } }
+  },
+
+  // LEGENDARY (2)
+  {
+    id: "TS-199",
+    faction: "Truth",
+    name: "Alien Disclosure Day",
+    type: "LEGENDARY",
+    rarity: "legendary",
+    cost: 27,
+    text: "+15% Truth. This round, your MEDIA gain +1% Truth and cost -1 IP (min 4).",
+    flavor: "Today's forecast: raining receipts.",
+    target: { scope: "global" },
+    effects: { truthDelta: +15, roundModifier: { mediaTruthBonus: +1, mediaCostDelta: -1, mediaCostFloor: 4 } }
+  },
+  {
+    id: "TS-200",
+    faction: "Truth",
+    name: "The Great Awakening",
     type: "LEGENDARY",
     rarity: "legendary",
     cost: 30,
-    text: "+12% Truth. Instantly capture Nevada if Pressure ≥ Defense there.",
-    flavor: "Long live the King—and the headline.",
-    target: { scope: "state" },
-    effects: { truthDelta: +12, conditionalCapture: { state: "Nevada" } }
-  }
+    text: "+12% Truth. Opponent discards their hand. Draw 2.",
+    flavor: "Eyes open, jaws drop, files fall.",
+    target: { scope: "opponent" },
+    effects: { truthDelta: +12, discardOpponentAll: true, draw: 2 }
+  },
+  
+  // ===== EXISTING CARDS FROM OTHER BATCHES =====
+  // (The rest of the cards for Government faction will be added in future batches)
 ];
 
 // Helper functions for card management
