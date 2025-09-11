@@ -39,7 +39,7 @@ export const useAudio = () => {
     }
     console.log('🎵 useAudio: Using default audio config');
     return {
-      volume: 0.7, // Default to 70%
+      volume: 0.1, // Default to 10%
       muted: false,
       musicEnabled: true,
       sfxEnabled: true,
