@@ -867,6 +867,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
     return { victoryType, playerWon };
   }, [achievements]);
+  const saveGame = useCallback(() => {
     const saveData = {
       ...gameState,
       timestamp: Date.now(),
