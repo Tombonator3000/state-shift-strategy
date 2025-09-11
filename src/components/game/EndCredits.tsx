@@ -14,9 +14,8 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
   const [currentSubtext, setCurrentSubtext] = useState('');
   const [isTextVisible, setIsTextVisible] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const musicRef = useRef<HTMLAudioElement | null>(null);
   const timelineRef = useRef<NodeJS.Timeout[]>([]);
-  const { playSFX, setVolume, config } = useAudioContext();
+  const { setEndCreditsMusic, stopMusic, playSFX } = useAudioContext();
 
   // Zany credit texts
   const creditTexts = {
@@ -121,27 +120,13 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
   };
 
   const startMusic = () => {
-    console.log('🎵 EndCredits: Starting end credits music');
-    try {
-      // Create and play the end credits music
-      const endCreditsMusic = new Audio('/muzak/endcredits-theme.mp3');
-      endCreditsMusic.volume = config.volume * 0.7; // Slightly quieter for credits
-      endCreditsMusic.loop = true;
-      endCreditsMusic.play();
-      musicRef.current = endCreditsMusic;
-      
-      console.log('🎵 EndCredits: End credits music started successfully');
-    } catch (error) {
-      console.error('🎵 EndCredits: Failed to start end credits music:', error);
-    }
+    console.log('🎵 EndCredits: Starting end credits music via main audio system');
+    setEndCreditsMusic();
   };
 
-  const stopMusic = () => {
-    if (musicRef.current) {
-      musicRef.current.pause();
-      musicRef.current.currentTime = 0;
-      musicRef.current = null;
-    }
+  const stopEndCreditsMusic = () => {
+    console.log('🎵 EndCredits: Stopping end credits music via main audio system');
+    stopMusic();
   };
 
   const clearTimeline = () => {
@@ -150,7 +135,7 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
   };
 
   const handleClose = () => {
-    stopMusic();
+    stopEndCreditsMusic();
     clearTimeline();
     onClose();
   };
@@ -167,14 +152,14 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
       setIsTextVisible(true);
     } else {
       // Cleanup when not visible
-      stopMusic();
+      stopEndCreditsMusic();
       clearTimeline();
       setCurrentPhase('intro');
       setIsTextVisible(false);
     }
 
     return () => {
-      stopMusic();
+      stopEndCreditsMusic();
       clearTimeline();
     };
   }, [isVisible]);

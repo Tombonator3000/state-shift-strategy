@@ -7,7 +7,7 @@ interface AudioConfig {
   sfxEnabled: boolean;
 }
 
-type MusicType = 'theme' | 'government' | 'truth';
+type MusicType = 'theme' | 'government' | 'truth' | 'endcredits';
 type GameState = 'menu' | 'factionSelect' | 'playing';
 
 export const useAudio = () => {
@@ -59,13 +59,15 @@ export const useAudio = () => {
   const musicTracks = useRef<{ [key in MusicType]: HTMLAudioElement[] }>({
     theme: [],
     government: [],
-    truth: []
+    truth: [],
+    endcredits: []
   });
   
   const currentTrackIndex = useRef<{ [key in MusicType]: number }>({
     theme: 0,
     government: 0,
-    truth: 0
+    truth: 0,
+    endcredits: 0
   });
 
   // Initialize audio context
@@ -177,10 +179,17 @@ export const useAudio = () => {
       const truthResults = await Promise.all(truthPromises);
       musicTracks.current.truth = truthResults.filter(audio => audio !== null) as HTMLAudioElement[];
 
+      // Load end credits music
+      const endCreditsAudio = await loadAudioTrack('/muzak/endcredits-theme.mp3');
+      if (endCreditsAudio) {
+        musicTracks.current.endcredits = [endCreditsAudio];
+      }
+
       console.log('🎵 Loaded music tracks:', {
         theme: musicTracks.current.theme.length,
         government: musicTracks.current.government.length,
-        truth: musicTracks.current.truth.length
+        truth: musicTracks.current.truth.length,
+        endcredits: musicTracks.current.endcredits.length
       });
 
       setTracksLoaded(true);
@@ -554,6 +563,16 @@ export const useAudio = () => {
     playMusic(faction);
   }, [gameState, currentMusicType, playMusic]);
 
+  const setEndCreditsMusic = useCallback(() => {
+    console.log('🎵 setEndCreditsMusic called');
+    if (currentMusicType === 'endcredits' && currentMusicRef.current && !currentMusicRef.current.paused) {
+      console.log('🎵 setEndCreditsMusic - already playing end credits music');
+      return;
+    }
+    setCurrentMusicType('endcredits');
+    playMusic('endcredits');
+  }, [currentMusicType, playMusic]);
+
   console.log('🎵 useAudio: Returning audio system object');
   
   return {
@@ -571,6 +590,7 @@ export const useAudio = () => {
     setMenuMusic,
     setFactionMusic,
     setGameplayMusic,
+    setEndCreditsMusic,
     currentMusicType,
     gameState,
     isPlaying,
