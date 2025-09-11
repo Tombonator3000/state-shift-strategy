@@ -1,22 +1,42 @@
-import React, { createContext, useContext, ReactNode, useMemo } from 'react';
-import { useAudio } from '@/hooks/useAudio';
+import React, { createContext, useContext, ReactNode } from 'react';
 
-type AudioContextType = ReturnType<typeof useAudio>;
+// Create a simple fallback audio object for testing
+const createFallbackAudio = () => ({
+  config: { volume: 0.7, muted: false, musicEnabled: false, sfxEnabled: false },
+  playMusic: (musicType?: string) => console.log('🎵 Fallback: playMusic called with', musicType),
+  stopMusic: () => console.log('🎵 Fallback: stopMusic called'),
+  pauseMusic: () => console.log('🎵 Fallback: pauseMusic called'),
+  resumeMusic: () => console.log('🎵 Fallback: resumeMusic called'),
+  playSFX: (soundName: string) => console.log('🎵 Fallback: playSFX called with', soundName),
+  testSFX: () => console.log('🎵 Fallback: testSFX called'),
+  setVolume: (volume: number) => console.log('🎵 Fallback: setVolume called with', volume),
+  toggleMute: () => console.log('🎵 Fallback: toggleMute called'),
+  toggleMusic: () => console.log('🎵 Fallback: toggleMusic called'),
+  toggleSFX: () => console.log('🎵 Fallback: toggleSFX called'),
+  setMenuMusic: () => console.log('🎵 Fallback: setMenuMusic called'),
+  setFactionMusic: (faction: 'government' | 'truth') => console.log('🎵 Fallback: setFactionMusic called with', faction),
+  setGameplayMusic: (faction: 'government' | 'truth') => console.log('🎵 Fallback: setGameplayMusic called with', faction),
+  currentMusicType: 'theme' as const,
+  gameState: 'menu' as const,
+  isPlaying: false,
+  currentTrackName: '',
+  audioStatus: 'Fallback mode - audio disabled',
+  tracksLoaded: false,
+  audioContextUnlocked: false
+});
 
-const AudioContext = createContext<AudioContextType | null>(null);
+type AudioContextType = ReturnType<typeof createFallbackAudio>;
+
+const AudioContext = createContext<AudioContextType>(createFallbackAudio());
 
 export const AudioProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  console.log('🎵 AudioProvider: Creating single audio system instance');
+  console.log('🎵 AudioProvider: Using fallback audio system for now');
   
-  // Memoize the audio system to prevent recreation on re-renders
-  const audioSystem = useMemo(() => {
-    const system = useAudio();
-    console.log('🎵 Audio system created and memoized');
-    return system;
-  }, []);
+  // Temporarily use fallback to test if context works
+  const fallbackAudio = createFallbackAudio();
   
   return (
-    <AudioContext.Provider value={audioSystem}>
+    <AudioContext.Provider value={fallbackAudio}>
       {children}
     </AudioContext.Provider>
   );
@@ -24,9 +44,6 @@ export const AudioProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
 export const useAudioContext = () => {
   const context = useContext(AudioContext);
-  if (!context) {
-    throw new Error('useAudioContext must be used within an AudioProvider');
-  }
-  console.log('🎵 useAudioContext: Using shared audio system');
+  console.log('🎵 useAudioContext: Context accessed successfully');
   return context;
 };
