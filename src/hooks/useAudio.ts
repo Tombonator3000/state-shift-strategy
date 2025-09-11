@@ -70,13 +70,15 @@ export const useAudio = () => {
     endcredits: 0
   });
 
-  // Initialize audio context
+  // Initialize audio context - only run once
   useEffect(() => {
     // Prevent duplicate initialization
     if (tracksLoaded) {
       console.log('🎵 Audio already initialized, skipping...');
       return;
     }
+    
+    console.log('🎵 useAudio: Initializing audio system...');
 
     // Mobile audio context unlock function
     const unlockAudioContext = () => {

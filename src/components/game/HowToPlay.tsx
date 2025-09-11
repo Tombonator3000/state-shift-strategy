@@ -1,13 +1,124 @@
+import { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useState, useRef } from 'react';
 
-const HowToPlay = ({ onClose }: { onClose: () => void }) => {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+interface HowToPlayProps {
+  onClose: () => void;
+}
+
+const HowToPlay = ({ onClose }: HowToPlayProps) => {
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(true);
+  const [rulesContent, setRulesContent] = useState<string>('');
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Load rules from the markdown file
+  useEffect(() => {
+    const loadRules = async () => {
+      try {
+        const response = await fetch('/ShadowGov-Rules-v2.1.md');
+        if (response.ok) {
+          const content = await response.text();
+          setRulesContent(content);
+        } else {
+          setRulesContent(fallbackRules);
+        }
+      } catch (error) {
+        console.log('Could not load rules file, using fallback');
+        setRulesContent(fallbackRules);
+      }
+    };
+    
+    loadRules();
+  }, []);
+
+  const fallbackRules = `# SHADOW GOVERNMENT — Official Rules v2.1
+
+## 1. Theme & Premise
+Shadow Government (Deep State) vs Truth Seekers (Conspiracy opposition).  
+- Government: suppress public awareness, control narrative.  
+- Truth Seekers: expose secrets, raise paranoia to 90% Truth.  
+Satirical, humorous style with **Weekly World News** flair.
+
+## 2. Objective
+Win immediately if ANY of the following is true:
+- Truth ≥ 90% (Truth Seekers win)  
+- Truth ≤ 10% (Government wins)  
+- Control 10 states  
+- Reach 200 IP (Influence Points)  
+- Complete your Secret Agenda  
+
+## 3. Components
+- USA map with 50 states (interactive).  
+- Cards (MEDIA, ZONE, ATTACK, DEFENSIVE).  
+- IP (currency).  
+- Truth meter (0–100%).  
+- State Pressure counters (per player).  
+- Defense values (per state).  
+- Secret Agenda deck (hidden objectives).  
+- Newspaper overlay (round summary with satire).  
+
+## 4. Setup
+1. Select Faction:  
+   - **Government**: Truth starts 40%, +10 IP.  
+   - **Truth Seekers**: Truth starts 60%, +10 Truth, +1 extra starting card.  
+2. Draw 1 hidden Secret Agenda.  
+3. Starting Hand: 5 cards (Truth Seekers get +1).  
+4. Initial Truth: 50% baseline, adjusted by faction bonus.  
+
+## 5. Turn Structure
+Each round has two turns: player → opponent.
+
+**Start of Turn**  
+- Draw until hand = 5 cards (if possible).  
+- Gain +5 base IP + IP from states owned.  
+
+**Action Phase**  
+- Play up to 3 cards, paying IP cost.  
+- **ATTACK** triggers Defense reaction:  
+  - Opponent may play 1 DEFENSIVE within 4s.  
+  - If none, Attack resolves.  
+
+**Resolution**  
+- Apply card effects.  
+- ZONE captures are immediate (Pressure ≥ Defense).  
+
+**Newspaper Phase**  
+- Satirical overlay with plays + 1 random event.  
+
+**Victory Check**  
+- If any win condition is met, game ends.  
+
+## 6. Cards & Costs
+Fixed card costs by type:  
+- MEDIA = 7 IP  
+- ZONE = 5 IP  
+- ATTACK = 6 IP  
+- DEFENSIVE = 3 IP  
+
+Rarity distribution:  
+- Common 70% (grey border)  
+- Uncommon 20% (green)  
+- Rare 8% (blue)  
+- Legendary 2% (orange)  
+
+## 7. Hotkeys
+- **1–9**: Play cards 1-9 from hand
+- **Space**: End Turn
+- **ESC**: Options menu
+- **S**: Quick Save
+- **L**: Quick Load
+- **H**: How to Play
+
+## 8. Victory Conditions
+- Truth ≥90% (Truth Seekers win).  
+- Truth ≤10% (Government wins).  
+- Control 10 states.  
+- Reach 200 IP.  
+- Complete Secret Agenda.  
+`;
 
   const scrollTo = (direction: 'up' | 'down') => {
     const scrollElement = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
@@ -30,251 +141,160 @@ const HowToPlay = ({ onClose }: { onClose: () => void }) => {
     const { scrollTop, scrollHeight, clientHeight } = scrollElement;
     
     setCanScrollUp(scrollTop > 0);
-    setCanScrollDown(scrollTop < scrollHeight - clientHeight - 10);
+    setCanScrollDown(scrollTop + clientHeight < scrollHeight - 10);
+  };
+
+  // Parse markdown content to HTML-like structure
+  const parseMarkdown = (content: string) => {
+    const lines = content.split('\n');
+    const elements: JSX.Element[] = [];
+    let currentSection = '';
+
+    lines.forEach((line, index) => {
+      if (line.startsWith('# ')) {
+        elements.push(
+          <h1 key={index} className="text-3xl font-bold text-newspaper-text mb-6 font-mono border-b-2 border-newspaper-text pb-2">
+            {line.substring(2)}
+          </h1>
+        );
+      } else if (line.startsWith('## ')) {
+        elements.push(
+          <h2 key={index} className="text-2xl font-bold text-newspaper-text mt-8 mb-4 font-mono">
+            {line.substring(3)}
+          </h2>
+        );
+      } else if (line.startsWith('### ')) {
+        elements.push(
+          <h3 key={index} className="text-xl font-bold text-newspaper-text mt-6 mb-3 font-mono">
+            {line.substring(4)}
+          </h3>
+        );
+      } else if (line.startsWith('- ')) {
+        elements.push(
+          <li key={index} className="text-newspaper-text ml-4 mb-2">
+            • {line.substring(2)}
+          </li>
+        );
+      } else if (line.startsWith('**') && line.endsWith('**')) {
+        elements.push(
+          <div key={index} className="font-bold text-newspaper-text mt-4 mb-2">
+            {line.substring(2, line.length - 2)}
+          </div>
+        );
+      } else if (line.trim() !== '' && !line.startsWith('---')) {
+        elements.push(
+          <p key={index} className="text-newspaper-text mb-3 leading-relaxed">
+            {line}
+          </p>
+        );
+      } else if (line.startsWith('---')) {
+        elements.push(
+          <div key={index} className="border-t border-newspaper-text/30 my-6"></div>
+        );
+      }
+    });
+
+    return elements;
   };
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-card border border-border max-w-4xl w-full max-h-[90vh] mx-4 relative rounded-lg shadow-lg">
-        {/* Header */}
-        <div className="p-6 border-b border-border text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-2">
-            HOW TO PLAY — SHADOW GOVERNMENT
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            A satirical cat-and-mouse battle for power, truth, and very suspicious pigeons. Learn the rules quickly, play smart, and let the "newspaper" summarize the chaos after each round.
-          </p>
-        </div>
-
-        <ScrollArea 
-          ref={scrollAreaRef}
-          className="h-[calc(90vh-200px)] relative"
-          onScrollCapture={handleScroll}
-        >
-          <div className="space-y-6 pr-4 p-6">
-            <Card className="p-6 bg-card border-border">
-              <h2 className="text-2xl font-bold text-foreground mb-4">Quick Start</h2>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Draw a card at the start of your turn (max 7 in hand). Gain +5 IP plus state income.</li>
-                <li>• Play up to 3 cards by paying IP (Influence Points). Choose targets if the card requires it.</li>
-                <li>• Press Space to end your turn. There's a 25% chance for a random event.</li>
-                <li>• Conquer states by building Press to their defense level.</li>
-                <li>• Win by controlling 10 states, reaching 200 IP, Truth ≥ 90%/≤ 10%, or completing Secret Agenda.</li>
-              </ul>
-            </Card>
-
-            <Card className="p-6 bg-card border-border">
-              <h2 className="text-2xl font-bold text-foreground mb-4">1) Quick Overview</h2>
-              <p className="text-sm text-muted-foreground">
-                Shadow Government is a turn-based strategy card game for two parties: Government (Deep State) and Truth Seekers. You choose your faction and collect IP (Influence Points), manipulate Truth, and fight for control of the USA map. Cards give direct effects, lasting benefits, or press states toward your side. After each round, a newspaper overlay rolls in with headlines, ads, and events - which every player naturally takes with a grain of salt.
-              </p>
-              <p className="text-sm mt-2 text-muted-foreground">
-                Your goal is to secure dominance: either through broad state control, massive resource advantage, total truth victory, or completing a secret agenda. Meanwhile, your opponent plays by exactly the same rules. Stand firm. Assume everyone lies - except you (of course).
-              </p>
-            </Card>
-
-            <Card className="p-6 bg-card border-border">
-              <h2 className="text-2xl font-bold text-foreground mb-4">2) How to Win</h2>
-              <p className="text-sm mb-2 text-muted-foreground">You win immediately when one of these happens:</p>
-              <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
-                <li>• Control 10 states</li>
-                <li>• Reach 200 IP</li>
-                <li>• Truth Victory:
-                  <ul className="ml-4 mt-1">
-                    <li>- Playing Truth: Truth ≥ 90%</li>
-                    <li>- Playing Government: Truth ≤ 10%</li>
-                  </ul>
-                </li>
-                <li>• Complete Secret Agenda (Drawn at start. Typically "Own D.C. + 2 neighbors" or similar)</li>
-              </ul>
-            </Card>
-
-            <Card className="p-6 bg-card border-border">
-              <h2 className="text-2xl font-bold text-foreground mb-4">3) Setup and Starting Bonuses</h2>
-              <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
-                <li>• Baseline Truth: 50%</li>
-                <li>• Choose Government: you start with +10 IP and Truth is set to 40-50% (depending on variant)</li>
-                <li>• Choose Truth: Truth starts at 60%; you get one extra card draw on first deal</li>
-                <li>• Both sides start with 5 cards in hand (Truth can get 6 first round), hand limit 7</li>
-              </ul>
-            </Card>
-
-            <Card className="p-6 bg-card border-border">
-              <h2 className="text-2xl font-bold text-foreground mb-4">5) Turn Step-by-Step</h2>
-              <p className="text-sm font-bold mb-2 text-muted-foreground">TURN LOOP: Draw → Play up to 3 cards → Effects → 25% Event → End turn → Opponent</p>
-              
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">Income</h3>
-                  <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
-                    <li>• Gain +5 IP base income</li>
-                    <li>• State income: each state gives IP equal to its defense (2/3/4)</li>
-                    <li>• Any developments (Development cards)</li>
-                    <li>• Draw 1 card (not over 7 in hand)</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">Action</h3>
-                  <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
-                    <li>• Play up to 3 cards. Pay IP cost</li>
-                    <li>• Target if card requires it (state/player/global). Click a state on the map for state targets</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">Reaction Window</h3>
-                  <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
-                    <li>• When you hit opponent with ATTACK/MEDIA, defender can play one DEFENSIVE/INSTANT</li>
-                    <li>• Then attacker can play one INSTANT in response</li>
-                    <li>• LIFO: Last card out resolves first. Stop when no one plays response</li>
-                  </ul>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6 bg-card border-border">
-              <h2 className="text-2xl font-bold text-foreground mb-4">6) Card Types and Targeting</h2>
-              <div className="space-y-3 text-sm">
-                <div>
-                  <h3 className="font-semibold text-foreground">MEDIA</h3>
-                  <p className="text-muted-foreground">Moves Truth up/down. Example: Moon Landing Hoax: +15% Truth in your favor</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">ZONE</h3>
-                  <p className="text-muted-foreground">Places Press in chosen state. Example: Local Influence: +1 Press in selected state</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">ATTACK</h3>
-                  <p className="text-muted-foreground">Targets opponent's IP/cards/economy. Example: Leaked Documents: opponent −8 IP</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">TECH</h3>
-                  <p className="text-muted-foreground">Advanced tools/one-time power. California gives −2 IP on TECH</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">DEVELOPMENT</h3>
-                  <p className="text-muted-foreground">Lasting bonuses (e.g., +1 IP/turn, max 3 active)</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">DEFENSIVE</h3>
-                  <p className="text-muted-foreground">Shields and counters. Example: Bunker: immune to attacks this round</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">INSTANT</h3>
-                  <p className="text-muted-foreground">Immediate response playable in reaction window</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6 bg-card border-border">
-              <h2 className="text-2xl font-bold text-foreground mb-4">7) Map & States</h2>
-              <div className="space-y-3 text-sm">
-                <div>
-                  <h3 className="font-semibold text-foreground">Map Colors & Indicators</h3>
-                  <div className="grid grid-cols-2 gap-3 mt-2">
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                      <div className="w-4 h-4 bg-blue-500 border border-border rounded shadow-sm"></div>
-                      <span className="text-foreground font-mono font-medium text-xs">Truth Seekers</span>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-                      <div className="w-4 h-4 bg-red-500 border border-border rounded shadow-sm"></div>
-                      <span className="text-foreground font-mono font-medium text-xs">Government</span>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-gray-400/10 border border-gray-400/20">
-                      <div className="w-4 h-4 bg-gray-400 border border-border rounded shadow-sm"></div>
-                      <span className="text-foreground font-mono font-medium text-xs">Neutral</span>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                      <div className="w-4 h-4 bg-orange-500 border border-border rounded shadow-sm animate-pulse"></div>
-                      <span className="text-foreground font-mono font-medium text-xs">Contested</span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 mt-2">
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-destructive/10 border border-destructive/20">
-                      <div className="w-3 h-3 bg-destructive rounded-full shadow-sm animate-pulse"></div>
-                      <span className="text-foreground font-mono font-medium text-xs">Pressure Indicators</span>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-accent/10 border border-accent/20">
-                      <div className="w-4 h-4 text-accent">♦</div>
-                      <span className="text-foreground font-mono font-medium text-xs">Defense Points</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="font-semibold text-foreground">Defense Levels</h3>
-                  <ul className="ml-4 text-muted-foreground">
-                    <li>• Most states: 2 defense</li>
-                    <li>• CA/NY/TX/FL/PA/IL (etc.): 3 defense</li>
-                    <li>• DC/AK/HI: 4 defense</li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">State Bonuses</h3>
-                  <ul className="ml-4 text-muted-foreground">
-                    <li>• Texas: +2 IP per turn (economy)</li>
-                    <li>• New York: −2 IP on MEDIA cards</li>
-                    <li>• California: −2 IP on TECH cards</li>
-                    <li>• D.C.: +5 on Truth manipulation</li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Conquest</h3>
-                  <p className="text-muted-foreground">When your Press ≥ Defense in a state during Resolution, you take control. Both sides' Press resets to 0 there.</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6 bg-card border-border">
-              <h2 className="text-2xl font-bold text-foreground mb-4">Tips</h2>
-              <ul className="space-y-1 text-sm ml-4 text-muted-foreground">
-                <li>• Secure an economic base: Texas, plus 2-3 mid-states with defense 2 gives steady IP</li>
-                <li>• Synchronize MEDIA cards with D.C. for big truth swings</li>
-                <li>• Press broad border states to open multiple fronts</li>
-                <li>• Keep one defensive card in reserve when you suspect a big attack</li>
-              </ul>
-            </Card>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <Card className="max-w-4xl w-full max-h-[90vh] bg-newspaper-bg border-4 border-newspaper-text overflow-hidden">
+        {/* Header with classified pattern */}
+        <div className="relative bg-newspaper-text/10 p-6 border-b-2 border-newspaper-text">
+          <div className="absolute inset-0 opacity-5">
+            {Array.from({ length: 15 }).map((_, i) => (
+              <div 
+                key={i}
+                className="absolute bg-newspaper-text h-4"
+                style={{
+                  width: `${Math.random() * 200 + 50}px`,
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                  transform: `rotate(${Math.random() * 4 - 2}deg)`
+                }}
+              />
+            ))}
           </div>
-        </ScrollArea>
 
-        {/* Scroll Buttons */}
-        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-2 z-10">
-          <Button
-            size="sm"
-            variant="outline"
-            className={`h-8 w-8 p-0 ${
-              !canScrollUp ? 'opacity-30 cursor-not-allowed' : ''
-            }`}
-            onClick={() => scrollTo('up')}
-            disabled={!canScrollUp}
+          <div className="relative flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-newspaper-text font-mono">
+                CLASSIFIED OPERATIONS MANUAL
+              </h2>
+              <p className="text-sm text-newspaper-text/70 font-mono mt-1">
+                Security Clearance: EYES ONLY
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              className="border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+            >
+              CLOSE
+            </Button>
+          </div>
+
+          {/* Classified stamps */}
+          <div className="absolute top-2 right-20 text-red-600 font-mono text-xs transform rotate-12 border-2 border-red-600 p-1">
+            TOP SECRET
+          </div>
+          <div className="absolute bottom-2 left-4 text-red-600 font-mono text-xs transform -rotate-12 border-2 border-red-600 p-1">
+            CLASSIFIED
+          </div>
+        </div>
+
+        <div className="relative flex-1">
+          <ScrollArea 
+            ref={scrollAreaRef} 
+            className="h-[calc(90vh-200px)] w-full"
           >
-            <ChevronUp size={16} />
-          </Button>
+            <div 
+              className="p-6 prose prose-sm max-w-none"
+              onScroll={handleScroll}
+            >
+              {rulesContent ? (
+                <div className="space-y-4">
+                  {parseMarkdown(rulesContent)}
+                </div>
+              ) : (
+                <div className="text-center text-newspaper-text/60 py-8">
+                  Loading classified documents...
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+
+          {/* Scroll controls */}
+          {canScrollUp && (
+            <Button
+              onClick={() => scrollTo('up')}
+              className="absolute top-4 right-4 bg-newspaper-text/20 hover:bg-newspaper-text/30 text-newspaper-text border border-newspaper-text"
+              size="sm"
+            >
+              <ChevronUp className="w-4 h-4" />
+            </Button>
+          )}
           
-          <Button
-            size="sm"
-            variant="outline"
-            className={`h-8 w-8 p-0 ${
-              !canScrollDown ? 'opacity-30 cursor-not-allowed' : ''
-            }`}
-            onClick={() => scrollTo('down')}
-            disabled={!canScrollDown}
-          >
-            <ChevronDown size={16} />
-          </Button>
+          {canScrollDown && (
+            <Button
+              onClick={() => scrollTo('down')}
+              className="absolute bottom-4 right-4 bg-newspaper-text/20 hover:bg-newspaper-text/30 text-newspaper-text border border-newspaper-text"
+              size="sm"
+            >
+              <ChevronDown className="w-4 h-4" />
+            </Button>
+          )}
         </div>
 
-        {/* Close Button */}
-        <div className="absolute top-4 right-4">
-          <Button 
-            onClick={onClose}
-            variant="outline"
-          >
-            Close
-          </Button>
+        {/* Footer */}
+        <div className="bg-newspaper-text/10 p-4 border-t-2 border-newspaper-text">
+          <div className="text-center text-xs font-mono text-newspaper-text/60">
+            <div>WARNING: Unauthorized access to this document is punishable by [REDACTED]</div>
+            <div className="mt-1">Distribution of this information may result in spontaneous combustion</div>
+          </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

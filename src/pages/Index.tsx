@@ -38,6 +38,7 @@ import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import ExtraEditionNewspaper from '@/components/game/ExtraEditionNewspaper';
+import InGameOptions from '@/components/game/InGameOptions';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
@@ -69,6 +70,7 @@ const Index = () => {
   const [gameOverReport, setGameOverReport] = useState<any>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   const [showActionPhase, setShowActionPhase] = useState(false);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
   const audio = useAudioContext();
@@ -266,26 +268,66 @@ const Index = () => {
     }
   }, [gameState.faction]);
 
-  // Handle audio initialization and menu music - only run once
+  // Handle keyboard shortcuts
   useEffect(() => {
-    console.log('🎵 Index: Initial audio setup');
-    let isInitialized = false;
-    
-    const initializeAudio = () => {
-      if (!isInitialized) {
-        console.log('🎵 Index: Setting up menu music for first time');
-        audio.setMenuMusic();
-        isInitialized = true;
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (showMenu || showIntro) return; // Don't handle shortcuts in menus
+      
+      switch (e.key.toLowerCase()) {
+        case 'escape':
+          setShowInGameOptions(true);
+          audio.playSFX('click');
+          break;
+        case 's':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            handleSaveGame();
+          }
+          break;
+        case 'l':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            handleLoadGame();
+          }
+          break;
+        case 'h':
+          setShowHowToPlay(true);
+          audio.playSFX('click');
+          break;
+        case ' ':
+          e.preventDefault();
+          if (gameState.phase === 'action' && !gameState.animating) {
+            handleEndTurn();
+          }
+          break;
       }
     };
-    
-    // Small delay to ensure audio system is ready
-    const timer = setTimeout(initializeAudio, 200);
-    
-    return () => {
-      clearTimeout(timer);
-    };
-  }, []); // Empty dependency array - only run once
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [showMenu, showIntro, gameState.phase, gameState.animating, audio]);
+
+  const handleSaveGame = () => {
+    if (saveGame) {
+      const success = saveGame();
+      const indicator = document.createElement('div');
+      indicator.textContent = success ? '✓ GAME SAVED' : '❌ SAVE FAILED';
+      indicator.className = `fixed top-4 right-4 ${success ? 'bg-green-600' : 'bg-red-600'} text-white px-4 py-2 rounded z-[70] animate-fade-in`;
+      document.body.appendChild(indicator);
+      setTimeout(() => indicator.remove(), 2000);
+    }
+  };
+
+  const handleLoadGame = () => {
+    if (loadGame && getSaveInfo?.()) {
+      const success = loadGame();
+      const indicator = document.createElement('div');
+      indicator.textContent = success ? '✓ GAME LOADED' : '❌ LOAD FAILED';
+      indicator.className = `fixed top-4 right-4 ${success ? 'bg-green-600' : 'bg-red-600'} text-white px-4 py-2 rounded z-[70] animate-fade-in`;
+      document.body.appendChild(indicator);
+      setTimeout(() => indicator.remove(), 2000);
+    }
+  };
 
   const startNewGame = async (faction: 'government' | 'truth') => {
     console.log('🎵 Index: Starting new game with faction:', faction);
