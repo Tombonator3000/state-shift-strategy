@@ -733,7 +733,7 @@ const Index = () => {
             </div>
           </div>
         )}
-          <div className="h-full border-2 border-newspaper-border bg-white/80 relative overflow-visible">
+          <div className="h-full border-2 border-newspaper-border bg-white/80 relative overflow-visible pb-16">
             {/* Card preview overlay */}
             <CardPreviewOverlay card={hoveredCard} />
             
@@ -748,7 +748,7 @@ const Index = () => {
             </div>
 
             {/* Played Cards Dock - anchored to bottom of map area */}
-            <div className="absolute left-0 right-0 bottom-0 z-50">
+            <div className="absolute left-0 right-0 bottom-0 z-50 h-16">
               <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} />
             </div>
           </div>
