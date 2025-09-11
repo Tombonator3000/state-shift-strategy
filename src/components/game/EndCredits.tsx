@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { useAudioContext } from '@/contexts/AudioContext';
 
 interface EndCreditsProps {
   isVisible: boolean;
@@ -15,6 +16,7 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
   const [showControls, setShowControls] = useState(true);
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const timelineRef = useRef<NodeJS.Timeout[]>([]);
+  const { playSFX, setVolume, config } = useAudioContext();
 
   // Zany credit texts
   const creditTexts = {
@@ -119,9 +121,19 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
   };
 
   const startMusic = () => {
-    // EndCredits will no longer create its own audio system
-    // Instead it should use the main audio system if needed
-    console.log('🎵 EndCredits: Using main audio system instead of separate instance');
+    console.log('🎵 EndCredits: Starting end credits music');
+    try {
+      // Create and play the end credits music
+      const endCreditsMusic = new Audio('/muzak/endcredits-theme.mp3');
+      endCreditsMusic.volume = config.volume * 0.7; // Slightly quieter for credits
+      endCreditsMusic.loop = true;
+      endCreditsMusic.play();
+      musicRef.current = endCreditsMusic;
+      
+      console.log('🎵 EndCredits: End credits music started successfully');
+    } catch (error) {
+      console.error('🎵 EndCredits: Failed to start end credits music:', error);
+    }
   };
 
   const stopMusic = () => {
