@@ -145,14 +145,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 
   return (
     <div className="space-y-2" ref={handRef} onPointerLeave={() => onCardHover?.(null)}>
-      <div className="flex items-center justify-between">
-        <h3 className="font-bold text-sm font-mono text-foreground">
-          YOUR HAND
-        </h3>
-        <div className="text-xs font-mono text-muted-foreground">
-          IP: {currentIP}
-        </div>
-      </div>
       
       {/* Minimized hand cards - Compact List */}
       <div className="space-y-1">
