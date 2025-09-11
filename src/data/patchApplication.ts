@@ -177,38 +177,95 @@ export class PatchParser {
     if (lines.length === 0) throw new Error('Empty CSV file');
     
     const headerLine = lines[0].toLowerCase();
-    const expectedColumns = ['cardid', 'currentcost', 'currentrarity', 'step', 'reccost', 'recrarity', 'reason'];
+    const headers = headerLine.split(',').map(h => h.trim().replace(/"/g, ''));
     
-    // Check if header contains expected columns
-    const hasExpectedFormat = expectedColumns.every(col => 
-      headerLine.includes(col.toLowerCase())
-    );
+    // Map expected columns to actual indices
+    const getColumnIndex = (expectedName: string): number => {
+      const variations = {
+        'cardid': ['cardid', 'card_id', 'id'],
+        'currentcost': ['currentcost', 'current_cost', 'cost'],
+        'currentrarity': ['currentrarity', 'current_rarity', 'rarity'],
+        'step': ['step'],
+        'reccost': ['reccost', 'rec_cost', 'recommended_cost', 'newcost', 'new_cost'],
+        'recrarity': ['recrarity', 'rec_rarity', 'recommended_rarity', 'newrarity', 'new_rarity'],
+        'reason': ['reason', 'comment', 'notes']
+      };
+      
+      const possibleNames = variations[expectedName as keyof typeof variations] || [expectedName];
+      
+      for (let i = 0; i < headers.length; i++) {
+        if (possibleNames.some(name => headers[i].includes(name))) {
+          return i;
+        }
+      }
+      return -1;
+    };
     
-    if (!hasExpectedFormat) {
-      throw new Error('CSV format not recognized. Expected columns: ' + expectedColumns.join(', '));
+    const indices = {
+      cardId: getColumnIndex('cardid'),
+      currentCost: getColumnIndex('currentcost'),
+      currentRarity: getColumnIndex('currentrarity'),
+      step: getColumnIndex('step'),
+      recCost: getColumnIndex('reccost'),
+      recRarity: getColumnIndex('recrarity'),
+      reason: getColumnIndex('reason')
+    };
+    
+    // Check if we found the essential columns
+    const missingColumns = Object.entries(indices)
+      .filter(([key, index]) => index === -1)
+      .map(([key]) => key);
+    
+    if (missingColumns.length > 0) {
+      throw new Error(`Missing columns: ${missingColumns.join(', ')}. Available columns: ${headers.join(', ')}`);
     }
     
     const cards: PatchCard[] = [];
     const cardMap = new Map<string, Partial<PatchCard>>();
     
     for (let i = 1; i < lines.length; i++) {
-      const line = lines[i];
-      const parts = line.split(',').map(p => p.trim().replace(/"/g, ''));
-      
-      if (parts.length >= 7) {
-        const cardId = parts[0];
-        const currentCost = parseInt(parts[1]);
-        const currentRarity = parts[2];
-        const step = parseInt(parts[3]);
-        const recCost = parseInt(parts[4]);
-        const recRarity = parts[5];
-        const reason = parts[6];
+      try {
+        const line = lines[i];
+        const parts = line.split(',').map(p => p.trim().replace(/"/g, ''));
+        
+        if (parts.length < Math.max(...Object.values(indices)) + 1) {
+          console.warn(`Row ${i + 1}: Not enough columns, skipping`);
+          continue;
+        }
+        
+        const cardId = parts[indices.cardId];
+        const currentCost = parseInt(parts[indices.currentCost]);
+        const currentRarity = parts[indices.currentRarity];
+        const step = parseInt(parts[indices.step]);
+        const recCost = parseInt(parts[indices.recCost]);
+        const recRarity = parts[indices.recRarity];
+        const reason = parts[indices.reason] || 'No reason provided';
+        
+        // Validate numeric values
+        if (isNaN(currentCost) || isNaN(step) || isNaN(recCost)) {
+          throw new Error(`Row ${i + 1}: Invalid numeric values - currentCost: ${parts[indices.currentCost]}, step: ${parts[indices.step]}, recCost: ${parts[indices.recCost]}`);
+        }
+        
+        // Convert numeric rarities to strings if needed
+        const normalizeRarity = (rarity: string): string => {
+          const numericRarity = parseInt(rarity);
+          if (!isNaN(numericRarity)) {
+            const rarityMap = ['common', 'uncommon', 'rare', 'legendary'];
+            if (numericRarity >= 0 && numericRarity < rarityMap.length) {
+              return rarityMap[numericRarity];
+            }
+          }
+          return rarity.toLowerCase();
+        };
+        
+        const normalizedCurrentRarity = normalizeRarity(currentRarity);
+        const normalizedRecRarity = normalizeRarity(recRarity);
         
         if (!cardMap.has(cardId)) {
           cardMap.set(cardId, {
             cardId,
             currentCost,
-            currentRarity: toRarityType(currentRarity),
+            currentRarity: toRarityType(normalizedCurrentRarity),
             steps: [],
             classification: 'unknown',
             alignment: 'unknown',
@@ -220,10 +277,10 @@ export class PatchParser {
         const costChange = recCost - (card.steps!.length === 0 ? currentCost : card.steps![card.steps!.length - 1].newCost);
         
         let rarityChange: 'unchanged' | 'promote' | 'demote' = 'unchanged';
-        if (recRarity !== currentRarity) {
+        if (normalizedRecRarity !== normalizedCurrentRarity) {
           const rarityOrder: RarityType[] = ['common', 'uncommon', 'rare', 'legendary'];
-          const currentIndex = rarityOrder.indexOf(toRarityType(currentRarity));
-          const newIndex = rarityOrder.indexOf(toRarityType(recRarity));
+          const currentIndex = rarityOrder.indexOf(toRarityType(normalizedCurrentRarity));
+          const newIndex = rarityOrder.indexOf(toRarityType(normalizedRecRarity));
           rarityChange = newIndex > currentIndex ? 'promote' : 'demote';
         }
         
@@ -232,9 +289,12 @@ export class PatchParser {
           costChange,
           newCost: recCost,
           rarityChange,
-          newRarity: toRarityType(recRarity),
+          newRarity: toRarityType(normalizedRecRarity),
           reason
         });
+        
+      } catch (error) {
+        throw new Error(`Row ${i + 1}: ${error.message}`);
       }
     }
     
