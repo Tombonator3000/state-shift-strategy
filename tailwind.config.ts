@@ -92,10 +92,10 @@ export default {
         },
         "glitch": {
           "0%": { transform: "translate(0)" },
-          "20%": { transform: "translate(-2px, 2px)" },
-          "40%": { transform: "translate(-2px, -2px)" },
-          "60%": { transform: "translate(2px, 2px)" },
-          "80%": { transform: "translate(2px, -2px)" },
+          "20%": { transform: "translate(-1px, 1px)" },
+          "40%": { transform: "translate(-1px, -1px)" },
+          "60%": { transform: "translate(1px, 1px)" },
+          "80%": { transform: "translate(1px, -1px)" },
           "100%": { transform: "translate(0)" }
         },
         "redacted-reveal": {
@@ -176,7 +176,7 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "glitch": "glitch 0.3s ease-in-out",
+        "glitch": "glitch 0.2s ease-in-out",
         "redacted-reveal": "redacted-reveal 0.8s ease-out",
         "card-deal": "card-deal 0.6s ease-out",
         "card-play": "card-play 0.8s ease-in",

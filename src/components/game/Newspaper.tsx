@@ -44,9 +44,9 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
     };
   }, []);
 
-  // Glitch masthead system - one-time 10% chance on load
+  // Glitch masthead system - one-time 5% chance on load, shorter duration
   useEffect(() => {
-    const shouldGlitch = Math.random() < 0.1;
+    const shouldGlitch = Math.random() < 0.05;
     if (shouldGlitch) {
       const timer = setTimeout(() => {
         setGlitching(true);
@@ -63,10 +63,10 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
         const resetTimer = setTimeout(() => {
           setGlitching(false);
           setMasthead('THE PARANOID TIMES');
-        }, 800);
+        }, 400);
         
         return () => clearTimeout(resetTimer);
-      }, 500);
+      }, 800);
       
       return () => clearTimeout(timer);
     }

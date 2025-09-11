@@ -27,12 +27,12 @@ interface ExtraEditionNewspaperProps {
 const ExtraEditionNewspaper = ({ report, onClose }: ExtraEditionNewspaperProps) => {
   const [glitching, setGlitching] = useState(false);
 
-  // Glitch effect on masthead
+  // Glitch effect on masthead - reduced frequency and duration
   useEffect(() => {
-    const shouldGlitch = Math.random() < 0.15;
+    const shouldGlitch = Math.random() < 0.08;
     if (shouldGlitch) {
       setGlitching(true);
-      setTimeout(() => setGlitching(false), 1500);
+      setTimeout(() => setGlitching(false), 600);
     }
   }, []);
 
