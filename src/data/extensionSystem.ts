@@ -13,6 +13,7 @@ export interface Extension {
   factions: ('government' | 'truth')[];
   count: number;
   cards: ExtensionCard[];
+  tempImageId?: string;
 }
 
 export interface EnabledExtension {

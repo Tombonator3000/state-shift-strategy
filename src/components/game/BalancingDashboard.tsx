@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { 
   BarChart, 
   Bar, 
@@ -25,9 +28,11 @@ import {
   EnhancedBalanceReport,
   SimulationReport
 } from '@/data/enhancedCardBalancing';
-import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle, ChevronDown, Info, Zap } from 'lucide-react';
+import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle, ChevronDown, Info, Zap, ImageIcon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import PatchApplicatorComponent from './PatchApplicator';
+import { CARD_DATABASE } from '@/data/cardDatabase';
+import { extensionManager } from '@/data/extensionSystem';
 
 interface BalancingDashboardProps {
   onClose: () => void;
@@ -35,6 +40,12 @@ interface BalancingDashboardProps {
 
 const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
   const [includeExtensions, setIncludeExtensions] = useState(true);
+  const [showCardArtDialog, setShowCardArtDialog] = useState(false);
+  const [cardArtFilters, setCardArtFilters] = useState({
+    onlyMissing: false,
+    tempOnly: false,
+    includeAll: true
+  });
   
   const enhancedBalancer = useMemo(() => new EnhancedCardBalancer(includeExtensions), [includeExtensions]);
   
@@ -145,6 +156,173 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
     URL.revokeObjectURL(url);
   };
 
+  const generateCardArtData = () => {
+    const allCards = [];
+    
+    // Core cards
+    const coreCards = CARD_DATABASE.map(card => ({
+      ...card,
+      expansionId: 'core',
+      expansionName: 'Core/Base',
+      isCore: true,
+      tempImageId: null
+    }));
+    allCards.push(...coreCards);
+    
+    // Extension cards
+    const extensions = extensionManager.getEnabledExtensions();
+    extensions.forEach(enabled => {
+      const extension = extensionManager.getExtension(enabled.id);
+      if (extension) {
+        const extensionCards = extension.cards.map(card => ({
+          ...card,
+          expansionId: extension.id,
+          expansionName: extension.name,
+          isCore: false,
+          tempImageId: extension.tempImageId || null
+        }));
+        allCards.push(...extensionCards);
+      }
+    });
+    
+    // Sort: Core first, then extensions alphabetically, then within each group by faction → rarity → type → name
+    const rarityOrder = { 'common': 1, 'uncommon': 2, 'rare': 3, 'legendary': 4 };
+    const typeOrder = { 'MEDIA': 1, 'ZONE': 2, 'ATTACK': 3, 'DEFENSIVE': 4, 'TECH': 5, 'DEVELOPMENT': 6, 'INSTANT': 7 };
+    
+    allCards.sort((a, b) => {
+      // First by isCore (core first)
+      if (a.isCore !== b.isCore) return b.isCore ? 1 : -1;
+      
+      // Then by expansion name
+      if (a.expansionId !== b.expansionId) {
+        return a.expansionName.localeCompare(b.expansionName);
+      }
+      
+      // Then by faction
+      if (a.faction !== b.faction) return a.faction.localeCompare(b.faction);
+      
+      // Then by rarity
+      const rarityA = rarityOrder[a.rarity] || 99;
+      const rarityB = rarityOrder[b.rarity] || 99;
+      if (rarityA !== rarityB) return rarityA - rarityB;
+      
+      // Then by type
+      const typeA = typeOrder[a.type] || 99;
+      const typeB = typeOrder[b.type] || 99;
+      if (typeA !== typeB) return typeA - typeB;
+      
+      // Finally by name
+      return a.name.localeCompare(b.name);
+    });
+    
+    // Process each card for image data
+    const processedCards = allCards.map(card => {
+      const currentImageId = card.imageId || '';
+      const suggestedImageBasename = currentImageId || card.id;
+      const suggestedImagePath = `/public/card-art/${suggestedImageBasename}.png`;
+      const usesTempImage = !currentImageId && !!card.tempImageId;
+      const placeholderFallback = !currentImageId && !card.tempImageId;
+      
+      return {
+        expansionId: card.expansionId,
+        expansionName: card.expansionName,
+        isCore: card.isCore,
+        tempImageId: card.tempImageId || '',
+        cardId: card.id,
+        cardName: card.name,
+        faction: card.faction || 'neutral',
+        type: card.type,
+        rarity: card.rarity,
+        currentImageId,
+        suggestedImageBasename,
+        suggestedImagePath,
+        usesTempImage,
+        placeholderFallback,
+        altText: `${card.name} – ${card.faction || 'neutral'} ${card.type}`,
+        notes: placeholderFallback ? 'missing image file' : (usesTempImage ? 'using temp image' : '')
+      };
+    });
+    
+    // Apply filters
+    let filteredCards = processedCards;
+    if (cardArtFilters.onlyMissing) {
+      filteredCards = processedCards.filter(card => !card.currentImageId || card.placeholderFallback);
+    } else if (cardArtFilters.tempOnly) {
+      filteredCards = processedCards.filter(card => card.usesTempImage);
+    }
+    
+    // Generate metadata
+    const metadata = {
+      totalCards: filteredCards.length,
+      coreCount: filteredCards.filter(card => card.isCore).length,
+      expansionCount: filteredCards.filter(card => !card.isCore).length,
+      expansionBreakdown: {}
+    };
+    
+    // Count per expansion
+    filteredCards.forEach(card => {
+      if (!metadata.expansionBreakdown[card.expansionId]) {
+        metadata.expansionBreakdown[card.expansionId] = 0;
+      }
+      metadata.expansionBreakdown[card.expansionId]++;
+    });
+    
+    return { cards: filteredCards, metadata };
+  };
+
+  const exportCardArtList = () => {
+    const { cards, metadata } = generateCardArtData();
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+    
+    // Generate CSV
+    const csvHeaders = [
+      'expansionId', 'expansionName', 'isCore', 'tempImageId', 'cardId', 'cardName',
+      'faction', 'type', 'rarity', 'currentImageId', 'suggestedImageBasename',
+      'suggestedImagePath', 'usesTempImage', 'placeholderFallback', 'altText', 'notes'
+    ];
+    
+    const csvRows = cards.map(card => 
+      csvHeaders.map(header => {
+        const value = card[header];
+        if (typeof value === 'boolean') return value.toString();
+        if (typeof value === 'string' && value.includes(',')) return `"${value}"`;
+        return value || '';
+      }).join(',')
+    );
+    
+    const csvContent = [csvHeaders.join(','), ...csvRows].join('\n');
+    
+    // Generate JSON
+    const jsonContent = JSON.stringify({
+      metadata,
+      cards
+    }, null, 2);
+    
+    // Download CSV
+    const csvBlob = new Blob([csvContent], { type: 'text/csv' });
+    const csvUrl = URL.createObjectURL(csvBlob);
+    const csvLink = document.createElement('a');
+    csvLink.href = csvUrl;
+    csvLink.download = `card-art-list_core+expansions_${timestamp}.csv`;
+    csvLink.click();
+    URL.revokeObjectURL(csvUrl);
+    
+    // Download JSON
+    const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
+    const jsonUrl = URL.createObjectURL(jsonBlob);
+    const jsonLink = document.createElement('a');
+    jsonLink.href = jsonUrl;
+    jsonLink.download = `card-art-list_core+expansions_${timestamp}.json`;
+    jsonLink.click();
+    URL.revokeObjectURL(jsonUrl);
+    
+    setShowCardArtDialog(false);
+    
+    // Show confirmation
+    const missingCount = cards.filter(card => !card.currentImageId || card.placeholderFallback).length;
+    alert(`Exported ${cards.length} cards to CSV and JSON files.\n${missingCount} cards are missing images.`);
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
       <Card className="w-full max-w-7xl h-[90vh] bg-gray-900 border-gray-700 overflow-hidden">
@@ -197,6 +375,13 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                 >
                   <Download size={14} className="mr-2" />
                   Export as TXT
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setShowCardArtDialog(true)}
+                  className="text-gray-200 hover:bg-gray-700 cursor-pointer focus:bg-gray-700"
+                >
+                  <ImageIcon size={14} className="mr-2" />
+                  Export Card Art List
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -680,6 +865,87 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Card Art Export Dialog */}
+        <Dialog open={showCardArtDialog} onOpenChange={setShowCardArtDialog}>
+          <DialogContent className="sm:max-w-md bg-gray-900 border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-white font-mono flex items-center gap-2">
+                <ImageIcon size={18} />
+                Export Card Art List
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="text-sm text-gray-300">
+                Export a complete list of all cards with image metadata for art production.
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="include-all"
+                    checked={cardArtFilters.includeAll}
+                    onCheckedChange={(checked) => setCardArtFilters({
+                      includeAll: !!checked,
+                      onlyMissing: false,
+                      tempOnly: false
+                    })}
+                  />
+                  <Label htmlFor="include-all" className="text-gray-300">Include all cards (default)</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="only-missing"
+                    checked={cardArtFilters.onlyMissing}
+                    onCheckedChange={(checked) => setCardArtFilters({
+                      includeAll: false,
+                      onlyMissing: !!checked,
+                      tempOnly: false
+                    })}
+                  />
+                  <Label htmlFor="only-missing" className="text-gray-300">Only missing images</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="temp-only"
+                    checked={cardArtFilters.tempOnly}
+                    onCheckedChange={(checked) => setCardArtFilters({
+                      includeAll: false,
+                      onlyMissing: false,
+                      tempOnly: !!checked
+                    })}
+                  />
+                  <Label htmlFor="temp-only" className="text-gray-300">Only temp image cards</Label>
+                </div>
+              </div>
+              
+              <div className="text-xs text-gray-400 space-y-1">
+                <div>• Exports both CSV and JSON formats</div>
+                <div>• Includes suggested paths: /public/card-art/&#123;basename&#125;.png</div>
+                <div>• Recommended format: PNG 300×200 (3:2 aspect ratio)</div>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowCardArtDialog(false)}
+                  className="text-gray-400 border-gray-600"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={exportCardArtList}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Download size={16} className="mr-2" />
+                  Export Files
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </Card>
     </div>
   );
