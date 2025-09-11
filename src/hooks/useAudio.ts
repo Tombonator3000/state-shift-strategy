@@ -169,9 +169,9 @@ export const useAudio = () => {
     const loadMusicTracks = async () => {
       console.log('🎵 Loading music tracks...');
       
-      // Load theme music tracks - only load existing files
-      const existingThemeTracks = ['/muzak/Theme-2.mp3']; // Only Theme-2 exists
-      const themePromises = existingThemeTracks.map(track => loadAudioTrack(track));
+      // Load all available theme music tracks
+      const allThemeTracks = ['/muzak/Theme-1.mp3', '/muzak/Theme-2.mp3', '/muzak/Theme-3.mp3', '/muzak/Theme-4.mp3'];
+      const themePromises = allThemeTracks.map(track => loadAudioTrack(track));
       
       const themeResults = await Promise.all(themePromises);
       const validThemeTracks = themeResults.filter(audio => audio !== null) as HTMLAudioElement[];
@@ -179,15 +179,15 @@ export const useAudio = () => {
       musicTracks.current.theme = validThemeTracks;
       console.log('🎵 Theme tracks loaded:', validThemeTracks.length);
 
-      // Load government faction music tracks - only existing files
-      const existingGovTracks = ['/muzak/Government-1.mp3', '/muzak/Government-3.mp3'];
-      const govPromises = existingGovTracks.map(track => loadAudioTrack(track));
+      // Load all available government faction music tracks
+      const allGovTracks = ['/muzak/Government-1.mp3', '/muzak/Government-2.mp3', '/muzak/Government-3.mp3'];
+      const govPromises = allGovTracks.map(track => loadAudioTrack(track));
       const govResults = await Promise.all(govPromises);
       musicTracks.current.government = govResults.filter(audio => audio !== null) as HTMLAudioElement[];
 
-      // Load truth faction music tracks - only existing files
-      const existingTruthTracks = ['/muzak/Truth-2.mp3', '/muzak/Truth-3.mp3'];
-      const truthPromises = existingTruthTracks.map(track => loadAudioTrack(track));
+      // Load all available truth faction music tracks  
+      const allTruthTracks = ['/muzak/Truth-1.mp3', '/muzak/Truth-2.mp3', '/muzak/Truth-3.mp3'];
+      const truthPromises = allTruthTracks.map(track => loadAudioTrack(track));
       const truthResults = await Promise.all(truthPromises);
       musicTracks.current.truth = truthResults.filter(audio => audio !== null) as HTMLAudioElement[];
 
