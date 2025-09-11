@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import { extensionManager, type Extension } from '@/data/extensionSystem';
+import { DistributionSettingsButton } from './DistributionSettingsButton';
 
 interface ManageExpansionsProps {
   onClose: () => void;
@@ -229,6 +230,7 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
             >
               Add JSON Files...
             </Button>
+            <DistributionSettingsButton />
           </div>
 
           {error && (

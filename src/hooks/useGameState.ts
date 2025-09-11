@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import type { GameCard } from '@/components/game/GameHand';
-import { CARD_DATABASE } from '@/data/cardDatabase';
+import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
 import { extensionManager } from '@/data/extensionSystem';
 import { TRUTH_SEEKERS_CARDS, GOVERNMENT_CARDS } from '@/data/factionCards';
-import { generateRandomDeck, getRandomCards } from '@/data/cardDatabase';
+import { generateWeightedDeck } from '@/data/weightedCardDistribution';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
 import { AIStrategist, type AIDifficulty } from '@/data/aiStrategy';
@@ -101,8 +101,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     hand: getRandomCards(3),
     aiHand: getRandomCards(3),
     isGameOver: false,
-    deck: generateRandomDeck(40),
-    aiDeck: generateRandomDeck(40),
+    deck: generateWeightedDeck(40),
+    aiDeck: generateWeightedDeck(40),
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
     controlledStates: [],
@@ -158,7 +158,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     const startingIP = faction === 'government' ? 20 : 10; // Player IP
     const aiStartingIP = faction === 'government' ? 10 : 20; // AI starts as the opposite faction
     const handSize = faction === 'truth' ? 4 : 3;
-    const newDeck = generateRandomDeck(40);
+    const newDeck = generateWeightedDeck(40);
     const startingHand = newDeck.slice(0, handSize);
     const initialControl = getInitialStateControl(faction);
 
