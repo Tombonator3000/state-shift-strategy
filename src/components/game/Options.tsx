@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { useState, useEffect } from 'react';
+import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
 
 interface OptionsProps {
   onClose: () => void;
@@ -22,6 +23,7 @@ interface GameSettings {
   difficulty: 'easy' | 'normal' | 'hard';
   screenShake: boolean;
   confirmActions: boolean;
+  drawMode: 'standard' | 'classic' | 'momentum' | 'catchup' | 'fast';
 }
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
@@ -37,6 +39,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     difficulty: 'normal',
     screenShake: true,
     confirmActions: true,
+    drawMode: 'standard',
   });
 
   // Load settings from localStorage on component mount
@@ -67,6 +70,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       difficulty: 'normal',
       screenShake: true,
       confirmActions: true,
+      drawMode: 'standard',
     };
     setSettings(defaultSettings);
     localStorage.setItem('gameSettings', JSON.stringify(defaultSettings));
@@ -275,6 +279,28 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   <option value="normal">NORMAL - Classified</option>
                   <option value="hard">HARD - Top Secret</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-newspaper-text mb-2 block">
+                  Card Draw Mode
+                </label>
+                <select 
+                  value={settings.drawMode}
+                  onChange={(e) => updateSettings({ drawMode: e.target.value as DrawMode })}
+                  className="w-full p-2 border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded mb-2"
+                >
+                  {Object.entries(DRAW_MODE_CONFIGS).map(([key, config]) => (
+                    <option key={key} value={key}>
+                      {config.name.toUpperCase()} - {config.description}
+                    </option>
+                  ))}
+                </select>
+                <div className="text-xs text-newspaper-text/70 space-y-1">
+                  {DRAW_MODE_CONFIGS[settings.drawMode].specialRules.map((rule, i) => (
+                    <div key={i}>• {rule}</div>
+                  ))}
+                </div>
               </div>
             </div>
           </Card>

@@ -10,6 +10,7 @@ import { AIStrategist, type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
 import { setStateOccupation } from '@/data/usaStates';
+import { getStartingHandSize, calculateCardDraw, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -74,6 +75,9 @@ interface GameState {
   pendingCardDraw?: number;
   newCards?: GameCard[];
   showNewCardsPresentation?: boolean;
+  // Enhanced drawing system state
+  drawMode: DrawMode;
+  cardDrawState: CardDrawState;
 }
 
 const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
@@ -150,14 +154,25 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     aiTurnInProgress: false,
     selectedCard: null,
     targetState: null,
-    aiStrategist: AIFactory.createStrategist(aiDifficulty)
+    aiStrategist: AIFactory.createStrategist(aiDifficulty),
+    drawMode: 'standard',
+    cardDrawState: {
+      cardsPlayedLastTurn: 0,
+      lastTurnWithoutPlay: false
+    }
   });
 
   const initGame = useCallback((faction: 'government' | 'truth') => {
     const startingTruth = faction === 'government' ? 40 : 60;
     const startingIP = faction === 'government' ? 20 : 10; // Player IP
     const aiStartingIP = faction === 'government' ? 10 : 20; // AI starts as the opposite faction
-    const handSize = faction === 'truth' ? 4 : 3;
+    
+    // Get draw mode from localStorage
+    const savedSettings = localStorage.getItem('gameSettings');
+    const drawMode: DrawMode = savedSettings ? 
+      (JSON.parse(savedSettings).drawMode || 'standard') : 'standard';
+    
+    const handSize = getStartingHandSize(drawMode, faction);
     const newDeck = generateWeightedDeck(40);
     const startingHand = newDeck.slice(0, handSize);
     const initialControl = getInitialStateControl(faction);
@@ -203,9 +218,14 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         `Game started - ${faction} faction selected`,
         `Starting Truth: ${startingTruth}%`,
         `Starting IP: ${startingIP}`,
-        `Cards drawn: ${handSize}`,
+        `Cards drawn: ${handSize} (${drawMode} mode)`,
         `Controlled states: ${initialControl.player.join(', ')}`
-      ]
+      ],
+      drawMode,
+      cardDrawState: {
+        cardsPlayedLastTurn: 0,
+        lastTurnWithoutPlay: false
+      }
     }));
   }, []);
 
@@ -535,6 +555,10 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           ip: prev.ip + totalIncome + ipModifier,
           pendingCardDraw,
           currentEvents: newEvents,
+          cardDrawState: {
+            cardsPlayedLastTurn: prev.cardsPlayedThisTurn,
+            lastTurnWithoutPlay: prev.cardsPlayedThisTurn === 0
+          },
           log: [...prev.log, 
             `Turn ${prev.turn} ended`, 
             `Base income: ${baseIncome} IP`,
@@ -716,12 +740,19 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
   const closeNewspaper = useCallback(() => {
     setGameState(prev => {
-      // Draw cards after newspaper closes (proper timing)
-      const maxHandSize = 7; // Correct hand limit as per rules
+      // Enhanced card drawing system
+      const maxHandSize = 7;
       const currentHandSize = prev.hand.length;
-      const baseCardDraw = Math.max(0, Math.min(1, maxHandSize - currentHandSize)); // Draw 1 card if under limit
       const bonusCardDraw = prev.pendingCardDraw || 0;
-      const totalCardsToDraw = baseCardDraw + bonusCardDraw;
+      
+      const totalCardsToDraw = calculateCardDraw(
+        prev.drawMode,
+        prev.turn,
+        currentHandSize,
+        maxHandSize,
+        prev.cardDrawState,
+        bonusCardDraw
+      );
       
       if (totalCardsToDraw > 0) {
         const drawnCards = prev.deck.slice(0, totalCardsToDraw);
@@ -736,7 +767,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           showNewCardsPresentation: true,
           deck: remainingDeck,
           pendingCardDraw: 0,
-          log: [...prev.log, `Drawing ${totalCardsToDraw} new cards...`]
+          log: [...prev.log, `Drawing ${totalCardsToDraw} cards (${prev.drawMode} mode)`]
         };
       } else {
         return {
