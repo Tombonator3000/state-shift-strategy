@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
 import { useAudioManager } from '@/hooks/useAudioManager';
 
@@ -26,10 +26,6 @@ interface GameSettings {
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const audio = useAudioManager();
-  const audioTimeoutRef = useRef<NodeJS.Timeout>();
-  const bgmTimeoutRef = useRef<NodeJS.Timeout>();
-  const sfxTimeoutRef = useRef<NodeJS.Timeout>();
-  
   const [settings, setSettings] = useState<GameSettings>({
     enableAnimations: true,
     autoEndTurn: false,
@@ -52,13 +48,13 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
         if (parsed.drawMode && !DRAW_MODE_CONFIGS[parsed.drawMode as DrawMode]) {
           parsed.drawMode = 'standard'; // fallback to default
         }
-        setSettings(prev => ({ ...prev, ...parsed }));
+        setSettings({ ...settings, ...parsed });
       } catch (error) {
         console.error('Failed to parse saved settings:', error);
         // Keep default settings if parsing fails
       }
     }
-  }, []); // Fixed: removed settings dependency to prevent loop
+  }, []);
 
   // Save settings to localStorage whenever they change
   const updateSettings = (newSettings: Partial<GameSettings>) => {
@@ -170,14 +166,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <Slider
                   value={[audio.settings.master * 100]}
                   onValueChange={([value]) => {
-                    // Debounced audio update to prevent rapid calls
-                    if (audioTimeoutRef.current) clearTimeout(audioTimeoutRef.current);
-                    audioTimeoutRef.current = setTimeout(() => {
-                      audio.setVolumes({ master: value / 100 });
-                    }, 50);
+                    audio.setVolumes({ master: value / 100 });
+                    audio.playSfx('click');
                   }}
                   max={100}
-                  step={5}
+                  step={1}
                   className="w-full"
                 />
               </div>
@@ -189,13 +182,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <Slider
                   value={[audio.settings.bgm * 100]}
                   onValueChange={([value]) => {
-                    if (bgmTimeoutRef.current) clearTimeout(bgmTimeoutRef.current);
-                    bgmTimeoutRef.current = setTimeout(() => {
-                      audio.setVolumes({ bgm: value / 100 });
-                    }, 50);
+                    audio.setVolumes({ bgm: value / 100 });
+                    audio.playSfx('click');
                   }}
                   max={100}
-                  step={5}
+                  step={1}
                   className="w-full"
                 />
               </div>
@@ -207,13 +198,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <Slider
                   value={[audio.settings.sfx * 100]}
                   onValueChange={([value]) => {
-                    if (sfxTimeoutRef.current) clearTimeout(sfxTimeoutRef.current);
-                    sfxTimeoutRef.current = setTimeout(() => {
-                      audio.setVolumes({ sfx: value / 100 });
-                    }, 50);
+                    audio.setVolumes({ sfx: value / 100 });
+                    audio.playSfx('click');
                   }}
                   max={100}
-                  step={5}
+                  step={1}
                   className="w-full"
                 />
               </div>
@@ -238,14 +227,6 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                     className="border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
                   >
                     ⏹️ STOP
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => audio.stopAllAudio()}
-                    className="border-red-600 text-red-600 hover:bg-red-600/10 font-bold"
-                  >
-                    🚨 KILL ALL
                   </Button>
                   <Button
                     variant="outline"

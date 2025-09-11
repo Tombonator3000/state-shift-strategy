@@ -110,13 +110,14 @@ const Index = () => {
     };
   }, []); // Empty dependency array - only run once
 
-  // Handle music for different game states - DISABLED TO PREVENT CHAOS
+  // Handle music for different game states  
   useEffect(() => {
     if (audio.canPlay) {
       if (showMenu && !showIntro) {
-        // Don't auto-start music - let user control it manually
-        console.log('Main menu shown - music disabled to prevent chaos');
+        // Main menu - play start theme
+        console.log('Starting start-theme for main menu');
         audio.setScene('start-menu');
+        audio.playBgm('start-theme');
       }
     }
   }, [showMenu, showIntro, audio.canPlay]);

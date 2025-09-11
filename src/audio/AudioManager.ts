@@ -35,9 +35,6 @@ class AudioManagerClass {
     console.log('AudioManager initialized with settings:', this.state.settings);
     this.setupVisibilityHandling();
     this.preloadSFX();
-    
-    // Force stop any existing audio on page load
-    this.stopAllAudio();
   }
 
   private setupVisibilityHandling() {
@@ -109,9 +106,9 @@ class AudioManagerClass {
       return;
     }
 
-    // Don't restart the same track that's already playing
-    if (this.state.currentTrackId === trackId && this.currentBgm && this.state.isPlaying && !this.currentBgm.paused) {
-      console.log('Same track already playing and not paused, skipping');
+    // Don't restart the same track
+    if (this.state.currentTrackId === trackId && this.currentBgm && this.state.isPlaying) {
+      console.log('Same track already playing, skipping');
       return;
     }
 
@@ -119,16 +116,12 @@ class AudioManagerClass {
       // Always stop current track first to prevent overlapping
       if (this.currentBgm) {
         console.log('Stopping current BGM before starting new one');
-        this.currentBgm.pause();
-        this.currentBgm.currentTime = 0;
-        this.currentBgm.src = '';
-        this.currentBgm = null;
+        this.stopBgm();
       }
 
       const newAudio = new Audio(track.path);
       newAudio.loop = options.loop ?? track.loop;
       newAudio.volume = this.calculateVolume(track.volume, 'bgm');
-      newAudio.preload = 'auto';
 
       console.log('Starting new BGM with volume:', newAudio.volume);
       await newAudio.play();
@@ -157,7 +150,7 @@ class AudioManagerClass {
       });
 
       newAudio.addEventListener('error', (e) => {
-        console.warn('BGM playback error:', e, 'for track:', trackId, 'path:', track.path);
+        console.warn('BGM playback error:', e);
         if (this.currentBgm === newAudio) {
           this.updateState({ isPlaying: false, currentTrackId: null });
           this.currentBgm = null;
@@ -221,12 +214,16 @@ class AudioManagerClass {
       try {
         this.currentBgm.pause();
         this.currentBgm.currentTime = 0;
-        this.currentBgm.src = ''; // Clear the source to fully stop
+        
+        // Remove event listeners to prevent memory leaks
+        this.currentBgm.removeEventListener('timeupdate', () => {});
+        this.currentBgm.removeEventListener('ended', () => {});
+        this.currentBgm.removeEventListener('error', () => {});
+        
         this.currentBgm = null;
         console.log('BGM stopped and cleaned up');
       } catch (error) {
         console.warn('Error stopping BGM:', error);
-        this.currentBgm = null; // Force cleanup even if error
       }
       
       this.updateState({
@@ -235,43 +232,6 @@ class AudioManagerClass {
         position: 0
       });
     }
-  }
-
-  // Nuclear option: stop ALL audio on the page
-  public stopAllAudio(): void {
-    console.log('STOPPING ALL AUDIO - Nuclear cleanup');
-    
-    // Stop our managed BGM
-    this.stopBgm();
-    
-    // Force stop ALL audio elements on the page
-    const allAudioElements = document.querySelectorAll('audio');
-    allAudioElements.forEach((audio, index) => {
-      try {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.src = '';
-        audio.load(); // Force reload to clear buffer
-        console.log(`Stopped audio element ${index}`);
-      } catch (e) {
-        console.warn(`Failed to stop audio element ${index}:`, e);
-      }
-    });
-    
-    // Clear all timeouts that might restart audio
-    if (this.crossfadeTimeout) {
-      clearTimeout(this.crossfadeTimeout);
-      this.crossfadeTimeout = null;
-    }
-    
-    // Reset state completely
-    this.updateState({
-      isPlaying: false,
-      currentTrackId: null,
-      position: 0
-    });
-    
-    console.log('All audio forcibly stopped');
   }
 
   public playSfx(soundId: SFXTrackId): void {
@@ -314,9 +274,17 @@ class AudioManagerClass {
   public setScene(scene: SceneId): void {
     this.updateState({ scene });
 
-    // DISABLED: Auto-play music to prevent chaos
-    // Only allow manual music control now
-    console.log('Scene changed to:', scene, '(auto-play disabled)');
+    // Auto-play appropriate music for scene
+    switch (scene) {
+      case 'start-menu':
+        if (this.state.canPlay) {
+          this.playBgm('start-theme');
+        }
+        break;
+      case 'end-credits':
+        this.playBgm('endcredits-theme', { duration: 1200 });
+        break;
+    }
   }
 
   public startGameplay(faction: 'government' | 'truth'): void {

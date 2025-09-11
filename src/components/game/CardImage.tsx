@@ -10,7 +10,7 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '' }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Check if this is an extension card and determine appropriate image
+  // Check if this is a Halloween Spooktacular extension card
   const getImagePath = () => {
     // Primary: extension metadata
     if (isExtensionCard(cardId)) {
@@ -18,17 +18,11 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '' }) => {
       if (extensionInfo?.id?.toLowerCase().includes('halloween_spooktacular')) {
         return '/card-art/halloween_spooktacular-Temp-Image.png';
       }
-      if (extensionInfo?.id?.toLowerCase().includes('cryptids')) {
-        return '/lovable-uploads/e77a8c78-91bb-46f5-b640-46f4c940371b.png';
-      }
     }
 
-    // Fallback: card id naming convention for expansions
+    // Fallback: card id naming convention for this expansion
     if (cardId.toLowerCase().startsWith('hallo-')) {
       return '/card-art/halloween_spooktacular-Temp-Image.png';
-    }
-    if (cardId.toLowerCase().startsWith('crypt-')) {
-      return '/lovable-uploads/e77a8c78-91bb-46f5-b640-46f4c940371b.png';
     }
 
     // Default PARANOID TIMES placeholder
