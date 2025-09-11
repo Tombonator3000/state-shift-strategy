@@ -65,16 +65,29 @@ export const useAudio = () => {
   useEffect(() => {
     // Mobile audio context unlock function
     const unlockAudioContext = () => {
-      if (audioContextUnlocked) return;
+      if (audioContextUnlocked) {
+        console.log('🎵 Audio context already unlocked');
+        return;
+      }
       setAudioContextUnlocked(true);
-      console.log('Audio context unlocked via user interaction');
+      setAudioStatus('Audio context unlocked - ready to play');
+      console.log('🎵 Audio context unlocked via user interaction - will auto-start menu music');
     };
 
     // Add click/tap/pointer event listener to unlock audio once
     const handleUserInteraction = () => {
       unlockAudioContext();
-      setAudioStatus('Audio context unlocked');
+      setAudioStatus('Audio context unlocked - starting menu music');
       console.log('🎵 Audio context unlocked via user interaction');
+      
+      // Auto-start menu music after audio context unlock
+      setTimeout(() => {
+        if (config.musicEnabled && currentMusicType === 'theme') {
+          console.log('🎵 Auto-starting menu music after user interaction');
+          playMusic('theme');
+        }
+      }, 500);
+      
       document.removeEventListener('click', handleUserInteraction);
       document.removeEventListener('touchstart', handleUserInteraction);
       document.removeEventListener('pointerdown', handleUserInteraction);
@@ -254,8 +267,8 @@ export const useAudio = () => {
     }
   }, [config.volume, config.muted]);
 
-  // Get next track for the current music type
   const getNextTrack = useCallback((musicType: MusicType): HTMLAudioElement | null => {
+    console.log('🎵 getNextTrack called for:', musicType);
     const tracks = musicTracks.current[musicType];
     if (!tracks || tracks.length === 0) {
       console.warn(`No tracks available for music type: ${musicType}`);
@@ -264,11 +277,13 @@ export const useAudio = () => {
     const currentIndex = currentTrackIndex.current[musicType];
     const nextIndex = (currentIndex + 1) % tracks.length;
     currentTrackIndex.current[musicType] = nextIndex;
+    console.log('🎵 Selected track index:', nextIndex, 'of', tracks.length);
     return tracks[nextIndex];
   }, []);
 
-  // Fade between two audio elements
   const switchTrack = useCallback((fromAudio: HTMLAudioElement | null, toAudio: HTMLAudioElement | null) => {
+    console.log('🎵 switchTrack called', { fromAudio: !!fromAudio, toAudio: !!toAudio });
+    
     if (!toAudio || !audioContextUnlocked) {
       console.warn('🎵 Cannot play: toAudio is null or audio context not unlocked');
       setAudioStatus('Cannot play - audio locked');
@@ -299,6 +314,7 @@ export const useAudio = () => {
           .then(() => {
             setIsPlaying(true);
             setAudioStatus(`Playing: ${trackName}`);
+            console.log('🎵 Track playing successfully');
           })
           .catch(error => {
             console.log('🎵 Audio play prevented by browser policy:', error);
@@ -463,13 +479,20 @@ export const useAudio = () => {
   }, []);
 
   const toggleMusic = useCallback(() => {
+    console.log('🎵 toggleMusic called - current state:', config.musicEnabled);
     setConfig(prev => {
       const newMusicEnabled = !prev.musicEnabled;
+      console.log('🎵 Music toggled to:', newMusicEnabled);
+      
       if (!newMusicEnabled && currentMusicRef.current) {
+        console.log('🎵 Stopping music due to toggle off');
         currentMusicRef.current.onended = null;
         currentMusicRef.current.pause();
         currentMusicRef.current.currentTime = 0;
+        setIsPlaying(false);
+        setAudioStatus('Music disabled');
       } else if (newMusicEnabled) {
+        console.log('🎵 Starting music due to toggle on');
         playMusic();
       }
       return { ...prev, musicEnabled: newMusicEnabled };
@@ -482,21 +505,33 @@ export const useAudio = () => {
 
   // New functions for game state management
   const setMenuMusic = useCallback(() => {
-    if (gameState === 'menu' && currentMusicType === 'theme' && currentMusicRef.current && !currentMusicRef.current.paused) return;
+    console.log('🎵 setMenuMusic called');
+    if (gameState === 'menu' && currentMusicType === 'theme' && currentMusicRef.current && !currentMusicRef.current.paused) {
+      console.log('🎵 setMenuMusic - already playing theme music');
+      return;
+    }
     setGameState('menu');
     setCurrentMusicType('theme');
     playMusic('theme');
   }, [gameState, currentMusicType, playMusic]);
 
   const setFactionMusic = useCallback((faction: 'government' | 'truth') => {
-    if (gameState === 'factionSelect' && currentMusicType === faction && currentMusicRef.current && !currentMusicRef.current.paused) return;
+    console.log('🎵 setFactionMusic called with:', faction);
+    if (gameState === 'factionSelect' && currentMusicType === faction && currentMusicRef.current && !currentMusicRef.current.paused) {
+      console.log('🎵 setFactionMusic - already playing faction music');
+      return;
+    }
     setGameState('factionSelect');
     setCurrentMusicType(faction);
     playMusic(faction);
   }, [gameState, currentMusicType, playMusic]);
 
   const setGameplayMusic = useCallback((faction: 'government' | 'truth') => {
-    if (gameState === 'playing' && currentMusicType === faction && currentMusicRef.current && !currentMusicRef.current.paused) return;
+    console.log('🎵 setGameplayMusic called with:', faction);
+    if (gameState === 'playing' && currentMusicType === faction && currentMusicRef.current && !currentMusicRef.current.paused) {
+      console.log('🎵 setGameplayMusic - already playing gameplay music');
+      return;
+    }
     setGameState('playing');
     setCurrentMusicType(faction);
     playMusic(faction);

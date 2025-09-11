@@ -266,7 +266,17 @@ const Index = () => {
     }
   }, [gameState.faction]);
 
+  // Handle audio initialization and menu music
+  useEffect(() => {
+    console.log('🎵 Index: Setting up menu music on component mount');
+    // Small delay to ensure audio system is fully initialized
+    setTimeout(() => {
+      audio.setMenuMusic(); 
+    }, 100);
+  }, [audio]);
+
   const startNewGame = async (faction: 'government' | 'truth') => {
+    console.log('🎵 Index: Starting new game with faction:', faction);
     await initGame(faction);
     setShowMenu(false);
     setShowIntro(false);
