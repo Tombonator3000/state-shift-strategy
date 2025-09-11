@@ -171,25 +171,30 @@ export const useAudio = () => {
       
       // Load all available theme music tracks
       const allThemeTracks = ['/muzak/Theme-1.mp3', '/muzak/Theme-2.mp3', '/muzak/Theme-3.mp3', '/muzak/Theme-4.mp3'];
+      console.log('🎵 Attempting to load theme tracks:', allThemeTracks);
       const themePromises = allThemeTracks.map(track => loadAudioTrack(track));
       
       const themeResults = await Promise.all(themePromises);
       const validThemeTracks = themeResults.filter(audio => audio !== null) as HTMLAudioElement[];
       
       musicTracks.current.theme = validThemeTracks;
-      console.log('🎵 Theme tracks loaded:', validThemeTracks.length);
+      console.log('🎵 Theme tracks loaded:', validThemeTracks.length, 'out of', allThemeTracks.length);
 
       // Load all available government faction music tracks
       const allGovTracks = ['/muzak/Government-1.mp3', '/muzak/Government-2.mp3', '/muzak/Government-3.mp3'];
+      console.log('🎵 Attempting to load government tracks:', allGovTracks);
       const govPromises = allGovTracks.map(track => loadAudioTrack(track));
       const govResults = await Promise.all(govPromises);
       musicTracks.current.government = govResults.filter(audio => audio !== null) as HTMLAudioElement[];
+      console.log('🎵 Government tracks loaded:', musicTracks.current.government.length, 'out of', allGovTracks.length);
 
       // Load all available truth faction music tracks  
       const allTruthTracks = ['/muzak/Truth-1.mp3', '/muzak/Truth-2.mp3', '/muzak/Truth-3.mp3'];
+      console.log('🎵 Attempting to load truth tracks:', allTruthTracks);
       const truthPromises = allTruthTracks.map(track => loadAudioTrack(track));
       const truthResults = await Promise.all(truthPromises);
       musicTracks.current.truth = truthResults.filter(audio => audio !== null) as HTMLAudioElement[];
+      console.log('🎵 Truth tracks loaded:', musicTracks.current.truth.length, 'out of', allTruthTracks.length);
 
       // Load end credits music
       const endCreditsAudio = await loadAudioTrack('/muzak/endcredits-theme.mp3');
@@ -197,15 +202,20 @@ export const useAudio = () => {
         musicTracks.current.endcredits = [endCreditsAudio];
       }
 
-      console.log('🎵 Loaded music tracks:', {
+      console.log('🎵 Final loaded music tracks:', {
         theme: musicTracks.current.theme.length,
         government: musicTracks.current.government.length,
         truth: musicTracks.current.truth.length,
         endcredits: musicTracks.current.endcredits.length
       });
 
+      // Log which specific tracks were successfully loaded
+      console.log('🎵 Successfully loaded theme tracks:', musicTracks.current.theme.map(audio => audio.src));
+      console.log('🎵 Successfully loaded government tracks:', musicTracks.current.government.map(audio => audio.src));
+      console.log('🎵 Successfully loaded truth tracks:', musicTracks.current.truth.map(audio => audio.src));
+
       setTracksLoaded(true);
-      setAudioStatus('Ready - No fallback music');
+      setAudioStatus('Ready - All tracks loaded');
     };
 
     loadMusicTracks();
