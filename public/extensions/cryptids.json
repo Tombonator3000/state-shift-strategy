@@ -13,7 +13,7 @@
       "name": "Men in Black Sweep",
       "type": "ATTACK",
       "rarity": "rare",
-      "cost": 6,
+      "cost": 4,
       "target": null,
       "text": "Opponent loses 7 IP. If Truth > 60%, lose 10 instead.",
       "flavor": "Memory erased, warranty void.",
