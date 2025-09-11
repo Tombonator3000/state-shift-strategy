@@ -142,7 +142,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "rare",
     cost: 13,
     text: "+8% Truth. Opponent discards 1 card.",
-    flavor: "Ink smudges reveal more than black bars.",
+    flavorTruth: "Ink smudges reveal more than black bars.",
     target: { scope: "opponent" },
     effects: { truthDelta: +8, discardOpponent: 1 }
   },
@@ -154,7 +154,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "rare",
     cost: 14,
     text: "+9% Truth.",
-    flavor: "Chat: 'first!'",
+    flavorTruth: "Chat: 'first!'",
     target: { scope: "global" },
     effects: { truthDelta: +9 }
   },
@@ -166,7 +166,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 6,
     text: "+5% Truth. Gain +1 IP if you played a MEDIA this turn.",
-    flavor: "He brought snacks. Questionable snacks.",
+    flavorTruth: "He brought snacks. Questionable snacks.",
     target: { scope: "global" },
     effects: { truthDelta: +5, conditional: { ifPlayedTypeThisTurn: "MEDIA", ipDelta: { self: +1 } } }
   },
@@ -178,7 +178,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "+7% Truth. Opponent -1 IP.",
-    flavor: "Tip jar shaped like a saucer.",
+    flavorTruth: "Tip jar shaped like a saucer.",
     target: { scope: "opponent" },
     effects: { truthDelta: +7, ipDelta: { opponent: -1 } }
   },
@@ -190,7 +190,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 5,
     text: "+4% Truth. Draw 1 card.",
-    flavor: "Phones are better than binoculars.",
+    flavorTruth: "Phones are better than binoculars.",
     target: { scope: "global" },
     effects: { truthDelta: +4, draw: 1 }
   },
@@ -3943,7 +3943,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 8,
     text: "Cancel a Truth MEDIA; opponent loses 2 IP.",
-    flavor: "Access is a privilege with paperwork.",
+    flavorGov: "Access is a privilege with paperwork.",
     target: { scope: "opponent" },
     effects: { cancel: { type: "MEDIA", scope: "Truth", timing: "instant" }, ipDelta: { opponent: -2 } }
   },
