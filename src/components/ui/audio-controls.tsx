@@ -39,6 +39,7 @@ interface AudioControlsProps {
   onToggleSFX: () => void;
   onPlayMusic?: () => void;
   onPauseMusic?: () => void;
+  onResumeMusic?: () => void;
   onStopMusic?: () => void;
   onTestSFX?: () => void;
 }
@@ -59,6 +60,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
   onToggleSFX,
   onPlayMusic,
   onPauseMusic,
+  onResumeMusic,
   onStopMusic,
   onTestSFX
 }) => {
@@ -176,8 +178,10 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
                   if (isPlaying) {
                     onPauseMusic?.();
                   } else {
-                    // Check if we should resume or play new music
-                    if (onPlayMusic) {
+                    // Use resume function if available, fallback to play
+                    if (onResumeMusic) {
+                      onResumeMusic();
+                    } else if (onPlayMusic) {
                       onPlayMusic();
                     }
                   }

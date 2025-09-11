@@ -193,10 +193,11 @@ const InGameOptions = ({
               onToggleMute={audio.toggleMute}
               onToggleMusic={audio.toggleMusic}
               onToggleSFX={audio.toggleSFX}
-              onPlayMusic={() => audio.playMusic?.('theme')}
+              onPlayMusic={audio.playMusic}
               onPauseMusic={audio.pauseMusic}
+              onResumeMusic={audio.resumeMusic}
               onStopMusic={audio.stopMusic}
-              onTestSFX={() => audio.playSFX?.('click')}
+              onTestSFX={() => audio.playSFX('click')}
               tracksLoaded={audio.tracksLoaded}
               audioContextUnlocked={audio.audioContextUnlocked}
               audioStatus={audio.tracksLoaded ? 'ready' : 'loading'}
