@@ -110,12 +110,12 @@ const Index = () => {
     };
   }, []); // Empty dependency array - only run once
 
-  // Handle music for different game states  
+  // Handle music for different game states - DISABLED TO PREVENT CHAOS
   useEffect(() => {
     if (audio.canPlay) {
       if (showMenu && !showIntro) {
-        // Main menu - setScene will auto-start the appropriate music
-        console.log('Setting scene to start-menu');
+        // Don't auto-start music - let user control it manually
+        console.log('Main menu shown - music disabled to prevent chaos');
         audio.setScene('start-menu');
       }
     }

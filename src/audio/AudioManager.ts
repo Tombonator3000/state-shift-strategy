@@ -35,6 +35,9 @@ class AudioManagerClass {
     console.log('AudioManager initialized with settings:', this.state.settings);
     this.setupVisibilityHandling();
     this.preloadSFX();
+    
+    // Force stop any existing audio on page load
+    this.stopAllAudio();
   }
 
   private setupVisibilityHandling() {
@@ -234,6 +237,43 @@ class AudioManagerClass {
     }
   }
 
+  // Nuclear option: stop ALL audio on the page
+  public stopAllAudio(): void {
+    console.log('STOPPING ALL AUDIO - Nuclear cleanup');
+    
+    // Stop our managed BGM
+    this.stopBgm();
+    
+    // Force stop ALL audio elements on the page
+    const allAudioElements = document.querySelectorAll('audio');
+    allAudioElements.forEach((audio, index) => {
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.src = '';
+        audio.load(); // Force reload to clear buffer
+        console.log(`Stopped audio element ${index}`);
+      } catch (e) {
+        console.warn(`Failed to stop audio element ${index}:`, e);
+      }
+    });
+    
+    // Clear all timeouts that might restart audio
+    if (this.crossfadeTimeout) {
+      clearTimeout(this.crossfadeTimeout);
+      this.crossfadeTimeout = null;
+    }
+    
+    // Reset state completely
+    this.updateState({
+      isPlaying: false,
+      currentTrackId: null,
+      position: 0
+    });
+    
+    console.log('All audio forcibly stopped');
+  }
+
   public playSfx(soundId: SFXTrackId): void {
     console.log('playSfx called:', soundId, 'canPlay:', this.state.canPlay, 'muted:', this.state.settings.isMuted);
     if (!this.state.canPlay) return;
@@ -274,21 +314,9 @@ class AudioManagerClass {
   public setScene(scene: SceneId): void {
     this.updateState({ scene });
 
-    // Auto-play appropriate music for scene - only if audio is enabled and we're not already playing the right track
-    if (!this.state.canPlay) return;
-    
-    switch (scene) {
-      case 'start-menu':
-        if (this.state.currentTrackId !== 'start-theme') {
-          this.playBgm('start-theme');
-        }
-        break;
-      case 'end-credits':
-        if (this.state.currentTrackId !== 'endcredits-theme') {
-          this.playBgm('endcredits-theme', { duration: 1200 });
-        }
-        break;
-    }
+    // DISABLED: Auto-play music to prevent chaos
+    // Only allow manual music control now
+    console.log('Scene changed to:', scene, '(auto-play disabled)');
   }
 
   public startGameplay(faction: 'government' | 'truth'): void {

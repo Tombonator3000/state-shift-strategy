@@ -242,6 +242,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => audio.stopAllAudio()}
+                    className="border-red-600 text-red-600 hover:bg-red-600/10 font-bold"
+                  >
+                    🚨 KILL ALL
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => audio.mute(!audio.settings.isMuted)}
                     className="border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
                   >

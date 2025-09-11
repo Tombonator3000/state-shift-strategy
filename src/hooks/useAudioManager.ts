@@ -33,6 +33,7 @@ export const useAudioManager = () => {
     startGameplay: (faction: 'government' | 'truth') => AudioManager.startGameplay(faction),
     
     // System
-    enableAudio: () => AudioManager.enableAudio()
+    enableAudio: () => AudioManager.enableAudio(),
+    stopAllAudio: () => AudioManager.stopAllAudio()
   };
 };
