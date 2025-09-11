@@ -25,6 +25,7 @@ import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import PhaseTransition from '@/components/effects/PhaseTransition';
 import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
+import ActionPhasePopup from '@/components/game/ActionPhasePopup';
 import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
 import ContextualHelp from '@/components/game/ContextualHelp';
 import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
@@ -67,6 +68,7 @@ const Index = () => {
   const [showCardCollection, setShowCardCollection] = useState(false);
   const [gameOverReport, setGameOverReport] = useState<any>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
+  const [showActionPhase, setShowActionPhase] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
   const audio = useAudio();
@@ -891,6 +893,12 @@ const Index = () => {
           setShowMenu(true);
           setShowIntro(true);
         }}
+        onMainMenu={() => {
+          setVictoryState({ isVictory: false, type: null });
+          setGameOverReport(null);
+          setShowMenu(true);
+          setShowIntro(true);
+        }}
       />
 
       {/* Extra Edition Newspaper */}
@@ -953,6 +961,13 @@ const Index = () => {
           onClose={handleCloseNewspaper}
         />
       )}
+
+      {/* Action Phase Popup */}
+      <ActionPhasePopup
+        isVisible={showActionPhase}
+        truthLevel={gameState.truth}
+        onClose={() => setShowActionPhase(false)}
+      />
     </div>
   );
 };
