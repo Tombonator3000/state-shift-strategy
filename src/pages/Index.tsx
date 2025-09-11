@@ -39,6 +39,9 @@ import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import ExtraEditionNewspaper from '@/components/game/ExtraEditionNewspaper';
 import InGameOptions from '@/components/game/InGameOptions';
+import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
+import EnhancedExpansionManager from '@/components/game/EnhancedExpansionManager';
+import MinimizedHand from '@/components/game/MinimizedHand';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
@@ -71,6 +74,7 @@ const Index = () => {
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   const [showActionPhase, setShowActionPhase] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const [showMinimizedHand, setShowMinimizedHand] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
   const audio = useAudioContext();
@@ -268,10 +272,18 @@ const Index = () => {
     }
   }, [gameState.faction]);
 
-  // Handle keyboard shortcuts
+  // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (showMenu || showIntro) return; // Don't handle shortcuts in menus
+      if (showMenu || showIntro || showInGameOptions || showHowToPlay) return;
+      
+      // Number keys for playing cards (1-9)
+      const cardNumber = parseInt(e.key);
+      if (cardNumber >= 1 && cardNumber <= 9 && gameState.hand[cardNumber - 1]) {
+        const card = gameState.hand[cardNumber - 1];
+        handlePlayCard(card.id);
+        return;
+      }
       
       switch (e.key.toLowerCase()) {
         case 'escape':
@@ -305,7 +317,7 @@ const Index = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showMenu, showIntro, gameState.phase, gameState.animating, audio]);
+  }, [showMenu, showIntro, showInGameOptions, showHowToPlay, gameState.phase, gameState.animating, gameState.hand, audio]);
 
   const handleSaveGame = () => {
     if (saveGame) {

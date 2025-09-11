@@ -5,6 +5,9 @@ interface AudioConfig {
   muted: boolean;
   musicEnabled: boolean;
   sfxEnabled: boolean;
+  shuffle: boolean;
+  loop: boolean;
+  crossfade: boolean;
 }
 
 type MusicType = 'theme' | 'government' | 'truth' | 'endcredits';
@@ -24,8 +27,11 @@ export const useAudio = () => {
         return {
           volume: (parsed.masterVolume || 70) / 100,
           muted: false,
-          musicEnabled: true,
-          sfxEnabled: true
+          musicEnabled: parsed.musicEnabled !== false,
+          sfxEnabled: parsed.sfxEnabled !== false,
+          shuffle: parsed.musicShuffle || false,
+          loop: parsed.musicLoop !== false,
+          crossfade: parsed.musicCrossfade !== false
         };
       } catch {
         console.log('🎵 useAudio: Failed to parse saved audio settings, using defaults');
@@ -36,7 +42,10 @@ export const useAudio = () => {
       volume: 0.7, // Default to 70%
       muted: false,
       musicEnabled: true,
-      sfxEnabled: true
+      sfxEnabled: true,
+      shuffle: false,
+      loop: true,
+      crossfade: true
     };
   });
 
@@ -47,6 +56,8 @@ export const useAudio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackName, setCurrentTrackName] = useState<string>('');
   const [audioStatus, setAudioStatus] = useState<string>('Initializing...');
+  const [previousTrackRef, setPreviousTrackRef] = useState<HTMLAudioElement | null>(null);
+  const [hoverPreventRestart, setHoverPreventRestart] = useState(false);
   
   console.log('🎵 useAudio: State initialized');
   
