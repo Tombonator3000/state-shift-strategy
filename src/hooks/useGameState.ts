@@ -103,11 +103,11 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     truth: 60,
     ip: 15,
     aiIP: 15,
-    hand: getRandomCards(3),
-    aiHand: getRandomCards(3),
+    hand: getRandomCards(3, { faction: 'truth' }),
+    aiHand: getRandomCards(3, { faction: 'government' }),
     isGameOver: false,
-    deck: generateWeightedDeck(40),
-    aiDeck: generateWeightedDeck(40),
+    deck: generateWeightedDeck(40, 'truth'),
+    aiDeck: generateWeightedDeck(40, 'government'),
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
     controlledStates: [],
@@ -174,7 +174,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       (JSON.parse(savedSettings).drawMode || 'standard') : 'standard';
     
     const handSize = getStartingHandSize(drawMode, faction);
-    const newDeck = generateWeightedDeck(40);
+    // CRITICAL: Pass faction to deck generation
+    const newDeck = generateWeightedDeck(40, faction);
     const startingHand = newDeck.slice(0, handSize);
     const initialControl = getInitialStateControl(faction);
 
@@ -190,6 +191,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       aiIP: aiStartingIP,
       hand: startingHand,
       deck: newDeck.slice(handSize),
+      // AI gets opposite faction cards
+      aiHand: getRandomCards(handSize, { faction: faction === 'government' ? 'truth' : 'government' }),
+      aiDeck: generateWeightedDeck(40, faction === 'government' ? 'truth' : 'government'),
       controlledStates: initialControl.player,
       isGameOver: false, // CRITICAL: Reset game over state
       phase: 'action', // Reset to proper starting phase
@@ -624,8 +628,17 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
     // AI draws cards (correct hand limit of 7)
     const aiCardsToDraw = Math.max(0, Math.min(1, 7 - currentGameState.aiHand.length)); // Draw 1 card if under limit
-    const aiDrawnCards = currentGameState.aiDeck.slice(0, aiCardsToDraw);
-    const aiRemainingDeck = currentGameState.aiDeck.slice(aiCardsToDraw);
+    
+    // Check if AI deck has enough cards, if not generate more with correct faction
+    let aiCurrentDeck = currentGameState.aiDeck;
+    if (aiCurrentDeck.length < aiCardsToDraw) {
+      const aiFaction = currentGameState.faction === 'government' ? 'truth' : 'government';
+      const additionalCards = generateWeightedDeck(40, aiFaction);
+      aiCurrentDeck = [...aiCurrentDeck, ...additionalCards];
+    }
+    
+    const aiDrawnCards = aiCurrentDeck.slice(0, aiCardsToDraw);
+    const aiRemainingDeck = aiCurrentDeck.slice(aiCardsToDraw);
 
     // Update state with AI income and cards
     setGameState(prev => ({
@@ -777,8 +790,15 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       );
       
       if (totalCardsToDraw > 0) {
-        const drawnCards = prev.deck.slice(0, totalCardsToDraw);
-        const remainingDeck = prev.deck.slice(totalCardsToDraw);
+        // Check if deck has enough cards, if not generate more with correct faction
+        let currentDeck = prev.deck;
+        if (currentDeck.length < totalCardsToDraw) {
+          const additionalCards = generateWeightedDeck(40, prev.faction);
+          currentDeck = [...currentDeck, ...additionalCards];
+        }
+        
+        const drawnCards = currentDeck.slice(0, totalCardsToDraw);
+        const remainingDeck = currentDeck.slice(totalCardsToDraw);
         
         return {
           ...prev,

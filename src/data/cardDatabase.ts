@@ -4878,6 +4878,7 @@ export const getCardsByRarity = (rarity: GameCard['rarity']) => {
 export const getRandomCards = (count: number, filters?: {
   type?: GameCard['type'];
   rarity?: GameCard['rarity'];
+  faction?: 'government' | 'truth';
 }): GameCard[] => {
   const allCards = [...CARD_DATABASE, ...extensionManager.getAllExtensionCards()];
   let pool = allCards;
@@ -4888,6 +4889,14 @@ export const getRandomCards = (count: number, filters?: {
   
   if (filters?.rarity) {
     pool = pool.filter(card => card.rarity === filters.rarity);
+  }
+  
+  // CRITICAL: Filter by faction
+  if (filters?.faction) {
+    pool = pool.filter(card => {
+      const cardFaction = card.faction?.toLowerCase();
+      return cardFaction === filters.faction;
+    });
   }
   
   const shuffled = [...pool].sort(() => Math.random() - 0.5);
@@ -4907,11 +4916,20 @@ export const RARITY_WEIGHTS = {
   legendary: 0.02
 };
 
-export const generateRandomDeck = (size: number = 40): GameCard[] => {
+export const generateRandomDeck = (size: number = 40, faction?: 'government' | 'truth'): GameCard[] => {
   const deck: GameCard[] = [];
   
   // Combine core cards with extension cards
   const allCards = [...CARD_DATABASE, ...extensionManager.getAllExtensionCards()];
+  
+  // CRITICAL: Filter by faction if provided
+  let factionCards = allCards;
+  if (faction) {
+    factionCards = allCards.filter(card => {
+      const cardFaction = card.faction?.toLowerCase();
+      return cardFaction === faction;
+    });
+  }
   
   for (let i = 0; i < size; i++) {
     const rand = Math.random();
@@ -4927,7 +4945,7 @@ export const generateRandomDeck = (size: number = 40): GameCard[] => {
       rarity = 'legendary';
     }
     
-    const cardsOfRarity = allCards.filter(card => card.rarity === rarity);
+    const cardsOfRarity = factionCards.filter(card => card.rarity === rarity);
     if (cardsOfRarity.length > 0) {
       const randomCard = cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)];
       deck.push(randomCard);

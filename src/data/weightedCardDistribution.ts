@@ -1,5 +1,5 @@
 import { GameCard } from '@/components/game/GameHand';
-import { CARD_DATABASE } from './cardDatabase';
+import { CARD_DATABASE, generateRandomDeck } from './cardDatabase';
 import { extensionManager } from './extensionSystem';
 
 // Distribution modes
@@ -355,6 +355,11 @@ class WeightedCardDistribution {
 export const weightedDistribution = new WeightedCardDistribution();
 
 // Helper function for backward compatibility
-export const generateWeightedDeck = (size: number = 40): GameCard[] => {
+export const generateWeightedDeck = (size: number = 40, faction?: 'government' | 'truth'): GameCard[] => {
+  // If faction is specified, use faction-filtered generation
+  if (faction) {
+    return generateRandomDeck(size, faction);
+  }
+  // Otherwise use the weighted distribution system (backwards compatible)
   return weightedDistribution.generateWeightedDeck(size);
 };
