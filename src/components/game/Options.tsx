@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
 import { useAudioManager } from '@/hooks/useAudioManager';
 
@@ -26,6 +26,10 @@ interface GameSettings {
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const audio = useAudioManager();
+  const audioTimeoutRef = useRef<NodeJS.Timeout>();
+  const bgmTimeoutRef = useRef<NodeJS.Timeout>();
+  const sfxTimeoutRef = useRef<NodeJS.Timeout>();
+  
   const [settings, setSettings] = useState<GameSettings>({
     enableAnimations: true,
     autoEndTurn: false,
@@ -48,13 +52,13 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
         if (parsed.drawMode && !DRAW_MODE_CONFIGS[parsed.drawMode as DrawMode]) {
           parsed.drawMode = 'standard'; // fallback to default
         }
-        setSettings({ ...settings, ...parsed });
+        setSettings(prev => ({ ...prev, ...parsed }));
       } catch (error) {
         console.error('Failed to parse saved settings:', error);
         // Keep default settings if parsing fails
       }
     }
-  }, []);
+  }, []); // Fixed: removed settings dependency to prevent loop
 
   // Save settings to localStorage whenever they change
   const updateSettings = (newSettings: Partial<GameSettings>) => {
@@ -166,11 +170,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <Slider
                   value={[audio.settings.master * 100]}
                   onValueChange={([value]) => {
-                    audio.setVolumes({ master: value / 100 });
-                    audio.playSfx('click');
+                    // Debounced audio update to prevent rapid calls
+                    if (audioTimeoutRef.current) clearTimeout(audioTimeoutRef.current);
+                    audioTimeoutRef.current = setTimeout(() => {
+                      audio.setVolumes({ master: value / 100 });
+                    }, 50);
                   }}
                   max={100}
-                  step={1}
+                  step={5}
                   className="w-full"
                 />
               </div>
@@ -182,11 +189,13 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <Slider
                   value={[audio.settings.bgm * 100]}
                   onValueChange={([value]) => {
-                    audio.setVolumes({ bgm: value / 100 });
-                    audio.playSfx('click');
+                    if (bgmTimeoutRef.current) clearTimeout(bgmTimeoutRef.current);
+                    bgmTimeoutRef.current = setTimeout(() => {
+                      audio.setVolumes({ bgm: value / 100 });
+                    }, 50);
                   }}
                   max={100}
-                  step={1}
+                  step={5}
                   className="w-full"
                 />
               </div>
@@ -198,11 +207,13 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <Slider
                   value={[audio.settings.sfx * 100]}
                   onValueChange={([value]) => {
-                    audio.setVolumes({ sfx: value / 100 });
-                    audio.playSfx('click');
+                    if (sfxTimeoutRef.current) clearTimeout(sfxTimeoutRef.current);
+                    sfxTimeoutRef.current = setTimeout(() => {
+                      audio.setVolumes({ sfx: value / 100 });
+                    }, 50);
                   }}
                   max={100}
-                  step={1}
+                  step={5}
                   className="w-full"
                 />
               </div>

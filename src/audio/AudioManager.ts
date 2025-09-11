@@ -106,9 +106,9 @@ class AudioManagerClass {
       return;
     }
 
-    // Don't restart the same track
-    if (this.state.currentTrackId === trackId && this.currentBgm && this.state.isPlaying) {
-      console.log('Same track already playing, skipping');
+    // Don't restart the same track that's already playing
+    if (this.state.currentTrackId === trackId && this.currentBgm && this.state.isPlaying && !this.currentBgm.paused) {
+      console.log('Same track already playing and not paused, skipping');
       return;
     }
 
@@ -116,12 +116,16 @@ class AudioManagerClass {
       // Always stop current track first to prevent overlapping
       if (this.currentBgm) {
         console.log('Stopping current BGM before starting new one');
-        this.stopBgm();
+        this.currentBgm.pause();
+        this.currentBgm.currentTime = 0;
+        this.currentBgm.src = '';
+        this.currentBgm = null;
       }
 
       const newAudio = new Audio(track.path);
       newAudio.loop = options.loop ?? track.loop;
       newAudio.volume = this.calculateVolume(track.volume, 'bgm');
+      newAudio.preload = 'auto';
 
       console.log('Starting new BGM with volume:', newAudio.volume);
       await newAudio.play();
@@ -150,7 +154,7 @@ class AudioManagerClass {
       });
 
       newAudio.addEventListener('error', (e) => {
-        console.warn('BGM playback error:', e);
+        console.warn('BGM playback error:', e, 'for track:', trackId, 'path:', track.path);
         if (this.currentBgm === newAudio) {
           this.updateState({ isPlaying: false, currentTrackId: null });
           this.currentBgm = null;
