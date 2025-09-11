@@ -110,10 +110,7 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
       });
     });
 
-    // Auto-exit after timeline completes
-    addEvent(6000, () => {
-      handleClose();
-    });
+    // No auto-exit - wait for music to end or manual button press
 
     timelineRef.current = timeouts;
   };
@@ -128,6 +125,11 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
       const audio = new Audio('/muzak/endcredits-theme.mp3');
       audio.volume = 0.3;
       audio.loop = false;
+      
+      // Auto-return to main menu when music ends
+      audio.addEventListener('ended', () => {
+        handleClose();
+      });
       
       audio.play().catch((error) => {
         console.warn('Could not play credits music:', error);
