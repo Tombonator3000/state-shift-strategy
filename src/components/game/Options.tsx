@@ -184,18 +184,6 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 />
               </div>
 
-              <div>
-                <label className="text-sm font-medium text-newspaper-text mb-2 block">
-                  Background Music: {settings.musicVolume}%
-                </label>
-                <Slider
-                  value={[settings.musicVolume]}
-                  onValueChange={([value]) => updateSettings({ musicVolume: value })}
-                  max={100}
-                  step={1}
-                  className="w-full"
-                />
-              </div>
 
               <div>
                 <label className="text-sm font-medium text-newspaper-text mb-2 block">
