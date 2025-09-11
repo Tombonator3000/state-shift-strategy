@@ -25,8 +25,9 @@ import {
   EnhancedBalanceReport,
   SimulationReport
 } from '@/data/enhancedCardBalancing';
-import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle, ChevronDown, Info } from 'lucide-react';
+import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle, ChevronDown, Info, Zap } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import PatchApplicatorComponent from './PatchApplicator';
 
 interface BalancingDashboardProps {
   onClose: () => void;
@@ -212,13 +213,14 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
 
         <div className="p-4 h-full overflow-auto">
           <Tabs defaultValue="overview" className="h-full">
-            <TabsList className="w-full flex flex-wrap gap-1 bg-gray-800">
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="overview">Overview</TabsTrigger>
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="cards">Card Analysis</TabsTrigger>
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="simulation">Simulation</TabsTrigger>
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="outliers">Top Outliers</TabsTrigger>
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="charts">Charts</TabsTrigger>
-            </TabsList>
+             <TabsList className="w-full flex flex-wrap gap-1 bg-gray-800">
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="overview">Overview</TabsTrigger>
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="cards">Card Analysis</TabsTrigger>
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="simulation">Simulation</TabsTrigger>
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="patch">Apply Patch</TabsTrigger>
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="outliers">Top Outliers</TabsTrigger>
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="charts">Charts</TabsTrigger>
+             </TabsList>
 
             <TabsContent value="overview" className="mt-4 space-y-4">
               {/* Simulation Results */}
@@ -500,6 +502,10 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                   </Card>
                 </div>
               </div>
+            </TabsContent>
+
+            <TabsContent value="patch" className="mt-4">
+              <PatchApplicatorComponent onPatchApplied={() => window.location.reload()} />
             </TabsContent>
 
             <TabsContent value="simulation" className="mt-4 space-y-4">
