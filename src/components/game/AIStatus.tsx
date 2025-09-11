@@ -1,8 +1,9 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Bot, Brain, Zap, Shield, Target } from 'lucide-react';
+import { Bot, Brain, Zap, Shield, Target, ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { type AIDifficulty } from '@/data/aiStrategy';
+import { useState } from 'react';
 
 interface AIStatusProps {
   difficulty: AIDifficulty;
@@ -11,6 +12,8 @@ interface AIStatusProps {
   currentPlayer: 'human' | 'ai';
   aiControlledStates: number;
   assessmentText?: string;
+  aiHandSize?: number;
+  aiObjectiveProgress?: number;
 }
 
 const AIStatus = ({ 
@@ -19,8 +22,11 @@ const AIStatus = ({
   isThinking = false, 
   currentPlayer,
   aiControlledStates,
-  assessmentText 
+  assessmentText,
+  aiHandSize = 0,
+  aiObjectiveProgress = 0
 }: AIStatusProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const getDifficultyColor = (diff: AIDifficulty) => {
     switch (diff) {
       case 'easy': return 'bg-green-900/50 text-green-400 border-green-600';
@@ -40,7 +46,7 @@ const AIStatus = ({
   };
 
   return (
-    <Card className="p-3 bg-gray-900 border-gray-700">
+    <Card className="p-3 bg-gray-900 border-gray-700 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           {getDifficultyIcon(difficulty)}
@@ -48,9 +54,16 @@ const AIStatus = ({
             AI OPPONENT
           </h3>
         </div>
-        <Badge className={`text-xs font-bold ${getDifficultyColor(difficulty)}`}>
-          {difficulty.toUpperCase()}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge className={`text-xs font-bold ${getDifficultyColor(difficulty)}`}>
+            {difficulty.toUpperCase()}
+          </Badge>
+          {isExpanded ? (
+            <ChevronUp size={14} className="text-gray-400" />
+          ) : (
+            <ChevronDown size={14} className="text-gray-400" />
+          )}
+        </div>
       </div>
 
       {personalityName && (
@@ -82,6 +95,45 @@ const AIStatus = ({
             {aiControlledStates} states
           </span>
         </div>
+
+        {/* Expanded Content */}
+        {isExpanded && (
+          <div className="space-y-2 border-t border-gray-700 pt-2">
+            {/* AI Intel Section */}
+            <div className="bg-gray-800 p-2 rounded border border-gray-600">
+              <h4 className="font-bold text-xs mb-1 text-white font-mono">AI INTEL</h4>
+              <div className="text-xs font-mono text-gray-300 space-y-1">
+                <div>Hand Size: {aiHandSize}</div>
+                <div>Strategy: Suppressing Truth</div>
+                <div>Threat Level: LOW</div>
+              </div>
+            </div>
+
+            {/* AI Objective Section */}
+            <div className="bg-black p-2 rounded border border-red-900/50 relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 to-transparent rounded"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-2">
+                  <Lock size={12} className="text-red-400/70" />
+                  <h4 className="font-bold text-xs font-mono text-red-400/70">
+                    AI OBJECTIVE
+                  </h4>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-2 bg-gray-800 rounded">
+                    <div 
+                      className="h-full bg-red-400/70 rounded transition-all"
+                      style={{ width: `${aiObjectiveProgress}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-gray-400 font-mono">
+                    {Math.floor(aiObjectiveProgress)}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* AI Assessment */}
         {assessmentText && (

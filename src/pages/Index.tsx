@@ -763,21 +763,13 @@ const Index = () => {
               currentPlayer={gameState.currentPlayer}
               aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
               assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
+              aiHandSize={gameState.aiHand.length}
+              aiObjectiveProgress={gameState.aiSecretAgenda ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100 : 0}
             />
           </div>
 
-          {/* AI Secret Agenda */}
-          <div className="mb-3">
-            <SecretAgenda 
-              agenda={{
-                ...gameState.aiSecretAgenda,
-                progress: gameState.aiSecretAgenda.progress,
-                completed: gameState.aiSecretAgenda.completed,
-                revealed: gameState.aiSecretAgenda.revealed
-              }} 
-              isPlayer={false} 
-            />
-          </div>
+          {/* AI Secret Agenda - Now integrated into AIStatus component */}
+          {/* This section has been moved to the expandable AI Opponent component */}
           
           <div className="bg-newspaper-bg border-2 border-newspaper-border p-2">
             <h3 className="font-bold text-xs mb-1 text-newspaper-text">CLASSIFIED INTEL</h3>
@@ -847,15 +839,8 @@ const Index = () => {
             </div>
           </div>
 
-          {/* AI Intel */}
-          <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border flex-shrink-0">
-            <h3 className="font-bold text-xs mb-1">AI INTEL</h3>
-            <div className="text-xs font-mono space-y-1">
-              <div>Hand Size: {gameState.aiHand.length}</div>
-              <div>Strategy: Suppressing Truth</div>
-              <div>Threat Level: LOW</div>
-            </div>
-          </div>
+          {/* AI Intel - Now integrated into AIStatus component */}
+          {/* This section has been moved to the expandable AI Opponent component on the left */}
 
           {/* Your Hand - Takes remaining space */}
           <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border flex-1 min-h-0">
