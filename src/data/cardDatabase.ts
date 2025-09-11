@@ -11,11 +11,12 @@ import { extensionManager } from './extensionSystem';
 // Batch 3 (Truth Seekers 101-150): ✅ Complete
 // Batch 4 (Truth Seekers 151-200): ✅ Complete
 // Batch 5 (Government 1-50): ✅ Complete
-// Batch 6 (Government 51-100): ⏳ Pending
-// Batch 7 (Government 101-150): ⏳ Pending
-// Batch 8 (Government 151-200): ⏳ Pending
+// Batch 6 (Government 51-100): ✅ Complete
+// Batch 7 (Government 101-150): ✅ Complete
+// Batch 8 (Government 151-200): ✅ Complete
 //
-// ⚡ MIGRATION RULES:
+// ⚡ MIGRATION COMPLETE:
+// - All 400 cards integrated (200 Truth + 200 Government)
 // - Truth changes: max ±15% (Legendary only)
 // - Legendary minimum cost: 25 IP  
 // - Truth clamped 0-100, IP ≥ 0

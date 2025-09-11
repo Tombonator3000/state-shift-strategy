@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import type { GameCard } from '@/components/game/GameHand';
 import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
 import { extensionManager } from '@/data/extensionSystem';
-import { TRUTH_SEEKERS_CARDS, GOVERNMENT_CARDS } from '@/data/factionCards';
 import { generateWeightedDeck } from '@/data/weightedCardDistribution';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
