@@ -7,10 +7,21 @@ import CardImage from './CardImage';
 interface GameCard {
   id: string;
   name: string;
-  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'TECH' | 'DEVELOPMENT';
+  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'DEVELOPMENT' | 'LEGENDARY';
   rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
   text: string;
+  flavor?: string;
   cost: number;
+  target?: {
+    scope: string;
+    restrict?: string[];
+    requireTag?: string;
+    type?: string;
+    faction?: string;
+    onlyIf?: any;
+  };
+  effects?: any;
+  faction?: string;
 }
 
 interface NewCardsPresentationProps {
@@ -48,8 +59,8 @@ const NewCardsPresentation = ({ cards, isVisible, onConfirm }: NewCardsPresentat
       case 'ZONE': return 'border-government-blue bg-government-blue/10';
       case 'ATTACK': return 'border-destructive bg-destructive/10';
       case 'DEFENSIVE': return 'border-accent bg-accent/10';
-      case 'TECH': return 'border-primary bg-primary/10';
-      case 'DEVELOPMENT': return 'border-secondary bg-secondary/10';
+      case 'DEVELOPMENT': return 'border-primary bg-primary/10';
+      case 'LEGENDARY': return 'border-secondary bg-secondary/10';
       default: return 'border-muted bg-muted/10';
     }
   };
@@ -99,8 +110,9 @@ const NewCardsPresentation = ({ cards, isVisible, onConfirm }: NewCardsPresentat
                       card.type === 'ZONE' ? 'bg-government-blue/20 border-government-blue text-government-blue' :
                       card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
                       card.type === 'DEFENSIVE' ? 'bg-accent/20 border-accent text-accent-foreground' :
-                      card.type === 'TECH' ? 'bg-primary/20 border-primary text-primary' :
-                      'bg-secondary/20 border-secondary text-secondary-foreground'
+                      card.type === 'DEVELOPMENT' ? 'bg-primary/20 border-primary text-primary' :
+                      card.type === 'LEGENDARY' ? 'bg-secondary/20 border-secondary text-secondary-foreground' :
+                      'bg-muted/20 border-muted text-muted-foreground'
                     }`}
                   >
                     [{card.type}]

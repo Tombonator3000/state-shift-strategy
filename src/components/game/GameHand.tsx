@@ -7,13 +7,23 @@ import { Badge } from '@/components/ui/badge';
 export interface GameCard {
   id: string;
   name: string;
-  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE';
+  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'DEVELOPMENT' | 'LEGENDARY';
   rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
   text: string;
-  flavorGov: string;
-  flavorTruth: string;
+  flavor?: string;
+  flavorGov?: string;
+  flavorTruth?: string;
   cost: number;
-  target?: string;
+  target?: {
+    scope: string;
+    restrict?: string[];
+    requireTag?: string;
+    type?: string;
+    faction?: string;
+    onlyIf?: any;
+  };
+  effects?: any;
+  faction?: string;
 }
 
 interface GameHandProps {

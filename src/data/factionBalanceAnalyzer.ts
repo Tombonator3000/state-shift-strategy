@@ -8,13 +8,23 @@ import { extensionManager } from './extensionSystem';
 export interface GameCard {
   id: string;
   name: string;
-  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'TECH' | 'DEVELOPMENT';
+  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'DEVELOPMENT' | 'LEGENDARY';
   rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
   text: string;
+  flavor?: string;
   flavorGov?: string;
   flavorTruth?: string;
   cost: number;
-  target?: string;
+  target?: {
+    scope: string;
+    restrict?: string[];
+    requireTag?: string;
+    type?: string;
+    faction?: string;
+    onlyIf?: any;
+  };
+  effects?: any;
+  faction?: string;
 }
 
 // Core interfaces for analysis system

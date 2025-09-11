@@ -5,10 +5,21 @@
 export interface GameCard {
   id: string;
   name: string;
-  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'TECH' | 'DEVELOPMENT';
+  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'DEVELOPMENT' | 'LEGENDARY';
   rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
   text: string;
+  flavor?: string;
   cost: number;
+  target?: {
+    scope: string;
+    restrict?: string[];
+    requireTag?: string;
+    type?: string;
+    faction?: string;
+    onlyIf?: any;
+  };
+  effects?: any;
+  faction?: string;
 }
 
 export interface VictoryCondition {
