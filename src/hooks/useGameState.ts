@@ -11,6 +11,7 @@ import { AIFactory } from '@/data/aiFactory';
 import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
 import { setStateOccupation } from '@/data/usaStates';
 import { getStartingHandSize, calculateCardDraw, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
+import { useAchievements } from '@/contexts/AchievementContext';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -91,6 +92,7 @@ const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
 
 export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   const [eventManager] = useState(() => new EventManager());
+  const achievements = useAchievements();
   
   const [gameState, setGameState] = useState<GameState>({
     faction: 'truth',
@@ -177,6 +179,10 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     const startingHand = newDeck.slice(0, handSize);
     const initialControl = getInitialStateControl(faction);
 
+    // Track game start in achievements
+    achievements.onGameStart(faction, aiDifficulty);
+    achievements.manager.onNewGameStart();
+
     setGameState(prev => ({
       ...prev,
       faction,
@@ -227,7 +233,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         lastTurnWithoutPlay: false
       }
     }));
-  }, []);
+  }, [achievements, aiDifficulty]);
 
   const playCard = useCallback((cardId: string) => {
     setGameState(prev => {
@@ -235,6 +241,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
         return prev;
       }
+
+      // Track card play in achievements
+      achievements.onCardPlayed(cardId, card.type);
 
       const newHand = prev.hand.filter(c => c.id !== cardId);
       let newTruth = prev.truth;
@@ -282,6 +291,13 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
                 if (!newControlledStates.includes(stateKey)) {
                   newControlledStates.push(stateKey);
                 }
+
+                // Track state capture in achievements
+                achievements.updateStats({
+                  total_states_controlled: achievements.stats.total_states_controlled + 1,
+                  max_states_controlled_single_game: newControlledStates.length
+                });
+
                 return {
                   ...prev,
                   hand: newHand,
@@ -342,6 +358,13 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           break;
       }
 
+      // Update achievements with current game state
+      achievements.updateStats({
+        max_ip_reached: Math.max(achievements.stats.max_ip_reached, newIP),
+        max_truth_reached: Math.max(achievements.stats.max_truth_reached, newTruth),
+        min_truth_reached: Math.min(achievements.stats.min_truth_reached, newTruth)
+      });
+
       return {
         ...prev,
         hand: newHand,
@@ -354,7 +377,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         log: [...prev.log, ...newLog]
       };
     });
-  }, []);
+  }, [achievements]);
 
   const playCardAnimated = useCallback(async (
     cardId: string,
@@ -792,7 +815,58 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     }));
   }, []);
 
-  const saveGame = useCallback(() => {
+  const checkVictoryConditions = useCallback((state: GameState) => {
+    // Check for victory conditions and update achievements
+    let victoryType = '';
+    let playerWon = false;
+
+    // Truth-based victories
+    if (state.truth >= 90 && state.faction === 'truth') {
+      victoryType = 'truth_high';
+      playerWon = true;
+    } else if (state.truth <= 10 && state.faction === 'government') {
+      victoryType = 'truth_low';
+      playerWon = true;
+    }
+    // Territorial victory (10+ states)
+    else if (state.controlledStates.length >= 10) {
+      victoryType = 'territorial';
+      playerWon = true;
+    }
+    // Economic victory (200+ IP)
+    else if (state.ip >= 200) {
+      victoryType = 'economic';
+      playerWon = true;
+    }
+    // Secret agenda completion
+    else if (state.secretAgenda?.completed) {
+      victoryType = 'agenda';
+      playerWon = true;
+    }
+    // AI victory conditions (similar checks for AI)
+    else if (state.aiIP >= 200 || state.controlledStates.filter(s => state.states.find(st => st.abbreviation === s)?.owner === 'ai').length >= 10) {
+      playerWon = false;
+    }
+
+    // If victory condition met, track in achievements
+    if (victoryType && playerWon) {
+      achievements.onGameEnd(true, victoryType, {
+        turns: state.turn,
+        finalIP: state.ip,
+        finalTruth: state.truth,
+        statesControlled: state.controlledStates.length
+      });
+    } else if (!playerWon && (state.aiIP >= 200 || state.truth <= 0 || state.truth >= 100)) {
+      achievements.onGameEnd(false, 'defeat', {
+        turns: state.turn,
+        finalIP: state.ip,
+        finalTruth: state.truth,
+        statesControlled: state.controlledStates.length
+      });
+    }
+
+    return { victoryType, playerWon };
+  }, [achievements]);
     const saveData = {
       ...gameState,
       timestamp: Date.now(),
@@ -882,6 +956,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     saveGame,
     loadGame,
     getSaveInfo,
-    deleteSave
+    deleteSave,
+    checkVictoryConditions
   };
 };

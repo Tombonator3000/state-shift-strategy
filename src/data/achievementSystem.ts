@@ -761,10 +761,32 @@ export class AchievementManager {
   exportData() {
     return {
       stats: this.stats,
-      achievements: this.unlockedAchievements,
+      unlockedAchievements: this.unlockedAchievements,
       timestamp: Date.now(),
       version: '1.0'
     };
+  }
+
+  // Import achievement data
+  importData(data: any): boolean {
+    try {
+      if (!data || !data.stats || !data.unlockedAchievements) {
+        console.error('Invalid data format for import');
+        return false;
+      }
+
+      // Validate and merge stats
+      this.stats = { ...this.getDefaultStats(), ...data.stats };
+      this.unlockedAchievements = Array.isArray(data.unlockedAchievements) ? 
+        data.unlockedAchievements : [];
+      
+      this.saveProgress();
+      console.log('Achievement data imported successfully');
+      return true;
+    } catch (error) {
+      console.error('Failed to import achievement data:', error);
+      return false;
+    }
   }
 
   // Game event handlers

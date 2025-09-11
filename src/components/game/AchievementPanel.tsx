@@ -5,8 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, Trophy, Star, Target, Zap, Users, BookOpen, Eye, Download } from 'lucide-react';
-import { AchievementManager, ACHIEVEMENTS, type Achievement } from '@/data/achievementSystem';
+import { X, Trophy, Star, Target, Zap, Users, BookOpen, Eye, Download, Upload, RotateCcw } from 'lucide-react';
+import { ACHIEVEMENTS, type Achievement } from '@/data/achievementSystem';
+import { useAchievements } from '@/contexts/AchievementContext';
 import { useToast } from '@/hooks/use-toast';
 
 interface AchievementPanelProps {
@@ -14,27 +15,31 @@ interface AchievementPanelProps {
 }
 
 const AchievementPanel = ({ onClose }: AchievementPanelProps) => {
-  const [achievementManager] = useState(() => new AchievementManager());
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   const [filter, setFilter] = useState<string>('all');
   
+  const { 
+    manager, 
+    stats, 
+    unlockedAchievements, 
+    lockedAchievements, 
+    newlyUnlocked,
+    exportData,
+    importData,
+    resetProgress,
+    clearNewlyUnlocked
+  } = useAchievements();
+  
   const { toast } = useToast();
 
-  const progress = achievementManager.getProgress();
-  const stats = achievementManager.getStats();
-  const unlockedAchievements = achievementManager.getUnlockedAchievements();
-  const lockedAchievements = achievementManager.getLockedAchievements();
+  const progress = manager.getProgress();
 
-  // Check for newly unlocked achievements on component mount
+  // Clear newly unlocked achievements when component mounts
   useEffect(() => {
-    const newlyUnlocked = achievementManager.getNewlyUnlocked();
-    newlyUnlocked.forEach(achievement => {
-      toast({
-        title: "Achievement Unlocked!",
-        description: `${achievement.name} - ${achievement.points} points`,
-      });
-    });
-  }, [toast, achievementManager]);
+    if (newlyUnlocked.length > 0) {
+      clearNewlyUnlocked();
+    }
+  }, [newlyUnlocked, clearNewlyUnlocked]);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -65,7 +70,7 @@ const AchievementPanel = ({ onClose }: AchievementPanelProps) => {
     lockedAchievements.filter(a => a.category === filter);
 
   const exportProgress = () => {
-    const data = achievementManager.exportData();
+    const data = exportData();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -78,6 +83,38 @@ const AchievementPanel = ({ onClose }: AchievementPanelProps) => {
       title: "Progress Exported",
       description: "Your achievements and statistics have been downloaded",
     });
+  };
+
+  const importProgress = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (event: any) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = JSON.parse(e.target?.result as string);
+            importData(data);
+          } catch (error) {
+            toast({
+              title: "Import Failed",
+              description: "Invalid file format",
+              variant: "destructive",
+            });
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  };
+
+  const handleResetProgress = () => {
+    if (window.confirm('Are you sure you want to reset all achievements and statistics? This cannot be undone.')) {
+      resetProgress();
+    }
   };
 
   return (
@@ -102,6 +139,24 @@ const AchievementPanel = ({ onClose }: AchievementPanelProps) => {
             >
               <Download size={16} className="mr-1" />
               Export
+            </Button>
+            <Button
+              onClick={importProgress}
+              variant="outline"
+              size="sm"
+              className="text-blue-400 border-blue-600 hover:bg-blue-900/20"
+            >
+              <Upload size={16} className="mr-1" />
+              Import
+            </Button>
+            <Button
+              onClick={handleResetProgress}
+              variant="outline"
+              size="sm"
+              className="text-red-400 border-red-600 hover:bg-red-900/20"
+            >
+              <RotateCcw size={16} className="mr-1" />
+              Reset
             </Button>
             <Button
               onClick={onClose}
