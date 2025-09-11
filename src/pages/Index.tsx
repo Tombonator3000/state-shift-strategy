@@ -638,7 +638,9 @@ const Index = () => {
                 </button>
                 <button
                   onClick={() => {
+                    console.log('In-game options button clicked');
                     setShowInGameOptions(true);
+                    console.log('showInGameOptions set to true');
                     audio.playSFX('click');
                   }}
                   className="bg-gray-600 text-white p-1 rounded hover:bg-gray-700 transition-colors"

@@ -435,8 +435,10 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
               variant="outline" 
               className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
               onClick={() => {
+                console.log('Options button clicked in GameMenu');
                 audio?.playSFX?.('click');
                 setShowOptions(true);
+                console.log('showOptions set to true');
               }}
             >
               OPTIONS
