@@ -214,16 +214,12 @@ class AudioManagerClass {
       try {
         this.currentBgm.pause();
         this.currentBgm.currentTime = 0;
-        
-        // Remove event listeners to prevent memory leaks
-        this.currentBgm.removeEventListener('timeupdate', () => {});
-        this.currentBgm.removeEventListener('ended', () => {});
-        this.currentBgm.removeEventListener('error', () => {});
-        
+        this.currentBgm.src = ''; // Clear the source to fully stop
         this.currentBgm = null;
         console.log('BGM stopped and cleaned up');
       } catch (error) {
         console.warn('Error stopping BGM:', error);
+        this.currentBgm = null; // Force cleanup even if error
       }
       
       this.updateState({
@@ -274,15 +270,19 @@ class AudioManagerClass {
   public setScene(scene: SceneId): void {
     this.updateState({ scene });
 
-    // Auto-play appropriate music for scene
+    // Auto-play appropriate music for scene - only if audio is enabled and we're not already playing the right track
+    if (!this.state.canPlay) return;
+    
     switch (scene) {
       case 'start-menu':
-        if (this.state.canPlay) {
+        if (this.state.currentTrackId !== 'start-theme') {
           this.playBgm('start-theme');
         }
         break;
       case 'end-credits':
-        this.playBgm('endcredits-theme', { duration: 1200 });
+        if (this.state.currentTrackId !== 'endcredits-theme') {
+          this.playBgm('endcredits-theme', { duration: 1200 });
+        }
         break;
     }
   }

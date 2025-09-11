@@ -114,10 +114,9 @@ const Index = () => {
   useEffect(() => {
     if (audio.canPlay) {
       if (showMenu && !showIntro) {
-        // Main menu - play start theme
-        console.log('Starting start-theme for main menu');
+        // Main menu - setScene will auto-start the appropriate music
+        console.log('Setting scene to start-menu');
         audio.setScene('start-menu');
-        audio.playBgm('start-theme');
       }
     }
   }, [showMenu, showIntro, audio.canPlay]);
