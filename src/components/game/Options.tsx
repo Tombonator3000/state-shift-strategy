@@ -226,10 +226,22 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                     onToggleMute={audio.toggleMute}
                     onToggleMusic={audio.toggleMusic}
                     onToggleSFX={audio.toggleSFX}
-                    onPlayMusic={() => audio.playMusic()}
-                    onPauseMusic={audio.pauseMusic}
-                    onStopMusic={audio.stopMusic}
-                    onTestSFX={audio.testSFX}
+                    onPlayMusic={() => {
+                      console.log('🎵 Play button clicked');
+                      audio.playMusic();
+                    }}
+                    onPauseMusic={() => {
+                      console.log('🎵 Pause button clicked');
+                      audio.pauseMusic();
+                    }}
+                    onStopMusic={() => {
+                      console.log('🎵 Stop button clicked');
+                      audio.stopMusic();
+                    }}
+                    onTestSFX={() => {
+                      console.log('🎵 Test SFX button clicked');
+                      audio.testSFX();
+                    }}
                   />
                 </div>
                 <div className="text-xs text-newspaper-text/70">

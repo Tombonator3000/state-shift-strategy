@@ -126,7 +126,9 @@ export const useAudio = () => {
     };
 
     const loadMusicTracks = async () => {
-      // Load theme music tracks (1-4)
+      console.log('🎵 Loading music tracks...');
+      
+      // Load theme music tracks (1-4) - DISABLE FALLBACK BACKGROUND MUSIC
       const themePromises = [];
       for (let i = 1; i <= 4; i++) {
         themePromises.push(loadAudioTrack(`/muzak/Theme-${i}.mp3`));
@@ -135,17 +137,9 @@ export const useAudio = () => {
       const themeResults = await Promise.all(themePromises);
       const validThemeTracks = themeResults.filter(audio => audio !== null) as HTMLAudioElement[];
       
-      // Only use background music as fallback if no theme tracks found
-      if (validThemeTracks.length === 0) {
-        const backgroundPromises = [
-          loadAudioTrack(`/audio/background-music.mp3`),
-          loadAudioTrack(`/audio/Background-music.mp3`)
-        ];
-        const backgroundResults = await Promise.all(backgroundPromises);
-        musicTracks.current.theme = backgroundResults.filter(audio => audio !== null) as HTMLAudioElement[];
-      } else {
-        musicTracks.current.theme = validThemeTracks;
-      }
+      // REMOVED FALLBACK - no more background-music.mp3 chaos
+      musicTracks.current.theme = validThemeTracks;
+      console.log('🎵 Theme tracks loaded:', validThemeTracks.length);
 
       // Load government faction music tracks (1-3)
       const govPromises = [];
@@ -170,7 +164,7 @@ export const useAudio = () => {
       });
 
       setTracksLoaded(true);
-      setAudioStatus('Music tracks loaded');
+      setAudioStatus('Ready - No fallback music');
     };
 
     loadMusicTracks();
@@ -317,6 +311,14 @@ export const useAudio = () => {
 
   // Play music based on current state
   const playMusic = useCallback((musicType?: MusicType) => {
+    console.log('🎵 playMusic called with type:', musicType, 'current state:', {
+      musicEnabled: config.musicEnabled,
+      muted: config.muted,
+      tracksLoaded,
+      audioContextUnlocked,
+      currentlyPlaying: !!currentMusicRef.current
+    });
+    
     // Don't play music until tracks are loaded and audio context is unlocked (mobile requirement)
     if (!config.musicEnabled || config.muted || !tracksLoaded || !audioContextUnlocked) {
       console.log('🎵 Music playback blocked:', { 
@@ -352,6 +354,8 @@ export const useAudio = () => {
       if (playTokenRef.current !== token) return;
       playMusic(typeToPlay);
     };
+    
+    console.log('🎵 playMusic completed for type:', typeToPlay);
   }, [config.musicEnabled, config.muted, currentMusicType, gameState, getNextTrack, switchTrack, tracksLoaded, audioContextUnlocked]);
 
 
@@ -371,16 +375,25 @@ export const useAudio = () => {
   }, []);
 
   const pauseMusic = useCallback(() => {
-    console.log('🎵 Pausing music');
+    console.log('🎵 pauseMusic called - current state:', { isPlaying, hasCurrentMusic: !!currentMusicRef.current });
     if (currentMusicRef.current && !currentMusicRef.current.paused) {
       currentMusicRef.current.pause();
       setIsPlaying(false);
       setAudioStatus('Music paused');
+      console.log('🎵 Music paused successfully');
+    } else {
+      console.log('🎵 Cannot pause - no music playing or already paused');
     }
   }, []);
 
   const resumeMusic = useCallback(() => {
-    console.log('🎵 Resuming music');
+    console.log('🎵 resumeMusic called - current state:', { 
+      hasCurrentMusic: !!currentMusicRef.current, 
+      isPaused: currentMusicRef.current?.paused,
+      audioContextUnlocked,
+      currentTrackName 
+    });
+    
     if (currentMusicRef.current && currentMusicRef.current.paused && audioContextUnlocked) {
       const playPromise = currentMusicRef.current.play();
       if (playPromise !== undefined) {
@@ -388,12 +401,15 @@ export const useAudio = () => {
           .then(() => {
             setIsPlaying(true);
             setAudioStatus(`Playing: ${currentTrackName}`);
+            console.log('🎵 Music resumed successfully');
           })
           .catch(error => {
             console.log('🎵 Resume failed:', error);
             setAudioStatus('Resume failed');
           });
       }
+    } else {
+      console.log('🎵 Cannot resume - no paused music or audio context locked');
     }
   }, [audioContextUnlocked, currentTrackName]);
 

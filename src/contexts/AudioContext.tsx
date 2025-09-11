@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
 type AudioContextType = ReturnType<typeof useAudio>;
@@ -7,7 +7,13 @@ const AudioContext = createContext<AudioContextType | null>(null);
 
 export const AudioProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   console.log('🎵 AudioProvider: Creating single audio system instance');
-  const audioSystem = useAudio();
+  
+  // Memoize the audio system to prevent recreation on re-renders
+  const audioSystem = useMemo(() => {
+    const system = useAudio();
+    console.log('🎵 Audio system created and memoized');
+    return system;
+  }, []);
   
   return (
     <AudioContext.Provider value={audioSystem}>

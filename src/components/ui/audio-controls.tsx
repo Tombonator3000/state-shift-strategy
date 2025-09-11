@@ -158,7 +158,10 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={onPlayMusic}
+                onClick={() => {
+                  console.log('🎵 UI: Play button clicked');
+                  onPlayMusic?.();
+                }}
                 disabled={!musicEnabled || !tracksLoaded}
                 className="flex-1 h-8"
               >
@@ -168,7 +171,17 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={isPlaying ? onPauseMusic : onPlayMusic}
+                onClick={() => {
+                  console.log('🎵 UI: Pause/Resume button clicked, isPlaying:', isPlaying);
+                  if (isPlaying) {
+                    onPauseMusic?.();
+                  } else {
+                    // Check if we should resume or play new music
+                    if (onPlayMusic) {
+                      onPlayMusic();
+                    }
+                  }
+                }}
                 disabled={!musicEnabled || !tracksLoaded}
                 className="flex-1 h-8"
               >
@@ -187,7 +200,10 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={onStopMusic}
+                onClick={() => {
+                  console.log('🎵 UI: Stop button clicked');
+                  onStopMusic?.();
+                }}
                 disabled={!musicEnabled}
                 className="flex-1 h-8"
               >
