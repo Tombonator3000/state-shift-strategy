@@ -86,17 +86,19 @@ class AudioManagerClass {
     console.log('enableAudio called, current canPlay:', this.state.canPlay);
     if (!this.state.canPlay) {
       this.updateState({ canPlay: true });
-      console.log('Audio enabled, starting start-theme');
-      // Auto-start appropriate music when audio is enabled
-      if (this.state.scene === 'start-menu') {
-        this.playBgm('start-theme');
-      }
+      console.log('Audio enabled');
+      // Don't auto-start music here, let components decide when to play
+    } else {
+      console.log('Audio already enabled');
     }
   }
 
   public async playBgm(trackId: BGMTrackId, options: CrossfadeOptions = {}): Promise<void> {
     console.log('playBgm called:', trackId, 'canPlay:', this.state.canPlay, 'currentTrackId:', this.state.currentTrackId);
-    if (!this.state.canPlay) return;
+    if (!this.state.canPlay) {
+      console.log('Audio not enabled yet, skipping playBgm');
+      return;
+    }
     
     const track = BGM_TRACKS[trackId];
     if (!track) {
@@ -111,18 +113,18 @@ class AudioManagerClass {
     }
 
     try {
+      // Always stop current track first to prevent overlapping
+      if (this.currentBgm) {
+        console.log('Stopping current BGM before starting new one');
+        this.stopBgm();
+      }
+
       const newAudio = new Audio(track.path);
       newAudio.loop = options.loop ?? track.loop;
       newAudio.volume = this.calculateVolume(track.volume, 'bgm');
 
-      // Crossfade if there's a current track
-      if (this.currentBgm && this.state.isPlaying && options.duration) {
-        await this.crossfade(this.currentBgm, newAudio, options.duration);
-      } else {
-        // Stop current and start new
-        this.stopBgm();
-        await newAudio.play();
-      }
+      console.log('Starting new BGM with volume:', newAudio.volume);
+      await newAudio.play();
 
       this.currentBgm = newAudio;
       this.updateState({
@@ -133,12 +135,25 @@ class AudioManagerClass {
 
       // Update position tracking
       newAudio.addEventListener('timeupdate', () => {
-        this.updateState({ position: newAudio.currentTime });
+        if (this.currentBgm === newAudio) { // Only update if this is still the current track
+          this.updateState({ position: newAudio.currentTime });
+        }
       });
 
       newAudio.addEventListener('ended', () => {
-        if (!newAudio.loop) {
+        if (this.currentBgm === newAudio) { // Only update if this is still the current track
+          if (!newAudio.loop) {
+            this.updateState({ isPlaying: false, currentTrackId: null });
+            this.currentBgm = null;
+          }
+        }
+      });
+
+      newAudio.addEventListener('error', (e) => {
+        console.warn('BGM playback error:', e);
+        if (this.currentBgm === newAudio) {
           this.updateState({ isPlaying: false, currentTrackId: null });
+          this.currentBgm = null;
         }
       });
 
@@ -194,12 +209,23 @@ class AudioManagerClass {
   }
 
   public stopBgm(): void {
-    console.log('stopBgm called');
+    console.log('stopBgm called, currentBgm exists:', !!this.currentBgm);
     if (this.currentBgm) {
-      this.currentBgm.pause();
-      this.currentBgm.currentTime = 0;
-      this.currentBgm.remove?.(); // Clean up if method exists
-      this.currentBgm = null;
+      try {
+        this.currentBgm.pause();
+        this.currentBgm.currentTime = 0;
+        
+        // Remove event listeners to prevent memory leaks
+        this.currentBgm.removeEventListener('timeupdate', () => {});
+        this.currentBgm.removeEventListener('ended', () => {});
+        this.currentBgm.removeEventListener('error', () => {});
+        
+        this.currentBgm = null;
+        console.log('BGM stopped and cleaned up');
+      } catch (error) {
+        console.warn('Error stopping BGM:', error);
+      }
+      
       this.updateState({
         isPlaying: false,
         currentTrackId: null,

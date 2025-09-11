@@ -83,8 +83,10 @@ const Index = () => {
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
 
-  // Enable audio on first user interaction
+  // Enable audio on first user interaction - only run once
   useEffect(() => {
+    let hasSetupListeners = false;
+    
     const enableAudioOnFirstClick = () => {
       console.log('First user interaction detected');
       if (!audio.canPlay) {
@@ -92,17 +94,33 @@ const Index = () => {
       }
     };
 
-    // Listen for any user interaction to enable audio
-    document.addEventListener('click', enableAudioOnFirstClick, { once: true });
-    document.addEventListener('keydown', enableAudioOnFirstClick, { once: true });
-    document.addEventListener('touchstart', enableAudioOnFirstClick, { once: true });
+    if (!audio.canPlay && !hasSetupListeners) {
+      hasSetupListeners = true;
+      document.addEventListener('click', enableAudioOnFirstClick, { once: true });
+      document.addEventListener('keydown', enableAudioOnFirstClick, { once: true });
+      document.addEventListener('touchstart', enableAudioOnFirstClick, { once: true });
+    }
 
     return () => {
-      document.removeEventListener('click', enableAudioOnFirstClick);
-      document.removeEventListener('keydown', enableAudioOnFirstClick);
-      document.removeEventListener('touchstart', enableAudioOnFirstClick);
+      if (hasSetupListeners) {
+        document.removeEventListener('click', enableAudioOnFirstClick);
+        document.removeEventListener('keydown', enableAudioOnFirstClick);
+        document.removeEventListener('touchstart', enableAudioOnFirstClick);
+      }
     };
-  }, [audio]);
+  }, []); // Empty dependency array - only run once
+
+  // Handle music for different game states  
+  useEffect(() => {
+    if (audio.canPlay) {
+      if (showMenu && !showIntro) {
+        // Main menu - play start theme
+        console.log('Starting start-theme for main menu');
+        audio.setScene('start-menu');
+        audio.playBgm('start-theme');
+      }
+    }
+  }, [showMenu, showIntro, audio.canPlay]);
 
   // Track IP changes for floating numbers
   useEffect(() => {
