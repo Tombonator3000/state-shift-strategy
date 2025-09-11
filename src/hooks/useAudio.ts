@@ -169,32 +169,32 @@ export const useAudio = () => {
     const loadMusicTracks = async () => {
       console.log('🎵 Loading music tracks...');
       
-      // Load all available theme music tracks
-      const allThemeTracks = ['/muzak/Theme-1.mp3', '/muzak/Theme-2.mp3', '/muzak/Theme-3.mp3', '/muzak/Theme-4.mp3'];
-      console.log('🎵 Attempting to load theme tracks:', allThemeTracks);
-      const themePromises = allThemeTracks.map(track => loadAudioTrack(track));
+      // Load theme music tracks for start screen
+      const themeTracks = ['/muzak/Theme-1.mp3', '/muzak/Theme-2.mp3'];
+      console.log('🎵 Attempting to load theme tracks:', themeTracks);
+      const themePromises = themeTracks.map(track => loadAudioTrack(track));
       
       const themeResults = await Promise.all(themePromises);
       const validThemeTracks = themeResults.filter(audio => audio !== null) as HTMLAudioElement[];
       
       musicTracks.current.theme = validThemeTracks;
-      console.log('🎵 Theme tracks loaded:', validThemeTracks.length, 'out of', allThemeTracks.length);
+      console.log('🎵 Theme tracks loaded:', validThemeTracks.length, 'out of', themeTracks.length);
 
-      // Load all available government faction music tracks
-      const allGovTracks = ['/muzak/Government-1.mp3', '/muzak/Government-2.mp3', '/muzak/Government-3.mp3'];
-      console.log('🎵 Attempting to load government tracks:', allGovTracks);
-      const govPromises = allGovTracks.map(track => loadAudioTrack(track));
+      // Load government faction music tracks in specific order
+      const govTracks = ['/muzak/Government-2.mp3', '/muzak/Government-1.mp3', '/muzak/Government-3.mp3'];
+      console.log('🎵 Attempting to load government tracks:', govTracks);
+      const govPromises = govTracks.map(track => loadAudioTrack(track));
       const govResults = await Promise.all(govPromises);
       musicTracks.current.government = govResults.filter(audio => audio !== null) as HTMLAudioElement[];
-      console.log('🎵 Government tracks loaded:', musicTracks.current.government.length, 'out of', allGovTracks.length);
+      console.log('🎵 Government tracks loaded:', musicTracks.current.government.length, 'out of', govTracks.length);
 
-      // Load all available truth faction music tracks  
-      const allTruthTracks = ['/muzak/Truth-1.mp3', '/muzak/Truth-2.mp3', '/muzak/Truth-3.mp3'];
-      console.log('🎵 Attempting to load truth tracks:', allTruthTracks);
-      const truthPromises = allTruthTracks.map(track => loadAudioTrack(track));
+      // Load truth faction music tracks in specific order
+      const truthTracks = ['/muzak/Truth-1.mp3', '/muzak/Truth-2.mp3', '/muzak/Truth-3.mp3'];
+      console.log('🎵 Attempting to load truth tracks:', truthTracks);
+      const truthPromises = truthTracks.map(track => loadAudioTrack(track));
       const truthResults = await Promise.all(truthPromises);
       musicTracks.current.truth = truthResults.filter(audio => audio !== null) as HTMLAudioElement[];
-      console.log('🎵 Truth tracks loaded:', musicTracks.current.truth.length, 'out of', allTruthTracks.length);
+      console.log('🎵 Truth tracks loaded:', musicTracks.current.truth.length, 'out of', truthTracks.length);
 
       // Load end credits music
       const endCreditsAudio = await loadAudioTrack('/muzak/endcredits-theme.mp3');
