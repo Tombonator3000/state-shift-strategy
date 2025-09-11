@@ -28,7 +28,7 @@
       "name": "Weather Machine Alpha",
       "type": "TECH",
       "rarity": "uncommon",
-      "cost": 5,
+      "cost": 7,
       "target": "state",
       "text": "Add 4 Pressure to target state. Draw 1 card.",
       "flavor": "Hurricane season is year-round now.",
@@ -42,8 +42,8 @@
       "faction": "government",
       "name": "Project Grand Mandela",
       "type": "TECH",
-      "rarity": "legendary",
-      "cost": 10,
+      "rarity": "rare",
+      "cost": 7,
       "target": null,
       "text": "Set Truth to 15%. Opponent skips next Action. Draw 1.",
       "flavor": "Remember when you thought you remembered?",
@@ -58,8 +58,8 @@
       "faction": "government",
       "name": "Chemtrail Deployment",
       "type": "ZONE",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": "state",
       "text": "Add 3 Pressure to target state. Truth -5%.",
       "flavor": "Just water vapor, citizen.",
@@ -74,7 +74,7 @@
       "name": "Area 51 Security",
       "type": "DEFENSIVE",
       "rarity": "common",
-      "cost": 2,
+      "cost": 5,
       "target": null,
       "text": "Immune to next MEDIA card. Gain 2 IP.",
       "flavor": "Perimeter secured, aliens relocated.",
@@ -88,8 +88,8 @@
       "faction": "government",
       "name": "Fake Alien Invasion",
       "type": "MEDIA",
-      "rarity": "rare",
-      "cost": 7,
+      "rarity": "legendary",
+      "cost": 10,
       "target": null,
       "text": "Truth -20%. All states gain 2 Pressure.",
       "flavor": "War of the Worlds 2: Electric Boogaloo",
@@ -103,8 +103,8 @@
       "faction": "government",
       "name": "Roswell Cover Story",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
       "text": "Truth -8%. Gain 1 IP.",
       "flavor": "Weather balloon. Always weather balloon.",
@@ -118,8 +118,8 @@
       "faction": "government",
       "name": "Disinformation Bureau",
       "type": "DEVELOPMENT",
-      "rarity": "uncommon",
-      "cost": 6,
+      "rarity": "rare",
+      "cost": 9,
       "target": null,
       "text": "All MEDIA cards cost 1 less. Truth -10%.",
       "flavor": "Truth is whatever we say it is.",
@@ -133,8 +133,8 @@
       "faction": "government",
       "name": "Bigfoot Suit Factory",
       "type": "TECH",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
       "text": "Truth -12%. Next ZONE card costs 2 less.",
       "flavor": "We're hiring tall extras.",
@@ -148,8 +148,8 @@
       "faction": "government",
       "name": "Project Blue Beam",
       "type": "TECH",
-      "rarity": "rare",
-      "cost": 8,
+      "rarity": "legendary",
+      "cost": 11,
       "target": null,
       "text": "Truth -25%. Opponent discards 2 cards.",
       "flavor": "Holographic messiah, patent pending.",
@@ -163,8 +163,8 @@
       "faction": "government",
       "name": "Mothman Relocation Program",
       "type": "ZONE",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": "state",
       "text": "Add 5 Pressure to target state. Truth -8%.",
       "flavor": "Bridge inspection complete.",
@@ -178,8 +178,8 @@
       "faction": "government",
       "name": "Chupacabra Protocol",
       "type": "ATTACK",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
       "text": "Opponent loses 5 IP. Truth -6%.",
       "flavor": "Livestock losses are... unexplained.",
@@ -194,7 +194,7 @@
       "name": "Cryptid Containment Unit",
       "type": "DEFENSIVE",
       "rarity": "common",
-      "cost": 3,
+      "cost": 5,
       "target": null,
       "text": "Block next ATTACK. Gain 3 IP.",
       "flavor": "SCP Foundation budget approved.",
@@ -209,7 +209,7 @@
       "name": "Jersey Devil Task Force",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
+      "cost": 5,
       "target": "state",
       "text": "Add 3 Pressure to target state.",
       "flavor": "Pine Barrens: Now under management.",
@@ -222,8 +222,8 @@
       "faction": "government",
       "name": "Lake Monster Drainage",
       "type": "TECH",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
       "text": "Truth -10%. Opponent loses 3 IP.",
       "flavor": "Just a big log. Really big log.",
@@ -238,7 +238,7 @@
       "name": "Men in Beige",
       "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
+      "cost": 5,
       "target": null,
       "text": "Opponent loses 4 IP. Draw 1 card.",
       "flavor": "Slightly less intimidating, equally effective.",
@@ -252,8 +252,8 @@
       "faction": "government",
       "name": "Swamp Gas Generator",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
       "text": "Truth -15%. Gain 2 IP.",
       "flavor": "Perfectly normal atmospheric phenomenon.",
@@ -268,7 +268,7 @@
       "name": "Deniability Protocols",
       "type": "DEFENSIVE",
       "rarity": "uncommon",
-      "cost": 4,
+      "cost": 7,
       "target": null,
       "text": "Immune to next 2 cards. Truth -5%.",
       "flavor": "We have no knowledge of these protocols.",
@@ -282,8 +282,8 @@
       "faction": "government",
       "name": "Black Helicopters",
       "type": "ZONE",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": "state",
       "text": "Add 4 Pressure to target state. Truth -6%.",
       "flavor": "Noise ordinance complaints filed.",
@@ -293,27 +293,12 @@
       ]
     },
     {
-      "id": "gov_operation_smirk",
-      "faction": "government",
-      "name": "Operation SMIRK",
-      "type": "ATTACK",
-      "rarity": "rare",
-      "cost": 6,
-      "target": null,
-      "text": "Opponent loses 8 IP and discards 1 card.",
-      "flavor": "Suspicious Male In Relaxed Knitwear.",
-      "effects": [
-        {"k":"ip","who":"ai","v":-8},
-        {"k":"flag","name":"forceDiscard","target":"ai","value":1}
-      ]
-    },
-    {
       "id": "gov_cryptozoology_dept",
       "faction": "government",
       "name": "Cryptozoology Department",
       "type": "DEVELOPMENT",
       "rarity": "uncommon",
-      "cost": 5,
+      "cost": 2,
       "target": null,
       "text": "ZONE cards cost 1 less. Gain 2 IP.",
       "flavor": "Officially doesn't exist.",
@@ -327,8 +312,8 @@
       "faction": "government",
       "name": "Flatwoods Incident",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
       "text": "Truth -12%. Gain 1 IP.",
       "flavor": "Just a barn owl in a tree.",
@@ -343,7 +328,7 @@
       "name": "Skunk Ape Safari",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
+      "cost": 5,
       "target": "state",
       "text": "Add 3 Pressure to target state.",
       "flavor": "Everglades tourism initiative.",
@@ -352,54 +337,12 @@
       ]
     },
     {
-      "id": "gov_beast_of_bray_road",
-      "faction": "government",
-      "name": "Beast of Bray Road",
-      "type": "ATTACK",
-      "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP.",
-      "flavor": "Wisconsin werewolf... or big dog.",
-      "effects": [
-        {"k":"ip","who":"ai","v":-4}
-      ]
-    },
-    {
-      "id": "gov_phantom_kangaroo",
-      "faction": "government",
-      "name": "Phantom Kangaroo Squad",
-      "type": "ZONE",
-      "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 2 Pressure to target state.",
-      "flavor": "Escaped from zoo. Repeatedly.",
-      "effects": [
-        {"k":"pressure","who":"player","v":2}
-      ]
-    },
-    {
-      "id": "gov_fouke_monster_task",
-      "faction": "government",
-      "name": "Fouke Monster Task Force",
-      "type": "ATTACK",
-      "rarity": "common",
-      "cost": 4,
-      "target": null,
-      "text": "Opponent loses 5 IP.",
-      "flavor": "Arkansas cryptid control.",
-      "effects": [
-        {"k":"ip","who":"ai","v":-5}
-      ]
-    },
-    {
       "id": "gov_thunderbird_tracking",
       "faction": "government",
       "name": "Thunderbird Tracking",
       "type": "TECH",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
       "text": "Truth -8%. Draw 1 card.",
       "flavor": "Large bird migration patterns.",
@@ -413,8 +356,8 @@
       "faction": "government",
       "name": "Shadow People Census",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
       "text": "Truth -10%. Opponent loses 2 IP.",
       "flavor": "Sleep deprivation study complete.",
@@ -428,8 +371,8 @@
       "faction": "government",
       "name": "Hopkinsville Goblins",
       "type": "ZONE",
-      "rarity": "uncommon",
-      "cost": 4,
+      "rarity": "rare",
+      "cost": 7,
       "target": "state",
       "text": "Add 4 Pressure to target state. Truth -5%.",
       "flavor": "Drunk farmers shooting at owls.",
@@ -443,8 +386,8 @@
       "faction": "government",
       "name": "Lizard Person Council",
       "type": "DEVELOPMENT",
-      "rarity": "rare",
-      "cost": 7,
+      "rarity": "legendary",
+      "cost": 10,
       "target": null,
       "text": "All cards cost 1 less. Truth -15%.",
       "flavor": "Ssssecret meeting adjourned.",
@@ -458,8 +401,8 @@
       "faction": "government",
       "name": "Hollow Earth Drilling",
       "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 6,
+      "rarity": "rare",
+      "cost": 9,
       "target": null,
       "text": "Truth -18%. Add 3 Pressure to 2 states.",
       "flavor": "Core samples totally normal.",
@@ -473,8 +416,8 @@
       "faction": "government",
       "name": "Time Travel Bureau",
       "type": "INSTANT",
-      "rarity": "rare",
-      "cost": 8,
+      "rarity": "uncommon",
+      "cost": 5,
       "target": null,
       "text": "Take another turn after this one.",
       "flavor": "Temporal paradox resolved.",
@@ -487,8 +430,8 @@
       "faction": "government",
       "name": "Flying Saucer Hangar",
       "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
       "text": "Draw 2 cards. Truth -10%.",
       "flavor": "Reverse engineering in progress.",
@@ -503,27 +446,13 @@
       "name": "Interdimensional Gate",
       "type": "TECH",
       "rarity": "rare",
-      "cost": 7,
+      "cost": 4,
       "target": null,
-      "text": "Shuffle opponent's hand into deck. Draw 2.",
-      "flavor": "Portal maintenance scheduled.",
+      "text": "Truth -15%. Opponent skips next turn.",
+      "flavor": "Portal to the shadow realm opened.",
       "effects": [
-        {"k":"flag","name":"shuffleHand","target":"ai","value":true},
-        {"k":"flag","name":"bonusDraw","value":2}
-      ]
-    },
-    {
-      "id": "gov_phantom_black_dogs",
-      "faction": "government",
-      "name": "Phantom Black Dogs",
-      "type": "ATTACK",
-      "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Opponent loses 3 IP.",
-      "flavor": "Good boys. Very good boys.",
-      "effects": [
-        {"k":"ip","who":"ai","v":-3}
+        {"k":"truth","v":-15},
+        {"k":"flag","name":"skipAction","target":"ai","value":true}
       ]
     },
     {
@@ -531,14 +460,14 @@
       "faction": "government",
       "name": "Yeti Expedition Hoax",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Truth -12%. Gain 2 IP.",
-      "flavor": "Bear tracks in snow. Always bears.",
+      "text": "Truth -12%. Add 2 Pressure to any snowy state.",
+      "flavor": "Just a guy in a white suit.",
       "effects": [
         {"k":"truth","v":-12},
-        {"k":"ip","who":"player","v":2}
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
@@ -547,13 +476,13 @@
       "name": "Skinwalker Ranch Buyout",
       "type": "ZONE",
       "rarity": "uncommon",
-      "cost": 6,
+      "cost": 8,
       "target": "state",
-      "text": "Add 5 Pressure to target state. Draw 1.",
-      "flavor": "Property development opportunity.",
+      "text": "Add 5 Pressure to Utah. Truth -10%.",
+      "flavor": "Private property, no trespassing.",
       "effects": [
         {"k":"pressure","who":"player","v":5},
-        {"k":"flag","name":"bonusDraw","value":1}
+        {"k":"truth","v":-10}
       ]
     },
     {
@@ -561,14 +490,14 @@
       "faction": "government",
       "name": "Dover Demon Debunking",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
-      "text": "Truth -10%. Gain 1 IP.",
-      "flavor": "Teenage prank confirmed.",
+      "text": "Truth -8%. Gain 2 IP.",
+      "flavor": "Just teenage hysteria.",
       "effects": [
-        {"k":"truth","v":-10},
-        {"k":"ip","who":"player","v":1}
+        {"k":"truth","v":-8},
+        {"k":"ip","who":"player","v":2}
       ]
     },
     {
@@ -576,14 +505,14 @@
       "faction": "government",
       "name": "Alien Autopsy Studio",
       "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Truth -15%. Next MEDIA costs 2 less.",
-      "flavor": "Hollywood special effects.",
+      "text": "Truth -20%. Draw 1 card.",
+      "flavor": "Hollywood props department at work.",
       "effects": [
-        {"k":"truth","v":-15},
-        {"k":"flag","name":"mediaCostReduction","value":2}
+        {"k":"truth","v":-20},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
@@ -591,29 +520,28 @@
       "faction": "government",
       "name": "Cattle Mutilation Labs",
       "type": "TECH",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Truth -8%. Opponent loses 3 IP.",
-      "flavor": "Predator damage analysis.",
+      "text": "Truth -10%. Add 3 Pressure to any rural state.",
+      "flavor": "Surgical precision training facility.",
       "effects": [
-        {"k":"truth","v":-8},
-        {"k":"ip","who":"ai","v":-3}
+        {"k":"truth","v":-10},
+        {"k":"pressure","who":"player","v":3}
       ]
     },
     {
       "id": "gov_crop_circle_artists",
       "faction": "government",
       "name": "Crop Circle Artists Guild",
-      "type": "MEDIA",
-      "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Truth -12%. Draw 1 card.",
-      "flavor": "Doug and Dave, LLC.",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "cost": 6,
+      "target": "state",
+      "text": "Add 3 Pressure to target agricultural state.",
+      "flavor": "We pay well for good geometric work.",
       "effects": [
-        {"k":"truth","v":-12},
-        {"k":"flag","name":"bonusDraw","value":1}
+        {"k":"pressure","who":"player","v":3}
       ]
     },
     {
@@ -622,26 +550,12 @@
       "name": "Phantom Airships",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
+      "cost": 5,
       "target": "state",
-      "text": "Add 3 Pressure to target state.",
-      "flavor": "Victorian-era test flights.",
+      "text": "Add 2 Pressure to target state.",
+      "flavor": "1897 mystery dirigibles explained.",
       "effects": [
-        {"k":"pressure","who":"player","v":3}
-      ]
-    },
-    {
-      "id": "gov_beast_of_bladenboro",
-      "faction": "government",
-      "name": "Beast of Bladenboro",
-      "type": "ATTACK",
-      "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP.",
-      "flavor": "Wild dog pack management.",
-      "effects": [
-        {"k":"ip","who":"ai","v":-4}
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
@@ -649,29 +563,27 @@
       "faction": "government",
       "name": "Washington Sea Serpent",
       "type": "ZONE",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": "state",
-      "text": "Add 3 Pressure to target state. Truth -5%.",
-      "flavor": "Kelp forest rehabilitation.",
+      "text": "Add 4 Pressure to Washington state.",
+      "flavor": "Just a really big eel.",
       "effects": [
-        {"k":"pressure","who":"player","v":3},
-        {"k":"truth","v":-5}
+        {"k":"pressure","who":"player","v":4}
       ]
     },
     {
       "id": "gov_moon_eyed_people",
       "faction": "government",
       "name": "Moon-Eyed People Census",
-      "type": "MEDIA",
-      "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Truth -8%. Gain 2 IP.",
-      "flavor": "Cherokee folklore documentation.",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "cost": 6,
+      "target": "state",
+      "text": "Add 3 Pressure to any Appalachian state.",
+      "flavor": "Ancient Cherokee folklore catalogued.",
       "effects": [
-        {"k":"truth","v":-8},
-        {"k":"ip","who":"player","v":2}
+        {"k":"pressure","who":"player","v":3}
       ]
     },
     {
@@ -679,14 +591,14 @@
       "faction": "government",
       "name": "Giant Octopus Cover-up",
       "type": "MEDIA",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Truth -15%. Opponent loses 3 IP.",
-      "flavor": "Fishing net malfunction.",
+      "text": "Truth -15%. Add 2 Pressure to any coastal state.",
+      "flavor": "Marine biology misidentification.",
       "effects": [
         {"k":"truth","v":-15},
-        {"k":"ip","who":"ai","v":-3}
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
@@ -695,13 +607,13 @@
       "name": "Psychic Spying Program",
       "type": "TECH",
       "rarity": "uncommon",
-      "cost": 6,
+      "cost": 3,
       "target": null,
-      "text": "Look at opponent's hand. Draw 2 cards.",
-      "flavor": "Remote viewing budget approved.",
+      "text": "Draw 2 cards. Truth -5%.",
+      "flavor": "Remote viewing officially discontinued.",
       "effects": [
-        {"k":"flag","name":"revealHand","target":"ai","value":true},
-        {"k":"flag","name":"bonusDraw","value":2}
+        {"k":"flag","name":"bonusDraw","value":2},
+        {"k":"truth","v":-5}
       ]
     },
     {
@@ -709,14 +621,14 @@
       "faction": "government",
       "name": "Invisible Aircraft Project",
       "type": "TECH",
-      "rarity": "rare",
-      "cost": 7,
+      "rarity": "legendary",
+      "cost": 10,
       "target": null,
-      "text": "Immune to ATTACK cards this turn. Truth -12%.",
-      "flavor": "Stealth technology prototype.",
+      "text": "Truth -25%. All ZONE cards cost 2 less this turn.",
+      "flavor": "Stealth technology achieved.",
       "effects": [
-        {"k":"flag","name":"immuneAttack","value":true},
-        {"k":"truth","v":-12}
+        {"k":"truth","v":-25},
+        {"k":"flag","name":"zoneCostReduction","value":2}
       ]
     },
     {
@@ -725,12 +637,13 @@
       "name": "Missing Time Protocol",
       "type": "INSTANT",
       "rarity": "uncommon",
-      "cost": 5,
+      "cost": 2,
       "target": null,
-      "text": "Opponent loses next turn.",
-      "flavor": "What happened last Tuesday?",
+      "text": "Opponent discards 1 card. Draw 1 card.",
+      "flavor": "Memory gap successfully implemented.",
       "effects": [
-        {"k":"flag","name":"skipTurn","target":"ai","value":true}
+        {"k":"flag","name":"forceDiscard","target":"ai","value":1},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
@@ -739,41 +652,27 @@
       "name": "Greys Employment Program",
       "type": "DEVELOPMENT",
       "rarity": "uncommon",
-      "cost": 5,
+      "cost": 3,
       "target": null,
-      "text": "TECH cards cost 1 less. Gain 3 IP.",
-      "flavor": "Excellent work ethic, no benefits.",
+      "text": "All ATTACK cards cost 1 less. Gain 1 IP per turn.",
+      "flavor": "Interspecies cooperation initiative.",
       "effects": [
-        {"k":"development","type":"techCost","value":-1},
-        {"k":"ip","who":"player","v":3}
+        {"k":"development","type":"attackCost","value":-1},
+        {"k":"development","type":"ipPerTurn","value":1}
       ]
     },
     {
       "id": "gov_reality_anchor_array",
       "faction": "government",
       "name": "Reality Anchor Array",
-      "type": "DEFENSIVE",
+      "type": "TECH",
       "rarity": "rare",
-      "cost": 6,
+      "cost": 3,
       "target": null,
-      "text": "Truth cannot go above 50% this turn.",
-      "flavor": "Consensus reality maintenance.",
+      "text": "Truth cannot change for 2 turns. Draw 1 card.",
+      "flavor": "Dimensional stability maintained.",
       "effects": [
-        {"k":"flag","name":"truthCap","value":50}
-      ]
-    },
-    {
-      "id": "gov_paranormal_task_force",
-      "faction": "government",
-      "name": "Paranormal Task Force",
-      "type": "ATTACK",
-      "rarity": "uncommon",
-      "cost": 5,
-      "target": null,
-      "text": "Opponent loses 6 IP. Draw 1 card.",
-      "flavor": "X-Files department budget.",
-      "effects": [
-        {"k":"ip","who":"ai","v":-6},
+        {"k":"flag","name":"truthLock","value":2},
         {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
@@ -781,14 +680,15 @@
       "id": "gov_dimension_x_portal",
       "faction": "government",
       "name": "Dimension X Portal",
-      "type": "TECH",
-      "rarity": "rare",
-      "cost": 8,
-      "target": null,
-      "text": "Banish opponent's next 3 drawn cards.",
-      "flavor": "Unauthorized entry prohibited.",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "cost": 5,
+      "target": "state",
+      "text": "Add 4 Pressure to target state. Opponent loses 2 IP.",
+      "flavor": "Portal to nowhere operational.",
       "effects": [
-        {"k":"flag","name":"banishCards","target":"ai","value":3}
+        {"k":"pressure","who":"player","v":4},
+        {"k":"ip","who":"ai","v":-2}
       ]
     },
     {
@@ -797,12 +697,13 @@
       "name": "Cryptid Rehabilitation Center",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 4,
+      "cost": 7,
       "target": "state",
-      "text": "Add 4 Pressure to target state.",
-      "flavor": "Wildlife sanctuary. Definitely.",
+      "text": "Add 2 Pressure to target state. Truth -5%.",
+      "flavor": "Helping cryptids integrate into society.",
       "effects": [
-        {"k":"pressure","who":"player","v":4}
+        {"k":"pressure","who":"player","v":2},
+        {"k":"truth","v":-5}
       ]
     },
     {
@@ -811,10 +712,10 @@
       "name": "Mind Probe Study",
       "type": "ATTACK",
       "rarity": "uncommon",
-      "cost": 4,
+      "cost": 3,
       "target": null,
       "text": "Opponent discards 2 cards. Gain 2 IP.",
-      "flavor": "Consent forms optional.",
+      "flavor": "Telepathic interrogation techniques.",
       "effects": [
         {"k":"flag","name":"forceDiscard","target":"ai","value":2},
         {"k":"ip","who":"player","v":2}
@@ -825,29 +726,29 @@
       "faction": "government",
       "name": "Subliminal Broadcast Network",
       "type": "MEDIA",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Truth -18%. All states gain 1 Pressure.",
-      "flavor": "Buy more stuff. Obey authority.",
+      "text": "Truth -20%. Opponent loses 3 IP.",
+      "flavor": "Hidden messages in every transmission.",
       "effects": [
-        {"k":"truth","v":-18},
-        {"k":"pressure","who":"player","v":1,"target":"all"}
+        {"k":"truth","v":-20},
+        {"k":"ip","who":"ai","v":-3}
       ]
     },
     {
       "id": "gov_fake_moon_landing_set",
       "faction": "government",
       "name": "Fake Moon Landing Set",
-      "type": "TECH",
-      "rarity": "common",
-      "cost": 4,
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Truth -15%. Gain 2 IP.",
-      "flavor": "Kubrick's final cut.",
+      "text": "Truth -15%. Draw 1 card.",
+      "flavor": "Kubrick's masterpiece.",
       "effects": [
         {"k":"truth","v":-15},
-        {"k":"ip","who":"player","v":2}
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
@@ -856,12 +757,13 @@
       "name": "Neuralyzer Deployment",
       "type": "INSTANT",
       "rarity": "uncommon",
-      "cost": 4,
+      "cost": 1,
       "target": null,
-      "text": "Opponent returns hand to deck and draws 3 new cards.",
-      "flavor": "Look right here... *flash*",
+      "text": "Opponent discards all cards, draws 3 new ones.",
+      "flavor": "You saw nothing.",
       "effects": [
-        {"k":"flag","name":"resetHand","target":"ai","value":3}
+        {"k":"flag","name":"discardAll","target":"ai","value":true},
+        {"k":"flag","name":"forceDraw","target":"ai","value":3}
       ]
     },
     {
@@ -869,28 +771,29 @@
       "faction": "government",
       "name": "Shadow Government HQ",
       "type": "DEVELOPMENT",
-      "rarity": "rare",
-      "cost": 8,
+      "rarity": "legendary",
+      "cost": 11,
       "target": null,
-      "text": "Draw 1 extra card each turn. Truth -10%.",
-      "flavor": "We don't exist. Officially.",
+      "text": "All cards cost 2 less. Gain 3 IP per turn.",
+      "flavor": "The real capital building.",
       "effects": [
-        {"k":"development","type":"cardDraw","value":1},
-        {"k":"truth","v":-10}
+        {"k":"development","type":"allCost","value":-2},
+        {"k":"development","type":"ipPerTurn","value":3}
       ]
     },
     {
       "id": "gov_operation_paperclip_2",
       "faction": "government",
       "name": "Operation Paperclip II",
-      "type": "TECH",
+      "type": "DEVELOPMENT",
       "rarity": "uncommon",
-      "cost": 6,
+      "cost": 3,
       "target": null,
-      "text": "Copy opponent's last played card effect.",
-      "flavor": "Recruitment drive successful.",
+      "text": "TECH cards cost 1 less. Truth -5%.",
+      "flavor": "Nazi scientists, round two.",
       "effects": [
-        {"k":"flag","name":"copyLastCard","target":"ai","value":true}
+        {"k":"development","type":"techCost","value":-1},
+        {"k":"truth","v":-5}
       ]
     },
     {
@@ -898,29 +801,29 @@
       "faction": "government",
       "name": "Holographic UFO Display",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Truth -10%. Draw 1 card.",
-      "flavor": "Swamp gas reflecting Venus.",
+      "text": "Truth -12%. Add 2 Pressure to any state.",
+      "flavor": "Project Blue Beam test successful.",
       "effects": [
-        {"k":"truth","v":-10},
-        {"k":"flag","name":"bonusDraw","value":1}
+        {"k":"truth","v":-12},
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
       "id": "gov_cryptid_breeding_program",
       "faction": "government",
       "name": "Cryptid Breeding Program",
-      "type": "DEVELOPMENT",
-      "rarity": "uncommon",
-      "cost": 6,
+      "type": "TECH",
+      "rarity": "rare",
+      "cost": 9,
       "target": null,
-      "text": "ZONE cards add +1 Pressure. Truth -8%.",
-      "flavor": "Genetic diversity initiative.",
+      "text": "Truth -15%. Create 2 random ZONE cards in hand.",
+      "flavor": "Selective breeding for docility.",
       "effects": [
-        {"k":"development","type":"zoneBonus","value":1},
-        {"k":"truth","v":-8}
+        {"k":"truth","v":-15},
+        {"k":"flag","name":"createCards","type":"ZONE","value":2}
       ]
     },
     {
@@ -928,28 +831,30 @@
       "faction": "government",
       "name": "False Flag Cryptid Attack",
       "type": "ATTACK",
-      "rarity": "rare",
-      "cost": 7,
+      "rarity": "legendary",
+      "cost": 10,
       "target": null,
-      "text": "Opponent loses 10 IP. Truth -15%.",
-      "flavor": "Problem, reaction, solution.",
+      "text": "Opponent loses 10 IP and 1 state. Truth -25%.",
+      "flavor": "Fake cryptid attack justifies extreme measures.",
       "effects": [
         {"k":"ip","who":"ai","v":-10},
-        {"k":"truth","v":-15}
+        {"k":"flag","name":"loseState","target":"ai","value":1},
+        {"k":"truth","v":-25}
       ]
     },
     {
       "id": "gov_extraterrestrial_treaty",
       "faction": "government",
       "name": "Extraterrestrial Non-Disclosure Treaty",
-      "type": "DEFENSIVE",
+      "type": "DEVELOPMENT",
       "rarity": "uncommon",
-      "cost": 5,
+      "cost": 2,
       "target": null,
-      "text": "Immune to MEDIA cards for 2 turns.",
-      "flavor": "Galactic copyright law is complex.",
+      "text": "Truth cannot exceed 50%. Draw 1 card per turn.",
+      "flavor": "Galactic silence agreement signed.",
       "effects": [
-        {"k":"flag","name":"immuneMedia","value":2}
+        {"k":"development","type":"truthCap","value":50},
+        {"k":"development","type":"drawPerTurn","value":1}
       ]
     },
     {
@@ -958,12 +863,13 @@
       "name": "Quantum Bigfoot Experiment",
       "type": "TECH",
       "rarity": "rare",
-      "cost": 6,
+      "cost": 3,
       "target": null,
-      "text": "Play 2 cards this turn instead of 1.",
-      "flavor": "Schrödinger's Sasquatch.",
+      "text": "Truth -10%. Gain ability to play cards from discard.",
+      "flavor": "Schrödinger's sasquatch.",
       "effects": [
-        {"k":"flag","name":"extraCardPlay","value":1}
+        {"k":"truth","v":-10},
+        {"k":"flag","name":"discardAccess","value":true}
       ]
     },
     {
@@ -972,13 +878,13 @@
       "name": "Interdimensional Customs",
       "type": "ZONE",
       "rarity": "uncommon",
-      "cost": 5,
+      "cost": 7,
       "target": "state",
-      "text": "Add 4 Pressure. Opponent pays 2 IP to play cards next turn.",
-      "flavor": "Papers, please. All of them.",
+      "text": "Add 3 Pressure to target state. Draw 1 card.",
+      "flavor": "Passport required for reality travel.",
       "effects": [
-        {"k":"pressure","who":"player","v":4},
-        {"k":"flag","name":"cardTax","target":"ai","value":2}
+        {"k":"pressure","who":"player","v":3},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
@@ -987,13 +893,13 @@
       "name": "Cosmic Horror Containment",
       "type": "DEFENSIVE",
       "rarity": "rare",
-      "cost": 7,
+      "cost": 4,
       "target": null,
-      "text": "Block all opponent cards this turn. Lose 5 IP.",
-      "flavor": "Some things are worth not knowing.",
+      "text": "Block all ATTACK cards this turn. Truth -10%.",
+      "flavor": "Some things must stay locked away.",
       "effects": [
-        {"k":"flag","name":"blockAll","value":true},
-        {"k":"ip","who":"player","v":-5}
+        {"k":"flag","name":"blockAllAttacks","value":true},
+        {"k":"truth","v":-10}
       ]
     },
     {
@@ -1002,13 +908,13 @@
       "name": "Reptilian Shapeshifter Agent",
       "type": "ATTACK",
       "rarity": "uncommon",
-      "cost": 5,
+      "cost": 4,
       "target": null,
-      "text": "Opponent loses 6 IP. Copy their next card.",
-      "flavor": "Trust no one. Especially not yourself.",
+      "text": "Opponent loses 5 IP. Gain 1 IP per turn.",
+      "flavor": "Cold-blooded infiltration.",
       "effects": [
-        {"k":"ip","who":"ai","v":-6},
-        {"k":"flag","name":"copyNextCard","target":"ai","value":true}
+        {"k":"ip","who":"ai","v":-5},
+        {"k":"development","type":"ipPerTurn","value":1}
       ]
     },
     {
@@ -1016,59 +922,59 @@
       "faction": "government",
       "name": "Memory Modification Clinic",
       "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Opponent discards hand, draws 2. Truth -10%.",
-      "flavor": "Did you remember to forget?",
+      "text": "Truth -20%. Opponent discards 2 cards.",
+      "flavor": "Selective amnesia services.",
       "effects": [
-        {"k":"flag","name":"handReset","target":"ai","value":2},
-        {"k":"truth","v":-10}
+        {"k":"truth","v":-20},
+        {"k":"flag","name":"forceDiscard","target":"ai","value":2}
       ]
     },
     {
       "id": "gov_psy_ops_division",
       "faction": "government",
       "name": "Psy-Ops Division",
-      "type": "ATTACK",
+      "type": "DEVELOPMENT",
       "rarity": "uncommon",
-      "cost": 4,
+      "cost": 3,
       "target": null,
-      "text": "Opponent loses 5 IP. Next card costs 3 more.",
-      "flavor": "Psychological warfare is best warfare.",
+      "text": "MEDIA cards cost 1 less. Opponent loses 1 IP per turn.",
+      "flavor": "Psychological warfare department.",
       "effects": [
-        {"k":"ip","who":"ai","v":-5},
-        {"k":"flag","name":"cardTax","target":"ai","value":3}
+        {"k":"development","type":"mediaCost","value":-1},
+        {"k":"development","type":"opponentIpLoss","value":1}
       ]
     },
     {
       "id": "gov_cryptid_witness_program",
       "faction": "government",
       "name": "Cryptid Witness Protection",
-      "type": "MEDIA",
-      "rarity": "common",
-      "cost": 3,
+      "type": "DEFENSIVE",
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
-      "text": "Truth -12%. Gain 1 IP.",
-      "flavor": "New identity, new life, old secrets.",
+      "text": "Block next 3 ATTACK cards. Truth -5%.",
+      "flavor": "Relocation for your safety.",
       "effects": [
-        {"k":"truth","v":-12},
-        {"k":"ip","who":"player","v":1}
+        {"k":"flag","name":"blockAttack","value":3},
+        {"k":"truth","v":-5}
       ]
     },
     {
       "id": "gov_underground_bunker",
       "faction": "government",
       "name": "Underground Bunker Network",
-      "type": "DEFENSIVE",
+      "type": "ZONE",
       "rarity": "uncommon",
-      "cost": 5,
-      "target": null,
-      "text": "Immune to next 3 cards. Draw 1.",
-      "flavor": "Deeper than you think.",
+      "cost": 4,
+      "target": "state",
+      "text": "Add 3 Pressure to target state. Gain 2 IP.",
+      "flavor": "Continuity of government ensured.",
       "effects": [
-        {"k":"flag","name":"immune","value":3},
-        {"k":"flag","name":"bonusDraw","value":1}
+        {"k":"pressure","who":"player","v":3},
+        {"k":"ip","who":"player","v":2}
       ]
     },
     {
@@ -1076,13 +982,14 @@
       "faction": "government",
       "name": "Orbital Mind Control Platform",
       "type": "TECH",
-      "rarity": "rare",
-      "cost": 8,
+      "rarity": "uncommon",
+      "cost": 5,
       "target": null,
-      "text": "Control opponent's next card play.",
-      "flavor": "Satellite TV has hidden features.",
+      "text": "Truth -15%. All states gain 1 Pressure.",
+      "flavor": "Satellite array operational.",
       "effects": [
-        {"k":"flag","name":"controlCard","target":"ai","value":true}
+        {"k":"truth","v":-15},
+        {"k":"pressure","who":"player","v":1,"target":"all"}
       ]
     },
     {
@@ -1091,12 +998,13 @@
       "name": "Temporal Loop Device",
       "type": "INSTANT",
       "rarity": "rare",
-      "cost": 6,
+      "cost": 3,
       "target": null,
-      "text": "Repeat your last card's effects.",
-      "flavor": "Repeat your last card's effects.",
+      "text": "Take 2 extra turns. Truth -10%.",
+      "flavor": "Stuck in a time paradox.",
       "effects": [
-        {"k":"flag","name":"repeatLast","value":true}
+        {"k":"flag","name":"extraTurn","value":2},
+        {"k":"truth","v":-10}
       ]
     },
     {
@@ -1105,12 +1013,12 @@
       "name": "Anomalous Materials Division",
       "type": "DEVELOPMENT",
       "rarity": "uncommon",
-      "cost": 6,
+      "cost": 9,
       "target": null,
-      "text": "All cards have +1 effect power. Truth -5%.",
-      "flavor": "Handle with Level 4 clearance.",
+      "text": "All cards cost 1 less. Truth -5%.",
+      "flavor": "Half-Life incident contained.",
       "effects": [
-        {"k":"development","type":"effectBonus","value":1},
+        {"k":"development","type":"allCost","value":-1},
         {"k":"truth","v":-5}
       ]
     },
@@ -1120,27 +1028,27 @@
       "name": "Phantom Helicopter Squadron",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 4,
+      "cost": 7,
       "target": "state",
-      "text": "Add 3 Pressure. Next turn gain +2 IP.",
-      "flavor": "Silent running mode engaged.",
+      "text": "Add 2 Pressure to target state.",
+      "flavor": "Silent running mode activated.",
       "effects": [
-        {"k":"pressure","who":"player","v":3},
-        {"k":"flag","name":"bonusIncome","value":2}
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
       "id": "gov_reality_distortion_field",
       "faction": "government",
       "name": "Reality Distortion Field",
-      "type": "DEFENSIVE",
-      "rarity": "rare",
-      "cost": 7,
+      "type": "TECH",
+      "rarity": "uncommon",
+      "cost": 4,
       "target": null,
-      "text": "All opponent cards do nothing this turn.",
-      "flavor": "What you see is what we want.",
+      "text": "Truth cannot increase for 2 turns. Draw 1 card.",
+      "flavor": "Perception management active.",
       "effects": [
-        {"k":"flag","name":"nullifyAll","target":"ai","value":true}
+        {"k":"flag","name":"truthSuppression","value":2},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
@@ -1148,14 +1056,14 @@
       "faction": "government",
       "name": "Cryptid DNA Database",
       "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Draw cards equal to states controlled. Truth -8%.",
-      "flavor": "Genetic catalog complete.",
+      "text": "Truth -15%. Create 1 random ATTACK card in hand.",
+      "flavor": "Genetic profiles catalogued.",
       "effects": [
-        {"k":"flag","name":"drawPerState","value":true},
-        {"k":"truth","v":-8}
+        {"k":"truth","v":-15},
+        {"k":"flag","name":"createCards","type":"ATTACK","value":1}
       ]
     },
     {
@@ -1163,14 +1071,14 @@
       "faction": "government",
       "name": "Phantom Satellite Grid",
       "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 6,
+      "rarity": "rare",
+      "cost": 9,
       "target": null,
-      "text": "See all opponent cards. Truth -12%.",
-      "flavor": "We see everything. And more.",
+      "text": "Truth -20%. Draw 2 cards.",
+      "flavor": "Orbital surveillance network complete.",
       "effects": [
-        {"k":"flag","name":"revealAll","target":"ai","value":true},
-        {"k":"truth","v":-12}
+        {"k":"truth","v":-20},
+        {"k":"flag","name":"bonusDraw","value":2}
       ]
     },
     {
@@ -1178,13 +1086,14 @@
       "faction": "government",
       "name": "Consciousness Transfer Lab",
       "type": "TECH",
-      "rarity": "rare",
-      "cost": 8,
+      "rarity": "uncommon",
+      "cost": 5,
       "target": null,
-      "text": "Steal opponent's next card before they play it.",
-      "flavor": "Identity theft, literally.",
+      "text": "Truth -10%. Opponent discards 1 card.",
+      "flavor": "Digital immortality achieved.",
       "effects": [
-        {"k":"flag","name":"stealCard","target":"ai","value":true}
+        {"k":"truth","v":-10},
+        {"k":"flag","name":"forceDiscard","target":"ai","value":1}
       ]
     },
     {
@@ -1192,13 +1101,14 @@
       "faction": "government",
       "name": "Multidimensional Embassy",
       "type": "DEVELOPMENT",
-      "rarity": "rare",
-      "cost": 9,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
-      "text": "Gain income from opponent's controlled states too.",
-      "flavor": "Diplomatic immunity across realities.",
+      "text": "ZONE cards cost 1 less. Truth -5%.",
+      "flavor": "Diplomatic relations with parallel Earths.",
       "effects": [
-        {"k":"development","type":"sharedIncome","value":true}
+        {"k":"development","type":"zoneCost","value":-1},
+        {"k":"truth","v":-5}
       ]
     },
     {
@@ -1206,14 +1116,14 @@
       "faction": "truth",
       "name": "Cryptid Field Research",
       "type": "TECH",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
-      "text": "Truth +10%. Draw 1 card.",
-      "flavor": "Hair sample analysis: 99% unknown.",
+      "text": "Truth +10%. Draw 2 cards.",
+      "flavor": "Boots on the ground investigation.",
       "effects": [
         {"k":"truth","v":10},
-        {"k":"flag","name":"bonusDraw","value":1}
+        {"k":"flag","name":"bonusDraw","value":2}
       ]
     },
     {
@@ -1222,14 +1132,13 @@
       "name": "Ultra Disclosure Protocol",
       "type": "MEDIA",
       "rarity": "legendary",
-      "cost": 10,
+      "cost": 13,
       "target": null,
-      "text": "Truth +25%. If you control D.C., +35% instead. AI loses 10 IP.",
-      "flavor": "The truth will set you free... eventually.",
+      "text": "Truth +40%. Opponent loses 5 IP.",
+      "flavor": "The ultimate truth bomb.",
       "effects": [
-        {"k":"truth","v":25},
-        {"k":"conditional","cond":"gs.playerStates.includes('District of Columbia')","then":[{"k":"truth","v":10}]},
-        {"k":"ip","who":"ai","v":-10}
+        {"k":"truth","v":40},
+        {"k":"ip","who":"ai","v":-5}
       ]
     },
     {
@@ -1237,11 +1146,11 @@
       "faction": "truth",
       "name": "Bigfoot Expedition",
       "type": "ZONE",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": "state",
-      "text": "Add 3 Pressure to target state. Truth +5%.",
-      "flavor": "Trail cam footage: inconclusive but promising.",
+      "text": "Add 3 Pressure to forested state. Truth +5%.",
+      "flavor": "Following the footprints.",
       "effects": [
         {"k":"pressure","who":"player","v":3},
         {"k":"truth","v":5}
@@ -1251,15 +1160,15 @@
       "id": "truth_alien_abduction_support",
       "faction": "truth",
       "name": "Alien Abduction Support Group",
-      "type": "MEDIA",
-      "rarity": "common",
-      "cost": 4,
+      "type": "DEVELOPMENT",
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Truth +12%. Gain 1 IP.",
-      "flavor": "You're not crazy. We have the scars to prove it.",
+      "text": "Truth +5% per turn. Draw 1 card.",
+      "flavor": "You are not alone.",
       "effects": [
-        {"k":"truth","v":12},
-        {"k":"ip","who":"player","v":1}
+        {"k":"development","type":"truthPerTurn","value":5},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
@@ -1267,29 +1176,29 @@
       "faction": "truth",
       "name": "UFO Hotline Network",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
-      "text": "Truth +10%. Draw 1 card.",
-      "flavor": "We believe. Call 1-800-TRUTH-IS-OUT-THERE.",
+      "text": "Truth +12%. Gain 2 IP.",
+      "flavor": "1-800-SAW-A-UFO",
       "effects": [
-        {"k":"truth","v":10},
-        {"k":"flag","name":"bonusDraw","value":1}
+        {"k":"truth","v":12},
+        {"k":"ip","who":"player","v":2}
       ]
     },
     {
       "id": "truth_mothman_prophecies",
       "faction": "truth",
       "name": "Mothman Prophecies",
-      "type": "ATTACK",
-      "rarity": "uncommon",
-      "cost": 5,
+      "type": "MEDIA",
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Opponent loses 6 IP. Truth +8%.",
-      "flavor": "The bridge collapse was just the beginning.",
+      "text": "Truth +15%. Draw 2 cards.",
+      "flavor": "The harbinger speaks truth.",
       "effects": [
-        {"k":"ip","who":"ai","v":-6},
-        {"k":"truth","v":8}
+        {"k":"truth","v":15},
+        {"k":"flag","name":"bonusDraw","value":2}
       ]
     },
     {
@@ -1297,44 +1206,44 @@
       "faction": "truth",
       "name": "Chupacabra Sighting Report",
       "type": "ZONE",
-      "rarity": "common",
-      "cost": 2,
+      "rarity": "uncommon",
+      "cost": 5,
       "target": "state",
-      "text": "Add 2 Pressure to target state. Truth +5%.",
-      "flavor": "Livestock deaths: not natural causes.",
+      "text": "Add 2 Pressure to southwestern state. Truth +8%.",
+      "flavor": "Goat sucker evidence collected.",
       "effects": [
         {"k":"pressure","who":"player","v":2},
-        {"k":"truth","v":5}
+        {"k":"truth","v":8}
       ]
     },
     {
       "id": "truth_lake_monster_sonar",
       "faction": "truth",
       "name": "Lake Monster Sonar Evidence",
-      "type": "MEDIA",
-      "rarity": "common",
-      "cost": 4,
+      "type": "TECH",
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Truth +12%. Opponent loses 2 IP.",
-      "flavor": "That's no log. Logs don't have teeth.",
+      "text": "Truth +10%. Add 2 Pressure to any lake state.",
+      "flavor": "Sonar doesn't lie about what's down there.",
       "effects": [
-        {"k":"truth","v":12},
-        {"k":"ip","who":"ai","v":-2}
+        {"k":"truth","v":10},
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
       "id": "truth_ancient_astronauts",
       "faction": "truth",
       "name": "Ancient Astronaut Theory",
-      "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 5,
+      "type": "MEDIA",
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Truth +15%. Draw 2 cards.",
+      "text": "Truth +18%. Opponent loses 2 IP.",
       "flavor": "Giorgio was right all along.",
       "effects": [
-        {"k":"truth","v":15},
-        {"k":"flag","name":"bonusDraw","value":2}
+        {"k":"truth","v":18},
+        {"k":"ip","who":"ai","v":-2}
       ]
     },
     {
@@ -1342,14 +1251,14 @@
       "faction": "truth",
       "name": "Roswell Survivor Testimony",
       "type": "MEDIA",
-      "rarity": "uncommon",
-      "cost": 4,
+      "rarity": "rare",
+      "cost": 7,
       "target": null,
-      "text": "Truth +18%. Opponent loses 3 IP.",
-      "flavor": "Deathbed confessions don't lie.",
+      "text": "Truth +20%. Draw 1 card.",
+      "flavor": "Deathbed confessions reveal all.",
       "effects": [
-        {"k":"truth","v":18},
-        {"k":"ip","who":"ai","v":-3}
+        {"k":"truth","v":20},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
@@ -1357,15 +1266,15 @@
       "faction": "truth",
       "name": "Area 51 Infiltration",
       "type": "ATTACK",
-      "rarity": "rare",
-      "cost": 7,
+      "rarity": "legendary",
+      "cost": 10,
       "target": null,
-      "text": "Opponent loses 8 IP. Truth +15%. Draw 1 card.",
+      "text": "Truth +25%. Opponent loses 8 IP and 1 state.",
       "flavor": "Naruto run successful.",
       "effects": [
+        {"k":"truth","v":25},
         {"k":"ip","who":"ai","v":-8},
-        {"k":"truth","v":15},
-        {"k":"flag","name":"bonusDraw","value":1}
+        {"k":"flag","name":"loseState","target":"ai","value":1}
       ]
     },
     {
@@ -1374,12 +1283,13 @@
       "name": "Jersey Devil Hunt",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
+      "cost": 5,
       "target": "state",
-      "text": "Add 3 Pressure to target state.",
-      "flavor": "Pine Barrens expedition: Day 13.",
+      "text": "Add 2 Pressure to New Jersey. Truth +5%.",
+      "flavor": "Pine Barrens expedition underway.",
       "effects": [
-        {"k":"pressure","who":"player","v":3}
+        {"k":"pressure","who":"player","v":2},
+        {"k":"truth","v":5}
       ]
     },
     {
@@ -1387,14 +1297,14 @@
       "faction": "truth",
       "name": "Skunk Ape Footage",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
-      "text": "Truth +10%. Gain 2 IP.",
-      "flavor": "Blurry, but that's definitely not a bear.",
+      "text": "Truth +12%. Add 1 Pressure to Florida.",
+      "flavor": "Finally, clear video evidence.",
       "effects": [
-        {"k":"truth","v":10},
-        {"k":"ip","who":"player","v":2}
+        {"k":"truth","v":12},
+        {"k":"pressure","who":"player","v":1}
       ]
     },
     {
@@ -1402,11 +1312,11 @@
       "faction": "truth",
       "name": "Beast of Bray Road Tracking",
       "type": "ZONE",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": "state",
-      "text": "Add 3 Pressure. Truth +8%.",
-      "flavor": "Wisconsin werewolf confirmed.",
+      "text": "Add 3 Pressure to Wisconsin. Truth +8%.",
+      "flavor": "Werewolf evidence mounting.",
       "effects": [
         {"k":"pressure","who":"player","v":3},
         {"k":"truth","v":8}
@@ -1416,30 +1326,29 @@
       "id": "truth_phantom_kangaroo_network",
       "faction": "truth",
       "name": "Phantom Kangaroo Tracking Network",
-      "type": "TECH",
-      "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Truth +8%. Draw 1 card.",
-      "flavor": "Marsupials don't belong in Minnesota.",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "cost": 5,
+      "target": "state",
+      "text": "Add 2 Pressure to any midwestern state.",
+      "flavor": "Marsupials where they shouldn't be.",
       "effects": [
-        {"k":"truth","v":8},
-        {"k":"flag","name":"bonusDraw","value":1}
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
       "id": "truth_fouke_monster_evidence",
       "faction": "truth",
       "name": "Fouke Monster Evidence",
-      "type": "MEDIA",
-      "rarity": "common",
-      "cost": 4,
-      "target": null,
-      "text": "Truth +12%. Opponent loses 2 IP.",
-      "flavor": "Arkansas Bigfoot is real and angry.",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "cost": 7,
+      "target": "state",
+      "text": "Add 3 Pressure to Arkansas. Truth +6%.",
+      "flavor": "The Legend continues.",
       "effects": [
-        {"k":"truth","v":12},
-        {"k":"ip","who":"ai","v":-2}
+        {"k":"pressure","who":"player","v":3},
+        {"k":"truth","v":6}
       ]
     },
     {
@@ -1447,14 +1356,14 @@
       "faction": "truth",
       "name": "Thunderbird Sightings Database",
       "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Truth +15%. All ZONE cards cost 1 less.",
-      "flavor": "Giant eagles are making a comeback.",
+      "text": "Truth +15%. Draw 1 card per turn.",
+      "flavor": "Giant bird migration patterns tracked.",
       "effects": [
         {"k":"truth","v":15},
-        {"k":"development","type":"zoneCost","value":-1}
+        {"k":"development","type":"drawPerTurn","value":1}
       ]
     },
     {
@@ -1462,29 +1371,29 @@
       "faction": "truth",
       "name": "Shadow People Documentation",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
-      "text": "Truth +10%. Opponent loses 3 IP.",
-      "flavor": "Sleep deprivation reveals the truth.",
+      "text": "Truth +10%. Opponent loses 2 IP.",
+      "flavor": "Peripheral vision evidence compiled.",
       "effects": [
         {"k":"truth","v":10},
-        {"k":"ip","who":"ai","v":-3}
+        {"k":"ip","who":"ai","v":-2}
       ]
     },
     {
       "id": "truth_hopkinsville_goblins_testimony",
       "faction": "truth",
       "name": "Hopkinsville Goblins Testimony",
-      "type": "ATTACK",
-      "rarity": "common",
-      "cost": 4,
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Opponent loses 5 IP. Truth +5%.",
-      "flavor": "Those weren't owls shooting back.",
+      "text": "Truth +12%. Add 2 Pressure to Kentucky.",
+      "flavor": "The Kelly family tells their story.",
       "effects": [
-        {"k":"ip","who":"ai","v":-5},
-        {"k":"truth","v":5}
+        {"k":"truth","v":12},
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
@@ -1492,29 +1401,29 @@
       "faction": "truth",
       "name": "Lizard People Exposé",
       "type": "MEDIA",
-      "rarity": "rare",
-      "cost": 6,
+      "rarity": "legendary",
+      "cost": 9,
       "target": null,
-      "text": "Truth +20%. Opponent loses 5 IP.",
-      "flavor": "Look closely at their eyes in photos.",
+      "text": "Truth +30%. Opponent loses 6 IP.",
+      "flavor": "David Icke was right!",
       "effects": [
-        {"k":"truth","v":20},
-        {"k":"ip","who":"ai","v":-5}
+        {"k":"truth","v":30},
+        {"k":"ip","who":"ai","v":-6}
       ]
     },
     {
       "id": "truth_hollow_earth_expedition",
       "faction": "truth",
       "name": "Hollow Earth Expedition",
-      "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 6,
-      "target": null,
-      "text": "Truth +18%. Draw 2 cards.",
-      "flavor": "Admiral Byrd's secret journal found.",
+      "type": "ZONE",
+      "rarity": "rare",
+      "cost": 9,
+      "target": "state",
+      "text": "Add 5 Pressure to any state. Truth +15%.",
+      "flavor": "Journey to the center confirmed.",
       "effects": [
-        {"k":"truth","v":18},
-        {"k":"flag","name":"bonusDraw","value":2}
+        {"k":"pressure","who":"player","v":5},
+        {"k":"truth","v":15}
       ]
     },
     {
@@ -1522,29 +1431,29 @@
       "faction": "truth",
       "name": "Time Traveler Interview",
       "type": "MEDIA",
-      "rarity": "rare",
-      "cost": 7,
+      "rarity": "legendary",
+      "cost": 10,
       "target": null,
-      "text": "Play 2 cards next turn. Truth +10%.",
-      "flavor": "He knew about COVID in 1998.",
+      "text": "Truth +25%. Draw 3 cards.",
+      "flavor": "John Titor returns with proof.",
       "effects": [
-        {"k":"flag","name":"extraCardPlay","value":1},
-        {"k":"truth","v":10}
+        {"k":"truth","v":25},
+        {"k":"flag","name":"bonusDraw","value":3}
       ]
     },
     {
       "id": "truth_ufo_crash_retrieval",
       "faction": "truth",
       "name": "UFO Crash Retrieval Team",
-      "type": "ATTACK",
+      "type": "TECH",
       "rarity": "uncommon",
-      "cost": 5,
+      "cost": 4,
       "target": null,
-      "text": "Opponent loses 6 IP. Gain alien technology token.",
-      "flavor": "Finders keepers, losers... probed.",
+      "text": "Truth +8%. Gain 3 IP.",
+      "flavor": "Recovery team beats government to the site.",
       "effects": [
-        {"k":"ip","who":"ai","v":-6},
-        {"k":"flag","name":"alienTech","value":true}
+        {"k":"truth","v":8},
+        {"k":"ip","who":"player","v":3}
       ]
     },
     {
@@ -1552,13 +1461,14 @@
       "faction": "truth",
       "name": "Interdimensional Portal Research",
       "type": "TECH",
-      "rarity": "rare",
-      "cost": 8,
+      "rarity": "uncommon",
+      "cost": 5,
       "target": null,
-      "text": "Draw cards from both players' decks.",
-      "flavor": "Parallel universe contact established.",
+      "text": "Truth +10%. Create 1 random card in hand.",
+      "flavor": "Gateway to parallel dimensions opened.",
       "effects": [
-        {"k":"flag","name":"drawFromBoth","value":2}
+        {"k":"truth","v":10},
+        {"k":"flag","name":"createCards","type":"random","value":1}
       ]
     },
     {
@@ -1566,14 +1476,13 @@
       "faction": "truth",
       "name": "Phantom Black Dog Network",
       "type": "ZONE",
-      "rarity": "common",
-      "cost": 2,
+      "rarity": "uncommon",
+      "cost": 5,
       "target": "state",
-      "text": "Add 2 Pressure. Truth +5%.",
-      "flavor": "Death omens forming pack behavior.",
+      "text": "Add 2 Pressure to any rural state.",
+      "flavor": "Hellhound sightings coordinated.",
       "effects": [
-        {"k":"pressure","who":"player","v":2},
-        {"k":"truth","v":5}
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
@@ -1581,11 +1490,11 @@
       "faction": "truth",
       "name": "Yeti Hair Analysis",
       "type": "TECH",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
       "text": "Truth +12%. Draw 1 card.",
-      "flavor": "DNA doesn't match any known species.",
+      "flavor": "DNA doesn't match any known primate.",
       "effects": [
         {"k":"truth","v":12},
         {"k":"flag","name":"bonusDraw","value":1}
@@ -1596,14 +1505,14 @@
       "faction": "truth",
       "name": "Skinwalker Ranch Investigation",
       "type": "ZONE",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": "state",
-      "text": "Add 4 Pressure. Truth +10%.",
-      "flavor": "Something's very wrong with this place.",
+      "text": "Add 4 Pressure to Utah. Truth +12%.",
+      "flavor": "Unauthorized access to the ranch.",
       "effects": [
         {"k":"pressure","who":"player","v":4},
-        {"k":"truth","v":10}
+        {"k":"truth","v":12}
       ]
     },
     {
@@ -1611,14 +1520,14 @@
       "faction": "truth",
       "name": "Dover Demon Witness Testimony",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
-      "text": "Truth +10%. Opponent loses 2 IP.",
-      "flavor": "Three teenagers, same story, 40 years later.",
+      "text": "Truth +10%. Add 2 Pressure to Massachusetts.",
+      "flavor": "Teenagers don't lie about this stuff.",
       "effects": [
         {"k":"truth","v":10},
-        {"k":"ip","who":"ai","v":-2}
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
@@ -1626,14 +1535,14 @@
       "faction": "truth",
       "name": "Real Alien Autopsy Leak",
       "type": "MEDIA",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Truth +18%. Opponent loses 4 IP.",
-      "flavor": "The fake was covering the real one.",
+      "text": "Truth +20%. Opponent loses 3 IP.",
+      "flavor": "Not the Hollywood version.",
       "effects": [
-        {"k":"truth","v":18},
-        {"k":"ip","who":"ai","v":-4}
+        {"k":"truth","v":20},
+        {"k":"ip","who":"ai","v":-3}
       ]
     },
     {
@@ -1641,14 +1550,14 @@
       "faction": "truth",
       "name": "Cattle Mutilation Pattern Analysis",
       "type": "TECH",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Truth +10%. Draw 2 cards.",
-      "flavor": "Surgical precision, no blood loss.",
+      "text": "Truth +12%. Add 2 Pressure to any agricultural state.",
+      "flavor": "Surgical precision beyond earthly technology.",
       "effects": [
-        {"k":"truth","v":10},
-        {"k":"flag","name":"bonusDraw","value":2}
+        {"k":"truth","v":12},
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
@@ -1656,14 +1565,14 @@
       "faction": "truth",
       "name": "Crop Circle Decoder Ring",
       "type": "TECH",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
-      "text": "Truth +8%. Next card costs 2 less.",
-      "flavor": "Mathematical perfection in wheat.",
+      "text": "Truth +8%. Draw 2 cards.",
+      "flavor": "Sacred geometry reveals alien messages.",
       "effects": [
         {"k":"truth","v":8},
-        {"k":"flag","name":"costReduction","value":2}
+        {"k":"flag","name":"bonusDraw","value":2}
       ]
     },
     {
@@ -1671,29 +1580,29 @@
       "faction": "truth",
       "name": "1897 Phantom Airship Reports",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Truth +12%. Gain 1 IP.",
-      "flavor": "Pre-Wright Brothers aerial technology.",
+      "text": "Truth +15%. Draw 1 card.",
+      "flavor": "UFOs before there were airplanes.",
       "effects": [
-        {"k":"truth","v":12},
-        {"k":"ip","who":"player","v":1}
+        {"k":"truth","v":15},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
       "id": "truth_beast_of_bladenboro_hunt",
       "faction": "truth",
       "name": "Beast of Bladenboro Hunt",
-      "type": "ATTACK",
-      "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP. Truth +6%.",
-      "flavor": "Vampire cat confirmed in North Carolina.",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "cost": 6,
+      "target": "state",
+      "text": "Add 3 Pressure to North Carolina. Truth +8%.",
+      "flavor": "Vampire beast evidence gathered.",
       "effects": [
-        {"k":"ip","who":"ai","v":-4},
-        {"k":"truth","v":6}
+        {"k":"pressure","who":"player","v":3},
+        {"k":"truth","v":8}
       ]
     },
     {
@@ -1701,14 +1610,14 @@
       "faction": "truth",
       "name": "Washington Sea Serpent Sonar",
       "type": "TECH",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Truth +10%. Add 2 Pressure to coastal states.",
-      "flavor": "Puget Sound has unexpected residents.",
+      "text": "Truth +10%. Add 3 Pressure to Washington.",
+      "flavor": "Puget Sound monster detected.",
       "effects": [
         {"k":"truth","v":10},
-        {"k":"pressure","who":"player","v":2,"target":"coastal"}
+        {"k":"pressure","who":"player","v":3}
       ]
     },
     {
@@ -1716,11 +1625,11 @@
       "faction": "truth",
       "name": "Moon-Eyed People Archaeological Site",
       "type": "ZONE",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": "state",
-      "text": "Add 4 Pressure. Truth +12%.",
-      "flavor": "Cherokee legends meet modern archaeology.",
+      "text": "Add 4 Pressure to any Appalachian state. Truth +12%.",
+      "flavor": "Ancient alien settlement excavated.",
       "effects": [
         {"k":"pressure","who":"player","v":4},
         {"k":"truth","v":12}
@@ -1730,15 +1639,15 @@
       "id": "truth_giant_octopus_encounter",
       "faction": "truth",
       "name": "Giant Pacific Octopus Encounter",
-      "type": "ATTACK",
-      "rarity": "uncommon",
-      "cost": 5,
-      "target": null,
-      "text": "Opponent loses 6 IP. Truth +8%.",
-      "flavor": "Kraken-class cephalopod confirmed.",
+      "type": "ZONE",
+      "rarity": "rare",
+      "cost": 8,
+      "target": "state",
+      "text": "Add 4 Pressure to any coastal state. Truth +10%.",
+      "flavor": "Kraken-sized cephalopod documented.",
       "effects": [
-        {"k":"ip","who":"ai","v":-6},
-        {"k":"truth","v":8}
+        {"k":"pressure","who":"player","v":4},
+        {"k":"truth","v":10}
       ]
     },
     {
@@ -1746,59 +1655,59 @@
       "faction": "truth",
       "name": "Remote Viewing Leak",
       "type": "MEDIA",
-      "rarity": "uncommon",
-      "cost": 4,
+      "rarity": "rare",
+      "cost": 7,
       "target": null,
-      "text": "See opponent's hand. Truth +15%.",
-      "flavor": "CIA psychic spies were real.",
+      "text": "Truth +18%. Draw 2 cards.",
+      "flavor": "Psychic spying program exposed.",
       "effects": [
-        {"k":"flag","name":"revealHand","target":"ai","value":true},
-        {"k":"truth","v":15}
+        {"k":"truth","v":18},
+        {"k":"flag","name":"bonusDraw","value":2}
       ]
     },
     {
       "id": "truth_invisible_aircraft_photos",
       "faction": "truth",
       "name": "Invisible Aircraft Photos",
-      "type": "TECH",
-      "rarity": "rare",
-      "cost": 6,
+      "type": "MEDIA",
+      "rarity": "legendary",
+      "cost": 9,
       "target": null,
-      "text": "Opponent cannot play TECH cards next turn. Truth +12%.",
-      "flavor": "Infrared reveals all.",
+      "text": "Truth +25%. Opponent loses 4 IP.",
+      "flavor": "Stealth technology revealed.",
       "effects": [
-        {"k":"flag","name":"blockTech","target":"ai","value":true},
-        {"k":"truth","v":12}
+        {"k":"truth","v":25},
+        {"k":"ip","who":"ai","v":-4}
       ]
     },
     {
       "id": "truth_missing_time_survivors",
       "faction": "truth",
       "name": "Missing Time Survivor Network",
-      "type": "MEDIA",
-      "rarity": "uncommon",
-      "cost": 4,
+      "type": "DEVELOPMENT",
+      "rarity": "rare",
+      "cost": 7,
       "target": null,
-      "text": "Truth +15%. Draw 2 cards.",
-      "flavor": "Hypnotic regression reveals truth.",
+      "text": "Truth +8% per turn. Draw 1 card.",
+      "flavor": "Abduction survivors speak out.",
       "effects": [
-        {"k":"truth","v":15},
-        {"k":"flag","name":"bonusDraw","value":2}
+        {"k":"development","type":"truthPerTurn","value":8},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
       "id": "truth_grey_alien_testimony",
       "faction": "truth",
       "name": "Grey Alien Eyewitness Testimony",
-      "type": "ATTACK",
-      "rarity": "uncommon",
-      "cost": 5,
+      "type": "MEDIA",
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Opponent loses 7 IP. Truth +10%.",
-      "flavor": "They're here, and they're not tourists.",
+      "text": "Truth +20%. Draw 1 card.",
+      "flavor": "Hundreds of consistent reports.",
       "effects": [
-        {"k":"ip","who":"ai","v":-7},
-        {"k":"truth","v":10}
+        {"k":"truth","v":20},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
@@ -1806,14 +1715,14 @@
       "faction": "truth",
       "name": "Reality Breach Detector",
       "type": "TECH",
-      "rarity": "rare",
-      "cost": 7,
+      "rarity": "legendary",
+      "cost": 10,
       "target": null,
-      "text": "Nullify opponent's DEFENSIVE cards. Truth +15%.",
-      "flavor": "Consensus reality is failing.",
+      "text": "Truth +30%. Create 2 random cards in hand.",
+      "flavor": "Dimensional anomaly scanner operational.",
       "effects": [
-        {"k":"flag","name":"pierceDefense","value":true},
-        {"k":"truth","v":15}
+        {"k":"truth","v":30},
+        {"k":"flag","name":"createCards","type":"random","value":2}
       ]
     },
     {
@@ -1822,43 +1731,13 @@
       "name": "Paranormal Investigation Society",
       "type": "DEVELOPMENT",
       "rarity": "uncommon",
-      "cost": 6,
+      "cost": 3,
       "target": null,
-      "text": "MEDIA cards give +5% Truth. Gain 2 IP.",
-      "flavor": "Scientific approach to the impossible.",
+      "text": "ZONE cards cost 1 less. Truth +5%.",
+      "flavor": "Ghost hunters and cryptid seekers unite.",
       "effects": [
-        {"k":"development","type":"mediaBonus","value":5},
-        {"k":"ip","who":"player","v":2}
-      ]
-    },
-    {
-      "id": "truth_dimension_x_refugees",
-      "faction": "truth",
-      "name": "Dimension X Refugees",
-      "type": "ATTACK",
-      "rarity": "rare",
-      "cost": 7,
-      "target": null,
-      "text": "Opponent loses 8 IP. Draw 3 cards.",
-      "flavor": "They fled here for a reason.",
-      "effects": [
-        {"k":"ip","who":"ai","v":-8},
-        {"k":"flag","name":"bonusDraw","value":3}
-      ]
-    },
-    {
-      "id": "truth_cryptid_sanctuary",
-      "faction": "truth",
-      "name": "Cryptid Sanctuary Network",
-      "type": "ZONE",
-      "rarity": "uncommon",
-      "cost": 5,
-      "target": "state",
-      "text": "Add 4 Pressure. Protected from TECH cards.",
-      "flavor": "Safe haven for the misunderstood.",
-      "effects": [
-        {"k":"pressure","who":"player","v":4},
-        {"k":"flag","name":"techImmune","value":true}
+        {"k":"development","type":"zoneCost","value":-1},
+        {"k":"truth","v":5}
       ]
     },
     {
@@ -1866,29 +1745,29 @@
       "faction": "truth",
       "name": "Alien Implant Removal Clinic",
       "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 4,
+      "rarity": "rare",
+      "cost": 7,
       "target": null,
-      "text": "Remove all opponent status effects. Truth +12%.",
-      "flavor": "Nasal cavity archaeology.",
+      "text": "Truth +15%. Gain 3 IP.",
+      "flavor": "Foreign nanotechnology extracted.",
       "effects": [
-        {"k":"flag","name":"purgeEffects","target":"ai","value":true},
-        {"k":"truth","v":12}
+        {"k":"truth","v":15},
+        {"k":"ip","who":"player","v":3}
       ]
     },
     {
       "id": "truth_consciousness_expansion",
       "faction": "truth",
       "name": "Consciousness Expansion Workshop",
-      "type": "MEDIA",
-      "rarity": "uncommon",
-      "cost": 5,
+      "type": "DEVELOPMENT",
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Truth +20%. All cards cost 1 less next turn.",
-      "flavor": "Open your mind, man.",
+      "text": "Draw 2 cards per turn. Truth +5%.",
+      "flavor": "Opening minds to higher dimensions.",
       "effects": [
-        {"k":"truth","v":20},
-        {"k":"flag","name":"costReduction","value":1,"duration":1}
+        {"k":"development","type":"drawPerTurn","value":2},
+        {"k":"truth","v":5}
       ]
     },
     {
@@ -1896,14 +1775,14 @@
       "faction": "truth",
       "name": "Multidimensional Gateway",
       "type": "TECH",
-      "rarity": "rare",
-      "cost": 8,
+      "rarity": "legendary",
+      "cost": 11,
       "target": null,
-      "text": "Gain cards from opponent's deck. Truth +15%.",
-      "flavor": "Parallel universe trade agreement.",
+      "text": "Truth +35%. Create 3 random cards in hand.",
+      "flavor": "Portal to infinite possibilities opened.",
       "effects": [
-        {"k":"flag","name":"stealFromDeck","target":"ai","value":2},
-        {"k":"truth","v":15}
+        {"k":"truth","v":35},
+        {"k":"flag","name":"createCards","type":"random","value":3}
       ]
     },
     {
@@ -1911,29 +1790,29 @@
       "faction": "truth",
       "name": "Moon Landing Hoax Evidence",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 4,
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Truth +15%. Opponent loses 3 IP.",
-      "flavor": "Waving flag in vacuum, case closed.",
+      "text": "Truth +15%. Opponent loses 2 IP.",
+      "flavor": "Studio lighting analysis complete.",
       "effects": [
         {"k":"truth","v":15},
-        {"k":"ip","who":"ai","v":-3}
+        {"k":"ip","who":"ai","v":-2}
       ]
     },
     {
       "id": "truth_memory_recovery_session",
       "faction": "truth",
       "name": "Memory Recovery Session",
-      "type": "ATTACK",
-      "rarity": "uncommon",
-      "cost": 4,
+      "type": "TECH",
+      "rarity": "rare",
+      "cost": 7,
       "target": null,
-      "text": "Force opponent to discard 3. Truth +10%.",
-      "flavor": "Remembering what they made you forget.",
+      "text": "Truth +18%. Draw 2 cards.",
+      "flavor": "Suppressed memories surfacing.",
       "effects": [
-        {"k":"flag","name":"forceDiscard","target":"ai","value":3},
-        {"k":"truth","v":10}
+        {"k":"truth","v":18},
+        {"k":"flag","name":"bonusDraw","value":2}
       ]
     },
     {
@@ -1941,14 +1820,15 @@
       "faction": "truth",
       "name": "Shadow Government Infiltration",
       "type": "ATTACK",
-      "rarity": "rare",
-      "cost": 6,
+      "rarity": "legendary",
+      "cost": 9,
       "target": null,
-      "text": "Copy opponent's DEVELOPMENT effects. Truth +12%.",
-      "flavor": "We have people on the inside now.",
+      "text": "Truth +25%. Opponent loses 8 IP and 1 state.",
+      "flavor": "Deep state exposed from within.",
       "effects": [
-        {"k":"flag","name":"copyDevelopments","target":"ai","value":true},
-        {"k":"truth","v":12}
+        {"k":"truth","v":25},
+        {"k":"ip","who":"ai","v":-8},
+        {"k":"flag","name":"loseState","target":"ai","value":1}
       ]
     },
     {
@@ -1956,14 +1836,14 @@
       "faction": "truth",
       "name": "Operation Paperclip Files",
       "type": "MEDIA",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Truth +18%. Opponent loses 4 IP.",
-      "flavor": "Nazi scientists in NASA confirmed.",
+      "text": "Truth +20%. Draw 1 card.",
+      "flavor": "Nazi scientist recruitment exposed.",
       "effects": [
-        {"k":"truth","v":18},
-        {"k":"ip","who":"ai","v":-4}
+        {"k":"truth","v":20},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
@@ -1971,13 +1851,14 @@
       "faction": "truth",
       "name": "Holographic Universe Theory",
       "type": "TECH",
-      "rarity": "rare",
-      "cost": 7,
+      "rarity": "uncommon",
+      "cost": 4,
       "target": null,
-      "text": "Reality becomes malleable. Next 3 cards cost 0.",
-      "flavor": "We're living in a simulation.",
+      "text": "Truth +8%. All cards cost 1 less this turn.",
+      "flavor": "Reality is just a projection.",
       "effects": [
-        {"k":"flag","name":"freeCards","value":3}
+        {"k":"truth","v":8},
+        {"k":"flag","name":"allCostReduction","value":1}
       ]
     },
     {
@@ -1985,14 +1866,14 @@
       "faction": "truth",
       "name": "Cryptid DNA Evidence Database",
       "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Truth +15%. ZONE cards cost 1 less.",
-      "flavor": "Genetic proof of the impossible.",
+      "text": "Truth +18%. Create 1 random ZONE card in hand.",
+      "flavor": "Genetic proof of unknown species.",
       "effects": [
-        {"k":"truth","v":15},
-        {"k":"development","type":"zoneCost","value":-1}
+        {"k":"truth","v":18},
+        {"k":"flag","name":"createCards","type":"ZONE","value":1}
       ]
     },
     {
@@ -2000,14 +1881,14 @@
       "faction": "truth",
       "name": "Phantom Satellite Tracking",
       "type": "TECH",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "See all opponent cards for 3 turns. Truth +8%.",
-      "flavor": "Black budget satellites are watching.",
+      "text": "Truth +15%. Draw 2 cards.",
+      "flavor": "Black budget satellite network exposed.",
       "effects": [
-        {"k":"flag","name":"seeAll","target":"ai","value":3},
-        {"k":"truth","v":8}
+        {"k":"truth","v":15},
+        {"k":"flag","name":"bonusDraw","value":2}
       ]
     },
     {
@@ -2015,13 +1896,14 @@
       "faction": "truth",
       "name": "Consciousness Upload Technology",
       "type": "TECH",
-      "rarity": "rare",
-      "cost": 8,
+      "rarity": "uncommon",
+      "cost": 5,
       "target": null,
-      "text": "Gain opponent's last played card permanently.",
+      "text": "Truth +10%. Gain 2 IP per turn.",
       "flavor": "Digital immortality achieved.",
       "effects": [
-        {"k":"flag","name":"permanentSteal","target":"ai","value":true}
+        {"k":"truth","v":10},
+        {"k":"development","type":"ipPerTurn","value":2}
       ]
     },
     {
@@ -2029,14 +1911,14 @@
       "faction": "truth",
       "name": "Multidimensional Broadcast Network",
       "type": "MEDIA",
-      "rarity": "rare",
-      "cost": 6,
+      "rarity": "legendary",
+      "cost": 9,
       "target": null,
-      "text": "Truth +25%. Cannot be countered.",
-      "flavor": "Truth across infinite realities.",
+      "text": "Truth +30%. All states gain 2 Pressure.",
+      "flavor": "Truth transmitted across all realities.",
       "effects": [
-        {"k":"truth","v":25},
-        {"k":"flag","name":"uncounterable","value":true}
+        {"k":"truth","v":30},
+        {"k":"pressure","who":"player","v":2,"target":"all"}
       ]
     },
     {
@@ -2045,27 +1927,13 @@
       "name": "Crystal Wi-Fi Chakra Network",
       "type": "DEVELOPMENT",
       "rarity": "uncommon",
-      "cost": 6,
-      "target": null,
-      "text": "All cards give +3% Truth. Gain 2 IP per turn.",
-      "flavor": "Spiritual technology convergence.",
-      "effects": [
-        {"k":"development","type":"truthBonus","value":3},
-        {"k":"development","type":"income","value":2}
-      ]
-    },
-    {
-      "id": "truth_tinfoil_hat_factory",
-      "faction": "truth",
-      "name": "Tinfoil Hat Manufacturing",
-      "type": "DEFENSIVE",
-      "rarity": "common",
       "cost": 3,
       "target": null,
-      "text": "Immune to MEDIA cards for 2 turns.",
-      "flavor": "Fashion meets function.",
+      "text": "All cards cost 1 less. Truth +3% per turn.",
+      "flavor": "Spiritual technology convergence.",
       "effects": [
-        {"k":"flag","name":"immuneMedia","value":2}
+        {"k":"development","type":"allCost","value":-1},
+        {"k":"development","type":"truthPerTurn","value":3}
       ]
     },
     {
@@ -2073,14 +1941,14 @@
       "faction": "truth",
       "name": "Late Night AM Radio",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 2,
+      "rarity": "uncommon",
+      "cost": 5,
       "target": null,
-      "text": "Truth +8%. Draw 1 card.",
-      "flavor": "Coast to Coast, the truth is out there.",
+      "text": "Truth +10%. Draw 1 card per turn.",
+      "flavor": "Coast to Coast truth transmission.",
       "effects": [
-        {"k":"truth","v":8},
-        {"k":"flag","name":"bonusDraw","value":1}
+        {"k":"truth","v":10},
+        {"k":"development","type":"drawPerTurn","value":1}
       ]
     },
     {
@@ -2088,14 +1956,14 @@
       "faction": "truth",
       "name": "Viral Thread Storm",
       "type": "MEDIA",
-      "rarity": "uncommon",
-      "cost": 4,
+      "rarity": "rare",
+      "cost": 7,
       "target": null,
-      "text": "Truth +15%. Next MEDIA costs 0.",
-      "flavor": "The algorithm can't suppress this.",
+      "text": "Truth +20%. Opponent loses 3 IP.",
+      "flavor": "Social media awakening cascade.",
       "effects": [
-        {"k":"truth","v":15},
-        {"k":"flag","name":"freeMedia","value":1}
+        {"k":"truth","v":20},
+        {"k":"ip","who":"ai","v":-3}
       ]
     },
     {
@@ -2103,29 +1971,29 @@
       "faction": "truth",
       "name": "Bigfoot Field Operations",
       "type": "ZONE",
-      "rarity": "uncommon",
-      "cost": 4,
+      "rarity": "rare",
+      "cost": 7,
       "target": "state",
-      "text": "Add 5 Pressure. Truth +8%.",
-      "flavor": "Sasquatch Squad deployment successful.",
+      "text": "Add 4 Pressure to any forested state. Truth +10%.",
+      "flavor": "Sasquatch research station established.",
       "effects": [
-        {"k":"pressure","who":"player","v":5},
-        {"k":"truth","v":8}
+        {"k":"pressure","who":"player","v":4},
+        {"k":"truth","v":10}
       ]
     },
     {
       "id": "truth_mothman_omens",
       "faction": "truth",
       "name": "Mothman Omen Network",
-      "type": "ATTACK",
+      "type": "DEVELOPMENT",
       "rarity": "uncommon",
-      "cost": 5,
+      "cost": 4,
       "target": null,
-      "text": "Opponent loses 6 IP. Predict their next card.",
-      "flavor": "Red eyes see the future.",
+      "text": "Truth +5% per turn. Draw 1 card.",
+      "flavor": "Prophecy distribution network active.",
       "effects": [
-        {"k":"ip","who":"ai","v":-6},
-        {"k":"flag","name":"predictCard","target":"ai","value":true}
+        {"k":"development","type":"truthPerTurn","value":5},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
@@ -2133,13 +2001,13 @@
       "faction": "truth",
       "name": "Essential Oils Mind Shield",
       "type": "DEFENSIVE",
-      "rarity": "common",
-      "cost": 2,
+      "rarity": "uncommon",
+      "cost": 5,
       "target": null,
-      "text": "Block next ATTACK. Truth +5%.",
-      "flavor": "Lavender protects against psychic attacks.",
+      "text": "Block all MEDIA attacks this turn. Truth +5%.",
+      "flavor": "Lavender protects from mind control.",
       "effects": [
-        {"k":"flag","name":"blockAttack","value":true},
+        {"k":"flag","name":"blockMediaAttacks","value":true},
         {"k":"truth","v":5}
       ]
     },
@@ -2148,11 +2016,11 @@
       "faction": "truth",
       "name": "Healing Crystal Array",
       "type": "TECH",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
       "text": "Truth +10%. Gain 3 IP.",
-      "flavor": "Quartz amplifies truth frequencies.",
+      "flavor": "Quartz resonance amplifies truth frequency.",
       "effects": [
         {"k":"truth","v":10},
         {"k":"ip","who":"player","v":3}
@@ -2163,14 +2031,14 @@
       "faction": "truth",
       "name": "Really Long YouTube Videos",
       "type": "MEDIA",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
-      "text": "Truth +12%. Opponent skips next draw.",
-      "flavor": "4-hour documentary on lizard people.",
+      "text": "Truth +12%. Draw 2 cards.",
+      "flavor": "4-hour truth compilations with red arrows.",
       "effects": [
         {"k":"truth","v":12},
-        {"k":"flag","name":"skipDraw","target":"ai","value":1}
+        {"k":"flag","name":"bonusDraw","value":2}
       ]
     },
     {
@@ -2178,14 +2046,14 @@
       "faction": "truth",
       "name": "Whistleblower Protection Network",
       "type": "DEFENSIVE",
-      "rarity": "uncommon",
-      "cost": 4,
+      "rarity": "rare",
+      "cost": 7,
       "target": null,
-      "text": "Immune to opponent effects for 2 turns. Truth +8%.",
-      "flavor": "Safe houses for truth tellers.",
+      "text": "Block all ATTACK cards this turn. Truth +10%.",
+      "flavor": "Safe house network for truth-tellers.",
       "effects": [
-        {"k":"flag","name":"immune","value":2},
-        {"k":"truth","v":8}
+        {"k":"flag","name":"blockAllAttacks","value":true},
+        {"k":"truth","v":10}
       ]
     },
     {
@@ -2193,29 +2061,29 @@
       "faction": "truth",
       "name": "Anonymous Leak Platform",
       "type": "MEDIA",
-      "rarity": "uncommon",
-      "cost": 5,
+      "rarity": "rare",
+      "cost": 8,
       "target": null,
-      "text": "Truth +18%. Opponent loses 4 IP.",
-      "flavor": "Secure drop for classified documents.",
+      "text": "Truth +25%. Draw 1 card.",
+      "flavor": "Secure digital drop for classified intel.",
       "effects": [
-        {"k":"truth","v":18},
-        {"k":"ip","who":"ai","v":-4}
+        {"k":"truth","v":25},
+        {"k":"flag","name":"bonusDraw","value":1}
       ]
     },
     {
       "id": "truth_flat_earth_conference",
       "faction": "truth",
       "name": "Flat Earth Conference",
-      "type": "MEDIA",
-      "rarity": "common",
-      "cost": 4,
+      "type": "DEVELOPMENT",
+      "rarity": "uncommon",
+      "cost": 7,
       "target": null,
-      "text": "Truth +15%. Draw 1 card.",
-      "flavor": "Globe manufacturers hate this one trick.",
+      "text": "MEDIA cards cost 1 less. Truth +5%.",
+      "flavor": "Globe skeptics unite worldwide.",
       "effects": [
-        {"k":"truth","v":15},
-        {"k":"flag","name":"bonusDraw","value":1}
+        {"k":"development","type":"mediaCost","value":-1},
+        {"k":"truth","v":5}
       ]
     },
     {
@@ -2223,14 +2091,14 @@
       "faction": "truth",
       "name": "Chemtrail Detection Kit",
       "type": "TECH",
-      "rarity": "common",
-      "cost": 3,
+      "rarity": "uncommon",
+      "cost": 6,
       "target": null,
-      "text": "Truth +10%. Counter next ZONE card.",
-      "flavor": "Aluminum oxide levels: OFF THE CHARTS.",
+      "text": "Truth +12%. Add 2 Pressure to any state.",
+      "flavor": "Atmospheric aerosol analysis complete.",
       "effects": [
-        {"k":"truth","v":10},
-        {"k":"flag","name":"counterZone","value":1}
+        {"k":"truth","v":12},
+        {"k":"pressure","who":"player","v":2}
       ]
     },
     {
@@ -2238,14 +2106,14 @@
       "faction": "truth",
       "name": "Vaccine Truth Bomb Campaign",
       "type": "MEDIA",
-      "rarity": "uncommon",
-      "cost": 4,
+      "rarity": "rare",
+      "cost": 7,
       "target": null,
-      "text": "Truth +20%. Opponent loses 3 IP.",
-      "flavor": "Big Pharma's worst nightmare.",
+      "text": "Truth +20%. Opponent loses 4 IP.",
+      "flavor": "Medical establishment exposed.",
       "effects": [
         {"k":"truth","v":20},
-        {"k":"ip","who":"ai","v":-3}
+        {"k":"ip","who":"ai","v":-4}
       ]
     }
   ]
