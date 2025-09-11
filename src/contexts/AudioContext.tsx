@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useRef, useEffect } from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
 type AudioContextType = ReturnType<typeof useAudio>;
@@ -6,11 +6,23 @@ type AudioContextType = ReturnType<typeof useAudio>;
 const AudioContext = createContext<AudioContextType | null>(null);
 
 export const AudioProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  console.log('🎵 AudioProvider: Initializing real audio system...');
+  const initializeRef = useRef(false);
   
-  // Now use the real useAudio hook
+  // Only initialize once using a ref to prevent multiple initializations
+  useEffect(() => {
+    if (!initializeRef.current) {
+      console.log('🎵 AudioProvider: First-time initialization');
+      initializeRef.current = true;
+    }
+  }, []);
+  
+  // Always call useAudio - hooks must be called consistently
   const audioSystem = useAudio();
-  console.log('🎵 AudioProvider: Real audio system created successfully');
+  
+  // Only log after first initialization to reduce noise
+  if (initializeRef.current) {
+    console.log('🎵 AudioProvider: Using stable audio system');
+  }
   
   return (
     <AudioContext.Provider value={audioSystem}>
@@ -25,6 +37,5 @@ export const useAudioContext = () => {
     console.error('🎵 useAudioContext: No audio context available');
     throw new Error('useAudioContext must be used within an AudioProvider');
   }
-  console.log('🎵 useAudioContext: Using real audio system');
   return context;
 };

@@ -266,14 +266,26 @@ const Index = () => {
     }
   }, [gameState.faction]);
 
-  // Handle audio initialization and menu music
+  // Handle audio initialization and menu music - only run once
   useEffect(() => {
-    console.log('🎵 Index: Setting up menu music on component mount');
-    // Small delay to ensure audio system is fully initialized
-    setTimeout(() => {
-      audio.setMenuMusic(); 
-    }, 100);
-  }, [audio]);
+    console.log('🎵 Index: Initial audio setup');
+    let isInitialized = false;
+    
+    const initializeAudio = () => {
+      if (!isInitialized) {
+        console.log('🎵 Index: Setting up menu music for first time');
+        audio.setMenuMusic();
+        isInitialized = true;
+      }
+    };
+    
+    // Small delay to ensure audio system is ready
+    const timer = setTimeout(initializeAudio, 200);
+    
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []); // Empty dependency array - only run once
 
   const startNewGame = async (faction: 'government' | 'truth') => {
     console.log('🎵 Index: Starting new game with faction:', faction);
