@@ -72,6 +72,12 @@ export const useAudio = () => {
 
   // Initialize audio context
   useEffect(() => {
+    // Prevent duplicate initialization
+    if (tracksLoaded) {
+      console.log('🎵 Audio already initialized, skipping...');
+      return;
+    }
+
     // Mobile audio context unlock function
     const unlockAudioContext = () => {
       if (audioContextUnlocked) {
@@ -150,32 +156,25 @@ export const useAudio = () => {
     const loadMusicTracks = async () => {
       console.log('🎵 Loading music tracks...');
       
-      // Load theme music tracks (1-4) - DISABLE FALLBACK BACKGROUND MUSIC
-      const themePromises = [];
-      for (let i = 1; i <= 4; i++) {
-        themePromises.push(loadAudioTrack(`/muzak/Theme-${i}.mp3`));
-      }
+      // Load theme music tracks - only load existing files
+      const existingThemeTracks = ['/muzak/Theme-2.mp3']; // Only Theme-2 exists
+      const themePromises = existingThemeTracks.map(track => loadAudioTrack(track));
       
       const themeResults = await Promise.all(themePromises);
       const validThemeTracks = themeResults.filter(audio => audio !== null) as HTMLAudioElement[];
       
-      // REMOVED FALLBACK - no more background-music.mp3 chaos
       musicTracks.current.theme = validThemeTracks;
       console.log('🎵 Theme tracks loaded:', validThemeTracks.length);
 
-      // Load government faction music tracks (1-3)
-      const govPromises = [];
-      for (let i = 1; i <= 3; i++) {
-        govPromises.push(loadAudioTrack(`/muzak/Government-${i}.mp3`));
-      }
+      // Load government faction music tracks - only existing files
+      const existingGovTracks = ['/muzak/Government-1.mp3', '/muzak/Government-3.mp3'];
+      const govPromises = existingGovTracks.map(track => loadAudioTrack(track));
       const govResults = await Promise.all(govPromises);
       musicTracks.current.government = govResults.filter(audio => audio !== null) as HTMLAudioElement[];
 
-      // Load truth faction music tracks (1-3)
-      const truthPromises = [];
-      for (let i = 1; i <= 3; i++) {
-        truthPromises.push(loadAudioTrack(`/muzak/Truth-${i}.mp3`));
-      }
+      // Load truth faction music tracks - only existing files
+      const existingTruthTracks = ['/muzak/Truth-2.mp3', '/muzak/Truth-3.mp3'];
+      const truthPromises = existingTruthTracks.map(track => loadAudioTrack(track));
       const truthResults = await Promise.all(truthPromises);
       musicTracks.current.truth = truthResults.filter(audio => audio !== null) as HTMLAudioElement[];
 
@@ -198,8 +197,8 @@ export const useAudio = () => {
 
     loadMusicTracks();
 
-    // Create sound effects with fallback handling
-    const sfxFiles = {
+    // Create sound effects with fallback handling - only load existing files
+    const existingSfxFiles = {
       cardPlay: '/audio/card-play.mp3',
       cardDraw: '/audio/card-draw.mp3',
       stateCapture: '/audio/state-capture.mp3',
@@ -210,19 +209,20 @@ export const useAudio = () => {
       hover: '/audio/hover.mp3',
       click: '/audio/click.mp3',
       typewriter: '/audio/typewriter.mp3',
-      lightClick: '/audio/click.mp3', // Very light sound for buttons
+      lightClick: '/audio/click.mp3', // Reuse click sound
       error: '/audio/click.mp3' // Fallback for error sound
     };
 
     // Load SFX asynchronously with error handling
     const loadSFX = async () => {
-      const loadPromises = Object.entries(sfxFiles).map(async ([key, src]) => {
+      const loadPromises = Object.entries(existingSfxFiles).map(async ([key, src]) => {
         const audio = await loadAudioTrack(src);
         if (audio) {
           audio.volume = config.volume;
           sfxRefs.current[key] = audio;
         } else {
           // Create silent audio element as fallback
+          console.log(`🎵 SFX not available: ${key}, using silent fallback`);
           const silentAudio = new Audio();
           silentAudio.volume = 0;
           sfxRefs.current[key] = silentAudio;
