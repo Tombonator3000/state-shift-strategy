@@ -25,8 +25,9 @@ import {
   EnhancedBalanceReport,
   SimulationReport
 } from '@/data/enhancedCardBalancing';
-import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle, ChevronDown, Info } from 'lucide-react';
+import { Download, RefreshCw, AlertTriangle, CheckCircle, XCircle, ChevronDown, Info, Zap } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import PatchApplicatorComponent from './PatchApplicator';
 
 interface BalancingDashboardProps {
   onClose: () => void;
@@ -212,15 +213,42 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
 
         <div className="p-4 h-full overflow-auto">
           <Tabs defaultValue="overview" className="h-full">
-            <TabsList className="w-full flex flex-wrap gap-1 bg-gray-800">
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="overview">Overview</TabsTrigger>
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="cards">Card Analysis</TabsTrigger>
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="simulation">Simulation</TabsTrigger>
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="outliers">Top Outliers</TabsTrigger>
-              <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="charts">Charts</TabsTrigger>
-            </TabsList>
+             <TabsList className="w-full flex flex-wrap gap-1 bg-gray-800">
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="overview">Overview</TabsTrigger>
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="cards">Card Analysis</TabsTrigger>
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="simulation">Simulation</TabsTrigger>
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="patch">Apply Patch</TabsTrigger>
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="outliers">Top Outliers</TabsTrigger>
+               <TabsTrigger className="flex-1 sm:flex-none min-w-[120px]" value="charts">Charts</TabsTrigger>
+             </TabsList>
 
             <TabsContent value="overview" className="mt-4 space-y-4">
+              {/* Simulation Results */}
+              <Card className="p-4 bg-gray-800 border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-4">Simulation Results (1000 games)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-400">{simulationResult.truthWinRate.toFixed(1)}%</div>
+                    <div className="text-sm text-gray-400">Truth Seeker Win Rate</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-400">{simulationResult.governmentWinRate.toFixed(1)}%</div>
+                    <div className="text-sm text-gray-400">Government Win Rate</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-400">{simulationResult.drawRate.toFixed(1)}%</div>
+                    <div className="text-sm text-gray-400">Draw Rate</div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <div className="text-sm text-gray-400 mb-2">Balance Target: 45-55% per faction</div>
+                  <div className="text-xs text-gray-500">
+                    Total: {(simulationResult.truthWinRate + simulationResult.governmentWinRate + simulationResult.drawRate).toFixed(1)}% | 
+                    Avg Game Length: {simulationResult.averageGameLength.toFixed(1)} turns
+                  </div>
+                </div>
+              </Card>
+
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card className="p-4 bg-gray-800 border-gray-700">
                   <div className="text-2xl font-bold text-white">{report.totalCards}</div>
@@ -316,14 +344,24 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                 </Card>
 
                 <Card className="p-4 bg-gray-800 border-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-4">Global Recommendations</h3>
+                  <h3 className="text-lg font-semibold text-white mb-4">Faction Alignment Issues</h3>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {report.globalRecommendations.slice(0, 6).map((recommendation, index) => (
-                      <div key={index} className="flex items-start gap-2 p-2 bg-gray-700 rounded">
-                        <Info size={16} className="text-blue-400 mt-0.5 flex-shrink-0" />
-                        <div className="text-sm text-gray-300">{recommendation}</div>
-                      </div>
-                    ))}
+                    {report.cardAnalysis
+                      .filter(card => card.alignment === 'Misaligned')
+                      .slice(0, 8)
+                      .map((card, index) => (
+                        <div key={index} className="flex items-start gap-2 p-2 bg-red-900/20 rounded border border-red-700">
+                          <AlertTriangle size={16} className="text-red-400 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <div className="text-sm font-medium text-red-400">{card.name}</div>
+                            <div className="text-xs text-gray-400">{card.faction} card with opposing faction effects</div>
+                          </div>
+                        </div>
+                      ))
+                    }
+                    {report.cardAnalysis.filter(card => card.alignment === 'Misaligned').length === 0 && (
+                      <div className="text-sm text-green-400">✓ No faction alignment issues detected</div>
+                    )}
                   </div>
                 </Card>
               </div>
@@ -358,12 +396,23 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                           </div>
                           <div className="flex items-center justify-between text-xs text-gray-400">
                             <span>{card.type} • {card.rarity} • {card.faction}</span>
-                            <span>Current: {card.currentCost} → Rec: {card.costRecommendation || card.currentCost}</span>
+                            <span>
+                              Current: {card.currentCost} IP → 
+                              {card.costRecommendation 
+                                ? ` Step 1: ${card.costRecommendation} IP${card.rarityRecommendation ? ` → ${card.rarityRecommendation}` : ''}`
+                                : ` ${card.currentCost} IP`
+                              }
+                            </span>
                           </div>
                           <div className="mt-1">
                             <div className="text-xs text-gray-500">
                               Utility: {card.totalUtilityScore.toFixed(1)} • {card.reasoning}
                             </div>
+                            {Math.abs((card.costRecommendation || card.currentCost) - card.currentCost) > 3 && (
+                              <div className="text-xs text-blue-400 mt-1">
+                                ⚠ Large change requires multiple steps (max ±3 per iteration)
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -455,6 +504,10 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
               </div>
             </TabsContent>
 
+            <TabsContent value="patch" className="mt-4">
+              <PatchApplicatorComponent onPatchApplied={() => window.location.reload()} />
+            </TabsContent>
+
             <TabsContent value="simulation" className="mt-4 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card className="p-4 bg-gray-800 border-gray-700">
@@ -509,11 +562,49 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
             </TabsContent>
 
             <TabsContent value="outliers" className="mt-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                <Card className="p-4 bg-gray-800 border-gray-700">
+                  <h3 className="text-lg font-semibold text-red-400 mb-4">Top Overpowered Cards (Simulation)</h3>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {simulationResult.cardPerformance.topOverpowered.map((card, index) => (
+                      <div key={index} className="p-3 bg-red-900/20 border border-red-700 rounded">
+                        <div className="flex justify-between items-start mb-1">
+                          <div className="text-sm font-medium text-white">{card.name}</div>
+                          <Badge className="text-red-400 bg-red-900/40">Impact: {card.impactScore.toFixed(1)}</Badge>
+                        </div>
+                        <div className="text-xs text-gray-400">{card.recommendedFix}</div>
+                      </div>
+                    ))}
+                    {simulationResult.cardPerformance.topOverpowered.length === 0 && (
+                      <div className="text-sm text-gray-400">No overpowered cards detected</div>
+                    )}
+                  </div>
+                </Card>
+                
+                <Card className="p-4 bg-gray-800 border-gray-700">
+                  <h3 className="text-lg font-semibold text-yellow-400 mb-4">Top Underpowered Cards (Simulation)</h3>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {simulationResult.cardPerformance.topUnderpowered.map((card, index) => (
+                      <div key={index} className="p-3 bg-yellow-900/20 border border-yellow-700 rounded">
+                        <div className="flex justify-between items-start mb-1">
+                          <div className="text-sm font-medium text-white">{card.name}</div>
+                          <Badge className="text-yellow-400 bg-yellow-900/40">Usage: {(card.usageRate * 100).toFixed(1)}%</Badge>
+                        </div>
+                        <div className="text-xs text-gray-400">{card.recommendedFix}</div>
+                      </div>
+                    ))}
+                    {simulationResult.cardPerformance.topUnderpowered.length === 0 && (
+                      <div className="text-sm text-gray-400">No underpowered cards detected</div>
+                    )}
+                  </div>
+                </Card>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <Card className="p-4 bg-gray-800 border-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-4">Top Undercosted Cards</h3>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {report.topOutliers.undercosted.map((card, index) => (
+                  <h3 className="text-lg font-semibold text-white mb-4">Top Undercosted Cards (Analysis)</h3>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {report.topOutliers.undercosted.slice(0, 10).map((card, index) => (
                       <div key={index} className="p-3 bg-red-900/20 rounded">
                         <div className="flex items-center justify-between mb-2">
                           <div className="text-sm font-medium text-white">{card.name}</div>
@@ -525,15 +616,18 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                           {card.type} • {card.rarity} • Utility: {card.totalUtilityScore.toFixed(1)}
                         </div>
                         <div className="text-xs text-gray-300">{card.reasoning}</div>
+                        {Math.abs((card.costRecommendation || card.currentCost) - card.currentCost) > 3 && (
+                          <div className="text-xs text-blue-400 mt-1">⚠ Requires multi-step patch (±3 max per iteration)</div>
+                        )}
                       </div>
                     ))}
                   </div>
                 </Card>
 
                 <Card className="p-4 bg-gray-800 border-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-4">Top Overcosted Cards</h3>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {report.topOutliers.overcosted.map((card, index) => (
+                  <h3 className="text-lg font-semibold text-white mb-4">Top Overcosted Cards (Analysis)</h3>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {report.topOutliers.overcosted.slice(0, 10).map((card, index) => (
                       <div key={index} className="p-3 bg-yellow-900/20 rounded">
                         <div className="flex items-center justify-between mb-2">
                           <div className="text-sm font-medium text-white">{card.name}</div>
@@ -545,6 +639,9 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                           {card.type} • {card.rarity} • Utility: {card.totalUtilityScore.toFixed(1)}
                         </div>
                         <div className="text-xs text-gray-300">{card.reasoning}</div>
+                        {Math.abs((card.costRecommendation || card.currentCost) - card.currentCost) > 3 && (
+                          <div className="text-xs text-blue-400 mt-1">⚠ Requires multi-step patch (±3 max per iteration)</div>
+                        )}
                       </div>
                     ))}
                   </div>
