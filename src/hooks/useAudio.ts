@@ -11,17 +11,37 @@ type MusicType = 'theme' | 'government' | 'truth';
 type GameState = 'menu' | 'factionSelect' | 'playing';
 
 export const useAudio = () => {
-  const [config, setConfig] = useState<AudioConfig>({
-    volume: 0.3, // Start at 30% volume
-    muted: false,
-    musicEnabled: true,
-    sfxEnabled: true
+  // Load initial config from localStorage or defaults
+  const [config, setConfig] = useState<AudioConfig>(() => {
+    const saved = localStorage.getItem('gameSettings');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          volume: (parsed.masterVolume || 70) / 100,
+          muted: false,
+          musicEnabled: true,
+          sfxEnabled: true
+        };
+      } catch {
+        console.log('🎵 Failed to parse saved audio settings, using defaults');
+      }
+    }
+    return {
+      volume: 0.7, // Default to 70%
+      muted: false,
+      musicEnabled: true,
+      sfxEnabled: true
+    };
   });
 
   const [currentMusicType, setCurrentMusicType] = useState<MusicType>('theme');
   const [gameState, setGameState] = useState<GameState>('menu');
   const [tracksLoaded, setTracksLoaded] = useState(false);
   const [audioContextUnlocked, setAudioContextUnlocked] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTrackName, setCurrentTrackName] = useState<string>('');
+  const [audioStatus, setAudioStatus] = useState<string>('Initializing...');
   
   const currentMusicRef = useRef<HTMLAudioElement | null>(null);
   const nextMusicRef = useRef<HTMLAudioElement | null>(null);
@@ -53,6 +73,8 @@ export const useAudio = () => {
     // Add click/tap/pointer event listener to unlock audio once
     const handleUserInteraction = () => {
       unlockAudioContext();
+      setAudioStatus('Audio context unlocked');
+      console.log('🎵 Audio context unlocked via user interaction');
       document.removeEventListener('click', handleUserInteraction);
       document.removeEventListener('touchstart', handleUserInteraction);
       document.removeEventListener('pointerdown', handleUserInteraction);
@@ -69,12 +91,13 @@ export const useAudio = () => {
         const onLoad = () => {
           audio.loop = false;
           audio.volume = config.volume;
+          console.log(`🎵 Audio loaded: ${src}`);
           cleanup();
           resolve(audio);
         };
         
         const onError = (e: ErrorEvent | Event) => {
-          console.warn(`Audio file failed to load: ${src}`, e);
+          console.warn(`🎵 Audio file failed to load: ${src}`, e);
           cleanup();
           resolve(null);
         };
@@ -140,13 +163,14 @@ export const useAudio = () => {
       const truthResults = await Promise.all(truthPromises);
       musicTracks.current.truth = truthResults.filter(audio => audio !== null) as HTMLAudioElement[];
 
-      console.log('Loaded music tracks:', {
+      console.log('🎵 Loaded music tracks:', {
         theme: musicTracks.current.theme.length,
         government: musicTracks.current.government.length,
         truth: musicTracks.current.truth.length
       });
 
       setTracksLoaded(true);
+      setAudioStatus('Music tracks loaded');
     };
 
     loadMusicTracks();
@@ -183,7 +207,8 @@ export const useAudio = () => {
       });
       
       await Promise.all(loadPromises);
-      console.log('SFX loaded:', Object.keys(sfxRefs.current).length, 'sounds');
+      console.log('🎵 SFX loaded:', Object.keys(sfxRefs.current).length, 'sounds');
+      setAudioStatus('Ready');
     };
 
     loadSFX();
@@ -208,8 +233,10 @@ export const useAudio = () => {
     };
   }, []);
 
-  // Update volumes when config changes
+  // Update volumes when config changes and sync to localStorage
   useEffect(() => {
+    console.log('🎵 Volume updated:', { volume: config.volume, muted: config.muted });
+    
     if (currentMusicRef.current) {
       currentMusicRef.current.volume = config.muted ? 0 : config.volume;
     }
@@ -219,6 +246,18 @@ export const useAudio = () => {
     Object.values(sfxRefs.current).forEach(audio => {
       audio.volume = config.muted ? 0 : config.volume;
     });
+
+    // Sync volume to localStorage (gameSettings)
+    const saved = localStorage.getItem('gameSettings');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        parsed.masterVolume = Math.round(config.volume * 100);
+        localStorage.setItem('gameSettings', JSON.stringify(parsed));
+      } catch (e) {
+        console.warn('🎵 Failed to sync audio settings to localStorage');
+      }
+    }
   }, [config.volume, config.muted]);
 
   // Get next track for the current music type
@@ -237,24 +276,41 @@ export const useAudio = () => {
   // Fade between two audio elements
   const switchTrack = useCallback((fromAudio: HTMLAudioElement | null, toAudio: HTMLAudioElement | null) => {
     if (!toAudio || !audioContextUnlocked) {
-      console.warn('Cannot play: toAudio is null or audio context not unlocked');
+      console.warn('🎵 Cannot play: toAudio is null or audio context not unlocked');
+      setAudioStatus('Cannot play - audio locked');
       return;
     }
+    
     if (fadeIntervalRef.current) {
       clearInterval(fadeIntervalRef.current);
     }
+    
     if (fromAudio) {
       fromAudio.pause();
       fromAudio.currentTime = 0;
+      setIsPlaying(false);
     }
+    
     if (config.musicEnabled) {
       toAudio.volume = config.muted ? 0 : config.volume;
       toAudio.currentTime = 0;
+      
+      const trackName = toAudio.src.split('/').pop() || 'Unknown';
+      setCurrentTrackName(trackName);
+      console.log('🎵 Switching to track:', trackName);
+      
       const playPromise = toAudio.play();
       if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.log('Audio play prevented by browser policy:', error);
-        });
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            setAudioStatus(`Playing: ${trackName}`);
+          })
+          .catch(error => {
+            console.log('🎵 Audio play prevented by browser policy:', error);
+            setAudioStatus('Playback blocked by browser');
+            setIsPlaying(false);
+          });
       }
     }
   }, [config.musicEnabled, config.muted, config.volume, audioContextUnlocked]);
@@ -263,12 +319,13 @@ export const useAudio = () => {
   const playMusic = useCallback((musicType?: MusicType) => {
     // Don't play music until tracks are loaded and audio context is unlocked (mobile requirement)
     if (!config.musicEnabled || config.muted || !tracksLoaded || !audioContextUnlocked) {
-      console.log('Music playback blocked:', { 
+      console.log('🎵 Music playback blocked:', { 
         musicEnabled: config.musicEnabled, 
         muted: config.muted, 
         tracksLoaded, 
         audioContextUnlocked 
       });
+      setAudioStatus('Music blocked - check settings');
       return;
     }
 
@@ -276,7 +333,8 @@ export const useAudio = () => {
     const nextTrack = getNextTrack(typeToPlay);
     
     if (!nextTrack) {
-      console.warn(`No available track for music type: ${typeToPlay}`);
+      console.warn(`🎵 No available track for music type: ${typeToPlay}`);
+      setAudioStatus(`No tracks available for: ${typeToPlay}`);
       return;
     }
     
@@ -298,21 +356,57 @@ export const useAudio = () => {
 
 
   const stopMusic = useCallback(() => {
+    console.log('🎵 Stopping music');
     if (fadeIntervalRef.current) {
       clearInterval(fadeIntervalRef.current);
     }
     if (currentMusicRef.current) {
       currentMusicRef.current.pause();
       currentMusicRef.current.currentTime = 0;
+      currentMusicRef.current.onended = null;
+    }
+    setIsPlaying(false);
+    setCurrentTrackName('');
+    setAudioStatus('Music stopped');
+  }, []);
+
+  const pauseMusic = useCallback(() => {
+    console.log('🎵 Pausing music');
+    if (currentMusicRef.current && !currentMusicRef.current.paused) {
+      currentMusicRef.current.pause();
+      setIsPlaying(false);
+      setAudioStatus('Music paused');
     }
   }, []);
 
+  const resumeMusic = useCallback(() => {
+    console.log('🎵 Resuming music');
+    if (currentMusicRef.current && currentMusicRef.current.paused && audioContextUnlocked) {
+      const playPromise = currentMusicRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            setAudioStatus(`Playing: ${currentTrackName}`);
+          })
+          .catch(error => {
+            console.log('🎵 Resume failed:', error);
+            setAudioStatus('Resume failed');
+          });
+      }
+    }
+  }, [audioContextUnlocked, currentTrackName]);
+
   const playSFX = useCallback((soundName: string) => {
-    if (!config.sfxEnabled || config.muted || !audioContextUnlocked) return;
+    if (!config.sfxEnabled || config.muted || !audioContextUnlocked) {
+      console.log('🎵 SFX blocked:', soundName, { sfxEnabled: config.sfxEnabled, muted: config.muted, unlocked: audioContextUnlocked });
+      return;
+    }
     
     const audio = sfxRefs.current[soundName];
     if (audio) {
       try {
+        console.log('🎵 Playing SFX:', soundName);
         // Reduce volume for light click specifically
         if (soundName === 'lightClick') {
           const originalVolume = audio.volume;
@@ -328,16 +422,24 @@ export const useAudio = () => {
           audio.play().catch(() => {}); // Silently fail
         }
       } catch (error) {
-        // Silently ignore audio errors in production
-        console.debug('SFX play failed:', soundName, error);
+        console.debug('🎵 SFX play failed:', soundName, error);
       }
     } else {
-      console.debug('SFX not found:', soundName);
+      console.debug('🎵 SFX not found:', soundName);
     }
   }, [config.sfxEnabled, config.muted, audioContextUnlocked]);
 
+  const testSFX = useCallback(() => {
+    const testSounds = ['click', 'hover', 'cardPlay', 'cardDraw'];
+    const randomSound = testSounds[Math.floor(Math.random() * testSounds.length)];
+    console.log('🎵 Testing SFX:', randomSound);
+    playSFX(randomSound);
+  }, [playSFX]);
+
   const setVolume = useCallback((volume: number) => {
-    setConfig(prev => ({ ...prev, volume: Math.max(0, Math.min(1, volume)) }));
+    const clampedVolume = Math.max(0, Math.min(1, volume));
+    console.log('🎵 Setting volume to:', Math.round(clampedVolume * 100) + '%');
+    setConfig(prev => ({ ...prev, volume: clampedVolume }));
   }, []);
 
   const toggleMute = useCallback(() => {
@@ -388,7 +490,10 @@ export const useAudio = () => {
     config,
     playMusic,
     stopMusic,
+    pauseMusic,
+    resumeMusic,
     playSFX,
+    testSFX,
     setVolume,
     toggleMute,
     toggleMusic,
@@ -397,6 +502,11 @@ export const useAudio = () => {
     setFactionMusic,
     setGameplayMusic,
     currentMusicType,
-    gameState
+    gameState,
+    isPlaying,
+    currentTrackName,
+    audioStatus,
+    tracksLoaded,
+    audioContextUnlocked
   };
 };

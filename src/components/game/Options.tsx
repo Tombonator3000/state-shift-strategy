@@ -2,6 +2,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
+import { AudioControls } from '@/components/ui/audio-controls';
+import { useAudio } from '@/hooks/useAudio';
 import { useState, useEffect } from 'react';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
 
@@ -27,8 +29,10 @@ interface GameSettings {
 }
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
+  const audio = useAudio();
+
   const [settings, setSettings] = useState<GameSettings>({
-    masterVolume: 70,
+    masterVolume: Math.round(audio.config.volume * 100),
     musicVolume: 50,
     sfxVolume: 80,
     enableAnimations: true,
@@ -59,6 +63,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       }
     }
   }, []);
+
+  // Update audio volume when master volume changes
+  useEffect(() => {
+    audio.setVolume(settings.masterVolume / 100);
+  }, [settings.masterVolume, audio]);
 
   // Save settings to localStorage whenever they change
   const updateSettings = (newSettings: Partial<GameSettings>) => {
@@ -195,6 +204,37 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   step={1}
                   className="w-full"
                 />
+              </div>
+
+              {/* Enhanced Audio Controls */}
+              <div className="border-t border-newspaper-text/20 pt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-newspaper-text">
+                    Advanced Audio Controls
+                  </label>
+                  <AudioControls
+                    volume={audio.config.volume}
+                    muted={audio.config.muted}
+                    musicEnabled={audio.config.musicEnabled}
+                    sfxEnabled={audio.config.sfxEnabled}
+                    isPlaying={audio.isPlaying}
+                    currentTrackName={audio.currentTrackName}
+                    audioStatus={audio.audioStatus}
+                    tracksLoaded={audio.tracksLoaded}
+                    audioContextUnlocked={audio.audioContextUnlocked}
+                    onVolumeChange={audio.setVolume}
+                    onToggleMute={audio.toggleMute}
+                    onToggleMusic={audio.toggleMusic}
+                    onToggleSFX={audio.toggleSFX}
+                    onPlayMusic={() => audio.playMusic()}
+                    onPauseMusic={audio.pauseMusic}
+                    onStopMusic={audio.stopMusic}
+                    onTestSFX={audio.testSFX}
+                  />
+                </div>
+                <div className="text-xs text-newspaper-text/70">
+                  Use the settings icon above for play/pause/stop controls, SFX testing, and real-time audio debugging.
+                </div>
               </div>
             </div>
           </Card>
@@ -405,4 +445,5 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   );
 };
 
+// Enhanced audio system with comprehensive controls
 export default Options;
