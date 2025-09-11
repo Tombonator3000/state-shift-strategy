@@ -83,7 +83,15 @@ class AudioManagerClass {
   }
 
   public enableAudio(): void {
-    this.updateState({ canPlay: true });
+    console.log('enableAudio called, current canPlay:', this.state.canPlay);
+    if (!this.state.canPlay) {
+      this.updateState({ canPlay: true });
+      console.log('Audio enabled, starting start-theme');
+      // Auto-start appropriate music when audio is enabled
+      if (this.state.scene === 'start-menu') {
+        this.playBgm('start-theme');
+      }
+    }
   }
 
   public async playBgm(trackId: BGMTrackId, options: CrossfadeOptions = {}): Promise<void> {
@@ -186,9 +194,11 @@ class AudioManagerClass {
   }
 
   public stopBgm(): void {
+    console.log('stopBgm called');
     if (this.currentBgm) {
       this.currentBgm.pause();
       this.currentBgm.currentTime = 0;
+      this.currentBgm.remove?.(); // Clean up if method exists
       this.currentBgm = null;
       this.updateState({
         isPlaying: false,
@@ -200,7 +210,8 @@ class AudioManagerClass {
 
   public playSfx(soundId: SFXTrackId): void {
     console.log('playSfx called:', soundId, 'canPlay:', this.state.canPlay, 'muted:', this.state.settings.isMuted);
-    if (!this.state.canPlay || this.state.settings.isMuted) return;
+    if (!this.state.canPlay) return;
+    if (this.state.settings.isMuted || this.state.settings.master === 0 || this.state.settings.sfx === 0) return;
 
     const audio = this.sfxPool.get(soundId);
     if (audio) {

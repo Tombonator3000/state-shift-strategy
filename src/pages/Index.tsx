@@ -83,6 +83,27 @@ const Index = () => {
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
 
+  // Enable audio on first user interaction
+  useEffect(() => {
+    const enableAudioOnFirstClick = () => {
+      console.log('First user interaction detected');
+      if (!audio.canPlay) {
+        audio.enableAudio();
+      }
+    };
+
+    // Listen for any user interaction to enable audio
+    document.addEventListener('click', enableAudioOnFirstClick, { once: true });
+    document.addEventListener('keydown', enableAudioOnFirstClick, { once: true });
+    document.addEventListener('touchstart', enableAudioOnFirstClick, { once: true });
+
+    return () => {
+      document.removeEventListener('click', enableAudioOnFirstClick);
+      document.removeEventListener('keydown', enableAudioOnFirstClick);
+      document.removeEventListener('touchstart', enableAudioOnFirstClick);
+    };
+  }, [audio]);
+
   // Track IP changes for floating numbers
   useEffect(() => {
     const currentIP = gameState.ip;
@@ -267,6 +288,11 @@ const Index = () => {
   }, [gameState.faction]);
 
   const startNewGame = async (faction: 'government' | 'truth') => {
+    // Enable audio on first user interaction
+    if (!audio.canPlay) {
+      audio.enableAudio();
+    }
+    
     await initGame(faction);
     setShowMenu(false);
     setShowIntro(false);
