@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { useAudio } from '@/hooks/useAudio';
 
 interface EndCreditsProps {
   isVisible: boolean;
@@ -10,229 +8,264 @@ interface EndCreditsProps {
 }
 
 const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [autoExit, setAutoExit] = useState(false);
-  const audio = useAudio();
+  const [currentPhase, setCurrentPhase] = useState<'intro' | 'segments' | 'cameos' | 'outro'>('intro');
+  const [currentText, setCurrentText] = useState('');
+  const [currentSubtext, setCurrentSubtext] = useState('');
+  const [isTextVisible, setIsTextVisible] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const musicRef = useRef<HTMLAudioElement | null>(null);
+  const timelineRef = useRef<NodeJS.Timeout[]>([]);
 
-  const credits = [
-    {
-      title: "SHADOW GOVERNMENT",
-      subtitle: "A Classified Production",
-      content: "\"Remember: They're Watching, But So Are We\""
-    },
-    {
-      title: "EXECUTIVE PRODUCER",
-      subtitle: "Tom Husby",
-      content: "Chief Bat Boy Negotiator & Temporal Leak Janitor (Acting)"
-    },
-    {
-      title: "CREATIVE DIRECTOR",
-      subtitle: "Tom Husby",
-      content: "Head of Lizard Hospitality & Interdimensional Coffee Service"
-    },
-    {
-      title: "LEAD CONSPIRACY THEORIST",
-      subtitle: "Tom Husby",
-      content: "Senior Tinfoil Hat Designer & Moon Base Operations Manager"
-    },
-    {
-      title: "AUDIO ENGINEER",
-      subtitle: "Tom Husby",
-      content: "Frequency Manipulator & Subliminal Message Consultant"
-    },
-    {
-      title: "QUALITY ASSURANCE",
-      subtitle: "Tom Husby",
-      content: "Bug Whisperer & Reality Debugging Specialist"
-    },
-    {
-      title: "SPECIAL THANKS",
-      subtitle: "The Usual Suspects",
-      content: [
-        "Three grandmas on shortwave radio",
-        "Anonymous leak platform contributors", 
-        "The Bat Boy Focus Group",
-        "Five committees that don't exist",
-        "Emergency horoscope consultants"
-      ].join(" • ")
-    },
-    {
-      title: "FACTION ADVISORS",
-      subtitle: playerFaction === 'government' 
-        ? "Department of Plausible Deniability" 
-        : "Underground Truth Network",
-      content: playerFaction === 'government'
-        ? "\"If you can read this, you have proper clearance\""
-        : "\"The truth is out there... we just made it easier to find\""
-    },
-    {
-      title: "DISCLAIMER",
-      subtitle: "Legal Department of Shadows",
-      content: "Any resemblance to actual conspiracies, living or dead, is purely intentional. No lizard people were harmed in the making of this game."
-    },
-    {
-      title: "THE END",
-      subtitle: "Or Is It?",
-      content: "Stay vigilant. Stay paranoid. The game never really ends."
+  // Zany credit texts
+  const creditTexts = {
+    intro: [
+      { title: "THE WEEKLY PARANOID NEWS", subtitle: "CLASSIFIED EDITION" },
+      { title: "A SHADOW GOVERNMENT PRODUCTION", subtitle: "Remember: They're Watching, But So Are We" }
+    ],
+    segments: [
+      { title: "EXECUTIVE PRODUCER", subtitle: "Tom Husby — Chief Bat Boy Negotiator & Temporal Leak Janitor (Acting)" },
+      { title: "CREATIVE DIRECTOR", subtitle: "Tom Husby — Head of Lizard Hospitality & Interdimensional Coffee Service" },
+      { title: "LEAD CONSPIRACY THEORIST", subtitle: "Tom Husby — Senior Tinfoil Hat Designer & Moon Base Operations Manager" },
+      { title: "AUDIO ENGINEER", subtitle: "Tom Husby — Frequency Manipulator & Subliminal Message Consultant" },
+      { title: "QUALITY ASSURANCE", subtitle: "Tom Husby — Bug Whisperer & Reality Debugging Specialist" },
+      { title: "REGIONAL COORDINATOR", subtitle: "Tom Husby — Regional Vending Machine Marriage Counselor" },
+      { title: "SPECIAL THANKS", subtitle: "Three grandmas on shortwave radio — Signal Boost Specialists" },
+      { title: "CONSULTING SERVICES", subtitle: "Anonymous leak platform contributors — 'We come in peace, mostly'" }
+    ],
+    cameos: [
+      "Five committees that don't exist — Unanimous approval",
+      "Emergency horoscope consultants — IP: favorable", 
+      "Bat Boy Focus Group — Snacks vanished mysteriously",
+      "Time-Travel Insurance — You were already covered yesterday",
+      "Psychic Wi-Fi — 6G Chakra Plan available now",
+      "Reptile Thermos™ — Keeps coffee hot, blood cold"
+    ],
+    outro: [
+      { title: "FACTION ADVISORS", subtitle: playerFaction === 'government' 
+        ? "Department of Plausible Deniability — 'If you can read this, you have proper clearance'"
+        : "Underground Truth Network — 'The truth is out there... we just made it easier to find'" },
+      { title: "DISCLAIMER", subtitle: "Any resemblance to actual conspiracies, living or dead, is purely intentional" },
+      { title: "PRINTED ON", subtitle: "Recycled surveillance reports and declassified documents" },
+      { title: "THANKS FOR PLAYING", subtitle: "Stay vigilant. Stay paranoid. The game never really ends." }
+    ]
+  };
+
+  const startTimeline = () => {
+    const timeouts: NodeJS.Timeout[] = [];
+    let currentTime = 0;
+
+    // Helper function to add timeline events
+    const addEvent = (delay: number, callback: () => void) => {
+      currentTime += delay;
+      const timeout = setTimeout(callback, currentTime);
+      timeouts.push(timeout);
+    };
+
+    // Intro phase (6 seconds total)
+    creditTexts.intro.forEach((credit, index) => {
+      addEvent(index === 0 ? 500 : 3000, () => {
+        setCurrentPhase('intro');
+        setCurrentText(credit.title);
+        setCurrentSubtext(credit.subtitle);
+        setIsTextVisible(true);
+      });
+    });
+
+    // Segments phase (48 seconds - 8 segments × 6 seconds)
+    creditTexts.segments.forEach((credit, index) => {
+      addEvent(6000, () => {
+        setCurrentPhase('segments');
+        setIsTextVisible(false);
+        setTimeout(() => {
+          setCurrentText(credit.title);
+          setCurrentSubtext(credit.subtitle);
+          setIsTextVisible(true);
+        }, 300);
+      });
+    });
+
+    // Cameos phase (12 seconds - rapid montage)
+    creditTexts.cameos.forEach((cameo, index) => {
+      addEvent(2000, () => {
+        setCurrentPhase('cameos');
+        setIsTextVisible(false);
+        setTimeout(() => {
+          setCurrentText('SPECIAL CAMEOS');
+          setCurrentSubtext(cameo);
+          setIsTextVisible(true);
+        }, 200);
+      });
+    });
+
+    // Outro phase (12 seconds)
+    creditTexts.outro.forEach((credit, index) => {
+      addEvent(index === 0 ? 3000 : 3000, () => {
+        setCurrentPhase('outro');
+        setIsTextVisible(false);
+        setTimeout(() => {
+          setCurrentText(credit.title);
+          setCurrentSubtext(credit.subtitle);
+          setIsTextVisible(true);
+        }, 300);
+      });
+    });
+
+    // Auto-exit after timeline completes
+    addEvent(6000, () => {
+      handleClose();
+    });
+
+    timelineRef.current = timeouts;
+  };
+
+  const startMusic = () => {
+    if (musicRef.current) {
+      musicRef.current.pause();
+      musicRef.current = null;
     }
-  ];
 
-  useEffect(() => {
-    if (isVisible) {
-      // Start credits music after first user interaction
-      const startMusic = () => {
-        // Try to load and play endcredits-theme.mp3
-        const creditsAudio = new Audio('/muzak/endcredits-theme.mp3');
-        creditsAudio.volume = 0.3; // 30% volume
-        creditsAudio.loop = true;
-        creditsAudio.play().catch(() => {
-          // Fallback to typewriter sound if credits music fails
-          audio.playSFX('typewriter');
-        });
-        
-        // Store reference for cleanup
-        return creditsAudio;
-      };
+    try {
+      const audio = new Audio('/muzak/endcredits-theme.mp3');
+      audio.volume = 0.3;
+      audio.loop = false;
       
-      const creditsMusic = setTimeout(() => {
-        const musicRef = startMusic();
-        
-        // Store music reference for cleanup
-        (window as any)._creditsMusic = musicRef;
-      }, 500);
-
-      const slideInterval = setInterval(() => {
-        setCurrentSlide(prev => {
-          if (prev >= credits.length - 1) {
-            setAutoExit(true);
-            return prev;
-          }
-          return prev + 1;
-        });
-      }, 4000);
-
-      // Auto-exit after 60 seconds
-      const exitTimeout = setTimeout(() => {
-        onClose();
-      }, 60000);
-
-      return () => {
-        clearTimeout(creditsMusic);
-        clearInterval(slideInterval);
-        clearTimeout(exitTimeout);
-        // Stop credits music if it exists
-        if ((window as any)._creditsMusic) {
-          (window as any)._creditsMusic.pause();
-          (window as any)._creditsMusic = null;
-        }
-      };
+      audio.play().catch((error) => {
+        console.warn('Could not play credits music:', error);
+      });
+      
+      musicRef.current = audio;
+    } catch (error) {
+      console.warn('Could not load credits music:', error);
     }
-  }, [isVisible, audio, onClose]);
+  };
 
-  useEffect(() => {
-    if (autoExit) {
-      const exitTimeout = setTimeout(() => {
-        // Stop music before closing
-        if ((window as any)._creditsMusic) {
-          (window as any)._creditsMusic.pause();
-          (window as any)._creditsMusic = null;
-        }
-        onClose();
-      }, 3000);
-      return () => clearTimeout(exitTimeout);
+  const stopMusic = () => {
+    if (musicRef.current) {
+      musicRef.current.pause();
+      musicRef.current.currentTime = 0;
+      musicRef.current = null;
     }
-  }, [autoExit, onClose]);
+  };
+
+  const clearTimeline = () => {
+    timelineRef.current.forEach(timeout => clearTimeout(timeout));
+    timelineRef.current = [];
+  };
 
   const handleClose = () => {
-    // Stop music when manually closing
-    if ((window as any)._creditsMusic) {
-      (window as any)._creditsMusic.pause();
-      (window as any)._creditsMusic = null;
-    }
+    stopMusic();
+    clearTimeline();
     onClose();
   };
 
+  useEffect(() => {
+    if (isVisible) {
+      // Start music and timeline
+      startMusic();
+      startTimeline();
+      
+      // Show initial text
+      setCurrentText('THE WEEKLY PARANOID NEWS');
+      setCurrentSubtext('CLASSIFIED EDITION');
+      setIsTextVisible(true);
+    } else {
+      // Cleanup when not visible
+      stopMusic();
+      clearTimeline();
+      setCurrentPhase('intro');
+      setIsTextVisible(false);
+    }
+
+    return () => {
+      stopMusic();
+      clearTimeline();
+    };
+  }, [isVisible]);
+
   if (!isVisible) return null;
 
-  const currentCredit = credits[currentSlide];
-  const factionColors = playerFaction === 'government' 
-    ? 'border-government-blue bg-government-blue/5' 
-    : 'border-truth-red bg-truth-red/5';
+  const getPhaseBackground = () => {
+    switch (currentPhase) {
+      case 'intro':
+        return 'bg-gradient-to-br from-newspaper-bg via-newspaper-bg to-newspaper-header/10';
+      case 'segments':
+        return 'bg-gradient-to-br from-newspaper-bg via-newspaper-header/5 to-newspaper-bg';
+      case 'cameos':
+        return 'bg-gradient-to-br from-newspaper-header/10 via-newspaper-bg to-newspaper-header/10';
+      case 'outro':
+        return 'bg-gradient-to-br from-newspaper-bg via-newspaper-bg to-newspaper-accent/10';
+      default:
+        return 'bg-newspaper-bg';
+    }
+  };
+
+  const factionAccent = playerFaction === 'government' ? 'text-red-800' : 'text-blue-800';
 
   return (
-    <div className="fixed inset-0 bg-newspaper-bg flex items-center justify-center z-50">
-      {/* Newsprint background pattern */}
-      <div className="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JheSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjgiIGhlaWdodD0iOCI+PGNpcmNsZSBjeD0iNCIgY3k9IjQiIHI9IjEiIGZpbGw9IiMwMDAiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0idXJsKCNncmF5KSIvPjwvc3ZnPg==')]"></div>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+      {/* Classified background pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9InJlZGFjdGVkIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBvcGFjaXR5PSIwLjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSJ1cmwoI3JlZGFjdGVkKSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMwIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')]"></div>
+      </div>
 
-      <Card className={`bg-newspaper-bg/95 backdrop-blur-sm border-4 ${factionColors} max-w-4xl mx-4 p-0 transform animate-fade-in shadow-2xl`}>
-        <div className="p-8 text-center min-h-[400px] flex flex-col justify-center">
-          <div className="mb-8">
-            <h1 className="text-4xl font-black font-serif text-newspaper-text mb-2 tracking-tight">
-              {currentCredit.title}
-            </h1>
-            <div className="w-24 h-1 bg-newspaper-accent mx-auto mb-4"></div>
-            <h2 className="text-xl font-bold text-newspaper-text/80 mb-6">
-              {currentCredit.subtitle}
-            </h2>
-          </div>
+      {/* Main credits display */}
+      <div className={`relative w-full max-w-4xl mx-4 min-h-[600px] flex items-center justify-center transition-all duration-1000 ${getPhaseBackground()}`}>
+        {/* Newsprint texture overlay */}
+        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JheSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjgiIGhlaWdodD0iOCI+PGNpcmNsZSBjeD0iNCIgY3k9IjQiIHI9IjEiIGZpbGw9IiMwMDAiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0idXJsKCNncmF5KSIvPjwvc3ZnPg==')]"></div>
 
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-lg text-newspaper-text/90 leading-relaxed max-w-2xl">
-              {currentCredit.content}
-            </div>
-          </div>
-
-          {/* Progress indicator */}
-          <div className="flex justify-center gap-2 mt-8">
-            {credits.map((_, index) => (
-              <div
-                key={index}
-                className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-                  index === currentSlide ? 'bg-newspaper-accent' : 'bg-newspaper-text/20'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Control buttons */}
-        <div className="border-t-2 border-newspaper-border bg-newspaper-header/30 p-4 flex justify-between">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
-            disabled={currentSlide === 0}
-            className="font-mono text-sm"
-          >
-            Previous
-          </Button>
+        {/* Credit text */}
+        <div className={`text-center p-8 transform transition-all duration-700 ${
+          isTextVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-8 opacity-0 scale-95'
+        }`}>
+          {/* Main title */}
+          <h1 className="text-4xl md:text-6xl font-black font-serif text-gray-900 mb-4 tracking-tight leading-none">
+            {currentText}
+          </h1>
           
-          <div className="flex gap-4">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentSlide(Math.min(credits.length - 1, currentSlide + 1))}
-              disabled={currentSlide === credits.length - 1}
-              className="font-mono text-sm"
-            >
-              Next
-            </Button>
-            
-            <Button
-              onClick={handleClose}
-              className="font-mono text-sm bg-newspaper-accent hover:bg-newspaper-accent/80 text-white"
-            >
-              Skip Credits
-            </Button>
-            
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              className="font-mono text-sm"
-            >
-              Return to Main Menu
-            </Button>
+          {/* Accent line */}
+          <div className="w-32 h-1 bg-red-600 mx-auto mb-6 transform scale-x-100 transition-transform duration-500"></div>
+          
+          {/* Subtitle */}
+          <div className="text-lg md:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto font-serif">
+            {currentSubtext}
+          </div>
+
+          {/* Phase indicator */}
+          <div className={`mt-8 text-sm font-mono tracking-wider uppercase ${factionAccent}`}>
+            {currentPhase === 'intro' && '• CLASSIFIED TRANSMISSION •'}
+            {currentPhase === 'segments' && '• PERSONNEL FILES •'}
+            {currentPhase === 'cameos' && '• SPECIAL RECOGNITION •'}
+            {currentPhase === 'outro' && '• END OF TRANSMISSION •'}
           </div>
         </div>
-      </Card>
+      </div>
+
+      {/* Controls */}
+      {showControls && (
+        <div className="absolute top-6 right-6 flex gap-3">
+          <Button
+            onClick={handleClose}
+            variant="outline"
+            className="bg-white/90 hover:bg-white text-gray-900 border-gray-300 shadow-lg font-mono text-sm"
+            aria-label="Skip end credits and return to main menu"
+          >
+            Skip Credits
+          </Button>
+        </div>
+      )}
+
+      {/* Bottom controls */}
+      {showControls && (
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+          <Button
+            onClick={handleClose}
+            className="bg-red-600 hover:bg-red-700 text-white font-mono text-sm shadow-lg"
+            aria-label="Return to main menu"
+          >
+            Return to Main Menu
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
