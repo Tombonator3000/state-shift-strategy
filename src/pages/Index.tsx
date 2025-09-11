@@ -509,12 +509,11 @@ const Index = () => {
     return <GameMenu 
       onStartGame={startNewGame} 
       onFactionHover={(faction) => {
+        // Play light hover sound effect instead of changing music
         if (faction) {
-          audio.setFactionMusic(faction);
-        } else {
-          audio.setMenuMusic();
+          audio.playSFX('hover');
         }
-      }} 
+      }}
       audio={audio}
       onShowCardCollection={() => setShowCardCollection(true)}
       onBackToMainMenu={() => {
