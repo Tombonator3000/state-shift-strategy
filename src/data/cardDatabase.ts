@@ -2481,7 +2481,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 8,
     text: "Flood the feed with black bars. Reduce Truth; opponent discards a Media card at random.",
-    flavor: "The fewer words, the safer the world.",
+    flavorGov: "The fewer words, the safer the world.",
     target: { scope: "opponent" },
     effects: { truthDelta: -5, discardOpponent: 1, discardType: "MEDIA", random: true }
   },
@@ -2493,7 +2493,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 10,
     text: "Set up shadow command lines. Gain IP now and more each round.",
-    flavor: "Democracy is great. Backups are greater.",
+    flavorGov: "Democracy is great. Backups are greater.",
     target: { scope: "self" },
     effects: { ipDelta: { self: +4 }, ongoing: { perTurn: { ip: { self: +2 } }, duration: 3 } }
   },
@@ -2505,7 +2505,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 7,
     text: "Establish a secure Zone in a State. +2 Defense there; Truth checks in that state are harder.",
-    flavor: "No windows, two clocks, three alarms.",
+    flavorGov: "No windows, two clocks, three alarms.",
     target: { scope: "state" },
     effects: { pressure: { state: "target", amount: 1 }, zone: { defense: +2, aura: { truthCheckPenalty: -1 } } }
   },
@@ -2517,7 +2517,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 5,
     text: "Delay release. Cancel a Truth MEDIA card targeting global/state this round.",
-    flavor: "Your transparency request is very important to us.",
+    flavorGov: "Your transparency request is very important to us.",
     target: { scope: "stack", type: "MEDIA", faction: "Truth" },
     effects: { cancel: { type: "MEDIA", faction: "Truth" } }
   },
