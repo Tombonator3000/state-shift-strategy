@@ -6,22 +6,23 @@ type AudioContextType = ReturnType<typeof useAudio>;
 const AudioContext = createContext<AudioContextType | null>(null);
 
 export const AudioProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const initCountRef = useRef(0);
+  console.log('🎵 AudioProvider: Starting render...');
   
-  // Track initialization count
-  initCountRef.current++;
-  
-  console.log(`🎵 AudioProvider: Render #${initCountRef.current} - initializing...`);
-  
-  // MUST call useAudio unconditionally - React hooks rule!
-  const audioSystem = useAudio();
-  
-  console.log(`🎵 AudioProvider: Audio system created successfully on render #${initCountRef.current}`);
-  
-  // Validate that audioSystem is not null/undefined
-  if (!audioSystem) {
-    console.error('🎵 AudioProvider: Audio system is null!');
+  let audioSystem;
+  try {
+    audioSystem = useAudio();
+    console.log('🎵 AudioProvider: useAudio completed successfully');
+  } catch (error) {
+    console.error('🎵 AudioProvider: Error in useAudio:', error);
+    throw error; // Re-throw to prevent rendering with null context
   }
+  
+  if (!audioSystem) {
+    console.error('🎵 AudioProvider: audioSystem is null/undefined!');
+    throw new Error('AudioProvider: useAudio returned null');
+  }
+  
+  console.log('🎵 AudioProvider: Providing context value');
   
   return (
     <AudioContext.Provider value={audioSystem}>
