@@ -3197,7 +3197,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 7,
     text: "Negate one active Truth Development. Gain 2 IP.",
-    flavor: ""We can neither confirm nor deny…"",
+    flavor: '"We can neither confirm nor deny…"',
     target: { scope: "opponent" },
     effects: { destroyDevelopment: { faction: "Truth" }, ipDelta: { self: +2 } }
   },
