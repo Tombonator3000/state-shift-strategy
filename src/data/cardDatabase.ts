@@ -34,7 +34,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 6,
     text: "+5% Truth. Draw 1 card.",
-    flavor: "Experts confirm: pixels don't lie.",
+    flavorTruth: "Experts confirm: pixels don't lie.",
     target: { scope: "global" },
     effects: { truthDelta: +5, draw: 1 }
   },
@@ -46,7 +46,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 8,
     text: "+6% Truth. Gain +1 IP.",
-    flavor: "The King recommends the midnight pancakes.",
+    flavorTruth: "The King recommends the midnight pancakes.",
     target: { scope: "global" },
     effects: { truthDelta: +6, ipDelta: { self: +1 } }
   },
@@ -58,7 +58,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "rare",
     cost: 12,
     text: "+8% Truth. If Truth ≥ 70%, gain +2 IP.",
-    flavor: "Sponsored by Doomsday Beans™.",
+    flavorTruth: "Sponsored by Doomsday Beans™.",
     target: { scope: "global" },
     effects: { truthDelta: +8, conditional: { ifTruthAtLeast: 70, ipDelta: { self: +2 } } }
   },
@@ -70,7 +70,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "+7% Truth.",
-    flavor: "His platform: windows with no curtains.",
+    flavorTruth: "His platform: windows with no curtains.",
     target: { scope: "global" },
     effects: { truthDelta: +7 }
   },
@@ -82,7 +82,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 6,
     text: "+5% Truth. Opponent loses 1 IP.",
-    flavor: "Rice thrown… immediately abducted.",
+    flavorTruth: "Rice thrown… immediately abducted.",
     target: { scope: "opponent" },
     effects: { truthDelta: +5, ipDelta: { opponent: -1 } }
   },
@@ -94,7 +94,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 5,
     text: "+4% Truth.",
-    flavor: "They politely asked for tea.",
+    flavorTruth: "They politely asked for tea.",
     target: { scope: "global" },
     effects: { truthDelta: +4 }
   },
@@ -106,7 +106,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 8,
     text: "+6% Truth. Draw 1 if you control any Zone.",
-    flavor: "Halftime show beamed in from Andromeda.",
+    flavorTruth: "Halftime show beamed in from Andromeda.",
     target: { scope: "global" },
     effects: { truthDelta: +6, conditional: { ifControlAnyZone: true, draw: 1 } }
   },
@@ -118,7 +118,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 6,
     text: "+5% Truth.",
-    flavor: "#NoFilter #DefinitelyReal",
+    flavorTruth: "#NoFilter #DefinitelyReal",
     target: { scope: "global" },
     effects: { truthDelta: +5 }
   },
@@ -130,7 +130,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "+6% Truth. Gain +1 IP.",
-    flavor: "He composts the tabloids.",
+    flavorTruth: "He composts the tabloids.",
     target: { scope: "global" },
     effects: { truthDelta: +6, ipDelta: { self: +1 } }
   },
