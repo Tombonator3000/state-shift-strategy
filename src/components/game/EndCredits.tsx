@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { useAudioManager } from '@/hooks/useAudioManager';
 
 interface EndCreditsProps {
   isVisible: boolean;
@@ -14,8 +13,8 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
   const [currentSubtext, setCurrentSubtext] = useState('');
   const [isTextVisible, setIsTextVisible] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const musicRef = useRef<HTMLAudioElement | null>(null);
   const timelineRef = useRef<NodeJS.Timeout[]>([]);
-  const audio = useAudioManager();
 
   // Zany credit texts
   const creditTexts = {
@@ -111,14 +110,41 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
       });
     });
 
-    // No auto-exit - wait for music to end or manual button press
+    // Auto-exit after timeline completes
+    addEvent(6000, () => {
+      handleClose();
+    });
 
     timelineRef.current = timeouts;
   };
 
-  const handleClose = () => {
-    clearTimeline();
-    onClose();
+  const startMusic = () => {
+    if (musicRef.current) {
+      musicRef.current.pause();
+      musicRef.current = null;
+    }
+
+    try {
+      const audio = new Audio('/muzak/endcredits-theme.mp3');
+      audio.volume = 0.3;
+      audio.loop = false;
+      
+      audio.play().catch((error) => {
+        console.warn('Could not play credits music:', error);
+      });
+      
+      musicRef.current = audio;
+    } catch (error) {
+      console.warn('Could not load credits music:', error);
+    }
+  };
+
+  const stopMusic = () => {
+    if (musicRef.current) {
+      musicRef.current.pause();
+      musicRef.current.currentTime = 0;
+      musicRef.current = null;
+    }
   };
 
   const clearTimeline = () => {
@@ -126,10 +152,16 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
     timelineRef.current = [];
   };
 
+  const handleClose = () => {
+    stopMusic();
+    clearTimeline();
+    onClose();
+  };
+
   useEffect(() => {
     if (isVisible) {
-      // Start credits music and timeline
-      audio.setScene('end-credits');
+      // Start music and timeline
+      startMusic();
       startTimeline();
       
       // Show initial text
@@ -138,15 +170,17 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
       setIsTextVisible(true);
     } else {
       // Cleanup when not visible
+      stopMusic();
       clearTimeline();
       setCurrentPhase('intro');
       setIsTextVisible(false);
     }
 
     return () => {
+      stopMusic();
       clearTimeline();
     };
-  }, [isVisible, audio]);
+  }, [isVisible]);
 
   if (!isVisible) return null;
 

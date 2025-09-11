@@ -8,32 +8,35 @@ import {
   Music, 
   Music2, 
   Speaker, 
-  Settings,
-  Play,
-  Pause,
-  Square
+  Settings
 } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useAudioManager } from '@/hooks/useAudioManager';
 
 interface AudioControlsProps {
-  // Legacy props for compatibility - will be ignored as we use the hook directly
-  volume?: number;
-  muted?: boolean;
-  musicEnabled?: boolean;
-  sfxEnabled?: boolean;
-  onVolumeChange?: (volume: number) => void;
-  onToggleMute?: () => void;
-  onToggleMusic?: () => void;
-  onToggleSFX?: () => void;
+  volume: number;
+  muted: boolean;
+  musicEnabled: boolean;
+  sfxEnabled: boolean;
+  onVolumeChange: (volume: number) => void;
+  onToggleMute: () => void;
+  onToggleMusic: () => void;
+  onToggleSFX: () => void;
 }
 
-export const AudioControls: React.FC<AudioControlsProps> = () => {
-  const audio = useAudioManager();
+export const AudioControls: React.FC<AudioControlsProps> = ({
+  volume,
+  muted,
+  musicEnabled,
+  sfxEnabled,
+  onVolumeChange,
+  onToggleMute,
+  onToggleMusic,
+  onToggleSFX
+}) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -47,7 +50,7 @@ export const AudioControls: React.FC<AudioControlsProps> = () => {
       </PopoverTrigger>
       <PopoverContent className="w-80 p-4">
         <Card className="p-4 space-y-4">
-          <div className="text-sm font-semibold text-foreground mb-3">Audio Surveillance</div>
+          <div className="text-sm font-semibold text-foreground mb-3">Audio Settings</div>
           
           {/* Master Volume */}
           <div className="space-y-2">
@@ -56,10 +59,10 @@ export const AudioControls: React.FC<AudioControlsProps> = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => audio.mute(!audio.settings.isMuted)}
+                onClick={onToggleMute}
                 className="h-6 w-6 p-0"
               >
-                {audio.settings.isMuted ? (
+                {muted ? (
                   <VolumeX className="h-4 w-4 text-muted-foreground" />
                 ) : (
                   <Volume2 className="h-4 w-4" />
@@ -67,85 +70,63 @@ export const AudioControls: React.FC<AudioControlsProps> = () => {
               </Button>
             </div>
             <Slider
-              value={[audio.settings.isMuted ? 0 : audio.settings.master * 100]}
-              onValueChange={(values) => audio.setVolumes({ master: values[0] / 100 })}
+              value={[muted ? 0 : volume * 100]}
+              onValueChange={(values) => onVolumeChange(values[0] / 100)}
               max={100}
               step={5}
               className="w-full"
-              disabled={audio.settings.isMuted}
+              disabled={muted}
             />
           </div>
 
-          {/* BGM Volume */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Background Music</span>
-              <div className="flex gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => audio.isPlaying ? audio.pauseBgm() : audio.resumeBgm()}
-                  className="h-6 w-6 p-0"
-                  disabled={!audio.currentTrackId}
-                >
-                  {audio.isPlaying ? (
-                    <Pause className="h-3 w-3" />
-                  ) : (
-                    <Play className="h-3 w-3" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={audio.stopBgm}
-                  className="h-6 w-6 p-0"
-                  disabled={!audio.currentTrackId}
-                >
-                  <Square className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-            <Slider
-              value={[audio.settings.bgm * 100]}
-              onValueChange={(values) => audio.setVolumes({ bgm: values[0] / 100 })}
-              max={100}
-              step={5}
-              className="w-full"
-            />
+          {/* Music Toggle */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Background Music</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleMusic}
+              className="h-8 w-16 text-xs"
+            >
+              {musicEnabled ? (
+                <>
+                  <Music className="h-3 w-3 mr-1" />
+                  ON
+                </>
+              ) : (
+                <>
+                  <Music2 className="h-3 w-3 mr-1 opacity-50" />
+                  OFF
+                </>
+              )}
+            </Button>
           </div>
 
-          {/* SFX Volume */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Sound Effects</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => audio.playSfx('click')}
-                className="h-6 w-6 p-0"
-              >
-                <Speaker className="h-3 w-3" />
-              </Button>
-            </div>
-            <Slider
-              value={[audio.settings.sfx * 100]}
-              onValueChange={(values) => audio.setVolumes({ sfx: values[0] / 100 })}
-              max={100}
-              step={5}
-              className="w-full"
-            />
+          {/* SFX Toggle */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Sound Effects</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleSFX}
+              className="h-8 w-16 text-xs"
+            >
+              {sfxEnabled ? (
+                <>
+                  <Speaker className="h-3 w-3 mr-1" />
+                  ON
+                </>
+              ) : (
+                <>
+                  <VolumeX className="h-3 w-3 mr-1" />
+                  OFF
+                </>
+              )}
+            </Button>
           </div>
 
-          {/* Status */}
           <div className="text-xs text-muted-foreground pt-2 border-t">
-            {audio.canPlay ? (
-              <>
-                Scene: {audio.scene} | Track: {audio.currentTrackId || 'None'}
-                {audio.isPlaying && ` | ${Math.floor(audio.position)}s`}
-              </>
-            ) : (
-              'Tap anywhere to enable audio'
-            )}
+            Audio files not included - add your own audio files to /public/audio/
           </div>
         </Card>
       </PopoverContent>

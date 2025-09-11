@@ -4,7 +4,6 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { useState, useEffect } from 'react';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
-import { useAudioManager } from '@/hooks/useAudioManager';
 
 interface OptionsProps {
   onClose: () => void;
@@ -13,6 +12,9 @@ interface OptionsProps {
 }
 
 interface GameSettings {
+  masterVolume: number;
+  musicVolume: number;
+  sfxVolume: number;
   enableAnimations: boolean;
   autoEndTurn: boolean;
   fastMode: boolean;
@@ -25,8 +27,10 @@ interface GameSettings {
 }
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
-  const audio = useAudioManager();
   const [settings, setSettings] = useState<GameSettings>({
+    masterVolume: 70,
+    musicVolume: 50,
+    sfxVolume: 80,
     enableAnimations: true,
     autoEndTurn: false,
     fastMode: false,
@@ -65,6 +69,9 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
 
   const resetToDefaults = () => {
     const defaultSettings: GameSettings = {
+      masterVolume: 70,
+      musicVolume: 50,
+      sfxVolume: 80,
       enableAnimations: true,
       autoEndTurn: false,
       fastMode: false,
@@ -77,14 +84,6 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     };
     setSettings(defaultSettings);
     localStorage.setItem('gameSettings', JSON.stringify(defaultSettings));
-    
-    // Reset audio to defaults
-    audio.setVolumes({
-      master: 0.3,
-      bgm: 1.0,
-      sfx: 1.0,
-      isMuted: false
-    });
   };
 
   const handleSaveGame = () => {
@@ -161,14 +160,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
             <div className="space-y-6">
               <div>
                 <label className="text-sm font-medium text-newspaper-text mb-2 block">
-                  Master Volume: {Math.round(audio.settings.master * 100)}%
+                  Master Volume: {settings.masterVolume}%
                 </label>
                 <Slider
-                  value={[audio.settings.master * 100]}
-                  onValueChange={([value]) => {
-                    audio.setVolumes({ master: value / 100 });
-                    audio.playSfx('click');
-                  }}
+                  value={[settings.masterVolume]}
+                  onValueChange={([value]) => updateSettings({ masterVolume: value })}
                   max={100}
                   step={1}
                   className="w-full"
@@ -177,14 +173,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
 
               <div>
                 <label className="text-sm font-medium text-newspaper-text mb-2 block">
-                  Background Music: {Math.round(audio.settings.bgm * 100)}%
+                  Background Music: {settings.musicVolume}%
                 </label>
                 <Slider
-                  value={[audio.settings.bgm * 100]}
-                  onValueChange={([value]) => {
-                    audio.setVolumes({ bgm: value / 100 });
-                    audio.playSfx('click');
-                  }}
+                  value={[settings.musicVolume]}
+                  onValueChange={([value]) => updateSettings({ musicVolume: value })}
                   max={100}
                   step={1}
                   className="w-full"
@@ -193,62 +186,15 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
 
               <div>
                 <label className="text-sm font-medium text-newspaper-text mb-2 block">
-                  Sound Effects: {Math.round(audio.settings.sfx * 100)}%
+                  Sound Effects: {settings.sfxVolume}%
                 </label>
                 <Slider
-                  value={[audio.settings.sfx * 100]}
-                  onValueChange={([value]) => {
-                    audio.setVolumes({ sfx: value / 100 });
-                    audio.playSfx('click');
-                  }}
+                  value={[settings.sfxVolume]}
+                  onValueChange={([value]) => updateSettings({ sfxVolume: value })}
                   max={100}
                   step={1}
                   className="w-full"
                 />
-              </div>
-
-              {/* Audio Controls */}
-              <div className="pt-4 border-t border-newspaper-text/20">
-                <div className="flex gap-2 mb-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => audio.isPlaying ? audio.pauseBgm() : audio.resumeBgm()}
-                    disabled={!audio.currentTrackId}
-                    className="border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
-                  >
-                    {audio.isPlaying ? '⏸️ PAUSE' : '▶️ PLAY'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={audio.stopBgm}
-                    disabled={!audio.currentTrackId}
-                    className="border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
-                  >
-                    ⏹️ STOP
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => audio.mute(!audio.settings.isMuted)}
-                    className="border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
-                  >
-                    {audio.settings.isMuted ? '🔇 UNMUTE' : '🔊 MUTE'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => audio.playSfx('click')}
-                    className="border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
-                  >
-                    🔊 TEST SFX
-                  </Button>
-                </div>
-                <div className="text-xs text-newspaper-text/70">
-                  Current: {audio.currentTrackId || 'None'} | Scene: {audio.scene}
-                  {audio.isPlaying && ` | ${Math.floor(audio.position)}s`}
-                </div>
               </div>
             </div>
           </Card>
