@@ -865,6 +865,9 @@ const Index = () => {
         <PhaseTransition 
           phase={gameState.phase}
           previousPhase={previousPhase}
+          truth={gameState.truth}
+          round={gameState.round}
+          faction={gameState.faction}
           onComplete={() => setShowPhaseTransition(false)}
         />
       )}
