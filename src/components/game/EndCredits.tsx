@@ -119,24 +119,9 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
   };
 
   const startMusic = () => {
-    if (musicRef.current) {
-      musicRef.current.pause();
-      musicRef.current = null;
-    }
-
-    try {
-      const audio = new Audio('/muzak/endcredits-theme.mp3');
-      audio.volume = 0.3;
-      audio.loop = false;
-      
-      audio.play().catch((error) => {
-        console.warn('Could not play credits music:', error);
-      });
-      
-      musicRef.current = audio;
-    } catch (error) {
-      console.warn('Could not load credits music:', error);
-    }
+    // EndCredits will no longer create its own audio system
+    // Instead it should use the main audio system if needed
+    console.log('🎵 EndCredits: Using main audio system instead of separate instance');
   };
 
   const stopMusic = () => {

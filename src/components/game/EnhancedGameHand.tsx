@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GameCard } from '@/components/game/GameHand';
-import { useAudio } from '@/hooks/useAudio';
+import { useAudioContext } from '@/contexts/AudioContext';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Zap, Shield, Target, X, Eye } from 'lucide-react';
 import { useHapticFeedback } from '@/hooks/useHapticFeedback';
@@ -38,7 +38,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
-  const audio = useAudio();
+  const audio = useAudioContext();
   const { triggerHaptic } = useHapticFeedback();
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);

@@ -19,7 +19,7 @@ import ZoneTargetingHelper from '@/components/game/ZoneTargetingHelper';
 import { AudioControls } from '@/components/ui/audio-controls';
 import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
-import { useAudio } from '@/hooks/useAudio';
+import { useAudioContext } from '@/contexts/AudioContext';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
@@ -71,7 +71,7 @@ const Index = () => {
   const [showActionPhase, setShowActionPhase] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
-  const audio = useAudio();
+  const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();

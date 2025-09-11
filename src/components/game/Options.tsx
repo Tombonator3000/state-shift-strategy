@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { AudioControls } from '@/components/ui/audio-controls';
-import { useAudio } from '@/hooks/useAudio';
+import { useAudioContext } from '@/contexts/AudioContext';
 import { useState, useEffect } from 'react';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
 
@@ -29,7 +29,7 @@ interface GameSettings {
 }
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
-  const audio = useAudio();
+  const audio = useAudioContext();
 
   const [settings, setSettings] = useState<GameSettings>({
     masterVolume: Math.round(audio.config.volume * 100),
