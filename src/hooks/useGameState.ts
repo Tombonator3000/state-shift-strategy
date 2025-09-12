@@ -97,6 +97,16 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   const [eventManager] = useState(() => new EventManager());
   const achievements = useAchievements();
   
+  // Ensure extensions are enabled for proper card variety
+  const coreCards = CARD_DATABASE;
+  const extensionCards = extensionManager.getAllExtensionCards();
+  const allCards = [...coreCards, ...extensionCards];
+  
+  console.log(`📊 Card Database Stats:
+  - Core cards: ${coreCards.length}
+  - Extension cards: ${extensionCards.length}  
+  - Total available: ${allCards.length}`);
+  
   const [gameState, setGameState] = useState<GameState>({
     faction: 'truth',
     phase: 'action',
@@ -107,6 +117,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     truth: 60,
     ip: 15,
     aiIP: 15,
+    // Use all available cards to ensure proper deck building
     hand: getRandomCards(3, { faction: 'truth' }),
     aiHand: getRandomCards(3, { faction: 'government' }),
     isGameOver: false,
