@@ -1,12 +1,13 @@
 {
   "id": "exp-cryptids",
   "name": "Cryptids",
+  "version": "2.0.0",
   "schemaVersion": 2,
   "author": "ShadowGov Team aka a drunk AI with one angry prompter",
   "description": "State monsters & cover-ups with home-state bonuses. v2.",
   "factions": [
-    "Government",
-    "Truth"
+    "government",
+    "truth"
   ],
   "count": 300,
   "cards": [

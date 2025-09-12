@@ -217,7 +217,7 @@ class ExtensionManager {
   }
 
   private validateExtension(extension: any): boolean {
-    return (
+    const isValid = (
       extension &&
       typeof extension.id === 'string' &&
       typeof extension.name === 'string' &&
@@ -229,6 +229,27 @@ class ExtensionManager {
         card.id && card.faction && card.name && card.type && card.cost !== undefined
       )
     );
+    
+    if (!isValid) {
+      console.warn('❌ Extension validation failed:', {
+        hasId: !!extension?.id,
+        hasName: !!extension?.name,
+        hasVersion: !!extension?.version,
+        hasAuthor: !!extension?.author,
+        hasFactions: Array.isArray(extension?.factions),
+        hasCards: Array.isArray(extension?.cards),
+        cardCount: extension?.cards?.length || 0,
+        firstCardValid: extension?.cards?.[0] ? {
+          hasId: !!extension.cards[0].id,
+          hasFaction: !!extension.cards[0].faction,
+          hasName: !!extension.cards[0].name,
+          hasType: !!extension.cards[0].type,
+          hasCost: extension.cards[0].cost !== undefined
+        } : 'no cards'
+      });
+    }
+    
+    return isValid;
   }
 
   registerExtension(extension: Extension, source: 'cdn' | 'folder' | 'file') {
