@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import USAMap from '@/components/game/USAMap';
@@ -273,6 +273,35 @@ const Index = () => {
     }
   }, [gameState.faction]);
 
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenEnabled) {
+        toast.error('Fullskjerm støttes ikke i denne nettleseren');
+        audio.playSFX('click');
+        return;
+      }
+      
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+        toast.success('Fullskjerm aktivert!');
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+        toast.success('Fullskjerm deaktivert');
+      }
+      audio.playSFX('click');
+    } catch (error) {
+      console.error('Fullscreen error:', error);
+      if (error.name === 'NotAllowedError') {
+        toast.error('Fullskjerm ble blokkert av nettleseren. Prøv F11 eller tillat fullskjerm i nettleserinnstillingene.');
+      } else {
+        toast.error('Kunne ikke bytte fullskjerm-modus');
+      }
+      audio.playSFX('click');
+    }
+  }, [audio]);
+
   // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -287,6 +316,10 @@ const Index = () => {
       }
       
       switch (e.key.toLowerCase()) {
+        case 'f11':
+          e.preventDefault();
+          toggleFullscreen();
+          break;
         case 'escape':
           setShowInGameOptions(true);
           audio.playSFX('click');
@@ -318,7 +351,7 @@ const Index = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showMenu, showIntro, showInGameOptions, showHowToPlay, gameState.phase, gameState.animating, gameState.hand, audio]);
+  }, [showMenu, showIntro, showInGameOptions, showHowToPlay, gameState.phase, gameState.animating, gameState.hand, audio, toggleFullscreen]);
 
   const handleSaveGame = () => {
     if (saveGame) {
@@ -350,15 +383,16 @@ const Index = () => {
     audio.setGameplayMusic(faction);
     audio.playSFX('click');
     
-    // Auto-enter fullscreen when game starts (skip in iframes or when not allowed)
+    // Auto-enter fullscreen when game starts
     try {
-      const canFullscreen = document.fullscreenEnabled && window.top === window.self;
-      if (canFullscreen && !document.fullscreenElement) {
+      if (document.fullscreenEnabled && !document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
         setIsFullscreen(true);
+        toast.success('Fullskjerm aktivert!');
       }
     } catch (error) {
-      console.log('Fullscreen auto-entry skipped or failed:', error);
+      console.log('Fullscreen auto-entry failed:', error);
+      toast.error('Kunne ikke aktivere fullskjerm automatisk');
     }
   };
 
@@ -497,27 +531,6 @@ const Index = () => {
   const handleCloseNewspaper = () => {
     closeNewspaper();
     audio.playSFX('newspaper');
-  };
-
-  const toggleFullscreen = async () => {
-    try {
-      const canFullscreen = document.fullscreenEnabled && window.top === window.self;
-      if (!canFullscreen) {
-        console.log('Fullscreen not permitted in this environment (likely in iframe).');
-        audio.playSFX('click');
-        return;
-      }
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-        setIsFullscreen(true);
-      } else {
-        await document.exitFullscreen();
-        setIsFullscreen(false);
-      }
-      audio.playSFX('click');
-    } catch (error) {
-      console.error('Fullscreen error:', error);
-    }
   };
 
   useEffect(() => {
