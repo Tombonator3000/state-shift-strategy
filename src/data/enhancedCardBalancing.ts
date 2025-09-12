@@ -270,12 +270,12 @@ export class EnhancedCardBalancer {
     if (faction === 'Truth' && effects.truthDelta && effects.truthDelta < 0) {
       if (totalUtility <= 0) {
         return { 
-          alignment: 'Misaligned', 
+          alignment: 'Misaligned' as const, 
           reason: 'Truth card with negative Truth effect and insufficient compensation' 
         };
       } else if (totalUtility < 5) {
         return { 
-          alignment: 'Mixed', 
+          alignment: 'Mixed' as const, 
           reason: 'Truth card with negative Truth effect but some compensating utility' 
         };
       }
@@ -284,12 +284,12 @@ export class EnhancedCardBalancer {
     if (faction === 'Government' && effects.truthDelta && effects.truthDelta > 0) {
       if (totalUtility <= 0) {
         return { 
-          alignment: 'Misaligned', 
+          alignment: 'Misaligned' as const, 
           reason: 'Government card with positive Truth effect and insufficient compensation' 
         };
       } else if (totalUtility < 5) {
         return { 
-          alignment: 'Mixed', 
+          alignment: 'Mixed' as const, 
           reason: 'Government card with positive Truth effect but some compensating utility' 
         };
       }
@@ -402,7 +402,7 @@ export class EnhancedCardBalancer {
         classification,
         severity,
         factionAlignment: {
-          alignment: alignment.alignment,
+          alignment: alignment.alignment as 'Aligned' | 'Mixed' | 'Misaligned',
           reason: alignment.reason
         },
         recommendation

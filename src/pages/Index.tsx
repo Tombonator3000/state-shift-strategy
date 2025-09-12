@@ -11,7 +11,7 @@ import Newspaper from '@/components/game/Newspaper';
 import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
 import AIStatus from '@/components/game/AIStatus';
-import BalancingDashboard from '@/components/game/BalancingDashboard';
+import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashboard';
 import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
@@ -592,7 +592,7 @@ const Index = () => {
   }
 
   if (showBalancing) {
-    return <BalancingDashboard onClose={() => setShowBalancing(false)} />;
+    return <EnhancedBalancingDashboard onClose={() => setShowBalancing(false)} />;
   }
 
   if (showMenu) {
