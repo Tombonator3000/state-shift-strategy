@@ -4,7 +4,7 @@
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import { CardEffectAnalyzer, EffectDiscrepancy } from './CardEffectAnalyzer';
 import { EnhancedCardEffects } from '@/types/enhancedCardEffects';
-import type { GameCard } from '@/components/game/GameHand';
+import type { GameCard } from '@/types/cardTypes';
 
 export interface CardFix {
   cardId: string;

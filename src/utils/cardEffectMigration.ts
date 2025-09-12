@@ -1,34 +1,30 @@
 // Card Effect Migration Utilities
 // Handles legacy card format compatibility
 
-import type { Card, CardEffects } from '@/types/cardEffects';
-import type { GameCard } from '@/components/game/GameHand';
+import type { Card as LegacyCard, CardEffects as LegacyCardEffects } from '@/types/cardEffects';
+import type { GameCard, CardEffects, Faction } from '@/types/cardTypes';
 
 export class CardEffectMigrator {
   
   // Migrate legacy card format to new unified format
-  static migrateCard(legacyCard: GameCard): Card {
-    const migratedCard: Card = {
+  static migrateCard(legacyCard: GameCard): GameCard {
+    // Normalize faction to lowercase
+    const faction = (legacyCard.faction as string)?.toLowerCase() as Faction;
+    
+    const migratedCard: GameCard = {
       id: legacyCard.id,
       name: legacyCard.name,
-      type: legacyCard.type as any,
-      faction: legacyCard.faction as "Truth" | "Government",
-      rarity: legacyCard.rarity,
+      type: legacyCard.type,
+      faction,
+      rarity: legacyCard.rarity || 'common',
       cost: legacyCard.cost,
       text: legacyCard.text,
+      flavorTruth: legacyCard.flavorTruth || '',
+      flavorGov: legacyCard.flavorGov || '',
       effects: legacyCard.effects || this.inferEffectsFromText(legacyCard),
-      target: legacyCard.target as any
+      target: legacyCard.target
     };
 
-    // Handle flavor text mapping
-    if (legacyCard.flavorTruth) {
-      migratedCard.flavorTruth = legacyCard.flavorTruth;
-    }
-    if (legacyCard.flavorGov) {
-      migratedCard.flavorGov = legacyCard.flavorGov;
-    }
-    
-    // If only one flavor exists, don't auto-duplicate to maintain data integrity
     
     return migratedCard;
   }
@@ -68,18 +64,8 @@ export class CardEffectMigrator {
       effects.pressureDelta = parseInt(pressureMatch[1]);
     }
     
-    // Parse damage
-    const damageMatch = text.match(/(?:Deal|Deals?)\s*(\d+)(?:-(\d+))?\s*damage/i);
-    if (damageMatch) {
-      if (damageMatch[2]) {
-        effects.damage = { 
-          min: parseInt(damageMatch[1]), 
-          max: parseInt(damageMatch[2]) 
-        };
-      } else {
-        effects.damage = { fixed: parseInt(damageMatch[1]) };
-      }
-    }
+    // Parse damage (not in v2.1E whitelist, skip)
+    // const damageMatch = text.match(/(?:Deal|Deals?)\s*(\d+)(?:-(\d+))?\s*damage/i);
     
     // Parse conditionals - basic truth threshold detection
     const truthConditionMatch = text.match(/If\s*Truth\s*[≥>=]\s*(\d+)%?[,:]\s*(.+)/i);
@@ -97,10 +83,8 @@ export class CardEffectMigrator {
       }
     }
     
-    // Add targeting requirement for ZONE cards
-    if (card.type === 'ZONE') {
-      effects.requiresTarget = true;
-    }
+    // Add targeting requirement for ZONE cards (remove requiresTarget as it's not in v2.1E)
+    // ZONE cards have explicit target in card definition
     
     return Object.keys(effects).length > 0 ? effects : undefined;
   }
@@ -148,11 +132,9 @@ export class CardEffectMigrator {
       normalized.pressureDelta = effects.pressureDelta;
     }
     
-    // Copy over valid properties
+    // Copy over valid v2.1E properties only
     const validProps = [
-      'draw', 'discardSelf', 'discardOpponent', 'zoneDefense', 
-      'captureBonus', 'damage', 'conditional', 'duration', 
-      'tags', 'repeatable', 'requiresTarget', 'incomeBonus'
+      'draw', 'discardOpponent', 'zoneDefense', 'conditional'
     ];
     
     for (const prop of validProps) {
@@ -165,7 +147,7 @@ export class CardEffectMigrator {
   }
 
   // Batch migrate all cards in a database
-  static migrateCardDatabase(cards: GameCard[]): Card[] {
+  static migrateCardDatabase(cards: GameCard[]): GameCard[] {
     return cards.map(card => this.migrateCard(card));
   }
 }

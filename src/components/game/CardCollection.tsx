@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { useCardCollection } from '@/hooks/useCardCollection';
-import { GameCard } from '@/components/game/GameHand';
+import type { GameCard } from '@/types/cardTypes';
 import { CARD_DATABASE } from '@/data/cardDatabase';
 
 interface CardCollectionProps {

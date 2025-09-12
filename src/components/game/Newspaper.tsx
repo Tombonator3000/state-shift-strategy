@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
-import type { GameCard } from './GameHand';
+import type { GameCard } from '@/types/cardTypes';
 import type { GameEvent } from '@/data/eventDatabase';
 
 interface PlayedCard {

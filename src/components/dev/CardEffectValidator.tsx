@@ -13,7 +13,7 @@ import { CheckCircle, XCircle, AlertTriangle, Bug, Zap } from 'lucide-react';
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import { CardEffectValidator, CardTextGenerator } from '@/systems/CardTextGenerator';
 import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
-import { Card as CardType } from '@/types/cardEffects';
+import type { GameCard } from '@/types/cardTypes';
 
 const CardEffectValidatorPanel: React.FC = () => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
@@ -21,7 +21,7 @@ const CardEffectValidatorPanel: React.FC = () => {
   
   // Run validation on all cards
   const validationSummary = useMemo(() => {
-    return CardEffectValidator.validateCards(CARD_DATABASE as CardType[]);
+    return CardEffectValidator.validateCards(CARD_DATABASE as GameCard[]);
   }, []);
 
   // Test effect processing for a sample game state
@@ -44,7 +44,7 @@ const CardEffectValidatorPanel: React.FC = () => {
   const effectResult = useMemo(() => {
     if (!selectedCard) return null;
     const processor = new CardEffectProcessor(testGameState, true);
-    return processor.processCard(selectedCard as CardType);
+    return processor.processCard(selectedCard as GameCard);
   }, [selectedCard]);
 
   const cardsToShow = showAllCards ? 
@@ -136,7 +136,7 @@ const CardEffectValidatorPanel: React.FC = () => {
           <ScrollArea className="h-96">
             <div className="space-y-2">
               {cardsToShow.map((card: any) => {
-                const validation = CardEffectValidator.validateCard(card as CardType);
+                const validation = CardEffectValidator.validateCard(card as GameCard);
                 const hasErrors = validation.issues.some(i => i.severity === 'error');
                 const hasWarnings = validation.issues.some(i => i.severity === 'warning');
                 
@@ -262,7 +262,7 @@ const CardEffectValidatorPanel: React.FC = () => {
             </CardHeader>
             <CardContent>
               <pre className="text-xs bg-muted p-4 rounded overflow-auto max-h-96">
-                {CardEffectValidator.createDevReport(CARD_DATABASE as CardType[])}
+                {CardEffectValidator.createDevReport(CARD_DATABASE as GameCard[])}
               </pre>
             </CardContent>
           </Card>

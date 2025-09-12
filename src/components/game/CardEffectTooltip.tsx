@@ -1,5 +1,5 @@
 import React from 'react';
-import { GameCard } from '@/components/game/GameHand';
+import type { GameCard } from '@/types/cardTypes';
 import { CardTextGenerator } from '@/systems/CardTextGenerator';
 
 interface CardEffectTooltipProps {

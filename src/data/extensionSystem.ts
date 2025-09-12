@@ -263,7 +263,7 @@ class ExtensionManager {
     
     // Enforce ZONE targeting
     if (normalized.type === 'ZONE') {
-      normalized.target = { scope: 'state' };
+      normalized.target = { scope: 'state', count: 1 };
     }
     
     return normalized;

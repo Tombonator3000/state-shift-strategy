@@ -1,7 +1,7 @@
 // v2.1E Card Type System - Strict Enforcement
 // This replaces the legacy mixed types with v2.1E compliant definitions
 
-export type Faction = 'truth' | 'government'; // v2.1E: lowercase only
+export type Faction = 'truth' | 'government' | 'Truth' | 'Government'; // Allow both cases during transition
 export type CardType = 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE'; // v2.1E: 4 types only
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'legendary';
 
@@ -37,7 +37,7 @@ export interface GameCard {
   name: string;
   type: CardType;
   faction: Faction;
-  rarity?: CardRarity;
+  rarity?: CardRarity; // Make optional to handle legacy data
   cost: number;
   
   // Text fields - both must exist for flavor routing

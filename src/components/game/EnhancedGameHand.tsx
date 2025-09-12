@@ -4,7 +4,7 @@ import CardDetailOverlay from './CardDetailOverlay';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { GameCard } from '@/components/game/GameHand';
+import type { GameCard } from '@/types/cardTypes';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Zap, Shield, Target, X, Eye } from 'lucide-react';

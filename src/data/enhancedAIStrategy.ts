@@ -1,4 +1,4 @@
-import type { GameCard } from '@/components/game/GameHand';
+import type { GameCard } from '@/types/cardTypes';
 import { CARD_DATABASE } from './cardDatabase';
 import { AIStrategist, type AIDifficulty, type AIPersonality, type CardPlay } from './aiStrategy';
 

@@ -44,8 +44,8 @@ export class CardEffectProcessor {
     // Process immediate effects
     this.processEffects(card.effects, result, card.name);
     
-    // Handle targeting requirements
-    if (card.effects.requiresTarget || card.type === 'ZONE') {
+    // Handle targeting requirements (v2.1E - ZONE cards have explicit target property)
+    if (card.type === 'ZONE') {
       result.requiresTarget = true;
     }
     

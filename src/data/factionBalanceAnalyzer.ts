@@ -4,28 +4,8 @@
 import { CARD_DATABASE } from './cardDatabase';
 import { extensionManager } from './extensionSystem';
 
-// GameCard interface for type safety
-export interface GameCard {
-  id: string;
-  name: string;
-  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'DEVELOPMENT' | 'LEGENDARY';
-  rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
-  text: string;
-  flavor?: string;
-  flavorGov?: string;
-  flavorTruth?: string;
-  cost: number;
-  target?: {
-    scope: string;
-    restrict?: string[];
-    requireTag?: string;
-    type?: string;
-    faction?: string;
-    onlyIf?: any;
-  };
-  effects?: any;
-  faction?: string;
-}
+// Use centralized v2.1E types
+import type { GameCard, Faction, CardType } from '@/types/cardTypes';
 
 // Core interfaces for analysis system
 export interface FactionAlignmentMatrix {

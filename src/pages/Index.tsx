@@ -1003,7 +1003,7 @@ const Index = () => {
 
       {/* New Cards Presentation */}
       <NewCardsPresentation
-        cards={gameState.newCards || []}
+        cards={gameState.newCards?.map(card => ({...card, rarity: card.rarity || 'common', text: card.text || ''})) || []}
         isVisible={gameState.showNewCardsPresentation || false}
         onConfirm={confirmNewCards}
       />

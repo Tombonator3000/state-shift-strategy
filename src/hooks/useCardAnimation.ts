@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import type { GameCard } from '@/components/game/GameHand';
+import type { GameCard } from '@/types/cardTypes';
 import { useScreenShake } from '@/components/effects/ScreenShake';
 
 interface AnimationRect {

@@ -67,27 +67,8 @@ export type CardEffects = {
   };
 };
 
-// Enhanced card interface with strict typing
-export interface Card {
-  id: string;
-  name: string;
-  type: "MEDIA" | "ZONE" | "ATTACK" | "TECH" | "DEVELOPMENT" | "DEFENSIVE" | "INSTANT" | "LEGENDARY";
-  faction?: "Truth" | "Government";
-  rarity?: "common" | "uncommon" | "rare" | "legendary";
-  cost: number;
-  
-  // Text fields
-  text?: string;           // Human-readable rules text (can be generated)
-  flavorTruth?: string;    // IMMUTABLE - Truth faction flavor
-  flavorGov?: string;      // IMMUTABLE - Government faction flavor
-  
-  // Gameplay data
-  effects?: CardEffects;   // Single source of truth for gameplay
-  target?: {               // Targeting requirements
-    scope: "global" | "self" | "opponent" | "state" | "controlled" | "contested";
-    count?: number;
-  };
-}
+// Re-export v2.1E types for backward compatibility
+export type { GameCard as Card, Faction, CardType } from '@/types/cardTypes';
 
 // Effect processing result
 export interface EffectResult {

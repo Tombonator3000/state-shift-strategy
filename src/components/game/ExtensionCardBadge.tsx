@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { isExtensionCard, getCardExtensionInfo } from '@/data/extensionIntegration';
-import type { GameCard } from './GameHand';
+import type { GameCard } from '@/types/cardTypes';
 
 interface ExtensionCardBadgeProps {
   cardId: string;
