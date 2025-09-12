@@ -251,7 +251,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     <span className={`px-1.5 py-0.5 rounded-full ${isMobile ? 'text-xs' : 'text-xs'} ${getRarityAccent(card.rarity)}`}>
                       {card.rarity.toUpperCase()}
                     </span>
-                    <ExtensionCardBadge cardId={card.id} />
+                    <ExtensionCardBadge cardId={card.id} card={card} variant="inline" />
                   </div>
                   <div className={`text-muted-foreground truncate max-w-[200px] ${isMobile ? 'text-sm' : 'text-xs'}`}>{card.text}</div>
                 </div>
@@ -284,8 +284,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                  <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-yellow-400 ring-2 ring-yellow-400/50" />
                )}
                
-               {/* Extension badge overlay */}
-               <ExtensionCardBadge cardId={card.id} variant="overlay" />
+                {/* Extension badge overlay */}
+                <ExtensionCardBadge cardId={card.id} card={card} variant="overlay" />
 
                {/* Inline hover tooltip right of the card */}
                <div

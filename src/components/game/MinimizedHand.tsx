@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Maximize2, Minimize2, Zap, Shield, Target, Megaphone } from 'lucide-react';
+import { ExtensionCardBadge } from './ExtensionCardBadge';
+import { isExtensionCard } from '@/data/extensionIntegration';
 import type { GameCard } from './GameHand';
 
 interface MinimizedHandProps {
@@ -175,23 +177,27 @@ const MinimizedHand = ({
                 onClick={() => canAffordCard(card.cost) && onSelectCard(card.id)}
                 onDoubleClick={() => canAffordCard(card.cost) && onPlayCard(card.id)}
                 onMouseEnter={() => setHoveredCard(card.id)}
-                onMouseLeave={() => setHoveredCard(null)}
-                data-card-id={card.id}
-              >
-                {/* Card type indicator */}
-                <div className={`absolute top-0.5 left-0.5 p-0.5 rounded ${getTypeColor(card.type)}`}>
-                  {getCardIcon(card.type)}
-                </div>
-                
-                {/* Cost badge */}
-                <div className="absolute top-0.5 right-0.5 bg-newspaper-text text-newspaper-bg text-xs font-bold rounded px-1 leading-none py-0.5">
-                  {card.cost}
-                </div>
-                
-                {/* Keyboard shortcut */}
-                <div className="absolute bottom-0.5 left-0.5 right-0.5 text-center text-xs font-mono font-bold text-newspaper-text/80">
-                  {index + 1}
-                </div>
+                 onMouseLeave={() => setHoveredCard(null)}
+                 data-card-id={card.id}
+               >
+                 {/* Extension/Faction badge - replaces separate type and faction indicators */}
+                 {isExtensionCard(card.id) ? (
+                   <ExtensionCardBadge cardId={card.id} card={card} variant="overlay" />
+                 ) : (
+                   <div className={`absolute top-0.5 left-0.5 p-0.5 rounded ${getTypeColor(card.type)}`}>
+                     {getCardIcon(card.type)}
+                   </div>
+                 )}
+                 
+                 {/* Cost badge */}
+                 <div className="absolute top-0.5 right-0.5 bg-newspaper-text text-newspaper-bg text-xs font-bold rounded px-1 leading-none py-0.5">
+                   {card.cost}
+                 </div>
+                 
+                 {/* Keyboard shortcut */}
+                 <div className="absolute bottom-0.5 left-0.5 right-0.5 text-center text-xs font-mono font-bold text-newspaper-text/80">
+                   {index + 1}
+                 </div>
                 
                 {/* Selected indicator */}
                 {selectedCard === card.id && (
@@ -204,16 +210,19 @@ const MinimizedHand = ({
               side="top" 
               className="max-w-xs bg-newspaper-bg border-2 border-newspaper-text p-3"
             >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Badge className={getTypeColor(card.type)}>
-                    {getCardIcon(card.type)}
-                    <span className="ml-1">{card.type}</span>
-                  </Badge>
-                  <Badge variant="outline" className="font-bold">
-                    {card.cost} IP
-                  </Badge>
-                </div>
+               <div className="space-y-2">
+                 <div className="flex items-center justify-between gap-2">
+                   <div className="flex items-center gap-1">
+                     <Badge className={getTypeColor(card.type)}>
+                       {getCardIcon(card.type)}
+                       <span className="ml-1">{card.type}</span>
+                     </Badge>
+                     <ExtensionCardBadge cardId={card.id} card={card} variant="inline" />
+                   </div>
+                   <Badge variant="outline" className="font-bold">
+                     {card.cost} IP
+                   </Badge>
+                 </div>
                 
                 <h4 className="font-bold text-newspaper-text">
                   {card.name}

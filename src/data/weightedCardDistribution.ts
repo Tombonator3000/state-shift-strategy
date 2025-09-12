@@ -91,6 +91,35 @@ class WeightedCardDistribution {
     return sets;
   }
 
+  // Add faction-aware filtering
+  private filterCardsByFaction(cards: GameCard[], faction?: 'government' | 'truth'): GameCard[] {
+    if (!faction) return cards;
+    
+    return cards.filter(card => {
+      if (card.faction) {
+        return card.faction.toLowerCase() === faction;
+      }
+      
+      // Fallback: determine faction from card properties
+      const cardText = (card.text || '').toLowerCase();
+      const cardName = (card.name || '').toLowerCase();
+      
+      // Government keywords
+      const govKeywords = ['classified', 'redacted', 'bureau', 'agent', 'department', 'official', 'security', 'surveillance', 'cover-up', 'asset', 'operation', 'protocol', 'clearance'];
+      // Truth keywords  
+      const truthKeywords = ['truth', 'expose', 'reveal', 'witness', 'evidence', 'conspiracy', 'cover', 'bigfoot', 'alien', 'ufo', 'cryptid', 'ghost', 'elvis'];
+      
+      const hasGovKeywords = govKeywords.some(keyword => cardText.includes(keyword) || cardName.includes(keyword));
+      const hasTruthKeywords = truthKeywords.some(keyword => cardText.includes(keyword) || cardName.includes(keyword));
+      
+      if (faction === 'government') {
+        return hasGovKeywords || (!hasGovKeywords && !hasTruthKeywords); // Default to government if unclear
+      } else {
+        return hasTruthKeywords;
+      }
+    });
+  }
+
   // Calculate effective weights based on mode
   private getEffectiveWeights(): SetWeights {
     const weights: SetWeights = { core: 0 };
@@ -228,8 +257,8 @@ class WeightedCardDistribution {
     return seedCards;
   }
 
-  // Main deck generation function
-  generateWeightedDeck(size: number = 40): GameCard[] {
+  // Main deck generation function with faction support
+  generateWeightedDeck(size: number = 40, faction?: 'government' | 'truth'): GameCard[] {
     const deck: GameCard[] = [];
     const availableSets = this.getAvailableCardSets();
     
@@ -238,8 +267,19 @@ class WeightedCardDistribution {
       return [];
     }
 
+    // Apply faction filtering to all sets
+    const factionFilteredSets = availableSets.map(set => ({
+      ...set,
+      cards: this.filterCardsByFaction(set.cards, faction)
+    })).filter(set => set.cards.length > 0);
+
+    if (factionFilteredSets.length === 0) {
+      console.warn(`No cards available for faction: ${faction}`);
+      return [];
+    }
+
     // Generate seed cards first
-    const seedCards = this.generateSeedCards(availableSets);
+    const seedCards = this.generateSeedCards(factionFilteredSets);
     deck.push(...seedCards);
 
     // Track usage for balancing
@@ -259,8 +299,8 @@ class WeightedCardDistribution {
       // Select target rarity
       const targetRarity = this.selectTargetRarity(rarityCount, i);
       
-      // Select weighted set
-      const selectedSet = this.selectWeightedSet(availableSets);
+      // Select weighted set from faction-filtered sets
+      const selectedSet = this.selectWeightedSet(factionFilteredSets);
       if (!selectedSet) {
         console.warn(`No valid set selected for card ${i}`);
         break;
@@ -279,9 +319,9 @@ class WeightedCardDistribution {
         }
       }
 
-      // Last resort: try any set with target rarity
+      // Last resort: try any faction-filtered set with target rarity
       if (!selectedCard) {
-        for (const set of availableSets) {
+        for (const set of factionFilteredSets) {
           selectedCard = this.selectCardFromSet(set, targetRarity, usedCards, typeCount);
           if (selectedCard) break;
         }
@@ -356,10 +396,5 @@ export const weightedDistribution = new WeightedCardDistribution();
 
 // Helper function for backward compatibility
 export const generateWeightedDeck = (size: number = 40, faction?: 'government' | 'truth'): GameCard[] => {
-  // If faction is specified, use faction-filtered generation
-  if (faction) {
-    return generateRandomDeck(size, faction);
-  }
-  // Otherwise use the weighted distribution system (backwards compatible)
-  return weightedDistribution.generateWeightedDeck(size);
+  return weightedDistribution.generateWeightedDeck(size, faction);
 };
