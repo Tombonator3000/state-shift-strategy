@@ -4033,7 +4033,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +4 Defense; while controlled, your MEDIA reduce +1% extra Truth.",
     flavor: "The best view is from behind glass.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 4 }, aura: { mediaTruthBonus: -1 } }
+    effects: { pressureDelta: 1, zoneDefense: 4 }
   },
   {
     id: "GOV-132",
@@ -4069,7 +4069,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +2 Defense; opponent loses 1 IP when attempting capture.",
     flavor: "All shipments marked 'later'.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 2 }, trap: { whenAttemptCaptureByOpponent: { ipDelta: { opponent: -1 } } } }
+    effects: { pressureDelta: 1, zoneDefense: 2 }
   },
   {
     id: "GOV-135",
@@ -4105,7 +4105,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +3 Defense; global Truth increases in this round are capped at +6%.",
     flavor: "Put the facts on ice.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 3 }, aura: { clampTruthIncrease: 6 } }
+    effects: { pressureDelta: 1, zoneDefense: 3 }
   },
   {
     id: "GOV-138",
@@ -4153,7 +4153,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +2 Defense; when created, you may move +1 Defense from another Zone to this one.",
     flavor: "Every track leads off-map.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 2 }, onCreate: { transferDefenseFromAnotherZone: 1 } }
+    effects: { pressureDelta: 1, zoneDefense: 2 }
   },
   {
     id: "GOV-142",
@@ -4189,7 +4189,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +3 Defense; opponent ATTACKs targeting this state cost +2 IP.",
     flavor: "By the time you arrive, you're out of bounds.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 3 }, taxOpponentPlays: { type: "ATTACK", scope: "targetState", costModifier: 2 } }
+    effects: { pressureDelta: 1, zoneDefense: 3 }
   },
   {
     id: "GOV-145",
@@ -4310,7 +4310,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +2 Defense. When created, gain 2 IP.",
     flavor: "Inbound: pallets of acronyms.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 2 }, onCreate: { ipDelta: { self: +2 } } }
+    effects: { pressureDelta: 1, zoneDefense: 2, ipDelta: { self: 2 } }
   },
   {
     id: "GOV-155",
@@ -4346,7 +4346,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +3 Defense; each round reveal opponent hand.",
     flavor: "Weather data, rumor data—air is air.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 3, perTurn: { revealOpponentHand: true } } }
+    effects: { pressureDelta: 1, zoneDefense: 3 }
   },
   {
     id: "GOV-158",
@@ -4382,7 +4382,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +2 Defense; when opponent attempts capture, they pay +2 IP.",
     flavor: "License, registration, and intentions.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 2 }, taxOpponentPlays: { type: "captureAttempt", costModifier: 2 } }
+    effects: { pressureDelta: 1, zoneDefense: 2 }
   },
   {
     id: "GOV-161",
@@ -4406,7 +4406,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +3 Defense. Opponent discards 1 when attempting capture.",
     flavor: "A file folder with doors.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 3 }, trap: { whenAttemptCaptureByOpponent: { discardOpponent: { amount: 1 } } } }
+    effects: { pressureDelta: 1, zoneDefense: 3 }
   },
   {
     id: "GOV-163",
@@ -4430,7 +4430,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +2 Defense; on create, draw 1.",
     flavor: "From somewhere to nowhere in one stop.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 2 }, onCreate: { draw: 1 } }
+    effects: { pressureDelta: 1, zoneDefense: 2, draw: 1 }
   },
   {
     id: "GOV-165",
@@ -4466,7 +4466,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +3 Defense; opponent ATTACKs targeting this state cost +2 IP.",
     flavor: "Passes available in theory.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 3 }, taxOpponentPlays: { type: "ATTACK", scope: "targetState", costModifier: 2 } }
+    effects: { pressureDelta: 1, zoneDefense: 3 }
   },
   {
     id: "GOV-168",
@@ -4490,7 +4490,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +2 Defense; when opponent plays MEDIA targeting this state, reduce Truth by 1%.",
     flavor: "Jet fuel evaporates, rumors too.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 2 }, trap: { whenOpponentPlay: { type: "MEDIA", scope: "targetState", truthDelta: -1 } } }
+    effects: { pressureDelta: 1, zoneDefense: 2 }
   },
   {
     id: "GOV-170",
@@ -4526,7 +4526,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +4 Defense; while controlled, Truth increases are capped at +6%.",
     flavor: "The lock has a clearance.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 4 }, aura: { clampTruthIncrease: 6 } }
+    effects: { pressureDelta: 1, zoneDefense: 4 }
   },
   {
     id: "GOV-173",
@@ -4550,7 +4550,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +3 Defense; on capture attempt, opponent skips next draw.",
     flavor: "The tide waits on paperwork.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 3 }, trap: { whenAttemptCaptureByOpponent: { skipNextDraw: { opponent: 1 } } } }
+    effects: { pressureDelta: 1, zoneDefense: 3 }
   },
   {
     id: "GOV-175",
@@ -4586,7 +4586,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +2 Defense; if opponent plays ATTACK here this round, cancel it.",
     flavor: "The map is the minefield.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 2 }, trap: { whenOpponentPlay: { type: "ATTACK", scope: "targetState", cancel: { type: "ATTACK", scope: "opponent", timing: "instant" } } } }
+    effects: { pressureDelta: 1, zoneDefense: 2 }
   },
   {
     id: "GOV-178",
@@ -4622,7 +4622,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +2 Defense; Truth checks in this state suffer −1.",
     flavor: "Miles of wings, gallons of dust.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 2 }, roundModifier: { localTruthChecks: -1 } }
+    effects: { pressureDelta: 1, zoneDefense: 2 }
   },
   {
     id: "GOV-181",
@@ -4658,7 +4658,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +3 Defense; each round, opponent's first ATTACK costs +2 IP.",
     flavor: "The airwaves learn to lie.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 3, perTurn: { taxOpponentFirstPlay: { type: "ATTACK", costModifier: 2 } } } }
+    effects: { pressureDelta: 1, zoneDefense: 3 }
   },
   {
     id: "GOV-184",
@@ -4694,7 +4694,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +4 Defense; while controlled, your MEDIA cost −1 IP.",
     flavor: "It only goes down.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 4 }, aura: { mediaCostModifierSelf: -1 } }
+    effects: { pressureDelta: 1, zoneDefense: 4 }
   },
   {
     id: "GOV-187",
@@ -4730,7 +4730,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +3 Defense; when created, draw 1 and gain 1 IP.",
     flavor: "Authorized personnel invent authorization.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 3 }, onCreate: { draw: 1, ipDelta: { self: +1 } } }
+    effects: { pressureDelta: 1, zoneDefense: 3, draw: 1, ipDelta: { self: 1 } }
   },
   {
     id: "GOV-190",
@@ -4766,7 +4766,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +2 Defense; each round, gain 1 IP.",
     flavor: "Every line ends in our pocket.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 2, perTurn: { ip: { self: +1 } } } }
+    effects: { pressureDelta: 1, zoneDefense: 2, incomeBonus: { ip: 1, duration: 999 } }
   },
   {
     id: "GOV-193",
@@ -4778,7 +4778,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +2 Defense; locally, Truth MEDIA cost +1 IP while active.",
     flavor: "Echoes of nothing important.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 2 }, aura: { localTruthMediaCostModifier: 1 } }
+    effects: { pressureDelta: 1, zoneDefense: 2 }
   },
   {
     id: "GOV-194",
@@ -4814,7 +4814,7 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Zone: +3 Defense; opponent discarding costs +1 IP.",
     flavor: "Requests go in. Winters come out.",
     target: { scope: "state" },
-    effects: { pressure: { state: "target", amount: 1 }, zone: { defenseDelta: 3 }, aura: { taxOpponentDiscards: 1 } }
+    effects: { pressureDelta: 1, zoneDefense: 3 }
   },
   {
     id: "GOV-197",
