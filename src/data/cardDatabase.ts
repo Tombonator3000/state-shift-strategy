@@ -4362,7 +4362,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 10,
     text: "Frame the narrative. Reduce Truth by 6%; your next MEDIA costs −1 IP.",
-    flavor: "If it leaks on time, it isn't an accident.",
+    flavorGov: "If it leaks on time, it isn't an accident.",
     target: { scope: "global" },
     effects: { truthDelta: -6, buffNextCards: { type: "MEDIA", count: 1, costModifier: -1 } }
   },
@@ -4374,7 +4374,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "rare",
     cost: 12,
     text: "Gain 6 IP. For the rest of this round, your ATTACKS drain +1 IP.",
-    flavor: "A river of funds with no banks.",
+    flavorGov: "A river of funds with no banks.",
     target: { scope: "self" },
     effects: { ipDelta: { self: +6 }, roundModifier: { type: "ATTACK", ipDeltaOpponentModifier: -1 } }
   },
@@ -4386,7 +4386,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 8,
     text: "Zone: +2 Defense; when opponent attempts capture, they pay +2 IP.",
-    flavor: "License, registration, and intentions.",
+    flavorGov: "License, registration, and intentions.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 2 }
   },
@@ -4398,7 +4398,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "rare",
     cost: 12,
     text: "Cancel the next two Truth MEDIA this round.",
-    flavor: "The story will be told later. Maybe.",
+    flavorGov: "The story will be told later. Maybe.",
     target: { scope: "global" },
     effects: { cancel: { type: "MEDIA", scope: "Truth", timing: "thisRound", count: 2 } }
   },
@@ -4410,7 +4410,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Zone: +3 Defense. Opponent discards 1 when attempting capture.",
-    flavor: "A file folder with doors.",
+    flavorGov: "A file folder with doors.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 3 }
   },
@@ -4422,7 +4422,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 8,
     text: "Reduce global Truth by 4%; if opponent played MEDIA this round, reduce an extra 2%.",
-    flavor: "Questions pre-approved, answers pre-written.",
+    flavorGov: "Questions pre-approved, answers pre-written.",
     target: { scope: "global" },
     effects: { truthDelta: -4, conditional: { ifOpponentPlayed: { type: "MEDIA", truthDelta: -2 } } }
   },
@@ -4434,7 +4434,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 7,
     text: "Zone: +2 Defense; on create, draw 1.",
-    flavor: "From somewhere to nowhere in one stop.",
+    flavorGov: "From somewhere to nowhere in one stop.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 2, draw: 1 }
   },
@@ -4446,7 +4446,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Drain 4 IP; reveal opponent hand.",
-    flavor: "A quiet call at a loud hour.",
+    flavorGov: "A quiet call at a loud hour.",
     target: { scope: "opponent" },
     effects: { ipDelta: { opponent: -4 }, revealOpponentHand: true }
   },
@@ -4458,7 +4458,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 7,
     text: "For 3 rounds: when opponent draws 2+ in a turn, they discard 1.",
-    flavor: "Paperwork moves at the speed of ice.",
+    flavorGov: "Paperwork moves at the speed of ice.",
     target: { scope: "self" },
     effects: { ongoing: { triggerOn: { opponentDrewAtLeast: 2 }, then: { discardOpponent: { amount: 1 } }, duration: 3 } }
   },
@@ -4470,7 +4470,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Zone: +3 Defense; opponent ATTACKs targeting this state cost +2 IP.",
-    flavor: "Passes available in theory.",
+    flavorGov: "Passes available in theory.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 3 }
   },
@@ -4482,7 +4482,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Reduce Truth by 5%; your next MEDIA draws 2.",
-    flavor: "We pick what people remember.",
+    flavorGov: "We pick what people remember.",
     target: { scope: "global" },
     effects: { truthDelta: -5, buffNextCards: { type: "MEDIA", count: 1, onPlay: { draw: 2 } } }
   },
@@ -4494,7 +4494,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 8,
     text: "Zone: +2 Defense; when opponent plays MEDIA targeting this state, reduce Truth by 1%.",
-    flavor: "Jet fuel evaporates, rumors too.",
+    flavorGov: "Jet fuel evaporates, rumors too.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 2 }
   },
@@ -4506,7 +4506,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 6,
     text: "Reduce Truth by 3%; draw 1.",
-    flavor: "The abstract tells a comforting story.",
+    flavorGov: "The abstract tells a comforting story.",
     target: { scope: "global" },
     effects: { truthDelta: -3, draw: 1 }
   },
@@ -4518,7 +4518,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 10,
     text: "Your next two ATTACKS cost −1 IP and drain +1 IP.",
-    flavor: "Practice makes pressure.",
+    flavorGov: "Practice makes pressure.",
     target: { scope: "self" },
     effects: { buffNextCards: { type: "ATTACK", count: 2, costModifier: -1, ipDeltaOpponentModifier: -1 } }
   },
@@ -4530,7 +4530,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "rare",
     cost: 12,
     text: "Zone: +4 Defense; while controlled, Truth increases are capped at +6%.",
-    flavor: "The lock has a clearance.",
+    flavorGov: "The lock has a clearance.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 4 }
   },
@@ -4542,7 +4542,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 6,
     text: "Cancel an ATTACK targeting you; reduce Truth by 2%.",
-    flavor: "The edit history is patriotic.",
+    flavorGov: "The edit history is patriotic.",
     target: { scope: "self" },
     effects: { cancel: { type: "ATTACK", scope: "targetingSelf", timing: "instant" }, truthDelta: -2 }
   },
@@ -4554,7 +4554,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Zone: +3 Defense; on capture attempt, opponent skips next draw.",
-    flavor: "The tide waits on paperwork.",
+    flavorGov: "The tide waits on paperwork.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 3 }
   },
@@ -4566,7 +4566,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "legendary",
     cost: 29,
     text: "Reduce global Truth by 15%. Then steal a Zone if your Pressure ≥ its Defense; otherwise drain 5 IP.",
-    flavor: "Every signal is a confession.",
+    flavorGov: "Every signal is a confession.",
     target: { scope: "global" },
     effects: { truthDelta: -15, conditional: { stealZoneIf: { pressureAtLeastDefense: true }, else: { ipDelta: { opponent: -5 } } } }
   },
@@ -4578,7 +4578,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Opponent discards a MEDIA at random and loses 3 IP.",
-    flavor: "Access revoked for service rendered.",
+    flavorGov: "Access revoked for service rendered.",
     target: { scope: "opponent" },
     effects: { discardOpponent: { type: "MEDIA", amount: 1, random: true }, ipDelta: { opponent: -3 } }
   },
@@ -4590,7 +4590,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 8,
     text: "Zone: +2 Defense; if opponent plays ATTACK here this round, cancel it.",
-    flavor: "The map is the minefield.",
+    flavorGov: "The map is the minefield.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 2 }
   },
@@ -4602,7 +4602,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "rare",
     cost: 13,
     text: "Reduce Truth by 8%; draw 2.",
-    flavor: "We keep talking so you don't have to think.",
+    flavorGov: "We keep talking so you don't have to think.",
     target: { scope: "global" },
     effects: { truthDelta: -8, draw: 2 }
   },
@@ -4614,7 +4614,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 7,
     text: "Gain 3 IP; your next DEFENSIVE costs −1 IP and draws 1.",
-    flavor: "A daisy chain of deniability.",
+    flavorGov: "A daisy chain of deniability.",
     target: { scope: "self" },
     effects: { ipDelta: { self: +3 }, buffNextCards: { type: "DEFENSIVE", count: 1, costModifier: -1, onPlay: { draw: 1 } } }
   },
@@ -4626,7 +4626,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 8,
     text: "Zone: +2 Defense; Truth checks in this state suffer −1.",
-    flavor: "Miles of wings, gallons of dust.",
+    flavorGov: "Miles of wings, gallons of dust.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 2 }
   },
@@ -4638,7 +4638,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Prevent capture in up to two states this round.",
-    flavor: "A paper wall is still a wall.",
+    flavorGov: "A paper wall is still a wall.",
     target: { scope: "state" },
     effects: { multiState: { count: 2, preventCapture: true } }
   },
@@ -4650,7 +4650,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 8,
     text: "Drain 3 IP; if you control 3+ Zones, drain +2 IP.",
-    flavor: "Budgets travel faster than rumors.",
+    flavorGov: "Budgets travel faster than rumors.",
     target: { scope: "opponent" },
     effects: { ipDelta: { opponent: -3 }, conditional: { ifZonesControlledAtLeast: { count: 3, ipDelta: { opponent: -2 } } } }
   },
@@ -4662,7 +4662,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Zone: +3 Defense; each round, opponent's first ATTACK costs +2 IP.",
-    flavor: "The airwaves learn to lie.",
+    flavorGov: "The airwaves learn to lie.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 3 }
   },
@@ -4674,7 +4674,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 10,
     text: "Reduce global Truth by 6%; opponent skips their next draw.",
-    flavor: "A still surface hides any depth.",
+    flavorGov: "A still surface hides any depth.",
     target: { scope: "opponent" },
     effects: { truthDelta: -6, skipNextDraw: { opponent: 1 } }
   },
@@ -4686,7 +4686,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Gain 5 IP; your next MEDIA reduces +2% extra Truth.",
-    flavor: "We overspent on silence.",
+    flavorGov: "We overspent on silence.",
     target: { scope: "self" },
     effects: { ipDelta: { self: +5 }, buffNextCards: { type: "MEDIA", count: 1, truthDeltaModifier: -2 } }
   },
@@ -4698,7 +4698,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "rare",
     cost: 12,
     text: "Zone: +4 Defense; while controlled, your MEDIA cost −1 IP.",
-    flavor: "It only goes down.",
+    flavorGov: "It only goes down.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 4 }
   },
@@ -4710,7 +4710,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Reveal opponent hand. Choose one non-Legendary card; it costs +2 IP next time they play it this round.",
-    flavor: "Answer yourself, on the record.",
+    flavorGov: "Answer yourself, on the record.",
     target: { scope: "opponent" },
     effects: { revealOpponentHand: true, markCardCostIncrease: { rarityMax: "rare", costModifier: 2, duration: 1 } }
   },
@@ -4722,7 +4722,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "legendary",
     cost: 27,
     text: "Reduce global Truth by 14%. Until end of round, prevent all Zone captures and cancel the first Truth MEDIA.",
-    flavor: "When the lights go out, the map stops moving.",
+    flavorGov: "When the lights go out, the map stops moving.",
     target: { scope: "global" },
     effects: { truthDelta: -14, roundModifier: { preventAllCaptures: true }, cancel: { type: "MEDIA", scope: "Truth", timing: "thisRound", count: 1 } }
   },
@@ -4734,7 +4734,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Zone: +3 Defense; when created, draw 1 and gain 1 IP.",
-    flavor: "Authorized personnel invent authorization.",
+    flavorGov: "Authorized personnel invent authorization.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 3, draw: 1, ipDelta: { self: 1 } }
   },
@@ -4746,7 +4746,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Cancel a Truth ATTACK; opponent loses 2 IP.",
-    flavor: "The best offense is a press release.",
+    flavorGov: "The best offense is a press release.",
     target: { scope: "opponent" },
     effects: { cancel: { type: "ATTACK", scope: "Truth", timing: "instant" }, ipDelta: { opponent: -2 } }
   },
@@ -4758,7 +4758,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Reduce Truth by 5%; if you control 3+ Zones, reduce an extra 2%.",
-    flavor: "The blinking lights mean it's working.",
+    flavorGov: "The blinking lights mean it's working.",
     target: { scope: "global" },
     effects: { truthDelta: -5, conditional: { ifZonesControlledAtLeast: { count: 3, truthDelta: -2 } } }
   },
@@ -4770,7 +4770,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 8,
     text: "Zone: +2 Defense; each round, gain 1 IP.",
-    flavor: "Every line ends in our pocket.",
+    flavorGov: "Every line ends in our pocket.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 2, incomeBonus: { ip: 1, duration: 999 } }
   },
@@ -4782,7 +4782,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 8,
     text: "Zone: +2 Defense; locally, Truth MEDIA cost +1 IP while active.",
-    flavor: "Echoes of nothing important.",
+    flavorGov: "Echoes of nothing important.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 2 }
   },
@@ -4794,7 +4794,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "rare",
     cost: 12,
     text: "Cancel a MEDIA or ATTACK targeting you, then reduce Truth by 4%.",
-    flavor: "A waterfall of 'no comment'.",
+    flavorGov: "A waterfall of 'no comment'.",
     target: { scope: "self" },
     effects: { cancel: { type: "any", scope: "targetingSelf", timing: "instant" }, truthDelta: -4 }
   },
@@ -4806,7 +4806,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 8,
     text: "Reduce global Truth by 4%; opponent's next MEDIA costs +2 IP.",
-    flavor: "The stagehands run the show.",
+    flavorGov: "The stagehands run the show.",
     target: { scope: "opponent" },
     effects: { truthDelta: -4, debuffOpponentNext: { type: "MEDIA", costModifier: 2 } }
   },
@@ -4818,7 +4818,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 9,
     text: "Zone: +3 Defense; opponent discarding costs +1 IP.",
-    flavor: "Requests go in. Winters come out.",
+    flavorGov: "Requests go in. Winters come out.",
     target: { scope: "state" },
     effects: { pressureDelta: 1, zoneDefense: 3 }
   },
@@ -4830,7 +4830,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 7,
     text: "Gain 3 IP. For 2 rounds: your weakest Zone gets +1 Defense.",
-    flavor: "Evidence of control.",
+    flavorGov: "Evidence of control.",
     target: { scope: "self" },
     effects: { ipDelta: { self: +3 }, ongoing: { buffWeakestZoneDefense: 1, duration: 2 } }
   },
@@ -4842,7 +4842,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "common",
     cost: 6,
     text: "For this round: prevent opponent Pressure gain in one state; reduce Truth by 2%.",
-    flavor: "Lights out means mics off.",
+    flavorGov: "Lights out means mics off.",
     target: { scope: "state" },
     effects: { aura: { preventOpponentPressure: true }, truthDelta: -2, duration: 1 }
   },
@@ -4854,7 +4854,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "uncommon",
     cost: 10,
     text: "Reduce global Truth by 6%; draw 1. If a Truth MEDIA resolved this round, gain 2 IP.",
-    flavor: "Sources say sources exist.",
+    flavorGov: "Sources say sources exist.",
     target: { scope: "global" },
     effects: { truthDelta: -6, draw: 1, conditional: { ifTruthMediaPlayedThisRound: { ipDelta: { self: +2 } } } }
   },
@@ -4866,7 +4866,7 @@ export const CARD_DATABASE: GameCard[] = [
     rarity: "legendary",
     cost: 30,
     text: "Reduce global Truth by 15%. Then: cancel all remaining Truth MEDIA this round and steal 1 Zone if your Pressure ≥ its Defense.",
-    flavor: "Even the shadow has a shadow.",
+    flavorGov: "Even the shadow has a shadow.",
     target: { scope: "global" },
     effects: { truthDelta: -15, cancel: { type: "MEDIA", scope: "Truth", timing: "thisRound", count: "ALL" }, conditional: { stealZoneIf: { pressureAtLeastDefense: true } } }
   }
