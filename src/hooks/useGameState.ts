@@ -437,7 +437,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
                 // Use pressure from effects, fallback to parsing if not available
                 const pressureGain = effectResult.pressureDelta || 
                   (resolveCard.text?.match(/\+(\d+) Pressure/) ? 
-                    parseInt(resolveCard.text.match(/\+(\d+) Pressure/)![1]) : 1);
+                    parseInt(resolveCard.text?.match(/\+(\d+) Pressure/)![1]) : 1);
                 
                 newStates[stateIndex] = {
                   ...newStates[stateIndex],
@@ -705,7 +705,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
             const stateIndex = newStates.findIndex(s => s.abbreviation === targetState);
             if (stateIndex !== -1) {
               // Parse pressure value from card text
-              const pressureMatch = card.text.match(/\+(\d+) Pressure/);
+              const pressureMatch = card.text?.match(/\+(\d+) Pressure/);
               const pressureGain = pressureMatch ? parseInt(pressureMatch[1]) : 1;
               
               newStates[stateIndex] = {
