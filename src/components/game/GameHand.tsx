@@ -105,7 +105,7 @@ const GameHand = ({ cards, onPlayCard, disabled }: GameHandProps) => {
                 </div>
                 
                 <div className="text-xs italic text-muted-foreground text-center mb-3 min-h-6 border-t pt-2">
-                  "{card.flavorTruth}"
+                  "{card.faction === 'Truth' ? card.flavorTruth : card.flavorGov}"
                 </div>
                 
                 <Button

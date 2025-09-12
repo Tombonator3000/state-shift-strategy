@@ -106,7 +106,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                         <div className="bg-truth-red/10 border-t border-truth-red/20 px-1 py-0.5">
                           <div className="text-[4px] font-bold text-muted-foreground mb-0.5">CLASSIFIED INTELLIGENCE</div>
                           <div className="text-[4px] italic line-clamp-1 leading-tight">
-                            "{playedCard.card.flavorTruth}"
+                            "{playedCard.card.faction === 'Truth' ? playedCard.card.flavorTruth : playedCard.card.flavorGov}"
                           </div>
                         </div>
                         
@@ -134,7 +134,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                             {playedCard.card.text}
                           </div>
                           <div className="text-xs italic text-muted-foreground border-l-4 border-truth-red bg-truth-red/10 rounded-r border border-truth-red/20 pl-2 pr-2 py-1">
-                            "{playedCard.card.flavorTruth}"
+                            "{playedCard.card.faction === 'Truth' ? playedCard.card.flavorTruth : playedCard.card.flavorGov}"
                           </div>
                         </div>
                       </div>
@@ -194,7 +194,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                         <div className="bg-government-blue/10 border-t border-government-blue/20 px-1 py-0.5">
                           <div className="text-[4px] font-bold text-muted-foreground mb-0.5">CLASSIFIED INTELLIGENCE</div>
                           <div className="text-[4px] italic line-clamp-1 leading-tight">
-                            "{playedCard.card.flavorTruth}"
+                            "{playedCard.card.faction === 'Truth' ? playedCard.card.flavorTruth : playedCard.card.flavorGov}"
                           </div>
                         </div>
                         
@@ -222,7 +222,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                             {playedCard.card.text}
                           </div>
                           <div className="text-xs italic text-muted-foreground border-l-4 border-government-blue bg-government-blue/10 rounded-r border border-government-blue/20 pl-2 pr-2 py-1">
-                            "{playedCard.card.flavorTruth}"
+                            "{playedCard.card.faction === 'Truth' ? playedCard.card.flavorTruth : playedCard.card.flavorGov}"
                           </div>
                         </div>
                       </div>
