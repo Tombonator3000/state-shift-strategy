@@ -1703,6 +1703,8 @@ export class EventManager {
   reset() {
     this.eventHistory = [];
     this.turnCount = 0;
+  }
+
   // Get state-specific events for a state
   getStateEvents(stateId: string): GameEvent[] {
     return STATE_EVENTS_DATABASE[stateId] || [];
@@ -1719,11 +1721,10 @@ export class EventManager {
         return false;
       }
       
-      // Check if event has already been triggered for this state recently
+      // Check if event has already been triggered recently (simplified)
       const eventKey = `${stateId}_${event.id}`;
-      const lastTriggered = this.eventHistory.get(eventKey);
-      if (lastTriggered && this.currentTurn - lastTriggered < 5) {
-        return false; // Don't repeat same state event within 5 turns
+      if (this.eventHistory.includes(eventKey)) {
+        return false; // Don't repeat same state event
       }
 
       return true;
@@ -1739,7 +1740,8 @@ export class EventManager {
       randomValue -= event.weight;
       if (randomValue <= 0) {
         // Mark event as used
-        this.eventHistory.set(`${stateId}_${event.id}`, this.currentTurn);
+        const eventKey = `${stateId}_${event.id}`;
+        this.eventHistory.push(eventKey);
         return event;
       }
     }
