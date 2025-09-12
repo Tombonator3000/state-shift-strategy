@@ -18,6 +18,17 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
   const report = useMemo(() => enhancedBalancer.generateEnhancedReport(), [enhancedBalancer]);
   const simulation = useMemo(() => enhancedBalancer.runEnhancedSimulation(500), [enhancedBalancer]);
 
+  // Get actual card counts from the balancer
+  const actualCardCount = report.totalCards;
+  const coreCardCount = 20; // Current CARD_DATABASE size
+  const extensionCardCount = actualCardCount - coreCardCount;
+
+  console.log(`🔢 Enhanced Balancing Card Counts:
+  - Core Database: ${coreCardCount} cards
+  - Extension Cards: ${extensionCardCount} cards  
+  - Total Cards: ${actualCardCount} cards
+  - Include Extensions: ${includeExtensions}`);
+
   const exportData = () => {
     const data = enhancedBalancer.exportFullAnalysis();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -139,6 +150,15 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
               <Image size={16} className="mr-1" />
               Export Art List
             </Button>
+            <Button 
+              onClick={() => window.open('/dev/recovery', '_blank')} 
+              variant="outline" 
+              size="sm"
+              className="text-orange-400 border-orange-600 hover:bg-orange-900/20"
+            >
+              <RefreshCw size={16} className="mr-1" />
+              Database Recovery
+            </Button>
             <Button onClick={onClose} variant="outline" size="sm">Lukk</Button>
           </div>
         </div>
@@ -195,8 +215,20 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Totalt kort:</span>
-                      <span className="text-white">{report.totalCards}</span>
+                      <span className="text-white font-mono">{actualCardCount}</span>
                     </div>
+                    {includeExtensions && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">- Core kort:</span>
+                          <span className="text-gray-300 font-mono">{coreCardCount}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">- Extension kort:</span>
+                          <span className="text-gray-300 font-mono">{extensionCardCount}</span>
+                        </div>
+                      </>
+                    )}
                     <div className="flex justify-between">
                       <span>Snitt kostnad:</span>
                       <span className="text-white">{report.averageCost.toFixed(1)} IP</span>
