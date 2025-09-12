@@ -94,7 +94,24 @@ class WeightedCardDistribution {
   // v2.1E: Remove keyword heuristics - exact faction match only
   private filterCardsByFaction(cards: GameCard[], faction?: 'government' | 'truth'): GameCard[] {
     if (!faction) return cards;
-    return cards.filter(card => card.faction === faction);
+    
+    // Debug logging
+    console.log('🔍 Filtering cards by faction:', faction);
+    console.log('🔍 Total cards before filtering:', cards.length);
+    
+    if (cards.length > 0) {
+      console.log('🔍 Sample card factions:', cards.slice(0, 10).map(c => ({ id: c.id, faction: c.faction, name: c.name })));
+    }
+    
+    const filtered = cards.filter(card => card.faction === faction);
+    console.log('🔍 Cards after filtering:', filtered.length);
+    
+    if (filtered.length === 0 && cards.length > 0) {
+      console.warn('⚠️ No cards found for faction:', faction);
+      console.warn('⚠️ Available factions in cards:', [...new Set(cards.map(c => c.faction))]);
+    }
+    
+    return filtered;
   }
 
   // Calculate effective weights based on mode

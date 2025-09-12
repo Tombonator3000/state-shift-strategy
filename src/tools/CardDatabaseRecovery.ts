@@ -136,7 +136,7 @@ export class CardDatabaseRecovery {
 // Total cards: ${allCards.length}
 // Core: ${CARD_DATABASE.length} | Extensions: ${allCards.length - CARD_DATABASE.length}
 
-import type { GameCard } from '@/components/game/GameHand';
+import type { GameCard } from '@/types/cardTypes';
 import { extensionManager } from './extensionSystem';
 
 export const RECOVERED_CARD_DATABASE: GameCard[] = [`;
