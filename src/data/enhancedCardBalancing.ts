@@ -166,7 +166,8 @@ export class EnhancedCardBalancer {
     }));
   }
 
-  private normalizeText(text: string): string {
+  private normalizeText(text: string | undefined): string {
+    if (!text) return '';
     return text
       .replace(/Ã©/g, 'é')
       .replace(/Ã¡/g, 'á')
