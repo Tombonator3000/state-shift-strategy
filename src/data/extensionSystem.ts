@@ -56,17 +56,33 @@ class ExtensionManager {
 
   async scanCDNExtensions(): Promise<Extension[]> {
     const extensions: Extension[] = [];
+    const timestamp = Date.now();
     
     try {
-      // Try to load manifest first
-      const manifestResponse = await fetch('/extensions/manifest.json', { cache: 'no-store' });
+      console.log(`🔄 Scanning CDN extensions with timestamp: ${timestamp}`);
+      
+      // Try to load manifest first with cache-busting
+      const manifestResponse = await fetch(`/extensions/manifest.json?t=${timestamp}`, { 
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      
       if (manifestResponse.ok) {
         const manifest = await manifestResponse.json();
+        console.log(`📋 CDN Manifest loaded:`, manifest);
+        
         for (const file of manifest.files || []) {
           try {
-            const extensionResponse = await fetch(`/extensions/${file}`, { cache: 'no-store' });
+            console.log(`📥 Loading CDN extension: ${file}`);
+            const extensionResponse = await fetch(`/extensions/${file}?t=${timestamp}`, { 
+              cache: 'no-store',
+              headers: { 'Cache-Control': 'no-cache' }
+            });
+            
             if (extensionResponse.ok) {
               const extension = await extensionResponse.json();
+              console.log(`✅ CDN Extension loaded:`, extension.name, extension.version);
+              
               if (this.validateExtension(extension)) {
                 extension.cards = extension.cards.map((card: ExtensionCard) => ({
                   ...card,
@@ -77,17 +93,23 @@ class ExtensionManager {
                 }));
                 extensions.push(extension);
               }
+            } else {
+              console.warn(`❌ Failed to load CDN extension ${file}: ${extensionResponse.status}`);
             }
           } catch (error) {
-            console.warn(`Failed to load extension ${file}:`, error);
+            console.warn(`💥 Failed to load CDN extension ${file}:`, error);
           }
         }
       } else {
+        console.warn('⚠️ CDN Manifest not found, trying fallback extensions');
         // Try known extensions if no manifest
         const knownExtensions = ['cryptids.json'];
         for (const file of knownExtensions) {
           try {
-            const response = await fetch(`/extensions/${file}`, { cache: 'no-store' });
+            const response = await fetch(`/extensions/${file}?t=${timestamp}`, { 
+              cache: 'no-store',
+              headers: { 'Cache-Control': 'no-cache' }
+            });
             if (response.ok) {
               const extension = await response.json();
               if (this.validateExtension(extension)) {
@@ -107,9 +129,10 @@ class ExtensionManager {
         }
       }
     } catch (error) {
-      console.warn('CDN extension scan failed:', error);
+      console.warn('💥 CDN extension scan failed:', error);
     }
     
+    console.log(`🎮 CDN scan complete: ${extensions.length} extensions found`);
     return extensions;
   }
 

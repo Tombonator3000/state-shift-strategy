@@ -36,6 +36,10 @@ const EnhancedExpansionManager = ({ onClose }: EnhancedExpansionManagerProps) =>
     setError(null);
     
     try {
+      // Clear existing extensions to force refresh
+      setExtensions([]);
+      console.log('🔄 Refreshing all extensions...');
+      
       // Try to load from local extensions directory first
       await loadLocalExtensions();
       
@@ -43,7 +47,7 @@ const EnhancedExpansionManager = ({ onClose }: EnhancedExpansionManagerProps) =>
       await loadCDNExtensions();
       
     } catch (err) {
-      console.warn('Extension loading failed:', err);
+      console.warn('💥 Extension loading failed:', err);
       setError('Failed to load extensions. Try manual loading.');
     } finally {
       setLoading(false);
@@ -52,20 +56,38 @@ const EnhancedExpansionManager = ({ onClose }: EnhancedExpansionManagerProps) =>
 
   const loadLocalExtensions = async () => {
     try {
-      // Try to load extensions from /public/extensions/
-      const extensionFiles = [
-        'halloween_spooktacular_with_temp_image.json',
-        'cryptids.json'
-      ];
+      // Use cache-busting timestamp
+      const timestamp = Date.now();
+      console.log(`🔄 Loading local extensions with timestamp: ${timestamp}`);
+      
+      // Try to load manifest first
+      const manifestResponse = await fetch(`/extensions/manifest.json?t=${timestamp}`, { 
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      
+      if (!manifestResponse.ok) {
+        console.warn('⚠️ Manifest not found, skipping local extensions');
+        return;
+      }
+      
+      const manifest = await manifestResponse.json();
+      console.log(`📋 Manifest loaded:`, manifest);
       
       const enabledList = extensionManager.getEnabledExtensions();
       const localExtensions: ExtensionDisplay[] = [];
       
-      for (const filename of extensionFiles) {
+      for (const filename of manifest.files || []) {
         try {
-          const response = await fetch(`/extensions/${filename}`);
+          console.log(`📥 Loading extension: ${filename}`);
+          const response = await fetch(`/extensions/${filename}?t=${timestamp}`, {
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache' }
+          });
+          
           if (response.ok) {
             const extensionData = await response.json();
+            console.log(`✅ Extension loaded:`, extensionData.name, extensionData.version);
             
             // Validate extension structure
             if (extensionData.id && extensionData.name && extensionData.cards) {
@@ -76,9 +98,11 @@ const EnhancedExpansionManager = ({ onClose }: EnhancedExpansionManagerProps) =>
                 status: 'loaded' as const
               });
             }
+          } else {
+            console.warn(`❌ Failed to load ${filename}: ${response.status}`);
           }
         } catch (err) {
-          console.warn(`Failed to load ${filename}:`, err);
+          console.warn(`💥 Failed to load ${filename}:`, err);
         }
       }
       
@@ -86,7 +110,7 @@ const EnhancedExpansionManager = ({ onClose }: EnhancedExpansionManagerProps) =>
       console.log(`🎮 Loaded ${localExtensions.length} local extensions`);
       
     } catch (err) {
-      console.warn('Local extension loading failed:', err);
+      console.warn('💥 Local extension loading failed:', err);
     }
   };
 
