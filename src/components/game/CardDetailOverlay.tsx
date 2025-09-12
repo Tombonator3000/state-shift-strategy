@@ -30,9 +30,19 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
   if (!card) return null;
 
   const getCardFaction = (card: GameCard): 'government' | 'truth' => {
-    return card.name.toLowerCase().includes('surveillance') || 
-           card.name.toLowerCase().includes('classified') ||
-           card.text.toLowerCase().includes('classified') ? 'government' : 'truth';
+    // First check if card has a direct faction property (for extension cards)
+    if (card.faction) {
+      return card.faction.toLowerCase() as 'government' | 'truth';
+    }
+    
+    // Fallback to determining faction based on card text and name (for base game cards)
+    if (card.name.toLowerCase().includes('surveillance') || 
+        card.name.toLowerCase().includes('classified') ||
+        (card.text && card.text.toLowerCase().includes('classified'))) {
+      return 'government';
+    }
+    
+    return 'truth';
   };
 
   const getRarityFrameClass = (rarity?: string) => {
