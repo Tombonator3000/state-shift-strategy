@@ -25,7 +25,7 @@ export const useAudio = () => {
         const parsed = JSON.parse(saved);
         console.log('🎵 useAudio: Loaded saved audio config');
         return {
-          volume: (parsed.masterVolume || 70) / 100,
+          volume: (parsed.masterVolume || 15) / 100,
           muted: false,
           musicEnabled: parsed.musicEnabled !== false,
           sfxEnabled: parsed.sfxEnabled !== false,
@@ -39,7 +39,7 @@ export const useAudio = () => {
     }
     console.log('🎵 useAudio: Using default audio config');
     return {
-      volume: 0.1, // Default to 10%
+      volume: 0.15, // Default to 15%
       muted: false,
       musicEnabled: true,
       sfxEnabled: true,
