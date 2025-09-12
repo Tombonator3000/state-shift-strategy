@@ -57,7 +57,7 @@ export class CardEffectProcessor {
   }
 
   // Process a CardEffects object
-  private processEffects(effects: CardEffects, result: EffectResult, cardName: string): void {
+  protected processEffects(effects: CardEffects, result: EffectResult, cardName: string): void {
     // Basic resource effects
     if (effects.truthDelta !== undefined) {
       result.truthDelta += effects.truthDelta;
@@ -163,7 +163,7 @@ export class CardEffectProcessor {
   }
 
   // Evaluate a single condition
-  private evaluateCondition(conditional: EffectConditional): boolean {
+  protected evaluateCondition(conditional: EffectConditional): boolean {
     const { gameState } = this;
     
     // Truth conditions
@@ -256,7 +256,7 @@ export class CardEffectProcessor {
   }
 
   // Create empty result template
-  private createEmptyResult(): EffectResult {
+  protected createEmptyResult(): EffectResult {
     return {
       truthDelta: 0,
       ipDelta: { self: 0, opponent: 0 },
