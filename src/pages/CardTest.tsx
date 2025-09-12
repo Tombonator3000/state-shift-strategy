@@ -8,13 +8,13 @@ import { ArrowLeft, Bug } from 'lucide-react';
 import EffectTestPanel from '@/components/game/EffectTestPanel';
 import { CardEffectValidator } from '@/systems/CardTextGenerator';
 import { CARD_DATABASE } from '@/data/cardDatabase';
-import type { Card as CardType } from '@/types/cardEffects';
+import type { GameCard } from '@/types/cardTypes';
 
 const CardTest: React.FC = () => {
   // Run validation on sample cards
   const sampleCards = CARD_DATABASE.slice(0, 5);
   const validationResults = sampleCards.map(card => 
-    CardEffectValidator.validateCard(card as CardType)
+    CardEffectValidator.validateCard(card as GameCard)
   );
 
   const validCards = validationResults.filter(r => r.isValid).length;

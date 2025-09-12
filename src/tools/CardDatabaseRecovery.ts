@@ -4,7 +4,7 @@
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import { ExtensionEffectMigrator } from './ExtensionEffectMigrator';
 import { CardEffectValidator } from '@/systems/CardTextGenerator';
-import type { Card } from '@/types/cardEffects';
+import type { GameCard } from '@/types/cardTypes';
 
 interface RecoveryReport {
   totalCards: number;
@@ -81,7 +81,7 @@ export class CardDatabaseRecovery {
 
     // Step 2: Validate all cards
     console.log('🔍 Validating all cards...');
-    const validationResults = CardEffectValidator.validateCards(allCards as Card[]);
+    const validationResults = CardEffectValidator.validateCards(allCards as GameCard[]);
     report.validationSummary = validationResults;
 
     // Step 3: Identify critical issues

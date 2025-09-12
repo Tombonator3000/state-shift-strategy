@@ -17,7 +17,7 @@ export const fixCryptidsExtension = async () => {
     // Fix faction casing in all cards
     let fixedCount = 0;
     extension.cards.forEach((card: any) => {
-      if (card.faction === 'Truth') {
+      if (card.faction === 'truth') {
         card.faction = 'truth';
         fixedCount++;
       } else if (card.faction === 'Government') {
