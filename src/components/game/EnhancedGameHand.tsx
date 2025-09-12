@@ -74,9 +74,17 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   };
 
   const getCardFaction = (card: GameCard) => {
-    // Determine faction based on card text effects
-    if (card.text.includes('Truth +')) return 'truth';
-    if (card.text.includes('Truth -')) return 'government';
+    // First check if card has a direct faction property (for extension cards)
+    if (card.faction) {
+      return card.faction.toLowerCase();
+    }
+    
+    // Fallback to determining faction based on card text effects (for base game cards)
+    if (card.text && typeof card.text === 'string') {
+      if (card.text.includes('Truth +')) return 'truth';
+      if (card.text.includes('Truth -')) return 'government';
+    }
+    
     return 'neutral';
   };
 
