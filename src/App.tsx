@@ -8,6 +8,7 @@ import { AudioProvider } from '@/contexts/AudioContext';
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import EffectSystemDashboard from "./pages/EffectSystemDashboard";
+import DatabaseRecovery from "./pages/DatabaseRecovery";
 import { initializeExtensionsOnStartup } from './data/extensionIntegration';
 import { AchievementProvider } from './contexts/AchievementContext';
 
@@ -30,6 +31,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/dev/effects" element={<EffectSystemDashboard />} />
+                <Route path="/dev/recovery" element={<DatabaseRecovery />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
