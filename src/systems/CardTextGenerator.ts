@@ -155,7 +155,10 @@ export class CardTextGenerator {
       conditions.push(`round ≥ ${conditional.ifRoundAtLeast}`);
     }
     if (conditional.ifTargetStateIs !== undefined) {
-      conditions.push(`targeting ${conditional.ifTargetStateIs}`);
+      const state = conditional.ifTargetStateIs;
+      if (state && typeof state === 'string' && state.trim().length > 0) {
+        conditions.push(`targeting ${state}`);
+      }
     }
     
     return conditions.join(' and ');

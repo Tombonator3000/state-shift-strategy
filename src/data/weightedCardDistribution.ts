@@ -91,33 +91,10 @@ class WeightedCardDistribution {
     return sets;
   }
 
-  // Add faction-aware filtering
+  // v2.1E: Remove keyword heuristics - exact faction match only
   private filterCardsByFaction(cards: GameCard[], faction?: 'government' | 'truth'): GameCard[] {
     if (!faction) return cards;
-    
-    return cards.filter(card => {
-      if (card.faction) {
-        return card.faction.toLowerCase() === faction;
-      }
-      
-      // Fallback: determine faction from card properties
-      const cardText = (card.text || '').toLowerCase();
-      const cardName = (card.name || '').toLowerCase();
-      
-      // Government keywords
-      const govKeywords = ['classified', 'redacted', 'bureau', 'agent', 'department', 'official', 'security', 'surveillance', 'cover-up', 'asset', 'operation', 'protocol', 'clearance'];
-      // Truth keywords  
-      const truthKeywords = ['truth', 'expose', 'reveal', 'witness', 'evidence', 'conspiracy', 'cover', 'bigfoot', 'alien', 'ufo', 'cryptid', 'ghost', 'elvis'];
-      
-      const hasGovKeywords = govKeywords.some(keyword => cardText.includes(keyword) || cardName.includes(keyword));
-      const hasTruthKeywords = truthKeywords.some(keyword => cardText.includes(keyword) || cardName.includes(keyword));
-      
-      if (faction === 'government') {
-        return hasGovKeywords || (!hasGovKeywords && !hasTruthKeywords); // Default to government if unclear
-      } else {
-        return hasTruthKeywords;
-      }
-    });
+    return cards.filter(card => card.faction === faction);
   }
 
   // Calculate effective weights based on mode

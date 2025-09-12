@@ -84,13 +84,9 @@ class ExtensionManager {
               console.log(`✅ CDN Extension loaded:`, extension.name, extension.version);
               
               if (this.validateExtension(extension)) {
-                extension.cards = extension.cards.map((card: ExtensionCard) => ({
-                  ...card,
-                  // Map single flavor field to faction-specific flavor fields
-                  flavorGov: (card as any).flavor || '',
-                  flavorTruth: (card as any).flavor || '',
-                  extId: extension.id
-                }));
+                extension.cards = extension.cards.map((card: ExtensionCard) => 
+                  this.normalizeCard({ ...card, extId: extension.id })
+                );
                 extensions.push(extension);
               }
             } else {
@@ -155,13 +151,9 @@ class ExtensionManager {
               const text = await file.text();
               const extension = JSON.parse(text);
               if (this.validateExtension(extension)) {
-                extension.cards = extension.cards.map((card: ExtensionCard) => ({
-                  ...card,
-                  // Map single flavor field to faction-specific flavor fields
-                  flavorGov: (card as any).flavor || '',
-                  flavorTruth: (card as any).flavor || '',
-                  extId: extension.id
-                }));
+                extension.cards = extension.cards.map((card: ExtensionCard) => 
+                  this.normalizeCard({ ...card, extId: extension.id })
+                );
                 extensions.push(extension);
               }
             } catch (error) {
@@ -195,13 +187,9 @@ class ExtensionManager {
             const text = await file.text();
             const extension = JSON.parse(text);
             if (this.validateExtension(extension)) {
-              extension.cards = extension.cards.map((card: ExtensionCard) => ({
-                ...card,
-                // Map single flavor field to faction-specific flavor fields
-                flavorGov: (card as any).flavor || '',
-                flavorTruth: (card as any).flavor || '',
-                extId: extension.id
-              }));
+                extension.cards = extension.cards.map((card: ExtensionCard) => 
+                  this.normalizeCard({ ...card, extId: extension.id })
+                );
               extensions.push(extension);
             }
           } catch (error) {
@@ -252,6 +240,35 @@ class ExtensionManager {
     return isValid;
   }
 
+  private normalizeCard(card: any): ExtensionCard {
+    const faction = String(card.faction || 'truth').toLowerCase() as 'truth' | 'government';
+    const type = String(card.type || 'MEDIA').toUpperCase();
+    
+    // Ensure both flavor fields exist
+    const flavorTruth = card.flavorTruth || (card as any).flavor || '';
+    const flavorGov = card.flavorGov || (card as any).flavor || '';
+    
+    const normalized: ExtensionCard = {
+      ...card,
+      faction,
+      type: ['MEDIA', 'ZONE', 'ATTACK', 'DEFENSIVE'].includes(type) 
+        ? (type as any) 
+        : 'MEDIA',
+      flavorTruth,
+      flavorGov
+    };
+    
+    // Remove legacy flavor field
+    delete (normalized as any).flavor;
+    
+    // Enforce ZONE targeting
+    if (normalized.type === 'ZONE') {
+      normalized.target = { scope: 'state' };
+    }
+    
+    return normalized;
+  }
+
   registerExtension(extension: Extension, source: 'cdn' | 'folder' | 'file') {
     this.extensions.set(extension.id, extension);
   }
@@ -297,13 +314,9 @@ class ExtensionManager {
       const extension = this.extensions.get(enabled.id);
       if (extension) {
         // Map extension cards to match GameCard interface
-        const mappedCards = extension.cards.map(card => ({
-          ...card,
-          // Map single flavor field to faction-specific flavor fields
-          flavorGov: (card as any).flavor || '',
-          flavorTruth: (card as any).flavor || '',
-          extId: extension.id
-        }));
+        const mappedCards = extension.cards.map(card => 
+          this.normalizeCard({ ...card, extId: extension.id })
+        );
         cards.push(...mappedCards);
       }
     }
