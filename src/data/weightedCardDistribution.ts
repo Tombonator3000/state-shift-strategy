@@ -95,20 +95,16 @@ class WeightedCardDistribution {
   private filterCardsByFaction(cards: GameCard[], faction?: 'government' | 'truth'): GameCard[] {
     if (!faction) return cards;
     
-    // Debug logging
-    console.log('🔍 Filtering cards by faction:', faction);
-    console.log('🔍 Total cards before filtering:', cards.length);
+    // Case-insensitive faction matching for safety
+    const filtered = cards.filter(card => {
+      if (!card.faction) return false;
+      return card.faction.toLowerCase() === faction.toLowerCase();
+    });
     
-    if (cards.length > 0) {
-      console.log('🔍 Sample card factions:', cards.slice(0, 10).map(c => ({ id: c.id, faction: c.faction, name: c.name })));
-    }
-    
-    const filtered = cards.filter(card => card.faction === faction);
-    console.log('🔍 Cards after filtering:', filtered.length);
-    
-    if (filtered.length === 0 && cards.length > 0) {
-      console.warn('⚠️ No cards found for faction:', faction);
-      console.warn('⚠️ Available factions in cards:', [...new Set(cards.map(c => c.faction))]);
+    // If no cards found for faction, return all cards as fallback to prevent empty decks
+    if (filtered.length === 0) {
+      console.warn(`⚠️ No cards found for faction: ${faction}, using all cards as fallback`);
+      return cards;
     }
     
     return filtered;
@@ -268,8 +264,9 @@ class WeightedCardDistribution {
     })).filter(set => set.cards.length > 0);
 
     if (factionFilteredSets.length === 0) {
-      console.warn(`No cards available for faction: ${faction}`);
-      return [];
+      console.warn(`No cards available for faction: ${faction}, using all sets as fallback`);
+      // Use all sets as fallback to prevent empty decks
+      factionFilteredSets.push(...availableSets);
     }
 
     // Generate seed cards first
@@ -327,7 +324,19 @@ class WeightedCardDistribution {
         typeCount.set(selectedCard.type, (typeCount.get(selectedCard.type) || 0) + 1);
         rarityCount.set(selectedCard.rarity, (rarityCount.get(selectedCard.rarity) || 0) + 1);
       } else {
-        console.warn(`Could not find suitable card for slot ${i}`);
+        // Last resort: pick any available card to prevent incomplete decks
+        const anyAvailableCard = availableSets
+          .flatMap(set => set.cards)
+          .find(card => (usedCards.get(card.id) || 0) < this.settings.duplicateLimit);
+        
+        if (anyAvailableCard) {
+          deck.push(anyAvailableCard);
+          usedCards.set(anyAvailableCard.id, (usedCards.get(anyAvailableCard.id) || 0) + 1);
+          typeCount.set(anyAvailableCard.type, (typeCount.get(anyAvailableCard.type) || 0) + 1);
+          rarityCount.set(anyAvailableCard.rarity, (rarityCount.get(anyAvailableCard.rarity) || 0) + 1);
+        } else {
+          console.warn(`Could not find suitable card for slot ${i}`);
+        }
       }
     }
 
