@@ -154,6 +154,9 @@ export class CardTextGenerator {
     if (conditional.ifRoundAtLeast !== undefined) {
       conditions.push(`round ≥ ${conditional.ifRoundAtLeast}`);
     }
+    if (conditional.ifTargetStateIs !== undefined) {
+      conditions.push(`targeting ${conditional.ifTargetStateIs}`);
+    }
     
     return conditions.join(' and ');
   }

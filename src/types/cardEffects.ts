@@ -14,6 +14,7 @@ export type EffectConditional = {
   ifHandSizeAtLeast?: number;
   ifHandSizeAtMost?: number;
   ifRoundAtLeast?: number;
+  ifTargetStateIs?: string;
   
   // Effects to apply if condition is met
   then?: CardEffects;
