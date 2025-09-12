@@ -1,4 +1,4 @@
-import type { GameCard } from '@/components/game/GameHand';
+import type { GameCard } from '@/types/cardTypes';
 
 export interface ExtensionCard extends GameCard {
   extId?: string; // Extension ID for tracking

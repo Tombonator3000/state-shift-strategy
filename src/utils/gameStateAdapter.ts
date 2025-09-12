@@ -1,7 +1,7 @@
 // Game State Adapter for v2.1E Compatibility
 // Bridges between old GameCard interface and new v2.1E types
 
-import type { GameCard as LegacyGameCard } from '@/components/game/GameHand';
+import type { GameCard as LegacyGameCard } from '@/types/cardTypes';
 import type { GameCard, Faction, CardType } from '@/types/cardTypes';
 import { whitelistEffects } from '@/utils/whitelistEffects';
 

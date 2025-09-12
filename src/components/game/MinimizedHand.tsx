@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Maximize2, Minimize2, Zap, Shield, Target, Megaphone } from 'lucide-react';
 import { ExtensionCardBadge } from './ExtensionCardBadge';
 import { isExtensionCard } from '@/data/extensionIntegration';
-import type { GameCard } from './GameHand';
+import type { GameCard } from '@/types/cardTypes';
 
 interface MinimizedHandProps {
   cards: GameCard[];

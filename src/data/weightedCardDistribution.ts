@@ -1,4 +1,4 @@
-import { GameCard } from '@/components/game/GameHand';
+import { GameCard } from '@/types/cardTypes';
 import { CARD_DATABASE, generateRandomDeck } from './cardDatabase';
 import { extensionManager } from './extensionSystem';
 

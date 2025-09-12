@@ -3,28 +3,7 @@ import CardImage from './CardImage';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
-export interface GameCard {
-  id: string;
-  name: string;
-  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'DEVELOPMENT' | 'LEGENDARY';
-  rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
-  text: string;
-  flavor?: string;
-  flavorGov?: string;
-  flavorTruth?: string;
-  cost: number;
-  target?: {
-    scope: string;
-    restrict?: string[];
-    requireTag?: string;
-    type?: string;
-    faction?: string;
-    onlyIf?: any;
-  };
-  effects?: any;
-  faction?: string;
-}
+import type { GameCard } from '@/types/cardTypes';
 
 interface GameHandProps {
   cards: GameCard[];
@@ -48,7 +27,7 @@ const GameHand = ({ cards, onPlayCard, disabled }: GameHandProps) => {
       case 'MEDIA': return 'border-truth-red bg-truth-red/10';
       case 'ZONE': return 'border-government-blue bg-government-blue/10';
       case 'ATTACK': return 'border-destructive bg-destructive/10';
-      case 'DEFENSIVE': return 'border-accent bg-accent/10';
+      case 'DEFENSIVE': return 'border-primary bg-primary/10';
       default: return 'border-muted bg-muted/10';
     }
   };
@@ -105,7 +84,7 @@ const GameHand = ({ cards, onPlayCard, disabled }: GameHandProps) => {
                 </div>
                 
                 <div className="text-xs italic text-muted-foreground text-center mb-3 min-h-6 border-t pt-2">
-                  "{card.faction === 'Truth' ? card.flavorTruth : card.flavorGov}"
+                  "{card.faction === 'truth' ? card.flavorTruth : card.flavorGov}"
                 </div>
                 
                 <Button

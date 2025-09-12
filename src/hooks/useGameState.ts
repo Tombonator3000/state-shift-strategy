@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { GameCard } from '@/components/game/GameHand';
+import type { GameCard } from '@/types/cardTypes';
 import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
 import { extensionManager } from '@/data/extensionSystem';
 import { generateWeightedDeck } from '@/data/weightedCardDistribution';
