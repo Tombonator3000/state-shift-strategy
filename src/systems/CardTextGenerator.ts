@@ -3,7 +3,23 @@
 
 import type { CardEffects, Card } from '@/types/cardEffects';
 
+// Helper function to render effects consistently
+const renderEffects = (e: CardEffects): string[] => {
+  const parts: string[] = [];
+  if (typeof e.truthDelta === 'number') parts.push(`${e.truthDelta >= 0 ? '+' : ''}${e.truthDelta}% Truth`);
+  if (e.ipDelta?.self) parts.push(`${e.ipDelta.self >= 0 ? '+' : ''}${e.ipDelta.self} IP (you)`);
+  if (e.ipDelta?.opponent) parts.push(`${e.ipDelta.opponent >= 0 ? '+' : ''}${e.ipDelta.opponent} IP (opponent)`);
+  if (typeof e.draw === 'number') parts.push(`Draw ${e.draw}`);
+  if (typeof e.discardOpponent === 'number') parts.push(`Opponent discards ${e.discardOpponent}`);
+  if (typeof e.pressureDelta === 'number') parts.push(`${e.pressureDelta >= 0 ? '+' : ''}${e.pressureDelta} Pressure`);
+  if (typeof e.zoneDefense === 'number') parts.push(`${e.zoneDefense >= 0 ? '+' : ''}${e.zoneDefense} Zone Defense`);
+  return parts;
+};
+
 export class CardTextGenerator {
+  
+  // Helper method to render effects (public for use in conditionals)
+  static renderEffects = renderEffects;
   
   // Generate human-readable rules text from effects
   static generateRulesText(effects: CardEffects): string {
@@ -90,19 +106,28 @@ export class CardTextGenerator {
       parts.push(`+${effects.incomeBonus.ip} IP per turn for ${effects.incomeBonus.duration} turns`);
     }
     
-    // Process conditional effects
+    // Process conditional effects with improved ifTargetStateIs handling
     if (effects.conditional) {
       const conditionals = Array.isArray(effects.conditional) ? effects.conditional : [effects.conditional];
       
       for (const conditional of conditionals) {
-        const conditionText = this.formatCondition(conditional);
-        const thenText = conditional.then ? this.generateRulesText(conditional.then) : '';
-        const elseText = conditional.else ? this.generateRulesText(conditional.else) : '';
-        
-        if (thenText && !elseText) {
-          parts.push(`If ${conditionText}: ${thenText}`);
-        } else if (thenText && elseText) {
-          parts.push(`If ${conditionText}: ${thenText}. Otherwise: ${elseText}`);
+        // Special handling for ifTargetStateIs
+        if (conditional.ifTargetStateIs) {
+          const thenText = conditional.then ? this.renderEffects(conditional.then).join('. ') : '';
+          const elseText = conditional.else ? this.renderEffects(conditional.else).join('. ') : '';
+          const seg = `If targeting ${conditional.ifTargetStateIs}: ${thenText}${elseText ? `. Else: ${elseText}` : ''}`;
+          if (thenText) parts.push(seg);
+        } else {
+          // Standard conditional handling
+          const conditionText = this.formatCondition(conditional);
+          const thenText = conditional.then ? this.generateRulesText(conditional.then) : '';
+          const elseText = conditional.else ? this.generateRulesText(conditional.else) : '';
+          
+          if (thenText && !elseText) {
+            parts.push(`If ${conditionText}: ${thenText}`);
+          } else if (thenText && elseText) {
+            parts.push(`If ${conditionText}: ${thenText}. Otherwise: ${elseText}`);
+          }
         }
       }
     }

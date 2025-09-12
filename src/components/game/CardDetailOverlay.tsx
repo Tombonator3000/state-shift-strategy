@@ -30,9 +30,10 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
   if (!card) return null;
 
   const getCardFaction = (card: GameCard): 'government' | 'truth' => {
-    // First check if card has a direct faction property (for extension cards)
-    if (card.faction) {
-      return card.faction.toLowerCase() as 'government' | 'truth';
+    // Use computed faction based on game state or card faction (normalized to lowercase)
+    const cardFaction = card.faction?.toLowerCase();
+    if (cardFaction === 'truth' || cardFaction === 'government') {
+      return cardFaction;
     }
     
     // Fallback to determining faction based on card text and name (for base game cards)
@@ -173,7 +174,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
               CLASSIFIED INTELLIGENCE
             </h4>
             <div className="italic text-sm text-foreground border-l-4 border-truth-red bg-truth-red/10 rounded-r border border-truth-red/20 pl-3 pr-3 py-2 leading-relaxed">
-              "{card.flavorTruth || card.flavorGov || 'No intelligence available.'}"
+              "{faction === 'truth' ? (card.flavorTruth ?? 'No intelligence available.') : (card.flavorGov ?? 'No intelligence available.')}"
             </div>
           </div>
 

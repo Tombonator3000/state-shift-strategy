@@ -7,6 +7,30 @@ export interface WildlifeAdvisoryPatchResult {
   errors: string[];
 }
 
+export function patchWildlifeAdvisory(card: any) {
+  if (card.name === 'Wildlife Advisory') {
+    // Sikrer ZONE + state-target + home-bonus
+    card.type = 'ZONE';
+    card.target = { scope: 'state', count: 1 };
+    
+    // Ensure effects exist
+    card.effects = card.effects ?? {};
+    
+    // Base zone defense
+    card.effects.zoneDefense = Math.max(1, card.effects.zoneDefense ?? 1);
+    
+    // Home state bonus through conditional
+    card.effects.conditional = {
+      ifTargetStateIs: card.homeState ?? 'Your Home State',
+      then: { zoneDefense: (card.effects.zoneDefense ?? 1) + 1 }
+    };
+    
+    console.log('Patched Wildlife Advisory with home bonus:', card);
+  }
+  
+  return card;
+}
+
 export async function patchWildlifeAdvisoryCards(): Promise<WildlifeAdvisoryPatchResult> {
   const result: WildlifeAdvisoryPatchResult = {
     updated: 0,

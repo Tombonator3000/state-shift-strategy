@@ -1,5 +1,6 @@
 import type { GameCard } from '@/types/cardTypes';
 import { extensionManager } from './extensionSystem';
+import { computeV21ECost } from '@/systems/cost/v21e';
 
 // Working card database with correct v2.1E types
 export const CARD_DATABASE: GameCard[] = [
