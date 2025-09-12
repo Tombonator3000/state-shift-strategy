@@ -291,100 +291,71 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       // Add all effect log messages
       newLog.push(...effectResult.logMessages.map(msg => `${card.name}: ${msg}`));
 
-      // Handle legacy card type-specific logic for non-effect driven mechanics
-      switch (card.type) {
-        case 'ZONE':
-          if (prev.targetState) {
-            const stateIndex = newStates.findIndex(s => 
-              s.abbreviation === prev.targetState || 
-              s.id === prev.targetState ||
-              s.name === prev.targetState
-            );
-            if (stateIndex !== -1) {
-              // Parse pressure value from card text
-              const pressureMatch = card.text.match(/\+(\d+) Pressure/);
-              const pressureGain = pressureMatch ? parseInt(pressureMatch[1]) : 1;
-              newStates[stateIndex] = {
-                ...newStates[stateIndex],
-                pressure: newStates[stateIndex].pressure + pressureGain
-              };
-              
-              // Check if state is captured
-              if (newStates[stateIndex].pressure >= newStates[stateIndex].defense) {
-                newStates[stateIndex].owner = 'player';
-                newLog.push(`🚨 ${card.name} captured ${newStates[stateIndex].name}! (+${pressureGain} pressure)`);
-                
-                // Update controlled states list
-                const newControlledStates = [...prev.controlledStates];
-                const stateKey = newStates[stateIndex].abbreviation;
-                if (!newControlledStates.includes(stateKey)) {
-                  newControlledStates.push(stateKey);
-                }
-
-                // Track state capture in achievements
-                achievements.updateStats({
-                  total_states_controlled: achievements.stats.total_states_controlled + 1,
-                  max_states_controlled_single_game: newControlledStates.length
-                });
-
-                return {
-                  ...prev,
-                  hand: newHand,
-                  ip: newIP,
-                  truth: newTruth,
-                  states: newStates,
-                  controlledStates: newControlledStates,
-                  cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-                  cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
-                  targetState: null, // Clear selection after use
-                  selectedCard: null, // Clear card selection
-                  log: [...prev.log, ...newLog]
-                };
-              } else {
-                newLog.push(`${card.name} added pressure to ${newStates[stateIndex].name} (+${pressureGain}, ${newStates[stateIndex].pressure}/${newStates[stateIndex].defense})`);
-              }
-            } else {
-              newLog.push(`${card.name} played: No valid target selected`);
-            }
-          } else {
-            newLog.push(`${card.name} played: Select a target state first!`);
-          }
-          break;
-        case 'ATTACK':
-          // Attack cards now use effects-driven damage
-          const damage = effectResult.damage || (8 + Math.floor(Math.random() * 6)); // Fallback
-          newAIIP = Math.max(0, prev.aiIP - damage);
-          newLog.push(`${card.name} played: Attack dealt ${damage} IP damage to AI (${prev.aiIP} → ${newAIIP})`);
-          return {
-            ...prev,
-            hand: newHand,
-            ip: newIP,
-            truth: newTruth,
-            states: newStates,
-            aiIP: newAIIP,
-            cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-            cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
-            log: [...prev.log, ...newLog]
+      // Handle ZONE cards with pressure targeting
+      if (card.type === 'ZONE' && prev.targetState && effectResult.pressureDelta > 0) {
+        const stateIndex = newStates.findIndex(s => 
+          s.abbreviation === prev.targetState || 
+          s.id === prev.targetState ||
+          s.name === prev.targetState
+        );
+        if (stateIndex !== -1) {
+          const pressureGain = effectResult.pressureDelta;
+          newStates[stateIndex] = {
+            ...newStates[stateIndex],
+            pressure: newStates[stateIndex].pressure + pressureGain
           };
-        case 'DEFENSIVE':
-          // Defensive cards reduce pressure on player-controlled states
-          const playerStates = newStates.filter(s => s.owner === 'player' && s.pressure > 0);
-          if (playerStates.length > 0) {
-            const randomState = playerStates[Math.floor(Math.random() * playerStates.length)];
-            const stateIndex = newStates.findIndex(s => s.id === randomState.id);
-            const pressureReduction = effectResult.zoneDefenseBonus || 1;
-            newStates[stateIndex] = {
-              ...newStates[stateIndex],
-              pressure: Math.max(0, newStates[stateIndex].pressure - pressureReduction)
+          
+          // Check if state is captured
+          if (newStates[stateIndex].pressure >= newStates[stateIndex].defense) {
+            newStates[stateIndex].owner = 'player';
+            newLog.push(`🚨 ${card.name} captured ${newStates[stateIndex].name}! (+${pressureGain} pressure)`);
+            
+            // Update controlled states list
+            const newControlledStates = [...prev.controlledStates];
+            const stateKey = newStates[stateIndex].abbreviation;
+            if (!newControlledStates.includes(stateKey)) {
+              newControlledStates.push(stateKey);
+            }
+
+            // Track state capture in achievements
+            achievements.updateStats({
+              total_states_controlled: achievements.stats.total_states_controlled + 1,
+              max_states_controlled_single_game: newControlledStates.length
+            });
+
+            return {
+              ...prev,
+              hand: newHand,
+              ip: newIP,
+              aiIP: newAIIP,
+              truth: newTruth,
+              states: newStates,
+              controlledStates: newControlledStates,
+              cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+              cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
+              targetState: null, // Clear selection after use
+              selectedCard: null, // Clear card selection
+              log: [...prev.log, ...newLog]
             };
-            newLog.push(`${card.name} played: Reduced pressure on ${randomState.name} (-${pressureReduction})`);
           } else {
-            newLog.push(`${card.name} played: Defense prepared (no active threats)`);
+            newLog.push(`${card.name} added pressure to ${newStates[stateIndex].name} (+${pressureGain}, ${newStates[stateIndex].pressure}/${newStates[stateIndex].defense})`);
           }
-          break;
-        default:
-          newLog.push(`${card.name} played: Effect activated`);
-          break;
+        }
+      }
+      
+      // Handle DEFENSIVE cards that reduce pressure
+      if (card.type === 'DEFENSIVE' && effectResult.zoneDefenseBonus < 0) {
+        const playerStates = newStates.filter(s => s.owner === 'player' && s.pressure > 0);
+        if (playerStates.length > 0) {
+          const randomState = playerStates[Math.floor(Math.random() * playerStates.length)];
+          const stateIndex = newStates.findIndex(s => s.id === randomState.id);
+          const pressureReduction = Math.abs(effectResult.zoneDefenseBonus);
+          newStates[stateIndex] = {
+            ...newStates[stateIndex],
+            pressure: Math.max(0, newStates[stateIndex].pressure - pressureReduction)
+          };
+          newLog.push(`${card.name} reduced pressure on ${randomState.name} (-${pressureReduction})`);
+        }
       }
 
       // Update achievements with current game state

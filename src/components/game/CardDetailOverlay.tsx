@@ -6,6 +6,7 @@ import { GameCard } from '@/components/game/GameHand';
 import CardImage from '@/components/game/CardImage';
 import { ExtensionCardBadge } from '@/components/game/ExtensionCardBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { CardTextGenerator } from '@/systems/CardTextGenerator';
 
 interface CardDetailOverlayProps {
   card: GameCard | null;
@@ -68,21 +69,12 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
     }
   };
 
-  const getEffectDescription = (card: GameCard, faction: 'government' | 'truth') => {
-    switch (card.type) {
-      case 'MEDIA':
-        return faction === 'truth' 
-          ? 'Exposes lies and corruption. +12% Truth meter.'
-          : 'Spreads disinformation and propaganda. -10% Truth meter.';
-      case 'ZONE':
-        return 'Adds +2 pressure to target state. States with pressure ≥ defense are captured and generate IP.';
-      case 'ATTACK':
-        return 'Deals 8-13 IP damage directly to enemy operations.';
-      case 'DEFENSIVE':
-        return 'Reduces pressure (-1) on your controlled states to prevent enemy capture.';
-      default:
-        return 'Special effect card with unique abilities.';
+  const getEffectDescription = (card: GameCard) => {
+    // Use the card's effects to generate description, fallback to card text
+    if (card.effects && Object.keys(card.effects).length > 0) {
+      return CardTextGenerator.generateRulesText(card.effects);
     }
+    return card.text || 'Special effect card with unique abilities.';
   };
 
   const faction = getCardFaction(card);
@@ -160,7 +152,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
                 {card.text}
               </p>
               <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
-                {getEffectDescription(card, faction)}
+                {getEffectDescription(card)}
               </div>
             </div>
           </div>
