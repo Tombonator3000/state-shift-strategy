@@ -12,6 +12,8 @@ import { setStateOccupation } from '@/data/usaStates';
 import { getStartingHandSize, calculateCardDraw, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
 import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
+import { CardEffectMigrator } from '@/utils/cardEffectMigration';
+import type { Card } from '@/types/cardEffects';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -349,9 +351,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           }
           break;
         case 'ATTACK':
-          // Attack cards damage AI IP
-          const damage = 8 + Math.floor(Math.random() * 6); // 8-13 damage
-          const newAIIP = Math.max(0, prev.aiIP - damage);
+          // Attack cards now use effects-driven damage
+          const damage = effectResult.damage || (8 + Math.floor(Math.random() * 6)); // Fallback
+          newAIIP = Math.max(0, prev.aiIP - damage);
           newLog.push(`${card.name} played: Attack dealt ${damage} IP damage to AI (${prev.aiIP} → ${newAIIP})`);
           return {
             ...prev,
@@ -370,7 +372,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           if (playerStates.length > 0) {
             const randomState = playerStates[Math.floor(Math.random() * playerStates.length)];
             const stateIndex = newStates.findIndex(s => s.id === randomState.id);
-            const pressureReduction = 1;
+            const pressureReduction = effectResult.zoneDefenseBonus || 1;
             newStates[stateIndex] = {
               ...newStates[stateIndex],
               pressure: Math.max(0, newStates[stateIndex].pressure - pressureReduction)
@@ -431,6 +433,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       await animateCard(cardId, card, {
         targetState: explicitTargetState ?? gameState.targetState,
         onResolve: async (resolveCard: any) => {
+          setGameState(prev => {
             // Apply card effects during animation using unified system
             const processor = new CardEffectProcessor({
               truth: prev.truth,
@@ -473,7 +476,6 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
                 if (newStates[stateIndex].pressure >= newStates[stateIndex].defense) {
                   newStates[stateIndex].owner = 'player';
                   
-                  // Set occupation data for ZONE takeover
                   setStateOccupation(
                     newStates[stateIndex], 
                     prev.faction, 
@@ -516,7 +518,6 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
     } catch (error) {
       console.error('Card animation failed:', error);
-      // Fallback to regular card play
       playCard(cardId);
       setGameState(prev => ({ ...prev, animating: false }));
     }
