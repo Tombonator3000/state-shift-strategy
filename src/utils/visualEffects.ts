@@ -9,7 +9,7 @@ export interface EffectPosition {
 export class VisualEffectsCoordinator {
   // Trigger particle effect at specific position
   static triggerParticleEffect(
-    type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain',
+    type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain' | 'stateevent' | 'contested',
     position: EffectPosition
   ): void {
     window.dispatchEvent(new CustomEvent('cardDeployed', {
@@ -57,6 +57,32 @@ export class VisualEffectsCoordinator {
   // Trigger state loss effects
   static triggerStateLoss(position: EffectPosition): void {
     window.dispatchEvent(new CustomEvent('stateLoss', {
+      detail: {
+        x: position.x,
+        y: position.y
+      }
+    }));
+  }
+
+  // Trigger state event effects
+  static triggerStateEvent(
+    eventType: string,
+    stateId: string, 
+    position: EffectPosition
+  ): void {
+    window.dispatchEvent(new CustomEvent('stateEvent', {
+      detail: {
+        eventType,
+        stateId,
+        x: position.x,
+        y: position.y
+      }
+    }));
+  }
+
+  // Trigger contested state effects
+  static triggerContestedState(position: EffectPosition): void {
+    window.dispatchEvent(new CustomEvent('contestedState', {
       detail: {
         x: position.x,
         y: position.y
