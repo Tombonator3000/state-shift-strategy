@@ -7,7 +7,7 @@ import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
 import EnhancedGameHand from '@/components/game/EnhancedGameHand';
 import PlayedCardsDock from '@/components/game/PlayedCardsDock';
 import TruthMeter from '@/components/game/TruthMeter';
-import Newspaper from '@/components/game/Newspaper';
+import TabloidNewspaper from '@/components/game/TabloidNewspaper';
 import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
 import AIStatus from '@/components/game/AIStatus';
@@ -25,7 +25,7 @@ import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import PhaseTransition from '@/components/effects/PhaseTransition';
 import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
-import ActionPhasePopup from '@/components/game/ActionPhasePopup';
+
 import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
 import ContextualHelp from '@/components/game/ContextualHelp';
 import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
@@ -73,7 +73,7 @@ const Index = () => {
   const [showCardCollection, setShowCardCollection] = useState(false);
   const [gameOverReport, setGameOverReport] = useState<any>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
-  const [showActionPhase, setShowActionPhase] = useState(false);
+  
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showMinimizedHand, setShowMinimizedHand] = useState(false);
   
@@ -1023,20 +1023,15 @@ const Index = () => {
 
       {/* Newspaper overlay */}
       {gameState.showNewspaper && (
-        <Newspaper 
+        <TabloidNewspaper 
           events={gameState.currentEvents}
           playedCards={gameState.cardsPlayedThisRound}
           faction={gameState.faction}
+          truth={gameState.truth}
           onClose={handleCloseNewspaper}
         />
       )}
 
-      {/* Action Phase Popup */}
-      <ActionPhasePopup
-        isVisible={showActionPhase}
-        truthLevel={gameState.truth}
-        onClose={() => setShowActionPhase(false)}
-      />
     </div>
   );
 };
