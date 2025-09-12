@@ -574,8 +574,8 @@ const BalancingDashboard = ({ onClose }: BalancingDashboardProps) => {
                               <Badge className={getClassificationColor(card.classification)}>
                                 {card.classification}
                               </Badge>
-                              <Badge className={getFactionAlignmentColor(card.alignment)}>
-                                {card.alignment}
+                    <Badge className={getFactionAlignmentColor(card.factionAlignment.alignment)}>
+                      {card.factionAlignment.alignment}
                               </Badge>
                             </div>
                           </div>
