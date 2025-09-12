@@ -3252,7 +3252,13 @@ export const CARD_DATABASE: GameCard[] = [
     text: "Store secrets. +2 Defense; draw 1 when established.",
     flavor: "Microfilm never dies.",
     target: { scope: "state" },
-    effects: { pressureDelta: 1, zoneDefense: 2, draw: 1 }
+    effects: { 
+      zoneDefense: 2,
+      conditional: {
+        ifZonesControlledAtLeast: 1,
+        then: { draw: 1 }
+      }
+    }
   },
   {
     id: "GOV-067",
