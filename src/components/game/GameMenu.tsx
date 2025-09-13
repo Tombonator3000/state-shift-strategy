@@ -6,73 +6,6 @@ import HowToPlay from './HowToPlay';
 import Options from './Options';
 import ManageExpansions from './ManageExpansions';
 import CardCollection from './CardCollection';
-import paranoidTimesMasthead from '/assets/paranoid-times-masthead.png';
-import governmentOperative from '/assets/government-operative.png';
-import truthSeeker from '/assets/truth-seeker.png';
-import ufoSighting from '/assets/ufo-sighting.png';
-import bigfootSighting from '/assets/bigfoot-sighting.png';
-
-// Helper Components
-const HeadlineButton = ({ children, onClick, className = "", fullWidth = false }: { 
-  children: React.ReactNode; 
-  onClick: () => void; 
-  className?: string;
-  fullWidth?: boolean;
-}) => (
-  <button
-    onClick={onClick}
-    className={`${fullWidth ? 'w-full' : ''} border-2 border-[var(--ink)] bg-[var(--paper)] text-[var(--ink)] 
-                text-xl md:text-2xl font-extrabold tracking-wide uppercase
-                shadow-[6px_6px_0_#000] hover:shadow-[4px_4px_0_#000] active:shadow-[2px_2px_0_#000]
-                transition-transform hover:translate-x-[1px] hover:translate-y-[1px] 
-                active:translate-x-[2px] active:translate-y-[2px]
-                focus:outline-none focus:ring-4 focus:ring-gray-300 
-                py-3 px-4 ${className}`}
-    style={{
-      fontFamily: 'Oswald, Impact, Arial Black, system-ui, sans-serif'
-    }}
-  >
-    {children}
-  </button>
-);
-
-const Masthead = ({ title, subtitle }: { title: string; subtitle: string }) => (
-  <div className="border-4 border-[var(--line)] bg-[var(--paper)] px-4 py-2 mb-4">
-    <div 
-      className="text-4xl md:text-6xl font-black tracking-tight uppercase text-center"
-      style={{ fontFamily: 'Oswald, Impact, Arial Black, system-ui, sans-serif' }}
-    >
-      {title}
-    </div>
-    <div className="bg-[var(--ink)] text-[var(--paper)] text-center py-1 mt-2">
-      <span className="text-xs md:text-sm font-sans uppercase tracking-wide">
-        {subtitle}
-      </span>
-    </div>
-  </div>
-);
-
-const DecorRule = () => (
-  <div className="h-2 bg-[var(--grey2)] my-2" />
-);
-
-const PhotoBox = ({ headline, image }: { headline: string; image?: string }) => (
-  <div className="border-4 border-[var(--line)] bg-[var(--paper)] p-2">
-    <div className="aspect-[4/3] bg-[var(--grey2)] border-2 border-[var(--line)] mb-2 flex items-center justify-center">
-      {image ? (
-        <img src={image} alt={headline} className="w-full h-full object-cover" />
-      ) : (
-        <div className="text-[var(--grey)] text-xs uppercase">Photo Placeholder</div>
-      )}
-    </div>
-    <div 
-      className="text-lg md:text-xl font-black tracking-tight uppercase text-center"
-      style={{ fontFamily: 'Oswald, Impact, Arial Black, system-ui, sans-serif' }}
-    >
-      {headline}
-    </div>
-  </div>
-);
 
 interface GameMenuProps {
   onStartGame: (faction: 'government' | 'truth') => Promise<void>;
@@ -87,25 +20,31 @@ interface GameMenuProps {
 
 const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSaveGame, onShowCardCollection, getSaveInfo, onLoadGame }: GameMenuProps) => {
   const [glitching, setGlitching] = useState(false);
-  const [redactedText, setRedactedText] = useState('THE PARANOID TIMES');
+  const [redactedText, setRedactedText] = useState('SHADOW GOVERNMENT');
   const [showCredits, setShowCredits] = useState(false);
   const [showFactionSelect, setShowFactionSelect] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showManageExpansions, setShowManageExpansions] = useState(false);
-  const [subtitleText, setSubtitleText] = useState('CLASSIFIED SPECIAL EDITION');
-  const [quoteText, setQuoteText] = useState('"Where conspiracy theories become reality"');
+  const [subtitleText, setSubtitleText] = useState('PARANOID TIMES EDITION');
+  const [quoteText, setQuoteText] = useState('"Where conspiracy theories go to become policy"');
   const [descriptionText, setDescriptionText] = useState('Control the narrative. Manipulate the truth.');
   const [description2Text, setDescription2Text] = useState('Convince people birds are real (or aren\'t).');
   const [promoText, setPromoText] = useState('NOW WITH 420% MORE SATIRE!');
+  const [bgLines] = useState(() => Array.from({ length: 30 }, () => ({
+    width: Math.random() * 300 + 100,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    rotate: Math.random() * 4 - 2,
+  })));
   const [showCollection, setShowCollection] = useState(false);
 
   useEffect(() => {
     const glitchTexts = {
-      title: ['SHEEPLE TIMES', 'THE TRUTH DAILY', 'CONSPIRACY NEWS', 'THE PARANOID TIMES', 'DEEP STATE WEEKLY', 'LIZARD PEOPLE POST', 'WEEKLY WORLD NEWS', 'TABLOID TRUTH', 'PARANOID PLANET'],
-      subtitle: ['CLASSIFIED SPECIAL EDITION', 'REDACTED DAILY', 'TOP SECRET TIMES', 'CONSPIRACY WEEKLY', 'BIGFOOT WEEKLY', 'ALIEN EDITION', 'CRYPTID CHRONICLES'],
+      title: ['SHEEPLE TIMES', 'THE TRUTH DAILY', 'CONSPIRACY NEWS', 'SHADOW GOVERNMENT', 'DEEP STATE WEEKLY', 'LIZARD PEOPLE POST', 'WEEKLY WORLD NEWS', 'TABLOID TRUTH', 'PARANOID PLANET'],
+      subtitle: ['PARANOID TIMES EDITION', 'CLASSIFIED EDITION', 'REDACTED DAILY', 'TOP SECRET TIMES', 'CONSPIRACY WEEKLY', 'BIGFOOT WEEKLY', 'ALIEN EDITION', 'CRYPTID CHRONICLES'],
       quote: [
-        '"Where conspiracy theories become reality"',
+        '"Where conspiracy theories go to become policy"',
         '"All your base are belong to us"',
         '"The cake is a lie"',
         '"Birds aren\'t real and neither are we"',
@@ -159,7 +98,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
           setRedactedText(glitchTexts.title[Math.floor(Math.random() * glitchTexts.title.length)]);
           setTimeout(() => {
             setGlitching(false);
-            setRedactedText('THE PARANOID TIMES');
+            setRedactedText('SHADOW GOVERNMENT');
           }, 1500);
         }
       }, Math.random() * 2000 + 2000), // 2-4 seconds
@@ -168,7 +107,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
       setInterval(() => {
         if (Math.random() < 0.12) {
           setSubtitleText(glitchTexts.subtitle[Math.floor(Math.random() * glitchTexts.subtitle.length)]);
-          setTimeout(() => setSubtitleText('CLASSIFIED SPECIAL EDITION'), 1200);
+          setTimeout(() => setSubtitleText('PARANOID TIMES EDITION'), 1200);
         }
       }, Math.random() * 3000 + 3000), // 3-6 seconds
 
@@ -176,7 +115,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
       setInterval(() => {
         if (Math.random() < 0.08) {
           setQuoteText(glitchTexts.quote[Math.floor(Math.random() * glitchTexts.quote.length)]);
-          setTimeout(() => setQuoteText('"Where conspiracy theories become reality"'), 1800);
+          setTimeout(() => setQuoteText('"Where conspiracy theories go to become policy"'), 1800);
         }
       }, Math.random() * 4000 + 4000), // 4-8 seconds
 
@@ -232,280 +171,291 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
 
   if (showFactionSelect) {
     return (
-      <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)] relative overflow-hidden max-w-[980px] mx-auto p-4 md:p-8">
-        {/* Back Button */}
-        <Button 
-          onClick={() => {
-            audio?.playSFX?.('click');
-            setShowFactionSelect(false);
-          }}
-          variant="outline" 
-          className="absolute top-4 left-4 z-20 bg-[var(--paper)] border-2 border-[var(--ink)] text-[var(--ink)] hover:bg-[var(--grey2)] font-bold"
-        >
-          ← BACK TO MAIN
-        </Button>
-
-        {/* 1. Top stripe - Title */}
-        <div className="border-4 border-[var(--line)] bg-[var(--paper)] px-4 py-3 mb-6 mt-12">
-          <div 
-            className="text-3xl md:text-5xl font-black tracking-tight uppercase text-center"
-            style={{ fontFamily: 'Oswald, Impact, Arial Black, system-ui, sans-serif' }}
-          >
-            SELECT YOUR CONSPIRACY
-          </div>
-          <div className="text-center text-xs md:text-sm font-sans uppercase tracking-wide mt-2">
-            Choose your side in ultimate battle for truth
-          </div>
-        </div>
-
-        {/* 2. Two main panels side-by-side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {/* Government Panel */}
-          <div 
-            className="relative border-4 border-[var(--line)] bg-[var(--paper)] p-4 cursor-pointer hover:bg-[var(--grey2)] transition-colors"
-            onMouseEnter={() => onFactionHover?.('government')}
-            onMouseLeave={() => onFactionHover?.(null)}
-          >
-            {/* Label badge */}
-            <div className="absolute -top-3 -left-3 bg-[var(--ink)] text-[var(--paper)] px-2 py-1 text-[10px] font-black tracking-wide uppercase">
-              GOVERNMENT
-            </div>
-            
-            {/* Title */}
+      <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
+        {/* Redacted background pattern */}
+        <div className="absolute inset-0 opacity-5">
+          {Array.from({ length: 30 }).map((_, i) => (
             <div 
-              className="text-2xl md:text-3xl font-black tracking-tight uppercase text-center mb-4 mt-2"
-              style={{ fontFamily: 'Oswald, Impact, Arial Black, system-ui, sans-serif' }}
-            >
-              DEEP STATE OPERATIVE
-            </div>
-            
-            {/* Image placeholder */}
-            <div className="aspect-[4/3] bg-[var(--grey2)] border-2 border-[var(--ink)] mb-4 flex items-center justify-center">
-              <img src={governmentOperative} alt="Government Operative" className="w-full h-full object-cover" />
-            </div>
-            
-            {/* CTA Button */}
-            <HeadlineButton 
-              onClick={async () => {
-                audio?.playSFX?.('click');
-                await onStartGame('government');
+              key={i}
+              className="absolute bg-newspaper-text h-6"
+              style={{
+                width: `${Math.random() * 300 + 100}px`,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                transform: `rotate(${Math.random() * 4 - 2}deg)`
               }}
-              fullWidth
-            >
-              JOIN THE CABAL
-            </HeadlineButton>
-          </div>
-
-          {/* Truth Seekers Panel */}
-          <div 
-            className="relative border-4 border-[var(--line)] bg-[var(--paper)] p-4 cursor-pointer hover:bg-[var(--grey2)] transition-colors"
-            onMouseEnter={() => onFactionHover?.('truth')}
-            onMouseLeave={() => onFactionHover?.(null)}
-          >
-            {/* Label badge */}
-            <div className="absolute -top-3 -left-3 bg-[var(--ink)] text-[var(--paper)] px-2 py-1 text-[10px] font-black tracking-wide uppercase">
-              TRUTH SEEKERS
-            </div>
-            
-            {/* Title */}
-            <div 
-              className="text-2xl md:text-3xl font-black tracking-tight uppercase text-center mb-4 mt-2"
-              style={{ fontFamily: 'Oswald, Impact, Arial Black, system-ui, sans-serif' }}
-            >
-              CONSPIRACY CRUSADER
-            </div>
-            
-            {/* Image placeholder */}
-            <div className="aspect-[4/3] bg-[var(--grey2)] border-2 border-[var(--ink)] mb-4 flex items-center justify-center">
-              <img src={truthSeeker} alt="Truth Seeker" className="w-full h-full object-cover" />
-            </div>
-            
-            {/* CTA Button */}
-            <HeadlineButton 
-              onClick={async () => {
-                audio?.playSFX?.('click');
-                await onStartGame('truth');
-              }}
-              fullWidth
-            >
-              EXPOSE THE CONSPIRACY
-            </HeadlineButton>
-          </div>
+            />
+          ))}
         </div>
 
-        {/* 3. Bottom banner (optional) */}
-        <div className="border-4 border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-center">
-          <div 
-            className="text-xl md:text-2xl font-black tracking-tight uppercase"
-            style={{ fontFamily: 'Oswald, Impact, Arial Black, system-ui, sans-serif' }}
+        <Card className="max-w-4xl w-full p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal relative" style={{ fontFamily: 'serif' }}>
+          {/* Back button */}
+          <Button 
+            onClick={() => {
+              audio?.playSFX?.('click');
+              setShowFactionSelect(false);
+            }}
+            variant="outline" 
+            className="absolute top-4 left-4 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
           >
-            THE TRUTH IS OUT THERE... PROBABLY
+            ← BACK
+          </Button>
+
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-newspaper-text mb-4">
+              SELECT YOUR CONSPIRACY
+            </h1>
+            <div className="text-sm text-newspaper-text/80 mb-4">
+              Choose your side in the ultimate battle for truth
+            </div>
           </div>
-        </div>
+
+          {/* Faction Selection */}
+          <div className="grid md:grid-cols-2 gap-8 mt-8">
+            <Card className="p-6 border-2 border-newspaper-text hover:border-newspaper-text transition-all hover:scale-105 cursor-pointer group bg-newspaper-bg"
+                  onMouseEnter={() => onFactionHover?.('government')}
+                  onMouseLeave={() => onFactionHover?.(null)}>
+              <div className="flex items-center mb-4">
+                <div className="text-3xl mr-3 animate-conspiracy-float">🦎</div>
+                <h3 className="font-bold text-xl text-government-blue">
+                  DEEP STATE
+                </h3>
+              </div>
+              
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span>Start Truth:</span>
+                  <span className="text-government-blue font-bold">40%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Bonus IP:</span>
+                  <span className="text-government-blue font-bold">+10</span>
+                </div>
+                <div className="text-xs text-newspaper-text/60 mt-2">
+                  Access to Lizard People
+                </div>
+              </div>
+              
+              <div className="bg-newspaper-text/10 p-3 mb-4 text-xs italic text-newspaper-text">
+                "Control the narrative with black helicopters, weather machines, and surprisingly comfortable underground bunkers."
+              </div>
+              
+              <Button 
+                onClick={async () => {
+                  audio?.playSFX?.('click');
+                  await onStartGame('government');
+                }}
+                className="w-full bg-government-blue hover:bg-government-blue/80 text-white group-hover:animate-pulse"
+              >
+                Join the Shadow Cabinet
+              </Button>
+            </Card>
+
+            <Card className="p-6 border-2 border-newspaper-text hover:border-newspaper-text transition-all hover:scale-105 cursor-pointer group bg-newspaper-bg"
+                  onMouseEnter={() => onFactionHover?.('truth')}
+                  onMouseLeave={() => onFactionHover?.(null)}>
+              <div className="flex items-center mb-4">
+                <div className="text-3xl mr-3 animate-conspiracy-float" style={{ animationDelay: '1s' }}>👁️</div>
+                <h3 className="font-bold text-xl text-truth-red">
+                  TRUTH SEEKERS
+                </h3>
+              </div>
+              
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span>Start Truth:</span>
+                  <span className="text-truth-red font-bold">60%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Bonus Truth:</span>
+                  <span className="text-truth-red font-bold">+10%</span>
+                </div>
+                <div className="text-xs text-newspaper-text/60 mt-2">
+                  Tinfoil Hat Immunity
+                </div>
+              </div>
+              
+              <div className="bg-newspaper-text/10 p-3 mb-4 text-xs italic text-newspaper-text">
+                "Wake up the sheeple with essential oils, healing crystals, and really long YouTube videos."
+              </div>
+              
+              <Button 
+                onClick={async () => {
+                  audio?.playSFX?.('click');
+                  await onStartGame('truth');
+                }}
+                className="w-full bg-truth-red hover:bg-truth-red/80 text-white group-hover:animate-pulse"
+              >
+                Expose the Conspiracy
+              </Button>
+            </Card>
+          </div>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)] relative overflow-hidden max-w-[980px] mx-auto p-4 md:p-8">
-      
-      {/* 1. Masthead stripe (full width) */}
-      <Masthead 
-        title="THE PARANOID TIMES"
-        subtitle="MIND-BLOWING NEWS YOU WON'T BELIEVE!"
-      />
-
-      {/* 2. Top grid (2 "photo fields") */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 mb-4">
-        <PhotoBox 
-          headline="A.I. CONTROL GRID EXPOSED"
-          image={ufoSighting}
-        />
-        <PhotoBox 
-          headline="BAT BOY SIGHTED IN CITY"
-          image={bigfootSighting}
-        />
+    <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
+      {/* Redacted background pattern */}
+      <div className="absolute inset-0 opacity-5">
+        {bgLines.map((line, i) => (
+          <div 
+            key={i}
+            className="absolute bg-newspaper-text h-6"
+            style={{
+              width: `${line.width}px`,
+              top: `${line.top}%`,
+              left: `${line.left}%`,
+              transform: `rotate(${line.rotate}deg)`
+            }}
+          />
+        ))}
       </div>
 
-      <DecorRule />
-
-      {/* 3. Giant title block with decorative elements */}
-      <div className="border-4 border-[var(--line)] bg-[var(--paper)] py-6 mb-4 relative">
-        {/* Gray decorative elements on sides */}
-        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-16 h-2 bg-[var(--grey2)]"></div>
-        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 w-16 h-2 bg-[var(--grey2)]"></div>
-        
-        <div 
-          className="text-5xl md:text-7xl font-black tracking-tight uppercase text-center"
-          style={{ fontFamily: 'Oswald, Impact, Arial Black, system-ui, sans-serif' }}
-        >
-          <div>SHADOW</div>
-          <div>GOVERNMENT</div>
+      <Card className="max-w-4xl w-full p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal relative" style={{ fontFamily: 'serif' }}>
+        {/* Classified stamps */}
+        <div className="absolute top-4 right-4 text-red-600 font-mono text-xs transform rotate-12 border-2 border-red-600 p-2">
+          TOP SECRET
         </div>
-      </div>
-
-      <DecorRule />
-
-      {/* 4. Button section with specific grid layout */}
-      <div className="grid gap-4 mb-4">
-        {/* Row A: NEW GAME (full width) */}
-        <div className="col-span-full">
-          <HeadlineButton 
-            onClick={() => {
-              audio?.playSFX?.('click');
-              setShowFactionSelect(true);
-            }}
-            fullWidth
-          >
-            START CONSPIRACY
-          </HeadlineButton>
+        <div className="absolute bottom-4 left-4 text-red-600 font-mono text-xs transform -rotate-12 border-2 border-red-600 p-2">
+          EYES ONLY
         </div>
 
-        {/* Row B: MANAGE EXPANSIONS (left), HOW TO PLAY (right) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <HeadlineButton 
-            onClick={() => {
-              audio?.playSFX?.('click');
-              setShowManageExpansions(true);
-            }}
-            fullWidth
-          >
-            MANAGE EXPANSIONS
-          </HeadlineButton>
-          <HeadlineButton 
-            onClick={() => {
-              audio?.playSFX?.('click');
-              setShowHowToPlay(true);
-            }}
-            fullWidth
-          >
-            HOW TO PLAY
-          </HeadlineButton>
+        <div className="text-center mb-8">
+          <h1 className={`text-5xl font-bold text-newspaper-text mb-2 ${glitching ? 'animate-glitch' : ''}`}>
+            {redactedText}
+          </h1>
+          <div className="text-xl font-medium text-newspaper-text/80 mb-2">
+            {subtitleText}
+          </div>
+          <div className="text-sm font-italic text-newspaper-text/60 mb-4">
+            {quoteText}
+          </div>
+          <div className="text-sm text-newspaper-text/80">
+            {descriptionText}
+          </div>
+          <div className="text-sm text-newspaper-text/80">
+            {description2Text}
+          </div>
+          <div className="text-lg font-bold text-secret-red mt-4">
+            {promoText}
+          </div>
         </div>
 
-        {/* Row C: CREDITS (left), CARD COLLECTION (right) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <HeadlineButton 
-            onClick={() => {
-              audio?.playSFX?.('click');
-              setShowCredits(true);
-            }}
-            fullWidth
-          >
-            CREDITS
-          </HeadlineButton>
-          <HeadlineButton 
-            onClick={() => {
-              audio?.playSFX?.('click');
-              setShowCollection(true);
-            }}
-            fullWidth
-          >
-            CARD COLLECTION
-          </HeadlineButton>
-        </div>
-
-        {/* Continue card - faux newspaper box (if save exists) */}
-        {getSaveInfo?.() && (
-          <div className="border-4 border-[var(--line)] bg-[var(--paper)] p-4 mb-4">
-            <div 
-              className="text-lg md:text-xl font-black tracking-tight uppercase text-center mb-2"
-              style={{ fontFamily: 'Oswald, Impact, Arial Black, system-ui, sans-serif' }}
-            >
-              CLASSIFIED DOSSIER FOUND
+        <div className="space-y-6">
+          <div className="text-center space-y-2 mb-6">
+            <div className="text-sm font-mono text-newspaper-text">Record: 8W / 0L</div>
+            <div className="text-sm font-mono text-newspaper-text">Win Streak: 8</div>
+            <div className="text-xs font-mono text-newspaper-text/60 mt-4">
+              HOTKEYS:
             </div>
-            <div className="text-xs font-sans uppercase text-center mb-3">
-              Turn {getSaveInfo?.()?.turn} - Investigation in Progress
+            <div className="text-xs font-mono text-newspaper-text/60">
+              Space = End Turn | T = Select Card
             </div>
-            <HeadlineButton 
+            <div className="text-xs font-mono text-newspaper-text/60">
+              U = Upgrades | S = Stats | Q/L = Save/Load
+            </div>
+          </div>
+
+          {/* Menu Options */}
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            <Button 
               onClick={() => {
-                if (getSaveInfo?.()) {
-                  audio?.playSFX?.('click');
-                  const success = onLoadGame?.();
+                audio?.playSFX?.('click');
+                setShowFactionSelect(true);
+              }}
+              className="w-full py-4 text-lg bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80"
+            >
+              START CONSPIRACY
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+              onClick={() => {
+                audio?.playSFX?.('click');
+                setShowManageExpansions(true);
+              }}
+            >
+              MANAGE EXPANSIONS
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+              onClick={() => {
+                audio?.playSFX?.('click');
+                setShowHowToPlay(true);
+              }}
+            >
+              HOW TO PLAY
+            </Button>
+            <Button 
+              onClick={() => {
+                audio?.playSFX?.('click');
+                const saveInfo = getSaveInfo?.();
+                if (saveInfo && onLoadGame) {
+                  // Load the saved game
+                  const success = onLoadGame();
                   if (success) {
                     const indicator = document.createElement('div');
-                    indicator.textContent = '✓ DOSSIER LOADED';
-                    indicator.className = 'fixed top-4 right-4 bg-[var(--ink)] text-[var(--paper)] px-4 py-2 z-[60] animate-fade-in';
+                    indicator.textContent = '✓ GAME LOADED';
+                    indicator.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded z-[60] animate-fade-in';
                     document.body.appendChild(indicator);
                     setTimeout(() => indicator.remove(), 2000);
                   }
                 }
               }}
-              fullWidth
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+              disabled={!getSaveInfo?.()}
             >
-              CONTINUE
-            </HeadlineButton>
+              {getSaveInfo?.() ? `CONTINUE (Turn ${getSaveInfo?.()?.turn})` : 'NO SAVED GAME'}
+            </Button>
+            <Button 
+              onClick={() => {
+                audio?.playSFX?.('click');
+                setShowCredits(true);
+              }}
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+            >
+              CREDITS
+            </Button>
+            <Button 
+              onClick={() => {
+                audio?.playSFX?.('click');
+                setShowCollection(true);
+              }}
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+            >
+              📚 CARD COLLECTION
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+              onClick={() => {
+                console.log('Options button clicked in GameMenu');
+                audio?.playSFX?.('click');
+                setShowOptions(true);
+                console.log('showOptions set to true');
+              }}
+            >
+              OPTIONS
+            </Button>
           </div>
-        )}
-
-        {/* Row D: OPTIONS (full width) */}
-        <div className="col-span-full">
-          <HeadlineButton 
-            onClick={() => {
-              audio?.playSFX?.('click');
-              setShowOptions(true);
-            }}
-            fullWidth
-          >
-            OPTIONS
-          </HeadlineButton>
         </div>
-      </div>
 
-      <DecorRule />
-
-      {/* 6. Decorative "gutter" elements */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        <div className="h-2 bg-[var(--grey2)]"></div>
-        <div className="h-2 bg-[var(--grey2)]"></div>
-        <div className="h-2 bg-[var(--grey2)]"></div>
-      </div>
-
-      {/* Card Collection */}
-      <CardCollection 
-        open={showCollection} 
-        onOpenChange={setShowCollection} 
-      />
+        {/* Footer */}
+        <div className="mt-8 text-center text-xs text-newspaper-text/60">
+          <div className="mb-2">WARNING: This game contains satirical content</div>
+          <div>Any resemblance to actual conspiracies is purely coincidental</div>
+          <div className="mt-2 text-red-600 font-bold">
+            [REDACTED] - Classification Level: FOR YOUR EYES ONLY
+          </div>
+        </div>
+      </Card>
+      <CardCollection open={showCollection} onOpenChange={setShowCollection} />
     </div>
   );
 };
