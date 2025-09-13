@@ -211,26 +211,57 @@ class NewspaperSystem {
   private generateBody(card: GameCard, context: RoundContext): string[] {
     const paragraphs = [];
     
-    // What happened
-    paragraphs.push(`Reports flooded in today as ${card.name} was deployed across multiple locations. Eyewitnesses describe scenes of [REDACTED] and unexplained phenomena.`);
+    // What happened - MORE SPECIFIC TO CARD
+    paragraphs.push(`Breaking news from the field: ${card.name} has been activated with unprecedented results. Witnesses report ${this.getCardSpecificEffect(card)} occurring across multiple sectors.`);
     
-    // Who was affected
-    paragraphs.push(`The operation affected an estimated ${this.extractValue(card)} percent of the target population. "I can't discuss specifics," said one anonymous official, "but the implications are... significant."`);
+    // Who was affected - USE ACTUAL CARD EFFECTS
+    const effectValue = this.extractValue(card);
+    paragraphs.push(`Initial reports suggest ${effectValue}% of the target population experienced the effects of ${card.name}. ${this.getOfficialDenial(card)}`);
     
-    // Expert quote (parodic)
+    // Expert quote (parodic) - REFERENCE THE ACTUAL CARD
     const expertQuotes = [
-      '"This changes everything we thought we knew," claims Dr. [REDACTED] from the Institute of Anomalous Studies.',
-      '"The readings are off the charts," whispers a scientist who requested anonymity.',
-      '"I predicted this in my newsletter three months ago," boasts conspiracy researcher Rex Tinfoilson.'
+      `"The deployment of ${card.name} changes everything we thought we knew about ${this.getCardTheme(card)}," claims Dr. [REDACTED] from the Institute of Anomalous Studies.`,
+      `"The readings from ${card.name} are completely off the charts," whispers a scientist who requested anonymity.`,
+      `"I predicted ${card.name} would surface in my newsletter three months ago," boasts conspiracy researcher Rex Tinfoilson.`
     ];
     paragraphs.push(expertQuotes[Math.floor(Math.random() * expertQuotes.length)]);
     
     // Follow-up hint
     if (Math.random() > 0.5) {
-      paragraphs.push('Stay tuned for further developments. (More on page [CLASSIFIED])');
+      paragraphs.push(`More details about ${card.name} expected in tomorrow's classified briefing. (Continued on page [REDACTED])`);
     }
     
     return paragraphs;
+  }
+
+  private getCardSpecificEffect(card: GameCard): string {
+    if (card.effects?.truthDelta) {
+      return card.effects.truthDelta > 0 ? 'reality distortions' : 'truth suppression events';
+    }
+    if (card.effects?.ipDelta?.self) {
+      return card.effects.ipDelta.self > 0 ? 'influence amplification' : 'power dampening';
+    }
+    if (card.type === 'ZONE') return 'territorial anomalies';
+    if (card.type === 'MEDIA') return 'information cascade events';
+    return 'unexplained phenomena';
+  }
+
+  private getOfficialDenial(card: GameCard): string {
+    const denials = [
+      `"We can neither confirm nor deny the existence of ${card.name}," stated a spokesperson.`,
+      `Officials dismissed reports of ${card.name} as "weather balloon incidents."`,
+      `The Department of Normal Affairs issued a statement: "${card.name} never happened."`,
+      `"Citizens should remain calm regarding ${card.name}," advised local authorities.`
+    ];
+    return denials[Math.floor(Math.random() * denials.length)];
+  }
+
+  private getCardTheme(card: GameCard): string {
+    if (card.faction === 'truth') return 'disclosure operations';
+    if (card.faction === 'government') return 'classified protocols';
+    if (card.type === 'ZONE') return 'territorial control';
+    if (card.type === 'MEDIA') return 'information warfare';
+    return 'conspiracy theory';
   }
 
   private getCardImage(card: GameCard): string {
@@ -253,17 +284,18 @@ class NewspaperSystem {
     const articles = [...this.queuedArticles].slice(0, 4); // Max 4 articles
     
     console.log('📰 Creating issue with masthead:', masthead, 'articles:', articles.length);
+    console.log('📰 Article headlines:', articles.map(a => a.title).join(', '));
     
-    // Clear queue
+    // Generate ticker for overflow BEFORE clearing queue
+    const overflowArticles = this.queuedArticles.slice(4);
+    const ticker = this.generateTicker(overflowArticles);
+    
+    // Clear queue AFTER using it
     this.queuedArticles = [];
     
     // Split articles into main and side
     const mainArticles = articles.slice(0, 3);
     const sideArticle = articles[3];
-    
-    // Generate ticker for overflow
-    const overflowArticles = this.queuedArticles.slice(4);
-    const ticker = this.generateTicker(overflowArticles);
     
     const issue = {
       masthead,
@@ -277,7 +309,8 @@ class NewspaperSystem {
       isGlitchEdition
     };
     
-    console.log('📰 Created newspaper issue:', issue);
+    console.log('📰 Created newspaper issue with', mainArticles.length, 'main articles featuring cards:', 
+      mainArticles.map(a => a.title).join(' | '));
     return issue;
   }
 
