@@ -55,19 +55,29 @@ class NewspaperSystem {
   private initialized = false;
 
   async loadConfig(): Promise<NewspaperConfig> {
+    console.log('📰 loadConfig called, current config:', !!this.config);
     if (this.config) return this.config;
     
     try {
+      console.log('📰 Fetching newspaper config from /data/newspaper.config.json');
       const response = await fetch('/data/newspaper.config.json');
-      if (!response.ok) throw new Error('Config not found');
+      if (!response.ok) {
+        console.error('📰 Config fetch failed:', response.status, response.statusText);
+        throw new Error('Config not found');
+      }
       this.config = await response.json();
       this.initialized = true;
+      console.log('📰 Config loaded successfully:', {
+        mastheads: this.config.mastheads.length,
+        ads: this.config.ads.length,
+        templates: this.config.headlineTemplates.length
+      });
       return this.config;
     } catch (error) {
-      console.warn('Failed to load newspaper config, using fallback');
+      console.warn('📰 Failed to load newspaper config, using fallback:', error);
       // Fallback config
       this.config = {
-        mastheads: [{ name: "The Paranoid Post" }],
+        mastheads: [{ name: "The Paranoid Post" }, { name: "Weekly World Whoa!" }],
         ads: [{ title: "Buy Tinfoil Hats!", body: "Mind protection guaranteed" }],
         headlineTemplates: [
           { type: "GENERIC", faction: "Any", templates: ["{CARD}!"] }
@@ -77,6 +87,7 @@ class NewspaperSystem {
         editorialStamps: ["BREAKING!"]
       };
       this.initialized = true;
+      console.log('📰 Fallback config initialized');
       return this.config;
     }
   }

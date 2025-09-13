@@ -307,18 +307,25 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         };
       }
 
+      console.log('🎮 PLAYING CARD:', card.name, 'Type:', card.type, 'Faction:', card.faction);
+      
       // Track card play in achievements
       achievements.onCardPlayed(cardId, card.type);
 
-      // Queue article for newspaper system
+      // Queue article for newspaper system - ADD MORE DEBUGGING
       const context = {
         round: prev.round,
         truth: prev.truth,
         ip: { human: prev.ip, ai: prev.aiIP },
         states: prev.states
       };
-      console.log('📰 Queuing article for card:', card.name, 'Round:', context.round);
-      newspaper.queueArticleFromCard(card, context);
+      console.log('📰 QUEUEING ARTICLE for card:', card.name, 'Context:', context);
+      try {
+        newspaper.queueArticleFromCard(card, context);
+        console.log('📰 ARTICLE QUEUED SUCCESSFULLY');
+      } catch (error) {
+        console.error('📰 FAILED TO QUEUE ARTICLE:', error);
+      }
 
       const newHand = prev.hand.filter(c => c.id !== cardId);
       let newTruth = prev.truth;

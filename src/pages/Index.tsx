@@ -47,6 +47,7 @@ import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import { newspaper } from '@/systems/newspaper';
 import { testNewspaperQuick } from '@/utils/testNewspaperSystem';
+import { debugNewspaperSystem } from '@/debug/newspaperDebug';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
@@ -94,13 +95,27 @@ const Index = () => {
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
 
-  // Handle newspaper phase - trigger NEW newspaper system
+  // Handle newspaper phase - trigger NEW newspaper system with DEBUGGING
   useEffect(() => {
+    console.log('📰 NEWSPAPER PHASE CHECK:', {
+      phase: gameState.phase,
+      showNewspaper: gameState.showNewspaper,
+      round: gameState.round,
+      cardsPlayedThisRound: gameState.cardsPlayedThisRound.length
+    });
+    
     if (gameState.phase === 'newspaper' && gameState.showNewspaper) {
-      console.log('📰 Triggering new newspaper system for round:', gameState.round);
+      console.log('📰 TRIGGERING NEW NEWSPAPER SYSTEM for round:', gameState.round);
+      console.log('📰 Cards played this round:', gameState.cardsPlayedThisRound.map(c => c.card.name));
+      
       // Small delay to let game state settle
       const timer = setTimeout(() => {
-        showNewspaperForRound(gameState.round);
+        try {
+          showNewspaperForRound(gameState.round);
+          console.log('📰 showNewspaperForRound called successfully');
+        } catch (error) {
+          console.error('📰 ERROR calling showNewspaperForRound:', error);
+        }
       }, 500);
       return () => clearTimeout(timer);
     }
@@ -265,15 +280,23 @@ const Index = () => {
     const initNewspaper = async () => {
       try {
         console.log('📰 Initializing newspaper system...');
+        
+        // Test if config file is accessible
+        console.log('📰 Testing config file access...');
+        const testResponse = await fetch('/data/newspaper.config.json');
+        console.log('📰 Config file response:', testResponse.status, testResponse.ok);
+        
         await newspaper.loadConfig();
         console.log('📰 Newspaper system initialized successfully');
         
         // Test the system in development
         if (process.env.NODE_ENV === 'development') {
-          console.log('🧪 Running newspaper test...');
-          const testResult = await testNewspaperQuick();
-          if (testResult) {
-            console.log('✅ Newspaper test passed!');
+          console.log('🧪 Running newspaper debug test...');
+          const debugResult = await debugNewspaperSystem();
+          if (debugResult) {
+            console.log('✅ Newspaper debug test passed!');
+          } else {
+            console.error('❌ Newspaper debug test failed!');
           }
         }
       } catch (error) {
@@ -944,19 +967,36 @@ const Index = () => {
 
       {/* Zone targeting is now handled by the map overlay only */}
 
-      {/* Toast notifications */}
-      <Toaster 
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#1f2937',
-            color: '#f3f4f6',
-            border: '1px solid #374151',
-            fontFamily: 'monospace'
-          }
-        }}
-      />
+       {/* Toast notifications */}
+       <Toaster 
+         position="top-right"
+         toastOptions={{
+           duration: 3000,
+           style: {
+             background: '#1f2937',
+             color: '#f3f4f6',
+             border: '1px solid #374151',
+             fontFamily: 'monospace'
+           }
+         }}
+       />
+
+       {/* Development Debug Controls */}
+       {process.env.NODE_ENV === 'development' && (
+         <div className="fixed top-20 right-4 z-50 space-y-2">
+           <Button
+             onClick={async () => {
+               console.log('🧪 Manual newspaper test triggered');
+               await debugNewspaperSystem();
+             }}
+             variant="outline"
+             size="sm"
+             className="bg-yellow-500 text-black hover:bg-yellow-400"
+           >
+             Test Newspaper
+           </Button>
+         </div>
+       )}
 
       {/* Card Animation Layer with integrated effects */}
       <CardAnimationLayer />
@@ -1045,8 +1085,8 @@ const Index = () => {
         onConfirm={confirmNewCards}
       />
 
-      {/* OLD NEWSPAPER SYSTEM - DISABLED 
-      {gameState.showNewspaper && (
+      {/* COMPLETELY DISABLED OLD NEWSPAPER SYSTEM */}
+      {false && gameState.showNewspaper && (
         <TabloidNewspaper 
           events={gameState.currentEvents}
           playedCards={gameState.cardsPlayedThisRound}
@@ -1055,28 +1095,30 @@ const Index = () => {
           onClose={handleCloseNewspaper}
         />
       )}
-      */}
 
-      {/* NEW TABLOID NEWSPAPER SYSTEM */}
+      {/* NEW TABLOID NEWSPAPER SYSTEM - ONLY THIS ONE */}
       {isNewspaperVisible && currentIssue && (
         <NewspaperOverlay 
           issue={currentIssue} 
           onClose={() => {
             closeNewspaperOverlay();
-            closeNewspaper(); // Also close the game state newspaper
+            closeNewspaper();
           }}
         />
       )}
       
-      {/* FALLBACK: Show old system if new system fails */}
-      {gameState.showNewspaper && !isNewspaperVisible && (
-        <TabloidNewspaper 
-          events={gameState.currentEvents}
-          playedCards={gameState.cardsPlayedThisRound}
-          faction={gameState.faction}
-          truth={gameState.truth}
-          onClose={handleCloseNewspaper}
-        />
+      {/* SHOW OLD SYSTEM ONLY IF NEW SYSTEM COMPLETELY FAILS */}
+      {gameState.showNewspaper && !isNewspaperVisible && !currentIssue && (
+        <div>
+          <p>New newspaper system failed, showing fallback...</p>
+          <TabloidNewspaper 
+            events={gameState.currentEvents}
+            playedCards={gameState.cardsPlayedThisRound}
+            faction={gameState.faction}
+            truth={gameState.truth}
+            onClose={handleCloseNewspaper}
+          />
+        </div>
       )}
 
     </div>
