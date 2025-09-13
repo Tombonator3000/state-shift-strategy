@@ -96,6 +96,10 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
 
   // Generate card articles with tabloid-style headlines
   const generateCardArticles = (): Article[] => {
+    // Dynamic text length based on card count - fewer cards = more text per article
+    const cardCount = playedCards.length;
+    const textExpansionLevel = cardCount <= 2 ? 'high' : cardCount <= 4 ? 'medium' : 'low';
+    
     return playedCards.map(pc => {
       const tabloidHeadlines = [
         `"${pc.card.name}" SHOCKS NATION`,
@@ -113,22 +117,49 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
       
       // Use flavor text or generate Weekly World News style content
       const flavorText = pc.card.flavorTruth || pc.card.flavorGov;
-      const tabloidContent = flavorText || 
-        `Local sources report bizarre activities linked to what witnesses describe as "${pc.card.name}". Government officials refuse comment, but experts claim this could change everything. "I've never seen anything like it," said one anonymous whistleblower. Full story inside – if the Men in Black don't stop us first!`;
+      const baseContent = flavorText || 
+        `Local sources report bizarre activities linked to what witnesses describe as "${pc.card.name}". Government officials refuse comment, but experts claim this could change everything. "I've never seen anything like it," said one anonymous whistleblower.`;
+
+      // Dynamic text expansion based on card count
+      const additionalContent = {
+        high: [
+          `Our investigative team spent weeks tracking down leads, interviewing witnesses who insisted on anonymity, and analyzing classified documents obtained through sources we cannot disclose. The implications are staggering.`,
+          `"This changes everything we thought we knew," claims Dr. Anonymous, a former government researcher who requested their real name be withheld for obvious reasons. "The public deserves to know the truth, but powerful forces are working to suppress this information."`,
+          `According to leaked internal memos, officials have been aware of this situation for months, possibly years. The cover-up extends to the highest levels of government, with multiple agencies coordinating their response.`,
+          `Eyewitness testimonies paint a disturbing picture of systematic deception and manipulation. Citizens are being kept in the dark while shadowy organizations pull the strings behind the scenes.`
+        ],
+        medium: [
+          `Further investigation reveals a pattern of suspicious activity spanning multiple states. Witnesses report strange phenomena and unexplained incidents that authorities refuse to acknowledge.`,
+          `"The evidence is overwhelming," states an anonymous insider. "But they don't want you to know the truth." Multiple attempts to reach official spokespersons for comment were unsuccessful.`
+        ],
+        low: [
+          `Officials maintain their denial, but insiders suggest otherwise. The truth is out there, and we're committed to uncovering it.`
+        ]
+      };
+
+      const expansionTexts = additionalContent[textExpansionLevel];
+      const selectedExpansions = expansionTexts.slice(0, textExpansionLevel === 'high' ? 3 : textExpansionLevel === 'medium' ? 2 : 1);
 
       const editorialComments = [
-        "Experts baffled!",
-        "Officials deny everything!",
-        "Eyewitness drunk at the time",
-        "Government refuses comment",
-        "Truth suppressed by Big Tech",
-        "Classified by order of ████████",
-        "Story develops..."
+        "Full story inside – if the Men in Black don't stop us first!",
+        "Experts remain baffled by the implications!",
+        "Officials deny everything – but the evidence speaks for itself!",
+        "Government refuses to comment – suspicious much?",
+        "Truth suppressed by Big Tech and mainstream media!",
+        "Classified by order of ████████ – what are they hiding?",
+        "This story continues to develop as more witnesses come forward...",
+        "The cover-up runs deeper than anyone imagined!"
       ];
+
+      const fullContent = [
+        baseContent,
+        ...selectedExpansions,
+        editorialComments[Math.floor(Math.random() * editorialComments.length)]
+      ].join(' ');
 
       return {
         headline,
-        content: `${tabloidContent} ${editorialComments[Math.floor(Math.random() * editorialComments.length)]}`,
+        content: fullContent,
         isCard: true,
         cardId: pc.card.id, // Store the actual card ID for the CardImage component
         player: pc.player
@@ -411,21 +442,21 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
                   {/* TABLOID PHOTO - Left column */}
                   <div className="md:col-span-2 relative">
                     {article.isCard && article.cardId ? (
-                      <div className="relative border-8 border-black bg-white p-2 transform -rotate-1 shadow-lg">
+                      <div className="relative border-8 border-black bg-white p-2 shadow-lg">
                         <CardImage 
                           cardId={article.cardId}
                           className="w-full h-48 md:h-64 object-cover grayscale contrast-125 sepia-[0.2]"
                         />
-                        <div className="absolute -bottom-2 -right-2 bg-black text-white text-xs px-3 py-2 font-bold border-4 border-white transform rotate-3">
+                        <div className="absolute -bottom-2 -right-2 bg-black text-white text-xs px-3 py-2 font-bold border-4 border-white">
                           CLASSIFIED DOCUMENT PHOTO
                         </div>
                         {/* Tape effect */}
-                        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-200 border border-yellow-400 px-8 py-1 rotate-12 opacity-80">
+                        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-200 border border-yellow-400 px-8 py-1 opacity-80">
                           EVIDENCE
                         </div>
                       </div>
                     ) : (
-                      <div className="border-8 border-black bg-black text-white h-48 md:h-64 flex items-center justify-center transform -rotate-1 shadow-lg">
+                      <div className="border-8 border-black bg-black text-white h-48 md:h-64 flex items-center justify-center shadow-lg">
                         <div className="text-center">
                           <div className="text-4xl font-bold mb-2 animate-pulse" style={{ fontFamily: 'Anton, sans-serif' }}>
                             [CLASSIFIED]
@@ -514,17 +545,45 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
                 </div>
               </div>
 
-              <div className="bg-blue-200 border-8 border-black p-4 transform -rotate-1">
+              <div className="bg-blue-200 border-8 border-black p-4">
                 <h4 className="font-black mb-3 text-center text-xl border-b-2 border-black pb-2"
                     style={{ fontFamily: 'Anton, sans-serif' }}>
                   🌤️ WEATHER CONTROL 🌤️
                 </h4>
                 <div className="text-sm text-center space-y-2">
-                  <div className="font-black text-lg">Today: Chemtrails</div>
-                  <div className="font-semibold">Tomorrow: Mind Control Fog</div>
-                  <div className="font-semibold">Weekend: 70% chance of UFOs</div>
+                  <div className="font-black text-lg">Today: {(() => {
+                    const todayWeather = [
+                      'Chemtrails', 'Mind Control Rays', 'Suspicious Fog', 'Government Clouds',
+                      '5G Drizzle', 'Alien Haze', 'Lizard People Mist', 'Deep State Storms',
+                      'Fluoride Rain', 'Surveillance Snow', 'Conspiracy Clouds', 'Illuminati Ice'
+                    ];
+                    return todayWeather[Math.floor(Math.random() * todayWeather.length)];
+                  })()}</div>
+                  <div className="font-semibold">Tomorrow: {(() => {
+                    const tomorrowWeather = [
+                      'Mind Control Fog', 'Tracking Precipitation', 'Behavior Modification Breeze',
+                      'Social Credit Showers', 'Microchip Mist', 'Drone Surveillance Drizzle',
+                      'Reality Distortion Rain', 'Memory Wipe Weather', 'Thought Police Fog'
+                    ];
+                    return tomorrowWeather[Math.floor(Math.random() * tomorrowWeather.length)];
+                  })()}</div>
+                  <div className="font-semibold">Weekend: {Math.floor(Math.random() * 40 + 60)}% chance of {(() => {
+                    const weekendEvents = [
+                      'UFOs', 'Bigfoot Sightings', 'Time Anomalies', 'Dimensional Rifts',
+                      'Crypto-Cryptids', 'Flying Saucers', 'Interdimensional Visitors',
+                      'Government Experiments', 'Alien Abductions', 'Mutant Weather'
+                    ];
+                    return weekendEvents[Math.floor(Math.random() * weekendEvents.length)];
+                  })()}</div>
                   <div className="mt-3 font-mono bg-yellow-200 border-2 border-black p-2 text-black">
-                    *Weather controlled by lizard people
+                    *Weather controlled by {(() => {
+                      const controllers = [
+                        'lizard people', 'the Illuminati', 'Big Weather Corp',
+                        'alien overlords', 'shadow government', 'interdimensional beings',
+                        'the deep state', 'weather wizards', 'climate conspirators'
+                      ];
+                      return controllers[Math.floor(Math.random() * controllers.length)];
+                    })()}
                   </div>
                 </div>
               </div>
