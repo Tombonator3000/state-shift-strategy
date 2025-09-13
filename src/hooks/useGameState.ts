@@ -14,10 +14,21 @@ import { useAchievements } from '@/contexts/AchievementContext';
 import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
 import { CardEffectMigrator } from '@/utils/cardEffectMigration';
 import type { Card } from '@/types/cardEffects';
+import { hasHarmfulEffect } from '@/utils/clashHelpers';
+
+interface ClashState {
+  open: boolean;
+  attacker?: 'human' | 'ai';
+  defender?: 'human' | 'ai';
+  attackCard?: GameCard;
+  defenseCard?: GameCard;
+  expiresAt?: number;   // Date.now() + windowMs
+  windowMs: number;     // default 4000
+}
 
 interface GameState {
   faction: 'government' | 'truth';
-  phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory' | 'ai_turn' | 'card_presentation';
+  phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory' | 'ai_turn' | 'card_presentation' | 'clash_window' | 'clash_resolving';
   turn: number;
   round: number;
   currentPlayer: 'human' | 'ai';
@@ -82,6 +93,8 @@ interface GameState {
   // Enhanced drawing system state
   drawMode: DrawMode;
   cardDrawState: CardDrawState;
+  // Clash Arena system
+  clash: ClashState;
 }
 
 const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
@@ -176,6 +189,10 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     cardDrawState: {
       cardsPlayedLastTurn: 0,
       lastTurnWithoutPlay: false
+    },
+    clash: {
+      open: false,
+      windowMs: 4000
     }
   });
 
@@ -250,6 +267,10 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       cardDrawState: {
         cardsPlayedLastTurn: 0,
         lastTurnWithoutPlay: false
+      },
+      clash: {
+        open: false,
+        windowMs: 4000
       }
     }));
   }, [achievements, aiDifficulty]);
@@ -259,6 +280,30 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       const card = prev.hand.find(c => c.id === cardId);
       if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
         return prev;
+      }
+
+      // Check if this is a reactive attack that should open clash window
+      const isReactive = card.type === "ATTACK" || (card.type === "MEDIA" && hasHarmfulEffect(card));
+      
+      if (isReactive && !prev.clash.open) {
+        // Open clash window for reactive attack
+        return {
+          ...prev,
+          phase: 'clash_window',
+          clash: {
+            open: true,
+            attacker: 'human',
+            defender: 'ai', 
+            attackCard: card,
+            windowMs: 4000,
+            expiresAt: Date.now() + 4000
+          },
+          hand: prev.hand.filter(c => c.id !== cardId),
+          ip: prev.ip - card.cost,
+          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+          selectedCard: null,
+          targetState: null
+        };
       }
 
       // Track card play in achievements
@@ -971,5 +1016,169 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     getSaveInfo,
     deleteSave,
     checkVictoryConditions
+  };
+  
+  // Clash Arena functions
+  const playDefensiveCard = useCallback((cardId: string) => {
+    setGameState(prev => {
+      if (!prev.clash.open || prev.clash.defender !== 'human') return prev;
+      
+      const card = prev.hand.find(c => c.id === cardId);
+      if (!card || card.type !== "DEFENSIVE" || prev.ip < card.cost) return prev;
+      
+      // Pay cost and remove from hand
+      return {
+        ...prev,
+        clash: {
+          ...prev.clash,
+          defenseCard: card,
+          expiresAt: Date.now() + 100 // Force immediate resolution
+        },
+        hand: prev.hand.filter(c => c.id !== cardId),
+        ip: prev.ip - card.cost
+      };
+    });
+  }, []);
+  
+  const resolveClash = useCallback(() => {
+    setGameState(prev => {
+      if (!prev.clash.open || !prev.clash.attackCard) return prev;
+      
+      const { attackCard, defenseCard } = prev.clash;
+      const newLog = [...prev.log];
+      
+      // Determine outcome
+      let outcome: 'BLOCK_ALL' | 'REDUCE' | 'FULL_HIT' = 'FULL_HIT';
+      let reduceFactor = 1;
+      
+      if (defenseCard) {
+        if (defenseCard.effects?.reduceFactor) {
+          outcome = 'REDUCE';
+          reduceFactor = defenseCard.effects.reduceFactor;
+        } else {
+          outcome = 'BLOCK_ALL';
+          reduceFactor = 0;
+        }
+      }
+      
+      // Apply effects based on outcome
+      let newTruth = prev.truth;
+      let newIP = prev.ip;
+      let newAIIP = prev.aiIP;
+      
+      if (outcome === 'BLOCK_ALL') {
+        newLog.push(`🛡️ ${defenseCard?.name} blocked ${attackCard.name}.`);
+      } else if (outcome === 'REDUCE') {
+        // Apply reduced effects
+        const processor = new CardEffectProcessor({
+          truth: prev.truth,
+          ip: prev.ip,
+          aiIP: prev.aiIP,
+          hand: prev.hand,
+          aiHand: prev.aiHand,
+          controlledStates: prev.controlledStates,
+          aiControlledStates: prev.aiControlledStates || [],
+          round: prev.round,
+          turn: prev.turn,
+          faction: prev.faction
+        });
+        
+        const effectResult = processor.processCard(attackCard as any, prev.targetState);
+        
+        newTruth = Math.max(0, Math.min(100, prev.truth + Math.round(effectResult.truthDelta * reduceFactor)));
+        newIP = Math.max(0, prev.ip + Math.round(effectResult.ipDelta.self * reduceFactor));
+        newAIIP = Math.max(0, prev.aiIP + Math.round(effectResult.ipDelta.opponent * reduceFactor));
+        
+        newLog.push(`🛡️ ${defenseCard?.name} reduced ${attackCard.name} by ${Math.round((1 - reduceFactor) * 100)}%.`);
+      } else {
+        // Full hit - apply normal effects
+        const processor = new CardEffectProcessor({
+          truth: prev.truth,
+          ip: prev.ip,
+          aiIP: prev.aiIP,
+          hand: prev.hand,
+          aiHand: prev.aiHand,
+          controlledStates: prev.controlledStates,
+          aiControlledStates: prev.aiControlledStates || [],
+          round: prev.round,
+          turn: prev.turn,
+          faction: prev.faction
+        });
+        
+        const effectResult = processor.processCard(attackCard as any, prev.targetState);
+        
+        newTruth = Math.max(0, Math.min(100, prev.truth + effectResult.truthDelta));
+        newIP = Math.max(0, prev.ip + effectResult.ipDelta.self);
+        newAIIP = Math.max(0, prev.aiIP + effectResult.ipDelta.opponent);
+        
+        newLog.push(`💥 ${attackCard.name} hits!`);
+      }
+      
+      // Track achievements
+      achievements.onCardPlayed(attackCard.id, attackCard.type);
+      if (defenseCard) {
+        achievements.onCardPlayed(defenseCard.id, defenseCard.type);
+      }
+      
+      // Clear clash and return to action phase
+      return {
+        ...prev,
+        phase: 'action',
+        truth: newTruth,
+        ip: newIP,
+        aiIP: newAIIP,
+        log: newLog,
+        clash: {
+          open: false,
+          windowMs: 4000
+        },
+        cardsPlayedThisRound: [
+          ...prev.cardsPlayedThisRound, 
+          { card: attackCard, player: 'human' as const },
+          ...(defenseCard ? [{ card: defenseCard, player: 'human' as const }] : [])
+        ]
+      };
+    });
+  }, [achievements]);
+  
+  const closeClashWindow = useCallback(() => {
+    setGameState(prev => {
+      if (!prev.clash.open) return prev;
+      
+      // If no defense was played, apply full effects
+      if (!prev.clash.defenseCard) {
+        return {
+          ...prev,
+          phase: 'action',
+          clash: {
+            open: false,
+            windowMs: 4000
+          }
+        };
+      }
+      
+      return prev;
+    });
+  }, []);
+
+  return {
+    gameState,
+    initGame,
+    playCard,
+    playCardAnimated,
+    selectCard,
+    selectTargetState,
+    endTurn,
+    closeNewspaper,
+    executeAITurn,
+    confirmNewCards,
+    setGameState,
+    saveGame,
+    loadGame,
+    getSaveInfo,
+    checkVictoryConditions,
+    playDefensiveCard,
+    resolveClash,
+    closeClashWindow
   };
 };

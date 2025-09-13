@@ -15,7 +15,8 @@ import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashb
 import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
-import ZoneTargetingHelper from '@/components/game/ZoneTargetingHelper';
+import { ClashArenaIntegrated } from '@/components/game/ClashArenaIntegrated';
+import { canPlayDefensively } from '@/utils/clashHelpers';
 import { AudioControls } from '@/components/ui/audio-controls';
 import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
@@ -75,7 +76,7 @@ const Index = () => {
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showMinimizedHand, setShowMinimizedHand] = useState(false);
   
-  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
+  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo, playDefensiveCard, resolveClash, closeClashWindow } = useGameState();
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -847,8 +848,17 @@ const Index = () => {
           <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border flex-1 min-h-0">
             <h3 className="font-bold text-xs mb-2">YOUR HAND</h3>
             <EnhancedGameHand 
-              cards={gameState.hand}
-              onPlayCard={handlePlayCard}
+          cards={gameState.hand}
+          onPlayCard={(cardId) => {
+            if (gameState.clash.open && gameState.clash.defender === 'human') {
+              const card = gameState.hand.find(c => c.id === cardId);
+              if (card && canPlayDefensively(card, gameState.ip, gameState.clash.open)) {
+                playDefensiveCard(cardId);
+                return;
+              }
+            }
+            handlePlayCard(cardId);
+          }}
               onSelectCard={handleSelectCard}
               selectedCard={gameState.selectedCard}
               disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
@@ -892,18 +902,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Zone Targeting Helper */}
-      <ZoneTargetingHelper 
-        selectedZoneCard={gameState.selectedCard}
-        onCancel={() => {
-          selectCard(null);
-          audio.playSFX('click');
-          toast('🚫 Zone targeting canceled', {
-            duration: 2000,
-            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #6b7280' }
-          });
-        }}
-      />
+      {/* Zone targeting is now handled by the map overlay only */}
 
       {/* Toast notifications */}
       <Toaster 

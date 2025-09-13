@@ -16,6 +16,7 @@ export interface CardEffects {
   discardOpponent?: number;
   pressureDelta?: number;
   zoneDefense?: number;
+  reduceFactor?: number; // For partial blocking defensive cards (0-1)
   conditional?: {
     ifTruthAtLeast?: number;
     ifZonesControlledAtLeast?: number;
