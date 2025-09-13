@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { X, TrendingUp, AlertTriangle } from 'lucide-react';
 import type { GameCard } from '@/types/cardTypes';
 import type { GameEvent } from '@/data/eventDatabase';
+import CardImage from '@/components/game/CardImage';
 
 interface PlayedCard {
   card: GameCard;
@@ -29,7 +30,7 @@ interface Article {
   content: string;
   isEvent?: boolean;
   isCard?: boolean;
-  cardImage?: string;
+  cardId?: string;
   player?: 'human' | 'ai';
 }
 
@@ -129,7 +130,7 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
         headline,
         content: `${tabloidContent} ${editorialComments[Math.floor(Math.random() * editorialComments.length)]}`,
         isCard: true,
-        cardImage: `/placeholder-card.png`, // Cards will use placeholder for now
+        cardId: pc.card.id, // Store the actual card ID for the CardImage component
         player: pc.player
       };
     });
@@ -340,18 +341,14 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
                 <div className="grid md:grid-cols-3 gap-4">
                   {/* Card Image as Newspaper Photo */}
                   <div className="md:col-span-1">
-                    {article.isCard ? (
+                    {article.isCard && article.cardId ? (
                       <div className="relative">
-                        <img 
-                          src={article.cardImage || '/placeholder-card.png'}
-                          alt={article.headline}
-                          className="w-full h-32 md:h-40 object-cover border-2 border-black"
-                          onError={(e) => {
-                            e.currentTarget.src = '/placeholder-card.png';
-                          }}
+                        <CardImage 
+                          cardId={article.cardId}
+                          className="w-full h-32 md:h-40 object-cover border-2 border-black rounded-none"
                         />
                         <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-xs p-1 text-center font-mono">
-                          {article.isEvent ? '[EMERGENCY BROADCAST]' : '[CLASSIFIED DOCUMENT]'}
+                          [CLASSIFIED DOCUMENT PHOTO]
                         </div>
                       </div>
                     ) : (
