@@ -56,6 +56,7 @@ const Index = () => {
   const [loadingCard, setLoadingCard] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [subtitle, setSubtitle] = useState('Truth Seeker Operative');
+  const isMobile = useIsMobile();
   
   // Visual effects state
   const [floatingNumbers, setFloatingNumbers] = useState<{ 
@@ -899,10 +900,33 @@ const Index = () => {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Zone targeting is now handled by the map overlay only */}
+  return (
+    <div>
+      {isMobile ? (
+        <MobileGameLayout
+          controlledStates={gameState.controlledStates.length}
+          truth={gameState.truth}
+          ip={gameState.ip}
+          aiIP={gameState.aiIP}
+          aiDifficulty={gameState.aiDifficulty}
+          aiPersonalityName={gameState.aiStrategist?.personality.name}
+          isAIThinking={gameState.phase === 'ai_turn'}
+          currentPlayer={gameState.currentPlayer}
+          aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
+          assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
+          aiHandSize={gameState.aiHand.length}
+          aiObjectiveProgress={gameState.aiSecretAgenda ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100 : 0}
+          playerAgenda={gameState.secretAgenda}
+          aiAgenda={gameState.aiSecretAgenda}
+          gameLog={gameState.log}
+          onShowInGameOptions={() => setShowInGameOptions(true)}
+          onShowAchievements={() => setShowAchievements(true)}
+          onShowCardCollection={() => setShowCardCollection(true)}
+          onShowTutorial={() => setShowTutorial(true)}
+        >
+          {gameContent}
+        </MobileGameLayout>
+      ) : gameContent}
 
       {/* Toast notifications */}
       <Toaster 
@@ -1005,15 +1029,25 @@ const Index = () => {
         onConfirm={confirmNewCards}
       />
 
-      {/* Newspaper overlay */}
+      {/* Responsive Newspaper overlay */}
       {gameState.showNewspaper && (
-        <TabloidNewspaper 
-          events={gameState.currentEvents}
-          playedCards={gameState.cardsPlayedThisRound}
-          faction={gameState.faction}
-          truth={gameState.truth}
-          onClose={handleCloseNewspaper}
-        />
+        isMobile ? (
+          <ResponsiveNewspaper 
+            events={gameState.currentEvents}
+            playedCards={gameState.cardsPlayedThisRound}
+            faction={gameState.faction}
+            truth={gameState.truth}
+            onClose={handleCloseNewspaper}
+          />
+        ) : (
+          <TabloidNewspaper 
+            events={gameState.currentEvents}
+            playedCards={gameState.cardsPlayedThisRound}
+            faction={gameState.faction}
+            truth={gameState.truth}
+            onClose={handleCloseNewspaper}
+          />
+        )
       )}
 
     </div>

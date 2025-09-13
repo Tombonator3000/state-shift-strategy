@@ -324,15 +324,21 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
   return (
     <div className="relative" ref={containerRef}>
-      <Card className="p-4 bg-card border-border relative">
+      <Card className="w-full h-full relative bg-white/95 backdrop-blur-sm border-2 border-border shadow-lg">
+        <div className="absolute top-3 left-3 z-10 pointer-events-none">
+          <div className="bg-card/95 backdrop-blur-sm border border-border rounded-lg px-3 py-2 shadow-md">
+            <h2 className="text-sm md:text-lg font-bold text-foreground mb-0">USA Territory Control</h2>
+          </div>
+        </div>
         
         <div className="relative">
           <svg 
             ref={svgRef}
-            width="800" 
-            height="500" 
-            className="w-full h-full border border-border rounded bg-black/5"
-            viewBox="0 0 800 500"
+            width="100%" 
+            height="100%" 
+            viewBox="0 0 975 610"
+            className="w-full h-full touch-pan-x touch-pan-y"
+            style={{ background: 'transparent', touchAction: 'pan-x pan-y pinch-zoom' }}
             preserveAspectRatio="xMidYMid meet"
           >
           </svg>
