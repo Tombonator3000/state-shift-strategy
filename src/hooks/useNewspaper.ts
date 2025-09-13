@@ -50,7 +50,7 @@ export const useNewspaper = () => {
 
   // Generate and show newspaper at round end
   const showNewspaperForRound = useCallback((round: number) => {
-    console.log('📰 showNewspaperForRound called for round:', round, 'initialized:', isInitialized);
+    console.log('[Newspaper] showNewspaperForRound called for round:', round, 'initialized:', isInitialized);
     
     if (!isInitialized) {
       console.warn('Newspaper system not yet initialized');
@@ -58,9 +58,9 @@ export const useNewspaper = () => {
     }
 
     try {
-      console.log('📰 Generating newspaper issue...');
+      console.log('[Newspaper] Generating newspaper issue...');
       const issue = flushForRound(round);
-      console.log('📰 Generated issue:', issue.masthead, 'Articles:', issue.lead.length);
+      console.log('[Newspaper] Generated issue:', issue.masthead, 'Articles:', issue.lead.length);
       setCurrentIssue(issue);
       setIsVisible(true);
     } catch (error) {
