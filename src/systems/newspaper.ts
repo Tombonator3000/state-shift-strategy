@@ -1,5 +1,22 @@
 import { GameCard } from '@/types/cardTypes';
 
+// Add GameEvent import
+interface GameEvent {
+  id: string;
+  title: string;
+  headline?: string;
+  content: string;
+  type: 'conspiracy' | 'government' | 'truth' | 'random' | 'crisis' | 'opportunity' | 'capture';
+  faction?: 'truth' | 'government' | 'neutral';
+  rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
+  effects?: {
+    truth?: number;
+    ip?: number;
+    cardDraw?: number;
+  };
+  flavorText?: string;
+}
+
 export interface QueuedArticle {
   cardId: string;
   title: string;
@@ -95,13 +112,25 @@ class NewspaperSystem {
   queueArticleFromCard(card: GameCard, context: RoundContext): void {
     console.log('📰 queueArticleFromCard called:', card.name, 'initialized:', this.initialized);
     if (!this.initialized) {
-      console.warn('Newspaper system not initialized');
+      console.warn('📰 Newspaper system not initialized, cannot queue card article');
       return;
     }
 
     const article = this.generateArticleFromCard(card, context);
     this.queuedArticles.push(article);
-    console.log('📰 Article queued. Total queued:', this.queuedArticles.length);
+    console.log('📰 Card article queued for:', card.name, 'Total queued articles:', this.queuedArticles.length);
+  }
+
+  queueArticleFromEvent(event: GameEvent, context: RoundContext): void {
+    console.log('📰 queueArticleFromEvent called:', event.title, 'initialized:', this.initialized);
+    if (!this.initialized) {
+      console.warn('📰 Newspaper system not initialized, cannot queue event article');
+      return;
+    }
+
+    const article = this.generateArticleFromEvent(event, context);
+    this.queuedArticles.push(article);
+    console.log('📰 Event article queued for:', event.title, 'Total queued articles:', this.queuedArticles.length);
   }
 
   private generateArticleFromCard(card: GameCard, context: RoundContext): QueuedArticle {
@@ -262,6 +291,86 @@ class NewspaperSystem {
     if (card.type === 'ZONE') return 'territorial control';
     if (card.type === 'MEDIA') return 'information warfare';
     return 'conspiracy theory';
+  }
+
+  private generateArticleFromEvent(event: GameEvent, context: RoundContext): QueuedArticle {
+    const headline = event.headline || event.title.toUpperCase();
+    const dek = this.generateEventDek(event);
+    const body = this.generateEventBody(event, context);
+    const stamp = this.pickRandomStamp();
+
+    return {
+      cardId: `event-${event.id}`,
+      title: headline,
+      dek,
+      body,
+      imageUrl: this.getEventImage(event),
+      stamp
+    };
+  }
+
+  private generateEventDek(event: GameEvent): string {
+    if (event.flavorText) {
+      return event.flavorText.length > 80 ? event.flavorText.substring(0, 77) + '...' : event.flavorText;
+    }
+
+    const eventDekTemplates = [
+      'Breaking developments unfold in real time',
+      'Experts scramble to understand implications', 
+      'Government response expected within hours',
+      'Citizens advised to remain vigilant',
+      'Investigation teams deployed nationwide'
+    ];
+    
+    return eventDekTemplates[Math.floor(Math.random() * eventDekTemplates.length)];
+  }
+
+  private generateEventBody(event: GameEvent, context: RoundContext): string[] {
+    const paragraphs = [];
+    
+    // Use the event's actual content as first paragraph
+    paragraphs.push(event.content);
+    
+    // Add context about effects
+    if (event.effects) {
+      let effectText = 'Sources report ';
+      const effects = [];
+      if (event.effects.truth) effects.push(`${Math.abs(event.effects.truth)}% shift in public awareness`);
+      if (event.effects.ip) effects.push(`${Math.abs(event.effects.ip)} point influence change`);
+      if (event.effects.cardDraw) effects.push('classified intelligence surfacing');
+      
+      if (effects.length > 0) {
+        effectText += effects.join(' and ') + '.';
+        paragraphs.push(effectText);
+      }
+    }
+    
+    // Add expert commentary based on event type
+    const commentaries = {
+      'conspiracy': 'Conspiracy researchers claim this validates years of investigation into shadow operations.',
+      'government': 'Official channels maintain this is part of routine administrative procedures.',
+      'truth': 'Truth advocacy groups herald this as a breakthrough in transparency efforts.',
+      'crisis': 'Emergency response protocols have been activated across multiple agencies.',
+      'opportunity': 'Strategic analysts suggest this development creates new possibilities.'
+    };
+    
+    const commentary = commentaries[event.type as keyof typeof commentaries] || 'Independent observers continue monitoring the situation.';
+    paragraphs.push(commentary);
+    
+    return paragraphs;
+  }
+
+  private getEventImage(event: GameEvent): string {
+    // Map event types to appropriate placeholder images
+    const eventImages = {
+      'conspiracy': '/img/classified-placeholder.png',
+      'government': '/img/classified-placeholder.png', 
+      'truth': '/img/classified-placeholder.png',
+      'crisis': '/img/classified-placeholder.png',
+      'opportunity': '/img/classified-placeholder.png'
+    };
+    
+    return eventImages[event.type as keyof typeof eventImages] || '/img/classified-placeholder.png';
   }
 
   private getCardImage(card: GameCard): string {

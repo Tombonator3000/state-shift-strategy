@@ -322,7 +322,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       console.log('📰 QUEUEING ARTICLE for card:', card.name, 'Context:', context);
       try {
         newspaper.queueArticleFromCard(card, context);
-        console.log('📰 ARTICLE QUEUED SUCCESSFULLY');
+        console.log('📰 ARTICLE QUEUED SUCCESSFULLY for card:', card.name);
       } catch (error) {
         console.error('📰 FAILED TO QUEUE ARTICLE:', error);
       }
@@ -607,6 +607,21 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           const triggeredEvent = prev.eventManager.selectRandomEvent(prev);
           if (triggeredEvent) {
             newEvents = [triggeredEvent];
+            
+            // Queue event for newspaper system too
+            console.log('📰 QUEUEING EVENT for newspaper:', triggeredEvent.title);
+            try {
+              const eventContext = {
+                round: prev.round,
+                truth: prev.truth,
+                ip: { human: prev.ip, ai: prev.aiIP },
+                states: prev.states
+              };
+              newspaper.queueArticleFromEvent(triggeredEvent, eventContext);
+              console.log('📰 EVENT ARTICLE QUEUED SUCCESSFULLY:', triggeredEvent.title);
+            } catch (error) {
+              console.error('📰 FAILED TO QUEUE EVENT ARTICLE:', error);
+            }
             
             // Apply event effects
             if (triggeredEvent.effects) {
