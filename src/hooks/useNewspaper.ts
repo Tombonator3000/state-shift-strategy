@@ -1,6 +1,11 @@
-import { useState, useCallback, useEffect } from 'react';
-import { newspaper, NewspaperIssue } from '@/systems/newspaper';
-import { GameCard } from '@/types/cardTypes';
+import { useState, useCallback, useEffect } from "react";
+import { GameCard } from "@/types/cardTypes";
+import {
+  loadConfig,
+  queueArticleFromCard as queueFromCard,
+  flushForRound,
+} from "@/services/newspaper";
+import { NewspaperIssue } from "@/types/newspaper";
 
 interface RoundContext {
   round: number;
@@ -18,10 +23,10 @@ export const useNewspaper = () => {
   useEffect(() => {
     const initNewspaper = async () => {
       try {
-        await newspaper.loadConfig();
+        await loadConfig();
         setIsInitialized(true);
       } catch (error) {
-        console.error('Failed to initialize newspaper system:', error);
+        console.error('[Newspaper] failed to initialize newspaper system:', error);
         setIsInitialized(true); // Continue with fallback config
       }
     };
@@ -32,30 +37,34 @@ export const useNewspaper = () => {
   // Queue an article when a card is played
   const queueArticleFromCard = useCallback((card: GameCard, context: RoundContext) => {
     if (!isInitialized) {
-      console.warn('Newspaper system not yet initialized');
-      return;
-    }
-
-    newspaper.queueArticleFromCard(card, context);
-  }, [isInitialized]);
-
-  // Generate and show newspaper at round end
-  const showNewspaperForRound = useCallback((round: number) => {
-    console.log('📰 showNewspaperForRound called for round:', round, 'initialized:', isInitialized);
-    
-    if (!isInitialized) {
-      console.warn('Newspaper system not yet initialized');
+      console.warn('[Newspaper] system not yet initialized');
       return;
     }
 
     try {
-      console.log('📰 Generating newspaper issue...');
-      const issue = newspaper.flushForRound(round);
-      console.log('📰 Generated issue:', issue.masthead, 'Articles:', issue.mainArticles.length);
+      queueFromCard(card as any, context);
+    } catch (err) {
+      console.error('[Newspaper] failed to queue newspaper article:', err);
+    }
+  }, [isInitialized]);
+
+  // Generate and show newspaper at round end
+  const showNewspaperForRound = useCallback((round: number) => {
+    console.debug('[Newspaper] showNewspaperForRound called for round:', round, 'initialized:', isInitialized);
+
+    if (!isInitialized) {
+      console.warn('[Newspaper] system not yet initialized');
+      return;
+    }
+
+    try {
+      console.debug('[Newspaper] generating newspaper issue...');
+      const issue = flushForRound(round);
+      console.debug('[Newspaper] generated issue:', issue.masthead, 'articles:', issue.lead.length);
       setCurrentIssue(issue);
       setIsVisible(true);
     } catch (error) {
-      console.error('Failed to generate newspaper issue:', error);
+      console.error('[Newspaper] failed to generate newspaper issue:', error);
     }
   }, [isInitialized]);
 

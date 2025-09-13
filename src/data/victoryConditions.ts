@@ -5,7 +5,7 @@
 export interface GameCard {
   id: string;
   name: string;
-  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'DEVELOPMENT' | 'LEGENDARY';
+  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE';
   rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
   text: string;
   flavor?: string;

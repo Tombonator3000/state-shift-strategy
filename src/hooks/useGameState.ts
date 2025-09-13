@@ -15,7 +15,7 @@ import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
 import { CardEffectMigrator } from '@/utils/cardEffectMigration';
 import type { Card } from '@/types/cardEffects';
 import { hasHarmfulEffect } from '@/utils/clashHelpers';
-import { newspaper } from '@/systems/newspaper';
+import { queueArticleFromCard } from "@/services/newspaper";
 
 interface ClashState {
   open: boolean;
@@ -319,12 +319,12 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         ip: { human: prev.ip, ai: prev.aiIP },
         states: prev.states
       };
-      console.log('📰 QUEUEING ARTICLE for card:', card.name, 'Context:', context);
+      console.debug('[Newspaper] queueing article for card:', card.name, 'context:', context);
       try {
-        newspaper.queueArticleFromCard(card, context);
-        console.log('📰 ARTICLE QUEUED SUCCESSFULLY for card:', card.name);
+        queueArticleFromCard(card as any, context);
+        console.debug('[Newspaper] article queued for card:', card.name);
       } catch (error) {
-        console.error('📰 FAILED TO QUEUE ARTICLE:', error);
+        console.error('[Newspaper] failed to queue article:', error);
       }
 
       const newHand = prev.hand.filter(c => c.id !== cardId);
@@ -607,21 +607,6 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           const triggeredEvent = prev.eventManager.selectRandomEvent(prev);
           if (triggeredEvent) {
             newEvents = [triggeredEvent];
-            
-            // Queue event for newspaper system too
-            console.log('📰 QUEUEING EVENT for newspaper:', triggeredEvent.title);
-            try {
-              const eventContext = {
-                round: prev.round,
-                truth: prev.truth,
-                ip: { human: prev.ip, ai: prev.aiIP },
-                states: prev.states
-              };
-              newspaper.queueArticleFromEvent(triggeredEvent, eventContext);
-              console.log('📰 EVENT ARTICLE QUEUED SUCCESSFULLY:', triggeredEvent.title);
-            } catch (error) {
-              console.error('📰 FAILED TO QUEUE EVENT ARTICLE:', error);
-            }
             
             // Apply event effects
             if (triggeredEvent.effects) {
