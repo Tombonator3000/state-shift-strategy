@@ -1,0 +1,31 @@
+{
+  "cards": [
+    {
+      "id": "truth-startup-1",
+      "faction": "truth",
+      "name": "Emergency Broadcast",
+      "type": "MEDIA",
+      "rarity": "common",
+      "cost": 4,
+      "text": "+3% Truth.",
+      "flavorTruth": "The airwaves belong to the people.",
+      "flavorGov": "Unauthorized transmission detected.",
+      "target": { "scope": "global", "count": 0 },
+      "effects": [{"k":"truth","who":"player","v":3}]
+    },
+    {
+      "id": "gov-startup-1",
+      "faction": "government",
+      "name": "Media Control",
+      "type": "MEDIA",
+      "rarity": "common",
+      "cost": 4,
+      "text": "-3% Truth.",
+      "flavorTruth": "The narrative shifts.",
+      "flavorGov": "Information secured.",
+      "target": { "scope": "global", "count": 0 },
+      "effects": [{"k":"truth","who":"player","v":-3}]
+    }
+  ],
+  "deck": ["truth-startup-1","gov-startup-1"]
+}
