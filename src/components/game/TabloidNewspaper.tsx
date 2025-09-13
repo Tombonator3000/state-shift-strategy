@@ -19,31 +19,57 @@ interface TabloidNewspaperProps {
   onClose: () => void;
 }
 
+interface NewspaperData {
+  mastheads: string[];
+  ads: string[];
+}
+
+interface Article {
+  headline: string;
+  content: string;
+  isEvent?: boolean;
+  isCard?: boolean;
+  player?: 'human' | 'ai';
+}
+
 const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: TabloidNewspaperProps) => {
   const [glitching, setGlitching] = useState(false);
   const [masthead, setMasthead] = useState('THE SHEEPLE DAILY');
+  const [newspaperData, setNewspaperData] = useState<NewspaperData | null>(null);
+
+  // Load newspaper data on component mount
+  useEffect(() => {
+    const loadNewspaperData = async () => {
+      try {
+        const response = await fetch('/data/newspaperData.json');
+        const data = await response.json();
+        setNewspaperData(data);
+        
+        // Set random masthead from the loaded data
+        const randomMasthead = data.mastheads[Math.floor(Math.random() * data.mastheads.length)];
+        setMasthead(randomMasthead);
+      } catch (error) {
+        console.error('Failed to load newspaper data:', error);
+        // Keep default masthead if loading fails
+      }
+    };
+
+    loadNewspaperData();
+  }, []);
 
   // Glitch masthead system - 5% chance on load
   useEffect(() => {
     const shouldGlitch = Math.random() < 0.05;
-    if (shouldGlitch) {
+    if (shouldGlitch && newspaperData) {
       const timer = setTimeout(() => {
         setGlitching(true);
-        const glitchMastheads = [
-          'THE PARANOID TIMES',
-          'AREA 51 DIGEST',
-          'BAT BOY BULLETIN', 
-          'CHEMTRAIL COURIER',
-          'ILLUMINATI LEDGER',
-          'BLACK HELICOPTER GAZETTE',
-          'WEEKLY WORLD WEIRD',
-          'TINFOIL HAT TRIBUNE'
-        ];
-        setMasthead(glitchMastheads[Math.floor(Math.random() * glitchMastheads.length)]);
+        const glitchOptions = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
+        setMasthead(glitchOptions[Math.floor(Math.random() * glitchOptions.length)]);
         
         const resetTimer = setTimeout(() => {
           setGlitching(false);
-          setMasthead('THE SHEEPLE DAILY');
+          const randomMasthead = newspaperData.mastheads[Math.floor(Math.random() * newspaperData.mastheads.length)];
+          setMasthead(randomMasthead);
         }, 1200);
         
         return () => clearTimeout(resetTimer);
@@ -51,29 +77,71 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
       
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [newspaperData]);
 
-  // Tabloid headlines from events and cards
-  const generateTabloidHeadlines = () => {
-    const headlines = [
-      "BIGFOOT RUNS FOR SENATE: 'More Hair Than Most Politicians'",
-      "ELVIS SPOTTED AT AREA 51 TACO BELL",
-      "BAT BOY DENIES INVOLVEMENT IN WEATHER MACHINE",
-      "FLORIDA MAN BUILDS ROCKET TO VISIT FLAT EARTH EDGE",
-      "PASTOR REX CLAIMS ALIENS ATTEND HIS SERMONS",
-      "AGENT SMITHERSON'S COFFEE MUG BECOMES SENTIENT",
-      "LOCAL GRANDMOTHER'S KNITTING CIRCLE SUSPECTED OF WITCHCRAFT",
-      "MOTHMAN PHOTOGRAPHED DOING TAXES",
-      "GOVERNMENT ADMITS BIRDS AREN'T REAL, BLAMES BUDGET CUTS",
-      "LIZARD PEOPLE DEMAND EQUAL RIGHTS AT CITY COUNCIL MEETING"
-    ];
-    
-    const eventHeadlines = events.map(event => 
-      event.headline || `BREAKING: ${event.title.toUpperCase()}`
-    );
-    
-    return [...eventHeadlines, ...headlines.slice(0, 3 - eventHeadlines.length)];
+  // Generate card articles with tabloid-style headlines
+  const generateCardArticles = (): Article[] => {
+    return playedCards.map(pc => {
+      const tabloidHeadlines = [
+        `"${pc.card.name}" SHOCKS NATION`,
+        `EXCLUSIVE: ${pc.card.name.toUpperCase()} LEAKED!`,
+        `BREAKING: ${pc.card.name} EXPOSED!`,
+        `SOURCES CONFIRM: ${pc.card.name} IS REAL`,
+        `WHISTLEBLOWER REVEALS: ${pc.card.name}`,
+        `CLASSIFIED DOCS: ${pc.card.name} UNCOVERED`,
+        `EXPERTS BAFFLED BY ${pc.card.name}`,
+        `${pc.card.name}: THE SHOCKING TRUTH`,
+        `GOVERNMENT DENIES ${pc.card.name} EXISTS`
+      ];
+
+      const headline = tabloidHeadlines[Math.floor(Math.random() * tabloidHeadlines.length)];
+      
+      // Use flavor text or generate Weekly World News style content
+      const flavorText = pc.card.flavorTruth || pc.card.flavorGov;
+      const tabloidContent = flavorText || 
+        `Local sources report bizarre activities linked to what witnesses describe as "${pc.card.name}". Government officials refuse comment, but experts claim this could change everything. "I've never seen anything like it," said one anonymous whistleblower. Full story inside – if the Men in Black don't stop us first!`;
+
+      const editorialComments = [
+        "Experts baffled!",
+        "Officials deny everything!",
+        "Eyewitness drunk at the time",
+        "Government refuses comment",
+        "Truth suppressed by Big Tech",
+        "Classified by order of ████████",
+        "Story develops..."
+      ];
+
+      return {
+        headline,
+        content: `${tabloidContent} ${editorialComments[Math.floor(Math.random() * editorialComments.length)]}`,
+        isCard: true,
+        player: pc.player
+      };
+    });
   };
+
+  // Tabloid headlines from events
+  const generateTabloidHeadlines = (): Article[] => {
+    const eventHeadlines = events.map(event => ({
+      headline: event.headline || `BREAKING: ${event.title.toUpperCase()}`,
+      content: event.content,
+      isEvent: true
+    }));
+    
+    return eventHeadlines;
+  };
+
+  // Get random ads from newspaper data
+  const getRandomAds = (count: number) => {
+    if (!newspaperData?.ads) return [];
+    const shuffled = [...newspaperData.ads].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+
+  const cardArticles = generateCardArticles();
+  const eventHeadlines = generateTabloidHeadlines();
+  const allArticles: Article[] = [...cardArticles, ...eventHeadlines];
+  const humorAds = getRandomAds(3);
 
   // Weird tabloid ads
   const weirdAds = [
@@ -132,8 +200,7 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
     "Pastor Rex's prayer circle accidentally summoned WiFi"
   ];
 
-  const selectedHeadlines = generateTabloidHeadlines().slice(0, 3);
-  const selectedAds = weirdAds.sort(() => 0.5 - Math.random()).slice(0, 3);
+  const selectedHeadlines = allArticles.slice(0, 4);
   const selectedConspiracies = conspiracyCorner.sort(() => 0.5 - Math.random()).slice(0, 4);
 
   const getTruthMeterStatus = () => {
@@ -245,26 +312,27 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
             </Card>
 
             {/* Headlines */}
-            {selectedHeadlines.map((headline, index) => (
+            {selectedHeadlines.map((article, index) => (
               <article key={index} className="border-4 border-black bg-white p-4">
-                <h2 className="text-2xl font-black mb-2 text-center transform -rotate-1">
-                  {headline}
+                <h2 className={`text-2xl font-black mb-2 text-center transform -rotate-1 ${
+                  article.isEvent ? 'text-red-600' : 'text-black'
+                }`}>
+                  {article.headline}
                 </h2>
                 
                 <div className="w-full h-20 bg-gray-300 mb-3 flex items-center justify-center text-gray-600 text-sm border-2 border-black font-mono">
-                  [DEFINITELY REAL PHOTO - NOT DOCTORED]
+                  {article.isEvent ? '[EMERGENCY BROADCAST PHOTO]' : '[DEFINITELY REAL PHOTO - NOT DOCTORED]'}
                 </div>
                 
-                <p className="text-sm leading-relaxed font-serif">
-                  Exclusive sources confirm this shocking development that will definitely change everything forever. 
-                  {index === 0 && " Our crack team of investigative journalists (three guys in a van) "}
-                  Reports indicate unprecedented levels of weirdness in the ongoing situation. 
-                  More details on page B-{Math.floor(Math.random() * 20) + 1}.
+                <p className={`text-sm leading-relaxed font-serif ${
+                  article.isEvent ? 'text-red-800' : 'text-black'
+                }`}>
+                  {article.content}
                 </p>
                 
                 <div className="flex justify-between items-center mt-2 text-xs text-gray-600">
-                  <span>By: {['Agent X', 'Deep Throat Jr.', 'Anonymous Tipster', 'Florida Man'][Math.floor(Math.random() * 4)]}</span>
-                  <span>Source: {['Totally Reliable', 'My Cousin\'s Blog', 'Overheard at Denny\'s'][Math.floor(Math.random() * 3)]}</span>
+                  <span>By: {article.isEvent ? 'Crisis Reporter' : ['Agent X', 'Deep Throat Jr.', 'Anonymous Tipster', 'Florida Man'][Math.floor(Math.random() * 4)]}</span>
+                  <span>Source: {article.isEvent ? 'EMERGENCY BROADCAST' : ['Totally Reliable', 'My Cousin\'s Blog', 'Overheard at Denny\'s'][Math.floor(Math.random() * 3)]}</span>
                 </div>
               </article>
             ))}
@@ -272,18 +340,19 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
 
           {/* Sidebar - 1 column */}
           <div className="space-y-4">
-            {/* Weird Ads */}
-            {selectedAds.map((ad, index) => (
-              <Card key={index} className={`p-3 bg-yellow-400 border-4 border-black transform ${
-                index % 2 === 0 ? 'rotate-1' : '-rotate-1'
-              } hover:rotate-0 transition-transform`}>
-                <h4 className="font-black text-center mb-2 text-xs">⚠️ ADVERTISEMENT ⚠️</h4>
-                <div className="text-center">
-                  <div className="font-black text-sm mb-1">{ad.title}</div>
-                  <div className="text-xs mb-2">{ad.subtitle}</div>
-                  <div className="text-xs font-mono bg-black text-yellow-400 p-1">
-                    {ad.contact}
-                  </div>
+            {/* Humor Ads */}
+            {humorAds.map((ad, index) => (
+              <Card key={index} className={`p-3 bg-yellow-400/95 text-black border-4 border-black transform ${
+                index % 3 === 0 ? 'rotate-1' : index % 3 === 1 ? '-rotate-1' : '-rotate-0.5'
+              } hover:rotate-0 transition-transform shadow-lg`}>
+                <h4 className="font-black text-center mb-2 font-mono text-xs uppercase tracking-wide">
+                  ⚠️ SPECIAL OFFER ⚠️
+                </h4>
+                <div className="text-center text-xs font-bold font-mono">
+                  {ad}
+                </div>
+                <div className="text-center text-[10px] font-mono mt-2 opacity-70">
+                  *Results not guaranteed. Side effects may include enlightenment.
                 </div>
               </Card>
             ))}
