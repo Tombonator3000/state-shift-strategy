@@ -865,6 +865,7 @@ const Index = () => {
               currentIP={gameState.ip}
               loadingCard={loadingCard}
               onCardHover={setHoveredCard}
+              clashState={gameState.clash}
             />
           </div>
 
@@ -1015,6 +1016,20 @@ const Index = () => {
           onClose={handleCloseNewspaper}
         />
       )}
+
+      {/* Clash Arena */}
+      <ClashArenaIntegrated
+        isOpen={gameState.clash.open}
+        attackCard={gameState.clash.attackCard}
+        defenseCard={gameState.clash.defenseCard}
+        expiresAt={gameState.clash.expiresAt}
+        windowMs={gameState.clash.windowMs}
+        hand={gameState.hand}
+        playerIP={gameState.ip}
+        onPlayDefensive={playDefensiveCard}
+        onResolveClash={resolveClash}
+        onCloseWindow={closeClashWindow}
+      />
 
     </div>
   );
