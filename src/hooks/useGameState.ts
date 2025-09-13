@@ -608,21 +608,6 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           if (triggeredEvent) {
             newEvents = [triggeredEvent];
             
-            // Queue event for newspaper system too
-            console.log('📰 QUEUEING EVENT for newspaper:', triggeredEvent.title);
-            try {
-              const eventContext = {
-                round: prev.round,
-                truth: prev.truth,
-                ip: { human: prev.ip, ai: prev.aiIP },
-                states: prev.states
-              };
-              newspaper.queueArticleFromEvent(triggeredEvent, eventContext);
-              console.log('📰 EVENT ARTICLE QUEUED SUCCESSFULLY:', triggeredEvent.title);
-            } catch (error) {
-              console.error('📰 FAILED TO QUEUE EVENT ARTICLE:', error);
-            }
-            
             // Apply event effects
             if (triggeredEvent.effects) {
               const effects = triggeredEvent.effects;
