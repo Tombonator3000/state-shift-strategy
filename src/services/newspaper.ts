@@ -28,8 +28,12 @@ export async function loadConfig(): Promise<NewspaperConfig> {
   return _cfg!;
 }
 
-export async function queueArticleFromCard(card: Card, ctx: { round: number; state: any }) {
-  const cfg = _cfg ?? (await loadConfig());
+export function queueArticleFromCard(card: Card, ctx: { round: number; state: any }) {
+  const cfg = _cfg;
+  if (!cfg) {
+    console.warn("[Newspaper] Config not loaded; cannot queue article for", card.name);
+    return;
+  }
 
   if (!["MEDIA", "ZONE", "ATTACK", "DEFENSIVE"].includes(card.type)) {
     console.debug("[Newspaper] Skipping unsupported card type:", card.type, card.name);

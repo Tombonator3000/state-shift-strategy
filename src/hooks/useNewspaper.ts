@@ -41,9 +41,11 @@ export const useNewspaper = () => {
       return;
     }
 
-    queueFromCard(card as any, context).catch(err => {
+    try {
+      queueFromCard(card as any, context);
+    } catch (err) {
       console.error('Failed to queue newspaper article:', err);
-    });
+    }
   }, [isInitialized]);
 
   // Generate and show newspaper at round end

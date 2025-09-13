@@ -320,9 +320,12 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         states: prev.states
       };
       console.log('📰 QUEUEING ARTICLE for card:', card.name, 'Context:', context);
-      queueArticleFromCard(card as any, context)
-        .then(() => console.log('📰 ARTICLE QUEUED SUCCESSFULLY for card:', card.name))
-        .catch(error => console.error('📰 FAILED TO QUEUE ARTICLE:', error));
+      try {
+        queueArticleFromCard(card as any, context);
+        console.log('📰 ARTICLE QUEUED for card:', card.name);
+      } catch (error) {
+        console.error('📰 FAILED TO QUEUE ARTICLE:', error);
+      }
 
       const newHand = prev.hand.filter(c => c.id !== cardId);
       let newTruth = prev.truth;
