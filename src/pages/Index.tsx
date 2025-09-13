@@ -65,7 +65,6 @@ const Index = () => {
     y?: number;
   } | null>(null);
   const [previousPhase, setPreviousPhase] = useState('');
-  const [showPhaseTransition, setShowPhaseTransition] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<any>(null);
   const [victoryState, setVictoryState] = useState<{ isVictory: boolean; type: 'states' | 'ip' | 'truth' | 'agenda' | null }>({ isVictory: false, type: null });
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -104,13 +103,10 @@ const Index = () => {
     localStorage.setItem('prevIP', currentIP.toString());
   }, [gameState.ip]);
 
-  // Track phase changes
+  // Track phase changes for context
   useEffect(() => {
-    if (gameState.phase !== previousPhase && previousPhase) {
-      setShowPhaseTransition(true);
-    }
     setPreviousPhase(gameState.phase);
-  }, [gameState.phase, previousPhase]);
+  }, [gameState.phase]);
 
   // Check victory conditions and trigger game over
   useEffect(() => {
@@ -927,16 +923,6 @@ const Index = () => {
       {/* Card Animation Layer with integrated effects */}
       <CardAnimationLayer />
       
-      {showPhaseTransition && (
-        <PhaseTransition 
-          phase={gameState.phase}
-          previousPhase={previousPhase}
-          truth={gameState.truth}
-          round={gameState.round}
-          faction={gameState.faction}
-          onComplete={() => setShowPhaseTransition(false)}
-        />
-      )}
       
       <TabloidVictoryScreen 
         isVisible={victoryState.isVictory}
