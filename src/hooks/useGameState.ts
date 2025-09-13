@@ -285,7 +285,10 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       // Check if this is a reactive attack that should open clash window
       const isReactive = card.type === "ATTACK" || (card.type === "MEDIA" && hasHarmfulEffect(card));
       
+      console.log(`[Clash] Playing card ${card.name} - isReactive: ${isReactive}, type: ${card.type}, clash.open: ${prev.clash.open}`);
+      
       if (isReactive && !prev.clash.open) {
+        console.log(`[Clash] OPENING clash window for human attack: ${card.name}`);
         // Open clash window for reactive attack
         return {
           ...prev,
@@ -564,7 +567,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   const endTurn = useCallback(() => {
     setGameState(prev => {
       // Don't allow turn ending if game is over or clash is active
-      if (prev.isGameOver || prev.clash?.open || prev.phase === 'clash_window' || prev.phase === 'clash_resolving') return prev;
+      if (prev.isGameOver || prev.clash?.open) return prev;
       
       if (prev.currentPlayer === 'human') {
         // Human player ending turn - switch to AI (no card draw here anymore)
@@ -636,8 +639,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         // AI turn ending - switch back to human
         // ✨ Guard: Never show newspaper if clash is active
         console.log(`[Clash] Checking newspaper guard - clash.open: ${prev.clash?.open}, phase: ${prev.phase}`);
-        if (prev.clash?.open || (prev.phase as any) === 'clash_window' || (prev.phase as any) === 'clash_resolving') {
-          console.log(`[Clash] Blocking newspaper - clash active`);
+        if (prev.clash?.open) {
+          console.log(`[Clash] Blocking newspaper - clash active, staying in current phase`);
           return prev; // Wait until clash resolves
         }
         
@@ -762,7 +765,10 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           // Check if this is harmful MEDIA that should trigger clash
           const isHarmfulMedia = hasHarmfulEffect(card);
           
+          console.log(`[Clash] AI playing MEDIA ${card.name} - isHarmful: ${isHarmfulMedia}`);
+          
           if (isHarmfulMedia) {
+            console.log(`[Clash] OPENING clash window for AI harmful MEDIA: ${card.name}`);
             // Open clash window for human to defend against harmful MEDIA
             newLog.push(`AI played ${card.name}: Harmful media attack - opening clash window!`);
             if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
@@ -814,7 +820,10 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           // Check if this should open clash window for human to defend
           const isReactiveAIAttack = card.type === "ATTACK" || (card.type === "MEDIA" && hasHarmfulEffect(card));
           
+          console.log(`[Clash] AI playing ATTACK ${card.name} - isReactive: ${isReactiveAIAttack}`);
+          
           if (isReactiveAIAttack) {
+            console.log(`[Clash] OPENING clash window for AI ATTACK: ${card.name}`);
             // Open clash window for human to defend against AI attack
             newLog.push(`AI played ${card.name}: Opening clash window for defense!`);
             if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
@@ -1105,6 +1114,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     setGameState(prev => {
       if (!prev.clash.open || !prev.clash.attackCard) {
         console.log("[Clash] Cannot resolve - clash not open or no attack card");
+        console.log(`[Clash] Debug - clash.open: ${prev.clash.open}, attackCard: ${prev.clash.attackCard?.name}`);
         return prev;
       }
       

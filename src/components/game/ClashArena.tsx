@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import type { GameCard } from '@/types/cardTypes';
-import { useClashWindow } from '@/hooks/useClashWindow';
+import { useClashTimer } from '@/hooks/useClashTimer';
 
 interface ClashArenaProps {
   isOpen: boolean;
@@ -48,21 +48,16 @@ export function ClashArena({
   hand, 
   playerIP 
 }: ClashArenaProps) {
-  // Create engine-like state for the hook
-  const engineState = {
-    clash: {
-      open: isOpen,
-      attacker,
-      defender,
-      attackCard,
-      defenseCard,
-      expiresAt,
-      windowMs
+  // Use simplified timer hook
+  const { msLeft } = useClashTimer({
+    isOpen,
+    expiresAt,
+    windowMs,
+    onTimeout: () => {
+      console.log("[Clash] Timer timeout - resolving clash");
+      resolveClash();
     }
-  } as any;
-
-  // Use the clash window hook for proper timer management
-  const { msLeft } = useClashWindow(engineState, resolveClash, closeClashWindow, playDefensiveCard);
+  });
   
   // Add debugging
   useEffect(() => {
@@ -70,6 +65,29 @@ export function ClashArena({
       console.log(`[Clash] Arena opened - msLeft: ${msLeft}, expiresAt: ${expiresAt}, now: ${Date.now()}`);
     }
   }, [isOpen, msLeft, expiresAt]);
+
+  // Hotkey D for defensive cards
+  useEffect(() => {
+    if (!isOpen || defender !== 'human') return;
+    
+    const handler = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "d") return;
+      e.preventDefault();
+      
+      const defensiveCard = hand.find(card => 
+        card.type === "DEFENSIVE" && 
+        playerIP >= card.cost
+      );
+      
+      if (defensiveCard) {
+        console.log(`[Clash] Playing defensive via hotkey: ${defensiveCard.name}`);
+        playDefensiveCard(defensiveCard.id);
+      }
+    };
+    
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isOpen, defender, hand, playerIP, playDefensiveCard]);
   
   if (!isOpen) return null;
 
