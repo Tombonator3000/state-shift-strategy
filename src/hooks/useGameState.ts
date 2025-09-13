@@ -263,6 +263,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         return prev;
       }
 
+      // Track card play in achievements
+      achievements.onCardPlayed(cardId, card.type);
       
       // Standard card play logic
       const processor = new CardEffectProcessor({
@@ -289,33 +291,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         selectedCard: null,
         targetState: null
       };
-
-      // Track card play in achievements
-      achievements.onCardPlayed(cardId, card.type);
-
-      const newHand = prev.hand.filter(c => c.id !== cardId);
-      let newTruth = prev.truth;
-      let newIP = prev.ip - card.cost;
-      let newAIIP = prev.aiIP;
-      const newLog = [...prev.log];
-
-      // Apply card effects
-      let newStates = [...prev.states];
-      
-      // Process card effects using the unified system
-      const processor = new CardEffectProcessor({
-        truth: prev.truth,
-        ip: prev.ip,
-        aiIP: prev.aiIP,
-        hand: prev.hand,
-        aiHand: prev.aiHand,
-        controlledStates: prev.controlledStates,
-        aiControlledStates: prev.aiControlledStates || [],
-        round: prev.round,
-        turn: prev.turn,
-        faction: prev.faction
-      });
-      const effectResult = processor.processCard(card as any, prev.targetState);
+    });
+  }, [achievements]);
       
       // Apply processed effects
       newTruth = Math.max(0, Math.min(100, prev.truth + effectResult.truthDelta));
@@ -784,11 +761,23 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           }
           break;
         case 'ATTACK':
-          // Check if this should open clash window for human to defend
-          const isReactiveAIAttack = card.type === "ATTACK" || (card.type === "MEDIA" && hasHarmfulEffect(card));
+          // Standard AI attack processing
+          const damage = 15 + Math.floor(Math.random() * 10);
+          newLog.push(`AI played ${card.name}: Attack for ${damage} IP damage`);
+          const newIP = Math.max(0, prev.ip - damage);
+          if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
+          return {
+            ...prev,
+            ip: newIP,
+            truth: newTruth,
+            states: newStates,
+            aiIP: Math.max(0, prev.aiIP - card.cost),
+            aiHand: prev.aiHand.filter(c => c.id !== cardId),
+            cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
+            log: newLog
+          };
           
-          console.log(`[Clash] AI playing ATTACK ${card.name} - isReactive: ${isReactiveAIAttack}`);
-          
+          if (isReactiveAIAttack) {
           if (isReactiveAIAttack) {
             console.log(`[Clash] OPENING clash window for AI ATTACK: ${card.name}`);
             // Open clash window for human to defend against AI attack
