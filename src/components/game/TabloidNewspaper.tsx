@@ -41,15 +41,28 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
   useEffect(() => {
     const loadNewspaperData = async () => {
       try {
+        console.log('🗞️ Attempting to load newspaper data...');
         const response = await fetch('/data/newspaperData.json');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const data = await response.json();
+        console.log('🗞️ Newspaper data loaded:', { 
+          mastheads: data.mastheads?.length, 
+          ads: data.ads?.length 
+        });
+        
         setNewspaperData(data);
         
         // Set random masthead from the loaded data
         const randomMasthead = data.mastheads[Math.floor(Math.random() * data.mastheads.length)];
+        console.log('🗞️ Random masthead selected:', randomMasthead);
         setMasthead(randomMasthead);
       } catch (error) {
-        console.error('Failed to load newspaper data:', error);
+        console.error('❌ Failed to load newspaper data:', error);
+        console.log('🗞️ Using fallback masthead');
         // Keep default masthead if loading fails
       }
     };
