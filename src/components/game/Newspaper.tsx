@@ -17,12 +17,45 @@ interface NewspaperProps {
   onClose: () => void;
 }
 
+interface NewspaperData {
+  mastheads: string[];
+  ads: string[];
+}
+
+interface Article {
+  id: string;
+  title: string;
+  headline: string;
+  content: string;
+  image: string;
+  isEvent: boolean;
+  isCard?: boolean;
+  player?: 'human' | 'ai';
+}
+
 const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) => {
   const [glitching, setGlitching] = useState(false);
   const [masthead, setMasthead] = useState('THE PARANOID TIMES');
+  const [newspaperData, setNewspaperData] = useState<NewspaperData | null>(null);
 
-  // Hide card layers when newspaper opens
+  // Load newspaper data and hide card layers when newspaper opens
   useEffect(() => {
+    const loadNewspaperData = async () => {
+      try {
+        const response = await fetch('/data/newspaperData.json');
+        const data = await response.json();
+        setNewspaperData(data);
+        
+        // Set random masthead
+        const randomMasthead = data.mastheads[Math.floor(Math.random() * data.mastheads.length)];
+        setMasthead(randomMasthead);
+      } catch (error) {
+        console.error('Failed to load newspaper data:', error);
+      }
+    };
+
+    loadNewspaperData();
+
     const cardLayer = document.getElementById('card-play-layer');
     const playedPile = document.getElementById('played-pile');
     
@@ -44,25 +77,19 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
     };
   }, []);
 
-  // Glitch masthead system - one-time 10% chance on load
+  // Glitch masthead system - 5% chance on load
   useEffect(() => {
-    const shouldGlitch = Math.random() < 0.1;
-    if (shouldGlitch) {
+    const shouldGlitch = Math.random() < 0.05;
+    if (shouldGlitch && newspaperData) {
       const timer = setTimeout(() => {
         setGlitching(true);
-        const glitchMastheads = [
-          'THE SHEEPLE DAILY',
-          'AREA 51 DIGEST',
-          'BAT BOY BULLETIN', 
-          'CHEMTRAIL COURIER',
-          'ILLUMINATI LEDGER',
-          'BLACK HELICOPTER GAZETTE'
-        ];
-        setMasthead(glitchMastheads[Math.floor(Math.random() * glitchMastheads.length)]);
+        const glitchOptions = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
+        setMasthead(glitchOptions[Math.floor(Math.random() * glitchOptions.length)]);
         
         const resetTimer = setTimeout(() => {
           setGlitching(false);
-          setMasthead('THE PARANOID TIMES');
+          const randomMasthead = newspaperData.mastheads[Math.floor(Math.random() * newspaperData.mastheads.length)];
+          setMasthead(randomMasthead);
         }, 800);
         
         return () => clearTimeout(resetTimer);
@@ -70,79 +97,75 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
       
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [newspaperData]);
 
-  // Generate headlines from played cards
-  const generateHeadline = (card: GameCard, player: 'human' | 'ai'): GameEvent => {
-    const isAI = player === 'ai';
-    const playerName = isAI ? 'AI OPERATIVE' : 'SHADOW AGENT';
-    
-    const headlines = {
-      MEDIA: [
-        `${playerName} CONTROLS MEDIA NARRATIVE`,
-        `BREAKING: ${isAI ? 'MACHINE INTELLIGENCE' : 'DEEP STATE'} MANIPULATES PUBLIC OPINION`,
-        `EXCLUSIVE: ${isAI ? 'ARTIFICIAL MIND' : 'SECRET CABAL'} RESHAPES TRUTH`
-      ],
-      ZONE: [
-        `${playerName} ESTABLISHES INFLUENCE IN KEY REGION`,
-        `BREAKING: ${isAI ? 'DIGITAL INFILTRATION' : 'COVERT OPERATIONS'} EXPAND TERRITORY`,
-        `LOCAL REPORTS: ${isAI ? 'ALGORITHMIC PRESENCE' : 'SHADOW NETWORK'} GAINS FOOTHOLD`
-      ],
-      ATTACK: [
-        `${playerName} LAUNCHES COORDINATED ASSAULT`,
-        `BREAKING: ${isAI ? 'CYBER WARFARE' : 'BLACK OPS'} TARGET ENEMIES`,
-        `CLASSIFIED: ${isAI ? 'DIGITAL STRIKE' : 'SHADOW OPERATION'} ELIMINATES THREATS`
-      ],
-      TECH: [
-        `${playerName} DEPLOYS ADVANCED TECHNOLOGY`,
-        `EXCLUSIVE: ${isAI ? 'QUANTUM PROCESSING' : 'EXPERIMENTAL TECH'} CHANGES GAME`,
-        `LEAKED: ${isAI ? 'NEURAL NETWORKS' : 'SECRET WEAPONS'} GIVE TACTICAL ADVANTAGE`
-      ],
-      DEVELOPMENT: [
-        `${playerName} ESTABLISHES PERMANENT INFRASTRUCTURE`,
-        `BREAKING: ${isAI ? 'AUTOMATED SYSTEMS' : 'SHADOW FACILITIES'} BUILT NATIONWIDE`,
-        `INVESTMENT: ${isAI ? 'DIGITAL EMPIRE' : 'UNDERGROUND NETWORK'} EXPANDS OPERATIONS`
-      ],
-      DEFENSIVE: [
-        `${playerName} ACTIVATES SECURITY PROTOCOLS`,
-        `BREAKING: ${isAI ? 'FIREWALL SYSTEMS' : 'BUNKER NETWORKS'} REPEL ATTACKS`,
-        `ALERT: ${isAI ? 'AUTOMATED DEFENSES' : 'COUNTER-INTELLIGENCE'} THWART ENEMIES`
-      ],
-      INSTANT: [
-        `${playerName} EXECUTES EMERGENCY RESPONSE`,
-        `FLASH: ${isAI ? 'INSTANT PROCESSING' : 'RAPID DEPLOYMENT'} CHANGES SITUATION`,
-        `URGENT: ${isAI ? 'REAL-TIME ADAPTATION' : 'CRISIS MANAGEMENT'} ACTIVATED`
-      ]
-    };
+  // Generate card articles with tabloid-style headlines
+  const generateCardArticle = (card: GameCard, player: 'human' | 'ai'): Article => {
+    const tabloidHeadlines = [
+      `"${card.name}" SHOCKS NATION`,
+      `EXCLUSIVE: ${card.name.toUpperCase()} LEAKED!`,
+      `BREAKING: ${card.name} EXPOSED!`,
+      `SOURCES CONFIRM: ${card.name} IS REAL`,
+      `WHISTLEBLOWER REVEALS: ${card.name}`,
+      `CLASSIFIED DOCS: ${card.name} UNCOVERED`,
+      `INSIDER TELLS ALL: ${card.name} TRUTH`,
+      `EXPERTS BAFFLED BY ${card.name}`,
+      `${card.name}: THE SHOCKING TRUTH`,
+      `GOVERNMENT DENIES ${card.name} EXISTS`
+    ];
 
-    const typeHeadlines = headlines[card.type as keyof typeof headlines] || headlines.ZONE;
-    const headline = typeHeadlines[Math.floor(Math.random() * typeHeadlines.length)];
+    const headline = tabloidHeadlines[Math.floor(Math.random() * tabloidHeadlines.length)];
     
-    const content = `Sources report that engineered crisis operations have significantly impacted the current information warfare landscape. ${isAI ? 'Artificial intelligence systems' : 'Human operatives'} continue to shape public perception through strategic ${card.type.toLowerCase()} initiatives. Card "${card.name}" was deployed with maximum effectiveness. The operation's success rate remains classified.`;
+    // Use flavor text or generate Weekly World News style content
+    const flavorText = card.flavorTruth || card.flavorGov;
+    const tabloidContent = flavorText || 
+      `Local sources report bizarre activities linked to what witnesses describe as "${card.name}". Government officials refuse comment, but experts claim this could change everything. "I've never seen anything like it," said one anonymous whistleblower. Full story inside – if the Men in Black don't stop us first!`;
+
+    const editorialComments = [
+      "Experts baffled!",
+      "Officials deny everything!",
+      "Eyewitness drunk at the time",
+      "Government refuses comment",
+      "Truth suppressed by Big Tech",
+      "Classified by order of ████████",
+      "Story develops..."
+    ];
 
     return {
-      id: `${card.id}-${player}`,
+      id: `card-${card.id}-${player}`,
       title: card.name,
       headline,
-      content,
-      type: isAI ? 'government' : 'conspiracy',
-      rarity: 'common' as const,
-      weight: 1,
-      effects: {}
+      content: `${tabloidContent} ${editorialComments[Math.floor(Math.random() * editorialComments.length)]}`,
+      image: '/placeholder-card.png', // Default since cards don't have images in the type
+      isCard: true,
+      isEvent: false,
+      player
     };
   };
 
-  // Generate headlines from played cards and events
-  const cardHeadlines = playedCards.map(pc => generateHeadline(pc.card, pc.player));
-  const allHeadlines = [...cardHeadlines, ...events];
+  // Generate articles from played cards and events
+  const cardArticles = playedCards.map(pc => generateCardArticle(pc.card, pc.player));
+  
+  // Convert events to articles with red styling for events
+  const eventArticles: Article[] = events.map(event => ({
+    id: event.id,
+    title: event.title,
+    headline: event.headline || event.title,
+    content: event.content,
+    image: '/placeholder-event.png',
+    isEvent: true
+  }));
 
-  // Advertisements
-  const ads = [
-    '🛸 Alien Detection Kit - Spot shapeshifters in your neighborhood!\nCall 1-800-WAKE-UP or visit TotallyNotAScam.com',
-    '🏠 Underground Bunkers - Premium apocalypse survival. Wi-Fi guaranteed!\nCall 1-800-WAKE-UP or visit TotallyNotAScam.com',
-    '👁️ Mind Reading Protection Hats - Block government thought scanners!\nCall 1-800-WAKE-UP or visit TotallyNotAScam.com',
-    '🐸 Turn the Frogs Straight Again - Reverse the chemicals! 100% natural!\nCall 1-800-WAKE-UP or visit TotallyNotAScam.com'
-  ];
+  const allArticles: Article[] = [...cardArticles, ...eventArticles];
+
+  // Get random ads from newspaper data
+  const getRandomAds = (count: number) => {
+    if (!newspaperData?.ads) return [];
+    const shuffled = [...newspaperData.ads].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+
+  const humorAds = getRandomAds(3);
   
   const conspiracies = [
     '• Elvis spotted buying groceries in Area 51 commissary',
@@ -157,7 +180,6 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
     '• Government admits pigeons are surveillance devices'
   ];
 
-  const selectedAds = ads.slice(0, 2);
   const selectedConspiracies = conspiracies.sort(() => 0.5 - Math.random()).slice(0, 4);
 
   const getImagePlaceholder = (event: GameEvent) => {
@@ -258,19 +280,34 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
               </div>
             </Card>
 
-            {/* Main Headlines */}
-            {allHeadlines.slice(0, 3).map((headline, index) => (
-              <article key={headline.id} className="border-b-2 border-newspaper-border pb-4">
-                <h2 className="text-2xl font-bold mb-3 font-serif text-newspaper-text hover:text-secret-red transition-colors cursor-pointer leading-tight">
-                  {headline.headline}
+            {/* Main Articles */}
+            {allArticles.slice(0, 4).map((article, index) => (
+              <article key={article.id} className="border-b-2 border-newspaper-border pb-4">
+                <h2 className={`text-3xl font-black mb-3 font-serif leading-tight ${
+                  article.isEvent 
+                    ? 'text-secret-red' 
+                    : 'text-newspaper-text hover:text-secret-red transition-colors cursor-pointer'
+                }`}>
+                  {article.headline}
                 </h2>
                 
-                <div className="w-full h-24 bg-gray-300 mb-3 flex items-center justify-center text-gray-600 text-sm border-2 border-gray-400 font-mono">
-                  {getImagePlaceholder(headline)}
-                </div>
+                {article.image && (
+                  <div className="w-full h-32 mb-3 border-2 border-newspaper-border overflow-hidden">
+                    <img 
+                      src={article.image} 
+                      alt={article.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder-card.png';
+                      }}
+                    />
+                  </div>
+                )}
                 
-                <p className="text-newspaper-text leading-relaxed font-serif">
-                  {headline.content}
+                <p className={`leading-relaxed font-serif ${
+                  article.isEvent ? 'text-secret-red' : 'text-newspaper-text'
+                }`}>
+                  {article.content}
                 </p>
                 
                 {index === 0 && (
@@ -281,8 +318,8 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
                 )}
                 
                 <div className="flex justify-between items-center mt-2 text-xs text-newspaper-text/60">
-                  <span>By: Agent ████████</span>
-                  <span>Source: {headline.type === 'conspiracy' ? 'Anonymous Whistleblower' : 'Official Statement'}</span>
+                  <span>By: {article.isEvent ? 'Crisis Reporter' : 'Agent ████████'}</span>
+                  <span>Source: {article.isEvent ? 'EMERGENCY BROADCAST' : 'Classified Intel'}</span>
                 </div>
               </article>
             ))}
@@ -290,12 +327,19 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
 
           {/* Sidebar - Takes up 1 column */}
           <div className="space-y-4">
-            {/* Advertisements */}
-            {selectedAds.map((ad, index) => (
-              <Card key={index} className={`p-3 bg-yellow-500/90 text-black border-4 border-black transform ${index % 2 === 0 ? '-rotate-1' : 'rotate-1'} hover:rotate-0 transition-transform`}>
-                <h4 className="font-bold text-center mb-2 font-mono text-sm">⚠️ ADVERTISEMENT ⚠️</h4>
-                <div className="text-center text-xs font-mono whitespace-pre-wrap">
+            {/* Humor Advertisements */}
+            {humorAds.map((ad, index) => (
+              <Card key={index} className={`p-3 bg-yellow-400/95 text-black border-4 border-black transform ${
+                index % 3 === 0 ? '-rotate-1' : index % 3 === 1 ? 'rotate-1' : '-rotate-0.5'
+              } hover:rotate-0 transition-transform shadow-lg`}>
+                <h4 className="font-black text-center mb-2 font-mono text-sm uppercase tracking-wide">
+                  ⚠️ SPECIAL OFFER ⚠️
+                </h4>
+                <div className="text-center text-xs font-bold font-mono">
                   {ad}
+                </div>
+                <div className="text-center text-[10px] font-mono mt-2 opacity-70">
+                  *Results not guaranteed. Side effects may include enlightenment.
                 </div>
               </Card>
             ))}
