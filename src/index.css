@@ -2,33 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Newspaper animations */
-@keyframes marquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
-}
-
-.animate-marquee {
-  animation: marquee 20s linear infinite;
-}
-
-@keyframes glitch {
-  0%, 100% { transform: translateX(0); }
-  10% { transform: translateX(-2px) skew(-1deg); }
-  20% { transform: translateX(2px) skew(1deg); }
-  30% { transform: translateX(-1px) skew(0deg); }
-  40% { transform: translateX(1px) skew(1deg); }
-  50% { transform: translateX(-1px) skew(-1deg); }
-  60% { transform: translateX(1px) skew(0deg); }
-  70% { transform: translateX(-2px) skew(1deg); }
-  80% { transform: translateX(2px) skew(-1deg); }
-  90% { transform: translateX(-1px) skew(0deg); }
-}
-
-.animate-glitch {
-  animation: glitch 0.3s linear infinite;
-}
-
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */

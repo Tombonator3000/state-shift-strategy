@@ -7,6 +7,7 @@ import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
 import EnhancedGameHand from '@/components/game/EnhancedGameHand';
 import PlayedCardsDock from '@/components/game/PlayedCardsDock';
 import TruthMeter from '@/components/game/TruthMeter';
+import TabloidNewspaper from '@/components/game/TabloidNewspaper';
 import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
 import AIStatus from '@/components/game/AIStatus';
@@ -15,8 +16,6 @@ import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
 import { ClashArenaIntegrated } from '@/components/game/ClashArenaIntegrated';
-import { NewspaperOverlay } from '@/components/game/NewspaperOverlay';
-import { useNewspaper } from '@/hooks/useNewspaper';
 import { canPlayDefensively } from '@/utils/clashHelpers';
 import { AudioControls } from '@/components/ui/audio-controls';
 import Options from '@/components/game/Options';
@@ -44,10 +43,6 @@ import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
 import EnhancedExpansionManager from '@/components/game/EnhancedExpansionManager';
 import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
-import { newspaper } from '@/systems/newspaper';
-import { testNewspaperQuick } from '@/utils/testNewspaperSystem';
-import { debugNewspaperSystem } from '@/debug/newspaperDebug';
-import { RealTimeVerifier } from '@/utils/realTimeVerifier';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
@@ -82,7 +77,6 @@ const Index = () => {
   const [showMinimizedHand, setShowMinimizedHand] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo, playDefensiveCard, resolveClash, closeClashWindow } = useGameState();
-  const { currentIssue, isVisible: isNewspaperVisible, closeNewspaper: closeNewspaperOverlay, showNewspaperForRound } = useNewspaper();
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -94,32 +88,6 @@ const Index = () => {
       executeAITurn();
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
-
-  // Handle newspaper phase - trigger NEW newspaper system with DEBUGGING
-  useEffect(() => {
-    console.log('📰 NEWSPAPER PHASE CHECK:', {
-      phase: gameState.phase,
-      showNewspaper: gameState.showNewspaper,
-      round: gameState.round,
-      cardsPlayedThisRound: gameState.cardsPlayedThisRound.length
-    });
-    
-    if (gameState.phase === 'newspaper' && gameState.showNewspaper) {
-      console.log('📰 TRIGGERING NEW NEWSPAPER SYSTEM for round:', gameState.round);
-      console.log('📰 Cards played this round:', gameState.cardsPlayedThisRound.map(c => c.card.name));
-      
-      // Small delay to let game state settle
-      const timer = setTimeout(() => {
-        try {
-          showNewspaperForRound(gameState.round);
-          console.log('📰 showNewspaperForRound called successfully');
-        } catch (error) {
-          console.error('📰 ERROR calling showNewspaperForRound:', error);
-        }
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [gameState.phase, gameState.showNewspaper, gameState.round, showNewspaperForRound]);
 
   // Track IP changes for floating numbers
   useEffect(() => {
@@ -274,45 +242,6 @@ const Index = () => {
       setShowOnboarding(true);
     }
   }, [showMenu, showIntro]);
-
-  // Initialize newspaper system on app start
-  useEffect(() => {
-    const initNewspaper = async () => {
-      try {
-        console.log('📰 Initializing newspaper system...');
-        
-        // Test if config file is accessible
-        console.log('📰 Testing config file access...');
-        const testResponse = await fetch('/data/newspaper.config.json');
-        console.log('📰 Config file response:', testResponse.status, testResponse.ok);
-        
-        await newspaper.loadConfig();
-        console.log('📰 Newspaper system initialized successfully');
-        
-        // Test the system in development
-        if (process.env.NODE_ENV === 'development') {
-          console.log('🧪 Running newspaper debug test...');
-          const debugResult = await debugNewspaperSystem();
-          if (debugResult) {
-            console.log('✅ Newspaper debug test passed!');
-          } else {
-            console.error('❌ Newspaper debug test failed!');
-          }
-        }
-      } catch (error) {
-        console.error('📰 Failed to initialize newspaper:', error);
-      }
-    };
-    initNewspaper();
-  }, []);
-
-  // Handle newspaper display - trigger new system when game shows newspaper
-  useEffect(() => {
-    if (gameState.showNewspaper && gameState.cardsPlayedThisRound.length > 0) {
-      console.log('📰 GAME STATE SHOWS NEWSPAPER - Triggering new system for round:', gameState.round);
-      showNewspaperForRound(gameState.round);
-    }
-  }, [gameState.showNewspaper, gameState.cardsPlayedThisRound.length, gameState.round, showNewspaperForRound]);
 
   // Update subtitle based on faction and add glitching effect
   useEffect(() => {
@@ -975,61 +904,19 @@ const Index = () => {
 
       {/* Zone targeting is now handled by the map overlay only */}
 
-       {/* Toast notifications */}
-       <Toaster 
-         position="top-right"
-         toastOptions={{
-           duration: 3000,
-           style: {
-             background: '#1f2937',
-             color: '#f3f4f6',
-             border: '1px solid #374151',
-             fontFamily: 'monospace'
-           }
-         }}
-       />
-
-       {/* Development Debug Controls */}
-       {process.env.NODE_ENV === 'development' && (
-         <div className="fixed top-20 right-4 z-50 space-y-2">
-           <Button
-             onClick={async () => {
-               console.log('🧪 Manual newspaper test triggered');
-               await debugNewspaperSystem();
-             }}
-             variant="outline"
-             size="sm"
-             className="bg-yellow-500 text-black hover:bg-yellow-400"
-           >
-             Test Newspaper
-           </Button>
-           
-           <Button
-             onClick={() => {
-               console.log('🔍 Running implementation verification...');
-               RealTimeVerifier.runFullVerification();
-             }}
-             variant="outline"
-             size="sm"
-             className="bg-red-500 text-white hover:bg-red-400"
-           >
-             Verify Implementation
-           </Button>
-           
-           <Button
-             onClick={async () => {
-               console.log('🚀 Running end-to-end validation...');
-               const { EndToEndValidator } = await import('@/utils/endToEndValidator');
-               await EndToEndValidator.validateCompleteNewspaperWorkflow();
-             }}
-             variant="outline"
-             size="sm"
-             className="bg-purple-500 text-white hover:bg-purple-400"
-           >
-             Full E2E Test
-           </Button>
-         </div>
-       )}
+      {/* Toast notifications */}
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#1f2937',
+            color: '#f3f4f6',
+            border: '1px solid #374151',
+            fontFamily: 'monospace'
+          }
+        }}
+      />
 
       {/* Card Animation Layer with integrated effects */}
       <CardAnimationLayer />
@@ -1118,20 +1005,16 @@ const Index = () => {
         onConfirm={confirmNewCards}
       />
 
-      {/* NEW NEWSPAPER SYSTEM ONLY */}
-
-      {/* NEW TABLOID NEWSPAPER SYSTEM - ONLY THIS ONE */}
-      {isNewspaperVisible && currentIssue && (
-        <NewspaperOverlay 
-          issue={currentIssue} 
-          onClose={() => {
-            closeNewspaperOverlay();
-            closeNewspaper();
-          }}
+      {/* Newspaper overlay */}
+      {gameState.showNewspaper && (
+        <TabloidNewspaper 
+          events={gameState.currentEvents}
+          playedCards={gameState.cardsPlayedThisRound}
+          faction={gameState.faction}
+          truth={gameState.truth}
+          onClose={handleCloseNewspaper}
         />
       )}
-      
-      {/* OLD SYSTEM COMPLETELY DISABLED - NEW SYSTEM ONLY */}
 
     </div>
   );
