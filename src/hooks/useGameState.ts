@@ -15,6 +15,7 @@ import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
 import { CardEffectMigrator } from '@/utils/cardEffectMigration';
 import type { Card } from '@/types/cardEffects';
 import { hasHarmfulEffect } from '@/utils/clashHelpers';
+import { newspaper } from '@/systems/newspaper';
 
 interface ClashState {
   open: boolean;
@@ -308,6 +309,15 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
       // Track card play in achievements
       achievements.onCardPlayed(cardId, card.type);
+
+      // Queue article for newspaper system
+      const context = {
+        round: prev.round,
+        truth: prev.truth,
+        ip: { human: prev.ip, ai: prev.aiIP },
+        states: prev.states
+      };
+      newspaper.queueArticleFromCard(card, context);
 
       const newHand = prev.hand.filter(c => c.id !== cardId);
       let newTruth = prev.truth;
@@ -633,14 +643,30 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           ]
         };
       } else {
-        // AI turn ending - switch back to human
-        return {
-          ...prev,
-          phase: 'newspaper',
-          currentPlayer: 'human',
-          showNewspaper: true,
-          log: [...prev.log, `AI turn completed`]
-        };
+        // AI turn ending - back to human, show newspaper for round recap
+        const roundComplete = prev.cardsPlayedThisRound.length > 0;
+        
+        if (roundComplete) {
+          // Show newspaper with round summary
+          return {
+            ...prev,
+            phase: 'newspaper',
+            currentPlayer: 'human',
+            showNewspaper: true,
+            round: prev.round + 1, // Increment round when showing newspaper
+            log: [...prev.log, `AI turn completed`, `Starting Round ${prev.round + 1}`]
+          };
+        } else {
+          // No cards played, skip newspaper
+          return {
+            ...prev,
+            phase: 'action',
+            currentPlayer: 'human',
+            showNewspaper: false,
+            cardsPlayedThisRound: [], // Clear round cards
+            log: [...prev.log, `AI turn completed`]
+          };
+        }
       }
     });
   }, []);

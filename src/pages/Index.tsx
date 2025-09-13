@@ -16,6 +16,8 @@ import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
 import { ClashArenaIntegrated } from '@/components/game/ClashArenaIntegrated';
+import { NewspaperOverlay } from '@/components/game/NewspaperOverlay';
+import { useNewspaper } from '@/hooks/useNewspaper';
 import { canPlayDefensively } from '@/utils/clashHelpers';
 import { AudioControls } from '@/components/ui/audio-controls';
 import Options from '@/components/game/Options';
@@ -43,6 +45,7 @@ import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
 import EnhancedExpansionManager from '@/components/game/EnhancedExpansionManager';
 import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
+import { newspaper } from '@/systems/newspaper';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
@@ -77,6 +80,7 @@ const Index = () => {
   const [showMinimizedHand, setShowMinimizedHand] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo, playDefensiveCard, resolveClash, closeClashWindow } = useGameState();
+  const { currentIssue, isVisible: isNewspaperVisible, closeNewspaper: closeNewspaperOverlay, showNewspaperForRound } = useNewspaper();
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -88,6 +92,17 @@ const Index = () => {
       executeAITurn();
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
+
+  // Handle newspaper phase - trigger newspaper system
+  useEffect(() => {
+    if (gameState.phase === 'newspaper' && gameState.showNewspaper) {
+      // Small delay to let game state settle
+      const timer = setTimeout(() => {
+        showNewspaperForRound(gameState.round);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState.phase, gameState.showNewspaper, gameState.round, showNewspaperForRound]);
 
   // Track IP changes for floating numbers
   useEffect(() => {
@@ -242,6 +257,19 @@ const Index = () => {
       setShowOnboarding(true);
     }
   }, [showMenu, showIntro]);
+
+  // Initialize newspaper system on app start
+  useEffect(() => {
+    const initNewspaper = async () => {
+      try {
+        await newspaper.loadConfig();
+        console.log('📰 Newspaper system initialized');
+      } catch (error) {
+        console.warn('📰 Failed to initialize newspaper:', error);
+      }
+    };
+    initNewspaper();
+  }, []);
 
   // Update subtitle based on faction and add glitching effect
   useEffect(() => {
@@ -1013,6 +1041,17 @@ const Index = () => {
           faction={gameState.faction}
           truth={gameState.truth}
           onClose={handleCloseNewspaper}
+        />
+      )}
+
+      {/* New tabloid newspaper system */}
+      {isNewspaperVisible && currentIssue && (
+        <NewspaperOverlay 
+          issue={currentIssue} 
+          onClose={() => {
+            closeNewspaperOverlay();
+            closeNewspaper(); // Also close the game state newspaper
+          }}
         />
       )}
 
