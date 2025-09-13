@@ -6,6 +6,9 @@ import HowToPlay from './HowToPlay';
 import Options from './Options';
 import ManageExpansions from './ManageExpansions';
 import CardCollection from './CardCollection';
+import CreditsTableoid from './CreditsTableoid';
+import HowToPlayTabloid from './HowToPlayTabloid';
+import CardCollectionTabloid from './CardCollectionTabloid';
 import StartScreenTabloid from './StartScreenTabloid';
 import FactionSelectTabloid from './FactionSelectTabloid';
 import { useUiTheme } from '@/hooks/useTheme';
@@ -152,11 +155,19 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
   }, []);
 
   if (showCredits) {
-    return <Credits onClose={() => setShowCredits(false)} />;
+    return uiTheme === 'tabloid_bw' ? (
+      <CreditsTableoid onClose={() => setShowCredits(false)} />
+    ) : (
+      <Credits onClose={() => setShowCredits(false)} />
+    );
   }
 
   if (showHowToPlay) {
-    return <HowToPlay onClose={() => setShowHowToPlay(false)} />;
+    return uiTheme === 'tabloid_bw' ? (
+      <HowToPlayTabloid onClose={() => setShowHowToPlay(false)} />
+    ) : (
+      <HowToPlay onClose={() => setShowHowToPlay(false)} />
+    );
   }
 
   if (showOptions) {
@@ -319,7 +330,11 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
         getSaveInfo={getSaveInfo}
         audio={audio}
       />
-      <CardCollection open={showCollection} onOpenChange={setShowCollection} />
+      {uiTheme === 'tabloid_bw' ? (
+        <CardCollectionTabloid open={showCollection} onOpenChange={setShowCollection} />
+      ) : (
+        <CardCollection open={showCollection} onOpenChange={setShowCollection} />
+      )}
     </>
   ) : (
     <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
@@ -481,7 +496,11 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
           </div>
         </div>
       </Card>
-      <CardCollection open={showCollection} onOpenChange={setShowCollection} />
+      {uiTheme === 'tabloid_bw' ? (
+        <CardCollectionTabloid open={showCollection} onOpenChange={setShowCollection} />
+      ) : (
+        <CardCollection open={showCollection} onOpenChange={setShowCollection} />
+      )}
     </div>
   );
 };
