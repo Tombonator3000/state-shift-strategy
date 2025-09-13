@@ -15,7 +15,7 @@ import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashb
 import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
-import { ClashArenaIntegrated } from '@/components/game/ClashArenaIntegrated';
+import { ClashArena } from '@/components/game/ClashArena';
 import { canPlayDefensively } from '@/utils/clashHelpers';
 import { AudioControls } from '@/components/ui/audio-controls';
 import Options from '@/components/game/Options';
@@ -1018,18 +1018,20 @@ const Index = () => {
       )}
 
       {/* Clash Arena */}
-      <ClashArenaIntegrated
-        isOpen={gameState.clash.open}
-        attackCard={gameState.clash.attackCard}
-        defenseCard={gameState.clash.defenseCard}
-        expiresAt={gameState.clash.expiresAt}
-        windowMs={gameState.clash.windowMs}
-        hand={gameState.hand}
-        playerIP={gameState.ip}
-        onPlayDefensive={playDefensiveCard}
-        onResolveClash={resolveClash}
-        onCloseWindow={closeClashWindow}
-      />
+        <ClashArena
+          isOpen={gameState.clash.open}
+          attackCard={gameState.clash.attackCard}
+          defenseCard={gameState.clash.defenseCard}
+          attacker={gameState.clash.attacker}
+          defender={gameState.clash.defender}
+          expiresAt={gameState.clash.expiresAt}
+          windowMs={gameState.clash.windowMs}
+          hand={gameState.hand}
+          playerIP={gameState.ip}
+          resolveClash={resolveClash}
+          closeClashWindow={closeClashWindow}
+          playDefensiveCard={playDefensiveCard}
+        />
 
     </div>
   );

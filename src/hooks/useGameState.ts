@@ -563,8 +563,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
   const endTurn = useCallback(() => {
     setGameState(prev => {
-      // Don't allow turn ending if game is over
-      if (prev.isGameOver) return prev;
+      // Don't allow turn ending if game is over or clash is active
+      if (prev.isGameOver || prev.clash?.open || prev.phase === 'clash_window' || prev.phase === 'clash_resolving') return prev;
       
       if (prev.currentPlayer === 'human') {
         // Human player ending turn - switch to AI (no card draw here anymore)
@@ -634,6 +634,11 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         };
       } else {
         // AI turn ending - switch back to human
+        // ✨ Guard: Never show newspaper if clash is active
+        if (prev.clash?.open || (prev.phase as any) === 'clash_window' || (prev.phase as any) === 'clash_resolving') {
+          return prev; // Wait until clash resolves
+        }
+        
         return {
           ...prev,
           phase: 'newspaper',
@@ -1187,7 +1192,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         },
         cardsPlayedThisRound: [
           ...prev.cardsPlayedThisRound, 
-          { card: attackCard, player: 'human' as const },
+          { card: attackCard, player: prev.clash.attacker || 'human' },
           ...(defenseCard ? [{ card: defenseCard, player: 'human' as const }] : [])
         ]
       };
@@ -1198,19 +1203,55 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     setGameState(prev => {
       if (!prev.clash.open) return prev;
       
-      // If no defense was played, apply full effects
-      if (!prev.clash.defenseCard) {
+      // If no defense was played, resolve as full hit
+      if (!prev.clash.defenseCard && prev.clash.attackCard) {
+        // Apply full attack effects using the card effect processor
+        const processor = new CardEffectProcessor({
+          truth: prev.truth,
+          ip: prev.ip,
+          aiIP: prev.aiIP,
+          hand: prev.hand,
+          aiHand: prev.aiHand,
+          controlledStates: prev.controlledStates,
+          aiControlledStates: prev.aiControlledStates || [],
+          round: prev.round,
+          turn: prev.turn,
+          faction: prev.faction
+        });
+        
+        const effectResult = processor.processCard(prev.clash.attackCard as any, prev.targetState);
+        
+        const newTruth = Math.max(0, Math.min(100, prev.truth + effectResult.truthDelta));
+        const newIP = Math.max(0, prev.ip + effectResult.ipDelta.self);
+        const newAIIP = Math.max(0, prev.aiIP + effectResult.ipDelta.opponent);
+        
         return {
           ...prev,
           phase: 'action',
+          truth: newTruth,
+          ip: newIP,
+          aiIP: newAIIP,
           clash: {
             open: false,
             windowMs: 4000
-          }
+          },
+          log: [...prev.log, `💥 ${prev.clash.attackCard.name} hits! No defense played.`],
+          cardsPlayedThisRound: [
+            ...prev.cardsPlayedThisRound,
+            { card: prev.clash.attackCard, player: prev.clash.attacker || 'human' }
+          ]
         };
       }
       
-      return prev;
+      // Just close without effects if something went wrong
+      return {
+        ...prev,
+        phase: 'action',
+        clash: {
+          open: false,
+          windowMs: 4000
+        }
+      };
     });
   }, []);
 

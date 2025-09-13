@@ -1,42 +1,81 @@
-import { useEffect, useMemo } from "react";
-import { EngineState, Card, PlayerID } from "@/engine/types";
-import { resolveClash, closeReactionWindow } from "@/engine/reaction";
+import { useEffect, useRef } from "react";
+import { EngineState, PlayerID, Card } from "@/engine/types";
+import type { GameCard } from '@/types/cardTypes';
 
-declare function firstPlayableDefensive(player: PlayerID): Card | undefined;
-declare function playDefensive(player: PlayerID, card: Card): void;
+export function useClashWindow(engine: EngineState, resolveClash: () => void, closeClashWindow: () => void, playDefensiveCard: (cardId: string) => void) {
+  const rafRef = useRef(0);
+  const hardTimeoutRef = useRef<number | null>(null);
 
-export function useClashWindow(engine: EngineState) {
-  const { clash, phase } = engine;
-  const msLeft = useMemo(() => Math.max(0, (clash.expiresAt ?? 0) - Date.now()), [clash.expiresAt, phase]);
-
-  // Timer loop
   useEffect(() => {
-    if (!clash.open) return;
-    let raf = 0;
-    const tick = () => {
+    // Start when Clash opens
+    if (!engine.clash.open) return;
+
+    // ✨ Hard safety timeout (fallback) 6s – whatever happens
+    hardTimeoutRef.current = window.setTimeout(() => {
       if (!engine.clash.open) return;
-      if (Date.now() >= (engine.clash.expiresAt ?? 0)) {
-        closeReactionWindow(engine);
-        resolveClash(engine);
+      try {
+        console.log("[Clash] Hard timeout - force resolving");
+        closeClashWindow();
+        resolveClash();
+      } catch (e) { 
+        console.error("[Clash] hard-timeout resolve error:", e); 
+      }
+    }, (engine.clash.windowMs ?? 4000) + 2000);
+
+    const tick = () => {
+      if (!engine.clash.open) return; // stop
+      const now = Date.now();
+      if ((engine.clash.expiresAt ?? 0) <= now) {
+        // Timer out → close and resolve
+        try {
+          closeClashWindow();
+          resolveClash();
+        } catch (e) {
+          console.error("[Clash] resolve error:", e);
+        }
         return;
       }
-      raf = requestAnimationFrame(tick);
+      rafRef.current = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [engine, clash.open, clash.expiresAt]);
 
-  // Hotkey D for defender
+    rafRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      // ✨ Always clean up
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (hardTimeoutRef.current) window.clearTimeout(hardTimeoutRef.current);
+      rafRef.current = 0;
+      hardTimeoutRef.current = null;
+    };
+  }, [engine.clash.open, engine.clash.expiresAt, engine.clash.windowMs, resolveClash, closeClashWindow]);
+
+  // Hotkey D for defender  
   useEffect(() => {
-    if (!clash.open) return;
+    if (!engine.clash.open || engine.clash.defender !== 'human') return;
+    
     const handler = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() !== "d") return;
-      const def = firstPlayableDefensive(engine.clash.defender!);
-      if (def) playDefensive(engine.clash.defender!, def);
+      
+      // Find first playable defensive in hand
+      const hand = (engine as any).hand || []; // Access hand from engine context
+      const defensiveCard = hand.find((card: GameCard) => 
+        card.type === "DEFENSIVE" && 
+        (engine as any).ip >= card.cost // Check if player can afford it
+      );
+      
+      if (defensiveCard) {
+        playDefensiveCard(defensiveCard.id);
+      }
     };
-    window.addEventListener("keydown", handler);
+    
+    window.addEventListener("keydown", handler, { passive: true });
     return () => window.removeEventListener("keydown", handler);
-  }, [engine, clash.open, clash.defender]);
+  }, [engine.clash.open, engine.clash.defender, playDefensiveCard]);
 
-  return { msLeft };
+  return {
+    // msLeft used in UI – robust against drift
+    get msLeft() {
+      return Math.max(0, (engine.clash.expiresAt ?? 0) - Date.now());
+    }
+  };
 }

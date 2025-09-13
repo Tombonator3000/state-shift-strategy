@@ -1,4 +1,4 @@
-export type PlayerID = "P1" | "P2";
+export type PlayerID = "P1" | "P2" | "human" | "ai";
 
 export interface Card {
   id: string;
@@ -26,7 +26,7 @@ export interface ClashState {
 }
 
 export interface EngineState {
-  phase: "IDLE" | "REACTION_WINDOW_OPEN" | "RESOLVING";
+  phase: "IDLE" | "REACTION_WINDOW_OPEN" | "RESOLVING" | "income" | "action" | "capture" | "event" | "newspaper" | "victory" | "ai_turn" | "card_presentation" | "clash_window" | "clash_resolving";
   clash: ClashState;
   hands: Record<PlayerID, Card[]>;
   ip: Record<PlayerID, number>;
