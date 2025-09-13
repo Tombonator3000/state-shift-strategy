@@ -48,6 +48,7 @@ import { VictoryConditions } from '@/components/game/VictoryConditions';
 import { newspaper } from '@/systems/newspaper';
 import { testNewspaperQuick } from '@/utils/testNewspaperSystem';
 import { debugNewspaperSystem } from '@/debug/newspaperDebug';
+import { RealTimeVerifier } from '@/utils/realTimeVerifier';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
@@ -994,6 +995,31 @@ const Index = () => {
              className="bg-yellow-500 text-black hover:bg-yellow-400"
            >
              Test Newspaper
+           </Button>
+           
+           <Button
+             onClick={() => {
+               console.log('🔍 Running implementation verification...');
+               RealTimeVerifier.runFullVerification();
+             }}
+             variant="outline"
+             size="sm"
+             className="bg-red-500 text-white hover:bg-red-400"
+           >
+             Verify Implementation
+           </Button>
+           
+           <Button
+             onClick={async () => {
+               console.log('🚀 Running end-to-end validation...');
+               const { EndToEndValidator } = await import('@/utils/endToEndValidator');
+               await EndToEndValidator.validateCompleteNewspaperWorkflow();
+             }}
+             variant="outline"
+             size="sm"
+             className="bg-purple-500 text-white hover:bg-purple-400"
+           >
+             Full E2E Test
            </Button>
          </div>
        )}
