@@ -230,71 +230,76 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
   const truthStatus = getTruthMeterStatus();
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4">
-      <Card className={`max-w-5xl w-full max-h-[85vh] overflow-y-auto bg-yellow-50 border-4 border-black shadow-2xl ${
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-2">
+      <Card className={`max-w-6xl w-full max-h-[90vh] overflow-y-auto bg-white border-8 border-black shadow-2xl ${
         glitching ? 'animate-pulse' : ''
-      }`}>
-        {/* Masthead */}
-        <div className="bg-red-800 text-white p-4 border-b-4 border-black relative">
-          <div className="absolute top-2 left-4 text-xs font-serif">Est. 1947</div>
-          <div className="absolute top-2 right-4 text-xs font-serif">
-            Issue #{Math.floor(Math.random() * 9999) + 1000}
+      }`} style={{ fontFamily: 'serif' }}>
+        
+        {/* TABLOID MASTHEAD - Classic newspaper header */}
+        <div className="bg-white border-b-8 border-black relative">
+          {/* Top info line */}
+          <div className="bg-black text-white px-6 py-1 text-xs font-mono flex justify-between">
+            <span>EST. 1947</span>
+            <span className="font-bold">THE WORLD'S ONLY RELIABLE NEWSPAPER</span>
+            <span>Issue #{Math.floor(Math.random() * 9999) + 1000}</span>
           </div>
           
-          <div className="text-center space-y-2">
-            <div className={`text-4xl font-black font-serif tracking-wider transform ${
+          {/* Main masthead */}
+          <div className="bg-red-600 text-white px-6 py-6 text-center relative">
+            <div className={`text-6xl font-black tracking-wider transform ${
               glitching ? 'text-green-400 animate-bounce' : 'text-white'
-            }`}>
+            }`} style={{ fontFamily: 'Anton, Impact, sans-serif' }}>
               {masthead}
             </div>
-            <div className="text-sm font-serif italic">
+            <div className="text-base mt-2 font-serif italic tracking-wide">
               "All The Weird That's Fit To Print" • 50¢ (or 3 conspiracy theories)
             </div>
+            
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onClose}
+              className="absolute top-4 right-4 text-white hover:bg-white/20 text-2xl p-2"
+            >
+              <X />
+            </Button>
           </div>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onClose}
-            className="absolute top-4 right-4 text-white hover:bg-white/20 text-xl"
-          >
-            <X />
-          </Button>
+
+          {/* Truth-O-Meter Banner - now integrated into header */}
+          <div className="bg-red-700 text-white p-4 border-b-4 border-black">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-8 h-8" />
+                <h3 className="text-2xl font-black" style={{ fontFamily: 'Anton, Impact, sans-serif' }}>
+                  CONSPIRACY LEVEL
+                </h3>
+                <TrendingUp className="w-8 h-8" />
+              </div>
+              <div className={`px-6 py-3 font-black text-2xl border-4 border-white ${truthStatus.color} bg-white text-black`}>
+                {truthStatus.level}
+              </div>
+            </div>
+            <div className="flex items-center gap-4 mt-2">
+              <Progress value={truth} className="flex-1 h-6 border-4 border-white bg-black" />
+              <div className="font-black text-4xl">{truth}%</div>
+            </div>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6 grid lg:grid-cols-4 gap-6 bg-yellow-50">
-          {/* Main Articles - 3 columns */}
-          <div className="lg:col-span-3 space-y-4">
-            {/* Truth-O-Meter Banner */}
-            <Card className="p-4 bg-gradient-to-r from-red-100 to-blue-100 border-4 border-black">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
-                  <h3 className="text-xl font-black">CONSPIRACY LEVEL MONITOR™</h3>
-                  <TrendingUp className="w-6 h-6 text-blue-600" />
-                </div>
-                <div className={`px-4 py-2 font-black text-lg border-2 border-black ${truthStatus.color}`}>
-                  {truthStatus.level}
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Progress value={truth} className="flex-1 h-4 border-2 border-black" />
-                <div className="font-black text-2xl">{truth}%</div>
-              </div>
-              <div className="text-xs mt-2 text-center font-mono">
-                *Results not guaranteed by any known reality
-              </div>
-            </Card>
-
-            {/* Turn Summary */}
-            <Card className="p-4 border-4 border-black bg-blue-50">
-              <h2 className="text-xl font-black mb-3 text-center">
+        {/* TABLOID CONTENT */}
+        <div className="p-6 bg-white">
+          {/* Round Summary - Compact tabloid info box */}
+          <div className="mb-6">
+            <div className="bg-gray-100 border-4 border-black p-4">
+              <h2 className="text-xl font-black mb-3 text-center border-b-2 border-black pb-2" 
+                  style={{ fontFamily: 'Anton, Impact, sans-serif' }}>
                 📋 ROUND SUMMARY: COVERT OPERATIONS 📋
               </h2>
               <div className="grid md:grid-cols-2 gap-4 text-sm">
-                <div className="bg-green-100 p-3 border-2 border-black">
-                  <h3 className="font-black text-green-800 mb-2">YOUR MOVES</h3>
+                <div className="bg-green-200 p-3 border-4 border-black">
+                  <h3 className="font-black text-green-800 mb-2" style={{ fontFamily: 'Anton, sans-serif' }}>
+                    YOUR MOVES
+                  </h3>
                   {playedCards.filter(pc => pc.player === 'human').length > 0 ? (
                     <ul className="space-y-1">
                       {playedCards.filter(pc => pc.player === 'human').map((pc, idx) => (
@@ -309,8 +314,10 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
                   )}
                 </div>
                 
-                <div className="bg-red-100 p-3 border-2 border-black">
-                  <h3 className="font-black text-red-800 mb-2">ENEMY ACTIONS</h3>
+                <div className="bg-red-200 p-3 border-4 border-black">
+                  <h3 className="font-black text-red-800 mb-2" style={{ fontFamily: 'Anton, sans-serif' }}>
+                    ENEMY ACTIONS
+                  </h3>
                   {playedCards.filter(pc => pc.player === 'ai').length > 0 ? (
                     <ul className="space-y-1">
                       {playedCards.filter(pc => pc.player === 'ai').map((pc, idx) => (
@@ -325,133 +332,179 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
                   )}
                 </div>
               </div>
-            </Card>
+            </div>
+          </div>
 
-            {/* Headlines */}
+          {/* MAIN ARTICLES - True tabloid style */}
+          <div className="space-y-8">
             {selectedHeadlines.map((article, index) => (
-              <article key={index} className="border-4 border-black bg-white p-6 mb-4">
-                {/* Large Tabloid Headline */}
-                <h2 className={`text-4xl md:text-5xl font-black mb-4 text-center leading-none transform -rotate-1 ${
+              <article key={index} className={`border-8 border-black bg-white p-6 shadow-lg transform ${
+                index % 2 === 0 ? 'rotate-0' : 'rotate-0'
+              } ${article.isEvent ? 'bg-red-50' : 'bg-white'}`}>
+                
+                {/* EVENT BADGE for event articles */}
+                {article.isEvent && (
+                  <div className="absolute -top-4 -right-4 bg-red-600 text-white px-4 py-2 border-4 border-black transform rotate-12 z-10">
+                    <span className="font-black text-lg" style={{ fontFamily: 'Anton, sans-serif' }}>EVENT</span>
+                  </div>
+                )}
+                
+                {/* MASSIVE TABLOID HEADLINE */}
+                <h2 className={`text-5xl md:text-7xl font-black mb-6 text-center leading-none transform -rotate-1 ${
                   article.isEvent ? 'text-red-600 animate-pulse' : 'text-black'
-                } font-serif uppercase tracking-tight`}>
+                } uppercase tracking-tight`} style={{ fontFamily: 'Anton, Impact, sans-serif' }}>
                   {article.headline}
                 </h2>
                 
-                {/* Article Layout with Image */}
-                <div className="grid md:grid-cols-3 gap-4">
-                  {/* Card Image as Newspaper Photo */}
-                  <div className="md:col-span-1">
+                {/* Subtitle/Dek */}
+                <div className="text-center mb-6">
+                  <p className="text-lg italic text-gray-600 border-t-2 border-b-2 border-black py-2 bg-gray-100">
+                    {article.isEvent ? 'DEVELOPING STORY - AUTHORITIES BAFFLED' : 'EXCLUSIVE INVESTIGATION'}
+                  </p>
+                </div>
+                
+                {/* Article Layout with Tabloid Photo */}
+                <div className="grid md:grid-cols-4 gap-6">
+                  {/* TABLOID PHOTO - Left column */}
+                  <div className="md:col-span-2 relative">
                     {article.isCard && article.cardId ? (
-                      <div className="relative">
+                      <div className="relative border-8 border-black bg-white p-2 transform -rotate-1 shadow-lg">
                         <CardImage 
                           cardId={article.cardId}
-                          className="w-full h-32 md:h-40 object-cover border-2 border-black rounded-none"
+                          className="w-full h-48 md:h-64 object-cover grayscale contrast-125 sepia-[0.2]"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-xs p-1 text-center font-mono">
-                          [CLASSIFIED DOCUMENT PHOTO]
+                        <div className="absolute -bottom-2 -right-2 bg-black text-white text-xs px-3 py-2 font-bold border-4 border-white transform rotate-3">
+                          CLASSIFIED DOCUMENT PHOTO
+                        </div>
+                        {/* Tape effect */}
+                        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-200 border border-yellow-400 px-8 py-1 rotate-12 opacity-80">
+                          EVIDENCE
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full h-32 md:h-40 bg-red-800 border-2 border-black flex items-center justify-center text-white text-sm font-mono text-center animate-pulse">
-                        <div>
-                          <div className="text-lg font-bold mb-1">🚨 BREAKING 🚨</div>
-                          <div>[EMERGENCY PHOTO]</div>
+                      <div className="border-8 border-black bg-black text-white h-48 md:h-64 flex items-center justify-center transform -rotate-1 shadow-lg">
+                        <div className="text-center">
+                          <div className="text-4xl font-bold mb-2 animate-pulse" style={{ fontFamily: 'Anton, sans-serif' }}>
+                            [CLASSIFIED]
+                          </div>
+                          <div className="text-lg">PHOTO CENSORED</div>
                         </div>
                       </div>
                     )}
                   </div>
                   
-                  {/* Article Text */}
+                  {/* ARTICLE TEXT - Right columns */}
                   <div className="md:col-span-2">
-                    <p className={`text-base leading-relaxed font-serif ${
+                    <p className={`text-lg leading-relaxed font-serif ${
                       article.isEvent ? 'text-red-800 font-bold' : 'text-black'
-                    }`}>
+                    } text-justify`}>
                       {article.content}
                     </p>
                     
+                    {/* Continuation notice */}
                     {index === 0 && (
-                      <div className="mt-3 text-sm text-gray-600 italic border-t border-gray-300 pt-2">
-                        Continued on page A-{Math.floor(Math.random() * 20) + 1}... 
-                        <span className="text-red-600 ml-2 font-bold">[REMAINDER CLASSIFIED]</span>
+                      <div className="mt-4 p-3 bg-yellow-100 border-4 border-black transform rotate-1">
+                        <div className="text-sm text-gray-800 italic text-center">
+                          Continued on page A-{Math.floor(Math.random() * 20) + 1}... 
+                          <span className="text-red-600 ml-2 font-black">[REMAINDER CLASSIFIED]</span>
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
                 
-                <div className="flex justify-between items-center mt-4 text-xs text-gray-600 border-t border-gray-300 pt-2">
-                  <span className="font-mono">By: {article.isEvent ? 'CRISIS REPORTER' : ['Agent X', 'Deep Throat Jr.', 'Anonymous Tipster', 'Florida Man'][Math.floor(Math.random() * 4)]}</span>
-                  <span className="font-mono">Source: {article.isEvent && article.isEvent ? 'EMERGENCY BROADCAST' : ['Totally Reliable', 'My Cousin\'s Blog', 'Overheard at Denny\'s'][Math.floor(Math.random() * 3)]}</span>
+                {/* BYLINE AND SOURCE - Tabloid style */}
+                <div className="flex justify-between items-center mt-6 text-xs border-t-4 border-black pt-3 bg-gray-50 px-4 py-2">
+                  <span className="font-mono font-bold">
+                    By: {article.isEvent ? 'CRISIS REPORTER' : ['Agent X', 'Deep Throat Jr.', 'Anonymous Tipster', 'Florida Man'][Math.floor(Math.random() * 4)]}
+                  </span>
+                  <span className="font-mono">
+                    Source: {article.isEvent ? 'EMERGENCY BROADCAST' : ['Totally Reliable', 'My Cousin\'s Blog', 'Overheard at Denny\'s'][Math.floor(Math.random() * 3)]}
+                  </span>
                 </div>
               </article>
             ))}
           </div>
-
-          {/* Sidebar - 1 column */}
-          <div className="space-y-4">
-            {/* Humor Ads */}
-            {humorAds.map((ad, index) => (
-              <Card key={index} className={`p-3 bg-yellow-400/95 text-black border-4 border-black transform ${
-                index % 3 === 0 ? 'rotate-1' : index % 3 === 1 ? '-rotate-1' : '-rotate-0.5'
-              } hover:rotate-0 transition-transform shadow-lg`}>
-                <h4 className="font-black text-center mb-2 font-mono text-xs uppercase tracking-wide">
-                  ⚠️ SPECIAL OFFER ⚠️
-                </h4>
-                <div className="text-center text-xs font-bold font-mono">
-                  {ad}
-                </div>
-                <div className="text-center text-[10px] font-mono mt-2 opacity-70">
-                  *Results not guaranteed. Side effects may include enlightenment.
-                </div>
-              </Card>
-            ))}
-
-            {/* Conspiracy Corner */}
-            <Card className="p-3 bg-red-900 text-white border-4 border-black">
-              <h4 className="font-black mb-2 text-center text-sm">
-                🔍 CONSPIRACY CORNER 🔍
-              </h4>
-              <div className="text-xs space-y-1">
-                {selectedConspiracies.map((item, i) => (
-                  <div key={i} className="border-b border-red-700 pb-1">
-                    • {item}
+          
+          {/* TABLOID ADS SECTION - Bottom of page */}
+          <div className="mt-8 border-t-8 border-black pt-6">
+            <h3 className="text-3xl font-black text-center mb-6 bg-yellow-400 py-3 border-4 border-black transform -rotate-1"
+                style={{ fontFamily: 'Anton, Impact, sans-serif' }}>
+              🚨 SPECIAL OFFERS FOR PATRIOTS! 🚨
+            </h3>
+            
+            <div className="grid md:grid-cols-3 gap-4">
+              {/* Humor Ads */}
+              {humorAds.slice(0, 3).map((ad, index) => (
+                <div key={index} className={`bg-yellow-300 border-8 border-black p-4 transform ${
+                  index % 3 === 0 ? 'rotate-1' : index % 3 === 1 ? '-rotate-1' : 'rotate-0'
+                } hover:rotate-0 transition-transform shadow-lg`}>
+                  <h4 className="font-black text-center mb-3 text-lg" style={{ fontFamily: 'Anton, sans-serif' }}>
+                    ⚠️ SPECIAL OFFER ⚠️
+                  </h4>
+                  <div className="text-center text-sm font-bold font-mono mb-2">
+                    {ad}
                   </div>
-                ))}
-              </div>
-              <div className="text-xs text-center mt-2 font-black bg-white text-red-900 p-1">
-                TIPS: 1-800-WEIRD-ME
-              </div>
-            </Card>
+                  <div className="text-center text-xs font-mono bg-red-600 text-white p-2 border-2 border-black">
+                    *Results not guaranteed. Side effects may include enlightenment.
+                  </div>
+                </div>
+              ))}
+            </div>
 
-            {/* Weather */}
-            <Card className="p-3 bg-blue-100 border-4 border-black">
-              <h4 className="font-black mb-2 text-center text-sm">🌤️ WEATHER 🌤️</h4>
-              <div className="text-xs text-center">
-                <div className="font-black">Today: Chemtrails</div>
-                <div>Tomorrow: Mind Control Fog</div>
-                <div>Weekend: 70% chance of UFOs</div>
-                <div className="mt-2 font-mono bg-yellow-200 p-1">
-                  *Weather controlled by lizard people
+            {/* Conspiracy Corner & Weather - Side by side */}
+            <div className="grid md:grid-cols-2 gap-4 mt-6">
+              <div className="bg-red-900 text-white border-8 border-black p-4 transform rotate-1">
+                <h4 className="font-black mb-3 text-center text-xl border-b-2 border-white pb-2"
+                    style={{ fontFamily: 'Anton, sans-serif' }}>
+                  🔍 CONSPIRACY CORNER 🔍
+                </h4>
+                <div className="text-sm space-y-2">
+                  {selectedConspiracies.map((item, i) => (
+                    <div key={i} className="border-b border-red-700 pb-2 font-mono">
+                      • {item}
+                    </div>
+                  ))}
+                </div>
+                <div className="text-center mt-4 bg-white text-red-900 p-2 border-4 border-red-700 font-black">
+                  TIPS: 1-800-WEIRD-ME
                 </div>
               </div>
-            </Card>
+
+              <div className="bg-blue-200 border-8 border-black p-4 transform -rotate-1">
+                <h4 className="font-black mb-3 text-center text-xl border-b-2 border-black pb-2"
+                    style={{ fontFamily: 'Anton, sans-serif' }}>
+                  🌤️ WEATHER CONTROL 🌤️
+                </h4>
+                <div className="text-sm text-center space-y-2">
+                  <div className="font-black text-lg">Today: Chemtrails</div>
+                  <div className="font-semibold">Tomorrow: Mind Control Fog</div>
+                  <div className="font-semibold">Weekend: 70% chance of UFOs</div>
+                  <div className="mt-3 font-mono bg-yellow-200 border-2 border-black p-2 text-black">
+                    *Weather controlled by lizard people
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="bg-red-800 text-white p-4 border-t-4 border-black text-center">
+        {/* TABLOID FOOTER */}
+        <div className="bg-black text-white p-6 border-t-8 border-black text-center">
           <Button 
             onClick={onClose}
-            className="bg-yellow-400 hover:bg-yellow-300 text-black font-black text-xl px-8 py-3 border-4 border-black transform hover:scale-105 transition-transform"
+            className="bg-red-600 hover:bg-red-700 text-white font-black text-2xl px-12 py-4 border-8 border-white transform hover:scale-105 transition-transform shadow-lg"
+            style={{ fontFamily: 'Anton, Impact, sans-serif' }}
           >
             🗞️ CONTINUE THE INVESTIGATION 🗞️
           </Button>
           
-          <div className="text-xs mt-3 opacity-80">
+          <div className="text-sm mt-6 opacity-80 font-mono max-w-2xl mx-auto">
             © {new Date().getFullYear()} The Sheeple Daily | All rights reserved by whoever's really in charge | 
             Printed with disappearing ink for your protection
           </div>
 
-          <div className="text-xs mt-1 font-mono">
+          <div className="text-xs mt-2 font-mono border-t border-white/20 pt-2">
             Remember: This newspaper will self-destruct in 5... 4... just kidding, keep it forever.
           </div>
         </div>
