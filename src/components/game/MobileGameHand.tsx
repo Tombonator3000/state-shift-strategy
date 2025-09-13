@@ -206,7 +206,7 @@ const MobileGameHand: React.FC<MobileGameHandProps> = ({
                 <div className="space-y-1">
                   <div className="flex items-center gap-1">
                     <h3 className="font-bold text-xs truncate flex-1">{card.name}</h3>
-                    <ExtensionCardBadge cardId={card.id} card={card} variant="mini" />
+                    <ExtensionCardBadge cardId={card.id} card={card} variant="inline" />
                   </div>
                   
                   <Badge variant="outline" className="text-xs">

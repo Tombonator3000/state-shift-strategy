@@ -101,10 +101,10 @@ const MobileGameLayout: React.FC<MobileGameLayoutProps> = ({
               
               <div className="border-2 border-black bg-white p-3">
                 <AIStatus 
-                  difficulty={aiDifficulty}
+                  difficulty={aiDifficulty as any}
                   personalityName={aiPersonalityName}
                   isThinking={isAIThinking}
-                  currentPlayer={currentPlayer}
+                  currentPlayer={currentPlayer as any}
                   aiControlledStates={aiControlledStates}
                   assessmentText={assessmentText}
                   aiHandSize={aiHandSize}

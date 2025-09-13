@@ -25,7 +25,6 @@ import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
-
 import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
 import ContextualHelp from '@/components/game/ContextualHelp';
 import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
@@ -44,6 +43,10 @@ import EnhancedExpansionManager from '@/components/game/EnhancedExpansionManager
 import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import MobileGameLayout from '@/components/game/MobileGameLayout';
+import MobileGameHand from '@/components/game/MobileGameHand';
+import ResponsiveNewspaper from '@/components/game/ResponsiveNewspaper';
 
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
@@ -900,33 +903,8 @@ const Index = () => {
               </div>
             </div>
           </div>
-  return (
-    <div>
-      {isMobile ? (
-        <MobileGameLayout
-          controlledStates={gameState.controlledStates.length}
-          truth={gameState.truth}
-          ip={gameState.ip}
-          aiIP={gameState.aiIP}
-          aiDifficulty={gameState.aiDifficulty}
-          aiPersonalityName={gameState.aiStrategist?.personality.name}
-          isAIThinking={gameState.phase === 'ai_turn'}
-          currentPlayer={gameState.currentPlayer}
-          aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
-          assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
-          aiHandSize={gameState.aiHand.length}
-          aiObjectiveProgress={gameState.aiSecretAgenda ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100 : 0}
-          playerAgenda={gameState.secretAgenda}
-          aiAgenda={gameState.aiSecretAgenda}
-          gameLog={gameState.log}
-          onShowInGameOptions={() => setShowInGameOptions(true)}
-          onShowAchievements={() => setShowAchievements(true)}
-          onShowCardCollection={() => setShowCardCollection(true)}
-          onShowTutorial={() => setShowTutorial(true)}
-        >
-          {gameContent}
-        </MobileGameLayout>
-      ) : gameContent}
+        </div>
+      </div>
 
       {/* Toast notifications */}
       <Toaster 
@@ -944,7 +922,6 @@ const Index = () => {
 
       {/* Card Animation Layer with integrated effects */}
       <CardAnimationLayer />
-      
       
       <TabloidVictoryScreen 
         isVisible={victoryState.isVictory}
@@ -1033,8 +1010,15 @@ const Index = () => {
       {gameState.showNewspaper && (
         isMobile ? (
           <ResponsiveNewspaper 
-            events={gameState.currentEvents}
-            playedCards={gameState.cardsPlayedThisRound}
+            events={gameState.currentEvents.map(event => ({
+              type: event.type || 'Breaking News',
+              description: (event as any).description || (event as any).text || 'Important event occurred',
+              impact: (event as any).impact
+            }))}
+            playedCards={gameState.cardsPlayedThisRound.map(played => ({
+              card: played.card,
+              playedBy: played.player === 'human' ? 'player' : played.player
+            }))}
             faction={gameState.faction}
             truth={gameState.truth}
             onClose={handleCloseNewspaper}
