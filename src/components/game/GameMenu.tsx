@@ -545,14 +545,11 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
         </div>
       </div>
 
-      {/* Card Collection Overlay */}
-      {showCollection && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-8 z-50">
-          <div className="bg-white max-w-6xl w-full h-full rounded-lg overflow-hidden">
-            <CardCollection onClose={() => setShowCollection(false)} />
-          </div>
-        </div>
-      )}
+      {/* Card Collection */}
+      <CardCollection 
+        open={showCollection} 
+        onOpenChange={setShowCollection} 
+      />
     </div>
   );
 };
