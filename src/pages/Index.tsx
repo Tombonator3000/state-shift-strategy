@@ -7,7 +7,6 @@ import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
 import EnhancedGameHand from '@/components/game/EnhancedGameHand';
 import PlayedCardsDock from '@/components/game/PlayedCardsDock';
 import TruthMeter from '@/components/game/TruthMeter';
-import TabloidNewspaper from '@/components/game/TabloidNewspaper';
 import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
 import AIStatus from '@/components/game/AIStatus';
@@ -306,6 +305,14 @@ const Index = () => {
     };
     initNewspaper();
   }, []);
+
+  // Handle newspaper display - trigger new system when game shows newspaper
+  useEffect(() => {
+    if (gameState.showNewspaper && gameState.cardsPlayedThisRound.length > 0) {
+      console.log('📰 GAME STATE SHOWS NEWSPAPER - Triggering new system for round:', gameState.round);
+      showNewspaperForRound(gameState.round);
+    }
+  }, [gameState.showNewspaper, gameState.cardsPlayedThisRound.length, gameState.round, showNewspaperForRound]);
 
   // Update subtitle based on faction and add glitching effect
   useEffect(() => {
@@ -1111,16 +1118,7 @@ const Index = () => {
         onConfirm={confirmNewCards}
       />
 
-      {/* COMPLETELY DISABLED OLD NEWSPAPER SYSTEM */}
-      {false && gameState.showNewspaper && (
-        <TabloidNewspaper 
-          events={gameState.currentEvents}
-          playedCards={gameState.cardsPlayedThisRound}
-          faction={gameState.faction}
-          truth={gameState.truth}
-          onClose={handleCloseNewspaper}
-        />
-      )}
+      {/* NEW NEWSPAPER SYSTEM ONLY */}
 
       {/* NEW TABLOID NEWSPAPER SYSTEM - ONLY THIS ONE */}
       {isNewspaperVisible && currentIssue && (
@@ -1133,19 +1131,7 @@ const Index = () => {
         />
       )}
       
-      {/* SHOW OLD SYSTEM ONLY IF NEW SYSTEM COMPLETELY FAILS */}
-      {gameState.showNewspaper && !isNewspaperVisible && !currentIssue && (
-        <div>
-          <p>New newspaper system failed, showing fallback...</p>
-          <TabloidNewspaper 
-            events={gameState.currentEvents}
-            playedCards={gameState.cardsPlayedThisRound}
-            faction={gameState.faction}
-            truth={gameState.truth}
-            onClose={handleCloseNewspaper}
-          />
-        </div>
-      )}
+      {/* OLD SYSTEM COMPLETELY DISABLED - NEW SYSTEM ONLY */}
 
     </div>
   );
