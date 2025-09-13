@@ -222,39 +222,6 @@
       ]
     },
     {
-      "type": "DEVELOPMENT",
-      "faction": "Any",
-      "templates": [
-        "NEW PROGRAM FUNDED: {CARD}",
-        "THINK-TANK SAYS YES TO {CARD}"
-      ]
-    },
-    {
-      "type": "LEGENDARY",
-      "faction": "Any",
-      "templates": [
-        "WORLD-SHIFTING REVEAL: {CARD}",
-        "HISTORY REWRITTEN BY {CARD}!",
-        "GLOBAL PARADIGM FLIPS: {CARD}"
-      ]
-    },
-    {
-      "type": "INSTANT",
-      "faction": "Any",
-      "templates": [
-        "FLASH ALERT: {CARD}",
-        "SURPRISE MOVE: {CARD} CHANGES EVERYTHING"
-      ]
-    },
-    {
-      "type": "EVENT",
-      "faction": "Any",
-      "templates": [
-        "TONIGHT ONLY: {CARD}",
-        "EERIE OMEN AT {PLACE}: {CARD}"
-      ]
-    },
-    {
       "type": "GENERIC",
       "faction": "Any",
       "templates": [
