@@ -1,8 +1,8 @@
 import React from "react";
 import { NewspaperIssue } from "@/types/newspaper";
-import { cn } from "@/lib/cn";
 
 type Props = { issue: NewspaperIssue; onClose: () => void };
+const cx = (...c:string[]) => c.filter(Boolean).join(" ");
 
 export default function NewspaperOverlay({ issue, onClose }: Props) {
   return (
@@ -18,62 +18,29 @@ export default function NewspaperOverlay({ issue, onClose }: Props) {
           {/* Lead (1–3) */}
           <section className="md:col-span-2 space-y-6">
             {issue.lead.map((a) => (
-              <article key={a.cardId} className={cn("news-article space-y-2", a.isEvent && "event")}>
+              <article key={a.cardId} className={cx("news-article space-y-2", a.isEvent && "event")}>
                 {a.isEvent && <span className="news-badge event inline-block">EVENT</span>}
-                <h2 className={cn("headline text-2xl font-black leading-tight", a.isEvent ? "text-rose-600" : "text-black")}>
+                <h2 className={cx("headline text-2xl font-black leading-tight", a.isEvent ? "text-rose-600" : "text-black")}>
                   {a.title}
                 </h2>
                 {a.dek && (
-                  <p className={cn("dek text-sm italic", a.isEvent ? "text-rose-400" : "text-neutral-700")}>{a.dek}</p>
+                  <p className={cx("dek text-sm italic", a.isEvent ? "text-rose-400" : "text-neutral-700")}>{a.dek}</p>
                 )}
-                <img
-                  src={a.imageUrl}
-                  alt=""
-                  className="w-full aspect-[16/9] object-cover rounded-md border border-neutral-200"
-                />
+                <img src={a.imageUrl} alt="" className="w-full aspect-[16/9] object-cover rounded-md border border-neutral-200" />
                 {a.body.map((p, idx) => (
-                  <p key={idx} className="text-sm text-neutral-800">
-                    {p}
-                  </p>
+                  <p key={idx} className="text-sm text-neutral-800">{p}</p>
                 ))}
-                {a.stamps?.length ? (
-                  <div className="mt-2 flex gap-2 flex-wrap">
-                    {a.stamps.map((s, j) => (
-                      <span
-                        key={j}
-                        className="text-[10px] font-extrabold px-2 py-1 border border-black rounded-sm"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
               </article>
             ))}
 
-            {/* Brief */}
             {issue.brief && (
-              <article
-                className={cn("news-article border-t pt-4 mt-4", issue.brief.isEvent && "event")}
-              >
+              <article className={cx("news-article border-t pt-4 mt-4", issue.brief.isEvent && "event")}>
                 {issue.brief.isEvent && <span className="news-badge event inline-block">EVENT</span>}
-                <h3
-                  className={cn(
-                    "headline text-xl font-extrabold",
-                    issue.brief.isEvent ? "text-rose-600" : "text-black"
-                  )}
-                >
+                <h3 className={cx("headline text-xl font-extrabold", issue.brief.isEvent ? "text-rose-600" : "text-black")}>
                   {issue.brief.title}
                 </h3>
                 {issue.brief.dek && (
-                  <p
-                    className={cn(
-                      "dek text-sm italic",
-                      issue.brief.isEvent ? "text-rose-400" : "text-neutral-700"
-                    )}
-                  >
-                    {issue.brief.dek}
-                  </p>
+                  <p className={cx("dek text-sm italic", issue.brief.isEvent ? "text-rose-400" : "text-neutral-700")}>{issue.brief.dek}</p>
                 )}
               </article>
             )}

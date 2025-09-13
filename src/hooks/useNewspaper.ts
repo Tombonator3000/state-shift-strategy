@@ -9,9 +9,11 @@ import { NewspaperIssue } from "@/types/newspaper";
 
 interface RoundContext {
   round: number;
-  truth: number;
-  ip: { human: number; ai: number };
-  states?: any[];
+  state: {
+    truth: number;
+    ip: { human: number; ai: number };
+    states?: any[];
+  };
 }
 
 export const useNewspaper = () => {

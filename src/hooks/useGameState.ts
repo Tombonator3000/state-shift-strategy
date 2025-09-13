@@ -315,9 +315,11 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       // Queue article for newspaper system - ADD MORE DEBUGGING
       const context = {
         round: prev.round,
-        truth: prev.truth,
-        ip: { human: prev.ip, ai: prev.aiIP },
-        states: prev.states
+        state: {
+          truth: prev.truth,
+          ip: { human: prev.ip, ai: prev.aiIP },
+          states: prev.states
+        }
       };
       console.log('📰 QUEUEING ARTICLE for card:', card.name, 'Context:', context);
       try {
@@ -611,16 +613,11 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
             // Queue event for newspaper system too
             console.log('📰 QUEUEING EVENT for newspaper:', triggeredEvent.title);
             try {
-              const eventContext = {
-                round: prev.round,
-                truth: prev.truth,
-                ip: { human: prev.ip, ai: prev.aiIP },
-                states: prev.states
-              };
-              newspaper.queueArticleFromEvent(triggeredEvent, eventContext);
-              console.log('📰 EVENT ARTICLE QUEUED SUCCESSFULLY:', triggeredEvent.title);
+              // Events can be queued as cards with meta.isEvent: true
+              // For now, we'll skip event integration until events are restructured as cards
+              console.log('📰 EVENT TRIGGERED (not yet integrated):', triggeredEvent.title);
             } catch (error) {
-              console.error('📰 FAILED TO QUEUE EVENT ARTICLE:', error);
+              console.error('📰 EVENT PROCESSING ERROR:', error);
             }
             
             // Apply event effects

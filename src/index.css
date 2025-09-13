@@ -569,3 +569,21 @@ All colors MUST be HSL.
     transform: translateY(-15px) scale(1.02);
   }
 }
+
+/* Newspaper Event Styles */
+.news-article.event .headline {
+  color: #e11d48 !important;
+}
+
+.news-article.event .dek {
+  color: #fb7185 !important;
+}
+
+.news-badge.event {
+  background: #e11d48;
+  color: #fff;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
