@@ -137,10 +137,53 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
   };
 
   // Tabloid headlines from events
+  // Helper function to format game effects for display
+  const formatGameEffects = (effects: any): string => {
+    if (!effects) return '';
+    
+    const effectParts: string[] = [];
+    
+    if (effects.truth) {
+      effectParts.push(`Truth ${effects.truth > 0 ? '+' : ''}${effects.truth}%`);
+    }
+    if (effects.ip) {
+      effectParts.push(`IP ${effects.ip > 0 ? '+' : ''}${effects.ip}`);
+    }
+    if (effects.cardDraw) {
+      effectParts.push(`Draw ${effects.cardDraw} card${effects.cardDraw > 1 ? 's' : ''}`);
+    }
+    if (effects.truthChange) {
+      effectParts.push(`Truth ${effects.truthChange > 0 ? '+' : ''}${effects.truthChange}%`);
+    }
+    if (effects.ipChange) {
+      effectParts.push(`IP ${effects.ipChange > 0 ? '+' : ''}${effects.ipChange}`);
+    }
+    if (effects.defenseChange) {
+      effectParts.push(`Defense ${effects.defenseChange > 0 ? '+' : ''}${effects.defenseChange}`);
+    }
+    if (effects.stateEffects?.pressure) {
+      effectParts.push(`State Pressure ${effects.stateEffects.pressure > 0 ? '+' : ''}${effects.stateEffects.pressure}`);
+    }
+    if (effects.stateEffects?.defense) {
+      effectParts.push(`State Defense ${effects.stateEffects.defense > 0 ? '+' : ''}${effects.stateEffects.defense}`);
+    }
+    if (effects.skipTurn) {
+      effectParts.push('Skip Next Turn');
+    }
+    if (effects.doubleIncome) {
+      effectParts.push('Double Income');
+    }
+    
+    return effectParts.length > 0 ? ` (${effectParts.join(', ')})` : '';
+  };
+
   const generateTabloidHeadlines = (): Article[] => {
-    const eventHeadlines = events.map(event => ({
+    // Only show events with 20% probability
+    const filteredEvents = events.filter(() => Math.random() < 0.2);
+    
+    const eventHeadlines = filteredEvents.map(event => ({
       headline: `🚨 ${event.headline || `BREAKING: ${event.title.toUpperCase()}`} 🚨`,
-      content: `URGENT UPDATE: ${event.content} This developing story continues to unfold as authorities scramble to contain the situation.`,
+      content: `URGENT UPDATE: ${event.content} This developing story continues to unfold as authorities scramble to contain the situation.${formatGameEffects(event.effects)}`,
       isEvent: true
     }));
     
