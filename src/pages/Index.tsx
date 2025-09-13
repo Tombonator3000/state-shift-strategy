@@ -46,6 +46,7 @@ import EnhancedExpansionManager from '@/components/game/EnhancedExpansionManager
 import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import { newspaper } from '@/systems/newspaper';
+import { testNewspaperQuick } from '@/utils/testNewspaperSystem';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Index = () => {
@@ -93,9 +94,10 @@ const Index = () => {
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
 
-  // Handle newspaper phase - trigger newspaper system
+  // Handle newspaper phase - trigger NEW newspaper system
   useEffect(() => {
     if (gameState.phase === 'newspaper' && gameState.showNewspaper) {
+      console.log('📰 Triggering new newspaper system for round:', gameState.round);
       // Small delay to let game state settle
       const timer = setTimeout(() => {
         showNewspaperForRound(gameState.round);
@@ -262,10 +264,20 @@ const Index = () => {
   useEffect(() => {
     const initNewspaper = async () => {
       try {
+        console.log('📰 Initializing newspaper system...');
         await newspaper.loadConfig();
-        console.log('📰 Newspaper system initialized');
+        console.log('📰 Newspaper system initialized successfully');
+        
+        // Test the system in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🧪 Running newspaper test...');
+          const testResult = await testNewspaperQuick();
+          if (testResult) {
+            console.log('✅ Newspaper test passed!');
+          }
+        }
       } catch (error) {
-        console.warn('📰 Failed to initialize newspaper:', error);
+        console.error('📰 Failed to initialize newspaper:', error);
       }
     };
     initNewspaper();
@@ -1033,7 +1045,7 @@ const Index = () => {
         onConfirm={confirmNewCards}
       />
 
-      {/* Newspaper overlay */}
+      {/* OLD NEWSPAPER SYSTEM - DISABLED 
       {gameState.showNewspaper && (
         <TabloidNewspaper 
           events={gameState.currentEvents}
@@ -1043,8 +1055,9 @@ const Index = () => {
           onClose={handleCloseNewspaper}
         />
       )}
+      */}
 
-      {/* New tabloid newspaper system */}
+      {/* NEW TABLOID NEWSPAPER SYSTEM */}
       {isNewspaperVisible && currentIssue && (
         <NewspaperOverlay 
           issue={currentIssue} 
@@ -1052,6 +1065,17 @@ const Index = () => {
             closeNewspaperOverlay();
             closeNewspaper(); // Also close the game state newspaper
           }}
+        />
+      )}
+      
+      {/* FALLBACK: Show old system if new system fails */}
+      {gameState.showNewspaper && !isNewspaperVisible && (
+        <TabloidNewspaper 
+          events={gameState.currentEvents}
+          playedCards={gameState.cardsPlayedThisRound}
+          faction={gameState.faction}
+          truth={gameState.truth}
+          onClose={handleCloseNewspaper}
         />
       )}
 

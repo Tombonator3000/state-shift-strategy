@@ -82,6 +82,7 @@ class NewspaperSystem {
   }
 
   queueArticleFromCard(card: GameCard, context: RoundContext): void {
+    console.log('📰 queueArticleFromCard called:', card.name, 'initialized:', this.initialized);
     if (!this.initialized) {
       console.warn('Newspaper system not initialized');
       return;
@@ -89,6 +90,7 @@ class NewspaperSystem {
 
     const article = this.generateArticleFromCard(card, context);
     this.queuedArticles.push(article);
+    console.log('📰 Article queued. Total queued:', this.queuedArticles.length);
   }
 
   private generateArticleFromCard(card: GameCard, context: RoundContext): QueuedArticle {
@@ -232,11 +234,14 @@ class NewspaperSystem {
   }
 
   flushForRound(round: number): NewspaperIssue {
+    console.log('📰 flushForRound called for round:', round, 'queued articles:', this.queuedArticles.length);
     if (!this.config) throw new Error('Config not loaded');
     
     const isGlitchEdition = Math.random() < 0.05; // 5% chance
     const masthead = this.chooseMasthead(isGlitchEdition);
     const articles = [...this.queuedArticles].slice(0, 4); // Max 4 articles
+    
+    console.log('📰 Creating issue with masthead:', masthead, 'articles:', articles.length);
     
     // Clear queue
     this.queuedArticles = [];
@@ -249,7 +254,7 @@ class NewspaperSystem {
     const overflowArticles = this.queuedArticles.slice(4);
     const ticker = this.generateTicker(overflowArticles);
     
-    return {
+    const issue = {
       masthead,
       volume: round,
       date: this.getCurrentDate(),
@@ -260,6 +265,9 @@ class NewspaperSystem {
       sidebar: this.pickSidebar(),
       isGlitchEdition
     };
+    
+    console.log('📰 Created newspaper issue:', issue);
+    return issue;
   }
 
   private chooseMasthead(isGlitch: boolean): string {

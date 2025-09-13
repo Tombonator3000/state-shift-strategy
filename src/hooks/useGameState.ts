@@ -317,6 +317,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         ip: { human: prev.ip, ai: prev.aiIP },
         states: prev.states
       };
+      console.log('📰 Queuing article for card:', card.name, 'Round:', context.round);
       newspaper.queueArticleFromCard(card, context);
 
       const newHand = prev.hand.filter(c => c.id !== cardId);
