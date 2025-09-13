@@ -6,6 +6,9 @@ import HowToPlay from './HowToPlay';
 import Options from './Options';
 import ManageExpansions from './ManageExpansions';
 import CardCollection from './CardCollection';
+import StartScreenTabloid from './StartScreenTabloid';
+import FactionSelectTabloid from './FactionSelectTabloid';
+import { useUiTheme } from '@/hooks/useTheme';
 
 interface GameMenuProps {
   onStartGame: (faction: 'government' | 'truth') => Promise<void>;
@@ -19,6 +22,7 @@ interface GameMenuProps {
 }
 
 const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSaveGame, onShowCardCollection, getSaveInfo, onLoadGame }: GameMenuProps) => {
+  const [uiTheme] = useUiTheme();
   const [glitching, setGlitching] = useState(false);
   const [redactedText, setRedactedText] = useState('SHADOW GOVERNMENT');
   const [showCredits, setShowCredits] = useState(false);
@@ -170,7 +174,14 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
   }
 
   if (showFactionSelect) {
-    return (
+    return uiTheme === 'tabloid_bw' ? (
+      <FactionSelectTabloid
+        onStartGame={onStartGame}
+        onFactionHover={onFactionHover}
+        onBack={() => setShowFactionSelect(false)}
+        audio={audio}
+      />
+    ) : (
       <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
         {/* Redacted background pattern */}
         <div className="absolute inset-0 opacity-5">
@@ -295,7 +306,22 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
     );
   }
 
-  return (
+  return uiTheme === 'tabloid_bw' ? (
+    <>
+      <StartScreenTabloid
+        onStartGame={() => setShowFactionSelect(true)}
+        onManageExpansions={() => setShowManageExpansions(true)}
+        onHowToPlay={() => setShowHowToPlay(true)}
+        onOptions={() => setShowOptions(true)}
+        onCredits={() => setShowCredits(true)}
+        onCardCollection={() => setShowCollection(true)}
+        onLoadGame={onLoadGame}
+        getSaveInfo={getSaveInfo}
+        audio={audio}
+      />
+      <CardCollection open={showCollection} onOpenChange={setShowCollection} />
+    </>
+  ) : (
     <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
       {/* Redacted background pattern */}
       <div className="absolute inset-0 opacity-5">

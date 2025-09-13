@@ -6,6 +6,7 @@ import { AudioControls } from '@/components/ui/audio-controls';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { useState, useEffect } from 'react';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
+import { useUiTheme, type UiTheme } from '@/hooks/useTheme';
 
 interface OptionsProps {
   onClose: () => void;
@@ -26,10 +27,12 @@ interface GameSettings {
   screenShake: boolean;
   confirmActions: boolean;
   drawMode: 'standard' | 'classic' | 'momentum' | 'catchup' | 'fast';
+  uiTheme: 'tabloid_bw' | 'government_classic';
 }
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const audio = useAudioContext();
+  const [uiTheme, setUiTheme] = useUiTheme();
 
   const [settings, setSettings] = useState<GameSettings>(() => {
     // Initialize settings from audio system and localStorage
@@ -47,6 +50,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       screenShake: true,
       confirmActions: true,
       drawMode: 'standard' as const,
+      uiTheme: uiTheme,
     };
     
     if (savedSettings) {
@@ -94,9 +98,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       screenShake: true,
       confirmActions: true,
       drawMode: 'standard',
+      uiTheme: 'tabloid_bw',
     };
     setSettings(defaultSettings);
     localStorage.setItem('gameSettings', JSON.stringify(defaultSettings));
+    setUiTheme('tabloid_bw');
   };
 
   const handleSaveGame = () => {
@@ -354,6 +360,27 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   {(DRAW_MODE_CONFIGS[settings.drawMode] || DRAW_MODE_CONFIGS.standard).specialRules.map((rule, i) => (
                     <div key={i}>• {rule}</div>
                   ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-newspaper-text mb-2 block">
+                  UI Theme
+                </label>
+                <select 
+                  value={uiTheme}
+                  onChange={(e) => {
+                    const newTheme = e.target.value as UiTheme;
+                    setUiTheme(newTheme);
+                    updateSettings({ uiTheme: newTheme });
+                  }}
+                  className="w-full p-2 border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded"
+                >
+                  <option value="tabloid_bw">TABLOID (Black & White)</option>
+                  <option value="government_classic">GOVERNMENT CLASSIC (Legacy Layout)</option>
+                </select>
+                <div className="text-xs text-newspaper-text/70 mt-1">
+                  Changes the visual appearance of menus and screens
                 </div>
               </div>
             </div>
