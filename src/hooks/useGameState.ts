@@ -838,6 +838,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         const drawnCards = currentDeck.slice(0, totalCardsToDraw);
         const remainingDeck = currentDeck.slice(totalCardsToDraw);
         
+        console.log('🔴 NEWSPAPER CLOSE - Going to card_presentation phase, drawing', totalCardsToDraw, 'cards');
         return {
           ...prev,
           showNewspaper: false,
@@ -850,6 +851,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           log: [...prev.log, `Drawing ${totalCardsToDraw} cards (${prev.drawMode} mode)`]
         };
       } else {
+        console.log('🔴 NEWSPAPER CLOSE - No cards to draw, going directly to action phase');
         return {
           ...prev,
           showNewspaper: false,
@@ -862,6 +864,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   }, []);
 
   const confirmNewCards = useCallback(() => {
+    console.log('🔴 CONFIRM NEW CARDS - Transitioning to action phase');
     setGameState(prev => ({
       ...prev,
       phase: 'action',

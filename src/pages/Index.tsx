@@ -520,6 +520,7 @@ const Index = () => {
   };
 
   const handleEndTurn = () => {
+    console.log('🔴 END TURN CLICKED - Phase:', gameState.phase, 'Player:', gameState.currentPlayer, 'Animating:', gameState.animating);
     endTurn();
     audio.playSFX('turnEnd');
     // Play card draw sound after a short delay
@@ -529,6 +530,7 @@ const Index = () => {
   };
 
   const handleCloseNewspaper = () => {
+    console.log('🔴 NEWSPAPER CLOSE CLICKED - Current phase:', gameState.phase);
     closeNewspaper();
     audio.playSFX('newspaper');
   };
