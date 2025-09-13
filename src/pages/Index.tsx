@@ -521,18 +521,32 @@ const Index = () => {
 
   const handleEndTurn = () => {
     console.log('🔴 END TURN CLICKED - Phase:', gameState.phase, 'Player:', gameState.currentPlayer, 'Animating:', gameState.animating);
-    endTurn();
-    audio.playSFX('turnEnd');
-    // Play card draw sound after a short delay
-    setTimeout(() => {
-      audio.playSFX('cardDraw');
-    }, 500);
+    
+    try {
+      endTurn();
+      audio.playSFX('turnEnd');
+      // Play card draw sound after a short delay
+      setTimeout(() => {
+        audio.playSFX('cardDraw');
+      }, 500);
+    } catch (error) {
+      console.error('🔴 END TURN ERROR:', error);
+      // Ensure game continues even if audio fails
+      endTurn();
+    }
   };
 
   const handleCloseNewspaper = () => {
     console.log('🔴 NEWSPAPER CLOSE CLICKED - Current phase:', gameState.phase);
-    closeNewspaper();
-    audio.playSFX('newspaper');
+    
+    try {
+      closeNewspaper();
+      audio.playSFX('newspaper');
+    } catch (error) {
+      console.error('🔴 NEWSPAPER CLOSE ERROR:', error);
+      // Ensure newspaper closes even if audio fails
+      closeNewspaper();
+    }
   };
 
   useEffect(() => {

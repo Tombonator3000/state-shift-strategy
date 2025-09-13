@@ -473,15 +473,15 @@ export const useAudio = () => {
   }, [audioContextUnlocked, currentTrackName]);
 
   const playSFX = useCallback((soundName: string) => {
-    if (!config.sfxEnabled || config.muted || !audioContextUnlocked) {
-      console.log('🎵 SFX blocked:', soundName, { sfxEnabled: config.sfxEnabled, muted: config.muted, unlocked: audioContextUnlocked });
+    // Always allow SFX calls to complete, just skip the actual playing if needed
+    if (!config.sfxEnabled || config.muted) {
+      // Don't log anything to reduce console spam, just skip quietly
       return;
     }
     
     const audio = sfxRefs.current[soundName];
-    if (audio) {
+    if (audio && audioContextUnlocked) {
       try {
-        console.log('🎵 Playing SFX:', soundName);
         // Reduce volume for light click specifically
         if (soundName === 'lightClick') {
           const originalVolume = audio.volume;
@@ -497,11 +497,10 @@ export const useAudio = () => {
           audio.play().catch(() => {}); // Silently fail
         }
       } catch (error) {
-        console.debug('🎵 SFX play failed:', soundName, error);
+        // Completely silent error handling to prevent UI lockups
       }
-    } else {
-      console.debug('🎵 SFX not found:', soundName);
     }
+    // Always return successfully, even if audio didn't play
   }, [config.sfxEnabled, config.muted, audioContextUnlocked]);
 
   const testSFX = useCallback(() => {

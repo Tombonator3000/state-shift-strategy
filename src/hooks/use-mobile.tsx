@@ -10,21 +10,25 @@ export function useIsMobile() {
   });
 
   React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-    const onChange = () => {
+    const checkMobile = () => {
       const mobile = window.innerWidth < MOBILE_BREAKPOINT;
-      console.log('🔍 Mobile Detection:', { width: window.innerWidth, isMobile: mobile, breakpoint: MOBILE_BREAKPOINT });
       setIsMobile(mobile);
     };
-    
-    mql.addEventListener("change", onChange);
-    
+
     // Initial check
-    const initialMobile = window.innerWidth < MOBILE_BREAKPOINT;
-    console.log('🔍 Initial Mobile Detection:', { width: window.innerWidth, isMobile: initialMobile, breakpoint: MOBILE_BREAKPOINT });
-    setIsMobile(initialMobile);
+    checkMobile();
     
-    return () => mql.removeEventListener("change", onChange);
+    // Use both resize event and matchMedia for comprehensive coverage
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const handleChange = () => checkMobile();
+    
+    window.addEventListener("resize", handleChange);
+    mql.addEventListener("change", handleChange);
+    
+    return () => {
+      window.removeEventListener("resize", handleChange);
+      mql.removeEventListener("change", handleChange);
+    };
   }, []);
 
   return isMobile;
