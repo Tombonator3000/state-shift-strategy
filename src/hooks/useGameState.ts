@@ -15,7 +15,7 @@ import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
 import { CardEffectMigrator } from '@/utils/cardEffectMigration';
 import type { Card } from '@/types/cardEffects';
 import { hasHarmfulEffect } from '@/utils/clashHelpers';
-import { queueArticleFromCard } from "@/services/newspaper";
+import { newspaper } from '@/systems/newspaper';
 
 interface ClashState {
   open: boolean;
@@ -315,16 +315,14 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       // Queue article for newspaper system - ADD MORE DEBUGGING
       const context = {
         round: prev.round,
-        state: {
-          truth: prev.truth,
-          ip: { human: prev.ip, ai: prev.aiIP },
-          states: prev.states
-        }
+        truth: prev.truth,
+        ip: { human: prev.ip, ai: prev.aiIP },
+        states: prev.states
       };
       console.log('📰 QUEUEING ARTICLE for card:', card.name, 'Context:', context);
       try {
-        queueArticleFromCard(card as any, context);
-        console.log('📰 ARTICLE QUEUED SUCCESSFULLY for card:', card.name);
+        newspaper.queueArticleFromCard(card, context);
+        console.log('📰 ARTICLE QUEUED SUCCESSFULLY');
       } catch (error) {
         console.error('📰 FAILED TO QUEUE ARTICLE:', error);
       }
@@ -609,16 +607,6 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           const triggeredEvent = prev.eventManager.selectRandomEvent(prev);
           if (triggeredEvent) {
             newEvents = [triggeredEvent];
-            
-            // Queue event for newspaper system too
-            console.log('📰 QUEUEING EVENT for newspaper:', triggeredEvent.title);
-            try {
-              // Events can be queued as cards with meta.isEvent: true
-              // For now, we'll skip event integration until events are restructured as cards
-              console.log('📰 EVENT TRIGGERED (not yet integrated):', triggeredEvent.title);
-            } catch (error) {
-              console.error('📰 EVENT PROCESSING ERROR:', error);
-            }
             
             // Apply event effects
             if (triggeredEvent.effects) {

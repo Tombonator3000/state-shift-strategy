@@ -1,19 +1,12 @@
-import { useState, useCallback, useEffect } from "react";
-import { GameCard } from "@/types/cardTypes";
-import {
-  loadConfig,
-  queueArticleFromCard as queueFromCard,
-  flushForRound,
-} from "@/services/newspaper";
-import { NewspaperIssue } from "@/types/newspaper";
+import { useState, useCallback, useEffect } from 'react';
+import { newspaper, NewspaperIssue } from '@/systems/newspaper';
+import { GameCard } from '@/types/cardTypes';
 
 interface RoundContext {
   round: number;
-  state: {
-    truth: number;
-    ip: { human: number; ai: number };
-    states?: any[];
-  };
+  truth: number;
+  ip: { human: number; ai: number };
+  states?: any[];
 }
 
 export const useNewspaper = () => {
@@ -25,7 +18,7 @@ export const useNewspaper = () => {
   useEffect(() => {
     const initNewspaper = async () => {
       try {
-        await loadConfig();
+        await newspaper.loadConfig();
         setIsInitialized(true);
       } catch (error) {
         console.error('Failed to initialize newspaper system:', error);
@@ -43,7 +36,7 @@ export const useNewspaper = () => {
       return;
     }
 
-    queueFromCard(card as any, context);
+    newspaper.queueArticleFromCard(card, context);
   }, [isInitialized]);
 
   // Generate and show newspaper at round end
@@ -57,8 +50,8 @@ export const useNewspaper = () => {
 
     try {
       console.log('📰 Generating newspaper issue...');
-      const issue = flushForRound(round);
-      console.log('📰 Generated issue:', issue.masthead, 'Articles:', issue.lead.length);
+      const issue = newspaper.flushForRound(round);
+      console.log('📰 Generated issue:', issue.masthead, 'Articles:', issue.mainArticles.length);
       setCurrentIssue(issue);
       setIsVisible(true);
     } catch (error) {

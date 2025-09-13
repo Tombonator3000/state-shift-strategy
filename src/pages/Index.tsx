@@ -15,7 +15,7 @@ import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
 import { ClashArenaIntegrated } from '@/components/game/ClashArenaIntegrated';
-import NewspaperOverlay from '@/ui/NewspaperOverlay';
+import { NewspaperOverlay } from '@/components/game/NewspaperOverlay';
 import { useNewspaper } from '@/hooks/useNewspaper';
 import { canPlayDefensively } from '@/utils/clashHelpers';
 import { AudioControls } from '@/components/ui/audio-controls';

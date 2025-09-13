@@ -69,6 +69,12 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
         return 'bg-destructive/20 border-destructive text-destructive';
       case 'DEFENSIVE':
         return 'bg-success/20 border-success text-success-foreground';
+      case 'TECH':
+        return 'bg-primary/20 border-primary text-primary';
+      case 'DEVELOPMENT':
+        return 'bg-secondary/20 border-secondary text-secondary-foreground';
+      case 'INSTANT':
+        return 'bg-warning/20 border-warning text-warning-foreground';
       default:
         return 'bg-muted/20 border-muted text-muted-foreground';
     }

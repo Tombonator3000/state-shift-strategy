@@ -19,18 +19,22 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
 
   const getTypeColor = (type: string, isAI: boolean) => {
     const truthColors = {
-      MEDIA: 'text-truth-red border-truth-red',
-      ZONE: 'text-yellow-600 border-yellow-600',
-      ATTACK: 'text-red-600 border-red-600',
-      DEFENSIVE: 'text-blue-600 border-blue-600',
-    } as const;
-
+      'MEDIA': 'text-truth-red border-truth-red',
+      'ZONE': 'text-yellow-600 border-yellow-600',
+      'ATTACK': 'text-red-600 border-red-600',
+      'DEFENSIVE': 'text-blue-600 border-blue-600',
+      'TECH': 'text-purple-600 border-purple-600',
+      'DEVELOPMENT': 'text-green-600 border-green-600'
+    };
+    
     const govColors = {
-      MEDIA: 'text-government-blue border-government-blue',
-      ZONE: 'text-yellow-600 border-yellow-600',
-      ATTACK: 'text-red-600 border-red-600',
-      DEFENSIVE: 'text-blue-600 border-blue-600',
-    } as const;
+      'MEDIA': 'text-government-blue border-government-blue',
+      'ZONE': 'text-yellow-600 border-yellow-600',
+      'ATTACK': 'text-red-600 border-red-600',
+      'DEFENSIVE': 'text-blue-600 border-blue-600',
+      'TECH': 'text-purple-600 border-purple-600',
+      'DEVELOPMENT': 'text-green-600 border-green-600'
+    };
     
     return isAI ? govColors[type as keyof typeof govColors] || 'text-government-blue border-government-blue' 
                 : truthColors[type as keyof typeof truthColors] || 'text-truth-red border-truth-red';
