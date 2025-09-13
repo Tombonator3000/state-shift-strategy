@@ -635,7 +635,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       } else {
         // AI turn ending - switch back to human
         // ✨ Guard: Never show newspaper if clash is active
+        console.log(`[Clash] Checking newspaper guard - clash.open: ${prev.clash?.open}, phase: ${prev.phase}`);
         if (prev.clash?.open || (prev.phase as any) === 'clash_window' || (prev.phase as any) === 'clash_resolving') {
+          console.log(`[Clash] Blocking newspaper - clash active`);
           return prev; // Wait until clash resolves
         }
         
@@ -1099,8 +1101,12 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   }, []);
   
   const resolveClash = useCallback(() => {
+    console.log("[Clash] Resolving clash...");
     setGameState(prev => {
-      if (!prev.clash.open || !prev.clash.attackCard) return prev;
+      if (!prev.clash.open || !prev.clash.attackCard) {
+        console.log("[Clash] Cannot resolve - clash not open or no attack card");
+        return prev;
+      }
       
       const { attackCard, defenseCard } = prev.clash;
       const newLog = [...prev.log];
@@ -1200,8 +1206,12 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   }, [achievements]);
   
   const closeClashWindow = useCallback(() => {
+    console.log("[Clash] Closing clash window...");
     setGameState(prev => {
-      if (!prev.clash.open) return prev;
+      if (!prev.clash.open) {
+        console.log("[Clash] Cannot close - clash not open");
+        return prev;
+      }
       
       // If no defense was played, resolve as full hit
       if (!prev.clash.defenseCard && prev.clash.attackCard) {

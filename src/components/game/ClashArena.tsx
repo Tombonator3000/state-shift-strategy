@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import type { GameCard } from '@/types/cardTypes';
+import { useClashWindow } from '@/hooks/useClashWindow';
 
 interface ClashArenaProps {
   isOpen: boolean;
@@ -37,6 +38,8 @@ export function ClashArena({
   isOpen, 
   attackCard, 
   defenseCard, 
+  attacker,
+  defender,
   expiresAt, 
   windowMs, 
   resolveClash, 
@@ -45,7 +48,28 @@ export function ClashArena({
   hand, 
   playerIP 
 }: ClashArenaProps) {
-  const msLeft = Math.max(0, (expiresAt ?? 0) - Date.now());
+  // Create engine-like state for the hook
+  const engineState = {
+    clash: {
+      open: isOpen,
+      attacker,
+      defender,
+      attackCard,
+      defenseCard,
+      expiresAt,
+      windowMs
+    }
+  } as any;
+
+  // Use the clash window hook for proper timer management
+  const { msLeft } = useClashWindow(engineState, resolveClash, closeClashWindow, playDefensiveCard);
+  
+  // Add debugging
+  useEffect(() => {
+    if (isOpen) {
+      console.log(`[Clash] Arena opened - msLeft: ${msLeft}, expiresAt: ${expiresAt}, now: ${Date.now()}`);
+    }
+  }, [isOpen, msLeft, expiresAt]);
   
   if (!isOpen) return null;
 

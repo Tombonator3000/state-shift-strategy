@@ -10,6 +10,8 @@ export function useClashWindow(engine: EngineState, resolveClash: () => void, cl
     // Start when Clash opens
     if (!engine.clash.open) return;
 
+    console.log(`[Clash] useClashWindow starting timer - expiresAt: ${engine.clash.expiresAt}, windowMs: ${engine.clash.windowMs}`);
+
     // ✨ Hard safety timeout (fallback) 6s – whatever happens
     hardTimeoutRef.current = window.setTimeout(() => {
       if (!engine.clash.open) return;
@@ -23,10 +25,17 @@ export function useClashWindow(engine: EngineState, resolveClash: () => void, cl
     }, (engine.clash.windowMs ?? 4000) + 2000);
 
     const tick = () => {
-      if (!engine.clash.open) return; // stop
+      if (!engine.clash.open) {
+        console.log("[Clash] Stopping timer - clash closed");
+        return; // stop
+      }
       const now = Date.now();
+      const timeLeft = (engine.clash.expiresAt ?? 0) - now;
+      console.log(`[Clash] Timer tick - timeLeft: ${timeLeft}ms, now: ${now}, expiresAt: ${engine.clash.expiresAt}`);
+      
       if ((engine.clash.expiresAt ?? 0) <= now) {
         // Timer out → close and resolve
+        console.log("[Clash] Timer expired - resolving");
         try {
           closeClashWindow();
           resolveClash();
@@ -42,6 +51,7 @@ export function useClashWindow(engine: EngineState, resolveClash: () => void, cl
 
     return () => {
       // ✨ Always clean up
+      console.log("[Clash] Cleaning up timer");
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (hardTimeoutRef.current) window.clearTimeout(hardTimeoutRef.current);
       rafRef.current = 0;
