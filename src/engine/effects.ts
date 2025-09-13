@@ -1,3 +1,4 @@
+import { normalizeEffects } from './normalizeEffects';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'legendary';
 
 export type Effect =
@@ -30,6 +31,9 @@ export function drawCards(gs: any, who: 'player' | 'ai', n: number) {
     if (gs.decks[who].length === 0) reshuffle(gs, who);
     if (gs.decks[who].length === 0) return; // nothing left
     const card = gs.decks[who].pop();
+    if (card) {
+      card.effects = normalizeEffects(card.effects);
+    }
     if (gs.hands[who].length < 7) {
       gs.hands[who].push(card);
     } else {

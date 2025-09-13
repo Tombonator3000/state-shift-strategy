@@ -1,4 +1,5 @@
 import { applyEffects } from './effects';
+import { normalizeEffects } from './normalizeEffects';
 
 export function playCard(gs: any, who: 'player' | 'ai', card: any, target: any) {
   if (gs[who].ip < card.cost) {
@@ -7,7 +8,8 @@ export function playCard(gs: any, who: 'player' | 'ai', card: any, target: any) 
   gs[who].ip -= card.cost;
   gs.discards[who].push(card);
 
-  applyEffects(gs, card.effects, { gs, who, target });
+  const effects = normalizeEffects(card.effects);
+  applyEffects(gs, effects, { gs, who, target });
 
   return { ok: true };
 }

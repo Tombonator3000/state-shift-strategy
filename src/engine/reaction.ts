@@ -1,5 +1,6 @@
 import { EngineState, Card, PlayerID } from "./types";
-import { applyEffects } from "./effects";
+import { applyEffects, Effect } from "./effects";
+import { normalizeEffects } from "./normalizeEffects";
 
 // Dependencies from existing engine:
 declare function other(p: PlayerID): PlayerID;
@@ -38,14 +39,21 @@ export function computeOutcome(attack: Card, defense?: Card): Outcome {
   return f <= 0 ? { type: "BLOCK_ALL" } : { type: "REDUCE", factor: f };
 }
 
-export function reduceEffects(effects: any, factor: number) {
-  // Utility: scales numbers in a subset we care about (IP/truthDelta/damage)
-  const copy = structuredClone(effects);
-  if (typeof copy?.ipDelta === "number") copy.ipDelta = Math.round(copy.ipDelta * factor);
-  if (typeof copy?.effects?.ipDelta === "number") copy.effects.ipDelta = Math.round(copy.effects.ipDelta * factor);
-  if (typeof copy?.truthDelta === "number") copy.truthDelta = Math.round(copy.truthDelta * factor);
-  if (typeof copy?.damage === "number") copy.damage = Math.round(copy.damage * factor);
-  return copy;
+export function scaleEffects(effects: Effect[], factor: number): Effect[] {
+  return effects.map((eff) => {
+    switch (eff.k) {
+      case 'ip':
+      case 'truth':
+      case 'pressure':
+        return { ...eff, v: Math.round(eff.v * factor) } as Effect;
+      case 'draw':
+      case 'discardRandom':
+      case 'discardChoice':
+        return { ...eff, n: Math.round(eff.n * factor) } as Effect;
+      default:
+        return eff;
+    }
+  });
 }
 
 export function resolveClash(engine: EngineState) {
@@ -55,14 +63,15 @@ export function resolveClash(engine: EngineState) {
   engine.phase = "RESOLVING";
   const outcome = computeOutcome(attackCard, defenseCard);
 
+  const normalized = normalizeEffects(attackCard.effects);
   if (outcome.type === "BLOCK_ALL") {
     log(`🛡️ ${defenseCard?.name ?? "Defense"} blocked ${attackCard.name}.`);
   } else if (outcome.type === "REDUCE") {
-    const scaled = reduceEffects(attackCard.effects, outcome.factor);
-    applyEffects(scaled, { attacker, defender, attackCard, defenseCard });
+    const scaled = scaleEffects(normalized, outcome.factor);
+    applyEffects(engine, scaled, { attacker, defender, attackCard, defenseCard });
     log(`🛡️ ${defenseCard?.name ?? "Defense"} reduced ${attackCard.name} by ${Math.round(outcome.factor * 100)}%.`);
   } else {
-    applyEffects(attackCard.effects, { attacker, defender, attackCard, defenseCard });
+    applyEffects(engine, normalized, { attacker, defender, attackCard, defenseCard });
     log(`💥 ${attackCard.name} hits!`);
   }
 
