@@ -752,9 +752,36 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       // Apply card effects
       switch (card.type) {
         case 'MEDIA':
-          // AI government faction tries to lower truth
-          newTruth = Math.max(0, prev.truth - 12);
-          newLog.push(`AI played ${card.name}: Truth manipulation (${prev.truth}% → ${newTruth}%)`);
+          // Check if this is harmful MEDIA that should trigger clash
+          const isHarmfulMedia = hasHarmfulEffect(card);
+          
+          if (isHarmfulMedia) {
+            // Open clash window for human to defend against harmful MEDIA
+            newLog.push(`AI played ${card.name}: Harmful media attack - opening clash window!`);
+            if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
+            
+            return {
+              ...prev,
+              phase: 'clash_window',
+              clash: {
+                open: true,
+                attacker: 'ai',
+                defender: 'human',
+                attackCard: card,
+                windowMs: 4000,
+                expiresAt: Date.now() + 4000
+              },
+              aiIP: Math.max(0, prev.aiIP - card.cost),
+              aiHand: prev.aiHand.filter(c => c.id !== cardId),
+              cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
+              log: newLog
+            };
+          } else {
+            // Regular media without clash
+            // AI government faction tries to lower truth
+            newTruth = Math.max(0, prev.truth - 12);
+            newLog.push(`AI played ${card.name}: Truth manipulation (${prev.truth}% → ${newTruth}%)`);
+          }
           break;
         case 'ZONE':
           if (targetState) {
@@ -777,21 +804,47 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           }
           break;
         case 'ATTACK':
-          const damage = 15 + Math.floor(Math.random() * 10);
-          newLog.push(`AI played ${card.name}: Attack for ${damage} IP damage`);
-          // Player loses IP (which is positive), so we subtract
-          const newIP = Math.max(0, prev.ip - damage);
-          if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
-          return {
-            ...prev,
-            truth: newTruth,
-            states: newStates,
-            ip: newIP,
-            aiIP: Math.max(0, prev.aiIP - card.cost),
-            aiHand: prev.aiHand.filter(c => c.id !== cardId),
-            cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
-            log: newLog
-          };
+          // Check if this should open clash window for human to defend
+          const isReactiveAIAttack = card.type === "ATTACK" || (card.type === "MEDIA" && hasHarmfulEffect(card));
+          
+          if (isReactiveAIAttack) {
+            // Open clash window for human to defend against AI attack
+            newLog.push(`AI played ${card.name}: Opening clash window for defense!`);
+            if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
+            
+            return {
+              ...prev,
+              phase: 'clash_window',
+              clash: {
+                open: true,
+                attacker: 'ai',
+                defender: 'human',
+                attackCard: card,
+                windowMs: 4000,
+                expiresAt: Date.now() + 4000
+              },
+              aiIP: Math.max(0, prev.aiIP - card.cost),
+              aiHand: prev.aiHand.filter(c => c.id !== cardId),
+              cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
+              log: newLog
+            };
+          } else {
+            // Regular attack without clash
+            const damage = 15 + Math.floor(Math.random() * 10);
+            newLog.push(`AI played ${card.name}: Attack for ${damage} IP damage`);
+            const newIP = Math.max(0, prev.ip - damage);
+            if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
+            return {
+              ...prev,
+              truth: newTruth,
+              states: newStates,
+              ip: newIP,
+              aiIP: Math.max(0, prev.aiIP - card.cost),
+              aiHand: prev.aiHand.filter(c => c.id !== cardId),
+              cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
+              log: newLog
+            };
+          }
         case 'DEFENSIVE':
           newLog.push(`AI played ${card.name}: Defensive preparations`);
           break;
