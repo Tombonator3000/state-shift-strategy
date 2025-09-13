@@ -637,7 +637,13 @@ const Index = () => {
   }
 
   // Create responsive layout based on device type
-  if (isMobile) {
+  console.log('🔍 Index.tsx - isMobile:', isMobile, 'window.innerWidth:', typeof window !== 'undefined' ? window.innerWidth : 'SSR');
+  
+  // Force mobile for testing - remove this line later
+  const forceMobile = typeof window !== 'undefined' && window.innerWidth < 900;
+  
+  if (isMobile || forceMobile) {
+    console.log('🔍 Rendering Mobile Layout - isMobile:', isMobile, 'forceMobile:', forceMobile);
     // Mobile layout with MobileGameLayout wrapper
     return (
       <MobileGameLayout
@@ -735,6 +741,7 @@ const Index = () => {
   }
 
   // Desktop layout (existing design)
+  console.log('🔍 Rendering Desktop Layout');
   return (
     <div className="min-h-screen bg-newspaper-bg">
       {/* Newspaper Header */}
