@@ -37,14 +37,14 @@ export const useNewspaper = () => {
   // Queue an article when a card is played
   const queueArticleFromCard = useCallback((card: GameCard, context: RoundContext) => {
     if (!isInitialized) {
-      console.warn('Newspaper system not yet initialized');
+      console.warn('[Newspaper] system not yet initialized');
       return;
     }
 
     try {
       queueFromCard(card as any, context);
     } catch (err) {
-      console.error('Failed to queue newspaper article:', err);
+      console.error('[Newspaper] Failed to queue newspaper article:', err);
     }
   }, [isInitialized]);
 

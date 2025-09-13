@@ -43,7 +43,7 @@ export function queueArticleFromCard(card: Card, ctx: { round: number; state: an
   const isEvent = !!card.meta?.isEvent; // event = flagg, ikke type
   const title = card.meta?.headlineOverride ?? generateHeadline(card, cfg);
   const dek = pickDek(card);
-  const body = buildBody(card, ctx);
+  const body = buildBodyParagraphs(card, ctx);
   const imageUrl = card.image ?? "/img/classified-placeholder.png";
   const stamps = pickStamps(cfg, isEvent);
 
@@ -91,7 +91,7 @@ function pickDek(card: Card): string | undefined {
   return card.flavorTruth ?? card.flavorGov ?? card.flavor ?? undefined;
 }
 
-function buildBody(card: Card, ctx: { round: number; state: any }): string[] {
+function buildBodyParagraphs(card: Card, ctx: { round: number; state: any }): string[] {
   const eff = summarizeEffects(card.effects);
   const tgt = summarizeTarget(card.target);
   return [
