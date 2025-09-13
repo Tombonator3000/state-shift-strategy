@@ -2,9 +2,10 @@ import { Progress } from '@/components/ui/progress';
 
 interface TruthMeterProps {
   value: number; // 0-100
+  faction?: "Truth" | "Government";
 }
 
-const TruthMeter = ({ value }: TruthMeterProps) => {
+const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
   const getColor = () => {
     if (value >= 90) return 'bg-truth-red';
     if (value <= 10) return 'bg-government-blue';
@@ -19,11 +20,40 @@ const TruthMeter = ({ value }: TruthMeterProps) => {
   };
 
   const getLabel = () => {
-    if (value >= 90) return 'TRUTH REVEALED';
-    if (value <= 10) return 'TRUTH SUPPRESSED';
-    if (value >= 70) return 'AWAKENING';
-    if (value <= 30) return 'CONTROLLED';
-    return 'CONTESTED';
+    if (faction === "Truth") {
+      // Truth faction perspective - higher % = more enlightened
+      if (value >= 95) return 'MAXIMUM WOKE';
+      if (value >= 90) return 'FULLY AWAKENED';
+      if (value >= 80) return 'REDPILLED';
+      if (value >= 70) return 'QUESTIONING';
+      if (value >= 60) return 'SUSPICIOUS';
+      if (value >= 40) return 'SLEEPY';
+      if (value >= 20) return 'SHEEPLE MODE';
+      if (value >= 10) return 'COMATOSE';
+      return 'BRAIN DEAD';
+    } else {
+      // Government faction perspective - higher % = more dangerous
+      if (value >= 95) return 'MAXIMUM PANIC';
+      if (value >= 90) return 'CODE RED';
+      if (value >= 80) return 'CONTAINMENT BREACH';
+      if (value >= 70) return 'CONSPIRACY DETECTED';
+      if (value >= 60) return 'ELEVATED THREAT';
+      if (value >= 40) return 'MONITORING';
+      if (value >= 20) return 'DOCILE';
+      if (value >= 10) return 'COMPLIANT';
+      return 'PERFECT CITIZEN';
+    }
+  };
+
+  const getStatusMessage = () => {
+    if (faction === "Truth") {
+      if (value >= 90) return '👁️ THE VEIL IS LIFTED 👁️';
+      if (value <= 10) return '😴 THEY LIVE, WE SLEEP 😴';
+    } else {
+      if (value >= 90) return '🚨 NARRATIVE COLLAPSE 🚨';
+      if (value <= 10) return '✅ OPERATION SUCCESS ✅';
+    }
+    return null;
   };
 
   return (
@@ -70,14 +100,11 @@ const TruthMeter = ({ value }: TruthMeterProps) => {
       </div>
       
       {/* Status indicators with glitch effects */}
-      {value >= 90 && (
-        <div className="text-xs font-mono text-truth-red animate-glitch">
-          ⚠️ CONTAINMENT BREACH ⚠️
-        </div>
-      )}
-      {value <= 10 && (
-        <div className="text-xs font-mono text-government-blue animate-glitch">
-          🔒 NARRATIVE SECURED 🔒
+      {getStatusMessage() && (
+        <div className={`text-xs font-mono animate-glitch ${
+          value >= 90 ? 'text-truth-red' : 'text-government-blue'
+        }`}>
+          {getStatusMessage()}
         </div>
       )}
     </div>
