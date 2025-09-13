@@ -636,6 +636,105 @@ const Index = () => {
     );
   }
 
+  // Create responsive layout based on device type
+  if (isMobile) {
+    // Mobile layout with MobileGameLayout wrapper
+    return (
+      <MobileGameLayout
+        controlledStates={gameState.controlledStates.length}
+        truth={gameState.truth}
+        ip={gameState.ip}
+        aiIP={gameState.aiIP}
+        aiDifficulty={gameState.aiDifficulty}
+        aiPersonalityName={gameState.aiStrategist?.personality.name}
+        isAIThinking={gameState.phase === 'ai_turn'}
+        currentPlayer={gameState.currentPlayer}
+        aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
+        assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
+        aiHandSize={gameState.aiHand.length}
+        aiObjectiveProgress={gameState.aiSecretAgenda ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100 : 0}
+        playerAgenda={gameState.secretAgenda}
+        aiAgenda={gameState.aiSecretAgenda}
+        gameLog={gameState.log}
+        onShowInGameOptions={() => setShowInGameOptions(true)}
+        onShowAchievements={() => setShowAchievements(true)}
+        onShowCardCollection={() => setShowCardCollection(true)}
+        onShowTutorial={() => setShowTutorial(true)}
+      >
+        {/* Mobile Game Content */}
+        <div className="flex flex-col h-full bg-[#f5f5f5]">
+          {/* Map Area */}
+          <div className="flex-1 border-2 border-black bg-white/80 relative overflow-auto">
+            <CardPreviewOverlay card={hoveredCard} />
+            
+            {/* Zone targeting overlay for mobile */}
+            {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
+              <div className="absolute top-4 left-4 right-4 z-20 pointer-events-none">
+                <div className="bg-black text-white p-3 border-2 border-white font-mono shadow-2xl animate-pulse text-center">
+                  <div className="text-lg mb-1 flex items-center justify-center gap-2">
+                    🎯 <span className="font-bold">TAP TO TARGET</span>
+                  </div>
+                  <div className="text-sm">
+                    Tap any <span className="text-yellow-400 font-bold">NEUTRAL</span> or <span className="text-red-500 font-bold">ENEMY</span> state
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div className="w-full h-full">
+              <EnhancedUSAMap 
+                states={gameState.states} 
+                onStateClick={handleStateClick}
+                selectedZoneCard={gameState.selectedCard}
+                selectedState={gameState.targetState}
+                audio={audio}
+              />
+            </div>
+          </div>
+
+          {/* Mobile Game Hand */}
+          <MobileGameHand
+            cards={gameState.hand}
+            onPlayCard={(cardId) => {
+              if (gameState.clash.open && gameState.clash.defender === 'human') {
+                const card = gameState.hand.find(c => c.id === cardId);
+                if (card && canPlayDefensively(card, gameState.ip, gameState.clash.open)) {
+                  playDefensiveCard(cardId);
+                  return;
+                }
+              }
+              handlePlayCard(cardId);
+            }}
+            onSelectCard={handleSelectCard}
+            selectedCard={gameState.selectedCard}
+            currentIP={gameState.ip}
+            disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
+            loadingCard={loadingCard}
+          />
+
+          {/* End Turn Button */}
+          <div className="p-4 bg-white border-t-2 border-black">
+            <Button 
+              onClick={handleEndTurn}
+              className="w-full bg-black text-white hover:bg-gray-800 min-h-[56px] text-lg font-bold"
+              disabled={gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human'}
+            >
+              {gameState.currentPlayer === 'ai' ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-current rounded-full animate-pulse"></div>
+                  AI Thinking...
+                </div>
+              ) : (
+                'End Turn'
+              )}
+            </Button>
+          </div>
+        </div>
+      </MobileGameLayout>
+    );
+  }
+
+  // Desktop layout (existing design)
   return (
     <div className="min-h-screen bg-newspaper-bg">
       {/* Newspaper Header */}
