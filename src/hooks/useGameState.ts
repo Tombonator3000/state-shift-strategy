@@ -14,21 +14,12 @@ import { useAchievements } from '@/contexts/AchievementContext';
 import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
 import { CardEffectMigrator } from '@/utils/cardEffectMigration';
 import type { Card } from '@/types/cardEffects';
-import { hasHarmfulEffect } from '@/utils/clashHelpers';
 
-interface ClashState {
-  open: boolean;
-  attacker?: 'human' | 'ai';
-  defender?: 'human' | 'ai';
-  attackCard?: GameCard;
-  defenseCard?: GameCard;
-  expiresAt?: number;   // Date.now() + windowMs
-  windowMs: number;     // default 4000
-}
+
 
 interface GameState {
   faction: 'government' | 'truth';
-  phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory' | 'ai_turn' | 'card_presentation' | 'clash_window' | 'clash_resolving';
+  phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory' | 'ai_turn' | 'card_presentation';
   turn: number;
   round: number;
   currentPlayer: 'human' | 'ai';
@@ -93,8 +84,6 @@ interface GameState {
   // Enhanced drawing system state
   drawMode: DrawMode;
   cardDrawState: CardDrawState;
-  // Clash Arena system
-  clash: ClashState;
 }
 
 const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
@@ -189,10 +178,6 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     cardDrawState: {
       cardsPlayedLastTurn: 0,
       lastTurnWithoutPlay: false
-    },
-    clash: {
-      open: false,
-      windowMs: 4000
     }
   });
 
@@ -267,10 +252,6 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       cardDrawState: {
         cardsPlayedLastTurn: 0,
         lastTurnWithoutPlay: false
-      },
-      clash: {
-        open: false,
-        windowMs: 4000
       }
     }));
   }, [achievements, aiDifficulty]);
@@ -282,32 +263,32 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         return prev;
       }
 
-      // Check if this is a reactive attack that should open clash window
-      const isReactive = card.type === "ATTACK" || (card.type === "MEDIA" && hasHarmfulEffect(card));
       
-      console.log(`[Clash] Playing card ${card.name} - isReactive: ${isReactive}, type: ${card.type}, clash.open: ${prev.clash.open}`);
+      // Standard card play logic
+      const processor = new CardEffectProcessor({
+        truth: prev.truth,
+        ip: prev.ip,
+        aiIP: prev.aiIP,
+        hand: prev.hand,
+        aiHand: prev.aiHand,
+        controlledStates: prev.controlledStates,
+        aiControlledStates: prev.aiControlledStates || [],
+        round: prev.round,
+        turn: prev.turn,
+        faction: prev.faction
+      });
+
+      const effectResult = processor.processCard(card as any, prev.targetState);
       
-      if (isReactive && !prev.clash.open) {
-        console.log(`[Clash] OPENING clash window for human attack: ${card.name}`);
-        // Open clash window for reactive attack
-        return {
-          ...prev,
-          phase: 'clash_window',
-          clash: {
-            open: true,
-            attacker: 'human',
-            defender: 'ai', 
-            attackCard: card,
-            windowMs: 4000,
-            expiresAt: Date.now() + 4000
-          },
-          hand: prev.hand.filter(c => c.id !== cardId),
-          ip: prev.ip - card.cost,
-          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-          selectedCard: null,
-          targetState: null
-        };
-      }
+      return {
+        ...prev,
+        ...effectResult,
+        hand: prev.hand.filter(c => c.id !== cardId),
+        ip: prev.ip - card.cost,
+        cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+        selectedCard: null,
+        targetState: null
+      };
 
       // Track card play in achievements
       achievements.onCardPlayed(cardId, card.type);
@@ -566,8 +547,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
   const endTurn = useCallback(() => {
     setGameState(prev => {
-      // Don't allow turn ending if game is over or clash is active
-      if (prev.isGameOver || prev.clash?.open) return prev;
+      // Don't allow turn ending if game is over
+      if (prev.isGameOver) return prev;
       
       if (prev.currentPlayer === 'human') {
         // Human player ending turn - switch to AI (no card draw here anymore)
@@ -637,12 +618,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         };
       } else {
         // AI turn ending - switch back to human
-        // ✨ Guard: Never show newspaper if clash is active
-        console.log(`[Clash] Checking newspaper guard - clash.open: ${prev.clash?.open}, phase: ${prev.phase}`);
-        if (prev.clash?.open) {
-          console.log(`[Clash] Blocking newspaper - clash active, staying in current phase`);
-          return prev; // Wait until clash resolves
-        }
+        // Standard newspaper guard
+        console.log(`Checking newspaper phase - phase: ${prev.phase}`);
         
         return {
           ...prev,
@@ -762,39 +739,29 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       // Apply card effects
       switch (card.type) {
         case 'MEDIA':
-          // Check if this is harmful MEDIA that should trigger clash
-          const isHarmfulMedia = hasHarmfulEffect(card);
-          
-          console.log(`[Clash] AI playing MEDIA ${card.name} - isHarmful: ${isHarmfulMedia}`);
-          
-          if (isHarmfulMedia) {
-            console.log(`[Clash] OPENING clash window for AI harmful MEDIA: ${card.name}`);
-            // Open clash window for human to defend against harmful MEDIA
-            newLog.push(`AI played ${card.name}: Harmful media attack - opening clash window!`);
-            if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
-            
-            return {
-              ...prev,
-              phase: 'clash_window',
-              clash: {
-                open: true,
-                attacker: 'ai',
-                defender: 'human',
-                attackCard: card,
-                windowMs: 4000,
-                expiresAt: Date.now() + 4000
-              },
-              aiIP: Math.max(0, prev.aiIP - card.cost),
-              aiHand: prev.aiHand.filter(c => c.id !== cardId),
-              cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
-              log: newLog
-            };
-          } else {
-            // Regular media without clash
-            // AI government faction tries to lower truth
-            newTruth = Math.max(0, prev.truth - 12);
-            newLog.push(`AI played ${card.name}: Truth manipulation (${prev.truth}% → ${newTruth}%)`);
-          }
+          // Standard AI processing - no clash system
+          const processor = new CardEffectProcessor({
+            truth: prev.truth,
+            ip: prev.ip,
+            aiIP: prev.aiIP,
+            hand: prev.hand,
+            aiHand: prev.aiHand,
+            controlledStates: prev.controlledStates,
+            aiControlledStates: prev.aiControlledStates || [],
+            round: prev.round,
+            turn: prev.turn,
+            faction: prev.faction
+          });
+
+          const effectResult = processor.processCard(card as any, targetState);
+          return {
+            ...prev,
+            ...effectResult,
+            aiIP: Math.max(0, prev.aiIP - card.cost),
+            aiHand: prev.aiHand.filter(c => c.id !== cardId),
+            cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
+            log: newLog
+          };
           break;
         case 'ZONE':
           if (targetState) {
@@ -1291,8 +1258,5 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     loadGame,
     getSaveInfo,
     checkVictoryConditions,
-    playDefensiveCard,
-    resolveClash,
-    closeClashWindow
   };
 };

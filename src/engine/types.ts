@@ -15,19 +15,9 @@ export interface Card {
   effects: any; // Our effect engine interprets this
 }
 
-export interface ClashState {
-  open: boolean;
-  attacker?: PlayerID;
-  defender?: PlayerID;
-  attackCard?: Card;
-  defenseCard?: Card;
-  expiresAt?: number;   // Date.now() + windowMs
-  windowMs: number;     // default 4000
-}
 
 export interface EngineState {
-  phase: "IDLE" | "REACTION_WINDOW_OPEN" | "RESOLVING" | "income" | "action" | "capture" | "event" | "newspaper" | "victory" | "ai_turn" | "card_presentation" | "clash_window" | "clash_resolving";
-  clash: ClashState;
+  phase: "IDLE" | "income" | "action" | "capture" | "event" | "newspaper" | "victory" | "ai_turn" | "card_presentation";
   hands: Record<PlayerID, Card[]>;
   ip: Record<PlayerID, number>;
   truthPercent: number;

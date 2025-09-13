@@ -15,8 +15,6 @@ import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashb
 import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
-import { ClashArena } from '@/components/game/ClashArena';
-import { canPlayDefensively } from '@/utils/clashHelpers';
 import { AudioControls } from '@/components/ui/audio-controls';
 import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
@@ -76,7 +74,7 @@ const Index = () => {
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showMinimizedHand, setShowMinimizedHand] = useState(false);
   
-  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo, playDefensiveCard, resolveClash, closeClashWindow } = useGameState();
+  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -849,23 +847,13 @@ const Index = () => {
             <h3 className="font-bold text-xs mb-2">YOUR HAND</h3>
             <EnhancedGameHand 
           cards={gameState.hand}
-          onPlayCard={(cardId) => {
-            if (gameState.clash.open && gameState.clash.defender === 'human') {
-              const card = gameState.hand.find(c => c.id === cardId);
-              if (card && canPlayDefensively(card, gameState.ip, gameState.clash.open)) {
-                playDefensiveCard(cardId);
-                return;
-              }
-            }
-            handlePlayCard(cardId);
-          }}
+          onPlayCard={handlePlayCard}
               onSelectCard={handleSelectCard}
               selectedCard={gameState.selectedCard}
               disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
               currentIP={gameState.ip}
               loadingCard={loadingCard}
               onCardHover={setHoveredCard}
-              clashState={gameState.clash}
             />
           </div>
 
@@ -1017,21 +1005,6 @@ const Index = () => {
         />
       )}
 
-      {/* Clash Arena */}
-        <ClashArena
-          isOpen={gameState.clash.open}
-          attackCard={gameState.clash.attackCard}
-          defenseCard={gameState.clash.defenseCard}
-          attacker={gameState.clash.attacker}
-          defender={gameState.clash.defender}
-          expiresAt={gameState.clash.expiresAt}
-          windowMs={gameState.clash.windowMs}
-          hand={gameState.hand}
-          playerIP={gameState.ip}
-          resolveClash={resolveClash}
-          closeClashWindow={closeClashWindow}
-          playDefensiveCard={playDefensiveCard}
-        />
 
     </div>
   );

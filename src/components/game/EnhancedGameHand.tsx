@@ -40,7 +40,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   currentIP,
   loadingCard,
   onCardHover,
-  clashState
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
@@ -169,11 +168,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           const canAfford = canAffordCard(card);
           const faction = getCardFaction(card);
           
-          // Check if this card can be played defensively during clash
-          const isDefensiveHighlight = clashState?.open && 
-                                      clashState.defender === 'human' && 
-                                      card.type === 'DEFENSIVE' && 
-                                      canAfford;
           
           return (
             <div 
@@ -185,7 +179,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 bg-card border-2 rounded-lg flex items-center gap-2 overflow-visible
                 ${isMobile ? 'p-4 min-h-[80px]' : 'p-2'}
                 ${isSelected ? 'ring-2 ring-warning scale-105 z-10 shadow-lg shadow-warning/50' : ''}
-                ${isDefensiveHighlight ? 'ring-4 ring-blue-400 scale-105 z-10 shadow-lg shadow-blue-400/50 animate-pulse bg-blue-50/20 border-blue-400' : ''}
                 ${isPlaying || isLoading ? 'animate-pulse scale-105 z-50 ring-2 ring-primary shadow-lg shadow-primary/50' : 'hover:scale-[1.03] hover:shadow-md'}
                 ${!canAfford && !disabled ? 'opacity-60 saturate-50 cursor-not-allowed' : 'hover:bg-accent/20'}
                 ${getRarityBorder(card.rarity)}
@@ -277,22 +270,15 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                    card.type === 'MEDIA' && faction === 'government' ? 'bg-government-blue/20 border-government-blue text-government-blue shadow-sm' :
                    card.type === 'ZONE' ? 'bg-warning/20 border-warning text-warning shadow-sm' :
                    card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive shadow-sm' :
-                   card.type === 'DEFENSIVE' && isDefensiveHighlight ? 'bg-blue-400/30 border-blue-400 text-blue-400 shadow-md animate-pulse' :
-                   'bg-muted/20 border-muted text-muted-foreground shadow-sm'
+                    'bg-muted/20 border-muted text-muted-foreground shadow-sm'
                  }`}
                >
                  {card.type === 'ZONE' && <Target className="w-3 h-3" />}
                  {card.type === 'ATTACK' && <Zap className="w-3 h-3" />}
-                 {card.type === 'DEFENSIVE' && <Shield className={`w-3 h-3 ${isDefensiveHighlight ? 'animate-pulse' : ''}`} />}
+                 {card.type === 'DEFENSIVE' && <Shield className="w-3 h-3" />}
                  {card.type}
                </Badge>
 
-               {/* Defensive ready indicator during clash */}
-               {isDefensiveHighlight && (
-                 <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-blue-400 text-white text-xs font-bold flex items-center justify-center ring-2 ring-blue-400/50 animate-bounce">
-                   🛡️
-                 </div>
-               )}
 
                {/* Selection indicator for zone targeting */}
                {isSelected && card.type === 'ZONE' && (

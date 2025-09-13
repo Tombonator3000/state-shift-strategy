@@ -1,6 +1,6 @@
 import type { GameCard } from '@/types/cardTypes';
 
-// Check if a card has harmful effects that warrant a defensive response
+// Check if a card has harmful effects
 export function hasHarmfulEffect(card: GameCard): boolean {
   if (!card.effects) return false;
   
@@ -25,22 +25,4 @@ export function hasHarmfulEffect(card: GameCard): boolean {
   }
   
   return false;
-}
-
-// Check if a card is reactive (ATTACK or harmful MEDIA)
-export function isReactiveAttack(card: GameCard): boolean {
-  return card.type === "ATTACK" || (card.type === "MEDIA" && hasHarmfulEffect(card));
-}
-
-// Find first playable defensive card in hand
-export function findFirstDefensiveCard(hand: GameCard[], playerIP: number): GameCard | undefined {
-  return hand.find(card => 
-    card.type === "DEFENSIVE" && 
-    card.cost <= playerIP
-  );
-}
-
-// Check if card can be used defensively
-export function canPlayDefensively(card: GameCard, playerIP: number, clashOpen: boolean): boolean {
-  return clashOpen && card.type === "DEFENSIVE" && card.cost <= playerIP;
 }
