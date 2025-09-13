@@ -1,8 +1,8 @@
 import { EngineState, Card, PlayerID } from "./types";
+import { applyEffects } from "./effects";
 
 // Dependencies from existing engine:
 declare function other(p: PlayerID): PlayerID;
-declare function applyEffects(effects: any, ctx: any): void;
 declare function log(msg: string): void;
 declare function discardIfNeeded(card?: Card): void;
 declare function hasHarmfulEffect(card: Card): boolean; // use existing test
