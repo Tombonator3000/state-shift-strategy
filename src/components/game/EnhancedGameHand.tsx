@@ -23,11 +23,6 @@ interface EnhancedGameHandProps {
   currentIP: number;
   loadingCard?: string | null;
   onCardHover?: (card: (GameCard & { _hoverPosition?: { x: number; y: number } }) | null) => void;
-  clashState?: {
-    open: boolean;
-    defender?: string;
-    windowMs?: number;
-  };
 }
 
 const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({ 
@@ -39,7 +34,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   maxCards = 7,
   currentIP,
   loadingCard,
-  onCardHover,
+  onCardHover
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
@@ -168,7 +163,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           const canAfford = canAffordCard(card);
           const faction = getCardFaction(card);
           
-          
           return (
             <div 
               key={`${card.id}-${index}`}
@@ -262,23 +256,22 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   <div className={`text-muted-foreground truncate max-w-[200px] ${isMobile ? 'text-sm' : 'text-xs'}`}>{card.text}</div>
                 </div>
               
-               {/* Enhanced Type Badge */}
-               <Badge 
-                 variant="outline" 
-                 className={`text-xs px-2 py-1 flex-shrink-0 flex items-center gap-1 transition-all duration-200 ${
-                   card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth-red/20 border-truth-red text-truth-red shadow-sm' :
-                   card.type === 'MEDIA' && faction === 'government' ? 'bg-government-blue/20 border-government-blue text-government-blue shadow-sm' :
-                   card.type === 'ZONE' ? 'bg-warning/20 border-warning text-warning shadow-sm' :
-                   card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive shadow-sm' :
-                    'bg-muted/20 border-muted text-muted-foreground shadow-sm'
-                 }`}
-               >
-                 {card.type === 'ZONE' && <Target className="w-3 h-3" />}
-                 {card.type === 'ATTACK' && <Zap className="w-3 h-3" />}
-                 {card.type === 'DEFENSIVE' && <Shield className="w-3 h-3" />}
-                 {card.type}
-               </Badge>
-
+              {/* Enhanced Type Badge */}
+              <Badge 
+                variant="outline" 
+                className={`text-xs px-2 py-1 flex-shrink-0 flex items-center gap-1 transition-all duration-200 ${
+                  card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth-red/20 border-truth-red text-truth-red shadow-sm' :
+                  card.type === 'MEDIA' && faction === 'government' ? 'bg-government-blue/20 border-government-blue text-government-blue shadow-sm' :
+                  card.type === 'ZONE' ? 'bg-warning/20 border-warning text-warning shadow-sm' :
+                  card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive shadow-sm' :
+                  'bg-muted/20 border-muted text-muted-foreground shadow-sm'
+                }`}
+              >
+                {card.type === 'ZONE' && <Target className="w-3 h-3" />}
+                {card.type === 'ATTACK' && <Zap className="w-3 h-3" />}
+                {card.type === 'DEFENSIVE' && <Shield className="w-3 h-3" />}
+                {card.type}
+              </Badge>
 
                {/* Selection indicator for zone targeting */}
                {isSelected && card.type === 'ZONE' && (
