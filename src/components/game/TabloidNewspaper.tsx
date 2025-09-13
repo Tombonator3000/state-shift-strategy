@@ -29,6 +29,7 @@ interface Article {
   content: string;
   isEvent?: boolean;
   isCard?: boolean;
+  cardImage?: string;
   player?: 'human' | 'ai';
 }
 
@@ -128,6 +129,7 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
         headline,
         content: `${tabloidContent} ${editorialComments[Math.floor(Math.random() * editorialComments.length)]}`,
         isCard: true,
+        cardImage: `/placeholder-card.png`, // Cards will use placeholder for now
         player: pc.player
       };
     });
@@ -136,8 +138,8 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
   // Tabloid headlines from events
   const generateTabloidHeadlines = (): Article[] => {
     const eventHeadlines = events.map(event => ({
-      headline: event.headline || `BREAKING: ${event.title.toUpperCase()}`,
-      content: event.content,
+      headline: `🚨 ${event.headline || `BREAKING: ${event.title.toUpperCase()}`} 🚨`,
+      content: `URGENT UPDATE: ${event.content} This developing story continues to unfold as authorities scramble to contain the situation.`,
       isEvent: true
     }));
     
@@ -326,26 +328,62 @@ const TabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: Tabl
 
             {/* Headlines */}
             {selectedHeadlines.map((article, index) => (
-              <article key={index} className="border-4 border-black bg-white p-4">
-                <h2 className={`text-2xl font-black mb-2 text-center transform -rotate-1 ${
-                  article.isEvent ? 'text-red-600' : 'text-black'
-                }`}>
+              <article key={index} className="border-4 border-black bg-white p-6 mb-4">
+                {/* Large Tabloid Headline */}
+                <h2 className={`text-4xl md:text-5xl font-black mb-4 text-center leading-none transform -rotate-1 ${
+                  article.isEvent ? 'text-red-600 animate-pulse' : 'text-black'
+                } font-serif uppercase tracking-tight`}>
                   {article.headline}
                 </h2>
                 
-                <div className="w-full h-20 bg-gray-300 mb-3 flex items-center justify-center text-gray-600 text-sm border-2 border-black font-mono">
-                  {article.isEvent ? '[EMERGENCY BROADCAST PHOTO]' : '[DEFINITELY REAL PHOTO - NOT DOCTORED]'}
+                {/* Article Layout with Image */}
+                <div className="grid md:grid-cols-3 gap-4">
+                  {/* Card Image as Newspaper Photo */}
+                  <div className="md:col-span-1">
+                    {article.isCard ? (
+                      <div className="relative">
+                        <img 
+                          src={article.cardImage || '/placeholder-card.png'}
+                          alt={article.headline}
+                          className="w-full h-32 md:h-40 object-cover border-2 border-black"
+                          onError={(e) => {
+                            e.currentTarget.src = '/placeholder-card.png';
+                          }}
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-xs p-1 text-center font-mono">
+                          {article.isEvent ? '[EMERGENCY BROADCAST]' : '[CLASSIFIED DOCUMENT]'}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-full h-32 md:h-40 bg-red-800 border-2 border-black flex items-center justify-center text-white text-sm font-mono text-center animate-pulse">
+                        <div>
+                          <div className="text-lg font-bold mb-1">🚨 BREAKING 🚨</div>
+                          <div>[EMERGENCY PHOTO]</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Article Text */}
+                  <div className="md:col-span-2">
+                    <p className={`text-base leading-relaxed font-serif ${
+                      article.isEvent ? 'text-red-800 font-bold' : 'text-black'
+                    }`}>
+                      {article.content}
+                    </p>
+                    
+                    {index === 0 && (
+                      <div className="mt-3 text-sm text-gray-600 italic border-t border-gray-300 pt-2">
+                        Continued on page A-{Math.floor(Math.random() * 20) + 1}... 
+                        <span className="text-red-600 ml-2 font-bold">[REMAINDER CLASSIFIED]</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
-                <p className={`text-sm leading-relaxed font-serif ${
-                  article.isEvent ? 'text-red-800' : 'text-black'
-                }`}>
-                  {article.content}
-                </p>
-                
-                <div className="flex justify-between items-center mt-2 text-xs text-gray-600">
-                  <span>By: {article.isEvent ? 'Crisis Reporter' : ['Agent X', 'Deep Throat Jr.', 'Anonymous Tipster', 'Florida Man'][Math.floor(Math.random() * 4)]}</span>
-                  <span>Source: {article.isEvent ? 'EMERGENCY BROADCAST' : ['Totally Reliable', 'My Cousin\'s Blog', 'Overheard at Denny\'s'][Math.floor(Math.random() * 3)]}</span>
+                <div className="flex justify-between items-center mt-4 text-xs text-gray-600 border-t border-gray-300 pt-2">
+                  <span className="font-mono">By: {article.isEvent ? 'CRISIS REPORTER' : ['Agent X', 'Deep Throat Jr.', 'Anonymous Tipster', 'Florida Man'][Math.floor(Math.random() * 4)]}</span>
+                  <span className="font-mono">Source: {article.isEvent && article.isEvent ? 'EMERGENCY BROADCAST' : ['Totally Reliable', 'My Cousin\'s Blog', 'Overheard at Denny\'s'][Math.floor(Math.random() * 3)]}</span>
                 </div>
               </article>
             ))}
