@@ -23,7 +23,6 @@ import { useAudioContext } from '@/contexts/AudioContext';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
-import PhaseTransition from '@/components/effects/PhaseTransition';
 import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
 
 import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
