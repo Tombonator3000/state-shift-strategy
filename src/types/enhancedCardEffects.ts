@@ -145,7 +145,7 @@ export interface EnhancedCardEffects extends CardEffects {
 export interface EnhancedCard {
   id: string;
   name: string;
-  type: "MEDIA" | "ZONE" | "ATTACK" | "TECH" | "DEVELOPMENT" | "DEFENSIVE" | "INSTANT" | "LEGENDARY";
+  type: "MEDIA" | "ZONE" | "ATTACK" | "DEFENSIVE";
   faction?: "Truth" | "Government";
   rarity?: "common" | "uncommon" | "rare" | "legendary";
   cost: number;

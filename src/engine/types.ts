@@ -3,7 +3,7 @@ export type PlayerID = "P1" | "P2";
 export interface Card {
   id: string;
   name: string;
-  type: "MEDIA" | "ZONE" | "ATTACK" | "DEFENSIVE" | "DEVELOPMENT" | "INSTANT" | "LEGENDARY";
+  type: "MEDIA" | "ZONE" | "ATTACK" | "DEFENSIVE";
   cost: number;
   faction?: "Truth" | "Government";
   rarity?: "common" | "uncommon" | "rare" | "legendary";

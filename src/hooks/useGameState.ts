@@ -15,7 +15,7 @@ import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
 import { CardEffectMigrator } from '@/utils/cardEffectMigration';
 import type { Card } from '@/types/cardEffects';
 import { hasHarmfulEffect } from '@/utils/clashHelpers';
-import { newspaper } from '@/systems/newspaper';
+import { queueArticleFromCard } from "@/services/newspaper";
 
 interface ClashState {
   open: boolean;
@@ -320,12 +320,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         states: prev.states
       };
       console.log('📰 QUEUEING ARTICLE for card:', card.name, 'Context:', context);
-      try {
-        newspaper.queueArticleFromCard(card, context);
-        console.log('📰 ARTICLE QUEUED SUCCESSFULLY for card:', card.name);
-      } catch (error) {
-        console.error('📰 FAILED TO QUEUE ARTICLE:', error);
-      }
+      queueArticleFromCard(card as any, context)
+        .then(() => console.log('📰 ARTICLE QUEUED SUCCESSFULLY for card:', card.name))
+        .catch(error => console.error('📰 FAILED TO QUEUE ARTICLE:', error));
 
       const newHand = prev.hand.filter(c => c.id !== cardId);
       let newTruth = prev.truth;
