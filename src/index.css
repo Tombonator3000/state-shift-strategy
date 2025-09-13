@@ -7,7 +7,14 @@ All colors MUST be HSL.
 */
 
 @layer base {
-  :root {
+:root {
+  /* Tabloid Color Tokens - Black & White Only */
+  --ink: #000;
+  --paper: #f6f6f6;
+  --line: #111;
+  --lineSoft: #222;
+  --grey: #ccc;
+  --grey2: #e9e9e9;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -73,6 +80,14 @@ All colors MUST be HSL.
     --newspaper-border: 0 0% 30%;
     --newspaper-accent: 0 75% 45%;
     --newspaper-headline: 0 0% 0%;
+    
+    /* Tabloid Color Tokens - Black & White Only */
+    --ink: #000;
+    --paper: #f6f6f6;
+    --line: #111;
+    --lineSoft: #222;
+    --grey: #ccc;
+    --grey2: #e9e9e9;
     
     /* Enhanced animation colors */
     --warning: 45 93% 58%;
