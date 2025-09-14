@@ -162,6 +162,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           const isLoading = loadingCard === card.id;
           const canAfford = canAffordCard(card);
           const faction = getCardFaction(card);
+          const flavor = faction === 'truth' ? card.flavorTruth : card.flavorGov;
           
           return (
             <div 
@@ -169,8 +170,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               data-card-id={card.id}
               aria-describedby={`hand-tooltip-${card.id}`}
               className={`
-                enhanced-button card-hover-glow group relative cursor-pointer transition-all duration-300
-                bg-card border-2 rounded-lg flex items-center gap-2 overflow-visible
+                card-base border-2 enhanced-button card-hover-glow group relative cursor-pointer transition-all duration-300
+                flex items-center gap-2 overflow-visible
                 ${isMobile ? 'p-4 min-h-[80px]' : 'p-2'}
                 ${isSelected ? 'ring-2 ring-warning scale-105 z-10 shadow-lg shadow-warning/50' : ''}
                 ${isPlaying || isLoading ? 'animate-pulse scale-105 z-50 ring-2 ring-primary shadow-lg shadow-primary/50' : 'hover:scale-[1.03] hover:shadow-md'}
@@ -247,13 +248,16 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                {/* Card Name and Rarity */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className={`font-bold text-foreground truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{card.name}</span>
+                    <span className={`font-bold text-[color:var(--card-text)] truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{card.name}</span>
                     <span className={`px-1.5 py-0.5 rounded-full ${isMobile ? 'text-xs' : 'text-xs'} ${getRarityAccent(card.rarity)}`}>
                       {card.rarity.toUpperCase()}
                     </span>
                     <ExtensionCardBadge cardId={card.id} card={card} variant="inline" />
                   </div>
-                  <div className={`text-muted-foreground truncate max-w-[200px] ${isMobile ? 'text-sm' : 'text-xs'}`}>{card.text}</div>
+                  <div className={`text-[color:var(--card-text)]/80 truncate max-w-[200px] ${isMobile ? 'text-sm' : 'text-xs'}`}>{card.text}</div>
+                  {flavor && (
+                    <div className={`mt-2 italic text-[color:var(--card-text)]/70 border-l-4 rounded-r px-2 py-1 ${faction === 'truth' ? 'border-truth-red bg-truth-red/10' : 'border-government-blue bg-government-blue/10'}`}>"{flavor}"</div>
+                  )}
                 </div>
               
               {/* Enhanced Type Badge */}

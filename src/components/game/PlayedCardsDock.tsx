@@ -1,7 +1,7 @@
-import React from 'react';
-import { Card } from '@/components/ui/card';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import CardImage from '@/components/game/CardImage';
+import CardDetailOverlay from './CardDetailOverlay';
 import type { GameCard } from '@/types/cardTypes';
 
 interface PlayedCard {
@@ -16,6 +16,7 @@ interface PlayedCardsDockProps {
 const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
   const humanCards = playedCards.filter(pc => pc.player === 'human');
   const aiCards = playedCards.filter(pc => pc.player === 'ai');
+  const [inspectedCard, setInspectedCard] = useState<GameCard | null>(null);
 
   const getTypeColor = (type: string, isAI: boolean) => {
     const truthColors = {
@@ -50,6 +51,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
   };
 
   return (
+    <>
     <div className="h-full flex flex-col">
       <div className="flex-1 p-2 overflow-y-auto">
         <h4 className="text-xs font-semibold text-newspaper-text mb-2 font-mono">
@@ -73,7 +75,8 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                   {humanCards.map((playedCard, index) => (
                     <div
                       key={`human-${playedCard.card.id}-${index}`}
-                      className="group relative"
+                      className="group relative cursor-pointer"
+                      onClick={() => setInspectedCard(playedCard.card)}
                     >
                       {/* Full card with newspaper styling - doubled size */}
                       <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden`}>
@@ -161,7 +164,8 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                   {aiCards.map((playedCard, index) => (
                     <div
                       key={`ai-${playedCard.card.id}-${index}`}
-                      className="group relative"
+                      className="group relative cursor-pointer"
+                      onClick={() => setInspectedCard(playedCard.card)}
                     >
                       {/* Full card with newspaper styling - doubled size */}
                       <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden`}>
@@ -242,6 +246,17 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
         </div>
       </div>
     </div>
+    {inspectedCard && (
+      <CardDetailOverlay
+        card={inspectedCard}
+        canAfford={false}
+        disabled={true}
+        readOnly
+        onClose={() => setInspectedCard(null)}
+        onPlayCard={() => {}}
+      />
+    )}
+    </>
   );
 };
 
