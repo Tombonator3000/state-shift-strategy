@@ -11,7 +11,7 @@
 .rarity-legendary { --rarity-color: var(--rarity-legendary); }
 
 .card-base {
-  @apply rounded-xl border shadow-md font-sans flex flex-col;
+  @apply rounded-xl border shadow-md font-body flex flex-col;
   background: #fafafa;
   color: #111;
   border-color: var(--rarity-color, #e5e7eb);
@@ -35,7 +35,7 @@
 }
 
 .card-effect {
-  @apply border border-black bg-white p-2 text-sm;
+  @apply border border-black bg-paper p-2 text-sm;
 }
 
 .card-flavor {
