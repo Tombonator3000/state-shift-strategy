@@ -90,6 +90,11 @@ All colors MUST be HSL.
     --rarity-uncommon: 142 76% 36%;
     --rarity-rare: 221 83% 53%;
     --rarity-legendary: 25 95% 53%;
+
+    /* Shared card styling */
+    --card-bg: #fafafa;
+    --card-border: #222;
+    --card-text: #111;
   }
   .dark {
     --background: 222.2 84% 4.9%;
@@ -153,6 +158,11 @@ All colors MUST be HSL.
     --rarity-uncommon: 142 84% 44%;
     --rarity-rare: 221 83% 63%;
     --rarity-legendary: 25 95% 63%;
+
+    /* Shared card styling */
+    --card-bg: #111;
+    --card-border: #fafafa;
+    --card-text: #eee;
   }
 }
 
@@ -167,6 +177,13 @@ All colors MUST be HSL.
 }
 
 @layer components {
+  .card-base {
+    @apply rounded-lg border p-4 shadow-md hover:shadow-lg transition-shadow;
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    color: var(--card-text);
+  }
+
   /* Enhanced Card Animation System */
   .play-card-clone {
     position: absolute;
