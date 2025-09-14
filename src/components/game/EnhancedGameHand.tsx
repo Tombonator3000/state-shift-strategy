@@ -43,7 +43,35 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);
 
-  // Rarity styling handled via CSS variables and classes
+  const getRarityGlow = (rarity: string) => {
+    switch (rarity) {
+      case 'common': return 'shadow-md';
+      case 'uncommon': return 'shadow-md shadow-emerald-400/40';
+      case 'rare': return 'shadow-lg shadow-blue-400/50';
+      case 'legendary': return 'shadow-xl shadow-amber-400/60 animate-pulse';
+      default: return 'shadow-md';
+    }
+  };
+
+  const getRarityBorder = (rarity: string) => {
+    switch (rarity) {
+      case 'common': return 'border-zinc-600';
+      case 'uncommon': return 'border-emerald-400';
+      case 'rare': return 'border-blue-400';
+      case 'legendary': return 'border-amber-400';
+      default: return 'border-zinc-600';
+    }
+  };
+
+  const getRarityAccent = (rarity: string) => {
+    switch (rarity) {
+      case 'common': return 'bg-zinc-100 text-zinc-800';
+      case 'uncommon': return 'bg-emerald-100 text-emerald-800';
+      case 'rare': return 'bg-blue-100 text-blue-800';
+      case 'legendary': return 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 font-bold';
+      default: return 'bg-zinc-100 text-zinc-800';
+    }
+  };
 
   const getCardFaction = (card: GameCard) => {
     // First check if card has a direct faction property (for extension cards)
@@ -134,7 +162,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           const isLoading = loadingCard === card.id;
           const canAfford = canAffordCard(card);
           const faction = getCardFaction(card);
-          const flavor = faction === 'truth' ? card.flavorTruth : card.flavorGov;
           
           return (
             <div 
@@ -142,13 +169,14 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               data-card-id={card.id}
               aria-describedby={`hand-tooltip-${card.id}`}
               className={`
-                card-base border-2 enhanced-button card-hover-glow group relative cursor-pointer transition-all duration-300
-                flex items-center gap-2 overflow-visible
+                enhanced-button card-hover-glow group relative cursor-pointer transition-all duration-300
+                bg-card border-2 rounded-lg flex items-center gap-2 overflow-visible
                 ${isMobile ? 'p-4 min-h-[80px]' : 'p-2'}
                 ${isSelected ? 'ring-2 ring-warning scale-105 z-10 shadow-lg shadow-warning/50' : ''}
                 ${isPlaying || isLoading ? 'animate-pulse scale-105 z-50 ring-2 ring-primary shadow-lg shadow-primary/50' : 'hover:scale-[1.03] hover:shadow-md'}
                 ${!canAfford && !disabled ? 'opacity-60 saturate-50 cursor-not-allowed' : 'hover:bg-accent/20'}
-                rarity-${card.rarity.toLowerCase()}
+                ${getRarityBorder(card.rarity)}
+                ${getRarityGlow(card.rarity)}
                 active:scale-95 hover:-translate-y-0.5
               `}
               style={{ 
@@ -219,16 +247,13 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                {/* Card Name and Rarity */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className={`font-bold text-[color:var(--card-text)] truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{card.name}</span>
-                    <span className={`card-badge px-1.5 py-0.5 rounded-full ${isMobile ? 'text-xs' : 'text-xs'}`}>
+                    <span className={`font-bold text-foreground truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{card.name}</span>
+                    <span className={`px-1.5 py-0.5 rounded-full ${isMobile ? 'text-xs' : 'text-xs'} ${getRarityAccent(card.rarity)}`}>
                       {card.rarity.toUpperCase()}
                     </span>
                     <ExtensionCardBadge cardId={card.id} card={card} variant="inline" />
                   </div>
-                  <div className={`text-[color:var(--card-text)]/80 truncate max-w-[200px] ${isMobile ? 'text-sm' : 'text-xs'}`}>{card.text}</div>
-                  {flavor && (
-                    <div className={`mt-2 italic text-[color:var(--card-text)]/70 border-l-4 rounded-r px-2 py-1 ${faction === 'truth' ? 'border-truth-red bg-truth-red/10' : 'border-government-blue bg-government-blue/10'}`}>"{flavor}"</div>
-                  )}
+                  <div className={`text-muted-foreground truncate max-w-[200px] ${isMobile ? 'text-sm' : 'text-xs'}`}>{card.text}</div>
                 </div>
               
               {/* Enhanced Type Badge */}

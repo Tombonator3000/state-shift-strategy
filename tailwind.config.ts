@@ -67,22 +67,6 @@ export default {
         "newspaper-border": "hsl(var(--newspaper-border))",
         "newspaper-accent": "hsl(var(--newspaper-accent))",
         "newspaper-headline": "hsl(var(--newspaper-headline))",
-        "rarity-common": "var(--rarity-common)",
-        "rarity-uncommon": "var(--rarity-uncommon)",
-        "rarity-rare": "var(--rarity-rare)",
-        "rarity-legendary": "var(--rarity-legendary)",
-        "masthead-bg": "var(--masthead-bg)",
-        "masthead-color": "var(--masthead-color)",
-      },
-      fontFamily: {
-        headline: "var(--font-headline)",
-        body: "var(--font-body)",
-      },
-      height: {
-        masthead: "var(--masthead-height)",
-        "tray-desktop": "var(--tray-height-desktop)",
-        "tray-tablet": "var(--tray-height-tablet)",
-        "tray-mobile": "var(--tray-height-mobile)",
       },
       borderRadius: {
         lg: "var(--radius)",

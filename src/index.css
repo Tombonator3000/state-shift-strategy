@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
@@ -87,28 +86,10 @@ All colors MUST be HSL.
     --success-foreground: 355 7% 97%;
     
     /* Card rarity colors */
-    --rarity-common: 216 12.2% 83.9%;
-    --rarity-uncommon: 156.2 71.6% 66.9%;
-    --rarity-rare: 213.1 93.9% 67.8%;
-    --rarity-legendary: 47.9 95.8% 53.1%;
-    --rarity-epic: 274.8 100% 80.4%;
-
-    /* Masthead and tray */
-    --masthead-height: 60px;
-    --masthead-bg: 0 0% 0%;
-    --masthead-color: 0 0% 100%;
-    --tray-height-desktop: 28vh;
-    --tray-height-tablet: 30vh;
-    --tray-height-mobile: 34vh;
-
-    /* Font families */
-    --font-headline: 'Anton', 'Bebas Neue', sans-serif;
-    --font-body: 'Inter', 'Roboto', sans-serif;
-
-    /* Shared card styling */
-    --card-bg: 220 9.7% 6.1%;
-    --card-border: 220 9.7% 18.2%;
-    --card-text: 210 22.2% 92.9%;
+    --rarity-common: 0 0% 60%;
+    --rarity-uncommon: 142 76% 36%;
+    --rarity-rare: 221 83% 53%;
+    --rarity-legendary: 25 95% 53%;
   }
   .dark {
     --background: 222.2 84% 4.9%;
@@ -168,28 +149,10 @@ All colors MUST be HSL.
     --success-foreground: 355 7% 97%;
     
     /* Dark card rarity colors */
-    --rarity-common: 216 12.2% 83.9%;
-    --rarity-uncommon: 156.2 71.6% 66.9%;
-    --rarity-rare: 213.1 93.9% 67.8%;
-    --rarity-legendary: 47.9 95.8% 53.1%;
-    --rarity-epic: 274.8 100% 80.4%;
-
-    /* Shared card styling */
-    --card-bg: 220 9.7% 6.1%;
-    --card-border: 220 9.7% 18.2%;
-    --card-text: 210 22.2% 92.9%;
-  }
-}
-
-@media (max-width: 1023px) {
-  :root {
-    --masthead-height: 48px;
-  }
-}
-
-@media (max-width: 767px) {
-  :root {
-    --masthead-height: 40px;
+    --rarity-common: 0 0% 70%;
+    --rarity-uncommon: 142 84% 44%;
+    --rarity-rare: 221 83% 63%;
+    --rarity-legendary: 25 95% 63%;
   }
 }
 
@@ -204,82 +167,20 @@ All colors MUST be HSL.
 }
 
 @layer components {
-  .rarity-common {
-    --rarity-accent: var(--rarity-common);
-    border: 2px solid var(--rarity-common);
-    box-shadow: 0 0 0 2px color-mix(in oklab, var(--rarity-common) 40%, transparent);
-  }
-  .rarity-uncommon {
-    --rarity-accent: var(--rarity-uncommon);
-    border: 2px solid var(--rarity-uncommon);
-    box-shadow: 0 0 0 2px color-mix(in oklab, var(--rarity-uncommon) 40%, transparent);
-  }
-  .rarity-rare {
-    --rarity-accent: var(--rarity-rare);
-    border: 2px solid var(--rarity-rare);
-    box-shadow: 0 0 0 2px color-mix(in oklab, var(--rarity-rare) 40%, transparent);
-  }
-  .rarity-legendary {
-    --rarity-accent: var(--rarity-legendary);
-    border: 2px solid var(--rarity-legendary);
-    box-shadow: 0 0 6px 3px color-mix(in oklab, var(--rarity-legendary) 50%, transparent);
-  }
-
-  .masthead {
-    height: var(--masthead-height);
-    background: var(--masthead-bg);
-    color: var(--masthead-color);
-    font-family: var(--font-headline);
-  }
-
-  .card-tray {
-    height: var(--tray-height-desktop);
-  }
-  @media (max-width: 1023px) {
-    .card-tray {
-      height: var(--tray-height-tablet);
-    }
-  }
-  @media (max-width: 767px) {
-    .card-tray {
-      height: var(--tray-height-mobile);
-    }
-  }
-
-  .card-base {
-    @apply rounded-xl border p-4 shadow-md hover:shadow-lg transition-shadow;
-    background: var(--card-bg);
-    color: var(--card-text);
-    border: 1px solid var(--card-border);
-    box-shadow: 0 0 0 2px color-mix(in oklab, var(--rarity-accent) 25%, transparent);
-  }
-
-  .card-header {
-    @apply font-bold;
-    background: color-mix(in oklab, var(--rarity-accent) 10%, var(--card-bg));
-    border-bottom: 1px solid var(--card-border);
-    color: var(--card-text);
-  }
-
-  .card-badge {
-    background: color-mix(in oklab, var(--rarity-accent) 18%, hsl(0 0% 100% / 0.06));
-    color: var(--card-text);
-  }
-
   /* Enhanced Card Animation System */
   .play-card-clone {
     position: absolute;
     will-change: transform, opacity, filter;
     transform-origin: center center;
     z-index: 1601;
-    filter: drop-shadow(0 8px 24px hsl(0 0% 0% / 0.35));
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
     transition: transform 220ms cubic-bezier(0.2,0.8,0.2,1), opacity 150ms linear;
     pointer-events: none;
   }
 
   .play-card-clone.play-card-fullsize {
     border-width: 3px;
-    filter: drop-shadow(0 16px 40px hsl(0 0% 0% / 0.5));
+    filter: drop-shadow(0 16px 40px rgba(0,0,0,0.5));
   }
 
   .played-card {
@@ -288,7 +189,7 @@ All colors MUST be HSL.
     overflow: hidden;
     border: 2px solid hsl(var(--border));
     background: hsl(var(--card));
-    box-shadow: 0 4px 12px hsl(0 0% 0% / 0.25);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
   }
 
   .state-highlight {
@@ -313,7 +214,7 @@ All colors MUST be HSL.
     background: linear-gradient(
       90deg,
       transparent,
-      hsl(0 0% 100% / 0.1),
+      rgba(255, 255, 255, 0.1),
       transparent
     );
     transition: left 0.5s ease;
@@ -325,65 +226,71 @@ All colors MUST be HSL.
 
   /* Rarity Frame System */
   .rarity-frame-common {
-    border: 2px solid var(--rarity-common);
+    border: 2px solid hsl(var(--rarity-common));
   }
-
+  
   .rarity-frame-uncommon {
-    border: 2px solid var(--rarity-uncommon);
+    border: 2px solid hsl(var(--rarity-uncommon));
   }
-
+  
   .rarity-frame-rare {
-    border: 2px solid var(--rarity-rare);
+    border: 2px solid hsl(var(--rarity-rare));
   }
-
+  
   .rarity-frame-legendary {
-    border: 3px solid var(--rarity-legendary);
-    background: color-mix(in oklab, var(--rarity-legendary) 10%, transparent);
+    border: 3px solid hsl(var(--rarity-legendary));
+    background: linear-gradient(135deg, 
+      hsl(var(--rarity-legendary) / 0.1), 
+      hsl(25 95% 63% / 0.1)
+    );
   }
   
   /* Maximized rarity frames */
   .rarity-frame-maximized-common {
-    border: 3px solid var(--rarity-common);
+    border: 3px solid hsl(var(--rarity-common));
   }
-
+  
   .rarity-frame-maximized-uncommon {
-    border: 4px solid var(--rarity-uncommon);
+    border: 4px solid hsl(var(--rarity-uncommon));
   }
-
+  
   .rarity-frame-maximized-rare {
-    border: 4px solid var(--rarity-rare);
+    border: 4px solid hsl(var(--rarity-rare));
   }
-
+  
   .rarity-frame-maximized-legendary {
-    border: 4px solid var(--rarity-legendary);
-    box-shadow: 0 0 30px color-mix(in oklab, var(--rarity-legendary) 50%, transparent);
-    background: color-mix(in oklab, var(--rarity-legendary) 15%, transparent);
+    border: 4px solid hsl(var(--rarity-legendary));
+    box-shadow: 0 0 30px hsl(var(--rarity-legendary) / 0.5);
+    background: linear-gradient(135deg, 
+      hsl(var(--rarity-legendary) / 0.15), 
+      hsl(25 95% 63% / 0.15)
+    );
   }
 
   /* Rarity Glows */
   .rarity-glow-common {
-    box-shadow: 0 0 10px color-mix(in oklab, var(--rarity-common) 30%, transparent);
+    box-shadow: 0 0 10px hsl(var(--rarity-common) / 0.3);
   }
 
   .rarity-glow-uncommon {
-    box-shadow: 0 0 15px color-mix(in oklab, var(--rarity-uncommon) 40%, transparent);
+    box-shadow: 0 0 15px hsl(var(--rarity-uncommon) / 0.4);
   }
 
   .rarity-glow-rare {
-    box-shadow: 0 0 20px color-mix(in oklab, var(--rarity-rare) 50%, transparent);
+    box-shadow: 0 0 20px hsl(var(--rarity-rare) / 0.5);
   }
 
   .rarity-glow-legendary {
-    box-shadow: 0 0 25px color-mix(in oklab, var(--rarity-legendary) 60%, transparent);
+    box-shadow: 0 0 25px hsl(var(--rarity-legendary) / 0.6);
     animation: legendary-pulse 2s ease-in-out infinite;
   }
 
   @keyframes legendary-pulse {
-    0%, 100% {
-      box-shadow: 0 0 25px color-mix(in oklab, var(--rarity-legendary) 60%, transparent);
+    0%, 100% { 
+      box-shadow: 0 0 25px hsl(var(--rarity-legendary) / 0.6);
     }
-    50% {
-      box-shadow: 0 0 35px color-mix(in oklab, var(--rarity-legendary) 80%, transparent);
+    50% { 
+      box-shadow: 0 0 35px hsl(var(--rarity-legendary) / 0.8);
     }
   }
 
@@ -394,7 +301,7 @@ All colors MUST be HSL.
 
   .synergy-active {
     animation: synergy-pulse 1.5s ease-in-out infinite;
-    border: 2px solid var(--rarity-rare);
+    border: 2px solid hsl(var(--rarity-rare));
   }
 
   .combo-multiplier {
@@ -423,7 +330,7 @@ All colors MUST be HSL.
   .enhanced-tooltip {
     background: hsl(var(--popover));
     border: 1px solid hsl(var(--border));
-    box-shadow: 0 10px 30px hsl(0 0% 0% / 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
     animation: tooltip-appear 0.2s ease-out;
   }
@@ -462,7 +369,7 @@ All colors MUST be HSL.
 
   .interactive-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px hsl(0 0% 0% / 0.15);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   }
 
   .interactive-hover:active {
@@ -490,7 +397,7 @@ All colors MUST be HSL.
 
   .enhanced-button:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px hsl(0 0% 0% / 0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   }
 
   .enhanced-button::before {
@@ -503,7 +410,7 @@ All colors MUST be HSL.
     background: linear-gradient(
       90deg,
       transparent,
-      hsl(0 0% 100% / 0.1),
+      rgba(255, 255, 255, 0.1),
       transparent
     );
     transition: left 0.5s ease;
@@ -520,7 +427,7 @@ All colors MUST be HSL.
     left: 50%;
     width: 0;
     height: 0;
-    background: hsl(0 0% 100% / 0.2);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     transition: width 0.6s, height 0.6s;
@@ -640,5 +547,3 @@ All colors MUST be HSL.
     transform: translateY(-15px) scale(1.02);
   }
 }
-
-@import "./components/game/card.css";
