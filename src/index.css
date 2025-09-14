@@ -45,12 +45,20 @@ All colors MUST be HSL.
     --sidebar-primary-foreground: 0 0% 98%;
 
     /* Tabloid newspaper theme tokens */
-    --ink: 0 0% 0%;
-    --paper: 0 0% 96.5%;
-    --line: 0 0% 6.7%;
-    --lineSoft: 0 0% 13.3%;
-    --grey: 0 0% 80%;
-    --grey2: 0 0% 91.4%;
+    --ink: #000000;
+    --paper: #f5efe2;
+    --line: #111111;
+    --lineSoft: #2a2a2a;
+    --grey: #d1d5db;
+    --grey2: #e5e7eb;
+
+    /* Panel and status colors */
+    --panel-bg: #0b0c0d;
+    --panel-border: #2a2d33;
+    --status-bg: #111111;
+    --status-text: #f1f5f9;
+    --status-border: #2a2a2a;
+    --cost-red: #dc2626;
 
   --sidebar-accent: 240 4.8% 95.9%;
 
@@ -87,11 +95,23 @@ All colors MUST be HSL.
     --success-foreground: 355 7% 97%;
     
     /* Card rarity colors */
-    --rarity-common: #cfd8e3;
-    --rarity-uncommon: #7ce4b2;
-    --rarity-rare: #8fb7ff;
-    --rarity-legendary: #ffc86b;
+    --rarity-common: #d1d5db;
+    --rarity-uncommon: #6ee7b7;
+    --rarity-rare: #60a5fa;
+    --rarity-legendary: #facc15;
     --rarity-epic: #d59bff;
+
+    /* Masthead and tray */
+    --masthead-height: 60px;
+    --masthead-bg: #000000;
+    --masthead-color: #ffffff;
+    --tray-height-desktop: 28vh;
+    --tray-height-tablet: 30vh;
+    --tray-height-mobile: 34vh;
+
+    /* Font families */
+    --font-headline: 'Anton', 'Bebas Neue', sans-serif;
+    --font-body: 'Inter', 'Roboto', sans-serif;
 
     /* Shared card styling */
     --card-bg: #0e0f11;
@@ -101,6 +121,15 @@ All colors MUST be HSL.
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
+
+    --ink: #ffffff;
+    --paper: #1a1a1a;
+    --panel-bg: #0b0c0d;
+    --panel-border: #2a2d33;
+    --status-bg: #111111;
+    --status-text: #f1f5f9;
+    --status-border: #2a2a2a;
+    --cost-red: #dc2626;
 
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
@@ -156,16 +185,28 @@ All colors MUST be HSL.
     --success-foreground: 355 7% 97%;
     
     /* Dark card rarity colors */
-    --rarity-common: #cfd8e3;
-    --rarity-uncommon: #7ce4b2;
-    --rarity-rare: #8fb7ff;
-    --rarity-legendary: #ffc86b;
+    --rarity-common: #d1d5db;
+    --rarity-uncommon: #6ee7b7;
+    --rarity-rare: #60a5fa;
+    --rarity-legendary: #facc15;
     --rarity-epic: #d59bff;
 
     /* Shared card styling */
     --card-bg: #0e0f11;
     --card-border: #2a2d33;
     --card-text: #e9edf1;
+  }
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --masthead-height: 48px;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --masthead-height: 40px;
   }
 }
 
@@ -176,14 +217,52 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
   }
 }
 
 @layer components {
-  .rarity-common     { --rarity-accent: var(--rarity-common); }
-  .rarity-uncommon   { --rarity-accent: var(--rarity-uncommon); }
-  .rarity-rare       { --rarity-accent: var(--rarity-rare); }
-  .rarity-legendary  { --rarity-accent: var(--rarity-legendary); }
+  .rarity-common {
+    --rarity-accent: var(--rarity-common);
+    border: 2px solid var(--rarity-common);
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--rarity-common) 40%, transparent);
+  }
+  .rarity-uncommon {
+    --rarity-accent: var(--rarity-uncommon);
+    border: 2px solid var(--rarity-uncommon);
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--rarity-uncommon) 40%, transparent);
+  }
+  .rarity-rare {
+    --rarity-accent: var(--rarity-rare);
+    border: 2px solid var(--rarity-rare);
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--rarity-rare) 40%, transparent);
+  }
+  .rarity-legendary {
+    --rarity-accent: var(--rarity-legendary);
+    border: 2px solid var(--rarity-legendary);
+    box-shadow: 0 0 6px 3px color-mix(in oklab, var(--rarity-legendary) 50%, transparent);
+  }
+
+  .masthead {
+    height: var(--masthead-height);
+    background: var(--masthead-bg);
+    color: var(--masthead-color);
+    font-family: var(--font-headline);
+  }
+
+  .card-tray {
+    height: var(--tray-height-desktop);
+  }
+  @media (max-width: 1023px) {
+    .card-tray {
+      height: var(--tray-height-tablet);
+    }
+  }
+  @media (max-width: 767px) {
+    .card-tray {
+      height: var(--tray-height-mobile);
+    }
+  }
 
   .card-base {
     @apply rounded-xl border p-4 shadow-md hover:shadow-lg transition-shadow;

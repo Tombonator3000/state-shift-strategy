@@ -26,14 +26,14 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4"
+      className="fixed inset-0 bg-black/70 z-50 grid place-items-center p-3"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       {...swipeHandlers}
     >
       <div
-        className="h-[90vh] sm:h-[70vh] lg:h-[60vh]"
+        className="w-[min(80vw,820px)] md:w-[min(86vw,640px)] sm:w-[min(92vw,420px)]"
         style={{ aspectRatio: '63 / 88' }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -56,7 +56,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
               <button
                 onClick={onPlayCard}
                 disabled={!canAfford || disabled}
-                className="w-full bg-black text-white py-1 rounded disabled:opacity-50"
+                className="w-full bg-cost-red text-white py-1 rounded font-headline disabled:opacity-50"
               >
                 Play Card
               </button>
