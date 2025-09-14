@@ -44,7 +44,7 @@ export type LegacyFlat = Partial<{
   discardRandom: number;            // opponent discards random N
   discardChoice: number;            // opponent discards chosen N
   truthDelta: number;
-  pressureDelta: { state:string; who?: 'self'|'opponent'|'player'|'ai'; v:number };
+  pressureDelta: number | { state:string; who?: 'self'|'opponent'|'player'|'ai'; v:number }; // Support both formats
   defenseDelta: { state:string; v:1|-1 };
   addCardId: string;
   if: { stat:string; op: '>='|'<='|'>'|'<'|'=='|'!='; value:number };

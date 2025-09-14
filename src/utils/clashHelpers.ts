@@ -20,8 +20,13 @@ export function hasHarmfulEffect(card: GameCard): boolean {
   }
   
   // Check for pressure effects (can capture states)
-  if (card.effects.pressureDelta && card.effects.pressureDelta > 0) {
-    return true;
+  if (card.effects.pressureDelta) {
+    const pressureValue = typeof card.effects.pressureDelta === 'number' 
+      ? card.effects.pressureDelta 
+      : card.effects.pressureDelta.v;
+    if (pressureValue > 0) {
+      return true;
+    }
   }
   
   return false;

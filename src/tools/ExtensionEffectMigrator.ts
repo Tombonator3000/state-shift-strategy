@@ -87,7 +87,9 @@ export class ExtensionEffectMigrator {
         
       case 'pressure':
         if (effect.who === 'player') {
-          effects.pressureDelta = (effects.pressureDelta || 0) + (effect.v || 0);
+          const currentPressure = effects.pressureDelta || 0;
+          const currentValue = typeof currentPressure === 'number' ? currentPressure : 0;
+          effects.pressureDelta = currentValue + (effect.v || 0);
         }
         break;
         

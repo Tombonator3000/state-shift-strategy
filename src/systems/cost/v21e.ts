@@ -32,7 +32,10 @@ export function computeV21ECost({ rarity, effects }: CostCtx): number {
 
   // State pressure and defense
   if (effects.pressureDelta) {
-    cost += Math.ceil(Math.abs(effects.pressureDelta) * 0.75);
+    const pressureValue = typeof effects.pressureDelta === 'number' 
+      ? effects.pressureDelta 
+      : effects.pressureDelta.v;
+    cost += Math.ceil(Math.abs(pressureValue) * 0.75);
   }
   if (effects.zoneDefense) {
     cost += Math.ceil(Math.abs(effects.zoneDefense) * 0.6);

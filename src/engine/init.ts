@@ -17,7 +17,7 @@ async function loadExpansions() {
 export async function initGame() {
   const { coreLibrary, decklist } = await loadCore();
 
-  const index = new Map(coreLibrary.map((c: any) => [c.id, c]));
+  const index = new Map<string, any>(coreLibrary.map((c: any) => [c.id, c]));
   const coreDeck = buildDeckFromIds(decklist.ids, index);
 
   registerCoreLibrary(coreLibrary, coreDeck);

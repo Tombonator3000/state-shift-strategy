@@ -42,7 +42,10 @@ export function scoreEffectsV21E(effects: CardEffects): number {
   
   // Zone control
   if (effects.pressureDelta) {
-    score += effects.pressureDelta * 1.2; // Zone pressure
+    const pressureValue = typeof effects.pressureDelta === 'number' 
+      ? effects.pressureDelta 
+      : effects.pressureDelta.v;
+    score += pressureValue * 1.2; // Zone pressure
   }
   
   if (effects.zoneDefense) {

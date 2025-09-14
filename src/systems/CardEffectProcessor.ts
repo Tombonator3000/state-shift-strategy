@@ -94,8 +94,11 @@ export class CardEffectProcessor {
     
     // Zone effects
     if (effects.pressureDelta !== undefined) {
-      result.pressureDelta += effects.pressureDelta;
-      result.logMessages.push(`+${effects.pressureDelta} Pressure to target`);
+      const pressureValue = typeof effects.pressureDelta === 'number' 
+        ? effects.pressureDelta 
+        : effects.pressureDelta.v;
+      result.pressureDelta += pressureValue;
+      result.logMessages.push(`+${pressureValue} Pressure to target`);
     }
     
     if (effects.zoneDefense !== undefined) {

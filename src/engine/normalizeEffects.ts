@@ -43,8 +43,14 @@ export function normalizeEffects(effects: LegacyEffects): Effect[] {
     out.push({ k:'truth', v: e.truthDelta });
   }
   if (e.pressureDelta) {
-    const who = (e.pressureDelta.who ?? 'self') as any;
-    out.push({ k:'pressure', who, state: e.pressureDelta.state, v: e.pressureDelta.v });
+    if (typeof e.pressureDelta === 'number') {
+      // Simple number format - assume target state will be provided by UI
+      out.push({ k:'pressure', who:'self', state:'*', v: e.pressureDelta });
+    } else {
+      // Object format with explicit state
+      const who = (e.pressureDelta.who ?? 'self') as any;
+      out.push({ k:'pressure', who, state: e.pressureDelta.state, v: e.pressureDelta.v });
+    }
   }
   if (e.defenseDelta) {
     out.push({ k:'defense', state: e.defenseDelta.state, v: e.defenseDelta.v });
@@ -107,6 +113,6 @@ export function normalizeCard<T extends { id:string; text?:string; flavor?:strin
   return { ...card, effects: normalizeEffects(card.effects) };
 }
 
-export function normalizeDeck<T extends { effects?: LegacyEffects }>(cards:T[]): (T & { effects: Effect[] })[] {
+export function normalizeDeck<T extends { id: string; text?: string; flavor?: string; effects?: LegacyEffects }>(cards: T[]): (T & { effects: Effect[] })[] {
   return (cards ?? []).map(normalizeCard);
 }

@@ -34,11 +34,10 @@ async function loadViaFetch() {
   return { coreLibrary, decklist };
 }
 
-// 3) TS fallback
-import { CORE_TRUTH_DECK } from '../../data/core/CORE_TRUTH_DECK';
-import { CORE_GOV_DECK }   from '../../data/core/CORE_GOV_DECK';
+// 3) TS fallback - use full core database
+import { CARD_DATABASE_CORE } from '../../data/core/index';
 function loadFallback() {
-  const coreLibrary = [...normalizeDeck(CORE_TRUTH_DECK), ...normalizeDeck(CORE_GOV_DECK)];
+  const coreLibrary = normalizeDeck(CARD_DATABASE_CORE);
   const decklist = { seed:'fallback', ids: coreLibrary.map(c => c.id) };
   return { coreLibrary, decklist };
 }

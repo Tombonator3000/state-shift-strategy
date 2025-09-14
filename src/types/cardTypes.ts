@@ -14,7 +14,8 @@ export interface CardEffects {
   };
   draw?: number;
   discardOpponent?: number;
-  pressureDelta?: number;
+  discardRandom?: number; // Legacy support
+  pressureDelta?: number | { state: string; who?: 'player' | 'ai' | 'self' | 'opponent'; v: number; }; // Support both formats
   zoneDefense?: number;
   reduceFactor?: number; // For partial blocking defensive cards (0-1)
   conditional?: {
