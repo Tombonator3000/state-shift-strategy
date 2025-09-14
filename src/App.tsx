@@ -12,6 +12,7 @@ import EffectSystemDashboard from "./pages/EffectSystemDashboard";
 import DatabaseRecovery from "./pages/DatabaseRecovery";
 import { initializeExtensionsOnStartup } from './data/extensionIntegration';
 import { AchievementProvider } from './contexts/AchievementContext';
+import { CardPreviewProvider } from './contexts/CardPreviewContext';
 
 const queryClient = new QueryClient();
 
@@ -26,17 +27,19 @@ const App = () => {
       <TooltipProvider>
         <AudioProvider>
           <AchievementProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/dev/effects" element={<EffectSystemDashboard />} />
-                <Route path="/dev/recovery" element={<DatabaseRecovery />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <CardPreviewProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/dev/effects" element={<EffectSystemDashboard />} />
+                  <Route path="/dev/recovery" element={<DatabaseRecovery />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </CardPreviewProvider>
           </AchievementProvider>
         </AudioProvider>
       </TooltipProvider>
