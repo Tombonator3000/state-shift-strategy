@@ -15,7 +15,6 @@ interface CardDetailOverlayProps {
   onClose: () => void;
   onPlayCard: () => void;
   swipeHandlers?: any;
-  sourceZone?: 'hand' | 'board' | 'discard' | 'zone' | 'timeline';
 }
 
 const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
@@ -24,8 +23,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
   disabled,
   onClose,
   onPlayCard,
-  swipeHandlers,
-  sourceZone = 'hand'
+  swipeHandlers
 }) => {
   const isMobile = useIsMobile();
   
@@ -92,32 +90,18 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
 
   const faction = getCardFaction(card);
 
-  const zoneLabel = () => {
-    switch (sourceZone) {
-      case 'board':
-        return 'In Play – Board';
-      case 'discard':
-        return 'Discard Pile';
-      case 'zone':
-        return 'Zone';
-      case 'timeline':
-        return 'Timeline';
-      default:
-        return null;
-    }
-  };
-
   return (
     <div 
       className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4"
       onClick={onClose}
       {...(isMobile ? swipeHandlers : {})}
     >
-      <div
-        className={`bg-card transform animate-fade-in flex flex-col overflow-hidden rounded-2xl ${
-          getRarityFrameClass(card.rarity)
-        } ${getRarityGlowClass(card.rarity)}`}
-        style={{ width: 'var(--card-w)', height: 'var(--card-h)', aspectRatio: '63 / 88' }}
+      <div 
+        className={`bg-card transform animate-fade-in flex flex-col overflow-hidden ${
+          isMobile 
+            ? 'w-full max-w-sm max-h-[90vh] rounded-xl' 
+            : 'w-full max-w-md h-[85vh] rounded-2xl'
+        } ${getRarityFrameClass(card.rarity)} ${getRarityGlowClass(card.rarity)}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Bar - Sticky */}
@@ -125,14 +109,9 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               {/* Title */}
-              <h2 className="font-bold text-foreground leading-tight mb-1 truncate" style={{ fontFamily: 'var(--font-head)' }}>
+              <h2 className="font-bold text-foreground leading-tight mb-2 truncate">
                 {card.name}
               </h2>
-              {zoneLabel() && (
-                <div className="text-xs text-muted-foreground" style={{ fontFamily: 'var(--font-ui)' }}>
-                  {zoneLabel()}
-                </div>
-              )}
               
               {/* Type Badge */}
               <Badge 
@@ -180,10 +159,10 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
           <div>
             <h4 className="text-sm font-bold mb-2 text-foreground">Effect</h4>
             <div className="bg-card/60 rounded-lg border border-border p-3 space-y-2">
-              <p className="text-sm font-medium text-foreground leading-snug" style={{ fontFamily: 'var(--font-ui)' }}>
+              <p className="text-sm font-medium text-foreground leading-relaxed">
                 {card.text}
               </p>
-              <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1" style={{ fontFamily: 'var(--font-ui)' }}>
+              <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
                 {getEffectDescription(card)}
               </div>
             </div>
@@ -194,7 +173,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
             <h4 className="text-xs font-bold mb-2 text-muted-foreground tracking-wider">
               CLASSIFIED INTELLIGENCE
             </h4>
-            <div className="italic text-sm text-foreground border-l-4 border-truth-red bg-truth-red/10 rounded-r border border-truth-red/20 pl-3 pr-3 py-2 leading-snug" style={{ fontFamily: 'var(--font-ui)' }}>
+            <div className="italic text-sm text-foreground border-l-4 border-truth-red bg-truth-red/10 rounded-r border border-truth-red/20 pl-3 pr-3 py-2 leading-relaxed">
               "{faction === 'truth' ? (card.flavorTruth ?? 'No intelligence available.') : (card.flavorGov ?? 'No intelligence available.')}"
             </div>
           </div>
@@ -213,34 +192,32 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
         </div>
 
         {/* Bottom CTA */}
-        {!disabled && (
-          <div className="flex-shrink-0 p-4 border-t border-border bg-card/95">
-            <Button
-              onClick={onPlayCard}
-              disabled={disabled || !canAfford}
-              className={`enhanced-button w-full font-mono relative overflow-hidden transition-all duration-300 ${
-                isMobile ? 'text-base py-4' : 'text-sm py-3'
-              } ${
-                !canAfford ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
-              }`}
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                {card.type === 'ZONE' && <Target className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-                {card.type === 'ATTACK' && <Zap className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-                {card.type === 'DEFENSIVE' && <Shield className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-                {card.type === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
-              </span>
-
-              {!canAfford && (
-                <div className="absolute inset-0 flex items-center justify-center bg-destructive/10">
-                  <span className="text-xs text-destructive font-medium">
-                    Need {card.cost} IP
-                  </span>
-                </div>
-              )}
-            </Button>
-          </div>
-        )}
+        <div className="flex-shrink-0 p-4 border-t border-border bg-card/95">
+          <Button
+            onClick={onPlayCard}
+            disabled={disabled || !canAfford}
+            className={`enhanced-button w-full font-mono relative overflow-hidden transition-all duration-300 ${
+              isMobile ? 'text-base py-4' : 'text-sm py-3'
+            } ${
+              !canAfford ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
+            }`}
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              {card.type === 'ZONE' && <Target className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+              {card.type === 'ATTACK' && <Zap className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+              {card.type === 'DEFENSIVE' && <Shield className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+              {card.type === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
+            </span>
+            
+            {!canAfford && (
+              <div className="absolute inset-0 flex items-center justify-center bg-destructive/10">
+                <span className="text-xs text-destructive font-medium">
+                  Need {card.cost} IP
+                </span>
+              </div>
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

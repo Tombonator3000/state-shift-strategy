@@ -3,7 +3,6 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import CardImage from '@/components/game/CardImage';
 import type { GameCard } from '@/types/cardTypes';
-import { useCardPreview } from '@/contexts/CardPreviewContext';
 
 interface PlayedCard {
   card: GameCard;
@@ -17,12 +16,6 @@ interface PlayedCardsDockProps {
 const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
   const humanCards = playedCards.filter(pc => pc.player === 'human');
   const aiCards = playedCards.filter(pc => pc.player === 'ai');
-  const { openCardPreview } = useCardPreview();
-  let pressTimer: number;
-  const startPress = (id: string) => {
-    pressTimer = window.setTimeout(() => openCardPreview(id, 'board'), 350);
-  };
-  const cancelPress = () => clearTimeout(pressTimer);
 
   const getTypeColor = (type: string, isAI: boolean) => {
     const truthColors = {
@@ -81,13 +74,6 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                     <div
                       key={`human-${playedCard.card.id}-${index}`}
                       className="group relative"
-                      tabIndex={0}
-                      onClick={() => openCardPreview(playedCard.card.id, 'board')}
-                      onKeyDown={e => e.key === 'Enter' && openCardPreview(playedCard.card.id, 'board')}
-                      onTouchStart={() => startPress(playedCard.card.id)}
-                      onTouchEnd={cancelPress}
-                      onTouchMove={cancelPress}
-                      onTouchCancel={cancelPress}
                     >
                       {/* Full card with newspaper styling - doubled size */}
                       <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden`}>
@@ -176,13 +162,6 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                     <div
                       key={`ai-${playedCard.card.id}-${index}`}
                       className="group relative"
-                      tabIndex={0}
-                      onClick={() => openCardPreview(playedCard.card.id, 'board')}
-                      onKeyDown={e => e.key === 'Enter' && openCardPreview(playedCard.card.id, 'board')}
-                      onTouchStart={() => startPress(playedCard.card.id)}
-                      onTouchEnd={cancelPress}
-                      onTouchMove={cancelPress}
-                      onTouchCancel={cancelPress}
                     >
                       {/* Full card with newspaper styling - doubled size */}
                       <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden`}>
