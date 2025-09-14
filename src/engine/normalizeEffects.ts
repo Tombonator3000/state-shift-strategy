@@ -1,129 +1,112 @@
-import type { Effect, Who } from './effects';
+import type { Effect, LegacyEffects, SideAbs } from './effects/types';
 
-export type { Effect, Who } from './effects';
-
-export type LegacyEffects =
-  | Effect[]
-  | {
-      truthDelta?: number;
-      draw?: number;
-      ipDelta?: number | { self?: number; opponent?: number };
-      pressureDelta?: { state: string; who?: Who; v: number };
-      defenseDelta?: { state: string; v: 1 | -1 };
-      discardRandom?: number;
-      discardChoice?: number;
-      addCardId?: string;
-      if?: { stat: string; op: '>=' | '<=' | '>' | '<' | '==' | '!='; value: number };
-      then?: LegacyEffects;
-      else?: LegacyEffects;
-    }
-  | undefined;
-
-function toWho(x?: any): Who {
-  return x === 'ai' ? 'ai' : 'player';
-}
-
-function readStat(gs: any, stat: string): number {
+// Read stat helper for conditionals
+function readStat(gs:any, stat:string): number {
   switch (stat) {
-    case 'truth':
-      return gs.truth ?? 0;
-    case 'ipSelf':
-      return gs.player?.ip ?? 0;
-    case 'ipOpponent':
-      return gs.ai?.ip ?? 0;
-    case 'zonesControlled':
-      return gs.player?.zonesControlled ?? 0;
-    case 'round':
-      return gs.round ?? 0;
-    default:
-      return 0;
+    case 'truth': return gs.truth ?? 0;
+    case 'ipSelf': return gs.player?.ip ?? 0;
+    case 'ipOpponent': return gs.ai?.ip ?? 0;
+    case 'zonesControlled': return gs.player?.zonesControlled ?? 0;
+    case 'round': return gs.round ?? 0;
+    default: return 0;
   }
 }
 
-function normalizeIpDelta(ip: any): Effect[] {
-  const out: Effect[] = [];
-  if (ip == null) return out;
-  if (typeof ip === 'number') {
-    out.push({ k: 'ip', who: 'player', v: ip });
-    return out;
-  }
-  const self = ip.self ?? 0;
-  const opp = ip.opponent ?? 0;
-  if (self) out.push({ k: 'ip', who: 'player', v: self });
-  if (opp) out.push({ k: 'ip', who: 'ai', v: opp });
-  return out;
-}
-
-function normalizeConditional(obj: any): Effect | null {
-  if (!obj?.if || (!obj.then && !obj.else)) return null;
-  const { stat, op, value } = obj.if;
-  const thenEff = normalizeEffects(obj.then);
-  const elseEff = normalizeEffects(obj.else);
+function mapConditional(e:any): Effect | null {
+  if (!e?.if || (!e.then && !e.else)) return null;
+  const { stat, op, value } = e.if;
   return {
-    k: 'conditional',
-    if: (gs: any) => {
+    k:'conditional',
+    if:(gs:any) => {
       const lhs = readStat(gs, stat);
-      switch (op) {
-        case '>=':
-          return lhs >= value;
-        case '<=':
-          return lhs <= value;
-        case '>':
-          return lhs > value;
-        case '<':
-          return lhs < value;
-        case '==':
-          return lhs === value;
-        case '!=':
-          return lhs !== value;
-        default:
-          return false;
-      }
+      return op === '>=' ? lhs >= value :
+             op === '<=' ? lhs <= value :
+             op === '>'  ? lhs >  value :
+             op === '<'  ? lhs <  value :
+             op === '==' ? lhs === value :
+             op === '!=' ? lhs !== value : false;
     },
-    then: thenEff,
-    else: elseEff,
+    then: normalizeEffects(e.then),
+    else: normalizeEffects(e.else)
   };
 }
 
 export function normalizeEffects(effects: LegacyEffects): Effect[] {
   if (!effects) return [];
-  if (Array.isArray(effects)) return effects;
+  if (Array.isArray(effects)) return effects as Effect[];
 
   const out: Effect[] = [];
-  const e: any = effects;
+  const e:any = effects;
 
-  if (typeof e.truthDelta === 'number' && e.truthDelta)
-    out.push({ k: 'truth', who: 'player', v: e.truthDelta });
+  // ---- Common fields across versions ----
+  if (typeof e.truthDelta === 'number' && e.truthDelta) {
+    out.push({ k:'truth', v: e.truthDelta });
+  }
+  if (e.pressureDelta) {
+    const who = (e.pressureDelta.who ?? 'self') as any;
+    out.push({ k:'pressure', who, state: e.pressureDelta.state, v: e.pressureDelta.v });
+  }
+  if (e.defenseDelta) {
+    out.push({ k:'defense', state: e.defenseDelta.state, v: e.defenseDelta.v });
+  }
+  if (typeof e.addCardId === 'string' && e.addCardId) {
+    out.push({ k:'addCard', who:'self', cardId: e.addCardId });
+  }
+
+  // ---- v2.1E style keys ----
+  if (typeof e.drawSelf === 'number' && e.drawSelf > 0)
+    out.push({ k:'draw', who:'self', n: e.drawSelf });
+
+  if (typeof e.drawOpponent === 'number' && e.drawOpponent > 0)
+    out.push({ k:'draw', who:'opponent', n: e.drawOpponent });
+
+  if (typeof e.ipSelf === 'number' && e.ipSelf)
+    out.push({ k:'ip', who:'self', v: e.ipSelf });
+
+  if (typeof e.ipOpponent === 'number' && e.ipOpponent)
+    out.push({ k:'ip', who:'opponent', v: e.ipOpponent });
+
+  if (typeof e.discardOpponent === 'number' && e.discardOpponent > 0)
+    out.push({ k:'discardRandom', who:'opponent', n: e.discardOpponent });
+
+  if (typeof e.discardOpponentChoice === 'number' && e.discardOpponentChoice > 0)
+    out.push({ k:'discardChoice', who:'opponent', n: e.discardOpponentChoice });
+
+  // ---- Legacy flat keys ----
   if (typeof e.draw === 'number' && e.draw > 0)
-    out.push({ k: 'draw', who: 'player', n: e.draw });
-  if (e.ipDelta != null) out.push(...normalizeIpDelta(e.ipDelta));
-  if (e.pressureDelta)
-    out.push({ k: 'pressure', who: toWho(e.pressureDelta.who), state: e.pressureDelta.state, v: e.pressureDelta.v });
-  if (e.defenseDelta)
-    out.push({ k: 'defense', state: e.defenseDelta.state, v: e.defenseDelta.v });
-  if (e.discardRandom)
-    out.push({ k: 'discardRandom', who: 'ai', n: e.discardRandom });
-  if (e.discardChoice)
-    out.push({ k: 'discardChoice', who: 'ai', n: e.discardChoice });
-  if (e.addCardId)
-    out.push({ k: 'addCard', who: 'player', cardId: e.addCardId });
+    out.push({ k:'draw', who:'self', n: e.draw });
 
-  const cond = normalizeConditional(e);
+  if (e.ipDelta != null) {
+    if (typeof e.ipDelta === 'number') {
+      out.push({ k:'ip', who:'self', v: e.ipDelta });
+    } else {
+      if (e.ipDelta.self)     out.push({ k:'ip', who:'self',     v: e.ipDelta.self });
+      if (e.ipDelta.opponent) out.push({ k:'ip', who:'opponent', v: e.ipDelta.opponent });
+    }
+  }
+
+  if (typeof e.discardRandom === 'number' && e.discardRandom > 0)
+    out.push({ k:'discardRandom', who:'opponent', n: e.discardRandom });
+
+  if (typeof e.discardChoice === 'number' && e.discardChoice > 0)
+    out.push({ k:'discardChoice', who:'opponent', n: e.discardChoice });
+
+  // ---- Conditional (supported in both styles) ----
+  const cond = mapConditional(e);
   if (cond) out.push(cond);
 
-  if (!out.length) console.warn('[normalizeEffects] Legacy produced no effects.', e);
   return out;
 }
 
-export function normalizeCard<T extends { effects?: LegacyEffects; text?: string; flavor?: string; id: string }>(
-  card: T,
-): T & { effects: Effect[] } {
-  const nonAscii = (s?: string) => !!s && /[^\x00-\x7F]/.test(s);
-  if (nonAscii(card.text) || nonAscii((card as any).flavor)) console.warn(`[i18n] Non-ASCII text on ${card.id}. In-game text must be English.`);
+export function normalizeCard<T extends { id:string; text?:string; flavor?:string; effects?: LegacyEffects }>(card:T): T & { effects: Effect[] } {
+  // Non-blocking English guard
+  const nonAscii = (s?:string) => !!s && /[^\x00-\x7F]/.test(s);
+  if (nonAscii(card.text) || nonAscii(card.flavor)) {
+    console.warn(`[i18n] Non-ASCII text on ${card.id}. In-game text must be English.`);
+  }
   return { ...card, effects: normalizeEffects(card.effects) };
 }
 
-export function normalizeDeck<T extends { effects?: LegacyEffects }>(cards: T[]): (T & { effects: Effect[] })[] {
+export function normalizeDeck<T extends { effects?: LegacyEffects }>(cards:T[]): (T & { effects: Effect[] })[] {
   return (cards ?? []).map(normalizeCard);
 }
-
