@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EnhancedCardBalancer } from '@/data/enhancedCardBalancing';
 import { Download, RefreshCw, Image, FileText, BarChart3 } from 'lucide-react';
+import { exportEffectsFiles } from '@/balance/exportEffects';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts';
 
 interface EnhancedBalancingDashboardProps {
@@ -142,7 +143,14 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
             >
               {includeExtensions ? "Med Extensions" : "Kun Base Cards"}
             </Button>
-            <Button onClick={exportData} variant="outline" size="sm">
+            <Button
+              onClick={() => {
+                exportData();
+                exportEffectsFiles(includeExtensions);
+              }}
+              variant="outline"
+              size="sm"
+            >
               <Download size={16} className="mr-1" />
               Export Data
             </Button>
