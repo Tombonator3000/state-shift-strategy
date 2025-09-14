@@ -3,7 +3,6 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import CardImage from '@/components/game/CardImage';
 import type { GameCard } from '@/types/cardTypes';
-import { useCardPreview } from '@/contexts/CardPreviewContext';
 
 interface PlayedCard {
   card: GameCard;
@@ -17,7 +16,6 @@ interface PlayedCardsDockProps {
 const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
   const humanCards = playedCards.filter(pc => pc.player === 'human');
   const aiCards = playedCards.filter(pc => pc.player === 'ai');
-  const { openCardPreview } = useCardPreview();
 
   const getTypeColor = (type: string, isAI: boolean) => {
     const truthColors = {
@@ -75,8 +73,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                   {humanCards.map((playedCard, index) => (
                     <div
                       key={`human-${playedCard.card.id}-${index}`}
-                      className="group relative cursor-pointer"
-                      onClick={() => openCardPreview(playedCard.card.id, 'board')}
+                      className="group relative"
                     >
                       {/* Full card with newspaper styling - doubled size */}
                       <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden`}>
@@ -164,8 +161,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                   {aiCards.map((playedCard, index) => (
                     <div
                       key={`ai-${playedCard.card.id}-${index}`}
-                      className="group relative cursor-pointer"
-                      onClick={() => openCardPreview(playedCard.card.id, 'board')}
+                      className="group relative"
                     >
                       {/* Full card with newspaper styling - doubled size */}
                       <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden`}>

@@ -198,11 +198,6 @@ All colors MUST be HSL.
     animation: pulse 1s ease-in-out infinite;
   }
 
-  /* ===== LOCKED: Your Hand mini card dimensions (DO NOT CHANGE) =====
-     Ikke endre width/height/padding/font-size/gap/margins her.
-     Disse verdiene er godkjent og skal forbli identiske.
-  ===== /LOCKED ===== */
-
   /* Enhanced Card Hover Effects */
   .card-hover-glow {
     position: relative;
