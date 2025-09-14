@@ -20,8 +20,6 @@ export const useCardPreview = () => {
 export function CardPreviewProvider({ children }: { children: ReactNode }) {
   const [card, setCard] = useState<GameCard | null>(null);
   const [sourceZone, setSourceZone] = useState<SourceZone>('board');
-
-  // Open read-only preview for any zone; only 'hand' is interactive/playable.
   const openCardPreview = (cardId: string, zone: SourceZone = 'board'): void => {
     const found = CARD_DATABASE.find((c) => c.id === cardId);
     if (!found) return;
@@ -38,7 +36,7 @@ export function CardPreviewProvider({ children }: { children: ReactNode }) {
         <CardDetailOverlay
           card={card}
           canAfford={true}
-          disabled={sourceZone !== 'hand'} // read-only for board/discard/zone/timeline
+          disabled={sourceZone !== 'hand'}
           sourceZone={sourceZone}
           onClose={handleClose}
           onPlayCard={() => {}}

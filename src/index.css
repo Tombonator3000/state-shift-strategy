@@ -211,10 +211,8 @@
   }
 
   /* ===== LOCKED: Your Hand mini card dimensions (DO NOT CHANGE) ===== */
-  /* Denne blokken dokumenterer at minikort-størrelse og spacing er låst.
-     Ikke endre width/height/padding/font-size/gap/margin i denne sonen. */
-  /* (Finn og behold dagens regler som styrer minikort i Your Hand,
-     typisk .hand .card-mini / [data-card-mini]. Ikke endre tallene.) */
+  /* Do not modify width/height/padding/font-size/gap/margins for .hand .card-mini */
+  /* ===== /LOCKED ===== */
   .played-card {
     width: 120px;
     height: 168px;
@@ -223,7 +221,6 @@
     background: hsl(var(--card));
     box-shadow: 0 4px 12px rgba(0,0,0,0.25);
   }
-  /* ===== /LOCKED ===== */
 
   .state-highlight {
     outline: 3px dashed hsl(var(--warning, 45 93% 58%));
