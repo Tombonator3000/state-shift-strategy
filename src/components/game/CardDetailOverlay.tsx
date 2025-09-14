@@ -33,7 +33,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
       {...swipeHandlers}
     >
       <div
-        className="h-[90vh] sm:h-[70vh] lg:h-[60vh]"
+        className="w-[min(92vw,420px)] md:w-[min(86vw,640px)] lg:w-[min(80vw,820px)] max-h-[90vh] sm:max-h-[70vh] lg:max-h-[60vh]"
         style={{ aspectRatio: '63 / 88' }}
         onClick={(e) => e.stopPropagation()}
       >
