@@ -9,7 +9,7 @@ export function playCard(gs: any, who: 'player' | 'ai', rawCard: any, target: an
 
   const card = normalizeCard(rawCard);
   gs.discards[who].push(card);
-  applyEffects(gs, card.effects, { gs, who, target });
+  applyEffects(gs, card.effects, { who, target });
   return { ok: true };
 }
 

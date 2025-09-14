@@ -1,17 +1,6 @@
-export type Who = 'player' | 'ai';
+import type { Effect, Who } from './effects';
 
-export type Effect =
-  | { k: 'truth'; who: Who; v: number }
-  | { k: 'ip'; who: Who; v: number }
-  | { k: 'draw'; who: Who; n: number }
-  | { k: 'pressure'; who: Who; state: string; v: number }
-  | { k: 'defense'; state: string; v: 1 | -1 }
-  | { k: 'discardRandom'; who: Who; n: number }
-  | { k: 'discardChoice'; who: Who; n: number }
-  | { k: 'addCard'; who: Who; cardId: string }
-  | { k: 'flag'; name: string; on?: boolean }
-  | { k: 'conditional'; if: (gs: any, target?: any) => boolean; then: Effect[]; else?: Effect[] }
-  | { k: 'special'; fn: (gs: any, target?: any) => void };
+export type { Effect, Who } from './effects';
 
 export type LegacyEffects =
   | Effect[]

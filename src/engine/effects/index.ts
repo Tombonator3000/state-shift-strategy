@@ -1,7 +1,23 @@
-import { normalizeEffects, Effect } from './normalizeEffects';
+import { normalizeEffects } from '../normalizeEffects';
+
+export type Who = 'player' | 'ai';
+
+export type Effect =
+  | { k: 'truth'; who: Who; v: number }
+  | { k: 'ip'; who: Who; v: number }
+  | { k: 'draw'; who: Who; n: number }
+  | { k: 'pressure'; who: Who; state: string; v: number }
+  | { k: 'defense'; state: string; v: 1 | -1 }
+  | { k: 'discardRandom'; who: Who; n: number }
+  | { k: 'discardChoice'; who: Who; n: number }
+  | { k: 'addCard'; who: Who; cardId: string }
+  | { k: 'flag'; name: string; on?: boolean }
+  | { k: 'conditional'; if: (gs: any, target?: any) => boolean; then: Effect[]; else?: Effect[] }
+  | { k: 'special'; fn: (gs: any, target?: any) => void };
+
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'legendary';
 
-function reshuffle(gs: any, who: 'player' | 'ai') {
+function reshuffle(gs: any, who: Who) {
   const deck = gs.decks[who];
   const discard = gs.discards[who];
   while (deck.length > 0) discard.push(deck.pop());
@@ -13,7 +29,7 @@ function reshuffle(gs: any, who: 'player' | 'ai') {
   gs.decks[who] = discard.splice(0);
 }
 
-export function drawCards(gs: any, who: 'player' | 'ai', n: number) {
+export function drawCards(gs: any, who: Who, n: number) {
   for (let i = 0; i < n; i++) {
     if (gs.decks[who].length === 0) reshuffle(gs, who);
     if (gs.decks[who].length === 0) return; // nothing left
@@ -29,7 +45,7 @@ export function drawCards(gs: any, who: 'player' | 'ai', n: number) {
   }
 }
 
-export function discardRandom(gs: any, who: 'player' | 'ai', n: number) {
+export function discardRandom(gs: any, who: Who, n: number) {
   for (let i = 0; i < n && gs.hands[who].length > 0; i++) {
     const idx = Math.floor(Math.random() * gs.hands[who].length);
     const [c] = gs.hands[who].splice(idx, 1);
@@ -37,7 +53,7 @@ export function discardRandom(gs: any, who: 'player' | 'ai', n: number) {
   }
 }
 
-export function promptDiscardChoice(gs: any, who: 'player' | 'ai', n: number) {
+export function promptDiscardChoice(gs: any, who: Who, n: number) {
   // TODO: UI modal for human. For AI, pick lowest-value card.
   // For now: if AI, auto-pick. If player, trigger callback placeholder.
   if (who === 'ai') {
@@ -48,7 +64,7 @@ export function promptDiscardChoice(gs: any, who: 'player' | 'ai', n: number) {
   }
 }
 
-export function addCardToHand(gs: any, who: 'player' | 'ai', cardId: string) {
+export function addCardToHand(gs: any, who: Who, cardId: string) {
   const card = gs.cardLibrary?.[cardId];
   if (card && gs.hands[who].length < 7) {
     gs.hands[who].push({ ...card });
