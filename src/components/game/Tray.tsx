@@ -21,14 +21,14 @@ export function Tray({ cards, onInspect }: TrayProps) {
             <button
               key={c.id}
               onClick={() => onInspect(c)}
-              className="bg-[#fff] border-2 border-black shadow-[6px_6px_0_#000] rounded text-left p-2"
+              className="bg-paper border-2 border-black shadow-[6px_6px_0_black] rounded text-left p-2"
             >
               <div className="font-[anton] text-xs uppercase flex justify-between mb-1">
                 <span className="truncate">{c.name}</span>
                 <span className="bg-[#dc2626] text-white px-2 rounded">{c.cost} IP</span>
               </div>
               <img src={c.image} alt="" className="w-full h-24 object-cover mb-2" />
-              <div className="border border-black bg-white text-xs p-1">{c.effectShort}</div>
+              <div className="border border-black bg-paper text-xs p-1">{c.effectShort}</div>
             </button>
           ))}
         </div>
