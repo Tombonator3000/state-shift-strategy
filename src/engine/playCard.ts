@@ -14,4 +14,3 @@ export async function playCard(gs: any, who: SideAbs, rawCard: any, target: any,
   return { ok: true };
 }
 
-export default playCard;

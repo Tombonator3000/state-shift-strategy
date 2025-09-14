@@ -17,7 +17,7 @@ export type LegacyEffects =
     }
   | undefined;
 
-function toAbs(x?: any): SideAbs {
+function toWho(x?: any): SideAbs {
   return x === 'ai' ? 'ai' : 'player';
 }
 
@@ -107,7 +107,7 @@ export function normalizeEffects(effects: LegacyEffects): Effect[] {
     out.push({ k: 'draw', who: 'self', n: e.draw });
   if (e.ipDelta != null) out.push(...normalizeIpDelta(e.ipDelta));
   if (e.pressureDelta)
-    out.push({ k: 'pressure', who: toAbs(e.pressureDelta.who), state: e.pressureDelta.state, v: e.pressureDelta.v });
+    out.push({ k: 'pressure', who: toWho(e.pressureDelta.who), state: e.pressureDelta.state, v: e.pressureDelta.v });
   if (e.defenseDelta)
     out.push({ k: 'defense', state: e.defenseDelta.state, v: e.defenseDelta.v });
   if (e.addCardId)
