@@ -2,7 +2,7 @@
 // This replaces the legacy mixed types with v2.1E compliant definitions
 
 export type Faction = 'truth' | 'government' | 'Truth' | 'Government'; // Allow both cases during transition
-export type CardType = 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'TECH'; // TECH reserved for future use
+export type CardType = 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE'; // v2.1E: 4 types only
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'legendary';
 
 // v2.1E Effect Whitelist - Only these effects are allowed in extensions
