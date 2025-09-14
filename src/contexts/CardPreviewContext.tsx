@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import type { GameCard } from '@/types/cardTypes';
 import CardPreview from '@/components/game/CardPreview';
@@ -7,7 +7,7 @@ import CardDetailOverlay from '@/components/game/CardDetailOverlay';
 export type SourceZone = 'hand' | 'board' | 'discard' | 'zone' | 'timeline';
 
 interface CardPreviewContextValue {
-  openCardPreview: (cardId: string, sourceZone: SourceZone) => void;
+  openCardPreview: (cardId: string, sourceZone?: SourceZone) => void;
 }
 
 const CardPreviewContext = createContext<CardPreviewContextValue | undefined>(undefined);
@@ -16,12 +16,11 @@ export const CardPreviewProvider = ({ children }: { children: ReactNode }) => {
   const [card, setCard] = useState<GameCard | null>(null);
   const [sourceZone, setSourceZone] = useState<SourceZone>('board');
 
-  const openCardPreview = (cardId: string, zone: SourceZone) => {
+  const openCardPreview = (cardId: string, zone: SourceZone = 'board') => {
     const found = CARD_DATABASE.find(c => c.id === cardId);
-    if (found) {
-      setCard(found);
-      setSourceZone(zone);
-    }
+    if (!found) return;
+    setCard(found);
+    setSourceZone(zone);
   };
 
   const handleClose = () => setCard(null);
@@ -33,7 +32,7 @@ export const CardPreviewProvider = ({ children }: { children: ReactNode }) => {
         sourceZone === 'hand' ? (
           <CardDetailOverlay
             card={card}
-            canAfford={true}
+            canAfford
             disabled={false}
             sourceZone={sourceZone}
             onClose={handleClose}
