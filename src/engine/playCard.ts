@@ -1,16 +1,15 @@
 import { applyEffects } from './effects';
-import { normalizeEffects } from './normalizeEffects';
+import { normalizeCard } from './normalizeEffects';
 
-export function playCard(gs: any, who: 'player' | 'ai', card: any, target: any) {
-  if (gs[who].ip < card.cost) {
+export function playCard(gs: any, who: 'player' | 'ai', rawCard: any, target: any) {
+  if (gs[who].ip < rawCard.cost) {
     return { ok: false, reason: 'Not enough IP' };
   }
-  gs[who].ip -= card.cost;
+  gs[who].ip -= rawCard.cost;
+
+  const card = normalizeCard(rawCard);
   gs.discards[who].push(card);
-
-  const effects = normalizeEffects(card.effects);
-  applyEffects(gs, effects, { gs, who, target });
-
+  applyEffects(gs, card.effects, { gs, who, target });
   return { ok: true };
 }
 

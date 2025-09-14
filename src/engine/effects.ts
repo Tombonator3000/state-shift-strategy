@@ -1,18 +1,5 @@
-import { normalizeEffects } from './normalizeEffects';
+import { normalizeEffects, Effect } from './normalizeEffects';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'legendary';
-
-export type Effect =
-  | { k: 'ip'; who: 'player' | 'ai'; v: number }
-  | { k: 'truth'; who: 'player' | 'ai'; v: number }
-  | { k: 'pressure'; who: 'player' | 'ai'; state: string; v: number }
-  | { k: 'defense'; state: string; v: 1 | -1 }
-  | { k: 'draw'; who: 'player' | 'ai'; n: number }
-  | { k: 'discardRandom'; who: 'player' | 'ai'; n: number }
-  | { k: 'discardChoice'; who: 'player' | 'ai'; n: number }
-  | { k: 'addCard'; who: 'player' | 'ai'; cardId: string }
-  | { k: 'flag'; name: string; on?: boolean }
-  | { k: 'conditional'; if: (gs: any, target: any) => boolean; then: Effect[]; else?: Effect[] }
-  | { k: 'special'; fn: (gs: any, target: any) => void };
 
 function reshuffle(gs: any, who: 'player' | 'ai') {
   const deck = gs.decks[who];

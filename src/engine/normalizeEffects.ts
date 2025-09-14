@@ -1,19 +1,17 @@
-// Normalizes legacy core cards into the new Effect[] schema.
-// New schema key summary:
-//  - truth       → { k:'truth', who:'player'|'ai', v:number }   (clamped 0..100 by engine)
-//  - ip          → { k:'ip',    who:'player'|'ai', v:number }   (min 0 by engine)
-//  - draw        → { k:'draw',  who:'player'|'ai', n:number }
-//  - pressure    → { k:'pressure', who:'player'|'ai', state:string, v:number }
-//  - defense     → { k:'defense', state:string, v:1|-1 }
-//  - discard rnd → { k:'discardRandom', who:'player'|'ai', n:number }
-//  - discard sel → { k:'discardChoice', who:'player'|'ai', n:number }
-//  - conditional → { k:'conditional', if:(gs,target)=>boolean, then:Effect[], else?:Effect[] }
-//  - addCard     → { k:'addCard', who:'player'|'ai', cardId:string }
-//  - flag        → { k:'flag', name:string, on?:boolean }
+export type Who = 'player' | 'ai';
 
-import type { Effect } from './effects'; // canonical Effect type
-
-type Who = 'player' | 'ai';
+export type Effect =
+  | { k: 'truth'; who: Who; v: number }
+  | { k: 'ip'; who: Who; v: number }
+  | { k: 'draw'; who: Who; n: number }
+  | { k: 'pressure'; who: Who; state: string; v: number }
+  | { k: 'defense'; state: string; v: 1 | -1 }
+  | { k: 'discardRandom'; who: Who; n: number }
+  | { k: 'discardChoice'; who: Who; n: number }
+  | { k: 'addCard'; who: Who; cardId: string }
+  | { k: 'flag'; name: string; on?: boolean }
+  | { k: 'conditional'; if: (gs: any, target?: any) => boolean; then: Effect[]; else?: Effect[] }
+  | { k: 'special'; fn: (gs: any, target?: any) => void };
 
 export type LegacyEffects =
   | Effect[]
@@ -36,20 +34,6 @@ function toWho(x?: any): Who {
   return x === 'ai' ? 'ai' : 'player';
 }
 
-function normalizeIpDelta(ip: any): Effect[] {
-  const out: Effect[] = [];
-  if (ip == null) return out;
-  if (typeof ip === 'number') {
-    out.push({ k: 'ip', who: 'player', v: ip });
-    return out;
-  }
-  const self = ip.self ?? 0;
-  const opp = ip.opponent ?? 0;
-  if (self !== 0) out.push({ k: 'ip', who: 'player', v: self });
-  if (opp !== 0) out.push({ k: 'ip', who: 'ai', v: opp });
-  return out;
-}
-
 function readStat(gs: any, stat: string): number {
   switch (stat) {
     case 'truth':
@@ -65,6 +49,20 @@ function readStat(gs: any, stat: string): number {
     default:
       return 0;
   }
+}
+
+function normalizeIpDelta(ip: any): Effect[] {
+  const out: Effect[] = [];
+  if (ip == null) return out;
+  if (typeof ip === 'number') {
+    out.push({ k: 'ip', who: 'player', v: ip });
+    return out;
+  }
+  const self = ip.self ?? 0;
+  const opp = ip.opponent ?? 0;
+  if (self) out.push({ k: 'ip', who: 'player', v: self });
+  if (opp) out.push({ k: 'ip', who: 'ai', v: opp });
+  return out;
 }
 
 function normalizeConditional(obj: any): Effect | null {
@@ -98,70 +96,45 @@ function normalizeConditional(obj: any): Effect | null {
   };
 }
 
-export function isLegacyFlat(obj: any): boolean {
-  if (!obj || Array.isArray(obj)) return false;
-  return (
-    'truthDelta' in obj ||
-    'draw' in obj ||
-    'ipDelta' in obj ||
-    'pressureDelta' in obj ||
-    'defenseDelta' in obj ||
-    'discardRandom' in obj ||
-    'discardChoice' in obj ||
-    'addCardId' in obj ||
-    'if' in obj
-  );
-}
-
-/** Normalize any effects value (array/new, or legacy flat object) to Effect[] */
 export function normalizeEffects(effects: LegacyEffects): Effect[] {
   if (!effects) return [];
-  if (Array.isArray(effects)) return effects as Effect[];
+  if (Array.isArray(effects)) return effects;
 
   const out: Effect[] = [];
   const e: any = effects;
 
-  if (typeof e.truthDelta === 'number' && e.truthDelta !== 0) {
+  if (typeof e.truthDelta === 'number' && e.truthDelta)
     out.push({ k: 'truth', who: 'player', v: e.truthDelta });
-  }
-  if (typeof e.draw === 'number' && e.draw > 0) {
+  if (typeof e.draw === 'number' && e.draw > 0)
     out.push({ k: 'draw', who: 'player', n: e.draw });
-  }
-  if (e.ipDelta != null) {
-    out.push(...normalizeIpDelta(e.ipDelta));
-  }
-  if (e.pressureDelta) {
-    out.push({
-      k: 'pressure',
-      who: toWho(e.pressureDelta.who),
-      state: e.pressureDelta.state,
-      v: e.pressureDelta.v,
-    });
-  }
-  if (e.defenseDelta) {
-    out.push({
-      k: 'defense',
-      state: e.defenseDelta.state,
-      v: e.defenseDelta.v,
-    });
-  }
-  if (typeof e.discardRandom === 'number' && e.discardRandom > 0) {
+  if (e.ipDelta != null) out.push(...normalizeIpDelta(e.ipDelta));
+  if (e.pressureDelta)
+    out.push({ k: 'pressure', who: toWho(e.pressureDelta.who), state: e.pressureDelta.state, v: e.pressureDelta.v });
+  if (e.defenseDelta)
+    out.push({ k: 'defense', state: e.defenseDelta.state, v: e.defenseDelta.v });
+  if (e.discardRandom)
     out.push({ k: 'discardRandom', who: 'ai', n: e.discardRandom });
-  }
-  if (typeof e.discardChoice === 'number' && e.discardChoice > 0) {
+  if (e.discardChoice)
     out.push({ k: 'discardChoice', who: 'ai', n: e.discardChoice });
-  }
-  if (typeof e.addCardId === 'string' && e.addCardId) {
+  if (e.addCardId)
     out.push({ k: 'addCard', who: 'player', cardId: e.addCardId });
-  }
 
-  const c = normalizeConditional(e);
-  if (c) out.push(c);
+  const cond = normalizeConditional(e);
+  if (cond) out.push(cond);
 
-  if (out.length === 0) {
-    console.warn('[normalizeEffects] Legacy object produced no effects. Check mapping.', e);
-  }
+  if (!out.length) console.warn('[normalizeEffects] Legacy produced no effects.', e);
   return out;
 }
 
-export default normalizeEffects;
+export function normalizeCard<T extends { effects?: LegacyEffects; text?: string; flavor?: string; id: string }>(
+  card: T,
+): T & { effects: Effect[] } {
+  const nonAscii = (s?: string) => !!s && /[^\x00-\x7F]/.test(s);
+  if (nonAscii(card.text) || nonAscii((card as any).flavor)) console.warn(`[i18n] Non-ASCII text on ${card.id}. In-game text must be English.`);
+  return { ...card, effects: normalizeEffects(card.effects) };
+}
+
+export function normalizeDeck<T extends { effects?: LegacyEffects }>(cards: T[]): (T & { effects: Effect[] })[] {
+  return (cards ?? []).map(normalizeCard);
+}
+
