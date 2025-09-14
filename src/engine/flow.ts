@@ -26,7 +26,13 @@ export function payCost(ctx: Context, owner: "P1" | "P2", card: Card) {
 export function resolveCard(ctx: Context, owner: "P1" | "P2", card: Card, targetStateId?: string) {
   applyEffects(ctx, owner, card.effects || {}, targetStateId);
   const you = ctx.state.players[owner];
-  you.hand = you.hand.filter(c => c !== card);
+  
+  // Fix: Use ID-based filtering instead of reference equality
+  console.log(`[Engine] Removing card ${card.id} from ${owner} hand (${you.hand.length} cards)`);
+  const originalHandSize = you.hand.length;
+  you.hand = you.hand.filter(c => c.id !== card.id);
+  console.log(`[Engine] Hand after removal: ${you.hand.length} cards (removed: ${originalHandSize - you.hand.length})`);
+  
   you.discard.push(card);
   if (card.type === "ZONE") {
     you.zones.push(card.id);
@@ -82,7 +88,8 @@ export function resolveReaction(
   if (blocked) {
     // withdraw cost for attack? No – cost is paid. Only effects are nullified.
     const you = ctx.state.players[attacker];
-    you.hand = you.hand.filter(c => c !== attackCard);
+    // Fix: Use ID-based filtering here too
+    you.hand = you.hand.filter(c => c.id !== attackCard.id);
     you.discard.push(attackCard);
     return "blocked";
   }

@@ -117,7 +117,8 @@ export function useRuleEngine() {
       console.log(`[Engine] Engine state conversion successful:`, { 
         truth: engineState.truth, 
         p1IP: engineState.players.P1.ip,
-        p1HandSize: engineState.players.P1.hand.length
+        p1HandSize: engineState.players.P1.hand.length,
+        p1HandCards: engineState.players.P1.hand.map(c => ({ id: c.id, name: c.name }))
       });
       
       const context = createContext(engineState);
@@ -148,13 +149,24 @@ export function useRuleEngine() {
         effects: card.effects || {}
       };
       
+      // Verify the card exists in engine hand before playing
+      const engineHandCard = context.state.players.P1.hand.find(c => c.id === cardId);
+      if (!engineHandCard) {
+        console.error(`[Engine] Card ${cardId} not found in engine hand!`, {
+          engineHandIds: context.state.players.P1.hand.map(c => c.id),
+          originalHandIds: hand.map(c => c.id)
+        });
+        return null;
+      }
+      
       const outcome = playCardEngine(context, "P1", engineCard, targetStateId);
       console.log(`[Engine] Play outcome:`, outcome);
       console.log(`[Engine] Post-play state:`, { 
         truth: context.state.truth, 
         p1IP: context.state.players.P1.ip,
         p1HandSize: context.state.players.P1.hand.length,
-        p1DiscardSize: context.state.players.P1.discard.length
+        p1DiscardSize: context.state.players.P1.discard.length,
+        p1HandCards: context.state.players.P1.hand.map(c => ({ id: c.id, name: c.name }))
       });
       
       return {
