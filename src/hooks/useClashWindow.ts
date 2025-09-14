@@ -13,11 +13,11 @@ export function useClashWindow(engine: EngineState) {
   useEffect(() => {
     if (!clash.open) return;
     let raf = 0;
-    const tick = () => {
+    const tick = async () => {
       if (!engine.clash.open) return;
       if (Date.now() >= (engine.clash.expiresAt ?? 0)) {
         closeReactionWindow(engine);
-        resolveClash(engine);
+        await resolveClash(engine);
         return;
       }
       raf = requestAnimationFrame(tick);

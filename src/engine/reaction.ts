@@ -1,5 +1,6 @@
 import { EngineState, Card, PlayerID } from "./types";
-import { applyEffects, Effect } from "./effects";
+import { applyEffects } from "./effects/applyEffects";
+import { Effect } from "./effects/types";
 import { normalizeEffects } from "./normalizeEffects";
 
 // Dependencies from existing engine:
@@ -31,10 +32,7 @@ export type Outcome =
 
 export function computeOutcome(attack: Card, defense?: Card): Outcome {
   if (!defense) return { type: "FULL_HIT" };
-  // Simple standard: DEFENSIVE without special field blocks everything
   if (!defense.tags?.partialBlock) return { type: "BLOCK_ALL" };
-
-  // If DEFENSIVE has partial-block in effects (e.g. { reduceFactor: 0.5 })
   const f = Math.max(0, Math.min(1, defense.effects?.reduceFactor ?? 0.5));
   return f <= 0 ? { type: "BLOCK_ALL" } : { type: "REDUCE", factor: f };
 }
@@ -56,7 +54,7 @@ export function scaleEffects(effects: Effect[], factor: number): Effect[] {
   });
 }
 
-export function resolveClash(engine: EngineState) {
+export async function resolveClash(engine: EngineState) {
   const { attackCard, defenseCard, attacker, defender } = engine.clash;
   if (!attackCard || !attacker || !defender) return;
 
@@ -68,14 +66,13 @@ export function resolveClash(engine: EngineState) {
     log(`🛡️ ${defenseCard?.name ?? "Defense"} blocked ${attackCard.name}.`);
   } else if (outcome.type === "REDUCE") {
     const scaled = scaleEffects(normalized, outcome.factor);
-    applyEffects(engine, scaled, { attacker, defender, attackCard, defenseCard });
+    await applyEffects(engine, scaled, { who: attacker as any, target: { attackCard, defenseCard, defender } });
     log(`🛡️ ${defenseCard?.name ?? "Defense"} reduced ${attackCard.name} by ${Math.round(outcome.factor * 100)}%.`);
   } else {
-    applyEffects(engine, normalized, { attacker, defender, attackCard, defenseCard });
+    await applyEffects(engine, normalized, { who: attacker as any, target: { attackCard, defenseCard, defender } });
     log(`💥 ${attackCard.name} hits!`);
   }
 
-  // Cleanup
   discardIfNeeded(attackCard);
   if (defenseCard) discardIfNeeded(defenseCard);
 

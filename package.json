@@ -8,7 +8,9 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "export:core": "tsx scripts/export-core-json.ts",
+    "build:core": "CORE_SEED=2025-09-14 tsx scripts/export-core-json.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
