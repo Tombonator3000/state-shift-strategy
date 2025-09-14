@@ -44,12 +44,41 @@ All colors MUST be HSL.
     --sidebar-primary-foreground: 0 0% 98%;
 
     /* Tabloid newspaper theme tokens */
-    --ink: 0 0% 0%;
-    --paper: 0 0% 96.5%;
+    --ink: 240 12% 5%;
+    --paper: 50 23% 95%;
     --line: 0 0% 6.7%;
     --lineSoft: 0 0% 13.3%;
     --grey: 0 0% 80%;
     --grey2: 0 0% 91.4%;
+
+    /* Layout tokens */
+    --masthead-h: 64px;
+    --tray-h-sm: 96px;
+    --tray-h-md: 120px;
+    --tray-h-lg: 140px;
+    --gap-sm: 8px;
+    --gap-md: 12px;
+    --gap-lg: 16px;
+
+    /* Fullsize card (63:88) */
+    --card-w-min: 220px;
+    --card-w-max: 340px;
+    --card-w: clamp(var(--card-w-min), 24vw, var(--card-w-max));
+    --card-h: calc(var(--card-w) * (88 / 63));
+
+    /* Theme colors */
+    --bg: 223 21% 6%;
+    --panel: 224 28% 10%;
+    --muted: 219 12% 54%;
+    --accent: 347 77% 50%;
+
+    /* Faction colors */
+    --truth: 194 100% 88%;
+    --gov: 32 100% 83%;
+
+    /* Typography */
+    --font-head: "Newsreader", serif;
+    --font-ui: "Inter", system-ui, sans-serif;
 
   --sidebar-accent: 240 4.8% 95.9%;
 
@@ -86,10 +115,10 @@ All colors MUST be HSL.
     --success-foreground: 355 7% 97%;
     
     /* Card rarity colors */
-    --rarity-common: 0 0% 60%;
-    --rarity-uncommon: 142 76% 36%;
-    --rarity-rare: 221 83% 53%;
-    --rarity-legendary: 25 95% 53%;
+    --rarity-common: 214 12% 65%;
+    --rarity-uncommon: 213 94% 68%;
+    --rarity-rare: 38 92% 50%;
+    --rarity-legendary: 0 84% 60%;
   }
   .dark {
     --background: 222.2 84% 4.9%;
@@ -488,6 +517,14 @@ All colors MUST be HSL.
     .synergy-unlock {
       animation: none !important;
     }
+  }
+}
+
+@layer components {
+  .card-full {
+    width: var(--card-w);
+    height: var(--card-h);
+    aspect-ratio: 63 / 88;
   }
 }
 
