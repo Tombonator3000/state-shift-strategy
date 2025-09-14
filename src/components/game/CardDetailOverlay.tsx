@@ -15,7 +15,7 @@ interface CardDetailOverlayProps {
   onClose: () => void;
   onPlayCard: () => void;
   swipeHandlers?: any;
-  readOnly?: boolean;
+  mode?: 'play' | 'inspect';
 }
 
 const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
@@ -25,7 +25,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
   onClose,
   onPlayCard,
   swipeHandlers,
-  readOnly = false
+  mode = 'play'
 }) => {
   const isMobile = useIsMobile();
   
@@ -93,25 +93,26 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
   const faction = getCardFaction(card);
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
       {...(isMobile ? swipeHandlers : {})}
     >
-      <div
-        className={`card-base p-0 transform animate-fade-in flex flex-col overflow-hidden ${
-          isMobile
-            ? 'w-full max-w-sm max-h-[90vh] rounded-xl'
-            : 'w-full max-w-md h-[85vh] rounded-2xl'
-        } ${getRarityFrameClass(card.rarity)} ${getRarityGlowClass(card.rarity)}`}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="w-[min(92vw,420px)] sm:w-[min(86vw,540px)] lg:w-[min(80vw,640px)] max-h-[90vh]">
+        <div className="relative w-full" style={{ aspectRatio: '63 / 88' }}>
+          <div
+            className={`card-base rarity-${card.rarity?.toLowerCase()} p-0 transform animate-fade-in flex flex-col overflow-hidden h-full rounded-xl ${getRarityFrameClass(card.rarity)} ${getRarityGlowClass(card.rarity)}`}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`${card.name} ${card.type} Cost ${card.cost}`}
+          >
         {/* Top Bar - Sticky */}
-        <div className="bg-[color:var(--card-bg)]/95 backdrop-blur-sm border-b border-[color:var(--card-border)] p-4 flex-shrink-0">
+        <div className="card-header backdrop-blur-sm p-4 flex-shrink-0">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               {/* Title */}
-              <h2 className="font-bold text-[color:var(--card-text)] leading-tight mb-2 truncate">
+              <h2 className="text-[color:var(--card-text)] leading-tight mb-2 truncate">
                 {card.name}
               </h2>
               
@@ -194,7 +195,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
         </div>
 
         {/* Bottom CTA */}
-        {!readOnly && (
+        {mode !== 'inspect' && (
           <div className="flex-shrink-0 p-4 border-t border-[color:var(--card-border)] bg-[color:var(--card-bg)]/95">
             <Button
               onClick={onPlayCard}
@@ -222,6 +223,8 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
             </Button>
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );

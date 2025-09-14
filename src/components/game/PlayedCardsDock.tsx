@@ -79,7 +79,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                       onClick={() => setInspectedCard(playedCard.card)}
                     >
                       {/* Full card with newspaper styling - doubled size */}
-                      <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden`}>
+                      <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden rarity-${playedCard.card.rarity.toLowerCase()}`}> 
                         {/* Card header with newspaper styling */}
                         <div className="bg-newspaper-text text-newspaper-bg text-center py-0.5 border-b">
                           <div className="text-[6px] font-bold leading-none">PARANOID TIMES</div>
@@ -168,7 +168,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                       onClick={() => setInspectedCard(playedCard.card)}
                     >
                       {/* Full card with newspaper styling - doubled size */}
-                      <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden`}>
+                      <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden rarity-${playedCard.card.rarity.toLowerCase()}`}> 
                         {/* Card header with newspaper styling */}
                         <div className="bg-newspaper-text text-newspaper-bg text-center py-0.5 border-b">
                           <div className="text-[6px] font-bold leading-none">PARANOID TIMES</div>
@@ -251,7 +251,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
         card={inspectedCard}
         canAfford={false}
         disabled={true}
-        readOnly
+        mode="inspect"
         onClose={() => setInspectedCard(null)}
         onPlayCard={() => {}}
       />

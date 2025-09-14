@@ -43,35 +43,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);
 
-  const getRarityGlow = (rarity: string) => {
-    switch (rarity) {
-      case 'common': return 'shadow-md';
-      case 'uncommon': return 'shadow-md shadow-emerald-400/40';
-      case 'rare': return 'shadow-lg shadow-blue-400/50';
-      case 'legendary': return 'shadow-xl shadow-amber-400/60 animate-pulse';
-      default: return 'shadow-md';
-    }
-  };
-
-  const getRarityBorder = (rarity: string) => {
-    switch (rarity) {
-      case 'common': return 'border-zinc-600';
-      case 'uncommon': return 'border-emerald-400';
-      case 'rare': return 'border-blue-400';
-      case 'legendary': return 'border-amber-400';
-      default: return 'border-zinc-600';
-    }
-  };
-
-  const getRarityAccent = (rarity: string) => {
-    switch (rarity) {
-      case 'common': return 'bg-zinc-100 text-zinc-800';
-      case 'uncommon': return 'bg-emerald-100 text-emerald-800';
-      case 'rare': return 'bg-blue-100 text-blue-800';
-      case 'legendary': return 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 font-bold';
-      default: return 'bg-zinc-100 text-zinc-800';
-    }
-  };
+  // Rarity styling handled via CSS variables and classes
 
   const getCardFaction = (card: GameCard) => {
     // First check if card has a direct faction property (for extension cards)
@@ -176,8 +148,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 ${isSelected ? 'ring-2 ring-warning scale-105 z-10 shadow-lg shadow-warning/50' : ''}
                 ${isPlaying || isLoading ? 'animate-pulse scale-105 z-50 ring-2 ring-primary shadow-lg shadow-primary/50' : 'hover:scale-[1.03] hover:shadow-md'}
                 ${!canAfford && !disabled ? 'opacity-60 saturate-50 cursor-not-allowed' : 'hover:bg-accent/20'}
-                ${getRarityBorder(card.rarity)}
-                ${getRarityGlow(card.rarity)}
+                rarity-${card.rarity.toLowerCase()}
                 active:scale-95 hover:-translate-y-0.5
               `}
               style={{ 
@@ -249,7 +220,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className={`font-bold text-[color:var(--card-text)] truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{card.name}</span>
-                    <span className={`px-1.5 py-0.5 rounded-full ${isMobile ? 'text-xs' : 'text-xs'} ${getRarityAccent(card.rarity)}`}>
+                    <span className={`card-badge px-1.5 py-0.5 rounded-full ${isMobile ? 'text-xs' : 'text-xs'}`}>
                       {card.rarity.toUpperCase()}
                     </span>
                     <ExtensionCardBadge cardId={card.id} card={card} variant="inline" />
