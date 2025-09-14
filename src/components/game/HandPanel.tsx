@@ -20,7 +20,7 @@ export function HandPanel({ cards, onClick }: HandPanelProps) {
           <button
             key={c.id}
             onClick={() => onClick(c)}
-            className="bg-white text-black rounded-lg border border-[#d1d5db] px-3 py-2 flex items-center justify-between hover:shadow-md"
+            className="bg-paper text-ink rounded-lg border border-[#d1d5db] px-3 py-2 flex items-center justify-between hover:shadow-md"
           >
             <span className="font-medium truncate">{c.name}</span>
             <div className="flex items-center gap-2">
