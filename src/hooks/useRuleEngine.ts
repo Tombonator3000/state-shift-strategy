@@ -101,14 +101,20 @@ export function useRuleEngine() {
   const handleDefenseSelection = useCallback((defenseCard: Card | null) => {
     if (!reactionState) return;
     
-    // This would need integration with the actual game state
-    // For now, we just close the modal
-    setReactionState(null);
+    console.log(`[Engine] Defense choice:`, defenseCard?.name || 'No defense');
     
-    // In full implementation, this would:
-    // 1. Get current engine state
+    // Close the modal - in a full implementation this would:
+    // 1. Get current engine state 
     // 2. Call resolveReaction with the defense choice
     // 3. Update game state with results
+    setReactionState(null);
+    
+    // Log the resolution for now
+    if (defenseCard) {
+      console.log(`[Engine] ${reactionState.defender} played defense: ${defenseCard.name}`);
+    } else {
+      console.log(`[Engine] ${reactionState.defender} chose not to defend`);
+    }
   }, [reactionState]);
 
   // Get defensive cards from hand

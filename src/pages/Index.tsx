@@ -87,7 +87,7 @@ const Index = () => {
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
-  const { reactionState, handleDefenseSelection, getDefensiveCards, closeReactionModal } = useRuleEngine();
+  const { reactionState, playCardWithEngine, handleDefenseSelection, getDefensiveCards, closeReactionModal } = useRuleEngine();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
 
   // Handle AI turns
@@ -485,8 +485,31 @@ const Index = () => {
     audio.playSFX('cardPlay');
     
     try {
-      // Use animated card play
-      await playCardAnimated(cardId, animatePlayCard, targetState);
+      // Use new rule engine for effect processing and reaction windows
+      const engineResult = playCardWithEngine(gameState, cardId, targetState);
+      
+      if (engineResult) {
+        const { outcome, updatedState } = engineResult;
+        
+        if (outcome === 'reaction-pending') {
+          // Reaction modal will handle the rest automatically
+          console.log(`[Engine] ${card.name} triggered reaction window`);
+        } else if (outcome === 'played') {
+          // Fallback to old animation system for visual effects only
+          await playCardAnimated(cardId, animatePlayCard, targetState);
+          console.log(`[Engine] ${card.name} played successfully with outcome: ${outcome}`);
+        } else if (outcome === 'blocked') {
+          toast('🛡️ Attack was blocked!', {
+            duration: 2000,
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #3b82f6' }
+          });
+        } else if (outcome === 'failed') {
+          throw new Error('Card failed to play');
+        }
+      } else {
+        // Fallback to old system if engine fails
+        await playCardAnimated(cardId, animatePlayCard, targetState);
+      }
       
       // Track card in collection
       recordCardPlay(cardId);
@@ -513,6 +536,7 @@ const Index = () => {
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
       });
     } catch (error) {
+      console.error('[Engine] Card play error:', error);
       toast.error('❌ Card deployment failed!', {
         duration: 3000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
