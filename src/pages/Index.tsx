@@ -12,6 +12,7 @@ import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
 import AIStatus from '@/components/game/AIStatus';
 import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashboard';
+import { EngineTestPanel } from '@/components/dev/EngineTestPanel';
 import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
@@ -22,6 +23,8 @@ import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
+import { useRuleEngine } from '@/hooks/useRuleEngine';
+import { ReactionModal } from '@/components/game/ReactionModal';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
@@ -84,6 +87,7 @@ const Index = () => {
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
+  const { reactionState, handleDefenseSelection, getDefensiveCards, closeReactionModal } = useRuleEngine();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
 
   // Handle AI turns
@@ -608,7 +612,12 @@ const Index = () => {
   }
 
   if (showBalancing) {
-    return <EnhancedBalancingDashboard onClose={() => setShowBalancing(false)} />;
+    return (
+      <div className="space-y-4">
+        <EnhancedBalancingDashboard onClose={() => setShowBalancing(false)} />
+        <EngineTestPanel />
+      </div>
+    );
   }
 
   if (showMenu) {
@@ -1154,6 +1163,17 @@ const Index = () => {
             onClose={handleCloseNewspaper}
           />
         )
+      )}
+
+      {/* Reaction Modal for card engine */}
+      {reactionState && (
+        <ReactionModal
+          open={!!reactionState}
+          onOpenChange={(open) => !open && closeReactionModal()}
+          attackCard={reactionState.attackCard}
+          defenseHand={getDefensiveCards(gameState)}
+          onDefend={handleDefenseSelection}
+        />
       )}
 
     </div>
