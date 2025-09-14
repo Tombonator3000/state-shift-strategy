@@ -213,6 +213,8 @@
   /* ===== LOCKED: Your Hand mini card dimensions (DO NOT CHANGE) ===== */
   /* Denne blokken dokumenterer at minikort-størrelse og spacing er låst.
      Ikke endre width/height/padding/font-size/gap/margin i denne sonen. */
+  /* (Finn og behold dagens regler som styrer minikort i Your Hand,
+     typisk .hand .card-mini / [data-card-mini]. Ikke endre tallene.) */
   .played-card {
     width: 120px;
     height: 168px;
