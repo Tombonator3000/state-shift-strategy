@@ -87,16 +87,16 @@ All colors MUST be HSL.
     --success-foreground: 355 7% 97%;
     
     /* Card rarity colors */
-    --rarity-common: #d1d5db;
-    --rarity-uncommon: #6ee7b7;
-    --rarity-rare: #60a5fa;
-    --rarity-legendary: #facc15;
-    --rarity-epic: #d59bff;
+    --rarity-common: 216 12.2% 83.9%;
+    --rarity-uncommon: 156.2 71.6% 66.9%;
+    --rarity-rare: 213.1 93.9% 67.8%;
+    --rarity-legendary: 47.9 95.8% 53.1%;
+    --rarity-epic: 274.8 100% 80.4%;
 
     /* Masthead and tray */
     --masthead-height: 60px;
-    --masthead-bg: #000000;
-    --masthead-color: #ffffff;
+    --masthead-bg: 0 0% 0%;
+    --masthead-color: 0 0% 100%;
     --tray-height-desktop: 28vh;
     --tray-height-tablet: 30vh;
     --tray-height-mobile: 34vh;
@@ -106,9 +106,9 @@ All colors MUST be HSL.
     --font-body: 'Inter', 'Roboto', sans-serif;
 
     /* Shared card styling */
-    --card-bg: #0e0f11;
-    --card-border: #2a2d33;
-    --card-text: #e9edf1;
+    --card-bg: 220 9.7% 6.1%;
+    --card-border: 220 9.7% 18.2%;
+    --card-text: 210 22.2% 92.9%;
   }
   .dark {
     --background: 222.2 84% 4.9%;
@@ -168,16 +168,16 @@ All colors MUST be HSL.
     --success-foreground: 355 7% 97%;
     
     /* Dark card rarity colors */
-    --rarity-common: #d1d5db;
-    --rarity-uncommon: #6ee7b7;
-    --rarity-rare: #60a5fa;
-    --rarity-legendary: #facc15;
-    --rarity-epic: #d59bff;
+    --rarity-common: 216 12.2% 83.9%;
+    --rarity-uncommon: 156.2 71.6% 66.9%;
+    --rarity-rare: 213.1 93.9% 67.8%;
+    --rarity-legendary: 47.9 95.8% 53.1%;
+    --rarity-epic: 274.8 100% 80.4%;
 
     /* Shared card styling */
-    --card-bg: #0e0f11;
-    --card-border: #2a2d33;
-    --card-text: #e9edf1;
+    --card-bg: 220 9.7% 6.1%;
+    --card-border: 220 9.7% 18.2%;
+    --card-text: 210 22.2% 92.9%;
   }
 }
 
@@ -262,7 +262,7 @@ All colors MUST be HSL.
   }
 
   .card-badge {
-    background: color-mix(in oklab, var(--rarity-accent) 18%, #ffffff0f);
+    background: color-mix(in oklab, var(--rarity-accent) 18%, hsl(0 0% 100% / 0.06));
     color: var(--card-text);
   }
 
@@ -272,14 +272,14 @@ All colors MUST be HSL.
     will-change: transform, opacity, filter;
     transform-origin: center center;
     z-index: 1601;
-    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+    filter: drop-shadow(0 8px 24px hsl(0 0% 0% / 0.35));
     transition: transform 220ms cubic-bezier(0.2,0.8,0.2,1), opacity 150ms linear;
     pointer-events: none;
   }
 
   .play-card-clone.play-card-fullsize {
     border-width: 3px;
-    filter: drop-shadow(0 16px 40px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 16px 40px hsl(0 0% 0% / 0.5));
   }
 
   .played-card {
@@ -288,7 +288,7 @@ All colors MUST be HSL.
     overflow: hidden;
     border: 2px solid hsl(var(--border));
     background: hsl(var(--card));
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    box-shadow: 0 4px 12px hsl(0 0% 0% / 0.25);
   }
 
   .state-highlight {
@@ -313,7 +313,7 @@ All colors MUST be HSL.
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.1),
+      hsl(0 0% 100% / 0.1),
       transparent
     );
     transition: left 0.5s ease;
@@ -423,7 +423,7 @@ All colors MUST be HSL.
   .enhanced-tooltip {
     background: hsl(var(--popover));
     border: 1px solid hsl(var(--border));
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 30px hsl(0 0% 0% / 0.3);
     backdrop-filter: blur(10px);
     animation: tooltip-appear 0.2s ease-out;
   }
@@ -462,7 +462,7 @@ All colors MUST be HSL.
 
   .interactive-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 25px hsl(0 0% 0% / 0.15);
   }
 
   .interactive-hover:active {
@@ -490,7 +490,7 @@ All colors MUST be HSL.
 
   .enhanced-button:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 20px hsl(0 0% 0% / 0.15);
   }
 
   .enhanced-button::before {
@@ -503,7 +503,7 @@ All colors MUST be HSL.
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.1),
+      hsl(0 0% 100% / 0.1),
       transparent
     );
     transition: left 0.5s ease;
@@ -520,7 +520,7 @@ All colors MUST be HSL.
     left: 50%;
     width: 0;
     height: 0;
-    background: rgba(255, 255, 255, 0.2);
+    background: hsl(0 0% 100% / 0.2);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     transition: width 0.6s, height 0.6s;
