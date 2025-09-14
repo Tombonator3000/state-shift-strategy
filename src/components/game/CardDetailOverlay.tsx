@@ -1,12 +1,7 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { X, Target, Zap, Shield } from 'lucide-react';
 import type { GameCard } from '@/types/cardTypes';
-import CardImage from '@/components/game/CardImage';
-import { ExtensionCardBadge } from '@/components/game/ExtensionCardBadge';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { CardTextGenerator } from '@/systems/CardTextGenerator';
+import CardBase from './CardBase';
+import CardImage from './CardImage';
 
 interface CardDetailOverlayProps {
   card: GameCard | null;
@@ -27,70 +22,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
   swipeHandlers,
   mode = 'play'
 }) => {
-  const isMobile = useIsMobile();
-  
   if (!card) return null;
-
-  const getCardFaction = (card: GameCard): 'government' | 'truth' => {
-    // Use computed faction based on game state or card faction (normalized to lowercase)
-    const cardFaction = card.faction?.toLowerCase();
-    if (cardFaction === 'truth' || cardFaction === 'government') {
-      return cardFaction;
-    }
-    
-    // Fallback to determining faction based on card text and name (for base game cards)
-    if (card.name.toLowerCase().includes('surveillance') || 
-        card.name.toLowerCase().includes('classified') ||
-        (card.text && card.text.toLowerCase().includes('classified'))) {
-      return 'government';
-    }
-    
-    return 'truth';
-  };
-
-  const getRarityFrameClass = (rarity?: string) => {
-    const rarityLevel = rarity?.toLowerCase() || 'common';
-    const prefix = isMobile ? 'rarity-frame' : 'rarity-frame-maximized';
-    return `${prefix}-${rarityLevel}`;
-  };
-
-  const getRarityGlowClass = (rarity?: string) => {
-    const rarityLevel = rarity?.toLowerCase() || 'common';
-    return `rarity-glow-${rarityLevel}`;
-  };
-
-  const getTypeColor = (type: string, faction: 'government' | 'truth') => {
-    switch (type) {
-      case 'MEDIA':
-        return faction === 'truth' 
-          ? 'bg-truth-red/20 border-truth-red text-truth-red'
-          : 'bg-government-blue/20 border-government-blue text-government-blue';
-      case 'ZONE':
-        return 'bg-accent/20 border-accent text-accent-foreground';
-      case 'ATTACK':
-        return 'bg-destructive/20 border-destructive text-destructive';
-      case 'DEFENSIVE':
-        return 'bg-success/20 border-success text-success-foreground';
-      case 'TECH':
-        return 'bg-primary/20 border-primary text-primary';
-      case 'DEVELOPMENT':
-        return 'bg-secondary/20 border-secondary text-secondary-foreground';
-      case 'INSTANT':
-        return 'bg-warning/20 border-warning text-warning-foreground';
-      default:
-        return 'bg-muted/20 border-muted text-muted-foreground';
-    }
-  };
-
-  const getEffectDescription = (card: GameCard) => {
-    // Use the card's effects to generate description, fallback to card text
-    if (card.effects && Object.keys(card.effects).length > 0) {
-      return CardTextGenerator.generateRulesText(card.effects);
-    }
-    return card.text || 'Special effect card with unique abilities.';
-  };
-
-  const faction = getCardFaction(card);
 
   return (
     <div
@@ -98,133 +30,39 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      {...(isMobile ? swipeHandlers : {})}
+      {...swipeHandlers}
     >
-      <div className="w-[min(92vw,420px)] sm:w-[min(86vw,540px)] lg:w-[min(80vw,640px)] max-h-[90vh]">
-        <div className="relative w-full" style={{ aspectRatio: '63 / 88' }}>
-          <div
-            className={`card-base rarity-${card.rarity?.toLowerCase()} p-0 transform animate-fade-in flex flex-col overflow-hidden h-full rounded-xl ${getRarityFrameClass(card.rarity)} ${getRarityGlowClass(card.rarity)}`}
-            onClick={(e) => e.stopPropagation()}
-            aria-label={`${card.name} ${card.type} Cost ${card.cost}`}
-          >
-        {/* Top Bar - Sticky */}
-        <div className="card-header backdrop-blur-sm p-4 flex-shrink-0">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              {/* Title */}
-              <h2 className="text-[color:var(--card-text)] leading-tight mb-2 truncate">
-                {card.name}
-              </h2>
-              
-              {/* Type Badge */}
-              <Badge 
-                variant="outline" 
-                className={`text-xs px-2 py-0.5 ${getTypeColor(card.type, faction)}`}
-              >
-                {card.type}
-              </Badge>
-            </div>
-            
-            <div className="flex items-start gap-2 flex-shrink-0">
-              {/* Cost */}
-              <div className={`rounded-lg flex items-center justify-center font-bold text-sm px-3 py-2 ${
-                canAfford ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'
-              }`}>
-                {card.cost} IP
-              </div>
-              
-              {/* Extension Badge */}
-              <ExtensionCardBadge cardId={card.id} variant="overlay" />
-              
-              {/* Close Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="p-2 hover:bg-muted"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+      <div
+        className="h-[90vh] sm:h-[70vh] lg:h-[60vh]"
+        style={{ aspectRatio: '63 / 88' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <CardBase
+          name={card.name}
+          cost={card.cost}
+          rarity={card.rarity ?? 'common'}
+          type={card.type}
+          className="h-full"
+        >
+          <div className="p-2 flex-1 overflow-y-auto flex flex-col">
+            <CardImage cardId={card.id} className="w-full h-48 object-cover mb-2" />
+            {card.text && <div className="card-effect mb-2">{card.text}</div>}
+            {card.flavorTruth && (
+              <div className="card-flavor">“{card.flavorTruth}”</div>
+            )}
           </div>
-        </div>
-
-        {/* Art Area - Full width */}
-        <div className={`flex-shrink-0 bg-muted overflow-hidden ${
-          isMobile ? 'h-48' : 'h-64'
-        }`}>
-          <CardImage cardId={card.id} className="w-full h-full" />
-        </div>
-
-        {/* Content Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-          {/* Rules / Effect */}
-          <div>
-            <h4 className="text-sm font-bold mb-2 text-[color:var(--card-text)]">Effect</h4>
-            <div className="bg-[color:var(--card-bg)]/60 rounded-lg border border-[color:var(--card-border)] p-3 space-y-2">
-              <p className="text-sm font-medium text-[color:var(--card-text)] leading-relaxed">
-                {card.text}
-              </p>
-              <div className="text-xs text-[color:var(--card-text)]/70 bg-muted/50 rounded px-2 py-1">
-                {getEffectDescription(card)}
-              </div>
-            </div>
-          </div>
-
-          {/* Flavor Text */}
-          <div>
-            <h4 className="text-xs font-bold mb-2 text-[color:var(--card-text)]/70 tracking-wider">
-              CLASSIFIED INTELLIGENCE
-            </h4>
-            <div className="italic text-sm text-[color:var(--card-text)] border-l-4 border-truth-red bg-truth-red/10 rounded-r border border-truth-red/20 pl-3 pr-3 py-2 leading-relaxed">
-              "{faction === 'truth' ? (card.flavorTruth ?? 'No intelligence available.') : (card.flavorGov ?? 'No intelligence available.')}"
-            </div>
-          </div>
-
-          {/* Rarity Display */}
-          {card.rarity && (
-            <div className="flex items-center gap-2">
-              <Badge 
-                variant="outline" 
-                className={`text-xs capitalize ${getRarityFrameClass(card.rarity)}`}
+          {mode !== 'inspect' && (
+            <div className="p-2">
+              <button
+                onClick={onPlayCard}
+                disabled={!canAfford || disabled}
+                className="w-full bg-black text-white py-1 rounded disabled:opacity-50"
               >
-                {card.rarity}
-              </Badge>
+                Play Card
+              </button>
             </div>
           )}
-        </div>
-
-        {/* Bottom CTA */}
-        {mode !== 'inspect' && (
-          <div className="flex-shrink-0 p-4 border-t border-[color:var(--card-border)] bg-[color:var(--card-bg)]/95">
-            <Button
-              onClick={onPlayCard}
-              disabled={disabled || !canAfford}
-              className={`enhanced-button w-full font-mono relative overflow-hidden transition-all duration-300 ${
-                isMobile ? 'text-base py-4' : 'text-sm py-3'
-              } ${
-                !canAfford ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
-              }`}
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                {card.type === 'ZONE' && <Target className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-                {card.type === 'ATTACK' && <Zap className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-                {card.type === 'DEFENSIVE' && <Shield className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-                {card.type === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
-              </span>
-
-              {!canAfford && (
-                <div className="absolute inset-0 flex items-center justify-center bg-destructive/10">
-                  <span className="text-xs text-destructive font-medium">
-                    Need {card.cost} IP
-                  </span>
-                </div>
-              )}
-            </Button>
-          </div>
-        )}
-          </div>
-        </div>
+        </CardBase>
       </div>
     </div>
   );
