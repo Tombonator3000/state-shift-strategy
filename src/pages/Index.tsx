@@ -514,6 +514,11 @@ const Index = () => {
             hand: updatedState.players.P1.hand.map(convertCardToGameCard),
             discard: updatedState.players.P1.discard.map(convertCardToGameCard),
             zonesControlled: updatedState.players.P1.zones,
+            // Update play tracking
+            cardsPlayedThisTurn: prevState.cardsPlayedThisTurn + 1,
+            cardsPlayedThisRound: [...prevState.cardsPlayedThisRound, { card, player: 'human' as const }],
+            selectedCard: null,
+            targetState: null,
             // Update AI state too
             aiIP: updatedState.players.P2.ip,
             aiHand: updatedState.players.P2.hand.map(convertCardToGameCard),
