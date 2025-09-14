@@ -4,22 +4,33 @@ import { normalizeEffects } from "./normalize";
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
 export function applyEffects(ctx: Context, owner: "P1" | "P2", rawEffects: any, targetStateId?: string) {
+  console.log(`[Engine] applyEffects for ${owner}:`, rawEffects);
   const eff = normalizeEffects(rawEffects);
+  console.log(`[Engine] normalized effects:`, eff);
+  
   const s = ctx.state;
   const you = s.players[owner];
   const opp = s.players[owner === "P1" ? "P2" : "P1"];
 
+  console.log(`[Engine] Before effects - Truth: ${s.truth}, IP: ${you.ip}, Opp IP: ${opp.ip}`);
+
   // ---- flat v2.1E + normalized shorthand ----
   if (typeof eff.truthDelta === "number") {
+    const oldTruth = s.truth;
     s.truth = clamp(s.truth + eff.truthDelta, 0, 100);
+    console.log(`[Engine] Truth changed: ${oldTruth} -> ${s.truth} (delta: ${eff.truthDelta})`);
   }
   
   if (eff.ipDelta?.self) {
+    const oldIP = you.ip;
     you.ip = Math.max(0, you.ip + eff.ipDelta.self);
+    console.log(`[Engine] ${owner} IP changed: ${oldIP} -> ${you.ip} (delta: ${eff.ipDelta.self})`);
   }
   
   if (eff.ipDelta?.opponent) {
+    const oldOppIP = opp.ip;
     opp.ip = Math.max(0, opp.ip + eff.ipDelta.opponent);
+    console.log(`[Engine] Opponent IP changed: ${oldOppIP} -> ${opp.ip} (delta: ${eff.ipDelta.opponent})`);
   }
 
   if (eff.draw) {

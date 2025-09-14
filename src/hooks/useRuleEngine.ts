@@ -72,12 +72,22 @@ export function useRuleEngine() {
 
   // Play a card using the new engine
   const playCardWithEngine = useCallback((gameState: any, cardId: string, targetStateId?: string) => {
+    console.log(`[Engine] playCardWithEngine called for card:`, cardId);
+    console.log(`[Engine] Original game state:`, { truth: gameState.truth, ip: gameState.ip, hand: gameState.hand?.length });
+    
     const engineState = convertToEngineState(gameState);
+    console.log(`[Engine] Converted engine state:`, { truth: engineState.truth, p1IP: engineState.players.P1.ip });
+    
     const context = createContext(engineState);
     
     const hand = gameState.hand || [];
     const card = hand.find((c: any) => c.id === cardId);
-    if (!card) return null;
+    if (!card) {
+      console.log(`[Engine] Card not found in hand:`, cardId);
+      return null;
+    }
+    
+    console.log(`[Engine] Card found:`, { id: card.id, name: card.name, effects: card.effects });
     
     // Convert card to engine format
     const engineCard: Card = {
@@ -91,6 +101,8 @@ export function useRuleEngine() {
     };
     
     const outcome = playCardEngine(context, "P1", engineCard, targetStateId);
+    console.log(`[Engine] Play outcome:`, outcome);
+    console.log(`[Engine] Updated engine state:`, { truth: context.state.truth, p1IP: context.state.players.P1.ip });
     
     return {
       outcome,

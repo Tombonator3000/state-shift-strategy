@@ -494,15 +494,41 @@ const Index = () => {
         if (outcome === 'reaction-pending') {
           // Reaction modal will handle the rest automatically
           console.log(`[Engine] ${card.name} triggered reaction window`);
+          return; // Don't continue with old system
         } else if (outcome === 'played') {
-          // Fallback to old animation system for visual effects only
-          await playCardAnimated(cardId, animatePlayCard, targetState);
-          console.log(`[Engine] ${card.name} played successfully with outcome: ${outcome}`);
+          // Update UI game state with engine results
+          console.log(`[Engine] ${card.name} played successfully, updating UI state`);
+          
+          // Convert engine Cards back to GameCards for UI compatibility
+          const convertCardToGameCard = (engineCard: any) => ({
+            ...engineCard,
+            flavorTruth: engineCard.flavorTruth || '',
+            flavorGov: engineCard.flavorGov || ''
+          });
+          
+          // Apply engine state changes to UI game state
+          setGameState(prevState => ({
+            ...prevState,
+            truth: updatedState.truth,
+            ip: updatedState.players.P1.ip,
+            hand: updatedState.players.P1.hand.map(convertCardToGameCard),
+            discard: updatedState.players.P1.discard.map(convertCardToGameCard),
+            zonesControlled: updatedState.players.P1.zones,
+            // Update AI state too
+            aiIP: updatedState.players.P2.ip,
+            aiHand: updatedState.players.P2.hand.map(convertCardToGameCard),
+            aiDiscard: updatedState.players.P2.discard.map(convertCardToGameCard),
+            aiZonesControlled: updatedState.players.P2.zones
+          }));
+          
+          // Still do visual animation for the card play
+          await animatePlayCard(cardId, card);
         } else if (outcome === 'blocked') {
           toast('🛡️ Attack was blocked!', {
             duration: 2000,
             style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #3b82f6' }
           });
+          return;
         } else if (outcome === 'failed') {
           throw new Error('Card failed to play');
         }
