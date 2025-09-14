@@ -16,7 +16,7 @@ export const CardPreviewProvider = ({ children }: { children: ReactNode }) => {
   const [card, setCard] = useState<GameCard | null>(null);
   const [sourceZone, setSourceZone] = useState<SourceZone>('board');
 
-  const openCardPreview = (cardId: string, zone: SourceZone = 'board') => {
+  const openCardPreview = (cardId: string, zone: SourceZone = 'board'): void => {
     const found = CARD_DATABASE.find(c => c.id === cardId);
     if (!found) return;
     setCard(found);
