@@ -2,8 +2,9 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import type { GameCard } from '@/types/cardTypes';
 import CardPreview from '@/components/game/CardPreview';
+import CardDetailOverlay from '@/components/game/CardDetailOverlay';
 
-export type SourceZone = 'board' | 'discard' | 'zone' | 'timeline';
+export type SourceZone = 'hand' | 'board' | 'discard' | 'zone' | 'timeline';
 
 interface CardPreviewContextValue {
   openCardPreview: (cardId: string, sourceZone: SourceZone) => void;
@@ -29,7 +30,18 @@ export const CardPreviewProvider = ({ children }: { children: ReactNode }) => {
     <CardPreviewContext.Provider value={{ openCardPreview }}>
       {children}
       {card && (
-        <CardPreview card={card} sourceZone={sourceZone} onClose={handleClose} />
+        sourceZone === 'hand' ? (
+          <CardDetailOverlay
+            card={card}
+            canAfford={true}
+            disabled={false}
+            sourceZone={sourceZone}
+            onClose={handleClose}
+            onPlayCard={() => {}}
+          />
+        ) : (
+          <CardPreview card={card} sourceZone={sourceZone} onClose={handleClose} />
+        )
       )}
     </CardPreviewContext.Provider>
   );
