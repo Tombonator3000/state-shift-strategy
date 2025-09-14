@@ -1,5 +1,6 @@
 import { EngineState, Card, PlayerID } from "./types";
-import { applyEffects, Effect } from "./effects";
+import { applyEffects } from "./effects/applyEffects";
+import type { Effect } from "./effects/types";
 import { normalizeEffects } from "./normalizeEffects";
 
 // Dependencies from existing engine:
@@ -68,10 +69,10 @@ export function resolveClash(engine: EngineState) {
     log(`🛡️ ${defenseCard?.name ?? "Defense"} blocked ${attackCard.name}.`);
   } else if (outcome.type === "REDUCE") {
     const scaled = scaleEffects(normalized, outcome.factor);
-    applyEffects(engine, scaled, { attacker, defender, attackCard, defenseCard });
+    applyEffects(engine, scaled, { who: attacker as any, target: defenseCard });
     log(`🛡️ ${defenseCard?.name ?? "Defense"} reduced ${attackCard.name} by ${Math.round(outcome.factor * 100)}%.`);
   } else {
-    applyEffects(engine, normalized, { attacker, defender, attackCard, defenseCard });
+    applyEffects(engine, normalized, { who: attacker as any, target: defenseCard });
     log(`💥 ${attackCard.name} hits!`);
   }
 

@@ -1,12 +1,12 @@
 export const CORE_BASE_URL = '/core/';
-export const CORE_BUNDLED = {
-  manifest: () => import('../../public/core/manifest.json').then(m => m.default).catch(() => null),
-  library: () => import('../../public/core/core-library.json').then(m => m.default).catch(() => null),
-  decklist: () => import('../../public/core/core-decklist-latest.json').then(m => m.default).catch(() => null),
-};
 
 export const coreFeatures = {
-  useBundledFirst: true,
-  allowHttpFetch: true,
+  useBundledFirst: true, // ESM JSON import (no CORS)
+  allowHttpFetch: true,  // fetch if bundled missing
 };
 
+// Safe dynamic imports (adjust paths to where JSON will be emitted)
+export async function tryImport<T>(path: string): Promise<T | null> {
+  try { const m = await import(/* @vite-ignore */ path); return (m as any).default ?? m; }
+  catch { return null; }
+}
