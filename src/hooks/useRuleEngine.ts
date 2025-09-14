@@ -16,17 +16,17 @@ export function useRuleEngine() {
   // Convert game state from existing format to engine format
   const convertToEngineState = useCallback((gameState: any): EngineGameState => {
     return {
-      turn: gameState.round,
-      truth: gameState.truth,
+      turn: gameState.round || 1,
+      truth: gameState.truth || 50,
       currentPlayer: gameState.currentPlayer === 'human' ? "P1" : "P2",
       players: {
         "P1": {
           id: "P1",
           faction: "truth",
-          deck: gameState.deck,
-          hand: gameState.hand,
-          discard: gameState.discard,
-          ip: gameState.ip,
+          deck: gameState.deck || [],
+          hand: gameState.hand || [],
+          discard: gameState.discard || [],
+          ip: gameState.ip || 0,
           zones: gameState.zonesControlled || [],
           zoneDefenseBonus: 0,
           pressureTotal: 0
@@ -75,7 +75,8 @@ export function useRuleEngine() {
     const engineState = convertToEngineState(gameState);
     const context = createContext(engineState);
     
-    const card = gameState.hand.find((c: any) => c.id === cardId);
+    const hand = gameState.hand || [];
+    const card = hand.find((c: any) => c.id === cardId);
     if (!card) return null;
     
     // Convert card to engine format
@@ -119,7 +120,8 @@ export function useRuleEngine() {
 
   // Get defensive cards from hand
   const getDefensiveCards = useCallback((gameState: any): Card[] => {
-    return gameState.hand
+    const hand = gameState.hand || [];
+    return hand
       .filter((card: any) => card.type === "DEFENSIVE" && gameState.ip >= card.cost)
       .map((card: any): Card => ({
         id: card.id,
