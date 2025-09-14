@@ -29,7 +29,46 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
   - Total Cards: ${actualCardCount} cards
   - Include Extensions: ${includeExtensions}`);
 
-  const exportData = () => {
+  const exportCardEffects = () => {
+    // Get all cards from the balancer with effects
+    const allCards = enhancedBalancer.getAllCards().map(card => ({
+      id: card.id,
+      name: card.name,
+      faction: card.faction,
+      type: card.type,
+      rarity: card.rarity || 'common',
+      cost: card.cost,
+      effects: JSON.stringify(card.effects || {})
+    }));
+
+    // Export as JSON
+    const jsonBlob = new Blob([JSON.stringify(allCards, null, 2)], { type: 'application/json' });
+    const jsonUrl = URL.createObjectURL(jsonBlob);
+    const jsonLink = document.createElement('a');
+    jsonLink.href = jsonUrl;
+    jsonLink.download = `card-effects-v21E.json`;
+    jsonLink.click();
+    URL.revokeObjectURL(jsonUrl);
+
+    // Export as CSV
+    const csvHeaders = 'id,name,faction,type,rarity,cost,effects\n';
+    const csvRows = allCards.map(card => 
+      `"${card.id}","${card.name}","${card.faction}","${card.type}","${card.rarity}",${card.cost},"${card.effects.replace(/"/g, '""')}"`
+    ).join('\n');
+    const csvContent = csvHeaders + csvRows;
+    
+    const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvUrl = URL.createObjectURL(csvBlob);
+    const csvLink = document.createElement('a');
+    csvLink.href = csvUrl;
+    csvLink.download = `card-effects-v21E.csv`;
+    csvLink.click();
+    URL.revokeObjectURL(csvUrl);
+
+    console.log(`✅ Exported ${allCards.length} cards to JSON and CSV format`);
+  };
+
+  const exportAnalysisData = () => {
     const data = enhancedBalancer.exportFullAnalysis();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -142,7 +181,11 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
             >
               {includeExtensions ? "Med Extensions" : "Kun Base Cards"}
             </Button>
-            <Button onClick={exportData} variant="outline" size="sm">
+            <Button onClick={exportCardEffects} variant="outline" size="sm">
+              <FileText size={16} className="mr-1" />
+              Export Effekter
+            </Button>
+            <Button onClick={exportAnalysisData} variant="outline" size="sm">
               <Download size={16} className="mr-1" />
               Export Data
             </Button>

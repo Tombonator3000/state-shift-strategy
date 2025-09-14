@@ -628,6 +628,10 @@ export class EnhancedCardBalancer {
       patches: JSON.parse(patches)
     };
   }
+
+  public getAllCards(): GameCard[] {
+    return this.cards;
+  }
 }
 
 // Public utility functions
