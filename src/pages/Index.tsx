@@ -1,12 +1,7 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import USAMap from '@/components/game/USAMap';
-import GameHand from '@/components/game/GameHand';
 import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
-import EnhancedGameHand from '@/components/game/EnhancedGameHand';
-import PlayedCardsDock from '@/components/game/PlayedCardsDock';
-import TruthMeter from '@/components/game/TruthMeter';
 import TabloidNewspaper from '@/components/game/TabloidNewspaper';
 import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
@@ -31,7 +26,6 @@ import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
 import MechanicsTooltip from '@/components/game/MechanicsTooltip';
 import CardCollection from '@/components/game/CardCollection';
 import NewCardsPresentation from '@/components/game/NewCardsPresentation';
-import { Maximize, Minimize } from 'lucide-react';
 import { getRandomAgenda } from '@/data/agendaDatabase';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
@@ -40,18 +34,20 @@ import ExtraEditionNewspaper from '@/components/game/ExtraEditionNewspaper';
 import InGameOptions from '@/components/game/InGameOptions';
 import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
 import EnhancedExpansionManager from '@/components/game/EnhancedExpansionManager';
-import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import MobileGameLayout from '@/components/game/MobileGameLayout';
-import MobileGameHand from '@/components/game/MobileGameHand';
 import ResponsiveNewspaper from '@/components/game/ResponsiveNewspaper';
+import GameLayout from '@/components/game/GameLayout';
+import { HandPanel } from '@/components/game/HandPanel';
+import { Tray } from '@/components/game/Tray';
+import { LeftColumn } from '@/components/game/LeftColumn';
+import { MapPanel } from '@/components/game/MapPanel';
+import { Masthead, StatusBar } from '@/components/game/Header';
 
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showBalancing, setShowBalancing] = useState(false);
   const [showEvents, setShowEvents] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
@@ -78,7 +74,6 @@ const Index = () => {
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   
   const [showHowToPlay, setShowHowToPlay] = useState(false);
-  const [showMinimizedHand, setShowMinimizedHand] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo, playDefensiveCard, resolveClash, closeClashWindow } = useGameState();
   const audio = useAudioContext();
@@ -273,35 +268,6 @@ const Index = () => {
     }
   }, [gameState.faction]);
 
-  const toggleFullscreen = useCallback(async () => {
-    try {
-      if (!document.fullscreenEnabled) {
-        toast.error('Fullskjerm støttes ikke i denne nettleseren');
-        audio.playSFX('click');
-        return;
-      }
-      
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-        setIsFullscreen(true);
-        toast.success('Fullskjerm aktivert!');
-      } else {
-        await document.exitFullscreen();
-        setIsFullscreen(false);
-        toast.success('Fullskjerm deaktivert');
-      }
-      audio.playSFX('click');
-    } catch (error) {
-      console.error('Fullscreen error:', error);
-      if (error.name === 'NotAllowedError') {
-        toast.error('Fullskjerm ble blokkert av nettleseren. Prøv F11 eller tillat fullskjerm i nettleserinnstillingene.');
-      } else {
-        toast.error('Kunne ikke bytte fullskjerm-modus');
-      }
-      audio.playSFX('click');
-    }
-  }, [audio]);
-
   // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -316,10 +282,6 @@ const Index = () => {
       }
       
       switch (e.key.toLowerCase()) {
-        case 'f11':
-          e.preventDefault();
-          toggleFullscreen();
-          break;
         case 'escape':
           setShowInGameOptions(true);
           audio.playSFX('click');
@@ -653,383 +615,136 @@ const Index = () => {
   }
 
   // Create responsive layout based on device type
-  console.log('🔍 Index.tsx - isMobile:', isMobile, 'window.innerWidth:', typeof window !== 'undefined' ? window.innerWidth : 'SSR');
-  
-  // Force mobile for testing - remove this line later
-  const forceMobile = typeof window !== 'undefined' && window.innerWidth < 900;
-  
-  if (isMobile || forceMobile) {
-    console.log('🔍 Rendering Mobile Layout - isMobile:', isMobile, 'forceMobile:', forceMobile);
-    // Mobile layout with MobileGameLayout wrapper
-    return (
-      <MobileGameLayout
-        controlledStates={gameState.controlledStates.length}
-        truth={gameState.truth}
-        ip={gameState.ip}
-        aiIP={gameState.aiIP}
-        aiDifficulty={gameState.aiDifficulty}
-        aiPersonalityName={gameState.aiStrategist?.personality.name}
-        isAIThinking={gameState.phase === 'ai_turn'}
-        currentPlayer={gameState.currentPlayer}
-        aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
-        assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
-        aiHandSize={gameState.aiHand.length}
-        aiObjectiveProgress={gameState.aiSecretAgenda ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100 : 0}
-        playerAgenda={gameState.secretAgenda}
-        aiAgenda={gameState.aiSecretAgenda}
-        gameLog={gameState.log}
-        onShowInGameOptions={() => setShowInGameOptions(true)}
-        onShowAchievements={() => setShowAchievements(true)}
-        onShowCardCollection={() => setShowCardCollection(true)}
-        onShowTutorial={() => setShowTutorial(true)}
-      >
-        {/* Mobile Game Content */}
-        <div className="flex flex-col h-full bg-[#f5f5f5]">
-          {/* Map Area */}
-          <div className="flex-1 border-2 border-black bg-white/80 relative overflow-auto">
-            <CardPreviewOverlay card={hoveredCard} />
-            
-            {/* Zone targeting overlay for mobile */}
-            {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-              <div className="absolute top-4 left-4 right-4 z-20 pointer-events-none">
-                <div className="bg-black text-white p-3 border-2 border-white font-mono shadow-2xl animate-pulse text-center">
-                  <div className="text-lg mb-1 flex items-center justify-center gap-2">
-                    🎯 <span className="font-bold">TAP TO TARGET</span>
-                  </div>
-                  <div className="text-sm">
-                    Tap any <span className="text-yellow-400 font-bold">NEUTRAL</span> or <span className="text-red-500 font-bold">ENEMY</span> state
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div className="w-full h-full">
-              <EnhancedUSAMap 
-                states={gameState.states} 
-                onStateClick={handleStateClick}
-                selectedZoneCard={gameState.selectedCard}
-                selectedState={gameState.targetState}
-                audio={audio}
-              />
-            </div>
-          </div>
+  // Helper to map rarity to colors for HandPanel
+  const getRarityColor = (rarity?: string) => {
+    switch (rarity) {
+      case 'legendary':
+        return '#f59e0b';
+      case 'rare':
+        return '#3b82f6';
+      case 'uncommon':
+        return '#16a34a';
+      default:
+        return '#6b7280';
+    }
+  };
 
-          {/* Mobile Game Hand */}
-          <MobileGameHand
-            cards={gameState.hand}
-            onPlayCard={(cardId) => {
-              if (gameState.clash.open && gameState.clash.defender === 'human') {
-                const card = gameState.hand.find(c => c.id === cardId);
-                if (card && canPlayDefensively(card, gameState.ip, gameState.clash.open)) {
-                  playDefensiveCard(cardId);
-                  return;
-                }
-              }
-              handlePlayCard(cardId);
-            }}
-            onSelectCard={handleSelectCard}
-            selectedCard={gameState.selectedCard}
-            currentIP={gameState.ip}
-            disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
-            loadingCard={loadingCard}
-          />
+  const handCards = gameState.hand.map(card => ({
+    id: card.id,
+    name: card.name,
+    rarity: card.rarity || 'common',
+    rarityColor: getRarityColor(card.rarity),
+    cost: card.cost,
+  }));
 
-          {/* End Turn Button */}
-          <div className="p-4 bg-white border-t-2 border-black">
-            <Button 
-              onClick={handleEndTurn}
-              className="w-full bg-black text-white hover:bg-gray-800 min-h-[56px] text-lg font-bold"
-              disabled={gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human'}
-            >
-              {gameState.currentPlayer === 'ai' ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-current rounded-full animate-pulse"></div>
-                  AI Thinking...
-                </div>
-              ) : (
-                'End Turn'
-              )}
-            </Button>
-          </div>
-        </div>
-      </MobileGameLayout>
-    );
-  }
+  const trayCards = gameState.cardsPlayedThisRound.map(pc => ({
+    id: pc.card.id,
+    name: pc.card.name,
+    cost: pc.card.cost,
+    image: '/lovable-uploads/e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png',
+    effectShort: pc.card.text || '',
+  }));
 
-  // Desktop layout (existing design)
-  console.log('🔍 Rendering Desktop Layout');
   return (
-    <div className="min-h-screen bg-newspaper-bg">
-      {/* Newspaper Header */}
-      <div className="bg-newspaper-bg border-b-4 border-newspaper-border">
-        <div className="container mx-auto px-4 py-2">
-          <div className="text-center border-b-2 border-newspaper-border pb-2 mb-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-newspaper-text" style={{ fontFamily: 'serif' }}>
-              THE PARANOID TIMES
-            </h1>
-            <div className="text-xs md:text-sm font-medium text-newspaper-text mt-1">
-              {subtitle}
-            </div>
-          </div>
-          <div className="bg-newspaper-text text-newspaper-bg p-1 rounded">
-            <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 text-xs font-mono">
-              <div className="text-center">
-                <div className="font-bold">ROUND</div>
-                <div className="text-sm">{gameState.turn}</div>
-              </div>
-              <MechanicsTooltip mechanic="ip">
-                <div className="text-center">
-                  <div className="font-bold">YOUR IP</div>
-                  <div className="text-sm">{gameState.ip}</div>
-                </div>
-              </MechanicsTooltip>
-              <MechanicsTooltip mechanic="truth">
-                <div className="text-center">
-                  <div className="font-bold">TRUTH</div>
-                  <div className="text-sm">{gameState.truth}%</div>
-                </div>
-              </MechanicsTooltip>
-              <MechanicsTooltip mechanic="zone">
-                <div className="text-center">
-                  <div className="font-bold">YOUR STATES</div>
-                  <div className="text-sm">{gameState.controlledStates.length}</div>
-                </div>
-              </MechanicsTooltip>
-              <div className="text-center">
-                <div className="font-bold">AI IP</div>
-                <div className="text-sm">{gameState.aiIP}</div>
-              </div>
-              <div className="text-center">
-                <div className="font-bold">AI STATES</div>
-                <div className="text-sm">{gameState.states.filter(s => s.owner === 'ai').length}</div>
-              </div>
-              <div className="absolute top-2 right-2 flex gap-2">
-                <button
-                  onClick={toggleFullscreen}
-                  className="bg-newspaper-text text-newspaper-bg p-1 rounded hover:bg-newspaper-text/80 transition-colors"
-                  title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-                >
-                  {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
-                </button>
-                <button
-                  onClick={() => setShowBalancing(true)}
-                  className="bg-blue-600 text-white p-1 rounded hover:bg-blue-700 transition-colors"
-                  title="Card Balancing Dashboard"
-                >
-                  ⚖️
-                </button>
-                <button
-                  onClick={() => setShowEvents(true)}
-                  className="bg-purple-600 text-white p-1 rounded hover:bg-purple-700 transition-colors"
-                  title="Event Database"
-                >
-                  📰
-                </button>
-                <button
-                  onClick={() => setShowTutorial(true)}
-                  className="bg-green-600 text-white p-1 rounded hover:bg-green-700 transition-colors"
-                  title="Tutorial & Training"
-                >
-                  🎓
-                </button>
-                <button
-                  onClick={() => setShowAchievements(true)}
-                  className="bg-yellow-600 text-white p-1 rounded hover:bg-yellow-700 transition-colors"
-                  title="Achievements"
-                >
-                  🏆
-                </button>
-                <button
-                  onClick={() => {
-                    setShowCardCollection(true);
-                    audio.playSFX('click');
-                  }}
-                  className="bg-indigo-600 text-white p-1 rounded hover:bg-indigo-700 transition-colors"
-                  title="Card Collection"
-                >
-                  📚
-                </button>
-                <button
-                  onClick={() => {
-                    console.log('In-game options button clicked');
-                    setShowInGameOptions(true);
-                    console.log('showInGameOptions set to true');
-                    audio.playSFX('click');
-                  }}
-                  className="bg-gray-600 text-white p-1 rounded hover:bg-gray-700 transition-colors"
-                  title="Options & Settings"
-                >
-                  ⚙️
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Game Area */}
-      <div className="flex flex-col xl:flex-row h-[calc(100vh-140px)] overflow-hidden">
-        {/* Left sidebar - Victory Conditions & Classified Intel */}
-        <div className="hidden xl:block w-52 bg-newspaper-bg border-r-2 border-newspaper-border p-2 overflow-y-auto">
-          <VictoryConditions
-            controlledStates={gameState.controlledStates.length}
+    <>
+      <GameLayout
+        header={<Masthead />}
+        status={
+          <StatusBar
+            round={gameState.turn}
+            yourIp={gameState.ip}
             truth={gameState.truth}
-            ip={gameState.ip}
+            yourStates={gameState.controlledStates.length}
+            aiIp={gameState.aiIP}
+            aiStates={gameState.states.filter(s => s.owner === 'ai').length}
           />
-
-          {/* Player Secret Agenda */}
-          <div className="mb-3">
-            <SecretAgenda agenda={gameState.secretAgenda} isPlayer={true} />
-          </div>
-
-          {/* AI Status */}
-          <div className="mb-3">
-            <AIStatus 
-              difficulty={gameState.aiDifficulty}
-              personalityName={gameState.aiStrategist?.personality.name}
-              isThinking={gameState.phase === 'ai_turn'}
-              currentPlayer={gameState.currentPlayer}
-              aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
-              assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
-              aiHandSize={gameState.aiHand.length}
-              aiObjectiveProgress={gameState.aiSecretAgenda ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100 : 0}
-            />
-          </div>
-
-          {/* AI Secret Agenda - Now integrated into AIStatus component */}
-          {/* This section has been moved to the expandable AI Opponent component */}
-          
-          <div className="bg-newspaper-bg border-2 border-newspaper-border p-2">
-            <h3 className="font-bold text-xs mb-1 text-newspaper-text">CLASSIFIED INTEL</h3>
-            <div className="text-xs space-y-1 max-h-32 overflow-y-auto">
-              {gameState.log.map((entry, i) => (
-                <div key={i} className="text-newspaper-text/80 animate-fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
-                  <span className="font-mono">▲</span> {entry}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Center - Map with proper spacing for card dock */}
-        <div className="flex-1 p-1 bg-newspaper-bg border-x-2 border-newspaper-border flex flex-col relative" id="map-container">
-          {/* Enhanced targeting overlay for ZONE cards - repositioned to upper right */}
-          {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-            <div className="absolute top-4 right-4 z-20 pointer-events-none">
-              <div className="bg-newspaper-text text-newspaper-bg p-4 border-2 border-newspaper-border font-mono shadow-2xl animate-pulse max-w-sm">
-                <div className="text-lg mb-2 flex items-center gap-2">
-                  🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
-                </div>
-                <div className="text-sm mb-3">
-                  Click any <span className="text-yellow-400 font-bold">NEUTRAL</span> or <span className="text-red-500 font-bold">ENEMY</span> state to target
-                </div>
-                <div className="text-xs bg-black/20 p-2 rounded mb-2">
-                  Card will deploy automatically when target is selected
-                </div>
-                <div className="text-xs text-yellow-400 flex items-center gap-1">
-                  ⚠️ Cannot target your own states
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Map Area - flex-1 takes remaining space above card dock */}
-          <div className="flex-1 border-2 border-newspaper-border bg-white/80 relative overflow-auto min-h-[360px]">
-            {/* Card preview overlay */}
+        }
+        left={
+          <LeftColumn
+            victory={{
+              title: 'Victory Conditions',
+              content: (
+                <VictoryConditions
+                  controlledStates={gameState.controlledStates.length}
+                  truth={gameState.truth}
+                  ip={gameState.ip}
+                />
+              ),
+            }}
+            agenda={{
+              title: 'Secret Agenda',
+              content: <SecretAgenda agenda={gameState.secretAgenda} isPlayer={true} />,
+            }}
+            intel={{
+              title: 'AI Opponent',
+              content: (
+                <AIStatus
+                  difficulty={gameState.aiDifficulty}
+                  personalityName={gameState.aiStrategist?.personality.name}
+                  isThinking={gameState.phase === 'ai_turn'}
+                  currentPlayer={gameState.currentPlayer}
+                  aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
+                  assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
+                  aiHandSize={gameState.aiHand.length}
+                  aiObjectiveProgress={
+                    gameState.aiSecretAgenda
+                      ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100
+                      : 0
+                  }
+                />
+              ),
+            }}
+          />
+        }
+        center={
+          <MapPanel>
             <CardPreviewOverlay card={hoveredCard} />
-            
-            <div className="w-full h-full">
-              <EnhancedUSAMap 
-                states={gameState.states} 
-                onStateClick={handleStateClick}
-                selectedZoneCard={gameState.selectedCard}
-                selectedState={gameState.targetState}
-                audio={audio}
-              />
-            </div>
-          </div>
-
-          {/* Played Cards Dock - fixed height at bottom */}
-          <div className="flex-shrink-0 h-[200px] md:h-[220px] lg:h-[240px] xl:h-[260px] bg-newspaper-bg border-t-2 border-newspaper-border relative z-50">
-            <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} />
-          </div>
-        </div>
-
-        {/* Right sidebar - AI Intel & Your Hand */}
-        <div className="w-full xl:w-64 bg-newspaper-bg border-l-2 border-newspaper-border p-2 flex flex-col max-h-full" data-right-sidebar="true">
-          {/* Mobile victory conditions - shown at top on mobile */}
-          <div className="xl:hidden mb-3">
-            <VictoryConditions
-              controlledStates={gameState.controlledStates.length}
-              truth={gameState.truth}
-              ip={gameState.ip}
-              isMobile={true}
+            <EnhancedUSAMap
+              states={gameState.states}
+              onStateClick={handleStateClick}
+              selectedZoneCard={gameState.selectedCard}
+              selectedState={gameState.targetState}
+              audio={audio}
             />
-          </div>
-
-          {/* AI Intel - Now integrated into AIStatus component */}
-          {/* This section has been moved to the expandable AI Opponent component on the left */}
-
-          {/* Your Hand - Takes remaining space */}
-          <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border flex-1 min-h-0">
-            <h3 className="font-bold text-xs mb-2">YOUR HAND</h3>
-            <EnhancedGameHand 
-          cards={gameState.hand}
-          onPlayCard={(cardId) => {
-            if (gameState.clash.open && gameState.clash.defender === 'human') {
-              const card = gameState.hand.find(c => c.id === cardId);
-              if (card && canPlayDefensively(card, gameState.ip, gameState.clash.open)) {
-                playDefensiveCard(cardId);
-                return;
-              }
-            }
-            handlePlayCard(cardId);
-          }}
-              onSelectCard={handleSelectCard}
-              selectedCard={gameState.selectedCard}
-              disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
-              currentIP={gameState.ip}
-              loadingCard={loadingCard}
-              onCardHover={setHoveredCard}
+          </MapPanel>
+        }
+        right={
+          <div className="h-full flex flex-col gap-3">
+            <HandPanel
+              cards={handCards}
+              onClick={(card) => {
+                if (gameState.clash.open && gameState.clash.defender === 'human') {
+                  const c = gameState.hand.find(hc => hc.id === card.id);
+                  if (c && canPlayDefensively(c, gameState.ip, gameState.clash.open)) {
+                    playDefensiveCard(card.id as string);
+                    return;
+                  }
+                }
+                handlePlayCard(card.id as string);
+              }}
             />
-          </div>
-
-          {/* Controls */}
-          <div className="space-y-2 flex-shrink-0">
-            <Button 
+            <Button
               onClick={handleEndTurn}
-              className="w-full bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80 hover:scale-105 transition-all duration-200 h-8 text-xs font-bold"
               disabled={gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human'}
             >
-              {gameState.currentPlayer === 'ai' ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-current rounded-full animate-pulse"></div>
-                  AI Thinking...
-                </div>
-              ) : (
-                'End Turn'
-              )}
+              {gameState.currentPlayer === 'ai' ? 'AI Thinking...' : 'End Turn'}
             </Button>
           </div>
+        }
+        tray={
+          <Tray
+            cards={trayCards}
+            onInspect={(card) => {
+              const full = gameState.cardsPlayedThisRound.find(pc => pc.card.id === card.id)?.card;
+              if (full) setHoveredCard(full);
+            }}
+          />
+        }
+      />
 
-          {/* Mobile Log - Collapsible */}
-          <div className="xl:hidden mt-2 flex-shrink-0">
-            <div className="bg-newspaper-bg border-2 border-newspaper-border p-2">
-              <h3 className="font-bold text-xs mb-1 text-newspaper-text">INTEL LOG</h3>
-              <div className="text-xs space-y-1 max-h-16 overflow-y-auto">
-                {gameState.log.slice(-3).map((entry, i) => (
-                  <div key={i} className="text-newspaper-text/80">
-                    <span className="font-mono">▲</span> {entry}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <FloatingNumbers trigger={floatingNumbers} />
 
-      {/* Toast notifications */}
-      <Toaster 
+      <Toaster
         position="top-right"
         toastOptions={{
           duration: 3000,
@@ -1037,15 +752,14 @@ const Index = () => {
             background: '#1f2937',
             color: '#f3f4f6',
             border: '1px solid #374151',
-            fontFamily: 'monospace'
-          }
+            fontFamily: 'monospace',
+          },
         }}
       />
 
-      {/* Card Animation Layer with integrated effects */}
       <CardAnimationLayer />
-      
-      <TabloidVictoryScreen 
+
+      <TabloidVictoryScreen
         isVisible={victoryState.isVictory}
         isVictory={gameState.faction === (gameOverReport?.winner || 'truth')}
         victoryType={victoryState.type}
@@ -1058,10 +772,9 @@ const Index = () => {
           playerStates: gameState.states.filter(s => s.owner === 'player').length,
           aiStates: gameState.states.filter(s => s.owner === 'ai').length,
           mvpCard: gameOverReport?.mvpCard,
-          agenda: gameState.agenda ? {
-            name: gameState.agenda.title,
-            complete: gameState.agenda.complete || false
-          } : undefined
+          agenda: gameState.agenda
+            ? { name: gameState.agenda.title, complete: gameState.agenda.complete || false }
+            : undefined,
         }}
         onClose={() => {
           setVictoryState({ isVictory: false, type: null });
@@ -1077,14 +790,12 @@ const Index = () => {
         }}
       />
 
-      {/* Extra Edition Newspaper */}
       {showExtraEdition && gameOverReport && (
         <ExtraEditionNewspaper
           report={gameOverReport}
           onClose={() => {
             setShowExtraEdition(false);
             setGameOverReport(null);
-            // Reset to start screen
             setShowMenu(true);
             setGameState(prev => ({ ...prev, isGameOver: false }));
             audio.playMusic('theme');
@@ -1092,7 +803,6 @@ const Index = () => {
         />
       )}
 
-      {/* Contextual Help System */}
       <ContextualHelp
         gamePhase={gameState.phase}
         currentPlayer={gameState.currentPlayer}
@@ -1102,12 +812,11 @@ const Index = () => {
         onSuggestMove={(suggestion) => {
           toast(suggestion, {
             duration: 4000,
-            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' },
           });
         }}
       />
 
-      {/* Interactive Onboarding */}
       <InteractiveOnboarding
         isActive={showOnboarding}
         onComplete={() => setShowOnboarding(false)}
@@ -1115,38 +824,32 @@ const Index = () => {
         gameState={gameState}
       />
 
-      {/* Card Collection */}
-      <CardCollection 
-        open={showCardCollection}
-        onOpenChange={setShowCardCollection}
-      />
+      <CardCollection open={showCardCollection} onOpenChange={setShowCardCollection} />
 
-      {/* New Cards Presentation */}
       <NewCardsPresentation
-        cards={gameState.newCards?.map(card => ({...card, rarity: card.rarity || 'common', text: card.text || ''})) || []}
+        cards={gameState.newCards?.map(card => ({ ...card, rarity: card.rarity || 'common', text: card.text || '' })) || []}
         isVisible={gameState.showNewCardsPresentation || false}
         onConfirm={confirmNewCards}
       />
 
-      {/* Responsive Newspaper overlay */}
       {gameState.showNewspaper && (
         isMobile ? (
-          <ResponsiveNewspaper 
+          <ResponsiveNewspaper
             events={gameState.currentEvents.map(event => ({
               type: event.type || 'Breaking News',
               description: (event as any).description || (event as any).text || 'Important event occurred',
-              impact: (event as any).impact
+              impact: (event as any).impact,
             }))}
             playedCards={gameState.cardsPlayedThisRound.map(played => ({
               card: played.card,
-              playedBy: played.player === 'human' ? 'player' : played.player
+              playedBy: played.player === 'human' ? 'player' : played.player,
             }))}
             faction={gameState.faction}
             truth={gameState.truth}
             onClose={handleCloseNewspaper}
           />
         ) : (
-          <TabloidNewspaper 
+          <TabloidNewspaper
             events={gameState.currentEvents}
             playedCards={gameState.cardsPlayedThisRound}
             faction={gameState.faction}
@@ -1155,8 +858,7 @@ const Index = () => {
           />
         )
       )}
-
-    </div>
+    </>
   );
 };
 
