@@ -502,29 +502,57 @@ const Index = () => {
           // Convert engine Cards back to GameCards for UI compatibility
           const convertCardToGameCard = (engineCard: any) => ({
             ...engineCard,
-            flavorTruth: engineCard.flavorTruth || '',
-            flavorGov: engineCard.flavorGov || ''
+            text: engineCard.text || engineCard.flavorTruth || engineCard.flavorGov || '',
+            flavorTruth: engineCard.flavorTruth || engineCard.text || '',
+            flavorGov: engineCard.flavorGov || engineCard.text || '',
+            rarity: engineCard.rarity || 'common'
           });
           
+          console.log(`[Engine] Updating UI state after successful card play`);
+          console.log(`[Engine] Truth: ${gameState.truth} -> ${updatedState.truth}`);
+          console.log(`[Engine] IP: ${gameState.ip} -> ${updatedState.players.P1.ip}`);
+          console.log(`[Engine] Hand: ${gameState.hand?.length} -> ${updatedState.players.P1.hand.length}`);
+          
           // Apply engine state changes to UI game state
-          setGameState(prevState => ({
-            ...prevState,
-            truth: updatedState.truth,
-            ip: updatedState.players.P1.ip,
-            hand: updatedState.players.P1.hand.map(convertCardToGameCard),
-            discard: updatedState.players.P1.discard.map(convertCardToGameCard),
-            zonesControlled: updatedState.players.P1.zones,
-            // Update play tracking
-            cardsPlayedThisTurn: prevState.cardsPlayedThisTurn + 1,
-            cardsPlayedThisRound: [...prevState.cardsPlayedThisRound, { card, player: 'human' as const }],
-            selectedCard: null,
-            targetState: null,
-            // Update AI state too
-            aiIP: updatedState.players.P2.ip,
-            aiHand: updatedState.players.P2.hand.map(convertCardToGameCard),
-            aiDiscard: updatedState.players.P2.discard.map(convertCardToGameCard),
-            aiZonesControlled: updatedState.players.P2.zones
-          }));
+          setGameState(prevState => {
+            const newState = {
+              ...prevState,
+              truth: updatedState.truth,
+              ip: updatedState.players.P1.ip,
+              hand: updatedState.players.P1.hand.map(convertCardToGameCard),
+              discard: updatedState.players.P1.discard.map(convertCardToGameCard),
+              controlledStates: updatedState.players.P1.zones, // Keep as string array for compatibility
+              // Update play tracking - CRITICAL for tray display
+              cardsPlayedThisTurn: prevState.cardsPlayedThisTurn + 1,
+              cardsPlayedThisRound: [...prevState.cardsPlayedThisRound, { card, player: 'human' as const }],
+              selectedCard: null,
+              targetState: null,
+              // Update AI state too
+              aiIP: updatedState.players.P2.ip,
+              aiHand: updatedState.players.P2.hand.map(convertCardToGameCard),
+              aiDiscard: updatedState.players.P2.discard.map(convertCardToGameCard),
+              // Update state ownership map properly
+              states: prevState.states.map(state => ({
+                ...state,
+                owner: updatedState.players.P1.zones.includes(state.id) || 
+                       updatedState.players.P1.zones.includes(state.abbreviation) 
+                       ? 'player' as const
+                       : updatedState.players.P2.zones.includes(state.id) ||
+                         updatedState.players.P2.zones.includes(state.abbreviation)
+                       ? 'ai' as const
+                       : state.owner
+              }))
+            };
+            
+            console.log(`[Engine] State update completed:`, {
+              handSize: newState.hand.length,
+              cardsPlayedThisTurn: newState.cardsPlayedThisTurn,
+              cardsPlayedThisRound: newState.cardsPlayedThisRound.length,
+              controlledStates: newState.controlledStates.length
+            });
+            
+            return newState;
+          });
           
           // Still do visual animation for the card play
           await animatePlayCard(cardId, card);
@@ -535,10 +563,11 @@ const Index = () => {
           });
           return;
         } else if (outcome === 'failed') {
-          throw new Error('Card failed to play');
+          throw new Error('Card failed to play - insufficient resources or invalid target');
         }
       } else {
         // Fallback to old system if engine fails
+        console.warn('[Engine] Engine failed, falling back to legacy system');
         await playCardAnimated(cardId, animatePlayCard, targetState);
       }
       
@@ -568,8 +597,21 @@ const Index = () => {
       });
     } catch (error) {
       console.error('[Engine] Card play error:', error);
-      toast.error('❌ Card deployment failed!', {
-        duration: 3000,
+      
+      // Detailed error reporting
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[Engine] Error details:', {
+        cardId,
+        cardName: card?.name,
+        targetState,
+        gamePhase: gameState.phase,
+        playerIP: gameState.ip,
+        handSize: gameState.hand?.length,
+        error: errorMessage
+      });
+      
+      toast.error(`❌ Card deployment failed: ${errorMessage}`, {
+        duration: 4000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
       });
       audio.playSFX('error');

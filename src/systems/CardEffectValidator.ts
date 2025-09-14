@@ -6,8 +6,10 @@ const WHITELIST_KEYS = new Set([
   'ipDelta', 
   'draw',
   'discardOpponent',
+  'discardRandom',
   'pressureDelta',
   'zoneDefense',
+  'reduceFactor',
   'conditional'
 ]);
 

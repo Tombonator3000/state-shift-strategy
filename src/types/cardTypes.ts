@@ -33,19 +33,19 @@ export interface CardTarget {
   count: number;
 }
 
-// v2.1E Compliant Card Interface
+// v2.1E Compliant Card Interface - SINGLE SOURCE OF TRUTH
 export interface GameCard {
   id: string;
   name: string;
   type: CardType;
   faction: Faction;
-  rarity?: CardRarity; // Make optional to handle legacy data
+  rarity: CardRarity; // Required for proper validation
   cost: number;
   
-  // Text fields - both must exist for flavor routing
-  text?: string;
-  flavorTruth: string;  // Required
-  flavorGov: string;    // Required
+  // Text fields - ensure both exist with fallbacks
+  text: string;         // Main card text
+  flavorTruth: string;  // Required - Truth faction flavor
+  flavorGov: string;    // Required - Government faction flavor
   
   // Gameplay
   effects?: CardEffects;

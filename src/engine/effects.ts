@@ -34,16 +34,38 @@ export function applyEffects(ctx: Context, owner: "P1" | "P2", rawEffects: any, 
   }
 
   if (eff.draw) {
+    console.log(`[Engine] Drawing ${eff.draw} cards for ${owner}`);
     for (let i = 0; i < eff.draw; i++) {
       const c = you.deck.shift();
-      if (c) you.hand.push(c);
+      if (c) {
+        you.hand.push(c);
+        console.log(`[Engine] Drew card: ${c.name}`);
+      }
     }
   }
   
   if (eff.discardOpponent) {
+    console.log(`[Engine] Forcing opponent to discard ${eff.discardOpponent} cards`);
     for (let i = 0; i < eff.discardOpponent; i++) {
       const c = opp.hand.shift();
-      if (c) opp.discard.push(c);
+      if (c) {
+        opp.discard.push(c);
+        console.log(`[Engine] Opponent discarded: ${c.name}`);
+      }
+    }
+  }
+  
+  if (eff.discardRandom) {
+    console.log(`[Engine] ${owner} discarding ${eff.discardRandom} random cards`);
+    for (let i = 0; i < eff.discardRandom; i++) {
+      if (you.hand.length > 0) {
+        const randomIndex = Math.floor(Math.random() * you.hand.length);
+        const c = you.hand.splice(randomIndex, 1)[0];
+        if (c) {
+          you.discard.push(c);
+          console.log(`[Engine] ${owner} randomly discarded: ${c.name}`);
+        }
+      }
     }
   }
 

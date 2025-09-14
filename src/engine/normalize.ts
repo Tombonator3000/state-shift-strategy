@@ -3,8 +3,10 @@ export type Normalized = {
   ipDelta?: { self?: number; opponent?: number };
   draw?: number;
   discardOpponent?: number;
+  discardRandom?: number; // Support for legacy random discard
   pressureDelta?: number;
   zoneDefense?: number;
+  reduceFactor?: number; // For partial blocking defensive cards (0-1)
   conditional?: any;
   flags?: {
     blockAttack?: boolean;
@@ -27,6 +29,14 @@ export function normalizeEffects(effectsField: any): Normalized {
     if (typeof (clone as any).antiTruthDelta === "number") {
       clone.truthDelta = (clone.truthDelta || 0) + (clone as any).antiTruthDelta;
       delete (clone as any).antiTruthDelta;
+    }
+    // Handle legacy discardRandom field
+    if (typeof (clone as any).discardRandom === "number") {
+      clone.discardRandom = (clone as any).discardRandom;
+    }
+    // Handle reduceFactor for defensive cards
+    if (typeof (clone as any).reduceFactor === "number") {
+      clone.reduceFactor = Math.max(0, Math.min(1, (clone as any).reduceFactor)); // Clamp 0-1
     }
     return clone as Normalized;
   }
@@ -57,8 +67,29 @@ export function normalizeEffects(effectsField: any): Normalized {
         }
         break;
       }
+      case "draw": {
+        out.draw = (out.draw || 0) + Number(item.v || item.value || 0);
+        break;
+      }
+      case "discardOpponent": {
+        out.discardOpponent = (out.discardOpponent || 0) + Number(item.v || item.value || 0);
+        break;
+      }
+      case "discardRandom": {
+        out.discardRandom = (out.discardRandom || 0) + Number(item.v || item.value || 0);
+        break;
+      }
       case "pressure": {
         out.pressureDelta = (out.pressureDelta || 0) + Number(item.v || item.value || 0);
+        break;
+      }
+      case "zoneDefense": {
+        out.zoneDefense = (out.zoneDefense || 0) + Number(item.v || item.value || 0);
+        break;
+      }
+      case "reduceFactor": {
+        const factor = Number(item.v || item.value || 0);
+        out.reduceFactor = Math.max(0, Math.min(1, factor)); // Clamp 0-1
         break;
       }
       case "flag": {

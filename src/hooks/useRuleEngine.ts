@@ -15,6 +15,13 @@ export function useRuleEngine() {
   
   // Convert game state from existing format to engine format
   const convertToEngineState = useCallback((gameState: any): EngineGameState => {
+    console.log(`[Engine] Converting game state:`, { 
+      phase: gameState.phase, 
+      handSize: gameState.hand?.length, 
+      ip: gameState.ip,
+      truth: gameState.truth 
+    });
+    
     return {
       turn: gameState.round || 1,
       truth: gameState.truth || 50,
@@ -22,23 +29,48 @@ export function useRuleEngine() {
       players: {
         "P1": {
           id: "P1",
-          faction: "truth",
+          faction: gameState.faction === 'truth' ? "truth" : "government", // Use actual player faction
           deck: gameState.deck || [],
-          hand: gameState.hand || [],
-          discard: gameState.discard || [],
+          hand: (gameState.hand || []).map((card: any) => ({
+            ...card,
+            // Ensure required fields exist
+            text: card.text || card.flavorTruth || card.flavorGov || '',
+            flavorTruth: card.flavorTruth || card.text || '',
+            flavorGov: card.flavorGov || card.text || '',
+            rarity: card.rarity || 'common'
+          })),
+          discard: (gameState.discard || []).map((card: any) => ({
+            ...card,
+            text: card.text || card.flavorTruth || card.flavorGov || '',
+            flavorTruth: card.flavorTruth || card.text || '',
+            flavorGov: card.flavorGov || card.text || '',
+            rarity: card.rarity || 'common'
+          })),
           ip: gameState.ip || 0,
-          zones: gameState.zonesControlled || [],
+          zones: gameState.controlledStates?.map((s: any) => s.id || s.abbreviation) || [],
           zoneDefenseBonus: 0,
           pressureTotal: 0
         },
         "P2": {
           id: "P2", 
-          faction: "government",
+          faction: gameState.faction === 'truth' ? "government" : "truth", // Opposite faction for AI
           deck: gameState.aiDeck || [],
-          hand: gameState.aiHand || [],
-          discard: gameState.aiDiscard || [],
+          hand: (gameState.aiHand || []).map((card: any) => ({
+            ...card,
+            text: card.text || card.flavorTruth || card.flavorGov || '',
+            flavorTruth: card.flavorTruth || card.text || '',
+            flavorGov: card.flavorGov || card.text || '',
+            rarity: card.rarity || 'common'
+          })),
+          discard: (gameState.aiDiscard || []).map((card: any) => ({
+            ...card,
+            text: card.text || card.flavorTruth || card.flavorGov || '',
+            flavorTruth: card.flavorTruth || card.text || '',
+            flavorGov: card.flavorGov || card.text || '',
+            rarity: card.rarity || 'common'  
+          })),
           ip: gameState.aiIP || 0,
-          zones: gameState.aiZonesControlled || [],
+          zones: gameState.states?.filter((s: any) => s.owner === 'ai').map((s: any) => s.id || s.abbreviation) || [],
           zoneDefenseBonus: 0,
           pressureTotal: 0
         }
@@ -72,42 +104,67 @@ export function useRuleEngine() {
 
   // Play a card using the new engine
   const playCardWithEngine = useCallback((gameState: any, cardId: string, targetStateId?: string) => {
-    console.log(`[Engine] playCardWithEngine called for card:`, cardId);
-    console.log(`[Engine] Original game state:`, { truth: gameState.truth, ip: gameState.ip, hand: gameState.hand?.length });
+    console.log(`[Engine] playCardWithEngine called for card:`, cardId, `target:`, targetStateId);
+    console.log(`[Engine] Original game state:`, { 
+      truth: gameState.truth, 
+      ip: gameState.ip, 
+      handSize: gameState.hand?.length,
+      phase: gameState.phase
+    });
     
-    const engineState = convertToEngineState(gameState);
-    console.log(`[Engine] Converted engine state:`, { truth: engineState.truth, p1IP: engineState.players.P1.ip });
-    
-    const context = createContext(engineState);
-    
-    const hand = gameState.hand || [];
-    const card = hand.find((c: any) => c.id === cardId);
-    if (!card) {
-      console.log(`[Engine] Card not found in hand:`, cardId);
+    try {
+      const engineState = convertToEngineState(gameState);
+      console.log(`[Engine] Engine state conversion successful:`, { 
+        truth: engineState.truth, 
+        p1IP: engineState.players.P1.ip,
+        p1HandSize: engineState.players.P1.hand.length
+      });
+      
+      const context = createContext(engineState);
+      
+      const hand = gameState.hand || [];
+      const card = hand.find((c: any) => c.id === cardId);
+      if (!card) {
+        console.error(`[Engine] Card not found in hand:`, cardId, `Available:`, hand.map((c: any) => c.id));
+        return null;
+      }
+      
+      console.log(`[Engine] Playing card:`, { 
+        id: card.id, 
+        name: card.name, 
+        type: card.type,
+        cost: card.cost,
+        effects: card.effects 
+      });
+      
+      // Convert card to engine format with proper validation
+      const engineCard: Card = {
+        id: card.id,
+        name: card.name,
+        type: card.type,
+        cost: card.cost,
+        faction: card.faction,
+        rarity: card.rarity || 'common',
+        effects: card.effects || {}
+      };
+      
+      const outcome = playCardEngine(context, "P1", engineCard, targetStateId);
+      console.log(`[Engine] Play outcome:`, outcome);
+      console.log(`[Engine] Post-play state:`, { 
+        truth: context.state.truth, 
+        p1IP: context.state.players.P1.ip,
+        p1HandSize: context.state.players.P1.hand.length,
+        p1DiscardSize: context.state.players.P1.discard.length
+      });
+      
+      return {
+        outcome,
+        updatedState: context.state
+      };
+    } catch (error) {
+      console.error(`[Engine] playCardWithEngine error:`, error);
       return null;
     }
-    
-    console.log(`[Engine] Card found:`, { id: card.id, name: card.name, effects: card.effects });
-    
-    // Convert card to engine format
-    const engineCard: Card = {
-      id: card.id,
-      name: card.name,
-      type: card.type,
-      cost: card.cost,
-      faction: card.faction,
-      rarity: card.rarity,
-      effects: card.effects
-    };
-    
-    const outcome = playCardEngine(context, "P1", engineCard, targetStateId);
-    console.log(`[Engine] Play outcome:`, outcome);
-    console.log(`[Engine] Updated engine state:`, { truth: context.state.truth, p1IP: context.state.players.P1.ip });
-    
-    return {
-      outcome,
-      updatedState: context.state
-    };
   }, [convertToEngineState, createContext]);
 
   // Handle defense selection from modal
