@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Target, Zap, Shield } from 'lucide-react';
@@ -7,13 +7,14 @@ import CardImage from '@/components/game/CardImage';
 import { ExtensionCardBadge } from '@/components/game/ExtensionCardBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CardTextGenerator } from '@/systems/CardTextGenerator';
+import type { PlayOutcome } from '@/engine/flow';
 
 interface CardDetailOverlayProps {
   card: GameCard | null;
   canAfford: boolean;
   disabled: boolean;
   onClose: () => void;
-  onPlayCard: () => void;
+  onPlayCard: () => void | PlayOutcome | Promise<void | PlayOutcome>;
   swipeHandlers?: any;
 }
 
@@ -26,6 +27,8 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
   swipeHandlers
 }) => {
   const isMobile = useIsMobile();
+  const [busy, setBusy] = useState(false);
+  const canPlay = !disabled && canAfford && !busy;
   
   if (!card) return null;
 
@@ -194,12 +197,20 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
         {/* Bottom CTA */}
         <div className="flex-shrink-0 p-4 border-t border-border bg-card/95">
           <Button
-            onClick={onPlayCard}
-            disabled={disabled || !canAfford}
+            onClick={async () => {
+              if (busy) return;
+              try {
+                setBusy(true);
+                await onPlayCard();
+              } finally {
+                setBusy(false);
+              }
+            }}
+            disabled={!canPlay}
             className={`enhanced-button w-full font-mono relative overflow-hidden transition-all duration-300 ${
               isMobile ? 'text-base py-4' : 'text-sm py-3'
             } ${
-              !canAfford ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
+              !canPlay ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
             }`}
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
