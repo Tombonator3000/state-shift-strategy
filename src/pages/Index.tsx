@@ -865,7 +865,8 @@ const Index = () => {
   // Desktop layout (existing design)
   console.log('🔍 Rendering Desktop Layout');
   return (
-    <div className="min-h-screen bg-newspaper-bg">
+    <div className="min-h-0 min-w-0 h-full overflow-visible"> {/* layout-fix no-cut v21E */}
+      <div className="h-full bg-newspaper-bg">{/* layout-fix no-cut v21E */}
       {/* Newspaper Header */}
       <div className="bg-newspaper-bg border-b-4 border-newspaper-border">
         <div className="container mx-auto px-4 py-2">
@@ -1273,6 +1274,7 @@ const Index = () => {
         />
       )}
 
+      </div>{/* layout-fix no-cut v21E */}
     </div>
   );
 };

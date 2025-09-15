@@ -78,7 +78,11 @@ All colors MUST be HSL.
     --newspaper-border: 0 0% 30%;
     --newspaper-accent: 0 75% 45%;
     --newspaper-headline: 0 0% 0%;
-    
+
+    /* layout-fix no-cut v21E */
+    --masthead-h: clamp(56px, 6svh, 72px); /* layout-fix no-cut v21E */
+    --tray-h: clamp(64px, 8svh, 96px); /* layout-fix no-cut v21E */
+
     /* Enhanced animation colors */
     --warning: 45 93% 58%;
     --warning-foreground: 0 0% 9%;
@@ -154,6 +158,22 @@ All colors MUST be HSL.
     --rarity-rare: 221 83% 63%;
     --rarity-legendary: 25 95% 63%;
   }
+
+  /* layout-fix no-cut v21E */
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    overflow: auto;
+  }
+  .masthead {
+    height: var(--masthead-h);
+  }
+  .tray {
+    height: var(--tray-h);
+  }
 }
 
 @layer base {
@@ -163,6 +183,15 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .h-svh { /* layout-fix no-cut v21E */
+    height: 100svh;
+  }
+  .min-h-svh { /* layout-fix no-cut v21E */
+    min-height: 100svh;
   }
 }
 

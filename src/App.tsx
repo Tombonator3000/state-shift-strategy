@@ -28,15 +28,22 @@ const App = () => {
           <AchievementProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/dev/effects" element={<EffectSystemDashboard />} />
-                <Route path="/dev/recovery" element={<DatabaseRecovery />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            {/* layout-fix no-cut v21E */}
+            <div className="grid min-h-[100svh] grid-rows-[auto,1fr,auto] w-full">
+              <header className="shrink-0 h-[var(--masthead-h)]" />
+              <main className="min-h-0 min-w-0 overflow-y-auto">
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/dev/effects" element={<EffectSystemDashboard />} />
+                    <Route path="/dev/recovery" element={<DatabaseRecovery />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </main>
+              <footer className="shrink-0 h-[var(--tray-h)]" />
+            </div>
           </AchievementProvider>
         </AudioProvider>
       </TooltipProvider>
