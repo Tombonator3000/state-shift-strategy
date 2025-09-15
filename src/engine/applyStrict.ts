@@ -1,5 +1,6 @@
 import { CanonicalEffects } from "@/rules/v21e-strict";
 import { Context } from "./types";
+import { normState } from "@/utils/stateAlias";
 
 const clamp = (v:number,lo:number,hi:number)=>Math.max(lo,Math.min(hi,v));
 const discardRandom = (arr: any[], n:number) => {
@@ -21,12 +22,17 @@ export function applyCanonical(ctx: Context, owner:"P1"|"P2", e: CanonicalEffect
   if (e.pressureAllDelta){
     for (const sid of Object.keys(s.pressureByState)) {
       const rec = (s.pressureByState[sid] ||= { P1:0, P2:0 });
-      rec[owner] = Math.max(0, rec[owner] + e.pressureAllDelta);
+      const before = rec[owner];
+      rec[owner] = Math.max(0, before + e.pressureAllDelta);
     }
+    ctx.log?.(`[pressure:ALL] ${owner} +${e.pressureAllDelta}`);
   }
   if (e.pressureDelta && targetStateId){
-    const rec = (s.pressureByState[targetStateId] ||= { P1:0, P2:0 });
-    rec[owner] = Math.max(0, rec[owner] + e.pressureDelta);
+    const tid = normState(targetStateId)!;
+    const rec = (s.pressureByState[tid] ||= { P1:0, P2:0 });
+    const before = rec[owner];
+    rec[owner] = Math.max(0, before + e.pressureDelta);
+    ctx.log?.(`[pressure:${tid}] ${owner} ${before} -> ${rec[owner]} (+${e.pressureDelta})`);
   }
 
   if (e.costModDelta){
@@ -46,7 +52,11 @@ export function applyCanonical(ctx: Context, owner:"P1"|"P2", e: CanonicalEffect
     const c = e.conditional; let ok = true;
     if (c.ifTruthAtLeast !== undefined) ok &&= s.truth >= c.ifTruthAtLeast;
     if (c.ifZonesControlledAtLeast !== undefined) ok &&= you.zones.length >= c.ifZonesControlledAtLeast;
-    if (c.ifTargetStateIs !== undefined) ok &&= (String(c.ifTargetStateIs).toUpperCase() === String(targetStateId||"").toUpperCase());
+    if (c.ifTargetStateIs !== undefined) {
+      const want = normState(c.ifTargetStateIs);
+      const got  = normState(targetStateId);
+      ok &&= !!want && !!got && want === got;
+    }
     applyCanonical(ctx, owner, ok ? (c.then||{}) : (c.else||{}), targetStateId);
   }
 

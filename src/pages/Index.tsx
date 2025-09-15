@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import USAMap from '@/components/game/USAMap';
@@ -50,6 +50,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import MobileGameLayout from '@/components/game/MobileGameLayout';
 import MobileGameHand from '@/components/game/MobileGameHand';
 import ResponsiveNewspaper from '@/components/game/ResponsiveNewspaper';
+import { normState } from '@/utils/stateAlias';
+import { GameContext } from '@/engine/GameContext';
 
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
@@ -84,6 +86,11 @@ const Index = () => {
   const [showMinimizedHand, setShowMinimizedHand] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo, playDefensiveCard, resolveClash, closeClashWindow } = useGameState();
+  const pressureContextValue = useMemo(() => ({
+    state: {
+      pressureByState: gameState.pressureByState || {}
+    }
+  }), [gameState.pressureByState]);
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -515,6 +522,24 @@ const Index = () => {
           
           // Apply engine state changes to UI game state
           setGameState(prevState => {
+            const pressureByState = updatedState.pressureByState || {};
+            const newStates = prevState.states.map(state => {
+              const tid = normState(state.abbreviation || state.id);
+              const rec = tid ? pressureByState[tid] : undefined;
+              const owner = updatedState.players.P1.zones.includes(state.id) ||
+                            updatedState.players.P1.zones.includes(state.abbreviation)
+                              ? 'player' as const
+                              : updatedState.players.P2.zones.includes(state.id) ||
+                                updatedState.players.P2.zones.includes(state.abbreviation)
+                              ? 'ai' as const
+                              : state.owner;
+              return {
+                ...state,
+                owner,
+                pressure: rec?.P1 ?? 0
+              };
+            });
+
             const newState = {
               ...prevState,
               truth: updatedState.truth,
@@ -531,17 +556,9 @@ const Index = () => {
               aiIP: updatedState.players.P2.ip,
               aiHand: updatedState.players.P2.hand.map(convertCardToGameCard),
               aiDiscard: updatedState.players.P2.discard.map(convertCardToGameCard),
+              pressureByState,
               // Update state ownership map properly
-              states: prevState.states.map(state => ({
-                ...state,
-                owner: updatedState.players.P1.zones.includes(state.id) || 
-                       updatedState.players.P1.zones.includes(state.abbreviation) 
-                       ? 'player' as const
-                       : updatedState.players.P2.zones.includes(state.id) ||
-                         updatedState.players.P2.zones.includes(state.abbreviation)
-                       ? 'ai' as const
-                       : state.owner
-              }))
+              states: newStates
             };
             
             console.log(`[Engine] State update completed:`, {
@@ -768,7 +785,8 @@ const Index = () => {
     console.log('🔍 Rendering Mobile Layout - isMobile:', isMobile, 'forceMobile:', forceMobile);
     // Mobile layout with MobileGameLayout wrapper
     return (
-      <MobileGameLayout
+      <GameContext.Provider value={pressureContextValue}>
+        <MobileGameLayout
         controlledStates={gameState.controlledStates.length}
         truth={gameState.truth}
         ip={gameState.ip}
@@ -858,14 +876,16 @@ const Index = () => {
             </Button>
           </div>
         </div>
-      </MobileGameLayout>
+        </MobileGameLayout>
+      </GameContext.Provider>
     );
   }
 
   // Desktop layout (existing design)
   console.log('🔍 Rendering Desktop Layout');
   return (
-    <div className="min-h-screen bg-newspaper-bg">
+    <GameContext.Provider value={pressureContextValue}>
+      <div className="min-h-screen bg-newspaper-bg">
       {/* Newspaper Header */}
       <div className="bg-newspaper-bg border-b-4 border-newspaper-border">
         <div className="container mx-auto px-4 py-2">
@@ -1273,7 +1293,8 @@ const Index = () => {
         />
       )}
 
-    </div>
+      </div>
+    </GameContext.Provider>
   );
 };
 

@@ -63,6 +63,7 @@ interface GameState {
     occupierIcon?: string | null;
     occupierUpdatedAt?: number;
   }>;
+  pressureByState: Record<string, { P1: number; P2: number }>;
   currentEvents: GameEvent[];
   eventManager?: EventManager;
   showNewspaper: boolean;
@@ -99,12 +100,19 @@ interface GameState {
 
 const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
   // Start with some common events for the first newspaper
-  const initialEvents = EVENT_DATABASE.filter(event => 
+  const initialEvents = EVENT_DATABASE.filter(event =>
     event.rarity === 'common' && !event.conditions
   ).slice(0, 3);
-  
+
   return initialEvents;
 };
+
+const createEmptyPressureMap = () => Object.fromEntries(
+  USA_STATES.map(state => {
+    const key = state.abbreviation || state.id;
+    return [key, { P1: 0, P2: 0 }];
+  })
+);
 
 export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   const [eventManager] = useState(() => new EventManager());
@@ -153,6 +161,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         bonusValue: state.bonusValue
       };
     }),
+    pressureByState: createEmptyPressureMap(),
     currentEvents: generateInitialEvents(eventManager),
     eventManager,
     showNewspaper: false,
@@ -240,7 +249,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       targetState: null,
       states: USA_STATES.map(state => {
         let owner: 'player' | 'ai' | 'neutral' = 'neutral';
-        
+
         if (initialControl.player.includes(state.abbreviation)) owner = 'player';
         else if (initialControl.ai.includes(state.abbreviation)) owner = 'ai';
         
@@ -256,6 +265,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
           bonusValue: state.bonusValue
         };
       }),
+      pressureByState: createEmptyPressureMap(),
       log: [
         `Game started - ${faction} faction selected`,
         `Starting Truth: ${startingTruth}%`,

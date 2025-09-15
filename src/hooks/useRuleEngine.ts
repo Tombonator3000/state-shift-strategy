@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { Card, Context, GameState as EngineGameState } from '@/engine/types';
 import { playCard as playCardEngine, resolveReaction, canAfford } from '@/engine/flow';
 import { pickDefenseForAI } from '@/engine/simpleAI';
+import { normState } from '@/utils/stateAlias';
 
 interface ReactionState {
   attackCard: Card;
@@ -24,16 +25,23 @@ export function useRuleEngine() {
     
     const pressureByState: Record<string, { P1: number; P2: number }> = {};
     const stateAliases: Record<string, string> = {};
+    const uiPressure = gameState.pressureByState || {};
     for (const st of gameState.states || []) {
-      const id = st.id || st.abbreviation;
-      if (!id) continue;
-      pressureByState[id] = { P1: 0, P2: 0 };
+      const rawId = st.abbreviation || st.id;
+      if (!rawId) continue;
+      const id = normState(rawId) || rawId;
+      const rec = uiPressure[id] || uiPressure[rawId] || { P1: st.pressure || 0, P2: 0 };
+      pressureByState[id] = {
+        P1: typeof rec.P1 === 'number' ? rec.P1 : st.pressure || 0,
+        P2: typeof rec.P2 === 'number' ? rec.P2 : 0
+      };
       if (st.name) stateAliases[st.name] = id;
       stateAliases[id] = id;
       stateAliases[id.toLowerCase()] = id;
       if (st.abbreviation) {
-        stateAliases[st.abbreviation] = id;
-        stateAliases[st.abbreviation.toLowerCase()] = id;
+        const abbr = st.abbreviation.toUpperCase();
+        stateAliases[abbr] = id;
+        stateAliases[abbr.toLowerCase()] = id;
       }
     }
 
