@@ -32,16 +32,26 @@ export function resolveCard(ctx: Context, owner:"P1"|"P2", card:Card, targetStat
 }
 
 export function playCard(ctx: Context, owner:"P1"|"P2", card:Card, targetStateId?: string): PlayOutcome {
+  if (card.type === "ZONE" && !targetStateId) {
+    ctx.log?.(`[warn] ZONE played without target → no effect`);
+  }
   if (!canAfford(ctx, owner, card)) return "failed";
   payCost(ctx, owner, card);
 
   const defender = owner === "P1" ? "P2" : "P1";
   const needsReaction = (card.type === "ATTACK" || card.type === "MEDIA");
   if (needsReaction){
-    if (ctx.openReaction && defenderHasPlayableReaction(ctx, defender)) {
+    const canReact = defenderHasPlayableReaction(ctx, defender);
+    if (!canReact) {
+      resolveCard(ctx, owner, card, targetStateId);
+      return "played";
+    }
+    if (ctx.openReaction) {
       ctx.openReaction(card, owner, defender, targetStateId);
       return "reaction-pending";
     }
+    resolveCard(ctx, owner, card, targetStateId);
+    return "played";
   }
 
   resolveCard(ctx, owner, card, targetStateId);

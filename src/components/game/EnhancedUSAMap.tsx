@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +6,8 @@ import { toast } from '@/hooks/use-toast';
 import * as topojson from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
+import { GameContext } from '@/engine/GameContext';
+import { normState } from '@/utils/stateAlias';
 
 
 interface EnhancedState {
@@ -42,9 +44,15 @@ interface EnhancedUSAMapProps {
   playedCards?: PlayedCard[];
 }
 
-const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({ 
-  states, 
-  onStateClick, 
+function usePressure(stateId: string, viewer: 'P1' | 'P2') {
+  const ctx = useContext(GameContext);
+  const tid = normState(stateId) || stateId;
+  return ctx?.state.pressureByState[tid]?.[viewer] ?? 0;
+}
+
+const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
+  states,
+  onStateClick,
   selectedZoneCard,
   hoveredStateId,
   selectedState,
@@ -321,6 +329,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   };
 
   const stateInfo = getHoveredStateInfo();
+  const viewer: 'P1' | 'P2' = 'P1';
+  const hoveredPressureId = stateInfo?.abbreviation || stateInfo?.id || '';
+  const viewerPressure = usePressure(hoveredPressureId, viewer);
 
   return (
     <div className="relative" ref={containerRef}>
@@ -389,12 +400,12 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <div className="text-muted-foreground">Pressure</div>
-                <div className="font-mono text-destructive">{stateInfo.pressure}</div>
+                <div className="font-mono text-destructive">{viewerPressure}</div>
               </div>
               <div>
                 <div className="text-muted-foreground">Capture</div>
                 <div className="font-mono text-foreground">
-                  {stateInfo.pressure >= stateInfo.defense ? 'READY' : `${stateInfo.defense - stateInfo.pressure} needed`}
+                  {viewerPressure >= stateInfo.defense ? 'READY' : `${Math.max(0, stateInfo.defense - viewerPressure)} needed`}
                 </div>
               </div>
             </div>
