@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "validate:core": "tsx scripts/validate-core-v21e-strict.ts",
+    "build": "bun run validate:core && vite build",
+    "build:npm": "npm run validate:core && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
     "export:core": "tsx scripts/export-core-json.ts",
-    "build:core": "CORE_SEED=2025-09-14 tsx scripts/export-core-json.ts"
+    "build:core": "CORE_SEED=2025-09-14 tsx scripts/export-core-json.ts",
+    "snapshot:core": "tsx scripts/snapshot-core-v21e-strict.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
