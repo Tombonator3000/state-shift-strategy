@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { GameCard } from '@/types/cardTypes';
+import type { PlayOutcome } from '@/engine/flow';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Zap, Shield, Target, X, Eye } from 'lucide-react';
@@ -15,7 +16,7 @@ import { ExtensionCardBadge } from './ExtensionCardBadge';
 
 interface EnhancedGameHandProps {
   cards: GameCard[];
-  onPlayCard: (cardId: string) => void;
+  onPlayCard: (cardId: string) => void | Promise<PlayOutcome | void>;
   disabled?: boolean;
   selectedCard?: string | null;
   onSelectCard?: (cardId: string) => void;
@@ -109,7 +110,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     
     
     try {
-      onPlayCard(cardId);
+      await onPlayCard(cardId);
       triggerHaptic('success');
     } catch (error) {
       triggerHaptic('error');
@@ -164,8 +165,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           const faction = getCardFaction(card);
           
           return (
-            <div 
-              key={`${card.id}-${index}`}
+            <div
+              key={card.id}
               data-card-id={card.id}
               aria-describedby={`hand-tooltip-${card.id}`}
               className={`

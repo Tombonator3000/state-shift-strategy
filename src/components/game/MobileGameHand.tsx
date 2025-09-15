@@ -10,10 +10,11 @@ import { useAudioContext } from '@/contexts/AudioContext';
 import type { GameCard } from '@/types/cardTypes';
 import CardDetailOverlay from './CardDetailOverlay';
 import { ExtensionCardBadge } from './ExtensionCardBadge';
+import type { PlayOutcome } from '@/engine/flow';
 
 interface MobileGameHandProps {
   cards: GameCard[];
-  onPlayCard: (cardId: string) => void;
+  onPlayCard: (cardId: string) => void | Promise<PlayOutcome | void>;
   onSelectCard?: (cardId: string) => void;
   selectedCard?: string | null;
   currentIP: number;
@@ -96,7 +97,7 @@ const MobileGameHand: React.FC<MobileGameHandProps> = ({
     }
   });
 
-  const handleCardPlay = (cardId: string) => {
+  const handleCardPlay = async (cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (!card || !canAffordCard(card)) {
       triggerHaptic('error');
@@ -109,7 +110,7 @@ const MobileGameHand: React.FC<MobileGameHandProps> = ({
       triggerHaptic('medium');
     } else {
       // For other cards, play immediately
-      onPlayCard(cardId);
+      await onPlayCard(cardId);
       triggerHaptic('success');
     }
   };
@@ -259,10 +260,10 @@ const MobileGameHand: React.FC<MobileGameHandProps> = ({
           canAfford={cards.find(c => c.id === examinedCard) ? canAffordCard(cards.find(c => c.id === examinedCard)!) : false}
           disabled={disabled}
           onClose={() => setExaminedCard(null)}
-          onPlayCard={() => {
+          onPlayCard={async () => {
             const card = cards.find(c => c.id === examinedCard);
             if (card) {
-              handleCardPlay(card.id);
+              await handleCardPlay(card.id);
               setExaminedCard(null);
             }
           }}

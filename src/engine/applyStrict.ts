@@ -28,7 +28,7 @@ export function applyCanonical(ctx: Context, owner:"P1"|"P2", e: CanonicalEffect
     ctx.log?.(`[pressure:ALL] ${owner} +${e.pressureAllDelta}`);
   }
   if (e.pressureDelta && targetStateId){
-    const tid = normState(targetStateId)!;
+    const tid = (targetStateId || "").toUpperCase();
     const rec = (s.pressureByState[tid] ||= { P1:0, P2:0 });
     const before = rec[owner];
     rec[owner] = Math.max(0, before + e.pressureDelta);

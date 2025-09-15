@@ -24,17 +24,28 @@ function defenderHasPlayableReaction(ctx: Context, defender: "P1" | "P2") {
 }
 
 export function resolveCard(ctx: Context, owner:"P1"|"P2", card:Card, targetStateId?: string){
+  ctx.log?.(`[resolve:start] ${owner} -> ${card.name}`);
   applyCanonical(ctx, owner, card.effects || {}, targetStateId);
+
   const you = ctx.state.players[owner];
-  you.hand = you.hand.filter(c => c !== card);
-  you.discard.push(card);
-  if (card.type === "ZONE") you.zones.push(card.id);
+  you.hand = you.hand.filter(c => c.id !== card.id);
+  you.discard = [...you.discard, card];
+
+  if (card.type === "ZONE") {
+    if (!you.zones.includes(card.id)) {
+      you.zones = [...you.zones, card.id];
+    }
+  }
+
+  ctx.log?.(`[resolve:end] ${card.name} -> moved to discard; hand=${you.hand.length}, discard=${you.discard.length}`);
 }
 
 export function playCard(ctx: Context, owner:"P1"|"P2", card:Card, targetStateId?: string): PlayOutcome {
   if (card.type === "ZONE" && !targetStateId) {
-    ctx.log?.(`[warn] ZONE played without target → no effect`);
+    ctx.log?.(`[warn] ZONE played without target -> abort`);
+    return "failed";
   }
+
   if (!canAfford(ctx, owner, card)) return "failed";
   payCost(ctx, owner, card);
 
@@ -78,8 +89,8 @@ export function resolveReaction(ctx: Context, attack: {card:Card, attacker:"P1"|
 
   // alltid forbruk angrepskortet (kost er allerede betalt)
   const atk = ctx.state.players[attacker];
-  atk.hand = atk.hand.filter(c => c !== attackCard);
-  atk.discard.push(attackCard);
+  atk.hand = atk.hand.filter(c => c.id !== attackCard.id);
+  atk.discard = [...atk.discard, attackCard];
 
   if (!blocked) {
     // vi har allerede lagt det i discard; men må kjøre effekter:

@@ -52,6 +52,7 @@ import MobileGameHand from '@/components/game/MobileGameHand';
 import ResponsiveNewspaper from '@/components/game/ResponsiveNewspaper';
 import { normState } from '@/utils/stateAlias';
 import { GameContext } from '@/engine/GameContext';
+import type { PlayOutcome } from '@/engine/flow';
 
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
@@ -96,6 +97,18 @@ const Index = () => {
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { reactionState, playCardWithEngine, handleDefenseSelection, getDefensiveCards, closeReactionModal } = useRuleEngine();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
+  const latestPlayedCards = useMemo(() => {
+    const cards: Array<{ card: any; player: 'human' | 'ai' }> = [];
+    const lastHuman = gameState.discard?.[gameState.discard.length - 1];
+    if (lastHuman) {
+      cards.push({ card: lastHuman, player: 'human' });
+    }
+    const lastAI = gameState.aiDiscard?.[gameState.aiDiscard.length - 1];
+    if (lastAI) {
+      cards.push({ card: lastAI, player: 'ai' });
+    }
+    return cards;
+  }, [gameState.discard, gameState.aiDiscard]);
 
   // Handle AI turns
   useEffect(() => {
@@ -322,7 +335,7 @@ const Index = () => {
       const cardNumber = parseInt(e.key);
       if (cardNumber >= 1 && cardNumber <= 9 && gameState.hand[cardNumber - 1]) {
         const card = gameState.hand[cardNumber - 1];
-        handlePlayCard(card.id);
+        void handlePlayCard(card.id);
         return;
       }
       
@@ -452,11 +465,10 @@ const Index = () => {
     audio.playSFX('hover');
   };
 
-  const handlePlayCard = async (cardId: string, targetState?: string) => {
+  const handlePlayCard = async (cardId: string, targetState?: string): Promise<PlayOutcome | undefined> => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || isAnimating()) return;
 
-    // Check if player can afford the card
     if (gameState.ip < card.cost) {
       toast.error(`💰 Insufficient IP! Need ${card.cost}, have ${gameState.ip}`, {
         duration: 3000,
@@ -466,7 +478,6 @@ const Index = () => {
       return;
     }
 
-    // Check if max cards played this turn
     if (gameState.cardsPlayedThisTurn >= 3) {
       toast.error('📋 Maximum 3 cards per turn!', {
         duration: 3000,
@@ -476,7 +487,6 @@ const Index = () => {
       return;
     }
 
-    // If it's a ZONE card that requires targeting
     if (card.type === 'ZONE' && !gameState.targetState && !targetState) {
       selectCard(cardId);
       audio.playSFX('hover');
@@ -487,26 +497,48 @@ const Index = () => {
       return;
     }
 
-    // Show loading state
     setLoadingCard(cardId);
     audio.playSFX('cardPlay');
-    
+
+    let finalOutcome: PlayOutcome | undefined;
+    let postStateUpdated = false;
+
     try {
-      // Use new rule engine for effect processing and reaction windows
       const engineResult = playCardWithEngine(gameState, cardId, targetState);
-      
+
       if (engineResult) {
         const { outcome, updatedState } = engineResult;
-        
+
         if (outcome === 'reaction-pending') {
-          // Reaction modal will handle the rest automatically
           console.log(`[Engine] ${card.name} triggered reaction window`);
-          return; // Don't continue with old system
-        } else if (outcome === 'played') {
-          // Update UI game state with engine results
+          finalOutcome = outcome;
+          return finalOutcome;
+        }
+
+        if (outcome === 'blocked') {
+          toast('🛡️ Attack was blocked!', {
+            duration: 2000,
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #3b82f6' }
+          });
+          finalOutcome = outcome;
+          return finalOutcome;
+        }
+
+        if (outcome === 'failed') {
+          const failureMessage = 'Card failed to play - insufficient resources or invalid target';
+          console.warn(`[Engine] ${card.name} could not be played: ${failureMessage}`);
+          toast.error(`❌ ${failureMessage}`, {
+            duration: 3000,
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+          });
+          audio.playSFX('error');
+          finalOutcome = outcome;
+          return finalOutcome;
+        }
+
+        if (outcome === 'played') {
           console.log(`[Engine] ${card.name} played successfully, updating UI state`);
-          
-          // Convert engine Cards back to GameCards for UI compatibility
+
           const convertCardToGameCard = (engineCard: any) => ({
             ...engineCard,
             text: engineCard.text || engineCard.flavorTruth || engineCard.flavorGov || '',
@@ -514,13 +546,7 @@ const Index = () => {
             flavorGov: engineCard.flavorGov || engineCard.text || '',
             rarity: engineCard.rarity || 'common'
           });
-          
-          console.log(`[Engine] Updating UI state after successful card play`);
-          console.log(`[Engine] Truth: ${gameState.truth} -> ${updatedState.truth}`);
-          console.log(`[Engine] IP: ${gameState.ip} -> ${updatedState.players.P1.ip}`);
-          console.log(`[Engine] Hand: ${gameState.hand?.length} -> ${updatedState.players.P1.hand.length}`);
-          
-          // Apply engine state changes to UI game state
+
           setGameState(prevState => {
             const pressureByState = updatedState.pressureByState || {};
             const newStates = prevState.states.map(state => {
@@ -546,76 +572,65 @@ const Index = () => {
               ip: updatedState.players.P1.ip,
               hand: updatedState.players.P1.hand.map(convertCardToGameCard),
               discard: updatedState.players.P1.discard.map(convertCardToGameCard),
-              controlledStates: updatedState.players.P1.zones, // Keep as string array for compatibility
-              // Update play tracking - CRITICAL for tray display
+              controlledStates: updatedState.players.P1.zones,
               cardsPlayedThisTurn: prevState.cardsPlayedThisTurn + 1,
               cardsPlayedThisRound: [...prevState.cardsPlayedThisRound, { card, player: 'human' as const }],
               selectedCard: null,
               targetState: null,
-              // Update AI state too
               aiIP: updatedState.players.P2.ip,
               aiHand: updatedState.players.P2.hand.map(convertCardToGameCard),
               aiDiscard: updatedState.players.P2.discard.map(convertCardToGameCard),
               pressureByState,
-              // Update state ownership map properly
               states: newStates
             };
-            
+
             console.log(`[Engine] State update completed:`, {
               handSize: newState.hand.length,
               cardsPlayedThisTurn: newState.cardsPlayedThisTurn,
               cardsPlayedThisRound: newState.cardsPlayedThisRound.length,
               controlledStates: newState.controlledStates.length
             });
-            
+
             return newState;
           });
-          
-          // Still do visual animation for the card play
+
           await animatePlayCard(cardId, card);
-        } else if (outcome === 'blocked') {
-          toast('🛡️ Attack was blocked!', {
-            duration: 2000,
-            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #3b82f6' }
-          });
-          return;
-        } else if (outcome === 'failed') {
-          throw new Error('Card failed to play - insufficient resources or invalid target');
+          finalOutcome = outcome;
+          postStateUpdated = true;
         }
       } else {
-        // Fallback to old system if engine fails
         console.warn('[Engine] Engine failed, falling back to legacy system');
         await playCardAnimated(cardId, animatePlayCard, targetState);
+        finalOutcome = 'played';
+        postStateUpdated = true;
       }
-      
-      // Track card in collection
-      recordCardPlay(cardId);
-      
-      // Enhanced visual effects for successful card play
-      const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
-      if (cardElement) {
-        const position = VisualEffectsCoordinator.getElementCenter(cardElement);
-        
-        // Trigger deploy particle effect
-        VisualEffectsCoordinator.triggerParticleEffect('deploy', position);
-        
-        // Show floating number for IP cost
-        if (card.cost > 0) {
-          VisualEffectsCoordinator.showFloatingNumber(-card.cost, 'ip', {
-            x: position.x - 30,
-            y: position.y - 20
-          });
+
+      if (postStateUpdated) {
+        recordCardPlay(cardId);
+
+        const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+        if (cardElement) {
+          const position = VisualEffectsCoordinator.getElementCenter(cardElement);
+          VisualEffectsCoordinator.triggerParticleEffect('deploy', position);
+
+          if (card.cost > 0) {
+            VisualEffectsCoordinator.showFloatingNumber(-card.cost, 'ip', {
+              x: position.x - 30,
+              y: position.y - 20
+            });
+          }
         }
+
+        toast.success(`✅ ${card.name} deployed successfully!`, {
+          duration: 2000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+        });
       }
-      
-      toast.success(`✅ ${card.name} deployed successfully!`, {
-        duration: 2000,
-        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
-      });
+
+      return finalOutcome;
     } catch (error) {
       console.error('[Engine] Card play error:', error);
-      
-      // Detailed error reporting
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('[Engine] Error details:', {
         cardId,
@@ -626,12 +641,14 @@ const Index = () => {
         handSize: gameState.hand?.length,
         error: errorMessage
       });
-      
+
       toast.error(`❌ Card deployment failed: ${errorMessage}`, {
         duration: 4000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
       });
       audio.playSFX('error');
+      finalOutcome = 'failed';
+      return finalOutcome;
     } finally {
       setLoadingCard(null);
     }
@@ -849,7 +866,7 @@ const Index = () => {
                   return;
                 }
               }
-              handlePlayCard(cardId);
+              return handlePlayCard(cardId);
             }}
             onSelectCard={handleSelectCard}
             selectedCard={gameState.selectedCard}
@@ -1077,7 +1094,7 @@ const Index = () => {
 
           {/* Played Cards Dock - fixed height at bottom */}
           <div className="flex-shrink-0 h-[200px] md:h-[220px] lg:h-[240px] xl:h-[260px] bg-newspaper-bg border-t-2 border-newspaper-border relative z-50">
-            <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} />
+            <PlayedCardsDock playedCards={latestPlayedCards} />
           </div>
         </div>
 
@@ -1099,18 +1116,18 @@ const Index = () => {
           {/* Your Hand - Takes remaining space */}
           <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border flex-1 min-h-0">
             <h3 className="font-bold text-xs mb-2">YOUR HAND</h3>
-            <EnhancedGameHand 
-          cards={gameState.hand}
-          onPlayCard={(cardId) => {
-            if (gameState.clash.open && gameState.clash.defender === 'human') {
-              const card = gameState.hand.find(c => c.id === cardId);
-              if (card && canPlayDefensively(card, gameState.ip, gameState.clash.open)) {
-                playDefensiveCard(cardId);
-                return;
-              }
-            }
-            handlePlayCard(cardId);
-          }}
+            <EnhancedGameHand
+              cards={gameState.hand}
+              onPlayCard={(cardId) => {
+                if (gameState.clash.open && gameState.clash.defender === 'human') {
+                  const card = gameState.hand.find(c => c.id === cardId);
+                  if (card && canPlayDefensively(card, gameState.ip, gameState.clash.open)) {
+                    playDefensiveCard(cardId);
+                    return;
+                  }
+                }
+                return handlePlayCard(cardId);
+              }}
               onSelectCard={handleSelectCard}
               selectedCard={gameState.selectedCard}
               disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
