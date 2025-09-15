@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "cards:rewrite": "bun scripts/rewrite-cards-unified.ts",
     "validate:core": "tsx scripts/validate-core-v21e-strict.ts",
-    "build": "bun run validate:core && vite build",
+    "build": "bun run cards:rewrite && vite build",
     "build:npm": "npm run validate:core && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
@@ -14,6 +15,7 @@
     "export:core": "tsx scripts/export-core-json.ts",
     "build:core": "CORE_SEED=2025-09-14 tsx scripts/export-core-json.ts",
     "snapshot:core": "tsx scripts/snapshot-core-v21e-strict.ts",
+    "report": "cat src/data/core/rewrite-report.txt",
     "test": "vitest run"
   },
   "dependencies": {
