@@ -41,6 +41,7 @@ export interface GameState {
   // NEW: trykk per stat per side
   pressureByState: Record<string, { P1: number; P2: number }>;
   skipAIActionNext?: boolean;
+  skipNextAction?: { P1: number; P2: number };
   // optional: map med statnavn/aliaser -> id
   stateAliases?: Record<string, string>; // "Minnesota"|"MN" -> "MN"
 }
