@@ -865,8 +865,7 @@ const Index = () => {
   // Desktop layout (existing design)
   console.log('🔍 Rendering Desktop Layout');
   return (
-    <div className="contents"> {/* responsive-v21E */}
-      <div className="overflow-auto lg:overflow-hidden h-full bg-newspaper-bg">{/* responsive-v21E */}
+    <div className="min-h-screen bg-newspaper-bg">
       {/* Newspaper Header */}
       <div className="bg-newspaper-bg border-b-4 border-newspaper-border">
         <div className="container mx-auto px-4 py-2">
@@ -1274,7 +1273,6 @@ const Index = () => {
         />
       )}
 
-      </div>{/* responsive-v21E */}
     </div>
   );
 };
