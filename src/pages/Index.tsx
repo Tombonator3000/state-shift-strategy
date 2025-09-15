@@ -24,8 +24,7 @@ import { useGameState } from '@/hooks/useGameState';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
 import { useRuleEngine } from '@/hooks/useRuleEngine';
-import ClashModal from '@/components/game/ClashModal';
-import NewspaperTape from '@/components/ui/NewspaperTape';
+import { ReactionModal } from '@/components/game/ReactionModal';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
@@ -88,7 +87,7 @@ const Index = () => {
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
-  const { reactionState, reactionOutcome, reactionBusy, playCardWithEngine, handleDefenseSelection, getDefensiveCards, closeReactionModal } = useRuleEngine();
+  const { reactionState, playCardWithEngine, handleDefenseSelection, getDefensiveCards, closeReactionModal } = useRuleEngine();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
 
   // Handle AI turns
@@ -1265,20 +1264,14 @@ const Index = () => {
 
       {/* Reaction Modal for card engine */}
       {reactionState && (
-        <ClashModal
+        <ReactionModal
           open={!!reactionState}
           onOpenChange={(open) => !open && closeReactionModal()}
           attackCard={reactionState.attackCard}
-          attackerName={reactionState.attacker === 'P1' ? gameState.faction.toUpperCase() : (gameState.faction === 'truth' ? 'GOVERNMENT' : 'TRUTH')}
           defenseHand={getDefensiveCards(gameState)}
-          defenderName={reactionState.defender === 'P1' ? gameState.faction.toUpperCase() : (gameState.faction === 'truth' ? 'GOVERNMENT' : 'TRUTH')}
           onDefend={handleDefenseSelection}
-          outcome={reactionOutcome}
-          busy={reactionBusy}
         />
       )}
-
-      <NewspaperTape />
 
     </div>
   );
