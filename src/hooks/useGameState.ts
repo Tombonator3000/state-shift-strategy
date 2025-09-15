@@ -39,6 +39,9 @@ interface GameState {
   aiIP: number; // AI IP
   hand: GameCard[];
   aiHand: GameCard[];
+  // CRITICAL FIX: Add discard piles that were missing
+  discard: GameCard[];
+  aiDiscard: GameCard[];
   isGameOver: boolean;
   deck: GameCard[];
   aiDeck: GameCard[];
@@ -141,6 +144,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     // Use all available cards to ensure proper deck building
     hand: getRandomCards(3, { faction: 'truth' }),
     aiHand: getRandomCards(3, { faction: 'government' }),
+    // CRITICAL FIX: Initialize discard piles
+    discard: [],
+    aiDiscard: [],
     isGameOver: false,
     deck: generateWeightedDeck(40, 'truth'),
     aiDeck: generateWeightedDeck(40, 'government'),
@@ -233,6 +239,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       aiIP: aiStartingIP,
       hand: startingHand,
       deck: newDeck.slice(handSize),
+      // CRITICAL FIX: Reset discard piles on game init
+      discard: [],
+      aiDiscard: [],
       // AI gets opposite faction cards
       aiHand: getRandomCards(handSize, { faction: faction === 'government' ? 'truth' : 'government' }),
       aiDeck: generateWeightedDeck(40, faction === 'government' ? 'truth' : 'government'),
@@ -320,6 +329,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       achievements.onCardPlayed(cardId, card.type);
 
       const newHand = prev.hand.filter(c => c.id !== cardId);
+      // CRITICAL FIX: Add played card to discard pile
+      const newDiscard = [...prev.discard, card];
       let newTruth = prev.truth;
       let newIP = prev.ip - card.cost;
       let newAIIP = prev.aiIP;
@@ -392,6 +403,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
             return {
               ...prev,
               hand: newHand,
+              // CRITICAL FIX: Update discard pile
+              discard: newDiscard,
               ip: newIP,
               aiIP: newAIIP,
               truth: newTruth,
@@ -434,6 +447,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       return {
         ...prev,
         hand: newHand,
+        // CRITICAL FIX: Update discard pile for all card plays
+        discard: newDiscard,
         ip: newIP,
         truth: newTruth,
         states: newStates,
@@ -542,16 +557,18 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         }
       });
 
-      // Remove from hand and cleanup
-      setGameState(prev => ({
-        ...prev,
-        hand: prev.hand.filter(c => c.id !== cardId),
-        cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
-        selectedCard: null,
-        targetState: null,
-        animating: false
-      }));
+        // Remove from hand and cleanup
+        setGameState(prev => ({
+          ...prev,
+          hand: prev.hand.filter(c => c.id !== cardId),
+          // CRITICAL FIX: Add animated played card to discard pile
+          discard: [...prev.discard, card],
+          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+          cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
+          selectedCard: null,
+          targetState: null,
+          animating: false
+        }));
 
     } catch (error) {
       console.error('Card animation failed:', error);
@@ -799,6 +816,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
             ip: newIP,
             aiIP: Math.max(0, prev.aiIP - card.cost),
             aiHand: prev.aiHand.filter(c => c.id !== cardId),
+            // CRITICAL FIX: Add AI played card to AI discard pile
+            aiDiscard: [...prev.aiDiscard, card],
             cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
             log: newLog
           };
@@ -815,6 +834,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         states: newStates,
         aiIP: Math.max(0, prev.aiIP - card.cost),
         aiHand: prev.aiHand.filter(c => c.id !== cardId),
+        // CRITICAL FIX: Add AI played card to AI discard pile
+        aiDiscard: [...prev.aiDiscard, card],
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
         log: newLog
       };
@@ -1039,17 +1060,19 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       const card = prev.hand.find(c => c.id === cardId);
       if (!card || card.type !== "DEFENSIVE" || prev.ip < card.cost) return prev;
       
-      // Pay cost and remove from hand
-      return {
-        ...prev,
-        clash: {
-          ...prev.clash,
-          defenseCard: card,
-          expiresAt: Date.now() + 100 // Force immediate resolution
-        },
-        hand: prev.hand.filter(c => c.id !== cardId),
-        ip: prev.ip - card.cost
-      };
+        // Pay cost and remove from hand
+        return {
+          ...prev,
+          clash: {
+            ...prev.clash,
+            defenseCard: card,
+            expiresAt: Date.now() + 100 // Force immediate resolution
+          },
+          hand: prev.hand.filter(c => c.id !== cardId),
+          // CRITICAL FIX: Add defensive card to discard pile when played
+          discard: [...prev.discard, card],
+          ip: prev.ip - card.cost
+        };
     });
   }, []);
   
