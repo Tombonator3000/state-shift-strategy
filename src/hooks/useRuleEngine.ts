@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Card, Context, GameState as EngineGameState, PlayerState } from '@/engine/types';
+import { Card, Context, GameState as EngineGameState } from '@/engine/types';
 import { playCard as playCardEngine, resolveReaction, canAfford } from '@/engine/flow';
 import { pickDefenseForAI } from '@/engine/simpleAI';
 
@@ -22,6 +22,21 @@ export function useRuleEngine() {
       truth: gameState.truth 
     });
     
+    const pressureByState: Record<string, { P1: number; P2: number }> = {};
+    const stateAliases: Record<string, string> = {};
+    for (const st of gameState.states || []) {
+      const id = st.id || st.abbreviation;
+      if (!id) continue;
+      pressureByState[id] = { P1: 0, P2: 0 };
+      if (st.name) stateAliases[st.name] = id;
+      stateAliases[id] = id;
+      stateAliases[id.toLowerCase()] = id;
+      if (st.abbreviation) {
+        stateAliases[st.abbreviation] = id;
+        stateAliases[st.abbreviation.toLowerCase()] = id;
+      }
+    }
+
     return {
       turn: gameState.round || 1,
       truth: gameState.truth || 50,
@@ -74,7 +89,9 @@ export function useRuleEngine() {
           zoneDefenseBonus: 0,
           pressureTotal: 0
         }
-      }
+      },
+      pressureByState,
+      stateAliases
     };
   }, []);
 
@@ -84,17 +101,17 @@ export function useRuleEngine() {
       state: engineState,
       log: (message: string) => console.log(`[Engine] ${message}`),
       turnFlags: {},
-      openReaction: (attackCard: Card, attacker: "P1" | "P2", defender: "P1" | "P2") => {
+      openReaction: (attackCard: Card, attacker: "P1" | "P2", defender: "P1" | "P2", targetStateId?: string) => {
         const isHumanDefender = defender === "P1";
-        
+
         if (isHumanDefender) {
-          setReactionState({ attackCard, attacker, defender });
+          setReactionState({ attackCard, attacker, defender, targetStateId });
         } else {
           // AI auto-defend
           const defense = pickDefenseForAI({ state: engineState } as Context, defender, attackCard);
           resolveReaction(
             { state: engineState } as Context,
-            { card: attackCard, attacker },
+            { card: attackCard, attacker, targetStateId },
             defense
           );
         }

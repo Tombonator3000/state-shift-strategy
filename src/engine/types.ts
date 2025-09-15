@@ -38,7 +38,11 @@ export interface GameState {
   truth: number; // 0..100
   currentPlayer: "P1" | "P2";
   players: Record<"P1" | "P2", PlayerState>;
+  // NEW: trykk per stat per side
+  pressureByState: Record<string, { P1: number; P2: number }>;
   skipAIActionNext?: boolean;
+  // optional: map med statnavn/aliaser -> id
+  stateAliases?: Record<string, string>; // "Minnesota"|"MN" -> "MN"
 }
 
 export interface Context {
@@ -46,7 +50,12 @@ export interface Context {
   rng?: () => number;
   log?: (m: string) => void;
   // Reaction hook – UI sets this to open modal when needed
-  openReaction?: (attackCard: Card, attacker: "P1" | "P2", defender: "P1" | "P2") => void;
+  openReaction?: (
+    attackCard: Card,
+    attacker: "P1" | "P2",
+    defender: "P1" | "P2",
+    targetStateId?: string
+  ) => void;
   // Turn flags (immune/block) – per side
   turnFlags?: Partial<Record<"P1" | "P2", { immune?: boolean; blockAttack?: boolean }>>;
 }

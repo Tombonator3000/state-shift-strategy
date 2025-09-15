@@ -5,6 +5,8 @@ export type Normalized = {
   discardOpponent?: number;
   discardRandom?: number; // Support for legacy random discard
   pressureDelta?: number;
+  // NEW: eksplisitte pressure-operasjoner
+  pressureOps?: Array<{ amount: number; scope: "target" | "all" }>;
   zoneDefense?: number;
   reduceFactor?: number; // For partial blocking defensive cards (0-1)
   conditional?: any;
@@ -80,7 +82,8 @@ export function normalizeEffects(effectsField: any): Normalized {
         break;
       }
       case "pressure": {
-        out.pressureDelta = (out.pressureDelta || 0) + Number(item.v || item.value || 0);
+        const scope = item.target === "all" ? "all" : "target";
+        (out.pressureOps ||= []).push({ amount: Number(item.v || item.value || 0), scope });
         break;
       }
       case "zoneDefense": {

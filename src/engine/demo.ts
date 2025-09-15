@@ -96,7 +96,9 @@ export function createDemoGameState(): GameState {
         zoneDefenseBonus: 0,
         pressureTotal: 0
       }
-    }
+    },
+    pressureByState: {},
+    stateAliases: {}
   };
 }
 
@@ -105,26 +107,26 @@ export function runEngineDemo(): string {
   const gameState = createDemoGameState();
   const log: string[] = [];
   
-  const context: Context = {
-    state: gameState,
-    log: (msg) => log.push(msg),
-    turnFlags: {},
-    openReaction: (attackCard, attacker, defender) => {
-      log.push(`🚨 Reaction window opened: ${attacker} played ${attackCard.name}, ${defender} can defend`);
-      
-      // Simulate AI defense selection
-      const defense = pickDefenseForAI(context, defender, attackCard);
-      if (defense) {
-        log.push(`🛡️ ${defender} chooses to defend with: ${defense.name}`);
-      } else {
-        log.push(`❌ ${defender} has no defensive options`);
+    const context: Context = {
+      state: gameState,
+      log: (msg) => log.push(msg),
+      turnFlags: {},
+      openReaction: (attackCard, attacker, defender, targetStateId) => {
+        log.push(`🚨 Reaction window opened: ${attacker} played ${attackCard.name}, ${defender} can defend`);
+
+        // Simulate AI defense selection
+        const defense = pickDefenseForAI(context, defender, attackCard);
+        if (defense) {
+          log.push(`🛡️ ${defender} chooses to defend with: ${defense.name}`);
+        } else {
+          log.push(`❌ ${defender} has no defensive options`);
+        }
+
+        // Resolve reaction
+        const outcome = resolveReaction(context, { card: attackCard, attacker, targetStateId }, defense);
+        log.push(`⚔️ Reaction resolved: ${outcome}`);
       }
-      
-      // Resolve reaction
-      const outcome = resolveReaction(context, { card: attackCard, attacker }, defense);
-      log.push(`⚔️ Reaction resolved: ${outcome}`);
-    }
-  };
+    };
   
   log.push("=== ENGINE DEMO START ===");
   log.push(`Initial state: Truth=${gameState.truth}%, P1 IP=${gameState.players.P1.ip}, P2 IP=${gameState.players.P2.ip}`);
