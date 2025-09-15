@@ -78,7 +78,11 @@ All colors MUST be HSL.
     --newspaper-border: 0 0% 30%;
     --newspaper-accent: 0 75% 45%;
     --newspaper-headline: 0 0% 0%;
-    
+
+    /* responsive-v21E */
+    --masthead-h: clamp(56px, 6svh, 72px);
+    --tray-h: clamp(72px, 10svh, 112px);
+
     /* Enhanced animation colors */
     --warning: 45 93% 58%;
     --warning-foreground: 0 0% 9%;
@@ -153,6 +157,26 @@ All colors MUST be HSL.
     --rarity-uncommon: 142 84% 44%;
     --rarity-rare: 221 83% 63%;
     --rarity-legendary: 25 95% 63%;
+  }
+
+  /* responsive-v21E */
+  html,
+  body {
+    height: 100%;
+  }
+  body {
+    overflow: auto;
+  }
+  @screen lg {
+    body {
+      overflow: hidden;
+    }
+  }
+  .masthead {
+    height: var(--masthead-h);
+  }
+  .tray {
+    height: var(--tray-h);
   }
 }
 
