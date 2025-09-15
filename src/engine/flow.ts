@@ -47,7 +47,7 @@ export function playCard(ctx: Context, owner: "P1" | "P2", card: Card, targetSta
   const needsReaction = (card.type === "ATTACK" || card.type === "MEDIA");
   
   if (needsReaction && ctx.openReaction) {
-    ctx.openReaction(card, owner, defender); // UI opens ReactionModal for human, AI can auto
+    ctx.openReaction(card, owner, defender, targetStateId); // UI opens ReactionModal for human, AI can auto
     return "reaction-pending";
   }
 
@@ -60,7 +60,7 @@ export function resolveReaction(
   ctx: Context, 
   attack: { card: Card, attacker: "P1" | "P2", targetStateId?: string }, 
   defenseCard: Card | null
-): PlayOutcome {
+  ): PlayOutcome {
   const { card: attackCard, attacker, targetStateId } = attack;
   const defender = attacker === "P1" ? "P2" : "P1";
 
@@ -91,9 +91,16 @@ export function resolveReaction(
     // Fix: Use ID-based filtering here too
     you.hand = you.hand.filter(c => c.id !== attackCard.id);
     you.discard.push(attackCard);
+    ctx.turnFlags = {};
     return "blocked";
   }
 
   resolveCard(ctx, attacker, attackCard, targetStateId);
+  ctx.turnFlags = {};
   return "played";
+}
+
+export function endTurn(ctx: Context) {
+  ctx.turnFlags = {};
+  if (ctx.state.skipAIActionNext) delete ctx.state.skipAIActionNext;
 }
