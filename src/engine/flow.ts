@@ -18,6 +18,11 @@ export function payCost(ctx: Context, owner:"P1"|"P2", card:Card) {
   ctx.state.players[owner].ip -= effectiveCostFor(ctx, owner, card);
 }
 
+function defenderHasPlayableReaction(ctx: Context, defender: "P1" | "P2") {
+  const hand = ctx.state.players[defender].hand;
+  return hand.some(c => (c.type === "DEFENSIVE" || c.type === "INSTANT") && canAfford(ctx, defender, c));
+}
+
 export function resolveCard(ctx: Context, owner:"P1"|"P2", card:Card, targetStateId?: string){
   applyCanonical(ctx, owner, card.effects || {}, targetStateId);
   const you = ctx.state.players[owner];
@@ -32,9 +37,11 @@ export function playCard(ctx: Context, owner:"P1"|"P2", card:Card, targetStateId
 
   const defender = owner === "P1" ? "P2" : "P1";
   const needsReaction = (card.type === "ATTACK" || card.type === "MEDIA");
-  if (needsReaction && ctx.openReaction){
-    ctx.openReaction(card, owner, defender, targetStateId); // UI åpner modal eller AI velger
-    return "reaction-pending";
+  if (needsReaction){
+    if (ctx.openReaction && defenderHasPlayableReaction(ctx, defender)) {
+      ctx.openReaction(card, owner, defender, targetStateId);
+      return "reaction-pending";
+    }
   }
 
   resolveCard(ctx, owner, card, targetStateId);
