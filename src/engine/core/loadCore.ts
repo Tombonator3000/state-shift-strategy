@@ -35,7 +35,7 @@ async function loadViaFetch() {
 }
 
 // 3) TS fallback - use full core database
-import { CARD_DATABASE_CORE } from '../../data/core_legacy/index';
+import { CARD_DATABASE_CORE } from '../../data/core/index';
 function loadFallback() {
   const coreLibrary = normalizeDeck(CARD_DATABASE_CORE);
   const decklist = { seed:'fallback', ids: coreLibrary.map(c => c.id) };
