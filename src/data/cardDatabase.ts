@@ -56,8 +56,8 @@ async function loadCoreCards(): Promise<GameCard[]> {
       const coreModule = await import('./core');
       const coreCards = coreModule.CARD_DATABASE_CORE || [];
       console.log(`✅ [RUNTIME RECOVERY] Loaded ${coreCards.length} cards from core collector`);
-      _coreCards = coreCards;
-      return coreCards;
+      _coreCards = coreCards as GameCard[];
+      return coreCards as GameCard[];
     } catch (error) {
       console.warn('⚠️ [RUNTIME RECOVERY] Core collector not available, using minimal fallback');
       
