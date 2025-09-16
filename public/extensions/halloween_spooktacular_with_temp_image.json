@@ -3,52 +3,39 @@
   "name": "Halloween Spooktacular",
   "version": "1.0.0",
   "author": "ShadowGov Team",
-  "description": "A spooky, pumpkin-spiced conspiracy expansion with tabloids, crypts, and candy-fueled chaos. 200 cards total: 100 per faction.",
-  "factions": [
-    "government",
-    "truth"
-  ],
-  "count": 200,
+  "description": "Halloween Spooktacular — MVP-compliant pack (ATTACK/MEDIA/ZONE only, table costs, simple flavor).",
   "cards": [
     {
       "id": "hallo-gov-graveyard-flyer-protocol-001",
       "faction": "government",
       "name": "Graveyard Flyer Protocol",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Someone left the portal open again.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-spider-scare-incident-002",
       "faction": "government",
       "name": "Spider Scare Incident",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Immediate spooky shenanigans.",
-      "flavor": "Bring a flashlight and plausible deniability.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Bring a flashlight and plausible deniability.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-cauldron-whispers-incident-003",
@@ -56,56 +43,45 @@
       "name": "Cauldron Whispers Incident",
       "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Opponent loses 4 IP. Numbers go bump in the night.",
-      "flavor": "All treats, suspicious tricks.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "All treats, suspicious tricks.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-ouija-shuffle-incident-004",
       "faction": "government",
       "name": "Ouija Shuffle Incident",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Barricade of blessed salt.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Approved by the Council of Shadows.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "immune",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-report-of-the-fog-machine-005",
       "faction": "government",
       "name": "Report of the Fog Machine",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Happens faster than a jump scare.",
-      "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Someone left the portal open again.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-dracula-shuffle-protocol-006",
@@ -113,75 +89,57 @@
       "name": "Dracula Shuffle Protocol",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth - 7%. Broadcast rocks the night.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Do not taunt the poltergeist.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -7
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-wolfman-shenanigans-007",
       "faction": "government",
       "name": "Wolfman Shenanigans",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Rated PG‑Paranoid.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-press-release-of-the-full-moon-008",
       "faction": "government",
       "name": "Press Release of the Full Moon",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Prototype from the occult lab.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-scare-of-the-midnight-009",
       "faction": "government",
       "name": "Scare of the Midnight",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Happens faster than a jump scare.",
-      "flavor": "Batteries not included.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Batteries not included.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-bat-boy-shuffle-protocol-010",
@@ -189,56 +147,44 @@
       "name": "Bat Boy Shuffle Protocol",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Neighborhood watch gets weird.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-skeleton-press-release-files-011",
       "faction": "government",
       "name": "Skeleton Press Release Files",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Immediate spooky shenanigans.",
-      "flavor": "Approved by the Council of Shadows.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Approved by the Council of Shadows.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-trick-or-treat-pamphlet-files-012",
       "faction": "government",
       "name": "Trick-or-Treat Pamphlet Files",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Ward against hostile acts.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-haunted-rally-protocol-013",
@@ -247,36 +193,28 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 3 IP. A sudden strike in the dark.",
-      "flavor": "Bring a flashlight and plausible deniability.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -3
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Bring a flashlight and plausible deniability.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-raven-flyer-protocol-014",
       "faction": "government",
       "name": "Raven Flyer Protocol",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Calibrating ecto-sensors.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-poltergeist-alert-protocol-015",
@@ -285,93 +223,74 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 2 IP. Numbers go bump in the night.",
-      "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -2
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Mind the ectoplasm.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-scarecrow-shenanigans-incident-016",
       "faction": "government",
       "name": "Scarecrow Shenanigans Incident",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Barricade of blessed salt.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "‘It was just the wind,’ said the intern.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-scare-of-the-ghost-017",
       "faction": "government",
       "name": "Scare of the Ghost",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Smells like fog machine and fear.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-banshee-shenanigans-incident-018",
       "faction": "government",
       "name": "Banshee Shenanigans Incident",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "The veil is thin tonight.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "The veil is thin tonight.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-wolfman-pamphlet-incident-019",
       "faction": "government",
       "name": "Wolfman Pamphlet Incident",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Happens faster than a jump scare.",
-      "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Someone left the portal open again.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-bat-boy-shuffle-020",
@@ -379,18 +298,15 @@
       "name": "Bat Boy Shuffle",
       "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP. A scare that hits the wallet.",
-      "flavor": "‘It was just the wind,’ said the intern.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "‘It was just the wind,’ said the intern.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-moonlight-scare-files-021",
@@ -398,56 +314,46 @@
       "name": "Moonlight Scare Files",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Neighborhood watch gets weird.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "‘It was just the wind,’ said the intern.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-shuffle-of-the-mummy-022",
       "faction": "government",
       "name": "Shuffle of the Mummy",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "The veil is thin tonight.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "The veil is thin tonight.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-haunted-mansion-whispers-023",
       "faction": "government",
       "name": "Haunted Mansion Whispers",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Happens faster than a jump scare.",
-      "flavor": "We can neither confirm nor deny the howling.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "We can neither confirm nor deny the howling.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-raven-scare-024",
@@ -456,16 +362,12 @@
       "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Truth - 8%. Broadcast rocks the night.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -8
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-frankenstein-pamphlet-initiative-025",
@@ -473,57 +375,44 @@
       "name": "Frankenstein Pamphlet Initiative",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Grassroots pressure in foggy streets.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-shenanigans-of-the-cauldron-026",
       "faction": "government",
       "name": "Shenanigans of the Cauldron",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Bring a flashlight and plausible deniability.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "immune",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-headless-horseman-pamphlet-files-027",
       "faction": "government",
       "name": "Headless Horseman Pamphlet Files",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "Licensed spooktacular.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Licensed spooktacular.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-ouija-scare-protocol-028",
@@ -531,17 +420,13 @@
       "name": "Ouija Scare Protocol",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth - 9%. Late-night AM radio frenzy.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -9
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-skeleton-flyer-files-029",
@@ -550,36 +435,28 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 2 IP. A sudden strike in the dark.",
-      "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -2
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Whispers from the cornfield.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-brief-of-the-skeleton-030",
       "faction": "government",
       "name": "Brief of the Skeleton",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Calibrating ecto-sensors.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-frankenstein-flyer-incident-031",
@@ -587,17 +464,13 @@
       "name": "Frankenstein Flyer Incident",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth - 8%. Late-night AM radio frenzy.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -8
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-coven-scare-032",
@@ -605,18 +478,14 @@
       "name": "Coven Scare",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Lantern-lit march adds leverage.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-poltergeist-flyer-033",
@@ -624,18 +493,15 @@
       "name": "Poltergeist Flyer",
       "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP. Numbers go bump in the night.",
-      "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Someone left the portal open again.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-fog-machine-rally-034",
@@ -643,36 +509,27 @@
       "name": "Fog Machine Rally",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth - 6%. Late-night AM radio frenzy.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -6
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-ghoul-alert-protocol-035",
       "faction": "government",
       "name": "Ghoul Alert Protocol",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Barricade of blessed salt.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Licensed spooktacular.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-cobweb-scare-036",
@@ -680,95 +537,73 @@
       "name": "Cobweb Scare",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Neighborhood watch gets weird.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "The veil is thin tonight.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-seance-alert-initiative-037",
       "faction": "government",
       "name": "Seance Alert Initiative",
-      "type": "DEVELOPMENT",
+      "type": "ZONE",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Ongoing benefit to income or media costs. Seasonal synergy unlocked.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Bring a flashlight and plausible deniability.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-ghost-alert-initiative-038",
       "faction": "government",
       "name": "Ghost Alert Initiative",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Paranormal analytics deployed.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-poltergeist-report-initiative-039",
       "faction": "government",
       "name": "Poltergeist Report Initiative",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Calibrating ecto-sensors.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-alert-of-the-haunted-mansion-040",
       "faction": "government",
       "name": "Alert of the Haunted Mansion",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Immediate spooky shenanigans.",
-      "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Try not to scream on camera.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-ghost-flyer-protocol-041",
@@ -776,134 +611,104 @@
       "name": "Ghost Flyer Protocol",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Grassroots pressure in foggy streets.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-jack-o-lantern-alert-042",
       "faction": "government",
       "name": "Jack-o-Lantern Alert",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Barricade of blessed salt.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Keep garlic handy.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-seance-shenanigans-043",
       "faction": "government",
       "name": "Seance Shenanigans",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Whispers from the cornfield.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-zombie-pamphlet-incident-044",
       "faction": "government",
       "name": "Zombie Pamphlet Incident",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Happens faster than a jump scare.",
-      "flavor": "Bring a flashlight and plausible deniability.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Bring a flashlight and plausible deniability.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-crypt-rumor-protocol-045",
       "faction": "government",
       "name": "Crypt Rumor Protocol",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "Sticky with sugar and secrets.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Sticky with sugar and secrets.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-skeleton-whispers-initiative-046",
       "faction": "government",
       "name": "Skeleton Whispers Initiative",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Barricade of blessed salt.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Keep garlic handy.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "immune",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-report-of-the-moonlight-047",
       "faction": "government",
       "name": "Report of the Moonlight",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Barricade of blessed salt.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "immune",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-ectoplasm-brief-files-048",
@@ -912,17 +717,14 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 4 IP. Numbers go bump in the night.",
-      "flavor": "‘It was just the wind,’ said the intern.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "‘It was just the wind,’ said the intern.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-cobweb-report-files-049",
@@ -930,36 +732,27 @@
       "name": "Cobweb Report Files",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth - 6%. Trending on crypt Tok.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -6
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-cobweb-alert-protocol-050",
       "faction": "government",
       "name": "Cobweb Alert Protocol",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Calibrating ecto-sensors.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Bring a flashlight and plausible deniability.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-omen-pamphlet-files-051",
@@ -967,18 +760,14 @@
       "name": "Omen Pamphlet Files",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Neighborhood watch gets weird.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-ghost-scare-files-052",
@@ -987,17 +776,14 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 3 IP. A sudden strike in the dark.",
-      "flavor": "The veil is thin tonight.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -3
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "The veil is thin tonight.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-frankenstein-pamphlet-protocol-053",
@@ -1005,56 +791,45 @@
       "name": "Frankenstein Pamphlet Protocol",
       "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Opponent loses 4 IP. A scare that hits the wallet.",
-      "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Mind the ectoplasm.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-cobweb-whispers-054",
       "faction": "government",
       "name": "Cobweb Whispers",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "Do not feed after midnight.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Do not feed after midnight.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-full-moon-press-release-incident-055",
       "faction": "government",
       "name": "Full Moon Press Release Incident",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Barricade of blessed salt.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Sticky with sugar and secrets.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-shuffle-of-the-haunted-056",
@@ -1063,17 +838,14 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 2 IP. Numbers go bump in the night.",
-      "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -2
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Someone left the portal open again.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-cobweb-shenanigans-incident-057",
@@ -1082,36 +854,29 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 2 IP. A sudden strike in the dark.",
-      "flavor": "Approved by the Council of Shadows.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -2
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Approved by the Council of Shadows.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-witch-shenanigans-058",
       "faction": "government",
       "name": "Witch Shenanigans",
-      "type": "DEVELOPMENT",
+      "type": "ZONE",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Ongoing benefit to income or media costs. Perennial pumpkin power.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-zombie-rally-files-059",
@@ -1119,18 +884,14 @@
       "name": "Zombie Rally Files",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Grassroots pressure in foggy streets.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-dracula-shenanigans-060",
@@ -1138,17 +899,13 @@
       "name": "Dracula Shenanigans",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth - 6%. Late-night AM radio frenzy.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Licensed spooktacular.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -6
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-ouija-rumor-061",
@@ -1157,17 +914,14 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 2 IP. A scare that hits the wallet.",
-      "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -2
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "This is fine. Probably.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-skeleton-rally-protocol-062",
@@ -1176,133 +930,106 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 4 IP. Numbers go bump in the night.",
-      "flavor": "Haunting sponsored by a totally normal NGO.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Haunting sponsored by a totally normal NGO.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-spider-shuffle-063",
       "faction": "government",
       "name": "Spider Shuffle",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Happens faster than a jump scare.",
-      "flavor": "Approved by the Council of Shadows.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Approved by the Council of Shadows.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-candy-corn-whispers-064",
       "faction": "government",
       "name": "Candy Corn Whispers",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "This is fine. Probably.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-moonlight-scare-initiative-065",
       "faction": "government",
       "name": "Moonlight Scare Initiative",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Barricade of blessed salt.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "All treats, suspicious tricks.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-jack-o-lantern-rally-incident-066",
       "faction": "government",
       "name": "Jack-o-Lantern Rally Incident",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Do not taunt the poltergeist.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "immune",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-full-moon-shenanigans-067",
       "faction": "government",
       "name": "Full Moon Shenanigans",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "This is fine. Probably.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-wolfman-flyer-protocol-068",
       "faction": "government",
       "name": "Wolfman Flyer Protocol",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Happens faster than a jump scare.",
-      "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "This is fine. Probably.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-brief-of-the-midnight-069",
@@ -1310,38 +1037,31 @@
       "name": "Brief of the Midnight",
       "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Opponent loses 3 IP. Numbers go bump in the night.",
-      "flavor": "Haunting sponsored by a totally normal NGO.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -3
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Haunting sponsored by a totally normal NGO.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-witch-press-release-incident-070",
       "faction": "government",
       "name": "Witch Press Release Incident",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Immediate spooky shenanigans.",
-      "flavor": "Sticky with sugar and secrets.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Sticky with sugar and secrets.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-ghoul-sweep-initiative-001",
@@ -1350,36 +1070,28 @@
       "type": "ATTACK",
       "rarity": "uncommon",
       "cost": 3,
-      "target": null,
-      "text": "Opponent loses 5 IP. Numbers go bump in the night.",
-      "flavor": "Bring a flashlight and plausible deniability.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -5
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "Bring a flashlight and plausible deniability.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-bat-boy-operation-protocol-002",
       "faction": "government",
       "name": "Bat Boy Operation Protocol",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-broadcast-of-the-seance-003",
@@ -1387,17 +1099,13 @@
       "name": "Broadcast of the Seance",
       "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 1,
-      "target": null,
-      "text": "Truth - 10%. Broadcast rocks the night.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -10
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-spooky-hayride-operation-initiative-004",
@@ -1406,17 +1114,14 @@
       "type": "ATTACK",
       "rarity": "uncommon",
       "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP. Numbers go bump in the night.",
-      "flavor": "All treats, suspicious tricks.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "All treats, suspicious tricks.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-ploy-of-the-headless-horseman-005",
@@ -1425,17 +1130,14 @@
       "type": "ATTACK",
       "rarity": "uncommon",
       "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP. A sudden strike in the dark.",
-      "flavor": "Smells like fog machine and fear.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "Smells like fog machine and fear.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-jack-o-lantern-stakeout-006",
@@ -1444,17 +1146,14 @@
       "type": "ATTACK",
       "rarity": "uncommon",
       "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP. A sudden strike in the dark.",
-      "flavor": "Licensed spooktacular.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "Licensed spooktacular.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-poltergeist-murmur-network-incident-007",
@@ -1462,55 +1161,41 @@
       "name": "Poltergeist Murmur Network Incident",
       "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 2,
-      "target": null,
-      "text": "Truth - 11%. Headline haunts the feed.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Rated PG‑Paranoid.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -11
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-moonlight-expedition-incident-008",
       "faction": "government",
       "name": "Moonlight Expedition Incident",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 1,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Calibrating ecto-sensors.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-seance-broadcast-incident-009",
       "faction": "government",
       "name": "Seance Broadcast Incident",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Ward against hostile acts.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Licensed spooktacular.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-midnight-ploy-protocol-010",
@@ -1518,17 +1203,13 @@
       "name": "Midnight Ploy Protocol",
       "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 1,
-      "target": null,
-      "text": "Truth - 11%. Broadcast rocks the night.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Do not feed after midnight.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -11
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-banshee-investigation-files-011",
@@ -1536,17 +1217,13 @@
       "name": "Banshee Investigation Files",
       "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 3,
-      "target": null,
-      "text": "Truth - 10%. Headline haunts the feed.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Smells like fog machine and fear.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -10
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-poltergeist-expedition-012",
@@ -1555,36 +1232,29 @@
       "type": "ATTACK",
       "rarity": "uncommon",
       "cost": 3,
-      "target": null,
-      "text": "Opponent loses 5 IP. A scare that hits the wallet.",
-      "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -5
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "Try not to scream on camera.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-graveyard-expedition-initiative-013",
       "faction": "government",
       "name": "Graveyard Expedition Initiative",
-      "type": "DEVELOPMENT",
+      "type": "ZONE",
       "rarity": "uncommon",
-      "cost": 4,
-      "target": null,
-      "text": "Ongoing benefit to income or media costs. Seasonal synergy unlocked.",
+      "cost": 5,
+      "effects": {
+        "pressureDelta": 2
+      },
+      "text": "+2 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Sticky with sugar and secrets.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "mediaCost",
-          "value": -1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-zombie-murmur-network-files-014",
@@ -1593,36 +1263,27 @@
       "type": "ZONE",
       "rarity": "uncommon",
       "cost": 5,
-      "target": "state",
-      "text": "Add 2 pressure to target state. Neighborhood watch gets weird.",
+      "effects": {
+        "pressureDelta": 2
+      },
+      "text": "+2 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Rated PG‑Paranoid.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-haunted-mansion-ploy-protocol-015",
       "faction": "government",
       "name": "Haunted Mansion Ploy Protocol",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "uncommon",
       "cost": 4,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Paranormal analytics deployed.",
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-headless-horseman-investigation-initiative-016",
@@ -1630,18 +1291,14 @@
       "name": "Headless Horseman Investigation Initiative",
       "type": "ZONE",
       "rarity": "uncommon",
-      "cost": 3,
-      "target": "state",
-      "text": "Add 2 pressure to target state. Neighborhood watch gets weird.",
+      "cost": 5,
+      "effects": {
+        "pressureDelta": 2
+      },
+      "text": "+2 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-headless-horseman-gambit-017",
@@ -1649,17 +1306,13 @@
       "name": "Headless Horseman Gambit",
       "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 5,
-      "target": null,
-      "text": "Truth - 11%. Late-night AM radio frenzy.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Licensed spooktacular.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -11
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-candy-corn-expedition-protocol-018",
@@ -1667,17 +1320,13 @@
       "name": "Candy Corn Expedition Protocol",
       "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 3,
-      "target": null,
-      "text": "Truth - 11%. Trending on crypt Tok.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -11
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-banshee-broadcast-initiative-019",
@@ -1685,18 +1334,14 @@
       "name": "Banshee Broadcast Initiative",
       "type": "ZONE",
       "rarity": "uncommon",
-      "cost": 4,
-      "target": "state",
-      "text": "Add 2 pressure to target state. Grassroots pressure in foggy streets.",
+      "cost": 5,
+      "effects": {
+        "pressureDelta": 2
+      },
+      "text": "+2 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-spider-gambit-protocol-020",
@@ -1704,17 +1349,13 @@
       "name": "Spider Gambit Protocol",
       "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 3,
-      "target": null,
-      "text": "Truth - 12%. Broadcast rocks the night.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Batteries not included.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -12
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-revelation-of-the-graveyard-001",
@@ -1722,47 +1363,27 @@
       "name": "Revelation of the Graveyard",
       "type": "MEDIA",
       "rarity": "rare",
-      "cost": 6,
-      "target": null,
-      "text": "Truth - 20%. Late-night AM radio frenzy.",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3
+      },
+      "text": "+3% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -20
-        },
-        {
-          "k": "flag",
-          "name": "forceDiscard",
-          "target": "ai",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-raven-revelation-initiative-002",
       "faction": "government",
       "name": "Raven Revelation Initiative",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "rare",
-      "cost": 8,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Paranormal analytics deployed.",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3
+      },
+      "text": "+3% Truth.",
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        },
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-containment-of-the-cauldron-003",
@@ -1770,152 +1391,100 @@
       "name": "Containment of the Cauldron",
       "type": "ATTACK",
       "rarity": "rare",
-      "cost": 7,
-      "target": null,
-      "text": "Opponent loses 6 IP. A scare that hits the wallet.",
+      "cost": 4,
+      "effects": {
+        "ipDelta": {
+          "opponent": 3
+        },
+        "discardOpponent": 1
+      },
+      "text": "Opponent −3 IP, discard 1.",
       "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -6
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-banshee-prime-directive-files-004",
       "faction": "government",
       "name": "Banshee Prime Directive Files",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "rare",
-      "cost": 6,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Prototype from the occult lab.",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3
+      },
+      "text": "+3% Truth.",
       "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        },
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-seance-containment-files-005",
       "faction": "government",
       "name": "Seance Containment Files",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "rare",
-      "cost": 7,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Calibrating ecto-sensors.",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3
+      },
+      "text": "+3% Truth.",
       "flavor": "Rated PG‑Paranoid.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        },
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-raven-project-protocol-006",
       "faction": "government",
       "name": "Raven Project Protocol",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "rare",
-      "cost": 8,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Paranormal analytics deployed.",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3
+      },
+      "text": "+3% Truth.",
       "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        },
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-moonlight-deep-cover-007",
       "faction": "government",
       "name": "Moonlight Deep Cover",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "rare",
-      "cost": 7,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Ward against hostile acts.",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3
+      },
+      "text": "+3% Truth.",
       "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        },
-        {
-          "k": "flag",
-          "name": "immune",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-full-moon-pamphlet-initiative-001",
       "faction": "truth",
       "name": "Full Moon Pamphlet Initiative",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Barricade of blessed salt.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Do not taunt the poltergeist.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-trick-or-treat-press-release-incident-002",
       "faction": "truth",
       "name": "Trick-or-Treat Press Release Incident",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-seance-scare-protocol-003",
@@ -1924,36 +1493,30 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 2 IP. A scare that hits the wallet.",
-      "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -2
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Try not to scream on camera.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-banshee-shuffle-004",
       "faction": "truth",
       "name": "Banshee Shuffle",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Immediate spooky shenanigans.",
-      "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "They came for the candy, stayed for the cover‑up.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-candy-corn-shuffle-protocol-005",
@@ -1961,17 +1524,13 @@
       "name": "Candy Corn Shuffle Protocol",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth + 10%. Trending on crypt Tok.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 10
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-scare-of-the-coven-006",
@@ -1979,17 +1538,13 @@
       "name": "Scare of the Coven",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth + 8%. Headline haunts the feed.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 8
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-spooky-hayride-pamphlet-files-007",
@@ -1997,18 +1552,14 @@
       "name": "Spooky Hayride Pamphlet Files",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Lantern-lit march adds leverage.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "The veil is thin tonight.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-ouija-shenanigans-files-008",
@@ -2016,36 +1567,27 @@
       "name": "Ouija Shenanigans Files",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth + 7%. Trending on crypt Tok.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 7
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-black-cat-shenanigans-files-009",
       "faction": "truth",
       "name": "Black Cat Shenanigans Files",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Licensed spooktacular.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-candy-corn-rumor-010",
@@ -2054,17 +1596,14 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 2 IP. A scare that hits the wallet.",
-      "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -2
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Someone left the portal open again.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-rumor-of-the-witch-011",
@@ -2072,18 +1611,14 @@
       "name": "Rumor of the Witch",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Lantern-lit march adds leverage.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-jack-o-lantern-press-release-protocol-012",
@@ -2091,18 +1626,14 @@
       "name": "Jack-o-Lantern Press Release Protocol",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Grassroots pressure in foggy streets.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Sticky with sugar and secrets.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-witch-report-013",
@@ -2110,18 +1641,15 @@
       "name": "Witch Report",
       "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP. A sudden strike in the dark.",
-      "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Red eyes in the rear-view mirror.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-ghost-brief-protocol-014",
@@ -2129,36 +1657,27 @@
       "name": "Ghost Brief Protocol",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth + 6%. Headline haunts the feed.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 6
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-raven-report-initiative-015",
       "faction": "truth",
       "name": "Raven Report Initiative",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Paranormal analytics deployed.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-ghost-report-initiative-016",
@@ -2166,17 +1685,13 @@
       "name": "Ghost Report Initiative",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth + 5%. Headline haunts the feed.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 5
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-alert-of-the-ghost-017",
@@ -2185,16 +1700,12 @@
       "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Truth + 7%. Broadcast rocks the night.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "We can neither confirm nor deny the howling.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 7
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-zombie-press-release-incident-018",
@@ -2203,35 +1714,26 @@
       "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Truth + 6%. Headline haunts the feed.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Licensed spooktacular.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 6
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-cemetery-press-release-initiative-019",
       "faction": "truth",
       "name": "Cemetery Press Release Initiative",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Calibrating ecto-sensors.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Rated PG‑Paranoid.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-rally-of-the-dracula-020",
@@ -2240,16 +1742,12 @@
       "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Truth + 6%. Trending on crypt Tok.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 6
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-seance-alert-incident-021",
@@ -2257,75 +1755,59 @@
       "name": "Seance Alert Incident",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth + 6%. Broadcast rocks the night.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Smells like fog machine and fear.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 6
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-cauldron-shuffle-protocol-022",
       "faction": "truth",
       "name": "Cauldron Shuffle Protocol",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Sticky with sugar and secrets.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-poltergeist-scare-files-023",
       "faction": "truth",
       "name": "Poltergeist Scare Files",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Try not to scream on camera.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-coven-shenanigans-024",
       "faction": "truth",
       "name": "Coven Shenanigans",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Immediate spooky shenanigans.",
-      "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Red eyes in the rear-view mirror.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-whispers-of-the-skeleton-025",
@@ -2333,18 +1815,14 @@
       "name": "Whispers of the Skeleton",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Neighborhood watch gets weird.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Do not taunt the poltergeist.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-midnight-shuffle-026",
@@ -2352,76 +1830,59 @@
       "name": "Midnight Shuffle",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Neighborhood watch gets weird.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Sticky with sugar and secrets.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-trick-or-treat-brief-incident-027",
       "faction": "truth",
       "name": "Trick-or-Treat Brief Incident",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Whispers from the cornfield.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-crypt-press-release-protocol-028",
       "faction": "truth",
       "name": "Crypt Press Release Protocol",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Prototype from the occult lab.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "We can neither confirm nor deny the howling.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-raven-press-release-029",
       "faction": "truth",
       "name": "Raven Press Release",
-      "type": "DEVELOPMENT",
+      "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Ongoing benefit to income or media costs. Seasonal synergy unlocked.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-witch-shuffle-incident-030",
@@ -2430,35 +1891,27 @@
       "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Truth + 8%. Trending on crypt Tok.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Approved by the Council of Shadows.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 8
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-ghoul-pamphlet-initiative-031",
       "faction": "truth",
       "name": "Ghoul Pamphlet Initiative",
-      "type": "DEVELOPMENT",
+      "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Ongoing benefit to income or media costs. Seasonal synergy unlocked.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-crypt-pamphlet-032",
@@ -2466,37 +1919,29 @@
       "name": "Crypt Pamphlet",
       "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Opponent loses 3 IP. A scare that hits the wallet.",
-      "flavor": "All treats, suspicious tricks.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -3
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "All treats, suspicious tricks.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-headless-horseman-rally-incident-033",
       "faction": "truth",
       "name": "Headless Horseman Rally Incident",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Ward against hostile acts.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-headless-horseman-brief-034",
@@ -2504,18 +1949,15 @@
       "name": "Headless Horseman Brief",
       "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP. A scare that hits the wallet.",
-      "flavor": "Smells like fog machine and fear.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Smells like fog machine and fear.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-jack-o-lantern-shuffle-incident-035",
@@ -2523,17 +1965,13 @@
       "name": "Jack-o-Lantern Shuffle Incident",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Truth + 10%. Headline haunts the feed.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 10
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-cobweb-alert-protocol-036",
@@ -2541,17 +1979,13 @@
       "name": "Cobweb Alert Protocol",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Truth + 10%. Headline haunts the feed.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 10
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-rally-of-the-cauldron-037",
@@ -2560,16 +1994,12 @@
       "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Truth + 6%. Trending on crypt Tok.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 6
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-scare-of-the-zombie-038",
@@ -2577,17 +2007,13 @@
       "name": "Scare of the Zombie",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth + 8%. Broadcast rocks the night.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Batteries not included.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 8
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-haunted-mansion-flyer-protocol-039",
@@ -2595,18 +2021,14 @@
       "name": "Haunted Mansion Flyer Protocol",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Neighborhood watch gets weird.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-shuffle-of-the-spooky-hayride-040",
@@ -2615,17 +2037,14 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 4 IP. A sudden strike in the dark.",
-      "flavor": "Haunting sponsored by a totally normal NGO.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Haunting sponsored by a totally normal NGO.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-cauldron-brief-files-041",
@@ -2633,17 +2052,13 @@
       "name": "Cauldron Brief Files",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth + 5%. Trending on crypt Tok.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Smells like fog machine and fear.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 5
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-moonlight-report-042",
@@ -2652,37 +2067,30 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 4 IP. A scare that hits the wallet.",
-      "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Try not to scream on camera.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-haunted-mansion-alert-initiative-043",
       "faction": "truth",
       "name": "Haunted Mansion Alert Initiative",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Happens faster than a jump scare.",
-      "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Mind the ectoplasm.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-banshee-shuffle-protocol-044",
@@ -2690,76 +2098,59 @@
       "name": "Banshee Shuffle Protocol",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 1,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Neighborhood watch gets weird.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "We can neither confirm nor deny the howling.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-ouija-rally-initiative-045",
       "faction": "truth",
       "name": "Ouija Rally Initiative",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Happens faster than a jump scare.",
-      "flavor": "All treats, suspicious tricks.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "All treats, suspicious tricks.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-banshee-shenanigans-files-046",
       "faction": "truth",
       "name": "Banshee Shenanigans Files",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Prototype from the occult lab.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-frankenstein-brief-incident-047",
       "faction": "truth",
       "name": "Frankenstein Brief Incident",
-      "type": "DEVELOPMENT",
+      "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Ongoing benefit to income or media costs. Long-term spooky investment.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Licensed spooktacular.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-poltergeist-whispers-files-048",
@@ -2767,36 +2158,27 @@
       "name": "Poltergeist Whispers Files",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Truth + 8%. Late-night AM radio frenzy.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Keep garlic handy.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 8
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-candy-corn-shuffle-incident-049",
       "faction": "truth",
       "name": "Candy Corn Shuffle Incident",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Barricade of blessed salt.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-spider-shenanigans-protocol-050",
@@ -2804,76 +2186,58 @@
       "name": "Spider Shenanigans Protocol",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Neighborhood watch gets weird.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-haunted-press-release-051",
       "faction": "truth",
       "name": "Haunted Press Release",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Calibrating ecto-sensors.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-ouija-flyer-052",
       "faction": "truth",
       "name": "Ouija Flyer",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Prototype from the occult lab.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Batteries not included.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-shuffle-of-the-dracula-053",
       "faction": "truth",
       "name": "Shuffle of the Dracula",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Immediate spooky shenanigans.",
-      "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Whispers from the cornfield.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-ghost-report-protocol-054",
@@ -2882,113 +2246,86 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 3 IP. A sudden strike in the dark.",
-      "flavor": "We can neither confirm nor deny the howling.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -3
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "We can neither confirm nor deny the howling.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-pamphlet-of-the-raven-055",
       "faction": "truth",
       "name": "Pamphlet of the Raven",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Haunting sponsored by a totally normal NGO.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-seance-shuffle-incident-056",
       "faction": "truth",
       "name": "Seance Shuffle Incident",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Red eyes in the rear-view mirror.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-pumpkin-rally-initiative-057",
       "faction": "truth",
       "name": "Pumpkin Rally Initiative",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Barricade of blessed salt.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Keep garlic handy.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "immune",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-black-cat-press-release-protocol-058",
       "faction": "truth",
       "name": "Black Cat Press Release Protocol",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "immune",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-cemetery-rumor-initiative-059",
       "faction": "truth",
       "name": "Cemetery Rumor Initiative",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Ward against hostile acts.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-midnight-flyer-protocol-060",
@@ -2996,18 +2333,15 @@
       "name": "Midnight Flyer Protocol",
       "type": "ATTACK",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Opponent loses 4 IP. A scare that hits the wallet.",
-      "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Red eyes in the rear-view mirror.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-ghost-press-release-files-061",
@@ -3015,17 +2349,13 @@
       "name": "Ghost Press Release Files",
       "type": "MEDIA",
       "rarity": "common",
-      "cost": 2,
-      "target": null,
-      "text": "Truth + 7%. Late-night AM radio frenzy.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Rated PG‑Paranoid.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 7
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-pamphlet-of-the-ouija-062",
@@ -3033,18 +2363,14 @@
       "name": "Pamphlet of the Ouija",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Lantern-lit march adds leverage.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-frankenstein-pamphlet-063",
@@ -3052,18 +2378,14 @@
       "name": "Frankenstein Pamphlet",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 3,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Neighborhood watch gets weird.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-ectoplasm-whispers-incident-064",
@@ -3072,36 +2394,28 @@
       "type": "ATTACK",
       "rarity": "common",
       "cost": 2,
-      "target": null,
-      "text": "Opponent loses 4 IP. A sudden strike in the dark.",
-      "flavor": "Keep garlic handy.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Keep garlic handy.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-crypt-flyer-initiative-065",
       "faction": "truth",
       "name": "Crypt Flyer Initiative",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
-      "cost": 1,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Prototype from the occult lab.",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Do not feed after midnight.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-full-moon-brief-incident-066",
@@ -3109,56 +2423,42 @@
       "name": "Full Moon Brief Incident",
       "type": "ZONE",
       "rarity": "common",
-      "cost": 2,
-      "target": "state",
-      "text": "Add 1 pressure to target state. Grassroots pressure in foggy streets.",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1
+      },
+      "text": "+1 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-spooky-hayride-rally-protocol-067",
       "faction": "truth",
       "name": "Spooky Hayride Rally Protocol",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Paranormal analytics deployed.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-alert-of-the-skeleton-068",
       "faction": "truth",
       "name": "Alert of the Skeleton",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "common",
       "cost": 3,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Ward against hostile acts.",
+      "effects": {
+        "truthDelta": 1
+      },
+      "text": "+1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "immune",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-headless-horseman-whispers-protocol-069",
@@ -3166,37 +2466,31 @@
       "name": "Headless Horseman Whispers Protocol",
       "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Opponent loses 2 IP. A scare that hits the wallet.",
-      "flavor": "The crypt Wi‑Fi is excellent.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -2
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "The crypt Wi‑Fi is excellent.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-candy-corn-press-release-initiative-070",
       "faction": "truth",
       "name": "Candy Corn Press Release Initiative",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "common",
-      "cost": 3,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Immediate spooky shenanigans.",
-      "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
+      "cost": 2,
+      "effects": {
+        "ipDelta": {
+          "opponent": 1
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −1 IP.",
+      "flavor": "Filed under ‘Seasonal Anomalies’.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-graveyard-murmur-network-protocol-001",
@@ -3204,44 +2498,31 @@
       "name": "Graveyard Murmur Network Protocol",
       "type": "ATTACK",
       "rarity": "uncommon",
-      "cost": 5,
-      "target": null,
-      "text": "Opponent loses 4 IP. Numbers go bump in the night.",
-      "flavor": "Keep garlic handy.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "cost": 3,
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "Keep garlic handy.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-poltergeist-broadcast-files-002",
       "faction": "truth",
       "name": "Poltergeist Broadcast Files",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "uncommon",
-      "cost": 4,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Immediate spooky shenanigans.",
-      "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
-        },
-        {
-          "k": "flag",
-          "name": "forceDiscard",
-          "target": "ai",
-          "value": 1
+      "cost": 3,
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "Whispers from the cornfield.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-haunted-mansion-operation-003",
@@ -3250,17 +2531,14 @@
       "type": "ATTACK",
       "rarity": "uncommon",
       "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP. A scare that hits the wallet.",
-      "flavor": "Licensed spooktacular.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "Licensed spooktacular.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-spider-expedition-incident-004",
@@ -3268,18 +2546,15 @@
       "name": "Spider Expedition Incident",
       "type": "ATTACK",
       "rarity": "uncommon",
-      "cost": 5,
-      "target": null,
-      "text": "Opponent loses 4 IP. A scare that hits the wallet.",
-      "flavor": "Batteries not included.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "cost": 3,
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "Batteries not included.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-haunted-mansion-expedition-protocol-005",
@@ -3287,41 +2562,27 @@
       "name": "Haunted Mansion Expedition Protocol",
       "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 3,
-      "target": null,
-      "text": "Truth + 12%. Trending on crypt Tok.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Bring a flashlight and plausible deniability.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 12
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-seance-sweep-006",
       "faction": "truth",
       "name": "Seance Sweep",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 5,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        },
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-trick-or-treat-ploy-007",
@@ -3330,36 +2591,28 @@
       "type": "MEDIA",
       "rarity": "uncommon",
       "cost": 4,
-      "target": null,
-      "text": "Truth + 10%. Late-night AM radio frenzy.",
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Batteries not included.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 10
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-graveyard-gambit-protocol-008",
       "faction": "truth",
       "name": "Graveyard Gambit Protocol",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "uncommon",
       "cost": 3,
-      "target": null,
-      "text": "Force a stumble or draw momentum. Blink-and-you-miss-it ploy.",
-      "flavor": "Bring a flashlight and plausible deniability.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "skipAction",
-          "target": "ai",
-          "value": true
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "Bring a flashlight and plausible deniability.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-cobweb-ploy-incident-009",
@@ -3367,17 +2620,13 @@
       "name": "Cobweb Ploy Incident",
       "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 3,
-      "target": null,
-      "text": "Truth + 10%. Trending on crypt Tok.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Do not feed after midnight.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 10
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-cauldron-gambit-protocol-010",
@@ -3385,18 +2634,14 @@
       "name": "Cauldron Gambit Protocol",
       "type": "ZONE",
       "rarity": "uncommon",
-      "cost": 3,
-      "target": "state",
-      "text": "Add 2 pressure to target state. Grassroots pressure in foggy streets.",
+      "cost": 5,
+      "effects": {
+        "pressureDelta": 2
+      },
+      "text": "+2 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Mind the ectoplasm.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-witch-operation-files-011",
@@ -3405,17 +2650,14 @@
       "type": "ATTACK",
       "rarity": "uncommon",
       "cost": 3,
-      "target": null,
-      "text": "Opponent loses 4 IP. A sudden strike in the dark.",
-      "flavor": "The crypt Wi‑Fi is excellent.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -4
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "The crypt Wi‑Fi is excellent.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-seance-sweep-012",
@@ -3423,18 +2665,14 @@
       "name": "Seance Sweep",
       "type": "ZONE",
       "rarity": "uncommon",
-      "cost": 3,
-      "target": "state",
-      "text": "Add 2 pressure to target state. Lantern-lit march adds leverage.",
+      "cost": 5,
+      "effects": {
+        "pressureDelta": 2
+      },
+      "text": "+2 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-zombie-murmur-network-013",
@@ -3442,17 +2680,13 @@
       "name": "Zombie Murmur Network",
       "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 5,
-      "target": null,
-      "text": "Truth + 10%. Headline haunts the feed.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Licensed spooktacular.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 10
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-moonlight-operation-initiative-014",
@@ -3461,17 +2695,13 @@
       "type": "ZONE",
       "rarity": "uncommon",
       "cost": 5,
-      "target": "state",
-      "text": "Add 2 pressure to target state. Grassroots pressure in foggy streets.",
+      "effects": {
+        "pressureDelta": 2
+      },
+      "text": "+2 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "Rated PG‑Paranoid.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-jack-o-lantern-broadcast-initiative-015",
@@ -3479,36 +2709,27 @@
       "name": "Jack-o-Lantern Broadcast Initiative",
       "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 5,
-      "target": null,
-      "text": "Truth + 10%. Broadcast rocks the night.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 10
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-ghoul-operation-initiative-016",
       "faction": "truth",
       "name": "Ghoul Operation Initiative",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 5,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Prototype from the occult lab.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Keep garlic handy.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-operation-of-the-mummy-017",
@@ -3516,80 +2737,57 @@
       "name": "Operation of the Mummy",
       "type": "ATTACK",
       "rarity": "uncommon",
-      "cost": 4,
-      "target": null,
-      "text": "Opponent loses 5 IP. A scare that hits the wallet.",
-      "flavor": "Rated PG‑Paranoid.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -5
+      "cost": 3,
+      "effects": {
+        "ipDelta": {
+          "opponent": 2
         }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      },
+      "text": "Opponent −2 IP.",
+      "flavor": "Rated PG‑Paranoid.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-poltergeist-murmur-network-incident-018",
       "faction": "truth",
       "name": "Poltergeist Murmur Network Incident",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "uncommon",
       "cost": 4,
-      "target": null,
-      "text": "Block next attack or gain temporary immunity. Circle of protection holds.",
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Someone left the portal open again.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        },
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-cobweb-ploy-initiative-019",
       "faction": "truth",
       "name": "Cobweb Ploy Initiative",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "uncommon",
       "cost": 4,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Paranormal analytics deployed.",
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-headless-horseman-expedition-files-020",
       "faction": "truth",
       "name": "Headless Horseman Expedition Files",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "uncommon",
-      "cost": 3,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Paranormal analytics deployed.",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2
+      },
+      "text": "+2% Truth.",
       "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-mummy-sanction-001",
@@ -3597,96 +2795,59 @@
       "name": "Mummy Sanction",
       "type": "ATTACK",
       "rarity": "rare",
-      "cost": 6,
-      "target": null,
-      "text": "Opponent loses 6 IP. A sudden strike in the dark.",
-      "flavor": "Do not taunt the poltergeist.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -6
+      "cost": 4,
+      "effects": {
+        "ipDelta": {
+          "opponent": 3
         },
-        {
-          "k": "flag",
-          "name": "forceDiscard",
-          "target": "ai",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+        "discardOpponent": 1
+      },
+      "text": "Opponent −3 IP, discard 1.",
+      "flavor": "Do not taunt the poltergeist.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-frankenstein-project-incident-002",
       "faction": "truth",
       "name": "Frankenstein Project Incident",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "rare",
-      "cost": 8,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Calibrating ecto-sensors.",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3
+      },
+      "text": "+3% Truth.",
       "flavor": "This is fine. Probably.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        },
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-zombie-deep-cover-files-003",
       "faction": "truth",
       "name": "Zombie Deep Cover Files",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "rare",
-      "cost": 7,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Calibrating ecto-sensors.",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3
+      },
+      "text": "+3% Truth.",
       "flavor": "Whispers from the cornfield.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        },
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-cauldron-grand-ritual-protocol-004",
       "faction": "truth",
       "name": "Cauldron Grand Ritual Protocol",
-      "type": "DEVELOPMENT",
+      "type": "ZONE",
       "rarity": "rare",
       "cost": 6,
-      "target": null,
-      "text": "Ongoing benefit to income or media costs. Perennial pumpkin power.",
+      "effects": {
+        "pressureDelta": 3
+      },
+      "text": "+3 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "‘It was just the wind,’ said the intern.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        },
-        {
-          "k": "development",
-          "type": "mediaCost",
-          "value": -1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-spooky-hayride-revelation-005",
@@ -3694,24 +2855,16 @@
       "name": "Spooky Hayride Revelation",
       "type": "ATTACK",
       "rarity": "rare",
-      "cost": 7,
-      "target": null,
-      "text": "Opponent loses 8 IP. A scare that hits the wallet.",
-      "flavor": "Try not to scream on camera.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -8
+      "cost": 4,
+      "effects": {
+        "ipDelta": {
+          "opponent": 3
         },
-        {
-          "k": "flag",
-          "name": "forceDiscard",
-          "target": "ai",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+        "discardOpponent": 1
+      },
+      "text": "Opponent −3 IP, discard 1.",
+      "flavor": "Try not to scream on camera.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-ghoul-project-incident-006",
@@ -3719,100 +2872,58 @@
       "name": "Ghoul Project Incident",
       "type": "ATTACK",
       "rarity": "rare",
-      "cost": 8,
-      "target": null,
-      "text": "Opponent loses 8 IP. A sudden strike in the dark.",
-      "flavor": "Red eyes in the rear-view mirror.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -8
+      "cost": 4,
+      "effects": {
+        "ipDelta": {
+          "opponent": 3
         },
-        {
-          "k": "flag",
-          "name": "forceDiscard",
-          "target": "ai",
-          "value": 1
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+        "discardOpponent": 1
+      },
+      "text": "Opponent −3 IP, discard 1.",
+      "flavor": "Red eyes in the rear-view mirror.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-cemetery-deep-cover-protocol-007",
       "faction": "truth",
       "name": "Cemetery Deep Cover Protocol",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "rare",
-      "cost": 6,
-      "target": null,
-      "text": "Minor systems boost for zones/draw. Prototype from the occult lab.",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3
+      },
+      "text": "+3% Truth.",
       "flavor": "Do not feed after midnight.",
-      "effects": [
-        {
-          "k": "development",
-          "type": "income",
-          "value": 1
-        },
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-operation-pumpkin-spice-legendary",
       "faction": "government",
       "name": "Operation Pumpkin Spice",
-      "type": "TECH",
+      "type": "MEDIA",
       "rarity": "legendary",
-      "cost": 15,
-      "target": null,
-      "text": "Truth -25%. Your next ZONE costs 3 less.",
+      "cost": 6,
+      "effects": {
+        "truthDelta": 4
+      },
+      "text": "+4% Truth.",
       "flavor": "Approved by the Starbucks Council of Shadows.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": -25
-        },
-        {
-          "k": "flag",
-          "name": "zoneCostReduction",
-          "value": 3
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-containment-protocol-dracula-legendary",
       "faction": "government",
       "name": "Containment Protocol: Dracula",
-      "type": "DEFENSIVE",
+      "type": "MEDIA",
       "rarity": "rare",
-      "cost": 8,
-      "target": null,
-      "text": "Block ALL enemy cards this round.",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3
+      },
+      "text": "+3% Truth.",
       "flavor": "Stake, garlic, plausible deniability.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "blockAttack",
-          "value": true
-        },
-        {
-          "k": "flag",
-          "name": "immune",
-          "value": true
-        },
-        {
-          "k": "flag",
-          "name": "counterNext",
-          "value": true
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-gov-the-skeleton-army-rises-legendary",
@@ -3820,19 +2931,14 @@
       "name": "The Skeleton Army Rises",
       "type": "ZONE",
       "rarity": "rare",
-      "cost": 10,
-      "target": "state",
-      "text": "Add 5 pressure to ALL states.",
+      "cost": 6,
+      "effects": {
+        "pressureDelta": 3
+      },
+      "text": "+3 Pressure in a chosen state.",
+      "requiresTarget": true,
       "flavor": "From the boneyard to the ballot box.",
-      "effects": [
-        {
-          "k": "pressure",
-          "who": "player",
-          "v": 5,
-          "target": "all"
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-elvira-mistress-of-the-leaks-legendary",
@@ -3840,22 +2946,13 @@
       "name": "Elvira, Mistress of the Leaks",
       "type": "MEDIA",
       "rarity": "legendary",
-      "cost": 14,
-      "target": null,
-      "text": "Truth +30%. Draw 2 cards.",
+      "cost": 6,
+      "effects": {
+        "truthDelta": 4
+      },
+      "text": "+4% Truth.",
       "flavor": "Late-night camp, early-morning chaos.",
-      "effects": [
-        {
-          "k": "truth",
-          "v": 30
-        },
-        {
-          "k": "flag",
-          "name": "bonusDraw",
-          "value": 2
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-bat-boy-s-rebellion-legendary",
@@ -3863,48 +2960,33 @@
       "name": "Bat Boy’s Rebellion",
       "type": "ATTACK",
       "rarity": "legendary",
-      "cost": 12,
-      "target": null,
-      "text": "Opponent −10 IP. Truth +10%.",
-      "flavor": "Finally escaped the tabloids — and he’s pissed.",
-      "effects": [
-        {
-          "k": "ip",
-          "who": "ai",
-          "v": -10
+      "cost": 5,
+      "effects": {
+        "ipDelta": {
+          "opponent": 4
         },
-        {
-          "k": "truth",
-          "v": 10
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+        "discardOpponent": 2
+      },
+      "text": "Opponent −4 IP, discard 2.",
+      "flavor": "Finally escaped the tabloids — and he’s pissed.",
+      "artId": "halloween_spooktacular-Temp-Image"
     },
     {
       "id": "hallo-truth-candy-apocalypse-legendary",
       "faction": "truth",
       "name": "Candy Apocalypse",
-      "type": "INSTANT",
+      "type": "ATTACK",
       "rarity": "rare",
-      "cost": 9,
-      "target": null,
-      "text": "Opponent discards 3. Gain +5 IP per discarded card.",
-      "flavor": "Too much sugar unleashes the truth.",
-      "effects": [
-        {
-          "k": "flag",
-          "name": "forceDiscard",
-          "target": "ai",
-          "value": 3
+      "cost": 4,
+      "effects": {
+        "ipDelta": {
+          "opponent": 3
         },
-        {
-          "k": "ip",
-          "who": "player",
-          "v": 15
-        }
-      ],
-      "imageId": "halloween_spooktacular-Temp-Image"
+        "discardOpponent": 1
+      },
+      "text": "Opponent −3 IP, discard 1.",
+      "flavor": "Too much sugar unleashes the truth.",
+      "artId": "halloween_spooktacular-Temp-Image"
     }
-  ],
-  "tempImageId": "halloween_spooktacular-Temp-Image"
+  ]
 }
