@@ -214,10 +214,7 @@ export class EnhancedCardBalancer {
 
     // Pressure effects  
     if (effects.pressureDelta) {
-      const pressureValue = typeof effects.pressureDelta === 'number' 
-        ? effects.pressureDelta 
-        : effects.pressureDelta.v;
-      breakdown.pressure += Math.abs(pressureValue) * IP_EQUIVALENT_WEIGHTS.pressureBase;
+      breakdown.pressure += Math.abs(effects.pressureDelta) * IP_EQUIVALENT_WEIGHTS.pressureBase;
     }
 
     // Draw effects
@@ -627,10 +624,6 @@ export class EnhancedCardBalancer {
       simulation,
       patches: JSON.parse(patches)
     };
-  }
-
-  public getAllCards(): GameCard[] {
-    return this.cards;
   }
 }
 

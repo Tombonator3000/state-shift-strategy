@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { GameCard } from '@/types/cardTypes';
-import { CARD_DATABASE, getShowcaseDeck } from '@/data/cardDatabase';
+import { CARD_DATABASE } from '@/data/cardDatabase';
 
 interface CardCollectionData {
   discoveredCards: Set<string>;
@@ -66,15 +66,8 @@ export const useCardCollection = () => {
     });
   };
 
-  const baseCollection: GameCard[] = CARD_DATABASE.length > 0
-    ? CARD_DATABASE
-    : getShowcaseDeck();
-
   const getDiscoveredCards = (): GameCard[] => {
-    if (collection.discoveredCards.size === 0) {
-      return baseCollection;
-    }
-    return baseCollection.filter(card => collection.discoveredCards.has(card.id));
+    return CARD_DATABASE.filter(card => collection.discoveredCards.has(card.id));
   };
 
   const getCardStats = (cardId: string) => {
@@ -86,11 +79,9 @@ export const useCardCollection = () => {
 
   const getCollectionStats = () => {
     return {
-      totalCards: baseCollection.length,
-      discoveredCards: collection.discoveredCards.size || baseCollection.length,
-      completionPercentage: baseCollection.length === 0
-        ? 0
-        : Math.round(((collection.discoveredCards.size || baseCollection.length) / baseCollection.length) * 100),
+      totalCards: CARD_DATABASE.length,
+      discoveredCards: collection.discoveredCards.size,
+      completionPercentage: Math.round((collection.discoveredCards.size / CARD_DATABASE.length) * 100),
       totalPlays: Array.from(collection.playedCards.values()).reduce((sum, count) => sum + count, 0)
     };
   };

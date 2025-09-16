@@ -70,9 +70,9 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {humanCards.map((playedCard) => (
+                  {humanCards.map((playedCard, index) => (
                     <div
-                      key={playedCard.card.id}
+                      key={`human-${playedCard.card.id}-${index}`}
                       className="group relative"
                     >
                       {/* Full card with newspaper styling - doubled size */}
@@ -158,9 +158,9 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {aiCards.map((playedCard) => (
+                  {aiCards.map((playedCard, index) => (
                     <div
-                      key={playedCard.card.id}
+                      key={`ai-${playedCard.card.id}-${index}`}
                       className="group relative"
                     >
                       {/* Full card with newspaper styling - doubled size */}

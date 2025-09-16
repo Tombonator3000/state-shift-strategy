@@ -5,21 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "cards:rewrite": "bun scripts/rewrite-cards-unified.ts",
-    "validate:core": "tsx scripts/validate-core-v21e-strict.ts",
     "build": "vite build",
-    "build:npm": "npm run validate:core && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "export:core": "tsx scripts/export-core-json.ts",
-    "build:core": "CORE_SEED=2025-09-14 tsx scripts/export-core-json.ts",
-    "snapshot:core": "tsx scripts/snapshot-core-v21e-strict.ts",
-    "report": "cat src/data/core/rewrite-report.txt",
-    "test": "vitest run",
-    "migrate:mvp": "bun tsx scripts/migrate-to-mvp.ts",
-    "validate:mvp": "bun tsx scripts/validate-mvp.ts",
-    "test:mvp": "vitest run -t mvp"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -85,7 +74,6 @@
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react-swc": "^3.11.0",
     "autoprefixer": "^10.4.21",
-    "tsx": "file:tools/tsx-shim",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
@@ -95,7 +83,6 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
-    "vite": "^5.4.19",
-    "vitest": "^1.6.0"
+    "vite": "^5.4.19"
   }
 }

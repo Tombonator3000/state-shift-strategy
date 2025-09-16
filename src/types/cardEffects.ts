@@ -34,14 +34,9 @@ export type CardEffects = {
   draw?: number;                    // Cards to draw
   discardSelf?: number;             // Cards player must discard
   discardOpponent?: number;         // Cards opponent must discard
-  discardRandom?: number;           // Legacy: opponent discards random cards
   
   // Zone/state effects
-  pressureDelta?: number | {        // Pressure to add (supports legacy object format)
-    state: string; 
-    who?: 'player' | 'ai' | 'self' | 'opponent'; 
-    v: number;
-  };
+  pressureDelta?: number;           // Pressure to add to target state
   zoneDefense?: number;             // Defense bonus to controlled states
   captureBonus?: number;            // Extra IP when capturing states
   
@@ -64,7 +59,6 @@ export type CardEffects = {
   // Special mechanics
   repeatable?: boolean;             // Can be played multiple times per turn
   requiresTarget?: boolean;         // Requires state selection
-  reduceFactor?: number;            // For defensive cards (0-1)
   
   // Resource generation
   incomeBonus?: {                   // Bonus income

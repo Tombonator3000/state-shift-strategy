@@ -1,76 +1,109 @@
-import type { Card as ShowcaseCard } from "@/types/public";
-import { Card as UiCard } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import React from 'react';
+import CardImage from './CardImage';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import type { GameCard } from '@/types/cardTypes';
 
 interface GameHandProps {
-  cards: ShowcaseCard[];
+  cards: GameCard[];
   onPlayCard: (cardId: string) => void;
   disabled?: boolean;
 }
 
-const rarityTone: Record<ShowcaseCard["rarity"], string> = {
-  common: "bg-slate-600",
-  uncommon: "bg-emerald-600",
-  rare: "bg-blue-600",
-  legendary: "bg-amber-500"
-};
-
-const typeTone: Record<ShowcaseCard["type"], string> = {
-  ATTACK: "border-destructive bg-destructive/10",
-  MEDIA: "border-truth-red bg-truth-red/10",
-  ZONE: "border-government-blue bg-government-blue/10"
-};
-
 const GameHand = ({ cards, onPlayCard, disabled }: GameHandProps) => {
+  const getRarityColor = (rarity: string) => {
+    switch (rarity) {
+      case 'common': return 'bg-gray-500';
+      case 'uncommon': return 'bg-green-500';
+      case 'rare': return 'bg-blue-500';
+      case 'legendary': return 'bg-orange-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'MEDIA': return 'border-truth-red bg-truth-red/10';
+      case 'ZONE': return 'border-government-blue bg-government-blue/10';
+      case 'ATTACK': return 'border-destructive bg-destructive/10';
+      case 'DEFENSIVE': return 'border-primary bg-primary/10';
+      default: return 'border-muted bg-muted/10';
+    }
+  };
+
   return (
-    <div className="space-y-3">
-      <p className="text-xs font-mono uppercase tracking-wide text-slate-300">
-        Showcase Cards ({cards.length})
-      </p>
-      <div className="grid gap-3">
-        {cards.map((card) => (
-          <UiCard
-            key={card.id}
-            className={`overflow-hidden border-2 ${typeTone[card.type]} ${disabled ? "opacity-60" : "hover:shadow-lg"}`}
+    <div className="space-y-2">
+      <h3 className="font-bold text-sm font-mono">Hand ({cards.length}/5)</h3>
+      
+      <div className="space-y-2 max-h-96 overflow-y-auto">
+        {cards.map((card, index) => (
+          <Card 
+            key={card.id} 
+            className={`relative p-0 cursor-pointer transition-all hover:scale-105 hover:-translate-y-2 ${getTypeColor(card.type)} ${
+              disabled ? 'opacity-50' : ''
+            } overflow-hidden animate-card-deal`}
+            style={{ animationDelay: `${index * 0.1}s` }}
           >
-            <div className="flex flex-col gap-3 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground">{card.name}</h3>
-                  <p className="text-xs text-slate-300">{card.faction.toUpperCase()}</p>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-sm font-bold text-white">
-                    {card.cost}
-                  </span>
-                  <span className={`h-2 w-12 rounded-full ${rarityTone[card.rarity]}`}></span>
-                </div>
+            {/* TCG Card Layout */}
+            <div className="relative">
+              {/* Rarity stripe */}
+              <div className={`absolute left-0 top-0 w-2 h-full ${getRarityColor(card.rarity)} z-10`}></div>
+              
+              {/* Cost pip */}
+              <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center z-10">
+                {card.cost}
               </div>
-
-              <div className="space-y-2 text-xs text-slate-200">
-                <Badge variant="outline">{card.type}</Badge>
-                <p className="min-h-[48px] rounded bg-black/30 p-3 text-xs text-slate-200">
-                  {card.flavor ?? "Showcase card (UI only)."}
-                </p>
+              
+              {/* Card header */}
+              <div className="p-3 pb-2 bg-gradient-to-r from-card to-card/80">
+                <h4 className="font-bold text-sm font-mono text-center">{card.name}</h4>
               </div>
-
-              <Button
-                size="sm"
-                className="w-full"
-                disabled={disabled}
-                onClick={() => onPlayCard(card.id)}
-              >
-                Highlight Card
-              </Button>
+              
+              {/* Art box placeholder */}
+              <div className="h-24 border-y overflow-hidden">
+                <CardImage cardId={card.id} className="w-full h-full" />
+              </div>
+              
+              {/* Card content */}
+              <div className="p-3">
+                <div className="flex justify-center mb-2">
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs font-mono ${card.type === 'MEDIA' ? 'bg-truth-red/20 border-truth-red text-truth-red' : 
+                      card.type === 'ZONE' ? 'bg-government-blue/20 border-government-blue text-government-blue' :
+                      card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
+                      'bg-accent/20 border-accent text-accent-foreground'}`}
+                  >
+                    [{card.type}]
+                  </Badge>
+                </div>
+                
+                <div className="text-xs text-center mb-3 min-h-8 flex items-center justify-center font-medium">
+                  {card.text}
+                </div>
+                
+                <div className="text-xs italic text-muted-foreground text-center mb-3 min-h-6 border-t pt-2">
+                  "{card.faction === 'truth' ? card.flavorTruth : card.flavorGov}"
+                </div>
+                
+                <Button
+                  size="sm"
+                  onClick={() => onPlayCard(card.id)}
+                  disabled={disabled}
+                  className="w-full text-xs animate-on-hover"
+                >
+                  Deploy Asset
+                </Button>
+              </div>
             </div>
-          </UiCard>
+          </Card>
         ))}
       </div>
-
+      
       {cards.length === 0 && (
-        <div className="rounded border border-dashed border-white/20 p-6 text-center text-sm text-slate-300">
-          Your showcase hand is empty. Start a new round to refresh cards.
+        <div className="text-center text-muted-foreground text-sm font-mono py-8">
+          No cards in hand
         </div>
       )}
     </div>

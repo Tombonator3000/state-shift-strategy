@@ -496,7 +496,11 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
           </div>
         </div>
       </Card>
-      <CardCollection open={showCollection} onOpenChange={setShowCollection} />
+      {uiTheme === 'tabloid_bw' ? (
+        <CardCollectionTabloid open={showCollection} onOpenChange={setShowCollection} />
+      ) : (
+        <CardCollection open={showCollection} onOpenChange={setShowCollection} />
+      )}
     </div>
   );
 };

@@ -1,8 +1,26 @@
 // Victory Conditions System for Shadow Government
 // Handles all win/loss conditions with proper evaluation timing and tie-breaking
 
-// Import the canonical GameCard interface
-import type { GameCard } from '@/types/cardTypes';
+// GameCard interface for type safety
+export interface GameCard {
+  id: string;
+  name: string;
+  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'DEVELOPMENT' | 'LEGENDARY';
+  rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
+  text: string;
+  flavor?: string;
+  cost: number;
+  target?: {
+    scope: string;
+    restrict?: string[];
+    requireTag?: string;
+    type?: string;
+    faction?: string;
+    onlyIf?: any;
+  };
+  effects?: any;
+  faction?: string;
+}
 
 export interface VictoryCondition {
   id: string;

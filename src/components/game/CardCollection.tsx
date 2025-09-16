@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/components/ui/progress';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import type { GameCard } from '@/types/cardTypes';
+import { CARD_DATABASE } from '@/data/cardDatabase';
 
 interface CardCollectionProps {
   open: boolean;
@@ -23,12 +24,11 @@ const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
   
   // Filter cards based on search and filters
   const filteredCards = discoveredCards.filter(card => {
-    const flavorText = card.flavorTruth || card.flavorGov || card.flavor || '';
     const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         flavorText.toLowerCase().includes(searchTerm.toLowerCase());
+                         card.text.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || card.type === filterType;
     const matchesRarity = filterRarity === 'all' || card.rarity === filterRarity;
-
+    
     return matchesSearch && matchesType && matchesRarity;
   });
 
@@ -48,16 +48,16 @@ const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
           </div>
         </div>
         
-        <p className="text-sm text-muted-foreground mb-3">{card.flavor || 'Showcase card (UI only).'}</p>
-
+        <p className="text-sm text-muted-foreground mb-3">{card.text}</p>
+        
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Cost: {card.cost} IP</span>
           <span>Played: {cardStats.timesPlayed} times</span>
         </div>
-
-        {card.flavor && (
+        
+        {card.flavorGov && (
           <div className="mt-2 p-2 bg-accent/30 rounded text-xs italic text-muted-foreground">
-            "{card.flavor}"
+            "{card.flavorGov}"
           </div>
         )}
       </div>
