@@ -1,24 +1,51 @@
+export type Faction = "truth" | "government";
+export type CardType = "ATTACK" | "MEDIA" | "ZONE";
+export type Rarity = "common" | "uncommon" | "rare" | "legendary";
+
 export type PlayerID = "P1" | "P2";
 
-export interface Card {
+export type EffectsATTACK = {
+  ipDelta: { opponent: number };
+  discardOpponent?: number;
+};
+
+export type EffectsMEDIA = {
+  truthDelta: number;
+};
+
+export type EffectsZONE = {
+  pressureDelta: number;
+};
+
+export type Card = {
   id: string;
   name: string;
-  type: "MEDIA" | "ZONE" | "ATTACK" | "DEFENSIVE" | "DEVELOPMENT" | "INSTANT" | "LEGENDARY";
+  faction: Faction;
+  type: CardType;
+  rarity: Rarity;
   cost: number;
-  faction?: "Truth" | "Government";
-  rarity?: "common" | "uncommon" | "rare" | "legendary";
-  tags?: {
-    defensive?: boolean;      // UI hint
-    reactive?: boolean;       // Legendary exception (can play outside window)
-    partialBlock?: boolean;   // UI hint
-  };
-  effects: any; // Our effect engine interprets this
-}
+  effects: EffectsATTACK | EffectsMEDIA | EffectsZONE;
+  artId?: string;
+  flavor?: string;
+  tags?: string[];
+};
 
-export interface EngineState {
-  phase: "IDLE" | "RESOLVING";
-  hands: Record<PlayerID, Card[]>;
-  ip: Record<PlayerID, number>;
-  truthPercent: number;
-  // ...rest of the state you already have
-}
+export type PlayerState = {
+  id: PlayerID;
+  faction: Faction;
+  deck: Card[];
+  hand: Card[];
+  discard: Card[];
+  ip: number;
+  states: string[];
+};
+
+export type GameState = {
+  turn: number;
+  currentPlayer: PlayerID;
+  truth: number;
+  players: Record<PlayerID, PlayerState>;
+  pressureByState: Record<string, { P1: number; P2: number }>;
+  stateDefense: Record<string, number>;
+  playsThisTurn: number;
+};
