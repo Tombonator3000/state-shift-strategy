@@ -15,8 +15,6 @@ import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashb
 import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
-import { ClashArenaIntegrated } from '@/components/game/ClashArenaIntegrated';
-import { canPlayDefensively } from '@/utils/clashHelpers';
 import { AudioControls } from '@/components/ui/audio-controls';
 import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
@@ -76,7 +74,7 @@ const Index = () => {
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showMinimizedHand, setShowMinimizedHand] = useState(false);
   
-  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo, playDefensiveCard, resolveClash, closeClashWindow } = useGameState();
+  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -847,18 +845,9 @@ const Index = () => {
           {/* Your Hand - Takes remaining space */}
           <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border flex-1 min-h-0">
             <h3 className="font-bold text-xs mb-2">YOUR HAND</h3>
-            <EnhancedGameHand 
-          cards={gameState.hand}
-          onPlayCard={(cardId) => {
-            if (gameState.clash.open && gameState.clash.defender === 'human') {
-              const card = gameState.hand.find(c => c.id === cardId);
-              if (card && canPlayDefensively(card, gameState.ip, gameState.clash.open)) {
-                playDefensiveCard(cardId);
-                return;
-              }
-            }
-            handlePlayCard(cardId);
-          }}
+            <EnhancedGameHand
+              cards={gameState.hand}
+              onPlayCard={handlePlayCard}
               onSelectCard={handleSelectCard}
               selectedCard={gameState.selectedCard}
               disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}

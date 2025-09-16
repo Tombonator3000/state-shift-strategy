@@ -11,22 +11,31 @@ export function isReactiveAttack(card: Card): boolean {
   return card.type === "ATTACK" || (card.type === "MEDIA" && hasHarmfulEffect(card));
 }
 
-export function openReactionWindow(engine: EngineState, attacker: PlayerID, attackCard: Card) {
-  engine.phase = "REACTION_WINDOW_OPEN";
-  engine.clash = {
-    open: true,
-    attacker,
-    defender: other(attacker),
-    attackCard,
-    windowMs: engine.clash?.windowMs ?? 4000,
-    expiresAt: Date.now() + (engine.clash?.windowMs ?? 4000),
-  };
-}
-
 export type Outcome =
   | { type: "BLOCK_ALL" }
   | { type: "REDUCE"; factor: number } // 0..1 (0.5 = 50%)
   | { type: "FULL_HIT" };
+
+export interface ClashResolution {
+  attacker: PlayerID;
+  defender?: PlayerID;
+  attackCard: Card;
+  defenseCard?: Card;
+}
+
+export function openReactionWindow(
+  engine: EngineState,
+  attacker: PlayerID,
+  attackCard: Card,
+  defenseCard?: Card
+) {
+  resolveClash(engine, {
+    attacker,
+    defender: other(attacker),
+    attackCard,
+    defenseCard,
+  });
+}
 
 export function computeOutcome(attack: Card, defense?: Card): Outcome {
   if (!defense) return { type: "FULL_HIT" };
@@ -48,9 +57,9 @@ export function reduceEffects(effects: any, factor: number) {
   return copy;
 }
 
-export function resolveClash(engine: EngineState) {
-  const { attackCard, defenseCard, attacker, defender } = engine.clash;
-  if (!attackCard || !attacker || !defender) return;
+export function resolveClash(engine: EngineState, context: ClashResolution) {
+  const { attackCard, defenseCard, attacker } = context;
+  const defender = context.defender ?? other(attacker);
 
   engine.phase = "RESOLVING";
   const outcome = computeOutcome(attackCard, defenseCard);
@@ -66,14 +75,12 @@ export function resolveClash(engine: EngineState) {
     log(`💥 ${attackCard.name} hits!`);
   }
 
-  // Cleanup
   discardIfNeeded(attackCard);
   if (defenseCard) discardIfNeeded(defenseCard);
 
-  engine.clash = { open: false, windowMs: engine.clash.windowMs };
   engine.phase = "IDLE";
 }
 
 export function closeReactionWindow(engine: EngineState) {
-  engine.clash.open = false;
+  engine.phase = "IDLE";
 }
