@@ -1,17 +1,17 @@
 // Run Full Migration and Update Files
 // This script loads existing cards, migrates them, and updates the MVP cards file
 
-import { CORE_BATCH_TRUTH_1 } from '@/data/core/truth-batch-1';
-import { CORE_BATCH_TRUTH_2 } from '@/data/core/truth-batch-2'; 
-import { CORE_BATCH_TRUTH_3 } from '@/data/core/truth-batch-3';
-import { CORE_BATCH_TRUTH_4 } from '@/data/core/truth-batch-4';
-import { CORE_BATCH_TRUTH_5 } from '@/data/core/truth-batch-5';
-import { CORE_BATCH_TRUTH_6 } from '@/data/core/truth-batch-6';
-import { CORE_BATCH_TRUTH_7 } from '@/data/core/truth-batch-7';
-import { CORE_BATCH_GOV_1 } from '@/data/core/government-batch-1';
-import { CORE_BATCH_GOV_2 } from '@/data/core/government-batch-2';
-import { CORE_GOV_DECK } from '@/data/core/CORE_GOV_DECK';
-import { CORE_TRUTH_DECK } from '@/data/core/CORE_TRUTH_DECK';
+import { CORE_BATCH_TRUTH_1 } from '@/data/core_legacy/truth-batch-1';
+import { CORE_BATCH_TRUTH_2 } from '@/data/core_legacy/truth-batch-2'; 
+import { CORE_BATCH_TRUTH_3 } from '@/data/core_legacy/truth-batch-3';
+import { CORE_BATCH_TRUTH_4 } from '@/data/core_legacy/truth-batch-4';
+import { CORE_BATCH_TRUTH_5 } from '@/data/core_legacy/truth-batch-5';
+import { CORE_BATCH_TRUTH_6 } from '@/data/core_legacy/truth-batch-6';
+import { CORE_BATCH_TRUTH_7 } from '@/data/core_legacy/truth-batch-7';
+import { CORE_BATCH_GOV_1 } from '@/data/core_legacy/government-batch-1';
+import { CORE_BATCH_GOV_2 } from '@/data/core_legacy/government-batch-2';
+import { CORE_GOV_DECK } from '@/data/core_legacy/CORE_GOV_DECK';
+import { CORE_TRUTH_DECK } from '@/data/core_legacy/CORE_TRUTH_DECK';
 
 import { CardMigrator } from '@/tools/migrate-to-mvp';
 import { validateMVPDatabase } from '@/rules/validate-mvp';

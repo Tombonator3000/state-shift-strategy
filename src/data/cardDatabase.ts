@@ -53,7 +53,7 @@ async function loadCoreCards(): Promise<GameCard[]> {
   _coreCardsPromise = (async () => {
     try {
       // Try to import core collector
-      const coreModule = await import('./core');
+      const coreModule = await import('./core_legacy');
       const coreCards = coreModule.CARD_DATABASE_CORE || [];
       console.log(`✅ [RUNTIME RECOVERY] Loaded ${coreCards.length} cards from core collector`);
       _coreCards = coreCards as GameCard[];

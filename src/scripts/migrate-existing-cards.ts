@@ -1,7 +1,7 @@
 // Migrate Existing Cards to MVP Format
 // Load all existing core cards and convert them to MVP
 
-import { CORE_BATCH_TRUTH_1 } from '@/data/core/truth-batch-1';
+import { CORE_BATCH_TRUTH_1 } from '@/data/core_legacy/truth-batch-1';
 import { CORE_BATCH_TRUTH_2 } from '@/data/core/truth-batch-2'; 
 import { CORE_BATCH_TRUTH_3 } from '@/data/core/truth-batch-3';
 import { CORE_BATCH_TRUTH_4 } from '@/data/core/truth-batch-4';

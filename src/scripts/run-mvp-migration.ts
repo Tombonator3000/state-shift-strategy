@@ -1,7 +1,7 @@
 // Run MVP Migration Script
 // Converts existing core cards to MVP format
 
-import { CARD_DATABASE_CORE } from '@/data/core';
+import { CARD_DATABASE_CORE } from '@/data/core_legacy';
 import { CardMigrator } from '@/tools/migrate-to-mvp';
 import { validateMVPDatabase } from '@/rules/validate-mvp';
 import type { MVPCard } from '@/types/mvp-types';

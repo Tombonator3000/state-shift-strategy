@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AudioProvider } from '@/contexts/AudioContext';
+import MVPGame from "./pages/MVPGame";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import EffectSystemDashboard from "./pages/EffectSystemDashboard";
@@ -31,6 +32,7 @@ const App = () => {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/mvp" element={<MVPGame />} />
                 <Route path="/dev/effects" element={<EffectSystemDashboard />} />
                 <Route path="/dev/recovery" element={<DatabaseRecovery />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
