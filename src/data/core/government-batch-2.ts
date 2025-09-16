@@ -1,672 +1,604 @@
-import type { GameCard } from '../../types/cardTypes';
+import type { Card } from "../../types/mvpCard";
 
-export const CORE_BATCH_GOV_2: GameCard[] = [
+export const CORE_BATCH_GOV_2: Card[] = [
   {
     id: "GOV-051",
-    faction: "government",
     name: "Men in Black Squad",
+    faction: "government",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 9,
-    text: "Deploy shadowy agents. Suppress one Truth card in play until end of round; opponent loses 2 IP.",
-    flavorTruth: "Nobody remembers the encounter… and that's the point.",
-    flavorGov: "Nobody remembers the encounter… and that's the point.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { opponent: -2 } }
+    cost: 3,
+    effects: {
+      ipDelta: { opponent: 2 }
+    },
+    flavor: "Nobody remembers the encounter… and that's the point.",
   },
   {
     id: "GOV-052",
-    faction: "government",
     name: "Weather Control Division",
+    faction: "government",
     type: "ZONE",
     rarity: "uncommon",
-    cost: 9,
-    text: "Target a State. Establish a Zone that prevents Truth bonuses here. +2 Defense.",
-    flavorTruth: "Forecast: 100% chance of plausible deniability.",
-    flavorGov: "Forecast: 100% chance of plausible deniability.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2 }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Forecast: 100% chance of plausible deniability.",
   },
   {
     id: "GOV-053",
-    faction: "government",
     name: "Cigarette Whisperer",
+    faction: "government",
     type: "MEDIA",
-    rarity: "rare",
-    cost: 12,
-    text: "An unnamed official reshapes the narrative. Reduce Truth by 8%.",
-    flavorTruth: "His smoke breaks last decades.",
-    flavorGov: "His smoke breaks last decades.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: -8 }
+    rarity: "legendary",
+    cost: 6,
+    effects: {
+      truthDelta: -4
+    },
+    flavor: "His smoke breaks last decades.",
   },
   {
     id: "GOV-054",
-    faction: "government",
     name: "Operation Mockingbird 2.0",
+    faction: "government",
     type: "MEDIA",
-    rarity: "uncommon",
-    cost: 10,
-    text: "Flood the networks. Truth player discards a Media card at random and Truth falls.",
-    flavorTruth: "Sponsored by your friendly neighborhood broadcast network.",
-    flavorGov: "Sponsored by your friendly neighborhood broadcast network.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: -5, discardOpponent: 1 }
+    rarity: "legendary",
+    cost: 6,
+    effects: {
+      truthDelta: -4
+    },
+    flavor: "Sponsored by your friendly neighborhood broadcast network.",
   },
   {
     id: "GOV-055",
-    faction: "government",
     name: "National Security Red Tape",
-    type: "DEFENSIVE",
+    faction: "government",
+    type: "ZONE",
     rarity: "common",
-    cost: 6,
-    text: "Block one play. Opponent cannot replay it until next round.",
-    flavorTruth: "Forms must be filed in triplicate, notarized, and burned.",
-    flavorGov: "Forms must be filed in triplicate, notarized, and burned.",
-    target: { scope: "global", count: 0 },
-    effects: {}
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "Forms must be filed in triplicate, notarized, and burned.",
   },
   {
     id: "GOV-056",
-    faction: "government",
     name: "Shadow Budget",
-    type: "DEFENSIVE",
-    rarity: "common",
-    cost: 8,
-    text: "Gain 4 IP now and +1 IP each turn for 2 rounds.",
-    flavorTruth: "Somewhere, in an Excel sheet nobody is allowed to open.",
-    flavorGov: "Somewhere, in an Excel sheet nobody is allowed to open.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { self: 4 } }
+    faction: "government",
+    type: "ZONE",
+    rarity: "legendary",
+    cost: 7,
+    effects: {
+      pressureDelta: 4
+    },
+    flavor: "Somewhere, in an Excel sheet nobody is allowed to open.",
   },
   {
     id: "GOV-057",
-    faction: "government",
     name: "Alien Autopsy Cover-Up",
+    faction: "government",
     type: "ATTACK",
-    rarity: "rare",
-    cost: 11,
-    text: "Remove one active Truth Zone permanently; opponent loses 2 IP.",
-    flavorTruth: "Grainy VHS footage? Totally fake. Trust us.",
-    flavorGov: "Grainy VHS footage? Totally fake. Trust us.",
-    target: { scope: "state", count: 1 },
-    effects: { ipDelta: { opponent: -2 } }
+    rarity: "uncommon",
+    cost: 3,
+    effects: {
+      ipDelta: { opponent: 2 }
+    },
+    flavor: "Grainy VHS footage? Totally fake. Trust us.",
   },
   {
     id: "GOV-058",
-    faction: "government",
     name: "Black Site Expansion",
+    faction: "government",
     type: "ZONE",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Establish a detention Zone. +3 Defense; opponent discards 1 if they attempt capture here.",
-    flavorTruth: "You'll never find it on Google Maps.",
-    flavorGov: "You'll never find it on Google Maps.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 3 }
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "You'll never find it on Google Maps.",
   },
   {
     id: "GOV-059",
-    faction: "government",
     name: "Patriot Act Reloaded",
+    faction: "government",
     type: "MEDIA",
-    rarity: "uncommon",
-    cost: 10,
-    text: "Increase costs for Truth cards. All Truth cards cost +1 IP this round.",
-    flavorTruth: "For your safety. Definitely not ours.",
-    flavorGov: "For your safety. Definitely not ours.",
-    target: { scope: "global", count: 0 },
-    effects: {}
+    rarity: "common",
+    cost: 3,
+    effects: {
+      truthDelta: 1
+    },
+    flavor: "For your safety. Definitely not ours.",
   },
   {
     id: "GOV-060",
-    faction: "government",
     name: "Mind Control Fluoride",
+    faction: "government",
     type: "MEDIA",
-    rarity: "common",
-    cost: 8,
-    text: "Truth player skips their draw step next round. Reduce Truth by 3%.",
-    flavorTruth: "It's in the water. Drink up.",
-    flavorGov: "It's in the water. Drink up.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: -3 }
+    rarity: "rare",
+    cost: 5,
+    effects: {
+      truthDelta: -3
+    },
+    flavor: "It's in the water. Drink up.",
   },
   {
     id: "GOV-061",
-    faction: "government",
     name: "Department of Denials",
-    type: "DEFENSIVE",
-    rarity: "common",
-    cost: 7,
-    text: "Negate one active Truth Development. Gain 2 IP.",
-    flavorTruth: '"We can neither confirm nor deny…"',
-    flavorGov: '"We can neither confirm nor deny…"',
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { self: 2 } }
+    faction: "government",
+    type: "ZONE",
+    rarity: "uncommon",
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "\"We can neither confirm nor deny…\"",
   },
   {
     id: "GOV-062",
-    faction: "government",
     name: "Krycek the Double Agent",
+    faction: "government",
     type: "ATTACK",
     rarity: "rare",
-    cost: 12,
-    text: "Steal one random card from opponent's hand. Opponent loses 3 IP.",
-    flavorTruth: "He works for everyone. And no one.",
-    flavorGov: "He works for everyone. And no one.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { opponent: -3 } }
+    cost: 4,
+    effects: {
+      ipDelta: { opponent: 3 }
+    },
+    flavor: "He works for everyone. And no one.",
   },
   {
     id: "GOV-063",
-    faction: "government",
     name: "Eternal Committee Hearing",
-    type: "DEFENSIVE",
+    faction: "government",
+    type: "ZONE",
     rarity: "common",
-    cost: 7,
-    text: "Delay one Truth card for 2 rounds.",
-    flavorTruth: "Please hold. Your conspiracy is important to us.",
-    flavorGov: "Please hold. Your conspiracy is important to us.",
-    target: { scope: "global", count: 0 },
-    effects: {}
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "Please hold. Your conspiracy is important to us.",
   },
   {
     id: "GOV-064",
-    faction: "government",
     name: "Big Brother Surveillance",
+    faction: "government",
     type: "ZONE",
-    rarity: "common",
-    cost: 8,
-    text: "Zone: Each turn you may look at opponent's hand. +2 Defense.",
-    flavorTruth: "Your camera is on.",
-    flavorGov: "Your camera is on.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2 }
+    rarity: "uncommon",
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Your camera is on.",
   },
   {
     id: "GOV-065",
-    faction: "government",
     name: "Agent Smitherson Cameo",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 8,
-    text: "Cancel a random Truth card played this round (50% chance).",
-    flavorTruth: "Always in the background, always adjusting his tie.",
-    flavorGov: "Always in the background, always adjusting his tie.",
-    target: { scope: "global", count: 0 },
-    effects: {}
+    faction: "government",
+    type: "ZONE",
+    rarity: "common",
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "Always in the background, always adjusting his tie.",
   },
   {
     id: "GOV-066",
-    faction: "government",
     name: "Underground Archive",
+    faction: "government",
     type: "ZONE",
-    rarity: "common",
-    cost: 7,
-    text: "Store secrets. +2 Defense; draw 1 when established.",
-    flavorTruth: "Microfilm never dies.",
-    flavorGov: "Microfilm never dies.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, draw: 1 }
+    rarity: "uncommon",
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Microfilm never dies.",
   },
   {
     id: "GOV-067",
-    faction: "government",
     name: "Spin Control Office",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Your Media cards reduce +2% more Truth this round.",
-    flavorTruth: "The narrative never rests.",
-    flavorGov: "The narrative never rests.",
-    target: { scope: "global", count: 0 },
-    effects: {}
+    faction: "government",
+    type: "ZONE",
+    rarity: "common",
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "The narrative never rests.",
   },
   {
     id: "GOV-068",
-    faction: "government",
     name: "Crash Retrieval Zone",
+    faction: "government",
     type: "ZONE",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Set up cordons. +3 Defense; opponent loses 1 IP when attempting capture.",
-    flavorTruth: "Shiny wreckage becomes classified instantly.",
-    flavorGov: "Shiny wreckage becomes classified instantly.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 3 }
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Shiny wreckage becomes classified instantly.",
   },
   {
     id: "GOV-069",
-    faction: "government",
     name: "Closed Session",
+    faction: "government",
     type: "MEDIA",
-    rarity: "common",
+    rarity: "legendary",
     cost: 6,
-    text: "Reduce Truth by 4%. Opponent discards 1 if they played Media this round.",
-    flavorTruth: "All cameras off, all lies on.",
-    flavorGov: "All cameras off, all lies on.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: -4 }
+    effects: {
+      truthDelta: -4
+    },
+    flavor: "All cameras off, all lies on.",
   },
   {
     id: "GOV-070",
-    faction: "government",
     name: "Psych Ops Lab",
+    faction: "government",
     type: "ZONE",
-    rarity: "uncommon",
-    cost: 10,
-    text: "Establish lab. +3 Defense. Each round, reduce local Truth by 1%.",
-    flavorTruth: "Testing slogans on rats and voters alike.",
-    flavorGov: "Testing slogans on rats and voters alike.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 3 }
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Testing slogans on rats and voters alike.",
   },
   {
     id: "GOV-071",
-    faction: "government",
     name: "Red Phone Network",
-    type: "DEFENSIVE",
-    rarity: "rare",
-    cost: 12,
-    text: "Emergency line. Draw 2 each time you play a Defensive card.",
-    flavorTruth: "One ring controls all.",
-    flavorGov: "One ring controls all.",
-    target: { scope: "global", count: 0 },
-    effects: {}
+    faction: "government",
+    type: "ZONE",
+    rarity: "common",
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "One ring controls all.",
   },
   {
     id: "GOV-072",
-    faction: "government",
     name: "Containment Zone",
+    faction: "government",
     type: "ZONE",
-    rarity: "common",
-    cost: 8,
-    text: "Seal off a state. +2 Defense; prevent Pressure gain for opponent this round.",
-    flavorTruth: "Cones, tape, and classified tape.",
-    flavorGov: "Cones, tape, and classified tape.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2 }
+    rarity: "uncommon",
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Cones, tape, and classified tape.",
   },
   {
     id: "GOV-073",
-    faction: "government",
     name: "Obfuscation Bureau",
-    type: "DEFENSIVE",
+    faction: "government",
+    type: "ZONE",
     rarity: "common",
-    cost: 7,
-    text: "Whenever you reduce Truth, gain +1 IP.",
-    flavorTruth: "The truth hurts, but pays well.",
-    flavorGov: "The truth hurts, but pays well.",
-    target: { scope: "global", count: 0 },
-    effects: {}
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "The truth hurts, but pays well.",
   },
   {
     id: "GOV-074",
-    faction: "government",
     name: "FOIA Shredder Room",
+    faction: "government",
     type: "ZONE",
     rarity: "common",
-    cost: 8,
-    text: "Every Truth discard costs them 1 extra IP while this Zone is active.",
-    flavorTruth: "The shredder is always hungry.",
-    flavorGov: "The shredder is always hungry.",
-    target: { scope: "state", count: 1 },
-    effects: {}
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "The shredder is always hungry.",
   },
   {
     id: "GOV-075",
-    faction: "government",
     name: "National Guard Rollout",
-    type: "DEFENSIVE",
+    faction: "government",
+    type: "ZONE",
     rarity: "common",
-    cost: 6,
-    text: "Cancel a Truth Zone capture this round.",
-    flavorTruth: "Nothing to see, nothing to seize.",
-    flavorGov: "Nothing to see, nothing to seize.",
-    target: { scope: "global", count: 1 },
-    effects: {}
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "Nothing to see, nothing to seize.",
   },
   {
     id: "GOV-076",
-    faction: "government",
     name: "Redaction Vault",
+    faction: "government",
     type: "ZONE",
-    rarity: "rare",
-    cost: 12,
-    text: "Massive archive Zone. +4 Defense; Truth cards cost +1 IP globally while active.",
-    flavorTruth: "█████████ everywhere.",
-    flavorGov: "█████████ everywhere.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 4 }
+    rarity: "legendary",
+    cost: 7,
+    effects: {
+      pressureDelta: 4
+    },
+    flavor: "█████████ everywhere.",
   },
   {
     id: "GOV-077",
-    faction: "government",
     name: "Satellite Uplink",
+    faction: "government",
     type: "ZONE",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Spy Zone. +3 Defense; per turn gain 1 IP.",
-    flavorTruth: "Every ping is patriotism.",
-    flavorGov: "Every ping is patriotism.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 3 }
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Every ping is patriotism.",
   },
   {
     id: "GOV-078",
-    faction: "government",
     name: "Political Lobby",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 10,
-    text: "Your Attacks drain +1 IP.",
-    flavorTruth: "Bribes are the sincerest form of flattery.",
-    flavorGov: "Bribes are the sincerest form of flattery.",
-    target: { scope: "global", count: 0 },
-    effects: {}
+    faction: "government",
+    type: "ZONE",
+    rarity: "common",
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "Bribes are the sincerest form of flattery.",
   },
   {
     id: "GOV-079",
-    faction: "government",
     name: "Crisis Management Zone",
+    faction: "government",
     type: "ZONE",
-    rarity: "common",
-    cost: 8,
-    text: "Zone: +2 Defense; when opponent plays Media, reduce Truth by 1%.",
-    flavorTruth: "Every crisis needs a committee.",
-    flavorGov: "Every crisis needs a committee.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2 }
+    rarity: "uncommon",
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Every crisis needs a committee.",
   },
   {
     id: "GOV-080",
-    faction: "government",
     name: "Continuity Bunker",
+    faction: "government",
     type: "ZONE",
-    rarity: "rare",
-    cost: 13,
-    text: "If you control this Zone, prevent global Truth increases greater than +5%.",
-    flavorTruth: "Built for a rainy doomsday.",
-    flavorGov: "Built for a rainy doomsday.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 4 }
+    rarity: "legendary",
+    cost: 7,
+    effects: {
+      pressureDelta: 4
+    },
+    flavor: "Built for a rainy doomsday.",
   },
   {
     id: "GOV-081",
-    faction: "government",
     name: "Spin Doctors' Lounge",
-    type: "DEFENSIVE",
-    rarity: "rare",
-    cost: 12,
-    text: "Whenever you play Media, gain 2 IP.",
-    flavorTruth: "Prescription: more headlines.",
-    flavorGov: "Prescription: more headlines.",
-    target: { scope: "global", count: 0 },
-    effects: {}
+    faction: "government",
+    type: "ZONE",
+    rarity: "common",
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "Prescription: more headlines.",
   },
   {
     id: "GOV-082",
-    faction: "government",
     name: "Federal PsyOps Center",
+    faction: "government",
     type: "ZONE",
     rarity: "rare",
-    cost: 12,
-    text: "Each round, opponent loses 1 IP. +3 Defense.",
-    flavorTruth: "Their nightmares are our research notes.",
-    flavorGov: "Their nightmares are our research notes.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 3 }
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Their nightmares are our research notes.",
   },
   {
     id: "GOV-083",
-    faction: "government",
     name: "Temporal Containment Lab",
+    faction: "government",
     type: "ZONE",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Strange experiments. +3 Defense; opponent skips next draw when attempting capture.",
-    flavorTruth: "We filed time under Pending.",
-    flavorGov: "We filed time under Pending.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 3 }
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "We filed time under Pending.",
   },
   {
     id: "GOV-084",
-    faction: "government",
     name: "Council of the Unseen",
+    faction: "government",
     type: "MEDIA",
     rarity: "legendary",
-    cost: 28,
-    text: "Reduce Truth by 15%. Steal 1 Zone if your Pressure ≥ Defense.",
-    flavorTruth: "Minutes vanish, so do freedoms.",
-    flavorGov: "Minutes vanish, so do freedoms.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: -15 }
+    cost: 6,
+    effects: {
+      truthDelta: -4
+    },
+    flavor: "Minutes vanish, so do freedoms.",
   },
   {
     id: "GOV-085",
-    faction: "government",
     name: "Front Organization",
-    type: "DEFENSIVE",
-    rarity: "common",
-    cost: 7,
-    text: "Play: Gain 3 IP. Ongoing: +1 Defense to your weakest Zone.",
-    flavorTruth: "Looks legit, smells classified.",
-    flavorGov: "Looks legit, smells classified.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { self: 3 } }
+    faction: "government",
+    type: "ZONE",
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Looks legit, smells classified.",
   },
   {
     id: "GOV-086",
-    faction: "government",
     name: "Controlled Media Outlet",
+    faction: "government",
     type: "ZONE",
-    rarity: "common",
-    cost: 8,
-    text: "Zone: +2 Defense. Each time opponent plays Media, they lose 1 IP.",
-    flavorTruth: "Your news, their loss.",
-    flavorGov: "Your news, their loss.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2 }
+    rarity: "uncommon",
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Your news, their loss.",
   },
   {
     id: "GOV-087",
-    faction: "government",
     name: "Continuity of Message",
+    faction: "government",
     type: "MEDIA",
-    rarity: "common",
-    cost: 6,
-    text: "Reduce Truth slightly; draw 1.",
-    flavorTruth: "We repeat until it becomes history.",
-    flavorGov: "We repeat until it becomes history.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: -3, draw: 1 }
+    rarity: "rare",
+    cost: 5,
+    effects: {
+      truthDelta: -3
+    },
+    flavor: "We repeat until it becomes history.",
   },
   {
     id: "GOV-088",
-    faction: "government",
     name: "Surplus MRAP Parade",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Target state gets +3 Defense this round; reduce Truth slightly.",
-    flavorTruth: "Intimidation is a safety feature.",
-    flavorGov: "Intimidation is a safety feature.",
-    target: { scope: "global", count: 1 },
-    effects: { truthDelta: -2 }
+    faction: "government",
+    type: "ATTACK",
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Intimidation is a safety feature.",
   },
   {
     id: "GOV-089",
-    faction: "government",
     name: "Continuity Servers",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Your next two DEFENSIVE cards cost −1 IP and draw 1 on play.",
-    flavorTruth: "Backups for backups.",
-    flavorGov: "Backups for backups.",
-    target: { scope: "global", count: 0 },
-    effects: {}
+    faction: "government",
+    type: "ZONE",
+    rarity: "common",
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "Backups for backups.",
   },
   {
     id: "GOV-090",
-    faction: "government",
     name: "Airport Media Pen",
+    faction: "government",
     type: "ZONE",
-    rarity: "common",
-    cost: 8,
-    text: "Zone: +2 Defense. When opponent tries to capture, reduce global Truth by 1%.",
-    flavorTruth: "Roped-off narratives.",
-    flavorGov: "Roped-off narratives.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2 }
+    rarity: "uncommon",
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Roped-off narratives.",
   },
   {
     id: "GOV-091",
-    faction: "government",
     name: "Compliance Audit",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 8,
-    text: "Opponent Attacks targeting this state cost +2 IP this round.",
-    flavorTruth: "Forms first, outrage later.",
-    flavorGov: "Forms first, outrage later.",
-    target: { scope: "global", count: 1 },
-    effects: {}
+    faction: "government",
+    type: "ZONE",
+    rarity: "common",
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "Forms first, outrage later.",
   },
   {
     id: "GOV-092",
-    faction: "government",
     name: "Continuity Signal Test",
+    faction: "government",
     type: "MEDIA",
-    rarity: "uncommon",
-    cost: 8,
-    text: "Reduce Truth; if you control 3+ Zones, reduce an extra 2%.",
-    flavorTruth: "This is only a drill. Or is it?",
-    flavorGov: "This is only a drill. Or is it?",
-    target: { scope: "global", count: 0 },
+    rarity: "legendary",
+    cost: 6,
     effects: {
-      truthDelta: -4,
-      conditional: {
-        ifZonesControlledAtLeast: 3,
-        then: { truthDelta: -2 }
-      }
-    }
+      truthDelta: -4
+    },
+    flavor: "This is only a drill. Or is it?",
   },
   {
     id: "GOV-093",
-    faction: "government",
     name: "Perimeter Cameras",
+    faction: "government",
     type: "ZONE",
-    rarity: "common",
-    cost: 7,
-    text: "Zone: +2 Defense. When created, gain 2 IP.",
-    flavorTruth: "The red light means 'welcome'.",
-    flavorGov: "The red light means 'welcome'.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, ipDelta: { self: 2 } }
+    rarity: "uncommon",
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "The red light means 'welcome'.",
   },
   {
     id: "GOV-094",
-    faction: "government",
     name: "Leaker's New Job",
+    faction: "government",
     type: "ATTACK",
-    rarity: "common",
-    cost: 8,
-    text: "Drain 3 IP; if opponent revealed their hand this round, drain +1 IP.",
-    flavorTruth: "Promotion to 'Elsewhere'.",
-    flavorGov: "Promotion to 'Elsewhere'.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { opponent: -3 } }
+    rarity: "rare",
+    cost: 4,
+    effects: {
+      ipDelta: { opponent: 3 }
+    },
+    flavor: "Promotion to 'Elsewhere'.",
   },
   {
     id: "GOV-095",
-    faction: "government",
     name: "Data Fusion Hub",
+    faction: "government",
     type: "ZONE",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Zone: +3 Defense. Your next ATTACK this round costs −1 IP.",
-    flavorTruth: "Interoperability is when everyone watches you together.",
-    flavorGov: "Interoperability is when everyone watches you together.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 3 }
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Interoperability is when everyone watches you together.",
   },
   {
     id: "GOV-096",
-    faction: "government",
     name: "Dry-Labbed Results",
+    faction: "government",
     type: "MEDIA",
-    rarity: "common",
-    cost: 6,
-    text: "Release supportive 'studies'. Reduce Truth; draw 1.",
-    flavorTruth: "Peer review by peers we hired.",
-    flavorGov: "Peer review by peers we hired.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: -3, draw: 1 }
+    rarity: "rare",
+    cost: 5,
+    effects: {
+      truthDelta: -3
+    },
+    flavor: "Peer review by peers we hired.",
   },
   {
     id: "GOV-097",
-    faction: "government",
     name: "Wilderness Listening Post",
+    faction: "government",
     type: "ZONE",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Zone: +3 Defense. Each turn, local Truth −1%.",
-    flavorTruth: "Owls aren't what they seem. Neither are antennas.",
-    flavorGov: "Owls aren't what they seem. Neither are antennas.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 3 }
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Owls aren't what they seem. Neither are antennas.",
   },
   {
     id: "GOV-098",
-    faction: "government",
     name: "National Security Letter",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 8,
-    text: "Cancel a Truth ATTACK; opponent discards 1.",
-    flavorTruth: "Gag orders pair well with coffee.",
-    flavorGov: "Gag orders pair well with coffee.",
-    target: { scope: "global", count: 0 },
-    effects: { discardOpponent: 1 }
+    faction: "government",
+    type: "ATTACK",
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Gag orders pair well with coffee.",
   },
   {
     id: "GOV-099",
-    faction: "government",
     name: "Asset Laundering",
-    type: "DEFENSIVE",
-    rarity: "common",
-    cost: 8,
-    text: "Gain 3 IP now. If you control 2+ Zones, gain +2 IP.",
-    flavorTruth: "We dry-clean money and reputations.",
-    flavorGov: "We dry-clean money and reputations.",
-    target: { scope: "global", count: 0 },
+    faction: "government",
+    type: "ZONE",
+    rarity: "rare",
+    cost: 6,
     effects: {
-      ipDelta: { self: 3 },
-      conditional: {
-        ifZonesControlledAtLeast: 2,
-        then: { ipDelta: { self: 2 } }
-      }
-    }
+      pressureDelta: 3
+    },
+    flavor: "We dry-clean money and reputations.",
   },
   {
     id: "GOV-100",
-    faction: "government",
     name: "Harbor Dock Warehouse",
+    faction: "government",
     type: "ZONE",
-    rarity: "common",
-    cost: 8,
-    text: "Zone: +2 Defense. If you control 3+ Zones, gain +2 IP when created.",
-    flavorTruth: "Manifest says 'miscellaneous'.",
-    flavorGov: "Manifest says 'miscellaneous'.",
-    target: { scope: "state", count: 1 },
+    rarity: "uncommon",
+    cost: 5,
     effects: {
-      zoneDefense: 2,
-      conditional: {
-        ifZonesControlledAtLeast: 3,
-        then: { ipDelta: { self: 2 } }
-      }
-    }
+      pressureDelta: 2
+    },
+    flavor: "Manifest says 'miscellaneous'.",
   }
 ];
