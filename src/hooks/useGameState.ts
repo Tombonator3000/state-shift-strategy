@@ -8,7 +8,7 @@ import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
 import { AIStrategist, type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
-import { getStartingHandSize, calculateCardDraw, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
+import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardEffects as resolveCardEffectsCore, type CardPlayResolution } from '@/systems/cardResolution';
 
@@ -91,6 +91,39 @@ const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
 };
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
+
+const HAND_LIMIT = 5;
+
+const drawCardsFromDeck = (
+  deck: GameCard[],
+  count: number,
+  faction: 'government' | 'truth',
+): { drawn: GameCard[]; deck: GameCard[] } => {
+  if (count <= 0) {
+    return { drawn: [], deck: [...deck] };
+  }
+
+  const drawn: GameCard[] = [];
+  let nextDeck = [...deck];
+
+  while (drawn.length < count) {
+    if (nextDeck.length === 0) {
+      const replenished = generateWeightedDeck(40, faction);
+      if (replenished.length === 0) {
+        break;
+      }
+      nextDeck = [...replenished];
+    }
+
+    const card = nextDeck.shift();
+    if (!card) {
+      break;
+    }
+    drawn.push(card);
+  }
+
+  return { drawn, deck: nextDeck };
+};
 
 export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   const [eventManager] = useState(() => new EventManager());
@@ -471,19 +504,13 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     const aiBaseIncome = 5;
     const aiTotalIncome = aiBaseIncome + aiStateIncome;
 
-    // AI draws cards (correct hand limit of 7)
-    const aiCardsToDraw = Math.max(0, Math.min(1, 7 - currentGameState.aiHand.length)); // Draw 1 card if under limit
-    
-    // Check if AI deck has enough cards, if not generate more with correct faction
-    let aiCurrentDeck = currentGameState.aiDeck;
-    if (aiCurrentDeck.length < aiCardsToDraw) {
-      const aiFaction = currentGameState.faction === 'government' ? 'truth' : 'government';
-      const additionalCards = generateWeightedDeck(40, aiFaction);
-      aiCurrentDeck = [...aiCurrentDeck, ...additionalCards];
-    }
-    
-    const aiDrawnCards = aiCurrentDeck.slice(0, aiCardsToDraw);
-    const aiRemainingDeck = aiCurrentDeck.slice(aiCardsToDraw);
+    const aiFaction = currentGameState.faction === 'government' ? 'truth' : 'government';
+    const aiCardsNeeded = Math.max(0, HAND_LIMIT - currentGameState.aiHand.length);
+    const {
+      drawn: aiDrawnCards,
+      deck: aiRemainingDeck,
+    } = drawCardsFromDeck(currentGameState.aiDeck, aiCardsNeeded, aiFaction);
+    const aiHandSizeAfterDraw = currentGameState.aiHand.length + aiDrawnCards.length;
 
     // Update state with AI income and cards
     setGameState(prev => ({
@@ -494,7 +521,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       aiIP: prev.aiIP + aiTotalIncome,
       log: [...prev.log,
         `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStates.length} states = ${aiTotalIncome} IP`,
-        `AI drew ${aiCardsToDraw} cards`
+        `AI drew ${aiDrawnCards.length} card${aiDrawnCards.length === 1 ? '' : 's'} (hand ${aiHandSizeAfterDraw}/${HAND_LIMIT})`
       ]
     }));
 
@@ -620,51 +647,44 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
   const closeNewspaper = useCallback(() => {
     setGameState(prev => {
-      // Enhanced card drawing system
-      const maxHandSize = 7;
-      const currentHandSize = prev.hand.length;
-      const bonusCardDraw = prev.pendingCardDraw || 0;
-      
-      const totalCardsToDraw = calculateCardDraw(
-        prev.drawMode,
-        prev.turn,
-        currentHandSize,
-        maxHandSize,
-        prev.cardDrawState,
-        bonusCardDraw
-      );
-      
-      if (totalCardsToDraw > 0) {
-        // Check if deck has enough cards, if not generate more with correct faction
-        let currentDeck = prev.deck;
-        if (currentDeck.length < totalCardsToDraw) {
-          const additionalCards = generateWeightedDeck(40, prev.faction);
-          currentDeck = [...currentDeck, ...additionalCards];
-        }
-        
-        const drawnCards = currentDeck.slice(0, totalCardsToDraw);
-        const remainingDeck = currentDeck.slice(totalCardsToDraw);
-        
-        return {
-          ...prev,
-          showNewspaper: false,
-          cardsPlayedThisRound: [], // Clear played cards for next round
-          phase: 'card_presentation',
-          newCards: drawnCards,
-          showNewCardsPresentation: true,
-          deck: remainingDeck,
-          pendingCardDraw: 0,
-          log: [...prev.log, `Drawing ${totalCardsToDraw} cards (${prev.drawMode} mode)`]
-        };
+      const bonusCardDraw = Math.max(0, prev.pendingCardDraw ?? 0);
+      const targetHandSize = HAND_LIMIT + bonusCardDraw;
+      const cardsNeeded = Math.max(0, targetHandSize - prev.hand.length);
+      const {
+        drawn,
+        deck: remainingDeck,
+      } = drawCardsFromDeck(prev.deck, cardsNeeded, prev.faction);
+      const newHand = cardsNeeded > 0 ? [...prev.hand, ...drawn] : [...prev.hand];
+      const deckShortage = cardsNeeded > 0 && drawn.length < cardsNeeded;
+
+      let drawLogEntry = '';
+      if (drawn.length > 0) {
+        const bonusNote = bonusCardDraw > 0 ? ` (+${bonusCardDraw} bonus)` : '';
+        drawLogEntry = `Drew ${drawn.length} card${drawn.length === 1 ? '' : 's'}${bonusNote} to start turn (hand ${newHand.length})`;
+      } else if (deckShortage) {
+        drawLogEntry = 'Deck exhausted: unable to draw enough cards for new turn';
       } else {
-        return {
-          ...prev,
-          showNewspaper: false,
-          cardsPlayedThisRound: [], // Clear played cards for next round
-          phase: 'action',
-          pendingCardDraw: 0
-        };
+        drawLogEntry = `Ready to act (hand ${newHand.length})`;
       }
+
+      return {
+        ...prev,
+        hand: newHand,
+        deck: remainingDeck,
+        showNewspaper: false,
+        cardsPlayedThisRound: [],
+        phase: 'action',
+        currentPlayer: 'human',
+        showNewCardsPresentation: false,
+        newCards: [],
+        pendingCardDraw: 0,
+        cardsPlayedThisTurn: 0,
+        animating: false,
+        selectedCard: null,
+        targetState: null,
+        aiTurnInProgress: false,
+        log: [...prev.log, drawLogEntry]
+      };
     });
   }, []);
 
