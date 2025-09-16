@@ -62,11 +62,8 @@ Each round has two turns: player → opponent.
 - Draw until hand = 5 cards (if possible).  
 - Gain +5 base IP + IP from states owned.  
 
-**Action Phase**  
-- Play up to 3 cards, paying IP cost.  
-- **ATTACK** triggers Defense reaction:  
-  - Opponent may play 1 DEFENSIVE within 4s.  
-  - If none, Attack resolves.  
+**Action Phase**
+- Play up to 3 cards, paying IP cost. **ATTACK** cards resolve immediately; opponents cannot respond defensively during the action phase.
 
 **Resolution**  
 - Apply card effects.  
