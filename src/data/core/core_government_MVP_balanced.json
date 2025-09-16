@@ -1,0 +1,2546 @@
+[
+  {
+    "id": "GOV-001",
+    "name": "Routine Training Exercise",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    }
+  },
+  {
+    "id": "GOV-002",
+    "name": "Redacted Press Briefing",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "The fewer words, the safer the world."
+  },
+  {
+    "id": "GOV-003",
+    "name": "Continuity of Government Protocol",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Democracy is great. Backups are greater."
+  },
+  {
+    "id": "GOV-004",
+    "name": "Classified Briefing Room",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "No windows, two clocks, three alarms."
+  },
+  {
+    "id": "GOV-005",
+    "name": "FOIA Slow-Walk",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Your transparency request is very important to us."
+  },
+  {
+    "id": "GOV-006",
+    "name": "Operation Mockingbird II",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "Tonight's top story was approved at noon."
+  },
+  {
+    "id": "GOV-007",
+    "name": "National Security Waiver",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "In the interest of national serenity."
+  },
+  {
+    "id": "GOV-008",
+    "name": "Budget Reprogramming",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Line items are a state of mind."
+  },
+  {
+    "id": "GOV-009",
+    "name": "Men in Charcoal",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "They don't need badges when they have clipboards."
+  },
+  {
+    "id": "GOV-010",
+    "name": "Compartmentalization",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "The left hand files the right hand."
+  },
+  {
+    "id": "GOV-011",
+    "name": "Intercept & Disrupt",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Static is the sound of safety."
+  },
+  {
+    "id": "GOV-012",
+    "name": "Crisis Actor Auditions",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Please cry on lines two and three."
+  },
+  {
+    "id": "GOV-013",
+    "name": "Roswell Storage Hangar",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Crates labeled 'Weather Balloon' (wink)."
+  },
+  {
+    "id": "GOV-014",
+    "name": "Emergency Broadcast Override",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "Your regularly scheduled reality will return shortly."
+  },
+  {
+    "id": "GOV-015",
+    "name": "SIGINT Sweep",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "If it beeped, we kept it."
+  },
+  {
+    "id": "GOV-016",
+    "name": "Plausible Deniability",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "We can neither confirm nor deny that we denied."
+  },
+  {
+    "id": "GOV-017",
+    "name": "Underground Briefing Theater",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Seats 12, alarms 13."
+  },
+  {
+    "id": "GOV-018",
+    "name": "Shell Company Carousel",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Money laundering? Please, we dry-clean it."
+  },
+  {
+    "id": "GOV-019",
+    "name": "Counter-Meme Task Force",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Clip art is a weapon system."
+  },
+  {
+    "id": "GOV-020",
+    "name": "Honeytrap Asset",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Sign here. Smile there."
+  },
+  {
+    "id": "GOV-021",
+    "name": "National Security Letter",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Gag orders pair well with coffee."
+  },
+  {
+    "id": "GOV-022",
+    "name": "Ghost Budget Annex",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Zeroes are patriotic."
+  },
+  {
+    "id": "GOV-023",
+    "name": "Airport Backroom",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Shoes off. Beliefs off."
+  },
+  {
+    "id": "GOV-024",
+    "name": "Cutout Courier",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Trust the trench coat."
+  },
+  {
+    "id": "GOV-025",
+    "name": "Cigarette Whisperer",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "The smoke alarm is for show."
+  },
+  {
+    "id": "GOV-026",
+    "name": "Operation Paper Shuffle",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Filed under 'Sometime'."
+  },
+  {
+    "id": "GOV-027",
+    "name": "Denver Airport Bunker",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Art, tunnels, and a lot of keycards."
+  },
+  {
+    "id": "GOV-028",
+    "name": "Black Helicopters",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "You can hear them when it's too late."
+  },
+  {
+    "id": "GOV-029",
+    "name": "Declassification, Eventually",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "History will vindicate page 47."
+  },
+  {
+    "id": "GOV-030",
+    "name": "Fusion Center Grid",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Interoperability is its own language."
+  },
+  {
+    "id": "GOV-031",
+    "name": "Sealed Indictment",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Allegedly mandatory."
+  },
+  {
+    "id": "GOV-032",
+    "name": "Telecom Compliance",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Terms of service, revised."
+  },
+  {
+    "id": "GOV-033",
+    "name": "Desert Storage Yard",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Everything important is in row 51."
+  },
+  {
+    "id": "GOV-034",
+    "name": "Friendly Fact-Checker",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Four Pinocchios wearing sunglasses."
+  },
+  {
+    "id": "GOV-035",
+    "name": "Strategic Briefcase",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "It's full of paper and power."
+  },
+  {
+    "id": "GOV-036",
+    "name": "Wilderness Listening Post",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Owls aren't what they seem. Neither are antennas."
+  },
+  {
+    "id": "GOV-037",
+    "name": "Kryptek Asset",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "A handshake you don't wash off."
+  },
+  {
+    "id": "GOV-038",
+    "name": "Compliance Audit",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Forms first, outrage later."
+  },
+  {
+    "id": "GOV-039",
+    "name": "Press Pool Lockdown",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Coverage is a privilege."
+  },
+  {
+    "id": "GOV-040",
+    "name": "Security Theater",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Now with 30% more beeping."
+  },
+  {
+    "id": "GOV-041",
+    "name": "Records Sealed by Court",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "Justice is blindfolded and ear-plugged."
+  },
+  {
+    "id": "GOV-042",
+    "name": "Harbor Dock Warehouse",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Manifest says 'miscellaneous'."
+  },
+  {
+    "id": "GOV-043",
+    "name": "Psychological Operations Cell",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "We A/B test reality."
+  },
+  {
+    "id": "GOV-044",
+    "name": "Unmarked Evidence Locker",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Keyholders unknown."
+  },
+  {
+    "id": "GOV-045",
+    "name": "Lizard Lobby Luncheon",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "The salad blinks first."
+  },
+  {
+    "id": "GOV-046",
+    "name": "Black Budget Skunkworks",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Innovation you'll never hear about."
+  },
+  {
+    "id": "GOV-047",
+    "name": "Mount Weather Complex",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "When the lights go out, these go on."
+  },
+  {
+    "id": "GOV-048",
+    "name": "Witness Relocation",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "New name, same story—now quieter."
+  },
+  {
+    "id": "GOV-049",
+    "name": "Council Above the Ceiling",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": -4
+    },
+    "flavor": "Minutes not taken. Decisions irreversible."
+  },
+  {
+    "id": "GOV-050",
+    "name": "Executive Privilege Blanket",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "It's not a cover-up if it's a comforter."
+  },
+  {
+    "id": "GOV-051",
+    "name": "Men in Black Squad",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Nobody remembers the encounter… and that's the point."
+  },
+  {
+    "id": "GOV-052",
+    "name": "Weather Control Division",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Forecast: 100% chance of plausible deniability."
+  },
+  {
+    "id": "GOV-053",
+    "name": "Cigarette Whisperer",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "His smoke breaks last decades."
+  },
+  {
+    "id": "GOV-054",
+    "name": "Operation Mockingbird 2.0",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Sponsored by your friendly neighborhood broadcast network."
+  },
+  {
+    "id": "GOV-055",
+    "name": "National Security Red Tape",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Forms must be filed in triplicate, notarized, and burned."
+  },
+  {
+    "id": "GOV-056",
+    "name": "Shadow Budget",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Somewhere, in an Excel sheet nobody is allowed to open."
+  },
+  {
+    "id": "GOV-057",
+    "name": "Alien Autopsy Cover-Up",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Grainy VHS footage? Totally fake. Trust us."
+  },
+  {
+    "id": "GOV-058",
+    "name": "Black Site Expansion",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "You'll never find it on Google Maps."
+  },
+  {
+    "id": "GOV-059",
+    "name": "Patriot Act Reloaded",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "For your safety. Definitely not ours."
+  },
+  {
+    "id": "GOV-060",
+    "name": "Mind Control Fluoride",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "It's in the water. Drink up."
+  },
+  {
+    "id": "GOV-061",
+    "name": "Department of Denials",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    }
+  },
+  {
+    "id": "GOV-062",
+    "name": "Krycek the Double Agent",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "He works for everyone. And no one."
+  },
+  {
+    "id": "GOV-063",
+    "name": "Eternal Committee Hearing",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Please hold. Your conspiracy is important to us."
+  },
+  {
+    "id": "GOV-064",
+    "name": "Big Brother Surveillance",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Your camera is on."
+  },
+  {
+    "id": "GOV-065",
+    "name": "Agent Smitherson Cameo",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Always in the background, always adjusting his tie."
+  },
+  {
+    "id": "GOV-066",
+    "name": "Underground Archive",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Microfilm never dies."
+  },
+  {
+    "id": "GOV-067",
+    "name": "Spin Control Office",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "The narrative never rests."
+  },
+  {
+    "id": "GOV-068",
+    "name": "Crash Retrieval Zone",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Shiny wreckage becomes classified instantly."
+  },
+  {
+    "id": "GOV-069",
+    "name": "Closed Session",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "All cameras off, all lies on."
+  },
+  {
+    "id": "GOV-070",
+    "name": "Psych Ops Lab",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Testing slogans on rats and voters alike."
+  },
+  {
+    "id": "GOV-071",
+    "name": "Red Phone Network",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "One ring controls all."
+  },
+  {
+    "id": "GOV-072",
+    "name": "Containment Zone",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Cones, tape, and classified tape."
+  },
+  {
+    "id": "GOV-073",
+    "name": "Obfuscation Bureau",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "The truth hurts, but pays well."
+  },
+  {
+    "id": "GOV-074",
+    "name": "FOIA Shredder Room",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "The shredder is always hungry."
+  },
+  {
+    "id": "GOV-075",
+    "name": "National Guard Rollout",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Nothing to see, nothing to seize."
+  },
+  {
+    "id": "GOV-076",
+    "name": "Redaction Vault",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "█████████ everywhere."
+  },
+  {
+    "id": "GOV-077",
+    "name": "Satellite Uplink",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Every ping is patriotism."
+  },
+  {
+    "id": "GOV-078",
+    "name": "Political Lobby",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Bribes are the sincerest form of flattery."
+  },
+  {
+    "id": "GOV-079",
+    "name": "Crisis Management Zone",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Every crisis needs a committee."
+  },
+  {
+    "id": "GOV-080",
+    "name": "Continuity Bunker",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Built for a rainy doomsday."
+  },
+  {
+    "id": "GOV-081",
+    "name": "Spin Doctors' Lounge",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "Prescription: more headlines."
+  },
+  {
+    "id": "GOV-082",
+    "name": "Federal PsyOps Center",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Their nightmares are our research notes."
+  },
+  {
+    "id": "GOV-083",
+    "name": "Temporal Containment Lab",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "We filed time under Pending."
+  },
+  {
+    "id": "GOV-084",
+    "name": "Council of the Unseen",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "legendary",
+    "cost": 5,
+    "effects": {
+      "ipDelta": {
+        "opponent": 4
+      }
+    },
+    "flavor": "Minutes vanish, so do freedoms.",
+    "orig_type": "MEDIA"
+  },
+  {
+    "id": "GOV-085",
+    "name": "Front Organization",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Looks legit, smells classified."
+  },
+  {
+    "id": "GOV-086",
+    "name": "Controlled Media Outlet",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Your news, their loss."
+  },
+  {
+    "id": "GOV-087",
+    "name": "Continuity of Message",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "We repeat until it becomes history."
+  },
+  {
+    "id": "GOV-088",
+    "name": "Surplus MRAP Parade",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Intimidation is a safety feature."
+  },
+  {
+    "id": "GOV-089",
+    "name": "Continuity Servers",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Backups for backups."
+  },
+  {
+    "id": "GOV-090",
+    "name": "Airport Media Pen",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Roped-off narratives."
+  },
+  {
+    "id": "GOV-091",
+    "name": "Compliance Audit",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Forms first, outrage later."
+  },
+  {
+    "id": "GOV-092",
+    "name": "Continuity Signal Test",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "This is only a drill. Or is it?"
+  },
+  {
+    "id": "GOV-093",
+    "name": "Perimeter Cameras",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "The red light means 'welcome'."
+  },
+  {
+    "id": "GOV-094",
+    "name": "Leaker's New Job",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Promotion to 'Elsewhere'."
+  },
+  {
+    "id": "GOV-095",
+    "name": "Data Fusion Hub",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Interoperability is when everyone watches you together."
+  },
+  {
+    "id": "GOV-096",
+    "name": "Dry-Labbed Results",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Peer review by peers we hired."
+  },
+  {
+    "id": "GOV-097",
+    "name": "Wilderness Listening Post",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Owls aren't what they seem. Neither are antennas."
+  },
+  {
+    "id": "GOV-098",
+    "name": "National Security Letter",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Gag orders pair well with coffee."
+  },
+  {
+    "id": "GOV-099",
+    "name": "Asset Laundering",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "We dry-clean money and reputations."
+  },
+  {
+    "id": "GOV-100",
+    "name": "Harbor Dock Warehouse",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Manifest says 'miscellaneous'."
+  },
+  {
+    "id": "GOV-101",
+    "name": "Man with the Match",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "He lights the story before it's written."
+  },
+  {
+    "id": "GOV-102",
+    "name": "Left-Handed Partner",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "He shakes with one hand and pockets with the other."
+  },
+  {
+    "id": "GOV-103",
+    "name": "Subcommittee X",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "The agenda item is secrecy."
+  },
+  {
+    "id": "GOV-104",
+    "name": "Deep Motor Pool",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Unmarked, unlimited, unavailable."
+  },
+  {
+    "id": "GOV-105",
+    "name": "Cutouts and Cover Names",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Everyone knows no one."
+  },
+  {
+    "id": "GOV-106",
+    "name": "Routine Satellite Test",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Routine. Repeated. Reassuring."
+  },
+  {
+    "id": "GOV-107",
+    "name": "Document Sanitization Bay",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Bleach for inconvenient ink."
+  },
+  {
+    "id": "GOV-108",
+    "name": "Joint Task Force: Optics",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Perception is nine-tenths of reality."
+  },
+  {
+    "id": "GOV-109",
+    "name": "Asset Relocation",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Subjects moved. Storyline removed."
+  },
+  {
+    "id": "GOV-110",
+    "name": "Desert Listening Array",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "The wind carries more than sand."
+  },
+  {
+    "id": "GOV-111",
+    "name": "Compliance Architecture",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "The system defends itself."
+  },
+  {
+    "id": "GOV-112",
+    "name": "Federalization Order",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Local control, centrally approved."
+  },
+  {
+    "id": "GOV-113",
+    "name": "Subterranean Tram",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Fast track to nowhere you know."
+  },
+  {
+    "id": "GOV-114",
+    "name": "Credible Source Program",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Blue checks for black ops."
+  },
+  {
+    "id": "GOV-115",
+    "name": "Intelligence Reprogramming",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "A budget is a moral narrative."
+  },
+  {
+    "id": "GOV-116",
+    "name": "Runway Hangar C",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Closed for renovations since forever."
+  },
+  {
+    "id": "GOV-117",
+    "name": "Red Team Leak Drill",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Practice makes perfect headlines.",
+    "orig_type": "MEDIA"
+  },
+  {
+    "id": "GOV-118",
+    "name": "Black Ledger",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Numbers that never audit."
+  },
+  {
+    "id": "GOV-119",
+    "name": "Harbor Quarantine Pier",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Hold the cargo. Hold the narrative."
+  },
+  {
+    "id": "GOV-120",
+    "name": "Clearance Revoked",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Trust withdrawn at the speed of pen."
+  },
+  {
+    "id": "GOV-121",
+    "name": "Asset Forfeiture Sweep",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Everything not nailed down becomes evidence."
+  },
+  {
+    "id": "GOV-122",
+    "name": "Records Suspension Wing",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "The filing cabinets hum ominously."
+  },
+  {
+    "id": "GOV-123",
+    "name": "Press Credentials Review",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Access is a privilege with paperwork."
+  },
+  {
+    "id": "GOV-124",
+    "name": "Narrative Harmonization",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Bring all voices into one key."
+  },
+  {
+    "id": "GOV-125",
+    "name": "Remote Hearing Room",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Muted. Camera off. Case closed."
+  },
+  {
+    "id": "GOV-126",
+    "name": "Compelled Testimony",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Answer the question you weren't asked."
+  },
+  {
+    "id": "GOV-127",
+    "name": "Continuity of Narrative",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Repetition is retention."
+  },
+  {
+    "id": "GOV-128",
+    "name": "Aquifer Sensor Farm",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "The waters whisper; we record."
+  },
+  {
+    "id": "GOV-129",
+    "name": "Strategic Denial",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "We categorically decline reality."
+  },
+  {
+    "id": "GOV-130",
+    "name": "Routine Systems Upgrade",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Security patches for public perception."
+  },
+  {
+    "id": "GOV-131",
+    "name": "Observation Deck 51",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "The best view is from behind glass."
+  },
+  {
+    "id": "GOV-132",
+    "name": "Guilt by Spreadsheet",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Cell B2 says you're compromised."
+  },
+  {
+    "id": "GOV-133",
+    "name": "Narrative Freeze Frame",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Stop motion truth."
+  },
+  {
+    "id": "GOV-134",
+    "name": "Sealed Loading Dock",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "All shipments marked 'later'."
+  },
+  {
+    "id": "GOV-135",
+    "name": "Global Reassurance Tour",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Handshake, headline, hush."
+  },
+  {
+    "id": "GOV-136",
+    "name": "Executive Summary Only",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "We read what matters. You read what remains."
+  },
+  {
+    "id": "GOV-137",
+    "name": "Cold Storage Vault",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Put the facts on ice."
+  },
+  {
+    "id": "GOV-138",
+    "name": "Seize the Servers",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "A warrant, a forklift, a silence."
+  },
+  {
+    "id": "GOV-139",
+    "name": "Calibrated Denials",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Precision-crafted statements of nothing."
+  },
+  {
+    "id": "GOV-140",
+    "name": "PR Blackout Grid",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Darken the lights, dim the doubts.",
+    "orig_type": "MEDIA"
+  },
+  {
+    "id": "GOV-141",
+    "name": "Rail Spur to Nowhere",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Every track leads off-map."
+  },
+  {
+    "id": "GOV-142",
+    "name": "Liaison to the Syndicate",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Partnerships need no sunlight."
+  },
+  {
+    "id": "GOV-143",
+    "name": "Friendly Fact-Checker Program",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Missing context, found budget."
+  },
+  {
+    "id": "GOV-144",
+    "name": "Jurisdiction Maze",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "By the time you arrive, you're out of bounds."
+  },
+  {
+    "id": "GOV-145",
+    "name": "Emergency Broadcast Hijack",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "Your regularly scheduled reality has been rescheduled."
+  },
+  {
+    "id": "GOV-146",
+    "name": "Black Budget Surge",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Money talks. In code names."
+  },
+  {
+    "id": "GOV-147",
+    "name": "Syndicate Directive Zero",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": -4
+    },
+    "flavor": "Decisions made above clearance."
+  },
+  {
+    "id": "GOV-148",
+    "name": "Overnight Guidelines",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Reality must adhere to policy."
+  },
+  {
+    "id": "GOV-149",
+    "name": "Confiscated Hard Drives",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "A persistent storage problem."
+  },
+  {
+    "id": "GOV-150",
+    "name": "Council in the Smoke",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": -4
+    },
+    "flavor": "When the room clears, the map has changed."
+  },
+  {
+    "id": "GOV-151",
+    "name": "Continuity Briefing: Omega",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "The fewer details, the greater the reassurance."
+  },
+  {
+    "id": "GOV-152",
+    "name": "Counter-Influence Bureau",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Every talking point has a billing code."
+  },
+  {
+    "id": "GOV-153",
+    "name": "Docu-Dump Friday",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Transparency occurs when no one's looking."
+  },
+  {
+    "id": "GOV-154",
+    "name": "Railhead Logistics Yard",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Inbound: pallets of acronyms."
+  },
+  {
+    "id": "GOV-155",
+    "name": "Hearing Without Cameras",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Public oversight—privately conducted."
+  },
+  {
+    "id": "GOV-156",
+    "name": "Unmarked Couriers",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "The signature is a wink."
+  },
+  {
+    "id": "GOV-157",
+    "name": "Observation Balloon Farm",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Weather data, rumor data—air is air."
+  },
+  {
+    "id": "GOV-158",
+    "name": "Guidance Memo Leak",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "If it leaks on time, it isn't an accident.",
+    "orig_type": "MEDIA"
+  },
+  {
+    "id": "GOV-159",
+    "name": "Black Funnel Accounts",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "A river of funds with no banks."
+  },
+  {
+    "id": "GOV-160",
+    "name": "Checkpoint Echo",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "License, registration, and intentions."
+  },
+  {
+    "id": "GOV-161",
+    "name": "Blackout Order",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "The story will be told later. Maybe.",
+    "orig_type": "MEDIA"
+  },
+  {
+    "id": "GOV-162",
+    "name": "Detention Annex 7",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "A file folder with doors."
+  },
+  {
+    "id": "GOV-163",
+    "name": "Rapid Response Press Pool",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Questions pre-approved, answers pre-written."
+  },
+  {
+    "id": "GOV-164",
+    "name": "Continuity Shuttle",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "From somewhere to nowhere in one stop."
+  },
+  {
+    "id": "GOV-165",
+    "name": "Operation Soft Silence",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "A quiet call at a loud hour."
+  },
+  {
+    "id": "GOV-166",
+    "name": "Glacier Records Unit",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Paperwork moves at the speed of ice."
+  },
+  {
+    "id": "GOV-167",
+    "name": "Interagency Chokepoint",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Passes available in theory."
+  },
+  {
+    "id": "GOV-168",
+    "name": "Narrative Curators",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "We pick what people remember."
+  },
+  {
+    "id": "GOV-169",
+    "name": "Tarmac Hush Zone",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Jet fuel evaporates, rumors too."
+  },
+  {
+    "id": "GOV-170",
+    "name": "Executive Summary Leak",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "The abstract tells a comforting story.",
+    "orig_type": "MEDIA"
+  },
+  {
+    "id": "GOV-171",
+    "name": "Red Cell Simulations",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Practice makes pressure."
+  },
+  {
+    "id": "GOV-172",
+    "name": "Above-Top-Secret Vault",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "The lock has a clearance."
+  },
+  {
+    "id": "GOV-173",
+    "name": "Quietly Amended",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "The edit history is patriotic."
+  },
+  {
+    "id": "GOV-174",
+    "name": "Harbor Quarantine Yard",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "The tide waits on paperwork."
+  },
+  {
+    "id": "GOV-175",
+    "name": "Directive: Total Information",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": -4
+    },
+    "flavor": "Every signal is a confession."
+  },
+  {
+    "id": "GOV-176",
+    "name": "Press Credentials Purge",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Access revoked for service rendered."
+  },
+  {
+    "id": "GOV-177",
+    "name": "Perimeter Tripwire Grid",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "The map is the minefield."
+  },
+  {
+    "id": "GOV-178",
+    "name": "Spin Cycle Marathon",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "We keep talking so you don't have to think."
+  },
+  {
+    "id": "GOV-179",
+    "name": "Cutout Relay Chain",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "A daisy chain of deniability."
+  },
+  {
+    "id": "GOV-180",
+    "name": "Desert Boneyard Annex",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Miles of wings, gallons of dust."
+  },
+  {
+    "id": "GOV-181",
+    "name": "Executive Waiver Stack",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "A paper wall is still a wall."
+  },
+  {
+    "id": "GOV-182",
+    "name": "Asset Reassignment",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Budgets travel faster than rumors."
+  },
+  {
+    "id": "GOV-183",
+    "name": "Signal Spoof Lab",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "The airwaves learn to lie."
+  },
+  {
+    "id": "GOV-184",
+    "name": "Calm the Waters",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "A still surface hides any depth."
+  },
+  {
+    "id": "GOV-185",
+    "name": "Procurement Overrun",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "We overspent on silence."
+  },
+  {
+    "id": "GOV-186",
+    "name": "Council Elevator",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "It only goes down."
+  },
+  {
+    "id": "GOV-187",
+    "name": "Mirrored Interrogation",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Answer yourself, on the record."
+  },
+  {
+    "id": "GOV-188",
+    "name": "Syndicate Nightfall",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": -4
+    },
+    "flavor": "When the lights go out, the map stops moving."
+  },
+  {
+    "id": "GOV-189",
+    "name": "Hangar Theta",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Authorized personnel invent authorization."
+  },
+  {
+    "id": "GOV-190",
+    "name": "Rapid Rebuttal Room",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "The best offense is a press release."
+  },
+  {
+    "id": "GOV-191",
+    "name": "Command Uplink Bluff",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "The blinking lights mean it's working."
+  },
+  {
+    "id": "GOV-192",
+    "name": "Intercept Hub",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Every line ends in our pocket.",
+    "orig_type": "ZONE"
+  },
+  {
+    "id": "GOV-193",
+    "name": "Sealed Chambers",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Echoes of nothing important."
+  },
+  {
+    "id": "GOV-194",
+    "name": "Denial Cascade",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "A waterfall of 'no comment'."
+  },
+  {
+    "id": "GOV-195",
+    "name": "Blackout Curtain",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "The stagehands run the show.",
+    "orig_type": "MEDIA"
+  },
+  {
+    "id": "GOV-196",
+    "name": "FOIA Glacier",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Requests go in. Winters come out."
+  },
+  {
+    "id": "GOV-197",
+    "name": "Chain of Custody",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Evidence of control."
+  },
+  {
+    "id": "GOV-198",
+    "name": "Overnight Curfew",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Lights out means mics off."
+  },
+  {
+    "id": "GOV-199",
+    "name": "Anonymous Senior Official",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Sources say sources exist."
+  },
+  {
+    "id": "GOV-200",
+    "name": "The Ceiling Above the Council",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "legendary",
+    "cost": 5,
+    "effects": {
+      "ipDelta": {
+        "opponent": 4
+      }
+    },
+    "flavor": "Even the shadow has a shadow.",
+    "orig_type": "MEDIA"
+  }
+]

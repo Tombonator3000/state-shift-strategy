@@ -1,0 +1,2538 @@
+[
+  {
+    "id": "TRUTH-001",
+    "name": "Blurry Bigfoot Photo Goes Viral",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Experts confirm: pixels don't lie."
+  },
+  {
+    "id": "TRUTH-002",
+    "name": "Elvis Spotted at 3 A.M. Diner",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "The King recommends the midnight pancakes."
+  },
+  {
+    "id": "TRUTH-003",
+    "name": "Pastor Rex's Apocalypse Podcast",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Sponsored by Doomsday Beans™."
+  },
+  {
+    "id": "TRUTH-004",
+    "name": "Bat Boy Endorses Transparency",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "His platform: windows with no curtains."
+  },
+  {
+    "id": "TRUTH-005",
+    "name": "Alien Wedding Blocks Traffic",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Rice thrown… immediately abducted."
+  },
+  {
+    "id": "TRUTH-006",
+    "name": "Local Grandma Sees Two Ghosts",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "They politely asked for tea."
+  },
+  {
+    "id": "TRUTH-007",
+    "name": "UFO Over High School Football Game",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Halftime show beamed in from Andromeda."
+  },
+  {
+    "id": "TRUTH-008",
+    "name": "Cryptid Selfie Goes Mainstream",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "#NoFilter #DefinitelyReal"
+  },
+  {
+    "id": "TRUTH-009",
+    "name": "Elvis Opens Community Garden",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "He composts the tabloids."
+  },
+  {
+    "id": "TRUTH-010",
+    "name": "Tabloid Thunder Special Edition",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Ink smudges reveal more than black bars."
+  },
+  {
+    "id": "TRUTH-011",
+    "name": "Mothership Livestream Crashes App",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Chat: 'first!'"
+  },
+  {
+    "id": "TRUTH-012",
+    "name": "Florida Man Joins the Resistance",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "He brought snacks. Questionable snacks."
+  },
+  {
+    "id": "TRUTH-013",
+    "name": "Elvis Busks in Area 51 Parking Lot",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Tip jar shaped like a saucer."
+  },
+  {
+    "id": "TRUTH-014",
+    "name": "Citizen Journalist Scoop",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Phones are better than binoculars."
+  },
+  {
+    "id": "TRUTH-015",
+    "name": "Crop Circle Art Festival",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "BYO tractor."
+  },
+  {
+    "id": "TRUTH-016",
+    "name": "Tabloid Whistleblower",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "The squeak heard round the world."
+  },
+  {
+    "id": "TRUTH-017",
+    "name": "Bat Boy Meets Bigfoot",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Historic handshake, very furry."
+  },
+  {
+    "id": "TRUTH-018",
+    "name": "Elvis the UFO Pilot",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Thank you, interstellar much."
+  },
+  {
+    "id": "TRUTH-019",
+    "name": "Haunted Walmart",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Rollback prices on cursed dolls."
+  },
+  {
+    "id": "TRUTH-020",
+    "name": "Cornfield Abduction Site",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Free tractor rides included."
+  },
+  {
+    "id": "TRUTH-021",
+    "name": "Bigfoot Campground",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Please don't feed the senator."
+  },
+  {
+    "id": "TRUTH-022",
+    "name": "Elvis Shrine in Vegas",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Burning love, steady income."
+  },
+  {
+    "id": "TRUTH-023",
+    "name": "Grandma's Haunted Basement",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Knitting needles levitate on Tuesdays."
+  },
+  {
+    "id": "TRUTH-024",
+    "name": "Tabloid Printing Warehouse",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Ink stains reveal hidden messages."
+  },
+  {
+    "id": "TRUTH-025",
+    "name": "Ghost Hunter Motel",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Room service knocks itself."
+  },
+  {
+    "id": "TRUTH-026",
+    "name": "Community Radio Tower",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Static carries secrets."
+  },
+  {
+    "id": "TRUTH-027",
+    "name": "Conspiracy Bookstore",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Stamped 'definitely not a front'."
+  },
+  {
+    "id": "TRUTH-028",
+    "name": "Lake Monster Pier",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "No refunds on splash damage."
+  },
+  {
+    "id": "TRUTH-029",
+    "name": "Roadside Elvis Museum",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Wax figures hum suspiciously on Thursdays."
+  },
+  {
+    "id": "TRUTH-030",
+    "name": "Paranormal Fairgrounds",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Tilt-a-Whirl screams back."
+  },
+  {
+    "id": "TRUTH-031",
+    "name": "Tinfoil Hat Distribution Drive",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Family-pack protection."
+  },
+  {
+    "id": "TRUTH-032",
+    "name": "Midnight Radio Broadcast",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "AM band, PM truths."
+  },
+  {
+    "id": "TRUTH-033",
+    "name": "Tabloid Exposé",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Front page beats front line."
+  },
+  {
+    "id": "TRUTH-034",
+    "name": "Ghost Hunter Raid",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "They ain't afraid of your hand size."
+  },
+  {
+    "id": "TRUTH-035",
+    "name": "UFOlogist Convention",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Keynote featuring laser pointer to Orion."
+  },
+  {
+    "id": "TRUTH-036",
+    "name": "Citizen Tipline Surge",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Hold, your call is very important to justice."
+  },
+  {
+    "id": "TRUTH-037",
+    "name": "Phantom File Dump",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Uploaded by user 'ghost_admin'."
+  },
+  {
+    "id": "TRUTH-038",
+    "name": "Witness Parade",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Everybody saw something."
+  },
+  {
+    "id": "TRUTH-039",
+    "name": "Freedom of Information Blitz",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "Heavily unredacted, lightly folded."
+  },
+  {
+    "id": "TRUTH-040",
+    "name": "Mothman Public Warning",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Those wings weren't for show."
+  },
+  {
+    "id": "TRUTH-041",
+    "name": "Alien Foil Shield",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Cranial shine, divine design."
+  },
+  {
+    "id": "TRUTH-042",
+    "name": "Community Watch",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Neighborhood eyes beat satellite spies."
+  },
+  {
+    "id": "TRUTH-043",
+    "name": "Paranoia Rally",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Chant louder, doubt quieter."
+  },
+  {
+    "id": "TRUTH-044",
+    "name": "Ghostly Intervention",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Invisible hands hold your hand."
+  },
+  {
+    "id": "TRUTH-045",
+    "name": "Mothership Umbrella",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Broadcast jammed by cosmic drizzle."
+  },
+  {
+    "id": "TRUTH-046",
+    "name": "Citizen Journalism Network",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Many eyes, fewer lies."
+  },
+  {
+    "id": "TRUTH-047",
+    "name": "Tabloid Press Alliance",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Coupons clipped from reality."
+  },
+  {
+    "id": "TRUTH-048",
+    "name": "Bigfoot Merchandise Store",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Socks for enormous feet sell out instantly."
+  },
+  {
+    "id": "TRUTH-049",
+    "name": "Elvis Pirate Radio",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "All shook up… and tuned in."
+  },
+  {
+    "id": "TRUTH-050",
+    "name": "Bat Boy Returns",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": 4
+    },
+    "flavor": "Running for Senate (again)."
+  },
+  {
+    "id": "TRUTH-051",
+    "name": "Florida Man Storms UFO Convention",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Security was no match for flip-flops and fury."
+  },
+  {
+    "id": "TRUTH-052",
+    "name": "Bat Boy Runs for Mayor",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Campaign slogan: 'More Screams, Less Taxes.'"
+  },
+  {
+    "id": "TRUTH-053",
+    "name": "Pastor Rex Predicts Elvis Resurrection",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Sunday service includes suspicious sequins."
+  },
+  {
+    "id": "TRUTH-054",
+    "name": "Tabloid Exposé: Alien Babysitter",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Best at bedtime stories, worst at curfew."
+  },
+  {
+    "id": "TRUTH-055",
+    "name": "Elvis Sighted at Roswell Diner",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Thank you, fried much."
+  },
+  {
+    "id": "TRUTH-056",
+    "name": "Florida Man Publishes Blog",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Powered entirely by gator energy drinks."
+  },
+  {
+    "id": "TRUTH-057",
+    "name": "Haunted House Live Stream",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Comment section full of ghosts."
+  },
+  {
+    "id": "TRUTH-058",
+    "name": "Local Reporter Exposes Deep State Donuts",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Sprinkles cover more than sugar."
+  },
+  {
+    "id": "TRUTH-059",
+    "name": "Bat Boy College Graduation",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Major: Paranormal Political Science."
+  },
+  {
+    "id": "TRUTH-060",
+    "name": "Elvis Performs at County Fair",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Corn dogs and hound dogs."
+  },
+  {
+    "id": "TRUTH-061",
+    "name": "Florida Man's UFO TikTok",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "The aliens subscribed instantly."
+  },
+  {
+    "id": "TRUTH-062",
+    "name": "Pastor Rex Preaches Disclosure",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Hallelujah, the files are open."
+  },
+  {
+    "id": "TRUTH-063",
+    "name": "Bat Boy Dating Show Scandal",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Final rose withheld for national security."
+  },
+  {
+    "id": "TRUTH-064",
+    "name": "Elvis on Mars Tabloid Scoop",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "His space suit sparkles."
+  },
+  {
+    "id": "TRUTH-065",
+    "name": "Agent Smitherson's UFO Leak",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Turns out interns shouldn't have clearance."
+  },
+  {
+    "id": "TRUTH-066",
+    "name": "Bat Boy Fan Club HQ",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Membership includes free capes."
+  },
+  {
+    "id": "TRUTH-067",
+    "name": "Elvis Shrine Gas Station",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Fill up on miracles."
+  },
+  {
+    "id": "TRUTH-068",
+    "name": "Florida Swamp Watchtower",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Mosquitoes included."
+  },
+  {
+    "id": "TRUTH-069",
+    "name": "Haunted Trailer Park",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Ghosts pay rent in ectoplasm."
+  },
+  {
+    "id": "TRUTH-070",
+    "name": "Pastor Rex's Tent Revival",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Hallelujah, the aliens are among us!"
+  },
+  {
+    "id": "TRUTH-071",
+    "name": "UFO Crash Carnival",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Funnel cakes taste out of this world."
+  },
+  {
+    "id": "TRUTH-072",
+    "name": "Elvis Museum Basement",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Thank you, very hidden."
+  },
+  {
+    "id": "TRUTH-073",
+    "name": "Bigfoot Nature Reserve",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Tickets include blurry binoculars."
+  },
+  {
+    "id": "TRUTH-074",
+    "name": "Tabloid Printing Press",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Hot off the paranormal presses."
+  },
+  {
+    "id": "TRUTH-075",
+    "name": "Haunted Amusement Park",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Roller coasters scream back."
+  },
+  {
+    "id": "TRUTH-076",
+    "name": "Florida Roadside Attraction",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Gator wrestling, Elvis impersonator optional."
+  },
+  {
+    "id": "TRUTH-077",
+    "name": "Ghost Town Saloon",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Bartender vanished in 1893, still pouring."
+  },
+  {
+    "id": "TRUTH-078",
+    "name": "Roswell Tourist Center",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "We sell postcards and plausible deniability."
+  },
+  {
+    "id": "TRUTH-079",
+    "name": "Mothman Statue Plaza",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Tourist trap with prophetic wings."
+  },
+  {
+    "id": "TRUTH-080",
+    "name": "Haunted Lighthouse",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Fog horn occasionally says your name."
+  },
+  {
+    "id": "TRUTH-081",
+    "name": "Conspiracy Archive Locker",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Files stacked by string color."
+  },
+  {
+    "id": "TRUTH-082",
+    "name": "Bigfoot Footprint Trail",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Size 28 evidence, mind the puddles."
+  },
+  {
+    "id": "TRUTH-083",
+    "name": "Elvis Chapel Roadside",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Love me tender, pay me weekly."
+  },
+  {
+    "id": "TRUTH-084",
+    "name": "Skywatch Ridge",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Blankets, binoculars, and bleeping."
+  },
+  {
+    "id": "TRUTH-085",
+    "name": "County Fair Crop Lab",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Blue ribbon for best geometry."
+  },
+  {
+    "id": "TRUTH-086",
+    "name": "FOIA Lawsuit",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Your honor, we respectfully unredact."
+  },
+  {
+    "id": "TRUTH-087",
+    "name": "X-Files Marathon",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Season 3 unlocks your third eye."
+  },
+  {
+    "id": "TRUTH-088",
+    "name": "Elvis Flashmob",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Sequins are blinding…and binding."
+  },
+  {
+    "id": "TRUTH-089",
+    "name": "Citizen Drone Recon",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Beep boop, nice try, spooks."
+  },
+  {
+    "id": "TRUTH-090",
+    "name": "Night-Vision Stakeout",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Green tint, clear intent."
+  },
+  {
+    "id": "TRUTH-091",
+    "name": "Bigfoot Press Conference",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Microphones mysteriously smeared with mud."
+  },
+  {
+    "id": "TRUTH-092",
+    "name": "Mothman Siren Test",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "The warning no one can ignore."
+  },
+  {
+    "id": "TRUTH-093",
+    "name": "Call-in Show Frenzy",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Lines lit, lies dimmed."
+  },
+  {
+    "id": "TRUTH-094",
+    "name": "Fact-Check Brigade",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Receipts loaded; caps locked."
+  },
+  {
+    "id": "TRUTH-095",
+    "name": "Neighborhood Cameras",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Smile, you're de-escalated."
+  },
+  {
+    "id": "TRUTH-096",
+    "name": "Emergency Press Conference",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Live rebuttal beats late retraction."
+  },
+  {
+    "id": "TRUTH-097",
+    "name": "Glitch in the Matrix",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Oops, the simulation dropped a frame."
+  },
+  {
+    "id": "TRUTH-098",
+    "name": "Open-Source UFO Tracker",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Git push: disclosure."
+  },
+  {
+    "id": "TRUTH-099",
+    "name": "Grassroots Crowdfunding",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "One micro-donation at a time."
+  },
+  {
+    "id": "TRUTH-100",
+    "name": "Mothership Over D.C.",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": 4
+    },
+    "flavor": "Take me to your committee chair."
+  },
+  {
+    "id": "TRUTH-101",
+    "name": "The Lone Gunmen",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Three hackers, zero hygiene, one friend on the inside."
+  },
+  {
+    "id": "TRUTH-102",
+    "name": "Open-Records Taskforce",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "If it's stamped 'secret', it's stapled to our to-do list."
+  },
+  {
+    "id": "TRUTH-103",
+    "name": "Grassroots Press Co-Op",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Ink by the people, for the people."
+  },
+  {
+    "id": "TRUTH-104",
+    "name": "Citizen Forensics Lab",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Microscopes donated, miracles improvised."
+  },
+  {
+    "id": "TRUTH-105",
+    "name": "Truth Meter Calibrator",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Batteries not included. Lies excluded."
+  },
+  {
+    "id": "TRUTH-106",
+    "name": "Tinfoil Supply Chain",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Industrial-grade hats for industrial-sized cover-ups."
+  },
+  {
+    "id": "TRUTH-107",
+    "name": "Elvis Works the Night Shift",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Punches in with a glittery glove."
+  },
+  {
+    "id": "TRUTH-108",
+    "name": "Bat Boy Delivers Breaking News",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Screams in AP style."
+  },
+  {
+    "id": "TRUTH-109",
+    "name": "Pastor Rex Calls Out the Lizard Cabal",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Tail between their legs, allegedly."
+  },
+  {
+    "id": "TRUTH-110",
+    "name": "Florida Man Finds Government Device",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "He used it to open soda first."
+  },
+  {
+    "id": "TRUTH-111",
+    "name": "MIB Slip Up on Live TV",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Blink and you'll still see it."
+  },
+  {
+    "id": "TRUTH-112",
+    "name": "Elvis Joins a Book Club",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Reads only paperbacks—no fingerprints."
+  },
+  {
+    "id": "TRUTH-113",
+    "name": "Agent Smitherson's Conscience",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "He anonymously CC'd everyone."
+  },
+  {
+    "id": "TRUTH-114",
+    "name": "Blurry Mothman Dashcam",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Wingspan: entire windshield."
+  },
+  {
+    "id": "TRUTH-115",
+    "name": "Ghost Jury Finds the Truth",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Verdict echoes for eternity."
+  },
+  {
+    "id": "TRUTH-116",
+    "name": "Elvis Edits the Front Page",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Headline: 'Love Me Tender, Tell Me Everything'."
+  },
+  {
+    "id": "TRUTH-117",
+    "name": "Local Kid Interviews a Gray",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "First question: favorite ice cream?"
+  },
+  {
+    "id": "TRUTH-118",
+    "name": "Bat Boy Launches a Zine",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Stapled with bravado."
+  },
+  {
+    "id": "TRUTH-119",
+    "name": "Psychic Predicts File Drop",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Knew you'd play this."
+  },
+  {
+    "id": "TRUTH-120",
+    "name": "Desert Billboards of Truth",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Text too big to redact."
+  },
+  {
+    "id": "TRUTH-121",
+    "name": "Bat Boy Community Center",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "After-school programs for aspiring screamers."
+  },
+  {
+    "id": "TRUTH-122",
+    "name": "Elvis Roadside Chapel",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Vows exchanged, lies annulled."
+  },
+  {
+    "id": "TRUTH-123",
+    "name": "Skywatcher Ridge",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Bring blankets, witness meteors and memos."
+  },
+  {
+    "id": "TRUTH-124",
+    "name": "Conspiracy Coffee Roasters",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Single-origin skepticism."
+  },
+  {
+    "id": "TRUTH-125",
+    "name": "Haunted Library Stacks",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Shhh… the books whisper back."
+  },
+  {
+    "id": "TRUTH-126",
+    "name": "Community Scanner Net",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Airwaves have nothing to hide."
+  },
+  {
+    "id": "TRUTH-127",
+    "name": "Cryptid Petting Zoo",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Waiver includes claws and clauses."
+  },
+  {
+    "id": "TRUTH-128",
+    "name": "College Radio Conspiracy Hour",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Playlists of leaks and licks."
+  },
+  {
+    "id": "TRUTH-129",
+    "name": "Elvis Tribute Casino Lounge",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "House always wins—unless truth shows up."
+  },
+  {
+    "id": "TRUTH-130",
+    "name": "Public-Access TV Studio",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Tonight on 'Open Secrets': everything."
+  },
+  {
+    "id": "TRUTH-131",
+    "name": "Haunted National Park",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Leave only footprints; hear many more."
+  },
+  {
+    "id": "TRUTH-132",
+    "name": "Data Breach Whistle",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "The loudest tiny whistle ever printed."
+  },
+  {
+    "id": "TRUTH-133",
+    "name": "Press Conference Ambush",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "First question, final answer."
+  },
+  {
+    "id": "TRUTH-134",
+    "name": "FOIA Lightning Round",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Redaction ink runs in the rain."
+  },
+  {
+    "id": "TRUTH-135",
+    "name": "Infiltrate the Briefing",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Credentials printed on recycled secrets."
+  },
+  {
+    "id": "TRUTH-136",
+    "name": "Crowdsourced Fact Storm",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "1,000 comments, one conclusion."
+  },
+  {
+    "id": "TRUTH-137",
+    "name": "Operation Spotlight",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "Stage lights melt alibis."
+  },
+  {
+    "id": "TRUTH-138",
+    "name": "Emergency Broadcast Override",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "We interrupt your regularly scheduled denial."
+  },
+  {
+    "id": "TRUTH-139",
+    "name": "Street Reporter Blitz",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Microphones swarm like bees."
+  },
+  {
+    "id": "TRUTH-140",
+    "name": "Subpoena Surprise",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Signed by Judge Public Opinion."
+  },
+  {
+    "id": "TRUTH-141",
+    "name": "Elvis Press Pass",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Laminate of destiny."
+  },
+  {
+    "id": "TRUTH-142",
+    "name": "Flash-Truth Rally",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Chants harmonize with sirens."
+  },
+  {
+    "id": "TRUTH-143",
+    "name": "Phone Tree Counterintel",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Ring once if it's a cover-up."
+  },
+  {
+    "id": "TRUTH-144",
+    "name": "Ghost Patrol",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Boo! Also, bookkeeping."
+  },
+  {
+    "id": "TRUTH-145",
+    "name": "Public Records Shield",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Stapled, stamped, safe."
+  },
+  {
+    "id": "TRUTH-146",
+    "name": "Witness Hotline",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Press 1 to spill, press 2 to bill."
+  },
+  {
+    "id": "TRUTH-147",
+    "name": "Mothership Cover",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Umbrella policy: extraterrestrial."
+  },
+  {
+    "id": "TRUTH-148",
+    "name": "Tabloid Legal Eagles",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Objection sustained, publicity gained."
+  },
+  {
+    "id": "TRUTH-149",
+    "name": "Bigfoot Senate Campaign",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": 4
+    },
+    "flavor": "A platform of planks and footprints."
+  },
+  {
+    "id": "TRUTH-150",
+    "name": "Elvis: The Immortal King",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": 4
+    },
+    "flavor": "Long live the King—and the headline."
+  },
+  {
+    "id": "TRUTH-151",
+    "name": "Elvis Volunteers at Animal Shelter",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Hound dogs approved."
+  },
+  {
+    "id": "TRUTH-152",
+    "name": "Bat Boy Hosts the Evening News",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Top story: screamingly credible."
+  },
+  {
+    "id": "TRUTH-153",
+    "name": "Florida Man's Meteor Fragment",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Hot rock, hotter takes."
+  },
+  {
+    "id": "TRUTH-154",
+    "name": "Pastor Rex Declares Open Files Week",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Bring your own highlighter."
+  },
+  {
+    "id": "TRUTH-155",
+    "name": "Agent Smitherson Leaves a Voicemail",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "'Do not call back.' *Beep.*"
+  },
+  {
+    "id": "TRUTH-156",
+    "name": "Crowd Spots Triangle Craft",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Geometry class finally pays off."
+  },
+  {
+    "id": "TRUTH-157",
+    "name": "Elvis Charity Telethon",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "All donations tax-deductible from reality."
+  },
+  {
+    "id": "TRUTH-158",
+    "name": "UFO Traffic Cam Compilation",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Please merge truthfully."
+  },
+  {
+    "id": "TRUTH-159",
+    "name": "Bat Boy Op-Ed: 'I Was There'",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Has the receipts, keeps the screams."
+  },
+  {
+    "id": "TRUTH-160",
+    "name": "Grandma's Séance Transcript",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Meeting minutes by planchette."
+  },
+  {
+    "id": "TRUTH-161",
+    "name": "Elvis Delivers FOIA Request",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Return address: The Heartbreak Hotel."
+  },
+  {
+    "id": "TRUTH-162",
+    "name": "MIB Parking Ticket Goes Viral",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Violation: obvious saucer."
+  },
+  {
+    "id": "TRUTH-163",
+    "name": "Florida Man's Paranormal BBQ",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Ribs and revelations."
+  },
+  {
+    "id": "TRUTH-164",
+    "name": "Bat Boy Wins Journalism Award",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Accepted with a polite shriek."
+  },
+  {
+    "id": "TRUTH-165",
+    "name": "Elvis Bus Tour to Area 51",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "No cameras, only camcorders."
+  },
+  {
+    "id": "TRUTH-166",
+    "name": "Community Leak Drop",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "The cloud is just a sky hard drive."
+  },
+  {
+    "id": "TRUTH-167",
+    "name": "Paranormal Bake Sale",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Cupcakes with classified sprinkles."
+  },
+  {
+    "id": "TRUTH-168",
+    "name": "Elvis Hologram Town Hall",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Questions answered, hips simulated."
+  },
+  {
+    "id": "TRUTH-169",
+    "name": "Blurry Angel Over Courthouse",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Attached wings, unattached verdict."
+  },
+  {
+    "id": "TRUTH-170",
+    "name": "Agent Smitherson Misplaces Briefcase",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Contents: oops, everything."
+  },
+  {
+    "id": "TRUTH-171",
+    "name": "Crowdfunded Telescope Network",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Eyes everywhere, budget nowhere."
+  },
+  {
+    "id": "TRUTH-172",
+    "name": "Tabloid 'Truth or Dare' Special",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "Dares accepted by democracy."
+  },
+  {
+    "id": "TRUTH-173",
+    "name": "Elvis Roadhouse",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Open late, secrets later."
+  },
+  {
+    "id": "TRUTH-174",
+    "name": "Bat Boy Youth Center",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Homework: screaming practice."
+  },
+  {
+    "id": "TRUTH-175",
+    "name": "Haunted Subway Platform",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Next arrival: transparency."
+  },
+  {
+    "id": "TRUTH-176",
+    "name": "Community Print Shop",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Ink smudges improve credibility."
+  },
+  {
+    "id": "TRUTH-177",
+    "name": "Lake Monster Boardwalk",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Souvenir shops sell periscopes."
+  },
+  {
+    "id": "TRUTH-178",
+    "name": "Paranormal Podcast Studio",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Recorded live in an undisclosed basement."
+  },
+  {
+    "id": "TRUTH-179",
+    "name": "Conspiracy Flea Market",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Gently used evidence."
+  },
+  {
+    "id": "TRUTH-180",
+    "name": "Ghost-Lit Lighthouse",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Beam bends around secrets."
+  },
+  {
+    "id": "TRUTH-181",
+    "name": "Elvis Chapel of Revelations",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Choir hums suspiciously familiar melodies."
+  },
+  {
+    "id": "TRUTH-182",
+    "name": "Bat Boy Archives",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Files arranged by shriek pitch."
+  },
+  {
+    "id": "TRUTH-183",
+    "name": "Open Mic Press Briefing",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Mic check, lie wreck."
+  },
+  {
+    "id": "TRUTH-184",
+    "name": "Neighborhood Drone Surge",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Eyes in the sky, pies on the porch."
+  },
+  {
+    "id": "TRUTH-185",
+    "name": "Leaks to Local Paper",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Ink beats intimidation."
+  },
+  {
+    "id": "TRUTH-186",
+    "name": "Citizen Audit",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Receipts stapled to reality."
+  },
+  {
+    "id": "TRUTH-187",
+    "name": "Midnight Signal Boost",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Static speaks volumes."
+  },
+  {
+    "id": "TRUTH-188",
+    "name": "Counter-Spin Workshop",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Spin class for facts."
+  },
+  {
+    "id": "TRUTH-189",
+    "name": "FOIA Blitz Marathon",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Paper cuts to the narrative."
+  },
+  {
+    "id": "TRUTH-190",
+    "name": "Flash Mob Fact-Check",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Synchronised citations."
+  },
+  {
+    "id": "TRUTH-191",
+    "name": "Mothman Siren",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Wings over weak points."
+  },
+  {
+    "id": "TRUTH-192",
+    "name": "Copier Jam of Destiny",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Paper wins this round."
+  },
+  {
+    "id": "TRUTH-193",
+    "name": "Neighborhood Witness Net",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "We saw that coming."
+  },
+  {
+    "id": "TRUTH-194",
+    "name": "Courthouse Candlelight Vigil",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Light pierces ledger lines."
+  },
+  {
+    "id": "TRUTH-195",
+    "name": "Ghost Jury Nullification",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Overruled by the afterlife."
+  },
+  {
+    "id": "TRUTH-196",
+    "name": "Open Source Investigators",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Threads that pull threads."
+  },
+  {
+    "id": "TRUTH-197",
+    "name": "Tabloid Freedom Fund",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Small bills fund big stories."
+  },
+  {
+    "id": "TRUTH-198",
+    "name": "Community Wi-Fi of Truth",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Password: OpenEverything."
+  },
+  {
+    "id": "TRUTH-199",
+    "name": "Elvis Time Capsule",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Contents: one sequined future."
+  },
+  {
+    "id": "TRUTH-200",
+    "name": "The Final Disclosure",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": 4
+    },
+    "flavor": "The last page of the last secret file."
+  }
+]
