@@ -110,7 +110,7 @@ Trekk: Trekk opp til 5 kort på hånd (fyll opp).
 
 Spillfase
 
-3\) Spill opptil 3 kort i valgfri rekkefølge. Betal IP-kost, kortet resolves umiddelbart. (Ingen reactions i MVP.)
+3\) Spill opptil 3 kort i valgfri rekkefølge. Betal IP-kost, kortet resolves umiddelbart.
 
 
 
@@ -671,10 +671,6 @@ A: Staten blir din, og Pressures i den staten nullstilles (0/0).
 
 
 12\. Videreutvikling (etter MVP)
-
-
-
-Reactions (enkel DEFENSIVE) mot ATTACK senere.
 
 
 
