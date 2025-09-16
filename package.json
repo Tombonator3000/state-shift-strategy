@@ -16,7 +16,10 @@
     "build:core": "CORE_SEED=2025-09-14 tsx scripts/export-core-json.ts",
     "snapshot:core": "tsx scripts/snapshot-core-v21e-strict.ts",
     "report": "cat src/data/core/rewrite-report.txt",
-    "test": "vitest run"
+    "test": "vitest run",
+    "migrate:mvp": "bun tsx scripts/migrate-to-mvp.ts",
+    "validate:mvp": "bun tsx scripts/validate-mvp.ts",
+    "test:mvp": "vitest run -t mvp"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -82,6 +85,7 @@
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react-swc": "^3.11.0",
     "autoprefixer": "^10.4.21",
+    "tsx": "file:tools/tsx-shim",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",

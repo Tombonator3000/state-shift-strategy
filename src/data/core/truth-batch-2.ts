@@ -1,332 +1,308 @@
 // Truth Batch 2 - v2.1E Compliant Cards
 // TRUTH-026 to TRUTH-050
 
-import type { GameCard } from '../../types/cardTypes';
 
-export const CORE_BATCH_TRUTH_2: GameCard[] = [
+import type { Card } from "../../types/mvpCard";
+
+export const CORE_BATCH_TRUTH_2: Card[] = [
   {
     id: "TRUTH-026",
-    faction: "truth",
     name: "Community Radio Tower",
+    faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
-    cost: 12,
-    text: "+2 Zone Defense. Gain 1 IP and +1% Truth when played.",
-    flavorTruth: "Static carries secrets.",
-    flavorGov: "Static carries secrets.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, ipDelta: { self: 1 }, truthDelta: 1 }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Static carries secrets.",
   },
   {
     id: "TRUTH-027",
-    faction: "truth",
     name: "Conspiracy Bookstore",
+    faction: "truth",
     type: "ZONE",
     rarity: "rare",
-    cost: 16,
-    text: "+3 Zone Defense. Draw 1 when played.",
-    flavorTruth: "Stamped 'definitely not a front'.",
-    flavorGov: "Stamped 'definitely not a front'.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 3, draw: 1 }
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Stamped 'definitely not a front'.",
   },
   {
     id: "TRUTH-028",
-    faction: "truth",
     name: "Lake Monster Pier",
+    faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
-    cost: 13,
-    text: "+2 Zone Defense. +5% Truth when played.",
-    flavorTruth: "No refunds on splash damage.",
-    flavorGov: "No refunds on splash damage.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, truthDelta: 5 }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "No refunds on splash damage.",
   },
   {
     id: "TRUTH-029",
-    faction: "truth",
     name: "Roadside Elvis Museum",
+    faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
-    cost: 12,
-    text: "+2 Zone Defense. Gain 1 IP when played.",
-    flavorTruth: "Wax figures hum suspiciously on Thursdays.",
-    flavorGov: "Wax figures hum suspiciously on Thursdays.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, ipDelta: { self: 1 } }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Wax figures hum suspiciously on Thursdays.",
   },
   {
     id: "TRUTH-030",
-    faction: "truth",
     name: "Paranormal Fairgrounds",
+    faction: "truth",
     type: "ZONE",
-    rarity: "rare",
-    cost: 17,
-    text: "+4 Zone Defense.",
-    flavorTruth: "Tilt-a-Whirl screams back.",
-    flavorGov: "Tilt-a-Whirl screams back.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 4 }
+    rarity: "legendary",
+    cost: 7,
+    effects: {
+      pressureDelta: 4
+    },
+    flavor: "Tilt-a-Whirl screams back.",
   },
   {
     id: "TRUTH-031",
-    faction: "truth",
     name: "Tinfoil Hat Distribution Drive",
+    faction: "truth",
     type: "ATTACK",
     rarity: "common",
-    cost: 5,
-    text: "Opponent discards 1 card.",
-    flavorTruth: "Family-pack protection.",
-    flavorGov: "Family-pack protection.",
-    target: { scope: "global", count: 0 },
-    effects: { discardOpponent: 1 }
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Family-pack protection.",
   },
   {
     id: "TRUTH-032",
-    faction: "truth",
     name: "Midnight Radio Broadcast",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "uncommon",
-    cost: 8,
-    text: "Opponent -3 IP. Draw 1 card.",
-    flavorTruth: "AM band, PM truths.",
-    flavorGov: "AM band, PM truths.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { opponent: -3 }, draw: 1 }
+    rarity: "rare",
+    cost: 4,
+    effects: {
+      ipDelta: { opponent: 3 }
+    },
+    flavor: "AM band, PM truths.",
   },
   {
     id: "TRUTH-033",
-    faction: "truth",
     name: "Tabloid Exposé",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Target state: reduce its Defense by 1 this turn.",
-    flavorTruth: "Front page beats front line.",
-    flavorGov: "Front page beats front line.",
-    target: { scope: "state", count: 1 },
-    effects: { pressureDelta: 1 }
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Front page beats front line.",
   },
   {
     id: "TRUTH-034",
-    faction: "truth",
     name: "Ghost Hunter Raid",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "uncommon",
-    cost: 8,
-    text: "Opponent discards 1 card.",
-    flavorTruth: "They ain't afraid of your hand size.",
-    flavorGov: "They ain't afraid of your hand size.",
-    target: { scope: "global", count: 0 },
-    effects: { discardOpponent: 1 }
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "They ain't afraid of your hand size.",
   },
   {
     id: "TRUTH-035",
-    faction: "truth",
     name: "UFOlogist Convention",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "rare",
-    cost: 12,
-    text: "+5% Truth. Opponent -2 IP.",
-    flavorTruth: "Keynote featuring laser pointer to Orion.",
-    flavorGov: "Keynote featuring laser pointer to Orion.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: 5, ipDelta: { opponent: -2 } }
+    rarity: "uncommon",
+    cost: 3,
+    effects: {
+      ipDelta: { opponent: 2 }
+    },
+    flavor: "Keynote featuring laser pointer to Orion.",
   },
   {
     id: "TRUTH-036",
-    faction: "truth",
     name: "Citizen Tipline Surge",
+    faction: "truth",
     type: "ATTACK",
     rarity: "common",
-    cost: 6,
-    text: "Opponent discards 1 card.",
-    flavorTruth: "Hold, your call is very important to justice.",
-    flavorGov: "Hold, your call is very important to justice.",
-    target: { scope: "global", count: 0 },
-    effects: { discardOpponent: 1 }
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Hold, your call is very important to justice.",
   },
   {
     id: "TRUTH-037",
-    faction: "truth",
     name: "Phantom File Dump",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "rare",
-    cost: 12,
-    text: "Draw 2 cards. Opponent -2 IP.",
-    flavorTruth: "Uploaded by user 'ghost_admin'.",
-    flavorGov: "Uploaded by user 'ghost_admin'.",
-    target: { scope: "global", count: 0 },
-    effects: { draw: 2, ipDelta: { opponent: -2 } }
+    rarity: "uncommon",
+    cost: 3,
+    effects: {
+      ipDelta: { opponent: 2 }
+    },
+    flavor: "Uploaded by user 'ghost_admin'.",
   },
   {
     id: "TRUTH-038",
-    faction: "truth",
     name: "Witness Parade",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Target state: +1 Pressure this turn.",
-    flavorTruth: "Everybody saw something.",
-    flavorGov: "Everybody saw something.",
-    target: { scope: "state", count: 1 },
-    effects: { pressureDelta: 1 }
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Everybody saw something.",
   },
   {
     id: "TRUTH-039",
-    faction: "truth",
     name: "Freedom of Information Blitz",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "rare",
-    cost: 13,
-    text: "Draw 2 cards, then discard 1.",
-    flavorTruth: "Heavily unredacted, lightly folded.",
-    flavorGov: "Heavily unredacted, lightly folded.",
-    target: { scope: "global", count: 0 },
-    effects: { draw: 2, discardOpponent: 1 }
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Heavily unredacted, lightly folded.",
   },
   {
     id: "TRUTH-040",
-    faction: "truth",
     name: "Mothman Public Warning",
+    faction: "truth",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 8,
-    text: "Opponent -2 IP.",
-    flavorTruth: "Those wings weren't for show.",
-    flavorGov: "Those wings weren't for show.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { opponent: -2 } }
+    cost: 3,
+    effects: {
+      ipDelta: { opponent: 2 }
+    },
+    flavor: "Those wings weren't for show.",
   },
   {
     id: "TRUTH-041",
-    faction: "truth",
     name: "Alien Foil Shield",
-    type: "DEFENSIVE",
-    rarity: "common",
+    faction: "truth",
+    type: "ZONE",
+    rarity: "uncommon",
     cost: 5,
-    text: "Gain 2 IP.",
-    flavorTruth: "Cranial shine, divine design.",
-    flavorGov: "Cranial shine, divine design.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { self: 2 } }
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Cranial shine, divine design.",
   },
   {
     id: "TRUTH-042",
-    faction: "truth",
     name: "Community Watch",
-    type: "DEFENSIVE",
+    faction: "truth",
+    type: "ATTACK",
     rarity: "uncommon",
-    cost: 7,
-    text: "Opponent -2 IP.",
-    flavorTruth: "Neighborhood eyes beat satellite spies.",
-    flavorGov: "Neighborhood eyes beat satellite spies.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { opponent: -2 } }
+    cost: 3,
+    effects: {
+      ipDelta: { opponent: 2 }
+    },
+    flavor: "Neighborhood eyes beat satellite spies.",
   },
   {
     id: "TRUTH-043",
-    faction: "truth",
     name: "Paranoia Rally",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 7,
-    text: "+3% Truth.",
-    flavorTruth: "Chant louder, doubt quieter.",
-    flavorGov: "Chant louder, doubt quieter.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: 3 }
+    faction: "truth",
+    type: "ZONE",
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Chant louder, doubt quieter.",
   },
   {
     id: "TRUTH-044",
-    faction: "truth",
     name: "Ghostly Intervention",
-    type: "DEFENSIVE",
-    rarity: "rare",
-    cost: 10,
-    text: "Gain 4 IP.",
-    flavorTruth: "Invisible hands hold your hand.",
-    flavorGov: "Invisible hands hold your hand.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { self: 4 } }
+    faction: "truth",
+    type: "ZONE",
+    rarity: "legendary",
+    cost: 7,
+    effects: {
+      pressureDelta: 4
+    },
+    flavor: "Invisible hands hold your hand.",
   },
   {
     id: "TRUTH-045",
-    faction: "truth",
     name: "Mothership Umbrella",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 8,
-    text: "+4% Truth.",
-    flavorTruth: "Broadcast jammed by cosmic drizzle.",
-    flavorGov: "Broadcast jammed by cosmic drizzle.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: 4 }
+    faction: "truth",
+    type: "ZONE",
+    rarity: "legendary",
+    cost: 7,
+    effects: {
+      pressureDelta: 4
+    },
+    flavor: "Broadcast jammed by cosmic drizzle.",
   },
   {
     id: "TRUTH-046",
-    faction: "truth",
     name: "Citizen Journalism Network",
-    type: "DEFENSIVE",
-    rarity: "rare",
-    cost: 12,
-    text: "Draw 2 cards.",
-    flavorTruth: "Many eyes, fewer lies.",
-    flavorGov: "Many eyes, fewer lies.",
-    target: { scope: "global", count: 0 },
-    effects: { draw: 2 }
+    faction: "truth",
+    type: "ZONE",
+    rarity: "common",
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "Many eyes, fewer lies.",
   },
   {
     id: "TRUTH-047",
-    faction: "truth",
     name: "Tabloid Press Alliance",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 10,
-    text: "Gain 3 IP.",
-    flavorTruth: "Coupons clipped from reality.",
-    flavorGov: "Coupons clipped from reality.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { self: 3 } }
+    faction: "truth",
+    type: "ZONE",
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Coupons clipped from reality.",
   },
   {
     id: "TRUTH-048",
-    faction: "truth",
     name: "Bigfoot Merchandise Store",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 10,
-    text: "Gain 3 IP.",
-    flavorTruth: "Socks for enormous feet sell out instantly.",
-    flavorGov: "Socks for enormous feet sell out instantly.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { self: 3 } }
+    faction: "truth",
+    type: "ZONE",
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Socks for enormous feet sell out instantly.",
   },
   {
     id: "TRUTH-049",
-    faction: "truth",
     name: "Elvis Pirate Radio",
-    type: "DEFENSIVE",
-    rarity: "rare",
-    cost: 12,
-    text: "+6% Truth.",
-    flavorTruth: "All shook up… and tuned in.",
-    flavorGov: "All shook up… and tuned in.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: 6 }
+    faction: "truth",
+    type: "ZONE",
+    rarity: "legendary",
+    cost: 7,
+    effects: {
+      pressureDelta: 4
+    },
+    flavor: "All shook up… and tuned in.",
   },
   {
     id: "TRUTH-050",
-    faction: "truth",
     name: "Bat Boy Returns",
+    faction: "truth",
     type: "MEDIA",
     rarity: "legendary",
-    cost: 30,
-    text: "+12% Truth. Gain 5 IP.",
-    flavorTruth: "Running for Senate (again).",
-    flavorGov: "Running for Senate (again).",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: 12, ipDelta: { self: 5 } }
+    cost: 6,
+    effects: {
+      truthDelta: 4
+    },
+    flavor: "Running for Senate (again).",
   }
 ];

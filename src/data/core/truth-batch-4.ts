@@ -1,338 +1,308 @@
 // Truth Batch 4 - v2.1E Compliant Cards
 // TRUTH-076 to TRUTH-100
 
-import type { GameCard } from '../../types/cardTypes';
 
-export const CORE_BATCH_TRUTH_4: GameCard[] = [
+import type { Card } from "../../types/mvpCard";
+
+export const CORE_BATCH_TRUTH_4: Card[] = [
   {
     id: "TRUTH-076",
-    faction: "truth",
     name: "Florida Roadside Attraction",
-    type: "ZONE", 
+    faction: "truth",
+    type: "ZONE",
     rarity: "uncommon",
-    cost: 13,
-    text: "+2 Zone Defense. Gain 2 IP when played.",
-    flavorTruth: "Gator wrestling, Elvis impersonator optional.",
-    flavorGov: "Gator wrestling, Elvis impersonator optional.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, ipDelta: { self: 2 } }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Gator wrestling, Elvis impersonator optional.",
   },
   {
     id: "TRUTH-077",
-    faction: "truth",
     name: "Ghost Town Saloon",
+    faction: "truth",
     type: "ZONE",
-    rarity: "uncommon", 
-    cost: 12,
-    text: "+2 Zone Defense. Draw 1 when played.",
-    flavorTruth: "Bartender vanished in 1893, still pouring.",
-    flavorGov: "Bartender vanished in 1893, still pouring.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, draw: 1 }
+    rarity: "uncommon",
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Bartender vanished in 1893, still pouring.",
   },
   {
     id: "TRUTH-078",
-    faction: "truth",
     name: "Roswell Tourist Center",
+    faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
-    cost: 13,
-    text: "+2 Zone Defense. Draw 1 and gain 1 IP when played.",
-    flavorTruth: "We sell postcards and plausible deniability.",
-    flavorGov: "We sell postcards and plausible deniability.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, draw: 1, ipDelta: { self: 1 } }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "We sell postcards and plausible deniability.",
   },
   {
     id: "TRUTH-079",
-    faction: "truth",
     name: "Mothman Statue Plaza",
+    faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
-    cost: 14,
-    text: "+2 Zone Defense. +5% Truth when played.",
-    flavorTruth: "Tourist trap with prophetic wings.",
-    flavorGov: "Tourist trap with prophetic wings.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, truthDelta: 5 }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Tourist trap with prophetic wings.",
   },
   {
     id: "TRUTH-080",
-    faction: "truth",
     name: "Haunted Lighthouse",
+    faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
-    cost: 13,
-    text: "+2 Zone Defense. +1% Truth when played.",
-    flavorTruth: "Fog horn occasionally says your name.",
-    flavorGov: "Fog horn occasionally says your name.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, truthDelta: 1 }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Fog horn occasionally says your name.",
   },
   {
     id: "TRUTH-081",
-    faction: "truth",
     name: "Conspiracy Archive Locker",
+    faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
-    cost: 14,
-    text: "+2 Zone Defense. Gain 1 IP when played.",
-    flavorTruth: "Files stacked by string color.",
-    flavorGov: "Files stacked by string color.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, ipDelta: { self: 1 } }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Files stacked by string color.",
   },
   {
     id: "TRUTH-082",
-    faction: "truth",
     name: "Bigfoot Footprint Trail",
+    faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
-    cost: 14,
-    text: "+2 Zone Defense. Draw 1 and +2% Truth when played.",
-    flavorTruth: "Size 28 evidence, mind the puddles.",
-    flavorGov: "Size 28 evidence, mind the puddles.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, draw: 1, truthDelta: 2 }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Size 28 evidence, mind the puddles.",
   },
   {
     id: "TRUTH-083",
-    faction: "truth",
     name: "Elvis Chapel Roadside",
+    faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
-    cost: 13,
-    text: "+2 Zone Defense. Gain 1 IP and draw 1 when played.",
-    flavorTruth: "Love me tender, pay me weekly.",
-    flavorGov: "Love me tender, pay me weekly.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, ipDelta: { self: 1 }, draw: 1 }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Love me tender, pay me weekly.",
   },
   {
     id: "TRUTH-084",
-    faction: "truth",
     name: "Skywatch Ridge",
+    faction: "truth",
     type: "ZONE",
-    rarity: "rare",
-    cost: 18,
-    text: "+4 Zone Defense.",
-    flavorTruth: "Blankets, binoculars, and bleeping.",
-    flavorGov: "Blankets, binoculars, and bleeping.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 4 }
+    rarity: "legendary",
+    cost: 7,
+    effects: {
+      pressureDelta: 4
+    },
+    flavor: "Blankets, binoculars, and bleeping.",
   },
   {
     id: "TRUTH-085",
-    faction: "truth",
     name: "County Fair Crop Lab",
+    faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
-    cost: 13,
-    text: "+2 Zone Defense. +4% Truth when played.",
-    flavorTruth: "Blue ribbon for best geometry.",
-    flavorGov: "Blue ribbon for best geometry.",
-    target: { scope: "state", count: 1 },
-    effects: { zoneDefense: 2, truthDelta: 4 }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Blue ribbon for best geometry.",
   },
   {
     id: "TRUTH-086",
-    faction: "truth",
     name: "FOIA Lawsuit",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "uncommon",
-    cost: 10,
-    text: "Opponent discards 1 card.",
-    flavorTruth: "Your honor, we respectfully unredact.",
-    flavorGov: "Your honor, we respectfully unredact.",
-    target: { scope: "global", count: 0 },
-    effects: { discardOpponent: 1 }
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Your honor, we respectfully unredact.",
   },
   {
     id: "TRUTH-087",
-    faction: "truth",
     name: "X-Files Marathon",
+    faction: "truth",
     type: "ATTACK",
     rarity: "common",
-    cost: 8,
-    text: "Draw 2, then discard 1.",
-    flavorTruth: "Season 3 unlocks your third eye.",
-    flavorGov: "Season 3 unlocks your third eye.",
-    target: { scope: "global", count: 0 },
-    effects: { draw: 2, discardOpponent: 1 }
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Season 3 unlocks your third eye.",
   },
   {
     id: "TRUTH-088",
-    faction: "truth",
     name: "Elvis Flashmob",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "uncommon",
-    cost: 9,
-    text: "+5% Truth. Opponent -1 IP.",
-    flavorTruth: "Sequins are blinding…and binding.",
-    flavorGov: "Sequins are blinding…and binding.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: 5, ipDelta: { opponent: -1 } }
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Sequins are blinding…and binding.",
   },
   {
     id: "TRUTH-089",
-    faction: "truth",
     name: "Citizen Drone Recon",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "uncommon",
-    cost: 10,
-    text: "Opponent discards 1 card.",
-    flavorTruth: "Beep boop, nice try, spooks.",
-    flavorGov: "Beep boop, nice try, spooks.",
-    target: { scope: "global", count: 0 },
-    effects: { discardOpponent: 1 }
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Beep boop, nice try, spooks.",
   },
   {
     id: "TRUTH-090",
-    faction: "truth",
     name: "Night-Vision Stakeout",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Target state: +1 Pressure. Draw 1.",
-    flavorTruth: "Green tint, clear intent.",
-    flavorGov: "Green tint, clear intent.",
-    target: { scope: "state", count: 1 },
-    effects: { pressureDelta: 1, draw: 1 }
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Green tint, clear intent.",
   },
   {
     id: "TRUTH-091",
-    faction: "truth",
     name: "Bigfoot Press Conference",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "rare",
-    cost: 12,
-    text: "+7% Truth. If you control 1+ zones, draw 1.",
-    flavorTruth: "Microphones mysteriously smeared with mud.",
-    flavorGov: "Microphones mysteriously smeared with mud.",
-    target: { scope: "global", count: 0 },
-    effects: { 
-      truthDelta: 7,
-      conditional: {
-        ifZonesControlledAtLeast: 1,
-        then: { draw: 1 }
-      }
-    }
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Microphones mysteriously smeared with mud.",
   },
   {
     id: "TRUTH-092",
-    faction: "truth",
     name: "Mothman Siren Test",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "rare",
-    cost: 12,
-    text: "Target state: reduce its Defense by 2.",
-    flavorTruth: "The warning no one can ignore.",
-    flavorGov: "The warning no one can ignore.",
-    target: { scope: "state", count: 1 },
-    effects: { pressureDelta: 2 }
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "The warning no one can ignore.",
   },
   {
     id: "TRUTH-093",
-    faction: "truth",
     name: "Call-in Show Frenzy",
+    faction: "truth",
     type: "ATTACK",
-    rarity: "uncommon",
-    cost: 10,
-    text: "Opponent discards 1 card. Draw 1.",
-    flavorTruth: "Lines lit, lies dimmed.",
-    flavorGov: "Lines lit, lies dimmed.",
-    target: { scope: "global", count: 0 },
-    effects: { discardOpponent: 1, draw: 1 }
+    rarity: "common",
+    cost: 2,
+    effects: {
+      ipDelta: { opponent: 1 }
+    },
+    flavor: "Lines lit, lies dimmed.",
   },
   {
     id: "TRUTH-094",
-    faction: "truth",
     name: "Fact-Check Brigade",
-    type: "DEFENSIVE",
+    faction: "truth",
+    type: "ZONE",
     rarity: "uncommon",
-    cost: 7,
-    text: "Gain 2 IP.",
-    flavorTruth: "Receipts loaded; caps locked.",
-    flavorGov: "Receipts loaded; caps locked.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { self: 2 } }
+    cost: 5,
+    effects: {
+      pressureDelta: 2
+    },
+    flavor: "Receipts loaded; caps locked.",
   },
   {
     id: "TRUTH-095",
-    faction: "truth",
     name: "Neighborhood Cameras",
-    type: "DEFENSIVE",
+    faction: "truth",
+    type: "ATTACK",
     rarity: "uncommon",
-    cost: 8,
-    text: "Opponent -2 IP.",
-    flavorTruth: "Smile, you're de-escalated.",
-    flavorGov: "Smile, you're de-escalated.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { opponent: -2 } }
+    cost: 3,
+    effects: {
+      ipDelta: { opponent: 2 }
+    },
+    flavor: "Smile, you're de-escalated.",
   },
   {
     id: "TRUTH-096",
-    faction: "truth",
     name: "Emergency Press Conference",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 9,
-    text: "Draw 1 card.",
-    flavorTruth: "Live rebuttal beats late retraction.",
-    flavorGov: "Live rebuttal beats late retraction.",
-    target: { scope: "global", count: 0 },
-    effects: { draw: 1 }
+    faction: "truth",
+    type: "ZONE",
+    rarity: "common",
+    cost: 4,
+    effects: {
+      pressureDelta: 1
+    },
+    flavor: "Live rebuttal beats late retraction.",
   },
   {
     id: "TRUTH-097",
-    faction: "truth",
     name: "Glitch in the Matrix",
-    type: "DEFENSIVE",
-    rarity: "rare",
-    cost: 10,
-    text: "Gain 4 IP.",
-    flavorTruth: "Oops, the simulation dropped a frame.",
-    flavorGov: "Oops, the simulation dropped a frame.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { self: 4 } }
+    faction: "truth",
+    type: "ZONE",
+    rarity: "legendary",
+    cost: 7,
+    effects: {
+      pressureDelta: 4
+    },
+    flavor: "Oops, the simulation dropped a frame.",
   },
   {
     id: "TRUTH-098",
-    faction: "truth",
     name: "Open-Source UFO Tracker",
-    type: "DEFENSIVE",
+    faction: "truth",
+    type: "ZONE",
     rarity: "rare",
-    cost: 12,
-    text: "+3% Truth.",
-    flavorTruth: "Git push: disclosure.",
-    flavorGov: "Git push: disclosure.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: 3 }
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "Git push: disclosure.",
   },
   {
     id: "TRUTH-099",
-    faction: "truth",
     name: "Grassroots Crowdfunding",
-    type: "DEFENSIVE",
-    rarity: "uncommon",
-    cost: 10,
-    text: "Gain 3 IP.",
-    flavorTruth: "One micro-donation at a time.",
-    flavorGov: "One micro-donation at a time.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { self: 3 } }
+    faction: "truth",
+    type: "ZONE",
+    rarity: "rare",
+    cost: 6,
+    effects: {
+      pressureDelta: 3
+    },
+    flavor: "One micro-donation at a time.",
   },
   {
     id: "TRUTH-100",
-    faction: "truth",
     name: "Mothership Over D.C.",
+    faction: "truth",
     type: "MEDIA",
     rarity: "legendary",
-    cost: 30,
-    text: "+12% Truth. Gain 5 IP.",
-    flavorTruth: "Take me to your committee chair.",
-    flavorGov: "Take me to your committee chair.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: 12, ipDelta: { self: 5 } }
+    cost: 6,
+    effects: {
+      truthDelta: 4
+    },
+    flavor: "Take me to your committee chair.",
   }
 ];

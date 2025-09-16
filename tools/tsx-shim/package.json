@@ -1,0 +1,8 @@
+{
+  "name": "tsx",
+  "version": "0.0.0",
+  "type": "module",
+  "bin": {
+    "tsx": "./bin/tsx.js"
+  }
+}
