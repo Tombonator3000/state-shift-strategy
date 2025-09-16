@@ -1,4 +1,15 @@
-[
+{
+  "id": "halloween_spooktacular",
+  "name": "Halloween Spooktacular",
+  "version": "2.0.0",
+  "author": "ShadowGov Team",
+  "description": "A spooky, pumpkin-spiced conspiracy expansion with tabloids, crypts, and candy-fueled chaos. 200 cards total: 100 per faction.",
+  "factions": [
+    "government",
+    "truth"
+  ],
+  "count": 200,
+  "cards": [
   {
     "schemaVersion": 2,
     "id": "CRY-TS-001",
