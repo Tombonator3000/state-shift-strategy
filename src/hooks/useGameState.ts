@@ -8,12 +8,9 @@ import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
 import { AIStrategist, type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
-import { setStateOccupation } from '@/data/usaStates';
 import { getStartingHandSize, calculateCardDraw, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
-import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
-import { CardEffectMigrator } from '@/utils/cardEffectMigration';
-import type { Card } from '@/types/cardEffects';
+import { resolveCardEffects as resolveCardEffectsCore, type CardPlayResolution } from '@/systems/cardResolution';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -179,125 +176,16 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     }
   });
 
-  interface CardPlayResolution {
-    ip: number;
-    aiIP: number;
-    truth: number;
-    states: GameState['states'];
-    controlledStates: string[];
-    targetState: string | null;
-    selectedCard: string | null;
-    logEntries: string[];
-  }
-
-  const resolveCardEffects = (
-    prev: GameState,
-    card: GameCard,
-    targetState: string | null
-  ): CardPlayResolution => {
-    const logEntries: string[] = [];
-    const newStates = prev.states.map(state => ({ ...state }));
-    let controlledStates = [...prev.controlledStates];
-
-    const processor = new CardEffectProcessor({
-      truth: prev.truth,
-      ip: prev.ip,
-      aiIP: prev.aiIP,
-      hand: prev.hand,
-      aiHand: prev.aiHand,
-      controlledStates: prev.controlledStates,
-      aiControlledStates: prev.aiControlledStates || [],
-      round: prev.round,
-      turn: prev.turn,
-      faction: prev.faction
-    });
-
-    const effectResult = processor.processCard(card as any, targetState ?? undefined);
-
-    const ipAfterCost = Math.max(0, prev.ip - card.cost);
-    const truthAfterEffects = Math.max(0, Math.min(100, prev.truth + effectResult.truthDelta));
-    const playerIPAfterEffects = Math.max(0, ipAfterCost + effectResult.ipDelta.self);
-    const aiIPAfterEffects = Math.max(0, prev.aiIP + effectResult.ipDelta.opponent);
-
-    if (effectResult.cardsToDraw > 0) {
-      logEntries.push(`Draw ${effectResult.cardsToDraw} card${effectResult.cardsToDraw !== 1 ? 's' : ''}`);
-    }
-
-    logEntries.push(...effectResult.logMessages.map(msg => `${card.name}: ${msg}`));
-
-    let nextTargetState: string | null = card.type === 'ZONE' ? targetState : null;
-    let selectedCard: string | null = null;
-
-    if (card.type === 'ZONE' && targetState && effectResult.pressureDelta) {
-      const stateIndex = newStates.findIndex(s =>
-        s.abbreviation === targetState ||
-        s.id === targetState ||
-        s.name === targetState
-      );
-
-      if (stateIndex !== -1) {
-        const previousState = newStates[stateIndex];
-        const pressureGain = effectResult.pressureDelta;
-        const updatedState = {
-          ...previousState,
-          pressure: (previousState.pressure || 0) + pressureGain
-        };
-
-        if (pressureGain > 0 && updatedState.pressure >= updatedState.defense) {
-          updatedState.owner = 'player';
-          setStateOccupation(updatedState, prev.faction, { id: card.id, name: card.name }, false);
-
-          if (!controlledStates.includes(updatedState.abbreviation)) {
-            controlledStates = [...controlledStates, updatedState.abbreviation];
-          }
-
-          logEntries.push(`🚨 ${card.name} captured ${updatedState.name}! (+${pressureGain} pressure)`);
-          nextTargetState = null;
-
-          achievements.updateStats({
-            total_states_controlled: achievements.stats.total_states_controlled + 1,
-            max_states_controlled_single_game: controlledStates.length
-          });
-        } else if (pressureGain !== 0) {
-          logEntries.push(`${card.name} added pressure to ${updatedState.name} (+${pressureGain}, ${updatedState.pressure}/${updatedState.defense})`);
-        }
-
-        newStates[stateIndex] = updatedState;
-      }
-    }
-
-    if (card.type === 'DEFENSIVE' && effectResult.zoneDefenseBonus < 0) {
-      const playerStates = newStates.filter(s => s.owner === 'player' && (s.pressure || 0) > 0);
-      if (playerStates.length > 0) {
-        const randomState = playerStates[Math.floor(Math.random() * playerStates.length)];
-        const stateIndex = newStates.findIndex(s => s.id === randomState.id);
-        const pressureReduction = Math.abs(effectResult.zoneDefenseBonus);
-        const updatedState = {
-          ...newStates[stateIndex],
-          pressure: Math.max(0, (newStates[stateIndex].pressure || 0) - pressureReduction)
-        };
-        newStates[stateIndex] = updatedState;
-        logEntries.push(`${card.name} reduced pressure on ${updatedState.name} (-${pressureReduction})`);
-      }
-    }
-
-    achievements.updateStats({
-      max_ip_reached: Math.max(achievements.stats.max_ip_reached, playerIPAfterEffects),
-      max_truth_reached: Math.max(achievements.stats.max_truth_reached, truthAfterEffects),
-      min_truth_reached: Math.min(achievements.stats.min_truth_reached, truthAfterEffects)
-    });
-
-    return {
-      ip: playerIPAfterEffects,
-      aiIP: aiIPAfterEffects,
-      truth: truthAfterEffects,
-      states: newStates,
-      controlledStates,
-      targetState: nextTargetState,
-      selectedCard,
-      logEntries
-    };
-  };
+  const resolveCardEffects = useCallback(
+    (
+      prev: GameState,
+      card: GameCard,
+      targetState: string | null,
+    ): CardPlayResolution => {
+      return resolveCardEffectsCore(prev, card, targetState, achievements);
+    },
+    [achievements],
+  );
 
   const initGame = useCallback((faction: 'government' | 'truth') => {
     const startingTruth = faction === 'government' ? 40 : 60;
