@@ -7,7 +7,7 @@
     "dev": "vite",
     "cards:rewrite": "bun scripts/rewrite-cards-unified.ts",
     "validate:core": "tsx scripts/validate-core-v21e-strict.ts",
-    "build": "bun run cards:rewrite && vite build",
+    "build": "vite build",
     "build:npm": "npm run validate:core && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
