@@ -83,12 +83,14 @@ interface GameState {
 
 const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
   // Start with some common events for the first newspaper
-  const initialEvents = EVENT_DATABASE.filter(event => 
+  const initialEvents = EVENT_DATABASE.filter(event =>
     event.rarity === 'common' && !event.conditions
   ).slice(0, 3);
-  
+
   return initialEvents;
 };
+
+const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
 export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   const [eventManager] = useState(() => new EventManager());
@@ -735,9 +737,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       timestamp: Date.now(),
       version: '1.0'
     };
-    
+
     try {
-      localStorage.setItem('shadowgov-savegame', JSON.stringify(saveData));
+      localStorage.setItem('shadowgov-savegame', JSON.stringify(saveData, omitClashKey));
       return true;
     } catch (error) {
       console.error('Failed to save game:', error);
@@ -749,9 +751,9 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     try {
       const savedData = localStorage.getItem('shadowgov-savegame');
       if (!savedData) return false;
-      
-      const saveData = JSON.parse(savedData);
-      
+
+      const saveData = JSON.parse(savedData, omitClashKey);
+
       // Validate save data structure
       if (!saveData.faction || !saveData.phase || saveData.version !== '1.0') {
         console.warn('Invalid or incompatible save data');
@@ -778,8 +780,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     try {
       const savedData = localStorage.getItem('shadowgov-savegame');
       if (!savedData) return null;
-      
-      const saveData = JSON.parse(savedData);
+
+      const saveData = JSON.parse(savedData, omitClashKey);
       return {
         faction: saveData.faction,
         turn: saveData.turn,
