@@ -1,8 +1,48 @@
-import { describe, expect, it } from 'bun:test';
+import { afterAll, describe, expect, it } from 'bun:test';
 import { HAND_LIMIT, prepareHumanTurnStart, prepareAITurnStart } from '@/state/turnPreparation';
 import type { GameState } from '@/state/gameState';
 import type { GameCard } from '@/types/cardTypes';
 import { getTotalIPFromStates } from '@/data/usaStates';
+
+const createStorageMock = (): Storage => {
+  let store: Record<string, string> = {};
+
+  return {
+    get length() {
+      return Object.keys(store).length;
+    },
+    clear: () => {
+      store = {};
+    },
+    getItem: (key: string) => (key in store ? store[key] : null),
+    key: (index: number) => Object.keys(store)[index] ?? null,
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+  } as Storage;
+};
+
+const originalLocalStorage = globalThis.localStorage;
+
+Object.defineProperty(globalThis, 'localStorage', {
+  configurable: true,
+  value: createStorageMock(),
+});
+
+afterAll(() => {
+  if (originalLocalStorage) {
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      value: originalLocalStorage,
+    });
+    return;
+  }
+
+  delete (globalThis as Partial<typeof globalThis> & { localStorage?: Storage }).localStorage;
+});
 
 const createCard = (id: string, faction: 'truth' | 'government' = 'truth'): GameCard => ({
   id,

@@ -35,6 +35,11 @@ class ExtensionManager {
   }
 
   private loadEnabledExtensions() {
+    if (typeof localStorage === 'undefined') {
+      this.enabledExtensions = [];
+      return;
+    }
+
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -47,6 +52,10 @@ class ExtensionManager {
   }
 
   private saveEnabledExtensions() {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.enabledExtensions));
     } catch (error) {
