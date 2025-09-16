@@ -1,7 +1,6 @@
 import React from "react";
 import type { GameCard } from '@/types/cardTypes';
 import { useClashManager } from '@/hooks/useClashManager';
-import { canPlayDefensively } from '@/utils/clashHelpers';
 
 interface ClashArenaProps {
   isOpen: boolean;
