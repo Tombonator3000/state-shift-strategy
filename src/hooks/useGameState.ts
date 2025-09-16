@@ -1,85 +1,23 @@
 import { useState, useCallback } from 'react';
 import type { GameCard } from '@/types/cardTypes';
-import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
+import { CARD_DATABASE } from '@/data/cardDatabase';
 import { extensionManager } from '@/data/extensionSystem';
 import { generateWeightedDeck } from '@/data/weightedCardDistribution';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
-import { AIStrategist, type AIDifficulty } from '@/data/aiStrategy';
+import { type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
-import { getStartingHandSize, calculateCardDraw, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
+import { getStartingHandSize, type DrawMode } from '@/data/cardDrawingSystem';
+import type { GameState } from '@/state/gameState';
+import {
+  HAND_LIMIT,
+  prepareAITurnStart,
+  prepareHumanTurnStart,
+  refillHandFromStacks,
+} from '@/state/turnPreparation';
 import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardEffects as resolveCardEffectsCore, type CardPlayResolution } from '@/systems/cardResolution';
-
-interface GameState {
-  faction: 'government' | 'truth';
-  phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory' | 'ai_turn' | 'card_presentation';
-  turn: number;
-  round: number;
-  currentPlayer: 'human' | 'ai';
-  aiDifficulty: AIDifficulty;
-  aiPersonality?: string;
-  truth: number;
-  ip: number; // Player IP
-  aiIP: number; // AI IP
-  hand: GameCard[];
-  aiHand: GameCard[];
-  isGameOver: boolean;
-  deck: GameCard[];
-  aiDeck: GameCard[];
-  cardsPlayedThisTurn: number;
-  cardsPlayedThisRound: Array<{ card: GameCard; player: 'human' | 'ai' }>;
-  controlledStates: string[];
-  aiControlledStates: string[];
-  states: Array<{
-    id: string;
-    name: string;
-    abbreviation: string;
-    baseIP: number;
-    defense: number;
-    pressure: number;
-    owner: 'player' | 'ai' | 'neutral';
-    specialBonus?: string;
-    bonusValue?: number;
-    // Occupation data for ZONE takeovers
-    occupierCardId?: string | null;
-    occupierCardName?: string | null;
-    occupierLabel?: string | null;
-    occupierIcon?: string | null;
-    occupierUpdatedAt?: number;
-  }>;
-  currentEvents: GameEvent[];
-  eventManager?: EventManager;
-  showNewspaper: boolean;
-  log: string[];
-  agenda?: SecretAgenda & {
-    progress?: number;
-    complete?: boolean;
-    revealed?: boolean;
-  };
-  secretAgenda?: SecretAgenda & {
-    progress: number;
-    completed: boolean;
-    revealed: boolean;
-  };
-  aiSecretAgenda?: SecretAgenda & {
-    progress: number;
-    completed: boolean;
-    revealed: boolean;
-  };
-  animating: boolean;
-  aiTurnInProgress: boolean;
-  selectedCard: string | null;
-  targetState: string | null;
-  aiStrategist?: AIStrategist;
-  pendingCardDraw?: number;
-  newCards?: GameCard[];
-  showNewCardsPresentation?: boolean;
-  // Enhanced drawing system state
-  drawMode: DrawMode;
-  cardDrawState: CardDrawState;
-}
 
 const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
   // Start with some common events for the first newspaper
@@ -91,7 +29,6 @@ const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
 };
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
-
 export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   const [eventManager] = useState(() => new EventManager());
   const achievements = useAchievements();
@@ -100,12 +37,25 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
   const coreCards = CARD_DATABASE;
   const extensionCards = extensionManager.getAllExtensionCards();
   const allCards = [...coreCards, ...extensionCards];
-  
+
   console.log(`📊 Card Database Stats:
   - Core cards: ${coreCards.length}
-  - Extension cards: ${extensionCards.length}  
+  - Extension cards: ${extensionCards.length}
   - Total available: ${allCards.length}`);
-  
+
+  const initialPlayerDeck = generateWeightedDeck(40, 'truth');
+  const initialPlayerSetup = refillHandFromStacks(
+    { hand: [], deck: initialPlayerDeck, discard: [] },
+    'truth',
+    3,
+  );
+  const initialAIDeck = generateWeightedDeck(40, 'government');
+  const initialAISetup = refillHandFromStacks(
+    { hand: [], deck: initialAIDeck, discard: [] },
+    'government',
+    3,
+  );
+
   const [gameState, setGameState] = useState<GameState>({
     faction: 'truth',
     phase: 'action',
@@ -117,11 +67,13 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     ip: 15,
     aiIP: 15,
     // Use all available cards to ensure proper deck building
-    hand: getRandomCards(3, { faction: 'truth' }),
-    aiHand: getRandomCards(3, { faction: 'government' }),
+    hand: initialPlayerSetup.hand,
+    discardPile: initialPlayerSetup.discard,
+    aiHand: initialAISetup.hand,
+    aiDiscardPile: initialAISetup.discard,
     isGameOver: false,
-    deck: generateWeightedDeck(40, 'truth'),
-    aiDeck: generateWeightedDeck(40, 'government'),
+    deck: initialPlayerSetup.deck,
+    aiDeck: initialAISetup.deck,
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
     controlledStates: [],
@@ -202,12 +154,24 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
     const handSize = getStartingHandSize(drawMode, faction);
     // CRITICAL: Pass faction to deck generation
     const newDeck = generateWeightedDeck(40, faction);
-    const startingHand = newDeck.slice(0, handSize);
+    const playerSetup = refillHandFromStacks(
+      { hand: [], deck: newDeck, discard: [] },
+      faction,
+      handSize,
+    );
     const initialControl = getInitialStateControl(faction);
 
     // Track game start in achievements
     achievements.onGameStart(faction, aiDifficulty);
     achievements.manager.onNewGameStart();
+
+    const aiFaction = faction === 'government' ? 'truth' : 'government';
+    const aiDeck = generateWeightedDeck(40, aiFaction);
+    const aiSetup = refillHandFromStacks(
+      { hand: [], deck: aiDeck, discard: [] },
+      aiFaction,
+      handSize,
+    );
 
     setGameState(prev => ({
       ...prev,
@@ -215,11 +179,13 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       truth: startingTruth,
       ip: startingIP,
       aiIP: aiStartingIP,
-      hand: startingHand,
-      deck: newDeck.slice(handSize),
+      hand: playerSetup.hand,
+      deck: playerSetup.deck,
+      discardPile: playerSetup.discard,
       // AI gets opposite faction cards
-      aiHand: getRandomCards(handSize, { faction: faction === 'government' ? 'truth' : 'government' }),
-      aiDeck: generateWeightedDeck(40, faction === 'government' ? 'truth' : 'government'),
+      aiHand: aiSetup.hand,
+      aiDeck: aiSetup.deck,
+      aiDiscardPile: aiSetup.discard,
       controlledStates: initialControl.player,
       isGameOver: false, // CRITICAL: Reset game over state
       phase: 'action', // Reset to proper starting phase
@@ -279,6 +245,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       return {
         ...prev,
         hand: prev.hand.filter(c => c.id !== cardId),
+        discardPile: [...prev.discardPile, card],
         ip: resolution.ip,
         aiIP: resolution.aiIP,
         truth: resolution.truth,
@@ -337,6 +304,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       setGameState(prev => ({
         ...prev,
         hand: prev.hand.filter(c => c.id !== cardId),
+        discardPile: [...prev.discardPile, card],
         cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
         selectedCard: null,
@@ -348,6 +316,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       setGameState(prev => ({
         ...prev,
         hand: prev.hand.filter(c => c.id !== cardId),
+        discardPile: [...prev.discardPile, card],
         cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
         selectedCard: null,
@@ -454,67 +423,50 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
   // AI Turn Management
   const executeAITurn = useCallback(async () => {
-    // Prevent re-entrancy or accidental multiple triggers
-    if (!gameState.aiStrategist || gameState.currentPlayer !== 'ai' || gameState.aiTurnInProgress) return;
+    const preparedState = await new Promise<GameState | null>(resolve => {
+      setGameState(prev => {
+        if (!prev.aiStrategist || prev.currentPlayer !== 'ai' || prev.aiTurnInProgress) {
+          resolve(null);
+          return prev;
+        }
 
-    // Mark AI turn as in progress
-    setGameState(prev => ({ ...prev, aiTurnInProgress: true }));
+        const { patch, logEntries } = prepareAITurnStart(prev);
+        const nextState: GameState = {
+          ...prev,
+          ...patch,
+          aiTurnInProgress: true,
+          log: [...prev.log, ...logEntries],
+        };
 
-    const currentGameState = gameState; // Capture current state
-    
-    // AI income phase
-    const aiControlledStates = currentGameState.states
-      .filter(state => state.owner === 'ai')
-      .map(state => state.abbreviation);
-      
-    const aiStateIncome = getTotalIPFromStates(aiControlledStates);
-    const aiBaseIncome = 5;
-    const aiTotalIncome = aiBaseIncome + aiStateIncome;
+        resolve(nextState);
+        return nextState;
+      });
+    });
 
-    // AI draws cards (correct hand limit of 7)
-    const aiCardsToDraw = Math.max(0, Math.min(1, 7 - currentGameState.aiHand.length)); // Draw 1 card if under limit
-    
-    // Check if AI deck has enough cards, if not generate more with correct faction
-    let aiCurrentDeck = currentGameState.aiDeck;
-    if (aiCurrentDeck.length < aiCardsToDraw) {
-      const aiFaction = currentGameState.faction === 'government' ? 'truth' : 'government';
-      const additionalCards = generateWeightedDeck(40, aiFaction);
-      aiCurrentDeck = [...aiCurrentDeck, ...additionalCards];
+    if (!preparedState || !preparedState.aiStrategist) {
+      return;
     }
-    
-    const aiDrawnCards = aiCurrentDeck.slice(0, aiCardsToDraw);
-    const aiRemainingDeck = aiCurrentDeck.slice(aiCardsToDraw);
-
-    // Update state with AI income and cards
-    setGameState(prev => ({
-      ...prev,
-      aiHand: [...prev.aiHand, ...aiDrawnCards],
-      aiDeck: aiRemainingDeck,
-      // AI IP income
-      aiIP: prev.aiIP + aiTotalIncome,
-      log: [...prev.log,
-        `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStates.length} states = ${aiTotalIncome} IP`,
-        `AI drew ${aiCardsToDraw} cards`
-      ]
-    }));
 
     // Give AI time to "think" (for better UX)
     await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
 
-    // AI plays cards
-    let cardsPlayed = 0;
     const maxCardsPerTurn = 3;
 
     for (let i = 0; i < maxCardsPerTurn; i++) {
-      // Get fresh game state for each card play
       const freshState = await new Promise<GameState>(resolve => {
         setGameState(prev => {
           resolve(prev);
           return prev;
         });
       });
-      
-      if (!freshState.aiStrategist || freshState.aiHand.length === 0) break;
+
+      if (
+        freshState.currentPlayer !== 'ai' ||
+        !freshState.aiStrategist ||
+        freshState.aiHand.length === 0
+      ) {
+        break;
+      }
 
       const bestPlay = freshState.aiStrategist.selectBestPlay({
         ...freshState,
@@ -523,18 +475,24 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         hand: freshState.aiHand,
         controlledStates: freshState.states
           .filter(state => state.owner === 'ai')
-          .map(state => state.abbreviation)
+          .map(state => state.abbreviation),
       });
 
-      if (!bestPlay || bestPlay.priority < 0.3) break; // AI decides not to play more cards
+      if (!bestPlay || bestPlay.priority < 0.3) {
+        break; // AI decides not to play more cards
+      }
 
       const cardToPlay = freshState.aiHand.find(c => c.id === bestPlay.cardId);
-      if (!cardToPlay) break;
-      if (freshState.aiIP < cardToPlay.cost) continue; // Can't afford, try next
+      if (!cardToPlay) {
+        break;
+      }
+
+      if (freshState.aiIP < cardToPlay.cost) {
+        continue; // Can't afford, try next
+      }
 
       await playAICard(bestPlay.cardId, bestPlay.targetState, bestPlay.reasoning);
-      cardsPlayed++;
-      
+
       // Brief pause between AI card plays
       await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
     }
@@ -545,7 +503,7 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       // Clear in-progress flag after AI ends turn
       setGameState(prev => ({ ...prev, aiTurnInProgress: false }));
     }, 1000);
-  }, [gameState]);
+  }, [endTurn, playAICard, setGameState]);
 
   const playAICard = useCallback(async (cardId: string, targetState?: string, reasoning?: string) => {
     const card = gameState.aiHand.find(c => c.id === cardId);
@@ -596,6 +554,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
             ip: newIP,
             aiIP: Math.max(0, prev.aiIP - card.cost),
             aiHand: prev.aiHand.filter(c => c.id !== cardId),
+            aiDiscardPile: [...prev.aiDiscardPile, card],
+            cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
             cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
             log: newLog
           };
@@ -612,6 +572,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
         states: newStates,
         aiIP: Math.max(0, prev.aiIP - card.cost),
         aiHand: prev.aiHand.filter(c => c.id !== cardId),
+        aiDiscardPile: [...prev.aiDiscardPile, card],
+        cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
         log: newLog
       };
@@ -620,51 +582,13 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
 
   const closeNewspaper = useCallback(() => {
     setGameState(prev => {
-      // Enhanced card drawing system
-      const maxHandSize = 7;
-      const currentHandSize = prev.hand.length;
-      const bonusCardDraw = prev.pendingCardDraw || 0;
-      
-      const totalCardsToDraw = calculateCardDraw(
-        prev.drawMode,
-        prev.turn,
-        currentHandSize,
-        maxHandSize,
-        prev.cardDrawState,
-        bonusCardDraw
-      );
-      
-      if (totalCardsToDraw > 0) {
-        // Check if deck has enough cards, if not generate more with correct faction
-        let currentDeck = prev.deck;
-        if (currentDeck.length < totalCardsToDraw) {
-          const additionalCards = generateWeightedDeck(40, prev.faction);
-          currentDeck = [...currentDeck, ...additionalCards];
-        }
-        
-        const drawnCards = currentDeck.slice(0, totalCardsToDraw);
-        const remainingDeck = currentDeck.slice(totalCardsToDraw);
-        
-        return {
-          ...prev,
-          showNewspaper: false,
-          cardsPlayedThisRound: [], // Clear played cards for next round
-          phase: 'card_presentation',
-          newCards: drawnCards,
-          showNewCardsPresentation: true,
-          deck: remainingDeck,
-          pendingCardDraw: 0,
-          log: [...prev.log, `Drawing ${totalCardsToDraw} cards (${prev.drawMode} mode)`]
-        };
-      } else {
-        return {
-          ...prev,
-          showNewspaper: false,
-          cardsPlayedThisRound: [], // Clear played cards for next round
-          phase: 'action',
-          pendingCardDraw: 0
-        };
-      }
+      const { patch, logEntries } = prepareHumanTurnStart(prev);
+
+      return {
+        ...prev,
+        ...patch,
+        log: [...prev.log, ...logEntries],
+      };
     });
   }, []);
 
@@ -764,6 +688,8 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       setGameState(prev => ({
         ...prev,
         ...saveData,
+        discardPile: Array.isArray(saveData.discardPile) ? saveData.discardPile : (prev.discardPile ?? []),
+        aiDiscardPile: Array.isArray(saveData.aiDiscardPile) ? saveData.aiDiscardPile : (prev.aiDiscardPile ?? []),
         // Ensure objects are properly reconstructed
         eventManager: prev.eventManager, // Keep the current event manager
         aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium')
