@@ -1,6 +1,82 @@
 import { GameCard } from '@/types/cardTypes';
-import { CARD_DATABASE, generateRandomDeck } from './cardDatabase';
+import { CARD_DATABASE } from './cardDatabase';
 import { extensionManager } from './extensionSystem';
+
+export const MVP_MODE = true;
+export const MVP_TYPE_WEIGHTS: Record<'ATTACK' | 'MEDIA' | 'ZONE', number> = {
+  ATTACK: 0.33,
+  MEDIA: 0.34,
+  ZONE: 0.33
+};
+
+type Rarity = NonNullable<GameCard['rarity']>;
+type MVPType = 'ATTACK' | 'MEDIA' | 'ZONE';
+type Pred = (card: GameCard) => boolean;
+
+const MVP_TYPES: MVPType[] = ['ATTACK', 'MEDIA', 'ZONE'];
+
+const DEV = typeof import.meta !== 'undefined' && (import.meta as any)?.env?.MODE !== 'production';
+function dbg(...args: any[]) {
+  if (DEV) {
+    console.warn(...args);
+  }
+}
+
+const byFaction = (faction: 'truth' | 'government'): Pred => card => {
+  if (!card.faction) return false;
+  return card.faction.toString().toLowerCase() === faction.toLowerCase();
+};
+
+const byType = (type: MVPType): Pred => card => card.type === type;
+const byRarity = (rarity: Rarity): Pred => card => (card.rarity ?? 'common') === rarity;
+
+function pickRandom<T>(arr: T[]): T | undefined {
+  if (!arr.length) return undefined;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+export function pickCardMVP(
+  pool: GameCard[],
+  faction?: 'truth' | 'government',
+  wantType?: MVPType,
+  wantRarity?: Rarity
+): GameCard | undefined {
+  const factionPool = faction ? pool.filter(byFaction(faction)) : [...pool];
+
+  let candidates = factionPool.filter(card => {
+    return (!wantType || byType(wantType)(card)) && (!wantRarity || byRarity(wantRarity)(card));
+  });
+
+  if (candidates.length) {
+    return pickRandom(candidates);
+  }
+
+  if (wantRarity) {
+    dbg('MVP fallback: dropping rarity requirement', { faction, wantType, wantRarity });
+    candidates = factionPool.filter(card => !wantType || byType(wantType)(card));
+    if (candidates.length) {
+      return pickRandom(candidates);
+    }
+  }
+
+  if (wantType) {
+    dbg('MVP fallback: dropping type requirement', { faction, wantType, wantRarity });
+    candidates = factionPool.filter(card => !wantRarity || byRarity(wantRarity)(card));
+    if (candidates.length) {
+      return pickRandom(candidates);
+    }
+  }
+
+  if (!factionPool.length) {
+    dbg('MVP fallback: no cards available for faction in pool', { faction });
+    return undefined;
+  }
+
+  dbg('MVP fallback: selecting any card for faction', { faction });
+  return pickRandom(factionPool);
+}
+
+const isMVPType = (type: GameCard['type']): type is MVPType => MVP_TYPES.includes(type as MVPType);
 
 // Distribution modes
 export type DistributionMode = 'core-only' | 'expansion-only' | 'balanced' | 'custom';
@@ -166,15 +242,16 @@ class WeightedCardDistribution {
 
   // Select card from set with rarity constraints
   private selectCardFromSet(
-    set: CardSet, 
-    targetRarity: GameCard['rarity'],
+    set: CardSet,
+    targetRarity: Rarity,
     usedCards: Map<string, number>,
     typeCount: Map<GameCard['type'], number>
   ): GameCard | null {
     // Filter by rarity and duplicate limit
     let candidates = set.cards.filter(card => {
       const timesUsed = usedCards.get(card.id) || 0;
-      return card.rarity === targetRarity && timesUsed < this.settings.duplicateLimit;
+      const cardRarity = (card.rarity ?? 'common') as Rarity;
+      return cardRarity === targetRarity && timesUsed < this.settings.duplicateLimit;
     });
 
     // Apply type balancing if enabled
@@ -193,18 +270,18 @@ class WeightedCardDistribution {
   }
 
   // Get rarity based on targets and current distribution
-  private selectTargetRarity(currentRarityCount: Map<GameCard['rarity'], number>, totalCards: number): GameCard['rarity'] {
-    const rarities: GameCard['rarity'][] = ['common', 'uncommon', 'rare', 'legendary'];
+  private selectTargetRarity(currentRarityCount: Map<Rarity, number>, totalCards: number): Rarity {
+    const rarities: Rarity[] = ['common', 'uncommon', 'rare', 'legendary'];
     
     // Calculate current ratios
-    const currentRatios = new Map<GameCard['rarity'], number>();
+    const currentRatios = new Map<Rarity, number>();
     rarities.forEach(rarity => {
       const count = currentRarityCount.get(rarity) || 0;
       currentRatios.set(rarity, totalCards > 0 ? count / totalCards : 0);
     });
 
     // Find rarity that's most under-represented
-    let selectedRarity: GameCard['rarity'] = 'common';
+    let selectedRarity: Rarity = 'common';
     let maxDeficit = -1;
 
     rarities.forEach(rarity => {
@@ -225,13 +302,13 @@ class WeightedCardDistribution {
   private generateSeedCards(availableSets: CardSet[]): GameCard[] {
     const seedCards: GameCard[] = [];
     const coreSet = availableSets.find(set => set.isCore);
-    
+
     if (!coreSet) return seedCards;
 
     // Prefer resource and defensive cards for early game
     const resourceTypes: GameCard['type'][] = ['DEFENSIVE'];
-    const seedCandidates = coreSet.cards.filter(card => 
-      resourceTypes.includes(card.type) && 
+    const seedCandidates = coreSet.cards.filter(card =>
+      resourceTypes.includes(card.type) &&
       (card.rarity === 'common' || card.rarity === 'uncommon')
     );
 
@@ -239,7 +316,7 @@ class WeightedCardDistribution {
       const randomIndex = Math.floor(Math.random() * seedCandidates.length);
       const selectedCard = seedCandidates[randomIndex];
       seedCards.push(selectedCard);
-      
+
       // Remove to prevent immediate duplicates in seed
       seedCandidates.splice(randomIndex, 1);
     }
@@ -247,8 +324,114 @@ class WeightedCardDistribution {
     return seedCards;
   }
 
+  private selectTargetType(currentTypeCount: Map<MVPType, number>, totalCards: number): MVPType {
+    let selected: MVPType = 'MEDIA';
+    let maxDeficit = Number.NEGATIVE_INFINITY;
+
+    MVP_TYPES.forEach(type => {
+      const count = currentTypeCount.get(type) || 0;
+      const currentRatio = totalCards > 0 ? count / totalCards : 0;
+      const targetRatio = MVP_TYPE_WEIGHTS[type];
+      const deficit = targetRatio - currentRatio;
+
+      if (deficit > maxDeficit) {
+        maxDeficit = deficit;
+        selected = type;
+      }
+    });
+
+    return selected;
+  }
+
+  private generateMVPDeck(size: number, faction?: 'government' | 'truth'): GameCard[] {
+    const deck: GameCard[] = [];
+    const availableSets = this.getAvailableCardSets();
+
+    if (availableSets.length === 0) {
+      console.warn('No card sets available for deck generation');
+      return deck;
+    }
+
+    const normalizedFaction = faction ? (faction.toLowerCase() as 'truth' | 'government') : undefined;
+
+    const factionFilteredSets = availableSets
+      .map(set => ({
+        ...set,
+        cards: this.filterCardsByFaction(set.cards, normalizedFaction)
+      }))
+      .filter(set => set.cards.length > 0);
+
+    if (factionFilteredSets.length === 0) {
+      console.warn(`No cards available for faction: ${normalizedFaction}, using all sets as fallback`);
+      factionFilteredSets.push(...availableSets);
+    }
+
+    const usedCards = new Map<string, number>();
+    const rarityCount = new Map<Rarity, number>();
+    const typeCount = new Map<MVPType, number>();
+
+    const filterByDuplicateLimit = (cards: GameCard[]) =>
+      cards.filter(card => (usedCards.get(card.id) || 0) < this.settings.duplicateLimit);
+
+    const allFactionCards = factionFilteredSets.flatMap(set => set.cards);
+
+    for (let slot = 0; slot < size; slot++) {
+      const currentTotal = deck.length;
+      const targetRarity = this.selectTargetRarity(rarityCount, currentTotal);
+      const targetType = this.selectTargetType(typeCount, currentTotal);
+
+      let chosen: GameCard | undefined;
+
+      const selectedSet = this.selectWeightedSet(factionFilteredSets);
+      if (selectedSet) {
+        chosen = pickCardMVP(filterByDuplicateLimit(selectedSet.cards), normalizedFaction, targetType, targetRarity);
+      }
+
+      if (!chosen) {
+        chosen = pickCardMVP(filterByDuplicateLimit(allFactionCards), normalizedFaction, targetType, targetRarity);
+      }
+
+      if (!chosen) {
+        chosen = pickCardMVP(allFactionCards, normalizedFaction, targetType, targetRarity);
+      }
+
+      if (!chosen) {
+        dbg('⚠️ Could not find ANY card for faction', normalizedFaction);
+        break;
+      }
+
+      deck.push(chosen);
+
+      const usage = (usedCards.get(chosen.id) || 0) + 1;
+      usedCards.set(chosen.id, usage);
+      if (usage > this.settings.duplicateLimit) {
+        dbg('MVP fallback: duplicate limit exceeded', { id: chosen.id, copies: usage });
+      }
+
+      const rarity = (chosen.rarity ?? 'common') as Rarity;
+      rarityCount.set(rarity, (rarityCount.get(rarity) || 0) + 1);
+
+      if (isMVPType(chosen.type)) {
+        typeCount.set(chosen.type, (typeCount.get(chosen.type) || 0) + 1);
+      }
+
+      dbg('🂠 Slot filled', {
+        slot,
+        id: chosen.id,
+        type: chosen.type,
+        rarity: chosen.rarity
+      });
+    }
+
+    return deck;
+  }
+
   // Main deck generation function with faction support
   generateWeightedDeck(size: number = 40, faction?: 'government' | 'truth'): GameCard[] {
+    if (MVP_MODE) {
+      return this.generateMVPDeck(size, faction);
+    }
+
     const deck: GameCard[] = [];
     const availableSets = this.getAvailableCardSets();
     
@@ -276,13 +459,14 @@ class WeightedCardDistribution {
     // Track usage for balancing
     const usedCards = new Map<string, number>();
     const typeCount = new Map<GameCard['type'], number>();
-    const rarityCount = new Map<GameCard['rarity'], number>();
+    const rarityCount = new Map<Rarity, number>();
 
     // Initialize counters with seed cards
     deck.forEach(card => {
       usedCards.set(card.id, (usedCards.get(card.id) || 0) + 1);
       typeCount.set(card.type, (typeCount.get(card.type) || 0) + 1);
-      rarityCount.set(card.rarity, (rarityCount.get(card.rarity) || 0) + 1);
+      const cardRarity = (card.rarity ?? 'common') as Rarity;
+      rarityCount.set(cardRarity, (rarityCount.get(cardRarity) || 0) + 1);
     });
 
     // Fill remaining deck slots
@@ -302,7 +486,7 @@ class WeightedCardDistribution {
       
       // Fallback: try other rarities in the same set
       if (!selectedCard) {
-        const fallbackRarities: GameCard['rarity'][] = ['common', 'uncommon', 'rare', 'legendary'];
+        const fallbackRarities: Rarity[] = ['common', 'uncommon', 'rare', 'legendary'];
         for (const fallbackRarity of fallbackRarities) {
           if (fallbackRarity === targetRarity) continue;
           selectedCard = this.selectCardFromSet(selectedSet, fallbackRarity, usedCards, typeCount);
@@ -322,7 +506,8 @@ class WeightedCardDistribution {
         deck.push(selectedCard);
         usedCards.set(selectedCard.id, (usedCards.get(selectedCard.id) || 0) + 1);
         typeCount.set(selectedCard.type, (typeCount.get(selectedCard.type) || 0) + 1);
-        rarityCount.set(selectedCard.rarity, (rarityCount.get(selectedCard.rarity) || 0) + 1);
+        const selectedRarity = (selectedCard.rarity ?? 'common') as Rarity;
+        rarityCount.set(selectedRarity, (rarityCount.get(selectedRarity) || 0) + 1);
       } else {
         // Last resort: pick any available card to prevent incomplete decks
         const anyAvailableCard = availableSets
@@ -333,9 +518,10 @@ class WeightedCardDistribution {
           deck.push(anyAvailableCard);
           usedCards.set(anyAvailableCard.id, (usedCards.get(anyAvailableCard.id) || 0) + 1);
           typeCount.set(anyAvailableCard.type, (typeCount.get(anyAvailableCard.type) || 0) + 1);
-          rarityCount.set(anyAvailableCard.rarity, (rarityCount.get(anyAvailableCard.rarity) || 0) + 1);
+          const anyRarity = (anyAvailableCard.rarity ?? 'common') as Rarity;
+          rarityCount.set(anyRarity, (rarityCount.get(anyRarity) || 0) + 1);
         } else {
-          console.warn(`Could not find suitable card for slot ${i}`);
+          dbg('⚠️ Could not find ANY card for faction in non-MVP mode', faction);
         }
       }
     }
@@ -346,11 +532,11 @@ class WeightedCardDistribution {
   // Simulate deck composition for preview
   simulateDeckComposition(trials: number = 1000): {
     setDistribution: Map<string, number>;
-    rarityDistribution: Map<GameCard['rarity'], number>;
+    rarityDistribution: Map<Rarity, number>;
     typeDistribution: Map<GameCard['type'], number>;
   } {
     const setCount = new Map<string, number>();
-    const rarityCount = new Map<GameCard['rarity'], number>();
+    const rarityCount = new Map<Rarity, number>();
     const typeCount = new Map<GameCard['type'], number>();
 
     for (let trial = 0; trial < trials; trial++) {
@@ -362,9 +548,10 @@ class WeightedCardDistribution {
         if ('extId' in card && card.extId) {
           cardSet = card.extId as string;
         }
-        
+
         setCount.set(cardSet, (setCount.get(cardSet) || 0) + 1);
-        rarityCount.set(card.rarity, (rarityCount.get(card.rarity) || 0) + 1);
+        const rarity = (card.rarity ?? 'common') as Rarity;
+        rarityCount.set(rarity, (rarityCount.get(rarity) || 0) + 1);
         typeCount.set(card.type, (typeCount.get(card.type) || 0) + 1);
       });
     }
