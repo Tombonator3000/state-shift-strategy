@@ -1,0 +1,156 @@
+[
+  {
+    "id": "GV-AT-C-001",
+    "name": "Budget Squeeze",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "'Red tape wraps tighter.'"
+  },
+  {
+    "id": "GV-AT-U-014",
+    "name": "Paperwork Tsunami",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "'Form 27-B/6? Sign… here, here, here—and here.'"
+  },
+  {
+    "id": "GV-AT-R-020",
+    "name": "Cut the Broadcast",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "'Signal lost across the heartland.'"
+  },
+  {
+    "id": "GV-AT-L-021",
+    "name": "Sealed Files",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "legendary",
+    "cost": 5,
+    "effects": {
+      "ipDelta": {
+        "opponent": 4
+      },
+      "discardOpponent": 2
+    },
+    "flavor": "'Classified forever, by executive sigh.'"
+  },
+  {
+    "id": "GV-ME-C-030",
+    "name": "Official Statement",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "'The press release says everything is fine.'"
+  },
+  {
+    "id": "GV-ME-U-031",
+    "name": "Spin Cycle",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "'Crisis becomes opportunity in three bullet points.'"
+  },
+  {
+    "id": "GV-ME-R-032",
+    "name": "Narrative Shock",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "'Prime time panic sets the tone.'"
+  },
+  {
+    "id": "GV-ME-L-033",
+    "name": "Full Denial Tour",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": -4
+    },
+    "flavor": "'Every mic, same message: \"Never happened.\"'"
+  },
+  {
+    "id": "GV-ZO-C-040",
+    "name": "Task Force Deployment",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "'Uniforms on the ground by sunrise.'"
+  },
+  {
+    "id": "GV-ZO-U-041",
+    "name": "Emergency Powers",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "'Curfews, checkpoints, compliance.'"
+  },
+  {
+    "id": "GV-ZO-R-042",
+    "name": "Federal Takeover",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "'Seal on the door, chains on the gate.'"
+  },
+  {
+    "id": "GV-ZO-L-043",
+    "name": "Martial Network",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "legendary",
+    "cost": 7,
+    "effects": {
+      "pressureDelta": 4
+    },
+    "flavor": "'Satellites coordinate the crackdown.'"
+  }
+]

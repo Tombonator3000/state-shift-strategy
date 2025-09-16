@@ -1,0 +1,156 @@
+[
+  {
+    "id": "TR-AT-C-001",
+    "name": "Expose Kickback",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "'Follow the receipts and the rest unravels.'"
+  },
+  {
+    "id": "TR-AT-U-006",
+    "name": "Leaks on Loop",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "'Another anonymous drop hits the inbox.'"
+  },
+  {
+    "id": "TR-AT-R-010",
+    "name": "Blacklist Broadcast",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "'Every channel runs the same viral expose.'"
+  },
+  {
+    "id": "TR-AT-L-014",
+    "name": "Signal Surge",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "legendary",
+    "cost": 5,
+    "effects": {
+      "ipDelta": {
+        "opponent": 4
+      },
+      "discardOpponent": 2
+    },
+    "flavor": "'The truth hijacks every feed at once.'"
+  },
+  {
+    "id": "TR-ME-C-020",
+    "name": "Fact-Check Blitz",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "'Push the corrections before breakfast.'"
+  },
+  {
+    "id": "TR-ME-U-021",
+    "name": "Citizen Streams",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2
+    },
+    "flavor": "'Every eyewitness goes live.'"
+  },
+  {
+    "id": "TR-ME-R-022",
+    "name": "Documentary Premiere",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "'They watched. They wondered. They argued online.'"
+  },
+  {
+    "id": "TR-ME-L-023",
+    "name": "Truth Megaphone",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "truthDelta": 4
+    },
+    "flavor": "'A million shares and counting.'"
+  },
+  {
+    "id": "TR-ZO-C-030",
+    "name": "Town Hall Tour",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "'Folding chairs, homemade signs, real momentum.'"
+  },
+  {
+    "id": "TR-ZO-U-031",
+    "name": "Coalition March",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "'Street by street, the noise rises.'"
+  },
+  {
+    "id": "TR-ZO-R-032",
+    "name": "Rapid Response Bus",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "'Wheels on asphalt, message on repeat.'"
+  },
+  {
+    "id": "TR-ZO-L-033",
+    "name": "Coalition March XL",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "legendary",
+    "cost": 7,
+    "effects": {
+      "pressureDelta": 4
+    },
+    "flavor": "'Boots, banners, and a very loud megaphone.'"
+  }
+]
