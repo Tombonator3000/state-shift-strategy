@@ -1,660 +1,644 @@
-import { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '../../types/cardTypes';
 
-export const GOVERNMENT_BATCH_3: GameCard[] = [
+export const governmentBatch3: GameCard[] = [
   {
     "id": "GOV-101",
-    "faction": "government",
     "name": "Man with the Match",
+    "faction": "government",
     "type": "MEDIA",
     "rarity": "rare",
-    "cost": 12,
-    "text": "A shadowy official leans on editors. Reduce global Truth by 8%; draw 1.",
-    "flavorTruth": "He lights the story before it's written.",
-    "flavorGov": "He lights the story before it's written.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -8, "draw": 1 }
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "He lights the story before it's written."
   },
   {
     "id": "GOV-102",
-    "faction": "government",
     "name": "Left-Handed Partner",
+    "faction": "government",
     "type": "ATTACK",
     "rarity": "rare",
-    "cost": 12,
-    "text": "Activate a duplicitous asset. Drain 5 IP and randomly cancel a non-Legendary Truth card in hand.",
-    "flavorTruth": "He shakes with one hand and pockets with the other.",
-    "flavorGov": "He shakes with one hand and pockets with the other.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "ipDelta": { "opponent": -5 } }
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "He shakes with one hand and pockets with the other."
   },
   {
     "id": "GOV-103",
-    "faction": "government",
     "name": "Subcommittee X",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "MEDIA",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Cancel a Truth MEDIA. If canceled, reduce Truth by 2%.",
-    "flavorTruth": "The agenda item is secrecy.",
-    "flavorGov": "The agenda item is secrecy.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -2 }
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "The agenda item is secrecy."
   },
   {
     "id": "GOV-104",
-    "faction": "government",
     "name": "Deep Motor Pool",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "common",
-    "cost": 8,
-    "text": "Zone: +2 Defense; when established, gain 2 IP.",
-    "flavorTruth": "Unmarked, unlimited, unavailable.",
-    "flavorGov": "Unmarked, unlimited, unavailable.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 2 }
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Unmarked, unlimited, unavailable."
   },
   {
     "id": "GOV-105",
-    "faction": "government",
     "name": "Cutouts and Cover Names",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "ATTACK",
     "rarity": "common",
-    "cost": 7,
-    "text": "For 3 rounds: your Attacks reveal opponent hand and drain +1 extra IP.",
-    "flavorTruth": "Everyone knows no one.",
-    "flavorGov": "Everyone knows no one.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": {}
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Everyone knows no one."
   },
   {
     "id": "GOV-106",
-    "faction": "government",
     "name": "Routine Satellite Test",
+    "faction": "government",
     "type": "MEDIA",
     "rarity": "common",
-    "cost": 6,
-    "text": "Bland announcement. Reduce Truth by 4%.",
-    "flavorTruth": "Routine. Repeated. Reassuring.",
-    "flavorGov": "Routine. Repeated. Reassuring.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -4 }
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Routine. Repeated. Reassuring."
   },
   {
     "id": "GOV-107",
-    "faction": "government",
     "name": "Document Sanitization Bay",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Zone: +3 Defense; Truth checks here suffer −1.",
-    "flavorTruth": "Bleach for inconvenient ink.",
-    "flavorGov": "Bleach for inconvenient ink.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 3 }
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Bleach for inconvenient ink."
   },
   {
     "id": "GOV-108",
-    "faction": "government",
     "name": "Joint Task Force: Optics",
+    "faction": "government",
     "type": "MEDIA",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Spin up the visuals. Reduce Truth by 5%; your next ATTACK costs −1 IP.",
-    "flavorTruth": "Perception is nine-tenths of reality.",
-    "flavorGov": "Perception is nine-tenths of reality.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -5 }
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Perception is nine-tenths of reality."
   },
   {
     "id": "GOV-109",
-    "faction": "government",
     "name": "Asset Relocation",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "ZONE",
     "rarity": "common",
-    "cost": 6,
-    "text": "Prevent capture of one of your Zones this round; draw 1.",
-    "flavorTruth": "Subjects moved. Storyline removed.",
-    "flavorGov": "Subjects moved. Storyline removed.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "draw": 1 }
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Subjects moved. Storyline removed."
   },
   {
     "id": "GOV-110",
-    "faction": "government",
     "name": "Desert Listening Array",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Zone: +3 Defense. Each round, reduce local Truth by 1%.",
-    "flavorTruth": "The wind carries more than sand.",
-    "flavorGov": "The wind carries more than sand.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 3 }
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "The wind carries more than sand."
   },
   {
     "id": "GOV-111",
-    "faction": "government",
     "name": "Compliance Architecture",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "ATTACK",
     "rarity": "uncommon",
-    "cost": 10,
-    "text": "Your next two DEFENSIVE cards cost −1 IP and also reduce Truth by 1% on play.",
-    "flavorTruth": "The system defends itself.",
-    "flavorGov": "The system defends itself.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": {}
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "The system defends itself."
   },
   {
     "id": "GOV-112",
-    "faction": "government",
     "name": "Federalization Order",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "ATTACK",
     "rarity": "rare",
-    "cost": 13,
-    "text": "Spike state resilience. Choose up to two states: each gets +4 Defense this round.",
-    "flavorTruth": "Local control, centrally approved.",
-    "flavorGov": "Local control, centrally approved.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": {}
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Local control, centrally approved."
   },
   {
     "id": "GOV-113",
-    "faction": "government",
     "name": "Subterranean Tram",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "common",
-    "cost": 8,
-    "text": "Zone: +2 Defense; when opponent plays ATTACK targeting this state, they pay +2 IP.",
-    "flavorTruth": "Fast track to nowhere you know.",
-    "flavorGov": "Fast track to nowhere you know.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 2 }
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Fast track to nowhere you know."
   },
   {
     "id": "GOV-114",
-    "faction": "government",
     "name": "Credible Source Program",
+    "faction": "government",
     "type": "MEDIA",
     "rarity": "uncommon",
-    "cost": 8,
-    "text": "Reduce global Truth by 4%; if a Truth MEDIA was canceled this round, gain 3 IP.",
-    "flavorTruth": "Blue checks for black ops.",
-    "flavorGov": "Blue checks for black ops.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -4 }
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Blue checks for black ops."
   },
   {
     "id": "GOV-115",
-    "faction": "government",
     "name": "Intelligence Reprogramming",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "MEDIA",
     "rarity": "common",
-    "cost": 8,
-    "text": "Gain 3 IP. Next round your MEDIA reduce +2% extra Truth.",
-    "flavorTruth": "A budget is a moral narrative.",
-    "flavorGov": "A budget is a moral narrative.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "ipDelta": { "self": 3 } }
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "A budget is a moral narrative."
   },
   {
     "id": "GOV-116",
-    "faction": "government",
     "name": "Runway Hangar C",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "common",
-    "cost": 7,
-    "text": "Zone: +2 Defense. On create: draw 1.",
-    "flavorTruth": "Closed for renovations since forever.",
-    "flavorGov": "Closed for renovations since forever.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 2, "draw": 1 }
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Closed for renovations since forever."
   },
   {
     "id": "GOV-117",
-    "faction": "government",
     "name": "Red Team Leak Drill",
-    "type": "MEDIA",
+    "faction": "government",
+    "type": "ATTACK",
     "rarity": "common",
-    "cost": 6,
-    "text": "Stage a controlled leak. Reduce Truth by 3% and reveal opponent hand.",
-    "flavorTruth": "Practice makes perfect headlines.",
-    "flavorGov": "Practice makes perfect headlines.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -3 }
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Practice makes perfect headlines.",
+    "orig_type": "MEDIA"
   },
   {
     "id": "GOV-118",
-    "faction": "government",
     "name": "Black Ledger",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "ATTACK",
     "rarity": "rare",
-    "cost": 12,
-    "text": "Gain 6 IP; your next ATTACK drains +2 additional IP.",
-    "flavorTruth": "Numbers that never audit.",
-    "flavorGov": "Numbers that never audit.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "ipDelta": { "self": 6 } }
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      }
+    },
+    "flavor": "Numbers that never audit."
   },
   {
     "id": "GOV-119",
-    "faction": "government",
     "name": "Harbor Quarantine Pier",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Zone: +3 Defense; opponent skips next draw if they attempt capture here.",
-    "flavorTruth": "Hold the cargo. Hold the narrative.",
-    "flavorGov": "Hold the cargo. Hold the narrative.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 3 }
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Hold the cargo. Hold the narrative."
   },
   {
     "id": "GOV-120",
-    "faction": "government",
     "name": "Clearance Revoked",
+    "faction": "government",
     "type": "ATTACK",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Opponent discards 2 cards. If they control a Zone, discard 3 instead.",
-    "flavorTruth": "Trust withdrawn at the speed of pen.",
-    "flavorGov": "Trust withdrawn at the speed of pen.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "discardOpponent": 2 }
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Trust withdrawn at the speed of pen."
   },
   {
     "id": "GOV-121",
-    "faction": "government",
     "name": "Asset Forfeiture Sweep",
+    "faction": "government",
     "type": "ATTACK",
     "rarity": "rare",
-    "cost": 13,
-    "text": "Drain 6 IP. If you control 3+ Zones, drain +2 IP more.",
-    "flavorTruth": "Everything not nailed down becomes evidence.",
-    "flavorGov": "Everything not nailed down becomes evidence.",
-    "target": { "scope": "global", "count": 0 },
+    "cost": 4,
     "effects": {
-      "ipDelta": { "opponent": -6 },
-      "conditional": {
-        "ifZonesControlledAtLeast": 3,
-        "then": { "ipDelta": { "opponent": -2 } }
+      "ipDelta": {
+        "opponent": 3
       }
-    }
+    },
+    "flavor": "Everything not nailed down becomes evidence."
   },
   {
     "id": "GOV-122",
-    "faction": "government",
     "name": "Records Suspension Wing",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "common",
-    "cost": 8,
-    "text": "Zone: +2 Defense; while active, Truth MEDIA cost +1 IP in this state.",
-    "flavorTruth": "The filing cabinets hum ominously.",
-    "flavorGov": "The filing cabinets hum ominously.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 2 }
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "The filing cabinets hum ominously."
   },
   {
     "id": "GOV-123",
-    "faction": "government",
     "name": "Press Credentials Review",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "MEDIA",
     "rarity": "uncommon",
-    "cost": 8,
-    "text": "Cancel a Truth MEDIA; opponent loses 2 IP.",
-    "flavorTruth": "Access is a privilege with paperwork.",
-    "flavorGov": "Access is a privilege with paperwork.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "ipDelta": { "opponent": -2 } }
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Access is a privilege with paperwork."
   },
   {
     "id": "GOV-124",
-    "faction": "government",
     "name": "Narrative Harmonization",
+    "faction": "government",
     "type": "MEDIA",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Reduce global Truth by 5%; your next MEDIA costs −1 IP.",
-    "flavorTruth": "Bring all voices into one key.",
-    "flavorGov": "Bring all voices into one key.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -5 }
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Bring all voices into one key."
   },
   {
     "id": "GOV-125",
-    "faction": "government",
     "name": "Remote Hearing Room",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "common",
-    "cost": 7,
-    "text": "Zone: +2 Defense; when opponent plays MEDIA targeting this state, reduce Truth by 1%.",
-    "flavorTruth": "Muted. Camera off. Case closed.",
-    "flavorGov": "Muted. Camera off. Case closed.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 2 }
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Muted. Camera off. Case closed."
   },
   {
     "id": "GOV-126",
-    "faction": "government",
     "name": "Compelled Testimony",
+    "faction": "government",
     "type": "ATTACK",
     "rarity": "common",
-    "cost": 8,
-    "text": "Reveal opponent hand. Choose and discard 1 non-Legendary card.",
-    "flavorTruth": "Answer the question you weren't asked.",
-    "flavorGov": "Answer the question you weren't asked.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "discardOpponent": 1 }
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Answer the question you weren't asked."
   },
   {
     "id": "GOV-127",
-    "faction": "government",
     "name": "Continuity of Narrative",
+    "faction": "government",
     "type": "MEDIA",
     "rarity": "common",
-    "cost": 6,
-    "text": "Reduce Truth by 3%; draw 1.",
-    "flavorTruth": "Repetition is retention.",
-    "flavorGov": "Repetition is retention.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -3, "draw": 1 }
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Repetition is retention."
   },
   {
     "id": "GOV-128",
-    "faction": "government",
     "name": "Aquifer Sensor Farm",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Zone: +3 Defense; per turn, gain +1 IP.",
-    "flavorTruth": "The waters whisper; we record.",
-    "flavorGov": "The waters whisper; we record.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 3 }
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "The waters whisper; we record."
   },
   {
     "id": "GOV-129",
-    "faction": "government",
     "name": "Strategic Denial",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "ATTACK",
     "rarity": "common",
-    "cost": 6,
-    "text": "Cancel an ATTACK targeting you; reduce Truth by 2%.",
-    "flavorTruth": "We categorically decline reality.",
-    "flavorGov": "We categorically decline reality.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -2 }
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "We categorically decline reality."
   },
   {
     "id": "GOV-130",
-    "faction": "government",
     "name": "Routine Systems Upgrade",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "ATTACK",
     "rarity": "common",
-    "cost": 7,
-    "text": "Gain 2 IP; your next DEFENSIVE draws 1 on play.",
-    "flavorTruth": "Security patches for public perception.",
-    "flavorGov": "Security patches for public perception.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "ipDelta": { "self": 2 } }
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Security patches for public perception."
   },
   {
     "id": "GOV-131",
-    "faction": "government",
     "name": "Observation Deck 51",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "rare",
-    "cost": 12,
-    "text": "Zone: +4 Defense; while controlled, your MEDIA reduce +1% extra Truth.",
-    "flavorTruth": "The best view is from behind glass.",
-    "flavorGov": "The best view is from behind glass.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 4 }
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "The best view is from behind glass."
   },
   {
     "id": "GOV-132",
-    "faction": "government",
     "name": "Guilt by Spreadsheet",
+    "faction": "government",
     "type": "ATTACK",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Drain 4 IP; if opponent has 5+ cards in hand, drain +1 IP and they discard 1.",
-    "flavorTruth": "Cell B2 says you're compromised.",
-    "flavorGov": "Cell B2 says you're compromised.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "ipDelta": { "opponent": -4 } }
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Cell B2 says you're compromised."
   },
   {
     "id": "GOV-133",
-    "faction": "government",
     "name": "Narrative Freeze Frame",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "ATTACK",
     "rarity": "uncommon",
-    "cost": 8,
-    "text": "Delay a Truth card just played by 2 rounds.",
-    "flavorTruth": "Stop motion truth.",
-    "flavorGov": "Stop motion truth.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": {}
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Stop motion truth."
   },
   {
     "id": "GOV-134",
-    "faction": "government",
     "name": "Sealed Loading Dock",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "common",
-    "cost": 8,
-    "text": "Zone: +2 Defense; opponent loses 1 IP when attempting capture.",
-    "flavorTruth": "All shipments marked 'later'.",
-    "flavorGov": "All shipments marked 'later'.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 2 }
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "All shipments marked 'later'."
   },
   {
     "id": "GOV-135",
-    "faction": "government",
     "name": "Global Reassurance Tour",
+    "faction": "government",
     "type": "MEDIA",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Reduce Truth by 5%; your next MEDIA costs −1 IP and draws 1.",
-    "flavorTruth": "Handshake, headline, hush.",
-    "flavorGov": "Handshake, headline, hush.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -5 }
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Handshake, headline, hush."
   },
   {
     "id": "GOV-136",
-    "faction": "government",
     "name": "Executive Summary Only",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "ATTACK",
     "rarity": "common",
-    "cost": 7,
-    "text": "For 3 rounds: when opponent draws 2+ in a turn, reduce Truth by 1% and gain 1 IP.",
-    "flavorTruth": "We read what matters. You read what remains.",
-    "flavorGov": "We read what matters. You read what remains.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": {}
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "We read what matters. You read what remains."
   },
   {
     "id": "GOV-137",
-    "faction": "government",
     "name": "Cold Storage Vault",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Zone: +3 Defense; global Truth increases in this round are capped at +6%.",
-    "flavorTruth": "Put the facts on ice.",
-    "flavorGov": "Put the facts on ice.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 3 }
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Put the facts on ice."
   },
   {
     "id": "GOV-138",
-    "faction": "government",
     "name": "Seize the Servers",
+    "faction": "government",
     "type": "ATTACK",
     "rarity": "rare",
-    "cost": 12,
-    "text": "Discard 2 from opponent and skip their next draw.",
-    "flavorTruth": "A warrant, a forklift, a silence.",
-    "flavorGov": "A warrant, a forklift, a silence.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "discardOpponent": 2 }
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "A warrant, a forklift, a silence."
   },
   {
     "id": "GOV-139",
-    "faction": "government",
     "name": "Calibrated Denials",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "MEDIA",
     "rarity": "common",
-    "cost": 6,
-    "text": "Cancel a MEDIA or ATTACK targeting you; draw 1.",
-    "flavorTruth": "Precision-crafted statements of nothing.",
-    "flavorGov": "Precision-crafted statements of nothing.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "draw": 1 }
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Precision-crafted statements of nothing."
   },
   {
     "id": "GOV-140",
-    "faction": "government",
     "name": "PR Blackout Grid",
-    "type": "MEDIA",
+    "faction": "government",
+    "type": "ATTACK",
     "rarity": "common",
-    "cost": 6,
-    "text": "Reduce Truth by 3%; opponent's next MEDIA costs +1 IP.",
-    "flavorTruth": "Darken the lights, dim the doubts.",
-    "flavorGov": "Darken the lights, dim the doubts.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -3 }
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Darken the lights, dim the doubts.",
+    "orig_type": "MEDIA"
   },
   {
     "id": "GOV-141",
-    "faction": "government",
     "name": "Rail Spur to Nowhere",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "common",
-    "cost": 8,
-    "text": "Zone: +2 Defense; when created, you may move +1 Defense from another Zone to this one.",
-    "flavorTruth": "Every track leads off-map.",
-    "flavorGov": "Every track leads off-map.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 2 }
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1
+    },
+    "flavor": "Every track leads off-map."
   },
   {
     "id": "GOV-142",
-    "faction": "government",
     "name": "Liaison to the Syndicate",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "ZONE",
     "rarity": "uncommon",
-    "cost": 10,
-    "text": "For 3 rounds: when you play a ZONE, gain 2 IP and reduce Truth by 1%.",
-    "flavorTruth": "Partnerships need no sunlight.",
-    "flavorGov": "Partnerships need no sunlight.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": {}
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Partnerships need no sunlight."
   },
   {
     "id": "GOV-143",
-    "faction": "government",
     "name": "Friendly Fact-Checker Program",
+    "faction": "government",
     "type": "MEDIA",
     "rarity": "uncommon",
-    "cost": 8,
-    "text": "Reduce Truth by 4%; if a Truth MEDIA resolves this round, reduce an additional 2%.",
-    "flavorTruth": "Missing context, found budget.",
-    "flavorGov": "Missing context, found budget.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -4 }
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Missing context, found budget."
   },
   {
     "id": "GOV-144",
-    "faction": "government",
     "name": "Jurisdiction Maze",
+    "faction": "government",
     "type": "ZONE",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Zone: +3 Defense; opponent ATTACKs targeting this state cost +2 IP.",
-    "flavorTruth": "By the time you arrive, you're out of bounds.",
-    "flavorGov": "By the time you arrive, you're out of bounds.",
-    "target": { "scope": "state", "count": 1 },
-    "effects": { "zoneDefense": 3 }
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "By the time you arrive, you're out of bounds."
   },
   {
     "id": "GOV-145",
-    "faction": "government",
     "name": "Emergency Broadcast Hijack",
+    "faction": "government",
     "type": "MEDIA",
     "rarity": "rare",
-    "cost": 13,
-    "text": "Reduce global Truth by 8% and draw 2.",
-    "flavorTruth": "Your regularly scheduled reality has been rescheduled.",
-    "flavorGov": "Your regularly scheduled reality has been rescheduled.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -8, "draw": 2 }
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "Your regularly scheduled reality has been rescheduled."
   },
   {
     "id": "GOV-146",
-    "faction": "government",
     "name": "Black Budget Surge",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "MEDIA",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Gain 5 IP; your next MEDIA this round costs −2 IP.",
-    "flavorTruth": "Money talks. In code names.",
-    "flavorGov": "Money talks. In code names.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "ipDelta": { "self": 5 } }
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Money talks. In code names."
   },
   {
     "id": "GOV-147",
-    "faction": "government",
     "name": "Syndicate Directive Zero",
+    "faction": "government",
     "type": "MEDIA",
     "rarity": "legendary",
-    "cost": 29,
-    "text": "Reduce global Truth by 15%. Then steal a Zone if your Pressure ≥ its Defense; otherwise, prevent its capture this round.",
-    "flavorTruth": "Decisions made above clearance.",
-    "flavorGov": "Decisions made above clearance.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -15 }
+    "cost": 6,
+    "effects": {
+      "truthDelta": -4
+    },
+    "flavor": "Decisions made above clearance."
   },
   {
     "id": "GOV-148",
-    "faction": "government",
     "name": "Overnight Guidelines",
-    "type": "DEFENSIVE",
+    "faction": "government",
+    "type": "ATTACK",
     "rarity": "common",
-    "cost": 6,
-    "text": "For this round, cap any single Truth increase at +4%.",
-    "flavorTruth": "Reality must adhere to policy.",
-    "flavorGov": "Reality must adhere to policy.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": {}
+    "cost": 2,
+    "effects": {
+      "ipDelta": {
+        "opponent": 1
+      }
+    },
+    "flavor": "Reality must adhere to policy."
   },
   {
     "id": "GOV-149",
-    "faction": "government",
     "name": "Confiscated Hard Drives",
+    "faction": "government",
     "type": "ATTACK",
     "rarity": "uncommon",
-    "cost": 9,
-    "text": "Opponent discards 1 at random and loses 3 IP.",
-    "flavorTruth": "A persistent storage problem.",
-    "flavorGov": "A persistent storage problem.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "discardOpponent": 1, "ipDelta": { "opponent": -3 } }
+    "cost": 3,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "A persistent storage problem."
   },
   {
     "id": "GOV-150",
-    "faction": "government",
     "name": "Council in the Smoke",
+    "faction": "government",
     "type": "MEDIA",
     "rarity": "legendary",
-    "cost": 27,
-    "text": "Reduce global Truth by 14%. If you control 4+ Zones, steal a Zone of your choice.",
-    "flavorTruth": "When the room clears, the map has changed.",
-    "flavorGov": "When the room clears, the map has changed.",
-    "target": { "scope": "global", "count": 0 },
-    "effects": { "truthDelta": -14 }
+    "cost": 6,
+    "effects": {
+      "truthDelta": -4
+    },
+    "flavor": "When the room clears, the map has changed."
   }
 ];

@@ -1,38 +1,38 @@
 import type { GameCard } from '../../types/cardTypes';
 
-/**
- * Samler ALLE exports som er arrays (CORE_BATCH_TRUTH_1..4, CORE_BATCH_GOV_1..4, osv.)
- * fra src/data/core/** automatisk ved build.
- */
-const modules = import.meta.glob('../core/**/*.{ts,tsx,js,json}', { eager: true }) as Record<string, any>;
+// TRUTH (4 × 50)
+import { truthBatch1 } from './truth-batch-1';
+import { truthBatch2 } from './truth-batch-2';
+import { truthBatch3 } from './truth-batch-3';
+import { truthBatch4 } from './truth-batch-4';
 
-function flattenBatches(): GameCard[] {
-  const arrays: GameCard[] = [];
-  
-  for (const path in modules) {
-    const module = modules[path];
-    
-    // Check for named exports that are arrays
-    for (const key of Object.keys(module)) {
-      const value = (module as any)[key];
-      if (Array.isArray(value) && value.length && typeof value[0] === 'object' && ('id' in value[0])) {
-        arrays.push(...value);
-      }
-    }
-    
-    // Check for JSON with {cards:[...]} structure
-    if (Array.isArray(module?.cards)) {
-      arrays.push(...module.cards);
-    }
-    
-    // Check for default export that is an array
-    if (Array.isArray(module?.default)) {
-      arrays.push(...module.default);
-    }
+// GOVERNMENT (4 × 50)
+import { governmentBatch1 } from './government-batch-1';
+import { governmentBatch2 } from './government-batch-2';
+import { governmentBatch3 } from './government-batch-3';
+import { governmentBatch4 } from './government-batch-4';
+
+export const CARD_DATABASE_CORE: GameCard[] = [
+  ...truthBatch1,
+  ...truthBatch2,
+  ...truthBatch3,
+  ...truthBatch4,
+  ...governmentBatch1,
+  ...governmentBatch2,
+  ...governmentBatch3,
+  ...governmentBatch4,
+];
+
+if (typeof import.meta !== 'undefined' && import.meta.env?.MODE !== 'production') {
+  const total = CARD_DATABASE_CORE.length;
+  const truth = CARD_DATABASE_CORE.filter((card) => card.faction === 'truth').length;
+  const government = CARD_DATABASE_CORE.filter((card) => card.faction === 'government').length;
+
+  if (total !== 400 || truth !== 200 || government !== 200) {
+    console.warn('[CORE] Unexpected counts', { total, truth, government });
+  } else {
+    console.log('[CORE] OK', { total, truth, government });
   }
-  
-  console.log(`[CORE COLLECTOR] Found ${arrays.length} cards from ${Object.keys(modules).length} batch files`);
-  return arrays;
 }
 
-export const CARD_DATABASE_CORE: GameCard[] = flattenBatches();
+export default CARD_DATABASE_CORE;
