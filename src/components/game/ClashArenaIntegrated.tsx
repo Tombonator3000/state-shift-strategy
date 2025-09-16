@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type { GameCard } from '@/types/cardTypes';
-import { useClashManager } from '@/hooks/useClashManager';
 
 interface ClashArenaProps {
   isOpen: boolean;
@@ -32,32 +31,61 @@ function CardView({ card, side, placeholder }: { card?: GameCard; side: "attacke
   );
 }
 
-export function ClashArenaIntegrated({ 
-  isOpen, 
-  attackCard, 
-  defenseCard, 
-  expiresAt, 
-  windowMs, 
-  hand, 
-  playerIP, 
-  onPlayDefensive, 
-  onResolveClash, 
-  onCloseWindow 
+export function ClashArenaIntegrated({
+  isOpen,
+  attackCard,
+  defenseCard,
+  expiresAt,
+  windowMs,
+  hand,
+  playerIP,
+  onPlayDefensive,
+  onResolveClash
 }: ClashArenaProps) {
-  const { msLeft } = useClashManager({
-    clashOpen: isOpen,
-    expiresAt,
-    windowMs,
-    hand,
-    playerIP,
-    onPlayDefensive,
-    onResolveClash,
-    onCloseWindow
-  });
+  const [msLeft, setMsLeft] = useState(() => Math.max(0, (expiresAt ?? 0) - Date.now()));
+
+  useEffect(() => {
+    if (!isOpen || !expiresAt) {
+      setMsLeft(0);
+      return;
+    }
+
+    let raf = 0;
+    const tick = () => {
+      const remaining = Math.max(0, expiresAt - Date.now());
+      setMsLeft(remaining);
+      if (remaining <= 0) {
+        onResolveClash();
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    tick();
+
+    return () => cancelAnimationFrame(raf);
+  }, [isOpen, expiresAt, onResolveClash]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "d") return;
+      e.preventDefault();
+
+      const defensiveCard = hand.find(card => card.type === "DEFENSIVE" && card.cost <= playerIP);
+      if (defensiveCard) {
+        onPlayDefensive(defensiveCard.id);
+      }
+    };
+
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isOpen, hand, playerIP, onPlayDefensive]);
 
   if (!isOpen) return null;
 
-  const pct = Math.max(0, Math.min(100, ((msLeft / windowMs) * 100) | 0));
+  const pct = windowMs > 0 ? Math.max(0, Math.min(100, Math.floor((msLeft / windowMs) * 100))) : 0;
   const secondsLeft = Math.ceil(msLeft / 1000);
 
   return (
