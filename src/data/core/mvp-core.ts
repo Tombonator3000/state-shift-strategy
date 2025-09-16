@@ -14,7 +14,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "common",
     cost: 2,
     effects: { ipDelta: { opponent: 1 } },
-    flavor: "One question can bring down empires."
+    text: "Opponent loses 1 IP.",
+    flavorTruth: "One question can bring down empires.",
+    flavorGov: "Containable inquiry neutralized.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "TRUTH-ATK-002", 
@@ -24,7 +27,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "uncommon",
     cost: 3,
     effects: { ipDelta: { opponent: 2 } },
-    flavor: "The truth has a way of surfacing."
+    text: "Opponent loses 2 IP.",
+    flavorTruth: "The truth has a way of surfacing.",
+    flavorGov: "Breach contained, leaker identified.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "TRUTH-ATK-003",
@@ -34,7 +40,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "rare",
     cost: 4,
     effects: { ipDelta: { opponent: 3 }, discardOpponent: 1 },
-    flavor: "One voice can silence the machine."
+    text: "Opponent loses 3 IP and discards 1 card.",
+    flavorTruth: "One voice can silence the machine.",
+    flavorGov: "Witness protection activated.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "TRUTH-ATK-004",
@@ -44,7 +53,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "legendary",
     cost: 5,
     effects: { ipDelta: { opponent: 4 }, discardOpponent: 2 },
-    flavor: "When the floodgates open, nothing stays hidden."
+    text: "Opponent loses 4 IP and discards 2 cards.",
+    flavorTruth: "When the floodgates open, nothing stays hidden.",
+    flavorGov: "Full damage control initiated.",
+    target: { scope: "global", count: 0 }
   },
 
   // TRUTH FACTION - MEDIA CARDS
@@ -56,7 +68,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "common",
     cost: 3,
     effects: { truthDelta: 1 },
-    flavor: "The smartphone is mightier than the sword."
+    text: "+1% Truth.",
+    flavorTruth: "The smartphone is mightier than the sword.",
+    flavorGov: "Unauthorized journalism detected.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "TRUTH-MED-002",
@@ -66,7 +81,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "common", 
     cost: 3,
     effects: { truthDelta: 1 },
-    flavor: "#NoFilter #DefinitelyReal"
+    text: "+1% Truth.",
+    flavorTruth: "#NoFilter #DefinitelyReal",
+    flavorGov: "Deepfake technology confirmed.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "TRUTH-MED-003",
@@ -76,7 +94,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "uncommon",
     cost: 4,
     effects: { truthDelta: 2 },
-    flavor: "Bigfoot has better camera skills than expected."
+    text: "+2% Truth.",
+    flavorTruth: "Bigfoot has better camera skills than expected.",
+    flavorGov: "Photoshop analysis in progress.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "TRUTH-MED-004",
@@ -86,7 +107,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "uncommon",
     cost: 4,
     effects: { truthDelta: 2 },
-    flavor: "The King recommends the midnight pancakes."
+    text: "+2% Truth.",
+    flavorTruth: "The King recommends the midnight pancakes.",
+    flavorGov: "Impersonator identification pending.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "TRUTH-MED-005",
@@ -96,7 +120,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "rare",
     cost: 5,
     effects: { truthDelta: 3 },
-    flavor: "Ink smudges reveal more than black bars."
+    text: "+3% Truth.",
+    flavorTruth: "Ink smudges reveal more than black bars.",
+    flavorGov: "Publication rights under review.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "TRUTH-MED-006",
@@ -106,7 +133,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "rare",
     cost: 5,
     effects: { truthDelta: 3 },
-    flavor: "Chat: 'first!'"
+    text: "+3% Truth.",
+    flavorTruth: "Chat: 'first!'",
+    flavorGov: "Stream terminated for terms violation.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "TRUTH-MED-007",
@@ -116,7 +146,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "legendary",
     cost: 6,
     effects: { truthDelta: 4 },
-    flavor: "Broadcasting truth to the masses."
+    text: "+4% Truth.",
+    flavorTruth: "Broadcasting truth to the masses.",
+    flavorGov: "Emergency broadcast system activated.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "TRUTH-MED-008",
@@ -126,7 +159,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "legendary", 
     cost: 6,
     effects: { truthDelta: 4 },
-    flavor: "The signal that changes everything."
+    text: "+4% Truth.",
+    flavorTruth: "The signal that changes everything.",
+    flavorGov: "Signal jammer deployment authorized.",
+    target: { scope: "global", count: 0 }
   },
 
   // TRUTH FACTION - ZONE CARDS
@@ -138,7 +174,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "common",
     cost: 4,
     effects: { pressureDelta: 1 },
-    flavor: "Please don't feed the senator."
+    text: "Target a state. +1 Pressure to capture it.",
+    flavorTruth: "Please don't feed the senator.",
+    flavorGov: "Tourist attraction permits revoked.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "TRUTH-ZON-002",
@@ -148,7 +187,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "common",
     cost: 4,
     effects: { pressureDelta: 1 },
-    flavor: "Room service knocks itself."
+    text: "Target a state. +1 Pressure to capture it.",
+    flavorTruth: "Room service knocks itself.",
+    flavorGov: "Health inspection scheduled.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "TRUTH-ZON-003",
@@ -158,7 +200,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "uncommon",
     cost: 5,
     effects: { pressureDelta: 2 },
-    flavor: "Rollback prices on cursed dolls."
+    text: "Target a state. +2 Pressure to capture it.",
+    flavorTruth: "Rollback prices on cursed dolls.",
+    flavorGov: "Corporate security notified.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "TRUTH-ZON-004",
@@ -168,7 +213,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "uncommon",
     cost: 5,
     effects: { pressureDelta: 2 },
-    flavor: "Burning love, steady income."
+    text: "Target a state. +2 Pressure to capture it.",
+    flavorTruth: "Burning love, steady income.",
+    flavorGov: "Licensing fees under audit.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "TRUTH-ZON-005",
@@ -178,7 +226,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "rare",
     cost: 6,
     effects: { pressureDelta: 3 },
-    flavor: "Free tractor rides included."
+    text: "Target a state. +3 Pressure to capture it.",
+    flavorTruth: "Free tractor rides included.",
+    flavorGov: "Agricultural survey recommended.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "TRUTH-ZON-006",
@@ -188,7 +239,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "rare",
     cost: 6,
     effects: { pressureDelta: 3 },
-    flavor: "Ink stains reveal hidden messages."
+    text: "Target a state. +3 Pressure to capture it.",
+    flavorTruth: "Ink stains reveal hidden messages.",
+    flavorGov: "Fire safety violations noted.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "TRUTH-ZON-007",
@@ -198,7 +252,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "legendary",
     cost: 7,
     effects: { pressureDelta: 4 },
-    flavor: "The signal reaches every home."
+    text: "Target a state. +4 Pressure to capture it.",
+    flavorTruth: "The signal reaches every home.",
+    flavorGov: "FCC compliance review initiated.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "TRUTH-ZON-008",
@@ -208,7 +265,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "legendary",
     cost: 7,
     effects: { pressureDelta: 4 },
-    flavor: "Spreading truth through secret channels."
+    text: "Target a state. +4 Pressure to capture it.",
+    flavorTruth: "Spreading truth through secret channels.",
+    flavorGov: "Network infiltration in progress.",
+    target: { scope: "state", count: 1 }
   },
 
   // GOVERNMENT FACTION - ATTACK CARDS
@@ -220,7 +280,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "common",
     cost: 2,
     effects: { ipDelta: { opponent: 1 } },
-    flavor: "You can hear them when it's too late."
+    text: "Opponent loses 1 IP.",
+    flavorTruth: "You can hear them when it's too late.",
+    flavorGov: "Air support deployed.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-ATK-002",
@@ -230,7 +293,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "common",
     cost: 2,
     effects: { ipDelta: { opponent: 1 } },
-    flavor: "Nobody remembers the encounter… and that's the point."
+    text: "Opponent loses 1 IP.",
+    flavorTruth: "Nobody remembers the encounter… and that's the point.",
+    flavorGov: "Memory adjustment successful.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-ATK-003",
@@ -240,7 +306,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "uncommon",
     cost: 3,
     effects: { ipDelta: { opponent: 2 } },
-    flavor: "Sign here. Smile there."
+    text: "Opponent loses 2 IP.",
+    flavorTruth: "Sign here. Smile there.",
+    flavorGov: "Asset recruitment confirmed.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-ATK-004",
@@ -250,7 +319,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "uncommon",
     cost: 3,
     effects: { ipDelta: { opponent: 2 } },
-    flavor: "Allegedly mandatory."
+    text: "Opponent loses 2 IP.",
+    flavorTruth: "Allegedly mandatory.",
+    flavorGov: "Legal proceedings authorized.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-ATK-005",
@@ -260,7 +332,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "rare",
     cost: 4,
     effects: { ipDelta: { opponent: 3 }, discardOpponent: 1 },
-    flavor: "He works for everyone. And no one."
+    text: "Opponent loses 3 IP and discards 1 card.",
+    flavorTruth: "He works for everyone. And no one.",
+    flavorGov: "Deep cover operation active.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-ATK-006",
@@ -270,7 +345,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "rare",
     cost: 4,
     effects: { ipDelta: { opponent: 3 }, discardOpponent: 1 },
-    flavor: "Grainy VHS footage? Totally fake. Trust us."
+    text: "Opponent loses 3 IP and discards 1 card.",
+    flavorTruth: "Grainy VHS footage? Totally fake. Trust us.",
+    flavorGov: "Evidence containment successful.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-ATK-007",
@@ -280,7 +358,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "legendary",
     cost: 5,
     effects: { ipDelta: { opponent: 4 }, discardOpponent: 2 },
-    flavor: "Cleaning house, one truth-teller at a time."
+    text: "Opponent loses 4 IP and discards 2 cards.",
+    flavorTruth: "Cleaning house, one truth-teller at a time.",
+    flavorGov: "Personnel restructuring complete.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-ATK-008",
@@ -290,7 +371,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "legendary",
     cost: 5,
     effects: { ipDelta: { opponent: 4 }, discardOpponent: 2 },
-    flavor: "We know everything. We always have."
+    text: "Opponent loses 4 IP and discards 2 cards.",
+    flavorTruth: "We know everything. We always have.",
+    flavorGov: "Surveillance grid optimized.",
+    target: { scope: "global", count: 0 }
   },
 
   // GOVERNMENT FACTION - MEDIA CARDS
@@ -302,7 +386,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "common",
     cost: 3,
     effects: { truthDelta: -1 },
-    flavor: "Please cry on lines two and three."
+    text: "-1% Truth.",
+    flavorTruth: "Please cry on lines two and three.",
+    flavorGov: "Talent acquisition successful.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-MED-002",
@@ -312,7 +399,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "common",
     cost: 3,
     effects: { truthDelta: -1 },
-    flavor: "It's in the water. Drink up."
+    text: "-1% Truth.",
+    flavorTruth: "It's in the water. Drink up.",
+    flavorGov: "Public health initiative approved.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-MED-003",
@@ -322,7 +412,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "uncommon",
     cost: 4,
     effects: { truthDelta: -2 },
-    flavor: "Nothing to see here. Please remain calm."
+    text: "-2% Truth.",
+    flavorTruth: "Nothing to see here. Please remain calm.",
+    flavorGov: "Preparedness drill concluded.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-MED-004",
@@ -332,7 +425,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "uncommon",
     cost: 4,
     effects: { truthDelta: -2 },
-    flavor: "For your safety. Definitely not ours."
+    text: "-2% Truth.",
+    flavorTruth: "For your safety. Definitely not ours.",
+    flavorGov: "Security measures enhanced.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-MED-005",
@@ -342,7 +438,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "rare",
     cost: 5,
     effects: { truthDelta: -3 },
-    flavor: "Sponsored by your friendly neighborhood network."
+    text: "-3% Truth.",
+    flavorTruth: "Sponsored by your friendly neighborhood network.",
+    flavorGov: "Media coordination successful.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-MED-006",
@@ -352,7 +451,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "rare",
     cost: 5,
     effects: { truthDelta: -3 },
-    flavor: "Your regularly scheduled reality will return shortly."
+    text: "-3% Truth.",
+    flavorTruth: "Your regularly scheduled reality will return shortly.",
+    flavorGov: "Emergency protocols activated.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-MED-007",
@@ -362,7 +464,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "legendary",
     cost: 6,
     effects: { truthDelta: -4 },
-    flavor: "When all channels sing the same song."
+    text: "-4% Truth.",
+    flavorTruth: "When all channels sing the same song.",
+    flavorGov: "Information control achieved.",
+    target: { scope: "global", count: 0 }
   },
   {
     id: "GOV-MED-008",
@@ -372,7 +477,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "legendary",
     cost: 6,
     effects: { truthDelta: -4 },
-    flavor: "His smoke breaks last decades."
+    text: "-4% Truth.",
+    flavorTruth: "His smoke breaks last decades.",
+    flavorGov: "Deep Throat asset operational.",
+    target: { scope: "global", count: 0 }
   },
 
   // GOVERNMENT FACTION - ZONE CARDS
@@ -384,7 +492,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "common",
     cost: 4,
     effects: { pressureDelta: 1 },
-    flavor: "No windows, two clocks, three alarms."
+    text: "Target a state. +1 Pressure to capture it.",
+    flavorTruth: "No windows, two clocks, three alarms.",
+    flavorGov: "Secure facility operational.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "GOV-ZON-002",
@@ -394,7 +505,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "common",
     cost: 4,
     effects: { pressureDelta: 1 },
-    flavor: "Microfilm never dies."
+    text: "Target a state. +1 Pressure to capture it.",
+    flavorTruth: "Microfilm never dies.",
+    flavorGov: "Data preservation secured.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "GOV-ZON-003",
@@ -404,7 +518,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "uncommon",
     cost: 5,
     effects: { pressureDelta: 2 },
-    flavor: "Crates labeled 'Weather Balloon' (wink)."
+    text: "Target a state. +2 Pressure to capture it.",
+    flavorTruth: "Crates labeled 'Weather Balloon' (wink).",
+    flavorGov: "Atmospheric research materials secured.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "GOV-ZON-004",
@@ -414,7 +531,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "uncommon",
     cost: 5,
     effects: { pressureDelta: 2 },
-    flavor: "You'll never find it on Google Maps."
+    text: "Target a state. +2 Pressure to capture it.",
+    flavorTruth: "You'll never find it on Google Maps.",
+    flavorGov: "Off-books facility established.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "GOV-ZON-005",
@@ -424,7 +544,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "rare",
     cost: 6,
     effects: { pressureDelta: 3 },
-    flavor: "Forecast: 100% chance of plausible deniability."
+    text: "Target a state. +3 Pressure to capture it.",
+    flavorTruth: "Forecast: 100% chance of plausible deniability.",
+    flavorGov: "Atmospheric manipulation online.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "GOV-ZON-006",
@@ -434,7 +557,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "rare",
     cost: 6,
     effects: { pressureDelta: 3 },
-    flavor: "Art, tunnels, and a lot of keycards."
+    text: "Target a state. +3 Pressure to capture it.",
+    flavorTruth: "Art, tunnels, and a lot of keycards.",
+    flavorGov: "Continuity facility activated.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "GOV-ZON-007",
@@ -444,7 +570,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "legendary",
     cost: 7,
     effects: { pressureDelta: 4 },
-    flavor: "The shredder is always hungry."
+    text: "Target a state. +4 Pressure to capture it.",
+    flavorTruth: "The shredder is always hungry.",
+    flavorGov: "Information disposal optimized.",
+    target: { scope: "state", count: 1 }
   },
   {
     id: "GOV-ZON-008",
@@ -454,7 +583,10 @@ export const MVP_CORE_CARDS: MVPCard[] = [
     rarity: "legendary",
     cost: 7,
     effects: { pressureDelta: 4 },
-    flavor: "█████████ everywhere."
+    text: "Target a state. +4 Pressure to capture it.",
+    flavorTruth: "█████████ everywhere.",
+    flavorGov: "Classification protocols enforced.",
+    target: { scope: "state", count: 1 }
   }
 ];
 

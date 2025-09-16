@@ -19,7 +19,7 @@ export type EffectsZONE = {
   pressureDelta: number;             // > 0, requires targetStateId when played
 };
 
-// Main card interface
+// Main card interface - Compatible with GameCard
 export type MVPCard = {
   id: string;
   name: string;
@@ -28,9 +28,17 @@ export type MVPCard = {
   rarity: Rarity;
   cost: number;                      // set from cost table
   effects: EffectsATTACK | EffectsMEDIA | EffectsZONE;
-  flavor?: string;                   // single flavor text
+  
+  // GameCard compatibility fields
+  text: string;                      // main card text describing effects
+  flavorTruth: string;              // truth faction flavor text
+  flavorGov: string;                // government faction flavor text
+  
+  // Optional fields
+  target?: { scope: 'global' | 'state' | 'controlled' | 'contested'; count: number };
   artId?: string;
   tags?: string[];
+  extId?: string;
 };
 
 // Game state for MVP

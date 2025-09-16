@@ -87,7 +87,7 @@ function MVPCardComponent({ card, isSelected, canPlay, onClick, onPlay }: MVPCar
           {getEffectText()}
         </div>
         <p className="text-xs text-muted-foreground italic">
-          {card.flavor}
+          {card.flavorTruth}
         </p>
         {onPlay && canPlay && (
           <Button 

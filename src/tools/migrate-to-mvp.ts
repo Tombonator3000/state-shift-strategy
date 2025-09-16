@@ -25,6 +25,31 @@ const stats: MigrationStats = {
   errors: []
 };
 
+// Generate effect text based on card type and effects
+function generateEffectText(card: Pick<MVPCard, 'type' | 'effects'>): string {
+  switch (card.type) {
+    case 'ATTACK':
+      const attackEffects = card.effects as any;
+      let text = `Opponent loses ${attackEffects.ipDelta.opponent} IP`;
+      if (attackEffects.discardOpponent) {
+        text += ` and discards ${attackEffects.discardOpponent} card${attackEffects.discardOpponent > 1 ? 's' : ''}`;
+      }
+      return text + '.';
+      
+    case 'MEDIA':
+      const mediaEffects = card.effects as any;
+      const delta = mediaEffects.truthDelta;
+      return `${delta > 0 ? '+' : ''}${delta}% Truth.`;
+      
+    case 'ZONE':
+      const zoneEffects = card.effects as any;
+      return `Target a state. +${zoneEffects.pressureDelta} Pressure to capture it.`;
+      
+    default:
+      return 'Unknown effect.';
+  }
+}
+
 function normalizeRarity(rarity: any): Rarity {
   const r = String(rarity || 'common').toLowerCase();
   if (['common', 'uncommon', 'rare', 'legendary'].includes(r)) {
@@ -101,7 +126,9 @@ function migrateCard(oldCard: GameCard): MVPCard {
       rarity,
       cost,
       effects: finalEffects,
-      flavor: oldCard.flavorTruth || oldCard.flavorGov || (oldCard as any).flavor || '',
+      text: oldCard.text || generateEffectText({ type, effects: finalEffects }),
+      flavorTruth: oldCard.flavorTruth || oldCard.text || `Truth sees: ${oldCard.name}`,
+      flavorGov: oldCard.flavorGov || oldCard.text || `Government responds: ${oldCard.name}`,
       artId: (oldCard as any).artId
     };
 
