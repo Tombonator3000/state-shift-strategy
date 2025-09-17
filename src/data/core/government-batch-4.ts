@@ -99,8 +99,7 @@ export const governmentBatch4: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "If it leaks on time, it isn't an accident.",
-    "orig_type": "MEDIA"
+    "flavor": "If it leaks on time, it isn't an accident."
   },
   {
     "id": "GOV-159",
@@ -140,8 +139,7 @@ export const governmentBatch4: GameCard[] = [
         "opponent": 3
       }
     },
-    "flavor": "The story will be told later. Maybe.",
-    "orig_type": "MEDIA"
+    "flavor": "The story will be told later. Maybe."
   },
   {
     "id": "GOV-162",
@@ -255,8 +253,7 @@ export const governmentBatch4: GameCard[] = [
         "opponent": 1
       }
     },
-    "flavor": "The abstract tells a comforting story.",
-    "orig_type": "MEDIA"
+    "flavor": "The abstract tells a comforting story."
   },
   {
     "id": "GOV-171",
@@ -534,8 +531,7 @@ export const governmentBatch4: GameCard[] = [
         "opponent": 1
       }
     },
-    "flavor": "Every line ends in our pocket.",
-    "orig_type": "ZONE"
+    "flavor": "Every line ends in our pocket."
   },
   {
     "id": "GOV-193",
@@ -573,8 +569,7 @@ export const governmentBatch4: GameCard[] = [
         "opponent": 1
       }
     },
-    "flavor": "The stagehands run the show.",
-    "orig_type": "MEDIA"
+    "flavor": "The stagehands run the show."
   },
   {
     "id": "GOV-196",
@@ -636,7 +631,6 @@ export const governmentBatch4: GameCard[] = [
         "opponent": 4
       }
     },
-    "flavor": "Even the shadow has a shadow.",
-    "orig_type": "MEDIA"
+    "flavor": "Even the shadow has a shadow."
   }
 ];

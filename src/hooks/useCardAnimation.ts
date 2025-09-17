@@ -229,7 +229,7 @@ export const useCardAnimation = () => {
             ${cardData.text || 'Effect unknown'}
           </div>
           <div class="text-xs italic text-muted-foreground text-center min-h-6 border-t border-border pt-2">
-            "${cardData.flavor ?? cardData.flavorGov ?? cardData.flavorTruth || 'No flavor text'}"
+            "${cardData.flavor ?? cardData.flavorGov ?? cardData.flavorTruth ?? 'No flavor text'}"
           </div>
           <div class="text-xs text-center font-bold text-primary">
             DEPLOYED

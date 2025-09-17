@@ -214,8 +214,7 @@ export const governmentBatch3: GameCard[] = [
         "opponent": 1
       }
     },
-    "flavor": "Practice makes perfect headlines.",
-    "orig_type": "MEDIA"
+    "flavor": "Practice makes perfect headlines."
   },
   {
     "id": "GOV-118",
@@ -514,8 +513,7 @@ export const governmentBatch3: GameCard[] = [
         "opponent": 1
       }
     },
-    "flavor": "Darken the lights, dim the doubts.",
-    "orig_type": "MEDIA"
+    "flavor": "Darken the lights, dim the doubts."
   },
   {
     "id": "GOV-141",

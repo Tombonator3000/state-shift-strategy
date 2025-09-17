@@ -10,7 +10,9 @@ export const governmentBatch1: GameCard[] = [
     "cost": 3,
     "effects": {
       "truthDelta": -1
-    }
+    },
+    "flavorTruth": "Just another military exercise, nothing to see here.",
+    "flavorGov": "Standard operational readiness training as scheduled."
   },
   {
     "id": "GOV-002",
@@ -22,7 +24,9 @@ export const governmentBatch1: GameCard[] = [
     "effects": {
       "truthDelta": -2
     },
-    "flavor": "The fewer words, the safer the world."
+    "flavor": "The fewer words, the safer the world.",
+    "flavorTruth": "What they're not telling you speaks volumes.",
+    "flavorGov": "The fewer words, the safer the world."
   },
   {
     "id": "GOV-003",
@@ -36,7 +40,9 @@ export const governmentBatch1: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "Democracy is great. Backups are greater."
+    "flavor": "Democracy is great. Backups are greater.",
+    "flavorTruth": "When democracy fails, what takes its place?",
+    "flavorGov": "Democracy is great. Backups are greater."
   },
   {
     "id": "GOV-004",

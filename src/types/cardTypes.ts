@@ -44,8 +44,8 @@ export interface GameCard {
   // Text fields - both must exist for flavor routing
   text?: string;
   flavor?: string;
-  flavorTruth: string;  // Required
-  flavorGov: string;    // Required
+  flavorTruth?: string;  // Temporarily optional
+  flavorGov?: string;    // Temporarily optional
   
   // Gameplay
   effects?: CardEffects;

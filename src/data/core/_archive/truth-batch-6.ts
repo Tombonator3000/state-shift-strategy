@@ -1,7 +1,7 @@
 // Truth Batch 6 - v2.1E Compliant Cards
 // TRUTH-126 to TRUTH-150
 
-import type { GameCard } from '../../types/cardTypes';
+import type { GameCard } from '../../../types/cardTypes';
 
 export const CORE_BATCH_TRUTH_6: GameCard[] = [
   {

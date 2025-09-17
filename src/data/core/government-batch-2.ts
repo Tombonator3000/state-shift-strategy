@@ -432,8 +432,7 @@ export const governmentBatch2: GameCard[] = [
         "opponent": 4
       }
     },
-    "flavor": "Minutes vanish, so do freedoms.",
-    "orig_type": "MEDIA"
+    "flavor": "Minutes vanish, so do freedoms."
   },
   {
     "id": "GOV-085",
