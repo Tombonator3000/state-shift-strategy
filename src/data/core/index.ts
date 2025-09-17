@@ -1,32 +1,50 @@
 import type { GameCard } from '@/rules/mvp';
 
-// TRUTH (4 × 50)
-import { truthBatch1 } from './truth-batch-1';
-import { truthBatch2 } from './truth-batch-2';
-import { truthBatch3 } from './truth-batch-3';
-import { truthBatch4 } from './truth-batch-4';
+const coreModules = import.meta.glob<true, string, { default: GameCard[] }>(
+  '/src/data/core/**/[!_]*.ts',
+  { eager: true },
+);
 
-// GOVERNMENT (4 × 50)
-import { governmentBatch1 } from './government-batch-1';
-import { governmentBatch2 } from './government-batch-2';
-import { governmentBatch3 } from './government-batch-3';
-import { governmentBatch4 } from './government-batch-4';
+const SOURCE_COUNTS: Record<string, number> = {};
+const SEEN_IDS = new Set<string>();
 
-export const CARD_DATABASE_CORE: GameCard[] = [
-  ...truthBatch1,
-  ...truthBatch2,
-  ...truthBatch3,
-  ...truthBatch4,
-  ...governmentBatch1,
-  ...governmentBatch2,
-  ...governmentBatch3,
-  ...governmentBatch4,
-];
+const moduleEntries = Object.entries(coreModules)
+  .filter(([path]) => !path.includes('/_') && !path.endsWith('/index.ts'))
+  .sort(([pathA], [pathB]) => pathA.localeCompare(pathB));
+
+const CORE_CARDS: GameCard[] = [];
+
+for (const [path, mod] of moduleEntries) {
+  const cards = (mod as any).default ?? Object.values(mod)[0];
+  if (!Array.isArray(cards)) continue;
+
+  const before = CORE_CARDS.length;
+
+  for (const card of cards as GameCard[]) {
+    if (!card?.id || SEEN_IDS.has(card.id)) continue;
+    SEEN_IDS.add(card.id);
+    CORE_CARDS.push(card);
+  }
+
+  const added = CORE_CARDS.length - before;
+  if (added > 0) {
+    const displayPath = path.replace(/^.*\/src\/data\/core\//, '');
+    SOURCE_COUNTS[displayPath] = added;
+  }
+}
 
 if (typeof import.meta !== 'undefined' && import.meta.env?.MODE !== 'production') {
-  const total = CARD_DATABASE_CORE.length;
-  const truth = CARD_DATABASE_CORE.filter((card) => card.faction === 'truth').length;
-  const government = CARD_DATABASE_CORE.filter((card) => card.faction === 'government').length;
+  const total = CORE_CARDS.length;
+  const truth = CORE_CARDS.filter(card => card.faction === 'truth').length;
+  const government = CORE_CARDS.filter(card => card.faction === 'government').length;
+
+  console.info('[CORE RECOVERY]', {
+    files: moduleEntries.length,
+    total,
+    truth,
+    government,
+    sources: SOURCE_COUNTS,
+  });
 
   if (total !== 400 || truth !== 200 || government !== 200) {
     console.warn('[CORE] Unexpected counts', { total, truth, government });
@@ -34,5 +52,7 @@ if (typeof import.meta !== 'undefined' && import.meta.env?.MODE !== 'production'
     console.log('[CORE] OK', { total, truth, government });
   }
 }
+
+export const CARD_DATABASE_CORE: GameCard[] = CORE_CARDS;
 
 export default CARD_DATABASE_CORE;
