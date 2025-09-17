@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AudioProvider } from '@/contexts/AudioContext';
-import { GameUiFeedProvider } from '@/hooks/useGameUiFeed';
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import EffectSystemDashboard from "./pages/EffectSystemDashboard";
@@ -24,25 +23,23 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <GameUiFeedProvider>
-        <TooltipProvider>
-          <AudioProvider>
-            <AchievementProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/dev/effects" element={<EffectSystemDashboard />} />
-                  <Route path="/dev/recovery" element={<DatabaseRecovery />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </AchievementProvider>
-          </AudioProvider>
-        </TooltipProvider>
-      </GameUiFeedProvider>
+      <TooltipProvider>
+        <AudioProvider>
+          <AchievementProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/dev/effects" element={<EffectSystemDashboard />} />
+                <Route path="/dev/recovery" element={<DatabaseRecovery />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </AchievementProvider>
+        </AudioProvider>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 };
