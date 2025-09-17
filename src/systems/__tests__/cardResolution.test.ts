@@ -1,136 +1,148 @@
-// Test file disabled - bun:test not available in this environment  
-/*
 import { describe, expect, it } from 'bun:test';
-import {
-  resolveCardEffects,
-  type GameSnapshot,
-  type AchievementTracker,
-} from '../cardResolution';
 import type { GameCard } from '@/rules/mvp';
-import type { PlayerStats } from '../../data/achievementSystem';
+import { expectedCost } from '@/rules/mvp';
+import type { PlayerStats } from '@/data/achievementSystem';
+import {
+  resolveCardMVP,
+  type AchievementTracker,
+  type CardActor,
+  type GameSnapshot,
+} from '../cardResolution';
 
-const createBaseState = (): GameSnapshot => ({
+const createBaseSnapshot = (overrides: Partial<GameSnapshot> = {}): GameSnapshot => ({
   truth: 60,
-  ip: 10,
+  ip: 12,
   aiIP: 20,
-  hand: [] as GameCard[],
-  aiHand: [] as GameCard[],
+  hand: [],
+  aiHand: [],
   controlledStates: [],
   aiControlledStates: [],
   round: 1,
   turn: 1,
   faction: 'truth',
+  targetState: null,
   states: [
     {
       id: 'CA',
       name: 'California',
       abbreviation: 'CA',
       baseIP: 5,
-      defense: 3,
+      defense: 2,
       pressure: 0,
       owner: 'neutral',
     },
   ],
+  ...overrides,
 });
 
-const createAchievementTracker = () => {
+const createTracker = (initial?: Partial<PlayerStats>): AchievementTracker & { updates: Array<Partial<PlayerStats>> } => {
   const updates: Array<Partial<PlayerStats>> = [];
-
-  const tracker: AchievementTracker = {
+  return {
+    updates,
     stats: {
       total_states_controlled: 0,
       max_states_controlled_single_game: 0,
       max_ip_reached: 0,
       max_truth_reached: 60,
       min_truth_reached: 60,
+      ...initial,
     },
-    updateStats: (update: Partial<PlayerStats>) => {
+    updateStats: update => {
       updates.push(update);
     },
   };
-
-  return { tracker, updates };
 };
 
-describe('resolveCardEffects - direct attack resolution', () => {
-  it('applies opponent IP delta for direct attacks', () => {
-    const gameState = createBaseState();
-    const { tracker, updates } = createAchievementTracker();
+describe('resolveCardMVP', () => {
+  const actor: CardActor = 'human';
 
-    const attackCard: GameCard = {
-      id: 'attack-direct-ip',
+  it('applies attack effects, IP costs, and achievement updates', () => {
+    const gameState = createBaseSnapshot();
+    const tracker = createTracker();
+    const card: GameCard = {
+      id: 'attack-direct',
       name: 'Coordinated Strike',
       type: 'ATTACK',
       faction: 'truth',
       rarity: 'common',
-      cost: 3,
-      text: '',
-      flavorTruth: '',
-      flavorGov: '',
+      cost: expectedCost('ATTACK', 'common'),
       effects: { ipDelta: { opponent: 4 } },
     };
 
-    const resolution = resolveCardEffects(gameState, attackCard, null, tracker);
+    const result = resolveCardMVP(gameState, card, null, actor, tracker);
 
-    expect(resolution.aiIP).toBe(16);
-    expect(resolution.ip).toBe(11);
-    expect(resolution.damageDealt).toBe(0);
-    expect(updates.length).toBe(1);
-    expect(updates[0]?.max_ip_reached).toBe(11);
-    expect(updates[0]?.max_truth_reached).toBe(60);
-    expect(updates[0]?.min_truth_reached).toBe(60);
-    // Ensure the original game state remains unchanged
-    expect(gameState.aiIP).toBe(20);
+    expect(result.aiIP).toBe(16);
+    expect(result.ip).toBe(10);
+    expect(result.damageDealt).toBe(4);
+    expect(result.logEntries[0]).toContain('Coordinated Strike');
+    expect(result.logEntries[0]).toContain('Opponent loses 4 IP');
+    expect(tracker.updates).toHaveLength(1);
+    expect(tracker.updates[0]).toMatchObject({
+      max_ip_reached: 10,
+      max_truth_reached: 60,
+      min_truth_reached: 60,
+    });
   });
 
-  it('applies fixed damage when present on direct attacks', () => {
-    const gameState = createBaseState();
-    const { tracker, updates } = createAchievementTracker();
-
-    const damageCard: GameCard = {
-      id: 'attack-direct-damage',
-      name: 'Direct Hit',
-      type: 'ATTACK',
+  it('propagates media truth gains to the global track', () => {
+    const gameState = createBaseSnapshot({ truth: 50, ip: 8 });
+    const tracker = createTracker();
+    const card: GameCard = {
+      id: 'media-broadcast',
+      name: 'Signal Flood',
+      type: 'MEDIA',
       faction: 'truth',
       rarity: 'common',
-      cost: 2,
-      text: '',
-      flavorTruth: '',
-      flavorGov: '',
-      effects: { truthDelta: -5 },
+      cost: expectedCost('MEDIA', 'common'),
+      effects: { truthDelta: 6 },
     };
 
-    const resolution = resolveCardEffects(gameState, damageCard, null, tracker);
+    const result = resolveCardMVP(gameState, card, null, actor, tracker);
 
-    expect(resolution.aiIP).toBe(15);
-    expect(resolution.damageDealt).toBe(5);
-    expect(resolution.logEntries).toContain('Direct Hit: Deal 5 damage');
-    expect(updates.length).toBeGreaterThan(0);
-    expect(updates[updates.length - 1]?.max_ip_reached).toBe(8);
+    expect(result.truth).toBe(56);
+    expect(result.ip).toBe(5);
+    expect(result.logEntries.some(entry => entry.includes('Truth manipulation'))).toBe(true);
+    expect(result.damageDealt).toBe(0);
   });
 
-  it('resolves even when no achievement tracker is provided', () => {
-    const gameState = createBaseState();
-
-    const attackCard: GameCard = {
-      id: 'attack-no-achievement',
-      name: 'Swift Raid',
-      type: 'ATTACK',
+  it('captures contested states when zone pressure meets the defense threshold', () => {
+    const gameState = createBaseSnapshot({
+      ip: 10,
+      states: [
+        {
+          id: 'NV',
+          name: 'Nevada',
+          abbreviation: 'NV',
+          baseIP: 2,
+          defense: 1,
+          pressure: 0,
+          owner: 'neutral',
+        },
+      ],
+    });
+    const tracker = createTracker();
+    const card: GameCard = {
+      id: 'zone-seizure',
+      name: 'Silent Takeover',
+      type: 'ZONE',
       faction: 'truth',
       rarity: 'common',
-      cost: 4,
-      text: '',
-      flavorTruth: '',
-      flavorGov: '',
-      effects: { ipDelta: { opponent: 2 } },
+      cost: expectedCost('ZONE', 'common'),
+      target: { scope: 'state', count: 1 },
+      effects: { pressureDelta: 2 },
     };
 
-    const resolution = resolveCardEffects(gameState, attackCard, null);
+    const result = resolveCardMVP(gameState, card, 'NV', actor, tracker);
 
-    expect(resolution.aiIP).toBe(18);
-    expect(resolution.damageDealt).toBe(0);
-    expect(gameState.aiIP).toBe(20);
+    expect(result.ip).toBe(6);
+    expect(result.states[0]?.owner).toBe('player');
+    expect(result.controlledStates).toContain('NV');
+    expect(result.aiControlledStates).not.toContain('NV');
+    expect(result.targetState).toBeNull();
+    expect(result.logEntries.some(entry => entry.includes('captured'))).toBe(true);
+    expect(tracker.updates.at(-1)).toMatchObject({
+      total_states_controlled: 1,
+      max_states_controlled_single_game: 1,
+    });
   });
 });
-*/
-export {}; // Make this a module
