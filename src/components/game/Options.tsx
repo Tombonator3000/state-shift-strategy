@@ -7,6 +7,61 @@ import { useAudioContext } from '@/contexts/AudioContext';
 import { useState, useEffect } from 'react';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
 import { useUiTheme, type UiTheme } from '@/hooks/useTheme';
+import type { Difficulty } from '@/ai';
+import { getDifficulty, setDifficultyFromLabel } from '@/state/settings';
+
+type DifficultyLabel =
+  | 'EASY - Intelligence Leak'
+  | 'NORMAL - Classified'
+  | 'HARD - Top Secret'
+  | 'TOP SECRET+ - Meta-Cheating';
+
+const DIFFICULTY_LABELS: Record<Difficulty, DifficultyLabel> = {
+  EASY: 'EASY - Intelligence Leak',
+  NORMAL: 'NORMAL - Classified',
+  HARD: 'HARD - Top Secret',
+  TOP_SECRET_PLUS: 'TOP SECRET+ - Meta-Cheating',
+};
+
+const LEGACY_DIFFICULTY_LABELS: Record<string, DifficultyLabel> = {
+  easy: DIFFICULTY_LABELS.EASY,
+  'easy - intelligence leak': DIFFICULTY_LABELS.EASY,
+  normal: DIFFICULTY_LABELS.NORMAL,
+  medium: DIFFICULTY_LABELS.NORMAL,
+  'normal - classified': DIFFICULTY_LABELS.NORMAL,
+  hard: DIFFICULTY_LABELS.HARD,
+  'hard - top secret': DIFFICULTY_LABELS.HARD,
+  legendary: DIFFICULTY_LABELS.TOP_SECRET_PLUS,
+  top_secret_plus: DIFFICULTY_LABELS.TOP_SECRET_PLUS,
+  'top secret+ - meta-cheating': DIFFICULTY_LABELS.TOP_SECRET_PLUS,
+};
+
+const DIFFICULTY_LABEL_SET = new Set<DifficultyLabel>(Object.values(DIFFICULTY_LABELS));
+const DIFFICULTY_OPTIONS: DifficultyLabel[] = [
+  DIFFICULTY_LABELS.EASY,
+  DIFFICULTY_LABELS.NORMAL,
+  DIFFICULTY_LABELS.HARD,
+  DIFFICULTY_LABELS.TOP_SECRET_PLUS,
+];
+
+const resolveStoredDifficultyLabel = (value: unknown): DifficultyLabel => {
+  if (typeof value === 'string') {
+    if (DIFFICULTY_LABEL_SET.has(value as DifficultyLabel)) {
+      return value as DifficultyLabel;
+    }
+
+    const normalized = LEGACY_DIFFICULTY_LABELS[value.toLowerCase()];
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  try {
+    return DIFFICULTY_LABELS[getDifficulty()];
+  } catch {
+    return DIFFICULTY_LABELS.NORMAL;
+  }
+};
 
 interface OptionsProps {
   onClose: () => void;
@@ -23,7 +78,7 @@ interface GameSettings {
   fastMode: boolean;
   showTooltips: boolean;
   enableKeyboardShortcuts: boolean;
-  difficulty: 'easy' | 'normal' | 'hard';
+  difficulty: DifficultyLabel;
   screenShake: boolean;
   confirmActions: boolean;
   drawMode: 'standard' | 'classic' | 'momentum' | 'catchup' | 'fast';
@@ -37,7 +92,15 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const [settings, setSettings] = useState<GameSettings>(() => {
     // Initialize settings from audio system and localStorage
     const savedSettings = localStorage.getItem('gameSettings');
-    const baseSettings = {
+    const defaultDifficultyLabel = (() => {
+      try {
+        return DIFFICULTY_LABELS[getDifficulty()];
+      } catch {
+        return DIFFICULTY_LABELS.NORMAL;
+      }
+    })();
+
+    const baseSettings: GameSettings = {
       masterVolume: Math.round(audio.config.volume * 100),
       musicVolume: 50,
       sfxVolume: 80,
@@ -46,22 +109,28 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       fastMode: false,
       showTooltips: true,
       enableKeyboardShortcuts: true,
-      difficulty: 'normal' as const,
+      difficulty: defaultDifficultyLabel,
       screenShake: true,
       confirmActions: true,
-      drawMode: 'standard' as const,
+      drawMode: 'standard',
       uiTheme: uiTheme,
     };
-    
+
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
-        return { ...baseSettings, ...parsed };
+        const difficultyLabel = resolveStoredDifficultyLabel(parsed?.difficulty);
+        const mergedSettings = { ...baseSettings, ...parsed, difficulty: difficultyLabel };
+        setDifficultyFromLabel(difficultyLabel);
+        return mergedSettings;
       } catch (error) {
         console.error('Failed to parse saved settings:', error);
+        setDifficultyFromLabel(baseSettings.difficulty);
       }
+    } else {
+      setDifficultyFromLabel(baseSettings.difficulty);
     }
-    
+
     return baseSettings;
   });
 
@@ -81,6 +150,9 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const updateSettings = (newSettings: Partial<GameSettings>) => {
     const updatedSettings = { ...settings, ...newSettings };
     setSettings(updatedSettings);
+    if (newSettings.difficulty) {
+      setDifficultyFromLabel(newSettings.difficulty);
+    }
     localStorage.setItem('gameSettings', JSON.stringify(updatedSettings));
   };
 
@@ -94,13 +166,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       fastMode: false,
       showTooltips: true,
       enableKeyboardShortcuts: true,
-      difficulty: 'normal',
+      difficulty: DIFFICULTY_LABELS.NORMAL,
       screenShake: true,
       confirmActions: true,
       drawMode: 'standard',
       uiTheme: 'tabloid_bw',
     };
     setSettings(defaultSettings);
+    setDifficultyFromLabel(defaultSettings.difficulty);
     localStorage.setItem('gameSettings', JSON.stringify(defaultSettings));
     setUiTheme('tabloid_bw');
   };
@@ -330,14 +403,16 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <label className="text-sm font-medium text-newspaper-text mb-2 block">
                   Difficulty Level
                 </label>
-                <select 
+                <select
                   value={settings.difficulty}
-                  onChange={(e) => updateSettings({ difficulty: e.target.value as 'easy' | 'normal' | 'hard' })}
+                  onChange={(e) => updateSettings({ difficulty: e.target.value as DifficultyLabel })}
                   className="w-full p-2 border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded"
                 >
-                  <option value="easy">EASY - Intelligence Leak</option>
-                  <option value="normal">NORMAL - Classified</option>
-                  <option value="hard">HARD - Top Secret</option>
+                  {DIFFICULTY_OPTIONS.map(option => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
                 </select>
               </div>
 
