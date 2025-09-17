@@ -1,7 +1,6 @@
 {
   "type": "module",
   "scripts": {
-    "rebuild-core": "tsx rebuild-core-db.ts",
     "validate-core": "tsx validate-core-count.ts"
   }
 }

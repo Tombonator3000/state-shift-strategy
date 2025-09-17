@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EnhancedCardBalancer } from '@/data/enhancedCardBalancing';
+import { extensionManager } from '@/data/extensionSystem';
 import { Download, RefreshCw, Image, FileText, BarChart3 } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts';
 
@@ -20,8 +21,8 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
 
   // Get actual card counts from the balancer
   const actualCardCount = report.totalCards;
-  const coreCardCount = 20; // Current CARD_DATABASE size
-  const extensionCardCount = actualCardCount - coreCardCount;
+  const extensionCardCount = includeExtensions ? extensionManager.getAllExtensionCards().length : 0;
+  const coreCardCount = actualCardCount - extensionCardCount;
 
   console.log(`🔢 Enhanced Balancing Card Counts:
   - Core Database: ${coreCardCount} cards
@@ -35,7 +36,7 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `balance-report-v21e-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `balance-report-mvp-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -131,7 +132,7 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
       <Card className="w-full max-w-6xl h-[90vh] bg-gray-900 border-gray-700 overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
-            <h2 className="text-xl font-bold text-white font-mono">ENHANCED BALANCING v2.1E</h2>
+            <h2 className="text-xl font-bold text-white font-mono">ENHANCED BALANCING (MVP)</h2>
             <div className="text-xs text-green-400 mt-1">Oppdatert for strukturerte card effects</div>
           </div>
           <div className="flex items-center gap-2">

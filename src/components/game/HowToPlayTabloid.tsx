@@ -17,7 +17,7 @@ const HowToPlayTabloid = ({ onClose }: HowToPlayTabloidProps) => {
   useEffect(() => {
     const loadRules = async () => {
       try {
-        const response = await fetch('/ShadowGov-Rules-v2.1.md');
+        const response = await fetch('/how-to-play-mvp.md');
         if (response.ok) {
           const content = await response.text();
           setRulesContent(content);
@@ -33,90 +33,33 @@ const HowToPlayTabloid = ({ onClose }: HowToPlayTabloidProps) => {
     loadRules();
   }, []);
 
-  const fallbackRules = `# SHADOW GOVERNMENT — Official Rules v2.1
+  const fallbackRules = `# How to Play ShadowGov (MVP Rules)
 
-## 1. Theme & Premise
-Shadow Government (Deep State) vs Truth Seekers (Conspiracy opposition).  
-- Government: suppress public awareness, control narrative.  
-- Truth Seekers: expose secrets, raise paranoia to 90% Truth.  
-Satirical, humorous style with **Weekly World News** flair.
+## Objective
+Win by pushing national Truth to 100 or by reducing your opponent's Influence Points (IP) to zero. Control states with pressure to accelerate your plan.
 
-## 2. Objective
-Win immediately if ANY of the following is true:
-- Truth ≥ 90% (Truth Seekers win)  
-- Truth ≤ 10% (Government wins)  
-- Control 10 states  
-- Reach 200 IP (Influence Points)  
-- Complete your Secret Agenda  
+## Turn Structure
+1. **Start of Turn** – Draw up to 5 cards and gain IP (5 + number of states you control).
+2. **Main Phase** – Play up to three cards, targeting states when required.
+3. **End Phase** – Resolve ongoing effects and pass the turn.
 
-## 3. Components
-- USA map with 50 states (interactive).  
-- Cards (MEDIA, ZONE, ATTACK, DEFENSIVE).  
-- IP (currency).  
-- Truth meter (0–100%).  
-- State Pressure counters (per player).  
-- Defense values (per state).  
-- Secret Agenda deck (hidden objectives).  
-- Newspaper overlay (round summary with satire).  
+## Card Types
+- **MEDIA** – Adjust Truth directly. Costs are fixed by rarity (Common 3, Uncommon 4, Rare 5, Legendary 6).
+- **ATTACK** – Spend IP to damage your opponent's IP or force discards. Costs follow rarity (2/3/4/5).
+- **ZONE** – Add pressure to specific states to claim control. Costs follow rarity (4/5/6/7).
 
-## 4. Setup
-1. Select Faction:  
-   - **Government**: Truth starts 40%, +10 IP.  
-   - **Truth Seekers**: Truth starts 60%, +10 Truth, +1 extra starting card.  
-2. Draw 1 hidden Secret Agenda.  
-3. Starting Hand: 5 cards (Truth Seekers get +1).  
-4. Initial Truth: 50% baseline, adjusted by faction bonus.  
+## Effects
+The MVP ruleset supports a focused effect set:
+- \`truthDelta\` for MEDIA cards.
+- \`ipDelta.opponent\` and optional \`discardOpponent\` for ATTACK cards.
+- \`pressureDelta\` for ZONE cards.
 
-## 5. Turn Structure
-Each round has two turns: player → opponent.
+Any legacy effect keys are ignored by the sanitiser during import.
 
-**Start of Turn**  
-- Draw until hand = 5 cards (if possible).  
-- Gain +5 base IP + IP from states owned.  
-
-**Action Phase**  
-- Play up to 3 cards, paying IP cost.  
-- **ATTACK** triggers Defense reaction:  
-  - Opponent may play 1 DEFENSIVE within 4s.  
-  - If none, Attack resolves.  
-
-**Resolution**  
-- Apply card effects.  
-- ZONE captures are immediate (Pressure ≥ Defense).  
-
-**Newspaper Phase**  
-- Satirical overlay with plays + 1 random event.  
-
-**Victory Check**  
-- If any win condition is met, game ends.  
-
-## 6. Cards & Costs
-Fixed card costs by type:  
-- MEDIA = 7 IP  
-- ZONE = 5 IP  
-- ATTACK = 6 IP  
-- DEFENSIVE = 3 IP  
-
-Rarity distribution:  
-- Common 70% (grey border)  
-- Uncommon 20% (green)  
-- Rare 8% (blue)  
-- Legendary 2% (orange)  
-
-## 7. Hotkeys
-- **1–9**: Play cards 1-9 from hand
-- **Space**: End Turn
-- **ESC**: Options menu
-- **S**: Quick Save
-- **L**: Quick Load
-- **H**: How to Play
-
-## 8. Victory Conditions
-- Truth ≥90% (Truth Seekers win).  
-- Truth ≤10% (Government wins).  
-- Control 10 states.  
-- Reach 200 IP.  
-- Complete Secret Agenda.  
+## Deck Building Tips
+- Keep a balance of card types so you can react to board state changes.
+- ZONE cards win games when backed by MEDIA momentum.
+- ATTACK cards are most efficient when the opponent banks IP for big plays.
 `;
 
   const scrollTo = (direction: 'up' | 'down') => {

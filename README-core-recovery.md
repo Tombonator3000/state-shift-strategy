@@ -44,17 +44,10 @@ export const CORE_BATCH_TRUTH_X: GameCard[] = [
 
 ## 🔧 Manual Recovery (CLI)
 
-### Rebuild Database
-```bash
-# Generate static cardDatabase.ts from all batch files
-cd scripts
-npm run rebuild-core
-```
-
 ### Validate Database
 ```bash
 # Check that we have 400 cards (200 truth + 200 government)
-cd scripts  
+cd scripts
 npm run validate-core
 ```
 
@@ -62,7 +55,7 @@ npm run validate-core
 
 1. **Runtime Recovery**: Automatic batch collection on startup
 2. **Fallback Protection**: 20 minimal cards prevent complete failure
-3. **Validation Scripts**: Ensure 400 card count in CI/CD
+3. **Validation Scripts**: Ensure 400 card count in CI/CD (run `npm run validate-core`)
 4. **Enhanced Dashboard**: Shows real card counts with core/extension breakdown
 
 ## 📊 Expected Results
