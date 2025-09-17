@@ -2,7 +2,13 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./index.html",
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}"
+  ],
   prefix: "",
   theme: {
     container: {
@@ -67,11 +73,35 @@ export default {
         "newspaper-border": "hsl(var(--newspaper-border))",
         "newspaper-accent": "hsl(var(--newspaper-accent))",
         "newspaper-headline": "hsl(var(--newspaper-headline))",
+        paper: "var(--pt-paper)",
+        ink: "var(--pt-ink)",
+        truth: "var(--pt-truth)",
+        gov: "var(--pt-gov)",
+        rarity: {
+          common: "var(--pt-rarity-common)",
+          uncommon: "var(--pt-rarity-uncommon)",
+          rare: "var(--pt-rarity-rare)",
+          legendary: "var(--pt-rarity-legendary)"
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        tabloid: "var(--pt-radius)",
+      },
+      fontFamily: {
+        headline: ["Anton", "Bebas Neue", "system-ui", "sans-serif"],
+        tabloid: ["Bebas Neue", "Anton", "system-ui", "sans-serif"],
+      },
+      boxShadow: {
+        tabloid: "0 6px 24px var(--pt-shadow)",
+      },
+      height: {
+        cardH: "var(--pt-card-h)",
+      },
+      width: {
+        cardW: "var(--pt-card-w)",
       },
       keyframes: {
         "accordion-down": {
