@@ -60,10 +60,28 @@ export default function UiOverlays() {
       window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 900);
     };
 
+    window.uiFlashState = (stateId: string, by: "P1" | "P2") => {
+      const el =
+        document.querySelector(`[data-state="${stateId}"]`) ||
+        document.getElementById(`state-${stateId}`) ||
+        document.querySelector(`[data-usps="${stateId}"]`);
+
+      if (el) {
+        el.classList.add("capture-glow");
+        window.setTimeout(() => el.classList.remove("capture-glow"), 900);
+      } else {
+        const id = Date.now() + Math.random();
+        const text = `Captured ${stateId}`;
+        setToasts((t) => [...t, { id, text, slot: "truth" }]);
+        window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 1100);
+      }
+    };
+
     return () => {
       delete window.uiShowOpponentCard;
       delete window.uiToastTruth;
       delete window.uiToastIp;
+      delete window.uiFlashState;
     };
   }, []);
 

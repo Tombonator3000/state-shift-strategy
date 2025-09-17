@@ -52,6 +52,10 @@ function applyAttackEffect(
   const damage = Math.max(0, effects.ipDelta?.opponent ?? 0);
   const before = state.players[opponent].ip;
   state.players[opponent].ip = clampIP(before - damage);
+  const delta = state.players[opponent].ip - before;
+  if (delta !== 0 && typeof window !== 'undefined' && window.uiToastIp) {
+    window.uiToastIp(opponent, delta);
+  }
   state.log.push(`Opponent loses ${damage} IP (${before} → ${state.players[opponent].ip})`);
 
   if ((effects.discardOpponent ?? 0) > 0) {
@@ -81,7 +85,8 @@ function applyZoneEffect(
   };
 
   const defense = state.stateDefense[targetStateId] ?? Infinity;
-  if (updatedOwnerPressure >= defense) {
+  const captured = updatedOwnerPressure >= defense;
+  if (captured) {
     pressureByState = {
       ...pressureByState,
       [targetStateId]: { P1: 0, P2: 0 },
@@ -106,6 +111,10 @@ function applyZoneEffect(
 
   state.players = updatedPlayers;
   state.pressureByState = pressureByState;
+
+  if (captured && typeof window !== 'undefined' && window.uiFlashState) {
+    window.uiFlashState(targetStateId, owner);
+  }
 }
 
 export function applyEffectsMvp(

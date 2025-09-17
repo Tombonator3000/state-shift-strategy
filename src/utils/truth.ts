@@ -26,6 +26,10 @@ export function applyTruthDelta<T extends TruthMutable>(
   const before = gs.truth;
   const after = clampTruth(before + delta);
   gs.truth = after;
+  const change = after - before;
+  if (change !== 0 && typeof window !== 'undefined' && window.uiToastTruth) {
+    window.uiToastTruth(change);
+  }
   const arrow = delta >= 0 ? '↑' : '↓';
   gs.log.push(`Truth manipulation ${arrow} (${before}% → ${after}%)`);
   return gs;
