@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Credits from './Credits';
 import HowToPlay from './HowToPlay';
 import Options from './Options';
-import ManageExpansions from './ManageExpansions';
+import ExpansionControl from '@/components/expansions/ExpansionControl';
 import CardCollection from './CardCollection';
 import CreditsTableoid from './CreditsTableoid';
 import HowToPlayTabloid from './HowToPlayTabloid';
@@ -181,7 +181,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
   }
 
   if (showManageExpansions) {
-    return <ManageExpansions onClose={() => setShowManageExpansions(false)} />;
+    return <ExpansionControl onClose={() => setShowManageExpansions(false)} />;
   }
 
   if (showFactionSelect) {

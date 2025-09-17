@@ -10,6 +10,8 @@
     "lint": "eslint .",
     "test": "bun test --coverage --coverage-reporter=text",
     "preview": "vite preview",
+    "predev": "node scripts/generate-extension-index.mjs",
+    "prebuild": "node scripts/generate-extension-index.mjs",
     "ingest:core": "ts-node scripts/splitCoreToBatches.ts",
     "validate:mvp": "bun scripts/validate-mvp-batch.ts"
   },

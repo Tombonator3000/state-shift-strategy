@@ -1,100 +1,80 @@
 import type { GameCard } from '@/rules/mvp';
-import { EXPANSION_MANIFEST, loadEnabledExpansions } from './index';
+import {
+  EXPANSION_MANIFEST,
+  ensureExpansionManifest,
+  loadEnabledExpansions,
+  refreshExpansionManifest,
+} from './index';
+import type { MixMode } from '@/lib/decks/expansions';
+import { loadPrefs, savePrefs } from '@/lib/persist';
 
-const STORAGE_KEY = 'sg:expansions';
-const MANIFEST_IDS = new Set(EXPANSION_MANIFEST.map(pack => pack.id));
+type StoredPrefs = {
+  mode?: MixMode;
+  enabled?: Record<string, boolean>;
+  customWeights?: Record<string, number>;
+};
 
+type Listener = (payload: { ids: string[]; cards: GameCard[] }) => void;
+
+let prefs: StoredPrefs = { enabled: {}, customWeights: {}, mode: 'BALANCED_MIX' };
 let enabledIdsCache: string[] = [];
 let cachedCards: GameCard[] = [];
 let loadingPromise: Promise<GameCard[]> | null = null;
-const listeners = new Set<(payload: { ids: string[]; cards: GameCard[] }) => void>();
+const listeners = new Set<Listener>();
 
-const readStoredIds = (): string[] => {
-  if (typeof window === 'undefined') {
-    return [...enabledIdsCache];
-  }
-
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return [];
-    }
-
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      return parsed.filter((value): value is string => typeof value === 'string');
-    }
-  } catch (error) {
-    console.warn('[EXPANSIONS] Failed to read stored expansions', error);
-  }
-
-  return [];
-};
-
-const normalizeIds = (ids: string[]): string[] => {
-  return Array.from(new Set(ids.filter(id => MANIFEST_IDS.has(id))));
-};
-
-const persistIds = (ids: string[]) => {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-  } catch (error) {
-    console.warn('[EXPANSIONS] Failed to persist enabled expansions', error);
-  }
-};
+const getManifestIdSet = () => new Set(EXPANSION_MANIFEST.map(pack => pack.id));
 
 const notify = () => {
-  const snapshot = getExpansionCardsSnapshot();
-  const ids = getEnabledExpansionIdsSnapshot();
+  const snapshotCards = getExpansionCardsSnapshot();
+  const snapshotIds = getEnabledExpansionIdsSnapshot();
   for (const listener of listeners) {
     try {
-      listener({ ids, cards: snapshot });
+      listener({ ids: snapshotIds, cards: snapshotCards });
     } catch (error) {
-      console.warn('[EXPANSIONS] Listener error', error);
+      console.warn('[Expansions] listener error', error);
     }
   }
 };
 
-export const getEnabledExpansionIdsSnapshot = (): string[] => {
-  return [...enabledIdsCache];
+const sanitizeEnabledIds = (ids: string[]): string[] => {
+  const manifestIds = getManifestIdSet();
+  return Array.from(new Set(ids.filter(id => manifestIds.has(id))));
 };
 
-export const getExpansionCardsSnapshot = (): GameCard[] => {
-  return [...cachedCards];
+const persistPrefs = () => {
+  savePrefs(prefs);
 };
 
-export const getStoredExpansionIds = (): string[] => {
-  const stored = readStoredIds();
-  enabledIdsCache = normalizeIds(stored);
-  return getEnabledExpansionIdsSnapshot();
+const rebuildEnabledMap = () => {
+  const map: Record<string, boolean> = {};
+  for (const id of enabledIdsCache) {
+    map[id] = true;
+  }
+  prefs.enabled = map;
+  persistPrefs();
 };
 
-export const subscribeToExpansionChanges = (
-  listener: (payload: { ids: string[]; cards: GameCard[] }) => void,
-): (() => void) => {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
+const loadStoredPrefs = () => {
+  const stored = loadPrefs<StoredPrefs>();
+  if (stored && typeof stored === 'object') {
+    prefs = {
+      mode: stored.mode,
+      enabled: stored.enabled ?? {},
+      customWeights: stored.customWeights ?? {},
+    };
+  }
 };
 
-export const refreshExpansionCards = async (ids?: string[]): Promise<GameCard[]> => {
-  const normalized = normalizeIds(ids ?? getStoredExpansionIds());
-  enabledIdsCache = normalized;
-  persistIds(enabledIdsCache);
-
-  const loadPromise = loadEnabledExpansions(enabledIdsCache)
+const ensureCardsLoaded = async () => {
+  const ids = enabledIdsCache;
+  const load = loadEnabledExpansions(ids)
     .then(cards => {
       cachedCards = cards.map(card => ({ ...card }));
       notify();
       return cachedCards;
     })
     .catch(error => {
-      console.warn('[EXPANSIONS] Failed to load expansions', error);
+      console.warn('[Expansions] failed to load cards', error);
       cachedCards = [];
       notify();
       return cachedCards;
@@ -103,25 +83,68 @@ export const refreshExpansionCards = async (ids?: string[]): Promise<GameCard[]>
       loadingPromise = null;
     });
 
-  loadingPromise = loadPromise;
-  return loadPromise;
+  loadingPromise = load;
+  return load;
 };
 
-export const updateEnabledExpansions = async (ids: string[]): Promise<GameCard[]> => {
-  const normalized = normalizeIds(ids);
-  enabledIdsCache = normalized;
-  persistIds(enabledIdsCache);
+export const getEnabledExpansionIdsSnapshot = (): string[] => [...enabledIdsCache];
+
+export const getExpansionCardsSnapshot = (): GameCard[] => cachedCards.map(card => ({ ...card }));
+
+export const getStoredExpansionIds = (): string[] => [...enabledIdsCache];
+
+export const subscribeToExpansionChanges = (listener: Listener): (() => void) => {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+};
+
+export const refreshExpansionCards = async (ids?: string[]): Promise<GameCard[]> => {
+  await ensureExpansionManifest();
+
+  if (ids) {
+    enabledIdsCache = sanitizeEnabledIds(ids);
+  }
+
+  rebuildEnabledMap();
+
   if (loadingPromise) {
     try {
       await loadingPromise;
     } catch {
-      // ignore errors from previous load
+      // ignore previous errors
     }
   }
-  return refreshExpansionCards(enabledIdsCache);
+
+  return ensureCardsLoaded();
+};
+
+export const updateEnabledExpansions = async (ids: string[]): Promise<GameCard[]> => {
+  enabledIdsCache = sanitizeEnabledIds(ids);
+  rebuildEnabledMap();
+
+  if (loadingPromise) {
+    try {
+      await loadingPromise;
+    } catch {
+      // ignore
+    }
+  }
+
+  return ensureCardsLoaded();
 };
 
 export const initializeExpansions = async (): Promise<void> => {
-  enabledIdsCache = normalizeIds(readStoredIds());
-  await refreshExpansionCards(enabledIdsCache);
+  await refreshExpansionManifest();
+  loadStoredPrefs();
+
+  enabledIdsCache = sanitizeEnabledIds(
+    Object.entries(prefs.enabled ?? {})
+      .filter(([, enabled]) => Boolean(enabled))
+      .map(([id]) => id),
+  );
+
+  rebuildEnabledMap();
+  await ensureCardsLoaded();
 };
