@@ -4,6 +4,10 @@
   "version": "1.0.0",
   "author": "ShadowGov Team",
   "description": "Halloween Spooktacular — MVP-compliant pack (ATTACK/MEDIA/ZONE only, table costs, simple flavor).",
+  "factions": [
+    "government"
+  ],
+  "count": 200,
   "cards": [
     {
       "id": "hallo-gov-graveyard-flyer-protocol-001",
