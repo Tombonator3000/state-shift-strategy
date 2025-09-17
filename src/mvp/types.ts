@@ -37,4 +37,5 @@ export type GameState = {
   pressureByState: Record<string, { P1: number; P2: number }>;
   stateDefense: Record<string, number>;
   playsThisTurn: number;
+  log: string[];
 };

@@ -300,6 +300,7 @@ export function clonePlayer(player: PlayerState): PlayerState {
 export function cloneGameState(state: GameState): GameState {
   return {
     ...state,
+    log: [...state.log],
     players: {
       P1: clonePlayer(state.players.P1),
       P2: clonePlayer(state.players.P2),
