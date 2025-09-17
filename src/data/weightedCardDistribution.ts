@@ -1,5 +1,10 @@
 import type { GameCard } from '@/rules/mvp';
 import { ensureMvpCosts, getCoreCards, isMvpCard } from './cardDatabase';
+import { EXPANSION_MANIFEST } from './expansions';
+import {
+  getEnabledExpansionIdsSnapshot,
+  getExpansionCardsSnapshot,
+} from './expansions/state';
 
 export const MVP_TYPE_WEIGHTS: Record<'ATTACK' | 'MEDIA' | 'ZONE', number> = {
   ATTACK: 0.33,
@@ -150,7 +155,7 @@ class WeightedCardDistribution {
   
   // Get available card sets (core only in MVP)
   private getAvailableCardSets(): CardSet[] {
-    return [
+    const sets: CardSet[] = [
       {
         id: 'core',
         name: 'Core Set',
@@ -158,6 +163,40 @@ class WeightedCardDistribution {
         isCore: true,
       },
     ];
+
+    const expansionCards = getExpansionCardsSnapshot();
+    if (expansionCards.length === 0) {
+      return sets;
+    }
+
+    const cardsByExpansion = new Map<string, GameCard[]>();
+    for (const card of expansionCards) {
+      const extId = card.extId;
+      if (!extId) continue;
+      if (!cardsByExpansion.has(extId)) {
+        cardsByExpansion.set(extId, []);
+      }
+      cardsByExpansion.get(extId)!.push(card);
+    }
+
+    const enabledIds = getEnabledExpansionIdsSnapshot();
+
+    for (const expansionId of enabledIds) {
+      const cards = cardsByExpansion.get(expansionId);
+      if (!cards || cards.length === 0) {
+        continue;
+      }
+
+      const manifest = EXPANSION_MANIFEST.find(pack => pack.id === expansionId);
+      sets.push({
+        id: expansionId,
+        name: manifest?.title ?? expansionId,
+        cards: sanitizeSetCards(cards, expansionId),
+        isCore: false,
+      });
+    }
+
+    return sets;
   }
 
   // MVP: Remove keyword heuristics - exact faction match only
@@ -187,6 +226,11 @@ class WeightedCardDistribution {
     switch (this.settings.mode) {
       case 'core-only':
         weights.core = 1.0;
+        availableSets.forEach(set => {
+          if (!set.isCore && set.cards.length > 0) {
+            weights[set.id] = 1.0;
+          }
+        });
         break;
       
       case 'expansion-only':
