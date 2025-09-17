@@ -109,13 +109,9 @@ class ExtensionManager {
             if (response.ok) {
               const extension = await response.json();
               if (this.validateExtension(extension)) {
-                extension.cards = extension.cards.map((card: ExtensionCard) => ({
-                  ...card,
-                  // Map single flavor field to faction-specific flavor fields
-                  flavorGov: (card as any).flavor || '',
-                  flavorTruth: (card as any).flavor || '',
-                  extId: extension.id
-                }));
+                extension.cards = extension.cards.map((card: ExtensionCard) => 
+                  this.normalizeCard({ ...card, extId: extension.id })
+                );
                 extensions.push(extension);
               }
             }
@@ -244,9 +240,10 @@ class ExtensionManager {
     const faction = String(card.faction || 'truth').toLowerCase() as 'truth' | 'government';
     const type = String(card.type || 'MEDIA').toUpperCase();
     
-    // Ensure both flavor fields exist
-    const flavorTruth = card.flavorTruth || (card as any).flavor || '';
-    const flavorGov = card.flavorGov || (card as any).flavor || '';
+    // Ensure both flavor fields exist - use flavor field as fallback for both
+    const flavorText = card.flavor || card.flavorTruth || card.flavorGov || '';
+    const flavorTruth = card.flavorTruth || flavorText;
+    const flavorGov = card.flavorGov || flavorText;
     
     const normalized: ExtensionCard = {
       ...card,
@@ -258,12 +255,17 @@ class ExtensionManager {
       flavorGov
     };
     
-    // Remove legacy flavor field
+    // Remove legacy flavor field to avoid confusion
     delete (normalized as any).flavor;
     
-    // Enforce ZONE targeting
+    // Ensure ZONE cards have proper targeting
     if (normalized.type === 'ZONE') {
-      normalized.target = { scope: 'state', count: 1 };
+      normalized.target = normalized.target || { scope: 'state', count: 1 };
+    }
+    
+    // Ensure effects object exists
+    if (!normalized.effects) {
+      normalized.effects = {};
     }
     
     return normalized;
@@ -329,15 +331,25 @@ class ExtensionManager {
   }
 
   async initializeExtensions() {
+    // Clear any cached extensions to force reload
+    this.extensions.clear();
+    
     // Try to reload all enabled extensions
     const cdnExtensions = await this.scanCDNExtensions();
+    
+    console.log(`🎮 Extension initialization: found ${cdnExtensions.length} CDN extensions`);
     
     for (const extension of cdnExtensions) {
       const enabled = this.enabledExtensions.find(e => e.id === extension.id);
       if (enabled) {
+        console.log(`✅ Re-registering enabled extension: ${extension.name} v${extension.version}`);
         this.registerExtension(extension, enabled.source);
       }
     }
+    
+    // Log final state
+    const allExtensionCards = this.getAllExtensionCards();
+    console.log(`🎯 Extension initialization complete: ${allExtensionCards.length} cards available from ${this.extensions.size} extensions`);
   }
 }
 

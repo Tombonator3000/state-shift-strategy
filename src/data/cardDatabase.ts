@@ -444,56 +444,62 @@ loadCoreCards().then(coreCards => {
   console.error('Failed to load core cards:', error);
 });
 
-// Export normalized cards
+// Export normalized cards with extension integration
 export const CARD_DATABASE: GameCard[] = new Proxy([], {
   get(target, prop) {
+    // Get extension cards at runtime
+    const extensionCards = extensionManager.getAllExtensionCards();
+    const allCards = [...CORE_CARDS, ...extensionCards];
+    
     if (prop === 'length') {
-      return CORE_CARDS.length;
+      return allCards.length;
     }
     if (typeof prop === 'string' && !isNaN(Number(prop))) {
       const index = Number(prop);
-      const card = CORE_CARDS[index];
+      const card = allCards[index];
       return card ? normalize(card) : undefined;
     }
     if (prop === Symbol.iterator) {
       return function* () {
-        for (let i = 0; i < CORE_CARDS.length; i++) {
-          yield normalize(CORE_CARDS[i]);
+        for (let i = 0; i < allCards.length; i++) {
+          yield normalize(allCards[i]);
         }
       };
     }
     // Handle array methods
     if (prop === 'filter') {
       return function(callback: (card: GameCard, index: number, array: GameCard[]) => boolean) {
-        const normalized = CORE_CARDS.map(normalize);
+        const normalized = allCards.map(normalize);
         return normalized.filter(callback);
       };
     }
     if (prop === 'map') {
       return function(callback: (card: GameCard, index: number, array: GameCard[]) => any) {
-        const normalized = CORE_CARDS.map(normalize);
+        const normalized = allCards.map(normalize);
         return normalized.map(callback);
       };
     }
     if (prop === 'find') {
       return function(callback: (card: GameCard, index: number, array: GameCard[]) => boolean) {
-        const normalized = CORE_CARDS.map(normalize);
+        const normalized = allCards.map(normalize);
         return normalized.find(callback);
       };
     }
     if (prop === 'slice') {
       return function(start?: number, end?: number) {
-        const normalized = CORE_CARDS.map(normalize);
+        const normalized = allCards.map(normalize);
         return normalized.slice(start, end);
       };
     }
-    return (CORE_CARDS as any)[prop];
+    return (allCards as any)[prop];
   }
 });
 
 // Generate random cards function
 export function getRandomCards(count: number, options?: { faction?: 'truth' | 'government' }): GameCard[] {
-  let pool = CORE_CARDS.map(normalize);
+  // Include extension cards
+  const extensionCards = extensionManager.getAllExtensionCards();
+  let pool = [...CORE_CARDS, ...extensionCards].map(normalize);
   
   if (options?.faction) {
     pool = pool.filter(card => card.faction === options.faction);
@@ -511,7 +517,9 @@ export function getRandomCards(count: number, options?: { faction?: 'truth' | 'g
 
 // Generate random deck function  
 export function generateRandomDeck(size: number = 40, faction?: 'truth' | 'government'): GameCard[] {
-  let pool = CORE_CARDS.map(normalize);
+  // Include extension cards  
+  const extensionCards = extensionManager.getAllExtensionCards();
+  let pool = [...CORE_CARDS, ...extensionCards].map(normalize);
   
   if (faction) {
     pool = pool.filter(card => card.faction === faction);

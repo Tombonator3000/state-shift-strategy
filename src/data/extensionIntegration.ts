@@ -3,10 +3,32 @@ import { extensionManager } from './extensionSystem';
 // Initialize extensions on app startup
 export const initializeExtensionsOnStartup = async () => {
   try {
+    console.log('🔄 Starting extension initialization...');
     await extensionManager.initializeExtensions();
-    console.log('Extensions initialized successfully');
+    
+    // Log the current state
+    const enabledExtensions = extensionManager.getEnabledExtensions();
+    const allCards = extensionManager.getAllExtensionCards();
+    
+    console.log(`✅ Extensions initialized successfully:`, {
+      enabledExtensions: enabledExtensions.length,
+      totalExtensionCards: allCards.length,
+      extensionNames: enabledExtensions.map(e => e.name)
+    });
+    
+    // Sample some cards for debugging
+    if (allCards.length > 0) {
+      console.log('📋 Sample extension cards:', allCards.slice(0, 3).map(c => ({
+        id: c.id,
+        name: c.name,
+        faction: c.faction,
+        hasFlavorTruth: !!c.flavorTruth,
+        hasFlavorGov: !!c.flavorGov
+      })));
+    }
+    
   } catch (error) {
-    console.warn('Failed to initialize extensions:', error);
+    console.warn('❌ Failed to initialize extensions:', error);
   }
 };
 
