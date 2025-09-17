@@ -1,15 +1,21 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { expectedCost, type Rarity } from "../src/rules/mvp";
+
 const DATA_ROOT = path.join(process.cwd(), "src", "data");
 const LOG_PATH = path.join(process.cwd(), "tools", "logs", "fix-attack-ip.json");
 
-const AMOUNT_BY_RARITY = { common: 1, uncommon: 2, rare: 3, legendary: 4 } as const;
-const COST_BY_RARITY = { common: 2, uncommon: 3, rare: 4, legendary: 5 } as const;
+const AMOUNT_BY_RARITY: Record<Rarity, number> = {
+  common: 1,
+  uncommon: 2,
+  rare: 3,
+  legendary: 4
+};
 
 const INDENT_STEP = "  ";
 
-type RarityKey = keyof typeof AMOUNT_BY_RARITY;
+type RarityKey = Rarity;
 type CardRecord = Record<string, unknown> & {
   id?: string;
   rarity?: RarityKey;
@@ -316,7 +322,7 @@ function processCard(cardText: string, indent: string, filePath: string): { upda
   }
 
   const amount = AMOUNT_BY_RARITY[rarity];
-  parsed.cost = COST_BY_RARITY[rarity];
+  parsed.cost = expectedCost("ATTACK", rarity);
   parsed.effects = parsed.effects ?? {};
   normalizeEffects(parsed.effects as EffectRecord, amount);
 
