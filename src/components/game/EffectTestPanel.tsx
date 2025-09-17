@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { CardEffectValidator, CardTextGenerator } from '@/systems/CardTextGenerator';
-import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
+import { applyEffectsMvp } from '@/engine/applyEffects-mvp';
+import { cloneGameState, type Card as EngineCard, type GameState as EngineGameState } from '@/mvp';
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import type { Card as CardType } from '@/types/cardEffects';
 
@@ -29,8 +30,55 @@ const EffectTestPanel: React.FC = () => {
 
   if (!testCard) return null;
 
-  const processor = new CardEffectProcessor(gameState, true);
-  const result = processor.processCard(testCard as CardType);
+  const engineLog: string[] = [];
+  const engineState: EngineGameState = {
+    turn: gameState.turn,
+    currentPlayer: 'P1',
+    truth: gameState.truth,
+    playsThisTurn: 0,
+    log: engineLog,
+    players: {
+      P1: {
+        id: 'P1',
+        faction: gameState.faction,
+        deck: [],
+        hand: [],
+        discard: [],
+        ip: gameState.ip,
+        states: [...gameState.controlledStates],
+      },
+      P2: {
+        id: 'P2',
+        faction: gameState.faction === 'truth' ? 'government' : 'truth',
+        deck: [],
+        hand: [],
+        discard: [],
+        ip: gameState.aiIP,
+        states: [...(gameState.aiControlledStates ?? [])],
+      },
+    },
+    pressureByState: {
+      CA: { P1: 0, P2: 0 },
+    },
+    stateDefense: {
+      CA: 3,
+    },
+  };
+
+  engineState.players.P1 = {
+    ...engineState.players.P1,
+    ip: Math.max(0, engineState.players.P1.ip - testCard.cost),
+  };
+
+  const before = cloneGameState(engineState);
+  applyEffectsMvp(engineState, 'P1', testCard as EngineCard, testCard.type === 'ZONE' ? 'CA' : undefined);
+
+  const result = {
+    truthDelta: engineState.truth - before.truth,
+    playerIpDelta: engineState.players.P1.ip - before.players.P1.ip,
+    opponentIpDelta: before.players.P2.ip - engineState.players.P2.ip,
+    logs: engineLog.map(msg => `${testCard.name}: ${msg}`),
+  };
   const validation = CardEffectValidator.validateCard(testCard as CardType);
   const generatedText = testCard.effects ? CardTextGenerator.generateRulesText(testCard.effects) : 'No effects';
 
@@ -76,12 +124,19 @@ const EffectTestPanel: React.FC = () => {
             
             <div>
               <div className="font-medium">Effect Result:</div>
-              <div className="bg-muted p-1 rounded text-xs">
-                {result.truthDelta !== 0 && <div>Truth: {result.truthDelta > 0 ? '+' : ''}{result.truthDelta}%</div>}
-                {result.ipDelta.self !== 0 && <div>IP: {result.ipDelta.self > 0 ? '+' : ''}{result.ipDelta.self}</div>}
-                {result.cardsToDraw > 0 && <div>Draw: {result.cardsToDraw}</div>}
-                {result.pressureDelta > 0 && <div>Pressure: +{result.pressureDelta}</div>}
-                {result.damage > 0 && <div>Damage: {result.damage}</div>}
+              <div className="bg-muted p-1 rounded text-xs space-y-1">
+                {result.truthDelta !== 0 && (
+                  <div>Truth: {result.truthDelta > 0 ? '+' : ''}{result.truthDelta}%</div>
+                )}
+                {result.playerIpDelta !== 0 && (
+                  <div>Player IP: {result.playerIpDelta > 0 ? '+' : ''}{result.playerIpDelta}</div>
+                )}
+                {result.opponentIpDelta !== 0 && (
+                  <div>Opponent IP: -{result.opponentIpDelta}</div>
+                )}
+                {result.logs.map((entry, idx) => (
+                  <div key={idx}>{entry}</div>
+                ))}
               </div>
             </div>
             

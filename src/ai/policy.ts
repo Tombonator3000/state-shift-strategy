@@ -34,9 +34,7 @@ type Node = { state: GameState; actions: Action[]; score: number; depth: number 
 
 // === Helpers for goal-aware bursts (Truth ≥90 / Gov ≤10) ===
 function availableIPAfterSeq(gs: GameState, me: PlayerId, seq: Action[]): number {
-  type GameStateWithProjection = GameState & { ip?: Record<PlayerId, number> };
-  // If you have a real IP projection, use it; else simple subtract of known costs:
-  const start = (gs as GameStateWithProjection).ip?.[me] ?? gs.players?.[me]?.ip ?? 0;
+  const start = gs.players?.[me]?.ip ?? 0;
   const spent = seq.reduce((acc, a) => acc + (a.card?.cost ?? 0), 0);
   return start - spent;
 }
@@ -140,7 +138,7 @@ function nearCaptureScore(s: GameState, p: PlayerId | number): number {
 function opponentIpHigh(s: GameState, p: PlayerId | number): boolean {
   const pid = resolvePlayerId(p);
   const opp = pid === "P1" ? "P2" : "P1";
-  const ip = (s as GameState & { ip?: Record<PlayerId, number> }).ip?.[opp] ?? 0;
+  const ip = s.players?.[opp]?.ip ?? 0;
   return ip >= 20; // terskel; justér om ønskelig
 }
 

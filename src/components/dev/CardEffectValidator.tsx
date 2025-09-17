@@ -12,7 +12,8 @@ import { CheckCircle, XCircle, AlertTriangle, Bug, Zap } from 'lucide-react';
 
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import { CardEffectValidator, CardTextGenerator } from '@/systems/CardTextGenerator';
-import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
+import { applyEffectsMvp } from '@/engine/applyEffects-mvp';
+import { cloneGameState, type Card as EngineCard, type GameState as EngineGameState } from '@/mvp';
 import type { GameCard } from '@/rules/mvp';
 
 const CardEffectValidatorPanel: React.FC = () => {
@@ -43,8 +44,57 @@ const CardEffectValidatorPanel: React.FC = () => {
   // Process effects for selected card
   const effectResult = useMemo(() => {
     if (!selectedCard) return null;
-    const processor = new CardEffectProcessor(testGameState, true);
-    return processor.processCard(selectedCard as GameCard);
+
+    const engineLog: string[] = [];
+    const engineState: EngineGameState = {
+      turn: testGameState.turn,
+      currentPlayer: 'P1',
+      truth: testGameState.truth,
+      playsThisTurn: 0,
+      log: engineLog,
+      players: {
+        P1: {
+          id: 'P1',
+          faction: testGameState.faction,
+          deck: [],
+          hand: [],
+          discard: [],
+          ip: testGameState.ip,
+          states: [...testGameState.controlledStates],
+        },
+        P2: {
+          id: 'P2',
+          faction: testGameState.faction === 'truth' ? 'government' : 'truth',
+          deck: [],
+          hand: [],
+          discard: [],
+          ip: testGameState.aiIP,
+          states: [...(testGameState.aiControlledStates ?? [])],
+        },
+      },
+      pressureByState: {
+        CA: { P1: 0, P2: 0 },
+      },
+      stateDefense: {
+        CA: 3,
+      },
+    };
+
+    engineState.players.P1 = {
+      ...engineState.players.P1,
+      ip: Math.max(0, engineState.players.P1.ip - selectedCard.cost),
+    };
+
+    const before = cloneGameState(engineState);
+    const targetId = selectedCard.type === 'ZONE' ? 'CA' : undefined;
+    applyEffectsMvp(engineState, 'P1', selectedCard as EngineCard, targetId);
+
+    return {
+      truthDelta: engineState.truth - before.truth,
+      playerIpDelta: engineState.players.P1.ip - before.players.P1.ip,
+      opponentIpDelta: before.players.P2.ip - engineState.players.P2.ip,
+      logs: engineLog.map(entry => `${selectedCard.name}: ${entry}`),
+    };
   }, [selectedCard]);
 
   const cardsToShow = showAllCards ? 
@@ -229,15 +279,18 @@ const CardEffectValidatorPanel: React.FC = () => {
                     <div>
                       <div className="font-medium">Effect Result:</div>
                       <div className="text-xs bg-muted p-2 rounded space-y-1">
-                        {effectResult.truthDelta !== 0 && <div>Truth: {effectResult.truthDelta > 0 ? '+' : ''}{effectResult.truthDelta}%</div>}
-                        {effectResult.ipDelta.self !== 0 && <div>Player IP: {effectResult.ipDelta.self > 0 ? '+' : ''}{effectResult.ipDelta.self}</div>}
-                        {effectResult.ipDelta.opponent !== 0 && <div>AI IP: {effectResult.ipDelta.opponent > 0 ? '+' : ''}{effectResult.ipDelta.opponent}</div>}
-                        {effectResult.cardsToDraw > 0 && <div>Draw: {effectResult.cardsToDraw} cards</div>}
-                        {effectResult.pressureDelta > 0 && <div>Pressure: +{effectResult.pressureDelta}</div>}
-                        {effectResult.damage > 0 && <div>Damage: {effectResult.damage}</div>}
-                        {effectResult.appliedConditionals.length > 0 && (
-                          <div>Conditionals: {effectResult.appliedConditionals.join(', ')}</div>
+                        {effectResult.truthDelta !== 0 && (
+                          <div>Truth: {effectResult.truthDelta > 0 ? '+' : ''}{effectResult.truthDelta}%</div>
                         )}
+                        {effectResult.playerIpDelta !== 0 && (
+                          <div>Player IP: {effectResult.playerIpDelta > 0 ? '+' : ''}{effectResult.playerIpDelta}</div>
+                        )}
+                        {effectResult.opponentIpDelta !== 0 && (
+                          <div>Opponent IP: -{effectResult.opponentIpDelta}</div>
+                        )}
+                        {effectResult.logs.map((entry, idx) => (
+                          <div key={idx}>{entry}</div>
+                        ))}
                       </div>
                     </div>
                   )}
