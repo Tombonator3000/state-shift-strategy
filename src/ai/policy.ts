@@ -15,13 +15,16 @@ type PlayerId = keyof GameState["players"];
 
 type PlayCardAction = {
   type: "play-card";
+  kind: "PLAY";
   cardId: string;
   targetStateId?: string;
   cardType?: Card["type"];
+  card: Card;
 };
 
 type EndTurnAction = {
   type: "end-turn";
+  kind: "END";
   discards?: string[];
 };
 
@@ -29,8 +32,86 @@ type Action = PlayCardAction | EndTurnAction;
 
 type Node = { state: GameState; actions: Action[]; score: number; depth: number };
 
+// === Helpers for goal-aware bursts (Truth ≥90 / Gov ≤10) ===
+function availableIPAfterSeq(gs: GameState, me: PlayerId, seq: Action[]): number {
+  type GameStateWithProjection = GameState & { ip?: Record<PlayerId, number> };
+  // If you have a real IP projection, use it; else simple subtract of known costs:
+  const start = (gs as GameStateWithProjection).ip?.[me] ?? gs.players?.[me]?.ip ?? 0;
+  const spent = seq.reduce((acc, a) => acc + (a.card?.cost ?? 0), 0);
+  return start - spent;
+}
+
+function canAfford(gs: GameState, me: PlayerId, seq: Action[], next: Action): boolean {
+  const ipLeft = availableIPAfterSeq(gs, me, seq);
+  const cost = next.card?.cost ?? 0;
+  return ipLeft >= cost;
+}
+
+/** Picks up to 3 MEDIA cards to reach Truth ≥90 (truth faction) or ≤10 (government faction). */
+function planMediaBurstToGoal(ctx: { state: GameState; legal: Action[] }): Action[] | null {
+  const gs = ctx.state;
+  const me = gs.currentPlayer as PlayerId;
+  const faction = gs.players?.[me]?.faction; // "truth" | "government"
+  const curTruth = gs.truth;
+
+  // Partition medias by sign
+  const medias = ctx.legal.filter(
+    a => a.kind === "PLAY" && a.card?.type === "MEDIA" && typeof a.card?.effects?.truthDelta === "number",
+  );
+  if (medias.length === 0) return null;
+
+  if (faction === "truth") {
+    // Need Δ+ to reach 90
+    const need = 90 - curTruth;
+    if (need <= 0) return null;
+    // Sort descending by +truthDelta
+    const plus = medias
+      .filter(a => (a.card!.effects!.truthDelta || 0) > 0)
+      .sort((a, b) => (b.card!.effects!.truthDelta || 0) - (a.card!.effects!.truthDelta || 0));
+    let acc = 0;
+    const seq: Action[] = [];
+    for (const a of plus) {
+      if (seq.length === 3) break;
+      if (!canAfford(gs, me, seq, a)) continue;
+      seq.push(a);
+      acc += a.card!.effects!.truthDelta || 0;
+      if (curTruth + acc >= 90) return seq;
+    }
+    return null;
+  }
+
+  if (faction === "government") {
+    // Need Δ- to reach 10 (i.e., reduce by >= (curTruth - 10))
+    const needDown = curTruth - 10;
+    if (needDown <= 0) return null;
+    // Sort ascending by truthDelta (most negative first)
+    const minus = medias
+      .filter(a => (a.card!.effects!.truthDelta || 0) < 0)
+      .sort((a, b) => (a.card!.effects!.truthDelta || 0) - (b.card!.effects!.truthDelta || 0));
+    let acc = 0;
+    const seq: Action[] = [];
+    for (const a of minus) {
+      if (seq.length === 3) break;
+      if (!canAfford(gs, me, seq, a)) continue;
+      seq.push(a);
+      acc += Math.abs(a.card!.effects!.truthDelta || 0);
+      if (curTruth - acc <= 10) return seq;
+    }
+    return null;
+  }
+
+  return null;
+}
+
 export function chooseTurnActions(state: GameState, level: Difficulty): Action[] {
   const cfg = AI_PRESETS[level];
+  // Try a direct goal burst first (Truth ≥90 for truth / ≤10 for government)
+  const legalNow = legalActionsFor(state);
+  const burst = planMediaBurstToGoal({ state, legal: legalNow });
+  if (burst && burst.length > 0) {
+    if (AI_DEBUG) console.info("[AI] Goal-burst chosen:", burst.map(x => x.card?.name ?? x.type));
+    return burst;
+  }
   const root: Node = {
     state: cloneState(state),
     actions: [],
@@ -99,6 +180,17 @@ export function evaluate(s: GameState, cfg: AiConfig): number {
 
   if (opTruth >= 60) score += cfg.denialPriority * 8;
   if (myTruth >= 60) score += cfg.aggression * 5;
+  // Small faction-goal bias
+  const faction = s.players?.[s.currentPlayer as PlayerId]?.faction;
+  if (faction === "truth") {
+    // push upwards a bit more if below 90
+    const gapUp = Math.max(0, 90 - (s.truth ?? 50));
+    score += 0.05 * gapUp * cfg.valueTruthSwing;
+  } else if (faction === "government") {
+    // push downwards a bit more if above 10
+    const gapDown = Math.max(0, (s.truth ?? 50) - 10);
+    score += 0.05 * gapDown * cfg.valueTruthSwing; // positive term, but since lower truth also boosts (myTruth - opTruth) component in your eval, this acts as bias toward reducing Truth
+  }
   return score;
 }
 
@@ -168,7 +260,7 @@ function applyAction(state: GameState, action: Action): GameState {
   return state;
 }
 
-function legalActionsFor(state: GameState, rootPlayer: PlayerId): Action[] {
+function legalActionsFor(state: GameState, rootPlayer: PlayerId = state.currentPlayer as PlayerId): Action[] {
   if (state.currentPlayer !== rootPlayer) return [];
 
   const player = state.players?.[state.currentPlayer as PlayerId];
@@ -185,7 +277,14 @@ function legalActionsFor(state: GameState, rootPlayer: PlayerId): Action[] {
         if (seen.has(key)) continue;
         const eligibility = canPlay(state, card, target);
         if (eligibility.ok) {
-          actions.push({ type: "play-card", cardId: card.id, targetStateId: target, cardType: card.type });
+          actions.push({
+            type: "play-card",
+            kind: "PLAY",
+            cardId: card.id,
+            targetStateId: target,
+            cardType: card.type,
+            card,
+          });
           seen.add(key);
         }
       }
@@ -194,14 +293,14 @@ function legalActionsFor(state: GameState, rootPlayer: PlayerId): Action[] {
       if (seen.has(key)) continue;
       const eligibility = canPlay(state, card);
       if (eligibility.ok) {
-        actions.push({ type: "play-card", cardId: card.id, cardType: card.type });
+        actions.push({ type: "play-card", kind: "PLAY", cardId: card.id, cardType: card.type, card });
         seen.add(key);
       }
     }
   }
 
   if (!actions.length) {
-    actions.push({ type: "end-turn", discards: [] });
+    actions.push({ type: "end-turn", kind: "END", discards: [] });
   }
 
   return actions;
