@@ -4,6 +4,7 @@ import type { Card } from '@/types/cardEffects';
 import type { GameCard } from '@/types/cardTypes';
 import { setStateOccupation } from '@/data/usaStates';
 import type { PlayerStats } from '@/data/achievementSystem';
+import { applyTruthDelta } from '@/utils/truth';
 
 type Faction = 'government' | 'truth';
 
@@ -112,7 +113,9 @@ export function resolveCardEffects(
     effectResult.truthDelta = truthDelta;
   }
 
-  const truthAfterEffects = Math.max(0, Math.min(100, gameState.truth + truthDelta));
+  const truthTracker = { truth: gameState.truth, log: logEntries };
+  applyTruthDelta(truthTracker, truthDelta, 'player');
+  const truthAfterEffects = truthTracker.truth;
   const playerIPAfterEffects = Math.max(0, ipAfterCost + effectResult.ipDelta.self);
   const damageDealt = effectResult.damage ?? 0;
   const aiIPAfterEffects = Math.max(

@@ -1,5 +1,6 @@
 import { cloneGameState } from './validator';
 import { computeMediaTruthDelta_MVP, warnIfMediaScaling, type MediaResolutionOptions } from './media';
+import { applyTruthDelta } from '@/utils/truth';
 import type {
   Card,
   EffectsATTACK,
@@ -7,9 +8,6 @@ import type {
   GameState,
   PlayerState,
 } from './types';
-
-const clamp = (value: number, min: number, max: number): number =>
-  Math.max(min, Math.min(max, value));
 
 const otherPlayer = (id: 'P1' | 'P2'): 'P1' | 'P2' => (id === 'P1' ? 'P2' : 'P1');
 
@@ -182,11 +180,12 @@ export function resolve(
   if (card.type === 'MEDIA') {
     const delta = computeMediaTruthDelta_MVP(me, card, opts);
     warnIfMediaScaling(card, delta);
-    const newTruth = clamp(cloned.truth + delta, 0, 100);
-    return {
+    const updated = {
       ...cloned,
-      truth: newTruth,
+      log: [...cloned.log],
     };
+    applyTruthDelta(updated, delta, owner);
+    return updated;
   }
 
   if (!targetStateId) {
