@@ -11,6 +11,7 @@ import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDataba
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardEffects as resolveCardEffectsCore, type CardPlayResolution } from '@/systems/cardResolution';
+import { computeMediaTruthDelta_MVP, warnIfMediaScaling } from '@/mvp/media';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -582,14 +583,27 @@ export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
       let newTruth = prev.truth;
       let newStates = [...prev.states];
       const newLog = [...prev.log];
+      const aiFaction = prev.faction === 'government' ? 'truth' : 'government';
 
       // Apply card effects
       switch (card.type) {
-        case 'MEDIA':
-          // AI government faction tries to lower truth
-          newTruth = Math.max(0, prev.truth - 12);
-          newLog.push(`AI played ${card.name}: Truth manipulation (${prev.truth}% → ${newTruth}%)`);
+        case 'MEDIA': {
+          const beforeTruth = prev.truth;
+          const sign = aiFaction === 'truth' ? 1 : -1;
+          const delta = computeMediaTruthDelta_MVP(
+            { faction: aiFaction, isAI: true },
+            card,
+            { overrideSign: sign },
+          );
+          warnIfMediaScaling(card, delta);
+          const magnitude = Math.abs(card.effects?.truthDelta ?? 0);
+          newTruth = Math.max(0, Math.min(100, beforeTruth + delta));
+          newLog.push(`AI played ${card.name}: Truth manipulation (${beforeTruth}% → ${newTruth}%)`);
+          newLog.push(
+            `AI Strategy: Media play to ${sign > 0 ? 'raise' : 'lower'} public opinion (${sign > 0 ? '+' : '-'}${magnitude}%)`,
+          );
           break;
+        }
         case 'ZONE':
           if (targetState) {
             const stateIndex = newStates.findIndex(s => s.abbreviation === targetState);
