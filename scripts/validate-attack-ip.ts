@@ -1,11 +1,17 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const DATA_ROOT = path.join(process.cwd(), "src", "data");
-const AMOUNT_BY_RARITY = { common: 1, uncommon: 2, rare: 3, legendary: 4 } as const;
-const COST_BY_RARITY = { common: 2, uncommon: 3, rare: 4, legendary: 5 } as const;
+import { expectedCost, type Rarity } from "../src/rules/mvp";
 
-type RarityKey = keyof typeof AMOUNT_BY_RARITY;
+const DATA_ROOT = path.join(process.cwd(), "src", "data");
+const AMOUNT_BY_RARITY: Record<Rarity, number> = {
+  common: 1,
+  uncommon: 2,
+  rare: 3,
+  legendary: 4
+};
+
+type RarityKey = Rarity;
 type CardRecord = {
   id?: string;
   rarity?: RarityKey;
@@ -158,7 +164,7 @@ for (const file of files) {
     }
 
     const expectedAmount = AMOUNT_BY_RARITY[rarity];
-    const expectedCost = COST_BY_RARITY[rarity];
+    const expectedCostValue = expectedCost("ATTACK", rarity);
 
     const ipDelta = card.effects?.ipDelta as Record<string, unknown> | undefined;
     if (!ipDelta) {
@@ -178,8 +184,8 @@ for (const file of files) {
       }
     }
 
-    if (card.cost !== expectedCost) {
-      errors.push(`${id}: cost=${card.cost} expected ${expectedCost}`);
+    if (card.cost !== expectedCostValue) {
+      errors.push(`${id}: cost=${card.cost} expected ${expectedCostValue}`);
     }
 
     const flavor = card.flavor ?? card.flavorGov ?? card.flavorTruth;
