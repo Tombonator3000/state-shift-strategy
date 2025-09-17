@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import type { GameCard } from '@/rules/mvp';
 import { getCoreCards } from '@/data/cardDatabase';
 import { normalizeFaction } from '@/data/mvpAnalysisUtils';
@@ -21,6 +21,8 @@ import {
 } from '@/data/expansions/state';
 import { useDistributionSettings } from '@/hooks/useDistributionSettings';
 import type { DistributionMode } from '@/data/weightedCardDistribution';
+import { ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ManageExpansionsProps {
   onClose: () => void;
@@ -82,6 +84,91 @@ const summarizeExpansionCards = (cards: GameCard[]): Record<string, number> => {
     counts[extId] = (counts[extId] ?? 0) + 1;
   });
   return counts;
+};
+
+interface ExpansionDetail {
+  pack: (typeof EXPANSION_MANIFEST)[number];
+  enabled: boolean;
+  loadedCount: number;
+}
+
+interface ExpansionPanelProps {
+  detail: ExpansionDetail;
+  onToggle: (id: string) => void;
+  isUpdating: boolean;
+}
+
+const ExpansionPanel = ({ detail, onToggle, isUpdating }: ExpansionPanelProps) => {
+  const { pack, enabled, loadedCount } = detail;
+  const [open, setOpen] = useState(enabled);
+
+  useEffect(() => {
+    setOpen(enabled);
+  }, [enabled]);
+
+  const description = pack.metadata?.description ?? 'No description provided yet.';
+  const infoItems = [
+    pack.metadata?.name ? `Alias: ${pack.metadata.name}` : null,
+    pack.metadata?.author ? `Author: ${pack.metadata.author}` : null,
+    pack.metadata?.version ? `Version: ${pack.metadata.version}` : null,
+    `File: ${pack.fileName}`,
+    `Loaded cards: ${loadedCount}`,
+  ].filter(Boolean) as string[];
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="h-full">
+      <Card className="flex h-full flex-col border-2 border-newspaper-text bg-newspaper-bg">
+        <CardHeader className="border-b border-newspaper-text/20 p-4 pb-3">
+          <div className="flex items-center justify-between gap-3">
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-2 text-left font-semibold text-newspaper-text transition-colors hover:text-newspaper-text/80 focus:outline-none"
+              >
+                <ChevronDown
+                  className={cn(
+                    'h-4 w-4 shrink-0 transition-transform',
+                    open ? 'rotate-0' : '-rotate-90',
+                  )}
+                  aria-hidden="true"
+                />
+                <span className="truncate text-base md:text-lg">{pack.title}</span>
+              </button>
+            </CollapsibleTrigger>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="whitespace-nowrap">
+                {pack.cardCount} cards
+              </Badge>
+              <Switch
+                checked={enabled}
+                onCheckedChange={() => onToggle(pack.id)}
+                disabled={isUpdating}
+                aria-label={`Toggle ${pack.title}`}
+              />
+            </div>
+          </div>
+          <p className="mt-2 line-clamp-2 text-xs text-newspaper-text/70">{description}</p>
+        </CardHeader>
+        <CollapsibleContent className="data-[state=closed]:hidden">
+          <CardContent className="flex flex-1 flex-col gap-3 p-4 text-sm text-newspaper-text">
+            <div className="flex flex-wrap gap-2 text-xs text-newspaper-text/70">
+              {infoItems.map(item => (
+                <span key={item} className="rounded border border-newspaper-text/20 px-2 py-1">
+                  {item}
+                </span>
+              ))}
+            </div>
+            <div className="text-xs text-newspaper-text/70">
+              {enabled
+                ? 'Included in MVP deck construction.'
+                : 'Disabled — excluded from automated deck builders.'}
+            </div>
+            {isUpdating && <div className="text-xs text-newspaper-text/60">Updating expansion pool…</div>}
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  );
 };
 
 const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
@@ -157,13 +244,12 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
     [expansionCounts],
   );
 
-  const expansionDetails = useMemo(
+  const expansionDetails = useMemo<ExpansionDetail[]>(
     () =>
       EXPANSION_MANIFEST.map(pack => ({
-        id: pack.id,
-        title: pack.title,
+        pack,
         enabled: enabledExpansions.includes(pack.id),
-        count: expansionCounts[pack.id] ?? 0,
+        loadedCount: expansionCounts[pack.id] ?? 0,
       })),
     [enabledExpansions, expansionCounts],
   );
@@ -186,12 +272,12 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
     ];
 
     expansionDetails
-      .filter(detail => detail.enabled && detail.count > 0)
+      .filter(detail => detail.enabled && detail.loadedCount > 0)
       .forEach(detail => {
         sets.push({
-          id: detail.id,
-          name: detail.title,
-          count: detail.count,
+          id: detail.pack.id,
+          name: detail.pack.title,
+          count: detail.loadedCount,
           isCore: false,
         });
       });
@@ -227,8 +313,8 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
   );
 
   const activeExpansionNames = expansionDetails
-    .filter(detail => detail.enabled && detail.count > 0)
-    .map(detail => detail.title)
+    .filter(detail => detail.enabled && detail.loadedCount > 0)
+    .map(detail => detail.pack.title)
     .join(', ');
 
   const hasPendingUpdates = useMemo(
@@ -447,40 +533,54 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
           </Card>
         </div>
 
-        <Card className="mt-6 p-6 border-2 border-newspaper-text bg-newspaper-bg">
-          <h2 className="font-bold text-xl text-newspaper-text mb-4">Expansion Packs</h2>
-          <div className="space-y-3 text-sm text-newspaper-text">
-            {expansionDetails.map(detail => {
-              const isUpdating = pendingUpdates[detail.id];
-              return (
-                <div key={detail.id} className="flex flex-col gap-1 border border-dashed border-newspaper-text/30 p-3 rounded">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">{detail.title}</span>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="outline">{detail.count} cards</Badge>
-                      <Checkbox
-                        checked={detail.enabled}
-                        onCheckedChange={() => handleExpansionToggle(detail.id)}
-                        disabled={!!isUpdating}
-                        aria-label={`Toggle ${detail.title}`}
-                      />
-                    </div>
+        <Card className="mt-6 border-2 border-newspaper-text bg-newspaper-bg">
+          <CardHeader className="border-b border-newspaper-text/20 p-6 pb-4">
+            <div className="flex flex-col gap-2 text-newspaper-text">
+              <h2 className="text-xl font-bold">Expansion Packs</h2>
+              <p className="text-xs text-newspaper-text/70">
+                Automatically detected from the /extensions folder. Toggle sets to include or exclude them from play.
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 p-6">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <Card className="flex h-full flex-col border-2 border-dashed border-newspaper-text/40 bg-newspaper-bg">
+                <CardHeader className="p-4 pb-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-base font-semibold text-newspaper-text md:text-lg">Core Deck</span>
+                    <Badge variant="outline" className="whitespace-nowrap">
+                      {coreStats.totalCards} cards
+                    </Badge>
                   </div>
-                  <div className="text-xs text-newspaper-text/70">
-                    {detail.enabled
-                      ? 'Included in MVP deck construction.'
-                      : 'Disabled — excluded from automated deck builders.'}
-                  </div>
-                  {isUpdating && <div className="text-xs text-newspaper-text/60">Updating expansion pool…</div>}
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-3 text-xs text-newspaper-text/70 space-y-1">
-            <div>Total expansion cards loaded: {expansionTotal}</div>
-            {updateError && <div className="text-red-600">{updateError}</div>}
-            {hasPendingUpdates && <div>Synchronizing selection…</div>}
-          </div>
+                  <p className="mt-2 text-xs text-newspaper-text/70">
+                    Always loaded. MVP-approved baseline used for every operation.
+                  </p>
+                </CardHeader>
+                <CardContent className="p-4 pt-0 text-xs text-newspaper-text/70">
+                  Locked to ensure consistent testing across builds. Combine with expansions for variety.
+                </CardContent>
+              </Card>
+              {expansionDetails.map(detail => (
+                <ExpansionPanel
+                  key={detail.pack.id}
+                  detail={detail}
+                  onToggle={handleExpansionToggle}
+                  isUpdating={!!pendingUpdates[detail.pack.id]}
+                />
+              ))}
+            </div>
+            {expansionDetails.length === 0 && (
+              <div className="rounded border border-dashed border-newspaper-text/40 bg-newspaper-bg/40 p-6 text-center text-sm text-newspaper-text/70">
+                No expansions found. Drop JSON files into the <code className="font-mono">/extensions</code> folder to add more
+                cards.
+              </div>
+            )}
+            <div className="text-xs text-newspaper-text/70 space-y-1">
+              <div>Total expansion cards loaded: {expansionTotal}</div>
+              {updateError && <div className="text-red-600">{updateError}</div>}
+              {hasPendingUpdates && <div>Synchronizing selection…</div>}
+            </div>
+          </CardContent>
         </Card>
 
         <Card className="mt-6 p-6 border-2 border-newspaper-text bg-newspaper-bg">
