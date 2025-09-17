@@ -152,6 +152,7 @@ export interface EnhancedCard {
   
   // Text fields
   text?: string;
+  flavor?: string;
   flavorTruth?: string;
   flavorGov?: string;
   

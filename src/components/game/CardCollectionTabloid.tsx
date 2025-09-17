@@ -73,9 +73,9 @@ const CardCollectionTabloid = ({ open, onOpenChange }: CardCollectionTabloidProp
           </div>
         </div>
         
-        {card.flavorGov && (
+        {(card.flavor ?? card.flavorGov ?? card.flavorTruth) && (
           <div className="mt-2 p-2 bg-[#e9e9e9] border border-black text-[10px] italic">
-            "{card.flavorGov}"
+            "{card.flavor ?? card.flavorGov ?? card.flavorTruth}"
           </div>
         )}
       </div>

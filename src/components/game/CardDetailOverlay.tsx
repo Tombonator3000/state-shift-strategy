@@ -89,6 +89,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
   };
 
   const faction = getCardFaction(card);
+  const flavorText = card.flavor ?? card.flavorGov ?? card.flavorTruth ?? 'No intelligence available.';
 
   return (
     <div 
@@ -174,7 +175,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
               CLASSIFIED INTELLIGENCE
             </h4>
             <div className="italic text-sm text-foreground border-l-4 border-truth-red bg-truth-red/10 rounded-r border border-truth-red/20 pl-3 pr-3 py-2 leading-relaxed">
-              "{faction === 'truth' ? (card.flavorTruth ?? 'No intelligence available.') : (card.flavorGov ?? 'No intelligence available.')}"
+              "{flavorText}"
             </div>
           </div>
 

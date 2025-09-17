@@ -7,8 +7,19 @@ import type { CardEffects, Card } from '@/types/cardEffects';
 const renderEffects = (e: CardEffects): string[] => {
   const parts: string[] = [];
   if (typeof e.truthDelta === 'number') parts.push(`${e.truthDelta >= 0 ? '+' : ''}${e.truthDelta}% Truth`);
-  if (e.ipDelta?.self) parts.push(`${e.ipDelta.self >= 0 ? '+' : ''}${e.ipDelta.self} IP (you)`);
-  if (e.ipDelta?.opponent) parts.push(`${e.ipDelta.opponent >= 0 ? '+' : ''}${e.ipDelta.opponent} IP (opponent)`);
+  if (typeof e.ipDelta?.self === 'number') {
+    parts.push(`${e.ipDelta.self >= 0 ? '+' : ''}${e.ipDelta.self} IP (you)`);
+  }
+  if (typeof e.ipDelta?.opponent === 'number') {
+    const n = e.ipDelta.opponent;
+    if (n > 0) {
+      parts.push(`Opponent loses ${n} IP`);
+    } else if (n < 0) {
+      parts.push(`Opponent gains ${Math.abs(n)} IP`);
+    } else {
+      parts.push('No IP change');
+    }
+  }
   if (typeof e.draw === 'number') parts.push(`Draw ${e.draw}`);
   if (typeof e.discardOpponent === 'number') parts.push(`Opponent discards ${e.discardOpponent}`);
   if (typeof e.pressureDelta === 'number') parts.push(`${e.pressureDelta >= 0 ? '+' : ''}${e.pressureDelta} Pressure`);
@@ -40,12 +51,14 @@ export class CardTextGenerator {
         const sign = effects.ipDelta.self >= 0 ? '+' : '';
         parts.push(`${sign}${effects.ipDelta.self} IP`);
       }
-      
+
       if (effects.ipDelta.opponent !== undefined) {
-        if (effects.ipDelta.opponent < 0) {
-          parts.push(`Opponent loses ${Math.abs(effects.ipDelta.opponent)} IP`);
+        if (effects.ipDelta.opponent > 0) {
+          parts.push(`Opponent loses ${effects.ipDelta.opponent} IP`);
+        } else if (effects.ipDelta.opponent < 0) {
+          parts.push(`Opponent gains ${Math.abs(effects.ipDelta.opponent)} IP`);
         } else {
-          parts.push(`Opponent gains ${effects.ipDelta.opponent} IP`);
+          parts.push('No IP change');
         }
       }
     }

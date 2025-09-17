@@ -27,7 +27,8 @@ export function scoreEffectsV21E(effects: CardEffects): number {
       score += effects.ipDelta.self > 0 ? effects.ipDelta.self * 0.5 : 0;
     }
     if (effects.ipDelta.opponent) {
-      score += effects.ipDelta.opponent < 0 ? Math.abs(effects.ipDelta.opponent) * 0.7 : 0;
+      const opponent = effects.ipDelta.opponent;
+      score += opponent > 0 ? opponent * 0.7 : 0;
     }
   }
   
