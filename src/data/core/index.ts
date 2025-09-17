@@ -1,4 +1,4 @@
-import type { GameCard } from '../../types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 
 // TRUTH (4 × 50)
 import { truthBatch1 } from './truth-batch-1';

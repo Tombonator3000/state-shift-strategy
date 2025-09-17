@@ -26,7 +26,7 @@ const CORE_DIR = path.resolve(ROOT, 'src', 'data', 'core');
 
 const TRUTH_SOURCE = path.join(CORE_DIR, 'core_truth_MVP_balanced.json');
 const GOVERNMENT_SOURCE = path.join(CORE_DIR, 'core_government_MVP_balanced.json');
-const IMPORT_PATH = '../../types/cardTypes';
+const IMPORT_PATH = '@/rules/mvp';
 const CARDS_PER_BATCH = 50;
 const EXPECTED_BATCHES = 4;
 

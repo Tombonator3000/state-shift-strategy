@@ -1,4 +1,4 @@
-import type { GameCard } from '../../types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 
 export const governmentBatch4: GameCard[] = [
   {

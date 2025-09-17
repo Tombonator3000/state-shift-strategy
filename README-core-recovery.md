@@ -8,7 +8,7 @@ The system is now active! The `src/data/core/index.ts` collector automatically g
 
 ### Current Status
 - ✅ Core collector active
-- ✅ Runtime normalization (v2.1E format)
+- ✅ MVP repair + validation (`repairToMVP` → `validateCardMVP`)
 - ✅ Fallback protection (20 minimal cards if batches fail)
 - ✅ Enhanced Balancing Dashboard updated with proper counts
 
@@ -18,29 +18,26 @@ Place your batch files in `src/data/core/` with this structure:
 
 ```typescript
 // src/data/core/truth-batch-X.ts
-import type { GameCard } from '../../types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 
 export const CORE_BATCH_TRUTH_X: GameCard[] = [
   {
-    id: "unique-id",
-    faction: "truth", // or "government"
-    name: "Card Name",
-    type: "MEDIA", // MEDIA, ZONE, ATTACK, DEFENSIVE
-    rarity: "common", // common, uncommon, rare, legendary
-    cost: 5, // Will be recalculated by v2.1E engine
-    text: "Card effect description",
-    flavorTruth: "Flavor text for truth perspective",
-    flavorGov: "Flavor text for government perspective", 
-    target: { scope: "global", count: 0 }, // or state targeting for ZONE
+    id: 'unique-id',
+    faction: 'truth', // or 'government'
+    name: 'Card Name',
+    type: 'MEDIA', // MEDIA, ZONE, ATTACK
+    rarity: 'common', // common, uncommon, rare, legendary
     effects: {
-      truthDelta: 3,
-      draw: 1,
-      // ... other v2.1E effects
-    }
-  }
+      truthDelta: 1,
+    },
+    flavor: 'Optional shared flavor line',
+    // For ZONE cards include: target: { scope: 'state', count: 1 }, effects: { pressureDelta: N }
+  },
   // ... more cards
 ];
 ```
+- `repairToMVP` fills in MVP costs automatically based on type/rarity.
+- Skip legacy `text` fields—only the MVP effect whitelist is preserved.
 
 ## 🔧 Manual Recovery (CLI)
 
@@ -75,7 +72,7 @@ Your batch files aren't being found. Check:
 
 ### "Build errors"
 - Ensure all cards have required fields (id, faction, name, type, rarity)
-- Use proper v2.1E effect structure
+- Stick to MVP effects: `truthDelta`, `pressureDelta`, `ipDelta.opponent` (+ optional `discardOpponent`)
 - Check TypeScript syntax in batch files
 
 ### "Duplicates or validation fails"

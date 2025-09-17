@@ -1,7 +1,7 @@
 // Truth Batch 7 - v2.1E Compliant Cards
 // TRUTH-151 to TRUTH-200
 
-import type { GameCard } from '../../../types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 
 export const CORE_BATCH_TRUTH_7: GameCard[] = [
   {
