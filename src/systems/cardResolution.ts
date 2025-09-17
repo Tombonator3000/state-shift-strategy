@@ -1,10 +1,9 @@
-import { CardEffectProcessor } from './CardEffectProcessor';
-import { computeMediaTruthDelta_MVP, warnIfMediaScaling, type MediaResolutionOptions } from '@/mvp/media';
-import type { Card } from '@/types/cardEffects';
+import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
+import type { MediaResolutionOptions } from '@/mvp/media';
+import { cloneGameState, type Card, type GameState as EngineGameState } from '@/mvp';
 import type { GameCard } from '@/rules/mvp';
 import { setStateOccupation } from '@/data/usaStates';
 import type { PlayerStats } from '@/data/achievementSystem';
-import { applyTruthDelta } from '@/utils/truth';
 
 type Faction = 'government' | 'truth';
 
@@ -66,6 +65,106 @@ export interface CardPlayResolution {
   damageDealt: number;
 }
 
+const PLAYER_ID: PlayerId = 'P1';
+const AI_ID: PlayerId = 'P2';
+
+const resolveTargetStateId = (
+  snapshot: GameSnapshot,
+  target?: string | null,
+): string | undefined => {
+  if (!target) {
+    return undefined;
+  }
+
+  const match = snapshot.states.find(
+    state =>
+      state.id === target ||
+      state.abbreviation === target ||
+      state.name === target,
+  );
+
+  return match?.id;
+};
+
+const buildStateLookups = (states: StateForResolution[]) => {
+  const abbreviationToId = new Map<string, string>();
+
+  for (const state of states) {
+    abbreviationToId.set(state.abbreviation, state.id);
+  }
+
+  return { abbreviationToId };
+};
+
+const toEngineState = (
+  snapshot: GameSnapshot,
+  log: string[],
+): EngineGameState => {
+  const { abbreviationToId } = buildStateLookups(snapshot.states);
+
+  const pressureByState: EngineGameState['pressureByState'] = {};
+  const stateDefense: EngineGameState['stateDefense'] = {};
+  const playerStates = new Set<string>();
+  const aiStates = new Set<string>();
+
+  for (const state of snapshot.states) {
+    stateDefense[state.id] = state.defense;
+    const pressure = Math.max(0, state.pressure ?? 0);
+    const owner = state.owner;
+
+    if (owner === 'player') {
+      playerStates.add(state.id);
+    } else if (owner === 'ai') {
+      aiStates.add(state.id);
+    }
+
+    pressureByState[state.id] = {
+      P1: owner === 'player' ? 0 : pressure,
+      P2: owner === 'ai' ? pressure : 0,
+    };
+  }
+
+  for (const abbr of snapshot.controlledStates) {
+    const id = abbreviationToId.get(abbr) ?? abbr;
+    playerStates.add(id);
+  }
+
+  for (const abbr of snapshot.aiControlledStates ?? []) {
+    const id = abbreviationToId.get(abbr) ?? abbr;
+    aiStates.add(id);
+  }
+
+  return {
+    turn: snapshot.turn,
+    currentPlayer: PLAYER_ID,
+    truth: snapshot.truth,
+    players: {
+      [PLAYER_ID]: {
+        id: PLAYER_ID,
+        faction: snapshot.faction,
+        deck: [],
+        hand: snapshot.hand as Card[],
+        discard: [],
+        ip: snapshot.ip,
+        states: Array.from(playerStates),
+      },
+      [AI_ID]: {
+        id: AI_ID,
+        faction: snapshot.faction === 'truth' ? 'government' : 'truth',
+        deck: [],
+        hand: snapshot.aiHand as Card[],
+        discard: [],
+        ip: snapshot.aiIP,
+        states: Array.from(aiStates),
+      },
+    },
+    pressureByState,
+    stateDefense,
+    playsThisTurn: 0,
+    log,
+  };
+};
+
 const defaultAchievementTracker: AchievementTracker = {
   stats: {
     total_states_controlled: 0,
@@ -86,134 +185,87 @@ export function resolveCardEffects(
   achievements: AchievementTracker = defaultAchievementTracker,
   mediaOptions: MediaResolutionOptions = {},
 ): CardPlayResolution {
-  const logEntries: string[] = [];
+  const engineLog: string[] = [];
+  const engineState = toEngineState(gameState, engineLog);
+  engineState.players[PLAYER_ID] = {
+    ...engineState.players[PLAYER_ID],
+    ip: Math.max(0, engineState.players[PLAYER_ID].ip - card.cost),
+  };
+
+  const beforeState = cloneGameState(engineState);
+  const targetStateId = resolveTargetStateId(gameState, targetState);
+
+  applyEffectsMvp(engineState, PLAYER_ID, card as Card, targetStateId, mediaOptions);
+
+  const logEntries: string[] = engineLog.map(message => `${card.name}: ${message}`);
   const newStates = gameState.states.map(state => ({ ...state }));
-  let controlledStates = [...gameState.controlledStates];
-
-  const processor = new CardEffectProcessor({
-    truth: gameState.truth,
-    ip: gameState.ip,
-    aiIP: gameState.aiIP,
-    hand: gameState.hand,
-    aiHand: gameState.aiHand,
-    controlledStates: gameState.controlledStates,
-    aiControlledStates: gameState.aiControlledStates || [],
-    round: gameState.round,
-    turn: gameState.turn,
-    faction: gameState.faction,
-  });
-
-  const effectResult = processor.processCard(card as Card, targetState ?? undefined);
-
-  const ipAfterCost = Math.max(0, gameState.ip - card.cost);
-  let truthDelta = effectResult.truthDelta;
-  if (card.type === 'MEDIA') {
-    truthDelta = computeMediaTruthDelta_MVP({ faction: gameState.faction }, card, mediaOptions);
-    warnIfMediaScaling(card, truthDelta);
-    effectResult.truthDelta = truthDelta;
-  }
-
-  const truthTracker = { truth: gameState.truth, log: logEntries };
-  applyTruthDelta(truthTracker, truthDelta, 'player');
-  const truthAfterEffects = truthTracker.truth;
-  const playerIPAfterEffects = Math.max(0, ipAfterCost + effectResult.ipDelta.self);
-  const damageDealt = effectResult.damage ?? 0;
-  const aiIPAfterEffects = Math.max(
-    0,
-    gameState.aiIP + effectResult.ipDelta.opponent - damageDealt,
-  );
-
-  if (effectResult.cardsToDraw > 0) {
-    logEntries.push(
-      `Draw ${effectResult.cardsToDraw} card${effectResult.cardsToDraw !== 1 ? 's' : ''}`,
-    );
-  }
-
-  logEntries.push(
-    ...effectResult.logMessages.map(msg => `${card.name}: ${msg}`),
-  );
-
+  const nextControlledStates = new Set(gameState.controlledStates);
+  let capturedCount = 0;
   let nextTargetState: string | null = card.type === 'ZONE' ? targetState : null;
-  let selectedCard: string | null = null;
+  for (const state of newStates) {
+    const beforePressure = beforeState.pressureByState[state.id]?.[PLAYER_ID] ?? 0;
+    const afterPressure = engineState.pressureByState[state.id]?.[PLAYER_ID] ?? 0;
+    const playerOwns = engineState.players[PLAYER_ID].states.includes(state.id);
+    const aiOwns = engineState.players[AI_ID].states.includes(state.id);
 
-  if (card.type === 'ZONE' && targetState && effectResult.pressureDelta) {
-    const stateIndex = newStates.findIndex(state =>
-      state.abbreviation === targetState ||
-      state.id === targetState ||
-      state.name === targetState,
-    );
+    const previousOwner = state.owner;
+    const owner: StateOwner = playerOwns ? 'player' : aiOwns ? 'ai' : 'neutral';
 
-    if (stateIndex !== -1) {
-      const previousState = newStates[stateIndex];
-      const pressureGain = effectResult.pressureDelta;
-      const updatedState: StateForResolution = {
-        ...previousState,
-        pressure: (previousState.pressure || 0) + pressureGain,
-      };
+    state.owner = owner;
+    state.pressure = afterPressure;
 
-      if (pressureGain > 0 && updatedState.pressure >= updatedState.defense) {
-        updatedState.owner = 'player';
-        setStateOccupation(updatedState, gameState.faction, { id: card.id, name: card.name }, false);
+    if (owner === 'player') {
+      nextControlledStates.add(state.abbreviation);
+    } else {
+      nextControlledStates.delete(state.abbreviation);
+    }
 
-        if (!controlledStates.includes(updatedState.abbreviation)) {
-          controlledStates = [...controlledStates, updatedState.abbreviation];
-        }
-
-        logEntries.push(
-          `🚨 ${card.name} captured ${updatedState.name}! (+${pressureGain} pressure)`,
-        );
+    if (previousOwner !== 'player' && owner === 'player') {
+      capturedCount += 1;
+      setStateOccupation(state, gameState.faction, { id: card.id, name: card.name }, false);
+      logEntries.push(`🚨 ${card.name} captured ${state.name}!`);
+      if (targetStateId === state.id) {
         nextTargetState = null;
-
-        achievements.updateStats({
-          total_states_controlled: achievements.stats.total_states_controlled + 1,
-          max_states_controlled_single_game: Math.max(
-            achievements.stats.max_states_controlled_single_game,
-            controlledStates.length,
-          ),
-        });
-      } else if (pressureGain !== 0) {
+      }
+    } else if (targetStateId === state.id && card.type === 'ZONE') {
+      const delta = afterPressure - beforePressure;
+      if (delta !== 0) {
         logEntries.push(
-          `${card.name} added pressure to ${updatedState.name} (+${pressureGain}, ${updatedState.pressure}/${updatedState.defense})`,
+          `${card.name} added pressure to ${state.name} (${delta > 0 ? '+' : ''}${delta}, ${afterPressure}/${state.defense})`,
         );
       }
-
-      newStates[stateIndex] = updatedState;
     }
   }
 
-  if (card.type === 'DEFENSIVE' && effectResult.zoneDefenseBonus < 0) {
-    const playerStates = newStates.filter(
-      state => state.owner === 'player' && (state.pressure || 0) > 0,
-    );
+  const playerIPAfterEffects = engineState.players[PLAYER_ID].ip;
+  const aiIPAfterEffects = engineState.players[AI_ID].ip;
+  const truthAfterEffects = engineState.truth;
+  const damageDealt = Math.max(0, beforeState.players[AI_ID].ip - aiIPAfterEffects);
 
-    if (playerStates.length > 0) {
-      const randomState = playerStates[Math.floor(Math.random() * playerStates.length)];
-      const stateIndex = newStates.findIndex(state => state.id === randomState.id);
-      const pressureReduction = Math.abs(effectResult.zoneDefenseBonus);
-      const updatedState = {
-        ...newStates[stateIndex],
-        pressure: Math.max(0, (newStates[stateIndex].pressure || 0) - pressureReduction),
-      };
-
-      newStates[stateIndex] = updatedState;
-      logEntries.push(`${card.name} reduced pressure on ${updatedState.name} (-${pressureReduction})`);
-    }
-  }
-
-  achievements.updateStats({
+  const achievementUpdates: Partial<PlayerStats> = {
     max_ip_reached: Math.max(achievements.stats.max_ip_reached, playerIPAfterEffects),
     max_truth_reached: Math.max(achievements.stats.max_truth_reached, truthAfterEffects),
     min_truth_reached: Math.min(achievements.stats.min_truth_reached, truthAfterEffects),
-  });
+  };
+
+  if (capturedCount > 0) {
+    achievementUpdates.total_states_controlled = achievements.stats.total_states_controlled + capturedCount;
+    achievementUpdates.max_states_controlled_single_game = Math.max(
+      achievements.stats.max_states_controlled_single_game,
+      nextControlledStates.size,
+    );
+  }
+
+  achievements.updateStats(achievementUpdates);
 
   return {
     ip: playerIPAfterEffects,
     aiIP: aiIPAfterEffects,
     truth: truthAfterEffects,
     states: newStates,
-    controlledStates,
+    controlledStates: Array.from(nextControlledStates),
     targetState: nextTargetState,
-    selectedCard,
+    selectedCard: null,
     logEntries,
     damageDealt,
   };

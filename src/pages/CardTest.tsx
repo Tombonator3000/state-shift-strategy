@@ -117,7 +117,7 @@ const CardTest: React.FC = () => {
               <div className="font-medium">✅ Completed Features:</div>
               <ul className="list-disc list-inside space-y-1 ml-4 text-muted-foreground">
                 <li>Type-safe CardEffects schema with conditionals and duration support</li>
-                <li>CardEffectProcessor engine that processes effects deterministically</li>
+                <li>MVP-aligned resolver that applies effects deterministically</li>
                 <li>Text generation from effects data (no more hardcoded descriptions)</li>
                 <li>Validation system to check text↔effects consistency</li>
                 <li>Migration utilities for legacy card format compatibility</li>
