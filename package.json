@@ -11,8 +11,7 @@
     "test": "bun test --coverage --coverage-reporter=text",
     "preview": "vite preview",
     "ingest:core": "ts-node scripts/splitCoreToBatches.ts",
-    "fix:attack-ip": "bun scripts/fix-attack-ip.ts",
-    "validate:attack-ip": "bun scripts/validate-attack-ip.ts"
+    "validate:mvp": "bun scripts/validate-mvp-batch.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -43,16 +43,15 @@ export const CORE_BATCH_TRUTH_X: GameCard[] = [
 
 ### Validate Database
 ```bash
-# Check that we have 400 cards (200 truth + 200 government)
-cd scripts
-npm run validate-core
+# Check every MVP batch (core + extensions) for schema issues
+npm run validate:mvp
 ```
 
 ## 🛡️ Safeguards
 
 1. **Runtime Recovery**: Automatic batch collection on startup
 2. **Fallback Protection**: 20 minimal cards prevent complete failure
-3. **Validation Scripts**: Ensure 400 card count in CI/CD (run `npm run validate-core`)
+3. **Validation Scripts**: Ensure MVP rules + counts in CI/CD (run `npm run validate:mvp`)
 4. **Enhanced Dashboard**: Shows real card counts with core/extension breakdown
 
 ## 📊 Expected Results
@@ -77,14 +76,13 @@ Your batch files aren't being found. Check:
 
 ### "Duplicates or validation fails"
 ```bash
-cd scripts
-npm run validate-core  # Shows specific issues
+npm run validate:mvp  # Shows specific issues
 ```
 
 ## 💡 Next Steps
 
 1. **Add your 400 batch files** to `src/data/core/`
-2. **Run validation** with `npm run validate-core` 
+2. **Run validation** with `npm run validate:mvp`
 3. **Test gameplay** - you should now have full card variety
 4. **Setup CI validation** to prevent regression
 
