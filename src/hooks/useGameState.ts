@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
-import { extensionManager } from '@/data/extensionSystem';
 import { generateWeightedDeck } from '@/data/weightedCardDistribution';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
@@ -10,8 +9,7 @@ import { AIFactory } from '@/data/aiFactory';
 import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
-import { resolveCardEffects as resolveCardEffectsCore, type CardPlayResolution } from '@/systems/cardResolution';
-import { computeMediaTruthDelta_MVP, warnIfMediaScaling } from '@/mvp/media';
+import { resolveCardMVP, type CardPlayResolution } from '@/systems/cardResolution';
 import { applyTruthDelta } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
@@ -153,15 +151,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const [eventManager] = useState(() => new EventManager());
   const achievements = useAchievements();
   
-  // Ensure extensions are enabled for proper card variety
-  const coreCards = CARD_DATABASE;
-  const extensionCards = extensionManager.getAllExtensionCards();
-  const allCards = [...coreCards, ...extensionCards];
-  
-  console.log(`📊 Card Database Stats:
-  - Core cards: ${coreCards.length}
-  - Extension cards: ${extensionCards.length}  
-  - Total available: ${allCards.length}`);
+  const availableCards = [...CARD_DATABASE];
+  console.log(`📊 Card Database Stats:\n  - Total available: ${availableCards.length}`);
   
   const [gameState, setGameState] = useState<GameState>({
     faction: 'truth',
@@ -241,7 +232,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       card: GameCard,
       targetState: string | null,
     ): CardPlayResolution => {
-      return resolveCardEffectsCore(prev, card, targetState, achievements);
+      return resolveCardMVP(prev, card, targetState, 'human', achievements);
     },
     [achievements],
   );
@@ -278,6 +269,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       aiHand: getRandomCards(handSize, { faction: faction === 'government' ? 'truth' : 'government' }),
       aiDeck: generateWeightedDeck(40, faction === 'government' ? 'truth' : 'government'),
       controlledStates: initialControl.player,
+      aiControlledStates: initialControl.ai,
       isGameOver: false, // CRITICAL: Reset game over state
       phase: 'action', // Reset to proper starting phase
       turn: 1,
@@ -341,6 +333,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         truth: resolution.truth,
         states: resolution.states,
         controlledStates: resolution.controlledStates,
+        aiControlledStates: resolution.aiControlledStates,
         cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
         targetState: resolution.targetState,
@@ -379,6 +372,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         truth: resolution.truth,
         states: resolution.states,
         controlledStates: resolution.controlledStates,
+        aiControlledStates: resolution.aiControlledStates,
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
         log: [...prev.log, ...resolution.logEntries]
@@ -605,85 +599,33 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     }, 1000);
   }, [gameState]);
 
-  const playAICard = useCallback(async (cardId: string, targetState?: string, reasoning?: string) => {
+  const playAICard = useCallback((cardId: string, targetState?: string, reasoning?: string) => {
     const card = gameState.aiHand.find(c => c.id === cardId);
     if (!card) return;
 
     setGameState(prev => {
-      const aiFaction = prev.faction === 'government' ? 'truth' : 'government';
-      const nextState: GameState = {
-        ...prev,
-        truth: prev.truth,
-        states: prev.states.map(state => ({ ...state })),
-        log: [...prev.log],
-      };
-
-      let playerIP = prev.ip;
-
-      switch (card.type) {
-        case 'MEDIA': {
-          const sign = aiFaction === 'truth' ? 1 : -1;
-          const delta = computeMediaTruthDelta_MVP(
-            { faction: aiFaction, isAI: true },
-            card,
-            { overrideSign: sign },
-          );
-          warnIfMediaScaling(card, delta);
-          const magnitude = Math.abs(card.effects?.truthDelta ?? 0);
-          nextState.log.push(
-            `AI played ${card.name}: Media play (${sign > 0 ? '+' : '-'}${magnitude}%)`,
-          );
-          applyTruthDelta(nextState, delta, 'ai');
-          nextState.log.push(
-            `AI Strategy: Media play to ${sign > 0 ? 'raise' : 'lower'} public opinion (${sign > 0 ? '+' : '-'}${magnitude}%)`,
-          );
-          break;
-        }
-        case 'ZONE':
-          if (targetState) {
-            const stateIndex = nextState.states.findIndex(s => s.abbreviation === targetState);
-            if (stateIndex !== -1) {
-              const pressureMatch = card.text?.match(/\+(\d+) Pressure/);
-              const pressureGain = pressureMatch ? parseInt(pressureMatch[1]) : 1;
-              const target = nextState.states[stateIndex];
-              const updatedPressure = target.pressure + pressureGain;
-              const updatedState = {
-                ...target,
-                pressure: updatedPressure,
-                owner: updatedPressure >= target.defense ? 'ai' : target.owner,
-              };
-
-              nextState.states[stateIndex] = updatedState;
-              nextState.log.push(`AI played ${card.name} on ${targetState}: Added pressure (+${pressureGain})`);
-              if (updatedState.owner === 'ai') {
-                nextState.log.push(`🚨 AI captured ${updatedState.name}!`);
-              }
-            }
-          }
-          break;
-        case 'ATTACK': {
-          const damage = 15 + Math.floor(Math.random() * 10);
-          nextState.log.push(`AI played ${card.name}: Attack for ${damage} IP damage`);
-          playerIP = Math.max(0, prev.ip - damage);
-          break;
-        }
-        case 'DEFENSIVE':
-          nextState.log.push(`AI played ${card.name}: Defensive preparations`);
-          break;
-      }
+      const resolution = resolveCardMVP(prev, card, targetState ?? null, 'ai', achievements);
+      const logEntries = [...prev.log, ...resolution.logEntries];
 
       if (reasoning) {
-        nextState.log.push(`AI Strategy: ${reasoning}`);
+        logEntries.push(`AI Strategy: ${reasoning}`);
       }
 
-      nextState.ip = playerIP;
-      nextState.aiIP = Math.max(0, prev.aiIP - card.cost);
-      nextState.aiHand = prev.aiHand.filter(c => c.id !== cardId);
-      nextState.cardsPlayedThisRound = [...prev.cardsPlayedThisRound, { card, player: 'ai' }];
-
-      return nextState;
+      return {
+        ...prev,
+        ip: resolution.ip,
+        aiIP: resolution.aiIP,
+        truth: resolution.truth,
+        states: resolution.states,
+        controlledStates: resolution.controlledStates,
+        aiControlledStates: resolution.aiControlledStates,
+        targetState: resolution.targetState,
+        aiHand: prev.aiHand.filter(c => c.id !== cardId),
+        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
+        log: logEntries,
+      };
     });
-  }, [gameState]);
+  }, [achievements, gameState]);
 
   const closeNewspaper = useCallback(() => {
     setGameState(prev => {

@@ -1,6 +1,5 @@
 import type { GameCard } from '@/rules/mvp';
 import { ensureMvpCosts, getCoreCards, isMvpCard } from './cardDatabase';
-import { extensionManager } from './extensionSystem';
 
 export const MVP_TYPE_WEIGHTS: Record<'ATTACK' | 'MEDIA' | 'ZONE', number> = {
   ATTACK: 0.33,
@@ -149,9 +148,9 @@ interface CardSet {
 class WeightedCardDistribution {
   private settings: DistributionSettings = { ...DEFAULT_DISTRIBUTION_SETTINGS };
   
-  // Get all available card sets (core + enabled extensions)
+  // Get available card sets (core only in MVP)
   private getAvailableCardSets(): CardSet[] {
-    const sets: CardSet[] = [
+    return [
       {
         id: 'core',
         name: 'Core Set',
@@ -159,26 +158,6 @@ class WeightedCardDistribution {
         isCore: true,
       },
     ];
-
-    const allExtensionCards = extensionManager.getAllExtensionCards();
-    const enabledExtensions = extensionManager.getEnabledExtensions();
-    enabledExtensions.forEach(ext => {
-      const extensionCards = sanitizeSetCards(
-        allExtensionCards.filter(card => card.extId === ext.id),
-        ext.id,
-      );
-
-      if (extensionCards.length > 0) {
-        sets.push({
-          id: ext.id,
-          name: ext.name,
-          cards: extensionCards,
-          isCore: false,
-        });
-      }
-    });
-
-    return sets;
   }
 
   // MVP: Remove keyword heuristics - exact faction match only
