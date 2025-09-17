@@ -107,24 +107,14 @@ async function loadCoreCards(): Promise<GameCard[]> {
           id: "truth-4",
           faction: "truth",
           name: "Freedom Rally",
-          type: "ATTACK",
+          type: "ATTACK", 
           rarity: "common",
-          cost: 2,
+          cost: 7,
           text: "+5% Truth. Target a state; reduce its Defense by 2.",
-          flavor: "The people unite for transparency.",
           flavorTruth: "The people unite for transparency.",
           flavorGov: "Domestic unrest contained.",
-          target: {
-            count: 1,
-            scope: "state"
-          },
-          effects: {
-            truthDelta: 5,
-            ipDelta: {
-              opponent: 1
-            },
-            zoneDefense: -2
-          }
+          target: { scope: "state", count: 1 },
+          effects: { truthDelta: 5, zoneDefense: -2 }
         },
         {
           id: "truth-5",
@@ -177,23 +167,12 @@ async function loadCoreCards(): Promise<GameCard[]> {
           name: "Protest Movement",
           type: "ATTACK",
           rarity: "uncommon",
-          cost: 3,
+          cost: 8,
           text: "+6% Truth. Target a state; reduce its Defense by 1. Opponent discards 1 card.",
-          flavor: "Voices cannot be silenced forever.",
           flavorTruth: "Voices cannot be silenced forever.",
           flavorGov: "Civil disturbance contained.",
-          target: {
-            count: 1,
-            scope: "state"
-          },
-          effects: {
-            truthDelta: 6,
-            ipDelta: {
-              opponent: 2
-            },
-            discardOpponent: 1,
-            zoneDefense: -1
-          }
+          target: { scope: "state", count: 1 },
+          effects: { truthDelta: 6, zoneDefense: -1, discardOpponent: 1 }
         },
         {
           id: "truth-9",
@@ -267,23 +246,13 @@ async function loadCoreCards(): Promise<GameCard[]> {
           faction: "government",
           name: "Federal Raid",
           type: "ATTACK",
-          rarity: "common",
-          cost: 2,
+          rarity: "common", 
+          cost: 7,
           text: "-5% Truth. Target a state; reduce its Defense by 2.",
-          flavor: "Authority silences dissent.",
           flavorTruth: "Authority silences dissent.",
           flavorGov: "National security maintained.",
-          target: {
-            count: 1,
-            scope: "state"
-          },
-          effects: {
-            truthDelta: -5,
-            ipDelta: {
-              opponent: 1
-            },
-            zoneDefense: -2
-          }
+          target: { scope: "state", count: 1 },
+          effects: { truthDelta: -5, zoneDefense: -2 }
         },
         {
           id: "gov-5", 
@@ -336,23 +305,12 @@ async function loadCoreCards(): Promise<GameCard[]> {
           name: "Surveillance State",
           type: "ATTACK",
           rarity: "uncommon",
-          cost: 3,
+          cost: 8,
           text: "-6% Truth. Target a state; reduce its Defense by 1. Opponent discards 1 card.",
-          flavor: "Big Brother is always watching.",
           flavorTruth: "Big Brother is always watching.",
           flavorGov: "Enhanced monitoring operational.",
-          target: {
-            count: 1,
-            scope: "state"
-          },
-          effects: {
-            truthDelta: -6,
-            ipDelta: {
-              opponent: 2
-            },
-            discardOpponent: 1,
-            zoneDefense: -1
-          }
+          target: { scope: "state", count: 1 },
+          effects: { truthDelta: -6, zoneDefense: -1, discardOpponent: 1 }
         },
         {
           id: "gov-9",

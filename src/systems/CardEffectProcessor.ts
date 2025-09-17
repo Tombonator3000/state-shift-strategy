@@ -69,22 +69,10 @@ export class CardEffectProcessor {
         result.ipDelta.self += effects.ipDelta.self;
         result.logMessages.push(`IP ${effects.ipDelta.self >= 0 ? '+' : ''}${effects.ipDelta.self}`);
       }
-
+      
       if (effects.ipDelta.opponent !== undefined) {
-        const amount = effects.ipDelta.opponent;
-        result.ipDelta.self += amount;
-        result.ipDelta.opponent -= amount;
-
-        if (amount > 0) {
-          result.logMessages.push(`Opponent loses ${amount} IP`);
-          result.logMessages.push(`You gain ${amount} IP`);
-        } else if (amount < 0) {
-          const abs = Math.abs(amount);
-          result.logMessages.push(`Opponent gains ${abs} IP`);
-          result.logMessages.push(`You lose ${abs} IP`);
-        } else {
-          result.logMessages.push('No IP change');
-        }
+        result.ipDelta.opponent += effects.ipDelta.opponent;
+        result.logMessages.push(`Opponent IP ${effects.ipDelta.opponent >= 0 ? '+' : ''}${effects.ipDelta.opponent}`);
       }
     }
     

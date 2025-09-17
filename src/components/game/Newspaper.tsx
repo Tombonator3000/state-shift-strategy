@@ -117,7 +117,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
     const headline = tabloidHeadlines[Math.floor(Math.random() * tabloidHeadlines.length)];
     
     // Use flavor text or generate Weekly World News style content
-    const flavorText = card.flavor ?? card.flavorGov ?? card.flavorTruth;
+    const flavorText = card.flavorTruth || card.flavorGov;
     const tabloidContent = flavorText || 
       `Local sources report bizarre activities linked to what witnesses describe as "${card.name}". Government officials refuse comment, but experts claim this could change everything. "I've never seen anything like it," said one anonymous whistleblower. Full story inside – if the Men in Black don't stop us first!`;
 

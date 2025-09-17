@@ -88,21 +88,12 @@ export const CORE_BATCH_TRUTH_6: GameCard[] = [
     name: "Data Breach Whistle",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 3,
+    cost: 10,
     text: "Opponent discards 1 card.",
-    flavor: "The loudest tiny whistle ever printed.",
     flavorTruth: "The loudest tiny whistle ever printed.",
     flavorGov: "The loudest tiny whistle ever printed.",
-    target: {
-      count: 0,
-      scope: "global"
-    },
-    effects: {
-      ipDelta: {
-        opponent: 2
-      },
-      discardOpponent: 1
-    }
+    target: { scope: "global", count: 0 },
+    effects: { discardOpponent: 1 }
   },
   {
     id: "TRUTH-133",
@@ -110,20 +101,12 @@ export const CORE_BATCH_TRUTH_6: GameCard[] = [
     name: "Press Conference Ambush",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 3,
+    cost: 9,
     text: "Opponent -2 IP.",
-    flavor: "First question, final answer.",
     flavorTruth: "First question, final answer.",
     flavorGov: "First question, final answer.",
-    target: {
-      count: 0,
-      scope: "global"
-    },
-    effects: {
-      ipDelta: {
-        opponent: 2
-      }
-    }
+    target: { scope: "global", count: 0 },
+    effects: { ipDelta: { opponent: -2 } }
   },
   {
     id: "TRUTH-134",
@@ -131,21 +114,12 @@ export const CORE_BATCH_TRUTH_6: GameCard[] = [
     name: "FOIA Lightning Round",
     type: "ATTACK",
     rarity: "rare",
-    cost: 4,
+    cost: 12,
     text: "Draw 2. Opponent -2 IP.",
-    flavor: "Redaction ink runs in the rain.",
     flavorTruth: "Redaction ink runs in the rain.",
     flavorGov: "Redaction ink runs in the rain.",
-    target: {
-      count: 0,
-      scope: "global"
-    },
-    effects: {
-      ipDelta: {
-        opponent: 3
-      },
-      draw: 2
-    }
+    target: { scope: "global", count: 0 },
+    effects: { draw: 2, ipDelta: { opponent: -2 } }
   },
   {
     id: "TRUTH-135",
@@ -153,22 +127,12 @@ export const CORE_BATCH_TRUTH_6: GameCard[] = [
     name: "Infiltrate the Briefing",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 3,
+    cost: 10,
     text: "Target state: reduce its Defense by 1. Draw 1.",
-    flavor: "Credentials printed on recycled secrets.",
     flavorTruth: "Credentials printed on recycled secrets.",
     flavorGov: "Credentials printed on recycled secrets.",
-    target: {
-      count: 1,
-      scope: "state"
-    },
-    effects: {
-      ipDelta: {
-        opponent: 2
-      },
-      draw: 1,
-      pressureDelta: 1
-    }
+    target: { scope: "state", count: 1 },
+    effects: { pressureDelta: 1, draw: 1 }
   },
   {
     id: "TRUTH-136",
@@ -176,20 +140,12 @@ export const CORE_BATCH_TRUTH_6: GameCard[] = [
     name: "Crowdsourced Fact Storm",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 3,
+    cost: 9,
     text: "Gain +1 IP.",
-    flavor: "1,000 comments, one conclusion.",
     flavorTruth: "1,000 comments, one conclusion.",
     flavorGov: "1,000 comments, one conclusion.",
-    target: {
-      count: 0,
-      scope: "global"
-    },
-    effects: {
-      ipDelta: {
-        opponent: 2
-      }
-    }
+    target: { scope: "global", count: 0 },
+    effects: { ipDelta: { self: 1 } }
   },
   {
     id: "TRUTH-137",
@@ -197,22 +153,12 @@ export const CORE_BATCH_TRUTH_6: GameCard[] = [
     name: "Operation Spotlight",
     type: "ATTACK",
     rarity: "rare",
-    cost: 4,
+    cost: 12,
     text: "Opponent discards 1 card. +4% Truth.",
-    flavor: "Stage lights melt alibis.",
     flavorTruth: "Stage lights melt alibis.",
     flavorGov: "Stage lights melt alibis.",
-    target: {
-      count: 0,
-      scope: "global"
-    },
-    effects: {
-      truthDelta: 4,
-      ipDelta: {
-        opponent: 3
-      },
-      discardOpponent: 1
-    }
+    target: { scope: "global", count: 0 },
+    effects: { discardOpponent: 1, truthDelta: 4 }
   },
   {
     id: "TRUTH-138",
@@ -220,21 +166,12 @@ export const CORE_BATCH_TRUTH_6: GameCard[] = [
     name: "Emergency Broadcast Override",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 3,
+    cost: 11,
     text: "Draw 1 card.",
-    flavor: "We interrupt your regularly scheduled denial.",
     flavorTruth: "We interrupt your regularly scheduled denial.",
     flavorGov: "We interrupt your regularly scheduled denial.",
-    target: {
-      count: 0,
-      scope: "global"
-    },
-    effects: {
-      ipDelta: {
-        opponent: 2
-      },
-      draw: 1
-    }
+    target: { scope: "global", count: 0 },
+    effects: { draw: 1 }
   },
   {
     id: "TRUTH-139",
@@ -242,22 +179,12 @@ export const CORE_BATCH_TRUTH_6: GameCard[] = [
     name: "Street Reporter Blitz",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 3,
+    cost: 9,
     text: "Target state: +1 Pressure. +3% Truth.",
-    flavor: "Microphones swarm like bees.",
     flavorTruth: "Microphones swarm like bees.",
     flavorGov: "Microphones swarm like bees.",
-    target: {
-      count: 1,
-      scope: "state"
-    },
-    effects: {
-      truthDelta: 3,
-      ipDelta: {
-        opponent: 2
-      },
-      pressureDelta: 1
-    }
+    target: { scope: "state", count: 1 },
+    effects: { pressureDelta: 1, truthDelta: 3 }
   },
   {
     id: "TRUTH-140",
@@ -265,21 +192,12 @@ export const CORE_BATCH_TRUTH_6: GameCard[] = [
     name: "Subpoena Surprise",
     type: "ATTACK",
     rarity: "rare",
-    cost: 4,
+    cost: 12,
     text: "Opponent -3 IP. Draw 1.",
-    flavor: "Signed by Judge Public Opinion.",
     flavorTruth: "Signed by Judge Public Opinion.",
     flavorGov: "Signed by Judge Public Opinion.",
-    target: {
-      count: 0,
-      scope: "global"
-    },
-    effects: {
-      ipDelta: {
-        opponent: 3
-      },
-      draw: 1
-    }
+    target: { scope: "global", count: 0 },
+    effects: { ipDelta: { opponent: -3 }, draw: 1 }
   },
   {
     id: "TRUTH-141",
@@ -287,21 +205,12 @@ export const CORE_BATCH_TRUTH_6: GameCard[] = [
     name: "Elvis Press Pass",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 3,
+    cost: 10,
     text: "Opponent discards 1 card.",
-    flavor: "Laminate of destiny.",
     flavorTruth: "Laminate of destiny.",
     flavorGov: "Laminate of destiny.",
-    target: {
-      count: 0,
-      scope: "global"
-    },
-    effects: {
-      ipDelta: {
-        opponent: 2
-      },
-      discardOpponent: 1
-    }
+    target: { scope: "global", count: 0 },
+    effects: { discardOpponent: 1 }
   },
   {
     id: "TRUTH-142",
@@ -309,27 +218,16 @@ export const CORE_BATCH_TRUTH_6: GameCard[] = [
     name: "Flash-Truth Rally",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 3,
+    cost: 10,
     text: "+4% Truth. If you control 2+ zones, gain +1 IP.",
-    flavor: "Chants harmonize with sirens.",
     flavorTruth: "Chants harmonize with sirens.",
     flavorGov: "Chants harmonize with sirens.",
-    target: {
-      count: 0,
-      scope: "global"
-    },
-    effects: {
+    target: { scope: "global", count: 0 },
+    effects: { 
       truthDelta: 4,
-      ipDelta: {
-        opponent: 2
-      },
       conditional: {
         ifZonesControlledAtLeast: 2,
-        then: {
-          ipDelta: {
-            opponent: 2
-          }
-        }
+        then: { ipDelta: { self: 1 } }
       }
     }
   },
