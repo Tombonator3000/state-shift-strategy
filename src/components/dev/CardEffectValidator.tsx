@@ -13,7 +13,7 @@ import { CheckCircle, XCircle, AlertTriangle, Bug, Zap } from 'lucide-react';
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import { CardEffectValidator, CardTextGenerator } from '@/systems/CardTextGenerator';
 import { CardEffectProcessor } from '@/systems/CardEffectProcessor';
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 
 const CardEffectValidatorPanel: React.FC = () => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);

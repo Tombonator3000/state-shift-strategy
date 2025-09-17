@@ -5,7 +5,7 @@ import { CARD_DATABASE } from './cardDatabase';
 import { extensionManager } from './extensionSystem';
 
 // Use centralized v2.1E types
-import type { GameCard, Faction, CardType } from '@/types/cardTypes';
+import type { GameCard, Faction, CardType } from '@/rules/mvp';
 
 // Core interfaces for analysis system
 export interface FactionAlignmentMatrix {

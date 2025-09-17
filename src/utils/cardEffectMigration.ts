@@ -1,8 +1,12 @@
 // Card Effect Migration Utilities
 // Handles legacy card format compatibility
 
-import type { Card as LegacyCard, CardEffects as LegacyCardEffects } from '@/types/cardEffects';
-import type { GameCard, CardEffects, Faction } from '@/types/cardTypes';
+import type {
+  Card as LegacyCard,
+  CardEffects as LegacyCardEffects,
+  CardEffects,
+} from '@/types/cardEffects';
+import type { GameCard, Faction } from '@/rules/mvp';
 
 export class CardEffectMigrator {
   

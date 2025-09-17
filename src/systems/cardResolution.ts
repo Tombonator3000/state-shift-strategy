@@ -1,7 +1,7 @@
 import { CardEffectProcessor } from './CardEffectProcessor';
 import { computeMediaTruthDelta_MVP, warnIfMediaScaling, type MediaResolutionOptions } from '@/mvp/media';
 import type { Card } from '@/types/cardEffects';
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 import { setStateOccupation } from '@/data/usaStates';
 import type { PlayerStats } from '@/data/achievementSystem';
 import { applyTruthDelta } from '@/utils/truth';

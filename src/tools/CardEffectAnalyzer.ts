@@ -4,7 +4,7 @@
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import { CardTextGenerator, CardEffectValidator } from '@/systems/CardTextGenerator';
 import type { Card } from '@/types/cardEffects';
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 
 export interface EffectDiscrepancy {
   cardId: string;

@@ -1,7 +1,7 @@
-import type { GameCard } from '@/types/cardTypes';
+import type { CardType, GameCard, Rarity } from '@/rules/mvp';
+import { expectedCost } from '@/rules/mvp';
 import { extensionManager } from './extensionSystem';
-import { expectedCost, sanitizeCard, validateCard } from '@/mvp/validator';
-import type { Card, CardType, Rarity } from '@/mvp/types';
+import { sanitizeCard, validateCard, type Card } from '@/mvp/validator';
 
 const MVP_TYPES: readonly CardType[] = ['ATTACK', 'MEDIA', 'ZONE'];
 const MVP_RARITIES: readonly Rarity[] = ['common', 'uncommon', 'rare', 'legendary'];

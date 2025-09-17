@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { X, TrendingUp, AlertTriangle } from 'lucide-react';
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
 import CardImage from '@/components/game/CardImage';
 

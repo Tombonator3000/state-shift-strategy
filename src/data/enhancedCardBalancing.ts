@@ -1,7 +1,7 @@
 // Enhanced Card Balancing System for Shadow Government v2.1E
 // Updated for new type system with GameCard and CardEffects
 
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 import type { CardEffects } from '@/types/cardEffects';
 import { CARD_DATABASE } from './cardDatabase';
 import { extensionManager } from './extensionSystem';
