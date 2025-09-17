@@ -450,12 +450,21 @@ export const CORE_BATCH_TRUTH_7: GameCard[] = [
     name: "Open Mic Press Briefing",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 10,
+    cost: 3,
     text: "Draw 1 card.",
+    flavor: "Mic check, lie wreck.",
     flavorTruth: "Mic check, lie wreck.",
     flavorGov: "Mic check, lie wreck.",
-    target: { scope: "global", count: 0 },
-    effects: { draw: 1 }
+    target: {
+      count: 0,
+      scope: "global"
+    },
+    effects: {
+      ipDelta: {
+        opponent: 2
+      },
+      draw: 1
+    }
   },
   {
     id: "TRUTH-184",
@@ -463,12 +472,22 @@ export const CORE_BATCH_TRUTH_7: GameCard[] = [
     name: "Neighborhood Drone Surge",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 10,
+    cost: 3,
     text: "Target state: +1 Pressure. Draw 1.",
+    flavor: "Eyes in the sky, pies on the porch.",
     flavorTruth: "Eyes in the sky, pies on the porch.",
     flavorGov: "Eyes in the sky, pies on the porch.",
-    target: { scope: "state", count: 1 },
-    effects: { pressureDelta: 1, draw: 1 }
+    target: {
+      count: 1,
+      scope: "state"
+    },
+    effects: {
+      ipDelta: {
+        opponent: 2
+      },
+      draw: 1,
+      pressureDelta: 1
+    }
   },
   {
     id: "TRUTH-185",
@@ -476,12 +495,21 @@ export const CORE_BATCH_TRUTH_7: GameCard[] = [
     name: "Leaks to Local Paper",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 9,
+    cost: 3,
     text: "Opponent discards 1 card.",
+    flavor: "Ink beats intimidation.",
     flavorTruth: "Ink beats intimidation.",
     flavorGov: "Ink beats intimidation.",
-    target: { scope: "global", count: 0 },
-    effects: { discardOpponent: 1 }
+    target: {
+      count: 0,
+      scope: "global"
+    },
+    effects: {
+      ipDelta: {
+        opponent: 2
+      },
+      discardOpponent: 1
+    }
   },
   {
     id: "TRUTH-186",
@@ -489,16 +517,26 @@ export const CORE_BATCH_TRUTH_7: GameCard[] = [
     name: "Citizen Audit",
     type: "ATTACK",
     rarity: "rare",
-    cost: 12,
+    cost: 4,
     text: "Opponent -3 IP. If Truth ≥ 60%, opponent -5 IP instead.",
+    flavor: "Receipts stapled to reality.",
     flavorTruth: "Receipts stapled to reality.",
     flavorGov: "Receipts stapled to reality.",
-    target: { scope: "global", count: 0 },
-    effects: { 
-      ipDelta: { opponent: -3 },
+    target: {
+      count: 0,
+      scope: "global"
+    },
+    effects: {
+      ipDelta: {
+        opponent: 3
+      },
       conditional: {
         ifTruthAtLeast: 60,
-        then: { ipDelta: { opponent: -5 } }
+        then: {
+          ipDelta: {
+            opponent: 5
+          }
+        }
       }
     }
   },
@@ -508,12 +546,21 @@ export const CORE_BATCH_TRUTH_7: GameCard[] = [
     name: "Midnight Signal Boost",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 9,
+    cost: 3,
     text: "+4% Truth. Opponent -1 IP.",
+    flavor: "Static speaks volumes.",
     flavorTruth: "Static speaks volumes.",
     flavorGov: "Static speaks volumes.",
-    target: { scope: "global", count: 0 },
-    effects: { truthDelta: 4, ipDelta: { opponent: -1 } }
+    target: {
+      count: 0,
+      scope: "global"
+    },
+    effects: {
+      truthDelta: 4,
+      ipDelta: {
+        opponent: 2
+      }
+    }
   },
   {
     id: "TRUTH-188",
@@ -521,12 +568,20 @@ export const CORE_BATCH_TRUTH_7: GameCard[] = [
     name: "Counter-Spin Workshop",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 9,
+    cost: 3,
     text: "Gain +1 IP.",
+    flavor: "Spin class for facts.",
     flavorTruth: "Spin class for facts.",
     flavorGov: "Spin class for facts.",
-    target: { scope: "global", count: 0 },
-    effects: { ipDelta: { self: 1 } }
+    target: {
+      count: 0,
+      scope: "global"
+    },
+    effects: {
+      ipDelta: {
+        opponent: 2
+      }
+    }
   },
   {
     id: "TRUTH-189",
@@ -534,12 +589,21 @@ export const CORE_BATCH_TRUTH_7: GameCard[] = [
     name: "FOIA Blitz Marathon",
     type: "ATTACK",
     rarity: "rare",
-    cost: 12,
+    cost: 4,
     text: "Draw 2. Opponent -2 IP.",
+    flavor: "Paper cuts to the narrative.",
     flavorTruth: "Paper cuts to the narrative.",
     flavorGov: "Paper cuts to the narrative.",
-    target: { scope: "global", count: 0 },
-    effects: { draw: 2, ipDelta: { opponent: -2 } }
+    target: {
+      count: 0,
+      scope: "global"
+    },
+    effects: {
+      ipDelta: {
+        opponent: 3
+      },
+      draw: 2
+    }
   },
   {
     id: "TRUTH-190",
@@ -547,12 +611,22 @@ export const CORE_BATCH_TRUTH_7: GameCard[] = [
     name: "Flash Mob Fact-Check",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 10,
+    cost: 3,
     text: "Target state: reduce its Defense by 1. Draw 1.",
+    flavor: "Synchronised citations.",
     flavorTruth: "Synchronised citations.",
     flavorGov: "Synchronised citations.",
-    target: { scope: "state", count: 1 },
-    effects: { pressureDelta: 1, draw: 1 }
+    target: {
+      count: 1,
+      scope: "state"
+    },
+    effects: {
+      ipDelta: {
+        opponent: 2
+      },
+      draw: 1,
+      pressureDelta: 1
+    }
   },
   {
     id: "TRUTH-191",
@@ -560,12 +634,21 @@ export const CORE_BATCH_TRUTH_7: GameCard[] = [
     name: "Mothman Siren",
     type: "ATTACK",
     rarity: "uncommon",
-    cost: 10,
+    cost: 3,
     text: "Target state: +1 Pressure.",
+    flavor: "Wings over weak points.",
     flavorTruth: "Wings over weak points.",
     flavorGov: "Wings over weak points.",
-    target: { scope: "state", count: 1 },
-    effects: { pressureDelta: 1 }
+    target: {
+      count: 1,
+      scope: "state"
+    },
+    effects: {
+      ipDelta: {
+        opponent: 2
+      },
+      pressureDelta: 1
+    }
   },
   {
     id: "TRUTH-192",
