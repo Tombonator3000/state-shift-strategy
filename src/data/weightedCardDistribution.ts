@@ -119,7 +119,7 @@ export interface DistributionSettings {
 
 // Default settings
 export const DEFAULT_DISTRIBUTION_SETTINGS: DistributionSettings = {
-  mode: 'balanced',
+  mode: 'core-only',
   setWeights: {
     core: 2.0
   },

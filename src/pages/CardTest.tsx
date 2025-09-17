@@ -116,12 +116,11 @@ const CardTest: React.FC = () => {
             <div className="text-sm space-y-2">
               <div className="font-medium">✅ Completed Features:</div>
               <ul className="list-disc list-inside space-y-1 ml-4 text-muted-foreground">
-                <li>Type-safe CardEffects schema with conditionals and duration support</li>
-                <li>MVP-aligned resolver that applies effects deterministically</li>
-                <li>Text generation from effects data (no more hardcoded descriptions)</li>
-                <li>Validation system to check text↔effects consistency</li>
-                <li>Migration utilities for legacy card format compatibility</li>
-                <li>Development tools and testing components</li>
+                <li>MVP CardEffects schema centred on truth, opponent IP, and pressure deltas</li>
+                <li>Deterministic resolver wired to the MVP engine pipeline</li>
+                <li>Rules text generation sourced from card effect data</li>
+                <li>Validation system to keep text and gameplay in sync</li>
+                <li>Lightweight developer tools for spot-checking new core cards</li>
                 <li>Unified gameplay logic replacing hardcoded switch statements</li>
               </ul>
               

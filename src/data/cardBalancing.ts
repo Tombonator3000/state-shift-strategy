@@ -1,18 +1,26 @@
-// Card Balancing System for Shadow Government
-// Analyzes and provides feedback on card balance
-
+import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE } from './cardDatabase';
-import { extensionManager } from './extensionSystem';
+import {
+  classifyMvpCost,
+  computeMvpEffectScore,
+  getExpectedMvpCost,
+  getMvpEffectSummary,
+  summarizeFactionCounts,
+  type MvpCostStatus,
+  type MvpEffectSummary,
+} from './mvpAnalysisUtils';
 
 export interface CardBalance {
   cardId: string;
   name: string;
-  type: string;
-  rarity: string;
+  type: GameCard['type'];
+  rarity?: GameCard['rarity'];
   cost: number;
-  effectValue: number;
-  costEfficiencyRatio: number;
-  balanceStatus: 'balanced' | 'undercosted' | 'overcosted';
+  expectedCost: number | null;
+  costStatus: MvpCostStatus;
+  costDelta: number | null;
+  effectSummary: MvpEffectSummary;
+  effectScore: number;
   recommendations: string[];
 }
 
@@ -22,303 +30,170 @@ export interface BalanceReport {
   balancedCards: number;
   undercostCards: number;
   overcostCards: number;
+  factionCounts: { truth: number; government: number; neutral: number };
+  averageCost: number;
   cardAnalysis: CardBalance[];
   recommendations: string[];
 }
 
-// For compatibility with existing dashboard
 export interface CardMetrics {
   id: string;
   name: string;
-  type: string;
-  rarity: string;
+  type: GameCard['type'];
+  rarity?: GameCard['rarity'];
   currentCost: number;
-  recommendedCost: number;
-  powerScore: number;
-  balanceStatus: 'balanced' | 'underpowered' | 'overpowered';
-  usageRate: number;
-  winRateWhenPlayed: number;
-  issues: string[];
-}
-
-export interface BalancingReport {
-  totalCards: number;
-  balancedCards: number;
-  underpoweredCards: number;
-  overpoweredCards: number;
-  averageCostByType: Record<string, number>;
-  averageCostByRarity: Record<string, number>;
-  recommendations: string[];
+  expectedCost: number | null;
+  costStatus: MvpCostStatus;
+  effectScore: number;
+  notes: string[];
 }
 
 export class CardBalancer {
-  private cards: any[];
+  private cards: GameCard[];
 
-  constructor(includeExtensions: boolean = true) {
-    if (includeExtensions) {
-      const extensionCards = extensionManager.getAllExtensionCards();
-      this.cards = [...CARD_DATABASE, ...extensionCards];
-    } else {
-      this.cards = CARD_DATABASE;
-    }
+  constructor(cards: GameCard[] = CARD_DATABASE) {
+    this.cards = cards;
   }
 
-  generateBalancingReport(): BalancingReport {
-    const analysis = analyzeCardBalance(this.cards);
-    
-    // Calculate averages by type and rarity
-    const costsByType: Record<string, number[]> = {};
-    const costsByRarity: Record<string, number[]> = {};
-
-    this.cards.forEach(card => {
-      if (!costsByType[card.type]) costsByType[card.type] = [];
-      if (!costsByRarity[card.rarity]) costsByRarity[card.rarity] = [];
-      
-      costsByType[card.type].push(card.cost);
-      costsByRarity[card.rarity].push(card.cost);
-    });
-
-    const averageCostByType: Record<string, number> = {};
-    Object.entries(costsByType).forEach(([type, costs]) => {
-      averageCostByType[type] = costs.reduce((a, b) => a + b, 0) / costs.length;
-    });
-
-    const averageCostByRarity: Record<string, number> = {};
-    Object.entries(costsByRarity).forEach(([rarity, costs]) => {
-      averageCostByRarity[rarity] = costs.reduce((a, b) => a + b, 0) / costs.length;
-    });
-
-    return {
-      totalCards: analysis.totalCards,
-      balancedCards: analysis.balancedCards,
-      underpoweredCards: analysis.overcostCards, // Overcosted -> underpowered
-      overpoweredCards: analysis.undercostCards, // Undercosted -> overpowered
-      averageCostByType,
-      averageCostByRarity,
-      recommendations: analysis.recommendations
-    };
+  generateBalancingReport(): BalanceReport {
+    return analyzeCardBalance(this.cards);
   }
 
   getCardsNeedingAttention(): CardMetrics[] {
-    const analysis = analyzeCardBalance(this.cards);
-    
-    return analysis.cardAnalysis
-      .filter(card => card.balanceStatus !== 'balanced')
-      .map(card => {
-        const optimalCost = calculateOptimalCost(card.type, card.rarity, card.effectValue);
-        
-        return {
-          id: card.cardId,
-          name: card.name,
-          type: card.type,
-          rarity: card.rarity,
-          currentCost: card.cost,
-          recommendedCost: optimalCost,
-          powerScore: Math.min(10, card.effectValue / (card.cost || 1)),
-          balanceStatus: card.balanceStatus === 'undercosted' ? 'overpowered' : 
-                        card.balanceStatus === 'overcosted' ? 'underpowered' : 'balanced',
-          usageRate: Math.random() * 100, // Mock data - would come from game analytics
-          winRateWhenPlayed: 45 + Math.random() * 20, // Mock data
-          issues: card.recommendations
-        };
-      });
+    const report = analyzeCardBalance(this.cards);
+    return report.cardAnalysis
+      .filter(card => card.costStatus !== 'On Curve')
+      .map(card => ({
+        id: card.cardId,
+        name: card.name,
+        type: card.type,
+        rarity: card.rarity,
+        currentCost: card.cost,
+        expectedCost: card.expectedCost,
+        costStatus: card.costStatus,
+        effectScore: card.effectScore,
+        notes: card.recommendations,
+      }));
   }
 
   exportBalancingData() {
     const report = this.generateBalancingReport();
     const cardsNeedingAttention = this.getCardsNeedingAttention();
-    
+
     return {
       report,
       cardsNeedingAttention,
       timestamp: new Date().toISOString(),
-      version: '1.0'
+      version: 'MVP',
     };
   }
 }
 
-// Base cost curves for different rarities and effects
-const COST_CURVES = {
-  MEDIA: {
-    common: { baseCost: 4, effectMultiplier: 1.0 }, // Truth ±10 = 4 cost
-    uncommon: { baseCost: 6, effectMultiplier: 1.5 }, // Truth ±20 = 6 cost  
-    rare: { baseCost: 8, effectMultiplier: 2.0 }, // Truth ±30 = 8 cost
-    legendary: { baseCost: 12, effectMultiplier: 3.0 } // Truth ±50+ = 12+ cost
-  },
-  ZONE: {
-    common: { baseCost: 5, effectMultiplier: 1.0 }, // +1 Pressure = 5 cost
-    uncommon: { baseCost: 7, effectMultiplier: 1.4 },
-    rare: { baseCost: 9, effectMultiplier: 1.8 },
-    legendary: { baseCost: 12, effectMultiplier: 2.2 }
-  },
-  ATTACK: {
-    common: { baseCost: 6, effectMultiplier: 1.0 },
-    uncommon: { baseCost: 8, effectMultiplier: 1.3 },
-    rare: { baseCost: 11, effectMultiplier: 1.6 },
-    legendary: { baseCost: 15, effectMultiplier: 2.0 }
-  },
-  DEFENSIVE: {
-    common: { baseCost: 5, effectMultiplier: 1.0 },
-    uncommon: { baseCost: 7, effectMultiplier: 1.3 },
-    rare: { baseCost: 9, effectMultiplier: 1.6 },
-    legendary: { baseCost: 13, effectMultiplier: 2.0 }
-  }
-};
+function buildRecommendations(card: CardBalance): string[] {
+  const recs: string[] = [];
 
-export function extractEffectValue(cardText: string | undefined, cardType: string): number {
-  const text = cardText ?? '';
-  // Extract numerical values from card text
-  const truthMatch = text.match(/Truth ([+-])(\d+)/);
-  if (truthMatch) {
-    return parseInt(truthMatch[2]);
+  if (card.costStatus === 'Undercosted' && card.expectedCost !== null) {
+    recs.push(`Raise cost to ${card.expectedCost} IP to match MVP baseline.`);
   }
 
-  const pressureMatch = text.match(/\+(\d+) Pressure/);
-  if (pressureMatch) {
-    return parseInt(pressureMatch[1]);
+  if (card.costStatus === 'Overcosted' && card.expectedCost !== null) {
+    recs.push(`Lower cost toward ${card.expectedCost} IP or add pressure.`);
   }
 
-  const damageMatch = text.match(/(\d+) (?:damage|IP)/i);
-  if (damageMatch) {
-    return parseInt(damageMatch[1]);
+  if (card.effectScore === 0) {
+    recs.push('No MVP effect primitives detected — confirm card text.');
   }
-  
-  // Default values for complex effects
-  if (cardType === 'ZONE') return 1;
-  if (cardType === 'MEDIA') return 10;
-  if (cardType === 'ATTACK') return 15;
-  if (cardType === 'DEFENSIVE') return 10;
-  
-  return 10; // Default
+
+  if (recs.length === 0) {
+    recs.push('Track in playtesting; no immediate action required.');
+  }
+
+  return recs;
 }
 
-export function calculateOptimalCost(
-  cardType: string, 
-  rarity: string, 
-  effectValue: number
-): number {
-  const curve = COST_CURVES[cardType as keyof typeof COST_CURVES];
-  if (!curve) return 4;
-  
-  const rarityData = curve[rarity as keyof typeof curve];
-  if (!rarityData) return 4;
-  
-  // Calculate cost based on effect value and rarity multiplier
-  const baseEffect = cardType === 'MEDIA' ? 10 : cardType === 'ZONE' ? 1 : 15;
-  const effectRatio = effectValue / baseEffect;
-  const optimalCost = Math.round(rarityData.baseCost * effectRatio);
-  
-  return Math.max(1, optimalCost);
+function analyzeCard(card: GameCard): CardBalance {
+  const effectSummary = getMvpEffectSummary(card);
+  const expectedCost = getExpectedMvpCost(card);
+  const { status: costStatus, delta: costDelta } = classifyMvpCost(card, expectedCost);
+  const effectScore = computeMvpEffectScore(effectSummary);
+
+  const base: CardBalance = {
+    cardId: card.id,
+    name: card.name,
+    type: card.type,
+    rarity: card.rarity,
+    cost: card.cost,
+    expectedCost,
+    costStatus,
+    costDelta,
+    effectSummary,
+    effectScore,
+    recommendations: [],
+  };
+
+  return { ...base, recommendations: buildRecommendations(base) };
 }
 
-export function analyzeCardBalance(cards: any[]): BalanceReport {
-  const cardAnalysis: CardBalance[] = [];
-  let balancedCount = 0;
-  let undercostCount = 0;
-  let overcostCount = 0;
-  
-  for (const card of cards) {
-    const effectValue = extractEffectValue(card.text, card.type);
-    const optimalCost = calculateOptimalCost(card.type, card.rarity, effectValue);
-    const costDifference = card.cost - optimalCost;
-    const costEfficiencyRatio = effectValue / card.cost;
-    
-    let balanceStatus: CardBalance['balanceStatus'];
-    const recommendations: string[] = [];
-    
-    if (Math.abs(costDifference) <= 1) {
-      balanceStatus = 'balanced';
-      balancedCount++;
-    } else if (costDifference < -1) {
-      balanceStatus = 'undercosted';
-      undercostCount++;
-      recommendations.push(`Increase cost from ${card.cost} to ${optimalCost}`);
-      recommendations.push(`Currently ${Math.abs(costDifference)} IP too cheap`);
-    } else {
-      balanceStatus = 'overcosted';
-      overcostCount++;
-      recommendations.push(`Decrease cost from ${card.cost} to ${optimalCost}`);
-      recommendations.push(`Currently ${costDifference} IP too expensive`);
-    }
-    
-    cardAnalysis.push({
-      cardId: card.id,
-      name: card.name,
-      type: card.type,
-      rarity: card.rarity,
-      cost: card.cost,
-      effectValue,
-      costEfficiencyRatio,
-      balanceStatus,
-      recommendations
-    });
+export function analyzeCardBalance(cards: GameCard[]): BalanceReport {
+  const analysis = cards.map(analyzeCard);
+  const totalCards = analysis.length;
+  const balancedCards = analysis.filter(card => card.costStatus === 'On Curve').length;
+  const undercostCards = analysis.filter(card => card.costStatus === 'Undercosted').length;
+  const overcostCards = analysis.filter(card => card.costStatus === 'Overcosted').length;
+  const factionCounts = summarizeFactionCounts(cards);
+  const averageCost =
+    totalCards > 0 ? analysis.reduce((sum, card) => sum + card.cost, 0) / totalCards : 0;
+
+  const recommendations: string[] = [];
+  if (undercostCards > totalCards * 0.15) {
+    recommendations.push('Several cards sit below the MVP cost curve. Revisit their IP deltas.');
   }
-  
-  // Generate overall recommendations
-  const overallRecommendations: string[] = [];
-  
-  const balancePercentage = (balancedCount / cards.length) * 100;
-  if (balancePercentage < 70) {
-    overallRecommendations.push("Major rebalancing needed - less than 70% of cards are balanced");
-  } else if (balancePercentage < 85) {
-    overallRecommendations.push("Minor rebalancing needed - fine-tune underperforming cards");
-  } else {
-    overallRecommendations.push("Card balance is healthy - only minor adjustments needed");
+  if (overcostCards > totalCards * 0.15) {
+    recommendations.push('Many cards appear overcosted. Ease costs or add pressure gains.');
   }
-  
-  const threshold = cards.length * 0.15;
-  if (undercostCount > threshold && overcostCount > threshold) {
-    overallRecommendations.push(`Balance polarization detected: ${undercostCount} overpowered and ${overcostCount} underpowered cards. Tighten cost curve and review outliers.`);
-  } else if (undercostCount > threshold) {
-    overallRecommendations.push("Too many overpowered cards - players may find game too easy");
-  } else if (overcostCount > threshold) {
-    overallRecommendations.push("Too many underpowered cards - some cards may never be played");
+  if (recommendations.length === 0) {
+    recommendations.push('Cost alignment looks healthy against the MVP baselines.');
   }
-  
+
   return {
     timestamp: new Date().toISOString(),
-    totalCards: cards.length,
-    balancedCards: balancedCount,
-    undercostCards: undercostCount,
-    overcostCards: overcostCount,
-    cardAnalysis,
-    recommendations: overallRecommendations
+    totalCards,
+    balancedCards,
+    undercostCards,
+    overcostCards,
+    factionCounts,
+    averageCost,
+    cardAnalysis: analysis,
+    recommendations,
   };
 }
 
-export function generateBalanceReport(cards: any[]): string {
+export function generateBalanceReport(cards: GameCard[]): string {
   const report = analyzeCardBalance(cards);
-  
-  let output = `# SHADOW GOVERNMENT CARD BALANCE REPORT\n`;
-  output += `Generated: ${new Date(report.timestamp).toLocaleString()}\n\n`;
-  
-  output += `## OVERVIEW\n`;
-  output += `Total Cards Analyzed: ${report.totalCards}\n`;
-  output += `Balanced Cards: ${report.balancedCards} (${Math.round((report.balancedCards/report.totalCards)*100)}%)\n`;
-  output += `Undercosted Cards: ${report.undercostCards} (${Math.round((report.undercostCards/report.totalCards)*100)}%)\n`;
-  output += `Overcosted Cards: ${report.overcostCards} (${Math.round((report.overcostCards/report.totalCards)*100)}%)\n\n`;
-  
-  output += `## RECOMMENDATIONS\n`;
-  for (const rec of report.recommendations) {
-    output += `- ${rec}\n`;
-  }
-  output += `\n`;
-  
-  // Group by balance status
-  const unbalanced = report.cardAnalysis.filter(c => c.balanceStatus !== 'balanced');
-  if (unbalanced.length > 0) {
-    output += `## CARDS NEEDING ATTENTION\n\n`;
-    
-    for (const card of unbalanced) {
-      output += `### ${card.name} (${card.type} - ${card.rarity})\n`;
-      output += `Current Cost: ${card.cost} | Effect Value: ${card.effectValue} | Status: ${card.balanceStatus.toUpperCase()}\n`;
-      output += `Efficiency Ratio: ${card.costEfficiencyRatio.toFixed(2)} effect per IP\n`;
-      for (const rec of card.recommendations) {
-        output += `- ${rec}\n`;
-      }
-      output += `\n`;
-    }
-  }
-  
-  return output;
+  const header = `# MVP CARD BALANCE REPORT\nGenerated: ${new Date(report.timestamp).toLocaleString()}\n\n`;
+
+  const overview = [
+    `Total Cards Analyzed: ${report.totalCards}`,
+    `On MVP Curve: ${report.balancedCards}`,
+    `Undercosted: ${report.undercostCards}`,
+    `Overcosted: ${report.overcostCards}`,
+    `Average Cost: ${report.averageCost.toFixed(2)} IP`,
+  ].join('\n');
+
+  const factionSummary = `\nFaction Counts → Truth: ${report.factionCounts.truth}, Government: ${report.factionCounts.government}, Neutral: ${report.factionCounts.neutral}\n`;
+
+  const recSection = `\n## Recommendations\n${report.recommendations.map(r => `- ${r}`).join('\n')}\n`;
+
+  const detail = report.cardAnalysis
+    .filter(card => card.costStatus !== 'On Curve')
+    .map(card => {
+      const deltaText = card.costDelta !== null ? `${card.costDelta > 0 ? '+' : ''}${card.costDelta.toFixed(1)} IP` : 'n/a';
+      return `\n### ${card.name} (${card.type}${card.rarity ? ` • ${card.rarity}` : ''})\n` +
+        `Current Cost: ${card.cost} (expected ${card.expectedCost ?? 'n/a'}) | Delta: ${deltaText}\n` +
+        `Effects → Truth ${card.effectSummary.truthDelta}, Opponent IP ${card.effectSummary.ipDeltaOpponent}, Pressure ${card.effectSummary.pressureDelta}\n` +
+        card.recommendations.map(rec => `- ${rec}\n`).join('');
+    })
+    .join('');
+
+  return `${header}${overview}${factionSummary}${recSection}${detail}`;
 }
