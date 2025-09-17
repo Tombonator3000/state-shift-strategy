@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { useCardCollection } from '@/hooks/useCardCollection';
-import type { GameCard } from '@/rules/mvp';
+import type { GameCard, MVPCardType } from '@/rules/mvp';
 import { CARD_DATABASE } from '@/data/cardDatabase';
+import { MVP_CARD_TYPES } from '@/rules/mvp';
 
 interface CardCollectionProps {
   open: boolean;
@@ -22,13 +23,17 @@ const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
   const stats = getCollectionStats();
   const discoveredCards = getDiscoveredCards();
   
+  const normalizeCardType = (type: string): MVPCardType => {
+    return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
+  };
+
   // Filter cards based on search and filters
   const filteredCards = discoveredCards.filter(card => {
     const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          card.text.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || card.type === filterType;
+    const matchesType = filterType === 'all' || normalizeCardType(card.type) === filterType;
     const matchesRarity = filterRarity === 'all' || card.rarity === filterRarity;
-    
+
     return matchesSearch && matchesType && matchesRarity;
   });
 
@@ -44,7 +49,7 @@ const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
                            card.rarity === 'rare' ? 'secondary' : 'outline'}>
               {card.rarity}
             </Badge>
-            <Badge variant="outline">{card.type}</Badge>
+            <Badge variant="outline">{normalizeCardType(card.type)}</Badge>
           </div>
         </div>
         
@@ -111,7 +116,6 @@ const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
               <SelectItem value="MEDIA">Media</SelectItem>
               <SelectItem value="ZONE">Zone</SelectItem>
               <SelectItem value="ATTACK">Attack</SelectItem>
-              <SelectItem value="DEFENSIVE">Defensive</SelectItem>
             </SelectContent>
           </Select>
           <Select value={filterRarity} onValueChange={setFilterRarity}>

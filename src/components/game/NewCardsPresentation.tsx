@@ -1,28 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import CardImage from './CardImage';
-
-interface GameCard {
-  id: string;
-  name: string;
-  type: 'MEDIA' | 'ZONE' | 'ATTACK' | 'DEFENSIVE' | 'DEVELOPMENT' | 'LEGENDARY';
-  rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
-  text: string;
-  flavor?: string;
-  cost: number;
-  target?: {
-    scope: string;
-    restrict?: string[];
-    requireTag?: string;
-    type?: string;
-    faction?: string;
-    onlyIf?: any;
-  };
-  effects?: any;
-  faction?: string;
-}
+import type { GameCard, MVPCardType } from '@/rules/mvp';
+import { MVP_CARD_TYPES } from '@/rules/mvp';
 
 interface NewCardsPresentationProps {
   cards: GameCard[];
@@ -30,17 +12,11 @@ interface NewCardsPresentationProps {
   onConfirm: () => void;
 }
 
+const normalizeCardType = (type: string): MVPCardType => {
+  return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
+};
+
 const NewCardsPresentation = ({ cards, isVisible, onConfirm }: NewCardsPresentationProps) => {
-  const [showCards, setShowCards] = useState(false);
-
-  useEffect(() => {
-    if (isVisible && cards.length > 0) {
-      setShowCards(true);
-    } else {
-      setShowCards(false);
-    }
-  }, [isVisible, cards]);
-
   if (!isVisible || cards.length === 0) return null;
 
   const getRarityColor = (rarity: string) => {
@@ -54,14 +30,12 @@ const NewCardsPresentation = ({ cards, isVisible, onConfirm }: NewCardsPresentat
   };
 
   const getTypeColor = (type: string) => {
-    switch (type) {
+    const normalized = normalizeCardType(type);
+    switch (normalized) {
       case 'MEDIA': return 'border-truth-red bg-truth-red/10';
       case 'ZONE': return 'border-government-blue bg-government-blue/10';
-      case 'ATTACK': return 'border-destructive bg-destructive/10';
-      case 'DEFENSIVE': return 'border-accent bg-accent/10';
-      case 'DEVELOPMENT': return 'border-primary bg-primary/10';
-      case 'LEGENDARY': return 'border-secondary bg-secondary/10';
-      default: return 'border-muted bg-muted/10';
+      case 'ATTACK':
+      default: return 'border-destructive bg-destructive/10';
     }
   };
 
@@ -103,19 +77,16 @@ const NewCardsPresentation = ({ cards, isVisible, onConfirm }: NewCardsPresentat
               {/* Card content */}
               <div className="p-3">
                 <div className="flex justify-center mb-2">
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs font-mono ${
-                      card.type === 'MEDIA' ? 'bg-truth-red/20 border-truth-red text-truth-red' : 
-                      card.type === 'ZONE' ? 'bg-government-blue/20 border-government-blue text-government-blue' :
-                      card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
-                      card.type === 'DEFENSIVE' ? 'bg-accent/20 border-accent text-accent-foreground' :
-                      card.type === 'DEVELOPMENT' ? 'bg-primary/20 border-primary text-primary' :
-                      card.type === 'LEGENDARY' ? 'bg-secondary/20 border-secondary text-secondary-foreground' :
-                      'bg-muted/20 border-muted text-muted-foreground'
-                    }`}
+                  <Badge
+                    variant="outline"
+                    className={`text-xs font-mono ${(() => {
+                      const type = normalizeCardType(card.type);
+                      if (type === 'MEDIA') return 'bg-truth-red/20 border-truth-red text-truth-red';
+                      if (type === 'ZONE') return 'bg-government-blue/20 border-government-blue text-government-blue';
+                      return 'bg-destructive/20 border-destructive text-destructive';
+                    })()}`}
                   >
-                    [{card.type}]
+                    [{normalizeCardType(card.type)}]
                   </Badge>
                 </div>
                 

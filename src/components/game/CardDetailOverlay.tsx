@@ -1,8 +1,9 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, Target, Zap, Shield } from 'lucide-react';
+import { X, Target, Zap, Megaphone } from 'lucide-react';
 import type { GameCard } from '@/rules/mvp';
+import { MVP_CARD_TYPES, type MVPCardType } from '@/rules/mvp';
 import CardImage from '@/components/game/CardImage';
 import { ExtensionCardBadge } from '@/components/game/ExtensionCardBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -57,26 +58,21 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
     return `rarity-glow-${rarityLevel}`;
   };
 
-  const getTypeColor = (type: string, faction: 'government' | 'truth') => {
+  const normalizeCardType = (type: string): MVPCardType => {
+    return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
+  };
+
+  const getTypeColor = (type: MVPCardType, faction: 'government' | 'truth') => {
     switch (type) {
       case 'MEDIA':
-        return faction === 'truth' 
+        return faction === 'truth'
           ? 'bg-truth-red/20 border-truth-red text-truth-red'
           : 'bg-government-blue/20 border-government-blue text-government-blue';
       case 'ZONE':
         return 'bg-accent/20 border-accent text-accent-foreground';
       case 'ATTACK':
-        return 'bg-destructive/20 border-destructive text-destructive';
-      case 'DEFENSIVE':
-        return 'bg-success/20 border-success text-success-foreground';
-      case 'TECH':
-        return 'bg-primary/20 border-primary text-primary';
-      case 'DEVELOPMENT':
-        return 'bg-secondary/20 border-secondary text-secondary-foreground';
-      case 'INSTANT':
-        return 'bg-warning/20 border-warning text-warning-foreground';
       default:
-        return 'bg-muted/20 border-muted text-muted-foreground';
+        return 'bg-destructive/20 border-destructive text-destructive';
     }
   };
 
@@ -89,6 +85,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
   };
 
   const faction = getCardFaction(card);
+  const displayType = normalizeCardType(card.type);
   const flavorText = card.flavor ?? card.flavorGov ?? card.flavorTruth ?? 'No intelligence available.';
 
   return (
@@ -115,11 +112,11 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
               </h2>
               
               {/* Type Badge */}
-              <Badge 
-                variant="outline" 
-                className={`text-xs px-2 py-0.5 ${getTypeColor(card.type, faction)}`}
+              <Badge
+                variant="outline"
+                className={`text-xs px-2 py-0.5 ${getTypeColor(displayType, faction)}`}
               >
-                {card.type}
+                {displayType}
               </Badge>
             </div>
             
@@ -204,10 +201,10 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
             }`}
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
-              {card.type === 'ZONE' && <Target className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-              {card.type === 'ATTACK' && <Zap className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-              {card.type === 'DEFENSIVE' && <Shield className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-              {card.type === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
+              {displayType === 'ZONE' && <Target className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+              {displayType === 'ATTACK' && <Zap className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+              {displayType === 'MEDIA' && <Megaphone className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+              {displayType === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
             </span>
             
             {!canAfford && (

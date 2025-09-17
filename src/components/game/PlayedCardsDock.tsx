@@ -2,7 +2,8 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import CardImage from '@/components/game/CardImage';
-import type { GameCard } from '@/rules/mvp';
+import type { GameCard, MVPCardType } from '@/rules/mvp';
+import { MVP_CARD_TYPES } from '@/rules/mvp';
 
 interface PlayedCard {
   card: GameCard;
@@ -17,27 +18,25 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
   const humanCards = playedCards.filter(pc => pc.player === 'human');
   const aiCards = playedCards.filter(pc => pc.player === 'ai');
 
+  const normalizeCardType = (type: string): MVPCardType => {
+    return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
+  };
+
   const getTypeColor = (type: string, isAI: boolean) => {
-    const truthColors = {
-      'MEDIA': 'text-truth-red border-truth-red',
-      'ZONE': 'text-yellow-600 border-yellow-600',
-      'ATTACK': 'text-red-600 border-red-600',
-      'DEFENSIVE': 'text-blue-600 border-blue-600',
-      'TECH': 'text-purple-600 border-purple-600',
-      'DEVELOPMENT': 'text-green-600 border-green-600'
+    const normalized = normalizeCardType(type);
+    const truthColors: Record<MVPCardType, string> = {
+      MEDIA: 'text-truth-red border-truth-red',
+      ZONE: 'text-yellow-600 border-yellow-600',
+      ATTACK: 'text-red-600 border-red-600'
     };
-    
-    const govColors = {
-      'MEDIA': 'text-government-blue border-government-blue',
-      'ZONE': 'text-yellow-600 border-yellow-600',
-      'ATTACK': 'text-red-600 border-red-600',
-      'DEFENSIVE': 'text-blue-600 border-blue-600',
-      'TECH': 'text-purple-600 border-purple-600',
-      'DEVELOPMENT': 'text-green-600 border-green-600'
+
+    const govColors: Record<MVPCardType, string> = {
+      MEDIA: 'text-government-blue border-government-blue',
+      ZONE: 'text-yellow-600 border-yellow-600',
+      ATTACK: 'text-red-600 border-red-600'
     };
-    
-    return isAI ? govColors[type as keyof typeof govColors] || 'text-government-blue border-government-blue' 
-                : truthColors[type as keyof typeof truthColors] || 'text-truth-red border-truth-red';
+
+    return isAI ? govColors[normalized] : truthColors[normalized];
   };
 
   const getRarityBg = (rarity: string) => {
@@ -70,11 +69,13 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {humanCards.map((playedCard, index) => (
-                    <div
-                      key={`human-${playedCard.card.id}-${index}`}
-                      className="group relative"
-                    >
+                  {humanCards.map((playedCard, index) => {
+                    const displayType = normalizeCardType(playedCard.card.type);
+                    return (
+                      <div
+                        key={`human-${playedCard.card.id}-${index}`}
+                        className="group relative"
+                      >
                       {/* Full card with newspaper styling - doubled size */}
                       <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden`}>
                         {/* Card header with newspaper styling */}
@@ -113,7 +114,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                         {/* Card type and cost */}
                         <div className="absolute top-5 left-0.5">
                           <Badge variant="outline" className={`text-[5px] px-0.5 py-0 ${getTypeColor(playedCard.card.type, false)}`}>
-                            {playedCard.card.type}
+                            {displayType}
                           </Badge>
                         </div>
                         <div className="absolute top-5 right-0.5 bg-primary text-primary-foreground text-[6px] font-bold px-1 py-0.5 rounded">
@@ -128,7 +129,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                             {playedCard.card.name}
                           </div>
                           <div className="text-xs text-muted-foreground mb-2">
-                            {playedCard.card.type} • Cost: {playedCard.card.cost} IP
+                            {displayType} • Cost: {playedCard.card.cost} IP
                           </div>
                           <div className="text-xs text-foreground mb-2">
                             {playedCard.card.text}
@@ -139,7 +140,8 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               </div>
             )}
@@ -158,11 +160,13 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {aiCards.map((playedCard, index) => (
-                    <div
-                      key={`ai-${playedCard.card.id}-${index}`}
-                      className="group relative"
-                    >
+                  {aiCards.map((playedCard, index) => {
+                    const displayType = normalizeCardType(playedCard.card.type);
+                    return (
+                      <div
+                        key={`ai-${playedCard.card.id}-${index}`}
+                        className="group relative"
+                      >
                       {/* Full card with newspaper styling - doubled size */}
                       <div className={`w-24 h-32 bg-gradient-to-b ${getRarityBg(playedCard.card.rarity)} border rounded shadow-sm animate-scale-in overflow-hidden`}>
                         {/* Card header with newspaper styling */}
@@ -201,7 +205,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                         {/* Card type and cost */}
                         <div className="absolute top-5 left-0.5">
                           <Badge variant="outline" className={`text-[5px] px-0.5 py-0 ${getTypeColor(playedCard.card.type, true)}`}>
-                            {playedCard.card.type}
+                            {displayType}
                           </Badge>
                         </div>
                         <div className="absolute top-5 right-0.5 bg-primary text-primary-foreground text-[6px] font-bold px-1 py-0.5 rounded">
@@ -216,7 +220,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                             {playedCard.card.name}
                           </div>
                           <div className="text-xs text-muted-foreground mb-2">
-                            {playedCard.card.type} • Cost: {playedCard.card.cost} IP
+                            {displayType} • Cost: {playedCard.card.cost} IP
                           </div>
                           <div className="text-xs text-foreground mb-2">
                             {playedCard.card.text}
@@ -227,7 +231,8 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               </div>
             )}

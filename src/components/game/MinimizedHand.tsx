@@ -3,10 +3,11 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Maximize2, Minimize2, Zap, Shield, Target, Megaphone } from 'lucide-react';
+import { Maximize2, Minimize2, Zap, Target, Megaphone } from 'lucide-react';
 import { ExtensionCardBadge } from './ExtensionCardBadge';
 import { isExtensionCard } from '@/data/extensionIntegration';
-import type { GameCard } from '@/rules/mvp';
+import type { GameCard, MVPCardType } from '@/rules/mvp';
+import { MVP_CARD_TYPES } from '@/rules/mvp';
 
 interface MinimizedHandProps {
   cards: GameCard[];
@@ -29,13 +30,17 @@ const MinimizedHand = ({
 }: MinimizedHandProps) => {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
+  const normalizeCardType = (type: string): MVPCardType => {
+    return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
+  };
+
   const getCardIcon = (type: string) => {
-    switch (type) {
+    const normalized = normalizeCardType(type);
+    switch (normalized) {
       case 'MEDIA': return <Megaphone className="w-3 h-3" />;
       case 'ZONE': return <Target className="w-3 h-3" />;
-      case 'ATTACK': return <Zap className="w-3 h-3" />;
-      case 'DEFENSIVE': return <Shield className="w-3 h-3" />;
-      default: return null;
+      case 'ATTACK':
+      default: return <Zap className="w-3 h-3" />;
     }
   };
 
@@ -50,12 +55,12 @@ const MinimizedHand = ({
   };
 
   const getTypeColor = (type: string) => {
-    switch (type) {
+    const normalized = normalizeCardType(type);
+    switch (normalized) {
       case 'MEDIA': return 'text-purple-600 bg-purple-100';
       case 'ZONE': return 'text-blue-600 bg-blue-100';
-      case 'ATTACK': return 'text-red-600 bg-red-100';
-      case 'DEFENSIVE': return 'text-green-600 bg-green-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'ATTACK':
+      default: return 'text-red-600 bg-red-100';
     }
   };
 
@@ -93,12 +98,12 @@ const MinimizedHand = ({
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className={`text-xs ${getTypeColor(card.type)} border-current`}
                   >
                     {getCardIcon(card.type)}
-                    <span className="ml-1">{card.type}</span>
+                    <span className="ml-1">{normalizeCardType(card.type)}</span>
                   </Badge>
                   <Badge variant="outline" className="text-xs font-bold">
                     {card.cost} IP
@@ -213,10 +218,10 @@ const MinimizedHand = ({
                <div className="space-y-2">
                  <div className="flex items-center justify-between gap-2">
                    <div className="flex items-center gap-1">
-                     <Badge className={getTypeColor(card.type)}>
-                       {getCardIcon(card.type)}
-                       <span className="ml-1">{card.type}</span>
-                     </Badge>
+                      <Badge className={getTypeColor(card.type)}>
+                        {getCardIcon(card.type)}
+                        <span className="ml-1">{normalizeCardType(card.type)}</span>
+                      </Badge>
                      <ExtensionCardBadge cardId={card.id} card={card} variant="inline" />
                    </div>
                    <Badge variant="outline" className="font-bold">
