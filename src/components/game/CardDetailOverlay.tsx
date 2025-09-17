@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Target, Zap, Shield } from 'lucide-react';
 import type { GameCard } from '@/types/cardTypes';
+import type { InspectMeta } from '@/state/uiState';
 import CardImage from '@/components/game/CardImage';
 import { ExtensionCardBadge } from '@/components/game/ExtensionCardBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -10,24 +11,30 @@ import { CardTextGenerator } from '@/systems/CardTextGenerator';
 
 interface CardDetailOverlayProps {
   card: GameCard | null;
-  canAfford: boolean;
-  disabled: boolean;
+  canAfford?: boolean;
+  disabled?: boolean;
+  interactive?: boolean;
   onClose: () => void;
-  onPlayCard: () => void;
+  onPlayCard?: () => void;
   swipeHandlers?: any;
+  playedMeta?: InspectMeta;
 }
 
 const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
   card,
-  canAfford,
-  disabled,
+  canAfford = true,
+  disabled = false,
+  interactive = true,
   onClose,
-  onPlayCard,
-  swipeHandlers
+  onPlayCard = () => {},
+  swipeHandlers,
+  playedMeta
 }) => {
   const isMobile = useIsMobile();
-  
+
   if (!card) return null;
+
+  const isInteractive = interactive !== false;
 
   const getCardFaction = (card: GameCard): 'government' | 'truth' => {
     // Use computed faction based on game state or card faction (normalized to lowercase)
@@ -90,9 +97,17 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
 
   const faction = getCardFaction(card);
   const flavorText = card.flavor ?? card.flavorGov ?? card.flavorTruth ?? 'No intelligence available.';
+  const hasPlayedMeta = Boolean(
+    playedMeta && (
+      playedMeta.playedBy ||
+      typeof playedMeta.round === 'number' ||
+      playedMeta.target ||
+      playedMeta.summary
+    )
+  );
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4"
       onClick={onClose}
       {...(isMobile ? swipeHandlers : {})}
@@ -156,6 +171,39 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
 
         {/* Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+          {hasPlayedMeta && playedMeta && (
+            <div>
+              <h4 className="text-xs font-bold mb-2 text-muted-foreground tracking-wider">
+                PLAY SUMMARY
+              </h4>
+              <div className="bg-card/60 rounded-lg border border-border p-3 space-y-2 text-xs text-foreground">
+                {playedMeta.playedBy && (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold uppercase tracking-wide">Played By</span>
+                    <span className="font-mono text-sm">{playedMeta.playedBy}</span>
+                  </div>
+                )}
+                {typeof playedMeta.round === 'number' && (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold uppercase tracking-wide">Round</span>
+                    <span className="font-mono text-sm">{playedMeta.round}</span>
+                  </div>
+                )}
+                {playedMeta.target && (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold uppercase tracking-wide">Target</span>
+                    <span className="font-mono text-sm">{playedMeta.target}</span>
+                  </div>
+                )}
+                {playedMeta.summary && (
+                  <div className="text-[11px] leading-relaxed">
+                    {playedMeta.summary}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Rules / Effect */}
           <div>
             <h4 className="text-sm font-bold mb-2 text-foreground">Effect</h4>
@@ -194,30 +242,36 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
 
         {/* Bottom CTA */}
         <div className="flex-shrink-0 p-4 border-t border-border bg-card/95">
-          <Button
-            onClick={onPlayCard}
-            disabled={disabled || !canAfford}
-            className={`enhanced-button w-full font-mono relative overflow-hidden transition-all duration-300 ${
-              isMobile ? 'text-base py-4' : 'text-sm py-3'
-            } ${
-              !canAfford ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
-            }`}
-          >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              {card.type === 'ZONE' && <Target className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-              {card.type === 'ATTACK' && <Zap className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-              {card.type === 'DEFENSIVE' && <Shield className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-              {card.type === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
-            </span>
-            
-            {!canAfford && (
-              <div className="absolute inset-0 flex items-center justify-center bg-destructive/10">
-                <span className="text-xs text-destructive font-medium">
-                  Need {card.cost} IP
-                </span>
-              </div>
-            )}
-          </Button>
+          {isInteractive ? (
+            <Button
+              onClick={onPlayCard}
+              disabled={disabled || !canAfford}
+              className={`enhanced-button w-full font-mono relative overflow-hidden transition-all duration-300 ${
+                isMobile ? 'text-base py-4' : 'text-sm py-3'
+              } ${
+                !canAfford ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
+              }`}
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {card.type === 'ZONE' && <Target className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+                {card.type === 'ATTACK' && <Zap className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+                {card.type === 'DEFENSIVE' && <Shield className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+                {card.type === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
+              </span>
+
+              {!canAfford && (
+                <div className="absolute inset-0 flex items-center justify-center bg-destructive/10">
+                  <span className="text-xs text-destructive font-medium">
+                    Need {card.cost} IP
+                  </span>
+                </div>
+              )}
+            </Button>
+          ) : (
+            <div className="text-xs text-muted-foreground text-center font-mono tracking-wide">
+              Read-only inspection view
+            </div>
+          )}
         </div>
       </div>
     </div>
