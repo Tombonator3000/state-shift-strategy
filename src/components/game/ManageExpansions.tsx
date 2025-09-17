@@ -2,14 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { GameCard } from '@/rules/mvp';
 import { getCoreCards } from '@/data/cardDatabase';
 import { normalizeFaction } from '@/data/mvpAnalysisUtils';
 import { EXPANSION_MANIFEST } from '@/data/expansions';
 import {
-  getEnabledExpansionIdsSnapshot,
   getExpansionCardsSnapshot,
+  getStoredExpansionIds,
   subscribeToExpansionChanges,
+  updateEnabledExpansions,
 } from '@/data/expansions/state';
 
 interface ManageExpansionsProps {
@@ -45,42 +47,49 @@ const computeStats = (cards: GameCard[]): StatBlock => {
   };
 };
 
-const groupCardsByExpansion = (cards: GameCard[]): Map<string, number> => {
-  const counts = new Map<string, number>();
+const EXPANSION_ID_SET = new Set(EXPANSION_MANIFEST.map(pack => pack.id));
+
+const summarizeExpansionCards = (cards: GameCard[]): Record<string, number> => {
+  const counts: Record<string, number> = {};
   cards.forEach(card => {
-    if (!card.extId) return;
-    counts.set(card.extId, (counts.get(card.extId) ?? 0) + 1);
+    const extId = card.extId;
+    if (!extId || !EXPANSION_ID_SET.has(extId)) {
+      return;
+    }
+    counts[extId] = (counts[extId] ?? 0) + 1;
   });
   return counts;
 };
 
 const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
   const [coreCards] = useState<GameCard[]>(() => getCoreCards());
-  const [expansionState, setExpansionState] = useState(() => ({
-    ids: getEnabledExpansionIdsSnapshot(),
-    cards: getExpansionCardsSnapshot(),
-  }));
+  const [enabledExpansions, setEnabledExpansions] = useState<string[]>(() => getStoredExpansionIds());
+  const [expansionCards, setExpansionCards] = useState<GameCard[]>(() => getExpansionCardsSnapshot());
+  const [expansionCounts, setExpansionCounts] = useState<Record<string, number>>(() =>
+    summarizeExpansionCards(getExpansionCardsSnapshot()),
+  );
+  const [pendingUpdates, setPendingUpdates] = useState<Record<string, boolean>>({});
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = subscribeToExpansionChanges(payload => {
-      setExpansionState(payload);
+    const unsubscribe = subscribeToExpansionChanges(({ ids, cards }) => {
+      setEnabledExpansions(ids);
+      setExpansionCards(cards);
+      setExpansionCounts(summarizeExpansionCards(cards));
     });
     return () => unsubscribe();
   }, []);
 
   const coreStats = useMemo(() => computeStats(coreCards), [coreCards]);
-  const expansionStats = useMemo(
-    () => computeStats(expansionState.cards),
-    [expansionState.cards],
-  );
+  const expansionStats = useMemo(() => computeStats(expansionCards), [expansionCards]);
   const combinedStats = useMemo(
-    () => computeStats([...coreCards, ...expansionState.cards]),
-    [coreCards, expansionState.cards],
+    () => computeStats([...coreCards, ...expansionCards]),
+    [coreCards, expansionCards],
   );
 
-  const cardsByExpansion = useMemo(
-    () => groupCardsByExpansion(expansionState.cards),
-    [expansionState.cards],
+  const expansionTotal = useMemo(
+    () => Object.values(expansionCounts).reduce((sum, value) => sum + value, 0),
+    [expansionCounts],
   );
 
   const expansionDetails = useMemo(
@@ -88,10 +97,10 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
       EXPANSION_MANIFEST.map(pack => ({
         id: pack.id,
         title: pack.title,
-        enabled: expansionState.ids.includes(pack.id),
-        count: cardsByExpansion.get(pack.id) ?? 0,
+        enabled: enabledExpansions.includes(pack.id),
+        count: expansionCounts[pack.id] ?? 0,
       })),
-    [cardsByExpansion, expansionState.ids],
+    [enabledExpansions, expansionCounts],
   );
 
   const typeKeys = useMemo(() => {
@@ -123,6 +132,41 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
     .filter(detail => detail.enabled && detail.count > 0)
     .map(detail => detail.title)
     .join(', ');
+
+  const hasPendingUpdates = useMemo(
+    () => Object.values(pendingUpdates).some(Boolean),
+    [pendingUpdates],
+  );
+
+  const handleExpansionToggle = async (expansionId: string) => {
+    setUpdateError(null);
+    const nextIds = enabledExpansions.includes(expansionId)
+      ? enabledExpansions.filter(id => id !== expansionId)
+      : [...enabledExpansions, expansionId];
+
+    setEnabledExpansions(nextIds);
+    setPendingUpdates(prev => ({ ...prev, [expansionId]: true }));
+
+    try {
+      const cards = await updateEnabledExpansions(nextIds);
+      setExpansionCards(cards);
+      setExpansionCounts(summarizeExpansionCards(cards));
+    } catch (error) {
+      console.error('Failed to update expansions:', error);
+      setUpdateError('Failed to update expansion selection. Restoring previous state.');
+      const storedIds = getStoredExpansionIds();
+      const storedCards = getExpansionCardsSnapshot();
+      setEnabledExpansions(storedIds);
+      setExpansionCards(storedCards);
+      setExpansionCounts(summarizeExpansionCards(storedCards));
+    } finally {
+      setPendingUpdates(prev => {
+        const next = { ...prev };
+        delete next[expansionId];
+        return next;
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
@@ -165,7 +209,7 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
             Review the core inventory and MVP-approved expansion packs.
           </p>
           <p className="text-xs text-newspaper-text/60 mt-2">
-            Toggle packs via Options → Expansion Content. Only ATTACK, MEDIA and ZONE cards that pass the MVP whitelist are enabled.
+            Enable or disable packs below. Only ATTACK, MEDIA and ZONE cards that pass the MVP whitelist are eligible for deployment.
           </p>
         </div>
 
@@ -192,27 +236,36 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
         <Card className="mt-6 p-6 border-2 border-newspaper-text bg-newspaper-bg">
           <h2 className="font-bold text-xl text-newspaper-text mb-4">Expansion Packs</h2>
           <div className="space-y-3 text-sm text-newspaper-text">
-            {expansionDetails.map(detail => (
-              <div key={detail.id} className="flex flex-col gap-1 border border-dashed border-newspaper-text/30 p-3 rounded">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">{detail.title}</span>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{detail.count} cards</Badge>
-                    <Badge
-                      variant={detail.enabled ? 'default' : 'outline'}
-                      className={detail.enabled ? 'bg-green-700 hover:bg-green-600 border-green-700' : ''}
-                    >
-                      {detail.enabled ? 'Enabled' : 'Disabled'}
-                    </Badge>
+            {expansionDetails.map(detail => {
+              const isUpdating = pendingUpdates[detail.id];
+              return (
+                <div key={detail.id} className="flex flex-col gap-1 border border-dashed border-newspaper-text/30 p-3 rounded">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">{detail.title}</span>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline">{detail.count} cards</Badge>
+                      <Checkbox
+                        checked={detail.enabled}
+                        onCheckedChange={() => handleExpansionToggle(detail.id)}
+                        disabled={!!isUpdating}
+                        aria-label={`Toggle ${detail.title}`}
+                      />
+                    </div>
                   </div>
+                  <div className="text-xs text-newspaper-text/70">
+                    {detail.enabled
+                      ? 'Included in MVP deck construction.'
+                      : 'Disabled — excluded from automated deck builders.'}
+                  </div>
+                  {isUpdating && <div className="text-xs text-newspaper-text/60">Updating expansion pool…</div>}
                 </div>
-                <div className="text-xs text-newspaper-text/70">
-                  {detail.enabled
-                    ? 'Included in MVP deck construction.'
-                    : 'Toggle on from Options to add these cards.'}
-                </div>
-              </div>
-            ))}
+              );
+            })}
+          </div>
+          <div className="mt-3 text-xs text-newspaper-text/70 space-y-1">
+            <div>Total expansion cards loaded: {expansionTotal}</div>
+            {updateError && <div className="text-red-600">{updateError}</div>}
+            {hasPendingUpdates && <div>Synchronizing selection…</div>}
           </div>
         </Card>
 
