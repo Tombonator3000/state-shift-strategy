@@ -59,6 +59,7 @@ export interface CardPlayResolution {
   truth: number;
   states: StateForResolution[];
   controlledStates: string[];
+  aiControlledStates: string[];
   targetState: string | null;
   selectedCard: string | null;
   logEntries: string[];
@@ -67,6 +68,8 @@ export interface CardPlayResolution {
 
 const PLAYER_ID: PlayerId = 'P1';
 const AI_ID: PlayerId = 'P2';
+
+export type CardActor = 'human' | 'ai';
 
 const resolveTargetStateId = (
   snapshot: GameSnapshot,
@@ -178,33 +181,40 @@ const defaultAchievementTracker: AchievementTracker = {
   },
 };
 
-export function resolveCardEffects(
+export function resolveCardMVP(
   gameState: GameSnapshot,
   card: GameCard,
   targetState: string | null,
+  actor: CardActor,
   achievements: AchievementTracker = defaultAchievementTracker,
   mediaOptions: MediaResolutionOptions = {},
 ): CardPlayResolution {
   const engineLog: string[] = [];
   const engineState = toEngineState(gameState, engineLog);
-  engineState.players[PLAYER_ID] = {
-    ...engineState.players[PLAYER_ID],
-    ip: Math.max(0, engineState.players[PLAYER_ID].ip - card.cost),
+  const ownerId = actor === 'human' ? PLAYER_ID : AI_ID;
+  const opponentId = ownerId === PLAYER_ID ? AI_ID : PLAYER_ID;
+
+  engineState.players[ownerId] = {
+    ...engineState.players[ownerId],
+    ip: Math.max(0, engineState.players[ownerId].ip - card.cost),
   };
 
   const beforeState = cloneGameState(engineState);
   const targetStateId = resolveTargetStateId(gameState, targetState);
 
-  applyEffectsMvp(engineState, PLAYER_ID, card as Card, targetStateId, mediaOptions);
+  applyEffectsMvp(engineState, ownerId, card as Card, targetStateId, mediaOptions);
 
   const logEntries: string[] = engineLog.map(message => `${card.name}: ${message}`);
   const newStates = gameState.states.map(state => ({ ...state }));
   const nextControlledStates = new Set(gameState.controlledStates);
+  const nextAiControlledStates = new Set(gameState.aiControlledStates ?? []);
   let capturedCount = 0;
-  let nextTargetState: string | null = card.type === 'ZONE' ? targetState : null;
+  let nextTargetState: string | null = actor === 'human' && card.type === 'ZONE' ? targetState : null;
   for (const state of newStates) {
-    const beforePressure = beforeState.pressureByState[state.id]?.[PLAYER_ID] ?? 0;
-    const afterPressure = engineState.pressureByState[state.id]?.[PLAYER_ID] ?? 0;
+    const beforePressurePlayer = beforeState.pressureByState[state.id]?.[PLAYER_ID] ?? 0;
+    const afterPressurePlayer = engineState.pressureByState[state.id]?.[PLAYER_ID] ?? 0;
+    const beforePressureAi = beforeState.pressureByState[state.id]?.[AI_ID] ?? 0;
+    const afterPressureAi = engineState.pressureByState[state.id]?.[AI_ID] ?? 0;
     const playerOwns = engineState.players[PLAYER_ID].states.includes(state.id);
     const aiOwns = engineState.players[AI_ID].states.includes(state.id);
 
@@ -212,12 +222,17 @@ export function resolveCardEffects(
     const owner: StateOwner = playerOwns ? 'player' : aiOwns ? 'ai' : 'neutral';
 
     state.owner = owner;
-    state.pressure = afterPressure;
+    state.pressure = Math.max(afterPressurePlayer, afterPressureAi);
 
     if (owner === 'player') {
       nextControlledStates.add(state.abbreviation);
+      nextAiControlledStates.delete(state.abbreviation);
+    } else if (owner === 'ai') {
+      nextControlledStates.delete(state.abbreviation);
+      nextAiControlledStates.add(state.abbreviation);
     } else {
       nextControlledStates.delete(state.abbreviation);
+      nextAiControlledStates.delete(state.abbreviation);
     }
 
     if (previousOwner !== 'player' && owner === 'player') {
@@ -227,11 +242,23 @@ export function resolveCardEffects(
       if (targetStateId === state.id) {
         nextTargetState = null;
       }
+    } else if (previousOwner !== 'ai' && owner === 'ai') {
+      const aiFaction = gameState.faction === 'truth' ? 'government' : 'truth';
+      setStateOccupation(state, aiFaction, { id: card.id, name: card.name }, false);
+      logEntries.push(`⚠️ ${card.name} seized ${state.name} for the enemy!`);
+      if (targetStateId === state.id) {
+        nextTargetState = null;
+      }
     } else if (targetStateId === state.id && card.type === 'ZONE') {
-      const delta = afterPressure - beforePressure;
-      if (delta !== 0) {
+      const deltaPlayer = afterPressurePlayer - beforePressurePlayer;
+      const deltaAi = afterPressureAi - beforePressureAi;
+      if (actor === 'human' && deltaPlayer !== 0) {
         logEntries.push(
-          `${card.name} added pressure to ${state.name} (${delta > 0 ? '+' : ''}${delta}, ${afterPressure}/${state.defense})`,
+          `${card.name} added pressure to ${state.name} (${deltaPlayer > 0 ? '+' : ''}${deltaPlayer}, ${afterPressurePlayer}/${state.defense})`,
+        );
+      } else if (actor === 'ai' && deltaAi !== 0) {
+        logEntries.push(
+          `${card.name} increased enemy pressure on ${state.name} (${deltaAi > 0 ? '+' : ''}${deltaAi}, ${afterPressureAi}/${state.defense})`,
         );
       }
     }
@@ -240,23 +267,25 @@ export function resolveCardEffects(
   const playerIPAfterEffects = engineState.players[PLAYER_ID].ip;
   const aiIPAfterEffects = engineState.players[AI_ID].ip;
   const truthAfterEffects = engineState.truth;
-  const damageDealt = Math.max(0, beforeState.players[AI_ID].ip - aiIPAfterEffects);
+  const damageDealt = Math.max(0, beforeState.players[opponentId].ip - engineState.players[opponentId].ip);
 
-  const achievementUpdates: Partial<PlayerStats> = {
-    max_ip_reached: Math.max(achievements.stats.max_ip_reached, playerIPAfterEffects),
-    max_truth_reached: Math.max(achievements.stats.max_truth_reached, truthAfterEffects),
-    min_truth_reached: Math.min(achievements.stats.min_truth_reached, truthAfterEffects),
-  };
+  if (actor === 'human') {
+    const achievementUpdates: Partial<PlayerStats> = {
+      max_ip_reached: Math.max(achievements.stats.max_ip_reached, playerIPAfterEffects),
+      max_truth_reached: Math.max(achievements.stats.max_truth_reached, truthAfterEffects),
+      min_truth_reached: Math.min(achievements.stats.min_truth_reached, truthAfterEffects),
+    };
 
-  if (capturedCount > 0) {
-    achievementUpdates.total_states_controlled = achievements.stats.total_states_controlled + capturedCount;
-    achievementUpdates.max_states_controlled_single_game = Math.max(
-      achievements.stats.max_states_controlled_single_game,
-      nextControlledStates.size,
-    );
+    if (capturedCount > 0) {
+      achievementUpdates.total_states_controlled = achievements.stats.total_states_controlled + capturedCount;
+      achievementUpdates.max_states_controlled_single_game = Math.max(
+        achievements.stats.max_states_controlled_single_game,
+        nextControlledStates.size,
+      );
+    }
+
+    achievements.updateStats(achievementUpdates);
   }
-
-  achievements.updateStats(achievementUpdates);
 
   return {
     ip: playerIPAfterEffects,
@@ -264,9 +293,20 @@ export function resolveCardEffects(
     truth: truthAfterEffects,
     states: newStates,
     controlledStates: Array.from(nextControlledStates),
-    targetState: nextTargetState,
+    aiControlledStates: Array.from(nextAiControlledStates),
+    targetState: actor === 'human' ? nextTargetState : gameState.targetState,
     selectedCard: null,
     logEntries,
     damageDealt,
   };
+}
+
+export function resolveCardEffects(
+  gameState: GameSnapshot,
+  card: GameCard,
+  targetState: string | null,
+  achievements: AchievementTracker = defaultAchievementTracker,
+  mediaOptions: MediaResolutionOptions = {},
+): CardPlayResolution {
+  return resolveCardMVP(gameState, card, targetState, 'human', achievements, mediaOptions);
 }

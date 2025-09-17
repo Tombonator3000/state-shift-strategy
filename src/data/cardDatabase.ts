@@ -176,6 +176,10 @@ export function getAllCardsSnapshot(): GameCard[] {
   return getAllCards();
 }
 
+export async function loadCardPool(): Promise<GameCard[]> {
+  return loadCoreCards();
+}
+
 export const CARD_DATABASE: GameCard[] = new Proxy([], {
   get(_target, prop) {
     const cards = getAllCards();
