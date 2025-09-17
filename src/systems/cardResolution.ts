@@ -1,4 +1,5 @@
 import { CardEffectProcessor } from './CardEffectProcessor';
+import { computeMediaTruthDelta_MVP, warnIfMediaScaling, type MediaResolutionOptions } from '@/mvp/media';
 import type { Card } from '@/types/cardEffects';
 import type { GameCard } from '@/types/cardTypes';
 import { setStateOccupation } from '@/data/usaStates';
@@ -82,6 +83,7 @@ export function resolveCardEffects(
   card: GameCard,
   targetState: string | null,
   achievements: AchievementTracker = defaultAchievementTracker,
+  mediaOptions: MediaResolutionOptions = {},
 ): CardPlayResolution {
   const logEntries: string[] = [];
   const newStates = gameState.states.map(state => ({ ...state }));
@@ -103,7 +105,14 @@ export function resolveCardEffects(
   const effectResult = processor.processCard(card as Card, targetState ?? undefined);
 
   const ipAfterCost = Math.max(0, gameState.ip - card.cost);
-  const truthAfterEffects = Math.max(0, Math.min(100, gameState.truth + effectResult.truthDelta));
+  let truthDelta = effectResult.truthDelta;
+  if (card.type === 'MEDIA') {
+    truthDelta = computeMediaTruthDelta_MVP({ faction: gameState.faction }, card, mediaOptions);
+    warnIfMediaScaling(card, truthDelta);
+    effectResult.truthDelta = truthDelta;
+  }
+
+  const truthAfterEffects = Math.max(0, Math.min(100, gameState.truth + truthDelta));
   const playerIPAfterEffects = Math.max(0, ipAfterCost + effectResult.ipDelta.self);
   const damageDealt = effectResult.damage ?? 0;
   const aiIPAfterEffects = Math.max(

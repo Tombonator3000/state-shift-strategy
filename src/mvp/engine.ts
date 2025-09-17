@@ -1,5 +1,12 @@
 import { cloneGameState } from './validator';
-import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './types';
+import { computeMediaTruthDelta_MVP, warnIfMediaScaling, type MediaResolutionOptions } from './media';
+import type {
+  Card,
+  EffectsATTACK,
+  EffectsZONE,
+  GameState,
+  PlayerState,
+} from './types';
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.max(min, Math.min(max, value));
@@ -69,7 +76,12 @@ export function canPlay(
   return { ok: true };
 }
 
-export function playCard(state: GameState, cardId: string, targetStateId?: string): GameState {
+export function playCard(
+  state: GameState,
+  cardId: string,
+  targetStateId?: string,
+  opts: MediaResolutionOptions = {},
+): GameState {
   const cloned = cloneGameState(state);
   const currentId = cloned.currentPlayer;
   const player = cloned.players[currentId];
@@ -103,7 +115,7 @@ export function playCard(state: GameState, cardId: string, targetStateId?: strin
     playsThisTurn: cloned.playsThisTurn + 1,
   };
 
-  return resolve(interimState, currentId, card, targetStateId);
+  return resolve(interimState, currentId, card, targetStateId, opts);
 }
 
 export function resolve(
@@ -111,6 +123,7 @@ export function resolve(
   owner: 'P1' | 'P2',
   card: Card,
   targetStateId?: string,
+  opts: MediaResolutionOptions = {},
 ): GameState {
   const cloned = cloneGameState(state);
   const opponentId = otherPlayer(owner);
@@ -148,8 +161,9 @@ export function resolve(
   }
 
   if (card.type === 'MEDIA') {
-    const effects = card.effects as EffectsMEDIA;
-    const newTruth = clamp(cloned.truth + effects.truthDelta, 0, 100);
+    const delta = computeMediaTruthDelta_MVP(me, card, opts);
+    warnIfMediaScaling(card, delta);
+    const newTruth = clamp(cloned.truth + delta, 0, 100);
     return {
       ...cloned,
       truth: newTruth,
