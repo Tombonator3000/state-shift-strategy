@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import USAMap from '@/components/game/USAMap';
 import GameHand from '@/components/game/GameHand';
@@ -42,6 +41,10 @@ import EnhancedExpansionManager from '@/components/game/EnhancedExpansionManager
 import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
+import ReviewPhaseBanner from '@/components/game/ReviewPhaseBanner';
+import { InspectorOverlay } from '@/ui/Inspector';
+import { useUIState } from '@/hooks/useUIState';
+import { enterReviewPhase, exitToMainPhase } from '@/phase/phaseController';
 
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
@@ -79,6 +82,9 @@ const Index = () => {
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
+  const uiState = useUIState();
+  const boardFrozen = uiState.boardFrozen;
+  const isNewspaperPhase = uiState.phase === 'NEWSPAPER';
 
   // Handle AI turns
   useEffect(() => {
@@ -391,6 +397,9 @@ const Index = () => {
   };
 
   const handleZoneCardSelect = (cardId: string) => {
+    if (boardFrozen) {
+      return;
+    }
     const card = gameState.hand.find(c => c.id === cardId);
     if (card?.type === 'ZONE') {
       selectCard(cardId);
@@ -399,6 +408,9 @@ const Index = () => {
   };
 
   const handleStateClick = async (stateId: string) => {
+    if (boardFrozen) {
+      return;
+    }
     if (gameState.selectedCard && !isAnimating()) {
       const card = gameState.hand.find(c => c.id === gameState.selectedCard);
       if (card?.type === 'ZONE') {
@@ -431,11 +443,17 @@ const Index = () => {
   };
 
   const handleSelectCard = (cardId: string) => {
+    if (boardFrozen) {
+      return;
+    }
     selectCard(cardId);
     audio.playSFX('hover');
   };
 
   const handlePlayCard = async (cardId: string, targetState?: string) => {
+    if (boardFrozen) {
+      return;
+    }
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || isAnimating()) return;
 
@@ -514,6 +532,9 @@ const Index = () => {
   };
 
   const handleEndTurn = () => {
+    if (boardFrozen) {
+      return;
+    }
     endTurn();
     audio.playSFX('turnEnd');
     // Play card draw sound after a short delay
@@ -524,6 +545,7 @@ const Index = () => {
 
   const handleCloseNewspaper = () => {
     closeNewspaper();
+    exitToMainPhase();
     audio.playSFX('newspaper');
   };
 
@@ -543,6 +565,16 @@ const Index = () => {
       audio.setMenuMusic();
     }
   }, [showIntro, showMenu, audio]);
+
+  useEffect(() => {
+    if (gameState.showNewspaper) {
+      if (uiState.phase === 'MAIN') {
+        enterReviewPhase();
+      }
+    } else if (uiState.phase !== 'MAIN') {
+      exitToMainPhase();
+    }
+  }, [gameState.showNewspaper, uiState.phase]);
 
   if (showIntro) {
     return (
@@ -823,7 +855,7 @@ const Index = () => {
 
           {/* Played Cards Dock - fixed height at bottom */}
           <div className="flex-shrink-0 h-[200px] md:h-[220px] lg:h-[240px] xl:h-[260px] bg-newspaper-bg border-t-2 border-newspaper-border relative z-50">
-            <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} />
+            <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} round={gameState.round} />
           </div>
         </div>
 
@@ -850,7 +882,7 @@ const Index = () => {
               onPlayCard={handlePlayCard}
               onSelectCard={handleSelectCard}
               selectedCard={gameState.selectedCard}
-              disabled={gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
+              disabled={boardFrozen || gameState.cardsPlayedThisTurn >= 3 || gameState.phase !== 'action' || gameState.animating}
               currentIP={gameState.ip}
               loadingCard={loadingCard}
               onCardHover={setHoveredCard}
@@ -859,10 +891,10 @@ const Index = () => {
 
           {/* Controls */}
           <div className="space-y-2 flex-shrink-0">
-            <Button 
+            <Button
               onClick={handleEndTurn}
               className="w-full bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80 hover:scale-105 transition-all duration-200 h-8 text-xs font-bold"
-              disabled={gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human'}
+              disabled={boardFrozen || gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human'}
             >
               {gameState.currentPlayer === 'ai' ? (
                 <div className="flex items-center gap-2">
@@ -995,8 +1027,8 @@ const Index = () => {
       />
 
       {/* Newspaper overlay */}
-      {gameState.showNewspaper && (
-        <TabloidNewspaper 
+      {gameState.showNewspaper && isNewspaperPhase && (
+        <TabloidNewspaper
           events={gameState.currentEvents}
           playedCards={gameState.cardsPlayedThisRound}
           faction={gameState.faction}
@@ -1004,6 +1036,9 @@ const Index = () => {
           onClose={handleCloseNewspaper}
         />
       )}
+
+      <ReviewPhaseBanner />
+      <InspectorOverlay />
 
     </div>
   );
