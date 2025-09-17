@@ -23,7 +23,8 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "framer-motion": ["./src/vendor/framer-motion"]
     }
   },
   "include": ["src"]

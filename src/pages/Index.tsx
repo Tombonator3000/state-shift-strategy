@@ -38,6 +38,12 @@ import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
 import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
+import CardRevealOverlay from '@/ui/CardRevealOverlay';
+import TruthPulse from '@/ui/TruthPulse';
+import IpTickerPulse from '@/ui/IpTickerPulse';
+import StateCaptureFX from '@/ui/StateCaptureFX';
+import OpponentActionStrip from '@/ui/OpponentActionStrip';
+import ActionLogPanel from '@/ui/ActionLogPanel';
 
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
@@ -819,15 +825,20 @@ const Index = () => {
             <span>{gameState.turn}</span>
           </div>
           <MechanicsTooltip mechanic="ip">
-            <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
-              <span className="font-bold uppercase tracking-wide">Your IP</span>
-              <span>{gameState.ip}</span>
-            </div>
+            <IpTickerPulse playerId="P1">
+              <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
+                <span className="font-bold uppercase tracking-wide">Your IP</span>
+                <span>{gameState.ip}</span>
+              </div>
+            </IpTickerPulse>
           </MechanicsTooltip>
           <MechanicsTooltip mechanic="truth">
-            <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
-              <span className="font-bold uppercase tracking-wide">Truth</span>
-              <span>{gameState.truth}%</span>
+            <div className="relative whitespace-nowrap overflow-hidden">
+              <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
+                <span className="font-bold uppercase tracking-wide">Truth</span>
+                <span>{gameState.truth}%</span>
+              </div>
+              <TruthPulse />
             </div>
           </MechanicsTooltip>
           <MechanicsTooltip mechanic="zone">
@@ -836,14 +847,19 @@ const Index = () => {
               <span>{gameState.controlledStates.length}</span>
             </div>
           </MechanicsTooltip>
-          <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
-            <span className="font-bold uppercase tracking-wide">AI IP</span>
-            <span>{gameState.aiIP}</span>
-          </div>
+          <IpTickerPulse playerId="P2" align="left">
+            <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
+              <span className="font-bold uppercase tracking-wide">AI IP</span>
+              <span>{gameState.aiIP}</span>
+            </div>
+          </IpTickerPulse>
           <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
             <span className="font-bold uppercase tracking-wide">AI States</span>
             <span>{gameState.states.filter(s => s.owner === 'ai').length}</span>
           </div>
+        </div>
+        <div className="mt-2">
+          <OpponentActionStrip />
         </div>
       </div>
     </div>
@@ -917,6 +933,9 @@ const Index = () => {
               <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} />
             </div>
           </div>
+        </div>
+        <div className="hidden xl:flex xl:w-72 xl:flex-shrink-0 relative">
+          <ActionLogPanel />
         </div>
       </div>
       <CardPreviewOverlay card={hoveredCard} />
@@ -1000,6 +1019,8 @@ const Index = () => {
       />
 
       <CardAnimationLayer />
+      <CardRevealOverlay />
+      <StateCaptureFX />
 
       <TabloidVictoryScreen
         isVisible={victoryState.isVictory}

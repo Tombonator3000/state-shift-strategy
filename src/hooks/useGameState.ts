@@ -13,6 +13,15 @@ import { resolveCardMVP, type CardPlayResolution } from '@/systems/cardResolutio
 import { applyTruthDelta } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
+import { useGameUiFeed, type UiEvent } from '@/hooks/useGameUiFeed';
+
+const enqueueMicrotask = (callback: () => void) => {
+  if (typeof queueMicrotask === 'function') {
+    queueMicrotask(callback);
+  } else {
+    Promise.resolve().then(callback);
+  }
+};
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -150,6 +159,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const aiDifficulty = resolveAiDifficulty(aiDifficultyOverride);
   const [eventManager] = useState(() => new EventManager());
   const achievements = useAchievements();
+  const { dispatchUiEvent } = useGameUiFeed();
   
   const availableCards = [...CARD_DATABASE];
   console.log(`📊 Card Database Stats:\n  - Total available: ${availableCards.length}`);
@@ -602,9 +612,55 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     }, 1000);
   }, [gameState]);
 
+  const emitAiUiEvents = useCallback((
+    previous: GameState,
+    resolution: CardPlayResolution,
+    card: GameCard,
+  ) => {
+    if (previous.currentPlayer !== 'ai') {
+      return;
+    }
+
+    const eventsToDispatch: UiEvent[] = [
+      { type: 'OPP_PLAYED_CARD', card, turn: previous.turn },
+    ];
+
+    const truthDelta = Math.round(resolution.truth - previous.truth);
+    if (truthDelta !== 0) {
+      eventsToDispatch.push({ type: 'TRUTH_CHANGED', delta: truthDelta, newValue: resolution.truth });
+    }
+
+    const playerIpDelta = Math.round(resolution.ip - previous.ip);
+    if (playerIpDelta !== 0) {
+      eventsToDispatch.push({ type: 'IP_CHANGED', playerId: 'P1', delta: playerIpDelta, newValue: resolution.ip });
+    }
+
+    const aiIpDelta = Math.round(resolution.aiIP - previous.aiIP);
+    if (aiIpDelta !== 0) {
+      eventsToDispatch.push({ type: 'IP_CHANGED', playerId: 'P2', delta: aiIpDelta, newValue: resolution.aiIP });
+    }
+
+    const previousOwners = new Map(previous.states.map(state => [state.id, state.owner] as const));
+    for (const state of resolution.states) {
+      const beforeOwner = previousOwners.get(state.id);
+      if (state.owner === 'ai' && beforeOwner !== 'ai') {
+        eventsToDispatch.push({ type: 'STATE_CAPTURED', stateId: state.abbreviation ?? state.id, by: 'P2' });
+      }
+    }
+
+    enqueueMicrotask(() => {
+      for (const event of eventsToDispatch) {
+        dispatchUiEvent(event);
+      }
+    });
+  }, [dispatchUiEvent]);
+
   const playAICard = useCallback((cardId: string, targetState?: string, reasoning?: string) => {
     const card = gameState.aiHand.find(c => c.id === cardId);
     if (!card) return;
+
+    let snapshotBefore: GameState | null = null;
+    let resolutionSnapshot: CardPlayResolution | null = null;
 
     setGameState(prev => {
       const resolution = resolveCardMVP(prev, card, targetState ?? null, 'ai', achievements);
@@ -613,6 +669,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (reasoning) {
         logEntries.push(`AI Strategy: ${reasoning}`);
       }
+
+      snapshotBefore = prev;
+      resolutionSnapshot = resolution;
 
       return {
         ...prev,
@@ -628,7 +687,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         log: logEntries,
       };
     });
-  }, [achievements, gameState]);
+
+    if (snapshotBefore && resolutionSnapshot) {
+      emitAiUiEvents(snapshotBefore, resolutionSnapshot, card);
+    }
+  }, [achievements, emitAiUiEvents, gameState]);
 
   const closeNewspaper = useCallback(() => {
     setGameState(prev => {
