@@ -142,11 +142,12 @@ export class FactionBalanceAnalyzer {
   }
 
   // Extract numerical effect value from card text
-  private extractEffectValue(cardText: string, cardType: string): number {
+  private extractEffectValue(cardText: string | undefined, cardType: string): number {
+    const text = cardText ?? '';
     let totalValue = 0;
-    
+
     // Truth effects
-    const truthMatch = cardText.match(/Truth\s*([+-]?\d+)/g);
+    const truthMatch = text.match(/Truth\s*([+-]?\d+)/gi);
     if (truthMatch) {
       truthMatch.forEach(match => {
         const value = parseInt(match.replace('Truth', '').trim());
@@ -155,7 +156,7 @@ export class FactionBalanceAnalyzer {
     }
     
     // IP effects
-    const ipMatch = cardText.match(/IP\s*([+-]?\d+)/g);
+    const ipMatch = text.match(/IP\s*([+-]?\d+)/gi);
     if (ipMatch) {
       ipMatch.forEach(match => {
         const value = parseInt(match.replace('IP', '').trim());
@@ -164,7 +165,7 @@ export class FactionBalanceAnalyzer {
     }
     
     // Pressure effects
-    const pressureMatch = cardText.match(/([+-]?\d+)\s*Pressure/g);
+    const pressureMatch = text.match(/([+-]?\d+)\s*Pressure/gi);
     if (pressureMatch) {
       pressureMatch.forEach(match => {
         const value = parseInt(match.replace('Pressure', '').trim());
@@ -173,14 +174,13 @@ export class FactionBalanceAnalyzer {
     }
     
     // Defensive keywords
-    if (cardText.toLowerCase().includes('block') || 
-        cardText.toLowerCase().includes('immune') ||
-        cardText.toLowerCase().includes('reduce')) {
+    const lowered = text.toLowerCase();
+    if (lowered.includes('block') || lowered.includes('immune') || lowered.includes('reduce')) {
       totalValue += 3 * EFFECT_WEIGHTS.defensive;
     }
     
     // Utility effects
-    if (cardText.toLowerCase().includes('draw')) {
+    if (lowered.includes('draw')) {
       totalValue += 2 * EFFECT_WEIGHTS.utility;
     }
     
@@ -200,7 +200,7 @@ export class FactionBalanceAnalyzer {
 
   // Determine faction based on card effects
   private determineFaction(card: GameCard): 'truth' | 'government' | 'neutral' {
-    const text = card.text.toLowerCase();
+    const text = (card.text ?? '').toLowerCase();
     
     // Check for truth-positive effects
     const truthPositive = /truth\s*\+/.test(text);
@@ -232,7 +232,9 @@ export class FactionBalanceAnalyzer {
     const explanations: string[] = [];
     
     // Parse truth effects
-    const truthMatch = card.text.match(/Truth\s*([+-]?\d+)/);
+    const text = (card.text ?? '').toLowerCase();
+
+    const truthMatch = text.match(/truth\s*([+-]?\d+)/);
     if (truthMatch) {
       const value = parseInt(truthMatch[1]);
       const sign = forFaction === 'truth' ? 1 : -1;
@@ -241,7 +243,7 @@ export class FactionBalanceAnalyzer {
     }
     
     // Parse IP effects (need to determine target)
-    const ipMatch = card.text.match(/IP\s*([+-]?\d+)/);
+    const ipMatch = text.match(/ip\s*([+-]?\d+)/);
     if (ipMatch) {
       const value = parseInt(ipMatch[1]);
       // Assume positive IP goes to player, negative damages opponent
@@ -251,7 +253,7 @@ export class FactionBalanceAnalyzer {
     }
     
     // Pressure effects (always positive for card owner)
-    const pressureMatch = card.text.match(/([+-]?\d+)\s*Pressure/);
+    const pressureMatch = text.match(/([+-]?\d+)\s*pressure/);
     if (pressureMatch) {
       const value = Math.abs(parseInt(pressureMatch[1]));
       breakdown.pressure = value * EFFECT_WEIGHTS.pressure;
@@ -259,13 +261,13 @@ export class FactionBalanceAnalyzer {
     }
     
     // Defensive effects
-    if (card.type === 'DEFENSIVE' || card.text.toLowerCase().includes('block')) {
+    if (card.type === 'DEFENSIVE' || text.includes('block')) {
       breakdown.defensive = 4 * EFFECT_WEIGHTS.defensive;
       explanations.push(`Defensive effect → ${breakdown.defensive.toFixed(1)} points`);
     }
     
     // Utility effects
-    if (card.text.toLowerCase().includes('draw')) {
+    if (text.includes('draw')) {
       breakdown.utility = 3 * EFFECT_WEIGHTS.utility;
       explanations.push(`Card utility → ${breakdown.utility.toFixed(1)} points`);
     }
@@ -316,7 +318,7 @@ export class FactionBalanceAnalyzer {
     
     // Cost analysis
     const expectedRange = COST_CURVES[card.rarity as keyof typeof COST_CURVES];
-    const effectValue = this.extractEffectValue(card.text, card.type);
+    const effectValue = this.extractEffectValue(card.text ?? '', card.type);
     const expectedCost = Math.max(expectedRange.min, Math.min(expectedRange.max, 
       expectedRange.baseline + (effectValue - 8) * 0.3));
     

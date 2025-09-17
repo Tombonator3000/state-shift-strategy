@@ -6,7 +6,7 @@ import {
   type GameSnapshot,
   type AchievementTracker,
 } from '../cardResolution';
-import type { GameCard } from '../../types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 import type { PlayerStats } from '../../data/achievementSystem';
 
 const createBaseState = (): GameSnapshot => ({

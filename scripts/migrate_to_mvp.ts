@@ -3,7 +3,7 @@ import { glob } from 'glob';
 import { readFile, writeFile } from 'node:fs/promises';
 import { relative } from 'node:path';
 import process from 'node:process';
-import { sanitizeCard, validateCard } from '../src/mvp/validator';
+import { repairToMVP, validateCardMVP } from '../src/mvp/validator';
 
 const DEFAULT_PATTERNS = ['src/**/*.json', 'public/**/*.json', 'assets/**/*.json'];
 const GLOB_OPTIONS = {
@@ -84,18 +84,18 @@ async function processFile(file: string): Promise<ProcessResult | null> {
   let hasErrors = false;
 
   extraction.cards.forEach((raw, index) => {
-    const { card, errors, changes } = sanitizeCard(raw);
+    const { card, errors, changes } = repairToMVP(raw);
     const hasId =
       typeof raw === 'object' && raw !== null && 'id' in raw && (raw as { id?: unknown }).id != null;
     const label = hasId ? String((raw as { id: unknown }).id) : `index ${index}`;
 
-    if (!card || errors.length > 0) {
+    if (errors.length > 0) {
       hasErrors = true;
       messages.push(`${label}: ${errors.join('; ')}`);
       return;
     }
 
-    const validation = validateCard(card);
+    const validation = validateCardMVP(card);
     if (!validation.ok) {
       hasErrors = true;
       messages.push(`${label}: ${validation.errors.join('; ')}`);

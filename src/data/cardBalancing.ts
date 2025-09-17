@@ -165,19 +165,20 @@ const COST_CURVES = {
   }
 };
 
-export function extractEffectValue(cardText: string, cardType: string): number {
+export function extractEffectValue(cardText: string | undefined, cardType: string): number {
+  const text = cardText ?? '';
   // Extract numerical values from card text
-  const truthMatch = cardText.match(/Truth ([+-])(\d+)/);
+  const truthMatch = text.match(/Truth ([+-])(\d+)/);
   if (truthMatch) {
     return parseInt(truthMatch[2]);
   }
-  
-  const pressureMatch = cardText.match(/\+(\d+) Pressure/);
+
+  const pressureMatch = text.match(/\+(\d+) Pressure/);
   if (pressureMatch) {
     return parseInt(pressureMatch[1]);
   }
-  
-  const damageMatch = cardText.match(/(\d+) (?:damage|IP)/i);
+
+  const damageMatch = text.match(/(\d+) (?:damage|IP)/i);
   if (damageMatch) {
     return parseInt(damageMatch[1]);
   }

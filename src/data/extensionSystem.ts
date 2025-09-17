@@ -1,4 +1,5 @@
 import type { GameCard } from '@/rules/mvp';
+import { repairToMVP, validateCardMVP } from '@/mvp/validator';
 
 export interface ExtensionCard extends GameCard {
   extId?: string; // Extension ID for tracking
@@ -25,6 +26,7 @@ export interface EnabledExtension {
 }
 
 const STORAGE_KEY = 'sg_enabled_extensions';
+const DEV = typeof import.meta !== 'undefined' && (import.meta as any)?.env?.DEV;
 
 class ExtensionManager {
   private extensions: Map<string, Extension> = new Map();
@@ -84,9 +86,7 @@ class ExtensionManager {
               console.log(`✅ CDN Extension loaded:`, extension.name, extension.version);
               
               if (this.validateExtension(extension)) {
-                extension.cards = extension.cards.map((card: ExtensionCard) => 
-                  this.normalizeCard({ ...card, extId: extension.id })
-                );
+                extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
                 extensions.push(extension);
               }
             } else {
@@ -109,9 +109,7 @@ class ExtensionManager {
             if (response.ok) {
               const extension = await response.json();
               if (this.validateExtension(extension)) {
-                extension.cards = extension.cards.map((card: ExtensionCard) => 
-                  this.normalizeCard({ ...card, extId: extension.id })
-                );
+                extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
                 extensions.push(extension);
               }
             }
@@ -147,9 +145,7 @@ class ExtensionManager {
               const text = await file.text();
               const extension = JSON.parse(text);
               if (this.validateExtension(extension)) {
-                extension.cards = extension.cards.map((card: ExtensionCard) => 
-                  this.normalizeCard({ ...card, extId: extension.id })
-                );
+                extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
                 extensions.push(extension);
               }
             } catch (error) {
@@ -183,9 +179,7 @@ class ExtensionManager {
             const text = await file.text();
             const extension = JSON.parse(text);
             if (this.validateExtension(extension)) {
-                extension.cards = extension.cards.map((card: ExtensionCard) => 
-                  this.normalizeCard({ ...card, extId: extension.id })
-                );
+              extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
               extensions.push(extension);
             }
           } catch (error) {
@@ -236,42 +230,40 @@ class ExtensionManager {
     return isValid;
   }
 
-  private normalizeCard(card: any): ExtensionCard {
-    const faction = String(card.faction || 'truth').toLowerCase() as 'truth' | 'government';
-    const type = String(card.type || 'MEDIA').toUpperCase();
-    
-    // Ensure both flavor fields exist - use flavor field as fallback for both
-    const flavorText = card.flavor || card.flavorTruth || card.flavorGov || '';
-    const flavorTruth = card.flavorTruth || flavorText;
-    const flavorGov = card.flavorGov || flavorText;
-    
-    const normalized: ExtensionCard = {
-      ...card,
-      faction,
-      type: ['MEDIA', 'ZONE', 'ATTACK', 'DEFENSIVE'].includes(type) 
-        ? (type as any) 
-        : 'MEDIA',
-      flavorTruth,
-      flavorGov
-    };
-    
-    // Remove legacy flavor field to avoid confusion
-    delete (normalized as any).flavor;
-    
-    // Ensure ZONE cards have proper targeting
-    if (normalized.type === 'ZONE') {
-      normalized.target = normalized.target || { scope: 'state', count: 1 };
+  private sanitizeExtensionCard(card: any, extensionId: string): ExtensionCard | null {
+    const source = { ...card, extId: extensionId };
+    const { card: repaired, errors, changes } = repairToMVP(source);
+    const validation = validateCardMVP(repaired);
+
+    if (DEV) {
+      if (changes.length > 0) {
+        console.info(`[EXTENSION:${extensionId}] ${repaired.id}: ${changes.join('; ')}`);
+      }
+      if (errors.length > 0) {
+        console.warn(`[EXTENSION:${extensionId}] ${repaired.id}: ${errors.join('; ')}`);
+      }
+      if (!validation.ok) {
+        console.warn(
+          `[EXTENSION:${extensionId}] ${repaired.id}: ${validation.errors.join('; ')}`,
+        );
+      }
     }
-    
-    // Ensure effects object exists
-    if (!normalized.effects) {
-      normalized.effects = {};
+
+    if (!validation.ok) {
+      return null;
     }
-    
-    return normalized;
+
+    return { ...repaired, extId: extensionId };
+  }
+
+  private prepareExtensionCards(cards: ExtensionCard[], extensionId: string): ExtensionCard[] {
+    return cards
+      .map(card => this.sanitizeExtensionCard(card, extensionId))
+      .filter((card): card is ExtensionCard => card !== null);
   }
 
   registerExtension(extension: Extension, source: 'cdn' | 'folder' | 'file') {
+    extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
     this.extensions.set(extension.id, extension);
   }
 
@@ -315,14 +307,10 @@ class ExtensionManager {
     for (const enabled of this.enabledExtensions) {
       const extension = this.extensions.get(enabled.id);
       if (extension) {
-        // Map extension cards to match GameCard interface
-        const mappedCards = extension.cards.map(card => 
-          this.normalizeCard({ ...card, extId: extension.id })
-        );
-        cards.push(...mappedCards);
+        cards.push(...extension.cards.map(card => ({ ...card, extId: extension.id })));
       }
     }
-    
+
     return cards;
   }
 
