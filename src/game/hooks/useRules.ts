@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import {
-  USE_MVP_RULES,
   canPlay as canPlayMvp,
   endTurn as endTurnMvp,
   playCard as playCardMvp,
@@ -9,7 +8,7 @@ import {
   winCheck as winCheckMvp,
   type Card,
 } from '@/mvp';
-import { fromEngineState, toEngineState, type UIGameState } from '@/state/gameState';
+import type { UIGameState } from '@/state/gameState';
 
 type RulesAdapter = {
   startTurn: (state: UIGameState) => UIGameState;
@@ -20,20 +19,15 @@ type RulesAdapter = {
   winCheck: (state: UIGameState) => ReturnType<typeof winCheckMvp>;
 };
 
-const createMvpAdapter = (): RulesAdapter => ({
-  startTurn: state => fromEngineState(startTurnMvp(toEngineState(state))),
-  canPlay: (state, card, targetStateId) => canPlayMvp(toEngineState(state), card, targetStateId),
-  playCard: (state, cardId, targetStateId) =>
-    fromEngineState(playCardMvp(toEngineState(state), cardId, targetStateId)),
-  resolve: (state, owner, card, targetStateId) =>
-    fromEngineState(resolveMvp(toEngineState(state), owner, card, targetStateId)),
-  endTurn: (state, discards) => fromEngineState(endTurnMvp(toEngineState(state), discards)),
-  winCheck: state => winCheckMvp(toEngineState(state)),
-});
+const MVP_RULES: RulesAdapter = {
+  startTurn: state => startTurnMvp(state),
+  canPlay: (state, card, targetStateId) => canPlayMvp(state, card, targetStateId),
+  playCard: (state, cardId, targetStateId) => playCardMvp(state, cardId, targetStateId),
+  resolve: (state, owner, card, targetStateId) => resolveMvp(state, owner, card, targetStateId),
+  endTurn: (state, discards) => endTurnMvp(state, discards),
+  winCheck: state => winCheckMvp(state),
+};
 
 export const useRules = (): RulesAdapter => {
-  return useMemo(() => {
-    const adapter = createMvpAdapter();
-    return USE_MVP_RULES ? adapter : adapter;
-  }, []);
+  return useMemo(() => MVP_RULES, []);
 };
