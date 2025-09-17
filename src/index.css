@@ -90,6 +90,29 @@ All colors MUST be HSL.
     --rarity-uncommon: 142 76% 36%;
     --rarity-rare: 221 83% 53%;
     --rarity-legendary: 25 95% 53%;
+
+    /* === Paranoid Times – Tabloid Card Theme === */
+    --pt-paper: #f2f0ea;
+    --pt-ink: #111111;
+    --pt-halftone: rgba(0, 0, 0, 0.06);
+
+    --pt-truth: #0ea5e9;
+    --pt-gov: #ef4444;
+
+    --pt-rarity-common: #9ca3af;
+    --pt-rarity-uncommon: #3b82f6;
+    --pt-rarity-rare: #8b5cf6;
+    --pt-rarity-legendary: #eab308;
+
+    --pt-border: #222222;
+    --pt-border-soft: rgba(17, 17, 17, 0.2);
+    --pt-shadow: rgba(0, 0, 0, 0.25);
+
+    --pt-card-w: 320px;
+    --pt-card-h: 450px;
+
+    --pt-gap: 10px;
+    --pt-radius: 14px;
   }
   .dark {
     --background: 222.2 84% 4.9%;
@@ -488,6 +511,78 @@ All colors MUST be HSL.
     .synergy-unlock {
       animation: none !important;
     }
+  }
+}
+
+/* Tabloid newspaper surface */
+.pt-card-surface {
+  background:
+    radial-gradient(var(--pt-halftone) 1px, transparent 1px) 0 0 / 6px 6px,
+    var(--pt-paper);
+}
+
+/* Polaroid frame */
+.pt-polaroid {
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Diagonal stamp */
+.pt-stamp {
+  position: absolute;
+  top: 10px;
+  right: -30px;
+  transform: rotate(15deg);
+  padding: 4px 10px;
+  font-family: "Bebas Neue", Anton, system-ui, sans-serif;
+  letter-spacing: 1px;
+  border: 2px solid var(--pt-border);
+  color: var(--pt-ink);
+  background: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Redacted hover effect */
+.pt-redacted {
+  position: relative;
+  overflow: hidden;
+}
+
+.pt-redacted::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: repeating-linear-gradient(
+    transparent 0 10px,
+    rgba(0, 0, 0, 0.85) 10px 16px,
+    transparent 16px 24px
+  );
+  transition: transform 0.35s ease;
+  pointer-events: none;
+}
+
+.pt-redacted:hover::after {
+  transform: translateX(0%);
+}
+
+/* Modal wrapper sizing */
+.pt-card-wrap {
+  width: var(--pt-card-w);
+  height: var(--pt-card-h);
+  max-width: 95vw;
+  max-height: 85vh;
+  border-radius: var(--pt-radius);
+}
+
+@media (max-width: 640px) {
+  .pt-card-wrap {
+    width: min(var(--pt-card-w), 95vw);
+    height: auto;
+    aspect-ratio: 320 / 450;
   }
 }
 
