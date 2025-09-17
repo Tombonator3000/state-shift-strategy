@@ -7,6 +7,7 @@ import { useAudioContext } from '@/contexts/AudioContext';
 import { useState, useEffect } from 'react';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
 import { useUiTheme, type UiTheme } from '@/hooks/useTheme';
+import { useGameUiFeed } from '@/hooks/useGameUiFeed';
 import type { Difficulty } from '@/ai';
 import { getDifficulty, setDifficultyFromLabel } from '@/state/settings';
 
@@ -88,6 +89,7 @@ interface GameSettings {
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const audio = useAudioContext();
   const [uiTheme, setUiTheme] = useUiTheme();
+  const { settings: uiFeedSettings, updateSettings: updateUiFeedSettings } = useGameUiFeed();
   const [settings, setSettings] = useState<GameSettings>(() => {
     // Initialize settings from audio system and localStorage
     const savedSettings = localStorage.getItem('gameSettings');
@@ -317,6 +319,64 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <div className="text-xs text-newspaper-text/70">
                   Use the settings icon above for play/pause/stop controls, SFX testing, and real-time audio debugging.
                 </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 border-2 border-newspaper-text bg-newspaper-bg">
+            <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">
+              📰 OPPONENT INTEL FEED
+            </h3>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-newspaper-text">
+                  Show Opponent Card Reveal
+                </label>
+                <Switch
+                  checked={uiFeedSettings.showOpponentCardReveal}
+                  onCheckedChange={(checked) => updateUiFeedSettings({ showOpponentCardReveal: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-newspaper-text">
+                  Resource Animations (Truth/IP)
+                </label>
+                <Switch
+                  checked={uiFeedSettings.showResourceAnimations}
+                  onCheckedChange={(checked) => updateUiFeedSettings({ showResourceAnimations: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-newspaper-text">
+                  State Capture Effects
+                </label>
+                <Switch
+                  checked={uiFeedSettings.showStateCaptureEffects}
+                  onCheckedChange={(checked) => updateUiFeedSettings({ showStateCaptureEffects: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-newspaper-text">
+                  Show Action Log Panel
+                </label>
+                <Switch
+                  checked={uiFeedSettings.showActionLogPanel}
+                  onCheckedChange={(checked) => updateUiFeedSettings({ showActionLogPanel: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-newspaper-text">
+                  Skip Opponent Animations
+                </label>
+                <Switch
+                  checked={uiFeedSettings.skipOpponentAnimations}
+                  onCheckedChange={(checked) => updateUiFeedSettings({ skipOpponentAnimations: checked })}
+                />
               </div>
             </div>
           </Card>
