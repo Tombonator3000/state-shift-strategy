@@ -4,10 +4,11 @@ import CardDetailOverlay from './CardDetailOverlay';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import type { GameCard } from '@/rules/mvp';
+import type { GameCard, MVPCardType } from '@/rules/mvp';
+import { MVP_CARD_TYPES } from '@/rules/mvp';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Zap, Shield, Target, X, Eye } from 'lucide-react';
+import { Loader2, Zap, Target, X, Eye, Megaphone } from 'lucide-react';
 import { useHapticFeedback } from '@/hooks/useHapticFeedback';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -70,6 +71,36 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       case 'rare': return 'bg-blue-100 text-blue-800';
       case 'legendary': return 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 font-bold';
       default: return 'bg-zinc-100 text-zinc-800';
+    }
+  };
+
+  const normalizeCardType = (type: string): MVPCardType => {
+    return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
+  };
+
+  const getTypeBadgeClass = (type: MVPCardType, faction: string) => {
+    if (type === 'MEDIA') {
+      return faction === 'government'
+        ? 'bg-government-blue/20 border-government-blue text-government-blue shadow-sm'
+        : 'bg-truth-red/20 border-truth-red text-truth-red shadow-sm';
+    }
+
+    if (type === 'ZONE') {
+      return 'bg-warning/20 border-warning text-warning shadow-sm';
+    }
+
+    return 'bg-destructive/20 border-destructive text-destructive shadow-sm';
+  };
+
+  const getTypeIcon = (type: MVPCardType) => {
+    switch (type) {
+      case 'MEDIA':
+        return <Megaphone className="w-3 h-3" />;
+      case 'ZONE':
+        return <Target className="w-3 h-3" />;
+      case 'ATTACK':
+      default:
+        return <Zap className="w-3 h-3" />;
     }
   };
 
@@ -162,6 +193,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           const isLoading = loadingCard === card.id;
           const canAfford = canAffordCard(card);
           const faction = getCardFaction(card);
+          const displayType = normalizeCardType(card.type);
           
           return (
             <div 
@@ -230,7 +262,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                  <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center z-20">
                    <Loader2 className={`w-5 h-5 ${isSelected ? 'animate-pulse' : 'animate-spin'} text-primary mb-1`} />
                    <span className="text-xs font-mono text-primary font-bold">
-                     {isPlaying ? 'DEPLOYING' : isSelected && card.type === 'ZONE' ? 'TARGETING' : 'PROCESSING'}
+                     {isPlaying ? 'DEPLOYING' : isSelected && displayType === 'ZONE' ? 'TARGETING' : 'PROCESSING'}
                    </span>
                  </div>
                )}
@@ -257,30 +289,22 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 </div>
               
               {/* Enhanced Type Badge */}
-              <Badge 
-                variant="outline" 
-                className={`text-xs px-2 py-1 flex-shrink-0 flex items-center gap-1 transition-all duration-200 ${
-                  card.type === 'MEDIA' && faction === 'truth' ? 'bg-truth-red/20 border-truth-red text-truth-red shadow-sm' :
-                  card.type === 'MEDIA' && faction === 'government' ? 'bg-government-blue/20 border-government-blue text-government-blue shadow-sm' :
-                  card.type === 'ZONE' ? 'bg-warning/20 border-warning text-warning shadow-sm' :
-                  card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive shadow-sm' :
-                  'bg-muted/20 border-muted text-muted-foreground shadow-sm'
-                }`}
+              <Badge
+                variant="outline"
+                className={`text-xs px-2 py-1 flex-shrink-0 flex items-center gap-1 transition-all duration-200 ${getTypeBadgeClass(displayType, faction)}`}
               >
-                {card.type === 'ZONE' && <Target className="w-3 h-3" />}
-                {card.type === 'ATTACK' && <Zap className="w-3 h-3" />}
-                {card.type === 'DEFENSIVE' && <Shield className="w-3 h-3" />}
-                {card.type}
+                {getTypeIcon(displayType)}
+                {displayType}
               </Badge>
 
                {/* Selection indicator for zone targeting */}
-               {isSelected && card.type === 'ZONE' && (
+               {isSelected && displayType === 'ZONE' && (
                  <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-warning text-warning-foreground text-xs font-bold flex items-center justify-center ring-2 ring-warning/50 animate-pulse">
                    🎯
                  </div>
                )}
                {/* Regular selection indicator */}
-               {isSelected && card.type !== 'ZONE' && (
+               {isSelected && displayType !== 'ZONE' && (
                  <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-yellow-400 ring-2 ring-yellow-400/50" />
                )}
                
@@ -295,7 +319,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                >
                  <div className="bg-popover border border-border rounded-lg p-3 shadow-xl max-w-xs">
                    <div className="font-bold text-sm text-foreground mb-1">{card.name}</div>
-                   <div className="text-xs text-muted-foreground mb-2">{card.type} • Cost: {card.cost}</div>
+                   <div className="text-xs text-muted-foreground mb-2">{displayType} • Cost: {card.cost}</div>
                    <div className="text-xs text-foreground">{card.text}</div>
                  </div>
                </div>
@@ -350,7 +374,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
             }
             
             // Zone card targeting - direct activation
-            if (card.type === 'ZONE') {
+            if (normalizeCardType(card.type) === 'ZONE') {
               // Immediately activate targeting without closing modal
               audio.playSFX('click');
               triggerHaptic('medium');

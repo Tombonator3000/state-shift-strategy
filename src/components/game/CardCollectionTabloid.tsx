@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { useCardCollection } from '@/hooks/useCardCollection';
-import type { GameCard } from '@/rules/mvp';
+import type { GameCard, MVPCardType } from '@/rules/mvp';
+import { MVP_CARD_TYPES } from '@/rules/mvp';
 
 interface CardCollectionTabloidProps {
   open: boolean;
@@ -22,13 +23,17 @@ const CardCollectionTabloid = ({ open, onOpenChange }: CardCollectionTabloidProp
   const stats = getCollectionStats();
   const discoveredCards = getDiscoveredCards();
   
+  const normalizeCardType = (type: string): MVPCardType => {
+    return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
+  };
+
   // Filter cards based on search and filters
   const filteredCards = discoveredCards.filter(card => {
     const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          card.text.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || card.type === filterType;
+    const matchesType = filterType === 'all' || normalizeCardType(card.type) === filterType;
     const matchesRarity = filterRarity === 'all' || card.rarity === filterRarity;
-    
+
     return matchesSearch && matchesType && matchesRarity;
   });
 
@@ -55,7 +60,7 @@ const CardCollectionTabloid = ({ open, onOpenChange }: CardCollectionTabloidProp
           </h3>
           <div className="flex gap-1 mt-1">
             <div className="text-[10px] uppercase font-black px-1 py-0.5 bg-black text-white">
-              {card.type}
+              {normalizeCardType(card.type)}
             </div>
             <div className="text-[10px] uppercase font-black px-1 py-0.5 border border-black">
               {card.rarity}
@@ -147,7 +152,6 @@ const CardCollectionTabloid = ({ open, onOpenChange }: CardCollectionTabloidProp
                   <SelectItem value="MEDIA">MEDIA</SelectItem>
                   <SelectItem value="ZONE">ZONE</SelectItem>
                   <SelectItem value="ATTACK">ATTACK</SelectItem>
-                  <SelectItem value="DEFENSIVE">DEFENSIVE</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={filterRarity} onValueChange={setFilterRarity}>

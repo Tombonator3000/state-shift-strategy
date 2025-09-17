@@ -1,8 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  MVP_COST_TABLE_ROWS,
+  MVP_RULES_SECTIONS,
+  MVP_RULES_TITLE,
+} from '@/content/mvpRules';
 
 interface HowToPlayProps {
   onClose: () => void;
@@ -10,134 +15,50 @@ interface HowToPlayProps {
 
 const HowToPlay = ({ onClose }: HowToPlayProps) => {
   const [canScrollUp, setCanScrollUp] = useState(false);
-  const [canScrollDown, setCanScrollDown] = useState(true);
-  const [rulesContent, setRulesContent] = useState<string>('');
+  const [canScrollDown, setCanScrollDown] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Load rules from the markdown file
-  useEffect(() => {
-    const loadRules = async () => {
-      try {
-        const response = await fetch('/how-to-play-mvp.md');
-        if (response.ok) {
-          const content = await response.text();
-          setRulesContent(content);
-        } else {
-          setRulesContent(fallbackRules);
-        }
-      } catch (error) {
-        console.log('Could not load rules file, using fallback');
-        setRulesContent(fallbackRules);
-      }
-    };
-    
-    loadRules();
+  const updateScrollButtons = useCallback(() => {
+    const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+    if (!viewport) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = viewport;
+    setCanScrollUp(scrollTop > 0);
+    setCanScrollDown(scrollTop + clientHeight < scrollHeight - 2);
   }, []);
 
-  const fallbackRules = `# How to Play ShadowGov (MVP Rules)
+  useEffect(() => {
+    const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+    if (!viewport) return;
 
-## Objective
-Win by pushing national Truth to 100 or by reducing your opponent's Influence Points (IP) to zero. Control states with pressure to accelerate your plan.
+    updateScrollButtons();
+    viewport.addEventListener('scroll', updateScrollButtons);
 
-## Turn Structure
-1. **Start of Turn** – Draw up to 5 cards and gain IP (5 + number of states you control).
-2. **Main Phase** – Play up to three cards, targeting states when required.
-3. **End Phase** – Resolve ongoing effects and pass the turn.
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => updateScrollButtons())
+      : null;
 
-## Card Types
-- **MEDIA** – Adjust Truth directly. Costs are fixed by rarity (Common 3, Uncommon 4, Rare 5, Legendary 6).
-- **ATTACK** – Spend IP to damage your opponent's IP or force discards. Costs follow rarity (2/3/4/5).
-- **ZONE** – Add pressure to specific states to claim control. Costs follow rarity (4/5/6/7).
+    resizeObserver?.observe(viewport);
 
-## Effects
-The MVP ruleset supports a focused effect set:
-- \`truthDelta\` for MEDIA cards.
-- \`ipDelta.opponent\` and optional \`discardOpponent\` for ATTACK cards.
-- \`pressureDelta\` for ZONE cards.
-
-Any legacy effect keys are ignored by the sanitiser during import.
-
-## Deck Building Tips
-- Keep a balance of card types so you can react to board state changes.
-- ZONE cards win games when backed by MEDIA momentum.
-- ATTACK cards are most efficient when the opponent banks IP for big plays.
-`;
+    return () => {
+      viewport.removeEventListener('scroll', updateScrollButtons);
+      resizeObserver?.disconnect();
+    };
+  }, [updateScrollButtons]);
 
   const scrollTo = (direction: 'up' | 'down') => {
-    const scrollElement = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
-    if (scrollElement) {
-      const scrollAmount = 300;
-      const currentScroll = scrollElement.scrollTop;
-      const newScroll = direction === 'down' 
-        ? currentScroll + scrollAmount 
-        : currentScroll - scrollAmount;
-      
-      scrollElement.scrollTo({
-        top: newScroll,
-        behavior: 'smooth'
-      });
-    }
-  };
+    const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+    if (!viewport) return;
 
-  const handleScroll = (event: any) => {
-    const scrollElement = event.target;
-    const { scrollTop, scrollHeight, clientHeight } = scrollElement;
-    
-    setCanScrollUp(scrollTop > 0);
-    setCanScrollDown(scrollTop + clientHeight < scrollHeight - 10);
-  };
+    const scrollAmount = 300;
+    const newScroll = direction === 'down'
+      ? viewport.scrollTop + scrollAmount
+      : viewport.scrollTop - scrollAmount;
 
-  // Parse markdown content to HTML-like structure
-  const parseMarkdown = (content: string) => {
-    const lines = content.split('\n');
-    const elements: JSX.Element[] = [];
-    let currentSection = '';
-
-    lines.forEach((line, index) => {
-      if (line.startsWith('# ')) {
-        elements.push(
-          <h1 key={index} className="text-3xl font-bold text-newspaper-text mb-6 font-mono border-b-2 border-newspaper-text pb-2">
-            {line.substring(2)}
-          </h1>
-        );
-      } else if (line.startsWith('## ')) {
-        elements.push(
-          <h2 key={index} className="text-2xl font-bold text-newspaper-text mt-8 mb-4 font-mono">
-            {line.substring(3)}
-          </h2>
-        );
-      } else if (line.startsWith('### ')) {
-        elements.push(
-          <h3 key={index} className="text-xl font-bold text-newspaper-text mt-6 mb-3 font-mono">
-            {line.substring(4)}
-          </h3>
-        );
-      } else if (line.startsWith('- ')) {
-        elements.push(
-          <li key={index} className="text-newspaper-text ml-4 mb-2">
-            • {line.substring(2)}
-          </li>
-        );
-      } else if (line.startsWith('**') && line.endsWith('**')) {
-        elements.push(
-          <div key={index} className="font-bold text-newspaper-text mt-4 mb-2">
-            {line.substring(2, line.length - 2)}
-          </div>
-        );
-      } else if (line.trim() !== '' && !line.startsWith('---')) {
-        elements.push(
-          <p key={index} className="text-newspaper-text mb-3 leading-relaxed">
-            {line}
-          </p>
-        );
-      } else if (line.startsWith('---')) {
-        elements.push(
-          <div key={index} className="border-t border-newspaper-text/30 my-6"></div>
-        );
-      }
+    viewport.scrollTo({
+      top: newScroll,
+      behavior: 'smooth'
     });
-
-    return elements;
   };
 
   return (
@@ -147,7 +68,7 @@ Any legacy effect keys are ignored by the sanitiser during import.
         <div className="relative bg-newspaper-text/10 p-6 border-b-2 border-newspaper-text">
           <div className="absolute inset-0 opacity-5">
             {Array.from({ length: 15 }).map((_, i) => (
-              <div 
+              <div
                 key={i}
                 className="absolute bg-newspaper-text h-4"
                 style={{
@@ -169,8 +90,8 @@ Any legacy effect keys are ignored by the sanitiser during import.
                 Security Clearance: EYES ONLY
               </p>
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={onClose}
               className="border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
             >
@@ -188,23 +109,79 @@ Any legacy effect keys are ignored by the sanitiser during import.
         </div>
 
         <div className="relative flex-1">
-          <ScrollArea 
-            ref={scrollAreaRef} 
+          <ScrollArea
+            ref={scrollAreaRef}
             className="h-[calc(90vh-200px)] w-full"
           >
-            <div 
-              className="p-6 prose prose-sm max-w-none"
-              onScroll={handleScroll}
-            >
-              {rulesContent ? (
-                <div className="space-y-4">
-                  {parseMarkdown(rulesContent)}
+            <div className="p-6 prose prose-sm max-w-none space-y-6">
+              <h1 className="text-3xl font-bold text-newspaper-text mb-2 font-mono border-b-2 border-newspaper-text pb-2">
+                {MVP_RULES_TITLE}
+              </h1>
+
+              {MVP_RULES_SECTIONS.map((section) => (
+                <section key={section.title} className="space-y-3">
+                  <h2 className="text-2xl font-bold text-newspaper-text font-mono">
+                    {section.title}
+                  </h2>
+                  {section.description && (
+                    <p className="text-newspaper-text/80 leading-relaxed">
+                      {section.description}
+                    </p>
+                  )}
+                  {section.bullets && (
+                    <ul className="space-y-2 text-newspaper-text">
+                      {section.bullets.map((bullet) => (
+                        <li key={bullet} className="pl-4 relative">
+                          <span className="absolute left-0 text-newspaper-text/70">•</span>
+                          <span className="leading-relaxed">{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ))}
+
+              <section className="space-y-3">
+                <h2 className="text-2xl font-bold text-newspaper-text font-mono">
+                  Cost Benchmarks by Rarity
+                </h2>
+                <p className="text-newspaper-text/80 leading-relaxed">
+                  MVP cards follow fixed IP costs and baseline effects. Use this table to spot curve breakers before they reach the battlefield.
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-newspaper-text/10">
+                        <th className="border border-newspaper-text/30 px-3 py-2 font-mono">Rarity</th>
+                        <th className="border border-newspaper-text/30 px-3 py-2 font-mono">ATTACK</th>
+                        <th className="border border-newspaper-text/30 px-3 py-2 font-mono">MEDIA</th>
+                        <th className="border border-newspaper-text/30 px-3 py-2 font-mono">ZONE</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {MVP_COST_TABLE_ROWS.map((row) => (
+                        <tr key={row.rarity}>
+                          <td className="border border-newspaper-text/30 px-3 py-2 font-semibold uppercase">
+                            {row.rarity}
+                          </td>
+                          <td className="border border-newspaper-text/30 px-3 py-2">
+                            <div className="font-semibold">{row.attack.effect}</div>
+                            <div className="text-xs text-newspaper-text/70">Cost {row.attack.cost}</div>
+                          </td>
+                          <td className="border border-newspaper-text/30 px-3 py-2">
+                            <div className="font-semibold">{row.media.effect}</div>
+                            <div className="text-xs text-newspaper-text/70">Cost {row.media.cost}</div>
+                          </td>
+                          <td className="border border-newspaper-text/30 px-3 py-2">
+                            <div className="font-semibold">{row.zone.effect}</div>
+                            <div className="text-xs text-newspaper-text/70">Cost {row.zone.cost}</div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ) : (
-                <div className="text-center text-newspaper-text/60 py-8">
-                  Loading classified documents...
-                </div>
-              )}
+              </section>
             </div>
           </ScrollArea>
 
@@ -218,7 +195,7 @@ Any legacy effect keys are ignored by the sanitiser during import.
               <ChevronUp className="w-4 h-4" />
             </Button>
           )}
-          
+
           {canScrollDown && (
             <Button
               onClick={() => scrollTo('down')}

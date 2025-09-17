@@ -3,7 +3,8 @@ import CardImage from './CardImage';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import type { GameCard } from '@/rules/mvp';
+import type { GameCard, MVPCardType } from '@/rules/mvp';
+import { MVP_CARD_TYPES } from '@/rules/mvp';
 
 interface GameHandProps {
   cards: GameCard[];
@@ -22,13 +23,16 @@ const GameHand = ({ cards, onPlayCard, disabled }: GameHandProps) => {
     }
   };
 
-  const getTypeColor = (type: string) => {
+  const normalizeCardType = (type: string): MVPCardType => {
+    return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
+  };
+
+  const getTypeColor = (type: MVPCardType) => {
     switch (type) {
       case 'MEDIA': return 'border-truth-red bg-truth-red/10';
       case 'ZONE': return 'border-government-blue bg-government-blue/10';
-      case 'ATTACK': return 'border-destructive bg-destructive/10';
-      case 'DEFENSIVE': return 'border-primary bg-primary/10';
-      default: return 'border-muted bg-muted/10';
+      case 'ATTACK':
+      default: return 'border-destructive bg-destructive/10';
     }
   };
 
@@ -40,7 +44,7 @@ const GameHand = ({ cards, onPlayCard, disabled }: GameHandProps) => {
         {cards.map((card, index) => (
           <Card 
             key={card.id} 
-            className={`relative p-0 cursor-pointer transition-all hover:scale-105 hover:-translate-y-2 ${getTypeColor(card.type)} ${
+            className={`relative p-0 cursor-pointer transition-all hover:scale-105 hover:-translate-y-2 ${getTypeColor(normalizeCardType(card.type))} ${
               disabled ? 'opacity-50' : ''
             } overflow-hidden animate-card-deal`}
             style={{ animationDelay: `${index * 0.1}s` }}
@@ -68,14 +72,16 @@ const GameHand = ({ cards, onPlayCard, disabled }: GameHandProps) => {
               {/* Card content */}
               <div className="p-3">
                 <div className="flex justify-center mb-2">
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs font-mono ${card.type === 'MEDIA' ? 'bg-truth-red/20 border-truth-red text-truth-red' : 
-                      card.type === 'ZONE' ? 'bg-government-blue/20 border-government-blue text-government-blue' :
-                      card.type === 'ATTACK' ? 'bg-destructive/20 border-destructive text-destructive' :
-                      'bg-accent/20 border-accent text-accent-foreground'}`}
+                  <Badge
+                    variant="outline"
+                    className={`text-xs font-mono ${(() => {
+                      const type = normalizeCardType(card.type);
+                      if (type === 'MEDIA') return 'bg-truth-red/20 border-truth-red text-truth-red';
+                      if (type === 'ZONE') return 'bg-government-blue/20 border-government-blue text-government-blue';
+                      return 'bg-destructive/20 border-destructive text-destructive';
+                    })()}`}
                   >
-                    [{card.type}]
+                    [{normalizeCardType(card.type)}]
                   </Badge>
                 </div>
                 
