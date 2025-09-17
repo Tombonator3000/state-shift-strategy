@@ -15,6 +15,50 @@ import {
   getExpansionCardsSnapshot,
   subscribeToExpansionChanges,
 } from '@/data/expansions/state';
+import { computeMvpMetrics } from '@/tools/balancing/mvp-metrics';
+
+type HistogramBin = { label: string; count: number };
+
+const HistogramCard = ({
+  title,
+  subtitle,
+  bins,
+  barClassName,
+}: {
+  title: string;
+  subtitle: string;
+  bins: HistogramBin[];
+  barClassName: string;
+}) => {
+  const max = Math.max(1, ...bins.map(bin => bin.count));
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-3">
+      <div>
+        <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">{title}</div>
+        <p className="text-xs text-slate-500">{subtitle}</p>
+      </div>
+      <div className="space-y-2">
+        {bins.map(bin => {
+          const width = max > 0 ? Math.round((bin.count / max) * 100) : 0;
+          return (
+            <div key={bin.label}>
+              <div className="flex justify-between text-xs text-slate-400 mb-1">
+                <span>{bin.label}</span>
+                <span>{bin.count}</span>
+              </div>
+              <div className="h-2 bg-gray-800 rounded">
+                <div
+                  className={`h-full rounded ${barClassName}`}
+                  style={{ width: `${width}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 interface EnhancedBalancingDashboardProps {
   onClose: () => void;
@@ -53,12 +97,45 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
   const winDrivers = simulation.winConditionBreakdown.sort((a, b) => b.weight - a.weight);
 
   const coreCount = CARD_DATABASE_CORE.length;
-  const expansionCount = expansionState.cards.length;
-  const totalCount = coreCount + expansionCount;
+  const combinedCards = useMemo(
+    () => [...CARD_DATABASE_CORE, ...expansionState.cards],
+    [expansionState.cards],
+  );
+  const metrics = useMemo(
+    () => computeMvpMetrics(combinedCards, coreCount),
+    [combinedCards, coreCount],
+  );
+  const expansionCount = Math.max(0, metrics.counts.exp);
+  const totalCount = metrics.counts.total;
   const activeExpansionNames = expansionState.ids
     .map(id => EXPANSION_MANIFEST.find(pack => pack.id === id)?.title ?? id)
     .filter(Boolean)
     .join(', ');
+
+  const truthBins = useMemo(() => {
+    const bins: HistogramBin[] = [];
+    for (let delta = -4; delta <= 4; delta++) {
+      const label = delta > 0 ? `+${delta}` : `${delta}`;
+      bins.push({ label, count: metrics.hist.truthDelta[delta] ?? 0 });
+    }
+    return bins;
+  }, [metrics.hist.truthDelta]);
+
+  const attackBins = useMemo(() => {
+    const bins: HistogramBin[] = [];
+    for (let ip = 1; ip <= 5; ip++) {
+      bins.push({ label: `${ip} IP`, count: metrics.hist.attackIp[ip] ?? 0 });
+    }
+    return bins;
+  }, [metrics.hist.attackIp]);
+
+  const pressureBins = useMemo(() => {
+    const bins: HistogramBin[] = [];
+    for (let pressure = 1; pressure <= 4; pressure++) {
+      bins.push({ label: `+${pressure}`, count: metrics.hist.pressure[pressure] ?? 0 });
+    }
+    return bins;
+  }, [metrics.hist.pressure]);
 
   const formatDelta = (card: EnhancedCardAnalysis) => {
     if (card.costDelta === null) return '—';
@@ -87,7 +164,9 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
         <section className="grid gap-3 md:grid-cols-4">
           <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
             <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Card pool</div>
-            <div className="text-2xl font-bold text-emerald-300">{coreCount}/{expansionCount}/{totalCount}</div>
+            <div className="text-2xl font-bold text-emerald-300">
+              {metrics.counts.core}/{expansionCount}/{totalCount}
+            </div>
             <p className="text-xs text-slate-400">
               Core / Expansions / Total.{' '}
               {activeExpansionNames ? `Active packs: ${activeExpansionNames}.` : 'No expansions enabled.'}
@@ -95,20 +174,44 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
           </div>
           <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
             <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Cost table conformity</div>
-            <div className="text-2xl font-bold text-emerald-300">{report.costTableConformity.toFixed(0)}%</div>
-            <p className="text-xs text-slate-400">{report.onCurve} of {report.totalCards} cards match MVP expectations.</p>
+            <div className="text-2xl font-bold text-emerald-300">{metrics.costConformity.pct.toFixed(0)}%</div>
+            <p className="text-xs text-slate-400">{metrics.costConformity.ok} of {metrics.costConformity.total} cards match MVP expectations.</p>
           </div>
             <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Average MVP score</div>
-              <div className="text-2xl font-bold text-sky-300">{report.averageScore.toFixed(1)}</div>
+              <div className="text-2xl font-bold text-sky-300">{metrics.avgMvpWeight.toFixed(1)}</div>
               <p className="text-xs text-slate-400">Aggregate weight from truth, IP and pressure deltas.</p>
             </div>
             <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Faction spread</div>
               <div className="text-2xl font-bold text-amber-300">
-                {report.factionCounts.truth}/{report.factionCounts.government}/{report.factionCounts.neutral}
+                {metrics.counts.truth}/{metrics.counts.government}
               </div>
-              <p className="text-xs text-slate-400">Truth / Government / Neutral card counts in the core set.</p>
+              <p className="text-xs text-slate-400">Truth / Government card counts in the active pool.</p>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h3 className="text-lg font-semibold text-white font-mono">MVP Effect Distribution</h3>
+            <div className="grid gap-3 md:grid-cols-3">
+              <HistogramCard
+                title="Truth delta"
+                subtitle="MEDIA cards and their truth adjustments"
+                barClassName="bg-emerald-400/80"
+                bins={truthBins}
+              />
+              <HistogramCard
+                title="IP pressure"
+                subtitle="ATTACK cards vs opponent influence points"
+                barClassName="bg-sky-400/80"
+                bins={attackBins}
+              />
+              <HistogramCard
+                title="Zone pressure"
+                subtitle="ZONE cards modifying state pressure"
+                barClassName="bg-amber-400/80"
+                bins={pressureBins}
+              />
             </div>
           </section>
 
