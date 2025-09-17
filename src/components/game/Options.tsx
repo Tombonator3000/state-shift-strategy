@@ -4,11 +4,21 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { AudioControls } from '@/components/ui/audio-controls';
 import { useAudioContext } from '@/contexts/AudioContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
 import { useUiTheme, type UiTheme } from '@/hooks/useTheme';
 import type { Difficulty } from '@/ai';
 import { getDifficulty, setDifficultyFromLabel } from '@/state/settings';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import type { GameCard } from '@/rules/mvp';
+import { EXPANSION_MANIFEST } from '@/data/expansions';
+import {
+  getExpansionCardsSnapshot,
+  getStoredExpansionIds,
+  subscribeToExpansionChanges,
+  updateEnabledExpansions,
+} from '@/data/expansions/state';
 
 type DifficultyLabel =
   | 'EASY - Intelligence Leak'
@@ -43,6 +53,20 @@ const DIFFICULTY_OPTIONS: DifficultyLabel[] = [
   DIFFICULTY_LABELS.HARD,
   DIFFICULTY_LABELS.TOP_SECRET_PLUS,
 ];
+
+const EXPANSION_ID_SET = new Set(EXPANSION_MANIFEST.map(pack => pack.id));
+
+const summarizeExpansionCards = (cards: GameCard[]): Record<string, number> => {
+  const counts: Record<string, number> = {};
+  cards.forEach(card => {
+    const extId = card.extId;
+    if (!extId || !EXPANSION_ID_SET.has(extId)) {
+      return;
+    }
+    counts[extId] = (counts[extId] ?? 0) + 1;
+  });
+  return counts;
+};
 
 const resolveStoredDifficultyLabel = (value: unknown): DifficultyLabel => {
   if (typeof value === 'string') {
@@ -88,6 +112,12 @@ interface GameSettings {
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const audio = useAudioContext();
   const [uiTheme, setUiTheme] = useUiTheme();
+  const [enabledExpansions, setEnabledExpansions] = useState<string[]>(() => getStoredExpansionIds());
+  const [expansionCounts, setExpansionCounts] = useState<Record<string, number>>(() =>
+    summarizeExpansionCards(getExpansionCardsSnapshot()),
+  );
+  const [expansionLoading, setExpansionLoading] = useState(false);
+  const [expansionError, setExpansionError] = useState<string | null>(null);
 
   const [settings, setSettings] = useState<GameSettings>(() => {
     // Initialize settings from audio system and localStorage
@@ -134,6 +164,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     return baseSettings;
   });
 
+  const expansionTotal = useMemo(
+    () => Object.values(expansionCounts).reduce((sum, value) => sum + value, 0),
+    [expansionCounts],
+  );
+
   // Load settings from localStorage on component mount - remove to prevent re-initialization
   // Settings are now loaded in useState initializer above
 
@@ -145,6 +180,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       audio.setVolume(settings.masterVolume / 100);
     }
   }, [settings.masterVolume]); // Remove 'audio' from dependencies to prevent loops
+
+  useEffect(() => {
+    const unsubscribe = subscribeToExpansionChanges(({ ids, cards }) => {
+      setEnabledExpansions(ids);
+      setExpansionCounts(summarizeExpansionCards(cards));
+    });
+    return unsubscribe;
+  }, []);
 
   // Save settings to localStorage whenever they change
   const updateSettings = (newSettings: Partial<GameSettings>) => {
@@ -176,6 +219,24 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     setDifficultyFromLabel(defaultSettings.difficulty);
     localStorage.setItem('gameSettings', JSON.stringify(defaultSettings));
     setUiTheme('tabloid_bw');
+  };
+
+  const handleExpansionToggle = async (expansionId: string) => {
+    setExpansionError(null);
+    const nextIds = enabledExpansions.includes(expansionId)
+      ? enabledExpansions.filter(id => id !== expansionId)
+      : [...enabledExpansions, expansionId];
+    setEnabledExpansions(nextIds);
+    setExpansionLoading(true);
+    try {
+      const cards = await updateEnabledExpansions(nextIds);
+      setExpansionCounts(summarizeExpansionCards(cards));
+    } catch (error) {
+      console.error('Failed to update expansions:', error);
+      setExpansionError('Failed to update expansions. Please try again.');
+    } finally {
+      setExpansionLoading(false);
+    }
   };
 
   const handleSaveGame = () => {
@@ -458,15 +519,58 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   Changes the visual appearance of menus and screens
                 </div>
               </div>
-            </div>
-          </Card>
         </div>
+      </Card>
+    </div>
 
-        {/* Game Actions */}
-        <Card className="mt-6 p-6 border-2 border-newspaper-text bg-newspaper-bg">
-          <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">
-            🎮 MISSION CONTROL
-          </h3>
+    <Card className="mt-6 p-6 border-2 border-newspaper-text bg-newspaper-bg">
+      <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">
+        🧪 EXPANSION CONTENT
+      </h3>
+      <div className="text-sm text-newspaper-text/80 mb-4">
+        Enable MVP-safe expansion packs. Selections are stored locally and applied to new decks.
+      </div>
+      <div className="space-y-3">
+        {EXPANSION_MANIFEST.map(pack => {
+          const enabled = enabledExpansions.includes(pack.id);
+          const cardCount = expansionCounts[pack.id] ?? 0;
+          return (
+            <div
+              key={pack.id}
+              className="flex items-center justify-between border border-newspaper-text/20 rounded px-3 py-2"
+            >
+              <div>
+                <div className="font-semibold text-newspaper-text">{pack.title}</div>
+                <div className="text-xs text-newspaper-text/70">
+                  {enabled ? 'Active in deck construction.' : 'Disabled — excluded from decks.'}
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge variant="outline">{cardCount} cards</Badge>
+                <Checkbox
+                  checked={enabled}
+                  onCheckedChange={() => handleExpansionToggle(pack.id)}
+                  disabled={expansionLoading}
+                  aria-label={`Toggle ${pack.title}`}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 text-xs text-newspaper-text/70 space-y-1">
+        <div>Total expansion cards loaded: {expansionTotal}</div>
+        {expansionError && <div className="text-red-600">{expansionError}</div>}
+        {expansionLoading && <div>Updating expansion pool…</div>}
+        <div>Only ATTACK, MEDIA, and ZONE cards that pass MVP validation are imported.</div>
+      </div>
+    </Card>
+
+    {/* Game Actions */}
+    <Card className="mt-6 p-6 border-2 border-newspaper-text bg-newspaper-bg">
+      <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">
+        🎮 MISSION CONTROL
+      </h3>
           <div className="grid md:grid-cols-4 gap-4">
             {onSaveGame && (
               <Button 

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,13 @@ import {
   type EnhancedCardAnalysis,
 } from '@/data/enhancedCardBalancing';
 import { MVP_COST_TABLE_ROWS, MVP_RULES_SECTIONS } from '@/content/mvpRules';
+import { CARD_DATABASE_CORE } from '@/data/core';
+import { EXPANSION_MANIFEST } from '@/data/expansions';
+import {
+  getEnabledExpansionIdsSnapshot,
+  getExpansionCardsSnapshot,
+  subscribeToExpansionChanges,
+} from '@/data/expansions/state';
 
 interface EnhancedBalancingDashboardProps {
   onClose: () => void;
@@ -16,6 +23,17 @@ interface EnhancedBalancingDashboardProps {
 const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps) => {
   const report = useMemo(() => analyzeCardBalanceEnhanced(false), []);
   const simulation = useMemo(() => runBalanceSimulationEnhanced(500, false), []);
+  const [expansionState, setExpansionState] = useState(() => ({
+    ids: getEnabledExpansionIdsSnapshot(),
+    cards: getExpansionCardsSnapshot(),
+  }));
+
+  useEffect(() => {
+    const unsubscribe = subscribeToExpansionChanges(payload => {
+      setExpansionState(payload);
+    });
+    return unsubscribe;
+  }, []);
 
   const effectSection = MVP_RULES_SECTIONS.find(
     section => section.title === 'Effect Whitelist (MVP)'
@@ -33,6 +51,14 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
   }, [report.cardAnalysis]);
 
   const winDrivers = simulation.winConditionBreakdown.sort((a, b) => b.weight - a.weight);
+
+  const coreCount = CARD_DATABASE_CORE.length;
+  const expansionCount = expansionState.cards.length;
+  const totalCount = coreCount + expansionCount;
+  const activeExpansionNames = expansionState.ids
+    .map(id => EXPANSION_MANIFEST.find(pack => pack.id === id)?.title ?? id)
+    .filter(Boolean)
+    .join(', ');
 
   const formatDelta = (card: EnhancedCardAnalysis) => {
     if (card.costDelta === null) return '—';
@@ -58,12 +84,20 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6 text-sm text-slate-200">
-          <section className="grid gap-3 md:grid-cols-3">
-            <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Cost table conformity</div>
-              <div className="text-2xl font-bold text-emerald-300">{report.costTableConformity.toFixed(0)}%</div>
-              <p className="text-xs text-slate-400">{report.onCurve} of {report.totalCards} cards match MVP expectations.</p>
-            </div>
+        <section className="grid gap-3 md:grid-cols-4">
+          <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Card pool</div>
+            <div className="text-2xl font-bold text-emerald-300">{coreCount}/{expansionCount}/{totalCount}</div>
+            <p className="text-xs text-slate-400">
+              Core / Expansions / Total.{' '}
+              {activeExpansionNames ? `Active packs: ${activeExpansionNames}.` : 'No expansions enabled.'}
+            </p>
+          </div>
+          <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Cost table conformity</div>
+            <div className="text-2xl font-bold text-emerald-300">{report.costTableConformity.toFixed(0)}%</div>
+            <p className="text-xs text-slate-400">{report.onCurve} of {report.totalCards} cards match MVP expectations.</p>
+          </div>
             <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Average MVP score</div>
               <div className="text-2xl font-bold text-sky-300">{report.averageScore.toFixed(1)}</div>
