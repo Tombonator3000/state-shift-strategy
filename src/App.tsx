@@ -12,6 +12,7 @@ import EffectSystemDashboard from "./pages/EffectSystemDashboard";
 import DatabaseRecovery from "./pages/DatabaseRecovery";
 import { initializeExtensionsOnStartup } from './data/extensionIntegration';
 import { AchievementProvider } from './contexts/AchievementContext';
+import UiOverlays from "./ui/UiOverlays";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
+            <UiOverlays />
           </AchievementProvider>
         </AudioProvider>
       </TooltipProvider>
