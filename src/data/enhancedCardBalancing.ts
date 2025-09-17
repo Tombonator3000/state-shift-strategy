@@ -49,6 +49,10 @@ export interface SimulationReport {
   }>;
 }
 
+const EXPECTED_CORE_TOTAL = 400;
+const EXPECTED_TRUTH_COUNT = 200;
+const EXPECTED_GOVERNMENT_COUNT = 200;
+
 export class EnhancedCardBalancer {
   private cards: GameCard[];
 
@@ -101,6 +105,21 @@ export class EnhancedCardBalancer {
     globalRecommendations.push(
       `${onCurve} of ${totalCards} cards (${costTableConformity.toFixed(0)}%) match MVP cost tables.`
     );
+
+    if (totalCards !== EXPECTED_CORE_TOTAL) {
+      globalRecommendations.push(
+        `Core set drift detected — expected ${EXPECTED_CORE_TOTAL} cards (200 truth + 200 government), found ${totalCards}.`,
+      );
+    }
+
+    if (
+      factionCounts.truth !== EXPECTED_TRUTH_COUNT ||
+      factionCounts.government !== EXPECTED_GOVERNMENT_COUNT
+    ) {
+      globalRecommendations.push(
+        `Faction counts off baseline: truth ${factionCounts.truth}, government ${factionCounts.government} (target 200 each).`,
+      );
+    }
 
     if (undercosted > totalCards * 0.15) {
       globalRecommendations.push('Large group of undercosted cards detected — raise costs or trim effects.');
