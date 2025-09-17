@@ -12,6 +12,7 @@ import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/c
 import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardEffects as resolveCardEffectsCore, type CardPlayResolution } from '@/systems/cardResolution';
 import { computeMediaTruthDelta_MVP, warnIfMediaScaling } from '@/mvp/media';
+import { applyTruthDelta } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
 
@@ -471,14 +472,23 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         // Store pending card draw for after newspaper
         const pendingCardDraw = bonusCardDraw;
         
-        return {
+        const logEntries = [
+          ...prev.log,
+          `Turn ${prev.turn} ended`,
+          `Base income: ${baseIncome} IP`,
+          `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
+          `Total income: ${totalIncome + ipModifier} IP`,
+          ...eventEffectLog,
+        ];
+
+        const nextState: GameState = {
           ...prev,
           turn: prev.turn + 1,
           phase: 'ai_turn',
           currentPlayer: 'ai',
           showNewspaper: false,
           cardsPlayedThisTurn: 0,
-          truth: Math.max(0, Math.min(100, prev.truth + truthModifier)),
+          truth: prev.truth,
           ip: prev.ip + totalIncome + ipModifier,
           pendingCardDraw,
           currentEvents: newEvents,
@@ -486,15 +496,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             cardsPlayedLastTurn: prev.cardsPlayedThisTurn,
             lastTurnWithoutPlay: prev.cardsPlayedThisTurn === 0
           },
-          log: [...prev.log, 
-            `Turn ${prev.turn} ended`, 
-            `Base income: ${baseIncome} IP`,
-            `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
-            `Total income: ${totalIncome + ipModifier} IP`, 
-            ...eventEffectLog,
-            `AI ${prev.aiStrategist?.personality.name} is thinking...`
-          ]
+          log: logEntries,
         };
+
+        applyTruthDelta(nextState, truthModifier, 'human');
+        nextState.log.push(`AI ${prev.aiStrategist?.personality.name} is thinking...`);
+
+        return nextState;
       } else {
         // AI turn ending - switch back to human
         return {
@@ -602,15 +610,18 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     if (!card) return;
 
     setGameState(prev => {
-      let newTruth = prev.truth;
-      let newStates = [...prev.states];
-      const newLog = [...prev.log];
       const aiFaction = prev.faction === 'government' ? 'truth' : 'government';
+      const nextState: GameState = {
+        ...prev,
+        truth: prev.truth,
+        states: prev.states.map(state => ({ ...state })),
+        log: [...prev.log],
+      };
 
-      // Apply card effects
+      let playerIP = prev.ip;
+
       switch (card.type) {
         case 'MEDIA': {
-          const beforeTruth = prev.truth;
           const sign = aiFaction === 'truth' ? 1 : -1;
           const delta = computeMediaTruthDelta_MVP(
             { faction: aiFaction, isAI: true },
@@ -619,65 +630,58 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           );
           warnIfMediaScaling(card, delta);
           const magnitude = Math.abs(card.effects?.truthDelta ?? 0);
-          newTruth = Math.max(0, Math.min(100, beforeTruth + delta));
-          newLog.push(`AI played ${card.name}: Truth manipulation (${beforeTruth}% → ${newTruth}%)`);
-          newLog.push(
+          nextState.log.push(
+            `AI played ${card.name}: Media play (${sign > 0 ? '+' : '-'}${magnitude}%)`,
+          );
+          applyTruthDelta(nextState, delta, 'ai');
+          nextState.log.push(
             `AI Strategy: Media play to ${sign > 0 ? 'raise' : 'lower'} public opinion (${sign > 0 ? '+' : '-'}${magnitude}%)`,
           );
           break;
         }
         case 'ZONE':
           if (targetState) {
-            const stateIndex = newStates.findIndex(s => s.abbreviation === targetState);
+            const stateIndex = nextState.states.findIndex(s => s.abbreviation === targetState);
             if (stateIndex !== -1) {
-              // Parse pressure value from card text
               const pressureMatch = card.text?.match(/\+(\d+) Pressure/);
               const pressureGain = pressureMatch ? parseInt(pressureMatch[1]) : 1;
-              
-              newStates[stateIndex] = {
-                ...newStates[stateIndex],
-                pressure: newStates[stateIndex].pressure + pressureGain,
-                owner: newStates[stateIndex].pressure + pressureGain >= newStates[stateIndex].defense ? 'ai' : newStates[stateIndex].owner
+              const target = nextState.states[stateIndex];
+              const updatedPressure = target.pressure + pressureGain;
+              const updatedState = {
+                ...target,
+                pressure: updatedPressure,
+                owner: updatedPressure >= target.defense ? 'ai' : target.owner,
               };
-              newLog.push(`AI played ${card.name} on ${targetState}: Added pressure (+${pressureGain})`);
-              if (newStates[stateIndex].owner === 'ai') {
-                newLog.push(`🚨 AI captured ${newStates[stateIndex].name}!`);
+
+              nextState.states[stateIndex] = updatedState;
+              nextState.log.push(`AI played ${card.name} on ${targetState}: Added pressure (+${pressureGain})`);
+              if (updatedState.owner === 'ai') {
+                nextState.log.push(`🚨 AI captured ${updatedState.name}!`);
               }
             }
           }
           break;
-        case 'ATTACK':
+        case 'ATTACK': {
           const damage = 15 + Math.floor(Math.random() * 10);
-          newLog.push(`AI played ${card.name}: Attack for ${damage} IP damage`);
-          // Player loses IP (which is positive), so we subtract
-          const newIP = Math.max(0, prev.ip - damage);
-          if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
-          return {
-            ...prev,
-            truth: newTruth,
-            states: newStates,
-            ip: newIP,
-            aiIP: Math.max(0, prev.aiIP - card.cost),
-            aiHand: prev.aiHand.filter(c => c.id !== cardId),
-            cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
-            log: newLog
-          };
+          nextState.log.push(`AI played ${card.name}: Attack for ${damage} IP damage`);
+          playerIP = Math.max(0, prev.ip - damage);
+          break;
+        }
         case 'DEFENSIVE':
-          newLog.push(`AI played ${card.name}: Defensive preparations`);
+          nextState.log.push(`AI played ${card.name}: Defensive preparations`);
           break;
       }
 
-      if (reasoning) newLog.push(`AI Strategy: ${reasoning}`);
+      if (reasoning) {
+        nextState.log.push(`AI Strategy: ${reasoning}`);
+      }
 
-      return {
-        ...prev,
-        truth: newTruth,
-        states: newStates,
-        aiIP: Math.max(0, prev.aiIP - card.cost),
-        aiHand: prev.aiHand.filter(c => c.id !== cardId),
-        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
-        log: newLog
-      };
+      nextState.ip = playerIP;
+      nextState.aiIP = Math.max(0, prev.aiIP - card.cost);
+      nextState.aiHand = prev.aiHand.filter(c => c.id !== cardId);
+      nextState.cardsPlayedThisRound = [...prev.cardsPlayedThisRound, { card, player: 'ai' }];
+
+      return nextState;
     });
   }, [gameState]);
 
