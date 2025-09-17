@@ -1,0 +1,146 @@
+[
+  {
+    "file": "src/data/cardDatabase.ts",
+    "id": "gov-8",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/cardDatabase.ts",
+    "id": "gov-4",
+    "rarity": "common",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/cardDatabase.ts",
+    "id": "truth-8",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/cardDatabase.ts",
+    "id": "truth-4",
+    "rarity": "common",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-6.ts",
+    "id": "TRUTH-142",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-6.ts",
+    "id": "TRUTH-141",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-6.ts",
+    "id": "TRUTH-140",
+    "rarity": "rare",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-6.ts",
+    "id": "TRUTH-139",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-6.ts",
+    "id": "TRUTH-138",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-6.ts",
+    "id": "TRUTH-137",
+    "rarity": "rare",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-6.ts",
+    "id": "TRUTH-136",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-6.ts",
+    "id": "TRUTH-135",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-6.ts",
+    "id": "TRUTH-134",
+    "rarity": "rare",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-6.ts",
+    "id": "TRUTH-133",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-6.ts",
+    "id": "TRUTH-132",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-7.ts",
+    "id": "TRUTH-191",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-7.ts",
+    "id": "TRUTH-190",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-7.ts",
+    "id": "TRUTH-189",
+    "rarity": "rare",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-7.ts",
+    "id": "TRUTH-188",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-7.ts",
+    "id": "TRUTH-187",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-7.ts",
+    "id": "TRUTH-186",
+    "rarity": "rare",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-7.ts",
+    "id": "TRUTH-185",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-7.ts",
+    "id": "TRUTH-184",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  },
+  {
+    "file": "src/data/core/_archive/truth-batch-7.ts",
+    "id": "TRUTH-183",
+    "rarity": "uncommon",
+    "fix": "attack-ip-normalized"
+  }
+]

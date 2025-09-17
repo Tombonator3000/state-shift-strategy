@@ -115,7 +115,7 @@ const MinimizedHand = ({
                 
                 <div className="pt-2 border-t border-newspaper-text/20">
                   <p className="text-xs italic text-newspaper-text/60">
-                    {card.flavorGov || card.flavorTruth}
+                    {card.flavor ?? card.flavorGov ?? card.flavorTruth}
                   </p>
                 </div>
                 
@@ -234,7 +234,7 @@ const MinimizedHand = ({
                 
                 <div className="border-t border-newspaper-text/20 pt-2">
                   <p className="text-xs italic text-newspaper-text/60">
-                    "{card.flavorGov || card.flavorTruth}"
+                    "{card.flavor ?? card.flavorGov ?? card.flavorTruth}"
                   </p>
                 </div>
                 

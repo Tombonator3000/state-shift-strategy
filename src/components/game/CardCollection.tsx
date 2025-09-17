@@ -55,9 +55,9 @@ const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
           <span>Played: {cardStats.timesPlayed} times</span>
         </div>
         
-        {card.flavorGov && (
+        {(card.flavor ?? card.flavorGov ?? card.flavorTruth) && (
           <div className="mt-2 p-2 bg-accent/30 rounded text-xs italic text-muted-foreground">
-            "{card.flavorGov}"
+            "{card.flavor ?? card.flavorGov ?? card.flavorTruth}"
           </div>
         )}
       </div>

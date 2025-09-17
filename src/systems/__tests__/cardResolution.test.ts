@@ -65,16 +65,16 @@ describe('resolveCardEffects - direct attack resolution', () => {
       text: '',
       flavorTruth: '',
       flavorGov: '',
-      effects: { ipDelta: { opponent: -4 } },
+      effects: { ipDelta: { opponent: 4 } },
     };
 
     const resolution = resolveCardEffects(gameState, attackCard, null, tracker);
 
     expect(resolution.aiIP).toBe(16);
-    expect(resolution.ip).toBe(7);
+    expect(resolution.ip).toBe(11);
     expect(resolution.damageDealt).toBe(0);
     expect(updates.length).toBe(1);
-    expect(updates[0]?.max_ip_reached).toBe(7);
+    expect(updates[0]?.max_ip_reached).toBe(11);
     expect(updates[0]?.max_truth_reached).toBe(60);
     expect(updates[0]?.min_truth_reached).toBe(60);
     // Ensure the original game state remains unchanged
@@ -120,7 +120,7 @@ describe('resolveCardEffects - direct attack resolution', () => {
       text: '',
       flavorTruth: '',
       flavorGov: '',
-      effects: { ipDelta: { opponent: -2 } },
+      effects: { ipDelta: { opponent: 2 } },
     };
 
     const resolution = resolveCardEffects(gameState, attackCard, null);
