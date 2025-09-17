@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Target, Zap, Shield } from 'lucide-react';
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 import CardImage from '@/components/game/CardImage';
 import { ExtensionCardBadge } from '@/components/game/ExtensionCardBadge';
 import { useIsMobile } from '@/hooks/use-mobile';

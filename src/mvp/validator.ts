@@ -1,28 +1,58 @@
-import type {
-  Card,
-  CardType,
-  EffectsATTACK,
-  EffectsMEDIA,
-  EffectsZONE,
-  Faction,
-  GameState,
-  PlayerState,
-  Rarity,
-} from './types';
+import type { CardType, Faction, Rarity } from '@/rules/mvp';
+import { expectedCost } from '@/rules/mvp';
+
+export type EffectsATTACK = {
+  ipDelta: { opponent: number };
+  discardOpponent?: 0 | 1 | 2;
+};
+
+export type EffectsMEDIA = {
+  truthDelta: number;
+};
+
+export type EffectsZONE = {
+  pressureDelta: number;
+};
+
+export type Card = {
+  id: string;
+  name: string;
+  faction: Faction;
+  type: CardType;
+  rarity: Rarity;
+  cost: number;
+  effects: EffectsATTACK | EffectsMEDIA | EffectsZONE;
+  artId?: string;
+  flavor?: string;
+  tags?: string[];
+};
+
+export type PlayerId = 'P1' | 'P2';
+
+export type PlayerState = {
+  id: PlayerId;
+  faction: Faction;
+  deck: Card[];
+  hand: Card[];
+  discard: Card[];
+  ip: number;
+  states: string[];
+};
+
+export type GameState = {
+  turn: number;
+  currentPlayer: PlayerId;
+  truth: number;
+  players: Record<PlayerId, PlayerState>;
+  pressureByState: Record<string, { P1: number; P2: number }>;
+  stateDefense: Record<string, number>;
+  playsThisTurn: number;
+  log: string[];
+};
 
 export const ALLOWED_FACTIONS: readonly Faction[] = ['truth', 'government'];
 export const ALLOWED_TYPES: readonly CardType[] = ['ATTACK', 'MEDIA', 'ZONE'];
 export const ALLOWED_RARITIES: readonly Rarity[] = ['common', 'uncommon', 'rare', 'legendary'];
-
-export const COST_TABLE: Record<CardType, Record<Rarity, number>> = {
-  ATTACK: { common: 2, uncommon: 3, rare: 4, legendary: 5 },
-  MEDIA: { common: 3, uncommon: 4, rare: 5, legendary: 6 },
-  ZONE: { common: 4, uncommon: 5, rare: 6, legendary: 7 },
-};
-
-export function expectedCost(type: CardType, rarity: Rarity): number {
-  return COST_TABLE[type][rarity];
-}
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;

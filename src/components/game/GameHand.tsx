@@ -3,7 +3,7 @@ import CardImage from './CardImage';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 
 interface GameHandProps {
   cards: GameCard[];

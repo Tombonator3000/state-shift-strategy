@@ -4,7 +4,7 @@
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import { ExtensionEffectMigrator } from './ExtensionEffectMigrator';
 import { CardEffectValidator } from '@/systems/CardTextGenerator';
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 
 interface RecoveryReport {
   totalCards: number;
@@ -136,7 +136,7 @@ export class CardDatabaseRecovery {
 // Total cards: ${allCards.length}
 // Core: ${CARD_DATABASE.length} | Extensions: ${allCards.length - CARD_DATABASE.length}
 
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 import { extensionManager } from './extensionSystem';
 
 export const RECOVERED_CARD_DATABASE: GameCard[] = [`;

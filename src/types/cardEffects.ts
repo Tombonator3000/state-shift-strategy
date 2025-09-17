@@ -68,7 +68,7 @@ export type CardEffects = {
 };
 
 // Re-export v2.1E types for backward compatibility
-export type { GameCard as Card, Faction, CardType } from '@/types/cardTypes';
+export type { GameCard as Card, Faction, CardType } from '@/rules/mvp';
 
 // Effect processing result
 export interface EffectResult {

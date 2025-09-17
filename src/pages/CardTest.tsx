@@ -8,7 +8,7 @@ import { ArrowLeft, Bug } from 'lucide-react';
 import EffectTestPanel from '@/components/game/EffectTestPanel';
 import { CardEffectValidator } from '@/systems/CardTextGenerator';
 import { CARD_DATABASE } from '@/data/cardDatabase';
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 
 const CardTest: React.FC = () => {
   // Run validation on sample cards

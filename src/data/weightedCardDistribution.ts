@@ -1,4 +1,4 @@
-import { GameCard } from '@/types/cardTypes';
+import { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE } from './cardDatabase';
 import { extensionManager } from './extensionSystem';
 
@@ -306,9 +306,9 @@ class WeightedCardDistribution {
     if (!coreSet) return seedCards;
 
     // Prefer resource and defensive cards for early game
-    const resourceTypes: GameCard['type'][] = ['DEFENSIVE'];
+    const resourceTypes = ['DEFENSIVE'] as const;
     const seedCandidates = coreSet.cards.filter(card =>
-      resourceTypes.includes(card.type) &&
+      resourceTypes.includes(card.type as (typeof resourceTypes)[number]) &&
       (card.rarity === 'common' || card.rarity === 'uncommon')
     );
 

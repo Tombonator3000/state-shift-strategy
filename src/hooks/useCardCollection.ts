@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE } from '@/data/cardDatabase';
 
 interface CardCollectionData {

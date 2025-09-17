@@ -1,4 +1,5 @@
-import type { Card, EffectsMEDIA, Faction, PlayerState } from './types';
+import type { Faction } from '@/rules/mvp';
+import type { Card, EffectsMEDIA, PlayerState } from './validator';
 
 export interface MediaResolutionOptions {
   overrideSign?: 1 | -1;

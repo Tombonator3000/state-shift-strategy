@@ -1,4 +1,4 @@
-import type { GameCard } from '@/types/cardTypes';
+import type { GameCard } from '@/rules/mvp';
 import type { CardEffects } from '@/types/cardEffects';
 
 const WHITELIST_KEYS = new Set([

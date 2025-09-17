@@ -2,7 +2,7 @@
 /*
 import { describe, expect, it } from 'bun:test';
 import { canPlay, endTurn, resolve, winCheck } from './engine';
-import type { Card, GameState, PlayerState } from './types';
+import type { Card, GameState, PlayerState } from './validator';
 
 const createPlayer = (id: 'P1' | 'P2', overrides: Partial<PlayerState> = {}): PlayerState => ({
   id,

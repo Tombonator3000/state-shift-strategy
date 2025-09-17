@@ -7,7 +7,7 @@ import type {
   EffectsZONE,
   GameState,
   PlayerState,
-} from './types';
+} from './validator';
 
 const otherPlayer = (id: 'P1' | 'P2'): 'P1' | 'P2' => (id === 'P1' ? 'P2' : 'P1');
 
