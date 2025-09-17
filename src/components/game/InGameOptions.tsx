@@ -6,7 +6,7 @@ import { X, Settings, FileText, Save, Upload, HelpCircle, Volume2, RotateCw, Hom
 import { AudioControls } from '@/components/ui/audio-controls';
 import { useAudioContext } from '@/contexts/AudioContext';
 import HowToPlay from './HowToPlay';
-import ManageExpansions from './ManageExpansions';
+import ExpansionControl from '@/components/expansions/ExpansionControl';
 
 interface InGameOptionsProps {
   onClose: () => void;
@@ -39,7 +39,7 @@ const InGameOptions = ({
   }
 
   if (activeTab === 'expansions') {
-    return <ManageExpansions onClose={() => setActiveTab('main')} />;
+    return <ExpansionControl onClose={() => setActiveTab('main')} />;
   }
 
   const handleSaveGame = () => {

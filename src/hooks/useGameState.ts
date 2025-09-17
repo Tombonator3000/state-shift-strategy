@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
-import { generateWeightedDeck } from '@/data/weightedCardDistribution';
+import { generateMixedDeck } from '@/lib/decks/generator';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
 import { AIStrategist, type AIDifficulty } from '@/data/aiStrategy';
@@ -129,7 +129,7 @@ const drawCardsFromDeck = (
 
   while (drawn.length < count) {
     if (nextDeck.length === 0) {
-      const replenished = generateWeightedDeck(40, faction);
+      const replenished = generateMixedDeck({ faction, deckSize: 40 }).deck;
       if (replenished.length === 0) {
         break;
       }
@@ -168,8 +168,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     hand: getRandomCards(3, { faction: 'truth' }),
     aiHand: getRandomCards(3, { faction: 'government' }),
     isGameOver: false,
-    deck: generateWeightedDeck(40, 'truth'),
-    aiDeck: generateWeightedDeck(40, 'government'),
+    deck: generateMixedDeck({ faction: 'truth', deckSize: 40 }).deck,
+    aiDeck: generateMixedDeck({ faction: 'government', deckSize: 40 }).deck,
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
     controlledStates: [],
@@ -249,7 +249,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     
     const handSize = getStartingHandSize(drawMode, faction);
     // CRITICAL: Pass faction to deck generation
-    const newDeck = generateWeightedDeck(40, faction);
+    const newDeck = generateMixedDeck({ faction, deckSize: 40 }).deck;
     const startingHand = newDeck.slice(0, handSize);
     const initialControl = getInitialStateControl(faction);
 
@@ -267,7 +267,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       deck: newDeck.slice(handSize),
       // AI gets opposite faction cards
       aiHand: getRandomCards(handSize, { faction: faction === 'government' ? 'truth' : 'government' }),
-      aiDeck: generateWeightedDeck(40, faction === 'government' ? 'truth' : 'government'),
+      aiDeck: generateMixedDeck({
+        faction: faction === 'government' ? 'truth' : 'government',
+        deckSize: 40,
+      }).deck,
       controlledStates: initialControl.player,
       aiControlledStates: initialControl.ai,
       isGameOver: false, // CRITICAL: Reset game over state
