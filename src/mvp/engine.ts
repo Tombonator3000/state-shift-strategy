@@ -13,6 +13,49 @@ const clamp = (value: number, min: number, max: number): number =>
 
 const otherPlayer = (id: 'P1' | 'P2'): 'P1' | 'P2' => (id === 'P1' ? 'P2' : 'P1');
 
+type PlayerId = 'P1' | 'P2';
+
+function clampIP(x: number) {
+  return Math.max(0, Math.floor(x));
+}
+
+function discardRandom(gs: GameState, who: PlayerId, count: number) {
+  let remaining = Math.max(0, Math.floor(count));
+  if (remaining <= 0) return;
+
+  const target = gs.players[who];
+  const hand = [...target.hand];
+  const discard = [...target.discard];
+
+  while (remaining > 0 && hand.length > 0) {
+    const index = Math.floor(Math.random() * hand.length);
+    const [card] = hand.splice(index, 1);
+    discard.push(card);
+    remaining -= 1;
+  }
+
+  gs.players[who] = {
+    ...target,
+    hand,
+    discard,
+  };
+}
+
+function applyAttackEffect(
+  gs: GameState,
+  who: PlayerId,
+  eff: { ipDelta?: { opponent?: number }; discardOpponent?: number },
+) {
+  const opp: PlayerId = who === 'P1' ? 'P2' : 'P1';
+  const dmg = Math.max(0, eff.ipDelta?.opponent ?? 0);
+  const before = gs.players[opp].ip;
+  gs.players[opp].ip = clampIP(before - dmg);
+  gs.log.push(`Opponent loses ${dmg} IP (${before} → ${gs.players[opp].ip})`);
+  if ((eff.discardOpponent ?? 0) > 0) {
+    discardRandom(gs, opp, eff.discardOpponent!);
+  }
+}
+
 const drawUpToFive = (player: PlayerState): PlayerState => {
   const deck = [...player.deck];
   const hand = [...player.hand];
@@ -132,32 +175,8 @@ export function resolve(
 
   if (card.type === 'ATTACK') {
     const effects = card.effects as EffectsATTACK;
-    const opponentLoss = effects.ipDelta.opponent;
-    const newOpponentIP = Math.max(0, opponent.ip - opponentLoss);
-
-    let updatedHand = [...opponent.hand];
-    let updatedDiscard = [...opponent.discard];
-
-    const discardCount = effects.discardOpponent ?? 0;
-    for (let i = 0; i < discardCount && updatedHand.length > 0; i += 1) {
-      const index = Math.floor(Math.random() * updatedHand.length);
-      const [discarded] = updatedHand.splice(index, 1);
-      updatedDiscard = [...updatedDiscard, discarded];
-    }
-
-    return {
-      ...cloned,
-      players: {
-        ...cloned.players,
-        [owner]: { ...me },
-        [opponentId]: {
-          ...opponent,
-          ip: newOpponentIP,
-          hand: updatedHand,
-          discard: updatedDiscard,
-        },
-      },
-    };
+    applyAttackEffect(cloned, owner, effects);
+    return cloned;
   }
 
   if (card.type === 'MEDIA') {
