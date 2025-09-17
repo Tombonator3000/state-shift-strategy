@@ -606,6 +606,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const card = gameState.aiHand.find(c => c.id === cardId);
     if (!card) return;
 
+    if (typeof window !== "undefined" && window.uiShowOpponentCard) {
+      window.uiShowOpponentCard(card);
+    }
+
     setGameState(prev => {
       const resolution = resolveCardMVP(prev, card, targetState ?? null, 'ai', achievements);
       const logEntries = [...prev.log, ...resolution.logEntries];
