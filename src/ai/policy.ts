@@ -103,6 +103,117 @@ function planMediaBurstToGoal(ctx: { state: GameState; legal: Action[] }): Actio
   return null;
 }
 
+// === Action Bias helpers (Truth/Government aware) ===
+function resolvePlayerId(p: PlayerId | number): PlayerId {
+  return (typeof p === "number" ? (p === 0 ? "P1" : "P2") : p) as PlayerId;
+}
+
+function isTruthFaction(s: GameState, p: PlayerId | number) {
+  const pid = resolvePlayerId(p);
+  return (s.players?.[pid]?.faction ?? "truth") === "truth";
+}
+function isGovFaction(s: GameState, p: PlayerId | number) {
+  const pid = resolvePlayerId(p);
+  return (s.players?.[pid]?.faction ?? "truth") === "government";
+}
+
+function truthDistanceToGoal(s: GameState, p: PlayerId | number) {
+  const t = s.truth ?? 50;
+  return isTruthFaction(s, p) ? Math.max(0, 90 - t) : Math.max(0, t - 10);
+}
+
+function nearCaptureScore(s: GameState, p: PlayerId | number): number {
+  const pid = resolvePlayerId(p);
+  // Teller antall stater der vi er nær capture (mangler ≤2 pressure)
+  const pb = s.pressureByState ?? {};
+  const def = s.stateDefense ?? {};
+  let near = 0;
+  for (const sid in pb) {
+    const mine = pb[sid]?.[pid] ?? 0;
+    const need = Math.max(0, (def[sid] ?? 0) - mine);
+    if (need > 0 && need <= 2) near++;
+  }
+  // Skaler svakt (ingen “hard commit”; bare bias)
+  return Math.min(5, near); // 0..5
+}
+
+function opponentIpHigh(s: GameState, p: PlayerId | number): boolean {
+  const pid = resolvePlayerId(p);
+  const opp = pid === "P1" ? "P2" : "P1";
+  const ip = (s as GameState & { ip?: Record<PlayerId, number> }).ip?.[opp] ?? 0;
+  return ip >= 20; // terskel; justér om ønskelig
+}
+
+function actionBias(a: Action, s: GameState): number {
+  // Positivt tall = mer attraktivt
+  const me = s.currentPlayer;
+  const t = s.truth ?? 50;
+  const dist = truthDistanceToGoal(s, me); // hvor langt fra målet
+  const nearCap = nearCaptureScore(s, me);
+  const oppHighIP = opponentIpHigh(s, me);
+
+  const type = a.card?.type ?? a.type;
+  const tDelta = (a.card?.effects?.truthDelta as number) ?? 0;
+  const cost = a.card?.cost ?? 0;
+
+  let bias = 0;
+
+  // 1) MEDIA (Truth/ Gov forskjellig retning)
+  if (type === "MEDIA") {
+    if (isTruthFaction(s, me)) {
+      // Langt unna 90 → preferér +truth (smått); nær 90 → hard push
+      if (tDelta > 0) {
+        bias += dist >= 20 ? 0.6 : 1.2; // nærmere mål => større bias
+        if (t + tDelta >= 90) bias += 0.8; // direkte måltreff
+      } else {
+        bias -= 0.2; // Truth-AI liker ikke −truth
+      }
+    } else if (isGovFaction(s, me)) {
+      // Høy Truth → preferér −truth; nær ≤10 → hard push
+      if (tDelta < 0) {
+        bias += t >= 50 ? 0.8 : 0.4;
+        if (t + tDelta <= 10) bias += 0.8;
+      } else {
+        bias -= 0.2; // Gov-AI liker ikke +truth
+      }
+    }
+  }
+
+  // 2) ZONE (nær capture = mer attraktivt)
+  if (type === "ZONE") {
+    // Når flere stater er nær capture, lønner det seg å følge opp
+    if (nearCap > 0) bias += 0.3 + 0.1 * nearCap; // +0.3..+0.8
+    // Hvis vi er svært langt fra sannhetsmålet, la ZONE få litt lavere prioritet enn MEDIA
+    if (dist >= 25) bias -= 0.1;
+  }
+
+  // 3) ATTACK (whittle IP når målet er relativt trygt)
+  if (type === "ATTACK") {
+    // Truth-AI: hvis t >= 75 (relativt trygt) og motstander har mye IP → litt bias
+    if (isTruthFaction(s, me) && t >= 75 && oppHighIP) bias += 0.35;
+    // Gov-AI: hvis t <= 25 (relativt trygt) og motstander har mye IP → litt bias
+    if (isGovFaction(s, me) && t <= 25 && oppHighIP) bias += 0.35;
+  }
+
+  // 4) Kost: svakt preferér lavere kost for bedre kjedebygging (flere kort innen 3-grensen)
+  bias += Math.max(0, 10 - Math.min(10, cost)) * 0.02; // +0..+0.2
+
+  return bias;
+}
+
+function biasedSort(s: GameState, cfg: AiConfig) {
+  return (a: Action, b: Action) => {
+    // scoreAction + actionBias
+    const sab = scoreAction(s, b, cfg) + actionBias(b, s);
+    const saa = scoreAction(s, a, cfg) + actionBias(a, s);
+    if (sab !== saa) return sab - saa;
+    // tie-breaker: billigere kort først for lettere sekvenser
+    const cb = b.card?.cost ?? 0;
+    const ca = a.card?.cost ?? 0;
+    return ca - cb;
+  };
+}
+
 export function chooseTurnActions(state: GameState, level: Difficulty): Action[] {
   const cfg = AI_PRESETS[level];
   // Try a direct goal burst first (Truth ≥90 for truth / ≤10 for government)
@@ -196,7 +307,7 @@ export function evaluate(s: GameState, cfg: AiConfig): number {
 
 function generateActionSequences(s: GameState, cfg: AiConfig, rootPlayer: PlayerId): Action[][] {
   const singles = legalActionsFor(s, rootPlayer)
-    .sort((a, b) => scoreAction(s, b, cfg) - scoreAction(s, a, cfg))
+    .sort(biasedSort(s, cfg))
     .slice(0, 6);
   const chains: Action[][] = [];
 
@@ -207,7 +318,7 @@ function generateActionSequences(s: GameState, cfg: AiConfig, rootPlayer: Player
     if (s1.currentPlayer !== rootPlayer) continue;
 
     const seconds = legalActionsFor(s1, rootPlayer)
-      .sort((x, y) => scoreAction(s1, y, cfg) - scoreAction(s1, x, cfg))
+      .sort(biasedSort(s1, cfg))
       .slice(0, 4);
 
     for (const b of seconds) {
@@ -217,7 +328,7 @@ function generateActionSequences(s: GameState, cfg: AiConfig, rootPlayer: Player
       if (s2.currentPlayer !== rootPlayer) continue;
 
       const thirds = legalActionsFor(s2, rootPlayer)
-        .sort((x, y) => scoreAction(s2, y, cfg) - scoreAction(s2, x, cfg))
+        .sort(biasedSort(s2, cfg))
         .slice(0, 2);
 
       for (const c of thirds) chains.push([a, b, c]);
