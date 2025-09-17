@@ -12,6 +12,8 @@ import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/c
 import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardEffects as resolveCardEffectsCore, type CardPlayResolution } from '@/systems/cardResolution';
 import { computeMediaTruthDelta_MVP, warnIfMediaScaling } from '@/mvp/media';
+import type { Difficulty } from '@/ai';
+import { getDifficulty } from '@/state/settings';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -95,6 +97,25 @@ const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefin
 
 const HAND_LIMIT = 5;
 
+const DIFFICULTY_TO_AI_DIFFICULTY: Record<Difficulty, AIDifficulty> = {
+  EASY: 'easy',
+  NORMAL: 'medium',
+  HARD: 'hard',
+  TOP_SECRET_PLUS: 'legendary',
+};
+
+const resolveAiDifficulty = (override?: AIDifficulty): AIDifficulty => {
+  if (override) {
+    return override;
+  }
+
+  try {
+    return DIFFICULTY_TO_AI_DIFFICULTY[getDifficulty()];
+  } catch {
+    return 'medium';
+  }
+};
+
 const drawCardsFromDeck = (
   deck: GameCard[],
   count: number,
@@ -126,7 +147,8 @@ const drawCardsFromDeck = (
   return { drawn, deck: nextDeck };
 };
 
-export const useGameState = (aiDifficulty: AIDifficulty = 'medium') => {
+export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
+  const aiDifficulty = resolveAiDifficulty(aiDifficultyOverride);
   const [eventManager] = useState(() => new EventManager());
   const achievements = useAchievements();
   
