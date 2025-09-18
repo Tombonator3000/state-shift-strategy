@@ -110,11 +110,11 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 
   return (
     <div
-      className="relative flex h-full flex-col"
+      className="relative h-full"
       ref={handRef}
       onPointerLeave={() => onCardHover?.(null)}
     >
-      <div className="grid grid-cols-3 items-start gap-4 overflow-y-auto p-3 max-h-[calc(100vh-220px)]">
+      <div className="grid w-full grid-cols-3 gap-3 place-items-start content-start">
         {cards.length === 0 ? (
           <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
             No assets available
@@ -174,7 +174,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 key={`${card.id}-${index}`}
                 type="button"
                 className={clsx(
-                  'group/card relative flex items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
+                  'group/card relative flex w-full items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
                   !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
                   disabled && 'cursor-default'
                 )}

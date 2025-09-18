@@ -41,7 +41,7 @@ const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, e
     >
       <h4 className="mb-2 text-[12px] font-bold uppercase tracking-[0.2em] text-black/70">{title}</h4>
       {cards.length > 0 ? (
-        <div className="grid grid-cols-3 items-start gap-3">
+        <div className="grid grid-cols-3 gap-3 place-items-start content-start">
           {cards.map((entry, index) => (
             <CardsInPlayCard key={`${entry.card.id}-${index}`} card={entry.card} />
           ))}
