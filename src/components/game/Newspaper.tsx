@@ -146,15 +146,60 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
   // Generate articles from played cards and events
   const cardArticles = playedCards.map(pc => generateCardArticle(pc.card, pc.player));
   
+  const formatEventImpact = (event: GameEvent): string | null => {
+    const effects = event.effects;
+    if (!effects) return null;
+
+    const parts: string[] = [];
+    const formatDelta = (value: number | undefined, label: string) => {
+      if (value === undefined || value === 0) return;
+      const sign = value > 0 ? '+' : '';
+      parts.push(`${sign}${value} ${label}`);
+    };
+
+    formatDelta(effects.truth, 'Truth');
+    formatDelta(effects.ip, 'IP');
+
+    if (effects.cardDraw !== undefined && effects.cardDraw !== 0) {
+      const cardLabel = Math.abs(effects.cardDraw) === 1 ? 'Card' : 'Cards';
+      const sign = effects.cardDraw > 0 ? '+' : '';
+      parts.push(`${sign}${effects.cardDraw} ${cardLabel}`);
+    }
+
+    formatDelta(effects.truthChange, 'Truth Change');
+    formatDelta(effects.ipChange, 'IP Change');
+    formatDelta(effects.defenseChange, 'Defense');
+
+    if (effects.stateEffects) {
+      formatDelta(effects.stateEffects.pressure, 'State Pressure');
+      formatDelta(effects.stateEffects.defense, 'State Defense');
+    }
+
+    if (effects.skipTurn) {
+      parts.push('Skip Turn');
+    }
+
+    if (effects.doubleIncome) {
+      parts.push('Double Income');
+    }
+
+    return parts.length > 0 ? parts.join(', ') : null;
+  };
+
   // Convert events to articles with red styling for events
-  const eventArticles: Article[] = events.map(event => ({
-    id: event.id,
-    title: event.title,
-    headline: event.headline || event.title,
-    content: event.content,
-    image: '/placeholder-event.png',
-    isEvent: true
-  }));
+  const eventArticles: Article[] = events.map(event => {
+    const impact = formatEventImpact(event);
+    const baseHeadline = event.headline || event.title;
+
+    return {
+      id: event.id,
+      title: event.title,
+      headline: impact ? `${baseHeadline} (${impact})` : baseHeadline,
+      content: event.content,
+      image: '/placeholder-event.png',
+      isEvent: true
+    };
+  });
 
   const allArticles: Article[] = [...cardArticles, ...eventArticles];
 
