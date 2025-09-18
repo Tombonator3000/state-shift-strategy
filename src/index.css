@@ -521,6 +521,37 @@ All colors MUST be HSL.
     var(--pt-paper);
 }
 
+.card-frame {
+  --card-scale: 1;
+  position: relative;
+  display: inline-block;
+  overflow: visible;
+  border-radius: calc(var(--pt-radius) * var(--card-scale));
+}
+
+.card-frame > .card-shell {
+  transform: scale(var(--card-scale));
+  transform-origin: top left;
+}
+
+.card-shell {
+  width: var(--pt-card-w);
+  min-height: var(--pt-card-h);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--pt-radius);
+}
+
+.card-header,
+.card-art,
+.card-effects {
+  width: 100%;
+}
+
+.card-flavor {
+  margin-top: auto;
+}
+
 /* Polaroid frame */
 .pt-polaroid {
   background: #ffffff;
