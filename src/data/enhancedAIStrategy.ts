@@ -1,7 +1,7 @@
 import type { GameCard } from '@/rules/mvp';
 import { resolveCardMVP, type GameSnapshot } from '@/systems/cardResolution';
 import { CARD_DATABASE } from './cardDatabase';
-import { AIStrategist, type AIDifficulty, type AIPersonality, type CardPlay } from './aiStrategy';
+import { AIStrategist, type AIDifficulty, type AIPersonality, type CardPlay, type GameStateEvaluation } from './aiStrategy';
 
 // Monte Carlo Tree Search Node
 interface MCTSNode {
@@ -142,16 +142,32 @@ export class EnhancedAIStrategist extends AIStrategist {
     let currentState = this.cloneSimulationState(gameState);
     let moves = 0;
     const maxMoves = 10; // Limit simulation depth
+    let evaluation = this.evaluateGameState(currentState);
 
     while (moves < maxMoves && !this.isGameOver(currentState)) {
-      const move = this.selectRandomMove(currentState);
+      const move = this.selectRandomMove(currentState, evaluation);
       if (move) {
         currentState = this.simulateMove(currentState, move);
+        evaluation = this.evaluateGameState(currentState);
+
+        if (evaluation.dangerSignals.imminentLoss.length > 2 && this.personality.planningDepth >= 3) {
+          break;
+        }
+      } else {
+        break;
       }
       moves++;
     }
 
-    return this.calculateReward(currentState);
+    const finalEvaluation = this.evaluateGameState(currentState);
+    const reward = this.calculateReward(currentState);
+    const dangerPenalty =
+      finalEvaluation.dangerSignals.imminentLoss.length * 2 +
+      finalEvaluation.dangerSignals.truthCrisis * 4 +
+      finalEvaluation.dangerSignals.opponentAggression * 2 +
+      finalEvaluation.dangerSignals.resourceCrunch * 1.5;
+
+    return reward - dangerPenalty;
   }
 
   private backpropagate(node: MCTSNode, reward: number): void {
@@ -165,15 +181,16 @@ export class EnhancedAIStrategist extends AIStrategist {
   // Enhanced play selection with synergy recognition
   private selectBestPlayWithSynergies(gameState: any): EnhancedCardPlay | null {
     const possiblePlays = this.generateAllPossiblePlays(gameState);
-    
+    const evaluation = this.evaluateGameState(gameState);
+
     // Enhance each play with synergy and deception analysis
     const enhancedPlays: EnhancedCardPlay[] = possiblePlays.map(play => {
-      const synergies = this.findCardSynergies(play.cardId, gameState.hand);
-      const deceptionValue = this.calculateDeceptionValue(play, gameState);
-      const threatResponse = this.isThreatResponse(play, gameState);
-      
+      const synergies = this.findCardSynergies(play.cardId, gameState.hand, evaluation, gameState, play);
+      const threatResponse = this.isThreatResponse(play, gameState, evaluation);
+      const deceptionValue = this.calculateDeceptionValue(play, gameState, evaluation);
+
       let adjustedPriority = play.priority;
-      
+
       // Synergy bonuses
       synergies.forEach(synergy => {
         adjustedPriority += synergy.bonusValue;
@@ -245,74 +262,212 @@ export class EnhancedAIStrategist extends AIStrategist {
     ];
   }
 
-  private findCardSynergies(cardId: string, hand: GameCard[]): CardSynergy[] {
+  private findCardSynergies(
+    cardId: string,
+    hand: GameCard[],
+    evaluation: GameStateEvaluation,
+    gameState: any,
+    play?: CardPlay
+  ): CardSynergy[] {
     const synergies: CardSynergy[] = [];
     const handIds = hand.map(c => c.id);
-    
+
     this.cardSynergies.forEach(synergy => {
       if (synergy.cardIds.includes(cardId)) {
         const otherCards = synergy.cardIds.filter(id => id !== cardId);
         const hasSynergyCards = otherCards.some(otherId => handIds.includes(otherId));
-        
+
         if (hasSynergyCards) {
           synergies.push(synergy);
         }
       }
     });
-    
+
+    const cardMeta = this.getCardMetadata(cardId);
+    const aiFaction = this.getAiFaction(gameState);
+
+    if (cardMeta) {
+      const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction);
+      if (factionBonus > 0.2) {
+        synergies.push({
+          cardIds: [cardId],
+          synergyType: 'sequence',
+          bonusValue: Math.min(0.3, factionBonus),
+          description: 'Aligns with faction objective'
+        });
+      }
+    }
+
+    const recentAiPlays = (gameState.cardsPlayedThisRound ?? []).filter(
+      (record: any) => record.player === 'ai'
+    );
+
+    if (play?.targetState && cardMeta) {
+      const stateChain = recentAiPlays.filter(
+        (record: any) => record.targetState === play.targetState && record.card.type === cardMeta.type
+      ).length;
+
+      if (stateChain > 0) {
+        synergies.push({
+          cardIds: [cardId],
+          synergyType: 'combo',
+          bonusValue: Math.min(0.35, 0.15 + stateChain * 0.1),
+          description: `Extends ${cardMeta.type?.toLowerCase()} chain on ${play.targetState}`
+        });
+      }
+
+      const pressureSignal = evaluation.pressureSignals.aiTargets.find(
+        signal => signal.abbreviation === play.targetState
+      );
+
+      if (pressureSignal && cardMeta.effects?.pressureDelta) {
+        const remainingAfterPlay = Math.max(0, pressureSignal.remaining - cardMeta.effects.pressureDelta);
+        synergies.push({
+          cardIds: [cardId],
+          synergyType: 'sequence',
+          bonusValue: remainingAfterPlay <= 0 ? 0.45 : 0.25,
+          description: `Sets up capture on ${pressureSignal.stateName}`
+        });
+      }
+
+      const imminentThreat = evaluation.dangerSignals.imminentLoss.find(
+        signal => signal.abbreviation === play.targetState
+      );
+
+      if (imminentThreat && cardMeta.type === 'DEFENSIVE') {
+        synergies.push({
+          cardIds: [cardId],
+          synergyType: 'counter',
+          bonusValue: 0.4,
+          description: `Reinforces threatened ${imminentThreat.stateName}`
+        });
+      }
+    }
+
+    const recentPlayerPattern = (gameState.cardsPlayedThisRound ?? []).slice(-3);
+    const consecutiveAttacks = recentPlayerPattern.every(
+      (record: any) => record.player === 'human' && record.card.type === 'ATTACK'
+    );
+
+    if (consecutiveAttacks && cardMeta?.type === 'DEFENSIVE') {
+      synergies.push({
+        cardIds: [cardId],
+        synergyType: 'counter',
+        bonusValue: 0.3,
+        description: 'Counters sustained attack pattern'
+      });
+    }
+
     return synergies;
   }
 
   // Advanced Threat Assessment
-  private isThreatResponse(play: CardPlay, gameState: any): boolean {
-    const evaluation = this.evaluateGameState(gameState);
-    
-    // Check if this play directly counters a recent player action
+  private isThreatResponse(play: CardPlay, gameState: any, evaluation: GameStateEvaluation): boolean {
     const recentPlayerMoves = gameState.cardsPlayedThisRound?.filter(
       (p: any) => p.player === 'human'
     ) || [];
-    
-    if (recentPlayerMoves.length === 0) return false;
-    
-    // Enhanced threat pattern recognition
-    const lastPlayerCard = recentPlayerMoves[recentPlayerMoves.length - 1];
-    
-    // Direct counter patterns
-    if (lastPlayerCard.card.type === 'ATTACK' && play.cardId.includes('defensive')) return true;
-    if (lastPlayerCard.card.type === 'MEDIA' && play.cardId.includes('counter')) return true;
-    if (lastPlayerCard.card.type === 'ZONE' && play.targetState === lastPlayerCard.targetState) return true;
-    
-    // Indirect threat response
-    if (evaluation.threatLevel > 0.6 && (play.cardId.includes('defensive') || play.cardId.includes('counter'))) {
+
+    const cardMeta = this.getCardMetadata(play.cardId);
+
+    const imminentDefense = play.targetState ?
+      evaluation.dangerSignals.imminentLoss.some(signal => signal.abbreviation === play.targetState) :
+      false;
+
+    if (imminentDefense && cardMeta?.type === 'DEFENSIVE') {
       return true;
     }
-    
+
+    if (evaluation.dangerSignals.truthCrisis > 0.4 && cardMeta?.effects?.truthDelta) {
+      const aiFaction = this.getAiFaction(gameState);
+      const truthDelta = cardMeta.effects.truthDelta;
+      if ((aiFaction === 'truth' && truthDelta > 0) || (aiFaction === 'government' && truthDelta < 0)) {
+        return true;
+      }
+    }
+
+    if (recentPlayerMoves.length === 0) {
+      return false;
+    }
+
+    const lastPlayerCard = recentPlayerMoves[recentPlayerMoves.length - 1];
+
+    if (lastPlayerCard.card.type === 'ATTACK' && cardMeta?.type === 'DEFENSIVE') {
+      return true;
+    }
+
+    if (lastPlayerCard.card.type === 'MEDIA' && cardMeta?.type === 'MEDIA' && cardMeta.effects?.truthDelta) {
+      const aiFaction = this.getAiFaction(gameState);
+      const truthDelta = cardMeta.effects.truthDelta;
+      if ((aiFaction === 'government' && truthDelta < 0) || (aiFaction === 'truth' && truthDelta > 0)) {
+        return true;
+      }
+    }
+
+    if (lastPlayerCard.card.type === 'ZONE' && play.targetState === lastPlayerCard.targetState) {
+      return true;
+    }
+
+    const repeatedAggression = recentPlayerMoves.slice(-3).every((move: any) => move.card.type === 'ATTACK');
+    if (repeatedAggression && cardMeta?.type === 'DEFENSIVE') {
+      return true;
+    }
+
+    if (evaluation.dangerSignals.opponentAggression > 0.6 && cardMeta?.type !== 'MEDIA') {
+      return true;
+    }
+
     return false;
   }
 
   // Deception and Bluffing Mechanics
-  private calculateDeceptionValue(play: CardPlay, gameState: any): number {
+  private calculateDeceptionValue(play: CardPlay, gameState: any, evaluation: GameStateEvaluation): number {
     let deceptionValue = 0;
-    
+
     // Only use deception on harder difficulties
     if (this.personality.planningDepth < 3) return 0;
-    
+
+    const cardMeta = this.getCardMetadata(play.cardId);
+
     // Misdirection value - play cards that don't reveal true strategy
     if (play.targetState && this.deceptionState.fakeTargets.includes(play.targetState)) {
       deceptionValue += 0.2;
     }
-    
+
     // Bluffing - play unexpected cards based on player pattern
     const playerPattern = this.analyzePlayerPattern(gameState);
     if (this.isUnexpectedPlay(play, playerPattern)) {
       deceptionValue += 0.15;
     }
-    
+
     // Counter-expectation plays
-    if (this.isCounterExpectationPlay(play, gameState)) {
+    if (this.isCounterExpectationPlay(play, gameState, evaluation)) {
       deceptionValue += 0.25;
     }
-    
+
+    const recentAiPlays = (gameState.cardsPlayedThisRound ?? []).filter(
+      (record: any) => record.player === 'ai'
+    );
+
+    const lastTwoTypes = recentAiPlays.slice(-2).map((record: any) => record.card.type);
+    if (lastTwoTypes.length === 2 && lastTwoTypes.every(type => type === lastTwoTypes[0])) {
+      if (cardMeta?.type && cardMeta.type !== lastTwoTypes[0]) {
+        deceptionValue += 0.1;
+      }
+    }
+
+    if (evaluation.dangerSignals.opponentAggression > 0.5 && cardMeta?.type === 'MEDIA') {
+      deceptionValue += 0.1;
+    }
+
+    if (play.targetState) {
+      const opponentFocus = evaluation.pressureSignals.opponentTargets.some(
+        signal => signal.abbreviation === play.targetState
+      );
+      if (!opponentFocus && evaluation.pressureSignals.opponentTargets.length > 0) {
+        deceptionValue += 0.08;
+      }
+    }
+
     return deceptionValue * this.deceptionState.misdirectionLevel;
   }
 
@@ -349,20 +504,20 @@ export class EnhancedAIStrategist extends AIStrategist {
     }
   }
 
-  private isCounterExpectationPlay(play: CardPlay, gameState: any): boolean {
+  private isCounterExpectationPlay(play: CardPlay, gameState: any, evaluation?: GameStateEvaluation): boolean {
     // Advanced psychological play - do the opposite of what player expects
-    const evaluation = this.evaluateGameState(gameState);
-    
+    const currentEvaluation = evaluation ?? this.evaluateGameState(gameState);
+
     // When winning, play unexpectedly aggressive moves
-    if (evaluation.overallScore > 0.3 && play.cardId.includes('attack')) {
+    if (currentEvaluation.overallScore > 0.3 && play.cardId.includes('attack')) {
       return true;
     }
-    
+
     // When losing, play unexpectedly defensive moves
-    if (evaluation.overallScore < -0.3 && play.cardId.includes('defensive')) {
+    if (currentEvaluation.overallScore < -0.3 && play.cardId.includes('defensive')) {
       return true;
     }
-    
+
     return false;
   }
 
@@ -398,6 +553,17 @@ export class EnhancedAIStrategist extends AIStrategist {
       newState.aiHand = newState.aiHand.filter((c: GameCard) => c.id !== move.cardId);
     }
 
+    const playRecord = {
+      card: { ...card },
+      player: 'ai' as const,
+      targetState: move.targetState ?? null,
+      truthDelta: card.effects?.truthDelta,
+    };
+    const history = Array.isArray(newState.cardsPlayedThisRound)
+      ? newState.cardsPlayedThisRound
+      : [];
+    newState.cardsPlayedThisRound = [...history, playRecord];
+
     newState.aiIP = resolution.aiIP;
     newState.truth = resolution.truth;
     newState.states = resolution.states.map(state => ({ ...state }));
@@ -411,9 +577,31 @@ export class EnhancedAIStrategist extends AIStrategist {
     return newState;
   }
 
-  private selectRandomMove(gameState: any): CardPlay | null {
+  private selectRandomMove(gameState: any, evaluation?: GameStateEvaluation): CardPlay | null {
     const moves = this.generateAllPossiblePlays(gameState);
-    return moves.length > 0 ? moves[Math.floor(Math.random() * moves.length)] : null;
+    if (moves.length === 0) return null;
+
+    if (evaluation) {
+      const urgentStates = new Set(
+        evaluation.dangerSignals.imminentLoss.map(signal => signal.abbreviation)
+      );
+
+      const urgentMoves = moves.filter(move => move.targetState && urgentStates.has(move.targetState));
+      if (urgentMoves.length > 0) {
+        return urgentMoves[Math.floor(Math.random() * urgentMoves.length)];
+      }
+
+      const highPriority = moves
+        .filter(move => move.priority >= 0.8)
+        .sort((a, b) => b.priority - a.priority)
+        .slice(0, 3);
+
+      if (highPriority.length > 0) {
+        return highPriority[Math.floor(Math.random() * highPriority.length)];
+      }
+    }
+
+    return moves[Math.floor(Math.random() * moves.length)];
   }
 
   private isGameOver(gameState: any): boolean {
@@ -441,6 +629,15 @@ export class EnhancedAIStrategist extends AIStrategist {
 
     if (Array.isArray(gameState.playerControlledStates)) {
       clone.playerControlledStates = [...gameState.playerControlledStates];
+    }
+
+    if (Array.isArray(gameState.cardsPlayedThisRound)) {
+      clone.cardsPlayedThisRound = gameState.cardsPlayedThisRound.map((record: any) => ({
+        ...record,
+        card: record.card ? { ...record.card } : record.card,
+      }));
+    } else {
+      clone.cardsPlayedThisRound = [];
     }
 
     return clone;
@@ -480,26 +677,6 @@ export class EnhancedAIStrategist extends AIStrategist {
       faction: gameState.faction ?? 'truth',
       states,
     };
-  }
-
-  private getPlayerIp(gameState: any): number {
-    if (typeof gameState.playerIp === 'number') {
-      return gameState.playerIp;
-    }
-
-    if (typeof gameState.playerIP === 'number') {
-      return gameState.playerIP;
-    }
-
-    if (typeof gameState.ip === 'number') {
-      return -gameState.ip;
-    }
-
-    return 0;
-  }
-
-  private getAiFaction(gameState: any): 'government' | 'truth' {
-    return gameState.faction === 'truth' ? 'government' : 'truth';
   }
 
   private evaluateOutcome(gameState: any): { aiWon: boolean; playerWon: boolean } {
