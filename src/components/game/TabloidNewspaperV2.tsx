@@ -286,6 +286,7 @@ const TabloidNewspaperV2 = ({ events, playedCards, faction, truth, onClose }: Ta
     ? makeBody(heroCardEntry.card as Card, dataset).split('\n\n')
     : [heroEvent?.content ?? 'Witness reports remain fragmentary; authorities maintain deliberate silence.'];
 
+  const heroIsEvent = !heroCardEntry;
   const heroTypeLabel = heroCardEntry ? `[${heroCardEntry.card.type}]` : `[EVENT]`;
   const heroTarget = heroCardEntry ? formatTarget(heroCardEntry) : null;
   const heroCaptured = heroCardEntry?.capturedStates ?? [];
@@ -419,8 +420,20 @@ const TabloidNewspaperV2 = ({ events, playedCards, faction, truth, onClose }: Ta
                   <span className="rounded-full border border-dashed border-newspaper-border px-2 py-1">{heroTarget}</span>
                 ) : null}
               </div>
-              <h2 className="text-3xl font-black leading-tight text-newspaper-headline sm:text-4xl">{heroHeadline}</h2>
-              <p className="text-lg font-semibold italic text-newspaper-text/80">{heroSubhead}</p>
+              <h2
+                className={`text-3xl font-black leading-tight sm:text-4xl ${
+                  heroIsEvent ? 'text-secret-red' : 'text-newspaper-headline'
+                }`}
+              >
+                {heroHeadline}
+              </h2>
+              <p
+                className={`text-lg font-semibold italic ${
+                  heroIsEvent ? 'text-secret-red/80' : 'text-newspaper-text/80'
+                }`}
+              >
+                {heroSubhead}
+              </p>
               <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/70">
                 <span>{byline}</span>
                 <span>{sourceLine}</span>
@@ -437,7 +450,11 @@ const TabloidNewspaperV2 = ({ events, playedCards, faction, truth, onClose }: Ta
                   <div className="stamp stamp--classified absolute right-3 top-3">{classifiedStamp}</div>
                 ) : null}
               </div>
-              <div className="space-y-4 text-sm leading-relaxed">
+              <div
+                className={`space-y-4 text-sm leading-relaxed ${
+                  heroIsEvent ? 'text-secret-red/90' : ''
+                }`}
+              >
                 {heroBody.map((paragraph, index) => (
                   <p key={index}>{paragraph}</p>
                 ))}
@@ -470,13 +487,13 @@ const TabloidNewspaperV2 = ({ events, playedCards, faction, truth, onClose }: Ta
 
               {eventStories.length ? (
                 <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                  <h3 className="mb-3 text-sm font-black uppercase tracking-wide">Event Wire</h3>
-                  <div className="space-y-3 text-sm">
+                  <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-secret-red">Event Wire</h3>
+                  <div className="space-y-3 text-sm text-secret-red/90">
                     {eventStories.slice(0, 3).map(story => (
                       <div key={story.id} className="border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0">
-                        <div className="text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">{story.typeLabel}</div>
-                        <p className="font-semibold leading-snug">{story.headline}</p>
-                        <p className="text-xs italic text-newspaper-text/70">{story.subhead}</p>
+                        <div className="text-[11px] font-semibold uppercase tracking-wide text-secret-red/80">{story.typeLabel}</div>
+                        <p className="font-semibold leading-snug text-secret-red">{story.headline}</p>
+                        <p className="text-xs italic text-secret-red/80">{story.subhead}</p>
                       </div>
                     ))}
                   </div>
@@ -491,19 +508,39 @@ const TabloidNewspaperV2 = ({ events, playedCards, faction, truth, onClose }: Ta
               <div className="grid gap-4 md:grid-cols-2">
                 {secondaryStories.map(story => (
                   <article key={story.id} className="space-y-2 border-b border-dashed border-newspaper-border/60 pb-3 last:border-0 last:pb-0">
-                    <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                      <span>{story.typeLabel}</span>
-                      {isCardStory(story)
-                        ? (
-                          <span>{story.player === 'ai' ? 'Opposition' : 'Dispatch'}</span>
-                        )
-                        : (
-                          <span>Event</span>
-                        )}
+                    <div
+                      className={`flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide ${
+                        isCardStory(story) ? 'text-newspaper-text/60' : 'text-secret-red/80'
+                      }`}
+                    >
+                      <span className={isCardStory(story) ? '' : 'text-secret-red'}>{story.typeLabel}</span>
+                      {isCardStory(story) ? (
+                        <span>{story.player === 'ai' ? 'Opposition' : 'Dispatch'}</span>
+                      ) : (
+                        <span className="text-secret-red">Event</span>
+                      )}
                     </div>
-                    <h4 className="text-lg font-semibold leading-snug">{story.headline}</h4>
-                    <p className="text-xs italic text-newspaper-text/70">{story.subhead}</p>
-                    <p className="text-sm leading-relaxed text-newspaper-text/80">{story.summary}</p>
+                    <h4
+                      className={`text-lg font-semibold leading-snug ${
+                        isCardStory(story) ? '' : 'text-secret-red'
+                      }`}
+                    >
+                      {story.headline}
+                    </h4>
+                    <p
+                      className={`text-xs italic ${
+                        isCardStory(story) ? 'text-newspaper-text/70' : 'text-secret-red/80'
+                      }`}
+                    >
+                      {story.subhead}
+                    </p>
+                    <p
+                      className={`text-sm leading-relaxed ${
+                        isCardStory(story) ? 'text-newspaper-text/80' : 'text-secret-red/90'
+                      }`}
+                    >
+                      {story.summary}
+                    </p>
                     <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
                       {isCardStory(story) && story.truthDeltaLabel ? (
                         <span className="rounded border border-newspaper-border px-2 py-0.5">Truth {story.truthDeltaLabel}</span>
