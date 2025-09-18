@@ -34,21 +34,15 @@ const FactionCard = forwardRef<HTMLDivElement, FactionCardProps>(
             src={imageSrc}
             alt={title}
             loading="eager"
-            className="h-full w-full object-cover object-center transition-transform duration-200 group-hover:scale-[1.02]"
+            className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-200 group-hover:scale-[1.02]"
           />
         </div>
         <div className="px-3 py-2">
-          <h3
-            className="font-[Anton] uppercase tracking-wide"
-            style={{ fontSize: 'clamp(18px, 2.2vh, 32px)' }}
-          >
+          <h3 className="font-[Anton] uppercase tracking-wide" style={{ fontSize: 'var(--h2)' }}>
             {title}
           </h3>
           {caption ? (
-            <p
-              className="mt-1 uppercase tracking-wide text-[var(--ink-weak)]"
-              style={{ fontSize: 'clamp(10px, 1.5vh, 13px)' }}
-            >
+            <p className="mt-1 uppercase tracking-wide text-[var(--ink-weak)]" style={{ fontSize: 'var(--cap)' }}>
               {caption}
             </p>
           ) : null}
