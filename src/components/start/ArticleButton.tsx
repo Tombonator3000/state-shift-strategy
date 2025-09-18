@@ -1,30 +1,22 @@
-import { MouseEventHandler } from 'react';
+import React from 'react';
 
-export type ArticleButtonProps = {
+type ArticleButtonProps = {
   label: string;
-  onClick: MouseEventHandler<HTMLButtonElement>;
-  variant?: 'article' | 'ad';
+  onClick: () => void;
   sub?: string;
 };
 
-const ArticleButton = ({ label, onClick, variant = 'article', sub }: ArticleButtonProps) => {
-  const accentClasses =
-    variant === 'ad'
-      ? 'text-[var(--accent)] border-[var(--accent)]'
-      : 'text-[var(--ink)] border-[var(--rule)]';
-
+export default function ArticleButton({ label, onClick, sub }: ArticleButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`print-border ${accentClasses} px-4 py-3 md:py-4 bg-[var(--paper)] hover:bg-black/5 active:translate-y-[1px] font-[800] tracking-[0.08em] text-xl md:text-2xl uppercase transition-colors focus:outline-none focus-visible:ring-4 focus-visible:ring-black/40 flex flex-col gap-1 text-left`}
+      className="w-full print-border bg-[var(--paper)] px-4 py-3 md:py-4 text-left transition-colors hover:bg-black/5 active:translate-y-[1px] focus:outline-none focus-visible:ring-4 focus-visible:ring-black/60"
     >
-      <span className="font-['Bebas Neue',sans-serif] leading-none">{label}</span>
+      <div className="font-[Anton] text-xl md:text-3xl leading-none tracking-wide uppercase">{label}</div>
       {sub ? (
-        <span className="text-sm md:text-base font-sans tracking-normal uppercase text-[var(--ink-weak)]">{sub}</span>
+        <div className="mt-1 text-xs md:text-sm text-[var(--ink-weak)] uppercase tracking-wide">{sub}</div>
       ) : null}
     </button>
   );
-};
-
-export default ArticleButton;
+}
