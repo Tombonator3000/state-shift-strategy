@@ -1,4 +1,5 @@
 import type { GameCard } from '@/rules/mvp';
+import { resolveCardMVP, type GameSnapshot } from '@/systems/cardResolution';
 import { CARD_DATABASE } from './cardDatabase';
 import { AIStrategist, type AIDifficulty, type AIPersonality, type CardPlay } from './aiStrategy';
 
@@ -138,10 +139,10 @@ export class EnhancedAIStrategist extends AIStrategist {
 
   private simulateGame(gameState: any): number {
     // Quick simulation to estimate win probability
-    let currentState = { ...gameState };
+    let currentState = this.cloneSimulationState(gameState);
     let moves = 0;
     const maxMoves = 10; // Limit simulation depth
-    
+
     while (moves < maxMoves && !this.isGameOver(currentState)) {
       const move = this.selectRandomMove(currentState);
       if (move) {
@@ -149,8 +150,8 @@ export class EnhancedAIStrategist extends AIStrategist {
       }
       moves++;
     }
-    
-    return this.evaluateGameState(currentState).overallScore;
+
+    return this.calculateReward(currentState);
   }
 
   private backpropagate(node: MCTSNode, reward: number): void {
@@ -379,29 +380,34 @@ export class EnhancedAIStrategist extends AIStrategist {
   }
 
   private simulateMove(gameState: any, move: CardPlay): any {
-    // Simplified simulation of game state after move
-    const newState = { ...gameState };
-    
-    // Remove card from hand
-    newState.hand = newState.hand.filter((c: any) => c.id !== move.cardId);
-    
-    // Apply move effects (simplified)
-    if (move.targetState) {
-      const state = newState.states.find((s: any) => s.abbreviation === move.targetState);
-      if (state) {
-        state.pressure = (state.pressure || 0) + 1;
-        if (state.pressure >= 2 && state.owner === 'neutral') {
-          state.owner = 'ai';
-        }
-      }
+    const newState = this.cloneSimulationState(gameState);
+    const card =
+      newState.hand.find((c: GameCard) => c.id === move.cardId) ||
+      newState.aiHand?.find((c: GameCard) => c.id === move.cardId) ||
+      CARD_DATABASE.find(c => c.id === move.cardId);
+
+    if (!card) {
+      return newState;
     }
-    
-    // Adjust IP (simplified)
-    const card = CARD_DATABASE.find(c => c.id === move.cardId);
-    if (card) {
-      newState.aiIP = (newState.aiIP || 0) - card.cost;
+
+    const snapshot = this.buildResolutionSnapshot(newState);
+    const resolution = resolveCardMVP(snapshot, card, move.targetState ?? null, 'ai');
+
+    newState.hand = (newState.hand ?? []).filter((c: GameCard) => c.id !== move.cardId);
+    if (Array.isArray(newState.aiHand)) {
+      newState.aiHand = newState.aiHand.filter((c: GameCard) => c.id !== move.cardId);
     }
-    
+
+    newState.aiIP = resolution.aiIP;
+    newState.truth = resolution.truth;
+    newState.states = resolution.states.map(state => ({ ...state }));
+    newState.controlledStates = resolution.aiControlledStates;
+    newState.aiControlledStates = resolution.aiControlledStates;
+    newState.playerControlledStates = resolution.controlledStates;
+    newState.ip = -resolution.ip;
+    newState.targetState = resolution.targetState;
+    newState.selectedCard = resolution.selectedCard;
+
     return newState;
   }
 
@@ -411,11 +417,168 @@ export class EnhancedAIStrategist extends AIStrategist {
   }
 
   private isGameOver(gameState: any): boolean {
-    // Simplified game over detection
-    const aiStates = gameState.states?.filter((s: any) => s.owner === 'ai').length || 0;
-    const playerStates = gameState.states?.filter((s: any) => s.owner === 'player').length || 0;
-    
-    return aiStates >= 10 || playerStates >= 10 || gameState.truth <= 0 || gameState.truth >= 100;
+    const { aiWon, playerWon } = this.evaluateOutcome(gameState);
+    return aiWon || playerWon;
+  }
+
+  private cloneSimulationState(gameState: any): any {
+    const clone: any = {
+      ...gameState,
+      states: (gameState.states ?? []).map((state: any) => ({ ...state })),
+      hand: (gameState.hand ?? []).map((card: GameCard) => ({ ...card })),
+      aiHand: (gameState.aiHand ?? []).map((card: GameCard) => ({ ...card })),
+      controlledStates: Array.isArray(gameState.controlledStates)
+        ? [...gameState.controlledStates]
+        : [],
+      aiControlledStates: Array.isArray(gameState.aiControlledStates)
+        ? [...gameState.aiControlledStates]
+        : [],
+    };
+
+    if (Array.isArray(gameState.playerHand)) {
+      clone.playerHand = gameState.playerHand.map((card: GameCard) => ({ ...card }));
+    }
+
+    if (Array.isArray(gameState.playerControlledStates)) {
+      clone.playerControlledStates = [...gameState.playerControlledStates];
+    }
+
+    return clone;
+  }
+
+  private buildResolutionSnapshot(gameState: any): GameSnapshot {
+    const states = (gameState.states ?? []).map((state: any) => ({ ...state }));
+    const playerHand = Array.isArray(gameState.playerHand)
+      ? gameState.playerHand.map((card: GameCard) => ({ ...card }))
+      : [];
+    const aiHand = Array.isArray(gameState.aiHand)
+      ? gameState.aiHand.map((card: GameCard) => ({ ...card }))
+      : (gameState.hand ?? []).map((card: GameCard) => ({ ...card }));
+
+    const playerControlledStates = Array.isArray(gameState.playerControlledStates)
+      ? [...gameState.playerControlledStates]
+      : states
+          .filter((state: any) => state.owner === 'player')
+          .map((state: any) => state.abbreviation);
+
+    const aiControlledStates = Array.isArray(gameState.aiControlledStates)
+      ? [...gameState.aiControlledStates]
+      : states
+          .filter((state: any) => state.owner === 'ai')
+          .map((state: any) => state.abbreviation);
+
+    return {
+      truth: gameState.truth ?? 0,
+      ip: this.getPlayerIp(gameState),
+      aiIP: gameState.aiIP ?? 0,
+      hand: playerHand,
+      aiHand,
+      controlledStates: playerControlledStates,
+      aiControlledStates,
+      round: gameState.round ?? 0,
+      turn: gameState.turn ?? 0,
+      faction: gameState.faction ?? 'truth',
+      states,
+    };
+  }
+
+  private getPlayerIp(gameState: any): number {
+    if (typeof gameState.playerIp === 'number') {
+      return gameState.playerIp;
+    }
+
+    if (typeof gameState.playerIP === 'number') {
+      return gameState.playerIP;
+    }
+
+    if (typeof gameState.ip === 'number') {
+      return -gameState.ip;
+    }
+
+    return 0;
+  }
+
+  private getAiFaction(gameState: any): 'government' | 'truth' {
+    return gameState.faction === 'truth' ? 'government' : 'truth';
+  }
+
+  private evaluateOutcome(gameState: any): { aiWon: boolean; playerWon: boolean } {
+    const aiStates = gameState.states?.filter((s: any) => s.owner === 'ai').length ?? 0;
+    const playerStates = gameState.states?.filter((s: any) => s.owner === 'player').length ?? 0;
+    const aiIp = gameState.aiIP ?? 0;
+    const playerIp = this.getPlayerIp(gameState);
+    const truth = gameState.truth ?? 0;
+    const aiFaction = this.getAiFaction(gameState);
+
+    const aiTerritorialWin = aiStates >= 10;
+    const playerTerritorialWin = playerStates >= 10;
+    const aiEconomicWin = aiIp >= 200;
+    const playerEconomicWin = playerIp >= 200;
+
+    let aiTruthWin = false;
+    let playerTruthWin = false;
+
+    if (aiFaction === 'government') {
+      aiTruthWin = truth <= 10;
+      playerTruthWin = truth >= 90;
+      if (truth <= 0) {
+        aiTruthWin = true;
+      }
+      if (truth >= 100) {
+        playerTruthWin = true;
+      }
+    } else {
+      aiTruthWin = truth >= 90;
+      playerTruthWin = truth <= 10;
+      if (truth >= 100) {
+        aiTruthWin = true;
+      }
+      if (truth <= 0) {
+        playerTruthWin = true;
+      }
+    }
+
+    const aiWon = aiTerritorialWin || aiEconomicWin || aiTruthWin;
+    const playerWon = playerTerritorialWin || playerEconomicWin || playerTruthWin;
+
+    return { aiWon, playerWon };
+  }
+
+  private calculateReward(gameState: any): number {
+    const { aiWon, playerWon } = this.evaluateOutcome(gameState);
+
+    if (aiWon && !playerWon) {
+      return 100;
+    }
+
+    if (playerWon && !aiWon) {
+      return -100;
+    }
+
+    const aiStates = gameState.states?.filter((s: any) => s.owner === 'ai').length ?? 0;
+    const playerStates = gameState.states?.filter((s: any) => s.owner === 'player').length ?? 0;
+    const stateControlScore = Math.max(-1, Math.min(1, (aiStates - playerStates) / 10));
+
+    const aiIp = gameState.aiIP ?? 0;
+    const playerIp = this.getPlayerIp(gameState);
+    const ipScore = Math.max(-1, Math.min(1, (aiIp - playerIp) / 200));
+
+    const aiFaction = this.getAiFaction(gameState);
+    const truthValue = gameState.truth ?? 50;
+    let truthScore = aiFaction === 'government'
+      ? (50 - truthValue) / 40
+      : (truthValue - 50) / 40;
+    truthScore = Math.max(-1, Math.min(1, truthScore));
+
+    const heuristicScore = this.evaluateGameState(gameState).overallScore;
+
+    const reward =
+      stateControlScore * 0.5 +
+      ipScore * 0.2 +
+      truthScore * 0.3 +
+      heuristicScore * 0.2;
+
+    return Math.max(-10, Math.min(10, reward));
   }
 
   // Enhanced strategic assessment with deception awareness
