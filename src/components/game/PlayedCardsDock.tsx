@@ -6,6 +6,9 @@ import BaseCard from '@/components/game/cards/BaseCard';
 interface PlayedCard {
   card: GameCard;
   player: 'human' | 'ai';
+  targetState?: string | null;
+  truthDelta?: number;
+  capturedStates?: string[];
 }
 
 interface PlayedCardsDockProps {

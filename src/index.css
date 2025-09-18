@@ -310,6 +310,94 @@ All colors MUST be HSL.
     animation: legendary-pulse 2s ease-in-out infinite;
   }
 
+  /* Newspaper V2 utility classes */
+  .ink-smudge {
+    background-color: hsl(var(--newspaper-bg));
+    background-image:
+      radial-gradient(circle at 18% 12%, rgba(0, 0, 0, 0.05) 0, rgba(0, 0, 0, 0) 55%),
+      radial-gradient(circle at 82% 28%, rgba(0, 0, 0, 0.04) 0, rgba(0, 0, 0, 0) 60%),
+      linear-gradient(115deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.06));
+    background-blend-mode: multiply;
+  }
+
+  .redaction {
+    display: inline-block;
+    padding: 0 0.3em;
+    border-radius: 2px;
+    background: hsl(var(--newspaper-text));
+    color: transparent;
+    line-height: 1.2;
+    text-shadow: 0 0 6px hsl(var(--newspaper-text));
+  }
+
+  .redaction::selection {
+    color: transparent;
+    background: hsl(var(--newspaper-text));
+  }
+
+  .glitch {
+    position: relative;
+    text-shadow:
+      1px 0 0 hsl(var(--newspaper-accent)),
+      -1px 0 0 hsl(var(--newspaper-header));
+    animation: glitch-text 2s infinite steps(2, end);
+  }
+
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: multiply;
+    color: hsl(var(--newspaper-text) / 0.45);
+    transform: translate(-1px, 1px);
+    pointer-events: none;
+  }
+
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.75rem;
+    border-radius: 999px;
+    font-family: "Bebas Neue", "Anton", system-ui, sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    border-width: 2px;
+    border-style: solid;
+    box-shadow: 0 0 0 2px hsl(var(--newspaper-bg));
+  }
+
+  .stamp--breaking {
+    background: hsl(var(--newspaper-accent));
+    color: white;
+    border-color: hsl(var(--newspaper-accent));
+  }
+
+  .stamp--classified {
+    background: hsl(var(--newspaper-text));
+    color: hsl(var(--newspaper-bg));
+    border-color: hsl(var(--newspaper-text));
+  }
+
+  @keyframes glitch-text {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    20% {
+      transform: translate(-1px, 1px);
+    }
+    40% {
+      transform: translate(-1px, -1px);
+    }
+    60% {
+      transform: translate(1px, 1px);
+    }
+    80% {
+      transform: translate(1px, -1px);
+    }
+  }
+
   @keyframes legendary-pulse {
     0%, 100% { 
       box-shadow: 0 0 25px hsl(var(--rarity-legendary) / 0.6);
@@ -503,7 +591,8 @@ All colors MUST be HSL.
     .play-card-clone,
     .card-hover-glow::before,
     .enhanced-tooltip,
-    .enhanced-button::after {
+    .enhanced-button::after,
+    .glitch {
       transition: none !important;
       animation: none !important;
     }
