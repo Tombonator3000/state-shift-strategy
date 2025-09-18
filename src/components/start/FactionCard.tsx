@@ -25,23 +25,22 @@ const FactionCard = forwardRef<HTMLDivElement, FactionCardProps>(
         data-faction-card={faction}
         onClick={onSelect}
         onKeyDown={handleKeyDown}
-        className="print-border bg-[var(--paper)] flex flex-col h-full overflow-hidden cursor-pointer transition-transform duration-200 hover:-translate-y-1 focus:outline-none focus-visible:ring-4 focus-visible:ring-black/50"
-        aria-label={`Start as ${title}`}
+        className="group cursor-pointer select-none bg-[var(--paper)] print-border focus:outline-none focus:ring-4 focus:ring-black/60"
+        aria-label={`${title} — select faction`}
       >
-        <div className="relative aspect-[4/3] overflow-hidden">
-          <img src={imageSrc} alt={title} className="h-full w-full object-cover" />
-          <span className="badge absolute top-3 left-3 bg-[var(--paper)] text-[var(--ink)] text-sm tracking-[0.08em]">
-            EXCLUSIVE
-          </span>
+        <div className="relative w-full aspect-[4/3] overflow-hidden bg-black/10">
+          <span className="absolute top-2 left-2 z-10 badge text-[10px] leading-none bg-[var(--paper)]">EXCLUSIVE</span>
+          <img
+            src={imageSrc}
+            alt={title}
+            loading="eager"
+            className="w-full h-full object-cover object-center transition-transform duration-200 group-hover:scale-[1.02]"
+          />
         </div>
-        <div className="flex flex-col gap-1 px-4 py-5 bg-[var(--paper)]">
-          <h3 className="font-['Anton',sans-serif] text-3xl sm:text-4xl tracking-[0.06em] uppercase">
-            {title}
-          </h3>
+        <div className="px-3 py-3">
+          <h3 className="font-[Anton] tracking-wide text-2xl sm:text-3xl md:text-4xl uppercase">{title}</h3>
           {caption ? (
-            <p className="font-['Bebas Neue',sans-serif] text-lg sm:text-xl uppercase tracking-[0.08em] text-[var(--ink-weak)]">
-              {caption}
-            </p>
+            <p className="mt-1 text-sm text-[var(--ink-weak)] uppercase tracking-wide">{caption}</p>
           ) : null}
         </div>
       </article>

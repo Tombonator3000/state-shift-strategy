@@ -27,10 +27,10 @@ const featureHeadlines = [
 ];
 
 const featureSubheads = [
-  'Mind-bending exclusives from sources we can definitely trust.',
-  'Alt-real news avoiding truth since this morning.',
-  'Citizens report wild scenes as reality gets optional.',
-  'Classified leaks suggest everything is absolutely true.'
+  'MIND-BENDING EXCLUSIVES FROM SOURCES WE CAN DEFINITELY TRUST.',
+  'ALT-REAL NEWS AVOIDING TRUTH SINCE THIS MORNING.',
+  'CITIZENS REPORT WILD SCENES AS REALITY GETS OPTIONAL.',
+  'CLASSIFIED LEAKS SUGGEST EVERYTHING IS ABSOLUTELY TRUE.'
 ];
 
 const StartScreen = ({
@@ -109,106 +109,87 @@ const StartScreen = ({
   };
 
   return (
-    <div className="newspaper-bg min-h-dvh text-[var(--ink)]">
-      <div className="max-w-[1200px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-6 space-y-6">
-        <header className="print-border bg-[var(--paper)] px-4 sm:px-6 py-4 md:py-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <h1 className="font-['Anton',sans-serif] text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-[0.05em] uppercase">
-              THE PARANOID TIMES
-            </h1>
-            <span className="badge text-sm uppercase tracking-[0.08em] bg-[var(--paper)] text-[var(--ink)]">TIMES</span>
+    <main className="newspaper-bg min-h-dvh text-[var(--ink)]">
+      <div className="max-w-[1200px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-6">
+        <header className="print-border bg-[var(--paper)] px-3 md:px-4 py-3 md:py-4 mb-4 md:mb-6">
+          <div className="flex items-end justify-between">
+            <h1 className="font-[Anton] text-4xl md:text-6xl tracking-wide uppercase">THE PARANOID TIMES</h1>
+            <span className="badge text-xs md:text-sm">TIMES</span>
           </div>
-          <div className="hr-rule my-4" aria-hidden="true" />
-          <p className="font-['Bebas Neue',sans-serif] text-base sm:text-lg md:text-xl uppercase tracking-[0.1em] text-center">
+          <div className="mt-2 bg-[var(--ink)] text-[var(--paper)] text-[11px] md:text-sm font-[Bebas Neue] px-2 py-1 inline-block tracking-wider uppercase">
             MIND-BLOWING NEWS YOU WON'T BELIEVE!
-          </p>
+          </div>
         </header>
 
-        <section className="grid gap-4 md:grid-cols-2" aria-label="Choose your faction">
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           <FactionCard
             ref={governmentCardRef}
             faction="government"
             title="GOVERNMENT"
-            caption="Control the narrative."
-            imageSrc="/assets/start/start-gov.jpg"
+            caption="CONTROL THE NARRATIVE."
+            imageSrc="/assets/start/start-gov.jpeg"
             onSelect={() => handleFactionSelect('government')}
           />
           <FactionCard
             faction="truth"
             title="TRUTH SEEKERS"
-            caption="Expose the deception."
-            imageSrc="/assets/start/start-truth.jpg"
+            caption="EXPOSE THE DECEPTION."
+            imageSrc="/assets/start/start-truth.jpeg"
             onSelect={() => handleFactionSelect('truth')}
           />
         </section>
 
-        <section className="print-border bg-[var(--paper)] px-4 sm:px-6 py-6 text-center space-y-3">
-          <span className="font-['Bebas Neue',sans-serif] text-sm sm:text-base uppercase tracking-[0.12em] text-[var(--accent)]">
-            BREAKING NEWS
-          </span>
-          <h2 className="font-['Anton',sans-serif] text-3xl sm:text-4xl md:text-5xl lg:text-6xl uppercase tracking-[0.05em]">
-            {headline}
-          </h2>
-          <p className="font-['Bebas Neue',sans-serif] text-base sm:text-lg uppercase tracking-[0.1em] text-[var(--ink-weak)]">
-            {subhead}
-          </p>
+        <section className="mt-4 md:mt-6 print-border px-3 md:px-4 py-4">
+          <h2 className="font-[Anton] text-2xl sm:text-4xl md:text-5xl leading-tight tracking-wide uppercase">{headline}</h2>
+          <p className="mt-2 text-[11px] md:text-sm text-[var(--ink-weak)] uppercase tracking-wide">{subhead}</p>
+          <div className="mt-3 hr-rule" />
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <div className="space-y-4">
-            <div className="print-border overflow-hidden bg-[var(--paper)]">
+        <section className="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="md:col-span-2 print-border bg-[var(--paper)]">
+            <div className="aspect-[4/3] bg-black/10">
               <img
-                src="/assets/start/start-continue.jpg"
+                src="/assets/start/start-continue.jpeg"
                 alt="Continue your conspiracies"
-                className="w-full h-full object-cover"
+                loading="lazy"
+                className="w-full h-full object-cover object-center"
               />
             </div>
-            <button
-              type="button"
-              onClick={handleFeatureAction}
-              className="print-border w-full bg-[var(--paper)] px-4 py-4 font-['Bebas Neue',sans-serif] text-2xl md:text-3xl uppercase tracking-[0.12em] hover:bg-black/5 transition-colors focus:outline-none focus-visible:ring-4 focus-visible:ring-black/40"
-            >
-              {continueLabel}
-            </button>
+            <div className="p-3 md:p-4">
+              <ArticleButton label={continueLabel} onClick={handleFeatureAction} />
+            </div>
           </div>
 
-          <aside className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1" aria-label="Menu options">
+          <aside className="space-y-3 md:space-y-4" aria-label="Menu options">
             <ArticleButton
-              label="OPTIONS"
-              onClick={handleArticleAction(onOptions)}
-              sub="Tune your paranoia settings"
-            />
-            <ArticleButton
-              label="MANAGE EXPANSIONS"
+              label="SELL EXPANSIONS!"
+              sub="STORY ON PAGE 6"
               onClick={handleArticleAction(onManageExpansions)}
-              sub="Sell expansions!"
             />
             <ArticleButton
-              label="HOW TO PLAY"
+              label="TOP SECRET SETTINGS"
+              onClick={handleArticleAction(onOptions)}
+            />
+            <ArticleButton
+              label="LEAKED HOW-TO GUIDE"
               onClick={handleArticleAction(onHowToPlay)}
-              sub="Top secret dossier"
             />
             <ArticleButton
-              label="CARD COLLECTION"
+              label="EVIDENCE ARCHIVE"
               onClick={handleArticleAction(onCardCollection)}
-              sub="Evidence archive"
             />
             <ArticleButton
-              label="CREDITS"
+              label="FOLLOW THE MONEY"
               onClick={handleArticleAction(onCredits)}
-              variant="ad"
-              sub="Who\'s behind the curtain?"
             />
           </aside>
         </section>
 
-        <footer className="print-border bg-[var(--paper)] px-3 py-3 text-center">
-          <span className="font-['Bebas Neue',sans-serif] text-lg sm:text-xl uppercase tracking-[0.14em]">
-            PHONY MOON CONTINUES TO SHINE IN NIGHT SKY!
-          </span>
+        <footer className="mt-4 md:mt-6 print-border px-3 py-2 font-[Bebas Neue] tracking-widest text-base md:text-lg uppercase text-center">
+          PHONY MOON CONTINUES TO SHINE IN NIGHT SKY!
         </footer>
       </div>
-    </div>
+    </main>
   );
 };
 
