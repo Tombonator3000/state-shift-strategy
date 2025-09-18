@@ -62,6 +62,7 @@ export default function UiOverlays() {
 
     window.uiFlashState = (stateId: string, by: "P1" | "P2") => {
       const el =
+        document.querySelector(`[data-state-id="${stateId}"]`) ||
         document.querySelector(`[data-state="${stateId}"]`) ||
         document.getElementById(`state-${stateId}`) ||
         document.querySelector(`[data-usps="${stateId}"]`);
