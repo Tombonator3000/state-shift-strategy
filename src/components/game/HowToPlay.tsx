@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import {
+  MVP_COMBO_OVERVIEW,
   MVP_COST_TABLE_ROWS,
   MVP_RULES_SECTIONS,
   MVP_RULES_TITLE,
@@ -180,6 +181,58 @@ const HowToPlay = ({ onClose }: HowToPlayProps) => {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              </section>
+
+              <section className="space-y-3">
+                <h2 className="text-2xl font-bold text-newspaper-text font-mono">
+                  Combo Catalogue
+                </h2>
+                <p className="text-newspaper-text/80 leading-relaxed">
+                  Combos award extra resources when you meet their turn-based requirements. Each entry below shows the reward payload and any caps that limit repeated payouts. Mix and match to build the turn that fits your strategy.
+                </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {MVP_COMBO_OVERVIEW.map(group => (
+                    <div
+                      key={group.category}
+                      className="border border-newspaper-text/30 bg-newspaper-text/5 p-3 rounded"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xl font-semibold text-newspaper-text font-mono uppercase">
+                          {group.category} Combos
+                        </h3>
+                        <span className="text-xs font-semibold text-newspaper-text/70">
+                          {group.combos.length} listed
+                        </span>
+                      </div>
+                      <div className="space-y-3 text-sm">
+                        {group.combos.map(combo => {
+                          const rewardText = combo.reward.replace(/[()]/g, '').trim();
+                          return (
+                            <div key={combo.id} className="border-t border-dashed border-newspaper-text/30 pt-2 first:border-t-0 first:pt-0">
+                              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                                <span className="font-semibold text-newspaper-text">{combo.name}</span>
+                                {rewardText && (
+                                  <span className="text-xs font-mono text-newspaper-text/70">
+                                    Reward: {rewardText}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-newspaper-text/80 text-xs leading-relaxed mt-1">
+                                {combo.description}
+                              </p>
+                              {(combo.cap || combo.fxText) && (
+                                <div className="mt-1 flex flex-wrap gap-2 text-[11px] text-newspaper-text/60">
+                                  {combo.cap ? <span>Cap: {combo.cap}</span> : null}
+                                  {combo.fxText ? <span className="italic">FX: {combo.fxText}</span> : null}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </section>
             </div>

@@ -164,6 +164,7 @@ const toEngineState = (
     pressureByState,
     stateDefense,
     playsThisTurn: 0,
+    turnPlays: [],
     log,
   };
 };

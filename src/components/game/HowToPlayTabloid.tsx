@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import {
+  MVP_COMBO_OVERVIEW,
   MVP_COST_TABLE_ROWS,
   MVP_RULES_SECTIONS,
   MVP_RULES_TITLE,
@@ -174,6 +175,60 @@ const HowToPlayTabloid = ({ onClose }: HowToPlayTabloidProps) => {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              </section>
+
+              <section className="border-2 border-black bg-white p-3 shadow-[2px_2px_0_#000] space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-black uppercase tracking-tight font-[Oswald,Impact,Arial-Black,system-ui,sans-serif]">
+                    COMBO CATALOGUE
+                  </h2>
+                  <div className="bg-red-500 text-white px-1 py-0.5 text-[8px] font-black uppercase border border-black">
+                    TOP SECRET
+                  </div>
+                </div>
+                <p className="text-sm leading-relaxed">
+                  Trigger these patterns within a single turn to earn additional IP or Truth. Manage the system, FX channel, and individual combos from the Options menu.
+                </p>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {MVP_COMBO_OVERVIEW.map(group => (
+                    <div key={group.category} className="border-2 border-dashed border-black bg-white p-2 shadow-[2px_2px_0_#000]">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-black uppercase tracking-tight">
+                          {group.category} Combos
+                        </h3>
+                        <span className="text-[9px] font-black text-black/70 uppercase">
+                          {group.combos.length} listed
+                        </span>
+                      </div>
+                      <div className="mt-2 space-y-2 text-xs leading-relaxed">
+                        {group.combos.map(combo => {
+                          const rewardText = combo.reward.replace(/[()]/g, '').trim();
+                          return (
+                            <div key={combo.id} className="border-t border-dotted border-black/30 pt-1 first:border-t-0 first:pt-0">
+                              <div className="flex flex-wrap items-baseline justify-between gap-1">
+                                <span className="font-semibold text-black">{combo.name}</span>
+                                {rewardText && (
+                                  <span className="text-[10px] font-mono text-black/70 uppercase">
+                                    Reward: {rewardText}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-black/80">
+                                {combo.description}
+                              </p>
+                              {(combo.cap || combo.fxText) && (
+                                <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-black/60 uppercase">
+                                  {combo.cap ? <span>Cap {combo.cap}</span> : null}
+                                  {combo.fxText ? <span className="italic normal-case">FX: {combo.fxText}</span> : null}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </section>
             </div>

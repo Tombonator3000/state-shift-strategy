@@ -1,14 +1,20 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { AudioControls } from '@/components/ui/audio-controls';
 import { useAudioContext } from '@/contexts/AudioContext';
-import { useState, useEffect } from 'react';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
 import { useUiTheme, type UiTheme } from '@/hooks/useTheme';
 import type { Difficulty } from '@/ai';
 import { getDifficulty, setDifficultyFromLabel } from '@/state/settings';
+import { COMBO_DEFINITIONS, DEFAULT_COMBO_SETTINGS } from '@/game/combo.config';
+import { formatComboReward, getComboSettings, setComboSettings } from '@/game/comboEngine';
+import type { ComboCategory, ComboSettings } from '@/game/combo.types';
+
+const SETTINGS_STORAGE_KEY = 'gameSettings';
 
 type DifficultyLabel =
   | 'EASY - Intelligence Leak'
@@ -43,6 +49,16 @@ const DIFFICULTY_OPTIONS: DifficultyLabel[] = [
   DIFFICULTY_LABELS.HARD,
   DIFFICULTY_LABELS.TOP_SECRET_PLUS,
 ];
+
+const CATEGORY_LABELS: Record<ComboCategory, string> = {
+  sequence: 'Sequence Chains',
+  count: 'Play Volume',
+  threshold: 'Threshold Targets',
+  state: 'State Operations',
+  hybrid: 'Hybrid Conditions',
+};
+
+const CATEGORY_ORDER: ComboCategory[] = ['sequence', 'count', 'threshold', 'state', 'hybrid'];
 
 const resolveStoredDifficultyLabel = (value: unknown): DifficultyLabel => {
   if (typeof value === 'string') {
@@ -88,10 +104,9 @@ interface GameSettings {
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const audio = useAudioContext();
   const [uiTheme, setUiTheme] = useUiTheme();
-  const [settings, setSettings] = useState<GameSettings>(() => {
-    // Initialize settings from audio system and localStorage
-    const savedSettings = localStorage.getItem('gameSettings');
-    const defaultDifficultyLabel = (() => {
+
+  const resolveInitialState = (): { settings: GameSettings; combo: ComboSettings } => {
+    const defaultDifficulty = (() => {
       try {
         return DIFFICULTY_LABELS[getDifficulty()];
       } catch {
@@ -108,51 +123,108 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       fastMode: false,
       showTooltips: true,
       enableKeyboardShortcuts: true,
-      difficulty: defaultDifficultyLabel,
+      difficulty: defaultDifficulty,
       screenShake: true,
       confirmActions: true,
       drawMode: 'standard',
-      uiTheme: uiTheme,
+      uiTheme,
     };
 
-    if (savedSettings) {
+    const stored = typeof localStorage !== 'undefined'
+      ? localStorage.getItem(SETTINGS_STORAGE_KEY)
+      : null;
+
+    if (stored) {
       try {
-        const parsed = JSON.parse(savedSettings);
-        const difficultyLabel = resolveStoredDifficultyLabel(parsed?.difficulty);
-        const mergedSettings = { ...baseSettings, ...parsed, difficulty: difficultyLabel };
-        setDifficultyFromLabel(difficultyLabel);
-        return mergedSettings;
+        const parsed = JSON.parse(stored) as (Partial<GameSettings> & { comboSettings?: ComboSettings }) | null;
+        const { comboSettings: storedComboSettings, ...rest } = parsed ?? {};
+        const difficultyLabel = resolveStoredDifficultyLabel(rest?.difficulty);
+        const mergedSettings: GameSettings = {
+          ...baseSettings,
+          ...rest,
+          difficulty: difficultyLabel,
+        };
+
+        setDifficultyFromLabel(mergedSettings.difficulty);
+
+        const combo = storedComboSettings
+          ? setComboSettings({
+              ...storedComboSettings,
+              comboToggles: {
+                ...DEFAULT_COMBO_SETTINGS.comboToggles,
+                ...(storedComboSettings.comboToggles ?? {}),
+              },
+            })
+          : setComboSettings({
+              ...DEFAULT_COMBO_SETTINGS,
+              comboToggles: { ...DEFAULT_COMBO_SETTINGS.comboToggles },
+            });
+
+        return { settings: mergedSettings, combo };
       } catch (error) {
         console.error('Failed to parse saved settings:', error);
-        setDifficultyFromLabel(baseSettings.difficulty);
       }
-    } else {
-      setDifficultyFromLabel(baseSettings.difficulty);
     }
 
-    return baseSettings;
-  });
+    setDifficultyFromLabel(baseSettings.difficulty);
+    const combo = setComboSettings({
+      ...getComboSettings(),
+      comboToggles: { ...DEFAULT_COMBO_SETTINGS.comboToggles },
+    });
 
-  // Load settings from localStorage on component mount - remove to prevent re-initialization
-  // Settings are now loaded in useState initializer above
+    return { settings: baseSettings, combo };
+  };
 
-  // Update audio volume when master volume changes - but avoid infinite loops
+  const initialStateRef = useRef<{ settings: GameSettings; combo: ComboSettings }>();
+  if (!initialStateRef.current) {
+    initialStateRef.current = resolveInitialState();
+  }
+
+  const [settings, setSettings] = useState<GameSettings>(initialStateRef.current.settings);
+  const [comboSettingsState, setComboSettingsState] = useState<ComboSettings>(initialStateRef.current.combo);
+
   useEffect(() => {
     const currentAudioVolume = Math.round(audio.config.volume * 100);
     if (currentAudioVolume !== settings.masterVolume) {
       console.log('🎵 Options: Syncing volume from', currentAudioVolume, 'to', settings.masterVolume);
       audio.setVolume(settings.masterVolume / 100);
     }
-  }, [settings.masterVolume]); // Remove 'audio' from dependencies to prevent loops
+  }, [settings.masterVolume, audio]);
 
-  // Save settings to localStorage whenever they change
-  const updateSettings = (newSettings: Partial<GameSettings>) => {
-    const updatedSettings = { ...settings, ...newSettings };
-    setSettings(updatedSettings);
-    if (newSettings.difficulty) {
-      setDifficultyFromLabel(newSettings.difficulty);
+  const persistSettings = (nextSettings: GameSettings, nextComboSettings: ComboSettings) => {
+    if (typeof localStorage === 'undefined') {
+      return;
     }
-    localStorage.setItem('gameSettings', JSON.stringify(updatedSettings));
+
+    try {
+      localStorage.setItem(
+        SETTINGS_STORAGE_KEY,
+        JSON.stringify({ ...nextSettings, comboSettings: nextComboSettings }),
+      );
+    } catch (error) {
+      console.error('Failed to persist settings:', error);
+    }
+  };
+
+  const updateSettings = (newSettings: Partial<GameSettings>) => {
+    setSettings(prev => {
+      const updated = { ...prev, ...newSettings };
+      if (newSettings.difficulty) {
+        setDifficultyFromLabel(newSettings.difficulty);
+      }
+      persistSettings(updated, comboSettingsState);
+      return updated;
+    });
+  };
+
+  const applyComboSettings = (update: Partial<ComboSettings>) => {
+    const normalized: Partial<ComboSettings> = { ...update };
+    if (update.comboToggles) {
+      normalized.comboToggles = { ...update.comboToggles };
+    }
+    const merged = setComboSettings(normalized);
+    setComboSettingsState(merged);
+    persistSettings(settings, merged);
   };
 
   const resetToDefaults = () => {
@@ -171,23 +243,29 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       drawMode: 'standard',
       uiTheme: 'tabloid_bw',
     };
+
+    const defaultCombos = setComboSettings({
+      ...DEFAULT_COMBO_SETTINGS,
+      comboToggles: { ...DEFAULT_COMBO_SETTINGS.comboToggles },
+    });
+
     setSettings(defaultSettings);
+    setComboSettingsState(defaultCombos);
     setDifficultyFromLabel(defaultSettings.difficulty);
-    localStorage.setItem('gameSettings', JSON.stringify(defaultSettings));
     setUiTheme('tabloid_bw');
+    persistSettings(defaultSettings, defaultCombos);
+    audio.setVolume(defaultSettings.masterVolume / 100);
   };
 
   const handleSaveGame = () => {
     const success = onSaveGame?.();
     if (success) {
-      // Show confirmation
       const savedIndicator = document.createElement('div');
       savedIndicator.textContent = '✓ GAME SAVED';
       savedIndicator.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded z-[60] animate-fade-in';
       document.body.appendChild(savedIndicator);
       setTimeout(() => savedIndicator.remove(), 2000);
     } else {
-      // Show error
       const errorIndicator = document.createElement('div');
       errorIndicator.textContent = '❌ SAVE FAILED';
       errorIndicator.className = 'fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded z-[60] animate-fade-in';
@@ -196,12 +274,52 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     }
   };
 
+  const comboGroups = useMemo(() => {
+    const grouped = new Map<ComboCategory, Array<{
+      id: string;
+      name: string;
+      description: string;
+      reward: string;
+      fxText?: string;
+      cap?: number;
+      priority: number;
+    }>>();
+
+    for (const def of COMBO_DEFINITIONS) {
+      const rewardText = formatComboReward(def.reward).replace(/[()]/g, '').trim();
+      const entry = {
+        id: def.id,
+        name: def.name,
+        description: def.description,
+        reward: rewardText,
+        fxText: def.fxText,
+        cap: def.cap,
+        priority: def.priority,
+      };
+
+      const bucket = grouped.get(def.category) ?? [];
+      bucket.push(entry);
+      grouped.set(def.category, bucket);
+    }
+
+    for (const bucket of grouped.values()) {
+      bucket.sort((a, b) => b.priority - a.priority);
+    }
+
+    return CATEGORY_ORDER
+      .filter(category => grouped.has(category))
+      .map(category => ({
+        category,
+        label: CATEGORY_LABELS[category],
+        combos: grouped.get(category) ?? [],
+      }));
+  }, []);
+
   return (
     <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
-      {/* Redacted background pattern */}
       <div className="absolute inset-0 opacity-5">
         {Array.from({ length: 30 }).map((_, i) => (
-          <div 
+          <div
             key={i}
             className="absolute bg-newspaper-text h-6"
             style={{
@@ -214,8 +332,10 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
         ))}
       </div>
 
-      <Card className="max-w-4xl w-full p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal relative" style={{ fontFamily: 'serif' }}>
-        {/* Classified stamps */}
+      <Card
+        className="max-w-4xl w-full p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal relative"
+        style={{ fontFamily: 'serif' }}
+      >
         <div className="absolute top-4 right-4 text-red-600 font-mono text-xs transform rotate-12 border-2 border-red-600 p-2">
           TOP SECRET
         </div>
@@ -223,31 +343,23 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
           EYES ONLY
         </div>
 
-        {/* Back button */}
-        <Button 
+        <Button
           onClick={onClose}
-          variant="outline" 
+          variant="outline"
           className="absolute top-4 left-4 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
         >
           ← BACK
         </Button>
 
         <div className="text-center mb-8 mt-8">
-          <h1 className="text-4xl font-bold text-newspaper-text mb-4">
-            CLASSIFIED OPTIONS
-          </h1>
-          <div className="text-sm text-newspaper-text/80 mb-4">
-            Configure your conspiracy experience
-          </div>
+          <h1 className="text-4xl font-bold text-newspaper-text mb-4">CLASSIFIED OPTIONS</h1>
+          <div className="text-sm text-newspaper-text/80 mb-4">Configure your conspiracy experience</div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Audio Settings */}
           <Card className="p-6 border-2 border-newspaper-text bg-newspaper-bg">
-            <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">
-              🔊 AUDIO SURVEILLANCE
-            </h3>
-            
+            <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">🔊 AUDIO SURVEILLANCE</h3>
+
             <div className="space-y-6">
               <div>
                 <label className="text-sm font-medium text-newspaper-text mb-2 block">
@@ -262,7 +374,6 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 />
               </div>
 
-
               <div>
                 <label className="text-sm font-medium text-newspaper-text mb-2 block">
                   Sound Effects: {settings.sfxVolume}%
@@ -276,12 +387,9 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 />
               </div>
 
-              {/* Enhanced Audio Controls */}
               <div className="border-t border-newspaper-text/20 pt-4">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-newspaper-text">
-                    Advanced Audio Controls
-                  </label>
+                  <label className="text-sm font-medium text-newspaper-text">Advanced Audio Controls</label>
                   <AudioControls
                     volume={audio.config.volume}
                     muted={audio.config.muted}
@@ -321,90 +429,68 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
             </div>
           </Card>
 
-          {/* Gameplay Settings */}
           <Card className="p-6 border-2 border-newspaper-text bg-newspaper-bg">
-            <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">
-              ⚙️ OPERATION PARAMETERS
-            </h3>
-            
+            <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">⚙️ OPERATION PARAMETERS</h3>
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">
-                  Enable Animations
-                </label>
+                <label className="text-sm font-medium text-newspaper-text">Enable Animations</label>
                 <Switch
                   checked={settings.enableAnimations}
-                  onCheckedChange={(checked) => updateSettings({ enableAnimations: checked })}
+                  onCheckedChange={checked => updateSettings({ enableAnimations: checked })}
                 />
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">
-                  Auto End Turn
-                </label>
+                <label className="text-sm font-medium text-newspaper-text">Auto End Turn</label>
                 <Switch
                   checked={settings.autoEndTurn}
-                  onCheckedChange={(checked) => updateSettings({ autoEndTurn: checked })}
+                  onCheckedChange={checked => updateSettings({ autoEndTurn: checked })}
                 />
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">
-                  Fast Mode
-                </label>
-                <Switch
-                  checked={settings.fastMode}
-                  onCheckedChange={(checked) => updateSettings({ fastMode: checked })}
-                />
+                <label className="text-sm font-medium text-newspaper-text">Fast Mode</label>
+                <Switch checked={settings.fastMode} onCheckedChange={checked => updateSettings({ fastMode: checked })} />
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">
-                  Show Tooltips
-                </label>
+                <label className="text-sm font-medium text-newspaper-text">Show Tooltips</label>
                 <Switch
                   checked={settings.showTooltips}
-                  onCheckedChange={(checked) => updateSettings({ showTooltips: checked })}
+                  onCheckedChange={checked => updateSettings({ showTooltips: checked })}
                 />
               </div>
 
-               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">
-                  Keyboard Shortcuts
-                </label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-newspaper-text">Keyboard Shortcuts</label>
                 <Switch
                   checked={settings.enableKeyboardShortcuts}
-                  onCheckedChange={(checked) => updateSettings({ enableKeyboardShortcuts: checked })}
+                  onCheckedChange={checked => updateSettings({ enableKeyboardShortcuts: checked })}
                 />
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">
-                  Screen Shake Effects
-                </label>
+                <label className="text-sm font-medium text-newspaper-text">Screen Shake Effects</label>
                 <Switch
                   checked={settings.screenShake}
-                  onCheckedChange={(checked) => updateSettings({ screenShake: checked })}
+                  onCheckedChange={checked => updateSettings({ screenShake: checked })}
                 />
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">
-                  Confirm Destructive Actions
-                </label>
+                <label className="text-sm font-medium text-newspaper-text">Confirm Destructive Actions</label>
                 <Switch
                   checked={settings.confirmActions}
-                  onCheckedChange={(checked) => updateSettings({ confirmActions: checked })}
+                  onCheckedChange={checked => updateSettings({ confirmActions: checked })}
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-newspaper-text mb-2 block">
-                  Difficulty Level
-                </label>
+                <label className="text-sm font-medium text-newspaper-text mb-2 block">Difficulty Level</label>
                 <select
                   value={settings.difficulty}
-                  onChange={(e) => updateSettings({ difficulty: e.target.value as DifficultyLabel })}
+                  onChange={event => updateSettings({ difficulty: event.target.value as DifficultyLabel })}
                   className="w-full p-2 border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded"
                 >
                   {DIFFICULTY_OPTIONS.map(option => (
@@ -416,12 +502,10 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-newspaper-text mb-2 block">
-                  Card Draw Mode
-                </label>
-                <select 
+                <label className="text-sm font-medium text-newspaper-text mb-2 block">Card Draw Mode</label>
+                <select
                   value={settings.drawMode}
-                  onChange={(e) => updateSettings({ drawMode: e.target.value as DrawMode })}
+                  onChange={event => updateSettings({ drawMode: event.target.value as DrawMode })}
                   className="w-full p-2 border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded mb-2"
                 >
                   {Object.entries(DRAW_MODE_CONFIGS).map(([key, config]) => (
@@ -431,51 +515,134 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   ))}
                 </select>
                 <div className="text-xs text-newspaper-text/70 space-y-1">
-                  {(DRAW_MODE_CONFIGS[settings.drawMode] || DRAW_MODE_CONFIGS.standard).specialRules.map((rule, i) => (
-                    <div key={i}>• {rule}</div>
+                  {(DRAW_MODE_CONFIGS[settings.drawMode] || DRAW_MODE_CONFIGS.standard).specialRules.map((rule, index) => (
+                    <div key={index}>• {rule}</div>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-newspaper-text mb-2 block">
-                  UI Theme
-                </label>
-                <select 
+                <label className="text-sm font-medium text-newspaper-text mb-2 block">UI Theme</label>
+                <select
                   value={uiTheme}
-                  onChange={(e) => {
-                    const newTheme = e.target.value as UiTheme;
+                  onChange={event => {
+                    const newTheme = event.target.value as UiTheme;
                     setUiTheme(newTheme);
                     updateSettings({ uiTheme: newTheme });
                   }}
                   className="w-full p-2 border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded"
                 >
-                  <option value="tabloid_bw">TABLOID (Black & White)</option>
+                  <option value="tabloid_bw">TABLOID (Black &amp; White)</option>
                   <option value="government_classic">GOVERNMENT CLASSIC (Legacy Layout)</option>
                 </select>
-                <div className="text-xs text-newspaper-text/70 mt-1">
-                  Changes the visual appearance of menus and screens
-                </div>
+                <div className="text-xs text-newspaper-text/70 mt-1">Changes the visual appearance of menus and screens</div>
               </div>
-        </div>
-      </Card>
-    </div>
+            </div>
+          </Card>
 
-    {/* Game Actions */}
-    <Card className="mt-6 p-6 border-2 border-newspaper-text bg-newspaper-bg">
-      <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">
-        🎮 MISSION CONTROL
-      </h3>
+          <Card className="p-6 border-2 border-newspaper-text bg-newspaper-bg md:col-span-2">
+            <h3 className="font-bold text-xl text-newspaper-text mb-2 flex items-center">⚡ COMBO PROTOCOLS</h3>
+            <p className="text-sm text-newspaper-text/80 mb-4">
+              Configure the combo engine, visual FX, and per-combo authorisations for this profile.
+            </p>
+
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <Switch
+                  checked={comboSettingsState.enabled}
+                  onCheckedChange={checked => applyComboSettings({ enabled: checked })}
+                />
+                <span className="text-sm text-newspaper-text font-medium">Enable combo engine</span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Switch
+                  checked={comboSettingsState.fxEnabled}
+                  onCheckedChange={checked => applyComboSettings({ fxEnabled: checked })}
+                  disabled={!comboSettingsState.enabled}
+                />
+                <span className="text-sm text-newspaper-text font-medium">
+                  FX notifications ({comboSettingsState.fxEnabled ? 'on' : 'off'})
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="text-sm font-medium text-newspaper-text mb-2 block">
+                Max combos per turn: {comboSettingsState.maxCombosPerTurn}
+              </label>
+              <Slider
+                value={[comboSettingsState.maxCombosPerTurn]}
+                onValueChange={([value]) => applyComboSettings({ maxCombosPerTurn: value })}
+                min={1}
+                max={5}
+                step={1}
+                className="w-full"
+                disabled={!comboSettingsState.enabled}
+              />
+            </div>
+
+            <ScrollArea className="mt-4 h-64 pr-2">
+              <div className="space-y-4">
+                {comboGroups.map(group => (
+                  <div key={group.category}>
+                    <div className="text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
+                      {group.label}
+                    </div>
+                    <div className="mt-2 space-y-3">
+                      {group.combos.map(combo => {
+                        const enabled = comboSettingsState.comboToggles[combo.id] ?? true;
+                        const rewardLabel = combo.reward;
+                        return (
+                          <div
+                            key={combo.id}
+                            className="rounded-md border border-newspaper-text/40 bg-white/70 p-3 shadow-sm"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="font-semibold text-newspaper-text">{combo.name}</div>
+                                <div className="text-xs text-newspaper-text/70">{combo.description}</div>
+                                {rewardLabel ? (
+                                  <div className="mt-1 text-xs font-semibold text-newspaper-text/80">
+                                    Reward: {rewardLabel}
+                                    {typeof combo.cap === 'number' ? ` (cap ${combo.cap})` : ''}
+                                  </div>
+                                ) : null}
+                                {combo.fxText ? (
+                                  <div className="text-[11px] italic text-newspaper-text/60">FX: {combo.fxText}</div>
+                                ) : null}
+                              </div>
+                              <Switch
+                                checked={enabled}
+                                onCheckedChange={checked =>
+                                  applyComboSettings({ comboToggles: { [combo.id]: checked } })
+                                }
+                                disabled={!comboSettingsState.enabled}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </Card>
+        </div>
+
+        <Card className="mt-6 p-6 border-2 border-newspaper-text bg-newspaper-bg">
+          <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">🎮 MISSION CONTROL</h3>
           <div className="grid md:grid-cols-4 gap-4">
             {onSaveGame && (
-              <Button 
+              <Button
                 onClick={handleSaveGame}
                 className="bg-green-700 hover:bg-green-600 text-white border-green-600"
               >
                 💾 SAVE GAME
               </Button>
             )}
-            <Button 
+            <Button
               onClick={resetToDefaults}
               variant="outline"
               className="border-yellow-600 text-yellow-600 hover:bg-yellow-600/10"
@@ -483,7 +650,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
               🔄 RESET DEFAULTS
             </Button>
             {onBackToMainMenu && (
-              <Button 
+              <Button
                 onClick={() => {
                   if (settings.confirmActions) {
                     if (confirm('Return to main menu? Unsaved progress will be lost.')) {
@@ -499,9 +666,10 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 🏠 MAIN MENU
               </Button>
             )}
-            <Button 
+            <Button
               onClick={() => {
-                navigator.clipboard?.writeText(JSON.stringify(settings, null, 2));
+                const exportPayload = { ...settings, comboSettings: comboSettingsState };
+                navigator.clipboard?.writeText(JSON.stringify(exportPayload, null, 2));
                 const exportIndicator = document.createElement('div');
                 exportIndicator.textContent = '📋 Settings copied to clipboard';
                 exportIndicator.className = 'fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded z-[60] animate-fade-in';
@@ -516,11 +684,8 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
           </div>
         </Card>
 
-        {/* Keyboard Shortcuts Reference */}
         <Card className="mt-6 p-6 border-2 border-newspaper-text bg-newspaper-bg">
-          <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">
-            ⌨️ COVERT OPERATIONS MANUAL
-          </h3>
+          <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">⌨️ COVERT OPERATIONS MANUAL</h3>
           <div className="grid md:grid-cols-2 gap-4 text-sm text-newspaper-text">
             <div>
               <div className="font-mono">SPACE - End Turn</div>
@@ -537,18 +702,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
           </div>
         </Card>
 
-        {/* Footer */}
         <div className="mt-8 text-center text-xs text-newspaper-text/60">
           <div className="mb-2">CONFIDENTIAL: Settings are automatically saved</div>
           <div>Changes take effect immediately</div>
-          <div className="mt-2 text-red-600 font-bold">
-            [CLASSIFIED] - Security Clearance: ULTRA BLACK
-          </div>
+          <div className="mt-2 text-red-600 font-bold">[CLASSIFIED] - Security Clearance: ULTRA BLACK</div>
         </div>
       </Card>
     </div>
   );
 };
 
-// Enhanced audio system with comprehensive controls
 export default Options;

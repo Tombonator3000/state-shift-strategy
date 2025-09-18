@@ -29,6 +29,7 @@ export function validateFixedEffectSystem() {
       currentPlayer: 'P1',
       truth: 50,
       playsThisTurn: 0,
+      turnPlays: [],
       log,
       players: {
         P1: {

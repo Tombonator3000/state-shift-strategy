@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -6,6 +6,7 @@ import { X, TrendingUp, AlertTriangle } from 'lucide-react';
 import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
 import CardImage from '@/components/game/CardImage';
+import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 
 export interface TabloidPlayedCard {
   card: GameCard;
@@ -296,6 +297,37 @@ const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }
   const selectedHeadlines = allArticles.slice(0, 4);
   const selectedConspiracies = conspiracyCorner.sort(() => 0.5 - Math.random()).slice(0, 4);
 
+  const comboSummary = useMemo(() => getLastComboSummary(), [playedCards, events]);
+  const comboReport = useMemo(() => {
+    if (!comboSummary || comboSummary.results.length === 0) {
+      return null;
+    }
+    return {
+      player: comboSummary.player,
+      turn: comboSummary.turn,
+      entries: comboSummary.results.map(result => ({
+        id: result.definition.id,
+        name: result.definition.name,
+        description: result.definition.description,
+        reward: formatComboReward(result.appliedReward).replace(/[()]/g, '').trim(),
+        matched: result.details.matchedPlays.map(play => play.cardName).filter(Boolean),
+        fxText: result.definition.fxText,
+      })),
+    };
+  }, [comboSummary]);
+  const comboOwnerLabel = useMemo(() => {
+    if (!comboReport) {
+      return null;
+    }
+    if (comboReport.player === 'P1') {
+      return 'OPERATIVE COMMAND';
+    }
+    if (comboReport.player === 'P2') {
+      return 'OPPOSITION CELL';
+    }
+    return comboReport.player;
+  }, [comboReport]);
+
   const getTruthMeterStatus = () => {
     if (truth >= 80) return { level: "MAXIMUM PANIC", color: "text-red-500", bgColor: "bg-red-500" };
     if (truth >= 60) return { level: "ELEVATED PARANOIA", color: "text-orange-500", bgColor: "bg-orange-500" };
@@ -389,11 +421,11 @@ const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }
                   ) : (
                     <p className="italic text-gray-600">Agent remained inactive</p>
                   )}
-                </div>
-                
-                <div className="bg-red-200 p-3 border-4 border-black">
-                  <h3 className="font-black text-red-800 mb-2" style={{ fontFamily: 'Anton, sans-serif' }}>
-                    ENEMY ACTIONS
+              </div>
+
+              <div className="bg-red-200 p-3 border-4 border-black">
+                <h3 className="font-black text-red-800 mb-2" style={{ fontFamily: 'Anton, sans-serif' }}>
+                  ENEMY ACTIONS
                   </h3>
                   {playedCards.filter(pc => pc.player === 'ai').length > 0 ? (
                     <ul className="space-y-1">
@@ -409,6 +441,38 @@ const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }
                   )}
                 </div>
               </div>
+
+              {comboReport ? (
+                <div className="md:col-span-2 bg-yellow-200 p-3 border-4 border-black">
+                  <h3 className="font-black text-yellow-900 mb-2" style={{ fontFamily: 'Anton, sans-serif' }}>
+                    COMBO INTELLIGENCE BRIEF
+                  </h3>
+                  <div className="text-xs font-mono mb-2">
+                    {comboOwnerLabel ? `${comboOwnerLabel} · ` : ''}Turn {comboReport.turn} —
+                    {` ${comboReport.entries.length} combo${comboReport.entries.length === 1 ? '' : 's'} executed`}
+                  </div>
+                  <div className="space-y-2">
+                    {comboReport.entries.map(entry => (
+                      <div
+                        key={entry.id}
+                        className="border-b border-dashed border-black pb-2 last:border-0 last:pb-0"
+                      >
+                        <div className="flex justify-between text-xs font-black">
+                          <span>{entry.name}</span>
+                          {entry.reward ? <span>{entry.reward}</span> : null}
+                        </div>
+                        <p className="text-xs italic">{entry.description}</p>
+                        {entry.matched.length ? (
+                          <div className="text-[11px] font-mono">Plays: {entry.matched.join(' → ')}</div>
+                        ) : null}
+                        {entry.fxText ? (
+                          <div className="text-[10px] uppercase text-yellow-900/80">FX: {entry.fxText}</div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
 

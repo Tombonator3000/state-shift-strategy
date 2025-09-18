@@ -9,6 +9,7 @@ import { makeBody, makeHeadline, makeSubhead, shouldStampBreaking, type RoundCon
 import type { TabloidNewspaperProps, TabloidPlayedCard } from './TabloidNewspaperLegacy';
 import type { Card } from '@/types';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
+import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
 
@@ -247,6 +248,37 @@ const TabloidNewspaperV2 = ({ events, playedCards, faction, truth, onClose }: Ta
     [playedCards],
   );
 
+  const comboSummary = useMemo(() => getLastComboSummary(), [events, playedCards]);
+  const comboReport = useMemo(() => {
+    if (!comboSummary || comboSummary.results.length === 0) {
+      return null;
+    }
+    return {
+      player: comboSummary.player,
+      turn: comboSummary.turn,
+      entries: comboSummary.results.map(result => ({
+        id: result.definition.id,
+        name: result.definition.name,
+        description: result.definition.description,
+        reward: formatComboReward(result.appliedReward).replace(/[()]/g, '').trim(),
+        matchedPlays: result.details.matchedPlays.map(play => play.cardName).filter(Boolean),
+        fxText: result.definition.fxText,
+      })),
+    };
+  }, [comboSummary]);
+  const comboOwnerLabel = useMemo(() => {
+    if (!comboReport) {
+      return null;
+    }
+    if (comboReport.player === 'P1') {
+      return 'Operative Team';
+    }
+    if (comboReport.player === 'P2') {
+      return 'Opposition Network';
+    }
+    return comboReport.player;
+  }, [comboReport]);
+
   const heroCardEntry = useMemo(() => {
     const capture = playerCards.find(entry => (entry.capturedStates ?? []).length > 0);
     if (capture) {
@@ -467,6 +499,41 @@ const TabloidNewspaperV2 = ({ events, playedCards, faction, truth, onClose }: Ta
             </article>
 
             <aside className="space-y-4">
+              {comboReport?.entries.length ? (
+                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
+                  <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
+                    Combo Dispatch
+                  </h3>
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                    {comboOwnerLabel ? `${comboOwnerLabel} · ` : ''}Turn {comboReport.turn}
+                  </div>
+                  <div className="mt-2 space-y-3 text-sm">
+                    {comboReport.entries.map(entry => {
+                      const rewardLabel = entry.reward;
+                      return (
+                        <div
+                          key={entry.id}
+                          className="border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0"
+                        >
+                          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                            <span>{entry.name}</span>
+                            {rewardLabel ? <span>{rewardLabel}</span> : null}
+                          </div>
+                          <p className="text-xs italic text-newspaper-text/70">{entry.description}</p>
+                          {entry.matchedPlays.length ? (
+                            <div className="text-[11px] font-mono text-newspaper-text/60">
+                              Plays: {entry.matchedPlays.join(' → ')}
+                            </div>
+                          ) : null}
+                          {entry.fxText ? (
+                            <div className="text-[10px] uppercase tracking-wide text-newspaper-text/50">FX: {entry.fxText}</div>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              ) : null}
               {oppositionStories.length ? (
                 <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
                   <h3 className="mb-3 text-sm font-black uppercase tracking-wide">Opposition Moves</h3>

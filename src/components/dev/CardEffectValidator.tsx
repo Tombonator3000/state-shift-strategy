@@ -51,6 +51,7 @@ const CardEffectValidatorPanel: React.FC = () => {
       currentPlayer: 'P1',
       truth: testGameState.truth,
       playsThisTurn: 0,
+      turnPlays: [],
       log: engineLog,
       players: {
         P1: {
