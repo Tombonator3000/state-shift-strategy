@@ -39,212 +39,1261 @@ export interface GameEvent {
 }
 
 export const EVENT_DATABASE: GameEvent[] = [
-  // COMMON EVENTS (40 events)
+  // COMMON EVENTS (80 events) — Tabloid randoms for the newspaper (low impact, balanced)
   {
-    id: 'ufo_sighting',
-    title: 'UFO Sighting',
-    headline: 'BREAKING: UFO Spotted Over Washington D.C.',
-    content: 'Multiple witnesses report seeing strange lights performing impossible maneuvers above the Capitol building. Government officials claim it was just weather balloons, but experts disagree...',
+    id: 'ufo_selfie_over_capitol',
+    title: 'UFO Selfie',
+    headline: 'TOURIST: "Saucer Behind Me, Not a Filter"',
+    content: 'Blurry night photo shows a glowing disc photobombing the Capitol dome. Officials: "Festive drone, probably."',
     type: 'conspiracy',
     rarity: 'common',
-    effects: { truth: 5 },
-    weight: 10
+    effects: { truth: 6, ip: -1 },
+    weight: 6,
+    flavorText: 'BREAKING: Local diners added "Cosmic Combo" to the breakfast menu within the hour. A souvenir shop sold out of alien plushies before noon. Meteorologists say the weather-balloon union is considering a strike after the PR disaster.'
   },
   {
-    id: 'media_blackout',
+    id: 'media_blackout_17min',
     title: 'Media Blackout',
-    headline: 'MYSTERIOUS: Major News Networks Experience Simultaneous Outages',
-    content: 'All major television networks went dark for exactly 17 minutes during prime time. Official explanation cites "solar flare interference," but timing seems suspiciously coordinated...',
+    headline: 'ALL CHANNELS GO DARK FOR 17 MINUTES',
+    content: 'Prime-time outage hits every major network at the exact same second. Cause labeled "cosmic hiccup."',
     type: 'conspiracy',
     rarity: 'common',
-    effects: { truth: -3, ip: 2 },
-    weight: 8
+    effects: { truth: -4, ip: 2 },
+    weight: 6,
+    flavorText: 'UPDATE: Test patterns reportedly winked at viewers in three time zones. A spokesperson advised "unblinking consumption of official guidance." Independent stations now advertise candles as "ad-free light sources."'
   },
   {
-    id: 'leaked_documents',
-    title: 'Document Leak',
-    headline: 'CLASSIFIED: Government Documents Surface Online',
-    content: 'Thousands of previously classified documents appear on various forums. Content appears authentic but government dismisses them as "sophisticated deepfakes."',
+    id: 'deepfile_dump_crochet_forum',
+    title: 'Files on the Loose',
+    headline: 'TOP SECRET PDFS UPLOADED TO CROCHET FORUM',
+    content: 'Redacted docs (with cat gifs) surface overnight. Spokesperson: "That\'s... not our watermark."',
     type: 'truth',
-    faction: 'truth',
     rarity: 'common',
-    effects: { truth: 8, cardDraw: 1 },
-    weight: 7
+    effects: { truth: 8, ip: -1 },
+    weight: 6,
+    flavorText: 'BREAKING: Forum moderators created a new thread called "Chain Stitch, Chain of Custody." Downloads quadrupled after someone posted a granny-square pattern named "Annex B." Several diagrams now include tasteful yarn arrows.'
   },
   {
-    id: 'disinformation_campaign',
-    title: 'Disinformation Wave',
-    headline: 'ALERT: Coordinated Misinformation Detected Across Platforms',
-    content: 'Social media algorithms suddenly start promoting conspiracy theories en masse. Tech companies claim it\'s a "minor glitch" but patterns suggest deliberate manipulation.',
+    id: 'algorithm_memeflood',
+    title: 'Meme Flood',
+    headline: 'FEEDS LOOP "WAKE UP, SHEEPLE!" FOR 9 HOURS',
+    content: 'Cooking videos replaced by synchronized rant-livestreams. Platforms blame "overly spicy algorithm."',
     type: 'government',
-    faction: 'government',
     rarity: 'common',
-    effects: { truth: -6, ip: 3 },
-    weight: 7
+    effects: { truth: -6, ip: 2 },
+    weight: 6,
+    flavorText: 'BULLETIN: Executives apologized using a pre-recorded apology-gif that looped itself. Community notes flagged the apology as "oddly enthusiastic." Trend analysts recommend clearing cache and expectations.'
   },
   {
-    id: 'whistleblower_appears',
-    title: 'Whistleblower Emerges',
-    headline: 'EXCLUSIVE: Former Government Employee Comes Forward',
-    content: 'A former NSA contractor reveals disturbing surveillance programs. Their identity is quickly scrubbed from all databases, but their testimony spreads like wildfire.',
+    id: 'masked_whistle_popcorn',
+    title: 'Masked Whistle',
+    headline: 'ANONYMOUS VOICE: "MICROWAVES ARE LISTENING"',
+    content: 'A distorted tipster claims popcorn bags double as parabolic mics. Video scrubbed, mirror links multiply.',
     type: 'truth',
-    faction: 'truth',
     rarity: 'common',
-    effects: { truth: 12, ip: -2 },
-    weight: 6
+    effects: { truth: 7 },
+    weight: 6,
+    flavorText: 'BREAKING: Appliance stores sold out of "mute stickers" for kitchenware by lunchtime. A neighborhood potluck served silent popcorn as protest. Tech bloggers insist the real threat is "butter fingerprints on evidence."'
   },
   {
-    id: 'government_announcement',
+    id: 'press_conf_water_breaks',
     title: 'Official Statement',
-    headline: 'OFFICIAL: Government Addresses Recent Concerns',
-    content: 'A carefully scripted press conference addresses "recent unfounded rumors." The spokesperson\'s nervous blinking and frequent water breaks don\'t inspire confidence.',
+    headline: 'SPOKESPERSON TAKES 23 SIPS IN 2 MINUTES',
+    content: 'Assures public that "rumors lack rum." Viewers compile blink-per-second charts.',
     type: 'government',
-    faction: 'government',
     rarity: 'common',
-    effects: { truth: -4, ip: 4 },
-    weight: 8
+    effects: { truth: -3, ip: 3 },
+    weight: 6,
+    flavorText: 'LIVE DESK: Camera operators requested hazard pay for trying to keep focus. The podium\'s glass of water now has its own fan account. Captioning AI briefly subtitled "(sweats politely)."'
   },
   {
-    id: 'internet_outage',
+    id: 'backbone_maintenance_again',
     title: 'Internet Disruption',
-    headline: 'TECHNICAL: Widespread Internet Outages Reported',
-    content: 'Major internet backbone providers experience "routine maintenance" that coincidentally affects conspiracy forums and truth-seeking websites most severely.',
+    headline: '"ROUTINE MAINTENANCE" HITS SAME FORUMS AGAIN',
+    content: 'Backbone hiccups knock out niche truth sites; shopping ads remain perfectly fine.',
     type: 'government',
     rarity: 'common',
     effects: { truth: -2, ip: 1 },
-    weight: 9
+    weight: 7,
+    flavorText: 'SERVICE NOTE: Providers called it a "surgical outage." A stray memo called it "surgery without anesthesia." Influencers report stable upload speeds for unboxing videos only.'
   },
   {
-    id: 'celebrity_endorsement',
+    id: 'celebrity_posts_then_hacked',
     title: 'Celebrity Speaks Out',
-    headline: 'ENTERTAINMENT: Popular Actor Questions Official Narrative',
-    content: 'A beloved celebrity uses their platform to question recent events. Their verified social media accounts are quickly "hacked" and the posts deleted.',
+    headline: 'A-LISTER POSTS THREAD, ACCOUNT "HACKED" 11 MIN LATER',
+    content: 'Screenshots show a 47-part expose. Publicist blames "jet-lagged thumbs."',
     type: 'truth',
     rarity: 'common',
-    effects: { truth: 6, ip: 1 },
-    weight: 8
+    effects: { truth: 5, ip: 1 },
+    weight: 6,
+    flavorText: 'ENTERTAINMENT: Fans reconstructed the thread using emoji for redactions. A conspiracy podcast released a director\'s cut with commentary. The star\'s dog\'s account denied involvement, adorably.'
   },
   {
-    id: 'scientific_study',
-    title: 'Research Published',
-    headline: 'SCIENCE: Independent Study Challenges Government Data',
-    content: 'A peer-reviewed study from a respected university contradicts official statistics. The lead researcher is suddenly reassigned to "focus on different priorities."',
+    id: 'peer_reviewed_ouch',
+    title: 'Independent Study',
+    headline: 'UNIVERSITY PAPER CONTRADICTS OFFICIAL NUMBERS',
+    content: 'Lead author reassigned to "aquarium census." The footnotes are lethal.',
     type: 'truth',
     rarity: 'common',
-    effects: { truth: 7, cardDraw: 1 },
-    weight: 7
+    effects: { truth: 7 },
+    weight: 6,
+    flavorText: 'CAMPUS WATCH: Librarians rolled out extra step ladders for the flood of citations. The registrar added a course titled "Intro to Uncomfortable Graphs." Meanwhile, goldfish attendance soared.'
   },
   {
-    id: 'budget_increase',
-    title: 'Budget Allocation',
-    headline: 'POLITICS: Defense Spending Sees Mysterious Increase',
-    content: 'Congressional budget documents show massive allocations to "Special Projects Division." When questioned, officials cite "national security classifications."',
+    id: 'mystery_budget_special_projects',
+    title: 'Budget Bump',
+    headline: '"SPECIAL PROJECTS" EATS WHOLE PAGE OF ZEROES',
+    content: 'Committee waves through "science-ish things." Accountants discover a new shade of red ink.',
     type: 'government',
     rarity: 'common',
-    effects: { ip: 5, truth: -1 },
-    weight: 8
+    effects: { ip: 4, truth: -1 },
+    weight: 6,
+    flavorText: 'LEDGER EXTRA: The line item "snacks & silence" costs more than a small moon. A staffer whispered the password is "donut." Procurement immediately ordered a dozen—of both.'
   },
   {
-    id: 'journalist_missing',
+    id: 'reporter_vanishes_near_nowhere',
     title: 'Reporter Vanishes',
-    headline: 'BREAKING: Investigative Journalist Goes Missing',
-    content: 'An award-winning reporter investigating corruption disappears. Their last known location was near a government facility that "doesn\'t exist" on official maps.',
+    headline: 'AWARD-WINNER LAST SEEN NEAR PLACE "THAT ISN\'T THERE"',
+    content: 'Car idling, trunk full of FOIA receipts. GPS pin: "¯\\_(ツ)_/¯".',
     type: 'conspiracy',
     rarity: 'common',
     effects: { truth: 8, ip: -1 },
-    weight: 6
+    weight: 5,
+    flavorText: 'NEWS ALERT: Their notebook contained a doodle labelled "Page 13." A local diner swears someone matching their description tipped in photocopies. The parking meter never started counting.'
   },
   {
-    id: 'weather_control',
-    title: 'Unusual Weather',
-    headline: 'WEATHER: Meteorologists Baffled by Storm Patterns',
-    content: 'Weather systems are behaving in ways that defy conventional meteorology. Scientists struggle to explain the mathematical precision of storm paths.',
+    id: 'weather_pins_and_strings',
+    title: 'Precision Storms',
+    headline: 'STORMS TURN 90° LIKE THEY READ A RULER',
+    content: 'Forecasts updated to "geometry with thunder." Kites now require permits.',
     type: 'conspiracy',
     rarity: 'common',
-    effects: { truth: 4, stateEffects: { pressure: 1 } },
-    weight: 8
+    effects: { truth: 4 },
+    weight: 7,
+    flavorText: 'WEATHER DESK: Doppler radar briefly displayed a thumbs-up. A retired math teacher sold chalk to meteorologists behind the station. Umbrella makers issued a protractor-themed line.'
   },
   {
-    id: 'social_media_purge',
-    title: 'Account Suspensions',
-    headline: 'TECH: Mass Account Suspensions Across Platforms',
-    content: 'Thousands of accounts discussing sensitive topics are simultaneously banned. Platform executives cite "terms of service violations" but provide no specifics.',
+    id: 'platform_purge_day',
+    title: 'Account Sweep',
+    headline: 'TERMS OF SERVICE ENFORCED ALL AT ONCE',
+    content: 'Thousands banned for "excessive curiosity." Appeals form features a single shrug emoji.',
     type: 'government',
     rarity: 'common',
     effects: { truth: -5, ip: 2 },
-    weight: 7
+    weight: 6,
+    flavorText: 'PLATFORM NOTE: A new badge "Probably Fine" appeared and vanished in an hour. PR claims it was an A/B test; users claim it was an A/A denial. Moderators requested ergonomic gavel-mice.'
   },
   {
-    id: 'economic_manipulation',
-    title: 'Market Fluctuations',
-    headline: 'FINANCE: Unexplained Stock Market Volatility',
-    content: 'Certain stocks experience impossible trading patterns. Expert analysis suggests algorithmic manipulation, but regulators find "no evidence of wrongdoing."',
+    id: 'market_salsa',
+    title: 'Algo Salsa',
+    headline: 'MARKETS DO THE CHA-CHA AT 3:33 A.M.',
+    content: 'Indices move in prime numbers. One trader swears the chart winked.',
     type: 'conspiracy',
     rarity: 'common',
-    effects: { ip: 3, truth: 2 },
-    weight: 8
+    effects: { ip: 2, truth: 2 },
+    weight: 7,
+    flavorText: 'FINANCE LIVE: Candlesticks were rebranded "candle-shticks." A bell rang itself, then apologized. Economists recommend diversifying into snacks and naps.'
   },
   {
-    id: 'military_exercise',
-    title: 'Training Operations',
-    headline: 'MILITARY: Large-Scale Exercises Begin Nationwide',
-    content: 'Unannounced military drills commence across multiple states. Officials describe them as "routine readiness assessments" despite their unprecedented scale.',
+    id: 'exercises_everywhere',
+    title: 'Surprise Drills',
+    headline: 'UNANNOUNCED EXERCISES TRACE CROP-CIRCLE ROUTES',
+    content: 'Convoys drive in pleasing spirals. Traffic cones promoted to captain.',
     type: 'government',
     rarity: 'common',
-    effects: { truth: -3, stateEffects: { defense: 1 } },
-    weight: 7
+    effects: { truth: -3, ip: 1 },
+    weight: 6,
+    flavorText: 'CIVIC ALERT: Residents asked to ignore synchronized marching and cheerful megaphones. A flyer promised "readiness, regardless of what." The mayor saluted an empty field, confidently.'
   },
   {
-    id: 'anonymous_leak',
-    title: 'Anonymous Source',
-    headline: 'LEAK: Classified Information Released by Unknown Party',
-    content: 'Sensitive documents appear on secure bulletin boards used by researchers. The leak\'s authenticity is verified, but the source remains completely untraceable.',
+    id: 'anonymous_brown_envelope',
+    title: 'Brown Envelope',
+    headline: 'UNMARKED PACKAGE: "OPEN AFTER MIDNIGHT"',
+    content: 'Inside: scans, dates, initials, and a doodle of a lizard in a tie.',
     type: 'truth',
     rarity: 'common',
     effects: { truth: 9, ip: -1 },
-    weight: 6
+    weight: 5,
+    flavorText: 'CITY DESK: The courier declined a tip and hummed the X-Files theme off-key. Forensics found toner, coffee, and something that smelled like civic duty. A second envelope appeared labeled "For the sequel."'
   },
   {
-    id: 'technology_malfunction',
-    title: 'System Failures',
-    headline: 'TECH: Critical Infrastructure Experiences Glitches',
-    content: 'Power grids, communication networks, and transportation systems suffer simultaneous "random" failures. Patterns suggest coordination, but investigations stall.',
+    id: 'critical_infrastructure_glitch',
+    title: 'System Glitch',
+    headline: 'GRIDS, TRAINS, PAGERS ALL SAY "404"',
+    content: 'Diagnostic screen reads: "Have you tried not asking questions?"',
     type: 'conspiracy',
     rarity: 'common',
-    effects: { truth: 3, ip: 2 },
-    weight: 8
+    effects: { truth: 3, ip: 1 },
+    weight: 7,
+    flavorText: 'SYSTEMS: Backup generators ran on vibes and one AA battery. A pager displayed the word "Ssshhh." IT required both a reboot and a quiet moment.'
   },
   {
-    id: 'public_protest',
-    title: 'Mass Demonstration',
-    headline: 'SOCIAL: Thousands Gather to Demand Transparency',
-    content: 'Peaceful protests demand government accountability. Media coverage is minimal, and organizers report their communications being mysteriously disrupted.',
+    id: 'crowd_with_homemade_signs',
+    title: 'Mass Rally',
+    headline: 'CITY SQUARE FILLS WITH POLITE MEGAPHONES',
+    content: 'Chants include citations. Someone brought spreadsheets.',
     type: 'truth',
     rarity: 'common',
-    effects: { truth: 6, ip: 1 },
-    weight: 7
+    effects: { truth: 6 },
+    weight: 6,
+    flavorText: 'STREET EXTRA: Organizers offered footnotes at the merch table. A toddler corrected a chant\'s grammar; applause followed. Police reported "orderly indignation with excellent penmanship."'
   },
   {
-    id: 'cover_story_fails',
-    title: 'Official Story Crumbles',
-    headline: 'EXPOSED: Government Explanation Contradicts Evidence',
-    content: 'Independent analysis reveals major inconsistencies in official accounts. Government doubles down on original story despite mounting contradictory evidence.',
+    id: 'cover_story_falls_apart',
+    title: 'Narrative Fracture',
+    headline: 'OFFICIAL TIMELINE HAS TUESDAY TWICE',
+    content: 'Side-by-side clips disagree about what a door is.',
     type: 'truth',
     rarity: 'common',
-    effects: { truth: 10, cardDraw: 1 },
-    weight: 6
+    effects: { truth: 10 },
+    weight: 5,
+    flavorText: 'MEDIA LAB: Fact-checkers requested neck braces for whiplash. A ministerial calendar simply skipped to Friday with a sigh. The door later released a statement: "I was always a window."'
   },
   {
-    id: 'surveillance_expansion',
-    title: 'Enhanced Monitoring',
-    headline: 'SECURITY: New Surveillance Measures Implemented',
-    content: 'Advanced monitoring systems are installed "for public safety." Privacy advocates raise concerns, but their objections are dismissed as "obstructionist."',
+    id: 'more_cameras_more_comfort',
+    title: 'Eyes Everywhere',
+    headline: 'NEW CAMERAS INSTALLED "FOR COMMUNITY HUGS"',
+    content: 'Boxes labeled "not surveillance" mounted on every lamppost.',
     type: 'government',
     rarity: 'common',
-    effects: { truth: -7, ip: 4 },
-    weight: 7
+    effects: { truth: -7, ip: 2 },
+    weight: 6,
+    flavorText: 'NOTICE: The lens caps arrived with smiley stickers. A brochure promised "optical support in challenging times." A bird nested in one unit and refused to be interviewed.'
   },
-
+  {
+    id: 'bigfoot_livestream',
+    title: 'Bigfoot Live',
+    headline: 'SASQUATCH STARTS COOKING CHANNEL, HATES RING LIGHTS',
+    content: 'Signature dish: moss au jus. Comments: "hair routine pls."',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 5 },
+    weight: 7,
+    flavorText: 'STREAMING: Chat mods banned the word "Yeti?" after 400 repeats. An off-camera howl triggered 10k likes. The recipe card was written in suspiciously large cursive.'
+  },
+  {
+    id: 'denver_airport_art_moves',
+    title: 'Moving Mural',
+    headline: 'DENVER AIRPORT ART BLINKS FIRST',
+    content: 'Night-vision footage shows murals changing outfits hourly.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4, ip: -1 },
+    weight: 7,
+    flavorText: 'TERMINAL WATCH: A gate agent insisted the painting "asked for a window seat." Tourists queued for selfies with the blinking horse. Security confiscated three paintbrushes "on general principle."'
+  },
+  {
+    id: 'haarp_open_house',
+    title: 'HAARP Open House',
+    headline: 'SKY STATION HOLDS "BRING YOUR OWN ANTENNA" DAY',
+    content: 'Visitors offered complimentary earplugs and plausible deniability.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -4, ip: 2 },
+    weight: 7,
+    flavorText: 'CLOUD REPORT: The sky formed a thumbs-up, then a question mark. Staff called it "atmospheric jazz." The gift shop sold limited-edition lightning in a bottle (empty).'
+  },
+  {
+    id: 'men_in_beige',
+    title: 'Men in Beige',
+    headline: 'LOW-BUDGET MIB SIGHTED IN DISCOUNT SLACKS',
+    content: 'They hand out business cards that simply say "NO."',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -2, ip: 2 },
+    weight: 7,
+    flavorText: 'FIELD NOTE: Their sedan played elevator music at weaponized volume. Witnesses described the beige as "emotionally neutral." Tailors refuse to discuss bulk orders of khaki.'
+  },
+  {
+    id: 'crop_circle_qr',
+    title: 'QR Circles',
+    headline: 'CROP CIRCLES NOW LINK TO CUSTOMER SURVEY',
+    content: '"How satisfied are you with abduction experience?"',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4 },
+    weight: 7,
+    flavorText: 'AGRI EXTRA: The farmer offered loyalty points redeemable for corn. An agronomist rated the design "90% symmetry, 10% sass." The QR also opened a playlist named "Probed & Vibed."'
+  },
+  {
+    id: 'lake_monster_selfie',
+    title: 'Lake Monster Selfie',
+    headline: 'TOURIST CAPTURES DUCK-FACE… AND SOMETHING HUGE',
+    content: 'Creature appears to wink. Ranger issues selfie-stick permit.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 5, ip: -1 },
+    weight: 7,
+    flavorText: 'WATERFRONT: Bait shops introduced "ethical chum." The lifeguard chair now includes binoculars and a cross-stitch of "I believe." Souvenir towels read "I got splashed by truth."'
+  },
+  {
+    id: 'paperwork_tsunami',
+    title: 'Paperwork Tsunami',
+    headline: 'FORMS BREED IN STORAGE CLOSET, DEMAND STAPLES',
+    content: 'Clerks report "hissing" from aisle G.',
+    type: 'government',
+    rarity: 'common',
+    effects: { ip: 3, truth: -1 },
+    weight: 7,
+    flavorText: 'CIVIL SERVICE: A new requisition form now requires a permission form to request the form. The label maker ran out of the letter "N" from printing "No." An intern earned a medal for defeating a jam.'
+  },
+  {
+    id: 'foil_hat_fashion_week',
+    title: 'Foil Week',
+    headline: 'TIN HAT COUTURE STORMS RUNWAY',
+    content: 'Designers unveil signal-chic with detachable ear flaps.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 4, ip: -1 },
+    weight: 7,
+    flavorText: 'STYLE: Models refused to reveal who they weren\'t listening to. Streetwear launched "orbital shimmer" jackets. Boutique mirrors came with a "no reflections were harmed" disclaimer.'
+  },
+  {
+    id: 'ghost_in_the_wifi',
+    title: 'Ghost Wi-Fi',
+    headline: 'ROUTERS WHISPER PASSWORDS FROM BEYOND',
+    content: 'IT says the phantom SSID is "Ectonet_5G."',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 3 },
+    weight: 7,
+    flavorText: 'TECH: Firmware notes included garlic and Latin. The helpdesk advised "try turning your house around and back on." Paranormal investigators brought EMF meters and snacks.'
+  },
+  {
+    id: 'black_helicopter_bogo',
+    title: 'Chopper BOGO',
+    headline: 'BLACK HELICOPTERS OFFER TWO-FOR-ONE NIGHT FLIGHTS',
+    content: 'Coupons valid after curfew. Pilots wear aviators at midnight.',
+    type: 'government',
+    rarity: 'common',
+    effects: { ip: 2, truth: -2 },
+    weight: 7,
+    flavorText: 'AVIATION: Noise complaints routed to a P.O. box in the sky. A brochure promised "hovering reassurance." The coupon\'s fine print was printed in invisibility ink.'
+  },
+  {
+    id: 'elvis_at_3am_diner',
+    title: 'Elvis at Diner',
+    headline: 'THE KING ORDERS PANCAKES, PAYS IN SUSPICIONS',
+    content: 'Security cam redacted with rhinestones.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 5 },
+    weight: 7,
+    flavorText: 'LATE EDITION: The jukebox queued "Return to Sender (Classified)." A blue suede shoeprint led nowhere in particular. The cook swore the syrup said "thank you very much."'
+  },
+  {
+    id: 'time_cube_intern',
+    title: 'Time Intern',
+    headline: 'NEW HIRE SCHEDULES YESTERDAY TWICE',
+    content: 'Office enjoys two Fridays; calendar develops stage fright.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 3, ip: 1 },
+    weight: 7,
+    flavorText: 'WORKPLACE: HR approved overtime both retroactively and preemptively. Coffee machines dispensed espresso and deja vu. Everyone forgot to go home right on time, again.'
+  },
+  {
+    id: 'denial_generator',
+    title: 'Denial Generator',
+    headline: 'DEVICE OUTPUTS "NO COMMENT" IN 48 LANGUAGES',
+    content: 'Press room installs it as white noise.',
+    type: 'government',
+    rarity: 'common',
+    effects: { ip: 3, truth: -1 },
+    weight: 7,
+    flavorText: 'MEDIA: Reporters brought universal translators and granola bars. The machine accepted follow-ups only in interpretive dance. It beeped twice when asked about the beep.'
+  },
+  {
+    id: 'mothman_hi_vis',
+    title: 'Hi-Vis Mothman',
+    headline: 'WINGED GUARDIAN HANDS OUT SAFETY VESTS',
+    content: 'Construction sites experience "forewarnings with flair."',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4 },
+    weight: 7,
+    flavorText: 'FIELD: The reflective tape spelled "duck." Hard hats sprouted tasteful antennae. The foreman said productivity soared, mostly from brisk, cautious walking.'
+  },
+  {
+    id: 'secret_tunnels_airport',
+    title: 'Baggage Tunnels',
+    headline: 'AIRPORT MAP LABELS A HALLWAY "NOPE"',
+    content: 'Custodians insist they mop around a humming rectangle.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4, ip: -1 },
+    weight: 7,
+    flavorText: 'TRAVEL: Gate agents practice saying "It\'s just wind" with confidence. A suitcase returned with a sticker: "I visited Elsewhere and all I got was this tag." TSA confiscated a map that folded itself.'
+  },
+  {
+    id: 'truth_hotline_busy',
+    title: 'Truth Hotline',
+    headline: 'TIP LINE PERMANENTLY "ON HOLD" WITH JAZZ',
+    content: 'Callers memorize trumpet solos; one solves a crime in 7/8 time.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -3, ip: 1 },
+    weight: 7,
+    flavorText: 'SWITCHBOARD: The hold music received a grant for community engagement. Agents refused to comment between choruses. A caller requested sheet music instead of answers.'
+  },
+  {
+    id: 'polaroid_from_tomorrow',
+    title: 'Tomorrow Polaroid',
+    headline: 'PHOTO DEVELOPS BEFORE IT IS TAKEN',
+    content: 'Caption reads "Don\'t forget the umbrella." Forecast: sunshine.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 6 },
+    weight: 6,
+    flavorText: 'PHOTO DESK: The camera apologized in cursive. The weather changed its mind with a polite drizzle. A gallery opened a "Previews of the Past" exhibition to confused applause.'
+  },
+  {
+    id: 'county_fair_abduction_booth',
+    title: 'Abduction Booth',
+    headline: 'MIDWAY GAME OFFERS "RIDE IN BEAM" FOR 5 TICKETS',
+    content: 'Winners return with fabulous hair and vague wisdom.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 5, ip: -1 },
+    weight: 7,
+    flavorText: 'FAIR: Cotton candy rebranded as "anti-gravity floss." The Ferris wheel rotated toward Orion once, tastefully. A carnie swore the plush prizes blinked independently.'
+  },
+  {
+    id: 'press_badge_everyone',
+    title: 'Everyone Press',
+    headline: 'CITY HANDS OUT PRESS BADGES LIKE STICKERS',
+    content: 'Interviews ensue. Microphones multiply.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 5, ip: -1 },
+    weight: 7,
+    flavorText: 'CIVICS: The mayor held a press conference about holding press conferences. Kids asked the best questions. A headline read "Public Holds Itself Accountable."'
+  },
+  {
+    id: 'quiet_hours_extended',
+    title: 'Extended Quiet',
+    headline: 'CURFEW RENAMED "COZY HOURS," ADDS EXTRA HOUR',
+    content: 'Citizens urged to "whisper indoors about nothing."',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -4, ip: 2 },
+    weight: 7,
+    flavorText: 'PUBLIC NOTICE: Flyers printed in soft fonts recommended "restful compliance." Streetlamps dimmed to a cooperative blush. The city soundtrack was replaced by a shush.'
+  },
+  {
+    id: 'library_shelf_moves',
+    title: 'Moving Shelves',
+    headline: 'ARCHIVE STACKS REARRANGE THEMSELVES AT NIGHT',
+    content: 'Files about files move to a room labeled "Deeper Quiet."',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4 },
+    weight: 7,
+    flavorText: 'ARCHIVES: The Dewey Decimal System added a code for "don\'t." A librarian stamped a ghost card with today\'s date and shrugged. The index hissed when opened to "H."'
+  },
+  {
+    id: 'truthers_get_citation_style',
+    title: 'Citation Chic',
+    headline: 'TRUTHERS MIX MLA & AP IN SAME SENTENCE',
+    content: 'Style guides unite against a common footnote.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 6 },
+    weight: 7,
+    flavorText: 'STYLE DESK: A zine taught Chicago style to whiteboards. Red string now comes with endnotes. A professor declared, "At last, rebellion with references."'
+  },
+  {
+    id: 'usb_cable_that_listens',
+    title: 'Listening Cable',
+    headline: 'CHARGER CLAIMS IT\'S JUST CHARGING, THEN WINKS',
+    content: 'Port emits faint dial tone. Device feels judged.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -3, ip: 1 },
+    weight: 7,
+    flavorText: 'GADGET: Privacy cases launched with tiny earmuffs. Retailers offered "air-gapped hugs." A teardown found a microphone labeled "Shhh."'
+  },
+  {
+    id: 'county_map_redrawn_overnight',
+    title: 'New Lines',
+    headline: 'COUNTY BORDERS SNEAK THREE FEET EAST',
+    content: 'Signs replaced at dawn by polite ninjas.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 3, ip: 1 },
+    weight: 7,
+    flavorText: 'CARTOGRAPHY: Compasses spun, then pretended they didn\'t. Surveyors demanded hazard pay in pushpins. Residents reported feeling slightly more easterly.'
+  },
+  {
+    id: 'press_club_strobe',
+    title: 'Press Strobe',
+    headline: 'NEWSROOM LIGHTS FLASH MORSE FOR "ASK BETTER"',
+    content: 'Reporters accuse ceiling of editorializing.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 5 },
+    weight: 7,
+    flavorText: 'NEWSROOM: The coffee machine printed quotes on the foam. An ombudsman taped a mirror to the podium labeled "You." The ceiling blinked again, smugly.'
+  },
+  {
+    id: 'gov_hotline_winner',
+    title: 'Caller Nine Wins',
+    headline: 'GOV HOTLINE OFFERS PRIZES FOR SHORT QUESTIONS',
+    content: 'Grand prize: expedited denial.',
+    type: 'government',
+    rarity: 'common',
+    effects: { ip: 2, truth: -2 },
+    weight: 7,
+    flavorText: 'HOTLINE: Operators announced a new tier—"Hold Plus." Callers could upgrade to "Be Right Back." The confetti cannon fired paperwork.'
+  },
+  {
+    id: 'mall_santa_is_mib',
+    title: 'Mall Santa MIB',
+    headline: 'DEPARTMENT STORE SANTA NEVER BLINKS',
+    content: 'Gift wish list redacted with candy-cane ink.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -2, ip: 2 },
+    weight: 7,
+    flavorText: 'HOLIDAY: The reindeer emitted encrypted jingles. Elves wore sunglasses indoors. A child asked for transparency and was offered wrapping paper.'
+  },
+  {
+    id: 'cat_reads_foia',
+    title: 'FOIA Cat',
+    headline: 'LIBRARY CAT CURLS UP ON JUST THE RIGHT BOX',
+    content: 'Archivist calls it "intuitive indexing."',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 5 },
+    weight: 7,
+    flavorText: 'LOCAL: Treat budget doubled after a successful purr-review. The cat batted a binder to "accidentally open" page 13. A staffer meowed "open access" with conviction.'
+  },
+  {
+    id: 'sudden_weather_balloon_week',
+    title: 'Balloon Week',
+    headline: 'WEATHER BALLOONS RECEIVE THEIR OWN PARADE',
+    content: 'Officials applaud. Sky looks smug.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -3, ip: 1 },
+    weight: 7,
+    flavorText: 'PARADE: Confetti was recycled from last year\'s denial. The grand marshal was "nobody in particular." Spectators reported a light static charge and a sense of closure.'
+  },
+  {
+    id: 'faraday_fashion',
+    title: 'Faraday Fashion',
+    headline: 'RUNWAY SHOW FEATURES POCKETS THAT HISS',
+    content: 'Phones go quiet. Heads go loud.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 4, ip: -1 },
+    weight: 7,
+    flavorText: 'STYLE: Designers claimed "signal-agnostic silhouettes." Attendees described the afterparty as "peacefully unpinged." A model said their thoughts sounded taller.'
+  },
+  {
+    id: 'parking_meter_time_tickets',
+    title: 'Time Meter',
+    headline: 'PARKING METERS ISSUE TICKETS FOR TOMORROW',
+    content: 'Appeals office asks you to come yesterday.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4, ip: 1 },
+    weight: 7,
+    flavorText: 'CITY HALL: A new coin called a "chronon" launched and folded. The app offered "Undo" for a small fee. The tow truck swore it returned your car before it left.'
+  },
+  {
+    id: 'distraction_con',
+    title: 'DistractionCon',
+    headline: 'THREE-DAY EXPO ON "LOOK OVER THERE"',
+    content: 'Keynote delivered while juggling fireworks.',
+    type: 'government',
+    rarity: 'common',
+    effects: { ip: 2, truth: -2 },
+    weight: 7,
+    flavorText: 'EVENTS: Swag bags contained shiny objects and a waiver. Panels overlapped with themselves. The closing ceremony ended before it began, spectacularly.'
+  },
+  {
+    id: 'red_string_shortage',
+    title: 'String Shortage',
+    headline: 'NATION RUNS LOW ON RED STRING',
+    content: 'Bulletin boards resort to spaghetti.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 4 },
+    weight: 7,
+    flavorText: 'DIY: Hardware stores rationed pushpins at two per person. A grandma crocheted a beautiful conspiracy doily. A mural depicted arrows pointing at each other, meaningfully.'
+  },
+  {
+    id: 'copy_paper_page3_missing',
+    title: 'Paper Vanish',
+    headline: 'PRINTER SHOWS "MISSING PAGE 3 OF 3" FOREVER',
+    content: 'Only page 2 prints. It giggles.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -3 },
+    weight: 7,
+    flavorText: 'IT: The new driver required a reboot and a confession. Page 3 was later found hiding behind a watermark. The toner pleaded the fifth.'
+  },
+  {
+    id: 'truth_or_dare_townhall',
+    title: 'Truth or Dare',
+    headline: 'TOWN HALL GAME NIGHT GETS REAL',
+    content: 'Officials pick "dare," public picks "truth."',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 6, ip: -1 },
+    weight: 7,
+    flavorText: 'CIVICS: The winning move was "show us the budget." Refreshments included humble pie. The microphone developed an honesty setting.'
+  },
+  {
+    id: 'smiley_drones',
+    title: 'Smiley Drones',
+    headline: 'NEW DRONES PAINTED WITH FRIENDLY FACES',
+    content: 'They wave with gimbals. Kids wave back.',
+    type: 'government',
+    rarity: 'common',
+    effects: { ip: 2, truth: -2 },
+    weight: 7,
+    flavorText: 'AIRSPACE: The manual recommends "reassuring hum at modest altitude." A balloon popped in protest, bravely. Street artists gave the drones eyebrows, for nuance.'
+  },
+  {
+    id: 'museum_labels_wink',
+    title: 'Museum Wink',
+    headline: 'EXHIBIT LABELS REWRITE THEMSELVES AFTER HOURS',
+    content: 'Plaques now include "allegedly."',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 3 },
+    weight: 7,
+    flavorText: 'CULTURE: Security footage shows a bust rolling its eyes. The gift shop sold limited-edition "I saw nothing" postcards. A docent sighed, "History is a moving target."'
+  },
+  {
+    id: 'am_radio_snow_whispers',
+    title: 'Snow Talk',
+    headline: 'STATIC ON AM RADIO WHISPERS NAMES',
+    content: 'Callers claim it correctly spelled "Brian with a Y."',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4 },
+    weight: 7,
+    flavorText: 'COMMUTE: Traffic slowed as drivers tried to write down the forecast. The station apologized to the alphabet. A DJ said the snow had excellent diction.'
+  },
+  {
+    id: 'press_release_madlibs',
+    title: 'Mad Libs PR',
+    headline: 'PRESS RELEASES USE BRACKETS LIKE [ADJECTIVE]',
+    content: 'Someone forgot to fill the template; everyone pretends it\'s art.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -2, ip: 1 },
+    weight: 7,
+    flavorText: 'LANGUAGE: The update now [adverb] denies [noun] with [emotion]. A curator offered to frame the mistake. The correction misspelled "correction."'
+  },
+  {
+    id: 'open_data_treasure_x',
+    title: 'Open Data Map',
+    headline: 'CITY API ACCIDENTALLY PLOTS A BIG RED X',
+    content: 'Developers swear it\'s caching; kids bring shovels.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 5 },
+    weight: 7,
+    flavorText: 'CIVTECH: The GIS layer labeled "Oops." A park bench now has a plaque that says "Close Enough." A buried lunchbox contained blueprints for better playgrounds.'
+  },
+  {
+    id: 'night_court_abductions',
+    title: 'Night Docket',
+    headline: 'COURT HEARS THREE ABDUCTION CASES BEFORE DAWN',
+    content: 'All defendants plead "beamed."',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4, ip: -1 },
+    weight: 7,
+    flavorText: 'LEGAL: The gavel echoed like a Theremin. A bailiff offered out-of-this-world snacks. The transcript included the word "whoosh" in brackets.'
+  },
+  {
+    id: 'citywide_deja_vu',
+    title: 'Déjà Vu',
+    headline: 'WHOLE TOWN SWEARS THEY SAID THIS ALREADY',
+    content: 'Calendar suspects foul play.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 3, ip: 1 },
+    weight: 7,
+    flavorText: 'TIMELINE: Residents greeted each other with "nice to re-meet." Shops advertised "sale again, again." The weatherman predicted yesterday with confidence.'
+  },
+  {
+    id: 'press_pool_windowless_aquarium',
+    title: 'Pool Day',
+    headline: 'PRESS POOL TAKEN TO WINDOWLESS AQUARIUM',
+    content: 'Fish stare back judgmentally.',
+    type: 'government',
+    rarity: 'common',
+    effects: { ip: 2, truth: -2 },
+    weight: 7,
+    flavorText: 'MARITIME: Dolphins refused comment but smiled knowingly. The gift shop sold water with an NDA. Reporters claimed the exit door swam away.'
+  },
+  {
+    id: 'future_timestamp_tip',
+    title: 'Future Tip',
+    headline: 'EMAIL TIMESTAMPED NEXT THURSDAY NAMES NAMES',
+    content: 'Spam filter lists it as "prophetic marketing."',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 7 },
+    weight: 6,
+    flavorText: 'INBOX: The sender field read "Tomorrow, Probably." The attachment was a to-do list with today already crossed out. IT cleared its throat and bought a lottery ticket.'
+  },
+  {
+    id: 'night_vision_squirrels',
+    title: 'Ops Squirrels',
+    headline: 'LOCAL SQUIRRELS WEAR TINY NIGHT-VISION GOGGLES',
+    content: 'Nuts buried with military precision.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -2, ip: 2 },
+    weight: 7,
+    flavorText: 'WILDLIFE: Officials called it "urban ecology outreach." Park benches were wiretapped by acorns. A jogger reported being debriefed in chitters.'
+  },
+  {
+    id: 'tour_bus_to_nowhere',
+    title: 'Mystery Tour',
+    headline: 'SIGHTSEEING BUS TAKES EVERY EXIT TO "CLASSIFIED"',
+    content: 'Guidebook consists of polite apologies and arrows.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 3, ip: -1 },
+    weight: 7,
+    flavorText: 'TRAVEL: The driver swore the map moved first. Passengers rated the journey "enigmatic but punctual." A postcard arrived before the bus departed.'
+  },
+  {
+    id: 'town_sign_blur',
+    title: 'Welcome Sign Blur',
+    headline: 'CITY LIMITS SIGN BLURS WHEN PHOTOGRAPHED',
+    content: 'Tourists blame autofocus; locals blame "policy."',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -3 },
+    weight: 7,
+    flavorText: 'CIVIC BRANDING: The font is officially "Sans Accountability." Souvenir shirts read "I visited ???." The highway shrugged in both directions.'
+  },
+  {
+    id: 'truth_cafe_receipts',
+    title: 'Receipt Revelations',
+    headline: 'COFFEE RECEIPTS INCLUDE FOOTNOTES & SOURCES',
+    content: 'Baristas cite claims about crema and corruption.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 5, ip: -1 },
+    weight: 7,
+    flavorText: 'LATTÉ PRESS: Milk foamed into the shape of a pie chart. The tip jar read "for sources." Customers left caffeinated and cited.'
+  },
+  {
+    id: 'park_statue_moves_a_bit',
+    title: 'Statue Shuffle',
+    headline: 'MONUMENT FACES SLIGHTLY DIFFERENT DIRECTION',
+    content: 'City denies rotation; pigeons confirm.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4 },
+    weight: 7,
+    flavorText: 'ART WATCH: The plinth\'s shadow suggested a conspiracy at noon. Tourists insisted yesterday\'s selfies disagree. A plaque was updated to "probably always looked this way."'
+  },
+  {
+    id: 'press_ids_expire_yesterday',
+    title: 'Expired Press',
+    headline: 'ALL PRESS PASSES EXPIRE "YESTERDAY, 5PM SHARP"',
+    content: 'Renewal office closed for "rolling lunch."',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -3, ip: 1 },
+    weight: 7,
+    flavorText: 'ADMIN: The new form requires two witnesses and one alibi. The queue looped through a broom closet. A stamp read "Denied, but in cursive."'
+  },
+  {
+    id: 'radio_scanner_hears_future',
+    title: 'Scanner Tomorrow',
+    headline: 'POLICE SCANNER PICKS UP NEXT WEEK\'S CHATTER',
+    content: 'Officers request calendar updates in real time.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 5 },
+    weight: 7,
+    flavorText: 'DISPATCH: A call reported a missing item that hadn\'t vanished yet. Traffic cones were deployed in advance. The log printed itself, smugly.'
+  },
+  {
+    id: 'city_budget_in_invisible_ink',
+    title: 'Invisible Budget',
+    headline: 'FINANCE DOCS LEGIBLE ONLY UNDER BLACKLIGHT',
+    content: 'Council meetings now BYO-disco.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -4, ip: 1 },
+    weight: 7,
+    flavorText: 'AUDIT: The line for "misc" glowed brightest. Accountants requested sunglasses and forgiveness. The mayor called the vibe "fiscally luminescent."'
+  },
+  {
+    id: 'lost_and_found_time',
+    title: 'Lost & Found Time',
+    headline: 'CITY LOST & FOUND ADDS "WEDNESDAY AFTERNOON"',
+    content: 'Claims require proof you were there and weren\'t.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4, ip: 1 },
+    weight: 7,
+    flavorText: 'CIVIC SERVICES: Items include umbrellas, a sock, and an unplayed voicemail. A clerk stamped a minute and handed it back. The clock chimed appreciatively.'
+  },
+  {
+    id: 'truth_zine_explodes',
+    title: 'Zine Boom',
+    headline: 'STAPLED TRUTH MAGAZINES OUTSELL GLOSSIES',
+    content: 'Photocopiers heat to "revelation."',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 6 },
+    weight: 7,
+    flavorText: 'PRINT: A corner store became a newsroom overnight. Red string bundles came free with staples. The horoscope predicted "sources align."'
+  },
+  {
+    id: 'gov_sticker_everything_ok',
+    title: 'Everything\'s Fine',
+    headline: 'NEW "ALL GOOD!" STICKERS APPEAR ON PROBLEMS',
+    content: 'Potholes and questions receive equal decals.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -2, ip: 2 },
+    weight: 7,
+    flavorText: 'PUBLIC WORKS: Workers were seen smoothing concerns with clipboards. A cone wore a smiley sticker, convincingly. The road agreed to disagree.'
+  },
+  {
+    id: 'mysterious_hum_citywide',
+    title: 'The Hum',
+    headline: 'CITYWIDE HUM AT A COMFORTABLE 432HZ',
+    content: 'Citizens report "pleasant unease."',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 3 },
+    weight: 7,
+    flavorText: 'ACOUSTICS: Musicians tuned to suspicion. The power grid blushed. A wellness studio sold "grounding earplugs" that smelled like rosemary.'
+  },
+  {
+    id: 'truth_map_scales_tilt',
+    title: 'Scales Tip',
+    headline: 'MAP LEGEND NOW INCLUDES "LIKELY TRUE-ISH"',
+    content: 'Cartographers add an eyebrow icon.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 5 },
+    weight: 7,
+    flavorText: 'ATLAS: A new projection maximizes room for footnotes. Compasses added "hmm." Tour guides adopted disclaimers as walking sticks.'
+  },
+  {
+    id: 'gov_press_kit_blank',
+    title: 'Blank Kit',
+    headline: 'PRESS KITS SHIP WITH ONLY A MIRROR',
+    content: 'Label: "Reflect on your questions."',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -3, ip: 1 },
+    weight: 7,
+    flavorText: 'PR: The mirror fogged up to spell "No." The USB contained a white noise MP3 and a stock photo of a shrug. The tote bag was high quality, unfortunately.'
+  },
+  {
+    id: 'satellite_flare_winks',
+    title: 'Winking Satellite',
+    headline: 'ORBITER FLASHES MORSE FOR "HI"',
+    content: 'Astronomers blame ice; kids wave anyway.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4, ip: -1 },
+    weight: 7,
+    flavorText: 'SKY: Backyard telescopes sold out alongside hot cocoa. One amateur radio picked up a cheerful beep. The clouds politely parted, briefly.'
+  },
+  {
+    id: 'truth_busker_factchecks',
+    title: 'Busker Facts',
+    headline: 'STREET MUSICIAN FACT-CHECKS BETWEEN SONGS',
+    content: 'Tips include citations on napkins.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 4, ip: -1 },
+    weight: 7,
+    flavorText: 'SIDEWALK: The hat filled with coins and sources. A duet with a passing historian drew a crowd. The encore was a bibliography.'
+  },
+  {
+    id: 'gov_guideline_on_tones',
+    title: 'Guided Tone',
+    headline: 'NEW GUIDELINE: "SPEAK IN REASSURING LOWERCASE"',
+    content: 'Capital letters reserved for "authorized excitement."',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -2, ip: 2 },
+    weight: 7,
+    flavorText: 'STYLE SHEET: A leaked memo banned italics "unless soothing." The exclamation mark union filed a grievance. Periods were told to soften their edges.'
+  },
+  {
+    id: 'neighbors_hear_typewriters',
+    title: 'Clackety Truth',
+    headline: 'NEIGHBORS REPORT TYPEWRITER SOUNDS AT MIDNIGHT',
+    content: 'No one owns a typewriter. The drafts are good.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4 },
+    weight: 7,
+    flavorText: 'NIGHT DESK: Pages slid under doors with gentle authority. The margins smelled like coffee and old bravery. Editors awoke with ink on their hands.'
+  },
+  {
+    id: 'truth_class_in_bar',
+    title: 'Pub Seminar',
+    headline: 'LOCAL BAR HOSTS "TRUTH 101 (LOUD)"',
+    content: 'Syllabi printed on coasters.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 5 },
+    weight: 7,
+    flavorText: 'EDU: A chalkboard listed sources and specials. The pop quiz involved darts and footnotes. A skeptic left a believer in citations.'
+  },
+  {
+    id: 'gov_civic_quiz_app',
+    title: 'Civic Quiz',
+    headline: 'OFFICIAL APP GRADES YOUR QUESTIONS',
+    content: 'Score too high? Try easier questions.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -4, ip: 1 },
+    weight: 7,
+    flavorText: 'APP STORE: Reviews praised the UI and punished the answers. The premium tier unlocked "hints" that said "no." A patch notes entry merely sighed.'
+  },
+  {
+    id: 'drone_light_show_spells_nah',
+    title: 'Drone Nah',
+    headline: 'LIGHT SHOW SPELLS "NAH" OVER CITY HALL',
+    content: 'Organizer blames font selection.',
+    type: 'government',
+    rarity: 'common',
+    effects: { ip: 2, truth: -2 },
+    weight: 7,
+    flavorText: 'SPECTACLE: The crowd cheered, then wondered why. A second wave spelled "K." The press release insisted it meant "Knowledge."'
+  },
+  {
+    id: 'truth_scavenger_hunt',
+    title: 'Clue Hunt',
+    headline: 'CITYWIDE SCAVENGER HUNT HIDES DOCUMENTS',
+    content: 'Winning team found receipts under a bench.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 6 },
+    weight: 7,
+    flavorText: 'URBAN PLAY: Clues included tasteful puns and grid coordinates. The prize was a file folder and a community hug. Someone framed the map and called it art.'
+  },
+  {
+    id: 'random_tan_briefcase',
+    title: 'Tan Briefcase',
+    headline: 'BRIEFCASE APPEARS, HUMS, CHANGES OWNER THRICE',
+    content: 'Each owner denies opening it.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4, ip: 1 },
+    weight: 7,
+    flavorText: 'CURB: The handle felt like a handshake. A sticker read "Property of Nobody." The final carrier walked into a revolving door and did not reappear.'
+  },
+  {
+    id: 'gov_signage_everything_normal',
+    title: 'All Normal',
+    headline: 'NEW SIGNS: "EVERYTHING NORMAL (THIS WAY)"',
+    content: 'Arrows point everywhere.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -2, ip: 2 },
+    weight: 7,
+    flavorText: 'WAYFINDING: Tourists took comfort while locals took notes. A map kiosk displayed a shrug icon. The information desk offered pamphlets titled "Sure."'
+  },
+  {
+    id: 'truth_window_notes',
+    title: 'Sticky Revelations',
+    headline: 'APARTMENT WINDOWS FILL WITH SOURCED STICKY NOTES',
+    content: 'Neighbors peer-review across alleys.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 5, ip: -1 },
+    weight: 7,
+    flavorText: 'BLOCK PARTY: Clotheslines carried citations like flags. A landlord tried to charge rent on the margin space. The moon nodded appreciatively.'
+  },
+  {
+    id: 'gov_calendar_redactions',
+    title: 'Calendar Redact',
+    headline: 'OFFICIAL CALENDAR BLACKS OUT LUNCH, TWICE',
+    content: 'Meetings listed as "meeting."',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -3 },
+    weight: 7,
+    flavorText: 'SCHEDULING: The day planner squeaked when opened. Staff referred to Tuesday as "TBD-day." Caterers signed NDAs for sandwiches.'
+  },
+  {
+    id: 'truth_billboard_microprint',
+    title: 'Fine Print Truth',
+    headline: 'BILLBOARD TEXT LEGIBLE ONLY WITH BINOCULARS',
+    content: 'It\'s just footnotes, glorious footnotes.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 6 },
+    weight: 7,
+    flavorText: 'OUTDOOR: Drivers pulled over to do close reading. A librarian blew it up on a plotter and cried happy tears. The QR code resolved to "thanks_for_trying.txt."'
+  },
+  {
+    id: 'gov_helpful_chatbot',
+    title: 'Helpful Bot',
+    headline: 'OFFICIAL CHATBOT ANSWERS EVERYTHING WITH "PERHAPS"',
+    content: 'Follow-up responses vary between "hmm" and "indeed."',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -2, ip: 2 },
+    weight: 7,
+    flavorText: 'SUPPORT: The typing indicator is permanent. The satisfaction survey autocompletes itself to "neutral." The bot apologized for being helpful.'
+  },
+  {
+    id: 'subway_gremlin_report',
+    title: 'Subway Gremlins',
+    headline: 'COMMUTERS BLAME GREMLINS FOR PERFECT DELAYS',
+    content: 'Every train is late by exactly the same amount.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 3, ip: 1 },
+    weight: 7,
+    flavorText: 'TRANSIT: A gremlin-sized turnstile appeared overnight. Announcements thanked riders for their mythical patience. A rat wore a safety vest with authority.'
+  },
+  {
+    id: 'truth_knock_and_drop',
+    title: 'Knock & Drop',
+    headline: 'MYSTERY COURIERS LEAVE BOX OF SOURCES, RING, VANISH',
+    content: 'Doorbell cams capture only a blur and a bibliography.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 7 },
+    weight: 6,
+    flavorText: 'DOORSTEP: The label read "For Whom It Concerns (Everyone)." Inside: xeroxes, clippings, and a small flashlight. The thank-you note wrote itself.'
+  },
+  {
+    id: 'gov_press_row_cardboard',
+    title: 'Cardboard Crowd',
+    headline: 'PRESS ROW REPLACED BY VERY REAL CARDBOARD CUTOUTS',
+    content: 'They nod politely during tough questions.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -4, ip: 1 },
+    weight: 7,
+    flavorText: 'BRIEFING: The cutouts were recycled into "We Hear You" signs. A real reporter disguised themselves as corrugated and got in. The mic stand confessed nothing.'
+  },
+  {
+    id: 'truth_bus_ad',
+    title: 'Bus Ad Truth',
+    headline: 'CITY BUS AD BOARDS PUBLISH FOIA HOW-TO',
+    content: 'Route maps include step-by-step transparency.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 6, ip: -1 },
+    weight: 7,
+    flavorText: 'TRANSIT: Riders compared request templates like recipes. One driver announced "sunlight stop next." A commuter filed a request from their seat and smiled.'
+  },
+  {
+    id: 'convenience_store_portal',
+    title: 'Store Portal',
+    headline: 'CORNER SHOP FREEZER DOOR OPENS TO AISLE… ELSEWHERE',
+    content: 'The milk is fine; the horizon is weird.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4, ip: -1 },
+    weight: 7,
+    flavorText: 'RETAIL: The barcode scanner beeped in a new accent. A receipt listed "one universe, lightly chilled." The clerk asked if you wanted a bag for that.'
+  },
+  {
+    id: 'gov_new_form_27b6',
+    title: 'Form 27-B/6',
+    headline: 'NEW FORM REQUIRES FORM REQUEST FORM',
+    content: 'Staple budget doubles.',
+    type: 'government',
+    rarity: 'common',
+    effects: { ip: 3, truth: -1 },
+    weight: 7,
+    flavorText: 'ADMIN: The instructions referenced themselves. A pilot program tested paperless paperwork; the printer printed a thumbs-down. An auditor nodded like a metronome.'
+  },
+  {
+    id: 'truth_window_projection',
+    title: 'Window Projector',
+    headline: 'APARTMENT WINDOWS CAST FACTS ONTO OPPOSITE WALLS',
+    content: 'Neighbors applaud at dusk.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 5 },
+    weight: 7,
+    flavorText: 'BLOCK: Chalk artists framed the light with filigree. A kid sold popcorn labeled "receipts." Someone yelled "footnote!" and three appeared.'
+  },
+  {
+    id: 'conspiracy_garden_hedge_maze',
+    title: 'Hedge Maze',
+    headline: 'PUBLIC GARDEN MAZE NOW SPELLS "LOOK HERE" FROM ABOVE',
+    content: 'Drone owners blush.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4 },
+    weight: 7,
+    flavorText: 'PARKS: Groundskeepers claimed it was always that shape. A squirrel posed for aerial shots like a pro. The exit led to a suggestion box full of clues.'
+  },
+  {
+    id: 'gov_blue_sky_committee',
+    title: 'Blue-Sky Panel',
+    headline: 'NEW COMMITTEE MEETS TO DISCUSS "NOTHING SPECIFIC"',
+    content: 'Minutes read: "great vibes."',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -2, ip: 2 },
+    weight: 7,
+    flavorText: 'POLICY: The agenda had an agenda. The coffee was strong and silent. Everyone agreed unanimously on indeterminate progress.'
+  },
+  {
+    id: 'truth_sticker_wave',
+    title: 'Sticker Wave',
+    headline: 'LAMPPOSTS BLOOM WITH QR CODES TO SOURCES',
+    content: 'Scan rate breaks municipal records.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 6 },
+    weight: 7,
+    flavorText: 'URBAN DATA: The codes resolved to archives and polite surprises. A lamplighter claimed the glow looked smarter. Street sweeping paused to read.'
+  },
+  {
+    id: 'conspiracy_bus_stop_whisper',
+    title: 'Shelter Whisper',
+    headline: 'BUS SHELTER AD WHISPERS WHEN NO ONE LOOKS',
+    content: 'Audio tests inconclusive; goosebumps conclusive.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 3, ip: 1 },
+    weight: 7,
+    flavorText: 'COMMUTE: Commuters reported hearing their names pronounced correctly. The ad agency released a statement in parentheses. The shelter\'s roof learned to nod.'
+  },
+  {
+    id: 'gov_press_lockbox',
+    title: 'Press Lockbox',
+    headline: 'QUESTIONS MUST BE SUBMITTED IN A SEALED JAR',
+    content: 'Jars opened off-site. Answers optional.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -4, ip: 1 },
+    weight: 7,
+    flavorText: 'BRIEFING: The jar key was redacted. A reporter brought a can opener and was applauded. The podium wore a smug grin it did not have yesterday.'
+  },
+  {
+    id: 'truth_mail_slot_midnight',
+    title: 'Midnight Mail',
+    headline: 'AT MIDNIGHT, MAIL SLOTS EXUDE PHOTOCOPIES',
+    content: 'Postmaster shrugs in plausible bewilderment.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 7 },
+    weight: 6,
+    flavorText: 'POST: Envelopes addressed to "Everyone" found their way. Stamps smelled faintly of toner and justice. A dog barked at the truth, then wagged.'
+  },
+  {
+    id: 'conspiracy_streetlight_codes',
+    title: 'Blink Code',
+    headline: 'STREETLIGHTS BLINK IN PERFECT PRIME PATTERNS',
+    content: 'Utility claims "normal photons behaving normally."',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4 },
+    weight: 7,
+    flavorText: 'NIGHT SHIFT: Amateur mathematicians gathered beneath the brightest lamp. A moth learned to count to 29. The dark agreed to cooperate—for now.'
+  },
+  {
+    id: 'gov_optimism_index',
+    title: 'Optimism Index',
+    headline: 'OFFICIAL MOOD GAUGE READS "CHEERFUL ENOUGH"',
+    content: 'Methodology undisclosed; balloons plentiful.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -2, ip: 2 },
+    weight: 7,
+    flavorText: 'SURVEY: The margin of error wore a party hat. Respondents were offered cake and a non-answer. Confetti declined to comment.'
+  },
+  {
+    id: 'truth_civic_choir',
+    title: 'Civic Choir',
+    headline: 'POP-UP CHOIR SINGS AUDIT REQUESTS IN HARMONY',
+    content: 'Four-part FOIA.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 6, ip: -1 },
+    weight: 7,
+    flavorText: 'MUSIC: The soprano hit "Transparency" at A5. A baritone rhymed "receipts" with "peeps." The encore was a round of "Show Your Work."'
+  },
+  {
+    id: 'conspiracy_crosswalk_blinks',
+    title: 'Walk/Don\'t',
+    headline: 'CROSSWALK LIGHTS FLASH "THINK" BETWEEN STATES',
+    content: 'Pedestrians comply, thoughtfully.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 3 },
+    weight: 7,
+    flavorText: 'STREET: Foot traffic slowed into contemplation. A bicycle bell tinkled like a eureka. The curb felt taller somehow.'
+  },
+  {
+    id: 'gov_podium_white_noise',
+    title: 'Podium Hiss',
+    headline: 'PRESS PODIUM EMITS CALMING WHITE NOISE',
+    content: 'Questions soften on approach.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -3, ip: 1 },
+    weight: 7,
+    flavorText: 'A/V: Engineers calibrated the hiss to "mmm." Boom mics reported drowsiness. The transcript included a tasteful yawn.'
+  },
+  {
+    id: 'truth_laundromat_wall',
+    title: 'Spin Cycle Files',
+    headline: 'LAUNDROMAT CORKBOARD HOSTS LEAKS BETWEEN COUPONS',
+    content: 'Whistleblowers fold with corners aligned.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 6 },
+    weight: 7,
+    flavorText: 'LOCAL: A dryer beeped in Morse for "more." The attendant posted "No Deep-State in the Delicates." Everyone left with cleaner laundry and heavier reading.'
+  },
+  {
+    id: 'conspiracy_puddle_reflection',
+    title: 'Puddle Gate',
+    headline: 'PUDDLE REFLECTS SKYLINE FROM ANOTHER YEAR',
+    content: 'Stepped-in evidence.',
+    type: 'conspiracy',
+    rarity: 'common',
+    effects: { truth: 4, ip: -1 },
+    weight: 7,
+    flavorText: 'WEATHER: Kids jumped between decades for fun. A tourist\'s shoe squeaked "why." The sun pretended not to notice.'
+  },
+  {
+    id: 'gov_press_sandwich_rule',
+    title: 'Sandwich Rule',
+    headline: 'NEW RULE: EVERY ANSWER MUST BE BETWEEN TWO THANK YOUS',
+    content: 'Meat missing.',
+    type: 'government',
+    rarity: 'common',
+    effects: { truth: -2, ip: 2 },
+    weight: 7,
+    flavorText: 'ETIQUETTE: Reporters rated the bread excellent. A baguette received accreditation. The filling filed a formal complaint.'
+  },
+  {
+    id: 'truth_projector_van',
+    title: 'Projector Van',
+    headline: 'MOBILE VAN PROJECTS SOURCES ON BLANK WALLS',
+    content: 'Streetlights dim respectfully.',
+    type: 'truth',
+    rarity: 'common',
+    effects: { truth: 6 },
+    weight: 7,
+    flavorText: 'NIGHT SCHOOL: Folding chairs appeared like mushrooms. Passersby took notes on napkins. The applause was quiet and definitive.'
+  },
   // UNCOMMON EVENTS (20 events)
   {
     id: 'alien_contact',
@@ -1590,10 +2639,27 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
 export class EventManager {
   private eventHistory: string[] = [];
   private turnCount: number = 0;
-  
+  private baseEventChance: number = 0.12;
+
   constructor() {
     this.eventHistory = [];
     this.turnCount = 0;
+  }
+
+  // Set (or tweak) the chance of triggering an event each turn
+  setEventChance(probability: number) {
+    this.baseEventChance = Math.max(0, Math.min(1, probability));
+  }
+
+  // Determine whether an event should trigger this turn
+  private rollEvent(): boolean {
+    return Math.random() < this.baseEventChance;
+  }
+
+  // Attempt to select a random event only if the gating roll succeeds
+  maybeSelectRandomEvent(gameState: any): GameEvent | null {
+    if (!this.rollEvent()) return null;
+    return this.selectRandomEvent(gameState);
   }
 
   // Update turn count for condition checking

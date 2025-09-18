@@ -493,18 +493,18 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         // Update event manager with current turn
         prev.eventManager?.updateTurn(prev.turn);
 
-        // Trigger random event (30% chance)
+        // Trigger random event using event manager gating
         let newEvents = [...prev.currentEvents];
         let eventEffectLog: string[] = [];
         let truthModifier = 0;
         let ipModifier = 0;
         let bonusCardDraw = 0;
-        
-        if (Math.random() < 0.3 && prev.eventManager) {
-          const triggeredEvent = prev.eventManager.selectRandomEvent(prev);
+
+        if (prev.eventManager) {
+          const triggeredEvent = prev.eventManager.maybeSelectRandomEvent(prev);
           if (triggeredEvent) {
             newEvents = [triggeredEvent];
-            
+
             // Apply event effects
             if (triggeredEvent.effects) {
               const effects = triggeredEvent.effects;
