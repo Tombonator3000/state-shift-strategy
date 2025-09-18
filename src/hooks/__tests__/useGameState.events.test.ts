@@ -12,40 +12,45 @@ const makeEvent = (id: string): GameEvent => ({
 });
 
 describe('buildEditionEvents', () => {
-  it('returns seeded events on the first edition when no trigger occurs', () => {
-    const seededEvents = [makeEvent('seed-1'), makeEvent('seed-2')];
-
+  it('returns no events on the first edition when no trigger occurs', () => {
     const result = buildEditionEvents(
-      { turn: 1, round: 1, currentEvents: seededEvents },
+      { turn: 1, round: 1, currentEvents: [] },
       null,
     );
 
-    expect(result).toEqual(seededEvents);
-    expect(result).not.toBe(seededEvents);
+    expect(result).toEqual([]);
   });
 
-  it('appends triggered events to the seeded first edition', () => {
-    const seededEvents = [makeEvent('seed-1')];
+  it('returns only the triggered event on the first edition when a trigger occurs', () => {
     const triggered = makeEvent('triggered');
 
     const result = buildEditionEvents(
-      { turn: 1, round: 1, currentEvents: seededEvents },
+      { turn: 1, round: 1, currentEvents: [] },
       triggered,
     );
 
-    expect(result).toEqual([...seededEvents, triggered]);
+    expect(result).toEqual([triggered]);
   });
 
   it('returns no events when no trigger fires on later editions', () => {
-    const seededEvents = [makeEvent('seed-1')];
-
     const firstEdition = buildEditionEvents(
-      { turn: 1, round: 1, currentEvents: seededEvents },
-      null,
+      { turn: 1, round: 1, currentEvents: [] },
+      makeEvent('triggered'),
     );
 
     const result = buildEditionEvents(
       { turn: 2, round: 1, currentEvents: firstEdition },
+      null,
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  it('ignores pre-seeded events on the first edition when no trigger occurs', () => {
+    const seededEvents = [makeEvent('seed-1'), makeEvent('seed-2')];
+
+    const result = buildEditionEvents(
+      { turn: 1, round: 1, currentEvents: seededEvents },
       null,
     );
 

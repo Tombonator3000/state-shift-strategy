@@ -7,7 +7,7 @@ import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
 import { AIStrategist, type AIDifficulty, type CardPlay } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
-import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
+import { EventManager, type GameEvent } from '@/data/eventDatabase';
 import { buildEditionEvents } from './eventEdition';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
@@ -90,15 +90,6 @@ interface GameState {
   drawMode: DrawMode;
   cardDrawState: CardDrawState;
 }
-
-const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
-  // Start with some common events for the first newspaper
-  const initialEvents = EVENT_DATABASE.filter(event =>
-    event.rarity === 'common' && !event.conditions
-  ).slice(0, 3);
-
-  return initialEvents;
-};
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
@@ -222,7 +213,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         bonusValue: state.bonusValue
       };
     }),
-    currentEvents: generateInitialEvents(eventManager),
+    currentEvents: [],
     eventManager,
     showNewspaper: false,
     log: [
