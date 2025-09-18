@@ -1,7 +1,6 @@
 import React from 'react';
 import type { GameCard } from '@/rules/mvp';
-import { CardTextGenerator } from '@/systems/CardTextGenerator';
-import { ExtensionCardBadge } from '@/components/game/ExtensionCardBadge';
+import BaseCard from '@/components/game/cards/BaseCard';
 
 interface PlayedCard {
   card: GameCard;
@@ -12,46 +11,16 @@ interface PlayedCardsDockProps {
   playedCards: PlayedCard[];
 }
 
-const summarizeCard = (card: GameCard): string[] => {
-  if (card.effects) {
-    const summary = CardTextGenerator.renderEffects(card.effects);
-    if (summary.length > 0) {
-      return summary;
-    }
-    return [CardTextGenerator.generateRulesText(card.effects)];
-  }
-
-  if (card.text) {
-    return card.text.split('\n');
-  }
-
-  return [];
-};
-
-const PlayedCardTile = ({ card }: { card: GameCard }) => {
-  const displayType = (card.type || 'MEDIA').toString().toUpperCase();
-  const rarityLabel = (card.rarity || 'common').toUpperCase();
-  const flavorText = card.flavor ?? card.flavorTruth ?? card.flavorGov ?? '';
-  const details = summarizeCard(card);
-
+const CardsInPlayCard = ({ card }: { card: GameCard }) => {
   return (
-    <div className="relative flex h-full flex-col rounded-lg border border-neutral-700 bg-neutral-900 p-2 text-white shadow-sm">
-      <div className="text-[11px] font-bold leading-tight line-clamp-2 pr-6">{card.name}</div>
-      <div className="mt-0.5 flex items-center justify-between text-[10px] uppercase tracking-wide opacity-70">
-        <span className="truncate">{displayType} · {rarityLabel}</span>
-        <span>IP {card.cost}</span>
-      </div>
-      <div className="mt-1 space-y-1 text-[10px] leading-snug">
-        {(details.length > 0 ? details.slice(0, 3) : ['No effect data']).map((line, index) => (
-          <p key={`${card.id}-detail-${index}`}>{line}</p>
-        ))}
-      </div>
-      {flavorText && (
-        <div className="mt-auto pt-1 text-[10px] italic opacity-70 line-clamp-2">
-          “{flavorText}”
-        </div>
-      )}
-      <ExtensionCardBadge cardId={card.id} card={card} variant="overlay" />
+    <div className="flex justify-center">
+      <BaseCard
+        card={card}
+        hideStamp
+        polaroidHover={false}
+        size="boardMini"
+        className="pointer-events-none select-none"
+      />
     </div>
   );
 };
@@ -72,9 +41,9 @@ const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, e
     >
       <h4 className="mb-2 text-[12px] font-bold uppercase tracking-[0.2em] text-black/70">{title}</h4>
       {cards.length > 0 ? (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-3 items-start gap-3">
           {cards.map((entry, index) => (
-            <PlayedCardTile key={`${entry.card.id}-${index}`} card={entry.card} />
+            <CardsInPlayCard key={`${entry.card.id}-${index}`} card={entry.card} />
           ))}
         </div>
       ) : (
