@@ -108,6 +108,52 @@ const createSecondaryStory = (
   };
 };
 
+const formatEventEffects = (
+  effects?: TabloidNewspaperProps['events'][number]['effects'],
+): string | null => {
+  if (!effects) {
+    return null;
+  }
+
+  const parts: string[] = [];
+  const formatDelta = (value: number | undefined, label: string) => {
+    if (value === undefined || value === 0) {
+      return;
+    }
+    const sign = value > 0 ? '+' : '−';
+    parts.push(`${sign}${Math.abs(value)} ${label}`);
+  };
+
+  formatDelta(effects.truth, 'Truth');
+  formatDelta(effects.ip, 'IP');
+
+  if (effects.cardDraw !== undefined && effects.cardDraw !== 0) {
+    const sign = effects.cardDraw > 0 ? '+' : '−';
+    const value = Math.abs(effects.cardDraw);
+    const cardLabel = value === 1 ? 'Card' : 'Cards';
+    parts.push(`${sign}${value} ${cardLabel}`);
+  }
+
+  formatDelta(effects.truthChange, 'Truth');
+  formatDelta(effects.ipChange, 'IP');
+  formatDelta(effects.defenseChange, 'Defense');
+
+  if (effects.stateEffects) {
+    formatDelta(effects.stateEffects.pressure, 'State Pressure');
+    formatDelta(effects.stateEffects.defense, 'State Defense');
+  }
+
+  if (effects.skipTurn) {
+    parts.push('Skip Turn');
+  }
+
+  if (effects.doubleIncome) {
+    parts.push('Double Income');
+  }
+
+  return parts.length > 0 ? parts.join(', ') : null;
+};
+
 const createEventStory = (
   event: TabloidNewspaperProps['events'][number],
 ): {
@@ -117,7 +163,9 @@ const createEventStory = (
   summary: string;
   typeLabel: string;
 } => {
-  const headline = (event.headline ?? event.title).toUpperCase();
+  const baseHeadline = (event.headline ?? event.title).toUpperCase();
+  const effectsLabel = formatEventEffects(event.effects);
+  const headline = effectsLabel ? `${baseHeadline} (${effectsLabel})` : baseHeadline;
   const summary = event.content;
   const subhead = event.flavorText ?? event.flavorTruth ?? event.flavorGov ?? 'Officials decline additional comment.';
   return {
@@ -221,7 +269,14 @@ const TabloidNewspaperV2 = ({ events, playedCards, faction, truth, onClose }: Ta
 
   const heroHeadline = heroCardEntry
     ? makeHeadline(heroCardEntry.card as Card, dataset)
-    : (heroEvent?.headline ?? heroEvent?.title ?? 'UNIDENTIFIED INCIDENT').toUpperCase();
+    : (() => {
+        const base = (heroEvent?.headline ?? heroEvent?.title ?? 'UNIDENTIFIED INCIDENT').toUpperCase();
+        if (!heroEvent) {
+          return base;
+        }
+        const effectsLabel = formatEventEffects(heroEvent.effects);
+        return effectsLabel ? `${base} (${effectsLabel})` : base;
+      })();
 
   const heroSubhead = heroCardEntry
     ? makeSubhead(heroCardEntry.card as Card, dataset)
