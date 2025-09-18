@@ -46,12 +46,14 @@ const createState = (
 };
 
 let sequence = 0;
-const makePlay = (partial: Partial<TurnPlay> & { cardType: TurnPlay['cardType']; cost: number }): TurnPlay => {
+const makePlay = (
+  partial: Partial<TurnPlay> & { cardType: TurnPlay['cardType']; cost: number },
+): TurnPlay => {
   sequence += 1;
   return {
     sequence,
     stage: 'resolve',
-    owner: 'P1',
+    owner: partial.owner ?? 'P1',
     cardId: `card-${sequence}`,
     cardName: partial.cardType,
     cardType: partial.cardType,
@@ -100,7 +102,7 @@ describe('comboEngine.evaluateCombos', () => {
       'MEDIA',
     ]);
     expect(evaluation.totalReward.truth).toBe(4);
-    expect(evaluation.logs).toEqual(['Media Wave (+4 Truth)']);
+    expect(evaluation.logs).toEqual(['Media Wave (±4 Truth)']);
   });
 
   it('triggers count combos based on total plays regardless of type', () => {
@@ -196,5 +198,25 @@ describe('comboEngine.evaluateCombos', () => {
     evaluateCombos(state, 'P1', enableOnly(['count_media_campaign'], { rng: seededRng }));
 
     expect(getComboRng()).toBe(seededRng);
+  });
+});
+
+describe('comboEngine.applyComboRewards', () => {
+  it('applies truth combo rewards as negative for government faction', () => {
+    const plays: TurnPlay[] = [
+      makePlay({ owner: 'P2', cardType: 'MEDIA', cost: 2 }),
+      makePlay({ owner: 'P2', cardType: 'MEDIA', cost: 3 }),
+      makePlay({ owner: 'P2', cardType: 'MEDIA', cost: 1 }),
+    ];
+    const state = createState(plays, { currentPlayer: 'P2' });
+
+    const evaluation = evaluateCombos(state, 'P2', enableOnly(['sequence_media_wave']));
+
+    expect(evaluation.totalReward.truth).toBe(4);
+
+    const updated = applyComboRewards(state, 'P2', evaluation);
+
+    expect(updated.truth).toBe(46);
+    expect(updated.log).toContain('Truth manipulation ↓ (50% → 46%)');
   });
 });

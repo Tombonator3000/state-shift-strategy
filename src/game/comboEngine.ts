@@ -519,8 +519,12 @@ export function applyComboRewards(
     };
   }
 
-  if (evaluation.totalReward.truth && evaluation.totalReward.truth !== 0) {
-    applyTruthDelta(updated, evaluation.totalReward.truth, player);
+  const truthMagnitude = Math.abs(evaluation.totalReward.truth ?? 0);
+  if (truthMagnitude !== 0) {
+    const playerState = updated.players[player];
+    const faction = playerState?.faction ?? 'truth';
+    const signedTruthDelta = faction === 'truth' ? truthMagnitude : -truthMagnitude;
+    applyTruthDelta(updated, signedTruthDelta, player);
   }
 
   for (const result of evaluation.results) {
