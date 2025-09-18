@@ -1,110 +1,64 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { cn } from "@/lib/utils";
 
-export type CardFrameSize = 'modal' | 'boardMini' | 'handMini';
+export type CardFrameSize = "modal" | "boardMini" | "handMini";
 
 type CardFrameProps = {
   children: React.ReactNode;
   size?: CardFrameSize;
   className?: string;
+  cardClassName?: string;
+  cardStyle?: React.CSSProperties;
+  overlay?: React.ReactNode;
+  cardProps?: Omit<React.HTMLAttributes<HTMLDivElement>, "className" | "style">;
 };
 
 const SIZE_TO_SCALE: Record<CardFrameSize, number> = {
   modal: 1,
-  boardMini: 0.72,
+  boardMini: 0.6,
   handMini: 0.78,
 };
 
-export function CardFrame({ children, size = 'modal', className }: CardFrameProps) {
+const BASE_W = 320;
+const BASE_H = 450;
+
+export function CardFrame({
+  children,
+  size = "modal",
+  className,
+  cardClassName,
+  cardStyle,
+  overlay,
+  cardProps,
+}: CardFrameProps) {
   const scale = SIZE_TO_SCALE[size];
-  const frameRef = React.useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = React.useState<{ width: number; height: number }>({
-    width: 320,
-    height: 450,
-  });
 
-  React.useLayoutEffect(() => {
-    const frameEl = frameRef.current;
-    if (!frameEl) {
-      return;
-    }
+  const cellStyle: React.CSSProperties = {
+    width: `calc(${BASE_W}px * ${scale})`,
+    height: `calc(${BASE_H}px * ${scale})`,
+    position: "relative",
+    flex: "0 0 auto",
+    ["--card-scale" as any]: scale,
+  };
 
-    const child = frameEl.firstElementChild as HTMLElement | null;
-    if (!child) {
-      return;
-    }
-
-    const updateDimensions = () => {
-      setDimensions(prev => {
-        const next = {
-          width: child.offsetWidth || prev.width,
-          height: child.offsetHeight || prev.height,
-        };
-
-        if (prev.width === next.width && prev.height === next.height) {
-          return prev;
-        }
-
-        return next;
-      });
-    };
-
-    updateDimensions();
-
-    if (typeof ResizeObserver === 'function') {
-      const observer = new ResizeObserver(entries => {
-        for (const entry of entries) {
-          const { width, height } = entry.contentRect;
-          setDimensions(prev => {
-            const next = {
-              width: width || prev.width,
-              height: height || prev.height,
-            };
-
-            if (prev.width === next.width && prev.height === next.height) {
-              return prev;
-            }
-
-            return next;
-          });
-        }
-      });
-
-      observer.observe(child);
-
-      return () => {
-        observer.disconnect();
-      };
-    }
-
-    if (typeof window !== 'undefined') {
-      const resizeHandler = () => updateDimensions();
-      window.addEventListener('resize', resizeHandler);
-
-      return () => {
-        window.removeEventListener('resize', resizeHandler);
-      };
-    }
-
-    return undefined;
-  }, [children]);
-
-  const scaledWidth = dimensions.width * scale;
-  const scaledHeight = dimensions.height * scale;
+  const innerStyle: React.CSSProperties = {
+    position: "absolute",
+    inset: 0,
+    transform: `scale(${scale})`,
+    transformOrigin: "top left",
+    willChange: "transform",
+  };
 
   return (
-    <div
-      ref={frameRef}
-      className={cn('card-frame', className)}
-      style={{
-        width: `${scaledWidth}px`,
-        height: `${scaledHeight}px`,
-        ['--card-scale' as any]: scale,
-      }}
-      aria-label={size === 'modal' ? 'Card (full)' : 'Card (mini)'}
-    >
-      {children}
+    <div className={cn("card-cell", className)} style={cellStyle} aria-label={`card-${size}`}>
+      <div className="card-inner" style={innerStyle}>
+        <div className={cn("card-shell", cardClassName)} style={cardStyle} {...cardProps}>
+          {children}
+        </div>
+      </div>
+      {overlay ? <div className="card-overlay">{overlay}</div> : null}
     </div>
   );
 }
 
+export default CardFrame;

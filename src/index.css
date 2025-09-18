@@ -521,25 +521,23 @@ All colors MUST be HSL.
     var(--pt-paper);
 }
 
-.card-frame {
-  --card-scale: 1;
+.card-cell {
   position: relative;
-  display: inline-block;
   overflow: visible;
-  border-radius: calc(var(--pt-radius) * var(--card-scale));
 }
 
-.card-frame > .card-shell {
-  transform: scale(var(--card-scale));
-  transform-origin: top left;
+.card-inner {
+  position: absolute;
+  inset: 0;
 }
 
 .card-shell {
-  width: var(--pt-card-w);
-  min-height: var(--pt-card-h);
+  width: 320px;
+  height: 450px;
   display: flex;
   flex-direction: column;
   border-radius: var(--pt-radius);
+  box-sizing: border-box;
 }
 
 .card-header,
@@ -548,8 +546,21 @@ All colors MUST be HSL.
   width: 100%;
 }
 
+.card-effects,
+.card-flavor {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
 .card-flavor {
   margin-top: auto;
+}
+
+.card-cell .card-overlay {
+  position: absolute;
+  inset: 0;
 }
 
 /* Polaroid frame */

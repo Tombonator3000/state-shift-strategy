@@ -41,16 +41,19 @@ export const BaseCard = ({
   const showCardText = card.text && card.text !== effectText;
 
   return (
-    <CardFrame size={size} className={frameClassName}>
-      <div
-        className={cn(
-          'card-shell relative w-cardW h-cardH pt-card-surface shadow-tabloid rounded-tabloid border overflow-hidden pt-card-wrap',
-          polaroidHover && 'group',
-          className,
-        )}
-        style={{ borderColor: 'var(--pt-border)' }}
-        data-testid="tabloid-card"
-      >
+    <CardFrame
+      size={size}
+      className={frameClassName}
+      cardClassName={cn(
+        'relative pt-card-surface shadow-tabloid rounded-tabloid border overflow-hidden pt-card-wrap',
+        polaroidHover && 'group',
+        className,
+      )}
+      cardStyle={{ borderColor: 'var(--pt-border)' }}
+      overlay={overlay}
+      cardProps={{ 'data-testid': 'tabloid-card' }}
+    >
+      <>
         <div className="card-header px-3 pt-3 text-[color:var(--pt-ink)]">
           <div className="text-3xl leading-none uppercase font-headline">
             {card.name}
@@ -107,8 +110,7 @@ export const BaseCard = ({
         )}
 
         {!hideStamp && <div className="pt-stamp select-none">{stampText}</div>}
-      </div>
-      {overlay}
+      </>
     </CardFrame>
   );
 };
