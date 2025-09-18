@@ -109,93 +109,116 @@ const StartScreen = ({
   };
 
   return (
-    <main className="newspaper-bg flex h-screen flex-col overflow-hidden text-[var(--ink)]">
-      <div className="mx-auto flex h-full max-w-[1200px] flex-1 flex-col overflow-hidden px-3 py-2 sm:px-4 md:px-6 md:py-4 lg:px-8">
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <header className="print-border bg-[var(--paper)] px-3 py-3 md:px-4 md:py-4 [flex:0_0_15%] sm:[flex:0_0_14%] lg:[flex:0_0_12%]">
-            <div className="flex h-full flex-col justify-center gap-2">
-              <div className="flex items-end justify-between gap-2">
-                <h1 className="font-[Anton] text-4xl tracking-wide uppercase md:text-6xl">THE PARANOID TIMES</h1>
-                <span className="badge text-xs md:text-sm">TIMES</span>
-              </div>
-              <div className="inline-block bg-[var(--ink)] px-2 py-1 font-[Bebas Neue] text-[11px] uppercase tracking-wider text-[var(--paper)] md:text-sm">
-                MIND-BLOWING NEWS YOU WON'T BELIEVE!
-              </div>
+    <main className="newspaper-bg h-[100dvh] overflow-hidden text-[var(--ink)]">
+      <div className="mx-auto h-full max-w-[1200px] px-3 pt-[var(--gut)] pb-[var(--gut)] sm:px-4 md:px-6 lg:px-8">
+        <header
+          className="print-border mb-[var(--gut)] bg-[var(--paper)] px-3 py-2 md:px-4 md:py-3"
+          style={{ height: 'var(--hdr)' }}
+        >
+          <div className="flex h-full flex-col justify-center gap-2">
+            <div className="flex items-end justify-between gap-2">
+              <h1
+                className="font-[Anton] uppercase tracking-wide"
+                style={{ fontSize: 'clamp(28px, 6vh, 64px)' }}
+              >
+                THE PARANOID TIMES
+              </h1>
+              <span className="badge text-[clamp(9px,1.3vh,12px)]">TIMES</span>
             </div>
-          </header>
-
-          <div className="flex-1 overflow-hidden">
-            <div className="grid h-full grid-rows-[0.4fr_minmax(0,0.2fr)_0.4fr] gap-3 overflow-hidden md:gap-4 lg:grid-rows-[0.32fr_minmax(0,0.2fr)_0.48fr]">
-              <section className="grid min-h-0 grid-cols-1 gap-3 md:grid-cols-2 md:gap-4" aria-label="Faction selection">
-                <FactionCard
-                  ref={governmentCardRef}
-                  faction="government"
-                  title="GOVERNMENT"
-                  caption="CONTROL THE NARRATIVE."
-                  imageSrc="/assets/start/start-gov.jpeg"
-                  onSelect={() => handleFactionSelect('government')}
-                />
-                <FactionCard
-                  faction="truth"
-                  title="TRUTH SEEKERS"
-                  caption="EXPOSE THE DECEPTION."
-                  imageSrc="/assets/start/start-truth.jpeg"
-                  onSelect={() => handleFactionSelect('truth')}
-                />
-              </section>
-
-              <section className="print-border min-h-0 px-3 py-3 md:px-4 md:py-4">
-                <h2 className="font-[Anton] text-2xl leading-tight tracking-wide uppercase sm:text-4xl md:text-5xl">{headline}</h2>
-                <p className="mt-2 text-[11px] uppercase tracking-wide text-[var(--ink-weak)] md:text-sm">{subhead}</p>
-                <div className="mt-3 hr-rule" />
-              </section>
-
-              <section className="grid min-h-0 grid-cols-1 gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] md:gap-4" aria-label="Main actions">
-                <div className="flex min-h-0 flex-col overflow-hidden print-border bg-[var(--paper)]">
-                  <div className="flex-1 overflow-hidden bg-black/10">
-                    <img
-                      src="/assets/start/start-continue.jpeg"
-                      alt="Continue your conspiracies"
-                      loading="lazy"
-                      className="h-full w-full object-cover object-center"
-                    />
-                  </div>
-                  <div className="px-3 py-3 md:px-4 md:py-4">
-                    <ArticleButton label={continueLabel} onClick={handleFeatureAction} />
-                  </div>
-                </div>
-
-                <aside className="flex min-h-0 flex-col justify-evenly gap-2 md:gap-3 lg:gap-4" aria-label="Menu options">
-                  <ArticleButton
-                    label="SELL EXPANSIONS!"
-                    sub="STORY ON PAGE 6"
-                    onClick={handleArticleAction(onManageExpansions)}
-                  />
-                  <ArticleButton
-                    label="TOP SECRET SETTINGS"
-                    onClick={handleArticleAction(onOptions)}
-                  />
-                  <ArticleButton
-                    label="LEAKED HOW-TO GUIDE"
-                    onClick={handleArticleAction(onHowToPlay)}
-                  />
-                  <ArticleButton
-                    label="EVIDENCE ARCHIVE"
-                    onClick={handleArticleAction(onCardCollection)}
-                  />
-                  <ArticleButton
-                    label="FOLLOW THE MONEY"
-                    onClick={handleArticleAction(onCredits)}
-                  />
-                </aside>
-              </section>
+            <div
+              className="inline-block bg-[var(--ink)] px-2 py-1 font-[Bebas Neue] uppercase tracking-wider text-[var(--paper)]"
+              style={{ fontSize: 'clamp(11px, 1.6vh, 16px)' }}
+            >
+              MIND-BLOWING NEWS YOU WON'T BELIEVE!
             </div>
           </div>
+        </header>
 
-          <footer className="print-border px-3 py-2 text-center font-[Bebas Neue] text-base uppercase tracking-widest md:px-4 md:text-lg [flex:0_0_10%] sm:[flex:0_0_9%] lg:[flex:0_0_7%]">
-            PHONY MOON CONTINUES TO SHINE IN NIGHT SKY!
-          </footer>
-        </div>
+        <section
+          className="grid gap-[var(--gut)]"
+          style={{
+            height: 'calc(100dvh - var(--hdr) - var(--ftr) - var(--gut)*2)',
+            gridTemplateRows: 'minmax(0, var(--row-top)) minmax(0, var(--row-bot))',
+            gridTemplateColumns: '1fr',
+          }}
+        >
+          <div className="grid min-h-0 grid-cols-1 gap-[var(--gut)] md:grid-cols-2" aria-label="Faction selection">
+            <FactionCard
+              ref={governmentCardRef}
+              faction="government"
+              title="GOVERNMENT"
+              caption="CONTROL THE NARRATIVE."
+              imageSrc="/assets/start/start-gov.jpeg"
+              onSelect={() => handleFactionSelect('government')}
+            />
+            <FactionCard
+              faction="truth"
+              title="TRUTH SEEKERS"
+              caption="EXPOSE THE DECEPTION."
+              imageSrc="/assets/start/start-truth.jpeg"
+              onSelect={() => handleFactionSelect('truth')}
+            />
+          </div>
+
+          <div className="grid min-h-0 grid-cols-1 gap-[var(--gut)] md:grid-cols-[2fr_1fr]" aria-label="Main actions">
+            <div className="print-border bg-[var(--paper)] min-h-0 flex flex-col">
+              <div className="relative flex-1 min-h-0 overflow-hidden">
+                <img
+                  src="/assets/start/start-continue.jpeg"
+                  alt="Continue your conspiracies"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+              <div className="flex flex-col gap-2 p-3 md:p-4">
+                <h2
+                  className="font-[Anton] uppercase tracking-wide text-[var(--ink)]"
+                  style={{ fontSize: 'clamp(18px, 3.4vh, 36px)' }}
+                >
+                  {headline}
+                </h2>
+                <p
+                  className="uppercase tracking-wide text-[var(--ink-weak)]"
+                  style={{ fontSize: 'clamp(10px, 1.4vh, 14px)' }}
+                >
+                  {subhead}
+                </p>
+                <ArticleButton label={continueLabel} onClick={handleFeatureAction} />
+              </div>
+            </div>
+
+            <aside className="grid min-h-0 content-start gap-[var(--gut)]" aria-label="Menu options">
+              <ArticleButton
+                label="SELL EXPANSIONS!"
+                sub="STORY ON PAGE 6"
+                onClick={handleArticleAction(onManageExpansions)}
+              />
+              <ArticleButton
+                label="TOP SECRET SETTINGS"
+                onClick={handleArticleAction(onOptions)}
+              />
+              <ArticleButton
+                label="LEAKED HOW-TO GUIDE"
+                onClick={handleArticleAction(onHowToPlay)}
+              />
+              <ArticleButton
+                label="EVIDENCE ARCHIVE"
+                onClick={handleArticleAction(onCardCollection)}
+              />
+              <ArticleButton
+                label="FOLLOW THE MONEY"
+                onClick={handleArticleAction(onCredits)}
+              />
+            </aside>
+          </div>
+        </section>
+
+        <footer
+          className="print-border mt-[var(--gut)] px-3 flex items-center justify-center font-[Bebas Neue] tracking-widest uppercase"
+          style={{ height: 'var(--ftr)', fontSize: 'clamp(12px, 1.8vh, 18px)' }}
+        >
+          PHONY MOON CONTINUES TO SHINE IN NIGHT SKY!
+        </footer>
       </div>
     </main>
   );
