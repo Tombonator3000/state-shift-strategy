@@ -1,37 +1,17 @@
 import React from "react";
-import { cn } from "@/lib/utils";
 
-export type CardFrameSize = "modal" | "boardMini" | "handMini";
+type Size = "modal" | "boardMini" | "handMini";
+type Props = { children: React.ReactNode; size?: Size };
 
-type CardFrameProps = {
-  children: React.ReactNode;
-  size?: CardFrameSize;
-  className?: string;
-  cardClassName?: string;
-  cardStyle?: React.CSSProperties;
-  overlay?: React.ReactNode;
-  cardProps?: Omit<React.HTMLAttributes<HTMLDivElement>, "className" | "style">;
-};
+export default function CardFrame({ children, size = "modal" }: Props) {
+  // FINJUSTÉR SKALA HER:
+  // - boardMini: senket til 0.56 for å unngå scroll i "Cards in Play"
+  // - handMini: beholdt 0.78 (god lesbarhet i Your Hand)
+  const scale = size === "modal" ? 1 : size === "boardMini" ? 0.56 : 0.78;
 
-const SIZE_TO_SCALE: Record<CardFrameSize, number> = {
-  modal: 1,
-  boardMini: 0.6,
-  handMini: 0.78,
-};
-
-const BASE_W = 320;
-const BASE_H = 460;
-
-export function CardFrame({
-  children,
-  size = "modal",
-  className,
-  cardClassName,
-  cardStyle,
-  overlay,
-  cardProps,
-}: CardFrameProps) {
-  const scale = SIZE_TO_SCALE[size];
+  // Basemål MÅ matche fullkortets outer size (inkl. border)
+  const BASE_W = 320;
+  const BASE_H = 460;
 
   const cellStyle: React.CSSProperties = {
     width: `calc(${BASE_W}px * ${scale})`,
@@ -39,7 +19,6 @@ export function CardFrame({
     position: "relative",
     flex: "0 0 auto",
     overflow: "hidden",
-    ["--card-scale" as any]: scale,
   };
 
   const innerStyle: React.CSSProperties = {
@@ -52,15 +31,10 @@ export function CardFrame({
   };
 
   return (
-    <div className={cn("card-cell", className)} style={cellStyle} aria-label={`card-${size}`}>
+    <div className="card-cell" style={cellStyle} aria-label={`card-${size}`}>
       <div className="card-inner" style={innerStyle}>
-        <div className={cn("card-shell", cardClassName)} style={cardStyle} {...cardProps}>
-          {children}
-        </div>
+        <div className="card-shell">{children}</div>
       </div>
-      {overlay ? <div className="card-overlay">{overlay}</div> : null}
     </div>
   );
 }
-
-export default CardFrame;
