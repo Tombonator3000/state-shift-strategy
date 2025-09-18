@@ -8,6 +8,7 @@ import { AIStrategist, type AIDifficulty, type CardPlay } from '@/data/aiStrateg
 import { AIFactory } from '@/data/aiFactory';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
+import { buildEditionEvents } from './eventEdition';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardMVP, type CardPlayResolution } from '@/systems/cardResolution';
@@ -495,16 +496,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         prev.eventManager?.updateTurn(prev.turn);
 
         // Trigger random event using event manager gating
-        let newEvents = [...prev.currentEvents];
         let eventEffectLog: string[] = [];
         let truthModifier = 0;
         let ipModifier = 0;
         let bonusCardDraw = 0;
+        let triggeredEvent: GameEvent | null = null;
 
         if (prev.eventManager) {
-          const triggeredEvent = prev.eventManager.maybeSelectRandomEvent(prev);
+          triggeredEvent = prev.eventManager.maybeSelectRandomEvent(prev);
           if (triggeredEvent) {
-            newEvents = [triggeredEvent];
 
             // Apply event effects
             if (triggeredEvent.effects) {
@@ -520,6 +520,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             }
           }
         }
+
+        const newEvents = buildEditionEvents(prev, triggeredEvent);
 
         // Store pending card draw for after newspaper
         const pendingCardDraw = bonusCardDraw;
