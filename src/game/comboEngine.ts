@@ -414,11 +414,14 @@ function evaluateTrigger(
 
 function formatReward(reward: ComboReward): string {
   const parts: string[] = [];
-  if (reward.ip && reward.ip !== 0) {
-    parts.push(`${reward.ip > 0 ? '+' : ''}${reward.ip} IP`);
+  const ip = reward.ip;
+  if (typeof ip === 'number' && ip !== 0) {
+    parts.push(`${ip > 0 ? '+' : ''}${ip} IP`);
   }
-  if (reward.truth && reward.truth !== 0) {
-    parts.push(`${reward.truth > 0 ? '+' : ''}${reward.truth} Truth`);
+
+  const truth = reward.truth;
+  if (typeof truth === 'number' && truth !== 0) {
+    parts.push(`${truth > 0 ? `±${truth}` : truth} Truth`);
   }
   return parts.length > 0 ? `(${parts.join(', ')})` : '';
 }
