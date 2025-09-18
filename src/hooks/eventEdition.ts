@@ -13,7 +13,7 @@ export const buildEditionEvents = (
   const events: GameEvent[] = [];
 
   const isFirstEdition = state.turn === 1 && state.round === 1;
-  if (isFirstEdition && state.currentEvents.length > 0) {
+  if (isFirstEdition && state.currentEvents.length > 0 && triggeredEvent) {
     events.push(...state.currentEvents);
   }
 
