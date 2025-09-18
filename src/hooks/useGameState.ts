@@ -31,13 +31,7 @@ interface GameState {
   deck: GameCard[];
   aiDeck: GameCard[];
   cardsPlayedThisTurn: number;
-  cardsPlayedThisRound: Array<{
-    card: GameCard;
-    player: 'human' | 'ai';
-    targetState?: string | null;
-    truthDelta?: number;
-    capturedStates?: string[];
-  }>;
+  cardsPlayedThisRound: Array<{ card: GameCard; player: 'human' | 'ai' }>;
   controlledStates: string[];
   aiControlledStates: string[];
   states: Array<{
@@ -101,33 +95,6 @@ const generateInitialEvents = (eventManager: EventManager): GameEvent[] => {
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
 const HAND_LIMIT = 5;
-
-const CAPTURE_REGEX = /(captured|seized)\s+([^!]+)!/i;
-
-const extractCapturedStates = (logEntries: string[]): string[] => {
-  const states: string[] = [];
-  for (const entry of logEntries) {
-    const match = entry.match(CAPTURE_REGEX);
-    if (match) {
-      states.push(match[2]);
-    }
-  }
-  return states;
-};
-
-const createPlayedCardRecord = (params: {
-  card: GameCard;
-  player: 'human' | 'ai';
-  targetState?: string | null;
-  resolution: CardPlayResolution;
-  previousTruth: number;
-}) => ({
-  card: params.card,
-  player: params.player,
-  targetState: params.targetState ?? null,
-  truthDelta: params.resolution.truth - params.previousTruth,
-  capturedStates: extractCapturedStates(params.resolution.logEntries),
-});
 
 const DIFFICULTY_TO_AI_DIFFICULTY: Record<Difficulty, AIDifficulty> = {
   EASY: 'easy',
@@ -360,13 +327,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const targetState = targetOverride ?? prev.targetState ?? null;
       const resolution = resolveCardEffects(prev, card, targetState);
-      const playedCardRecord = createPlayedCardRecord({
-        card,
-        player: 'human',
-        targetState,
-        resolution,
-        previousTruth: prev.truth,
-      });
 
       return {
         ...prev,
@@ -378,7 +338,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         controlledStates: resolution.controlledStates,
         aiControlledStates: resolution.aiControlledStates,
         cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
+        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
         log: [...prev.log, ...resolution.logEntries]
@@ -399,7 +359,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     achievements.onCardPlayed(cardId, card.type);
 
     const targetState = explicitTargetState ?? gameState.targetState ?? null;
-    let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
 
     setGameState(prev => {
       if (prev.animating) {
@@ -407,13 +366,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }
 
       const resolution = resolveCardEffects(prev, card, targetState);
-      pendingRecord = createPlayedCardRecord({
-        card,
-        player: 'human',
-        targetState,
-        resolution,
-        previousTruth: prev.truth,
-      });
 
       return {
         ...prev,
@@ -436,32 +388,26 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         onResolve: async () => Promise.resolve()
       });
 
-      setGameState(prev => {
-        const record = pendingRecord ?? { card, player: 'human', targetState };
-        return {
-          ...prev,
-          hand: prev.hand.filter(c => c.id !== cardId),
-          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-          cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
-          selectedCard: null,
-          targetState: null,
-          animating: false,
-        };
-      });
+      setGameState(prev => ({
+        ...prev,
+        hand: prev.hand.filter(c => c.id !== cardId),
+        cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
+        selectedCard: null,
+        targetState: null,
+        animating: false
+      }));
     } catch (error) {
       console.error('Card animation failed:', error);
-      setGameState(prev => {
-        const record = pendingRecord ?? { card, player: 'human', targetState };
-        return {
-          ...prev,
-          hand: prev.hand.filter(c => c.id !== cardId),
-          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-          cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
-          selectedCard: null,
-          targetState: null,
-          animating: false,
-        };
-      });
+      setGameState(prev => ({
+        ...prev,
+        hand: prev.hand.filter(c => c.id !== cardId),
+        cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'human' }],
+        selectedCard: null,
+        targetState: null,
+        animating: false
+      }));
     }
   }, [gameState, achievements, resolveCardEffects]);
 
@@ -672,14 +618,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         logEntries.push(`AI Strategy: ${reasoning}`);
       }
 
-      const playedCardRecord = createPlayedCardRecord({
-        card,
-        player: 'ai',
-        targetState,
-        resolution,
-        previousTruth: prev.truth,
-      });
-
       return {
         ...prev,
         ip: resolution.ip,
@@ -690,7 +628,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         aiControlledStates: resolution.aiControlledStates,
         targetState: resolution.targetState,
         aiHand: prev.aiHand.filter(c => c.id !== cardId),
-        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
+        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, { card, player: 'ai' }],
         log: logEntries,
       };
     });

@@ -12,7 +12,7 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
 
   return (
     <div
-      className="app-shell flex h-screen min-h-0 flex-col"
+      className="app-shell flex flex-col"
       style={{
         paddingTop: "var(--safe-top)",
       }}
@@ -37,18 +37,14 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
           <div className="app-scroll h-full p-2 sm:p-4 md:p-6">
             <div
               className={clsx(
-                "grid h-full min-h-0 gap-4",
+                "grid h-full gap-4",
                 "grid-cols-1",
                 hasRightPane && "lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_480px]"
               )}
             >
-              <main className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-                <div className="flex h-full min-h-0 min-w-0 flex-col overflow-y-auto">
-                  {leftPane}
-                </div>
-              </main>
+              <main className="min-h-0">{leftPane}</main>
               {hasRightPane && (
-                <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">{rightPane}</div>
+                <aside className="min-h-0">{rightPane}</aside>
               )}
             </div>
           </div>

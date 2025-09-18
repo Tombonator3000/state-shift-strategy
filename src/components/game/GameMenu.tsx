@@ -9,7 +9,7 @@ import CardCollection from './CardCollection';
 import CreditsTableoid from './CreditsTableoid';
 import HowToPlayTabloid from './HowToPlayTabloid';
 import CardCollectionTabloid from './CardCollectionTabloid';
-import StartScreen from '@/components/start/StartScreen';
+import StartScreenTabloid from './StartScreenTabloid';
 import FactionSelectTabloid from './FactionSelectTabloid';
 import { useUiTheme } from '@/hooks/useTheme';
 
@@ -319,10 +319,8 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
 
   return uiTheme === 'tabloid_bw' ? (
     <>
-      <StartScreen
-        onStartGame={async (faction) => {
-          await onStartGame(faction);
-        }}
+      <StartScreenTabloid
+        onStartGame={() => setShowFactionSelect(true)}
         onManageExpansions={() => setShowManageExpansions(true)}
         onHowToPlay={() => setShowHowToPlay(true)}
         onOptions={() => setShowOptions(true)}
@@ -331,7 +329,6 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
         onLoadGame={onLoadGame}
         getSaveInfo={getSaveInfo}
         audio={audio}
-        onStartNewGameFallback={() => setShowFactionSelect(true)}
       />
       {uiTheme === 'tabloid_bw' ? (
         <CardCollectionTabloid open={showCollection} onOpenChange={setShowCollection} />

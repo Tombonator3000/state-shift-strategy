@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import clsx from 'clsx';
 import CardDetailOverlay from './CardDetailOverlay';
-import BaseCard from '@/components/game/cards/BaseCard';
 import { Card } from '@/components/ui/card';
 import type { GameCard, MVPCardType } from '@/rules/mvp';
 import { MVP_CARD_TYPES } from '@/rules/mvp';
@@ -12,6 +11,7 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ExtensionCardBadge } from './ExtensionCardBadge';
+import { CardTextGenerator } from '@/systems/CardTextGenerator';
 
 interface EnhancedGameHandProps {
   cards: GameCard[];
@@ -110,11 +110,11 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 
   return (
     <div
-      className="relative h-full"
+      className="relative flex h-full flex-col"
       ref={handRef}
       onPointerLeave={() => onCardHover?.(null)}
     >
-      <div className="grid w-full grid-cols-3 gap-3 justify-items-start items-start content-start">
+      <div className="grid grid-cols-2 gap-3 overflow-y-auto p-3 lg:grid-cols-3 max-h-[calc(100vh-220px)]">
         {cards.length === 0 ? (
           <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
             No assets available
@@ -126,57 +126,26 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
             const isLoading = loadingCard === card.id;
             const canAfford = canAffordCard(card);
             const displayType = normalizeCardType(card.type);
-
-            const overlay = (
-              <>
-                {(isLoading || isPlaying || isSelected) && (
-                  <div
-                    className={clsx(
-                      'pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-sm',
-                      isSelected && !isPlaying && !isLoading && 'bg-yellow-400/15 text-yellow-100'
-                    )}
-                    style={{ borderRadius: 'calc(var(--pt-radius) * var(--card-scale))' }}
-                  >
-                    <Loader2
-                      className={clsx(
-                        'mb-1 h-5 w-5',
-                        isSelected ? 'animate-pulse text-yellow-200' : 'animate-spin text-primary'
-                      )}
-                    />
-                    <span className="text-xs font-mono font-bold">
-                      {isPlaying
-                        ? 'DEPLOYING'
-                        : isSelected && displayType === 'ZONE'
-                          ? 'TARGETING'
-                          : 'PROCESSING'}
-                    </span>
-                  </div>
-                )}
-
-                {isSelected && displayType === 'ZONE' && (
-                  <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-black ring-2 ring-yellow-300 animate-pulse">
-                    🎯
-                  </div>
-                )}
-
-                {isSelected && displayType !== 'ZONE' && (
-                  <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-yellow-300 ring-2 ring-yellow-200" />
-                )}
-
-                <div className="pointer-events-none">
-                  <ExtensionCardBadge cardId={card.id} card={card} variant="overlay" />
-                </div>
-              </>
-            );
+            const rarityLabel = (card.rarity || 'common').toUpperCase();
+            const flavorText = card.flavor ?? card.flavorTruth ?? card.flavorGov ?? '';
+            const effectLines = card.effects ? CardTextGenerator.renderEffects(card.effects) : [];
+            const details = effectLines.length > 0
+              ? effectLines
+              : card.text
+                ? card.text.split('\n')
+                : card.effects
+                  ? [CardTextGenerator.generateRulesText(card.effects)]
+                  : [];
 
             return (
               <button
                 key={`${card.id}-${index}`}
                 type="button"
                 className={clsx(
-                  'group/card relative flex w-full items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
-                  !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
-                  disabled && 'cursor-default'
+                  'group relative flex h-full flex-col rounded-lg border border-neutral-700 bg-neutral-900 p-2 text-left text-white shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
+                  (isPlaying || isLoading) && 'ring-2 ring-primary shadow-primary/40',
+                  isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40',
+                  !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50 hover:translate-y-0 hover:shadow-none'
                 )}
                 style={{ animationDelay: `${index * 0.03}s` }}
                 onClick={(e) => {
@@ -213,20 +182,58 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   onCardHover?.(null);
                 }}
               >
-                <BaseCard
-                  card={card}
-                  hideStamp
-                  polaroidHover={false}
-                  size="handMini"
-                  className="pointer-events-none select-none"
-                  frameClassName={clsx(
-                    'drop-shadow-[0_12px_22px_rgba(0,0,0,0.32)] transition-transform duration-200',
-                    !disabled && canAfford && 'group-hover/card:-translate-y-1 group-hover/card:drop-shadow-[0_22px_30px_rgba(0,0,0,0.35)]',
-                    (isPlaying || isLoading) && 'ring-2 ring-primary shadow-primary/40',
-                    isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40'
+                {(isLoading || isPlaying || isSelected) && (
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg bg-primary/15 backdrop-blur-sm">
+                    <Loader2 className={clsx('mb-1 h-5 w-5', isSelected ? 'animate-pulse' : 'animate-spin', 'text-primary')} />
+                    <span className="text-xs font-mono font-bold text-primary">
+                      {isPlaying ? 'DEPLOYING' : isSelected && displayType === 'ZONE' ? 'TARGETING' : 'PROCESSING'}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex flex-col h-full">
+                  <header className="mb-1">
+                    <div className="text-[13px] font-extrabold leading-tight line-clamp-2">{card.name}</div>
+                    <div className="flex items-center justify-between text-[11px] uppercase opacity-80">
+                      <span className="truncate">
+                        {displayType} · {rarityLabel}
+                      </span>
+                      <span>IP {card.cost}</span>
+                    </div>
+                  </header>
+
+                  <div className="mb-2 space-y-1 text-[12px]">
+                    {details.length > 0 ? (
+                      details.map((line, detailIndex) => (
+                        <p key={`${card.id}-detail-${detailIndex}`} className="leading-snug">
+                          {line}
+                        </p>
+                      ))
+                    ) : (
+                      <p className="opacity-80">No effect data</p>
+                    )}
+                  </div>
+
+                  <div className="mt-auto" />
+
+                  {flavorText && (
+                    <div className="border-t border-white/10 pt-1 text-[11px] italic opacity-80 line-clamp-2">
+                      “{flavorText}”
+                    </div>
                   )}
-                  overlay={overlay}
-                />
+                </div>
+
+                {isSelected && displayType === 'ZONE' && (
+                  <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-black ring-2 ring-yellow-300 animate-pulse">
+                    🎯
+                  </div>
+                )}
+
+                {isSelected && displayType !== 'ZONE' && (
+                  <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-yellow-300 ring-2 ring-yellow-200" />
+                )}
+
+                <ExtensionCardBadge cardId={card.id} card={card} variant="overlay" />
               </button>
             );
           })

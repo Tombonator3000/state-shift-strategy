@@ -803,8 +803,8 @@ const Index = () => {
   );
 
   const leftPaneContent = (
-    <div className="flex h-full min-h-0 flex-col gap-4">
-      <div className="flex min-h-0 flex-1 flex-col gap-4 xl:flex-row">
+    <div className="flex h-full flex-col gap-4">
+      <div className="flex flex-1 flex-col gap-4 xl:flex-row">
         <div className="hidden xl:flex xl:w-72 xl:flex-col xl:gap-4">
           <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
             <VictoryConditions
@@ -875,12 +875,12 @@ const Index = () => {
   );
 
   const rightPaneContent = (
-    <aside className="h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
-      <header className="flex items-center justify-between gap-2 border-b border-newspaper-border/60 px-4 py-3">
+    <div className="flex h-full flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
+      <div className="flex items-center justify-between gap-2 border-b border-newspaper-border/60 px-4 py-3">
         <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Your Hand</h3>
         <span className="text-xs font-mono">IP {gameState.ip}</span>
-      </header>
-      <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
+      </div>
+      <div className="flex-1 min-h-0">
         <EnhancedGameHand
           cards={gameState.hand}
           onPlayCard={handlePlayCard}
@@ -892,7 +892,7 @@ const Index = () => {
           onCardHover={setHoveredCard}
         />
       </div>
-      <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
+      <div className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
         <Button
           onClick={handleEndTurn}
           className="touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60"
@@ -907,8 +907,8 @@ const Index = () => {
             'End Turn'
           )}
         </Button>
-      </footer>
-    </aside>
+      </div>
+    </div>
   );
 
   return (
