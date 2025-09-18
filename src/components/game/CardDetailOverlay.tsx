@@ -58,7 +58,11 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
           </Button>
         </div>
 
-        <BaseCard card={card} polaroidHover={false} />
+        <div className="modal-wrapper">
+          <div className="modal-card">
+            <BaseCard card={card} polaroidHover={false} />
+          </div>
+        </div>
 
         <div className="flex w-full flex-col items-center gap-2 sm:gap-3">
           <Button

@@ -154,5 +154,64 @@
     "Alien Baby Stroller – For Your Hybrid Offspring",
     "Pastor Rex End Times Clock – Always 11:59",
     "Gator-Proof Bathrobe – Relax With Bite Protection"
-  ]
+  ],
+  "subheads": {
+    "generic": [
+      "Sources insist it’s totally normal.",
+      "Officials decline to elaborate.",
+      "Eyewitness: “It winked at me.”",
+      "Exclusive: documents printed on very secret paper."
+    ],
+    "attack": [
+      "Leaked memos roil the bureaucracy.",
+      "Budget cuts, shredded files and raised eyebrows.",
+      "‘Administrative turbulence’ reported across agencies."
+    ],
+    "media": [
+      "Narrative momentum shifts on all channels.",
+      "Fact checkers need a nap.",
+      "Clip goes viral, pundits go feral."
+    ],
+    "zone": [
+      "Canvassers swarm precinct coffee machines.",
+      "Boots, banners and a very loud megaphone.",
+      "County clerks experience paper-jam spike."
+    ]
+  },
+
+  "bylines": [
+    "By: Agent X",
+    "By: Anonymous Source (Probably)",
+    "By: Desk of Plausible Deniability",
+    "By: Field Unit 27-B/6"
+  ],
+
+  "sources": [
+    "Source: My Cousin’s Blog",
+    "Source: Heavily Redacted FOIA",
+    "Source: Classified (Trust Us)",
+    "Source: Guy At The Diner"
+  ],
+
+  "conspiracyCorner": [
+    "Elvis spotted buying groceries with Bitcoin",
+    "Government admits pigeons are unionized surveillance",
+    "Bigfoot runs illegal cryptocurrency farm",
+    "Moon landing filmed in Florida Man’s backyard"
+  ],
+
+  "weather": [
+    "Today: Suspicious Fog",
+    "Tomorrow: Reality Distortion Rain",
+    "Weekend: 65% chance of Mutant Weather"
+  ],
+
+  "attackVerbs": ["EXPOSED", "LEAKED", "REDACTED", "BUSTED"],
+  "mediaVerbs":  ["GOES VIRAL", "REVEALED", "DEBUNKED?", "TRENDING"],
+  "zoneVerbs":   ["MARCHES", "SURGE", "OCCUPIES", "FLIPS DISTRICT"],
+
+  "stamps": {
+    "breaking": ["BREAKING", "URGENT", "DEVELOPING"],
+    "classified": ["CLASSIFIED", "TOP SECRET", "EYES ONLY"]
+  }
 }
