@@ -58,7 +58,7 @@ export const BaseCard = ({
     >
       <CardFrame size={size}>
         <>
-          <div className="card-header px-3 pt-3 text-[color:var(--pt-ink)]">
+          <div className="card-header text-[color:var(--ink)]">
             <div className="text-3xl leading-none uppercase font-headline">
               {card.name}
             </div>
@@ -86,27 +86,24 @@ export const BaseCard = ({
 
           <div
             className={cn(
-              'card-art mt-3 mx-3 pt-polaroid transition-transform duration-200',
+              'card-art overflow-hidden transition-transform duration-200',
               polaroidHover && 'group-hover:-rotate-[0.75deg] group-hover:-translate-y-1',
             )}
           >
-            <div className="aspect-[4/3] w-full overflow-hidden">
+            <div className="aspect-[4/3] w-full">
               <CardImage cardId={card.id} className="h-full w-full grayscale" />
             </div>
           </div>
 
-          <div
-            className="card-effects m-3 space-y-2 rounded border bg-black/80 p-3 text-sm leading-snug text-white"
-            style={{ borderColor: 'var(--pt-border-soft)' }}
-          >
+          <div className="card-effects space-y-2 text-sm leading-snug">
             <div className="text-[11px] uppercase tracking-[0.18em] text-white/70">{typeLabel}</div>
             <div className="font-semibold">{effectText}</div>
             {showCardText && <div className="text-xs leading-snug text-white/80">{card.text}</div>}
           </div>
 
           {flavor && (
-            <div className="card-flavor mx-3 mb-3 text-[12px] italic text-[color:var(--pt-ink)] opacity-80">
-              <span className="mr-1 font-mono not-italic uppercase tracking-wide opacity-70 text-[color:var(--pt-ink)]">
+            <div className="card-flavor text-[12px]">
+              <span className="mr-1 font-mono not-italic uppercase tracking-wide opacity-70 text-[color:var(--ink)]">
                 CLASSIFIED INTELLIGENCE:
               </span>
               {flavor}

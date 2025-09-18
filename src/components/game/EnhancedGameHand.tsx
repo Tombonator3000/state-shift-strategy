@@ -114,7 +114,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       ref={handRef}
       onPointerLeave={() => onCardHover?.(null)}
     >
-      <div className="grid w-full grid-cols-3 gap-3 place-items-start content-start">
+      <div className="grid w-full grid-cols-3 gap-3 justify-items-start items-start content-start">
         {cards.length === 0 ? (
           <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
             No assets available

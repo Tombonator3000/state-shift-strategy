@@ -44,8 +44,10 @@ All colors MUST be HSL.
     --sidebar-primary-foreground: 0 0% 98%;
 
     /* Tabloid newspaper theme tokens */
-    --ink: 0 0% 0%;
-    --paper: 0 0% 96.5%;
+    --paper: #f4f3f1;
+    --ink: #111111;
+    --ink-80: #1a1a1a;
+    --panel: #0b0b0b;
     --line: 0 0% 6.7%;
     --lineSoft: 0 0% 13.3%;
     --grey: 0 0% 80%;
@@ -540,28 +542,40 @@ All colors MUST be HSL.
   box-sizing: border-box;
   width: 320px;
   height: 460px;
-  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  padding: var(--card-shell-padding, 12px);
   display: flex;
   flex-direction: column;
-  background: var(--card-shell-bg, #111111);
-  color: var(--card-shell-fg, #ffffff);
-  border: 3px solid var(--card-shell-border, #000000);
-  border-radius: var(--card-shell-radius, 10px);
-  padding: var(--card-shell-padding, 12px);
   font-size: 14px;
   line-height: 1.2;
-  box-shadow: 0 2px 0 #000000, 0 8px 24px rgba(0, 0, 0, 0.35);
-  overflow: hidden;
+  box-shadow: 0 2px 0 var(--ink), 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .card-header {
-  width: 100%;
   margin-bottom: 8px;
 }
 
-.card-effects {
-  width: 100%;
+.card-art {
   margin-bottom: 8px;
+  background: #e9e7e4;
+}
+
+.card-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.card-effects {
+  margin-top: auto;
+  margin-bottom: 8px;
+  background: #1b1b1b;
+  color: #eeeeee;
+  padding: 10px 12px;
+  border-radius: 6px;
 }
 
 .card-effects,
@@ -573,11 +587,11 @@ All colors MUST be HSL.
 }
 
 .card-flavor {
-  margin-top: auto;
   padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
   font-style: italic;
   opacity: 0.85;
+  color: var(--ink-80);
 }
 
 /* Når kortet rendres i modal: gi en overlay-ramme som ikke klippes */
@@ -594,10 +608,10 @@ All colors MUST be HSL.
   content: "";
   position: absolute;
   inset: -3px;
-  border: 3px solid #000000;
+  border: 3px solid var(--ink);
   border-radius: 12px;
   pointer-events: none;
-  box-shadow: 0 2px 0 #000000, 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 0 var(--ink), 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .modal-wrapper {
