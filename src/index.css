@@ -649,6 +649,9 @@ All colors MUST be HSL.
   --tray-h-md: 160px;
   --tray-h-lg: 200px;
 
+  --halftone-red: radial-gradient(circle at 1px 1px, rgba(220, 38, 38, 0.25) 1px, transparent 1px);
+  --halftone-blue: radial-gradient(circle at 1px 1px, rgba(37, 99, 235, 0.23) 1px, transparent 1px);
+
   /* iOS safe area */
   --safe-top: env(safe-area-inset-top);
   --safe-right: env(safe-area-inset-right);

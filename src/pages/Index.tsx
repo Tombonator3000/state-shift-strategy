@@ -674,53 +674,6 @@ const Index = () => {
           <div className="mt-2">{renderIntelLog(6)}</div>
         </div>
       </div>
-
-      <div className="flex min-h-0 flex-1 flex-col gap-3 rounded border border-newspaper-border bg-newspaper-text p-3 text-newspaper-bg shadow-sm">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="text-xs font-bold uppercase tracking-wide">Your Hand</h3>
-          <span className="text-xs font-mono">IP {gameState.ip}</span>
-        </div>
-        <div className="min-h-0 flex-1 overflow-visible">
-          <EnhancedGameHand
-            cards={gameState.hand}
-            onPlayCard={handlePlayCard}
-            onSelectCard={handleSelectCard}
-            selectedCard={gameState.selectedCard}
-            disabled={handInteractionDisabled}
-            currentIP={gameState.ip}
-            loadingCard={loadingCard}
-            onCardHover={setHoveredCard}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Button
-          onClick={handleEndTurn}
-          className="touch-target w-full bg-newspaper-text text-newspaper-bg transition-all duration-200 hover:bg-newspaper-text/80"
-          disabled={isPlayerActionLocked}
-        >
-          {gameState.currentPlayer === 'ai' ? (
-            <span className="flex items-center justify-center gap-2 text-sm">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
-              AI Thinking...
-            </span>
-          ) : (
-            'End Turn'
-          )}
-        </Button>
-        <Button
-          onClick={() => {
-            setShowInGameOptions(true);
-            setIsSidebarOpen(false);
-            audio.playSFX('click');
-          }}
-          variant="outline"
-          className="touch-target w-full border-newspaper-border text-newspaper-text hover:bg-newspaper-bg/60"
-        >
-          Options & Settings
-        </Button>
-      </div>
     </div>
   );
 
@@ -849,10 +802,10 @@ const Index = () => {
     </div>
   );
 
-  const mainContent = (
+  const leftPaneContent = (
     <div className="flex h-full flex-col gap-4">
-      <div className="flex h-full flex-col gap-4 xl:flex-row">
-        <div className="hidden xl:flex xl:w-64 xl:flex-col xl:gap-4">
+      <div className="flex flex-1 flex-col gap-4 xl:flex-row">
+        <div className="hidden xl:flex xl:w-72 xl:flex-col xl:gap-4">
           <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
             <VictoryConditions
               controlledStates={gameState.controlledStates.length}
@@ -912,10 +865,8 @@ const Index = () => {
               />
             </div>
           </div>
-          <div className="shrink-0 rounded border-2 border-newspaper-border bg-newspaper-bg">
-            <div className="h-[200px] md:h-[220px] lg:h-[240px] xl:h-[260px]">
-              <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} />
-            </div>
+          <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
+            <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} />
           </div>
         </div>
       </div>
@@ -923,56 +874,39 @@ const Index = () => {
     </div>
   );
 
-  const trayContent = (
-    <div className="flex h-full flex-col gap-2">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">Command Tray</span>
-        <Button
-          variant="outline"
-          className="touch-target md:hidden"
-          onClick={() => setIsSidebarOpen(true)}
-        >
-          Open Panel
-        </Button>
+  const rightPaneContent = (
+    <div className="flex h-full flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
+      <div className="flex items-center justify-between gap-2 border-b border-newspaper-border/60 px-4 py-3">
+        <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Your Hand</h3>
+        <span className="text-xs font-mono">IP {gameState.ip}</span>
       </div>
       <div className="flex-1 min-h-0">
-        <div className="h-full flex items-stretch gap-3 overflow-x-auto overflow-y-hidden">
-          {gameState.hand.map(card => {
-            const canPlay = !handInteractionDisabled && gameState.ip >= card.cost;
-            return (
-              <div
-                key={card.id}
-                className="touch-target flex w-44 flex-shrink-0 flex-col justify-between rounded-lg border border-newspaper-border bg-newspaper-bg p-3 shadow-sm"
-              >
-                <button
-                  type="button"
-                  className="flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg"
-                  onClick={() => {
-                    handleSelectCard(card.id);
-                    setIsSidebarOpen(true);
-                  }}
-                >
-                  <div className="text-[11px] font-mono text-newspaper-text/70">IP {card.cost}</div>
-                  <div className="mt-1 text-sm font-bold leading-tight text-newspaper-text">{card.name}</div>
-                  <div className="mt-1 line-clamp-2 text-xs leading-snug text-newspaper-text/70">{card.text}</div>
-                </button>
-                <Button
-                  type="button"
-                  onClick={() => handlePlayCard(card.id)}
-                  disabled={!canPlay}
-                  className="touch-target mt-2 w-full bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80 disabled:opacity-60"
-                >
-                  Play
-                </Button>
-              </div>
-            );
-          })}
-          {gameState.hand.length === 0 && (
-            <div className="flex w-full items-center justify-center rounded-lg border border-dashed border-newspaper-border bg-newspaper-bg/80 p-4 text-sm font-mono text-newspaper-text/60">
-              No cards in hand
-            </div>
+        <EnhancedGameHand
+          cards={gameState.hand}
+          onPlayCard={handlePlayCard}
+          onSelectCard={handleSelectCard}
+          selectedCard={gameState.selectedCard}
+          disabled={handInteractionDisabled}
+          currentIP={gameState.ip}
+          loadingCard={loadingCard}
+          onCardHover={setHoveredCard}
+        />
+      </div>
+      <div className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
+        <Button
+          onClick={handleEndTurn}
+          className="touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60"
+          disabled={isPlayerActionLocked}
+        >
+          {gameState.currentPlayer === 'ai' ? (
+            <span className="flex items-center justify-center gap-2 text-sm">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
+              AI Thinking...
+            </span>
+          ) : (
+            'End Turn'
           )}
-        </div>
+        </Button>
       </div>
     </div>
   );
@@ -981,9 +915,8 @@ const Index = () => {
     <>
       <ResponsiveLayout
         masthead={mastheadContent}
-        main={mainContent}
-        sidebar={renderSidebar()}
-        tray={trayContent}
+        leftPane={leftPaneContent}
+        rightPane={rightPaneContent}
       />
 
       <Toaster
