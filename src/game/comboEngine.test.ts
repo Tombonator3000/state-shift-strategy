@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'bun:test';
 import type { GameState, PlayerId, PlayerState } from '@/mvp/validator';
 import type { TurnPlay } from './combo.types';
-import { applyComboRewards, evaluateCombos, setComboSettings } from './comboEngine';
+import { applyComboRewards, evaluateCombos, getComboRng, setComboSettings } from './comboEngine';
 import { COMBO_DEFINITIONS, DEFAULT_COMBO_SETTINGS } from './combo.config';
 
 type MutableGameState = GameState & { players: Record<PlayerId, PlayerState> };
@@ -186,5 +186,15 @@ describe('comboEngine.evaluateCombos', () => {
 
     expect(evaluation.results).toHaveLength(0);
     expect(evaluation.totalReward).toEqual({});
+  });
+
+  it('tracks the provided rng for reuse across combo processing', () => {
+    const plays: TurnPlay[] = [makePlay({ cardType: 'MEDIA', cost: 2 })];
+    const state = createState(plays);
+    const seededRng = () => 0.5;
+
+    evaluateCombos(state, 'P1', enableOnly(['count_media_campaign'], { rng: seededRng }));
+
+    expect(getComboRng()).toBe(seededRng);
   });
 });
