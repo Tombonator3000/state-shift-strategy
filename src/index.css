@@ -109,7 +109,7 @@ All colors MUST be HSL.
     --pt-shadow: rgba(0, 0, 0, 0.25);
 
     --pt-card-w: 320px;
-    --pt-card-h: 450px;
+    --pt-card-h: 460px;
 
     --pt-gap: 10px;
     --pt-radius: 14px;
@@ -516,28 +516,39 @@ All colors MUST be HSL.
 
 /* Tabloid newspaper surface */
 .pt-card-surface {
-  background:
+  --card-shell-bg:
     radial-gradient(var(--pt-halftone) 1px, transparent 1px) 0 0 / 6px 6px,
     var(--pt-paper);
+  --card-shell-fg: var(--pt-ink);
+  --card-shell-border: var(--pt-border);
+  --card-shell-border-width: 3px;
 }
 
 .card-cell {
   position: relative;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .card-inner {
   position: absolute;
   inset: 0;
+  backface-visibility: hidden;
 }
 
 .card-shell {
+  box-sizing: border-box;
   width: 320px;
-  height: 450px;
+  height: 460px;
   display: flex;
   flex-direction: column;
   border-radius: var(--pt-radius);
-  box-sizing: border-box;
+  padding: var(--card-shell-padding, 12px);
+  background: var(--card-shell-bg, #111111);
+  color: var(--card-shell-fg, #ffffff);
+  border: var(--card-shell-border-width, 3px) solid var(--card-shell-border, #000000);
+  font-size: 14px;
+  line-height: 1.2;
+  box-shadow: 0 2px 0 #000000, 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .card-header,
@@ -618,13 +629,14 @@ All colors MUST be HSL.
   max-width: 95vw;
   max-height: 85vh;
   border-radius: var(--pt-radius);
+  --card-shell-padding: 0px;
 }
 
 @media (max-width: 640px) {
   .pt-card-wrap {
     width: min(var(--pt-card-w), 95vw);
     height: auto;
-    aspect-ratio: 320 / 450;
+    aspect-ratio: 320 / 460;
   }
 }
 
@@ -703,17 +715,19 @@ All colors MUST be HSL.
 
 html, body, #root {
   height: 100%;
+  min-height: 100%;
 }
 
 /* Scroll-oppførsel – hovedcontainer får scroll, barn unngår nested scroll */
 .app-shell {
-  height: 100%;
+  min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
 }
 
 .app-scroll {
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   -webkit-overflow-scrolling: touch;
   padding-bottom: var(--safe-bottom);
 }

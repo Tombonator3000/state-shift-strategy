@@ -41,7 +41,7 @@ const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, e
     >
       <h4 className="mb-2 text-[12px] font-bold uppercase tracking-[0.2em] text-black/70">{title}</h4>
       {cards.length > 0 ? (
-        <div className="grid grid-cols-3 gap-3 place-items-start content-start">
+        <div className="grid grid-cols-3 gap-2 place-items-start content-start">
           {cards.map((entry, index) => (
             <CardsInPlayCard key={`${entry.card.id}-${index}`} card={entry.card} />
           ))}
@@ -60,13 +60,13 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
   const aiCards = playedCards.filter(card => card.player === 'ai');
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       <header className="border-b border-newspaper-border/60 px-4 py-3">
         <h3 className="text-xs font-semibold uppercase tracking-[0.3em] text-newspaper-text">
           CARDS IN PLAY THIS ROUND
         </h3>
       </header>
-      <div className="grid grid-cols-1 gap-3 p-3 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 p-3 lg:grid-cols-2 max-h-[clamp(180px,28vh,320px)] overflow-y-auto">
         <PlayedCardsSection
           title="OPPONENT"
           ariaLabel="Opponent Cards"

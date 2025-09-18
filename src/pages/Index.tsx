@@ -803,8 +803,8 @@ const Index = () => {
   );
 
   const leftPaneContent = (
-    <div className="flex h-full flex-col gap-4">
-      <div className="flex flex-1 flex-col gap-4 xl:flex-row">
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 xl:flex-row">
         <div className="hidden xl:flex xl:w-72 xl:flex-col xl:gap-4">
           <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
             <VictoryConditions

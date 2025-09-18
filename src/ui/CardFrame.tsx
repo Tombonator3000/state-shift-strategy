@@ -20,7 +20,7 @@ const SIZE_TO_SCALE: Record<CardFrameSize, number> = {
 };
 
 const BASE_W = 320;
-const BASE_H = 450;
+const BASE_H = 460;
 
 export function CardFrame({
   children,
@@ -38,6 +38,7 @@ export function CardFrame({
     height: `calc(${BASE_H}px * ${scale})`,
     position: "relative",
     flex: "0 0 auto",
+    overflow: "hidden",
     ["--card-scale" as any]: scale,
   };
 
@@ -47,6 +48,7 @@ export function CardFrame({
     transform: `scale(${scale})`,
     transformOrigin: "top left",
     willChange: "transform",
+    backfaceVisibility: "hidden",
   };
 
   return (
