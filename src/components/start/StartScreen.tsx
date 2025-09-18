@@ -110,24 +110,23 @@ const StartScreen = ({
 
   return (
     <main className="newspaper-bg h-[100dvh] overflow-hidden text-[var(--ink)]">
-      <div className="mx-auto h-full max-w-[1200px] px-3 pt-[var(--gut)] pb-[var(--gut)] sm:px-4 md:px-6 lg:px-8">
+      <div className="max-w-[1200px] mx-auto h-full px-3 sm:px-4 md:px-6 lg:px-8 pt-[var(--gut)] pb-[var(--gut)]">
         <header
-          className="print-border mb-[var(--gut)] bg-[var(--paper)] px-3 py-2 md:px-4 md:py-3"
+          className="print-border bg-[var(--paper)] px-3 md:px-4 mb-[var(--gut)] flex items-end"
           style={{ height: 'var(--hdr)' }}
         >
-          <div className="flex h-full flex-col justify-center gap-2">
-            <div className="flex items-end justify-between gap-2">
-              <h1
-                className="font-[Anton] uppercase tracking-wide"
-                style={{ fontSize: 'clamp(28px, 6vh, 64px)' }}
-              >
+          <div className="w-full flex flex-col gap-2">
+            <div className="w-full flex items-end justify-between">
+              <h1 className="font-[Anton] uppercase tracking-wide" style={{ fontSize: 'var(--h1)' }}>
                 THE PARANOID TIMES
               </h1>
-              <span className="badge text-[clamp(9px,1.3vh,12px)]">TIMES</span>
+              <span className="badge" style={{ fontSize: 'var(--cap)' }}>
+                TIMES
+              </span>
             </div>
             <div
               className="inline-block bg-[var(--ink)] px-2 py-1 font-[Bebas Neue] uppercase tracking-wider text-[var(--paper)]"
-              style={{ fontSize: 'clamp(11px, 1.6vh, 16px)' }}
+              style={{ fontSize: 'var(--btn)' }}
             >
               MIND-BLOWING NEWS YOU WON'T BELIEVE!
             </div>
@@ -166,20 +165,20 @@ const StartScreen = ({
                 <img
                   src="/assets/start/start-continue.jpeg"
                   alt="Continue your conspiracies"
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover object-center"
                   loading="lazy"
                 />
               </div>
               <div className="flex flex-col gap-2 p-3 md:p-4">
                 <h2
                   className="font-[Anton] uppercase tracking-wide text-[var(--ink)]"
-                  style={{ fontSize: 'clamp(18px, 3.4vh, 36px)' }}
+                  style={{ fontSize: 'var(--h2)' }}
                 >
                   {headline}
                 </h2>
                 <p
                   className="uppercase tracking-wide text-[var(--ink-weak)]"
-                  style={{ fontSize: 'clamp(10px, 1.4vh, 14px)' }}
+                  style={{ fontSize: 'var(--cap)' }}
                 >
                   {subhead}
                 </p>
@@ -215,7 +214,7 @@ const StartScreen = ({
 
         <footer
           className="print-border mt-[var(--gut)] px-3 flex items-center justify-center font-[Bebas Neue] tracking-widest uppercase"
-          style={{ height: 'var(--ftr)', fontSize: 'clamp(12px, 1.8vh, 18px)' }}
+          style={{ height: 'var(--ftr)', fontSize: 'clamp(11px, 1.8vh, 18px)' }}
         >
           PHONY MOON CONTINUES TO SHINE IN NIGHT SKY!
         </footer>
