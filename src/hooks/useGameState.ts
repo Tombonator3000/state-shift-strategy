@@ -4,8 +4,9 @@ import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
 import { generateMixedDeck } from '@/lib/decks/generator';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
-import { AIStrategist, type AIDifficulty } from '@/data/aiStrategy';
+import { AIStrategist, type AIDifficulty, type CardPlay } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
+import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import { EventManager, type GameEvent, EVENT_DATABASE } from '@/data/eventDatabase';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
@@ -622,10 +623,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           return prev;
         });
       });
-      
+
       if (!freshState.aiStrategist || freshState.aiHand.length === 0) break;
 
-      const bestPlay = freshState.aiStrategist.selectBestPlay({
+      const strategistView = {
         ...freshState,
         // Provide AI-relative IP metric expected by strategist (negative = player advantage)
         ip: -freshState.ip,
@@ -633,7 +634,34 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         controlledStates: freshState.states
           .filter(state => state.owner === 'ai')
           .map(state => state.abbreviation)
-      });
+      };
+
+      let bestPlay: CardPlay | null;
+      const strategyDetails: string[] = [];
+
+      if (freshState.aiStrategist instanceof EnhancedAIStrategist) {
+        const enhancedPlay = freshState.aiStrategist.selectOptimalPlay(strategistView);
+        bestPlay = enhancedPlay;
+
+        if (enhancedPlay) {
+          const { synergies, deceptionValue, threatResponse } = enhancedPlay;
+
+          if (synergies?.length) {
+            const synergyDescriptions = synergies.map(synergy => synergy.description).join(', ');
+            strategyDetails.push(`AI Synergy Bonus: ${synergyDescriptions}`);
+          }
+
+          if (deceptionValue > 0) {
+            strategyDetails.push(`Deception tactics engaged (${Math.round(deceptionValue * 100)}% intensity)`);
+          }
+
+          if (threatResponse) {
+            strategyDetails.push('Countering recent player action.');
+          }
+        }
+      } else {
+        bestPlay = freshState.aiStrategist.selectBestPlay(strategistView);
+      }
 
       if (!bestPlay || bestPlay.priority < 0.3) break; // AI decides not to play more cards
 
@@ -641,9 +669,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (!cardToPlay) break;
       if (freshState.aiIP < cardToPlay.cost) continue; // Can't afford, try next
 
-      await playAICard(bestPlay.cardId, bestPlay.targetState, bestPlay.reasoning);
+      await playAICard(
+        bestPlay.cardId,
+        bestPlay.targetState,
+        bestPlay.reasoning,
+        strategyDetails.length > 0 ? strategyDetails : undefined,
+      );
       cardsPlayed++;
-      
+
       // Brief pause between AI card plays
       await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
     }
@@ -656,7 +689,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     }, 1000);
   }, [gameState]);
 
-  const playAICard = useCallback((cardId: string, targetState?: string, reasoning?: string) => {
+  const playAICard = useCallback((
+    cardId: string,
+    targetState?: string,
+    reasoning?: string,
+    strategyDetails?: string[],
+  ) => {
     const card = gameState.aiHand.find(c => c.id === cardId);
     if (!card) return;
 
@@ -670,6 +708,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       if (reasoning) {
         logEntries.push(`AI Strategy: ${reasoning}`);
+      }
+
+      if (strategyDetails?.length) {
+        logEntries.push(...strategyDetails);
       }
 
       const playedCardRecord = createPlayedCardRecord({

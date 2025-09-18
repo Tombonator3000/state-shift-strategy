@@ -30,15 +30,11 @@ interface DeceptionState {
 }
 
 // Enhanced Card Play with synergy info
-interface EnhancedCardPlay {
-  cardId: string;
-  targetState?: string;
-  priority: number;
-  reasoning: string;
+export type EnhancedCardPlay = CardPlay & {
   synergies: CardSynergy[];
   deceptionValue: number;
   threatResponse: boolean;
-}
+};
 
 export class EnhancedAIStrategist extends AIStrategist {
   private cardSynergies: CardSynergy[] = [];
@@ -68,6 +64,10 @@ export class EnhancedAIStrategist extends AIStrategist {
 
     // Fallback to enhanced heuristic search
     return this.selectBestPlayWithSynergies(gameState);
+  }
+
+  public override selectBestPlay(gameState: any): CardPlay | null {
+    return this.selectOptimalPlay(gameState);
   }
 
   private runMCTS(gameState: any, iterations: number): EnhancedCardPlay | null {
