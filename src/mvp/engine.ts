@@ -101,6 +101,7 @@ export function playCard(
   cardId: string,
   targetStateId?: string,
   opts: MediaResolutionOptions = {},
+  rng: () => number = Math.random,
 ): GameState {
   const cloned = cloneGameState(state);
   const currentId = cloned.currentPlayer;
@@ -148,7 +149,7 @@ export function playCard(
     playsThisTurn: cloned.playsThisTurn + 1,
   };
 
-  return resolve(interimState, currentId, card, targetStateId, opts);
+  return resolve(interimState, currentId, card, targetStateId, opts, rng);
 }
 
 export function resolve(
@@ -157,10 +158,11 @@ export function resolve(
   card: Card,
   targetStateId?: string,
   opts: MediaResolutionOptions = {},
+  rng: () => number = Math.random,
 ): GameState {
   const cloned = cloneGameState(state);
   const beforeStates = new Set(cloned.players[owner].states);
-  const resolved = applyEffectsMvp(cloned, owner, card, targetStateId, opts);
+  const resolved = applyEffectsMvp(cloned, owner, card, targetStateId, opts, rng);
 
   const metadata: Record<string, number | string | undefined> = {};
   if (card.type === 'ATTACK') {

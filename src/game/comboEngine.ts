@@ -32,10 +32,12 @@ interface ComboMetrics {
   targetedPlays: TurnPlay[];
 }
 
-let comboSettings: ComboSettings = {
+let comboSettings: ComboSettings = ensureToggleCoverage({
   ...DEFAULT_COMBO_SETTINGS,
   comboToggles: { ...DEFAULT_COMBO_SETTINGS.comboToggles },
-};
+});
+
+let currentComboRng: () => number = comboSettings.rng ?? Math.random;
 
 let lastComboSummary: ComboSummary | null = null;
 
@@ -46,11 +48,16 @@ function ensureToggleCoverage(settings: ComboSettings): ComboSettings {
       toggles[def.id] = def.enabledByDefault ?? true;
     }
   }
-  return { ...settings, comboToggles: toggles };
+  const rng = settings.rng ?? DEFAULT_COMBO_SETTINGS.rng ?? Math.random;
+  return { ...settings, comboToggles: toggles, rng };
 }
 
 export function getComboSettings(): ComboSettings {
   return ensureToggleCoverage(comboSettings);
+}
+
+export function getComboRng(): () => number {
+  return currentComboRng;
 }
 
 export function setComboSettings(update: Partial<ComboSettings>): ComboSettings {
@@ -72,6 +79,7 @@ export function setComboSettings(update: Partial<ComboSettings>): ComboSettings 
     : base.maxCombosPerTurn;
 
   comboSettings = ensureToggleCoverage(next);
+  currentComboRng = comboSettings.rng ?? currentComboRng;
   return comboSettings;
 }
 
@@ -102,6 +110,8 @@ function resolveSettings(overrides?: ComboOptions): ComboSettings {
   if (overrides.maxCombosPerTurn !== undefined) {
     merged.maxCombosPerTurn = Math.max(0, Math.floor(overrides.maxCombosPerTurn));
   }
+
+  merged.rng = overrides.rng ?? base.rng ?? DEFAULT_COMBO_SETTINGS.rng ?? Math.random;
 
   return ensureToggleCoverage(merged);
 }
@@ -434,6 +444,7 @@ export function evaluateCombos(
   options?: ComboOptions,
 ): ComboEvaluation {
   const settings = resolveSettings(options);
+  currentComboRng = settings.rng ?? currentComboRng;
   const plays = state.turnPlays
     .filter(play => play.stage === 'resolve' && play.owner === player)
     .sort((a, b) => a.sequence - b.sequence);

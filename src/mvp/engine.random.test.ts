@@ -1,0 +1,117 @@
+import { describe, expect, it } from 'bun:test';
+import { playCard } from '@/mvp/engine';
+import type { Card, GameState } from '@/mvp/validator';
+
+const createSeededRng = (seed: number): (() => number) => {
+  let state = seed % 2147483647;
+  if (state <= 0) {
+    state += 2147483646;
+  }
+  return () => {
+    state = (state * 16807) % 2147483647;
+    return (state - 1) / 2147483646;
+  };
+};
+
+const simulateDiscards = (handIds: string[], count: number, rng: () => number): string[] => {
+  const hand = [...handIds];
+  const result: string[] = [];
+  let remaining = count;
+  while (remaining > 0 && hand.length > 0) {
+    const index = Math.floor(rng() * hand.length);
+    result.push(hand.splice(index, 1)[0]!);
+    remaining -= 1;
+  }
+  return result;
+};
+
+const createAttackCard = (): Card => ({
+  id: 'attack-seeded',
+  name: 'Seeded Strike',
+  type: 'ATTACK',
+  faction: 'truth',
+  rarity: 'common',
+  cost: 2,
+  effects: { ipDelta: { opponent: 2 }, discardOpponent: 2 },
+});
+
+const createOpponentCard = (id: string): Card => ({
+  id,
+  name: `Opponent ${id}`,
+  type: 'MEDIA',
+  faction: 'government',
+  rarity: 'common',
+  cost: 1,
+  effects: { truthDelta: 1 },
+});
+
+const createState = (): GameState => {
+  const attackCard = createAttackCard();
+  const opponentHand = ['opp-1', 'opp-2', 'opp-3', 'opp-4'].map(createOpponentCard);
+  return {
+    turn: 1,
+    currentPlayer: 'P1',
+    truth: 50,
+    playsThisTurn: 0,
+    turnPlays: [],
+    log: [],
+    pressureByState: { CA: { P1: 0, P2: 0 } },
+    stateDefense: { CA: 3 },
+    players: {
+      P1: {
+        id: 'P1',
+        faction: 'truth',
+        deck: [],
+        hand: [attackCard],
+        discard: [],
+        ip: 10,
+        states: [],
+      },
+      P2: {
+        id: 'P2',
+        faction: 'government',
+        deck: [],
+        hand: opponentHand,
+        discard: [],
+        ip: 10,
+        states: [],
+      },
+    },
+  };
+};
+
+describe('playCard RNG integration', () => {
+  it('produces deterministic discards with a seeded RNG', () => {
+    const seed = 1337;
+    const state = createState();
+    const expectedDiscards = simulateDiscards(
+      state.players.P2.hand.map(card => card.id),
+      2,
+      createSeededRng(seed),
+    );
+
+    const resolved = playCard(createState(), 'attack-seeded', undefined, {}, createSeededRng(seed));
+    const discardedIds = resolved.players.P2.discard.map(card => card.id);
+
+    expect(discardedIds).toEqual(expectedDiscards);
+  });
+
+  it('yields identical discards when reusing the same seed', () => {
+    const seed = 9001;
+    const first = playCard(createState(), 'attack-seeded', undefined, {}, createSeededRng(seed));
+    const second = playCard(createState(), 'attack-seeded', undefined, {}, createSeededRng(seed));
+
+    expect(first.players.P2.discard.map(card => card.id)).toEqual(
+      second.players.P2.discard.map(card => card.id),
+    );
+  });
+
+  it('can produce different discards when seeds diverge', () => {
+    const one = playCard(createState(), 'attack-seeded', undefined, {}, createSeededRng(1));
+    const two = playCard(createState(), 'attack-seeded', undefined, {}, createSeededRng(6));
+
+    expect(one.players.P2.discard.map(card => card.id)).not.toEqual(
+      two.players.P2.discard.map(card => card.id),
+    );
+  });
+});

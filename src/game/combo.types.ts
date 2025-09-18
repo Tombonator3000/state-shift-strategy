@@ -104,6 +104,7 @@ export interface ComboSettings {
   fxEnabled: boolean;
   comboToggles: Record<string, boolean>;
   maxCombosPerTurn: number;
+  rng?: () => number;
 }
 
 export interface ComboFXCallbacks {

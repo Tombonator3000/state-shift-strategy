@@ -19,7 +19,12 @@ export function clampIP(value: number): number {
   return Math.max(0, Math.floor(value));
 }
 
-export function discardRandom(state: GameState, who: PlayerId, count: number): void {
+export function discardRandom(
+  state: GameState,
+  who: PlayerId,
+  count: number,
+  rng: () => number,
+): void {
   let remaining = Math.max(0, Math.floor(count));
   if (remaining <= 0) {
     return;
@@ -30,7 +35,7 @@ export function discardRandom(state: GameState, who: PlayerId, count: number): v
   const discard = [...target.discard];
 
   while (remaining > 0 && hand.length > 0) {
-    const index = Math.floor(Math.random() * hand.length);
+    const index = Math.floor(rng() * hand.length);
     const [card] = hand.splice(index, 1);
     discard.push(card);
     remaining -= 1;
@@ -47,6 +52,7 @@ function applyAttackEffect(
   state: GameState,
   owner: PlayerId,
   effects: EffectsATTACK,
+  rng: () => number,
 ) {
   const opponent = otherPlayer(owner);
   const damage = Math.max(0, effects.ipDelta?.opponent ?? 0);
@@ -59,7 +65,7 @@ function applyAttackEffect(
   state.log.push(`Opponent loses ${damage} IP (${before} → ${state.players[opponent].ip})`);
 
   if ((effects.discardOpponent ?? 0) > 0) {
-    discardRandom(state, opponent, effects.discardOpponent ?? 0);
+    discardRandom(state, opponent, effects.discardOpponent ?? 0, rng);
   }
 }
 
@@ -123,9 +129,10 @@ export function applyEffectsMvp(
   card: Card,
   targetStateId?: string,
   opts: MediaResolutionOptions = {},
+  rng: () => number = Math.random,
 ): GameState {
   if (card.type === 'ATTACK') {
-    applyAttackEffect(state, owner, card.effects as EffectsATTACK);
+    applyAttackEffect(state, owner, card.effects as EffectsATTACK, rng);
     return state;
   }
 
