@@ -25,16 +25,16 @@ const FactionCard = forwardRef<HTMLDivElement, FactionCardProps>(
         data-faction-card={faction}
         onClick={onSelect}
         onKeyDown={handleKeyDown}
-        className="group cursor-pointer select-none bg-[var(--paper)] print-border focus:outline-none focus:ring-4 focus:ring-black/60"
+        className="group flex h-full flex-col cursor-pointer select-none bg-[var(--paper)] print-border focus:outline-none focus:ring-4 focus:ring-black/60"
         aria-label={`${title} — select faction`}
       >
-        <div className="relative w-full aspect-[4/3] overflow-hidden bg-black/10">
+        <div className="relative flex-1 overflow-hidden bg-black/10">
           <span className="absolute top-2 left-2 z-10 badge text-[10px] leading-none bg-[var(--paper)]">EXCLUSIVE</span>
           <img
             src={imageSrc}
             alt={title}
             loading="eager"
-            className="w-full h-full object-cover object-center transition-transform duration-200 group-hover:scale-[1.02]"
+            className="h-full w-full object-cover object-center transition-transform duration-200 group-hover:scale-[1.02]"
           />
         </div>
         <div className="px-3 py-3">
