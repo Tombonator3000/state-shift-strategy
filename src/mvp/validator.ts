@@ -1,4 +1,5 @@
 import type { Faction, GameCard, MVPCardType, Rarity } from '@/rules/mvp';
+import type { TurnPlay } from '@/game/combo.types';
 import { expectedCost, MVP_CARD_TYPES } from '@/rules/mvp';
 
 export type EffectsATTACK = {
@@ -42,6 +43,7 @@ export type GameState = {
   pressureByState: Record<string, { P1: number; P2: number }>;
   stateDefense: Record<string, number>;
   playsThisTurn: number;
+  turnPlays: TurnPlay[];
   log: string[];
 };
 
@@ -469,6 +471,10 @@ export function cloneGameState(state: GameState): GameState {
   return {
     ...state,
     log: [...state.log],
+    turnPlays: state.turnPlays.map(play => ({
+      ...play,
+      metadata: play.metadata ? { ...play.metadata } : undefined,
+    })),
     players: {
       P1: clonePlayer(state.players.P1),
       P2: clonePlayer(state.players.P2),

@@ -1,6 +1,8 @@
 import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
+import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward } from '@/game/comboEngine';
+import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
 import { cloneGameState } from './validator';
-import type { Card, GameState, PlayerState } from './validator';
+import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
 import type { MediaResolutionOptions } from './media';
 
 const otherPlayer = (id: PlayerId): PlayerId => (id === 'P1' ? 'P2' : 'P1');
@@ -17,6 +19,31 @@ const drawUpToFive = (player: PlayerState): PlayerState => {
     hand,
   };
 };
+
+export type WinResult = { winner?: PlayerId; reason?: 'states' | 'truth' | 'ip' };
+
+export interface EndTurnOptions {
+  combo?: ComboOptions;
+}
+
+export interface EndTurnSummary {
+  player: PlayerId;
+  turn: number;
+  combos: ComboSummary;
+  discarded: {
+    requested: number;
+    discarded: number;
+    extraCost: number;
+  };
+  captureEvents: string[];
+  logEntries: string[];
+  winCheck: WinResult | null;
+}
+
+export interface EndTurnResult {
+  state: GameState;
+  summary: EndTurnSummary;
+}
 
 export function startTurn(state: GameState): GameState {
   const cloned = cloneGameState(state);
@@ -35,6 +62,7 @@ export function startTurn(state: GameState): GameState {
       [currentId]: updatedPlayer,
     },
     playsThisTurn: 0,
+    turnPlays: [],
   };
 }
 
@@ -98,8 +126,21 @@ export function playCard(
     ip: player.ip - card.cost,
   };
 
+  const playEntry: TurnPlay = {
+    sequence: cloned.turnPlays.length,
+    stage: 'play',
+    owner: currentId,
+    cardId: card.id,
+    cardName: card.name,
+    cardType: card.type,
+    cardRarity: card.rarity,
+    cost: card.cost,
+    targetStateId,
+  };
+
   const interimState: GameState = {
     ...cloned,
+    turnPlays: [...cloned.turnPlays, playEntry],
     players: {
       ...cloned.players,
       [currentId]: updatedPlayer,
@@ -118,13 +159,87 @@ export function resolve(
   opts: MediaResolutionOptions = {},
 ): GameState {
   const cloned = cloneGameState(state);
-  return applyEffectsMvp(cloned, owner, card, targetStateId, opts);
+  const beforeStates = new Set(cloned.players[owner].states);
+  const resolved = applyEffectsMvp(cloned, owner, card, targetStateId, opts);
+
+  const metadata: Record<string, number | string | undefined> = {};
+  if (card.type === 'ATTACK') {
+    const effects = card.effects as EffectsATTACK | undefined;
+    if (effects?.ipDelta?.opponent) {
+      metadata.damage = effects.ipDelta.opponent;
+    }
+    if (effects?.discardOpponent) {
+      metadata.discard = effects.discardOpponent;
+    }
+  } else if (card.type === 'MEDIA') {
+    const effects = card.effects as EffectsMEDIA | undefined;
+    if (typeof effects?.truthDelta === 'number') {
+      metadata.truth = effects.truthDelta;
+    }
+  } else if (card.type === 'ZONE') {
+    const effects = card.effects as EffectsZONE | undefined;
+    if (effects?.pressureDelta) {
+      metadata.pressure = effects.pressureDelta;
+    }
+    if (targetStateId) {
+      metadata.target = targetStateId;
+    }
+    const afterStates = resolved.players[owner].states;
+    const captured = afterStates.filter(stateId => !beforeStates.has(stateId));
+    if (captured.length > 0) {
+      metadata.captured = captured.join(',');
+    }
+  }
+
+  const resolveEntry: TurnPlay = {
+    sequence: resolved.turnPlays.length,
+    stage: 'resolve',
+    owner,
+    cardId: card.id,
+    cardName: card.name,
+    cardType: card.type,
+    cardRarity: card.rarity,
+    cost: card.cost,
+    targetStateId,
+    metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
+  };
+
+  return {
+    ...resolved,
+    turnPlays: [...resolved.turnPlays, resolveEntry],
+  };
 }
 
-export function endTurn(state: GameState, discards: string[]): GameState {
+export function endTurn(
+  state: GameState,
+  discards: string[],
+  options: EndTurnOptions = {},
+): EndTurnResult {
   const cloned = cloneGameState(state);
   const currentId = cloned.currentPlayer;
   const player = cloned.players[currentId];
+  const turnNumber = cloned.turn;
+
+  const captureEvents: string[] = [];
+  const turnLog: string[] = [];
+
+  for (const play of cloned.turnPlays) {
+    if (play.stage !== 'resolve' || play.owner !== currentId) {
+      continue;
+    }
+    const captured = play.metadata?.captured;
+    if (typeof captured === 'string' && captured.length > 0) {
+      const states = captured
+        .split(',')
+        .map(entry => entry.trim())
+        .filter(entry => entry.length > 0);
+      for (const stateId of states) {
+        const message = `Captured ${stateId}`;
+        captureEvents.push(message);
+        turnLog.push(message);
+      }
+    }
+  }
 
   const discardCounts = new Map<string, number>();
   for (const id of discards) {
@@ -157,18 +272,92 @@ export function endTurn(state: GameState, discards: string[]): GameState {
     ip: updatedIP,
   };
 
+  cloned.players = {
+    ...cloned.players,
+    [currentId]: updatedPlayer,
+  };
+
+  const discardMessage = `Discarded ${discarded} card${discarded === 1 ? '' : 's'}${
+    ipCost > 0 ? ` (paid ${ipCost} IP)` : ''
+  }`;
+  turnLog.push(discardMessage.trim());
+
+  const comboEvaluation = evaluateCombos(cloned, currentId, options.combo);
+  const comboSummary: ComboSummary = {
+    ...comboEvaluation,
+    player: currentId,
+    turn: turnNumber,
+  };
+
+  if (comboEvaluation.results.length > 0) {
+    const summaryText = comboEvaluation.results
+      .map(result => {
+        const rewardText = formatComboReward(result.appliedReward);
+        return rewardText ? `${result.definition.name} ${rewardText}` : result.definition.name;
+      })
+      .join('; ');
+    turnLog.push(`Combos triggered: ${summaryText}`);
+  }
+
+  const rewardedState = applyComboRewards(cloned, currentId, comboEvaluation);
+
+  const callbacks = options.combo?.fxCallbacks;
+  for (const result of comboEvaluation.results) {
+    callbacks?.onComboTriggered?.(result);
+  }
+
+  let fxEnabled = getComboSettings().fxEnabled;
+  if (options.combo?.fxEnabled !== undefined) {
+    fxEnabled = options.combo.fxEnabled;
+  }
+  if (options.combo?.enabled === false) {
+    fxEnabled = false;
+  }
+
+  if (fxEnabled && comboEvaluation.results.length > 0) {
+    for (const result of comboEvaluation.results) {
+      callbacks?.onComboFx?.(result);
+      if (typeof window !== 'undefined' && typeof window.uiComboToast === 'function') {
+        const rewardText = formatComboReward(result.appliedReward);
+        window.uiComboToast(
+          rewardText ? `${result.definition.name} ${rewardText}` : result.definition.name,
+        );
+      }
+    }
+  }
+
+  const logEnhancedState: GameState = {
+    ...rewardedState,
+    log: [...rewardedState.log, ...turnLog],
+  };
+
+  const winResult = winCheck(logEnhancedState);
+
   const nextPlayer = otherPlayer(currentId);
 
-  return {
-    ...cloned,
+  const finalState: GameState = {
+    ...logEnhancedState,
     currentPlayer: nextPlayer,
-    turn: cloned.turn + 1,
+    turn: logEnhancedState.turn + 1,
     playsThisTurn: 0,
-    players: {
-      ...cloned.players,
-      [currentId]: updatedPlayer,
-    },
+    turnPlays: [],
   };
+
+  const summary: EndTurnSummary = {
+    player: currentId,
+    turn: turnNumber,
+    combos: comboSummary,
+    discarded: {
+      requested: discards.length,
+      discarded,
+      extraCost: ipCost,
+    },
+    captureEvents,
+    logEntries: turnLog,
+    winCheck: winResult.winner ? winResult : null,
+  };
+
+  return { state: finalState, summary };
 }
 
 export function winCheck(

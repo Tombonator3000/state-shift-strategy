@@ -20,7 +20,7 @@ function applyAction(state: GameState, action: Action): GameState {
     return playCard(state, action.cardId, action.targetStateId);
   }
   if (action.type === 'end-turn') {
-    return endTurn(state, action.discards ?? []);
+    return endTurn(state, action.discards ?? []).state;
   }
   return state;
 }

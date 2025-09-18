@@ -11,7 +11,7 @@ type AnyCard = {
   effects?: any;
 };
 
-type Toast = { id: number; text: string; slot: "truth" | "ip-left" | "ip-right" };
+type Toast = { id: number; text: string; slot: "truth" | "ip-left" | "ip-right" | "combo" };
 
 declare global {
   interface Window {
@@ -19,6 +19,7 @@ declare global {
     uiToastTruth?: (delta: number) => void;
     uiToastIp?: (playerId: "P1" | "P2", delta: number) => void;
     uiFlashState?: (stateId: string, by: "P1" | "P2") => void; // placeholder for future prompts
+    uiComboToast?: (message: string) => void;
   }
 }
 
@@ -60,6 +61,12 @@ export default function UiOverlays() {
       window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 900);
     };
 
+    window.uiComboToast = (message: string) => {
+      const id = Date.now() + Math.random();
+      setToasts((t) => [...t, { id, text: message, slot: "combo" }]);
+      window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 1400);
+    };
+
     window.uiFlashState = (stateId: string, by: "P1" | "P2") => {
       const el =
         document.querySelector(`[data-state-id="${stateId}"]`) ||
@@ -83,6 +90,7 @@ export default function UiOverlays() {
       delete window.uiToastTruth;
       delete window.uiToastIp;
       delete window.uiFlashState;
+      delete window.uiComboToast;
     };
   }, []);
 
@@ -148,6 +156,16 @@ export default function UiOverlays() {
           .filter((t) => t.slot === "ip-right")
           .map((t) => (
             <div key={t.id} className="px-3 py-1 bg-black text-white text-sm shadow">
+              {t.text}
+            </div>
+          ))}
+      </div>
+      {/* Combo notifications */}
+      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[998] space-y-2">
+        {toasts
+          .filter((t) => t.slot === "combo")
+          .map((t) => (
+            <div key={t.id} className="px-4 py-2 bg-black text-yellow-300 text-sm shadow-lg">
               {t.text}
             </div>
           ))}

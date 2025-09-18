@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
+import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 
 interface PlayedCard {
   card: GameCard;
@@ -239,6 +240,37 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
     return placeholders[event.type as keyof typeof placeholders] || '[PHOTO: CLASSIFIED BY ORDER OF █████████]';
   };
 
+  const comboSummary = useMemo(() => getLastComboSummary(), [playedCards, events]);
+  const comboReport = useMemo(() => {
+    if (!comboSummary || comboSummary.results.length === 0) {
+      return null;
+    }
+    return {
+      player: comboSummary.player,
+      turn: comboSummary.turn,
+      entries: comboSummary.results.map(result => ({
+        id: result.definition.id,
+        name: result.definition.name,
+        description: result.definition.description,
+        reward: formatComboReward(result.appliedReward).replace(/[()]/g, '').trim(),
+        matched: result.details.matchedPlays.map(play => play.cardName).filter(Boolean),
+        fxText: result.definition.fxText,
+      })),
+    };
+  }, [comboSummary]);
+  const comboOwnerLabel = useMemo(() => {
+    if (!comboReport) {
+      return null;
+    }
+    if (comboReport.player === 'P1') {
+      return 'Operatives';
+    }
+    if (comboReport.player === 'P2') {
+      return 'Opposition';
+    }
+    return comboReport.player;
+  }, [comboReport]);
+
   return (
     <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-[100] p-4 animate-fade-in">
       <Card className={`max-w-6xl w-full max-h-[90vh] overflow-y-auto bg-newspaper-bg border-4 border-newspaper-border ${
@@ -306,7 +338,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
                     <p className="italic text-gray-500">No cards played this turn</p>
                   )}
                 </div>
-                
+
                 <div>
                   <h3 className="font-bold text-secret-red mb-2">AI ACTIONS</h3>
                   {playedCards.filter(pc => pc.player === 'ai').length > 0 ? (
@@ -316,12 +348,45 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
                           <span>• {pc.card.name}</span>
                           <span className="text-secret-red font-mono">[{pc.card.type}]</span>
                         </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="italic text-gray-500">No cards played this turn</p>
-                  )}
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="italic text-gray-500">No cards played this turn</p>
+                )}
+              </div>
+
+              {comboReport ? (
+                <div className="md:col-span-2 rounded border border-government-blue/40 bg-government-blue/5 p-3">
+                  <div className="flex items-center justify-between text-xs font-mono text-government-blue">
+                    <span>{comboOwnerLabel ? `${comboOwnerLabel} · ` : ''}Turn {comboReport.turn}</span>
+                    <span>
+                      {comboReport.entries.length} combo{comboReport.entries.length === 1 ? '' : 's'} resolved
+                    </span>
+                  </div>
+                  <div className="mt-2 space-y-2 text-sm">
+                    {comboReport.entries.map(entry => (
+                      <div
+                        key={entry.id}
+                        className="border-b border-dashed border-government-blue/50 pb-2 last:border-0 last:pb-0"
+                      >
+                        <div className="flex justify-between text-xs font-semibold text-government-blue">
+                          <span>{entry.name}</span>
+                          {entry.reward ? <span>{entry.reward}</span> : null}
+                        </div>
+                        <p className="text-xs italic text-newspaper-text/70">{entry.description}</p>
+                        {entry.matched.length ? (
+                          <div className="text-[11px] font-mono text-newspaper-text/60">
+                            Plays: {entry.matched.join(' → ')}
+                          </div>
+                        ) : null}
+                        {entry.fxText ? (
+                          <div className="text-[10px] uppercase text-newspaper-text/50">FX: {entry.fxText}</div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              ) : null}
               </div>
             </Card>
 
