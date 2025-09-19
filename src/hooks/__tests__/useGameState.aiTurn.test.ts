@@ -36,6 +36,7 @@ const createBaseState = (overrides: Partial<GameState> = {}): GameState => ({
   aiDeck: [],
   cardsPlayedThisTurn: 0,
   cardsPlayedThisRound: [],
+  comboTruthDeltaThisRound: 0,
   playHistory: [],
   turnPlays: [],
   controlledStates: [],

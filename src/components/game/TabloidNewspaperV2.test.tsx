@@ -40,4 +40,17 @@ describe('TabloidNewspaperV2 truth delta summary', () => {
     expect(context.truthDeltaTotal).toBe(expectedNet);
     expect(formatTruthDelta(context.truthDeltaTotal)).toBe('+4%');
   });
+
+  it('accounts for combo truth swings separately from card plays and events', () => {
+    const playerCards = [makeCard('player-small', 'human', 2)];
+    const opponentCards = [makeCard('opponent-boost', 'ai', -1)];
+    const eventTruth = 0;
+    const comboTruth = 5;
+
+    const context = buildRoundContext(playerCards, opponentCards, eventTruth, comboTruth);
+    const expectedNet = 2 - 1 + 0 + comboTruth;
+
+    expect(context.truthDeltaTotal).toBe(expectedNet);
+    expect(formatTruthDelta(context.truthDeltaTotal)).toBe('+6%');
+  });
 });

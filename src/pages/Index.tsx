@@ -1290,6 +1290,7 @@ const Index = () => {
           playedCards={gameState.cardsPlayedThisRound}
           faction={gameState.faction}
           truth={gameState.truth}
+          comboTruthDelta={gameState.comboTruthDeltaThisRound}
           onClose={handleCloseNewspaper}
         />
       )}

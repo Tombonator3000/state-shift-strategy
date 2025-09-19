@@ -65,6 +65,7 @@ const buildStateDefense = (state: GameState): EngineGameState['stateDefense'] =>
 export interface ComboAdapterResult {
   evaluation: ComboEvaluation;
   updatedTruth: number;
+  truthDelta: number;
   updatedPlayerIp: number;
   updatedOpponentIp: number;
   logEntries: string[];
@@ -97,6 +98,7 @@ export const evaluateCombosForTurn = (
   const evaluation = evaluateCombos(engineState, playerId);
   const rewardedState = applyComboRewards(engineState, playerId, evaluation);
   const rewardLogs = rewardedState.log.slice(logStart);
+  const truthDelta = rewardedState.truth - state.truth;
 
   const comboMessages = evaluation.results.map(result => {
     const rewardText = formatComboReward(result.appliedReward);
@@ -114,6 +116,7 @@ export const evaluateCombosForTurn = (
   return {
     evaluation,
     updatedTruth: rewardedState.truth,
+    truthDelta,
     updatedPlayerIp: rewardedState.players[playerId].ip,
     updatedOpponentIp: rewardedState.players[opponentId].ip,
     logEntries,

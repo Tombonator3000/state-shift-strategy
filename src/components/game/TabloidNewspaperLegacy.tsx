@@ -21,6 +21,7 @@ export interface TabloidNewspaperProps {
   playedCards: TabloidPlayedCard[];
   faction: 'government' | 'truth';
   truth: number;
+  comboTruthDelta?: number;
   onClose: () => void;
 }
 
