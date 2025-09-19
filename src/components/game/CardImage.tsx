@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { isExtensionCard, getCardExtensionInfo } from '@/data/extensionIntegration';
 
 interface CardImageProps {
@@ -9,9 +9,10 @@ interface CardImageProps {
 const CardImage: React.FC<CardImageProps> = ({ cardId, className = '' }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageExtension, setImageExtension] = useState<'jpg' | 'png'>('jpg');
 
   // Check if this is an extension card with temp image
-  const getImagePath = () => {
+  const getFallbackImagePath = () => {
     // Primary: extension metadata
     if (isExtensionCard(cardId)) {
       const extensionInfo = getCardExtensionInfo(cardId);
@@ -47,10 +48,28 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '' }) => {
     return '/lovable-uploads/e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png';
   };
 
-  const imagePath = getImagePath();
+  const fallbackImagePath = getFallbackImagePath();
+  const imagePath = imageError
+    ? fallbackImagePath
+    : `/card-art/${cardId}.${imageExtension}`;
+
+  useEffect(() => {
+    setImageError(false);
+    setImageLoaded(false);
+    setImageExtension('jpg');
+  }, [cardId]);
 
   const handleImageError = () => {
-    setImageError(true);
+    setImageLoaded(false);
+
+    if (!imageError && imageExtension === 'jpg') {
+      setImageExtension('png');
+      return;
+    }
+
+    if (!imageError) {
+      setImageError(true);
+    }
   };
 
   const handleImageLoad = () => {
