@@ -223,6 +223,11 @@ export function getRandomCards(
   for (let i = 0; i < count && poolCopy.length > 0; i++) {
     const randomIndex = Math.floor(Math.random() * poolCopy.length);
     selected.push(poolCopy[randomIndex]);
+    poolCopy.splice(randomIndex, 1);
+
+    if (poolCopy.length === 0) {
+      break;
+    }
   }
 
   return selected;
