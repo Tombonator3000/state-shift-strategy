@@ -4,6 +4,21 @@ import { CARD_DATABASE } from './cardDatabase';
 import { getAiTuningConfig, type AiTuningConfig } from './aiTuning';
 import { AIStrategist, type AIDifficulty, type AIPersonality, type CardPlay, type GameStateEvaluation } from './aiStrategy';
 
+export interface EnhancedAiDifficultyProfile {
+  planningDepth: number;
+  randomness: number;
+  aggression: number;
+  riskTolerance: number;
+  rollouts?: number;
+}
+
+const clamp = (value: number, min: number, max: number): number => {
+  if (Number.isNaN(value)) {
+    return min;
+  }
+  return Math.min(max, Math.max(min, value));
+};
+
 const CAPTURE_REGEX = /(captured|seized)\s+([^!]+)!/i;
 
 type BluffOutcome = 'capture' | 'truth_gain' | 'resource_gain' | 'pressure' | 'setback' | 'neutral';
@@ -69,6 +84,7 @@ export class EnhancedAIStrategist extends AIStrategist {
   private cardSynergies: CardSynergy[] = [];
   private deceptionState: DeceptionState;
   private playerBehaviorPattern: string[] = [];
+  private difficultyProfile: EnhancedAiDifficultyProfile;
   private threatHistory: {
     turn: number;
     threat: number;
@@ -88,14 +104,55 @@ export class EnhancedAIStrategist extends AIStrategist {
   private totalRecordedBluffs = 0;
   private successfulRecordedBluffs = 0;
 
-  constructor(difficulty: AIDifficulty = 'medium', tuning: AiTuningConfig = getAiTuningConfig()) {
+  constructor(
+    difficulty: AIDifficulty = 'medium',
+    tuning: AiTuningConfig = getAiTuningConfig(),
+    difficultyProfileOverrides?: Partial<EnhancedAiDifficultyProfile>,
+  ) {
     super(difficulty, tuning);
+
+    const basePersonality = this.personality;
+    this.difficultyProfile = this.buildDifficultyProfile(basePersonality, difficultyProfileOverrides);
+    this.personality = {
+      ...basePersonality,
+      planningDepth: this.difficultyProfile.planningDepth,
+      aggressiveness: this.difficultyProfile.aggression,
+      riskTolerance: this.difficultyProfile.riskTolerance,
+    };
+
     this.initializeCardSynergies();
     this.deceptionState = {
       fakeTargets: [],
       misdirectionLevel: this.personality.riskTolerance * 0.3,
       bluffHistory: [],
       playerPattern: []
+    };
+  }
+
+  private buildDifficultyProfile(
+    basePersonality: AIPersonality,
+    overrides?: Partial<EnhancedAiDifficultyProfile>,
+  ): EnhancedAiDifficultyProfile {
+    const defaultProfile: EnhancedAiDifficultyProfile = {
+      planningDepth: clamp(basePersonality.planningDepth, 1, 4),
+      randomness: basePersonality.planningDepth >= 3 ? 0.2 : 0.4,
+      aggression: clamp(basePersonality.aggressiveness, 0, 1),
+      riskTolerance: clamp(basePersonality.riskTolerance, 0, 1),
+      rollouts: basePersonality.planningDepth >= 3 ? basePersonality.planningDepth * 500 : 0,
+    };
+
+    if (!overrides) {
+      return defaultProfile;
+    }
+
+    return {
+      planningDepth: clamp(overrides.planningDepth ?? defaultProfile.planningDepth, 1, 4),
+      randomness: clamp(overrides.randomness ?? defaultProfile.randomness, 0, 1),
+      aggression: clamp(overrides.aggression ?? defaultProfile.aggression, 0, 1),
+      riskTolerance: clamp(overrides.riskTolerance ?? defaultProfile.riskTolerance, 0, 1),
+      rollouts: overrides.rollouts !== undefined
+        ? Math.max(0, Math.round(overrides.rollouts))
+        : defaultProfile.rollouts,
     };
   }
 
@@ -108,7 +165,10 @@ export class EnhancedAIStrategist extends AIStrategist {
 
     // Use MCTS only on hard+ difficulties due to computational cost
     if (this.personality.planningDepth >= 3) {
-      return this.runMCTS(gameState, this.personality.planningDepth * 500); // iterations
+      const iterations = this.difficultyProfile.rollouts && this.difficultyProfile.rollouts > 0
+        ? Math.max(200, Math.round(this.difficultyProfile.rollouts))
+        : this.personality.planningDepth * 500;
+      return this.runMCTS(gameState, iterations); // iterations
     }
 
     // Fallback to enhanced heuristic search
@@ -259,6 +319,7 @@ export class EnhancedAIStrategist extends AIStrategist {
       }
 
       if (cardMeta) {
+        const aggressionModifier = (this.difficultyProfile.aggression - 0.5) * 0.25;
         if (cardMeta.type === 'DEFENSIVE' && this.adaptiveSnapshot.averageThreat > 0.5) {
           adjustedPriority += this.adaptiveSnapshot.averageThreat * 0.2;
         }
@@ -269,6 +330,14 @@ export class EnhancedAIStrategist extends AIStrategist {
 
         if (cardMeta.type === 'MEDIA' && this.adaptiveSnapshot.bluffSuccessRate < 0.3) {
           adjustedPriority -= 0.05;
+        }
+
+        if (cardMeta.type === 'ATTACK') {
+          adjustedPriority += aggressionModifier;
+        }
+
+        if (cardMeta.type === 'DEFENSIVE') {
+          adjustedPriority -= aggressionModifier * 0.6;
         }
       }
 
@@ -284,7 +353,7 @@ export class EnhancedAIStrategist extends AIStrategist {
     if (enhancedPlays.length === 0) return null;
 
     // Add controlled randomness based on difficulty
-    const randomnessFactor = this.personality.planningDepth >= 4 ? 0.05 : 0.15;
+    const randomnessFactor = Math.min(0.35, 0.05 + this.difficultyProfile.randomness * 0.5);
     
     enhancedPlays.sort((a, b) => {
       const randomA = a.priority + (Math.random() * randomnessFactor);
@@ -956,7 +1025,12 @@ export class EnhancedAIStrategist extends AIStrategist {
       }
     }
 
-    return moves[Math.floor(Math.random() * moves.length)];
+    const sortedMoves = [...moves].sort((a, b) => b.priority - a.priority);
+    const randomnessWindow = Math.max(
+      1,
+      Math.min(sortedMoves.length, Math.round(1 + this.difficultyProfile.randomness * 5)),
+    );
+    return sortedMoves[Math.floor(Math.random() * randomnessWindow)];
   }
 
   private isGameOver(gameState: any): boolean {

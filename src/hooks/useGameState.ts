@@ -4,7 +4,7 @@ import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
 import { generateMixedDeck } from '@/lib/decks/generator';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
-import { AIStrategist, type AIDifficulty, type CardPlay } from '@/data/aiStrategy';
+import { type AIDifficulty, type CardPlay } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import { EventManager, type GameEvent } from '@/data/eventDatabase';
@@ -83,7 +83,7 @@ interface GameState {
   aiTurnInProgress: boolean;
   selectedCard: string | null;
   targetState: string | null;
-  aiStrategist?: AIStrategist;
+  aiStrategist?: EnhancedAIStrategist;
   pendingCardDraw?: number;
   newCards?: GameCard[];
   showNewCardsPresentation?: boolean;
@@ -703,62 +703,16 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           aiHand: availableHand,
         };
 
-        if (freshState.aiStrategist instanceof EnhancedAIStrategist) {
-          const enhancedPlay = freshState.aiStrategist.selectOptimalPlay(strategistView);
+        const enhancedPlay = freshState.aiStrategist.selectOptimalPlay(strategistView);
 
-          if (!enhancedPlay || enhancedPlay.priority < 0.3) {
-            stopPlaying = true;
-            break;
-          }
-
-          const candidateCard = availableHand.find(card => card.id === enhancedPlay.cardId);
-          if (!candidateCard) {
-            attemptedCardIds.add(enhancedPlay.cardId);
-            continue;
-          }
-
-          if (freshState.aiIP < candidateCard.cost) {
-            attemptedCardIds.add(candidateCard.id);
-            continue;
-          }
-
-          const details: string[] = [];
-          const { synergies, deceptionValue, threatResponse } = enhancedPlay;
-
-          if (synergies?.length) {
-            const synergyDescriptions = synergies.map(synergy => synergy.description).join(', ');
-            details.push(`AI Synergy Bonus: ${synergyDescriptions}`);
-          }
-
-          if (deceptionValue > 0) {
-            details.push(`Deception tactics engaged (${Math.round(deceptionValue * 100)}% intensity)`);
-          }
-
-          if (threatResponse) {
-            details.push('Countering recent player action.');
-          }
-
-          const adaptiveSummary = freshState.aiStrategist.getAdaptiveSummary();
-          if (adaptiveSummary.length) {
-            details.push(...adaptiveSummary);
-          }
-
-          selectedPlay = enhancedPlay;
-          selectedCard = candidateCard;
-          selectedStrategyDetails = details.length > 0 ? details : undefined;
-          break;
-        }
-
-        const basicPlay = freshState.aiStrategist.selectBestPlay(strategistView);
-
-        if (!basicPlay || basicPlay.priority < 0.3) {
+        if (!enhancedPlay || enhancedPlay.priority < 0.3) {
           stopPlaying = true;
           break;
         }
 
-        const candidateCard = availableHand.find(card => card.id === basicPlay.cardId);
+        const candidateCard = availableHand.find(card => card.id === enhancedPlay.cardId);
         if (!candidateCard) {
-          attemptedCardIds.add(basicPlay.cardId);
+          attemptedCardIds.add(enhancedPlay.cardId);
           continue;
         }
 
@@ -767,9 +721,30 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           continue;
         }
 
-        selectedPlay = basicPlay;
+        const details: string[] = [];
+        const { synergies, deceptionValue, threatResponse } = enhancedPlay;
+
+        if (synergies?.length) {
+          const synergyDescriptions = synergies.map(synergy => synergy.description).join(', ');
+          details.push(`AI Synergy Bonus: ${synergyDescriptions}`);
+        }
+
+        if (deceptionValue > 0) {
+          details.push(`Deception tactics engaged (${Math.round(deceptionValue * 100)}% intensity)`);
+        }
+
+        if (threatResponse) {
+          details.push('Countering recent player action.');
+        }
+
+        const adaptiveSummary = freshState.aiStrategist.getAdaptiveSummary();
+        if (adaptiveSummary.length) {
+          details.push(...adaptiveSummary);
+        }
+
+        selectedPlay = enhancedPlay;
         selectedCard = candidateCard;
-        selectedStrategyDetails = undefined;
+        selectedStrategyDetails = details.length > 0 ? details : undefined;
         break;
       }
 
@@ -821,14 +796,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         debugStrategyToConsole(reasoning, strategyDetails);
       }
 
-      if (prev.aiStrategist instanceof EnhancedAIStrategist) {
-        prev.aiStrategist.recordAiPlayOutcome({
-          card,
-          targetState,
-          resolution,
-          previousState: prev,
-        });
-      }
+      prev.aiStrategist?.recordAiPlayOutcome({
+        card,
+        targetState,
+        resolution,
+        previousState: prev,
+      });
 
       const playedCardRecord = createPlayedCardRecord({
         card,

@@ -1,3 +1,4 @@
+import { AI_PRESETS, type AiConfig } from '@/ai/difficulty';
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE } from './cardDatabase';
 import { getAiTuningConfig, normalizeAiTuningConfig, type AiTuningConfig } from './aiTuning';
@@ -15,47 +16,55 @@ export interface AIPersonality {
   planningDepth: number; // 1-3, how many turns ahead to think
 }
 
+const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
+
+const toPlanningDepth = (lookaheadDepth: number): number => {
+  return Math.max(1, Math.min(4, Math.round(lookaheadDepth + 1)));
+};
+
+const createPersonality = (
+  name: string,
+  description: string,
+  preset: AiConfig,
+): AIPersonality => ({
+  name,
+  description,
+  aggressiveness: clamp01(preset.aggression),
+  defensiveness: clamp01(0.2 + preset.denialPriority * 0.8),
+  territorial: clamp01((preset.aggression + preset.denialPriority) / 2),
+  economical: clamp01(preset.resourceValue),
+  riskTolerance: clamp01(preset.riskTolerance),
+  planningDepth: toPlanningDepth(preset.lookaheadDepth),
+});
+
+const PRESET_LOOKUP: Record<AIDifficulty, AiConfig> = {
+  easy: AI_PRESETS.EASY,
+  medium: AI_PRESETS.NORMAL,
+  hard: AI_PRESETS.HARD,
+  legendary: AI_PRESETS.TOP_SECRET_PLUS,
+};
+
 export const AI_PERSONALITIES: Record<AIDifficulty, AIPersonality> = {
-  easy: {
-    name: "Intern Agent",
-    description: "New to the conspiracy, makes obvious mistakes",
-    aggressiveness: 0.2,
-    defensiveness: 0.1,
-    territorial: 0.3,
-    economical: 0.5,
-    riskTolerance: 0.2,
-    planningDepth: 1
-  },
-  medium: {
-    name: "Field Operative",
-    description: "Experienced agent with solid tactical understanding",
-    aggressiveness: 0.5,
-    defensiveness: 0.5,
-    territorial: 0.5,
-    economical: 0.6,
-    riskTolerance: 0.4,
-    planningDepth: 2
-  },
-  hard: {
-    name: "Senior Handler",
-    description: "Veteran strategist with deep understanding of the game",
-    aggressiveness: 0.8,
-    defensiveness: 0.8,
-    territorial: 0.7,
-    economical: 0.7,
-    riskTolerance: 0.3,
-    planningDepth: 3
-  },
-  legendary: {
-    name: "Shadow Director",
-    description: "Master manipulator who sees all angles",
-    aggressiveness: 1.0,
-    defensiveness: 0.95,
-    territorial: 0.85,
-    economical: 0.9,
-    riskTolerance: 0.1,
-    planningDepth: 4
-  }
+  easy: createPersonality(
+    "Intern Agent",
+    "New to the conspiracy, makes obvious mistakes",
+    PRESET_LOOKUP.easy,
+  ),
+  medium: createPersonality(
+    "Field Operative",
+    "Experienced agent with solid tactical understanding",
+    PRESET_LOOKUP.medium,
+  ),
+  hard: createPersonality(
+    "Senior Handler",
+    "Veteran strategist with deep understanding of the game",
+    PRESET_LOOKUP.hard,
+  ),
+  legendary: createPersonality(
+    "Shadow Director",
+    "Master manipulator who sees all angles",
+    PRESET_LOOKUP.legendary,
+  ),
 };
 
 interface PressureInsight {
