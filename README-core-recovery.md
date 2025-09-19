@@ -14,7 +14,7 @@ The system is now active! The `src/data/core/index.ts` collector automatically g
 
 ## 📂 Adding Batch Files
 
-Place your batch files in `src/data/core/` with this structure:
+Place your batch files in `src/data/core/` with this structure (the canonical MVP card and engine types now live in `src/mvp/validator.ts`):
 
 ```typescript
 // src/data/core/truth-batch-X.ts
