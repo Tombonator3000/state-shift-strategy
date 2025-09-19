@@ -76,7 +76,7 @@ export const MVP_RULES_SECTIONS: MvpRulesSection[] = [
       'Count combos reward playing several cards of a type, rarity, or overall volume.',
       'Threshold combos measure total IP spent, high/low cost usage, and unique targets.',
       'State combos focus on hitting the same location repeatedly or spreading across regions.',
-      'Hybrid combos mix multiple triggers. All rewards respect each combo’s cap and your per-turn limit (default 3).',
+      'Hybrid combos mix multiple triggers. All rewards respect each combo’s cap and your per-turn limit (default 2).',
     ],
   },
   {
