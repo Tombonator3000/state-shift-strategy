@@ -244,7 +244,7 @@ export class EnhancedAIStrategist implements AIStrategist {
       const iterations = this.difficultyProfile.rollouts && this.difficultyProfile.rollouts > 0
         ? Math.max(200, Math.round(this.difficultyProfile.rollouts))
         : this.personality.planningDepth * 500;
-      return this.runMCTS(gameState, iterations); // iterations
+      return this.runMCTS(gameState, iterations, evaluation); // iterations
     }
 
     // Fallback to enhanced heuristic search
@@ -255,11 +255,15 @@ export class EnhancedAIStrategist implements AIStrategist {
     return this.selectOptimalPlay(gameState);
   }
 
-  private runMCTS(gameState: any, iterations: number): EnhancedCardPlay | null {
+  private runMCTS(
+    gameState: any,
+    iterations: number,
+    baseEvaluation?: GameStateEvaluation
+  ): EnhancedCardPlay | null {
     const root = this.createMCTSNode(gameState, null);
 
     if (root.unexploredMoves.length === 0) {
-      return this.selectBestPlayWithSynergies(gameState);
+      return this.selectBestPlayWithSynergies(gameState, baseEvaluation);
     }
 
     for (let i = 0; i < iterations; i++) {
@@ -291,7 +295,12 @@ export class EnhancedAIStrategist implements AIStrategist {
       child.visits > best.visits ? child : best
     );
 
-    return bestChild?.move as EnhancedCardPlay;
+    if (!bestChild?.move) {
+      return this.selectBestPlayWithSynergies(gameState, baseEvaluation);
+    }
+
+    const evaluation = baseEvaluation ?? this.evaluateGameState(gameState);
+    return this.enhancePlay(bestChild.move, gameState, evaluation);
   }
 
   private createMCTSNode(gameState: any, move: CardPlay | null): MCTSNode {
@@ -387,60 +396,9 @@ export class EnhancedAIStrategist implements AIStrategist {
     const evaluation = baseEvaluation ?? this.evaluateGameState(gameState);
 
     // Enhance each play with synergy and deception analysis
-    const enhancedPlays: EnhancedCardPlay[] = possiblePlays.map(play => {
-      const synergies = this.findCardSynergies(play.cardId, gameState.hand, evaluation, gameState, play);
-      const threatResponse = this.isThreatResponse(play, gameState, evaluation);
-      const deceptionValue = this.calculateDeceptionValue(play, gameState, evaluation);
-      const cardMeta = this.getCardMetadata(play.cardId);
-
-      let adjustedPriority = play.priority;
-
-      // Synergy bonuses
-      synergies.forEach(synergy => {
-        adjustedPriority += synergy.bonusValue;
-      });
-
-      // Deception bonus for higher difficulties
-      if (this.personality.planningDepth >= 3) {
-        adjustedPriority += deceptionValue * 0.2;
-      }
-
-      // Threat response bonus
-      if (threatResponse) {
-        adjustedPriority += 0.3;
-      }
-
-      if (cardMeta) {
-        const aggressionModifier = (this.difficultyProfile.aggression - 0.5) * 0.25;
-        if (cardMeta.type === 'DEFENSIVE' && this.adaptiveSnapshot.averageThreat > 0.5) {
-          adjustedPriority += this.adaptiveSnapshot.averageThreat * 0.2;
-        }
-
-        if (cardMeta.type === 'ATTACK' && this.adaptiveSnapshot.aggressionTrend < 0.35) {
-          adjustedPriority += 0.1;
-        }
-
-        if (cardMeta.type === 'MEDIA' && this.adaptiveSnapshot.bluffSuccessRate < 0.3) {
-          adjustedPriority -= 0.05;
-        }
-
-        if (cardMeta.type === 'ATTACK') {
-          adjustedPriority += aggressionModifier;
-        }
-
-        if (cardMeta.type === 'DEFENSIVE') {
-          adjustedPriority -= aggressionModifier * 0.6;
-        }
-      }
-
-      return {
-        ...play,
-        synergies,
-        deceptionValue,
-        threatResponse,
-        priority: adjustedPriority
-      } as EnhancedCardPlay;
-    });
+    const enhancedPlays: EnhancedCardPlay[] = possiblePlays.map(play =>
+      this.enhancePlay(play, gameState, evaluation)
+    );
 
     if (enhancedPlays.length === 0) return null;
 
@@ -454,6 +412,65 @@ export class EnhancedAIStrategist implements AIStrategist {
     });
 
     return enhancedPlays[0];
+  }
+
+  private enhancePlay(
+    play: CardPlay,
+    gameState: any,
+    evaluation: GameStateEvaluation
+  ): EnhancedCardPlay {
+    const synergies = this.findCardSynergies(play.cardId, gameState.hand, evaluation, gameState, play);
+    const threatResponse = this.isThreatResponse(play, gameState, evaluation);
+    const deceptionValue = this.calculateDeceptionValue(play, gameState, evaluation);
+    const cardMeta = this.getCardMetadata(play.cardId);
+
+    let adjustedPriority = play.priority;
+
+    // Synergy bonuses
+    synergies.forEach(synergy => {
+      adjustedPriority += synergy.bonusValue;
+    });
+
+    // Deception bonus for higher difficulties
+    if (this.personality.planningDepth >= 3) {
+      adjustedPriority += deceptionValue * 0.2;
+    }
+
+    // Threat response bonus
+    if (threatResponse) {
+      adjustedPriority += 0.3;
+    }
+
+    if (cardMeta) {
+      const aggressionModifier = (this.difficultyProfile.aggression - 0.5) * 0.25;
+      if (cardMeta.type === 'DEFENSIVE' && this.adaptiveSnapshot.averageThreat > 0.5) {
+        adjustedPriority += this.adaptiveSnapshot.averageThreat * 0.2;
+      }
+
+      if (cardMeta.type === 'ATTACK' && this.adaptiveSnapshot.aggressionTrend < 0.35) {
+        adjustedPriority += 0.1;
+      }
+
+      if (cardMeta.type === 'MEDIA' && this.adaptiveSnapshot.bluffSuccessRate < 0.3) {
+        adjustedPriority -= 0.05;
+      }
+
+      if (cardMeta.type === 'ATTACK') {
+        adjustedPriority += aggressionModifier;
+      }
+
+      if (cardMeta.type === 'DEFENSIVE') {
+        adjustedPriority -= aggressionModifier * 0.6;
+      }
+    }
+
+    return {
+      ...play,
+      synergies,
+      deceptionValue,
+      threatResponse,
+      priority: adjustedPriority,
+    } as EnhancedCardPlay;
   }
 
   private updateAdaptiveMemory(gameState: any, evaluation: GameStateEvaluation): void {
