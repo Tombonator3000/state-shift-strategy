@@ -24,9 +24,11 @@ import { loadPrefs, savePrefs } from '@/lib/persist';
 import { getCoreCards } from '@/data/cardDatabase';
 import type { GameCard } from '@/rules/mvp';
 import { cn } from '@/lib/utils';
+import { updateEnabledExpansions } from '@/data/expansions/state';
 
 const DEFAULT_MODE: MixMode = 'BALANCED_MIX';
 const DEFAULT_WEIGHT = 100;
+const SYNC_ERROR_MESSAGE = 'Failed to update enabled expansions. Please try again.';
 
 const toCard = (card: GameCard): Card => ({
   ...(card as Card),
@@ -176,6 +178,17 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
         customWeights: buildWeightMap(nextEntries, coreWeight),
       };
       savePrefs(prefs);
+      const enabledIds = nextEntries.filter(entry => entry.enabled).map(entry => entry.id);
+      void updateEnabledExpansions(enabledIds)
+        .then(() => {
+          setError(prev => (prev === SYNC_ERROR_MESSAGE ? null : prev));
+        })
+        .catch(err => {
+          console.error('[ExpansionControl] failed to sync enabled expansions', err);
+          setError(prev =>
+            prev && prev !== SYNC_ERROR_MESSAGE ? prev : SYNC_ERROR_MESSAGE,
+          );
+        });
       recalcPreview(nextMode, nextEntries);
     },
     [coreWeight, recalcPreview],
