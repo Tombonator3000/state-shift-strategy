@@ -13,7 +13,7 @@ Win immediately if ANY of the following is true:
 - Truth ≥ 90% (Truth Seekers win)  
 - Truth ≤ 10% (Government wins)  
 - Control 10 states  
-- Reach 200 IP (Influence Points)  
+- Reach 300 IP (Influence Points)
 - Complete your Secret Agenda  
 
 ---
@@ -158,7 +158,7 @@ Humor: 10% chance to make a “stupid” move with a funny log.
 - Truth ≥90% (Truth Seekers win).  
 - Truth ≤10% (Government wins).  
 - Control 10 states.  
-- Reach 200 IP.  
+- Reach 300 IP.
 - Complete Secret Agenda.  
 
 ---

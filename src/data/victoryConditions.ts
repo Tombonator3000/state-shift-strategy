@@ -99,14 +99,14 @@ export const BASE_VICTORY_CONDITIONS: VictoryCondition[] = [
   {
     id: 'ip_victory',
     name: 'Resource Dominance',
-    description: 'Accumulate 200 IP',
+    description: 'Accumulate 300 IP',
     priority: 3,
     faction: 'both',
     checkCondition: (gameState: any) => {
-      return gameState.ip >= 200;
+      return gameState.ip >= 300;
     },
     getProgress: (gameState: any) => {
-      return Math.max(0, Math.min(100, (gameState.ip / 200) * 100));
+      return Math.max(0, Math.min(100, (gameState.ip / 300) * 100));
     }
   },
 

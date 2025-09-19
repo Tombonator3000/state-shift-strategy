@@ -88,7 +88,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'economic_supremacy',
     name: 'Resource Emperor',
-    description: 'Win by accumulating 200+ IP',
+    description: 'Win by accumulating 300+ IP',
     category: 'victory',
     rarity: 'uncommon',
     icon: '💰',

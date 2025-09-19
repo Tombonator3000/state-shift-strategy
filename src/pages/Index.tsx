@@ -398,11 +398,11 @@ const Index = () => {
       victoryType = 'truth';
     }
     
-    // Priority 3: IP victory (200 IP)
-    else if (gameState.ip >= 200) {
+    // Priority 3: IP victory (300 IP)
+    else if (gameState.ip >= 300) {
       winner = gameState.faction;
       victoryType = 'ip';
-    } else if (gameState.aiIP >= 200) {
+    } else if (gameState.aiIP >= 300) {
       winner = gameState.faction === 'government' ? 'truth' : 'government';
       victoryType = 'ip';
     }

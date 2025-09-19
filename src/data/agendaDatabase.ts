@@ -200,8 +200,8 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     faction: 'government',
     category: 'resource',
     title: 'Resource Monopoly',
-    description: 'Accumulate 200 IP through systematic exploitation',
-    target: 200,
+    description: 'Accumulate 300 IP through systematic exploitation',
+    target: 300,
     difficulty: 'hard',
     checkProgress: (gameState) => {
       return gameState.ip;

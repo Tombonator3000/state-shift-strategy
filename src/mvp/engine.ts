@@ -383,10 +383,10 @@ export function winCheck(
     return { winner: governmentPlayer, reason: 'truth' };
   }
 
-  if (players.P1.ip >= 200) {
+  if (players.P1.ip >= 300) {
     return { winner: 'P1', reason: 'ip' };
   }
-  if (players.P2.ip >= 200) {
+  if (players.P2.ip >= 300) {
     return { winner: 'P2', reason: 'ip' };
   }
 

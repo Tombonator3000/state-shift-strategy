@@ -30,7 +30,7 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     {
       id: 'welcome',
       title: '🎯 Welcome to Shadow Government!',
-      description: 'You are a player choosing between Government or Truth Seekers. Win by controlling 10 states, reaching 200 IP, or achieving your faction\'s truth threshold.',
+      description: 'You are a player choosing between Government or Truth Seekers. Win by controlling 10 states, reaching 300 IP, or achieving your faction\'s truth threshold.',
       target: '#game-header',
       skipable: true
     },
@@ -69,7 +69,7 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     {
       id: 'victory',
       title: '🏆 Victory Conditions',
-      description: 'Win by controlling 10 states, reaching 200 IP, or achieving 90% truth level. Watch these in the header!',
+      description: 'Win by controlling 10 states, reaching 300 IP, or achieving 90% truth level. Watch these in the header!',
       target: '#victory-conditions'
     }
   ];

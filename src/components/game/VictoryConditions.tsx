@@ -34,17 +34,17 @@ export const VictoryConditions: React.FC<VictoryConditionsProps> = ({
         <div className="mt-2">
           {isMobile ? (
             <div className="text-xs font-mono">
-              States: {controlledStates}/10 | Truth: {truth}% | IP: {ip}/200
+              States: {controlledStates}/10 | Truth: {truth}% | IP: {ip}/300
             </div>
           ) : (
             <div className="text-xs space-y-1 font-mono">
               <div>• Control 10 states</div>
-              <div>• Reach 200 IP</div>
+              <div>• Reach 300 IP</div>
               <div>• Truth ≥90%</div>
               <div className="border-t border-newspaper-bg/30 pt-1 mt-1">
                 <div className="text-center text-xs">States: {controlledStates}/10</div>
                 <div className="text-center text-xs">Truth: {truth}%</div>
-                <div className="text-center text-xs">IP: {ip}/200</div>
+                <div className="text-center text-xs">IP: {ip}/300</div>
               </div>
             </div>
           )}
