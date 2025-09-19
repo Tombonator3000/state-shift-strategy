@@ -31,7 +31,7 @@ const MechanicsTooltip = ({ children, mechanic, customContent }: MechanicsToolti
         title: '🔍 Truth Meter',
         icon: <TrendingUp size={16} />,
         description: 'Truth represents public awareness of the conspiracy. Higher truth makes cards more effective.',
-        example: 'At 90% truth, you win the game!',
+        example: 'At 95% truth, you win the game!',
         tips: ['Play truth-boosting cards', 'AI will try to suppress truth', 'Truth affects card costs']
       },
       ip: {

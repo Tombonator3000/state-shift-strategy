@@ -43,7 +43,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'truth_victory',
     name: 'Truth Revealed',
-    description: 'Win by achieving 90%+ Truth as Truth Seekers',
+    description: 'Win by achieving 95%+ Truth as Truth Seekers',
     category: 'victory',
     rarity: 'uncommon',
     icon: '💡',
@@ -59,7 +59,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'suppression_victory',
     name: 'Information Control',
-    description: 'Win by reducing Truth to 10% or below as Government',
+    description: 'Win by reducing Truth to 5% or below as Government',
     category: 'victory',
     rarity: 'uncommon',
     icon: '🔒',

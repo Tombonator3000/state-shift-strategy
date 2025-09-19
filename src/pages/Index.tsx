@@ -389,11 +389,11 @@ const Index = () => {
       victoryType = 'agenda';
     }
     
-    // Priority 2: Truth thresholds (Truth ≥ 90% for Truth Seekers, Truth ≤ 10% for Government)
-    else if (gameState.truth >= 90 && gameState.faction === 'truth') {
+    // Priority 2: Truth thresholds (Truth ≥ 95% for Truth Seekers, Truth ≤ 5% for Government)
+    else if (gameState.truth >= 95 && gameState.faction === 'truth') {
       winner = 'truth';
       victoryType = 'truth';
-    } else if (gameState.truth <= 10 && gameState.faction === 'government') {
+    } else if (gameState.truth <= 5 && gameState.faction === 'government') {
       winner = 'government';
       victoryType = 'truth';
     }

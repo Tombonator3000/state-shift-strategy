@@ -126,7 +126,7 @@ const ExtraEditionNewspaper = ({ report, onClose }: ExtraEditionNewspaperProps) 
     if (winner === "truth") {
       headlines.push(`SHEEPLE AWAKE! Truth Hits ${finalTruth}% — Government in Disarray!`);
       headlines.push(`Bat Boy Endorses New Regime; Ratings Soar!`);
-      if (finalTruth >= 90) headlines.push(`Elvira Declares Victory: 'Leaks Never Sleep!'`);
+      if (finalTruth >= 95) headlines.push(`Elvira Declares Victory: 'Leaks Never Sleep!'`);
       if (statesTruth >= 10) headlines.push(`Corn Empire Falls; Popcorn Prices Plunge!`);
     } else if (winner === "government") {
       headlines.push(`ORDER RESTORED! Narrative Lockdown at ${finalTruth}%`);

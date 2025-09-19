@@ -1250,8 +1250,8 @@ export class EnhancedAIStrategist implements AIStrategist {
     let playerTruthWin = false;
 
     if (aiFaction === 'government') {
-      aiTruthWin = truth <= 10;
-      playerTruthWin = truth >= 90;
+      aiTruthWin = truth <= 5;
+      playerTruthWin = truth >= 95;
       if (truth <= 0) {
         aiTruthWin = true;
       }
@@ -1259,8 +1259,8 @@ export class EnhancedAIStrategist implements AIStrategist {
         playerTruthWin = true;
       }
     } else {
-      aiTruthWin = truth >= 90;
-      playerTruthWin = truth <= 10;
+      aiTruthWin = truth >= 95;
+      playerTruthWin = truth <= 5;
       if (truth >= 100) {
         aiTruthWin = true;
       }
