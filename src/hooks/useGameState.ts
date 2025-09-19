@@ -17,112 +17,17 @@ import { applyTruthDelta } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
-
-interface GameState {
-  faction: 'government' | 'truth';
-  phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory' | 'ai_turn' | 'card_presentation';
-  turn: number;
-  round: number;
-  currentPlayer: 'human' | 'ai';
-  aiDifficulty: AIDifficulty;
-  aiPersonality?: string;
-  truth: number;
-  ip: number; // Player IP
-  aiIP: number; // AI IP
-  hand: GameCard[];
-  aiHand: GameCard[];
-  isGameOver: boolean;
-  deck: GameCard[];
-  aiDeck: GameCard[];
-  cardsPlayedThisTurn: number;
-  cardsPlayedThisRound: Array<{
-    card: GameCard;
-    player: 'human' | 'ai';
-    targetState?: string | null;
-    truthDelta?: number;
-    capturedStates?: string[];
-  }>;
-  controlledStates: string[];
-  aiControlledStates: string[];
-  states: Array<{
-    id: string;
-    name: string;
-    abbreviation: string;
-    baseIP: number;
-    defense: number;
-    pressure: number;
-    owner: 'player' | 'ai' | 'neutral';
-    specialBonus?: string;
-    bonusValue?: number;
-    // Occupation data for ZONE takeovers
-    occupierCardId?: string | null;
-    occupierCardName?: string | null;
-    occupierLabel?: string | null;
-    occupierIcon?: string | null;
-    occupierUpdatedAt?: number;
-  }>;
-  currentEvents: GameEvent[];
-  eventManager?: EventManager;
-  showNewspaper: boolean;
-  log: string[];
-  agenda?: SecretAgenda & {
-    progress?: number;
-    complete?: boolean;
-    revealed?: boolean;
-  };
-  secretAgenda?: SecretAgenda & {
-    progress: number;
-    completed: boolean;
-    revealed: boolean;
-  };
-  aiSecretAgenda?: SecretAgenda & {
-    progress: number;
-    completed: boolean;
-    revealed: boolean;
-  };
-  animating: boolean;
-  aiTurnInProgress: boolean;
-  selectedCard: string | null;
-  targetState: string | null;
-  aiStrategist?: EnhancedAIStrategist;
-  pendingCardDraw?: number;
-  newCards?: GameCard[];
-  showNewCardsPresentation?: boolean;
-  // Enhanced drawing system state
-  drawMode: DrawMode;
-  cardDrawState: CardDrawState;
-}
+import type { GameState } from './gameStateTypes';
+import {
+  applyAiCardPlay,
+  buildStrategyLogEntries,
+  createPlayedCardRecord,
+  type AiCardPlayParams,
+} from './aiHelpers';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
 const HAND_LIMIT = 5;
-
-const CAPTURE_REGEX = /(captured|seized)\s+([^!]+)!/i;
-
-const extractCapturedStates = (logEntries: string[]): string[] => {
-  const states: string[] = [];
-  for (const entry of logEntries) {
-    const match = entry.match(CAPTURE_REGEX);
-    if (match) {
-      states.push(match[2]);
-    }
-  }
-  return states;
-};
-
-const createPlayedCardRecord = (params: {
-  card: GameCard;
-  player: 'human' | 'ai';
-  targetState?: string | null;
-  resolution: CardPlayResolution;
-  previousTruth: number;
-}) => ({
-  card: params.card,
-  player: params.player,
-  targetState: params.targetState ?? null,
-  truthDelta: params.resolution.truth - params.previousTruth,
-  capturedStates: extractCapturedStates(params.resolution.logEntries),
-});
 
 const DIFFICULTY_TO_AI_DIFFICULTY: Record<Difficulty, AIDifficulty> = {
   EASY: 'easy',
@@ -617,62 +522,30 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     });
   }, []);
 
-  const playAICard = useCallback((
-    cardId: string,
-    targetState?: string,
-    reasoning?: string,
-    strategyDetails?: string[],
-  ) => {
-    const card = gameState.aiHand.find(c => c.id === cardId);
-    if (!card) return;
-
-    if (typeof window !== "undefined" && window.uiShowOpponentCard) {
-      window.uiShowOpponentCard(card);
-    }
-
+  const playAICard = useCallback((params: AiCardPlayParams) => {
     setGameState(prev => {
-      const resolution = resolveCardMVP(prev, card, targetState ?? null, 'ai', achievements);
-      const logEntries = [...prev.log, ...resolution.logEntries];
-      const strategyLogEntries = buildStrategyLogEntries(reasoning, strategyDetails);
+      const result = applyAiCardPlay(prev, params, achievements);
 
-      if (strategyLogEntries.length) {
-        logEntries.push(...strategyLogEntries);
+      if (result.card && typeof window !== 'undefined' && window.uiShowOpponentCard) {
+        window.uiShowOpponentCard(result.card);
       }
 
-      if (!featureFlags.aiVerboseStrategyLog && (reasoning || strategyDetails?.length)) {
-        debugStrategyToConsole(reasoning, strategyDetails);
+      if (result.card && result.resolution) {
+        prev.aiStrategist?.recordAiPlayOutcome({
+          card: result.card,
+          targetState: params.targetState,
+          resolution: result.resolution,
+          previousState: prev,
+        });
       }
 
-      prev.aiStrategist?.recordAiPlayOutcome({
-        card,
-        targetState,
-        resolution,
-        previousState: prev,
-      });
+      if (!result.failed && !featureFlags.aiVerboseStrategyLog && (params.reasoning || params.strategyDetails?.length)) {
+        debugStrategyToConsole(params.reasoning, params.strategyDetails);
+      }
 
-      const playedCardRecord = createPlayedCardRecord({
-        card,
-        player: 'ai',
-        targetState,
-        resolution,
-        previousTruth: prev.truth,
-      });
-
-      return {
-        ...prev,
-        ip: resolution.ip,
-        aiIP: resolution.aiIP,
-        truth: resolution.truth,
-        states: resolution.states,
-        controlledStates: resolution.controlledStates,
-        aiControlledStates: resolution.aiControlledStates,
-        targetState: resolution.targetState,
-        aiHand: prev.aiHand.filter(c => c.id !== cardId),
-        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
-        log: logEntries,
-      };
+      return result.nextState;
     });
-  }, [achievements, gameState]);
+  }, [achievements]);
 
   // AI Turn Management
   const executeAITurn = useCallback(async () => {
@@ -749,12 +622,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         ...(action.strategyDetails ?? []),
       ];
 
-      await playAICard(
-        action.cardId,
-        action.targetState,
-        action.reasoning,
-        detailEntries.length ? detailEntries : undefined,
-      );
+      await playAICard({
+        cardId: action.cardId,
+        card: action.card,
+        targetState: action.targetState,
+        reasoning: action.reasoning,
+        strategyDetails: detailEntries.length ? detailEntries : undefined,
+      });
 
       if (index < turnPlan.actions.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
