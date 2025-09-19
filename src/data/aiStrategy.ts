@@ -1,5 +1,6 @@
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE } from './cardDatabase';
+import { getAiTuningConfig, normalizeAiTuningConfig, type AiTuningConfig } from './aiTuning';
 
 export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'legendary';
 
@@ -118,10 +119,12 @@ export type { CardPlay };
 export class AIStrategist {
   public personality: AIPersonality;
   private difficulty: AIDifficulty;
+  protected tuning: AiTuningConfig;
 
-  constructor(difficulty: AIDifficulty = 'medium') {
+  constructor(difficulty: AIDifficulty = 'medium', tuning: AiTuningConfig = getAiTuningConfig()) {
     this.difficulty = difficulty;
     this.personality = AI_PERSONALITIES[difficulty];
+    this.tuning = normalizeAiTuningConfig(tuning);
   }
 
   // Factory method moved to AIFactory to avoid circular dependencies
@@ -185,16 +188,18 @@ export class AIStrategist {
       opponentHandThreat
     });
 
+    const evaluationWeights = this.tuning.evaluateGameState;
+
     const overallScore =
-      territorialControl * weights.territorial +
-      resourceAdvantage * weights.resource +
-      handQuality * weights.hand +
-      (1 - threatLevel) * weights.threatMitigation +
-      agendaProgress * weights.agenda +
-      pressureMomentum * weights.pressure +
-      truthObjective * weights.truth +
-      (1 - opponentResourceThreat) * weights.opponentEconomy +
-      (1 - opponentHandThreat) * weights.opponentHand;
+      territorialControl * weights.territorial * evaluationWeights.territorialWeight +
+      resourceAdvantage * weights.resource * evaluationWeights.resourceWeight +
+      handQuality * weights.hand * evaluationWeights.handWeight +
+      (1 - threatLevel) * weights.threatMitigation * evaluationWeights.threatMitigationWeight +
+      agendaProgress * weights.agenda * evaluationWeights.agendaWeight +
+      pressureMomentum * weights.pressure * evaluationWeights.pressureWeight +
+      truthObjective * weights.truth * evaluationWeights.truthWeight +
+      (1 - opponentResourceThreat) * weights.opponentEconomy * evaluationWeights.opponentEconomyWeight +
+      (1 - opponentHandThreat) * weights.opponentHand * evaluationWeights.opponentHandWeight;
 
     return {
       territorialControl,
@@ -426,17 +431,18 @@ export class AIStrategist {
     opponentHand: number;
   } {
     const planningBias = metrics.planningWeight;
+    const dynamic = this.tuning.dynamicWeights;
 
     const weights = {
-      territorial: 0.2 + this.personality.territorial * 0.25,
-      resource: 0.15 + this.personality.economical * 0.25,
-      hand: 0.15 + planningBias * 0.2,
-      threatMitigation: 0.18 + this.personality.defensiveness * 0.3,
-      agenda: 0.12 + planningBias * 0.25,
-      pressure: 0.15 + this.personality.territorial * 0.2,
-      truth: 0.1 + (1 - this.personality.territorial) * 0.2,
-      opponentEconomy: 0.1 + this.personality.defensiveness * 0.15,
-      opponentHand: 0.08 + planningBias * 0.15
+      territorial: dynamic.territorialBase + this.personality.territorial * dynamic.territorialPersonality,
+      resource: dynamic.resourceBase + this.personality.economical * dynamic.resourcePersonality,
+      hand: dynamic.handBase + planningBias * dynamic.handPlanning,
+      threatMitigation: dynamic.threatMitigationBase + this.personality.defensiveness * dynamic.threatDefensiveness,
+      agenda: dynamic.agendaBase + planningBias * dynamic.agendaPlanning,
+      pressure: dynamic.pressureBase + this.personality.territorial * dynamic.pressureTerritorial,
+      truth: dynamic.truthBase + (1 - this.personality.territorial) * dynamic.truthTerritorial,
+      opponentEconomy: dynamic.opponentEconomyBase + this.personality.defensiveness * dynamic.opponentEconomyDefensive,
+      opponentHand: dynamic.opponentHandBase + planningBias * dynamic.opponentHandPlanning
     } as const;
 
     const total = Object.values(weights).reduce((sum, value) => sum + value, 0);
@@ -619,9 +625,10 @@ export class AIStrategist {
     const cardMeta = this.getCardMetadata(card.id) ?? card;
     const pressureDelta = cardMeta.effects?.pressureDelta ?? card.effects?.pressureDelta ?? 0;
     const aiFaction = this.getAiFaction(gameState);
+    const zoneWeights = this.tuning.cardPriority.zone;
 
-    const chainBonus = this.countRecentPlays(gameState, 'ai', 'ZONE') * 0.12;
-    const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction);
+    const chainBonus = this.countRecentPlays(gameState, 'ai', 'ZONE') * 0.12 * zoneWeights.chainMultiplier;
+    const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction) * zoneWeights.factionMultiplier;
 
     const signalLookup = new Map(
       evaluation.pressureSignals.aiTargets.map(signal => [signal.abbreviation, signal])
@@ -631,37 +638,37 @@ export class AIStrategist {
       if (state.owner === 'ai') continue;
 
       const signal = signalLookup.get(state.abbreviation);
-      let priority = this.personality.territorial + chainBonus + factionBonus;
+      let priority = this.personality.territorial * zoneWeights.baseMultiplier + chainBonus + factionBonus;
 
       // High IP and strategic positions matter more for territorial personalities
-      priority += (state.baseIP ?? 0) * 0.04 * (1 + this.personality.territorial);
-      priority += this.getLocationBonus(state);
+      priority += (state.baseIP ?? 0) * 0.04 * (1 + this.personality.territorial) * zoneWeights.highValueMultiplier;
+      priority += this.getLocationBonus(state) * zoneWeights.locationMultiplier;
 
       if (state.specialBonus) {
-        priority += 0.15;
+        priority += 0.15 * zoneWeights.specialBonusMultiplier;
       }
 
       if (state.owner === 'player') {
-        priority += this.personality.aggressiveness * 0.3;
+        priority += this.personality.aggressiveness * 0.3 * zoneWeights.ownerAggressionMultiplier;
       } else if (state.owner === 'neutral') {
-        priority += 0.1;
+        priority += 0.1 * zoneWeights.ownerAggressionMultiplier;
       }
 
       if (signal) {
         const remainingAfterPlay = Math.max(0, signal.remaining - pressureDelta);
         if (signal.remaining <= pressureDelta) {
-          priority += 0.7;
+          priority += 0.7 * zoneWeights.signalCaptureMultiplier;
         } else if (remainingAfterPlay <= 1) {
-          priority += 0.5;
+          priority += 0.5 * zoneWeights.signalCaptureMultiplier;
         } else {
-          priority += Math.max(0, (pressureDelta / Math.max(1, signal.defense)) * 0.4);
+          priority += Math.max(0, (pressureDelta / Math.max(1, signal.defense)) * 0.4 * zoneWeights.signalCaptureMultiplier);
         }
       } else if (pressureDelta > 0 && state.owner !== 'ai') {
-        priority += (pressureDelta / Math.max(1, state.defense ?? 1)) * 0.25;
+        priority += (pressureDelta / Math.max(1, state.defense ?? 1)) * 0.25 * zoneWeights.signalCaptureMultiplier;
       }
 
       if (evaluation.dangerSignals.opponentAggression > 0.6 && state.owner === 'player') {
-        priority += 0.1;
+        priority += 0.1 * zoneWeights.dangerResponseMultiplier;
       }
 
       const reasoningParts = [`Pressure ${state.name}`];
@@ -689,26 +696,27 @@ export class AIStrategist {
     const cardMeta = this.getCardMetadata(card.id) ?? card;
     const aiFaction = this.getAiFaction(gameState);
     const chainCount = this.countRecentPlays(gameState, 'ai', 'MEDIA');
-    const chainBonus = chainCount * 0.1;
-    const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction);
+    const mediaWeights = this.tuning.cardPriority.media;
+    const chainBonus = chainCount * 0.1 * mediaWeights.chainMultiplier;
+    const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction) * mediaWeights.factionMultiplier;
 
-    let priority = (1 - this.personality.territorial) * 0.6 + chainBonus + factionBonus;
+    let priority = (1 - this.personality.territorial) * 0.6 * mediaWeights.baseMultiplier + chainBonus + factionBonus;
 
     const truthDelta = cardMeta.effects?.truthDelta ?? 0;
     if (evaluation.truthObjective < 0 && ((aiFaction === 'truth' && truthDelta > 0) || (aiFaction === 'government' && truthDelta < 0))) {
-      priority += Math.min(0.5, Math.abs(evaluation.truthObjective));
+      priority += Math.min(0.5, Math.abs(evaluation.truthObjective)) * mediaWeights.truthObjectiveMultiplier;
     }
 
     if (evaluation.resourceAdvantage < -0.2 && cardMeta.effects?.ipDelta?.self) {
-      priority += 0.2;
+      priority += 0.2 * mediaWeights.resourceSwingMultiplier;
     }
 
     if (evaluation.opponentHandThreat > 0.4 && cardMeta.effects?.discardOpponent) {
-      priority += cardMeta.effects.discardOpponent * 0.12;
+      priority += cardMeta.effects.discardOpponent * 0.12 * mediaWeights.discardMultiplier;
     }
 
     if (cardMeta.effects?.draw) {
-      priority += cardMeta.effects.draw * 0.05;
+      priority += cardMeta.effects.draw * 0.05 * mediaWeights.drawMultiplier;
     }
 
     return [{
@@ -722,25 +730,27 @@ export class AIStrategist {
     const cardMeta = this.getCardMetadata(card.id) ?? card;
     const aiFaction = this.getAiFaction(gameState);
     const attackChain = this.countRecentPlays(gameState, 'ai', 'ATTACK');
-    const chainBonus = attackChain * 0.1;
-    const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction);
+    const attackWeights = this.tuning.cardPriority.attack;
+    const chainBonus = attackChain * 0.1 * attackWeights.chainMultiplier;
+    const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction) * attackWeights.factionMultiplier;
 
-    let priority = this.personality.aggressiveness + chainBonus + factionBonus;
+    let priority = this.personality.aggressiveness * attackWeights.baseMultiplier + chainBonus + factionBonus;
 
-    if (evaluation.overallScore < -0.1) priority += 0.3;
-    if (evaluation.opponentResourceThreat > 0.4) priority += 0.2;
-    if (evaluation.dangerSignals.opponentAggression > 0.5) priority += 0.1;
+    if (evaluation.overallScore < -0.1) priority += 0.3 * attackWeights.comebackMultiplier;
+    if (evaluation.opponentResourceThreat > 0.4) priority += 0.2 * attackWeights.resourceThreatMultiplier;
+    if (evaluation.dangerSignals.opponentAggression > 0.5) priority += 0.1 * attackWeights.aggressionResponseMultiplier;
 
     if (cardMeta.effects?.ipDelta?.opponent) {
-      priority += (cardMeta.effects.ipDelta.opponent / 6) * (0.8 + this.personality.aggressiveness);
+      priority += (cardMeta.effects.ipDelta.opponent / 6) * (0.8 + this.personality.aggressiveness) * attackWeights.ipDamageMultiplier;
     }
 
     if (cardMeta.effects?.discardOpponent) {
-      priority += cardMeta.effects.discardOpponent * 0.1 * (1 + evaluation.opponentHandThreat);
+      priority += cardMeta.effects.discardOpponent * 0.1 * (1 + evaluation.opponentHandThreat) * attackWeights.discardMultiplier;
     }
 
     if (evaluation.overallScore > 0.3) {
-      priority *= 0.7;
+      const penalty = Math.max(0.1, 1 - 0.3 * attackWeights.aheadPenaltyMultiplier);
+      priority *= penalty;
     }
 
     return [{
@@ -754,25 +764,27 @@ export class AIStrategist {
     const cardMeta = this.getCardMetadata(card.id) ?? card;
     const aiFaction = this.getAiFaction(gameState);
     const defenseChain = this.countRecentPlays(gameState, 'ai', 'DEFENSIVE');
-    const chainBonus = defenseChain * 0.1;
-    const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction);
+    const defensiveWeights = this.tuning.cardPriority.defensive;
+    const chainBonus = defenseChain * 0.1 * defensiveWeights.chainMultiplier;
+    const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction) * defensiveWeights.factionMultiplier;
 
-    let priority = this.personality.defensiveness + chainBonus + factionBonus;
+    let priority = this.personality.defensiveness * defensiveWeights.baseMultiplier + chainBonus + factionBonus;
 
-    if (evaluation.threatLevel > 0.5) priority += 0.4;
+    if (evaluation.threatLevel > 0.5) priority += 0.4 * defensiveWeights.threatResponseMultiplier;
     if (evaluation.dangerSignals.truthCrisis > 0.3 && cardMeta.effects?.truthDelta) {
-      priority += Math.abs(cardMeta.effects.truthDelta) * 0.05;
+      priority += Math.abs(cardMeta.effects.truthDelta) * 0.05 * defensiveWeights.truthCrisisMultiplier;
     }
 
     const recentAttacks = (gameState.cardsPlayedThisRound ?? []).filter(
       (play: any) => play.player === 'human' && play.card.type === 'ATTACK'
     );
     if (recentAttacks.length > 0) {
-      priority += 0.4 + Math.min(0.2, recentAttacks.length * 0.1);
+      const retaliation = 0.4 + Math.min(0.2, recentAttacks.length * 0.1);
+      priority += retaliation * defensiveWeights.recentAttackMultiplier;
     }
 
     if (evaluation.dangerSignals.imminentLoss.length > 0) {
-      priority += 0.3;
+      priority += 0.3 * defensiveWeights.imminentLossMultiplier;
     }
 
     return [{
