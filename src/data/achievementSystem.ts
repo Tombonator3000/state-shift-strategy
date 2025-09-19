@@ -846,12 +846,12 @@ export class AchievementManager {
     this.updateStats(updates);
   }
 
-  onCardPlayed(cardType: string, cardRarity: string) {
+  onCardPlayed(cardType: string, cardRarity?: string) {
     this.incrementStat('total_cards_played');
-    
+
     // Reset per-game counters at start of new game
     // (This would be called when a new game starts)
-    
+
     switch (cardType.toLowerCase()) {
       case 'media':
         this.incrementStat('media_cards_played');
@@ -871,7 +871,7 @@ export class AchievementManager {
         break;
     }
 
-    if (cardRarity === 'legendary') {
+    if (cardRarity?.toLowerCase() === 'legendary') {
       this.incrementStat('legendary_cards_played');
     }
   }

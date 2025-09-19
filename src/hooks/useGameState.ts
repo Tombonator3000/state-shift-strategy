@@ -331,7 +331,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return prev;
       }
 
-      achievements.onCardPlayed(cardId, card.type);
+      achievements.onCardPlayed(cardId, card.type, card.rarity);
 
       const targetState = targetOverride ?? prev.targetState ?? null;
       const resolution = resolveCardEffects(prev, card, targetState);
@@ -386,7 +386,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       return;
     }
 
-    achievements.onCardPlayed(cardId, card.type);
+    achievements.onCardPlayed(cardId, card.type, card.rarity);
 
     const targetState = explicitTargetState ?? gameState.targetState ?? null;
     let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
