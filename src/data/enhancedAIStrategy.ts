@@ -1,8 +1,35 @@
 import type { GameCard } from '@/rules/mvp';
-import { resolveCardMVP, type GameSnapshot } from '@/systems/cardResolution';
+import { resolveCardMVP, type CardPlayResolution, type GameSnapshot } from '@/systems/cardResolution';
 import { CARD_DATABASE } from './cardDatabase';
 import { getAiTuningConfig, type AiTuningConfig } from './aiTuning';
 import { AIStrategist, type AIDifficulty, type AIPersonality, type CardPlay, type GameStateEvaluation } from './aiStrategy';
+
+const CAPTURE_REGEX = /(captured|seized)\s+([^!]+)!/i;
+
+type BluffOutcome = 'capture' | 'truth_gain' | 'resource_gain' | 'pressure' | 'setback' | 'neutral';
+
+interface TargetRecord {
+  turn: number;
+  state: string;
+}
+
+interface BluffRecord {
+  turn: number;
+  cardType: string;
+  outcome: BluffOutcome;
+  target?: string;
+}
+
+interface BehaviorRecord {
+  turn: number;
+  outcome: BluffOutcome;
+}
+
+interface AdaptiveSnapshot {
+  averageThreat: number;
+  aggressionTrend: number;
+  bluffSuccessRate: number;
+}
 
 // Monte Carlo Tree Search Node
 interface MCTSNode {
@@ -42,7 +69,24 @@ export class EnhancedAIStrategist extends AIStrategist {
   private cardSynergies: CardSynergy[] = [];
   private deceptionState: DeceptionState;
   private playerBehaviorPattern: string[] = [];
-  private threatHistory: { turn: number; threat: number; response: string }[] = [];
+  private threatHistory: {
+    turn: number;
+    threat: number;
+    response: string;
+    opponentAggression: number;
+    bluffSuccessRate: number;
+  }[] = [];
+  private recentTargetHistory: TargetRecord[] = [];
+  private bluffOutcomeHistory: BluffRecord[] = [];
+  private behaviorOutcomeHistory: BehaviorRecord[] = [];
+  private adaptiveSnapshot: AdaptiveSnapshot = {
+    averageThreat: 0,
+    aggressionTrend: 0,
+    bluffSuccessRate: 0,
+  };
+  private lastProcessedTurn = -1;
+  private totalRecordedBluffs = 0;
+  private successfulRecordedBluffs = 0;
 
   constructor(difficulty: AIDifficulty = 'medium', tuning: AiTuningConfig = getAiTuningConfig()) {
     super(difficulty, tuning);
@@ -59,13 +103,16 @@ export class EnhancedAIStrategist extends AIStrategist {
   public selectOptimalPlay(gameState: any): EnhancedCardPlay | null {
     if (!gameState.hand || gameState.hand.length === 0) return null;
 
+    const evaluation = this.evaluateGameState(gameState);
+    this.updateAdaptiveMemory(gameState, evaluation);
+
     // Use MCTS only on hard+ difficulties due to computational cost
     if (this.personality.planningDepth >= 3) {
       return this.runMCTS(gameState, this.personality.planningDepth * 500); // iterations
     }
 
     // Fallback to enhanced heuristic search
-    return this.selectBestPlayWithSynergies(gameState);
+    return this.selectBestPlayWithSynergies(gameState, evaluation);
   }
 
   public override selectBestPlay(gameState: any): CardPlay | null {
@@ -180,15 +227,19 @@ export class EnhancedAIStrategist extends AIStrategist {
   }
 
   // Enhanced play selection with synergy recognition
-  private selectBestPlayWithSynergies(gameState: any): EnhancedCardPlay | null {
+  private selectBestPlayWithSynergies(
+    gameState: any,
+    baseEvaluation?: GameStateEvaluation
+  ): EnhancedCardPlay | null {
     const possiblePlays = this.generateAllPossiblePlays(gameState);
-    const evaluation = this.evaluateGameState(gameState);
+    const evaluation = baseEvaluation ?? this.evaluateGameState(gameState);
 
     // Enhance each play with synergy and deception analysis
     const enhancedPlays: EnhancedCardPlay[] = possiblePlays.map(play => {
       const synergies = this.findCardSynergies(play.cardId, gameState.hand, evaluation, gameState, play);
       const threatResponse = this.isThreatResponse(play, gameState, evaluation);
       const deceptionValue = this.calculateDeceptionValue(play, gameState, evaluation);
+      const cardMeta = this.getCardMetadata(play.cardId);
 
       let adjustedPriority = play.priority;
 
@@ -196,17 +247,31 @@ export class EnhancedAIStrategist extends AIStrategist {
       synergies.forEach(synergy => {
         adjustedPriority += synergy.bonusValue;
       });
-      
+
       // Deception bonus for higher difficulties
       if (this.personality.planningDepth >= 3) {
         adjustedPriority += deceptionValue * 0.2;
       }
-      
+
       // Threat response bonus
       if (threatResponse) {
         adjustedPriority += 0.3;
       }
-      
+
+      if (cardMeta) {
+        if (cardMeta.type === 'DEFENSIVE' && this.adaptiveSnapshot.averageThreat > 0.5) {
+          adjustedPriority += this.adaptiveSnapshot.averageThreat * 0.2;
+        }
+
+        if (cardMeta.type === 'ATTACK' && this.adaptiveSnapshot.aggressionTrend < 0.35) {
+          adjustedPriority += 0.1;
+        }
+
+        if (cardMeta.type === 'MEDIA' && this.adaptiveSnapshot.bluffSuccessRate < 0.3) {
+          adjustedPriority -= 0.05;
+        }
+      }
+
       return {
         ...play,
         synergies,
@@ -228,6 +293,224 @@ export class EnhancedAIStrategist extends AIStrategist {
     });
 
     return enhancedPlays[0];
+  }
+
+  private updateAdaptiveMemory(gameState: any, evaluation: GameStateEvaluation): void {
+    const currentTurn = typeof gameState.turn === 'number' ? gameState.turn : 0;
+
+    if (this.lastProcessedTurn === currentTurn) {
+      return;
+    }
+
+    this.lastProcessedTurn = currentTurn;
+
+    const response = evaluation.threatLevel > 0.65
+      ? 'fortify defenses'
+      : evaluation.pressureMomentum > 0.2
+        ? 'press advantage'
+        : 'probe for openings';
+
+    this.threatHistory.push({
+      turn: currentTurn,
+      threat: evaluation.threatLevel,
+      response,
+      opponentAggression: evaluation.dangerSignals.opponentAggression,
+      bluffSuccessRate: this.adaptiveSnapshot.bluffSuccessRate,
+    });
+
+    if (this.threatHistory.length > 12) {
+      this.threatHistory.splice(0, this.threatHistory.length - 12);
+    }
+
+    this.pruneHistories(currentTurn);
+    this.updateAdaptiveSnapshot();
+  }
+
+  private pruneHistories(currentTurn: number): void {
+    const freshnessWindow = 4;
+
+    this.recentTargetHistory = this.recentTargetHistory.filter(
+      record => currentTurn - record.turn <= freshnessWindow
+    );
+
+    this.bluffOutcomeHistory = this.bluffOutcomeHistory.filter(
+      record => currentTurn - record.turn <= freshnessWindow
+    );
+
+    this.behaviorOutcomeHistory = this.behaviorOutcomeHistory.filter(
+      record => currentTurn - record.turn <= freshnessWindow
+    );
+
+    const clampHistory = <T>(history: T[], limit: number): T[] => {
+      if (history.length > limit) {
+        return history.slice(history.length - limit);
+      }
+      return history;
+    };
+
+    this.recentTargetHistory = clampHistory(this.recentTargetHistory, 10);
+    this.bluffOutcomeHistory = clampHistory(this.bluffOutcomeHistory, 12);
+    this.behaviorOutcomeHistory = clampHistory(this.behaviorOutcomeHistory, 12);
+
+    this.syncDeceptionTracking();
+  }
+
+  private syncDeceptionTracking(): void {
+    this.deceptionState.fakeTargets = this.recentTargetHistory.map(record => record.state);
+    this.deceptionState.bluffHistory = this.bluffOutcomeHistory.map(
+      record => `${record.cardType}:${record.outcome}`
+    );
+    this.playerBehaviorPattern = this.behaviorOutcomeHistory.map(record => record.outcome);
+    this.deceptionState.playerPattern = [...this.playerBehaviorPattern];
+  }
+
+  private updateAdaptiveSnapshot(): void {
+    const recentThreats = this.threatHistory.slice(-6);
+
+    if (recentThreats.length > 0) {
+      const totalThreat = recentThreats.reduce((sum, entry) => sum + entry.threat, 0);
+      const totalAggression = recentThreats.reduce(
+        (sum, entry) => sum + entry.opponentAggression,
+        0
+      );
+
+      this.adaptiveSnapshot.averageThreat = totalThreat / recentThreats.length;
+      this.adaptiveSnapshot.aggressionTrend = totalAggression / recentThreats.length;
+    } else {
+      this.adaptiveSnapshot.averageThreat = 0;
+      this.adaptiveSnapshot.aggressionTrend = 0;
+    }
+  }
+
+  private isPositiveOutcome(outcome: BluffOutcome): boolean {
+    return outcome === 'capture'
+      || outcome === 'truth_gain'
+      || outcome === 'resource_gain'
+      || outcome === 'pressure';
+  }
+
+  private updateMisdirectionLevel(): void {
+    if (this.totalRecordedBluffs === 0) {
+      this.deceptionState.misdirectionLevel = this.personality.riskTolerance * 0.3;
+      this.adaptiveSnapshot.bluffSuccessRate = 0;
+      return;
+    }
+
+    const overallSuccessRate = this.successfulRecordedBluffs / Math.max(1, this.totalRecordedBluffs);
+    const recentWindow = this.bluffOutcomeHistory.slice(-5);
+    const recentSuccess = recentWindow.filter(record => this.isPositiveOutcome(record.outcome)).length;
+    const recentRate = recentWindow.length > 0
+      ? recentSuccess / recentWindow.length
+      : overallSuccessRate;
+
+    const baseLevel = this.personality.riskTolerance * 0.3;
+    const modifier = (recentRate - 0.5) * 0.4;
+
+    this.deceptionState.misdirectionLevel = Math.min(1, Math.max(0.1, baseLevel + modifier));
+    this.adaptiveSnapshot.bluffSuccessRate = overallSuccessRate;
+  }
+
+  private classifyOutcome(params: {
+    resolution: CardPlayResolution;
+    previousState: any;
+    card: GameCard;
+    targetState?: string | null;
+  }): BluffOutcome {
+    const { resolution, previousState, card, targetState } = params;
+    const previousTruth = typeof previousState.truth === 'number' ? previousState.truth : 50;
+    const previousAiIp = typeof previousState.aiIP === 'number' ? previousState.aiIP : 0;
+    const truthDelta = (resolution.truth ?? previousTruth) - previousTruth;
+    const aiIpDelta = (resolution.aiIP ?? previousAiIp) - previousAiIp;
+    const aiFaction = this.getAiFaction(previousState);
+
+    if (resolution.logEntries.some(entry => CAPTURE_REGEX.test(entry))) {
+      return 'capture';
+    }
+
+    if (truthDelta !== 0) {
+      const truthImproved =
+        (aiFaction === 'government' && truthDelta < 0) ||
+        (aiFaction === 'truth' && truthDelta > 0);
+
+      if (truthImproved) {
+        return 'truth_gain';
+      }
+
+      return 'setback';
+    }
+
+    if (aiIpDelta > 0) {
+      return 'resource_gain';
+    }
+
+    if (resolution.damageDealt > 0 || (targetState && card.type === 'ATTACK')) {
+      return 'pressure';
+    }
+
+    if (aiIpDelta < 0) {
+      return 'setback';
+    }
+
+    return 'neutral';
+  }
+
+  public recordAiPlayOutcome(params: {
+    card: GameCard;
+    targetState?: string | null;
+    resolution: CardPlayResolution;
+    previousState: any;
+  }): void {
+    const { card, targetState, resolution, previousState } = params;
+    const currentTurn = typeof previousState.turn === 'number' ? previousState.turn : 0;
+    const recordedTarget = targetState ?? 'none';
+
+    this.recentTargetHistory.push({ turn: currentTurn, state: recordedTarget });
+
+    const outcome = this.classifyOutcome({
+      resolution,
+      previousState,
+      card,
+      targetState,
+    });
+
+    this.bluffOutcomeHistory.push({
+      turn: currentTurn,
+      cardType: card.type ?? 'UNKNOWN',
+      outcome,
+      target: targetState ?? undefined,
+    });
+
+    this.behaviorOutcomeHistory.push({ turn: currentTurn, outcome });
+    this.totalRecordedBluffs += 1;
+
+    if (this.isPositiveOutcome(outcome)) {
+      this.successfulRecordedBluffs += 1;
+    }
+
+    this.pruneHistories(currentTurn);
+    this.updateMisdirectionLevel();
+  }
+
+  public getAdaptiveSummary(): string[] {
+    if (this.threatHistory.length === 0) {
+      return [];
+    }
+
+    const summary: string[] = [];
+    const avgThreatPercent = Math.round(this.adaptiveSnapshot.averageThreat * 100);
+    const aggressionPercent = Math.round(this.adaptiveSnapshot.aggressionTrend * 100);
+    const bluffSuccessPercent = Math.round(this.adaptiveSnapshot.bluffSuccessRate * 100);
+
+    summary.push(
+      `Adaptive trend: threat ${avgThreatPercent}%, opponent aggression ${aggressionPercent}%, bluff success ${bluffSuccessPercent}%.`
+    );
+
+    const latest = this.threatHistory[this.threatHistory.length - 1];
+    if (latest?.response) {
+      summary.push(`Long-term response: ${latest.response}.`);
+    }
+
+    return summary;
   }
 
   // Card Synergy Recognition System
@@ -417,6 +700,21 @@ export class EnhancedAIStrategist extends AIStrategist {
       return true;
     }
 
+    const latestThreat = this.threatHistory[this.threatHistory.length - 1];
+    if (latestThreat) {
+      if (latestThreat.threat > 0.65 && cardMeta?.type === 'DEFENSIVE') {
+        return true;
+      }
+
+      if (latestThreat.opponentAggression > 0.7 && cardMeta?.type === 'ATTACK') {
+        return true;
+      }
+    }
+
+    if (this.adaptiveSnapshot.averageThreat > 0.7 && cardMeta?.type === 'DEFENSIVE') {
+      return true;
+    }
+
     return false;
   }
 
@@ -469,6 +767,31 @@ export class EnhancedAIStrategist extends AIStrategist {
       }
     }
 
+    const recentBluffs = this.deceptionState.bluffHistory.slice(-3);
+    if (recentBluffs.length > 0) {
+      const successfulBluffs = recentBluffs.filter(entry =>
+        entry.includes('capture') ||
+        entry.includes('truth_gain') ||
+        entry.includes('resource_gain') ||
+        entry.includes('pressure')
+      ).length;
+
+      deceptionValue += (successfulBluffs / recentBluffs.length) * 0.05;
+    }
+
+    const recentOutcomes = this.playerBehaviorPattern.slice(-3);
+    if (recentOutcomes.length === 3 && recentOutcomes.every(outcome => outcome === 'setback')) {
+      deceptionValue *= 0.75;
+    }
+
+    if (this.adaptiveSnapshot.bluffSuccessRate > 0.6) {
+      deceptionValue *= 1.1;
+    } else if (this.adaptiveSnapshot.bluffSuccessRate < 0.3) {
+      deceptionValue *= 0.8;
+    }
+
+    deceptionValue = Math.max(0, deceptionValue);
+
     return deceptionValue * this.deceptionState.misdirectionLevel;
   }
 
@@ -477,17 +800,36 @@ export class EnhancedAIStrategist extends AIStrategist {
     const recentMoves = gameState.cardsPlayedThisRound?.filter(
       (p: any) => p.player === 'human'
     ) || [];
-    
-    if (recentMoves.length < 2) return 'insufficient_data';
-    
+
+    if (recentMoves.length < 2) {
+      if (this.playerBehaviorPattern.length >= 3) {
+        const storedOutcomes = this.playerBehaviorPattern.slice(-3);
+        const setbacks = storedOutcomes.filter(outcome => outcome === 'setback').length;
+        if (setbacks >= 2) {
+          return 'player_countering';
+        }
+
+        const truthPress = storedOutcomes.filter(outcome => outcome === 'truth_gain').length;
+        if (truthPress >= 2) {
+          return 'propaganda_focus';
+        }
+      }
+
+      return 'insufficient_data';
+    }
+
     const moveTypes = recentMoves.map((m: any) => m.card.type);
-    
+
     // Detect patterns
     if (moveTypes.every((t: string) => t === 'ZONE')) return 'territorial_focus';
     if (moveTypes.every((t: string) => t === 'MEDIA')) return 'propaganda_focus';
     if (moveTypes.every((t: string) => t === 'ATTACK')) return 'aggressive_focus';
     if (moveTypes.includes('ATTACK') && moveTypes.includes('ZONE')) return 'aggressive_expansion';
-    
+
+    if (this.adaptiveSnapshot.aggressionTrend > 0.6) {
+      return 'aggressive_focus';
+    }
+
     return 'mixed_strategy';
   }
 
@@ -500,6 +842,8 @@ export class EnhancedAIStrategist extends AIStrategist {
         return play.cardId.includes('zone') || play.cardId.includes('defensive');
       case 'aggressive_focus':
         return !play.cardId.includes('defensive') && !play.cardId.includes('counter');
+      case 'player_countering':
+        return play.cardId.includes('media') || play.cardId.includes('zone');
       default:
         return false;
     }
