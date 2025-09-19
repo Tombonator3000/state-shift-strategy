@@ -71,6 +71,7 @@ const createPlanningState = () => ({
       baseIP: 6,
       defense: 4,
       pressure: 1,
+      contested: false,
       owner: 'ai' as const,
     },
     {
@@ -80,6 +81,7 @@ const createPlanningState = () => ({
       baseIP: 5,
       defense: 5,
       pressure: 2,
+      contested: false,
       owner: 'player' as const,
     },
     {
@@ -89,6 +91,7 @@ const createPlanningState = () => ({
       baseIP: 3,
       defense: 3,
       pressure: 0,
+      contested: false,
       owner: 'neutral' as const,
     },
   ],

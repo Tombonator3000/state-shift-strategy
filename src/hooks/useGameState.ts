@@ -169,9 +169,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         baseIP: state.baseIP,
         defense: state.defense,
         pressure: 0,
+        contested: false,
         owner: 'neutral' as const,
         specialBonus: state.specialBonus,
-        bonusValue: state.bonusValue
+        bonusValue: state.bonusValue,
       };
     }),
     currentEvents: [],
@@ -269,10 +270,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       targetState: null,
       states: USA_STATES.map(state => {
         let owner: 'player' | 'ai' | 'neutral' = 'neutral';
-        
+
         if (initialControl.player.includes(state.abbreviation)) owner = 'player';
         else if (initialControl.ai.includes(state.abbreviation)) owner = 'ai';
-        
+
         return {
           id: state.id,
           name: state.name,
@@ -280,9 +281,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           baseIP: state.baseIP,
           defense: state.defense,
           pressure: 0,
+          contested: false,
           owner,
           specialBonus: state.specialBonus,
-          bonusValue: state.bonusValue
+          bonusValue: state.bonusValue,
         };
       }),
       log: [
