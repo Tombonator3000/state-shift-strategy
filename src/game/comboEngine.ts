@@ -519,11 +519,11 @@ export function applyComboRewards(
     };
   }
 
-  const truthMagnitude = Math.abs(evaluation.totalReward.truth ?? 0);
-  if (truthMagnitude !== 0) {
+  const truthReward = evaluation.totalReward.truth ?? 0;
+  if (truthReward !== 0) {
     const playerState = updated.players[player];
     const faction = playerState?.faction ?? 'truth';
-    const signedTruthDelta = faction === 'truth' ? truthMagnitude : -truthMagnitude;
+    const signedTruthDelta = faction === 'government' ? -truthReward : truthReward;
     applyTruthDelta(updated, signedTruthDelta, player);
   }
 

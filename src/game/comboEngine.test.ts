@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'bun:test';
 import type { GameState, PlayerId, PlayerState } from '@/mvp/validator';
-import type { TurnPlay } from './combo.types';
+import type { ComboEvaluation, TurnPlay } from './combo.types';
 import { applyComboRewards, evaluateCombos, getComboRng, setComboSettings } from './comboEngine';
 import { COMBO_DEFINITIONS, DEFAULT_COMBO_SETTINGS } from './combo.config';
 
@@ -218,5 +218,39 @@ describe('comboEngine.applyComboRewards', () => {
 
     expect(updated.truth).toBe(46);
     expect(updated.log).toContain('Truth manipulation ↓ (50% → 46%)');
+  });
+
+  it('propagates negative truth rewards based on faction alignment', () => {
+    const penaltyDefinition = {
+      ...COMBO_DEFINITIONS.find(def => def.id === 'sequence_media_wave')!,
+      reward: { truth: -3, log: 'Truth penalty event' },
+    };
+
+    const penaltyEvaluation = {
+      results: [
+        {
+          definition: penaltyDefinition,
+          reward: penaltyDefinition.reward,
+          appliedReward: penaltyDefinition.reward,
+          details: { matchedPlays: [] },
+        },
+      ],
+      totalReward: { truth: -3 },
+      logs: [],
+    } satisfies ComboEvaluation;
+
+    const truthState = createState([]);
+    const truthUpdated = applyComboRewards(truthState, 'P1', penaltyEvaluation);
+
+    expect(truthUpdated.truth).toBe(47);
+    expect(truthUpdated.log).toContain('Truth manipulation ↓ (50% → 47%)');
+    expect(truthUpdated.log).toContain('Truth penalty event');
+
+    const governmentState = createState([], { currentPlayer: 'P2' });
+    const governmentUpdated = applyComboRewards(governmentState, 'P2', penaltyEvaluation);
+
+    expect(governmentUpdated.truth).toBe(53);
+    expect(governmentUpdated.log).toContain('Truth manipulation ↑ (50% → 53%)');
+    expect(governmentUpdated.log).toContain('Truth penalty event');
   });
 });
