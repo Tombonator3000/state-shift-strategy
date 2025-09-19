@@ -130,4 +130,35 @@ describe('Unified AI planning', () => {
       });
     });
   }
+
+  it('returns an empty plan when no affordable cards are available', () => {
+    for (const difficulty of DIFFICULTIES) {
+      const strategist = AIFactory.createStrategist(DIFFICULTY_TO_AI[difficulty]);
+      const baseState = createPlanningState();
+      const expensiveHand = baseState.aiHand.map(card => ({
+        ...card,
+        cost: (card.cost ?? 0) + 10,
+      }));
+
+      const planningState = {
+        ...baseState,
+        aiIP: 0,
+        aiHand: expensiveHand,
+      };
+
+      let plan: ReturnType<typeof chooseTurnActions> | null = null;
+      expect(() => {
+        plan = chooseTurnActions({
+          strategist,
+          gameState: planningState,
+          maxActions: 3,
+          priorityThreshold: 0.2,
+        });
+      }).not.toThrow();
+
+      expect(plan).not.toBeNull();
+      expect(plan!.actions.length).toBe(0);
+      expect(plan!.sequenceDetails.length).toBeGreaterThan(0);
+    }
+  });
 });
