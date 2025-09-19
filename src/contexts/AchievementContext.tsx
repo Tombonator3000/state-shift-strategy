@@ -11,7 +11,7 @@ interface AchievementContextType {
   updateStats: (updates: Partial<PlayerStats>) => void;
   onGameStart: (faction: 'truth' | 'government', aiDifficulty: string) => void;
   onGameEnd: (won: boolean, victoryType: string, gameData: any) => void;
-  onCardPlayed: (cardId: string, cardType: string) => void;
+  onCardPlayed: (cardId: string, cardType: string, cardRarity?: string) => void;
   exportData: () => any;
   importData: (data: any) => boolean;
   resetProgress: () => void;
@@ -82,9 +82,9 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     refreshStats();
   }, [manager, refreshStats]);
 
-  const onCardPlayed = useCallback((cardId: string, cardType: string) => {
-    console.log('Achievement: Card played', { cardId, cardType });
-    manager.onCardPlayed(cardId, cardType);
+  const onCardPlayed = useCallback((cardId: string, cardType: string, cardRarity?: string) => {
+    console.log('Achievement: Card played', { cardId, cardType, cardRarity });
+    manager.onCardPlayed(cardType, cardRarity);
     refreshStats();
   }, [manager, refreshStats]);
 
