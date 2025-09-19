@@ -870,12 +870,22 @@ export class EnhancedAIStrategist extends AIStrategist {
   private generateAllPossiblePlays(gameState: any): CardPlay[] {
     const plays: CardPlay[] = [];
     const evaluation = this.evaluateGameState(gameState);
-    
+    const availableIp = typeof gameState.aiIP === 'number' ? gameState.aiIP : 0;
+
     for (const card of gameState.hand || []) {
+      const cardCost =
+        typeof card.cost === 'number'
+          ? card.cost
+          : this.getCardMetadata(card.id)?.cost ?? 0;
+
+      if (cardCost > availableIp) {
+        continue;
+      }
+
       const cardPlays = this.generateCardPlays(card, gameState, evaluation);
       plays.push(...cardPlays);
     }
-    
+
     return plays;
   }
 

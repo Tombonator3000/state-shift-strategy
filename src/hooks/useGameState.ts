@@ -663,7 +663,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     let cardsPlayed = 0;
     const maxCardsPerTurn = 3;
 
-    for (let i = 0; i < maxCardsPerTurn; i++) {
+    while (cardsPlayed < maxCardsPerTurn) {
       // Get fresh game state for each card play
       const freshState = await new Promise<GameState>(resolve => {
         setGameState(prev => {
@@ -674,59 +674,112 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       if (!freshState.aiStrategist || freshState.aiHand.length === 0) break;
 
-      const strategistView = {
+      const baseStrategistView = {
         ...freshState,
         // Provide AI-relative IP metric expected by strategist (negative = player advantage)
         ip: -freshState.ip,
         hand: freshState.aiHand,
+        aiHand: freshState.aiHand,
         controlledStates: freshState.states
           .filter(state => state.owner === 'ai')
           .map(state => state.abbreviation)
       };
 
-      let bestPlay: CardPlay | null;
-      const strategyDetails: string[] = [];
+      const attemptedCardIds = new Set<string>();
+      let selectedPlay: CardPlay | null = null;
+      let selectedCard: GameCard | undefined;
+      let selectedStrategyDetails: string[] | undefined;
+      let stopPlaying = false;
 
-      if (freshState.aiStrategist instanceof EnhancedAIStrategist) {
-        const enhancedPlay = freshState.aiStrategist.selectOptimalPlay(strategistView);
-        bestPlay = enhancedPlay;
+      while (!stopPlaying && attemptedCardIds.size < freshState.aiHand.length) {
+        const availableHand = freshState.aiHand.filter(card => !attemptedCardIds.has(card.id));
+        if (availableHand.length === 0) {
+          break;
+        }
 
-        if (enhancedPlay) {
+        const strategistView = {
+          ...baseStrategistView,
+          hand: availableHand,
+          aiHand: availableHand,
+        };
+
+        if (freshState.aiStrategist instanceof EnhancedAIStrategist) {
+          const enhancedPlay = freshState.aiStrategist.selectOptimalPlay(strategistView);
+
+          if (!enhancedPlay || enhancedPlay.priority < 0.3) {
+            stopPlaying = true;
+            break;
+          }
+
+          const candidateCard = availableHand.find(card => card.id === enhancedPlay.cardId);
+          if (!candidateCard) {
+            attemptedCardIds.add(enhancedPlay.cardId);
+            continue;
+          }
+
+          if (freshState.aiIP < candidateCard.cost) {
+            attemptedCardIds.add(candidateCard.id);
+            continue;
+          }
+
+          const details: string[] = [];
           const { synergies, deceptionValue, threatResponse } = enhancedPlay;
 
           if (synergies?.length) {
             const synergyDescriptions = synergies.map(synergy => synergy.description).join(', ');
-            strategyDetails.push(`AI Synergy Bonus: ${synergyDescriptions}`);
+            details.push(`AI Synergy Bonus: ${synergyDescriptions}`);
           }
 
           if (deceptionValue > 0) {
-            strategyDetails.push(`Deception tactics engaged (${Math.round(deceptionValue * 100)}% intensity)`);
+            details.push(`Deception tactics engaged (${Math.round(deceptionValue * 100)}% intensity)`);
           }
 
           if (threatResponse) {
-            strategyDetails.push('Countering recent player action.');
+            details.push('Countering recent player action.');
           }
 
           const adaptiveSummary = freshState.aiStrategist.getAdaptiveSummary();
           if (adaptiveSummary.length) {
-            strategyDetails.push(...adaptiveSummary);
+            details.push(...adaptiveSummary);
           }
+
+          selectedPlay = enhancedPlay;
+          selectedCard = candidateCard;
+          selectedStrategyDetails = details.length > 0 ? details : undefined;
+          break;
         }
-      } else {
-        bestPlay = freshState.aiStrategist.selectBestPlay(strategistView);
+
+        const basicPlay = freshState.aiStrategist.selectBestPlay(strategistView);
+
+        if (!basicPlay || basicPlay.priority < 0.3) {
+          stopPlaying = true;
+          break;
+        }
+
+        const candidateCard = availableHand.find(card => card.id === basicPlay.cardId);
+        if (!candidateCard) {
+          attemptedCardIds.add(basicPlay.cardId);
+          continue;
+        }
+
+        if (freshState.aiIP < candidateCard.cost) {
+          attemptedCardIds.add(candidateCard.id);
+          continue;
+        }
+
+        selectedPlay = basicPlay;
+        selectedCard = candidateCard;
+        selectedStrategyDetails = undefined;
+        break;
       }
 
-      if (!bestPlay || bestPlay.priority < 0.3) break; // AI decides not to play more cards
-
-      const cardToPlay = freshState.aiHand.find(c => c.id === bestPlay.cardId);
-      if (!cardToPlay) break;
-      if (freshState.aiIP < cardToPlay.cost) continue; // Can't afford, try next
+      if (stopPlaying || !selectedPlay || !selectedCard) break;
 
       await playAICard(
-        bestPlay.cardId,
-        bestPlay.targetState,
-        bestPlay.reasoning,
-        strategyDetails.length > 0 ? strategyDetails : undefined,
+        selectedPlay.cardId,
+        selectedPlay.targetState,
+        selectedPlay.reasoning,
+        selectedStrategyDetails,
       );
       cardsPlayed++;
 
