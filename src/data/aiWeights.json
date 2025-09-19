@@ -1,0 +1,75 @@
+{
+  "evaluateGameState": {
+    "territorialWeight": 1,
+    "resourceWeight": 1,
+    "handWeight": 1,
+    "threatMitigationWeight": 1,
+    "agendaWeight": 1,
+    "pressureWeight": 1,
+    "truthWeight": 1,
+    "opponentEconomyWeight": 1,
+    "opponentHandWeight": 1
+  },
+  "dynamicWeights": {
+    "territorialBase": 0.2,
+    "territorialPersonality": 0.25,
+    "resourceBase": 0.15,
+    "resourcePersonality": 0.25,
+    "handBase": 0.15,
+    "handPlanning": 0.2,
+    "threatMitigationBase": 0.18,
+    "threatDefensiveness": 0.3,
+    "agendaBase": 0.12,
+    "agendaPlanning": 0.25,
+    "pressureBase": 0.15,
+    "pressureTerritorial": 0.2,
+    "truthBase": 0.1,
+    "truthTerritorial": 0.2,
+    "opponentEconomyBase": 0.1,
+    "opponentEconomyDefensive": 0.15,
+    "opponentHandBase": 0.08,
+    "opponentHandPlanning": 0.15
+  },
+  "cardPriority": {
+    "zone": {
+      "baseMultiplier": 1,
+      "chainMultiplier": 1,
+      "factionMultiplier": 1,
+      "highValueMultiplier": 1,
+      "locationMultiplier": 1,
+      "specialBonusMultiplier": 1,
+      "ownerAggressionMultiplier": 1,
+      "signalCaptureMultiplier": 1,
+      "dangerResponseMultiplier": 1
+    },
+    "media": {
+      "baseMultiplier": 1,
+      "chainMultiplier": 1,
+      "factionMultiplier": 1,
+      "truthObjectiveMultiplier": 1,
+      "resourceSwingMultiplier": 1,
+      "discardMultiplier": 1,
+      "drawMultiplier": 1
+    },
+    "attack": {
+      "baseMultiplier": 1,
+      "chainMultiplier": 1,
+      "factionMultiplier": 1,
+      "comebackMultiplier": 1,
+      "resourceThreatMultiplier": 1,
+      "aggressionResponseMultiplier": 1,
+      "ipDamageMultiplier": 1,
+      "discardMultiplier": 1,
+      "aheadPenaltyMultiplier": 1
+    },
+    "defensive": {
+      "baseMultiplier": 1,
+      "chainMultiplier": 1,
+      "factionMultiplier": 1,
+      "threatResponseMultiplier": 1,
+      "truthCrisisMultiplier": 1,
+      "recentAttackMultiplier": 1,
+      "imminentLossMultiplier": 1
+    }
+  }
+}

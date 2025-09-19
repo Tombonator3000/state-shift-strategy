@@ -1,6 +1,7 @@
 import type { GameCard } from '@/rules/mvp';
 import { resolveCardMVP, type GameSnapshot } from '@/systems/cardResolution';
 import { CARD_DATABASE } from './cardDatabase';
+import { getAiTuningConfig, type AiTuningConfig } from './aiTuning';
 import { AIStrategist, type AIDifficulty, type AIPersonality, type CardPlay, type GameStateEvaluation } from './aiStrategy';
 
 // Monte Carlo Tree Search Node
@@ -43,8 +44,8 @@ export class EnhancedAIStrategist extends AIStrategist {
   private playerBehaviorPattern: string[] = [];
   private threatHistory: { turn: number; threat: number; response: string }[] = [];
 
-  constructor(difficulty: AIDifficulty = 'medium') {
-    super(difficulty);
+  constructor(difficulty: AIDifficulty = 'medium', tuning: AiTuningConfig = getAiTuningConfig()) {
+    super(difficulty, tuning);
     this.initializeCardSynergies();
     this.deceptionState = {
       fakeTargets: [],
