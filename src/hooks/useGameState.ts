@@ -9,6 +9,7 @@ import { AIFactory } from '@/data/aiFactory';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import { chooseTurnActions } from '@/ai/enhancedController';
 import { EventManager, type GameEvent } from '@/data/eventDatabase';
+import { processAiActions } from './aiTurnActions';
 import { buildEditionEvents } from './eventEdition';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
@@ -522,40 +523,66 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   }, []);
 
   const playAICard = useCallback((params: AiCardPlayParams) => {
-    setGameState(prev => {
-      const result = applyAiCardPlay(prev, params, achievements);
+    return new Promise<GameState>(resolve => {
+      setGameState(prev => {
+        if (prev.isGameOver) {
+          resolve(prev);
+          return prev;
+        }
 
-      if (result.card && typeof window !== 'undefined' && window.uiShowOpponentCard) {
-        window.uiShowOpponentCard(result.card);
-      }
+        const result = applyAiCardPlay(prev, params, achievements);
 
-      if (result.card && result.resolution) {
-        prev.aiStrategist?.recordAiPlayOutcome({
-          card: result.card,
-          targetState: params.targetState,
-          resolution: result.resolution,
-          previousState: prev,
-        });
-      }
+        if (result.card && typeof window !== 'undefined' && window.uiShowOpponentCard) {
+          window.uiShowOpponentCard(result.card);
+        }
 
-      if (!result.failed && !featureFlags.aiVerboseStrategyLog && (params.reasoning || params.strategyDetails?.length)) {
-        debugStrategyToConsole(params.reasoning, params.strategyDetails);
-      }
+        if (result.card && result.resolution) {
+          prev.aiStrategist?.recordAiPlayOutcome({
+            card: result.card,
+            targetState: params.targetState,
+            resolution: result.resolution,
+            previousState: prev,
+          });
+        }
 
-      return result.nextState;
+        if (!result.failed && !featureFlags.aiVerboseStrategyLog && (params.reasoning || params.strategyDetails?.length)) {
+          debugStrategyToConsole(params.reasoning, params.strategyDetails);
+        }
+
+        resolve(result.nextState);
+        return result.nextState;
+      });
     });
   }, [achievements]);
 
   // AI Turn Management
   const executeAITurn = useCallback(async () => {
-    if (!gameState.aiStrategist || gameState.currentPlayer !== 'ai' || gameState.aiTurnInProgress) {
+    if (
+      !gameState.aiStrategist ||
+      gameState.currentPlayer !== 'ai' ||
+      gameState.aiTurnInProgress ||
+      gameState.isGameOver
+    ) {
       return;
     }
 
-    setGameState(prev => ({ ...prev, aiTurnInProgress: true }));
+    const readLatestState = () =>
+      new Promise<GameState>(resolve => {
+        setGameState(prev => {
+          resolve(prev);
+          return prev;
+        });
+      });
+
+    setGameState(prev => (prev.isGameOver ? prev : { ...prev, aiTurnInProgress: true }));
 
     await new Promise<GameState>(resolve => {
       setGameState(prev => {
+        if (prev.isGameOver) {
+          resolve(prev);
+          return prev;
+        }
+
         const aiControlledStates = prev.states
           .filter(state => state.owner === 'ai')
           .map(state => state.abbreviation);
@@ -586,17 +613,21 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       });
     });
 
+    const prePlanningState = await readLatestState();
+    if (prePlanningState.isGameOver) {
+      return;
+    }
+
     await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
 
-    const planningState = await new Promise<GameState>(resolve => {
-      setGameState(prev => {
-        resolve(prev);
-        return prev;
-      });
-    });
+    const planningState = await readLatestState();
 
     if (!planningState.aiStrategist) {
-      setGameState(prev => ({ ...prev, aiTurnInProgress: false }));
+      setGameState(prev => (prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false }));
+      return;
+    }
+
+    if (planningState.isGameOver) {
       return;
     }
 
@@ -614,29 +645,39 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }));
     }
 
-    for (let index = 0; index < turnPlan.actions.length; index++) {
-      const action = turnPlan.actions[index];
-      const detailEntries = [
-        ...(index === 0 ? turnPlan.sequenceDetails : []),
-        ...(action.strategyDetails ?? []),
-      ];
+    const actionOutcome = await processAiActions({
+      actions: turnPlan.actions,
+      sequenceDetails: turnPlan.sequenceDetails,
+      readLatestState,
+      playCard: playAICard,
+      waitBetweenActions: () => new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400)),
+    });
 
-      await playAICard({
-        cardId: action.cardId,
-        card: action.card,
-        targetState: action.targetState,
-        reasoning: action.reasoning,
-        strategyDetails: detailEntries.length ? detailEntries : undefined,
-      });
+    if (actionOutcome.gameOver) {
+      return;
+    }
 
-      if (index < turnPlan.actions.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
-      }
+    const latestState = await readLatestState();
+    if (latestState.isGameOver) {
+      return;
     }
 
     setTimeout(() => {
+      let shouldProceed = true;
+      setGameState(prev => {
+        if (prev.isGameOver) {
+          shouldProceed = false;
+          return prev;
+        }
+        return prev;
+      });
+
+      if (!shouldProceed) {
+        return;
+      }
+
       endTurn();
-      setGameState(prev => ({ ...prev, aiTurnInProgress: false }));
+      setGameState(prev => (prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false }));
     }, 1000);
   }, [gameState, endTurn, playAICard]);
 
