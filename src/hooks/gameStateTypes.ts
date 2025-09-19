@@ -42,6 +42,7 @@ export interface GameState {
   cardsPlayedThisRound: CardPlayRecord[];
   playHistory: CardPlayRecord[];
   turnPlays: TurnPlay[];
+  comboTruthDeltaThisRound: number;
   controlledStates: string[];
   aiControlledStates: string[];
   states: Array<{

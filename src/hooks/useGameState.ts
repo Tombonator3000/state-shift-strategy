@@ -177,6 +177,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     aiDeck: generateWeightedDeck(40, 'government'),
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
+    comboTruthDeltaThisRound: 0,
     playHistory: [],
     turnPlays: [],
     controlledStates: [],
@@ -582,6 +583,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const humanIpAfterCombos = comboResult.updatedPlayerIp;
         const aiIpAfterCombos = comboResult.updatedOpponentIp;
         const truthAfterCombos = comboResult.updatedTruth;
+        const comboTruthDelta = comboResult.truthDelta;
 
         const logEntries = [
           ...comboLog,
@@ -604,6 +606,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           aiIP: aiIpAfterCombos,
           pendingCardDraw,
           currentEvents: newEvents,
+          comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboTruthDelta,
           cardDrawState: {
             cardsPlayedLastTurn: prev.cardsPlayedThisTurn,
             lastTurnWithoutPlay: prev.cardsPlayedThisTurn === 0
@@ -632,6 +635,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         aiIP: comboResult.updatedPlayerIp,
         cardsPlayedThisTurn: 0,
         turnPlays: [],
+        comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboResult.truthDelta,
         log: [...comboLog, 'AI turn completed']
       };
     });
@@ -824,6 +828,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         deck: remainingDeck,
         showNewspaper: false,
         cardsPlayedThisRound: [],
+        comboTruthDeltaThisRound: 0,
         phase: 'action',
         currentPlayer: 'human',
         showNewCardsPresentation: false,
@@ -950,6 +955,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         turnPlays: Array.isArray(saveData.turnPlays)
           ? saveData.turnPlays
           : [],
+        comboTruthDeltaThisRound:
+          typeof saveData.comboTruthDeltaThisRound === 'number' ? saveData.comboTruthDeltaThisRound : 0,
         // Ensure objects are properly reconstructed
         eventManager: prev.eventManager, // Keep the current event manager
         aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium')

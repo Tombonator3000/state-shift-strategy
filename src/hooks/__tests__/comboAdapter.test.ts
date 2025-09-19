@@ -44,6 +44,7 @@ const createState = (overrides: Partial<GameState> = {}): GameState => ({
   aiDeck: [],
   cardsPlayedThisTurn: 3,
   cardsPlayedThisRound: [],
+  comboTruthDeltaThisRound: 0,
   playHistory: [],
   turnPlays: makeTurnPlays(),
   controlledStates: [],
@@ -97,6 +98,7 @@ describe('evaluateCombosForTurn', () => {
 
     expect(result.evaluation.results.length).toBeGreaterThan(0);
     expect(result.updatedTruth).toBeGreaterThan(state.truth);
+    expect(result.truthDelta).toBe(result.updatedTruth - state.truth);
     expect(result.fxMessages.length).toBe(result.evaluation.results.length);
     expect(result.logEntries[0]).toContain('Combos triggered');
 

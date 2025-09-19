@@ -160,7 +160,14 @@ type SecondaryStory = SecondaryCardStory | ReturnType<typeof createEventStory>;
 
 const isCardStory = (story: SecondaryStory): story is SecondaryCardStory => 'player' in story;
 
-const TabloidNewspaperV2 = ({ events, playedCards, faction, truth, onClose }: TabloidNewspaperProps) => {
+const TabloidNewspaperV2 = ({
+  events,
+  playedCards,
+  faction,
+  truth,
+  comboTruthDelta = 0,
+  onClose,
+}: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState('THE PARANOID TIMES');
   const [glitchText, setGlitchText] = useState<string | null>(null);
@@ -270,8 +277,8 @@ const TabloidNewspaperV2 = ({ events, playedCards, faction, truth, onClose }: Ta
 
   const eventsTruthDelta = useMemo(() => computeEventTruthDelta(events), [events]);
   const roundContext = useMemo(
-    () => buildRoundContext(playerCards, opponentCards, eventsTruthDelta),
-    [playerCards, opponentCards, eventsTruthDelta],
+    () => buildRoundContext(playerCards, opponentCards, eventsTruthDelta, comboTruthDelta),
+    [playerCards, opponentCards, eventsTruthDelta, comboTruthDelta],
   );
 
   const heroEvent = heroCardEntry ? null : events[0];
