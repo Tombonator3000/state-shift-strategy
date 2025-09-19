@@ -1100,9 +1100,9 @@ export class EnhancedAIStrategist implements AIStrategist {
     newState.aiIP = resolution.aiIP;
     newState.truth = resolution.truth;
     newState.states = resolution.states.map(state => ({ ...state }));
-    newState.controlledStates = resolution.aiControlledStates;
-    newState.aiControlledStates = resolution.aiControlledStates;
-    newState.playerControlledStates = resolution.controlledStates;
+    newState.controlledStates = [...resolution.controlledStates];
+    newState.playerControlledStates = [...resolution.controlledStates];
+    newState.aiControlledStates = [...resolution.aiControlledStates];
     newState.ip = -resolution.ip;
     newState.targetState = resolution.targetState;
     newState.selectedCard = resolution.selectedCard;
@@ -1148,25 +1148,34 @@ export class EnhancedAIStrategist implements AIStrategist {
   }
 
   private cloneSimulationState(gameState: any): any {
+    const states = (gameState.states ?? []).map((state: any) => ({ ...state }));
+
+    const playerControlledStates = Array.isArray(gameState.playerControlledStates)
+      ? [...gameState.playerControlledStates]
+      : Array.isArray(gameState.controlledStates)
+        ? [...gameState.controlledStates]
+        : states
+            .filter((state: any) => state.owner === 'player')
+            .map((state: any) => state.abbreviation);
+
+    const aiControlledStates = Array.isArray(gameState.aiControlledStates)
+      ? [...gameState.aiControlledStates]
+      : states
+          .filter((state: any) => state.owner === 'ai')
+          .map((state: any) => state.abbreviation);
+
     const clone: any = {
       ...gameState,
-      states: (gameState.states ?? []).map((state: any) => ({ ...state })),
+      states,
       hand: (gameState.hand ?? []).map((card: GameCard) => ({ ...card })),
       aiHand: (gameState.aiHand ?? []).map((card: GameCard) => ({ ...card })),
-      controlledStates: Array.isArray(gameState.controlledStates)
-        ? [...gameState.controlledStates]
-        : [],
-      aiControlledStates: Array.isArray(gameState.aiControlledStates)
-        ? [...gameState.aiControlledStates]
-        : [],
+      controlledStates: playerControlledStates,
+      playerControlledStates,
+      aiControlledStates,
     };
 
     if (Array.isArray(gameState.playerHand)) {
       clone.playerHand = gameState.playerHand.map((card: GameCard) => ({ ...card }));
-    }
-
-    if (Array.isArray(gameState.playerControlledStates)) {
-      clone.playerControlledStates = [...gameState.playerControlledStates];
     }
 
     if (Array.isArray(gameState.cardsPlayedThisRound)) {
@@ -1192,9 +1201,11 @@ export class EnhancedAIStrategist implements AIStrategist {
 
     const playerControlledStates = Array.isArray(gameState.playerControlledStates)
       ? [...gameState.playerControlledStates]
-      : states
-          .filter((state: any) => state.owner === 'player')
-          .map((state: any) => state.abbreviation);
+      : Array.isArray(gameState.controlledStates)
+        ? [...gameState.controlledStates]
+        : states
+            .filter((state: any) => state.owner === 'player')
+            .map((state: any) => state.abbreviation);
 
     const aiControlledStates = Array.isArray(gameState.aiControlledStates)
       ? [...gameState.aiControlledStates]
@@ -1215,6 +1226,11 @@ export class EnhancedAIStrategist implements AIStrategist {
       faction: gameState.faction ?? 'truth',
       states,
     };
+  }
+
+  /** @internal - exposed for verification in tests */
+  public simulateMoveForTesting(gameState: any, move: CardPlay): any {
+    return this.simulateMove(gameState, move);
   }
 
   private evaluateOutcome(gameState: any): { aiWon: boolean; playerWon: boolean } {
