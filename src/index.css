@@ -228,6 +228,182 @@ All colors MUST be HSL.
 }
 
 @layer components {
+  /* Government redaction sweep overlay */
+  .redaction-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: rgba(8, 9, 13, 0);
+    animation: redaction-overlay-fade 1.8s ease-in-out forwards;
+    z-index: 60;
+  }
+
+  .redaction-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15), transparent 55%);
+    opacity: 0;
+    animation: redaction-overlay-highlight 1.6s ease-out forwards;
+  }
+
+  .redaction-overlay__content {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(12px, 3vh, 28px);
+    padding: clamp(16px, 5vh, 48px) clamp(16px, 6vw, 64px);
+  }
+
+  .redaction-bar {
+    position: relative;
+    width: min(720px, var(--bar-width, 80%));
+    height: clamp(38px, 8vh, 72px);
+    background: rgba(0, 0, 0, 0.92);
+    color: #f9fafb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 6px;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.08);
+    transform: translateX(-125%) rotate(var(--bar-tilt, 0deg));
+    opacity: 0;
+    animation: redaction-bar-sweep 1.2s cubic-bezier(0.42, 0, 0.2, 1) forwards;
+    animation-delay: var(--bar-delay, 0s);
+  }
+
+  .redaction-bar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.1) 0px,
+      rgba(255, 255, 255, 0.1) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+    opacity: 0.18;
+    mix-blend-mode: screen;
+    animation: redaction-bar-stripes 0.8s linear infinite;
+  }
+
+  .redaction-bar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .redaction-bar__label {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 clamp(24px, 4vw, 48px);
+    font-family: "Bebas Neue", "Anton", system-ui, sans-serif;
+    font-size: clamp(1.5rem, 4vw, 3.25rem);
+    letter-spacing: 0.45em;
+    text-indent: 0.45em;
+    text-transform: uppercase;
+    color: rgba(248, 250, 252, 0.95);
+    line-height: 1;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
+    white-space: nowrap;
+    animation: redaction-text-flicker 0.6s steps(2, end) 3 forwards;
+  }
+
+  .redaction-bar__label::after {
+    content: "REDACTED";
+    position: absolute;
+    inset: 0;
+    transform: translate(2px, 1px);
+    color: rgba(248, 250, 252, 0.12);
+    pointer-events: none;
+  }
+
+  @keyframes redaction-overlay-fade {
+    0% { background: rgba(8, 9, 13, 0); }
+    20% { background: rgba(8, 9, 13, 0.55); }
+    65% { background: rgba(8, 9, 13, 0.6); }
+    100% { background: rgba(8, 9, 13, 0); }
+  }
+
+  @keyframes redaction-overlay-highlight {
+    0% { opacity: 0; }
+    30% { opacity: 0.4; }
+    80% { opacity: 0.15; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes redaction-bar-sweep {
+    0% {
+      transform: translateX(-135%) rotate(var(--bar-tilt, 0deg));
+      opacity: 0;
+    }
+    25% {
+      opacity: 1;
+    }
+    45% {
+      transform: translateX(0%) rotate(var(--bar-tilt, 0deg));
+      opacity: 1;
+    }
+    80% {
+      transform: translateX(0%) rotate(var(--bar-tilt, 0deg));
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(135%) rotate(var(--bar-tilt, 0deg));
+      opacity: 0;
+    }
+  }
+
+  @keyframes redaction-bar-stripes {
+    0% { background-position: 0 0; }
+    100% { background-position: 120px 0; }
+  }
+
+  @keyframes redaction-text-flicker {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .redaction-overlay {
+      animation: none;
+      background: rgba(8, 9, 13, 0.82);
+    }
+
+    .redaction-overlay::before {
+      animation: none;
+      opacity: 0.2;
+    }
+
+    .redaction-bar {
+      animation: none;
+      transform: none;
+      opacity: 1;
+    }
+
+    .redaction-bar::before {
+      animation: none;
+    }
+
+    .redaction-bar__label {
+      animation: none;
+    }
+  }
+
   /* Enhanced Card Animation System */
   .play-card-clone {
     position: absolute;

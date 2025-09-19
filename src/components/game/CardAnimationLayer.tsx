@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ParticleSystem } from '@/components/effects/ParticleSystem';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
+import RedactionSweep from '@/components/effects/RedactionSweep';
 
 interface CardAnimationLayerProps {
   children?: React.ReactNode;
@@ -24,6 +25,11 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain';
     x?: number;
     y?: number;
+  } | null>(null);
+
+  const [redactionSweep, setRedactionSweep] = useState<{
+    active: boolean;
+    key: number;
   } | null>(null);
 
   useEffect(() => {
@@ -80,12 +86,20 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       });
     };
 
+    const handleGovernmentRedaction = () => {
+      setRedactionSweep({
+        active: true,
+        key: Date.now()
+      });
+    };
+
     // Register event listeners
     window.addEventListener('cardDeployed', handleCardDeployed as EventListener);
     window.addEventListener('stateCapture', handleStateCapture as EventListener);
     window.addEventListener('stateLoss', handleStateLoss as EventListener);
     window.addEventListener('synergyActivation', handleSynergyActivation as EventListener);
     window.addEventListener('showFloatingNumber', handleFloatingNumber as EventListener);
+    window.addEventListener('governmentRedaction', handleGovernmentRedaction as EventListener);
 
     return () => {
       window.removeEventListener('cardDeployed', handleCardDeployed as EventListener);
@@ -93,6 +107,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('stateLoss', handleStateLoss as EventListener);
       window.removeEventListener('synergyActivation', handleSynergyActivation as EventListener);
       window.removeEventListener('showFloatingNumber', handleFloatingNumber as EventListener);
+      window.removeEventListener('governmentRedaction', handleGovernmentRedaction as EventListener);
     };
   }, []);
 
@@ -104,17 +119,23 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     setFloatingNumber(null);
   };
 
+  const handleRedactionComplete = () => {
+    setRedactionSweep(null);
+  };
+
   return (
     <>
       {/* Full-screen overlay for card animations */}
-      <div 
-        id="card-play-layer" 
+      <div
+        id="card-play-layer"
         className="fixed inset-0 pointer-events-none z-[40]"
         aria-hidden="true"
       >
         {children}
+        {redactionSweep?.active && (
+          <RedactionSweep key={redactionSweep.key} onComplete={handleRedactionComplete} />
+        )}
       </div>
-      
 
       {/* Particle Effects */}
       <ParticleSystem
