@@ -38,6 +38,269 @@ import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
 import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
+import type { CardPlayRecord } from '@/hooks/gameStateTypes';
+
+type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
+
+interface MVPReport {
+  cardId: string;
+  cardName: string;
+  player: 'human' | 'ai';
+  faction: 'truth' | 'government';
+  truthDelta: number;
+  ipDelta: number;
+  aiIpDelta: number;
+  capturedStates: string[];
+  damageDealt: number;
+  round: number;
+  turn: number;
+  impactType: ImpactType;
+  impactValue: number;
+  impactLabel: string;
+  highlight: string;
+}
+
+interface GameOverReport {
+  winner: 'government' | 'truth' | 'draw';
+  rounds: number;
+  finalTruth: number;
+  ipPlayer: number;
+  ipAI: number;
+  statesGov: number;
+  statesTruth: number;
+  agenda?: {
+    side: 'truth' | 'government';
+    name: string;
+    success: boolean;
+  };
+  mvp?: MVPReport | null;
+  legendaryUsed: string[];
+}
+
+interface EnrichedPlay {
+  play: CardPlayRecord;
+  faction: 'truth' | 'government';
+  captureCount: number;
+  truthImpact: number;
+  ipImpact: number;
+  damageImpact: number;
+  actorGain: number;
+  opponentDrop: number;
+}
+
+const inferFactionFromRecord = (
+  record: CardPlayRecord,
+  playerFaction: 'truth' | 'government',
+): 'truth' | 'government' => {
+  if (record.faction === 'truth' || record.faction === 'government') {
+    return record.faction;
+  }
+
+  return record.player === 'human'
+    ? playerFaction
+    : playerFaction === 'truth'
+      ? 'government'
+      : 'truth';
+};
+
+const computePlayMetrics = (
+  record: CardPlayRecord,
+  faction: 'truth' | 'government',
+): Pick<EnrichedPlay, 'captureCount' | 'truthImpact' | 'ipImpact' | 'damageImpact' | 'actorGain' | 'opponentDrop'> => {
+  const captureCount = Array.isArray(record.capturedStates) ? record.capturedStates.length : 0;
+  const truthDelta = typeof record.truthDelta === 'number' ? record.truthDelta : 0;
+  const truthImpact = faction === 'truth'
+    ? Math.max(0, truthDelta)
+    : Math.max(0, -truthDelta);
+
+  const ipDelta = typeof record.ipDelta === 'number' ? record.ipDelta : 0;
+  const aiIpDelta = typeof record.aiIpDelta === 'number' ? record.aiIpDelta : 0;
+  const actorGainRaw = record.player === 'human' ? ipDelta : aiIpDelta;
+  const opponentDropRaw = record.player === 'human' ? -aiIpDelta : -ipDelta;
+  const actorGain = actorGainRaw > 0 ? actorGainRaw : 0;
+  const opponentDrop = opponentDropRaw > 0 ? opponentDropRaw : 0;
+  const ipImpact = actorGain + opponentDrop;
+
+  const damageImpact = Math.max(0, typeof record.damageDealt === 'number' ? record.damageDealt : 0);
+
+  return { captureCount, truthImpact, ipImpact, damageImpact, actorGain, opponentDrop };
+};
+
+const pickBestCandidate = (
+  candidates: EnrichedPlay[],
+  primary: keyof Pick<EnrichedPlay, 'captureCount' | 'truthImpact' | 'ipImpact' | 'damageImpact'>,
+  fallbacks: Array<keyof Pick<EnrichedPlay, 'captureCount' | 'truthImpact' | 'ipImpact' | 'damageImpact'>>,
+): EnrichedPlay | null => {
+  return candidates.reduce<EnrichedPlay | null>((best, current) => {
+    if (!best) {
+      return current;
+    }
+
+    if (current[primary] > best[primary]) {
+      return current;
+    }
+    if (current[primary] < best[primary]) {
+      return best;
+    }
+
+    for (const metric of fallbacks) {
+      if (current[metric] > best[metric]) {
+        return current;
+      }
+      if (current[metric] < best[metric]) {
+        return best;
+      }
+    }
+
+    const currentTimestamp = current.play.timestamp ?? 0;
+    const bestTimestamp = best.play.timestamp ?? 0;
+    if (currentTimestamp !== bestTimestamp) {
+      return currentTimestamp > bestTimestamp ? current : best;
+    }
+
+    const currentRound = current.play.round ?? 0;
+    const bestRound = best.play.round ?? 0;
+    if (currentRound !== bestRound) {
+      return currentRound > bestRound ? current : best;
+    }
+
+    const currentTurn = current.play.turn ?? 0;
+    const bestTurn = best.play.turn ?? 0;
+    return currentTurn >= bestTurn ? current : best;
+  }, null);
+};
+
+const buildMvpHighlight = (candidate: EnrichedPlay, impactType: ImpactType, impactValue: number): string => {
+  const { play, actorGain, opponentDrop, captureCount } = candidate;
+  switch (impactType) {
+    case 'capture': {
+      if (captureCount <= 0) {
+        return 'Stabilized territorial control at a critical moment.';
+      }
+      const capturedList = play.capturedStates?.length ? play.capturedStates.join(', ') : 'undisclosed locations';
+      return `Secured ${captureCount} state${captureCount === 1 ? '' : 's'} (${capturedList}) in one sweep.`;
+    }
+    case 'truth': {
+      const delta = Math.abs(play.truthDelta ?? 0);
+      if (delta === 0) {
+        return 'Neutralized a truth swing before it escalated.';
+      }
+      if (play.faction === 'government') {
+        return play.truthDelta <= 0
+          ? `Suppressed truth by ${delta}% to keep the narrative contained.`
+          : `Twisted a ${delta}% truth surge into controlled propaganda.`;
+      }
+      return play.truthDelta >= 0
+        ? `Raised national awareness by ${delta}% in a single broadcast.`
+        : `Absorbed a ${delta}% misinformation hit and held the line.`;
+    }
+    case 'ip': {
+      const fragments: string[] = [];
+      if (actorGain > 0) {
+        fragments.push(`Generated ${actorGain} IP`);
+      }
+      if (opponentDrop > 0) {
+        fragments.push(`Siphoned ${opponentDrop} IP from the enemy`);
+      }
+      return fragments.length ? `${fragments.join(' & ')}.` : 'Shifted the resource war decisively.';
+    }
+    case 'damage':
+      return impactValue > 0
+        ? `Inflicted ${impactValue} direct damage to hostile operations.`
+        : 'Shredded enemy defenses without breaking stride.';
+    case 'support':
+    default:
+      return 'Delivered the clutch support play that sealed the deal.';
+  }
+};
+
+const buildMvpReport = (candidate: EnrichedPlay, impactType: ImpactType, impactValue: number): MVPReport => {
+  const { play } = candidate;
+  const impactLabels: Record<ImpactType, string> = {
+    capture: 'States Captured',
+    truth: 'Truth Swing',
+    ip: 'IP Swing',
+    damage: 'Damage Dealt',
+    support: 'Clutch Play',
+  };
+
+  return {
+    cardId: play.card.id,
+    cardName: play.card.name,
+    player: play.player,
+    faction: candidate.faction,
+    truthDelta: play.truthDelta,
+    ipDelta: play.ipDelta,
+    aiIpDelta: play.aiIpDelta,
+    capturedStates: play.capturedStates ?? [],
+    damageDealt: play.damageDealt,
+    round: play.round,
+    turn: play.turn,
+    impactType,
+    impactValue,
+    impactLabel: impactLabels[impactType],
+    highlight: buildMvpHighlight(candidate, impactType, impactValue),
+  };
+};
+
+const determineMVP = (
+  history: CardPlayRecord[],
+  winner: 'truth' | 'government' | 'draw' | null,
+  playerFaction: 'truth' | 'government',
+): MVPReport | null => {
+  if (!winner || winner === 'draw' || history.length === 0) {
+    return null;
+  }
+
+  const enrichedPlays: EnrichedPlay[] = history.map(play => {
+    const faction = inferFactionFromRecord(play, playerFaction);
+    const metrics = computePlayMetrics(play, faction);
+    return { play, faction, ...metrics };
+  }).filter(entry => entry.faction === winner);
+
+  if (enrichedPlays.length === 0) {
+    return null;
+  }
+
+  const captureMax = Math.max(...enrichedPlays.map(entry => entry.captureCount), 0);
+  if (captureMax > 0) {
+    const captureCandidates = enrichedPlays.filter(entry => entry.captureCount === captureMax);
+    const best = pickBestCandidate(captureCandidates, 'truthImpact', ['ipImpact', 'damageImpact']);
+    if (best) {
+      return buildMvpReport(best, 'capture', captureMax);
+    }
+  }
+
+  const truthMax = Math.max(...enrichedPlays.map(entry => entry.truthImpact), 0);
+  if (truthMax > 0) {
+    const truthCandidates = enrichedPlays.filter(entry => entry.truthImpact === truthMax);
+    const best = pickBestCandidate(truthCandidates, 'captureCount', ['ipImpact', 'damageImpact']);
+    if (best) {
+      return buildMvpReport(best, 'truth', truthMax);
+    }
+  }
+
+  const ipMax = Math.max(...enrichedPlays.map(entry => entry.ipImpact), 0);
+  if (ipMax > 0) {
+    const ipCandidates = enrichedPlays.filter(entry => entry.ipImpact === ipMax);
+    const best = pickBestCandidate(ipCandidates, 'captureCount', ['truthImpact', 'damageImpact']);
+    if (best) {
+      return buildMvpReport(best, 'ip', ipMax);
+    }
+  }
+
+  const damageMax = Math.max(...enrichedPlays.map(entry => entry.damageImpact), 0);
+  if (damageMax > 0) {
+    const damageCandidates = enrichedPlays.filter(entry => entry.damageImpact === damageMax);
+    const best = pickBestCandidate(damageCandidates, 'truthImpact', ['ipImpact', 'captureCount']);
+    if (best) {
+      return buildMvpReport(best, 'damage', damageMax);
+    }
+  }
+
+  const fallback = pickBestCandidate(enrichedPlays, 'captureCount', ['truthImpact', 'ipImpact', 'damageImpact']);
+  return fallback ? buildMvpReport(fallback, 'support', 0) : null;
+};
 
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
@@ -64,7 +327,7 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showInGameOptions, setShowInGameOptions] = useState(false);
   const [showCardCollection, setShowCardCollection] = useState(false);
-  const [gameOverReport, setGameOverReport] = useState<any>(null);
+  const [gameOverReport, setGameOverReport] = useState<GameOverReport | null>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
@@ -159,8 +422,14 @@ const Index = () => {
     if (winner && victoryType) {
       // Stop the game immediately
       setGameState(prev => ({ ...prev, isGameOver: true }));
-      
+
       // Build game over report
+      const mvp = determineMVP(gameState.playHistory, winner, gameState.faction);
+      const legendaryUsed = Array.from(new Set(
+        gameState.playHistory
+          .filter(entry => entry.card.rarity === 'legendary')
+          .map(entry => entry.card.name),
+      ));
       const report = {
         winner,
         rounds: gameState.round,
@@ -174,8 +443,8 @@ const Index = () => {
           name: gameState.agenda.title,
           success: gameState.agenda.complete
         } : undefined,
-        mvpCard: gameState.cardsPlayedThisRound.length > 0 ? gameState.cardsPlayedThisRound[gameState.cardsPlayedThisRound.length - 1]?.card?.name : undefined,
-        legendaryUsed: gameState.cardsPlayedThisRound.filter(c => c.card.rarity === 'legendary').map(c => c.card.name)
+        mvp,
+        legendaryUsed,
       };
 
       setGameOverReport(report);
@@ -950,7 +1219,7 @@ const Index = () => {
           aiIP: gameState.aiIP,
           playerStates: gameState.states.filter(s => s.owner === 'player').length,
           aiStates: gameState.states.filter(s => s.owner === 'ai').length,
-          mvpCard: gameOverReport?.mvpCard,
+          mvp: gameOverReport?.mvp ?? undefined,
           agenda: gameState.agenda ? {
             name: gameState.agenda.title,
             complete: gameState.agenda.complete || false

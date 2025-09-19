@@ -1,18 +1,11 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import type { CardPlayRecord } from '@/hooks/gameStateTypes';
 import type { GameCard } from '@/rules/mvp';
 import BaseCard from '@/components/game/cards/BaseCard';
 
-interface PlayedCard {
-  card: GameCard;
-  player: 'human' | 'ai';
-  targetState?: string | null;
-  truthDelta?: number;
-  capturedStates?: string[];
-}
-
 interface PlayedCardsDockProps {
-  playedCards: PlayedCard[];
+  playedCards: CardPlayRecord[];
 }
 
 const CardsInPlayCard = ({ card }: { card: GameCard }) => (
@@ -28,7 +21,7 @@ const CardsInPlayCard = ({ card }: { card: GameCard }) => (
 interface SectionProps {
   title: string;
   toneClass: string;
-  cards: PlayedCard[];
+  cards: CardPlayRecord[];
   emptyMessage: string;
   ariaLabel: string;
 }

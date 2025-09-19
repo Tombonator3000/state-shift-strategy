@@ -2,7 +2,7 @@ import type { GameCard } from '@/rules/mvp';
 import { featureFlags } from '@/state/featureFlags';
 import { resolveCardMVP, type AchievementTracker, type CardPlayResolution } from '@/systems/cardResolution';
 
-import type { GameState } from './gameStateTypes';
+import type { CardPlayRecord, GameState } from './gameStateTypes';
 
 const CAPTURE_REGEX = /(captured|seized)\s+([^!]+)!/i;
 
@@ -20,16 +20,37 @@ export const extractCapturedStates = (logEntries: string[]): string[] => {
 export const createPlayedCardRecord = (params: {
   card: GameCard;
   player: 'human' | 'ai';
+  faction: 'government' | 'truth';
   targetState?: string | null;
   resolution: CardPlayResolution;
   previousTruth: number;
-}) => ({
-  card: params.card,
-  player: params.player,
-  targetState: params.targetState ?? null,
-  truthDelta: params.resolution.truth - params.previousTruth,
-  capturedStates: extractCapturedStates(params.resolution.logEntries),
-});
+  previousIp: number;
+  previousAiIP: number;
+  round: number;
+  turn: number;
+}): CardPlayRecord => {
+  const logEntries = params.resolution.logEntries ?? [];
+  const truthDelta = params.resolution.truth - params.previousTruth;
+  const ipDelta = params.resolution.ip - params.previousIp;
+  const aiIpDelta = params.resolution.aiIP - params.previousAiIP;
+  const capturedStates = extractCapturedStates(logEntries);
+
+  return {
+    card: params.card,
+    player: params.player,
+    faction: params.faction,
+    targetState: params.targetState ?? null,
+    truthDelta,
+    ipDelta,
+    aiIpDelta,
+    capturedStates,
+    damageDealt: params.resolution.damageDealt ?? 0,
+    round: params.round,
+    turn: params.turn,
+    timestamp: Date.now(),
+    logEntries: [...logEntries],
+  };
+};
 
 const summarizeStrategy = (reasoning?: string, strategyDetails?: string[]): string | undefined => {
   const source = reasoning ?? strategyDetails?.[0];
@@ -117,9 +138,14 @@ export const applyAiCardPlay = (
   const playedCardRecord = createPlayedCardRecord({
     card: resolvedCard,
     player: 'ai',
+    faction: prev.faction === 'truth' ? 'government' : 'truth',
     targetState,
     resolution,
     previousTruth: prev.truth,
+    previousIp: prev.ip,
+    previousAiIP: prev.aiIP,
+    round: prev.round,
+    turn: prev.turn,
   });
 
   const nextState: GameState = {
@@ -133,6 +159,7 @@ export const applyAiCardPlay = (
     targetState: resolution.targetState,
     aiHand: prev.aiHand.filter(c => c.id !== resolvedCard.id),
     cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
+    playHistory: [...prev.playHistory, playedCardRecord],
     log: logEntries,
   };
 

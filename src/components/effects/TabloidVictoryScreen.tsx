@@ -4,6 +4,26 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import EndCredits from '@/components/game/EndCredits';
 
+type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
+
+interface MVPDetails {
+  cardId: string;
+  cardName: string;
+  player: 'human' | 'ai';
+  faction: 'truth' | 'government';
+  truthDelta: number;
+  ipDelta: number;
+  aiIpDelta: number;
+  capturedStates: string[];
+  damageDealt: number;
+  round: number;
+  turn: number;
+  impactType: ImpactType;
+  impactValue: number;
+  impactLabel: string;
+  highlight: string;
+}
+
 interface TabloidVictoryScreenProps {
   isVisible: boolean;
   isVictory: boolean;
@@ -17,7 +37,7 @@ interface TabloidVictoryScreenProps {
     aiIP: number;
     playerStates: number;
     aiStates: number;
-    mvpCard?: string;
+    mvp?: MVPDetails;
     agenda?: { name: string; complete: boolean };
   };
   onClose: () => void;
@@ -67,6 +87,85 @@ const TabloidVictoryScreen = ({
   const roundSummaryFragment = completedRounds === 0
     ? 'before the first full round could even conclude'
     : `after ${completedRounds} full round${completedRounds === 1 ? '' : 's'} of intense ${battleDescriptor}`;
+
+  const formatSignedNumber = (value: number) => {
+    const rounded = Math.round(value);
+    if (rounded > 0) return `+${rounded}`;
+    if (rounded < 0) return `${rounded}`;
+    return '0';
+  };
+
+  const formatPercent = (value: number) => {
+    const rounded = Math.round(value);
+    if (rounded > 0) return `+${rounded}%`;
+    if (rounded < 0) return `${rounded}%`;
+    return '0%';
+  };
+
+  const formatImpactValue = (mvp: MVPDetails): string => {
+    switch (mvp.impactType) {
+      case 'capture':
+        return `${mvp.impactValue} state${mvp.impactValue === 1 ? '' : 's'}`;
+      case 'truth':
+        return `${formatPercent(mvp.impactValue)}`;
+      case 'ip':
+        return `${formatSignedNumber(mvp.impactValue)} IP swing`;
+      case 'damage':
+        return `${Math.round(mvp.impactValue)} damage`; 
+      case 'support':
+      default:
+        return 'Momentum play';
+    }
+  };
+
+  const getMvpStatLines = (mvp: MVPDetails): string[] => {
+    const lines: string[] = [];
+    if (mvp.truthDelta !== 0) {
+      lines.push(`Truth delta: ${formatPercent(mvp.truthDelta)}`);
+    }
+
+    const operativeIp = mvp.player === 'human' ? mvp.ipDelta : mvp.aiIpDelta;
+    const opponentIp = mvp.player === 'human' ? mvp.aiIpDelta : mvp.ipDelta;
+    if (operativeIp !== 0 || opponentIp !== 0) {
+      const segments: string[] = [];
+      if (operativeIp !== 0) {
+        segments.push(`${mvp.player === 'human' ? 'Operative' : 'AI'} IP ${formatSignedNumber(operativeIp)}`);
+      }
+      if (opponentIp !== 0) {
+        segments.push(`${mvp.player === 'human' ? 'AI' : 'Operative'} IP ${formatSignedNumber(opponentIp)}`);
+      }
+      if (segments.length) {
+        lines.push(segments.join(' | '));
+      }
+    }
+
+    if (mvp.damageDealt > 0) {
+      lines.push(`Damage dealt: ${Math.round(mvp.damageDealt)}`);
+    }
+
+    if (mvp.capturedStates.length > 0) {
+      lines.push(`Captured: ${mvp.capturedStates.join(', ')}`);
+    }
+
+    return lines.slice(0, 3);
+  };
+
+  const buildMvpHeadline = (mvp: MVPDetails): string => {
+    const loudName = mvp.cardName.toUpperCase();
+    switch (mvp.impactType) {
+      case 'capture':
+        return `${loudName} SWEEPS ${mvp.impactValue} STATE${mvp.impactValue === 1 ? '' : 'S'}!`;
+      case 'truth':
+        return `${loudName} ${mvp.faction === 'truth' ? 'IGNITES' : 'SUPPRESSES'} TRUTH ${formatPercent(mvp.impactValue)}!`;
+      case 'ip':
+        return `${loudName} CHANNELS ${formatSignedNumber(mvp.impactValue)} IP POWER SURGE!`;
+      case 'damage':
+        return `${loudName} CRIPPLES OPPOSITION WITH ${Math.round(mvp.impactValue)} DAMAGE!`;
+      case 'support':
+      default:
+        return `${loudName} NAMED OPERATION MVP IN CLUTCH MANEUVER!`;
+    }
+  };
 
   const generateHeadlines = () => {
     const headlines: string[] = [];
@@ -125,13 +224,11 @@ const TabloidVictoryScreen = ({
 
     // Universal headlines with faction flavor
     headlines.push(`Round ${displayRoundNumber} ${isVictory ? 'Triumph' : 'Disaster'}: ${gameStats.playerStates}-${gameStats.aiStates} State Split!`);
-    if (gameStats.mvpCard) {
-      const mvpLabel = playerFaction === 'government' ? 'Asset of the Day' : 
-                      gameStats.mvpCard.includes('MEDIA') || gameStats.mvpCard.includes('Leak') ? 'Leak of the Day' : 'Beacon of the Day';
-      headlines.push(`${mvpLabel}: "${gameStats.mvpCard}" Changes Everything!`);
+    if (gameStats.mvp) {
+      headlines.push(buildMvpHeadline(gameStats.mvp));
     }
     headlines.push(`Florida Man ${getRandomFloridaAntic()} During Final Count!`);
-    
+
     return headlines.slice(0, 4);
   };
 
@@ -375,14 +472,41 @@ const TabloidVictoryScreen = ({
                     <span>{statesLabel}:</span>
                     <span className="font-bold">{playerStates} vs {aiStates}</span>
                   </div>
-                  {gameStats.mvpCard && (
-                    <div className="border-t border-newspaper-border pt-2 mt-2 text-center">
-                      <div className="text-xs font-bold opacity-80">
-                        {playerFaction === 'government' ? 'ASSET OF THE DAY' : 
-                         gameStats.mvpCard.includes('MEDIA') || gameStats.mvpCard.includes('Leak') ? 'LEAK OF THE DAY' : 'BEACON OF THE DAY'}
+                  {gameStats.mvp && (
+                    <div className="border-t border-newspaper-border pt-2 mt-2 text-left">
+                      <div className="text-xs font-bold opacity-80 text-center">
+                        {playerFaction === 'government' ? 'ASSET OF THE MATCH' : 'TRUTH MVP'}
                       </div>
-                      <div className={`font-black text-sm ${playerFaction === 'government' ? 'text-government-blue' : 'text-truth-red'}`}>
-                        {gameStats.mvpCard}
+                      <div className={`font-black text-sm text-center ${playerFaction === 'government' ? 'text-government-blue' : 'text-truth-red'}`}>
+                        {gameStats.mvp.cardName}
+                      </div>
+                      <div className="text-xs font-bold uppercase tracking-wide text-black/70 mt-1 text-center">
+                        {gameStats.mvp.impactLabel}: {formatImpactValue(gameStats.mvp)}
+                      </div>
+                      <div className="text-xs italic mt-2 text-black/70 text-justify">
+                        {gameStats.mvp.highlight}
+                      </div>
+                      <div className="mt-2 space-y-1 text-[10px] uppercase tracking-wide text-black/60">
+                        <div className="flex justify-between">
+                          <span>Round</span>
+                          <span>{(gameStats.mvp.round && gameStats.mvp.round > 0) ? gameStats.mvp.round : displayRoundNumber}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Turn</span>
+                          <span>{(gameStats.mvp.turn && gameStats.mvp.turn > 0) ? gameStats.mvp.turn : 1}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Operative</span>
+                          <span>{gameStats.mvp.player === 'human' ? 'Player' : 'AI Strategist'}</span>
+                        </div>
+                        {getMvpStatLines(gameStats.mvp).map((line, index) => (
+                          <div
+                            key={index}
+                            className="text-left normal-case tracking-normal text-black/70 first-letter:uppercase"
+                          >
+                            {line}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}

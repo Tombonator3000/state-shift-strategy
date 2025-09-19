@@ -25,6 +25,7 @@ describe('EnhancedAIStrategist MCTS simulation cloning', () => {
     hand: [captureCard],
     aiHand: [captureCard],
     cardsPlayedThisRound: [],
+    playHistory: [],
     states: [
       {
         id: 'ca',
