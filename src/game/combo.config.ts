@@ -468,7 +468,7 @@ export const COMBO_DEFINITIONS: ComboDefinition[] = [
 export const DEFAULT_COMBO_SETTINGS: ComboSettings = {
   enabled: true,
   fxEnabled: true,
-  maxCombosPerTurn: 3,
+  maxCombosPerTurn: 2,
   comboToggles: Object.fromEntries(COMBO_DEFINITIONS.map(def => [def.id, def.enabledByDefault ?? true])),
   rng: Math.random,
 };
