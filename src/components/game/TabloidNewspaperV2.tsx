@@ -10,6 +10,7 @@ import type { TabloidNewspaperProps, TabloidPlayedCard } from './TabloidNewspape
 import type { Card } from '@/types';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
+import { buildRoundContext, formatTruthDelta } from './tabloidRoundUtils';
 
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
 
@@ -27,15 +28,6 @@ const FALLBACK_DATA: NewspaperData = {
   stamps: { breaking: ['BREAKING'], classified: ['CLASSIFIED'] },
 };
 
-const formatTruthDelta = (value?: number) => {
-  if (value === undefined || Number.isNaN(value) || value === 0) {
-    return null;
-  }
-  const rounded = Math.abs(value) < 1 ? Math.round(value * 10) / 10 : Math.round(value);
-  const sign = value > 0 ? '+' : value < 0 ? '−' : '';
-  return `${sign}${Math.abs(rounded)}%`;
-};
-
 const formatTarget = (entry: TabloidPlayedCard): string | null => {
   if (entry.card.type !== 'ZONE') {
     return null;
@@ -50,23 +42,6 @@ const formatTarget = (entry: TabloidPlayedCard): string | null => {
   const stateByAbbr = getStateByAbbreviation(target.toUpperCase());
   const name = stateById?.name ?? stateByAbbr?.name ?? target;
   return `Target: ${name}`;
-};
-
-const buildRoundContext = (
-  playerCards: TabloidPlayedCard[],
-  opponentCards: TabloidPlayedCard[],
-  eventsTruthDelta: number,
-): RoundContext => {
-  const truthFromPlayer = playerCards.reduce((sum, entry) => sum + (entry.truthDelta ?? 0), 0);
-  const truthFromOpponent = opponentCards.reduce((sum, entry) => sum + (entry.truthDelta ?? 0), 0);
-  const capturedStates = playerCards.flatMap(entry => entry.capturedStates ?? []);
-
-  return {
-    truthDeltaTotal: truthFromPlayer - truthFromOpponent + eventsTruthDelta,
-    capturedStates,
-    cardsPlayedByYou: playerCards.map(entry => entry.card as Card),
-    cardsPlayedByOpp: opponentCards.map(entry => entry.card as Card),
-  };
 };
 
 const computeEventTruthDelta = (events: TabloidNewspaperProps['events']): number => {
