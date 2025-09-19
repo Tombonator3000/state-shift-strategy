@@ -35,6 +35,38 @@ export interface ChooseTurnActionsParams {
 
 const DEFAULT_PRIORITY_THRESHOLD = 0.3;
 const DEFAULT_MAX_ACTIONS = 3;
+const ABSOLUTE_PRIORITY_FLOOR = 0.18;
+
+const DIFFICULTY_PRIORITY_FLOORS: Record<EnhancedAIStrategist['difficulty'], number> = {
+  easy: 0.3,
+  medium: 0.27,
+  hard: 0.22,
+  legendary: 0.2,
+};
+
+const evaluatePriorityPreferences = (
+  strategist: EnhancedAIStrategist,
+  configuredThreshold: number,
+): { minimumPriority: number; allowFallback: boolean } => {
+  const preferredThreshold = Number.isFinite(configuredThreshold)
+    ? configuredThreshold
+    : DEFAULT_PRIORITY_THRESHOLD;
+
+  const baseFloor = DIFFICULTY_PRIORITY_FLOORS[strategist.difficulty] ?? preferredThreshold;
+  const personality = strategist.personality;
+  const aggression = typeof personality?.aggressiveness === 'number' ? personality.aggressiveness : 0.5;
+  const territorial = typeof personality?.territorial === 'number' ? personality.territorial : 0.5;
+  const aggressionProfile = (aggression + territorial) / 2;
+  const aggressionAdjustment = Math.max(0, aggressionProfile - 0.6) * 0.15;
+  const dynamicFloor = Math.max(ABSOLUTE_PRIORITY_FLOOR, baseFloor - aggressionAdjustment);
+  const minimumPriority = Math.max(ABSOLUTE_PRIORITY_FLOOR, Math.min(preferredThreshold, dynamicFloor));
+  const allowFallback =
+    strategist.difficulty === 'hard' ||
+    strategist.difficulty === 'legendary' ||
+    aggressionProfile >= 0.7;
+
+  return { minimumPriority, allowFallback };
+};
 
 const formatEvaluationScore = (score: number): string => {
   if (!Number.isFinite(score)) {
@@ -86,6 +118,46 @@ export const chooseTurnActions = ({
   const chosenIds = new Set<string>();
   const attemptedIds = new Set<string>();
   let availableIp = gameState.aiIP ?? 0;
+  const preferredThreshold = Number.isFinite(priorityThreshold)
+    ? priorityThreshold
+    : DEFAULT_PRIORITY_THRESHOLD;
+  const { minimumPriority, allowFallback } = evaluatePriorityPreferences(strategist, preferredThreshold);
+  let fallbackPlay: EnhancedCardPlay | null = null;
+  let fallbackCard: GameCard | null = null;
+
+  const createPlannedAction = (
+    play: EnhancedCardPlay,
+    card: GameCard,
+    { opportunistic = false }: { opportunistic?: boolean } = {},
+  ): PlannedCardAction => {
+    const details: string[] = [];
+
+    if (play.synergies?.length) {
+      const synergyDescriptions = play.synergies.map(synergy => synergy.description);
+      synergyDescriptions.forEach(desc => synergyHighlights.add(desc));
+      details.push(`AI Synergy Bonus: ${synergyDescriptions.join(', ')}`);
+    }
+
+    if (play.deceptionValue > 0) {
+      details.push(`Deception tactics engaged (${Math.round(play.deceptionValue * 100)}% intensity)`);
+    }
+
+    if (play.threatResponse) {
+      details.push('Countering recent player action.');
+    }
+
+    if (opportunistic) {
+      details.push('Opportunistic play despite low priority assessment.');
+    }
+
+    return {
+      cardId: card.id,
+      card,
+      targetState: play.targetState,
+      reasoning: play.reasoning,
+      strategyDetails: details.length ? details : undefined,
+    };
+  };
 
   while (actions.length < maxActions) {
     const remainingHand = initialHand.filter(
@@ -105,7 +177,7 @@ export const chooseTurnActions = ({
 
     const enhancedPlay = strategist.selectOptimalPlay(strategistView) as EnhancedCardPlay | null;
 
-    if (!enhancedPlay || enhancedPlay.priority < priorityThreshold) {
+    if (!enhancedPlay) {
       break;
     }
 
@@ -122,33 +194,30 @@ export const chooseTurnActions = ({
       continue;
     }
 
-    const details: string[] = [];
-
-    if (enhancedPlay.synergies?.length) {
-      const synergyDescriptions = enhancedPlay.synergies.map(synergy => synergy.description);
-      synergyDescriptions.forEach(desc => synergyHighlights.add(desc));
-      details.push(`AI Synergy Bonus: ${synergyDescriptions.join(', ')}`);
+    if (!fallbackPlay || enhancedPlay.priority > fallbackPlay.priority) {
+      fallbackPlay = enhancedPlay;
+      fallbackCard = candidateCard;
     }
 
-    if (enhancedPlay.deceptionValue > 0) {
-      details.push(`Deception tactics engaged (${Math.round(enhancedPlay.deceptionValue * 100)}% intensity)`);
+    if (enhancedPlay.priority < minimumPriority) {
+      break;
     }
 
-    if (enhancedPlay.threatResponse) {
-      details.push('Countering recent player action.');
-    }
-
-    actions.push({
-      cardId: candidateCard.id,
-      card: candidateCard,
-      targetState: enhancedPlay.targetState,
-      reasoning: enhancedPlay.reasoning,
-      strategyDetails: details.length ? details : undefined,
-    });
+    const opportunistic = enhancedPlay.priority < preferredThreshold;
+    actions.push(createPlannedAction(enhancedPlay, candidateCard, { opportunistic }));
 
     chosenIds.add(candidateCard.id);
     availableIp -= cost;
     attemptedIds.clear();
+  }
+
+  if (!actions.length && allowFallback && fallbackPlay && fallbackCard) {
+    const fallbackCost = fallbackCard.cost ?? 0;
+    if (availableIp >= fallbackCost) {
+      actions.push(createPlannedAction(fallbackPlay, fallbackCard, { opportunistic: true }));
+      availableIp -= fallbackCost;
+      sequenceDetails.push('Fallback action: executing best available option despite low priorities.');
+    }
   }
 
   if (actions.length && synergyHighlights.size) {

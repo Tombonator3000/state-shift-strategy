@@ -114,14 +114,14 @@ describe('Unified AI planning', () => {
       const strategist: AIStrategist = AIFactory.createStrategist(DIFFICULTY_TO_AI[difficulty]);
       const planningState = createPlanningState();
 
-      const turnPlan = chooseTurnActions({
-        strategist,
-        gameState: planningState,
-        maxActions: 3,
-        priorityThreshold: 0.2,
-      });
+      const turnPlan = chooseTurnActions({ strategist, gameState: planningState });
 
-      expect(turnPlan.actions.length).toBeGreaterThan(0);
+      const requiresGuaranteedAction = difficulty === 'HARD' || difficulty === 'TOP_SECRET_PLUS';
+      const minimumActions = requiresGuaranteedAction ? 1 : 0;
+      expect(turnPlan.actions.length).toBeGreaterThanOrEqual(minimumActions);
+      if (!requiresGuaranteedAction) {
+        expect(turnPlan.actions.length).toBeGreaterThan(0);
+      }
       expect(turnPlan.sequenceDetails.length).toBeGreaterThan(0);
       const playedIds = new Set(planningState.aiHand.map(card => card.id));
       turnPlan.actions.forEach(action => {
@@ -154,8 +154,6 @@ describe('Unified AI planning', () => {
         plan = chooseTurnActions({
           strategist,
           gameState: planningState,
-          maxActions: 3,
-          priorityThreshold: 0.2,
         });
       }).not.toThrow();
 
@@ -163,5 +161,33 @@ describe('Unified AI planning', () => {
       expect(plan!.actions.length).toBe(0);
       expect(plan!.sequenceDetails.length).toBeGreaterThan(0);
     }
+  });
+
+  it('falls back to low-priority media plays for hard strategists', () => {
+    const strategist = AIFactory.createStrategist('hard');
+    const baseState = createPlanningState();
+    const mediaHeavyHand: GameCard[] = [
+      { ...MEDIA_CARD, id: 'media-alpha', cost: 2, effects: { truthDelta: 0 } },
+      { ...MEDIA_CARD, id: 'media-beta', cost: 2, effects: { truthDelta: 0 } },
+      { ...MEDIA_CARD, id: 'media-gamma', cost: 1, effects: { truthDelta: 0 } },
+    ];
+
+    const planningState = {
+      ...baseState,
+      aiIP: 2,
+      aiHand: mediaHeavyHand,
+    };
+
+    const plan = chooseTurnActions({ strategist, gameState: planningState });
+
+    expect(plan.actions.length).toBeGreaterThan(0);
+    const firstAction = plan.actions[0];
+    expect(firstAction).toBeDefined();
+    expect(firstAction!.strategyDetails).toBeDefined();
+    expect(firstAction!.strategyDetails).toContain('Opportunistic play despite low priority assessment.');
+    const validIds = new Set(mediaHeavyHand.map(card => card.id));
+    plan.actions.forEach(action => {
+      expect(validIds.has(action.cardId)).toBe(true);
+    });
   });
 });
