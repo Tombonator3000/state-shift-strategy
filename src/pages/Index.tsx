@@ -677,6 +677,9 @@ const Index = () => {
     </div>
   );
 
+  const roundsCompleted = Math.max(0, gameState.round - 1);
+  const currentRoundNumber = Math.max(1, gameState.round);
+
   const mastheadButtonClass = "touch-target inline-flex items-center justify-center rounded-md border border-newspaper-border bg-newspaper-text px-3 text-sm font-semibold text-newspaper-bg shadow-sm transition hover:bg-newspaper-text/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg";
 
   const mastheadContent = (
@@ -940,7 +943,8 @@ const Index = () => {
         victoryType={victoryState.type}
         playerFaction={gameState.faction}
         gameStats={{
-          rounds: gameState.round,
+          rounds: roundsCompleted,
+          roundNumber: currentRoundNumber,
           finalTruth: Math.round(gameState.truth),
           playerIP: gameState.ip,
           aiIP: gameState.aiIP,
