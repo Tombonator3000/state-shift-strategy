@@ -257,25 +257,37 @@ export class EnhancedAIStrategist implements AIStrategist {
 
   private runMCTS(gameState: any, iterations: number): EnhancedCardPlay | null {
     const root = this.createMCTSNode(gameState, null);
-    
+
+    if (root.unexploredMoves.length === 0) {
+      return this.selectBestPlayWithSynergies(gameState);
+    }
+
     for (let i = 0; i < iterations; i++) {
       // Selection
       let node = this.selectNode(root);
-      
+
+      if (node.unexploredMoves.length === 0) {
+        break;
+      }
+
       // Expansion
       if (node.unexploredMoves.length > 0 && node.visits > 0) {
         node = this.expandNode(node);
       }
-      
+
       // Simulation
       const reward = this.simulateGame(node.gameState);
-      
+
       // Backpropagation
       this.backpropagate(node, reward);
     }
 
     // Return best move
-    const bestChild = root.children.reduce((best, child) => 
+    if (root.children.length === 0) {
+      return this.selectBestPlayWithSynergies(gameState);
+    }
+
+    const bestChild = root.children.reduce((best, child) =>
       child.visits > best.visits ? child : best
     );
 
@@ -311,6 +323,10 @@ export class EnhancedAIStrategist implements AIStrategist {
   }
 
   private expandNode(node: MCTSNode): MCTSNode {
+    if (node.unexploredMoves.length === 0) {
+      return node;
+    }
+
     const move = node.unexploredMoves.pop()!;
     const newGameState = this.simulateMove(node.gameState, move);
     
