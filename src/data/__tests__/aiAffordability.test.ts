@@ -45,6 +45,7 @@ describe('AI affordability heuristics', () => {
     aiHand: [expensiveCard, cheapCard],
     states: [],
     cardsPlayedThisRound: [],
+    playHistory: [],
     turn: 1,
     round: 1,
   });

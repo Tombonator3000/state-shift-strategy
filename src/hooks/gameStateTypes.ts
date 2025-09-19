@@ -5,6 +5,22 @@ import type { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import type { DrawMode, CardDrawState } from '@/data/cardDrawingSystem';
 import type { AIDifficulty } from '@/data/aiStrategy';
 
+export interface CardPlayRecord {
+  card: GameCard;
+  player: 'human' | 'ai';
+  faction: 'government' | 'truth';
+  targetState: string | null;
+  truthDelta: number;
+  ipDelta: number;
+  aiIpDelta: number;
+  capturedStates: string[];
+  damageDealt: number;
+  round: number;
+  turn: number;
+  timestamp: number;
+  logEntries: string[];
+}
+
 export interface GameState {
   faction: 'government' | 'truth';
   phase: 'income' | 'action' | 'capture' | 'event' | 'newspaper' | 'victory' | 'ai_turn' | 'card_presentation';
@@ -22,13 +38,8 @@ export interface GameState {
   deck: GameCard[];
   aiDeck: GameCard[];
   cardsPlayedThisTurn: number;
-  cardsPlayedThisRound: Array<{
-    card: GameCard;
-    player: 'human' | 'ai';
-    targetState?: string | null;
-    truthDelta?: number;
-    capturedStates?: string[];
-  }>;
+  cardsPlayedThisRound: CardPlayRecord[];
+  playHistory: CardPlayRecord[];
   controlledStates: string[];
   aiControlledStates: string[];
   states: Array<{

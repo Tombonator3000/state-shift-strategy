@@ -174,6 +174,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     aiDeck: generateWeightedDeck(40, 'government'),
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
+    playHistory: [],
     controlledStates: [],
     aiControlledStates: [],
     states: USA_STATES.map(state => {
@@ -279,6 +280,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       round: 1,
       cardsPlayedThisTurn: 0,
       cardsPlayedThisRound: [],
+      playHistory: [],
       animating: false,
       aiTurnInProgress: false,
       selectedCard: null,
@@ -331,9 +333,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const playedCardRecord = createPlayedCardRecord({
         card,
         player: 'human',
+        faction: prev.faction,
         targetState,
         resolution,
         previousTruth: prev.truth,
+        previousIp: prev.ip,
+        previousAiIP: prev.aiIP,
+        round: prev.round,
+        turn: prev.turn,
       });
 
       return {
@@ -347,6 +354,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         aiControlledStates: resolution.aiControlledStates,
         cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
+        playHistory: [...prev.playHistory, playedCardRecord],
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
         log: [...prev.log, ...resolution.logEntries]
@@ -378,9 +386,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       pendingRecord = createPlayedCardRecord({
         card,
         player: 'human',
+        faction: prev.faction,
         targetState,
         resolution,
         previousTruth: prev.truth,
+        previousIp: prev.ip,
+        previousAiIP: prev.aiIP,
+        round: prev.round,
+        turn: prev.turn,
       });
 
       return {
@@ -405,12 +418,27 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       });
 
       setGameState(prev => {
-        const record = pendingRecord ?? { card, player: 'human', targetState };
+        const record = pendingRecord ?? {
+          card,
+          player: 'human' as const,
+          faction: prev.faction,
+          targetState: targetState ?? null,
+          truthDelta: 0,
+          ipDelta: 0,
+          aiIpDelta: 0,
+          capturedStates: [],
+          damageDealt: 0,
+          round: prev.round,
+          turn: prev.turn,
+          timestamp: Date.now(),
+          logEntries: [],
+        };
         return {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),
           cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
           cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
+          playHistory: [...prev.playHistory, record],
           selectedCard: null,
           targetState: null,
           animating: false,
@@ -419,12 +447,27 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     } catch (error) {
       console.error('Card animation failed:', error);
       setGameState(prev => {
-        const record = pendingRecord ?? { card, player: 'human', targetState };
+        const record = pendingRecord ?? {
+          card,
+          player: 'human' as const,
+          faction: prev.faction,
+          targetState: targetState ?? null,
+          truthDelta: 0,
+          ipDelta: 0,
+          aiIpDelta: 0,
+          capturedStates: [],
+          damageDealt: 0,
+          round: prev.round,
+          turn: prev.turn,
+          timestamp: Date.now(),
+          logEntries: [],
+        };
         return {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),
           cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
           cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
+          playHistory: [...prev.playHistory, record],
           selectedCard: null,
           targetState: null,
           animating: false,
@@ -841,6 +884,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         ...saveData,
         turn: normalizedTurn,
         round: normalizedRound,
+        cardsPlayedThisRound: Array.isArray(saveData.cardsPlayedThisRound)
+          ? saveData.cardsPlayedThisRound
+          : [],
+        playHistory: Array.isArray(saveData.playHistory)
+          ? saveData.playHistory
+          : [],
         // Ensure objects are properly reconstructed
         eventManager: prev.eventManager, // Keep the current event manager
         aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium')

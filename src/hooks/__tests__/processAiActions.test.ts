@@ -23,6 +23,7 @@ const baseState = (overrides: Partial<GameState> = {}): GameState => ({
   aiDeck: [],
   cardsPlayedThisTurn: 0,
   cardsPlayedThisRound: [],
+  playHistory: [],
   controlledStates: [],
   aiControlledStates: [],
   states: [],

@@ -3,6 +3,26 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
+type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
+
+interface MVPDetails {
+  cardId: string;
+  cardName: string;
+  player: 'human' | 'ai';
+  faction: 'truth' | 'government';
+  truthDelta: number;
+  ipDelta: number;
+  aiIpDelta: number;
+  capturedStates: string[];
+  damageDealt: number;
+  round: number;
+  turn: number;
+  impactType: ImpactType;
+  impactValue: number;
+  impactLabel: string;
+  highlight: string;
+}
+
 interface GameOverReport {
   winner: "government" | "truth" | "draw";
   rounds: number;
@@ -15,7 +35,7 @@ interface GameOverReport {
   topPlays?: string[];
   legendaryUsed?: string[];
   funniestEvent?: string;
-  mvpCard?: string;
+  mvp?: MVPDetails | null;
   durationSec?: number;
 }
 
@@ -23,6 +43,68 @@ interface ExtraEditionNewspaperProps {
   report: GameOverReport;
   onClose: () => void;
 }
+
+const formatSignedNumber = (value: number) => {
+  const rounded = Math.round(value);
+  if (rounded > 0) return `+${rounded}`;
+  if (rounded < 0) return `${rounded}`;
+  return '0';
+};
+
+const formatPercent = (value: number) => {
+  const rounded = Math.round(value);
+  if (rounded > 0) return `+${rounded}%`;
+  if (rounded < 0) return `${rounded}%`;
+  return '0%';
+};
+
+const describeMvpImpact = (mvp: MVPDetails): string => {
+  switch (mvp.impactType) {
+    case 'capture':
+      return `Captured ${mvp.impactValue} state${mvp.impactValue === 1 ? '' : 's'}`;
+    case 'truth':
+      return `Shifted truth ${formatPercent(mvp.impactValue)}`;
+    case 'ip':
+      return `Swung IP ${formatSignedNumber(mvp.impactValue)}`;
+    case 'damage':
+      return `Dealt ${Math.round(mvp.impactValue)} damage`;
+    case 'support':
+    default:
+      return 'Clutch momentum play';
+  }
+};
+
+const summarizeMvpStats = (mvp: MVPDetails): string[] => {
+  const lines: string[] = [];
+  if (mvp.truthDelta !== 0) {
+    lines.push(`Truth delta: ${formatPercent(mvp.truthDelta)}`);
+  }
+
+  const operativeIp = mvp.player === 'human' ? mvp.ipDelta : mvp.aiIpDelta;
+  const opponentIp = mvp.player === 'human' ? mvp.aiIpDelta : mvp.ipDelta;
+  if (operativeIp !== 0 || opponentIp !== 0) {
+    const segments: string[] = [];
+    if (operativeIp !== 0) {
+      segments.push(`${mvp.player === 'human' ? 'Operative' : 'AI'} IP ${formatSignedNumber(operativeIp)}`);
+    }
+    if (opponentIp !== 0) {
+      segments.push(`${mvp.player === 'human' ? 'AI' : 'Operative'} IP ${formatSignedNumber(opponentIp)}`);
+    }
+    if (segments.length) {
+      lines.push(segments.join(' | '));
+    }
+  }
+
+  if (mvp.damageDealt > 0) {
+    lines.push(`Damage dealt: ${Math.round(mvp.damageDealt)}`);
+  }
+
+  if (mvp.capturedStates.length > 0) {
+    lines.push(`Captured: ${mvp.capturedStates.join(', ')}`);
+  }
+
+  return lines;
+};
 
 const ExtraEditionNewspaper = ({ report, onClose }: ExtraEditionNewspaperProps) => {
   const [glitching, setGlitching] = useState(false);
@@ -38,7 +120,7 @@ const ExtraEditionNewspaper = ({ report, onClose }: ExtraEditionNewspaperProps) 
 
   // Generate headlines based on winner
   const generateHeadlines = () => {
-    const { winner, finalTruth, statesGov, statesTruth, rounds, legendaryUsed, mvpCard } = report;
+    const { winner, finalTruth, statesGov, statesTruth, rounds, legendaryUsed, mvp } = report;
     const headlines: string[] = [];
 
     if (winner === "truth") {
@@ -61,8 +143,8 @@ const ExtraEditionNewspaper = ({ report, onClose }: ExtraEditionNewspaperProps) 
     if (legendaryUsed && legendaryUsed.length > 0) {
       headlines.push(`Legendary Play of the Night: ${legendaryUsed[0]}`);
     }
-    if (mvpCard) {
-      headlines.push(`MVP Card: "${mvpCard}" Changes Everything`);
+    if (mvp) {
+      headlines.push(`MVP ${mvp.cardName}: ${describeMvpImpact(mvp)}`);
     }
     headlines.push(`Florida Man ${getRandomFloridaAntic()} During Count — Officials Shrug`);
 
@@ -177,12 +259,29 @@ const ExtraEditionNewspaper = ({ report, onClose }: ExtraEditionNewspaperProps) 
                   <span>AI IP:</span>
                   <span className="font-bold">{report.ipAI}</span>
                 </div>
-                {report.mvpCard && (
-                  <div className="border-t border-newspaper-text/20 pt-2 mt-2">
+                {report.mvp && (
+                  <div className="border-t border-newspaper-text/20 pt-2 mt-2 space-y-1">
                     <div className="text-center">
-                      <div className="text-xs opacity-80">MVP CARD</div>
-                      <div className="font-bold text-government-blue">{report.mvpCard}</div>
+                      <div className="text-xs opacity-80">OPERATION MVP</div>
+                      <div className={`font-bold ${report.mvp.faction === 'government' ? 'text-government-blue' : 'text-truth-red'}`}>
+                        {report.mvp.cardName}
+                      </div>
+                      <div className="text-[11px] uppercase tracking-wide opacity-80">
+                        {report.mvp.impactLabel}: {describeMvpImpact(report.mvp)}
+                      </div>
                     </div>
+                    <div className="text-xs italic text-center text-newspaper-text/80">
+                      {report.mvp.highlight}
+                    </div>
+                    <div className="grid grid-cols-2 gap-1 text-[10px] uppercase tracking-wide text-newspaper-text/70">
+                      <span>Round {report.mvp.round && report.mvp.round > 0 ? report.mvp.round : report.rounds}</span>
+                      <span className="text-right">Turn {report.mvp.turn && report.mvp.turn > 0 ? report.mvp.turn : 1}</span>
+                    </div>
+                    {summarizeMvpStats(report.mvp).map((line, index) => (
+                      <div key={index} className="text-[10px] text-newspaper-text/70">
+                        {line}
+                      </div>
+                    ))}
                   </div>
                 )}
                 {report.agenda && (
