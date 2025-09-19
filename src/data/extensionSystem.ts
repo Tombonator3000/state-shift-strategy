@@ -26,14 +26,17 @@ export interface EnabledExtension {
 }
 
 const STORAGE_KEY = 'sg_enabled_extensions';
+const PAYLOAD_STORAGE_KEY = 'sg_extension_payloads';
 const DEV = typeof import.meta !== 'undefined' && (import.meta as any)?.env?.DEV;
 
-class ExtensionManager {
+export class ExtensionManager {
   private extensions: Map<string, Extension> = new Map();
   private enabledExtensions: EnabledExtension[] = [];
+  private persistedExtensions: Map<string, Extension> = new Map();
 
   constructor() {
     this.loadEnabledExtensions();
+    this.loadPersistedExtensions();
   }
 
   private loadEnabledExtensions() {
@@ -53,6 +56,45 @@ class ExtensionManager {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.enabledExtensions));
     } catch (error) {
       console.warn('Failed to save enabled extensions:', error);
+    }
+  }
+
+  private loadPersistedExtensions() {
+    this.persistedExtensions.clear();
+
+    try {
+      const stored = localStorage.getItem(PAYLOAD_STORAGE_KEY);
+      if (!stored) {
+        return;
+      }
+
+      const parsed = JSON.parse(stored) as Record<string, Extension>;
+      let needsSave = false;
+
+      for (const extension of Object.values(parsed)) {
+        if (this.validateExtension(extension)) {
+          const sanitized = this.sanitizeExtension(extension);
+          this.persistedExtensions.set(sanitized.id, sanitized);
+        } else {
+          needsSave = true;
+        }
+      }
+
+      if (needsSave) {
+        this.savePersistedExtensions();
+      }
+    } catch (error) {
+      console.warn('Failed to load persisted extensions:', error);
+      this.persistedExtensions.clear();
+    }
+  }
+
+  private savePersistedExtensions() {
+    try {
+      const serialized = JSON.stringify(Object.fromEntries(this.persistedExtensions.entries()));
+      localStorage.setItem(PAYLOAD_STORAGE_KEY, serialized);
+    } catch (error) {
+      console.warn('Failed to save persisted extensions:', error);
     }
   }
 
@@ -262,9 +304,26 @@ class ExtensionManager {
       .filter((card): card is ExtensionCard => card !== null);
   }
 
+  private sanitizeExtension(extension: Extension): Extension {
+    return {
+      ...extension,
+      cards: this.prepareExtensionCards(extension.cards, extension.id)
+    };
+  }
+
   registerExtension(extension: Extension, source: 'cdn' | 'folder' | 'file') {
-    extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
-    this.extensions.set(extension.id, extension);
+    const sanitizedExtension = this.sanitizeExtension(extension);
+    this.extensions.set(extension.id, sanitizedExtension);
+
+    if (source === 'cdn') {
+      if (this.persistedExtensions.delete(extension.id)) {
+        this.savePersistedExtensions();
+      }
+      return;
+    }
+
+    this.persistedExtensions.set(extension.id, sanitizedExtension);
+    this.savePersistedExtensions();
   }
 
   enableExtension(extension: Extension, source: 'cdn' | 'folder' | 'file') {
@@ -290,6 +349,9 @@ class ExtensionManager {
   disableExtension(extensionId: string) {
     this.enabledExtensions = this.enabledExtensions.filter(e => e.id !== extensionId);
     this.extensions.delete(extensionId);
+    if (this.persistedExtensions.delete(extensionId)) {
+      this.savePersistedExtensions();
+    }
     this.saveEnabledExtensions();
   }
 
@@ -321,23 +383,49 @@ class ExtensionManager {
   async initializeExtensions() {
     // Clear any cached extensions to force reload
     this.extensions.clear();
-    
+
     // Try to reload all enabled extensions
     const cdnExtensions = await this.scanCDNExtensions();
-    
+
     console.log(`🎮 Extension initialization: found ${cdnExtensions.length} CDN extensions`);
-    
+
     for (const extension of cdnExtensions) {
-      const enabled = this.enabledExtensions.find(e => e.id === extension.id);
+      const enabled = this.enabledExtensions.find(
+        e => e.id === extension.id && e.source === 'cdn'
+      );
       if (enabled) {
-        console.log(`✅ Re-registering enabled extension: ${extension.name} v${extension.version}`);
+        console.log(`✅ Re-registering enabled CDN extension: ${extension.name} v${extension.version}`);
         this.registerExtension(extension, enabled.source);
       }
     }
-    
-    // Log final state
+
+    const missingLocalExtensions: string[] = [];
+
+    for (const enabled of this.enabledExtensions) {
+      if (enabled.source === 'cdn') {
+        continue;
+      }
+
+      const stored = this.persistedExtensions.get(enabled.id);
+      if (stored) {
+        console.log(`✅ Restoring persisted extension: ${stored.name} v${stored.version}`);
+        this.registerExtension(stored, enabled.source);
+      } else {
+        console.warn(
+          `⚠️ Unable to restore extension '${enabled.id}' from persisted data. Disabling.`
+        );
+        missingLocalExtensions.push(enabled.id);
+      }
+    }
+
+    for (const extensionId of missingLocalExtensions) {
+      this.disableExtension(extensionId);
+    }
+
     const allExtensionCards = this.getAllExtensionCards();
-    console.log(`🎯 Extension initialization complete: ${allExtensionCards.length} cards available from ${this.extensions.size} extensions`);
+    console.log(
+      `🎯 Extension initialization complete: ${allExtensionCards.length} cards available from ${this.extensions.size} extensions`
+    );
   }
 }
 
