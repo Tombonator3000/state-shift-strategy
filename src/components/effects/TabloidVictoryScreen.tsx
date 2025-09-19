@@ -11,6 +11,7 @@ interface TabloidVictoryScreenProps {
   playerFaction: 'truth' | 'government';
   gameStats: {
     rounds: number;
+    roundNumber?: number;
     finalTruth: number;
     playerIP: number;
     aiIP: number;
@@ -57,6 +58,15 @@ const TabloidVictoryScreen = ({
   }, [isVisible]);
 
   if (!isVisible) return null;
+
+  const completedRounds = Math.max(0, Math.floor(gameStats.rounds ?? 0));
+  const displayRoundNumber = gameStats.roundNumber && gameStats.roundNumber > 0
+    ? gameStats.roundNumber
+    : Math.max(1, completedRounds || 1);
+  const battleDescriptor = playerFaction === 'government' ? 'information warfare' : 'awakening operations';
+  const roundSummaryFragment = completedRounds === 0
+    ? 'before the first full round could even conclude'
+    : `after ${completedRounds} full round${completedRounds === 1 ? '' : 's'} of intense ${battleDescriptor}`;
 
   const generateHeadlines = () => {
     const headlines: string[] = [];
@@ -114,7 +124,7 @@ const TabloidVictoryScreen = ({
     }
 
     // Universal headlines with faction flavor
-    headlines.push(`Round ${gameStats.rounds} ${isVictory ? 'Triumph' : 'Disaster'}: ${gameStats.playerStates}-${gameStats.aiStates} State Split!`);
+    headlines.push(`Round ${displayRoundNumber} ${isVictory ? 'Triumph' : 'Disaster'}: ${gameStats.playerStates}-${gameStats.aiStates} State Split!`);
     if (gameStats.mvpCard) {
       const mvpLabel = playerFaction === 'government' ? 'Asset of the Day' : 
                       gameStats.mvpCard.includes('MEDIA') || gameStats.mvpCard.includes('Leak') ? 'Leak of the Day' : 'Beacon of the Day';
@@ -251,7 +261,7 @@ const TabloidVictoryScreen = ({
               THE WEEKLY PARANOID NEWS
             </h1>
             <div className="flex flex-col sm:flex-row justify-between items-center text-xs font-bold border-t border-b border-newspaper-border py-1 gap-1">
-              <span>Vol. 77, No. {gameStats.rounds}</span>
+              <span>Vol. 77, No. {displayRoundNumber}</span>
               <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
               <span>Price: YOUR SOUL</span>
             </div>
@@ -290,8 +300,8 @@ const TabloidVictoryScreen = ({
                        <p className="mb-3">
                          <span className="float-left text-4xl sm:text-6xl font-black leading-none mr-2 mt-1">{isVictory ? 'I' : 'I'}</span>
                          n a {isVictory ? 'stunning victory that has shocked the intelligence community' : 'devastating defeat that will echo through classified corridors'}, 
-                         the {playerFaction === 'truth' ? 'Truth Seekers resistance movement' : 'Government shadow operations'} have {isVictory ? 'emerged triumphant' : 'suffered catastrophic losses'} 
-                         after {gameStats.rounds} rounds of intense {playerFaction === 'government' ? 'information warfare' : 'awakening operations'}.
+                        the {playerFaction === 'truth' ? 'Truth Seekers resistance movement' : 'Government shadow operations'} have {isVictory ? 'emerged triumphant' : 'suffered catastrophic losses'}
+                        {` ${roundSummaryFragment}.`}
                        </p>
                        <p className="mb-3">
                          {playerFaction === 'government' 
@@ -346,8 +356,8 @@ const TabloidVictoryScreen = ({
                     </span>
                   </div>
                   <div className="flex justify-between border-b border-newspaper-border/30 py-1">
-                    <span>Rounds:</span>
-                    <span className="font-bold">{gameStats.rounds}</span>
+                    <span>Full Rounds:</span>
+                    <span className="font-bold">{completedRounds}</span>
                   </div>
                   <div className="flex justify-between border-b border-newspaper-border/30 py-1">
                     <span>{truthMeterLabel}:</span>

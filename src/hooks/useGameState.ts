@@ -37,6 +37,20 @@ const DIFFICULTY_TO_AI_DIFFICULTY: Record<Difficulty, AIDifficulty> = {
   TOP_SECRET_PLUS: 'legendary',
 };
 
+const normalizeRoundFromSave = (saveData: Partial<GameState>): number => {
+  const rawRound = typeof saveData.round === 'number' && Number.isFinite(saveData.round)
+    ? saveData.round
+    : 0;
+  const rawTurn = typeof saveData.turn === 'number' && Number.isFinite(saveData.turn)
+    ? saveData.turn
+    : 1;
+  const expectedRound = saveData.currentPlayer === 'human'
+    ? Math.max(1, rawTurn)
+    : Math.max(1, rawTurn - 1);
+
+  return Math.max(expectedRound, rawRound);
+};
+
 const summarizeStrategy = (reasoning?: string, strategyDetails?: string[]): string | undefined => {
   const source = reasoning ?? strategyDetails?.[0];
   if (!source) {
@@ -513,6 +527,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         // AI turn ending - switch back to human
         return {
           ...prev,
+          round: prev.round + 1,
           phase: 'newspaper',
           currentPlayer: 'human',
           showNewspaper: true,
@@ -809,17 +824,23 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (!savedData) return false;
 
       const saveData = JSON.parse(savedData, omitClashKey);
+      const normalizedRound = normalizeRoundFromSave(saveData);
+      const normalizedTurn = typeof saveData.turn === 'number' && Number.isFinite(saveData.turn)
+        ? Math.max(1, saveData.turn)
+        : 1;
 
       // Validate save data structure
       if (!saveData.faction || !saveData.phase || saveData.version !== '1.0') {
         console.warn('Invalid or incompatible save data');
         return false;
       }
-      
+
       // Reconstruct the game state
       setGameState(prev => ({
         ...prev,
         ...saveData,
+        turn: normalizedTurn,
+        round: normalizedRound,
         // Ensure objects are properly reconstructed
         eventManager: prev.eventManager, // Keep the current event manager
         aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium')
@@ -838,10 +859,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (!savedData) return null;
 
       const saveData = JSON.parse(savedData, omitClashKey);
+      const normalizedRound = normalizeRoundFromSave(saveData);
+      const normalizedTurn = typeof saveData.turn === 'number' && Number.isFinite(saveData.turn)
+        ? Math.max(1, saveData.turn)
+        : 1;
       return {
         faction: saveData.faction,
-        turn: saveData.turn,
-        round: saveData.round,
+        turn: normalizedTurn,
+        round: normalizedRound,
         phase: saveData.phase,
         truth: saveData.truth,
         timestamp: saveData.timestamp,
