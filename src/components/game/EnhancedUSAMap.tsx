@@ -6,6 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import * as topojson from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
+import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 
 
 interface EnhancedState {
@@ -59,10 +60,12 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const lastPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const frameRef = useRef<number | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const tooltipStableRef = useRef<{ timeout: NodeJS.Timeout | null; lastUpdate: number }>({ 
-    timeout: null, 
-    lastUpdate: 0 
+  const tooltipStableRef = useRef<{ timeout: NodeJS.Timeout | null; lastUpdate: number }>({
+    timeout: null,
+    lastUpdate: 0
   });
+  const contestedStatesRef = useRef<Record<string, boolean>>({});
+  const contestedAnimationTimeoutsRef = useRef<number[]>([]);
 
   const getTooltipPosition = () => {
     const tooltipWidth = tooltipRef.current?.offsetWidth ?? 384;
@@ -139,8 +142,13 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     const width = 800;
     const height = 500;
 
+    // Clear any pending contested animation retries before rebuilding the scene
+    contestedAnimationTimeoutsRef.current.forEach(timeoutId => window.clearTimeout(timeoutId));
+    contestedAnimationTimeoutsRef.current = [];
+
     // Global pointerleave to hide tooltip when exiting the map
-    svg.addEventListener('pointerleave', () => setHoveredState(null));
+    const handlePointerLeave = () => setHoveredState(null);
+    svg.addEventListener('pointerleave', handlePointerLeave);
 
     const projection = geoAlbersUsa()
       .scale(1000)
@@ -161,13 +169,19 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     svg.appendChild(labelsGroup);
 
     // Draw states
+    const nextContestedStates: Record<string, boolean> = {};
+    const svgRect = svg.getBoundingClientRect();
+
     geoData.features.forEach((feature: any) => {
       const stateId = feature.properties.STUSPS || feature.id || feature.properties.name;
-      const gameState = states.find(s => 
-        s.abbreviation === stateId || 
-        s.id === stateId || 
+      const gameState = states.find(s =>
+        s.abbreviation === stateId ||
+        s.id === stateId ||
         s.name === feature.properties.name
       );
+      const stateKey = gameState?.abbreviation || stateId;
+      const isContested = Boolean(gameState?.contested);
+      nextContestedStates[stateKey] = isContested;
 
       const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       pathElement.setAttribute('d', path(feature) || '');
@@ -301,8 +315,47 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             pressureGroup.appendChild(shield);
           }
         }
+
+        if (isContested) {
+          const contestedRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          contestedRing.setAttribute('cx', centroid[0].toString());
+          contestedRing.setAttribute('cy', centroid[1].toString());
+          contestedRing.setAttribute('r', '28');
+          contestedRing.setAttribute('class', 'contested-radar');
+          contestedRing.setAttribute('pointer-events', 'none');
+          pressureGroup.appendChild(contestedRing);
+
+          const contestedChanged = contestedStatesRef.current[stateKey] !== isContested;
+          if (contestedChanged) {
+            const timeoutId = window.setTimeout(() => {
+              contestedRing.remove();
+              window.requestAnimationFrame(() => {
+                pressureGroup.appendChild(contestedRing);
+              });
+            }, 50);
+            contestedAnimationTimeoutsRef.current.push(timeoutId);
+
+            if (typeof window !== 'undefined') {
+              const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+              if (!prefersReducedMotion) {
+                VisualEffectsCoordinator.triggerParticleEffect('contested', {
+                  x: svgRect.left + centroid[0],
+                  y: svgRect.top + centroid[1]
+                });
+              }
+            }
+          }
+        }
       }
     });
+
+    contestedStatesRef.current = nextContestedStates;
+
+    return () => {
+      svg.removeEventListener('pointerleave', handlePointerLeave);
+      contestedAnimationTimeoutsRef.current.forEach(timeoutId => window.clearTimeout(timeoutId));
+      contestedAnimationTimeoutsRef.current = [];
+    };
 
   }, [geoData, states, onStateClick, selectedZoneCard, selectedState]);
 
@@ -459,12 +512,24 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           fill: #f97316;
           animation: pulse 2s infinite;
         }
-        
+
         .state-path:hover {
           stroke-width: 3;
           stroke: hsl(var(--foreground));
         }
-        
+
+        .contested-radar {
+          fill: rgba(57, 255, 20, 0.08);
+          stroke: #39ff14;
+          stroke-width: 2.5;
+          stroke-dasharray: 8 10;
+          animation: radarSweep 2.4s linear infinite, contestedPulse 2.4s ease-in-out infinite;
+          transform-origin: center;
+          opacity: 0.85;
+          filter: drop-shadow(0 0 10px rgba(57, 255, 20, 0.35));
+          pointer-events: none;
+        }
+
         /* Firefox-specific: reduce costly filter effects */
         @-moz-document url-prefix() {
           .state-path:hover {
@@ -472,7 +537,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             opacity: 0.9;
           }
         }
-        
+
         .state-path.targeting {
           stroke: #ffd700;
           stroke-width: 4;
@@ -481,7 +546,42 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           filter: brightness(1.3) drop-shadow(0 0 15px #ffd700);
           cursor: crosshair;
         }
-        
+
+        @keyframes radarSweep {
+          0% {
+            stroke-dashoffset: 0;
+            transform: scale(0.85);
+            opacity: 0.9;
+          }
+          60% {
+            opacity: 0.45;
+          }
+          100% {
+            stroke-dashoffset: -140;
+            transform: scale(1.32);
+            opacity: 0;
+          }
+        }
+
+        @keyframes contestedPulse {
+          0%, 100% {
+            filter: drop-shadow(0 0 12px rgba(57, 255, 20, 0.45));
+          }
+          50% {
+            filter: drop-shadow(0 0 24px rgba(57, 255, 20, 0.85));
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .contested-radar {
+            animation: none !important;
+            transform: none !important;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 14px rgba(57, 255, 20, 0.6));
+            stroke-dasharray: 0;
+          }
+        }
+
         .state-path.invalid-target {
           stroke: #ef4444;
           stroke-width: 3;
