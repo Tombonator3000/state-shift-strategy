@@ -12,6 +12,12 @@ type AnyCard = {
 };
 
 type Toast = { id: number; text: string; slot: "truth" | "ip-left" | "ip-right" | "combo" };
+type PendingDelta = { delta: number; timer: number };
+
+const MAX_TOASTS_PER_SLOT = 3;
+const DEFAULT_TOAST_LIFETIME = 900;
+const COMBO_TOAST_LIFETIME = 1400;
+const DELTA_BATCH_WINDOW = 180; // milliseconds
 
 declare global {
   interface Window {
@@ -28,6 +34,80 @@ export default function UiOverlays() {
   const revealTimer = React.useRef<number | null>(null);
 
   const [toasts, setToasts] = React.useState<Toast[]>([]);
+  const pendingDeltas = React.useRef<Record<string, PendingDelta>>({});
+
+  const addToast = React.useCallback(
+    (slot: Toast["slot"], text: string, duration = DEFAULT_TOAST_LIFETIME) => {
+      const id = Date.now() + Math.random();
+      setToasts((prev) => {
+        const slotCount = prev.reduce(
+          (count, toast) => count + (toast.slot === slot ? 1 : 0),
+          0,
+        );
+        let trimmed = prev;
+        if (slotCount >= MAX_TOASTS_PER_SLOT) {
+          const removeIndex = prev.findIndex((toast) => toast.slot === slot);
+          if (removeIndex !== -1) {
+            trimmed = [...prev.slice(0, removeIndex), ...prev.slice(removeIndex + 1)];
+          }
+        } else {
+          trimmed = [...prev];
+        }
+        return [...trimmed, { id, text, slot }];
+      });
+
+      window.setTimeout(() => {
+        setToasts((current) => current.filter((toast) => toast.id !== id));
+      }, duration);
+    },
+    [],
+  );
+
+  const flushPendingDelta = React.useCallback(
+    (
+      key: string,
+      slot: Toast["slot"],
+      formatter: (delta: number) => string,
+      duration: number,
+    ) => {
+      const entry = pendingDeltas.current[key];
+      if (!entry) {
+        return;
+      }
+      const total = entry.delta;
+      delete pendingDeltas.current[key];
+      if (total !== 0) {
+        addToast(slot, formatter(total), duration);
+      }
+    },
+    [addToast],
+  );
+
+  const queueDeltaToast = React.useCallback(
+    (
+      key: string,
+      slot: Toast["slot"],
+      delta: number,
+      formatter: (delta: number) => string,
+      duration = DEFAULT_TOAST_LIFETIME,
+    ) => {
+      if (!delta) {
+        return;
+      }
+
+      const existing = pendingDeltas.current[key];
+      if (existing) {
+        existing.delta += delta;
+        return;
+      }
+
+      const timer = window.setTimeout(() => {
+        flushPendingDelta(key, slot, formatter, duration);
+      }, DELTA_BATCH_WINDOW);
+      pendingDeltas.current[key] = { delta, timer };
+    },
+    [flushPendingDelta],
+  );
 
   React.useEffect(() => {
     window.uiShowOpponentCard = (card: AnyCard) => {
@@ -43,28 +123,28 @@ export default function UiOverlays() {
     };
 
     window.uiToastTruth = (delta: number) => {
-      const id = Date.now() + Math.random();
-      setToasts((t) => [
-        ...t,
-        { id, text: `${delta > 0 ? "+" : ""}${delta}% Truth`, slot: "truth" },
-      ]);
-      window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 900);
+      queueDeltaToast(
+        "truth",
+        "truth",
+        delta,
+        (total) => `${total > 0 ? "+" : ""}${total}% Truth`,
+        DEFAULT_TOAST_LIFETIME,
+      );
     };
 
     window.uiToastIp = (playerId: "P1" | "P2", delta: number) => {
-      const id = Date.now() + Math.random();
       const slot = playerId === "P1" ? "ip-left" : "ip-right";
-      setToasts((t) => [
-        ...t,
-        { id, text: `${delta > 0 ? "+" : ""}${delta} IP`, slot },
-      ]);
-      window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 900);
+      queueDeltaToast(
+        `ip-${playerId}`,
+        slot,
+        delta,
+        (total) => `${total > 0 ? "+" : ""}${total} IP`,
+        DEFAULT_TOAST_LIFETIME,
+      );
     };
 
     window.uiComboToast = (message: string) => {
-      const id = Date.now() + Math.random();
-      setToasts((t) => [...t, { id, text: message, slot: "combo" }]);
-      window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 1400);
+      addToast("combo", message, COMBO_TOAST_LIFETIME);
     };
 
     window.uiFlashState = (stateId: string, by: "P1" | "P2") => {
@@ -78,10 +158,7 @@ export default function UiOverlays() {
         el.classList.add("capture-glow");
         window.setTimeout(() => el.classList.remove("capture-glow"), 900);
       } else {
-        const id = Date.now() + Math.random();
-        const text = `Captured ${stateId}`;
-        setToasts((t) => [...t, { id, text, slot: "truth" }]);
-        window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 1100);
+        addToast("truth", `Captured ${stateId}`, 1100);
       }
     };
 
@@ -91,8 +168,12 @@ export default function UiOverlays() {
       delete window.uiToastIp;
       delete window.uiFlashState;
       delete window.uiComboToast;
+      Object.values(pendingDeltas.current).forEach((pending) => {
+        window.clearTimeout(pending.timer);
+      });
+      pendingDeltas.current = {};
     };
-  }, []);
+  }, [addToast, queueDeltaToast]);
 
   function renderEffects(card: AnyCard) {
     const eff = card?.effects || {};
