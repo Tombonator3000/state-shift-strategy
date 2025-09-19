@@ -518,9 +518,19 @@ export class AIStrategist {
 
     const evaluation = this.evaluateGameState(gameState);
     const possiblePlays: CardPlay[] = [];
+    const availableIp = typeof gameState.aiIP === 'number' ? gameState.aiIP : 0;
 
     // Evaluate each card in hand
     for (const card of gameState.hand) {
+      const cardCost =
+        typeof card.cost === 'number'
+          ? card.cost
+          : this.getCardMetadata(card.id)?.cost ?? 0;
+
+      if (cardCost > availableIp) {
+        continue;
+      }
+
       const plays = this.generateCardPlays(card, gameState, evaluation);
       possiblePlays.push(...plays);
     }
