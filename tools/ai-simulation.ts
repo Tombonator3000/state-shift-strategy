@@ -12,7 +12,8 @@ import {
   type StateForResolution,
 } from '@/systems/cardResolution';
 import {
-  AIStrategist,
+  createAiStrategist,
+  type AIStrategist,
   type AIDifficulty,
   type CardPlay,
   type GameStateEvaluation,
@@ -533,7 +534,7 @@ function createStrategist(
   if (useEnhanced) {
     return new EnhancedAIStrategist(difficulty, tuning);
   }
-  return new AIStrategist(difficulty, tuning);
+  return createAiStrategist(difficulty, tuning);
 }
 
 function simulateMatch(

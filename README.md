@@ -71,3 +71,12 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Unified AI configuration & debugging
+
+The new unified AI stack uses the enhanced strategist pipeline that powers both the in-game agent and automated tests.
+
+- Instantiate the AI with `AIFactory.createStrategist(difficulty)`. This returns an enhanced strategist wired to the latest `AI_PRESETS` for `easy`, `medium`, `hard`, and `legendary` modes. For lower-level experiments you can also call `createAiStrategist` directly from `@/data/aiStrategy` to obtain the normalized baseline heuristics.
+- Turn planning flows through `chooseTurnActions` in `@/ai/enhancedController`. Pass the live game state and strategist to receive a ranked list of card plays plus short-form `sequenceDetails` suitable for logging.
+- Strategy logging defaults to concise one-line summaries. Set the `featureFlags.aiVerboseStrategyLog` flag (see `@/state/featureFlags`) to include the full adaptive context, synergy notes, and evaluation breakdowns in the game log when debugging complex situations.
+- All supported difficulties—`EASY`, `NORMAL`, `HARD`, and `TOP_SECRET_PLUS`—are exercised via `bun test`. The `src/ai/__tests__/unifiedAiPlanning.test.ts` suite simulates turns to ensure at least one legal card is played and that the generated strategy messages stay brief. Run `bun test` after tweaking presets or heuristics to confirm the AI still behaves as expected.
