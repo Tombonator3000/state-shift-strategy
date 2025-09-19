@@ -70,11 +70,11 @@ export const BASE_VICTORY_CONDITIONS: VictoryCondition[] = [
   {
     id: 'truth_high',
     name: 'Truth Awakening',
-    description: 'Truth ≥ 90% (Truth Seekers)',
+    description: 'Truth ≥ 95% (Truth Seekers)',
     priority: 2,
     faction: 'truth',
     checkCondition: (gameState: any) => {
-      return gameState.truth >= 90;
+      return gameState.truth >= 95;
     },
     getProgress: (gameState: any) => {
       return Math.max(0, Math.min(100, gameState.truth));
@@ -83,11 +83,11 @@ export const BASE_VICTORY_CONDITIONS: VictoryCondition[] = [
   {
     id: 'truth_low',
     name: 'Information Suppression',
-    description: 'Truth ≤ 10% (Government)',
+    description: 'Truth ≤ 5% (Government)',
     priority: 2,
     faction: 'government',
     checkCondition: (gameState: any) => {
-      return gameState.truth <= 10;
+      return gameState.truth <= 5;
     },
     getProgress: (gameState: any) => {
       // For government, progress goes up as truth goes down

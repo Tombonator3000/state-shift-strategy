@@ -861,10 +861,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     let playerWon = false;
 
     // Truth-based victories
-    if (state.truth >= 90 && state.faction === 'truth') {
+    if (state.truth >= 95 && state.faction === 'truth') {
       victoryType = 'truth_high';
       playerWon = true;
-    } else if (state.truth <= 10 && state.faction === 'government') {
+    } else if (state.truth <= 5 && state.faction === 'government') {
       victoryType = 'truth_low';
       playerWon = true;
     }

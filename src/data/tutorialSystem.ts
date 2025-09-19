@@ -137,7 +137,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'victory_conditions',
         title: 'Path to Victory',
-        description: 'Win by: 1) Controlling 10+ states, 2) Accumulating 300+ IP, 3) Achieving extreme Truth levels (90%+ or 10%-), or 4) Completing your Secret Agenda.',
+        description: 'Win by: 1) Controlling 10+ states, 2) Accumulating 300+ IP, 3) Achieving extreme Truth levels (95%+ or 5%-), or 4) Completing your Secret Agenda.',
         position: 'center',
         delay: 4000
       }

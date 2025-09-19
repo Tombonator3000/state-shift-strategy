@@ -32,7 +32,7 @@ type Action = PlayCardAction | EndTurnAction;
 
 type Node = { state: GameState; actions: Action[]; score: number; depth: number };
 
-// === Helpers for goal-aware bursts (Truth ≥90 / Gov ≤10) ===
+// === Helpers for goal-aware bursts (Truth ≥95 / Gov ≤5) ===
 function availableIPAfterSeq(gs: GameState, me: PlayerId, seq: Action[]): number {
   const start = gs.players?.[me]?.ip ?? 0;
   const spent = seq.reduce((acc, a) => acc + (a.card?.cost ?? 0), 0);
@@ -45,7 +45,7 @@ function canAfford(gs: GameState, me: PlayerId, seq: Action[], next: Action): bo
   return ipLeft >= cost;
 }
 
-/** Picks up to 3 MEDIA cards to reach Truth ≥90 (truth faction) or ≤10 (government faction). */
+/** Picks up to 3 MEDIA cards to reach Truth ≥95 (truth faction) or ≤5 (government faction). */
 function planMediaBurstToGoal(ctx: { state: GameState; legal: Action[] }): Action[] | null {
   const gs = ctx.state;
   const me = gs.currentPlayer as PlayerId;
@@ -59,8 +59,8 @@ function planMediaBurstToGoal(ctx: { state: GameState; legal: Action[] }): Actio
   if (medias.length === 0) return null;
 
   if (faction === "truth") {
-    // Need Δ+ to reach 90
-    const need = 90 - curTruth;
+    // Need Δ+ to reach 95
+    const need = 95 - curTruth;
     if (need <= 0) return null;
     // Sort descending by +truthDelta
     const plus = medias
@@ -73,14 +73,14 @@ function planMediaBurstToGoal(ctx: { state: GameState; legal: Action[] }): Actio
       if (!canAfford(gs, me, seq, a)) continue;
       seq.push(a);
       acc += a.card!.effects!.truthDelta || 0;
-      if (curTruth + acc >= 90) return seq;
+      if (curTruth + acc >= 95) return seq;
     }
     return null;
   }
 
   if (faction === "government") {
-    // Need Δ- to reach 10 (i.e., reduce by >= (curTruth - 10))
-    const needDown = curTruth - 10;
+    // Need Δ- to reach 5 (i.e., reduce by >= (curTruth - 5))
+    const needDown = curTruth - 5;
     if (needDown <= 0) return null;
     // Sort ascending by truthDelta (most negative first)
     const minus = medias
@@ -93,7 +93,7 @@ function planMediaBurstToGoal(ctx: { state: GameState; legal: Action[] }): Actio
       if (!canAfford(gs, me, seq, a)) continue;
       seq.push(a);
       acc += Math.abs(a.card!.effects!.truthDelta || 0);
-      if (curTruth - acc <= 10) return seq;
+      if (curTruth - acc <= 5) return seq;
     }
     return null;
   }
@@ -117,7 +117,7 @@ function isGovFaction(s: GameState, p: PlayerId | number) {
 
 function truthDistanceToGoal(s: GameState, p: PlayerId | number) {
   const t = s.truth ?? 50;
-  return isTruthFaction(s, p) ? Math.max(0, 90 - t) : Math.max(0, t - 10);
+  return isTruthFaction(s, p) ? Math.max(0, 95 - t) : Math.max(0, t - 5);
 }
 
 function nearCaptureScore(s: GameState, p: PlayerId | number): number {
@@ -159,18 +159,18 @@ function actionBias(a: Action, s: GameState): number {
   // 1) MEDIA (Truth/ Gov forskjellig retning)
   if (type === "MEDIA") {
     if (isTruthFaction(s, me)) {
-      // Langt unna 90 → preferér +truth (smått); nær 90 → hard push
+      // Langt unna 95 → preferér +truth (smått); nær 95 → hard push
       if (tDelta > 0) {
         bias += dist >= 20 ? 0.6 : 1.2; // nærmere mål => større bias
-        if (t + tDelta >= 90) bias += 0.8; // direkte måltreff
+        if (t + tDelta >= 95) bias += 0.8; // direkte måltreff
       } else {
         bias -= 0.2; // Truth-AI liker ikke −truth
       }
     } else if (isGovFaction(s, me)) {
-      // Høy Truth → preferér −truth; nær ≤10 → hard push
+      // Høy Truth → preferér −truth; nær ≤5 → hard push
       if (tDelta < 0) {
         bias += t >= 50 ? 0.8 : 0.4;
-        if (t + tDelta <= 10) bias += 0.8;
+        if (t + tDelta <= 5) bias += 0.8;
       } else {
         bias -= 0.2; // Gov-AI liker ikke +truth
       }
@@ -217,7 +217,7 @@ function biasedSort(s: GameState, cfg: AiConfig) {
  */
 export function legacyChooseTurnActions(state: GameState, level: Difficulty): Action[] {
   const cfg = AI_PRESETS[level];
-  // Try a direct goal burst first (Truth ≥90 for truth / ≤10 for government)
+  // Try a direct goal burst first (Truth ≥95 for truth / ≤5 for government)
   const legalNow = legalActionsFor(state);
   const burst = planMediaBurstToGoal({ state, legal: legalNow });
   if (burst && burst.length > 0) {
@@ -295,12 +295,12 @@ export function evaluate(s: GameState, cfg: AiConfig): number {
   // Small faction-goal bias
   const faction = s.players?.[s.currentPlayer as PlayerId]?.faction;
   if (faction === "truth") {
-    // push upwards a bit more if below 90
-    const gapUp = Math.max(0, 90 - (s.truth ?? 50));
+    // push upwards a bit more if below 95
+    const gapUp = Math.max(0, 95 - (s.truth ?? 50));
     score += 0.05 * gapUp * cfg.valueTruthSwing;
   } else if (faction === "government") {
-    // push downwards a bit more if above 10
-    const gapDown = Math.max(0, (s.truth ?? 50) - 10);
+    // push downwards a bit more if above 5
+    const gapDown = Math.max(0, (s.truth ?? 50) - 5);
     score += 0.05 * gapDown * cfg.valueTruthSwing; // positive term, but since lower truth also boosts (myTruth - opTruth) component in your eval, this acts as bias toward reducing Truth
   }
   return score;

@@ -373,12 +373,12 @@ export function winCheck(
     return { winner: 'P2', reason: 'states' };
   }
 
-  if (state.truth >= 90) {
+  if (state.truth >= 95) {
     const truthPlayer = players.P1.faction === 'truth' ? 'P1' : 'P2';
     return { winner: truthPlayer, reason: 'truth' };
   }
 
-  if (state.truth <= 10) {
+  if (state.truth <= 5) {
     const governmentPlayer = players.P1.faction === 'government' ? 'P1' : 'P2';
     return { winner: governmentPlayer, reason: 'truth' };
   }

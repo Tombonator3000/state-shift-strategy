@@ -7,13 +7,13 @@ interface TruthMeterProps {
 
 const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
   const getColor = () => {
-    if (value >= 90) return 'bg-truth-red';
-    if (value <= 10) return 'bg-government-blue';
+    if (value >= 95) return 'bg-truth-red';
+    if (value <= 5) return 'bg-government-blue';
     return 'bg-gradient-to-r from-government-blue to-truth-red';
   };
 
   const getGlowEffect = () => {
-    if (value >= 90 || value <= 10) {
+    if (value >= 95 || value <= 5) {
       return 'animate-truth-pulse';
     }
     return '';
@@ -47,11 +47,11 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
 
   const getStatusMessage = () => {
     if (faction === "Truth") {
-      if (value >= 90) return '👁️ THE VEIL IS LIFTED 👁️';
-      if (value <= 10) return '😴 THEY LIVE, WE SLEEP 😴';
+      if (value >= 95) return '👁️ THE VEIL IS LIFTED 👁️';
+      if (value <= 5) return '😴 THEY LIVE, WE SLEEP 😴';
     } else {
-      if (value >= 90) return '🚨 NARRATIVE COLLAPSE 🚨';
-      if (value <= 10) return '✅ OPERATION SUCCESS ✅';
+      if (value >= 95) return '🚨 NARRATIVE COLLAPSE 🚨';
+      if (value <= 5) return '✅ OPERATION SUCCESS ✅';
     }
     return null;
   };
@@ -62,10 +62,10 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
       
       <div className={`relative w-40 ${getGlowEffect()}`}>
         <div className="relative h-4 bg-black rounded border border-secret-red/50 overflow-hidden">
-          <div 
+          <div
             className={`absolute top-0 left-0 h-full transition-all duration-500 ${
-              value >= 90 ? 'bg-truth-red' : 
-              value <= 10 ? 'bg-government-blue' : 
+              value >= 95 ? 'bg-truth-red' :
+              value <= 5 ? 'bg-government-blue' :
               'bg-gradient-to-r from-government-blue via-yellow-500 to-truth-red'
             }`}
             style={{ width: `${value}%` }}
@@ -76,13 +76,13 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
         </div>
         
         {/* Critical thresholds with labels */}
-        <div className="absolute -bottom-2 left-[10%] transform -translate-x-1/2">
+        <div className="absolute -bottom-2 left-[5%] transform -translate-x-1/2">
           <div className="w-0.5 h-2 bg-government-blue"></div>
-          <div className="text-xs font-mono text-government-blue mt-1">10%</div>
+          <div className="text-xs font-mono text-government-blue mt-1">5%</div>
         </div>
-        <div className="absolute -bottom-2 left-[90%] transform -translate-x-1/2">
+        <div className="absolute -bottom-2 left-[95%] transform -translate-x-1/2">
           <div className="w-0.5 h-2 bg-truth-red"></div>
-          <div className="text-xs font-mono text-truth-red mt-1">90%</div>
+          <div className="text-xs font-mono text-truth-red mt-1">95%</div>
         </div>
       </div>
       
@@ -91,8 +91,8 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
           {value}%
         </div>
         <div className={`text-xs font-mono text-center ${
-          value >= 90 ? 'text-truth-red' :
-          value <= 10 ? 'text-government-blue' :
+          value >= 95 ? 'text-truth-red' :
+          value <= 5 ? 'text-government-blue' :
           'text-yellow-500'
         }`}>
           {getLabel()}
@@ -102,7 +102,7 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
       {/* Status indicators with glitch effects */}
       {getStatusMessage() && (
         <div className={`text-xs font-mono animate-glitch ${
-          value >= 90 ? 'text-truth-red' : 'text-government-blue'
+          value >= 95 ? 'text-truth-red' : 'text-government-blue'
         }`}>
           {getStatusMessage()}
         </div>
