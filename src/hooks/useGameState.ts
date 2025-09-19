@@ -519,6 +519,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       
       const isHumanTurn = prev.currentPlayer === 'human';
       const comboResult = evaluateCombosForTurn(prev, isHumanTurn ? 'human' : 'ai');
+      achievements.onCombosResolved(isHumanTurn ? 'human' : 'ai', comboResult.evaluation);
       const fxEnabled = getComboSettings().fxEnabled;
 
       if (

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { AchievementManager, type Achievement, type PlayerStats } from '@/data/achievementSystem';
+import type { ComboEvaluation } from '@/game/combo.types';
 import { useToast } from '@/hooks/use-toast';
 
 interface AchievementContextType {
@@ -12,6 +13,7 @@ interface AchievementContextType {
   onGameStart: (faction: 'truth' | 'government', aiDifficulty: string) => void;
   onGameEnd: (won: boolean, victoryType: string, gameData: any) => void;
   onCardPlayed: (cardId: string, cardType: string, cardRarity?: string) => void;
+  onCombosResolved: (owner: 'human' | 'ai', evaluation: ComboEvaluation) => void;
   exportData: () => any;
   importData: (data: any) => boolean;
   resetProgress: () => void;
@@ -88,6 +90,12 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     refreshStats();
   }, [manager, refreshStats]);
 
+  const onCombosResolved = useCallback((owner: 'human' | 'ai', evaluation: ComboEvaluation) => {
+    console.log('Achievement: Combos resolved', { owner, comboCount: evaluation.results.length });
+    manager.onCombosResolved(owner, evaluation);
+    refreshStats();
+  }, [manager, refreshStats]);
+
   const exportData = useCallback(() => {
     return manager.exportData();
   }, [manager]);
@@ -151,6 +159,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     onGameStart,
     onGameEnd,
     onCardPlayed,
+    onCombosResolved,
     exportData,
     importData,
     resetProgress,

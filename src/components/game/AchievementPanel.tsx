@@ -422,6 +422,47 @@ const AchievementPanel = ({ onClose }: AchievementPanelProps) => {
                   <div className="text-2xl font-bold text-orange-400">{Math.round(stats.total_play_time_minutes / 60)}h</div>
                   <div className="text-sm text-gray-400">Play Time</div>
                 </Card>
+                <Card className="p-4 bg-gray-800 border-gray-700 md:col-span-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <div className="text-2xl font-bold text-fuchsia-400">{stats.total_combos_executed}</div>
+                      <div className="text-sm text-gray-400">Combos Triggered</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-sky-400">{stats.highest_combo_chain}</div>
+                      <div className="text-sm text-gray-400">Best Combo Chain</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-amber-400">{stats.max_combos_in_single_game}</div>
+                      <div className="text-sm text-gray-400">Most Combos in a Game</div>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4 bg-gray-800 border-gray-700 md:col-span-2">
+                  <h4 className="text-sm font-semibold text-gray-200 mb-3">Combo Category Breakdown</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-300">
+                    <div className="flex items-center justify-between">
+                      <span>Sequence</span>
+                      <span className="font-semibold text-white">{stats.total_sequence_combos}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Count</span>
+                      <span className="font-semibold text-white">{stats.total_count_combos}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Threshold</span>
+                      <span className="font-semibold text-white">{stats.total_threshold_combos}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>State Control</span>
+                      <span className="font-semibold text-white">{stats.total_state_combos}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Hybrid</span>
+                      <span className="font-semibold text-white">{stats.total_hybrid_combos}</span>
+                    </div>
+                  </div>
+                </Card>
               </div>
             </TabsContent>
 
