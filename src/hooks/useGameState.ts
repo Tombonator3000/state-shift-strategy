@@ -651,6 +651,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           if (threatResponse) {
             strategyDetails.push('Countering recent player action.');
           }
+
+          const adaptiveSummary = freshState.aiStrategist.getAdaptiveSummary();
+          if (adaptiveSummary.length) {
+            strategyDetails.push(...adaptiveSummary);
+          }
         }
       } else {
         bestPlay = freshState.aiStrategist.selectBestPlay(strategistView);
@@ -705,6 +710,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       if (strategyDetails?.length) {
         logEntries.push(...strategyDetails);
+      }
+
+      if (prev.aiStrategist instanceof EnhancedAIStrategist) {
+        prev.aiStrategist.recordAiPlayOutcome({
+          card,
+          targetState,
+          resolution,
+          previousState: prev,
+        });
       }
 
       const playedCardRecord = createPlayedCardRecord({
