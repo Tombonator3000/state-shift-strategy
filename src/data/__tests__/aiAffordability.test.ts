@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'bun:test';
-import { AIStrategist, type CardPlay } from '@/data/aiStrategy';
+import { createAiStrategist, type AiStrategistOverrides, type CardPlay } from '@/data/aiStrategy';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import type { GameCard } from '@/rules/mvp';
 
-class TestStrategist extends AIStrategist {
-  protected override generateCardPlays(card: GameCard): CardPlay[] {
-    const priority = card.id === 'expensive-card' ? 1 : 0.6;
-    return [{ cardId: card.id, priority, reasoning: 'test priority' }];
-  }
-}
+const createTestStrategist = (overrides?: AiStrategistOverrides) =>
+  createAiStrategist('medium', undefined, {
+    generateCardPlays(card: GameCard) {
+      const priority = card.id === 'expensive-card' ? 1 : 0.6;
+      return [{ cardId: card.id, priority, reasoning: 'test priority' }];
+    },
+    ...overrides,
+  });
 
 class TestEnhancedStrategist extends EnhancedAIStrategist {
   protected override generateCardPlays(card: GameCard): CardPlay[] {
@@ -48,7 +50,7 @@ describe('AI affordability heuristics', () => {
   });
 
   it('prefers an affordable card in the basic strategist', () => {
-    const strategist = new TestStrategist('medium');
+    const strategist = createTestStrategist();
     const play = strategist.selectBestPlay(createGameState());
 
     expect(play?.cardId).toBe('cheap-card');

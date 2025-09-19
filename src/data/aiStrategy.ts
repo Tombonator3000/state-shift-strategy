@@ -125,10 +125,10 @@ interface CardPlay {
 
 export type { CardPlay };
 
-export class AIStrategist {
+class LegacyAIStrategist {
   public personality: AIPersonality;
-  private difficulty: AIDifficulty;
-  protected tuning: AiTuningConfig;
+  public tuning: AiTuningConfig;
+  public readonly difficulty: AIDifficulty;
 
   constructor(difficulty: AIDifficulty = 'medium', tuning: AiTuningConfig = getAiTuningConfig()) {
     this.difficulty = difficulty;
@@ -228,7 +228,7 @@ export class AIStrategist {
     };
   }
 
-  protected getPlayerIp(gameState: any): number {
+  public getPlayerIp(gameState: any): number {
     if (typeof gameState.playerIp === 'number') {
       return gameState.playerIp;
     }
@@ -245,7 +245,7 @@ export class AIStrategist {
     return 0;
   }
 
-  protected getAiFaction(gameState: any): 'government' | 'truth' {
+  public getAiFaction(gameState: any): 'government' | 'truth' {
     return gameState.faction === 'truth' ? 'government' : 'truth';
   }
 
@@ -471,7 +471,7 @@ export class AIStrategist {
     };
   }
 
-  protected countRecentPlays(gameState: any, player: 'human' | 'ai', type?: GameCard['type']): number {
+  public countRecentPlays(gameState: any, player: 'human' | 'ai', type?: GameCard['type']): number {
     return (gameState.cardsPlayedThisRound ?? []).filter((play: any) => {
       if (play.player !== player) return false;
       if (!type) return true;
@@ -479,11 +479,11 @@ export class AIStrategist {
     }).length;
   }
 
-  protected getCardMetadata(cardId: string): GameCard | undefined {
+  public getCardMetadata(cardId: string): GameCard | undefined {
     return CARD_DATABASE.find(card => card.id === cardId);
   }
 
-  protected getFactionGoalBonus(cardMeta: GameCard | undefined, aiFaction: 'government' | 'truth'): number {
+  public getFactionGoalBonus(cardMeta: GameCard | undefined, aiFaction: 'government' | 'truth'): number {
     if (!cardMeta?.effects) {
       return 0;
     }
@@ -622,7 +622,7 @@ export class AIStrategist {
     return Math.min(1, threat);
   }
 
-  protected generateCardPlays(card: GameCard, gameState: any, evaluation: GameStateEvaluation): CardPlay[] {
+  public generateCardPlays(card: GameCard, gameState: any, evaluation: GameStateEvaluation): CardPlay[] {
     const plays: CardPlay[] = [];
     
     switch (card.type) {
@@ -830,9 +830,9 @@ export class AIStrategist {
   // Get AI's strategic assessment for logging
   getStrategicAssessment(gameState: any): string {
     const evaluation = this.evaluateGameState(gameState);
-    
+
     let assessment = `${this.personality.name} Analysis: `;
-    
+
     if (evaluation.overallScore > 0.3) {
       assessment += "Situation favorable. ";
     } else if (evaluation.overallScore < -0.3) {
@@ -840,15 +840,46 @@ export class AIStrategist {
     } else {
       assessment += "Balanced position. ";
     }
-    
+
     if (evaluation.threatLevel > 0.6) {
       assessment += "HIGH THREAT DETECTED! ";
     }
-    
+
     if (evaluation.territorialControl < -0.4) {
       assessment += "Need more territory. ";
     }
-    
+
     return assessment;
   }
 }
+
+type StrategistOverrideKeys = 'generateCardPlays' | 'selectBestPlay';
+
+export interface AIStrategist {
+  readonly difficulty: AIDifficulty;
+  personality: AIPersonality;
+  tuning: AiTuningConfig;
+  evaluateGameState(gameState: any): GameStateEvaluation;
+  selectBestPlay(gameState: any): CardPlay | null;
+  getStrategicAssessment(gameState: any): string;
+  getPlayerIp(gameState: any): number;
+  getAiFaction(gameState: any): 'government' | 'truth';
+  countRecentPlays(gameState: any, player: 'human' | 'ai', type?: GameCard['type']): number;
+  getCardMetadata(cardId: string): GameCard | undefined;
+  getFactionGoalBonus(cardMeta: GameCard | undefined, aiFaction: 'government' | 'truth'): number;
+  generateCardPlays(card: GameCard, gameState: any, evaluation: GameStateEvaluation): CardPlay[];
+}
+
+export type AiStrategistOverrides = Partial<Pick<AIStrategist, StrategistOverrideKeys>>;
+
+export const createAiStrategist = (
+  difficulty: AIDifficulty = 'medium',
+  tuning: AiTuningConfig = getAiTuningConfig(),
+  overrides?: AiStrategistOverrides,
+): AIStrategist => {
+  const strategist = new LegacyAIStrategist(difficulty, tuning);
+  if (overrides) {
+    Object.assign(strategist, overrides);
+  }
+  return strategist;
+};

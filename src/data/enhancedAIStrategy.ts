@@ -2,7 +2,14 @@ import type { GameCard } from '@/rules/mvp';
 import { resolveCardMVP, type CardPlayResolution, type GameSnapshot } from '@/systems/cardResolution';
 import { CARD_DATABASE } from './cardDatabase';
 import { getAiTuningConfig, type AiTuningConfig } from './aiTuning';
-import { AIStrategist, type AIDifficulty, type AIPersonality, type CardPlay, type GameStateEvaluation } from './aiStrategy';
+import {
+  createAiStrategist,
+  type AIStrategist,
+  type AIDifficulty,
+  type AIPersonality,
+  type CardPlay,
+  type GameStateEvaluation,
+} from './aiStrategy';
 
 export interface EnhancedAiDifficultyProfile {
   planningDepth: number;
@@ -80,7 +87,11 @@ export type EnhancedCardPlay = CardPlay & {
   threatResponse: boolean;
 };
 
-export class EnhancedAIStrategist extends AIStrategist {
+export class EnhancedAIStrategist implements AIStrategist {
+  private readonly base: AIStrategist;
+  public readonly difficulty: AIDifficulty;
+  private _personality: AIPersonality;
+  private _tuning: AiTuningConfig;
   private cardSynergies: CardSynergy[] = [];
   private deceptionState: DeceptionState;
   private playerBehaviorPattern: string[] = [];
@@ -109,7 +120,10 @@ export class EnhancedAIStrategist extends AIStrategist {
     tuning: AiTuningConfig = getAiTuningConfig(),
     difficultyProfileOverrides?: Partial<EnhancedAiDifficultyProfile>,
   ) {
-    super(difficulty, tuning);
+    this.base = createAiStrategist(difficulty, tuning);
+    this.difficulty = difficulty;
+    this._personality = this.base.personality;
+    this._tuning = this.base.tuning;
 
     const basePersonality = this.personality;
     this.difficultyProfile = this.buildDifficultyProfile(basePersonality, difficultyProfileOverrides);
@@ -127,6 +141,67 @@ export class EnhancedAIStrategist extends AIStrategist {
       bluffHistory: [],
       playerPattern: []
     };
+  }
+
+  public get personality(): AIPersonality {
+    return this._personality;
+  }
+
+  public set personality(value: AIPersonality) {
+    this._personality = value;
+    this.base.personality = value;
+  }
+
+  public get tuning(): AiTuningConfig {
+    return this._tuning;
+  }
+
+  public set tuning(value: AiTuningConfig) {
+    this._tuning = value;
+    this.base.tuning = value;
+  }
+
+  private syncBase(): void {
+    this.base.personality = this._personality;
+    this.base.tuning = this._tuning;
+  }
+
+  public evaluateGameState(gameState: any): GameStateEvaluation {
+    this.syncBase();
+    return this.base.evaluateGameState(gameState);
+  }
+
+  public selectBestPlay(gameState: any): CardPlay | null {
+    return this.selectOptimalPlay(gameState);
+  }
+
+  public getStrategicAssessment(gameState: any): string {
+    this.syncBase();
+    return this.base.getStrategicAssessment(gameState);
+  }
+
+  public getPlayerIp(gameState: any): number {
+    return this.base.getPlayerIp(gameState);
+  }
+
+  public getAiFaction(gameState: any): 'government' | 'truth' {
+    return this.base.getAiFaction(gameState);
+  }
+
+  public countRecentPlays(gameState: any, player: 'human' | 'ai', type?: GameCard['type']): number {
+    return this.base.countRecentPlays(gameState, player, type);
+  }
+
+  public getCardMetadata(cardId: string): GameCard | undefined {
+    return this.base.getCardMetadata(cardId);
+  }
+
+  public getFactionGoalBonus(cardMeta: GameCard | undefined, aiFaction: 'government' | 'truth'): number {
+    return this.base.getFactionGoalBonus(cardMeta, aiFaction);
+  }
+
+  protected generateCardPlays(card: GameCard, gameState: any, evaluation: GameStateEvaluation): CardPlay[] {
+    return this.base.generateCardPlays(card, gameState, evaluation);
   }
 
   private buildDifficultyProfile(
@@ -158,6 +233,7 @@ export class EnhancedAIStrategist extends AIStrategist {
 
   // Monte Carlo Tree Search for optimal play selection
   public selectOptimalPlay(gameState: any): EnhancedCardPlay | null {
+    this.syncBase();
     if (!gameState.hand || gameState.hand.length === 0) return null;
 
     const evaluation = this.evaluateGameState(gameState);
