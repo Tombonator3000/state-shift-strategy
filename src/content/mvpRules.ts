@@ -47,7 +47,7 @@ export const MVP_RULES_SECTIONS: MvpRulesSection[] = [
     bullets: [
       'Control 10 states to secure the map.',
       'Truth faction wins at ≥ 90% Truth; Government faction wins at ≤ 10% Truth.',
-      'Reach 200 Influence Points (IP) to overrun your rival’s resources.',
+      'Reach 300 Influence Points (IP) to overrun your rival’s resources.',
     ],
   },
   {

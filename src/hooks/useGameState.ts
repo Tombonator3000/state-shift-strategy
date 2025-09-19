@@ -873,8 +873,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       victoryType = 'territorial';
       playerWon = true;
     }
-    // Economic victory (200+ IP)
-    else if (state.ip >= 200) {
+    // Economic victory (300+ IP)
+    else if (state.ip >= 300) {
       victoryType = 'economic';
       playerWon = true;
     }
@@ -884,7 +884,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       playerWon = true;
     }
     // AI victory conditions (similar checks for AI)
-    else if (state.aiIP >= 200 || state.controlledStates.filter(s => state.states.find(st => st.abbreviation === s)?.owner === 'ai').length >= 10) {
+    else if (state.aiIP >= 300 || state.controlledStates.filter(s => state.states.find(st => st.abbreviation === s)?.owner === 'ai').length >= 10) {
       playerWon = false;
     }
 
@@ -896,7 +896,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         finalTruth: state.truth,
         statesControlled: state.controlledStates.length
       });
-    } else if (!playerWon && (state.aiIP >= 200 || state.truth <= 0 || state.truth >= 100)) {
+    } else if (!playerWon && (state.aiIP >= 300 || state.truth <= 0 || state.truth >= 100)) {
       achievements.onGameEnd(false, 'defeat', {
         turns: state.turn,
         finalIP: state.ip,

@@ -4,7 +4,7 @@ Paranoid Times — Design \& Regelbok (MVP)
 
 
 
-Paranoid Times er et satirisk kartspill om å vinne narrativet, plystre bort motstanderens ressurser og “punsje” politisk press inn i delstater. Kortene er “nyheter” og aksjoner som skaper målbare effekter i spillets verden: IP (Influence Points), Truth (0–100%), og Pressure per stat. Førstemann til 10 stater, Truth-terskel, eller 200 IP vinner.
+Paranoid Times er et satirisk kartspill om å vinne narrativet, plystre bort motstanderens ressurser og “punsje” politisk press inn i delstater. Kortene er “nyheter” og aksjoner som skaper målbare effekter i spillets verden: IP (Influence Points), Truth (0–100%), og Pressure per stat. Førstemann til 10 stater, Truth-terskel, eller 300 IP vinner.
 
 
 
@@ -60,7 +60,7 @@ Truth ≥ 90% (Truth-spilleren) / Truth ≤ 10% (Government-spilleren), eller
 
 
 
-Du har 200 IP.
+Du har 300 IP.
 
 
 
@@ -530,7 +530,7 @@ Bytt currentPlayer, turn++.
 
 
 
-winCheck(s): kall etter endTurn: 10 stater / Truth-terskel / 200 IP.
+winCheck(s): kall etter endTurn: 10 stater / Truth-terskel / 300 IP.
 
 
 

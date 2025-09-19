@@ -60,7 +60,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'ip_display',
         title: 'Influence Points (IP)',
-        description: 'IP is your operational currency. Gain IP from controlled states and use it to play powerful cards. Accumulating 200+ IP can secure victory through resource dominance.',
+        description: 'IP is your operational currency. Gain IP from controlled states and use it to play powerful cards. Accumulating 300+ IP can secure victory through resource dominance.',
         targetElement: '.ip-display',
         position: 'left',
         delay: 3000
@@ -137,7 +137,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'victory_conditions',
         title: 'Path to Victory',
-        description: 'Win by: 1) Controlling 10+ states, 2) Accumulating 200+ IP, 3) Achieving extreme Truth levels (90%+ or 10%-), or 4) Completing your Secret Agenda.',
+        description: 'Win by: 1) Controlling 10+ states, 2) Accumulating 300+ IP, 3) Achieving extreme Truth levels (90%+ or 10%-), or 4) Completing your Secret Agenda.',
         position: 'center',
         delay: 4000
       }

@@ -1243,8 +1243,8 @@ export class EnhancedAIStrategist implements AIStrategist {
 
     const aiTerritorialWin = aiStates >= 10;
     const playerTerritorialWin = playerStates >= 10;
-    const aiEconomicWin = aiIp >= 200;
-    const playerEconomicWin = playerIp >= 200;
+    const aiEconomicWin = aiIp >= 300;
+    const playerEconomicWin = playerIp >= 300;
 
     let aiTruthWin = false;
     let playerTruthWin = false;
@@ -1292,7 +1292,7 @@ export class EnhancedAIStrategist implements AIStrategist {
 
     const aiIp = gameState.aiIP ?? 0;
     const playerIp = this.getPlayerIp(gameState);
-    const ipScore = Math.max(-1, Math.min(1, (aiIp - playerIp) / 200));
+    const ipScore = Math.max(-1, Math.min(1, (aiIp - playerIp) / 300));
 
     const aiFaction = this.getAiFaction(gameState);
     const truthValue = gameState.truth ?? 50;
