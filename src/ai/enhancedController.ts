@@ -26,7 +26,7 @@ interface TurnSequencePlan {
   evaluationScore: number;
 }
 
-interface ChooseTurnActionsParams {
+export interface ChooseTurnActionsParams {
   strategist: EnhancedAIStrategist;
   gameState: AIPlanningState;
   maxActions?: number;
