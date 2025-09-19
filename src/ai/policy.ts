@@ -212,7 +212,10 @@ function biasedSort(s: GameState, cfg: AiConfig) {
   };
 }
 
-export function chooseTurnActions(state: GameState, level: Difficulty): Action[] {
+/**
+ * @deprecated Use chooseTurnActions from enhancedController instead.
+ */
+export function legacyChooseTurnActions(state: GameState, level: Difficulty): Action[] {
   const cfg = AI_PRESETS[level];
   // Try a direct goal burst first (Truth ≥90 for truth / ≤10 for government)
   const legalNow = legalActionsFor(state);
