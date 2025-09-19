@@ -9,12 +9,12 @@ export interface EffectPosition {
 export class VisualEffectsCoordinator {
   // Trigger particle effect at specific position
   static triggerParticleEffect(
-    type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain' | 'stateevent' | 'contested',
+    type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain' | 'stateevent' | 'contested' | 'flash',
     position: EffectPosition
   ): void {
     window.dispatchEvent(new CustomEvent('cardDeployed', {
-      detail: { 
-        type, 
+      detail: {
+        type,
         x: position.x, 
         y: position.y 
       }
@@ -24,6 +24,16 @@ export class VisualEffectsCoordinator {
   // Trigger full-screen government redaction sweep
   static triggerGovernmentRedaction(position: EffectPosition): void {
     window.dispatchEvent(new CustomEvent('governmentRedaction', {
+      detail: {
+        x: position.x,
+        y: position.y
+      }
+    }));
+  }
+
+  // Trigger a tabloid flash burst
+  static triggerTruthFlash(position: EffectPosition): void {
+    window.dispatchEvent(new CustomEvent('truthFlash', {
       detail: {
         x: position.x,
         y: position.y

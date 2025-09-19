@@ -1,24 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { ParticleSystem } from '@/components/effects/ParticleSystem';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ParticleEffectType, ParticleSystem } from '@/components/effects/ParticleSystem';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import RedactionSweep from '@/components/effects/RedactionSweep';
+import TabloidFlashOverlay from '@/components/effects/TabloidFlashOverlay';
 
 interface CardAnimationLayerProps {
   children?: React.ReactNode;
 }
 
 const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => {
-  const [particleEffect, setParticleEffect] = useState<{
-    active: boolean;
+  const [particleEffects, setParticleEffects] = useState<Array<{
+    id: number;
     x: number;
     y: number;
-    type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain';
-  }>({
-    active: false,
-    x: 0,
-    y: 0,
-    type: 'deploy'
-  });
+    type: ParticleEffectType;
+  }>>([]);
 
   const [floatingNumber, setFloatingNumber] = useState<{
     value: number;
@@ -32,52 +28,57 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     key: number;
   } | null>(null);
 
+  const [truthFlash, setTruthFlash] = useState<{
+    id: number;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const spawnParticleEffect = useCallback((type: ParticleEffectType, x: number, y: number) => {
+    setParticleEffects(prev => [
+      ...prev,
+      {
+        id: Date.now() + Math.random(),
+        type,
+        x,
+        y
+      }
+    ]);
+  }, []);
+
   useEffect(() => {
-    const handleCardDeployed = (event: CustomEvent) => {
-      setParticleEffect({
-        active: true,
-        x: event.detail.x,
-        y: event.detail.y,
-        type: event.detail.type
-      });
+    const handleCardDeployed = (event: CustomEvent<{ type: ParticleEffectType; x: number; y: number }>) => {
+      if (!event?.detail) return;
+      spawnParticleEffect(event.detail.type, event.detail.x, event.detail.y);
     };
 
-    const handleStateCapture = (event: CustomEvent) => {
-      setParticleEffect({
-        active: true,
-        x: event.detail.x,
-        y: event.detail.y,
-        type: 'capture'
-      });
+    const handleStateCapture = (event: CustomEvent<{ x: number; y: number }>) => {
+      if (!event?.detail) return;
+      spawnParticleEffect('capture', event.detail.x, event.detail.y);
     };
 
-    const handleStateLoss = (event: CustomEvent) => {
-      setParticleEffect({
-        active: true,
-        x: event.detail.x,
-        y: event.detail.y,
-        type: 'stateloss'
-      });
+    const handleStateLoss = (event: CustomEvent<{ x: number; y: number }>) => {
+      if (!event?.detail) return;
+      spawnParticleEffect('stateloss', event.detail.x, event.detail.y);
     };
 
-    const handleSynergyActivation = (event: CustomEvent) => {
-      setParticleEffect({
-        active: true,
-        x: event.detail.x,
-        y: event.detail.y,
-        type: event.detail.effectType || 'synergy'
-      });
+    const handleSynergyActivation = (event: CustomEvent<{ bonusIP: number; numberType?: 'synergy' | 'combo' | 'chain'; effectType?: ParticleEffectType; x: number; y: number }>) => {
+      if (!event?.detail) return;
+      const effectType = event.detail.effectType || 'synergy';
+      const numberType = event.detail.numberType ?? 'synergy';
+      spawnParticleEffect(effectType, event.detail.x, event.detail.y);
 
       // Also show floating number for synergy bonus
       setFloatingNumber({
         value: event.detail.bonusIP,
-        type: event.detail.numberType || 'synergy',
+        type: numberType,
         x: event.detail.x,
         y: event.detail.y - 50
       });
     };
 
-    const handleFloatingNumber = (event: CustomEvent) => {
+    const handleFloatingNumber = (event: CustomEvent<{ value: number; type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain'; x: number; y: number }>) => {
+      if (!event?.detail) return;
       setFloatingNumber({
         value: event.detail.value,
         type: event.detail.type,
@@ -93,6 +94,24 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       });
     };
 
+    const handleTruthFlash = (event: CustomEvent<{ x: number; y: number }>) => {
+      if (!event?.detail) return;
+      const { x, y } = event.detail;
+      const prefersReducedMotion = typeof window !== 'undefined'
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (prefersReducedMotion) {
+        return;
+      }
+
+      setTruthFlash({
+        id: Date.now(),
+        x,
+        y
+      });
+      spawnParticleEffect('flash', x, y);
+    };
+
     // Register event listeners
     window.addEventListener('cardDeployed', handleCardDeployed as EventListener);
     window.addEventListener('stateCapture', handleStateCapture as EventListener);
@@ -100,6 +119,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     window.addEventListener('synergyActivation', handleSynergyActivation as EventListener);
     window.addEventListener('showFloatingNumber', handleFloatingNumber as EventListener);
     window.addEventListener('governmentRedaction', handleGovernmentRedaction as EventListener);
+    window.addEventListener('truthFlash', handleTruthFlash as EventListener);
 
     return () => {
       window.removeEventListener('cardDeployed', handleCardDeployed as EventListener);
@@ -108,12 +128,13 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('synergyActivation', handleSynergyActivation as EventListener);
       window.removeEventListener('showFloatingNumber', handleFloatingNumber as EventListener);
       window.removeEventListener('governmentRedaction', handleGovernmentRedaction as EventListener);
+      window.removeEventListener('truthFlash', handleTruthFlash as EventListener);
     };
-  }, []);
+  }, [spawnParticleEffect]);
 
-  const handleParticleComplete = () => {
-    setParticleEffect(prev => ({ ...prev, active: false }));
-  };
+  const handleParticleComplete = useCallback((id: number) => {
+    setParticleEffects(prev => prev.filter(effect => effect.id !== id));
+  }, []);
 
   const handleFloatingNumberComplete = () => {
     setFloatingNumber(null);
@@ -122,6 +143,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
   const handleRedactionComplete = () => {
     setRedactionSweep(null);
   };
+
+  const handleTruthFlashComplete = useCallback(() => {
+    setTruthFlash(null);
+  }, []);
 
   return (
     <>
@@ -138,16 +163,29 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       </div>
 
       {/* Particle Effects */}
-      <ParticleSystem
-        active={particleEffect.active}
-        x={particleEffect.x}
-        y={particleEffect.y}
-        type={particleEffect.type}
-        onComplete={handleParticleComplete}
-      />
+      {particleEffects.map(effect => (
+        <ParticleSystem
+          key={effect.id}
+          active
+          x={effect.x}
+          y={effect.y}
+          type={effect.type}
+          onComplete={() => handleParticleComplete(effect.id)}
+        />
+      ))}
+
+      {/* Truth Flash Overlay */}
+      {truthFlash && (
+        <TabloidFlashOverlay
+          key={truthFlash.id}
+          x={truthFlash.x}
+          y={truthFlash.y}
+          onComplete={handleTruthFlashComplete}
+        />
+      )}
 
       {/* Floating Numbers */}
-      <FloatingNumbers 
+      <FloatingNumbers
         trigger={floatingNumber}
       />
     </>

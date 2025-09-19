@@ -225,6 +225,7 @@ export const useAudio = () => {
     // Create sound effects with fallback handling - only load existing files
     const existingSfxFiles = {
       cardPlay: '/audio/card-play.mp3',
+      flash: '/audio/card-play.mp3',
       cardDraw: '/audio/card-draw.mp3',
       stateCapture: '/audio/state-capture.mp3',
       turnEnd: '/audio/turn-end.mp3',

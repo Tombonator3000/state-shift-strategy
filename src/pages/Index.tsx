@@ -747,24 +747,30 @@ const Index = () => {
       recordCardPlay(cardId);
       
       // Enhanced visual effects for successful card play
+      let effectPosition = VisualEffectsCoordinator.getScreenCenter();
       const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
       if (cardElement) {
-        const position = VisualEffectsCoordinator.getElementCenter(cardElement);
+        effectPosition = VisualEffectsCoordinator.getElementCenter(cardElement);
 
         // Trigger deploy particle effect
-        VisualEffectsCoordinator.triggerParticleEffect('deploy', position);
+        VisualEffectsCoordinator.triggerParticleEffect('deploy', effectPosition);
 
         if (card.faction === 'government' && card.type === 'ATTACK') {
-          VisualEffectsCoordinator.triggerGovernmentRedaction(position);
+          VisualEffectsCoordinator.triggerGovernmentRedaction(effectPosition);
         }
 
         // Show floating number for IP cost
         if (card.cost > 0) {
           VisualEffectsCoordinator.showFloatingNumber(-card.cost, 'ip', {
-            x: position.x - 30,
-            y: position.y - 20
+            x: effectPosition.x - 30,
+            y: effectPosition.y - 20
           });
         }
+      }
+
+      if (card.faction === 'truth' && card.type === 'MEDIA') {
+        VisualEffectsCoordinator.triggerTruthFlash(effectPosition);
+        audio.playSFX('flash');
       }
       
       toast.success(`✅ ${card.name} deployed successfully!`, {
