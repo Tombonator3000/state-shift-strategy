@@ -29,6 +29,7 @@ export interface StateForResolution {
   baseIP: number;
   defense: number;
   pressure: number;
+  contested: boolean;
   owner: StateOwner;
   specialBonus?: string;
   bonusValue?: number;
@@ -224,6 +225,8 @@ export function resolveCardMVP(
 
     state.owner = owner;
     state.pressure = Math.max(afterPressurePlayer, afterPressureAi);
+    const isContested = afterPressurePlayer > 0 && afterPressureAi > 0;
+    state.contested = previousOwner !== owner ? false : isContested;
 
     if (owner === 'player') {
       nextControlledStates.add(state.abbreviation);

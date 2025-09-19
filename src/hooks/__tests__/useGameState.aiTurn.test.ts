@@ -46,6 +46,7 @@ const createBaseState = (overrides: Partial<GameState> = {}): GameState => ({
       baseIP: 6,
       defense: 4,
       pressure: 0,
+      contested: false,
       owner: 'player',
     },
     {
@@ -55,6 +56,7 @@ const createBaseState = (overrides: Partial<GameState> = {}): GameState => ({
       baseIP: 3,
       defense: 3,
       pressure: 0,
+      contested: false,
       owner: 'neutral',
     },
   ],

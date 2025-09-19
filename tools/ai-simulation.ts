@@ -233,6 +233,7 @@ function selectStates(count: number, rng: () => number): SimulatedState[] {
     baseIP: state.baseIP,
     defense: state.defense,
     pressure: 0,
+    contested: false,
     owner: 'neutral',
     specialBonus: state.specialBonus,
     bonusValue: state.bonusValue,

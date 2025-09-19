@@ -38,6 +38,7 @@ export interface GameState {
     baseIP: number;
     defense: number;
     pressure: number;
+    contested: boolean;
     owner: 'player' | 'ai' | 'neutral';
     specialBonus?: string;
     bonusValue?: number;
