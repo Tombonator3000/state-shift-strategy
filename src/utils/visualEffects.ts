@@ -21,6 +21,16 @@ export class VisualEffectsCoordinator {
     }));
   }
 
+  // Trigger full-screen government redaction sweep
+  static triggerGovernmentRedaction(position: EffectPosition): void {
+    window.dispatchEvent(new CustomEvent('governmentRedaction', {
+      detail: {
+        x: position.x,
+        y: position.y
+      }
+    }));
+  }
+
   // Trigger synergy activation effects
   static triggerSynergyActivation(
     bonusIP: number,

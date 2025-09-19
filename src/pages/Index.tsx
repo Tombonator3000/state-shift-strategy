@@ -750,10 +750,14 @@ const Index = () => {
       const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
       if (cardElement) {
         const position = VisualEffectsCoordinator.getElementCenter(cardElement);
-        
+
         // Trigger deploy particle effect
         VisualEffectsCoordinator.triggerParticleEffect('deploy', position);
-        
+
+        if (card.faction === 'government' && card.type === 'ATTACK') {
+          VisualEffectsCoordinator.triggerGovernmentRedaction(position);
+        }
+
         // Show floating number for IP cost
         if (card.cost > 0) {
           VisualEffectsCoordinator.showFloatingNumber(-card.cost, 'ip', {
