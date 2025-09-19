@@ -1,3 +1,5 @@
+import type { ComboCategory, ComboEvaluation } from '@/game/combo.types';
+
 export interface Achievement {
   id: string;
   name: string;
@@ -170,6 +172,45 @@ export const ACHIEVEMENTS: Achievement[] = [
     }
   },
   {
+    id: 'combo_initiate',
+    name: 'Combo Initiate',
+    description: 'Trigger your first combo chain',
+    category: 'mastery',
+    rarity: 'common',
+    icon: '🌀',
+    points: 15,
+    requirements: {
+      type: 'single',
+      conditions: [{ key: 'total_combos_executed', value: 1, operator: '>=' }]
+    }
+  },
+  {
+    id: 'combo_conductor',
+    name: 'Combo Conductor',
+    description: 'Trigger a chain of 3+ combos in a single turn',
+    category: 'mastery',
+    rarity: 'rare',
+    icon: '🎼',
+    points: 50,
+    requirements: {
+      type: 'single',
+      conditions: [{ key: 'highest_combo_chain', value: 3, operator: '>=' }]
+    }
+  },
+  {
+    id: 'combo_maestro',
+    name: 'Combo Maestro',
+    description: 'Trigger 100 combos across all games',
+    category: 'mastery',
+    rarity: 'legendary',
+    icon: '🎶',
+    points: 90,
+    requirements: {
+      type: 'cumulative',
+      conditions: [{ key: 'total_combos_executed', value: 100, operator: '>=' }]
+    }
+  },
+  {
     id: 'legendary_difficulty',
     name: 'Shadow Director Defeated',
     description: 'Defeat the AI on Legendary difficulty',
@@ -300,6 +341,25 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirements: {
       type: 'single',
       conditions: [{ key: 'max_ip_reached', value: 300, operator: '>=' }]
+    }
+  },
+  {
+    id: 'combo_specialist',
+    name: 'Combo Specialist',
+    description: 'Trigger every combo category at least once',
+    category: 'challenge',
+    rarity: 'rare',
+    icon: '🎲',
+    points: 55,
+    requirements: {
+      type: 'cumulative',
+      conditions: [
+        { key: 'total_sequence_combos', value: 1, operator: '>=' },
+        { key: 'total_count_combos', value: 1, operator: '>=' },
+        { key: 'total_threshold_combos', value: 1, operator: '>=' },
+        { key: 'total_state_combos', value: 1, operator: '>=' },
+        { key: 'total_hybrid_combos', value: 1, operator: '>=' }
+      ]
     }
   },
 
@@ -449,7 +509,18 @@ export interface PlayerStats {
   zone_cards_played_game: number;
   attack_cards_played_game: number;
   defensive_cards_played_game: number;
-  
+
+  // Combo Tracking
+  total_combos_executed: number;
+  highest_combo_chain: number;
+  max_combos_in_single_game: number;
+  combos_executed_current_game: number;
+  total_sequence_combos: number;
+  total_count_combos: number;
+  total_threshold_combos: number;
+  total_state_combos: number;
+  total_hybrid_combos: number;
+
   // State Control
   total_states_controlled: number;
   unique_states_controlled: number;
@@ -497,6 +568,14 @@ export interface PlayerStats {
   last_game_states_controlled: number;
 }
 
+const COMBO_CATEGORY_STAT_KEYS: Record<ComboCategory, keyof PlayerStats> = {
+  sequence: 'total_sequence_combos',
+  count: 'total_count_combos',
+  threshold: 'total_threshold_combos',
+  state: 'total_state_combos',
+  hybrid: 'total_hybrid_combos',
+};
+
 export class AchievementManager {
   private stats: PlayerStats;
   private unlockedAchievements: string[] = [];
@@ -532,6 +611,15 @@ export class AchievementManager {
       zone_cards_played_game: 0,
       attack_cards_played_game: 0,
       defensive_cards_played_game: 0,
+      total_combos_executed: 0,
+      highest_combo_chain: 0,
+      max_combos_in_single_game: 0,
+      combos_executed_current_game: 0,
+      total_sequence_combos: 0,
+      total_count_combos: 0,
+      total_threshold_combos: 0,
+      total_state_combos: 0,
+      total_hybrid_combos: 0,
       total_states_controlled: 0,
       unique_states_controlled: 0,
       max_states_controlled_single_game: 0,
@@ -794,7 +882,8 @@ export class AchievementManager {
     this.updateStats({
       last_game_faction: faction,
       last_game_ai_difficulty: difficulty,
-      total_games_played: this.stats.total_games_played + 1
+      total_games_played: this.stats.total_games_played + 1,
+      combos_executed_current_game: 0,
     });
   }
 
@@ -846,6 +935,42 @@ export class AchievementManager {
     this.updateStats(updates);
   }
 
+  onCombosResolved(owner: 'human' | 'ai', evaluation: ComboEvaluation) {
+    if (owner !== 'human') {
+      return;
+    }
+
+    const combosTriggered = evaluation.results.length;
+    if (combosTriggered === 0) {
+      return;
+    }
+
+    const categoryTallies: Partial<Record<ComboCategory, number>> = {};
+    evaluation.results.forEach(result => {
+      const category = result.definition.category;
+      categoryTallies[category] = (categoryTallies[category] ?? 0) + 1;
+    });
+
+    const combosThisGame = this.stats.combos_executed_current_game + combosTriggered;
+
+    const updates: Partial<PlayerStats> = {
+      total_combos_executed: this.stats.total_combos_executed + combosTriggered,
+      combos_executed_current_game: combosThisGame,
+      highest_combo_chain: Math.max(this.stats.highest_combo_chain, combosTriggered),
+      max_combos_in_single_game: Math.max(this.stats.max_combos_in_single_game, combosThisGame),
+    };
+
+    (Object.keys(COMBO_CATEGORY_STAT_KEYS) as ComboCategory[]).forEach(category => {
+      const tally = categoryTallies[category];
+      if (tally && tally > 0) {
+        const statKey = COMBO_CATEGORY_STAT_KEYS[category];
+        updates[statKey] = (this.stats[statKey] as number) + tally;
+      }
+    });
+
+    this.updateStats(updates);
+  }
+
   onCardPlayed(cardType: string, cardRarity?: string) {
     this.incrementStat('total_cards_played');
 
@@ -883,7 +1008,8 @@ export class AchievementManager {
       zone_cards_played_game: 0,
       attack_cards_played_game: 0,
       defensive_cards_played_game: 0,
-      ip_lost_to_attacks: 0
+      ip_lost_to_attacks: 0,
+      combos_executed_current_game: 0,
     });
   }
 }
