@@ -166,7 +166,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     round: 1,
     currentPlayer: 'human',
     aiDifficulty,
-    truth: 60,
+    truth: 50,
     ip: 15,
     aiIP: 15,
     // Use all available cards to ensure proper deck building
@@ -201,7 +201,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     showNewspaper: false,
     log: [
       'Game started - Truth Seekers faction selected',
-      'Starting Truth: 60%',
+      'Starting Truth: 50%',
       'Cards drawn: 3',
       `AI Difficulty: ${aiDifficulty}`
     ],
@@ -247,7 +247,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   );
 
   const initGame = useCallback((faction: 'government' | 'truth') => {
-    const startingTruth = faction === 'government' ? 40 : 60;
+    const startingTruth = 50;
     const startingIP = faction === 'government' ? 20 : 10; // Player IP
     const aiStartingIP = faction === 'government' ? 10 : 20; // AI starts as the opposite faction
     

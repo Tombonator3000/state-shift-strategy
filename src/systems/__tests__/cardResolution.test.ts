@@ -10,7 +10,7 @@ import {
 } from '../cardResolution';
 
 const createBaseSnapshot = (overrides: Partial<GameSnapshot> = {}): GameSnapshot => ({
-  truth: 60,
+  truth: 50,
   ip: 12,
   aiIP: 20,
   hand: [],
@@ -44,8 +44,8 @@ const createTracker = (initial?: Partial<PlayerStats>): AchievementTracker & { u
       total_states_controlled: 0,
       max_states_controlled_single_game: 0,
       max_ip_reached: 0,
-      max_truth_reached: 60,
-      min_truth_reached: 60,
+      max_truth_reached: 50,
+      min_truth_reached: 50,
       ...initial,
     },
     updateStats: update => {
@@ -80,8 +80,8 @@ describe('resolveCardMVP', () => {
     expect(tracker.updates).toHaveLength(1);
     expect(tracker.updates[0]).toMatchObject({
       max_ip_reached: 10,
-      max_truth_reached: 60,
-      min_truth_reached: 60,
+      max_truth_reached: 50,
+      min_truth_reached: 50,
     });
   });
 
