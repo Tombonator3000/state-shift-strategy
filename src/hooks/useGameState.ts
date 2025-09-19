@@ -15,6 +15,7 @@ import { resolveCardMVP, type CardPlayResolution } from '@/systems/cardResolutio
 import { applyTruthDelta } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
+import { featureFlags } from '@/state/featureFlags';
 
 interface GameState {
   faction: 'government' | 'truth';
@@ -127,6 +128,60 @@ const DIFFICULTY_TO_AI_DIFFICULTY: Record<Difficulty, AIDifficulty> = {
   NORMAL: 'medium',
   HARD: 'hard',
   TOP_SECRET_PLUS: 'legendary',
+};
+
+const summarizeStrategy = (reasoning?: string, strategyDetails?: string[]): string | undefined => {
+  const source = reasoning ?? strategyDetails?.[0];
+  if (!source) {
+    return undefined;
+  }
+
+  const cleaned = source.replace(/^AI Strategy:\s*/i, '').replace(/^AI Synergy Bonus:\s*/i, '').trim();
+  const normalized = cleaned.replace(/\s+/g, ' ');
+
+  if (!normalized.length) {
+    return 'AI executed a strategic play.';
+  }
+
+  const firstSentenceMatch = normalized.match(/^[^.?!]*(?:[.?!]|$)/);
+  const firstSentence = (firstSentenceMatch ? firstSentenceMatch[0] : normalized).trim();
+  if (!firstSentence.length) {
+    return 'AI executed a strategic play.';
+  }
+
+  return firstSentence.length > 100 ? `${firstSentence.slice(0, 97).trimEnd()}…` : firstSentence;
+};
+
+const isDebugEnvironment = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV ?? false;
+
+const buildStrategyLogEntries = (reasoning?: string, strategyDetails?: string[]): string[] => {
+  if (featureFlags.aiVerboseStrategyLog) {
+    const verboseEntries: string[] = [];
+    if (reasoning) {
+      verboseEntries.push(`AI Strategy: ${reasoning}`);
+    }
+    if (strategyDetails?.length) {
+      verboseEntries.push(...strategyDetails);
+    }
+    return verboseEntries;
+  }
+
+  const summary = summarizeStrategy(reasoning, strategyDetails);
+  return summary ? [`AI focus: ${summary}`] : [];
+};
+
+const debugStrategyToConsole = (reasoning?: string, strategyDetails?: string[]) => {
+  if (featureFlags.aiVerboseStrategyLog || !isDebugEnvironment) {
+    return;
+  }
+
+  if (reasoning) {
+    console.debug('[AI Strategy]', reasoning);
+  }
+
+  strategyDetails?.forEach(detail => {
+    console.debug('[AI Strategy Detail]', detail);
+  });
 };
 
 const resolveAiDifficulty = (override?: AIDifficulty): AIDifficulty => {
@@ -703,13 +758,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     setGameState(prev => {
       const resolution = resolveCardMVP(prev, card, targetState ?? null, 'ai', achievements);
       const logEntries = [...prev.log, ...resolution.logEntries];
+      const strategyLogEntries = buildStrategyLogEntries(reasoning, strategyDetails);
 
-      if (reasoning) {
-        logEntries.push(`AI Strategy: ${reasoning}`);
+      if (strategyLogEntries.length) {
+        logEntries.push(...strategyLogEntries);
       }
 
-      if (strategyDetails?.length) {
-        logEntries.push(...strategyDetails);
+      if (!featureFlags.aiVerboseStrategyLog && (reasoning || strategyDetails?.length)) {
+        debugStrategyToConsole(reasoning, strategyDetails);
       }
 
       if (prev.aiStrategist instanceof EnhancedAIStrategist) {
