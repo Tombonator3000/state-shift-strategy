@@ -60,6 +60,12 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Card art assets
+
+Custom artwork for cards should be stored in `public/card-art/` with filenames that match the card ID. The game first looks for a
+`<cardId>.jpg` image and then for `<cardId>.png`. If neither file is present the UI will automatically fall back to the existing
+placeholder illustrations.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/fa2f38e2-5939-4c65-a945-2c0f8029da84) and click on Share -> Publish.
