@@ -66,6 +66,8 @@ export const useAudio = () => {
   const sfxRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const playTokenRef = useRef(0);
+  const resumeMenuAfterEndRef = useRef(false);
+  const menuMusicCallbackRef = useRef<(() => void) | null>(null);
   // Music track arrays
   const musicTracks = useRef<{ [key in MusicType]: HTMLAudioElement[] }>({
     theme: [],
@@ -411,6 +413,17 @@ export const useAudio = () => {
 
     nextTrack.onended = () => {
       if (playTokenRef.current !== token) return;
+
+      if (typeToPlay === 'endcredits') {
+        if (resumeMenuAfterEndRef.current && menuMusicCallbackRef.current) {
+          resumeMenuAfterEndRef.current = false;
+          menuMusicCallbackRef.current();
+        } else {
+          playMusic(typeToPlay);
+        }
+        return;
+      }
+
       playMusic(typeToPlay);
     };
     
@@ -564,6 +577,8 @@ export const useAudio = () => {
     playMusic('theme');
   }, [gameState, currentMusicType, playMusic]);
 
+  menuMusicCallbackRef.current = setMenuMusic;
+
   const setFactionMusic = useCallback((faction: 'government' | 'truth') => {
     console.log('🎵 setFactionMusic called with:', faction);
     if (gameState === 'factionSelect' && currentMusicType === faction && currentMusicRef.current && !currentMusicRef.current.paused) {
@@ -596,6 +611,16 @@ export const useAudio = () => {
     playMusic('endcredits');
   }, [currentMusicType, playMusic]);
 
+  const queueMenuMusicAfterEnd = useCallback(() => {
+    console.log('🎵 queueMenuMusicAfterEnd called');
+    resumeMenuAfterEndRef.current = true;
+  }, []);
+
+  const cancelMenuMusicQueue = useCallback(() => {
+    console.log('🎵 cancelMenuMusicQueue called');
+    resumeMenuAfterEndRef.current = false;
+  }, []);
+
   console.log('🎵 useAudio: Returning audio system object');
   
   return {
@@ -614,6 +639,8 @@ export const useAudio = () => {
     setFactionMusic,
     setGameplayMusic,
     setEndCreditsMusic,
+    queueMenuMusicAfterEnd,
+    cancelMenuMusicQueue,
     currentMusicType,
     gameState,
     isPlaying,

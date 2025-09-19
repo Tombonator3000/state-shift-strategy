@@ -15,7 +15,13 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
   const [isTextVisible, setIsTextVisible] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const timelineRef = useRef<NodeJS.Timeout[]>([]);
-  const { setEndCreditsMusic, stopMusic, playSFX } = useAudioContext();
+  const {
+    setEndCreditsMusic,
+    stopMusic,
+    setMenuMusic,
+    queueMenuMusicAfterEnd,
+    cancelMenuMusicQueue
+  } = useAudioContext();
 
   // Zany credit texts
   const creditTexts = {
@@ -113,7 +119,7 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
 
     // Auto-exit after timeline completes
     addEvent(6000, () => {
-      handleClose();
+      handleTimelineComplete();
     });
 
     timelineRef.current = timeouts;
@@ -134,32 +140,42 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
     timelineRef.current = [];
   };
 
-  const handleClose = () => {
-    stopEndCreditsMusic();
+  const closeCredits = () => {
     clearTimeline();
     onClose();
+  };
+
+  const handleManualClose = () => {
+    cancelMenuMusicQueue();
+    stopEndCreditsMusic();
+    setMenuMusic();
+    closeCredits();
+  };
+
+  const handleTimelineComplete = () => {
+    queueMenuMusicAfterEnd();
+    closeCredits();
   };
 
   useEffect(() => {
     if (isVisible) {
       // Start music and timeline
+      cancelMenuMusicQueue();
       startMusic();
       startTimeline();
-      
+
       // Show initial text
       setCurrentText('THE WEEKLY PARANOID NEWS');
       setCurrentSubtext('CLASSIFIED EDITION');
       setIsTextVisible(true);
     } else {
       // Cleanup when not visible
-      stopEndCreditsMusic();
       clearTimeline();
       setCurrentPhase('intro');
       setIsTextVisible(false);
     }
 
     return () => {
-      stopEndCreditsMusic();
       clearTimeline();
     };
   }, [isVisible]);
@@ -226,7 +242,7 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
       {showControls && (
         <div className="absolute top-6 right-6 flex gap-3">
           <Button
-            onClick={handleClose}
+            onClick={handleManualClose}
             variant="outline"
             className="bg-white/90 hover:bg-white text-gray-900 border-gray-300 shadow-lg font-mono text-sm"
             aria-label="Skip end credits and return to main menu"
@@ -240,7 +256,7 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
       {showControls && (
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
           <Button
-            onClick={handleClose}
+            onClick={handleManualClose}
             className="bg-red-600 hover:bg-red-700 text-white font-mono text-sm shadow-lg"
             aria-label="Return to main menu"
           >
