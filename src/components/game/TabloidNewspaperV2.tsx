@@ -81,6 +81,7 @@ const createSecondaryStory = (
   data: NewspaperData,
 ): {
   id: string;
+  cardId: string;
   headline: string;
   subhead: string;
   summary: string;
@@ -98,6 +99,7 @@ const createSecondaryStory = (
   const targetLabel = formatTarget(entry);
   return {
     id: entry.card.id,
+    cardId: entry.card.id,
     headline,
     subhead,
     summary,
@@ -540,12 +542,26 @@ const TabloidNewspaperV2 = ({ events, playedCards, faction, truth, onClose }: Ta
                   <div className="space-y-3 text-sm">
                     {oppositionStories.map(story => (
                       <div key={story.id} className="border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0">
-                        <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                          <span>{story.typeLabel}</span>
-                          {story.truthDeltaLabel ? <span>{story.truthDeltaLabel}</span> : null}
+                        <div className="flex gap-3 items-start">
+                          {story.cardId ? (
+                            <CardImage
+                              cardId={story.cardId}
+                              className="h-16 w-16 flex-shrink-0 rounded border border-newspaper-border/60 bg-newspaper-header/20"
+                            />
+                          ) : (
+                            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded border border-dashed border-newspaper-border/60 bg-newspaper-header/10 text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/40">
+                              No Art
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                              <span>{story.typeLabel}</span>
+                              {story.truthDeltaLabel ? <span>{story.truthDeltaLabel}</span> : null}
+                            </div>
+                            <p className="font-semibold leading-snug">{story.headline}</p>
+                            <p className="text-xs italic text-newspaper-text/70">{story.subhead}</p>
+                          </div>
                         </div>
-                        <p className="font-semibold leading-snug">{story.headline}</p>
-                        <p className="text-xs italic text-newspaper-text/70">{story.subhead}</p>
                       </div>
                     ))}
                   </div>
