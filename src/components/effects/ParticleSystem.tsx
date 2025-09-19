@@ -13,11 +13,24 @@ interface Particle {
   opacity: number;
 }
 
+export type ParticleEffectType =
+  | 'deploy'
+  | 'capture'
+  | 'counter'
+  | 'victory'
+  | 'synergy'
+  | 'bigwin'
+  | 'stateloss'
+  | 'chain'
+  | 'flash'
+  | 'stateevent'
+  | 'contested';
+
 interface ParticleSystemProps {
   active: boolean;
   x: number;
   y: number;
-  type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain';
+  type: ParticleEffectType;
   onComplete?: () => void;
 }
 
@@ -87,21 +100,33 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
     };
   }, [active, x, y, type, onComplete]);
 
-  const getParticleCount = (type: string): number => {
+  const getParticleCount = (type: ParticleEffectType): number => {
     switch (type) {
-      case 'victory': case 'bigwin': return 60;
-      case 'synergy': return 40;
-      case 'chain': return 35;
-      case 'deploy': case 'stateloss': return 30;
-      case 'capture': case 'counter': return 20;
+      case 'victory':
+      case 'bigwin':
+        return 60;
+      case 'flash':
+        return 48;
+      case 'synergy':
+      case 'stateevent':
+        return 40;
+      case 'chain':
+      case 'contested':
+        return 35;
+      case 'deploy':
+      case 'stateloss':
+        return 30;
+      case 'capture':
+      case 'counter':
+        return 20;
       default: return 20;
     }
   };
 
-  const createParticle = (id: number, centerX: number, centerY: number, effectType: string): Particle => {
+  const createParticle = (id: number, centerX: number, centerY: number, effectType: ParticleEffectType): Particle => {
     const angle = (Math.PI * 2 * id) / 20 + Math.random() * 0.5;
     const speed = getParticleSpeed(effectType);
-    
+
     const color = getParticleColor(effectType);
 
     const spread = getParticleSpread(effectType);
@@ -121,17 +146,27 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
     };
   };
 
-  const getParticleSpeed = (type: string): number => {
+  const getParticleSpeed = (type: ParticleEffectType): number => {
     switch (type) {
-      case 'victory': case 'bigwin': return 4 + Math.random() * 5;
-      case 'synergy': return 3 + Math.random() * 4;
-      case 'chain': return 2.5 + Math.random() * 3;
-      case 'stateloss': return 1.5 + Math.random() * 2;
-      default: return 2 + Math.random() * 3;
+      case 'victory':
+      case 'bigwin':
+        return 4 + Math.random() * 5;
+      case 'flash':
+        return 3.5 + Math.random() * 4;
+      case 'synergy':
+      case 'stateevent':
+        return 3 + Math.random() * 4;
+      case 'chain':
+      case 'contested':
+        return 2.5 + Math.random() * 3;
+      case 'stateloss':
+        return 1.5 + Math.random() * 2;
+      default:
+        return 2 + Math.random() * 3;
     }
   };
 
-  const getParticleColor = (type: string): string => {
+  const getParticleColor = (type: ParticleEffectType): string => {
     switch (type) {
       case 'deploy':
         return `hsl(${142 + Math.random() * 20}, 76%, ${36 + Math.random() * 20}%)`;
@@ -147,38 +182,73 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
         return `hsl(${180 + Math.random() * 40}, 90%, ${50 + Math.random() * 20}%)`;
       case 'stateloss':
         return `hsl(${0 + Math.random() * 20}, 95%, ${40 + Math.random() * 15}%)`;
+      case 'flash':
+        return `hsla(${50 + Math.random() * 10}, 95%, ${85 + Math.random() * 10}%, ${0.85 - Math.random() * 0.2})`;
+      case 'stateevent':
+        return `hsl(${305 + Math.random() * 20}, 88%, ${62 + Math.random() * 12}%)`;
+      case 'contested':
+        return `hsl(${200 + Math.random() * 20}, 72%, ${58 + Math.random() * 10}%)`;
       default:
         return `hsl(${Math.random() * 360}, 70%, 60%)`;
     }
   };
 
-  const getParticleSpread = (type: string): number => {
+  const getParticleSpread = (type: ParticleEffectType): number => {
     switch (type) {
-      case 'victory': case 'bigwin': return 80;
-      case 'synergy': return 70;
-      case 'chain': return 60;
-      default: return 50;
+      case 'victory':
+      case 'bigwin':
+        return 80;
+      case 'flash':
+        return 90;
+      case 'synergy':
+      case 'stateevent':
+        return 70;
+      case 'chain':
+      case 'contested':
+        return 60;
+      default:
+        return 50;
     }
   };
 
-  const getParticleLifespan = (type: string): number => {
+  const getParticleLifespan = (type: ParticleEffectType): number => {
     const base = 120 + Math.random() * 60;
     switch (type) {
-      case 'victory': case 'bigwin': return base * 1.5;
-      case 'synergy': return base * 1.3;
-      case 'chain': return base * 1.1;
-      case 'stateloss': return base * 0.8;
-      default: return base;
+      case 'victory':
+      case 'bigwin':
+        return base * 1.5;
+      case 'flash':
+        return base * 1.2;
+      case 'synergy':
+      case 'stateevent':
+        return base * 1.3;
+      case 'chain':
+      case 'contested':
+        return base * 1.1;
+      case 'stateloss':
+        return base * 0.8;
+      default:
+        return base;
     }
   };
 
-  const getParticleSize = (type: string): number => {
+  const getParticleSize = (type: ParticleEffectType): number => {
     switch (type) {
-      case 'victory': case 'bigwin': return 5 + Math.random() * 5;
-      case 'synergy': return 4 + Math.random() * 4;
-      case 'chain': return 3 + Math.random() * 3;
-      case 'stateloss': return 2 + Math.random() * 2;
-      default: return 2 + Math.random() * 3;
+      case 'victory':
+      case 'bigwin':
+        return 5 + Math.random() * 5;
+      case 'flash':
+        return 3 + Math.random() * 3;
+      case 'synergy':
+      case 'stateevent':
+        return 4 + Math.random() * 4;
+      case 'chain':
+      case 'contested':
+        return 3 + Math.random() * 3;
+      case 'stateloss':
+        return 2 + Math.random() * 2;
+      default:
+        return 2 + Math.random() * 3;
     }
   };
 
