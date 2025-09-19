@@ -1,6 +1,8 @@
-import type { GameCard } from '@/rules/mvp';
+import type { GameCard, Rarity } from '@/rules/mvp';
 import { featureFlags } from '@/state/featureFlags';
 import { resolveCardMVP, type AchievementTracker, type CardPlayResolution } from '@/systems/cardResolution';
+import type { TurnPlay } from '@/game/combo.types';
+import type { PlayerId } from '@/mvp/validator';
 
 import type { CardPlayRecord, GameState } from './gameStateTypes';
 
@@ -50,6 +52,144 @@ export const createPlayedCardRecord = (params: {
     timestamp: Date.now(),
     logEntries: [...logEntries],
   };
+};
+
+const TURN_PLAY_OWNER: Record<'human' | 'ai', PlayerId> = {
+  human: 'P1',
+  ai: 'P2',
+};
+
+const resolveTargetStateId = (state: GameState, target?: string | null): string | undefined => {
+  if (!target) {
+    return undefined;
+  }
+
+  const normalized = String(target).trim();
+  if (!normalized.length) {
+    return undefined;
+  }
+
+  const match = state.states.find(candidate =>
+    candidate.id === normalized ||
+    candidate.abbreviation === normalized ||
+    candidate.name === normalized,
+  );
+
+  return match?.id ?? normalized;
+};
+
+const computeZoneCaptures = (
+  owner: 'human' | 'ai',
+  state: GameState,
+  resolution: CardPlayResolution,
+): string[] => {
+  const previous = new Set(owner === 'human' ? state.controlledStates : state.aiControlledStates);
+  const next = owner === 'human' ? resolution.controlledStates : resolution.aiControlledStates;
+  return next.filter(entry => !previous.has(entry));
+};
+
+const buildResolveMetadata = (
+  params: {
+    owner: 'human' | 'ai';
+    state: GameState;
+    card: GameCard;
+    resolution: CardPlayResolution;
+    targetStateId?: string;
+  },
+): Record<string, number | string | undefined> | undefined => {
+  const { owner, state, card, resolution, targetStateId } = params;
+
+  if (card.type !== 'ATTACK' && card.type !== 'MEDIA' && card.type !== 'ZONE') {
+    return undefined;
+  }
+
+  const metadata: Record<string, number | string | undefined> = {};
+
+  if (card.type === 'ATTACK') {
+    if (resolution.damageDealt > 0) {
+      metadata.damage = resolution.damageDealt;
+    }
+    const discardValue = (card.effects as { discardOpponent?: number } | undefined)?.discardOpponent;
+    if (typeof discardValue === 'number' && discardValue > 0) {
+      metadata.discard = discardValue;
+    }
+  }
+
+  if (card.type === 'MEDIA') {
+    const truthDelta = resolution.truth - state.truth;
+    if (truthDelta !== 0) {
+      metadata.truth = truthDelta;
+    }
+  }
+
+  if (card.type === 'ZONE') {
+    const pressureDelta = (card.effects as { pressureDelta?: number } | undefined)?.pressureDelta;
+    if (typeof pressureDelta === 'number' && pressureDelta !== 0) {
+      metadata.pressure = pressureDelta;
+    }
+
+    if (targetStateId) {
+      metadata.target = targetStateId;
+    }
+
+    const captured = computeZoneCaptures(owner, state, resolution);
+    if (captured.length > 0) {
+      metadata.captured = captured.join(',');
+    }
+  }
+
+  const definedEntries = Object.entries(metadata).filter(([, value]) => value !== undefined);
+  if (definedEntries.length === 0) {
+    return undefined;
+  }
+
+  return Object.fromEntries(definedEntries);
+};
+
+export const createTurnPlayEntries = (params: {
+  state: GameState;
+  card: GameCard;
+  owner: 'human' | 'ai';
+  targetState?: string | null;
+  resolution: CardPlayResolution;
+  sequenceStart?: number;
+}): TurnPlay[] => {
+  const { state, card, owner, targetState, resolution } = params;
+  if (card.type !== 'ATTACK' && card.type !== 'MEDIA' && card.type !== 'ZONE') {
+    return [];
+  }
+
+  const playerId = TURN_PLAY_OWNER[owner];
+  const rarity = (card.rarity ?? 'common') as Rarity;
+  const targetStateId = resolveTargetStateId(state, targetState ?? resolution.targetState);
+  const startSequence =
+    typeof params.sequenceStart === 'number' ? params.sequenceStart : state.turnPlays.length;
+
+  const baseEntry = {
+    owner: playerId,
+    cardId: card.id,
+    cardName: card.name,
+    cardType: card.type,
+    cardRarity: rarity,
+    cost: card.cost,
+    targetStateId,
+  } as const;
+
+  const resolveMetadata = buildResolveMetadata({ owner, state, card, resolution, targetStateId });
+
+  return [
+    {
+      sequence: startSequence,
+      stage: 'play',
+      ...baseEntry,
+    },
+    {
+      sequence: startSequence + 1,
+      stage: 'resolve',
+      ...baseEntry,
+      metadata: resolveMetadata,
+    },
+  ];
 };
 
 const summarizeStrategy = (reasoning?: string, strategyDetails?: string[]): string | undefined => {
@@ -148,6 +288,14 @@ export const applyAiCardPlay = (
     turn: prev.turn,
   });
 
+  const turnPlayEntries = createTurnPlayEntries({
+    state: prev,
+    card: resolvedCard,
+    owner: 'ai',
+    targetState,
+    resolution,
+  });
+
   const nextState: GameState = {
     ...prev,
     ip: resolution.ip,
@@ -160,6 +308,7 @@ export const applyAiCardPlay = (
     aiHand: prev.aiHand.filter(c => c.id !== resolvedCard.id),
     cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
     playHistory: [...prev.playHistory, playedCardRecord],
+    turnPlays: [...prev.turnPlays, ...turnPlayEntries],
     log: logEntries,
   };
 

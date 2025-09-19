@@ -4,6 +4,7 @@ import type { SecretAgenda } from '@/data/agendaDatabase';
 import type { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import type { DrawMode, CardDrawState } from '@/data/cardDrawingSystem';
 import type { AIDifficulty } from '@/data/aiStrategy';
+import type { TurnPlay } from '@/game/combo.types';
 
 export interface CardPlayRecord {
   card: GameCard;
@@ -40,6 +41,7 @@ export interface GameState {
   cardsPlayedThisTurn: number;
   cardsPlayedThisRound: CardPlayRecord[];
   playHistory: CardPlayRecord[];
+  turnPlays: TurnPlay[];
   controlledStates: string[];
   aiControlledStates: string[];
   states: Array<{
