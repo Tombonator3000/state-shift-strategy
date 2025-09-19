@@ -227,8 +227,8 @@ class WeightedCardDistribution {
       case 'core-only':
         weights.core = 1.0;
         availableSets.forEach(set => {
-          if (!set.isCore && set.cards.length > 0) {
-            weights[set.id] = 1.0;
+          if (!set.isCore && set.id in weights) {
+            delete weights[set.id];
           }
         });
         break;
