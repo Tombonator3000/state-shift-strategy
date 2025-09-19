@@ -4,9 +4,10 @@ import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
 import { generateMixedDeck } from '@/lib/decks/generator';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
-import { type AIDifficulty, type CardPlay } from '@/data/aiStrategy';
+import { type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
+import { chooseTurnActions } from '@/ai/enhancedController';
 import { EventManager, type GameEvent } from '@/data/eventDatabase';
 import { buildEditionEvents } from './eventEdition';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
@@ -616,160 +617,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     });
   }, []);
 
-  // AI Turn Management
-  const executeAITurn = useCallback(async () => {
-    // Prevent re-entrancy or accidental multiple triggers
-    if (!gameState.aiStrategist || gameState.currentPlayer !== 'ai' || gameState.aiTurnInProgress) return;
-
-    // Mark AI turn as in progress
-    setGameState(prev => ({ ...prev, aiTurnInProgress: true }));
-
-    const currentGameState = gameState; // Capture current state
-    
-    // AI income phase
-    const aiControlledStates = currentGameState.states
-      .filter(state => state.owner === 'ai')
-      .map(state => state.abbreviation);
-      
-    const aiStateIncome = getTotalIPFromStates(aiControlledStates);
-    const aiBaseIncome = 5;
-    const aiTotalIncome = aiBaseIncome + aiStateIncome;
-
-    const aiFaction = currentGameState.faction === 'government' ? 'truth' : 'government';
-    const aiCardsNeeded = Math.max(0, HAND_LIMIT - currentGameState.aiHand.length);
-    const {
-      drawn: aiDrawnCards,
-      deck: aiRemainingDeck,
-    } = drawCardsFromDeck(currentGameState.aiDeck, aiCardsNeeded, aiFaction);
-    const aiHandSizeAfterDraw = currentGameState.aiHand.length + aiDrawnCards.length;
-
-    // Update state with AI income and cards
-    setGameState(prev => ({
-      ...prev,
-      aiHand: [...prev.aiHand, ...aiDrawnCards],
-      aiDeck: aiRemainingDeck,
-      // AI IP income
-      aiIP: prev.aiIP + aiTotalIncome,
-      log: [...prev.log,
-        `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStates.length} states = ${aiTotalIncome} IP`,
-        `AI drew ${aiDrawnCards.length} card${aiDrawnCards.length === 1 ? '' : 's'} (hand ${aiHandSizeAfterDraw}/${HAND_LIMIT})`
-      ]
-    }));
-
-    // Give AI time to "think" (for better UX)
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
-
-    // AI plays cards
-    let cardsPlayed = 0;
-    const maxCardsPerTurn = 3;
-
-    while (cardsPlayed < maxCardsPerTurn) {
-      // Get fresh game state for each card play
-      const freshState = await new Promise<GameState>(resolve => {
-        setGameState(prev => {
-          resolve(prev);
-          return prev;
-        });
-      });
-
-      if (!freshState.aiStrategist || freshState.aiHand.length === 0) break;
-
-      const baseStrategistView = {
-        ...freshState,
-        // Provide AI-relative IP metric expected by strategist (negative = player advantage)
-        ip: -freshState.ip,
-        hand: freshState.aiHand,
-        aiHand: freshState.aiHand,
-        controlledStates: freshState.states
-          .filter(state => state.owner === 'ai')
-          .map(state => state.abbreviation)
-      };
-
-      const attemptedCardIds = new Set<string>();
-      let selectedPlay: CardPlay | null = null;
-      let selectedCard: GameCard | undefined;
-      let selectedStrategyDetails: string[] | undefined;
-      let stopPlaying = false;
-
-      while (!stopPlaying && attemptedCardIds.size < freshState.aiHand.length) {
-        const availableHand = freshState.aiHand.filter(card => !attemptedCardIds.has(card.id));
-        if (availableHand.length === 0) {
-          break;
-        }
-
-        const strategistView = {
-          ...baseStrategistView,
-          hand: availableHand,
-          aiHand: availableHand,
-        };
-
-        const enhancedPlay = freshState.aiStrategist.selectOptimalPlay(strategistView);
-
-        if (!enhancedPlay || enhancedPlay.priority < 0.3) {
-          stopPlaying = true;
-          break;
-        }
-
-        const candidateCard = availableHand.find(card => card.id === enhancedPlay.cardId);
-        if (!candidateCard) {
-          attemptedCardIds.add(enhancedPlay.cardId);
-          continue;
-        }
-
-        if (freshState.aiIP < candidateCard.cost) {
-          attemptedCardIds.add(candidateCard.id);
-          continue;
-        }
-
-        const details: string[] = [];
-        const { synergies, deceptionValue, threatResponse } = enhancedPlay;
-
-        if (synergies?.length) {
-          const synergyDescriptions = synergies.map(synergy => synergy.description).join(', ');
-          details.push(`AI Synergy Bonus: ${synergyDescriptions}`);
-        }
-
-        if (deceptionValue > 0) {
-          details.push(`Deception tactics engaged (${Math.round(deceptionValue * 100)}% intensity)`);
-        }
-
-        if (threatResponse) {
-          details.push('Countering recent player action.');
-        }
-
-        const adaptiveSummary = freshState.aiStrategist.getAdaptiveSummary();
-        if (adaptiveSummary.length) {
-          details.push(...adaptiveSummary);
-        }
-
-        selectedPlay = enhancedPlay;
-        selectedCard = candidateCard;
-        selectedStrategyDetails = details.length > 0 ? details : undefined;
-        break;
-      }
-
-      if (stopPlaying || !selectedPlay || !selectedCard) break;
-
-      await playAICard(
-        selectedPlay.cardId,
-        selectedPlay.targetState,
-        selectedPlay.reasoning,
-        selectedStrategyDetails,
-      );
-      cardsPlayed++;
-
-      // Brief pause between AI card plays
-      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
-    }
-
-    // End AI turn
-    setTimeout(() => {
-      endTurn();
-      // Clear in-progress flag after AI ends turn
-      setGameState(prev => ({ ...prev, aiTurnInProgress: false }));
-    }, 1000);
-  }, [gameState]);
-
   const playAICard = useCallback((
     cardId: string,
     targetState?: string,
@@ -826,6 +673,99 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       };
     });
   }, [achievements, gameState]);
+
+  // AI Turn Management
+  const executeAITurn = useCallback(async () => {
+    if (!gameState.aiStrategist || gameState.currentPlayer !== 'ai' || gameState.aiTurnInProgress) {
+      return;
+    }
+
+    setGameState(prev => ({ ...prev, aiTurnInProgress: true }));
+
+    await new Promise<GameState>(resolve => {
+      setGameState(prev => {
+        const aiControlledStates = prev.states
+          .filter(state => state.owner === 'ai')
+          .map(state => state.abbreviation);
+
+        const aiStateIncome = getTotalIPFromStates(aiControlledStates);
+        const aiBaseIncome = 5;
+        const aiTotalIncome = aiBaseIncome + aiStateIncome;
+
+        const aiFaction = prev.faction === 'government' ? 'truth' : 'government';
+        const aiCardsNeeded = Math.max(0, HAND_LIMIT - prev.aiHand.length);
+        const { drawn: aiDrawnCards, deck: aiRemainingDeck } = drawCardsFromDeck(prev.aiDeck, aiCardsNeeded, aiFaction);
+        const aiHandSizeAfterDraw = prev.aiHand.length + aiDrawnCards.length;
+
+        const nextState: GameState = {
+          ...prev,
+          aiHand: [...prev.aiHand, ...aiDrawnCards],
+          aiDeck: aiRemainingDeck,
+          aiIP: prev.aiIP + aiTotalIncome,
+          log: [
+            ...prev.log,
+            `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStates.length} states = ${aiTotalIncome} IP`,
+            `AI drew ${aiDrawnCards.length} card${aiDrawnCards.length === 1 ? '' : 's'} (hand ${aiHandSizeAfterDraw}/${HAND_LIMIT})`,
+          ],
+        };
+
+        resolve(nextState);
+        return nextState;
+      });
+    });
+
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+
+    const planningState = await new Promise<GameState>(resolve => {
+      setGameState(prev => {
+        resolve(prev);
+        return prev;
+      });
+    });
+
+    if (!planningState.aiStrategist) {
+      setGameState(prev => ({ ...prev, aiTurnInProgress: false }));
+      return;
+    }
+
+    const turnPlan = chooseTurnActions({
+      strategist: planningState.aiStrategist,
+      gameState: planningState,
+      maxActions: 3,
+      priorityThreshold: 0.3,
+    });
+
+    if (turnPlan.actions.length === 0 && turnPlan.sequenceDetails.length) {
+      setGameState(prev => ({
+        ...prev,
+        log: [...prev.log, ...buildStrategyLogEntries(undefined, turnPlan.sequenceDetails)],
+      }));
+    }
+
+    for (let index = 0; index < turnPlan.actions.length; index++) {
+      const action = turnPlan.actions[index];
+      const detailEntries = [
+        ...(index === 0 ? turnPlan.sequenceDetails : []),
+        ...(action.strategyDetails ?? []),
+      ];
+
+      await playAICard(
+        action.cardId,
+        action.targetState,
+        action.reasoning,
+        detailEntries.length ? detailEntries : undefined,
+      );
+
+      if (index < turnPlan.actions.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
+      }
+    }
+
+    setTimeout(() => {
+      endTurn();
+      setGameState(prev => ({ ...prev, aiTurnInProgress: false }));
+    }, 1000);
+  }, [gameState, endTurn, playAICard]);
 
   const closeNewspaper = useCallback(() => {
     setGameState(prev => {
