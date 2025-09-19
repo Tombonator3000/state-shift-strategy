@@ -18,13 +18,16 @@ import { applyTruthDelta } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
+import { getComboSettings } from '@/game/comboEngine';
 import type { GameState } from './gameStateTypes';
 import {
   applyAiCardPlay,
   buildStrategyLogEntries,
   createPlayedCardRecord,
+  createTurnPlayEntries,
   type AiCardPlayParams,
 } from './aiHelpers';
+import { evaluateCombosForTurn } from './comboAdapter';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
@@ -175,6 +178,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
     playHistory: [],
+    turnPlays: [],
     controlledStates: [],
     aiControlledStates: [],
     states: USA_STATES.map(state => {
@@ -281,6 +285,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       cardsPlayedThisTurn: 0,
       cardsPlayedThisRound: [],
       playHistory: [],
+      turnPlays: [],
       animating: false,
       aiTurnInProgress: false,
       selectedCard: null,
@@ -343,6 +348,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         turn: prev.turn,
       });
 
+      const turnPlayEntries = createTurnPlayEntries({
+        state: prev,
+        card,
+        owner: 'human',
+        targetState,
+        resolution,
+      });
+
       return {
         ...prev,
         hand: prev.hand.filter(c => c.id !== cardId),
@@ -355,6 +368,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
         playHistory: [...prev.playHistory, playedCardRecord],
+        turnPlays: [...prev.turnPlays, ...turnPlayEntries],
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
         log: [...prev.log, ...resolution.logEntries]
@@ -376,6 +390,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
     const targetState = explicitTargetState ?? gameState.targetState ?? null;
     let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
+    let pendingTurnPlays: ReturnType<typeof createTurnPlayEntries> | null = null;
 
     setGameState(prev => {
       if (prev.animating) {
@@ -394,6 +409,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         previousAiIP: prev.aiIP,
         round: prev.round,
         turn: prev.turn,
+      });
+
+      pendingTurnPlays = createTurnPlayEntries({
+        state: prev,
+        card,
+        owner: 'human',
+        targetState,
+        resolution,
       });
 
       return {
@@ -439,6 +462,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
           cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
           playHistory: [...prev.playHistory, record],
+          turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
           selectedCard: null,
           targetState: null,
           animating: false,
@@ -468,6 +492,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
           cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
           playHistory: [...prev.playHistory, record],
+          turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
           selectedCard: null,
           targetState: null,
           animating: false,
@@ -492,10 +517,25 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       // Don't allow turn ending if game is over
       if (prev.isGameOver) return prev;
       
-      if (prev.currentPlayer === 'human') {
+      const isHumanTurn = prev.currentPlayer === 'human';
+      const comboResult = evaluateCombosForTurn(prev, isHumanTurn ? 'human' : 'ai');
+      const fxEnabled = getComboSettings().fxEnabled;
+
+      if (
+        fxEnabled &&
+        comboResult.fxMessages.length > 0 &&
+        typeof window !== 'undefined' &&
+        typeof window.uiComboToast === 'function'
+      ) {
+        for (const message of comboResult.fxMessages) {
+          window.uiComboToast(message);
+        }
+      }
+
+      if (isHumanTurn) {
         // Human player ending turn - switch to AI (no card draw here anymore)
         // Card drawing will happen after newspaper at start of new turn
-        
+
         // Calculate IP income from controlled states
         const stateIncome = getTotalIPFromStates(prev.controlledStates);
         const baseIncome = 5;
@@ -521,7 +561,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
               if (effects.truth) truthModifier = effects.truth;
               if (effects.ip) ipModifier = effects.ip;
               if (effects.cardDraw) bonusCardDraw = effects.cardDraw;
-              
+
               eventEffectLog.push(`EVENT: ${triggeredEvent.title} triggered!`);
               if (effects.truth) eventEffectLog.push(`Truth ${effects.truth > 0 ? '+' : ''}${effects.truth}%`);
               if (effects.ip) eventEffectLog.push(`IP ${effects.ip > 0 ? '+' : ''}${effects.ip}`);
@@ -534,9 +574,16 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
         // Store pending card draw for after newspaper
         const pendingCardDraw = bonusCardDraw;
-        
+
+        const comboLog =
+          comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
+
+        const humanIpAfterCombos = comboResult.updatedPlayerIp;
+        const aiIpAfterCombos = comboResult.updatedOpponentIp;
+        const truthAfterCombos = comboResult.updatedTruth;
+
         const logEntries = [
-          ...prev.log,
+          ...comboLog,
           `Turn ${prev.turn} ended`,
           `Base income: ${baseIncome} IP`,
           `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
@@ -551,8 +598,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           currentPlayer: 'ai',
           showNewspaper: false,
           cardsPlayedThisTurn: 0,
-          truth: prev.truth,
-          ip: prev.ip + totalIncome + ipModifier,
+          truth: truthAfterCombos,
+          ip: humanIpAfterCombos + totalIncome + ipModifier,
+          aiIP: aiIpAfterCombos,
           pendingCardDraw,
           currentEvents: newEvents,
           cardDrawState: {
@@ -560,23 +608,31 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             lastTurnWithoutPlay: prev.cardsPlayedThisTurn === 0
           },
           log: logEntries,
+          turnPlays: [],
         };
 
         applyTruthDelta(nextState, truthModifier, 'human');
         nextState.log.push(`AI ${prev.aiStrategist?.personality.name} is thinking...`);
 
         return nextState;
-      } else {
-        // AI turn ending - switch back to human
-        return {
-          ...prev,
-          round: prev.round + 1,
-          phase: 'newspaper',
-          currentPlayer: 'human',
-          showNewspaper: true,
-          log: [...prev.log, `AI turn completed`]
-        };
       }
+
+      const comboLog =
+        comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
+
+      return {
+        ...prev,
+        round: prev.round + 1,
+        phase: 'newspaper',
+        currentPlayer: 'human',
+        showNewspaper: true,
+        truth: comboResult.updatedTruth,
+        ip: comboResult.updatedOpponentIp,
+        aiIP: comboResult.updatedPlayerIp,
+        cardsPlayedThisTurn: 0,
+        turnPlays: [],
+        log: [...comboLog, 'AI turn completed']
+      };
     });
   }, []);
 
@@ -889,6 +945,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           : [],
         playHistory: Array.isArray(saveData.playHistory)
           ? saveData.playHistory
+          : [],
+        turnPlays: Array.isArray(saveData.turnPlays)
+          ? saveData.turnPlays
           : [],
         // Ensure objects are properly reconstructed
         eventManager: prev.eventManager, // Keep the current event manager
