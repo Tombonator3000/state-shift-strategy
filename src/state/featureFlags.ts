@@ -1,9 +1,11 @@
 export type FeatureFlags = {
   newspaperV2: boolean;
+  aiVerboseStrategyLog: boolean;
 };
 
 const DEFAULT_FLAGS: FeatureFlags = {
   newspaperV2: true,
+  aiVerboseStrategyLog: false,
 };
 
 const readBoolean = (key: string, fallback: boolean): boolean => {
@@ -35,4 +37,6 @@ const overrides: Partial<FeatureFlags> =
 
 export const featureFlags: FeatureFlags = {
   newspaperV2: overrides.newspaperV2 ?? readBoolean('shadowgov:flag:newspaperV2', DEFAULT_FLAGS.newspaperV2),
+  aiVerboseStrategyLog:
+    overrides.aiVerboseStrategyLog ?? readBoolean('shadowgov:flag:aiVerboseStrategyLog', DEFAULT_FLAGS.aiVerboseStrategyLog),
 };
