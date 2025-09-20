@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -105,6 +105,7 @@ interface GameSettings {
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const audio = useAudioContext();
   const [uiTheme, setUiTheme] = useUiTheme();
+  const { volume: audioMasterVolume } = audio.config;
 
   const resolveInitialState = (): { settings: GameSettings; combo: ComboSettings } => {
     const defaultDifficulty = (() => {
@@ -184,14 +185,21 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
 
   const [settings, setSettings] = useState<GameSettings>(initialStateRef.current.settings);
   const [comboSettingsState, setComboSettingsState] = useState<ComboSettings>(initialStateRef.current.combo);
+  const masterVolumeUpdateSource = useRef<'settings' | null>(null);
 
   useEffect(() => {
-    const currentAudioVolume = Math.round(audio.config.volume * 100);
+    if (masterVolumeUpdateSource.current !== 'settings') {
+      return;
+    }
+
+    const currentAudioVolume = Math.round(audioMasterVolume * 100);
     if (currentAudioVolume !== settings.masterVolume) {
       console.log('🎵 Options: Syncing volume from', currentAudioVolume, 'to', settings.masterVolume);
       audio.setVolume(settings.masterVolume / 100);
     }
-  }, [settings.masterVolume, audio]);
+
+    masterVolumeUpdateSource.current = null;
+  }, [settings.masterVolume, audio, audioMasterVolume]);
 
   useEffect(() => {
     const currentSfxVolume = Math.round(audio.config.sfxVolume * 100);
@@ -209,7 +217,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     }
   }, [settings.musicVolume, audio]);
 
-  const persistSettings = (nextSettings: GameSettings, nextComboSettings: ComboSettings) => {
+  const persistSettings = useCallback((nextSettings: GameSettings, nextComboSettings: ComboSettings) => {
     if (typeof localStorage === 'undefined') {
       return;
     }
@@ -222,9 +230,13 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     } catch (error) {
       console.error('Failed to persist settings:', error);
     }
-  };
+  }, []);
 
   const updateSettings = (newSettings: Partial<GameSettings>) => {
+    if (typeof newSettings.masterVolume === 'number') {
+      masterVolumeUpdateSource.current = 'settings';
+    }
+
     setSettings(prev => {
       const updated = { ...prev, ...newSettings };
       if (newSettings.difficulty) {
@@ -234,6 +246,36 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       return updated;
     });
   };
+
+  const handleMasterVolumeChange = (volume: number) => {
+    const clampedVolume = Math.min(1, Math.max(0, volume));
+    const percentValue = Math.round(clampedVolume * 100);
+
+    masterVolumeUpdateSource.current = 'settings';
+    updateSettings({ masterVolume: percentValue });
+    audio.setVolume(clampedVolume);
+  };
+
+  useEffect(() => {
+    if (masterVolumeUpdateSource.current === 'settings') {
+      return;
+    }
+
+    const currentAudioVolume = Math.round(audioMasterVolume * 100);
+    if (currentAudioVolume === settings.masterVolume) {
+      return;
+    }
+
+    setSettings(prev => {
+      if (prev.masterVolume === currentAudioVolume) {
+        return prev;
+      }
+
+      const updated = { ...prev, masterVolume: currentAudioVolume };
+      persistSettings(updated, comboSettingsState);
+      return updated;
+    });
+  }, [audioMasterVolume, comboSettingsState, persistSettings, settings.masterVolume]);
 
   const applyComboSettings = (update: Partial<ComboSettings>) => {
     const normalized: Partial<ComboSettings> = { ...update };
@@ -268,6 +310,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       comboToggles: { ...DEFAULT_COMBO_SETTINGS.comboToggles },
     });
 
+    masterVolumeUpdateSource.current = 'settings';
     setSettings(defaultSettings);
     setComboSettingsState(defaultCombos);
     setDifficultyFromLabel(defaultSettings.difficulty);
@@ -388,7 +431,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 </label>
                 <Slider
                   value={[settings.masterVolume]}
-                  onValueChange={([value]) => updateSettings({ masterVolume: value })}
+                  onValueChange={([value]) => handleMasterVolumeChange(value / 100)}
                   max={100}
                   step={1}
                   className="w-full"
@@ -431,7 +474,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-sm font-medium text-newspaper-text">Advanced Audio Controls</label>
                   <AudioControls
-                    volume={audio.config.volume}
+                    volume={settings.masterVolume / 100}
                     musicVolume={audio.config.musicVolume}
                     muted={audio.config.muted}
                     musicEnabled={audio.config.musicEnabled}
@@ -441,7 +484,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                     audioStatus={audio.audioStatus}
                     tracksLoaded={audio.tracksLoaded}
                     audioContextUnlocked={audio.audioContextUnlocked}
-                    onVolumeChange={audio.setVolume}
+                    onVolumeChange={handleMasterVolumeChange}
                     onMusicVolumeChange={audio.setMusicVolume}
                     onToggleMute={audio.toggleMute}
                     onToggleMusic={audio.toggleMusic}
