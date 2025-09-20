@@ -6,6 +6,11 @@ import TabloidFlashOverlay from '@/components/effects/TabloidFlashOverlay';
 import ConspiracyCorkboard from '@/components/effects/ConspiracyCorkboard';
 import UFOElvisBroadcast from '@/components/effects/UFOElvisBroadcast';
 import BigfootTrailCam from '@/components/effects/BigfootTrailCam';
+import BreakingNewsTicker from '@/components/effects/BreakingNewsTicker';
+import GovernmentSurveillance from '@/components/effects/GovernmentSurveillance';
+import TypewriterReveal from '@/components/effects/TypewriterReveal';
+import StaticInterference from '@/components/effects/StaticInterference';
+import EvidencePhotoGallery from '@/components/effects/EvidencePhotoGallery';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { areParanormalEffectsEnabled } from '@/state/settings';
 
@@ -64,6 +69,53 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     stateName?: string;
     footageQuality: string;
     reducedMotion?: boolean;
+  } | null>(null);
+
+  // New enhanced effect states
+  const [breakingNewsOverlay, setBreakingNewsOverlay] = useState<{
+    id: number;
+    x: number;
+    y: number;
+    newsText: string;
+  } | null>(null);
+
+  const [surveillanceOverlay, setSurveillanceOverlay] = useState<{
+    id: number;
+    x: number;
+    y: number;
+    targetName: string;
+    threatLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CLASSIFIED';
+  } | null>(null);
+
+  const [typewriterOverlay, setTypewriterOverlay] = useState<{
+    id: number;
+    x: number;
+    y: number;
+    documentTitle: string;
+    documentContent: string[];
+    classificationLevel: 'UNCLASSIFIED' | 'CONFIDENTIAL' | 'SECRET' | 'TOP SECRET';
+  } | null>(null);
+
+  const [staticOverlay, setStaticOverlay] = useState<{
+    id: number;
+    x: number;
+    y: number;
+    intensity: 'light' | 'medium' | 'heavy' | 'signal-lost';
+    message: string;
+  } | null>(null);
+
+  const [evidenceOverlay, setEvidenceOverlay] = useState<{
+    id: number;
+    x: number;
+    y: number;
+    caseTitle: string;
+    photos: Array<{
+      id: string;
+      src: string;
+      caption: string;
+      timestamp: string;
+      caseNumber: string;
+    }>;
   } | null>(null);
 
   const spawnParticleEffect = useCallback((type: ParticleEffectType, x: number, y: number) => {
@@ -177,6 +229,107 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       }
     };
 
+    // New enhanced effect handlers
+    const handleBreakingNews = (event: CustomEvent<{
+      newsText: string;
+      x: number;
+      y: number;
+    }>) => {
+      if (!event?.detail) return;
+      const { newsText, x, y } = event.detail;
+      setBreakingNewsOverlay({
+        id: Date.now(),
+        x,
+        y,
+        newsText
+      });
+      spawnParticleEffect('flash', x, y);
+      audio?.playSFX?.('newspaper');
+    };
+
+    const handleGovernmentSurveillance = (event: CustomEvent<{
+      targetName: string;
+      threatLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CLASSIFIED';
+      x: number;
+      y: number;
+    }>) => {
+      if (!event?.detail) return;
+      const { targetName, threatLevel, x, y } = event.detail;
+      setSurveillanceOverlay({
+        id: Date.now(),
+        x,
+        y,
+        targetName,
+        threatLevel
+      });
+      spawnParticleEffect('counter', x, y);
+      audio?.playSFX?.('click'); // Surveillance beep
+    };
+
+    const handleTypewriterReveal = (event: CustomEvent<{
+      documentTitle: string;
+      documentContent: string[];
+      classificationLevel: 'UNCLASSIFIED' | 'CONFIDENTIAL' | 'SECRET' | 'TOP SECRET';
+      x: number;
+      y: number;
+    }>) => {
+      if (!event?.detail) return;
+      const { documentTitle, documentContent, classificationLevel, x, y } = event.detail;
+      setTypewriterOverlay({
+        id: Date.now(),
+        x,
+        y,
+        documentTitle,
+        documentContent,
+        classificationLevel
+      });
+      audio?.playSFX?.('typewriter');
+    };
+
+    const handleStaticInterference = (event: CustomEvent<{
+      intensity: 'light' | 'medium' | 'heavy' | 'signal-lost';
+      message: string;
+      x: number;
+      y: number;
+    }>) => {
+      if (!event?.detail) return;
+      const { intensity, message, x, y } = event.detail;
+      setStaticOverlay({
+        id: Date.now(),
+        x,
+        y,
+        intensity,
+        message
+      });
+      spawnParticleEffect('broadcast', x, y);
+      audio?.playSFX?.('radio-static');
+    };
+
+    const handleEvidenceGallery = (event: CustomEvent<{
+      caseTitle: string;
+      photos: Array<{
+        id: string;
+        src: string;
+        caption: string;
+        timestamp: string;
+        caseNumber: string;
+      }>;
+      x: number;
+      y: number;
+    }>) => {
+      if (!event?.detail) return;
+      const { caseTitle, photos, x, y } = event.detail;
+      setEvidenceOverlay({
+        id: Date.now(),
+        x,
+        y,
+        caseTitle,
+        photos
+      });
+      spawnParticleEffect('flash', x, y);
+      audio?.playSFX?.('cardPlay');
+    };
+
     const handleFloatingNumber = (event: CustomEvent<{ value: number; type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain'; x: number; y: number }>) => {
       if (!event?.detail) return;
       setFloatingNumber({
@@ -223,6 +376,13 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     window.addEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
     window.addEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
     window.addEventListener('cryptidSighting', handleCryptidSighting as EventListener);
+    
+    // New enhanced effect listeners
+    window.addEventListener('breakingNews', handleBreakingNews as EventListener);
+    window.addEventListener('governmentSurveillance', handleGovernmentSurveillance as EventListener);
+    window.addEventListener('typewriterReveal', handleTypewriterReveal as EventListener);
+    window.addEventListener('staticInterference', handleStaticInterference as EventListener);
+    window.addEventListener('evidenceGallery', handleEvidenceGallery as EventListener);
 
     return () => {
       window.removeEventListener('cardDeployed', handleCardDeployed as EventListener);
@@ -235,6 +395,13 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
       window.removeEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
       window.removeEventListener('cryptidSighting', handleCryptidSighting as EventListener);
+      
+      // New enhanced effect listeners
+      window.removeEventListener('breakingNews', handleBreakingNews as EventListener);
+      window.removeEventListener('governmentSurveillance', handleGovernmentSurveillance as EventListener);
+      window.removeEventListener('typewriterReveal', handleTypewriterReveal as EventListener);
+      window.removeEventListener('staticInterference', handleStaticInterference as EventListener);
+      window.removeEventListener('evidenceGallery', handleEvidenceGallery as EventListener);
     };
   }, [spawnParticleEffect, audio]);
 
@@ -264,6 +431,27 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
 
   const handleCryptidComplete = useCallback(() => {
     setCryptidOverlay(null);
+  }, []);
+
+  // New enhanced effect completion handlers
+  const handleBreakingNewsComplete = useCallback(() => {
+    setBreakingNewsOverlay(null);
+  }, []);
+
+  const handleSurveillanceComplete = useCallback(() => {
+    setSurveillanceOverlay(null);
+  }, []);
+
+  const handleTypewriterComplete = useCallback(() => {
+    setTypewriterOverlay(null);
+  }, []);
+
+  const handleStaticComplete = useCallback(() => {
+    setStaticOverlay(null);
+  }, []);
+
+  const handleEvidenceComplete = useCallback(() => {
+    setEvidenceOverlay(null);
   }, []);
 
   return (
@@ -309,6 +497,62 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
             footageQuality={cryptidOverlay.footageQuality}
             reducedMotion={cryptidOverlay.reducedMotion}
             onComplete={handleCryptidComplete}
+          />
+        )}
+
+        {/* New Enhanced Effects */}
+        {breakingNewsOverlay && (
+          <BreakingNewsTicker
+            key={breakingNewsOverlay.id}
+            x={breakingNewsOverlay.x}
+            y={breakingNewsOverlay.y}
+            newsText={breakingNewsOverlay.newsText}
+            onComplete={handleBreakingNewsComplete}
+          />
+        )}
+
+        {surveillanceOverlay && (
+          <GovernmentSurveillance
+            key={surveillanceOverlay.id}
+            x={surveillanceOverlay.x}
+            y={surveillanceOverlay.y}
+            targetName={surveillanceOverlay.targetName}
+            threatLevel={surveillanceOverlay.threatLevel}
+            onComplete={handleSurveillanceComplete}
+          />
+        )}
+
+        {typewriterOverlay && (
+          <TypewriterReveal
+            key={typewriterOverlay.id}
+            x={typewriterOverlay.x}
+            y={typewriterOverlay.y}
+            documentTitle={typewriterOverlay.documentTitle}
+            documentContent={typewriterOverlay.documentContent}
+            classificationLevel={typewriterOverlay.classificationLevel}
+            onComplete={handleTypewriterComplete}
+          />
+        )}
+
+        {staticOverlay && (
+          <StaticInterference
+            key={staticOverlay.id}
+            x={staticOverlay.x}
+            y={staticOverlay.y}
+            intensity={staticOverlay.intensity}
+            message={staticOverlay.message}
+            onComplete={handleStaticComplete}
+          />
+        )}
+
+        {evidenceOverlay && (
+          <EvidencePhotoGallery
+            key={evidenceOverlay.id}
+            x={evidenceOverlay.x}
+            y={evidenceOverlay.y}
+            caseTitle={evidenceOverlay.caseTitle}
+            photos={evidenceOverlay.photos}
+            onComplete={handleEvidenceComplete}
           />
         )}
       </div>

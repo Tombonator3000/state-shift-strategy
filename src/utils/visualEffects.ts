@@ -181,4 +181,143 @@ export class VisualEffectsCoordinator {
       y: center.y + (Math.random() - 0.5) * spread
     };
   }
+
+  // === NEW ENHANCED TABLOID/X-FILES EFFECTS ===
+
+  // Trigger breaking news ticker overlay
+  static triggerBreakingNews(newsText: string, position: EffectPosition): void {
+    window.dispatchEvent(new CustomEvent('breakingNews', {
+      detail: {
+        newsText,
+        x: position.x,
+        y: position.y
+      }
+    }));
+  }
+
+  // Trigger government surveillance overlay
+  static triggerGovernmentSurveillance(
+    targetName: string,
+    threatLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CLASSIFIED',
+    position: EffectPosition
+  ): void {
+    window.dispatchEvent(new CustomEvent('governmentSurveillance', {
+      detail: {
+        targetName,
+        threatLevel,
+        x: position.x,
+        y: position.y
+      }
+    }));
+  }
+
+  // Trigger typewriter document reveal
+  static triggerTypewriterReveal(
+    documentTitle: string,
+    documentContent: string[],
+    classificationLevel: 'UNCLASSIFIED' | 'CONFIDENTIAL' | 'SECRET' | 'TOP SECRET',
+    position: EffectPosition
+  ): void {
+    window.dispatchEvent(new CustomEvent('typewriterReveal', {
+      detail: {
+        documentTitle,
+        documentContent,
+        classificationLevel,
+        x: position.x,
+        y: position.y
+      }
+    }));
+  }
+
+  // Trigger static interference effect
+  static triggerStaticInterference(
+    intensity: 'light' | 'medium' | 'heavy' | 'signal-lost',
+    message: string,
+    position: EffectPosition
+  ): void {
+    window.dispatchEvent(new CustomEvent('staticInterference', {
+      detail: {
+        intensity,
+        message,
+        x: position.x,
+        y: position.y
+      }
+    }));
+  }
+
+  // Trigger evidence photo gallery
+  static triggerEvidenceGallery(
+    caseTitle: string,
+    photos: Array<{
+      id: string;
+      src: string;
+      caption: string;
+      timestamp: string;
+      caseNumber: string;
+    }>,
+    position: EffectPosition
+  ): void {
+    window.dispatchEvent(new CustomEvent('evidenceGallery', {
+      detail: {
+        caseTitle,
+        photos,
+        x: position.x,
+        y: position.y
+      }
+    }));
+  }
+
+  // Helper method to trigger contextual effects based on game events
+  static triggerContextualEffect(
+    eventType: 'media_blast' | 'government_crackdown' | 'conspiracy_revealed' | 'evidence_leaked' | 'surveillance_detected',
+    cardName: string,
+    position: EffectPosition
+  ): void {
+    switch (eventType) {
+      case 'media_blast':
+        this.triggerBreakingNews(
+          `${cardName} EXPOSES GOVERNMENT SECRETS!`,
+          position
+        );
+        break;
+      
+      case 'government_crackdown':
+        this.triggerGovernmentSurveillance(
+          cardName,
+          'HIGH',
+          position
+        );
+        break;
+      
+      case 'conspiracy_revealed':
+        this.triggerTypewriterReveal(
+          'CLASSIFIED INTELLIGENCE REPORT',
+          [
+            `SUBJECT: ${cardName}`,
+            'THREAT ASSESSMENT: CONFIRMED',
+            'RECOMMENDED ACTION: IMMEDIATE CONTAINMENT',
+            'AUTHORIZATION: [REDACTED]'
+          ],
+          'TOP SECRET',
+          position
+        );
+        break;
+      
+      case 'evidence_leaked':
+        this.triggerEvidenceGallery(
+          `LEAKED: ${cardName} FILES`,
+          [], // Use default photos
+          position
+        );
+        break;
+      
+      case 'surveillance_detected':
+        this.triggerStaticInterference(
+          'heavy',
+          'SURVEILLANCE NETWORK COMPROMISED',
+          position
+        );
+        break;
+    }
+  }
 }
