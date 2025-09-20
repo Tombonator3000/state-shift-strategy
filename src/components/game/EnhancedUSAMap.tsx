@@ -67,10 +67,6 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   });
   const contestedStatesRef = useRef<Record<string, boolean>>({});
   const contestedAnimationTimeoutsRef = useRef<number[]>([]);
-  const hasAttemptedMapLoadRef = useRef(false);
-  const localMapErrorToastShownRef = useRef(false);
-  const cdnFallbackToastShownRef = useRef(false);
-  const mockFallbackToastShownRef = useRef(false);
   const [governmentTarget, setGovernmentTarget] = useState<{
     active: boolean;
     cardId?: string;
@@ -120,80 +116,15 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   };
 
   useEffect(() => {
-    if (geoData || hasAttemptedMapLoadRef.current) return;
-
-    hasAttemptedMapLoadRef.current = true;
-
-    const parseMapData = (rawData: any) => {
-      if (!rawData) {
-        throw new Error('No map data returned');
-      }
-
-      if (rawData.type === 'Topology') {
-        if (!rawData.objects?.states) {
-          throw new Error('Invalid TopoJSON: missing states object');
-        }
-        return topojson.feature(rawData, rawData.objects.states);
-      }
-
-      if (rawData.type === 'FeatureCollection') {
-        return rawData;
-      }
-
-      throw new Error(`Unsupported map data format: ${rawData.type ?? 'unknown'}`);
-    };
-
-    const localDataUrl = `${import.meta.env.BASE_URL || '/'}data/us-states-topology.json`;
-
     const loadUSData = async () => {
       try {
-        const localResponse = await fetch(localDataUrl, { cache: 'force-cache' });
-        if (!localResponse.ok) {
-          throw new Error(`HTTP ${localResponse.status}`);
-        }
-        const localData = parseMapData(await localResponse.json());
-        setGeoData(localData);
-        return;
-      } catch (error) {
-        console.error('Failed to load local US map data:', error);
-        if (!localMapErrorToastShownRef.current) {
-          toast({
-            title: 'Offline map unavailable',
-            description: `Falling back to the CDN copy of the U.S. map data. Local asset was missing or unreadable (${error instanceof Error ? error.message : String(error)}).`,
-            variant: 'destructive'
-          });
-          localMapErrorToastShownRef.current = true;
-        }
-      }
-
-      try {
-        const response = await fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json', {
-          cache: 'no-cache'
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
+        const response = await fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
         const topology = await response.json();
-        const geojson = parseMapData(topology);
+        const geojson = topojson.feature(topology, topology.objects.states);
         setGeoData(geojson);
-        if (!cdnFallbackToastShownRef.current) {
-          toast({
-            title: 'Loaded map data from CDN',
-            description: 'Continuing with online topology after local fetch failed.'
-          });
-          cdnFallbackToastShownRef.current = true;
-        }
       } catch (error) {
-        console.error('Failed to load CDN US map data:', error);
-        if (!mockFallbackToastShownRef.current) {
-          toast({
-            title: 'Map data unavailable',
-            description: `Using simplified placeholder map geometry instead (${error instanceof Error ? error.message : String(error)}).`,
-            variant: 'destructive'
-          });
-          mockFallbackToastShownRef.current = true;
-        }
-
+        console.error('Failed to load US map data:', error);
+        // Fallback mock data
         setGeoData({
           type: 'FeatureCollection',
           features: states.map(state => ({
@@ -210,7 +141,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     };
 
     loadUSData();
-  }, [geoData, states, toast]);
+  }, [states]);
 
   useEffect(() => {
     const handleGovernmentZoneTarget = (event: CustomEvent<{ active: boolean; cardId?: string; cardName?: string; stateId?: string; mode?: 'select' | 'lock' | 'complete'; }>) => {
