@@ -6,16 +6,24 @@ import BaseCard from '@/components/game/cards/BaseCard';
 
 interface PlayedCardsDockProps {
   playedCards: CardPlayRecord[];
+  onInspectCard?: (card: GameCard) => void;
 }
 
-const CardsInPlayCard = ({ card }: { card: GameCard }) => (
-  <BaseCard
-    card={card}
-    hideStamp
-    polaroidHover={false}
-    size="boardMini"
-    className="pointer-events-none select-none"
-  />
+const CardsInPlayCard = ({ card, onInspect }: { card: GameCard; onInspect?: (card: GameCard) => void }) => (
+  <button
+    type="button"
+    onClick={() => onInspect?.(card)}
+    className="group relative flex w-full items-center justify-center rounded-lg border border-transparent bg-transparent p-0 transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-yellow-200 focus-visible:ring-yellow-400"
+  >
+    <span className="sr-only">View {card.name}</span>
+    <BaseCard
+      card={card}
+      hideStamp
+      polaroidHover={false}
+      size="boardMini"
+      className="pointer-events-none select-none transition-transform duration-200 group-hover:scale-[1.04]"
+    />
+  </button>
 );
 
 interface SectionProps {
@@ -24,9 +32,10 @@ interface SectionProps {
   cards: CardPlayRecord[];
   emptyMessage: string;
   ariaLabel: string;
+  onInspectCard?: (card: GameCard) => void;
 }
 
-const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, emptyMessage, ariaLabel }) => (
+const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, emptyMessage, ariaLabel, onInspectCard }) => (
   <section
     aria-label={ariaLabel}
     className={cn('rounded-md p-3 text-black', toneClass)}
@@ -35,7 +44,11 @@ const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, e
     {cards.length > 0 ? (
       <div className="grid grid-cols-3 gap-2 place-items-start">
         {cards.map((entry, index) => (
-          <CardsInPlayCard key={`${entry.card.id}-${index}`} card={entry.card} />
+          <CardsInPlayCard
+            key={`${entry.card.id}-${index}`}
+            card={entry.card}
+            onInspect={onInspectCard}
+          />
         ))}
       </div>
     ) : (
@@ -46,7 +59,7 @@ const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, e
   </section>
 );
 
-const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
+const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards, onInspectCard }) => {
   const humanCards = playedCards.filter(card => card.player === 'human');
   const aiCards = playedCards.filter(card => card.player === 'ai');
 
@@ -62,6 +75,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
           cards={aiCards}
           emptyMessage="Opponent has no cards in play."
           toneClass="bg-[image:var(--halftone-red)] bg-[length:8px_8px] bg-repeat bg-red-50/40"
+          onInspectCard={onInspectCard}
         />
         <PlayedCardsSection
           title="YOU"
@@ -69,6 +83,7 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards }) => {
           cards={humanCards}
           emptyMessage="No cards deployed this turn."
           toneClass="bg-[image:var(--halftone-blue)] bg-[length:8px_8px] bg-repeat bg-blue-50/40"
+          onInspectCard={onInspectCard}
         />
       </div>
     </div>
