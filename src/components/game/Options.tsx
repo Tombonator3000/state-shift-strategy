@@ -118,7 +118,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     const baseSettings: GameSettings = {
       masterVolume: Math.round(audio.config.volume * 100),
       musicVolume: 50,
-      sfxVolume: 80,
+      sfxVolume: Math.round(audio.config.sfxVolume * 100),
       enableAnimations: true,
       autoEndTurn: false,
       fastMode: false,
@@ -193,6 +193,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     }
   }, [settings.masterVolume, audio]);
 
+  useEffect(() => {
+    const currentSfxVolume = Math.round(audio.config.sfxVolume * 100);
+    if (currentSfxVolume !== settings.sfxVolume) {
+      console.log('🎵 Options: Syncing SFX volume from', currentSfxVolume, 'to', settings.sfxVolume);
+      audio.setSfxVolume(settings.sfxVolume / 100);
+    }
+  }, [settings.sfxVolume, audio]);
+
   const persistSettings = (nextSettings: GameSettings, nextComboSettings: ComboSettings) => {
     if (typeof localStorage === 'undefined') {
       return;
@@ -258,6 +266,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     setUiTheme('tabloid_bw');
     persistSettings(defaultSettings, defaultCombos);
     audio.setVolume(defaultSettings.masterVolume / 100);
+    audio.setSfxVolume(defaultSettings.sfxVolume / 100);
   };
 
   const handleSaveGame = () => {
@@ -383,7 +392,10 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 </label>
                 <Slider
                   value={[settings.sfxVolume]}
-                  onValueChange={([value]) => updateSettings({ sfxVolume: value })}
+                  onValueChange={([value]) => {
+                    audio.setSfxVolume(value / 100);
+                    updateSettings({ sfxVolume: value });
+                  }}
                   max={100}
                   step={1}
                   className="w-full"

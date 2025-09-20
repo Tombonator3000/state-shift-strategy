@@ -3,6 +3,7 @@ import { UFO_ELVIS_DATA_URL } from '../assets/audio/ufoElvisDataUrl';
 
 interface AudioConfig {
   volume: number;
+  sfxVolume: number;
   muted: boolean;
   musicEnabled: boolean;
   sfxEnabled: boolean;
@@ -25,8 +26,21 @@ export const useAudio = () => {
       try {
         const parsed = JSON.parse(saved);
         console.log('🎵 useAudio: Loaded saved audio config');
+        const rawMasterVolume = typeof parsed.masterVolume === 'number'
+          ? parsed.masterVolume
+          : 15;
+        const rawSfxVolume = typeof parsed.sfxVolume === 'number'
+          ? parsed.sfxVolume
+          : 80;
+
+        const normalizeVolume = (value: number) => {
+          const clamped = Math.max(0, Math.min(100, value));
+          return clamped > 1 ? clamped / 100 : clamped;
+        };
+
         return {
-          volume: (parsed.masterVolume || 15) / 100,
+          volume: normalizeVolume(rawMasterVolume),
+          sfxVolume: normalizeVolume(rawSfxVolume),
           muted: false,
           musicEnabled: parsed.musicEnabled !== false,
           sfxEnabled: parsed.sfxEnabled !== false,
@@ -41,6 +55,7 @@ export const useAudio = () => {
     console.log('🎵 useAudio: Using default audio config');
     return {
       volume: 0.15, // Default to 15%
+      sfxVolume: 0.8,
       muted: false,
       musicEnabled: true,
       sfxEnabled: true,
@@ -249,7 +264,8 @@ export const useAudio = () => {
       const loadPromises = Object.entries(existingSfxFiles).map(async ([key, src]) => {
         const audio = await loadAudioTrack(src);
         if (audio) {
-          audio.volume = config.volume;
+          const baseSfxVolume = config.muted ? 0 : config.volume * config.sfxVolume;
+          audio.volume = baseSfxVolume;
           sfxRefs.current[key] = audio;
         } else {
           // Create silent audio element as fallback
@@ -289,16 +305,19 @@ export const useAudio = () => {
 
   // Update volumes when config changes and sync to localStorage - but prevent excessive calls
   useEffect(() => {
-    console.log('🎵 Volume update triggered:', { volume: config.volume, muted: config.muted });
+    console.log('🎵 Volume update triggered:', { volume: config.volume, sfxVolume: config.sfxVolume, muted: config.muted });
     
+    const masterVolume = config.muted ? 0 : config.volume;
+    const sfxVolume = config.muted ? 0 : config.volume * config.sfxVolume;
+
     if (currentMusicRef.current) {
-      currentMusicRef.current.volume = config.muted ? 0 : config.volume;
+      currentMusicRef.current.volume = masterVolume;
     }
     Object.values(musicTracks.current).flat().forEach(audio => {
-      audio.volume = config.muted ? 0 : config.volume;
+      audio.volume = masterVolume;
     });
     Object.values(sfxRefs.current).forEach(audio => {
-      audio.volume = config.muted ? 0 : config.volume;
+      audio.volume = sfxVolume;
     });
 
     // Sync volume to localStorage (gameSettings) - but only if it actually changed
@@ -307,16 +326,31 @@ export const useAudio = () => {
       try {
         const parsed = JSON.parse(saved);
         const newMasterVolume = Math.round(config.volume * 100);
+        const newSfxVolume = Math.round(config.sfxVolume * 100);
+        let shouldSync = false;
+
         if (parsed.masterVolume !== newMasterVolume) {
           parsed.masterVolume = newMasterVolume;
+          shouldSync = true;
+        }
+
+        if (parsed.sfxVolume !== newSfxVolume) {
+          parsed.sfxVolume = newSfxVolume;
+          shouldSync = true;
+        }
+
+        if (shouldSync) {
           localStorage.setItem('gameSettings', JSON.stringify(parsed));
-          console.log('🎵 Synced volume to localStorage:', newMasterVolume);
+          console.log('🎵 Synced volume to localStorage:', {
+            masterVolume: newMasterVolume,
+            sfxVolume: newSfxVolume
+          });
         }
       } catch (e) {
         console.warn('🎵 Failed to sync audio settings to localStorage');
       }
     }
-  }, [config.volume, config.muted]);
+  }, [config.volume, config.sfxVolume, config.muted]);
 
   const getNextTrack = useCallback((musicType: MusicType): HTMLAudioElement | null => {
     console.log('🎵 getNextTrack called for:', musicType);
@@ -496,14 +530,15 @@ export const useAudio = () => {
       console.log('🎵 SFX blocked:', soundName, { sfxEnabled: config.sfxEnabled, muted: config.muted, unlocked: audioContextUnlocked });
       return;
     }
-    
+
     const audio = sfxRefs.current[soundName];
     if (audio) {
       try {
         console.log('🎵 Playing SFX:', soundName);
+        const baseSfxVolume = config.muted ? 0 : config.volume * config.sfxVolume;
         // Reduce volume for light click specifically
         if (soundName === 'lightClick') {
-          const originalVolume = audio.volume;
+          const originalVolume = baseSfxVolume;
           audio.volume = originalVolume * 0.3; // Very quiet
           audio.currentTime = 0;
           audio.play().catch(() => {}); // Silently fail
@@ -512,6 +547,7 @@ export const useAudio = () => {
             audio.volume = originalVolume;
           }, 100);
         } else {
+          audio.volume = baseSfxVolume;
           audio.currentTime = 0;
           audio.play().catch(() => {}); // Silently fail
         }
@@ -521,7 +557,7 @@ export const useAudio = () => {
     } else {
       console.debug('🎵 SFX not found:', soundName);
     }
-  }, [config.sfxEnabled, config.muted, audioContextUnlocked]);
+  }, [config.sfxEnabled, config.muted, config.volume, config.sfxVolume, audioContextUnlocked]);
 
   const testSFX = useCallback(() => {
     const testSounds = ['click', 'hover', 'cardPlay', 'cardDraw'];
@@ -534,13 +570,24 @@ export const useAudio = () => {
     const clampedVolume = Math.max(0, Math.min(1, volume));
     const currentVolumePercent = Math.round(config.volume * 100);
     const newVolumePercent = Math.round(clampedVolume * 100);
-    
+
     // Only update if volume actually changed to prevent spam
     if (currentVolumePercent !== newVolumePercent) {
       console.log('🎵 Setting volume from', currentVolumePercent + '%', 'to:', newVolumePercent + '%');
       setConfig(prev => ({ ...prev, volume: clampedVolume }));
     }
   }, [config.volume]);
+
+  const setSfxVolume = useCallback((volume: number) => {
+    const clampedVolume = Math.max(0, Math.min(1, volume));
+    const currentSfxPercent = Math.round(config.sfxVolume * 100);
+    const newSfxPercent = Math.round(clampedVolume * 100);
+
+    if (currentSfxPercent !== newSfxPercent) {
+      console.log('🎵 Setting SFX volume from', currentSfxPercent + '%', 'to:', newSfxPercent + '%');
+      setConfig(prev => ({ ...prev, sfxVolume: clampedVolume }));
+    }
+  }, [config.sfxVolume]);
 
   const toggleMute = useCallback(() => {
     setConfig(prev => ({ ...prev, muted: !prev.muted }));
@@ -638,6 +685,7 @@ export const useAudio = () => {
     playSFX,
     testSFX,
     setVolume,
+    setSfxVolume,
     toggleMute,
     toggleMusic,
     toggleSFX,
