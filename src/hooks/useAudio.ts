@@ -29,13 +29,13 @@ export const useAudio = () => {
         console.log('🎵 useAudio: Loaded saved audio config');
         const rawMasterVolume = typeof parsed.masterVolume === 'number'
           ? parsed.masterVolume
-          : 15;
+          : 80;
         const rawSfxVolume = typeof parsed.sfxVolume === 'number'
           ? parsed.sfxVolume
           : 80;
         const rawMusicVolume = typeof parsed.musicVolume === 'number'
           ? parsed.musicVolume
-          : 50;
+          : 20;
 
         const normalizeVolume = (value: number) => {
           const clamped = Math.max(0, Math.min(100, value));
@@ -59,8 +59,8 @@ export const useAudio = () => {
     }
     console.log('🎵 useAudio: Using default audio config');
     return {
-      volume: 0.15, // Default to 15%
-      musicVolume: 0.5,
+      volume: 0.8, // Default to 80%
+      musicVolume: 0.2,
       sfxVolume: 0.8,
       muted: false,
       musicEnabled: true,
