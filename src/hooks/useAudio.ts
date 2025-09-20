@@ -236,7 +236,10 @@ export const useAudio = () => {
       click: '/audio/click.mp3',
       typewriter: '/audio/typewriter.mp3',
       lightClick: '/audio/click.mp3', // Reuse click sound
-      error: '/audio/click.mp3' // Fallback for error sound
+      error: '/audio/click.mp3', // Fallback for error sound
+      'ufo-elvis': '/audio/ufo-elvis.mp3',
+      'cryptid-rumble': '/audio/cryptid-rumble.mp3',
+      'radio-static': '/audio/radio-static.mp3'
     };
 
     // Load SFX asynchronously with error handling

@@ -24,7 +24,9 @@ export type ParticleEffectType =
   | 'chain'
   | 'flash'
   | 'stateevent'
-  | 'contested';
+  | 'contested'
+  | 'broadcast'
+  | 'cryptid';
 
 interface ParticleSystemProps {
   active: boolean;
@@ -109,9 +111,11 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
         return 48;
       case 'synergy':
       case 'stateevent':
+      case 'broadcast':
         return 40;
       case 'chain':
       case 'contested':
+      case 'cryptid':
         return 35;
       case 'deploy':
       case 'stateloss':
@@ -155,9 +159,11 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
         return 3.5 + Math.random() * 4;
       case 'synergy':
       case 'stateevent':
+      case 'broadcast':
         return 3 + Math.random() * 4;
       case 'chain':
       case 'contested':
+      case 'cryptid':
         return 2.5 + Math.random() * 3;
       case 'stateloss':
         return 1.5 + Math.random() * 2;
@@ -178,6 +184,8 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
         return `hsl(${25 + Math.random() * 40}, 95%, ${53 + Math.random() * 20}%)`;
       case 'synergy':
         return `hsl(${270 + Math.random() * 30}, 85%, ${65 + Math.random() * 15}%)`;
+      case 'broadcast':
+        return `hsla(${195 + Math.random() * 20}, 90%, ${70 + Math.random() * 10}%, ${0.8 - Math.random() * 0.2})`;
       case 'chain':
         return `hsl(${180 + Math.random() * 40}, 90%, ${50 + Math.random() * 20}%)`;
       case 'stateloss':
@@ -188,6 +196,8 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
         return `hsl(${305 + Math.random() * 20}, 88%, ${62 + Math.random() * 12}%)`;
       case 'contested':
         return `hsl(${200 + Math.random() * 20}, 72%, ${58 + Math.random() * 10}%)`;
+      case 'cryptid':
+        return `hsl(${135 + Math.random() * 30}, 60%, ${50 + Math.random() * 15}%)`;
       default:
         return `hsl(${Math.random() * 360}, 70%, 60%)`;
     }
@@ -202,9 +212,11 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
         return 90;
       case 'synergy':
       case 'stateevent':
+      case 'broadcast':
         return 70;
       case 'chain':
       case 'contested':
+      case 'cryptid':
         return 60;
       default:
         return 50;
@@ -221,9 +233,11 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
         return base * 1.2;
       case 'synergy':
       case 'stateevent':
+      case 'broadcast':
         return base * 1.3;
       case 'chain':
       case 'contested':
+      case 'cryptid':
         return base * 1.1;
       case 'stateloss':
         return base * 0.8;
@@ -241,9 +255,11 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
         return 3 + Math.random() * 3;
       case 'synergy':
       case 'stateevent':
+      case 'broadcast':
         return 4 + Math.random() * 4;
       case 'chain':
       case 'contested':
+      case 'cryptid':
         return 3 + Math.random() * 3;
       case 'stateloss':
         return 2 + Math.random() * 2;

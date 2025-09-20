@@ -9,7 +9,7 @@ export interface EffectPosition {
 export class VisualEffectsCoordinator {
   // Trigger particle effect at specific position
   static triggerParticleEffect(
-    type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain' | 'stateevent' | 'contested' | 'flash',
+    type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain' | 'stateevent' | 'contested' | 'flash' | 'broadcast' | 'cryptid',
     position: EffectPosition
   ): void {
     window.dispatchEvent(new CustomEvent('cardDeployed', {
@@ -123,6 +123,37 @@ export class VisualEffectsCoordinator {
     mode?: 'select' | 'lock' | 'complete';
   }): void {
     window.dispatchEvent(new CustomEvent('governmentZoneTarget', { detail }));
+  }
+
+  static triggerTruthMeltdownBroadcast(detail: {
+    position: EffectPosition;
+    intensity: 'surge' | 'collapse';
+    setList: string[];
+    truthValue?: number;
+    reducedMotion?: boolean;
+    source?: 'truth' | 'government';
+  }): void {
+    window.dispatchEvent(new CustomEvent('truthMeltdownBroadcast', {
+      detail: {
+        ...detail,
+        position: { ...detail.position }
+      }
+    }));
+  }
+
+  static triggerCryptidSighting(detail: {
+    position: EffectPosition;
+    stateId: string;
+    stateName?: string;
+    footageQuality: string;
+    reducedMotion?: boolean;
+  }): void {
+    window.dispatchEvent(new CustomEvent('cryptidSighting', {
+      detail: {
+        ...detail,
+        position: { ...detail.position }
+      }
+    }));
   }
 
   // Helper to get element center position
