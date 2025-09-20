@@ -1002,7 +1002,7 @@ const Index = () => {
     audio.playSFX('hover');
   };
 
-  const handlePlayCard = async (cardId: string, targetState?: string) => {
+  const handlePlayCard = async (cardId: string, targetStateArg?: string) => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || isAnimating()) return;
 
@@ -1031,7 +1031,7 @@ const Index = () => {
     }
 
     // If it's a ZONE card that requires targeting
-    if (card.type === 'ZONE' && !gameState.targetState && !targetState) {
+    if (card.type === 'ZONE' && !gameState.targetState && !targetStateArg) {
       selectCard(cardId);
       audio.playSFX('hover');
       toast('🎯 Zone card selected - click a state to target it!', {
@@ -1057,15 +1057,64 @@ const Index = () => {
       return;
     }
 
+    let resolvedTargetStateId: string | undefined = targetStateArg ?? gameState.targetState ?? undefined;
+
+    if (card.type === 'ZONE') {
+      const states = Array.isArray(gameState.states) ? gameState.states : [];
+      const findStateMatch = (identifier?: string | null) => {
+        if (!identifier) return null;
+        const trimmed = identifier.trim();
+        if (!trimmed) return null;
+        const normalized = trimmed.toLowerCase();
+
+        const matchedState = states.find(state => {
+          const abbreviation = typeof state.abbreviation === 'string' ? state.abbreviation.toLowerCase() : undefined;
+          const id = typeof state.id === 'string' ? state.id.toLowerCase() : undefined;
+          const name = typeof state.name === 'string' ? state.name.toLowerCase() : undefined;
+          return abbreviation === normalized || id === normalized || name === normalized;
+        });
+
+        if (!matchedState) {
+          return null;
+        }
+
+        const canonicalId =
+          (typeof matchedState.id === 'string' && matchedState.id) ||
+          (typeof matchedState.abbreviation === 'string' && matchedState.abbreviation) ||
+          (typeof matchedState.name === 'string' && matchedState.name) ||
+          trimmed;
+
+        return { canonicalId };
+      };
+
+      const resolvedMatch = findStateMatch(targetStateArg) ?? findStateMatch(gameState.targetState);
+
+      if (!resolvedMatch) {
+        selectTargetState(null);
+        setLoadingCard(null);
+        if (gameState.selectedCard !== cardId) {
+          selectCard(cardId);
+        }
+        audio.playSFX('error');
+        toast('🎯 Select a valid state target before deploying this zone card!', {
+          duration: 4000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
+        });
+        return;
+      }
+
+      resolvedTargetStateId = resolvedMatch.canonicalId;
+    }
+
     // Show loading state
     setLoadingCard(cardId);
     audio.playSFX('cardPlay');
-    
+
     try {
       if (card.faction === 'government' && card.type === 'ZONE') {
         VisualEffectsCoordinator.triggerGovernmentZoneTarget({
           active: true,
-          stateId: targetState || gameState.targetState || undefined,
+          stateId: resolvedTargetStateId,
           cardId: card.id,
           cardName: card.name,
           mode: 'lock'
@@ -1073,7 +1122,7 @@ const Index = () => {
       }
 
       // Use animated card play
-      await playCardAnimated(cardId, animatePlayCard, targetState);
+      await playCardAnimated(cardId, animatePlayCard, resolvedTargetStateId);
 
       // Track card in collection
       recordCardPlay(cardId);
