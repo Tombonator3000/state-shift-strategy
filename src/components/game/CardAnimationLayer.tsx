@@ -3,6 +3,7 @@ import { ParticleEffectType, ParticleSystem } from '@/components/effects/Particl
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import RedactionSweep from '@/components/effects/RedactionSweep';
 import TabloidFlashOverlay from '@/components/effects/TabloidFlashOverlay';
+import ConspiracyCorkboard from '@/components/effects/ConspiracyCorkboard';
 
 interface CardAnimationLayerProps {
   children?: React.ReactNode;
@@ -34,6 +35,14 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     y: number;
   } | null>(null);
 
+  const [corkboardOverlay, setCorkboardOverlay] = useState<{
+    id: number;
+    x: number;
+    y: number;
+    comboName?: string;
+    bonusIP?: number;
+  } | null>(null);
+
   const spawnParticleEffect = useCallback((type: ParticleEffectType, x: number, y: number) => {
     setParticleEffects(prev => [
       ...prev,
@@ -62,19 +71,23 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       spawnParticleEffect('stateloss', event.detail.x, event.detail.y);
     };
 
-    const handleSynergyActivation = (event: CustomEvent<{ bonusIP: number; numberType?: 'synergy' | 'combo' | 'chain'; effectType?: ParticleEffectType; x: number; y: number }>) => {
+    const handleSynergyActivation = (event: CustomEvent<{ bonusIP: number; numberType?: 'synergy' | 'combo' | 'chain'; effectType?: ParticleEffectType; x: number; y: number; comboName?: string }>) => {
       if (!event?.detail) return;
-      const effectType = event.detail.effectType || 'synergy';
-      const numberType = event.detail.numberType ?? 'synergy';
-      spawnParticleEffect(effectType, event.detail.x, event.detail.y);
-
-      // Also show floating number for synergy bonus
-      setFloatingNumber({
-        value: event.detail.bonusIP,
-        type: numberType,
+      setCorkboardOverlay({
+        id: Date.now(),
         x: event.detail.x,
-        y: event.detail.y - 50
+        y: event.detail.y,
+        comboName: event.detail.comboName,
+        bonusIP: event.detail.bonusIP
       });
+    };
+
+    const handleGovernmentZoneTarget = (event: CustomEvent<{ active: boolean; x?: number; y?: number }>) => {
+      if (!event?.detail) return;
+
+      if (event.detail.active && typeof event.detail.x === 'number' && typeof event.detail.y === 'number') {
+        spawnParticleEffect('counter', event.detail.x, event.detail.y);
+      }
     };
 
     const handleFloatingNumber = (event: CustomEvent<{ value: number; type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain'; x: number; y: number }>) => {
@@ -120,6 +133,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     window.addEventListener('showFloatingNumber', handleFloatingNumber as EventListener);
     window.addEventListener('governmentRedaction', handleGovernmentRedaction as EventListener);
     window.addEventListener('truthFlash', handleTruthFlash as EventListener);
+    window.addEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
 
     return () => {
       window.removeEventListener('cardDeployed', handleCardDeployed as EventListener);
@@ -129,6 +143,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('showFloatingNumber', handleFloatingNumber as EventListener);
       window.removeEventListener('governmentRedaction', handleGovernmentRedaction as EventListener);
       window.removeEventListener('truthFlash', handleTruthFlash as EventListener);
+      window.removeEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
     };
   }, [spawnParticleEffect]);
 
@@ -148,6 +163,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     setTruthFlash(null);
   }, []);
 
+  const handleCorkboardComplete = useCallback(() => {
+    setCorkboardOverlay(null);
+  }, []);
+
   return (
     <>
       {/* Full-screen overlay for card animations */}
@@ -159,6 +178,16 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         {children}
         {redactionSweep?.active && (
           <RedactionSweep key={redactionSweep.key} onComplete={handleRedactionComplete} />
+        )}
+        {corkboardOverlay && (
+          <ConspiracyCorkboard
+            key={corkboardOverlay.id}
+            x={corkboardOverlay.x}
+            y={corkboardOverlay.y}
+            comboName={corkboardOverlay.comboName}
+            bonusIP={corkboardOverlay.bonusIP}
+            onComplete={handleCorkboardComplete}
+          />
         )}
       </div>
 

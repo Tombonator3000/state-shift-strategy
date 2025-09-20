@@ -39,14 +39,14 @@ export const useSynergyDetection = () => {
           const centerX = window.innerWidth / 2 + (Math.random() - 0.5) * 200;
           const centerY = window.innerHeight / 2 + (Math.random() - 0.5) * 100;
           
+          // Notify parent component first so overlays can anchor
+          onSynergyActivated?.(combo, { x: centerX, y: centerY });
+
           // Trigger particle effects
           onParticleEffect?.('synergy', centerX, centerY);
-          
+
           // Show floating number for bonus IP
           onFloatingNumber?.(combo.bonusIP, 'synergy', centerX, centerY - 50);
-          
-          // Notify parent component
-          onSynergyActivated?.(combo, { x: centerX, y: centerY });
           
           // Trigger chain effects for multi-combo activations
           if (newCombinations.length > 1) {

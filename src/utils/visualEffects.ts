@@ -45,7 +45,8 @@ export class VisualEffectsCoordinator {
   static triggerSynergyActivation(
     bonusIP: number,
     position: EffectPosition,
-    effectType: 'synergy' | 'bigwin' | 'chain' = 'synergy'
+    effectType: 'synergy' | 'bigwin' | 'chain' = 'synergy',
+    comboName?: string
   ): void {
     window.dispatchEvent(new CustomEvent('synergyActivation', {
       detail: {
@@ -53,7 +54,8 @@ export class VisualEffectsCoordinator {
         x: position.x,
         y: position.y,
         effectType,
-        numberType: effectType
+        numberType: effectType,
+        comboName
       }
     }));
   }
@@ -108,6 +110,19 @@ export class VisualEffectsCoordinator {
         y: position.y
       }
     }));
+  }
+
+  // Signal Government ZONE targeting overlays
+  static triggerGovernmentZoneTarget(detail: {
+    active: boolean;
+    x?: number;
+    y?: number;
+    cardId?: string;
+    cardName?: string;
+    stateId?: string;
+    mode?: 'select' | 'lock' | 'complete';
+  }): void {
+    window.dispatchEvent(new CustomEvent('governmentZoneTarget', { detail }));
   }
 
   // Helper to get element center position

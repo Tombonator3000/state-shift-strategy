@@ -43,9 +43,9 @@ interface EnhancedUSAMapProps {
   playedCards?: PlayedCard[];
 }
 
-const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({ 
-  states, 
-  onStateClick, 
+const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
+  states,
+  onStateClick,
   selectedZoneCard,
   hoveredStateId,
   selectedState,
@@ -66,6 +66,13 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   });
   const contestedStatesRef = useRef<Record<string, boolean>>({});
   const contestedAnimationTimeoutsRef = useRef<number[]>([]);
+  const [governmentTarget, setGovernmentTarget] = useState<{
+    active: boolean;
+    cardId?: string;
+    cardName?: string;
+    stateId?: string;
+    mode?: 'select' | 'lock' | 'complete';
+  } | null>(null);
 
   const getTooltipPosition = () => {
     const tooltipWidth = tooltipRef.current?.offsetWidth ?? 384;
@@ -136,6 +143,25 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   }, [states]);
 
   useEffect(() => {
+    const handleGovernmentZoneTarget = (event: CustomEvent<{ active: boolean; cardId?: string; cardName?: string; stateId?: string; mode?: 'select' | 'lock' | 'complete'; }>) => {
+      if (!event?.detail) return;
+
+      if (!event.detail.active) {
+        setGovernmentTarget(null);
+        return;
+      }
+
+      setGovernmentTarget(event.detail);
+    };
+
+    window.addEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
+
+    return () => {
+      window.removeEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!geoData || !svgRef.current) return;
 
     const svg = svgRef.current;
@@ -171,6 +197,13 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     // Draw states
     const nextContestedStates: Record<string, boolean> = {};
     const svgRect = svg.getBoundingClientRect();
+
+    const prefersReducedMotion = typeof window !== 'undefined'
+      ? window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      : false;
+
+    const isGovernmentZoneTargeting = Boolean(governmentTarget?.active);
+    const lockedStateId = governmentTarget?.stateId;
 
     geoData.features.forEach((feature: any) => {
       const stateId = feature.properties.STUSPS || feature.id || feature.properties.name;
@@ -221,9 +254,11 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           onStateClick(gameState?.abbreviation || stateId);
         }
       });
+      let spotlightGroup: SVGGElement | null = null;
+
       pathElement.addEventListener('pointerenter', (e: PointerEvent) => {
         audio?.playSFX?.('lightClick'); // Very quiet hover sound
-        
+
         // Clear any pending hide timeout
         if (tooltipStableRef.current.timeout) {
           clearTimeout(tooltipStableRef.current.timeout);
@@ -238,8 +273,12 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         lastPosRef.current = { x: clientX, y: clientY };
         setMousePosition({ x: clientX, y: clientY });
         tooltipStableRef.current.lastUpdate = Date.now();
+
+        if (spotlightGroup && isGovernmentZoneTargeting && canTarget && !spotlightGroup.classList.contains('locked')) {
+          spotlightGroup.classList.add('focused');
+        }
       });
-      
+
       pathElement.addEventListener('pointermove', (e: PointerEvent) => {
         const { clientX, clientY } = e;
         lastPosRef.current = { x: clientX, y: clientY };
@@ -256,13 +295,17 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           }
         }
       });
-      
+
       pathElement.addEventListener('pointerleave', () => {
         // Add small delay before hiding to prevent flicker from micro-movements
         tooltipStableRef.current.timeout = setTimeout(() => {
           setHoveredState(null);
           pathElement.removeAttribute('aria-describedby');
         }, 50);
+
+        if (spotlightGroup && !spotlightGroup.classList.contains('locked')) {
+          spotlightGroup.classList.remove('focused');
+        }
       });
 
       statesGroup.appendChild(pathElement);
@@ -346,6 +389,58 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             }
           }
         }
+
+        if (isGovernmentZoneTargeting && canTarget) {
+          spotlightGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          spotlightGroup.setAttribute('class', 'orbital-spotlight');
+          spotlightGroup.setAttribute('transform', `translate(${centroid[0]}, ${centroid[1]})`);
+          spotlightGroup.setAttribute('pointer-events', 'none');
+
+          if (prefersReducedMotion) {
+            spotlightGroup.classList.add('reduced-motion');
+          }
+
+          spotlightGroup.classList.add('active');
+
+          const outerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          outerRing.setAttribute('class', 'orbital-ring');
+          outerRing.setAttribute('r', '36');
+          spotlightGroup.appendChild(outerRing);
+
+          const innerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          innerRing.setAttribute('class', 'orbital-inner-ring');
+          innerRing.setAttribute('r', '18');
+          spotlightGroup.appendChild(innerRing);
+
+          const verticalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          verticalLine.setAttribute('class', 'orbital-cross');
+          verticalLine.setAttribute('x1', '0');
+          verticalLine.setAttribute('y1', '-44');
+          verticalLine.setAttribute('x2', '0');
+          verticalLine.setAttribute('y2', '44');
+          spotlightGroup.appendChild(verticalLine);
+
+          const horizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          horizontalLine.setAttribute('class', 'orbital-cross');
+          horizontalLine.setAttribute('x1', '-44');
+          horizontalLine.setAttribute('y1', '0');
+          horizontalLine.setAttribute('x2', '44');
+          horizontalLine.setAttribute('y2', '0');
+          spotlightGroup.appendChild(horizontalLine);
+
+          const caption = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          caption.setAttribute('class', 'orbital-caption');
+          caption.setAttribute('y', '58');
+          caption.setAttribute('text-anchor', 'middle');
+          caption.textContent = 'COORD. VERIFIED – NOTHING TO SEE';
+          spotlightGroup.appendChild(caption);
+
+          if (lockedStateId && lockedStateId === (gameState?.abbreviation || stateId)) {
+            spotlightGroup.classList.add('locked', 'focused');
+          }
+
+          pressureGroup.appendChild(spotlightGroup);
+        }
       }
     });
 
@@ -357,7 +452,15 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       contestedAnimationTimeoutsRef.current = [];
     };
 
-  }, [geoData, states, onStateClick, selectedZoneCard, selectedState]);
+  }, [
+    geoData,
+    states,
+    onStateClick,
+    selectedZoneCard,
+    selectedState,
+    governmentTarget?.active,
+    governmentTarget?.stateId
+  ]);
 
   const getStateOwnerClass = (state?: EnhancedState) => {
     if (!state) return 'neutral';
