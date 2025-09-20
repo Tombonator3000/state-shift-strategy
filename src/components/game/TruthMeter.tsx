@@ -1,4 +1,4 @@
-import { Progress } from '@/components/ui/progress';
+import { useEffect, useState } from 'react';
 
 interface TruthMeterProps {
   value: number; // 0-100
@@ -6,6 +6,35 @@ interface TruthMeterProps {
 }
 
 const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
+  const [meltdownActive, setMeltdownActive] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleChange = (event: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event.matches);
+    };
+
+    setPrefersReducedMotion(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setMeltdownActive(false);
+      return;
+    }
+
+    const isExtreme = value >= 95 || value <= 5;
+    setMeltdownActive(isExtreme);
+  }, [value, prefersReducedMotion]);
   const getColor = () => {
     if (value >= 95) return 'bg-truth-red';
     if (value <= 5) return 'bg-government-blue';
@@ -70,11 +99,23 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
             }`}
             style={{ width: `${value}%` }}
           />
-          
+
           {/* Animated scanlines */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
         </div>
-        
+
+        {meltdownActive && (
+          <div className="truth-meltdown-overlay" aria-hidden="true">
+            <div className="truth-meltdown-scanlines" />
+            <div className="truth-meltdown-stripes" />
+            <div className="truth-meltdown-sparks" />
+            <div className="truth-meltdown-warning">
+              <span>WE INTERRUPT THIS BROADCAST</span>
+              <strong>{`TRUTH LEVEL ${value}%`}</strong>
+            </div>
+          </div>
+        )}
+
         {/* Critical thresholds with labels */}
         <div className="absolute -bottom-2 left-[5%] transform -translate-x-1/2">
           <div className="w-0.5 h-2 bg-government-blue"></div>
