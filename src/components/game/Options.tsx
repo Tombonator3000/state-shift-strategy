@@ -289,8 +289,8 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
 
   const resetToDefaults = () => {
     const defaultSettings: GameSettings = {
-      masterVolume: 70,
-      musicVolume: 50,
+      masterVolume: 80,
+      musicVolume: 20,
       sfxVolume: 80,
       enableAnimations: true,
       autoEndTurn: false,
