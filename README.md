@@ -4,6 +4,8 @@
 
 **URL**: https://lovable.dev/projects/fa2f38e2-5939-4c65-a945-2c0f8029da84
 
+**Technical overview**: See [docs/TECHNICAL_README.md](docs/TECHNICAL_README.md) for gameplay rules, data pipelines, and audio integration notes.
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
