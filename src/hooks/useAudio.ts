@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { UFO_ELVIS_DATA_URL } from '../assets/audio/ufoElvisDataUrl';
 
 interface AudioConfig {
   volume: number;
@@ -238,7 +239,7 @@ export const useAudio = () => {
       lightClick: '/audio/click.mp3', // Reuse click sound
       error: '/audio/click.mp3', // Fallback for error sound
       // Paranormal effects - using creative fallbacks until proper sounds are added
-      'ufo-elvis': '/audio/Background-music.mp3', // Use background music as UFO sound
+      'ufo-elvis': UFO_ELVIS_DATA_URL, // Generated shortwave broadcast sting for UFO/Elvis reports
       'cryptid-rumble': '/audio/defeat.mp3', // Use defeat sound as rumble
       'radio-static': '/audio/typewriter.mp3' // Use typewriter as static
     };

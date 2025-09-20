@@ -17,6 +17,10 @@ This directory should contain the following audio files:
 - `click.mp3` - UI click sound
 - `typewriter.mp3` - Typewriter effect for text
 
+### Procedural Assets
+- `ufo-elvis` sting is bundled as an in-code base64 WAV data URL (`src/assets/audio/ufoElvisDataUrl.ts`). Override this file if you
+  want to ship a different broadcast clip.
+
 ## Audio Sources
 You can find royalty-free audio at:
 - Freesound.org
