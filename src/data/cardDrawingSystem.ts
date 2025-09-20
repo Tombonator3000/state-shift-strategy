@@ -14,14 +14,15 @@ export interface DrawModeConfig {
 export const DRAW_MODE_CONFIGS: Record<DrawMode, DrawModeConfig> = {
   standard: {
     name: 'Standard',
-    description: 'Balanced draw system with safety nets',
-    startingHandSize: 4,
+    description: 'MVP baseline: five-card opener with steady draw-up',
+    startingHandSize: 5,
     baseDrawPerTurn: 1,
-    minHandGuarantee: 3,
+    minHandGuarantee: 5,
     midgameRampTurn: 8,
     midgameExtraDraw: 1,
     specialRules: [
-      'Draw up to 3 cards if hand < 3 at turn start',
+      'Both factions start with five cards',
+      'Top of turn: draw back up to five cards',
       'From turn 8: +1 extra draw per turn'
     ]
   },
@@ -132,12 +133,15 @@ export function calculateCardDraw(
 
 export function getStartingHandSize(mode: DrawMode, faction?: 'government' | 'truth'): number {
   const config = DRAW_MODE_CONFIGS[mode];
-  
+
   // Keep faction-based variance for balance
   if (faction === 'government') {
+    if (mode === 'standard') {
+      return config.startingHandSize;
+    }
     return Math.max(3, config.startingHandSize - 1);
   }
-  
+
   return config.startingHandSize;
 }
 

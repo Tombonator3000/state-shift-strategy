@@ -37,14 +37,14 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     {
       id: 'hand',
       title: '🎴 Your Hand',
-      description: 'These are your cards. Each has a cost (circle) and type. Click cards to examine them closely.',
+      description: 'Every op opens with five cards. Each shows its cost (circle) and type — click a card to inspect the details.',
       target: '#enhanced-hand',
       action: 'Click on a card to examine it'
     },
     {
       id: 'ip',
       title: '💰 Influence Points (IP)',
-      description: 'IP is your currency. You gain IP each turn based on controlled states. Spend it to play cards.',
+      description: 'IP starts at 0 for both factions. End turns to collect 5 + controlled states, then spend it to deploy cards.',
       target: '#ip-display'
     },
     {

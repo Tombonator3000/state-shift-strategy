@@ -32,6 +32,67 @@ import { evaluateCombosForTurn } from './comboAdapter';
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
 const HAND_LIMIT = 5;
+const CURRENT_SAVE_VERSION = '1.1';
+const SUPPORTED_SAVE_VERSIONS = new Set(['1.0', CURRENT_SAVE_VERSION]);
+
+const createDefaultCardDrawState = (): CardDrawState => ({
+  cardsPlayedLastTurn: 0,
+  lastTurnWithoutPlay: false,
+});
+
+const sanitizeCardDrawState = (value: Partial<CardDrawState> | undefined | null): CardDrawState => ({
+  cardsPlayedLastTurn: typeof value?.cardsPlayedLastTurn === 'number' && Number.isFinite(value.cardsPlayedLastTurn)
+    ? value.cardsPlayedLastTurn
+    : 0,
+  lastTurnWithoutPlay: Boolean(value?.lastTurnWithoutPlay),
+});
+
+const MIGRATION_LOG_ENTRY = 'Save migrated to v1.1 baseline (0 IP start, five-card opener).';
+
+type RawSaveData = Partial<GameState> & {
+  version?: string;
+  drawMode?: DrawMode;
+  cardDrawState?: Partial<CardDrawState>;
+};
+
+const isValidDrawMode = (mode: unknown): mode is DrawMode =>
+  typeof mode === 'string' && (['standard', 'classic', 'momentum', 'catchup', 'fast'] as DrawMode[]).includes(mode as DrawMode);
+
+const migrateSaveData = (raw: RawSaveData): RawSaveData & { version: string; drawMode: DrawMode; cardDrawState: CardDrawState } => {
+  const version = typeof raw.version === 'string' ? raw.version : '1.0';
+  const resolvedDrawMode = isValidDrawMode(raw.drawMode) ? raw.drawMode : 'standard';
+  const migrated: RawSaveData & { version: string; drawMode: DrawMode; cardDrawState: CardDrawState } = {
+    ...raw,
+    version,
+    drawMode: resolvedDrawMode,
+    cardDrawState: sanitizeCardDrawState(raw.cardDrawState),
+  };
+
+  if (!Number.isFinite(migrated.ip as number)) {
+    migrated.ip = 0;
+  }
+
+  if (!Number.isFinite(migrated.aiIP as number)) {
+    migrated.aiIP = 0;
+  }
+
+  if (!Array.isArray(migrated.log)) {
+    migrated.log = [];
+  }
+
+  if (version === '1.0') {
+    migrated.version = CURRENT_SAVE_VERSION;
+    if (Array.isArray(migrated.log) && !migrated.log.includes(MIGRATION_LOG_ENTRY)) {
+      migrated.log = [...migrated.log, MIGRATION_LOG_ENTRY];
+    }
+  }
+
+  if (!SUPPORTED_SAVE_VERSIONS.has(migrated.version)) {
+    migrated.version = CURRENT_SAVE_VERSION;
+  }
+
+  return migrated;
+};
 
 const DIFFICULTY_TO_AI_DIFFICULTY: Record<Difficulty, AIDifficulty> = {
   EASY: 'easy',
@@ -167,11 +228,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     currentPlayer: 'human',
     aiDifficulty,
     truth: 50,
-    ip: 15,
-    aiIP: 15,
+    ip: 0,
+    aiIP: 0,
     // Use all available cards to ensure proper deck building
-    hand: getRandomCards(3, { faction: 'truth' }),
-    aiHand: getRandomCards(3, { faction: 'government' }),
+    hand: getRandomCards(HAND_LIMIT, { faction: 'truth' }),
+    aiHand: getRandomCards(HAND_LIMIT, { faction: 'government' }),
     isGameOver: false,
     deck: generateWeightedDeck(40, 'truth'),
     aiDeck: generateWeightedDeck(40, 'government'),
@@ -202,7 +263,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     log: [
       'Game started - Truth Seekers faction selected',
       'Starting Truth: 50%',
-      'Cards drawn: 3',
+      `Opening hand: ${HAND_LIMIT} cards`,
       `AI Difficulty: ${aiDifficulty}`
     ],
     agenda: {
@@ -229,10 +290,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     targetState: null,
     aiStrategist: AIFactory.createStrategist(aiDifficulty),
     drawMode: 'standard',
-    cardDrawState: {
-      cardsPlayedLastTurn: 0,
-      lastTurnWithoutPlay: false
-    }
+    cardDrawState: createDefaultCardDrawState()
   });
 
   const resolveCardEffects = useCallback(
@@ -248,8 +306,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
   const initGame = useCallback((faction: 'government' | 'truth') => {
     const startingTruth = 50;
-    const startingIP = faction === 'government' ? 20 : 10; // Player IP
-    const aiStartingIP = faction === 'government' ? 10 : 20; // AI starts as the opposite faction
+    const startingIP = 0;
+    const aiStartingIP = 0;
     
     // Get draw mode from localStorage
     const savedSettings = localStorage.getItem('gameSettings');
@@ -257,9 +315,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       (JSON.parse(savedSettings).drawMode || 'standard') : 'standard';
     
     const handSize = getStartingHandSize(drawMode, faction);
+    const opposingFaction = faction === 'government' ? 'truth' : 'government';
+    const aiHandSize = getStartingHandSize(drawMode, opposingFaction);
     // CRITICAL: Pass faction to deck generation
     const newDeck = generateWeightedDeck(40, faction);
     const startingHand = newDeck.slice(0, handSize);
+    const aiStartingDeck = generateWeightedDeck(40, opposingFaction);
+    const aiStartingHand = aiStartingDeck.slice(0, aiHandSize);
     const initialControl = getInitialStateControl(faction);
 
     // Track game start in achievements
@@ -275,8 +337,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       hand: startingHand,
       deck: newDeck.slice(handSize),
       // AI gets opposite faction cards
-      aiHand: getRandomCards(handSize, { faction: faction === 'government' ? 'truth' : 'government' }),
-      aiDeck: generateWeightedDeck(40, faction === 'government' ? 'truth' : 'government'),
+      aiHand: aiStartingHand,
+      aiDeck: aiStartingDeck.slice(aiHandSize),
       controlledStates: initialControl.player,
       aiControlledStates: initialControl.ai,
       isGameOver: false, // CRITICAL: Reset game over state
@@ -313,15 +375,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       log: [
         `Game started - ${faction} faction selected`,
         `Starting Truth: ${startingTruth}%`,
-        `Starting IP: ${startingIP}`,
+        `Starting IP: ${startingIP} (gain 5 + controlled states each income phase)`,
         `Cards drawn: ${handSize} (${drawMode} mode)`,
+        `AI opening hand: ${aiHandSize}`,
         `Controlled states: ${initialControl.player.join(', ')}`
       ],
       drawMode,
-      cardDrawState: {
-        cardsPlayedLastTurn: 0,
-        lastTurnWithoutPlay: false
-      }
+      cardDrawState: createDefaultCardDrawState()
     }));
   }, [achievements, aiDifficulty]);
 
@@ -911,7 +971,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const saveData = {
       ...gameState,
       timestamp: Date.now(),
-      version: '1.0'
+      version: CURRENT_SAVE_VERSION
     };
 
     try {
@@ -929,39 +989,43 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (!savedData) return false;
 
       const saveData = JSON.parse(savedData, omitClashKey);
-      const normalizedRound = normalizeRoundFromSave(saveData);
-      const normalizedTurn = typeof saveData.turn === 'number' && Number.isFinite(saveData.turn)
-        ? Math.max(1, saveData.turn)
-        : 1;
-
-      // Validate save data structure
-      if (!saveData.faction || !saveData.phase || saveData.version !== '1.0') {
+      const rawVersion = typeof saveData.version === 'string' ? saveData.version : '1.0';
+      if (!saveData.faction || !saveData.phase || !SUPPORTED_SAVE_VERSIONS.has(rawVersion)) {
         console.warn('Invalid or incompatible save data');
         return false;
       }
 
+      const migrated = migrateSaveData(saveData);
+      const normalizedRound = normalizeRoundFromSave(migrated);
+      const migratedTurn = typeof migrated.turn === 'number' && Number.isFinite(migrated.turn)
+        ? Math.max(1, migrated.turn)
+        : 1;
+
+      // Validate save data structure
       // Reconstruct the game state
       setGameState(prev => ({
         ...prev,
-        ...saveData,
-        turn: normalizedTurn,
+        ...migrated,
+        turn: migratedTurn,
         round: normalizedRound,
-        cardsPlayedThisRound: Array.isArray(saveData.cardsPlayedThisRound)
-          ? saveData.cardsPlayedThisRound
+        cardsPlayedThisRound: Array.isArray(migrated.cardsPlayedThisRound)
+          ? migrated.cardsPlayedThisRound
           : [],
-        playHistory: Array.isArray(saveData.playHistory)
-          ? saveData.playHistory
+        playHistory: Array.isArray(migrated.playHistory)
+          ? migrated.playHistory
           : [],
-        turnPlays: Array.isArray(saveData.turnPlays)
-          ? saveData.turnPlays
+        turnPlays: Array.isArray(migrated.turnPlays)
+          ? migrated.turnPlays
           : [],
         comboTruthDeltaThisRound:
-          typeof saveData.comboTruthDeltaThisRound === 'number' ? saveData.comboTruthDeltaThisRound : 0,
+          typeof migrated.comboTruthDeltaThisRound === 'number' ? migrated.comboTruthDeltaThisRound : 0,
         // Ensure objects are properly reconstructed
         eventManager: prev.eventManager, // Keep the current event manager
-        aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium')
+        aiStrategist: prev.aiStrategist || AIFactory.createStrategist(migrated.aiDifficulty || 'medium'),
+        drawMode: migrated.drawMode,
+        cardDrawState: migrated.cardDrawState ?? createDefaultCardDrawState()
       }));
-      
+
       return true;
     } catch (error) {
       console.error('Failed to load game:', error);
@@ -975,17 +1039,18 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (!savedData) return null;
 
       const saveData = JSON.parse(savedData, omitClashKey);
-      const normalizedRound = normalizeRoundFromSave(saveData);
-      const normalizedTurn = typeof saveData.turn === 'number' && Number.isFinite(saveData.turn)
-        ? Math.max(1, saveData.turn)
+      const migrated = migrateSaveData(saveData);
+      const normalizedRound = normalizeRoundFromSave(migrated);
+      const normalizedTurn = typeof migrated.turn === 'number' && Number.isFinite(migrated.turn)
+        ? Math.max(1, migrated.turn)
         : 1;
       return {
-        faction: saveData.faction,
+        faction: migrated.faction,
         turn: normalizedTurn,
         round: normalizedRound,
-        phase: saveData.phase,
-        truth: saveData.truth,
-        timestamp: saveData.timestamp,
+        phase: migrated.phase,
+        truth: migrated.truth,
+        timestamp: migrated.timestamp,
         exists: true
       };
     } catch {
