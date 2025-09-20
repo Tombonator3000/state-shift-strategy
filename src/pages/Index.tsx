@@ -42,6 +42,9 @@ import type { CardPlayRecord } from '@/hooks/gameStateTypes';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
 import { areParanormalEffectsEnabled } from '@/state/settings';
+import type { GameCard } from '@/rules/mvp';
+
+type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
 type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
 
@@ -168,6 +171,75 @@ const computePlayMetrics = (
   const damageImpact = Math.max(0, typeof record.damageDealt === 'number' ? record.damageDealt : 0);
 
   return { captureCount, truthImpact, ipImpact, damageImpact, actorGain, opponentDrop };
+};
+
+const normalizeCardFaction = (faction: GameCard['faction']): 'truth' | 'government' => {
+  const normalized = typeof faction === 'string' ? faction.toLowerCase() : '';
+  return normalized.includes('government') ? 'government' : 'truth';
+};
+
+const determineCardContextualEffect = (card: GameCard): ContextualEffectType | null => {
+  const faction = normalizeCardFaction(card.faction);
+  const type = card.type;
+  const truthDelta = typeof (card.effects as { truthDelta?: number } | undefined)?.truthDelta === 'number'
+    ? (card.effects as { truthDelta?: number }).truthDelta
+    : null;
+
+  if (truthDelta !== null && truthDelta !== 0) {
+    return truthDelta > 0 ? 'media_blast' : 'government_crackdown';
+  }
+
+  if (type === 'MEDIA') {
+    return faction === 'truth' ? 'media_blast' : 'government_crackdown';
+  }
+
+  if (type === 'ATTACK') {
+    return faction === 'truth' ? 'conspiracy_revealed' : 'government_crackdown';
+  }
+
+  if (type === 'ZONE') {
+    return faction === 'truth' ? 'evidence_leaked' : 'surveillance_detected';
+  }
+
+  if ((card.effects as { ipDelta?: { opponent?: number } } | undefined)?.ipDelta?.opponent) {
+    return faction === 'truth' ? 'conspiracy_revealed' : 'government_crackdown';
+  }
+
+  return faction === 'truth' ? 'media_blast' : 'government_crackdown';
+};
+
+const determineStateEventContext = (eventType?: string): ContextualEffectType | null => {
+  const normalized = typeof eventType === 'string' ? eventType.toLowerCase() : '';
+  switch (normalized) {
+    case 'truth':
+    case 'opportunity':
+      return 'evidence_leaked';
+    case 'conspiracy':
+      return 'conspiracy_revealed';
+    case 'government':
+    case 'crisis':
+    case 'capture':
+      return 'government_crackdown';
+    case 'random':
+      return 'media_blast';
+    default:
+      return null;
+  }
+};
+
+const determineTruthBroadcastContext = (
+  intensity: 'surge' | 'collapse',
+  source?: 'truth' | 'government',
+): ContextualEffectType => {
+  if (intensity === 'surge') {
+    return 'media_blast';
+  }
+
+  if (source === 'truth') {
+    return 'surveillance_detected';
+  }
+
+  return 'government_crackdown';
 };
 
 const pickBestCandidate = (
@@ -629,6 +701,15 @@ const Index = () => {
           source: detail.source,
         },
       });
+
+      const meltdownContext = determineTruthBroadcastContext(detail.intensity, detail.source);
+      const meltdownPosition = VisualEffectsCoordinator.getRandomCenterPosition();
+      const meltdownLabel = detail.intensity === 'surge' ? 'Truth Surge' : 'Truth Collapse';
+      VisualEffectsCoordinator.triggerContextualEffect(
+        meltdownContext,
+        meltdownLabel,
+        meltdownPosition,
+      );
     };
 
     const handleCryptidSighting = (event: Event) => {
@@ -678,6 +759,37 @@ const Index = () => {
       window.removeEventListener('cryptidSighting', handleCryptidSighting as EventListener);
     };
   }, [pushSighting]);
+
+  useEffect(() => {
+    const handleStateEventEffect = (event: Event) => {
+      const detail = (event as CustomEvent<{ eventType?: string; stateId: string; x?: number; y?: number }>).detail;
+      if (!detail) {
+        return;
+      }
+
+      const context = determineStateEventContext(detail.eventType);
+      if (!context) {
+        return;
+      }
+
+      const position = typeof detail.x === 'number' && typeof detail.y === 'number'
+        ? { x: detail.x, y: detail.y }
+        : VisualEffectsCoordinator.getScreenCenter();
+      const stateLabel = resolveStateName(detail.stateId);
+      const descriptor = detail.eventType ? detail.eventType.toUpperCase() : 'EVENT';
+
+      VisualEffectsCoordinator.triggerContextualEffect(
+        context,
+        `${stateLabel} ${descriptor}`,
+        position,
+      );
+    };
+
+    window.addEventListener('stateEvent', handleStateEventEffect as EventListener);
+    return () => {
+      window.removeEventListener('stateEvent', handleStateEventEffect as EventListener);
+    };
+  }, []);
 
   // Track cards being drawn to hand for collection discovery
   useEffect(() => {
@@ -986,11 +1098,16 @@ const Index = () => {
         }
       }
 
+      const contextualEffect = determineCardContextualEffect(card);
+      if (contextualEffect) {
+        VisualEffectsCoordinator.triggerContextualEffect(contextualEffect, card.name, effectPosition);
+      }
+
       if (card.faction === 'truth' && card.type === 'MEDIA') {
         VisualEffectsCoordinator.triggerTruthFlash(effectPosition);
         audio.playSFX('flash');
       }
-      
+
       toast.success(`✅ ${card.name} deployed successfully!`, {
         duration: 2000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
