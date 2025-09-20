@@ -460,10 +460,19 @@ const Index = () => {
         (combo, position) => {
           // Synergy activation callback
           console.log(`🔗 New synergy activated: ${combo.name} (+${combo.bonusIP} IP)`);
-          
+
+          if (position) {
+            VisualEffectsCoordinator.triggerSynergyActivation(
+              combo.bonusIP,
+              position,
+              'synergy',
+              combo.name
+            );
+          }
+
           // Play audio feedback
           audio?.playSFX?.('state-capture');
-          
+
           // Toast notification for synergy activation
           toast.success(`🔗 Synergy Activated: ${combo.name} (+${combo.bonusIP} IP)`, {
             duration: 3000,
@@ -704,6 +713,10 @@ const Index = () => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || isAnimating()) return;
 
+    if (!(card.faction === 'government' && card.type === 'ZONE')) {
+      VisualEffectsCoordinator.triggerGovernmentZoneTarget({ active: false, mode: 'complete' });
+    }
+
     // Check if player can afford the card
     if (gameState.ip < card.cost) {
       toast.error(`💰 Insufficient IP! Need ${card.cost}, have ${gameState.ip}`, {
@@ -732,6 +745,22 @@ const Index = () => {
         duration: 4000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
       });
+
+      if (card.faction === 'government') {
+        const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+        const position = cardElement
+          ? VisualEffectsCoordinator.getElementCenter(cardElement)
+          : VisualEffectsCoordinator.getScreenCenter();
+
+        VisualEffectsCoordinator.triggerGovernmentZoneTarget({
+          active: true,
+          x: position.x,
+          y: position.y,
+          cardId: card.id,
+          cardName: card.name,
+          mode: 'select'
+        });
+      }
       return;
     }
 
@@ -740,9 +769,19 @@ const Index = () => {
     audio.playSFX('cardPlay');
     
     try {
+      if (card.faction === 'government' && card.type === 'ZONE') {
+        VisualEffectsCoordinator.triggerGovernmentZoneTarget({
+          active: true,
+          stateId: targetState || gameState.targetState || undefined,
+          cardId: card.id,
+          cardName: card.name,
+          mode: 'lock'
+        });
+      }
+
       // Use animated card play
       await playCardAnimated(cardId, animatePlayCard, targetState);
-      
+
       // Track card in collection
       recordCardPlay(cardId);
       
@@ -785,6 +824,10 @@ const Index = () => {
       audio.playSFX('error');
     } finally {
       setLoadingCard(null);
+
+      if (card.faction === 'government' && card.type === 'ZONE') {
+        VisualEffectsCoordinator.triggerGovernmentZoneTarget({ active: false, mode: 'complete' });
+      }
     }
   };
 
