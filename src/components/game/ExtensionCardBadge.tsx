@@ -33,10 +33,31 @@ export const ExtensionCardBadge = ({ cardId, card, variant = 'inline' }: Extensi
 
   const extensionInfo = getCardExtensionInfo(cardId);
   const faction = getCardFaction(card);
-  
-  // Combined faction + extension symbols
-  const symbol = faction === 'truth' ? '👁️' : '🦎';
+
+  const extensionId = extensionInfo?.id?.toLowerCase();
+  const isCryptidsExtension = extensionId?.includes('cryptid');
+  const isHalloweenExtension = extensionId?.includes('halloween');
+
+  // Base faction styling + fallback labels
   const factionLabel = faction === 'truth' ? 'Truth Ext' : 'Gov Ext';
+  const factionSymbol = faction === 'truth' ? '👁️' : '🦎';
+
+  // Extension specific overrides
+  const symbol = isCryptidsExtension
+    ? '🦎'
+    : isHalloweenExtension
+      ? '🎃'
+      : factionSymbol;
+
+  const badgeText = isCryptidsExtension
+    ? 'CRYPTIDS'
+    : isHalloweenExtension
+      ? 'HALLOWEEN'
+      : factionLabel.split(' ')[0].toUpperCase();
+
+  const badgeTitle = extensionInfo
+    ? `${extensionInfo.name} Extension v${extensionInfo.version}`
+    : `${factionLabel} Card`;
   
   if (variant === 'overlay') {
     return (
@@ -52,9 +73,9 @@ export const ExtensionCardBadge = ({ cardId, card, variant = 'inline' }: Extensi
     <Badge 
       variant="outline" 
       className={`text-xs ${faction === 'truth' ? 'bg-truth-blue/20 border-truth-blue text-truth-blue' : 'bg-government-blue/20 border-government-blue text-government-blue'} px-1.5 py-0.5`}
-      title={extensionInfo ? `${factionLabel}: ${extensionInfo.name} v${extensionInfo.version}` : `${factionLabel} Card`}
+      title={badgeTitle}
     >
-      {symbol} {factionLabel.split(' ')[0].toUpperCase()}
+      {symbol} {badgeText}
     </Badge>
   );
 };
