@@ -1802,3 +1802,369 @@ html, body, #root {
     opacity: 0.6;
   }
 }
+
+/* --- Paranormal Overlay Effects --- */
+.ufo-broadcast {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 30%, hsla(195, 90%, 72%, 0.75), hsla(210, 92%, 18%, 0.05) 72%);
+  mix-blend-mode: screen;
+  overflow: visible;
+  animation: tractorBeam 4.2s ease-in-out infinite;
+  box-shadow: 0 0 32px hsla(195, 100%, 75%, 0.35);
+}
+
+.ufo-broadcast.reduced-motion {
+  animation: none;
+  box-shadow: 0 0 18px hsla(195, 80%, 70%, 0.3);
+}
+
+.ufo-ship {
+  position: relative;
+  width: 120px;
+  height: 60px;
+  border-radius: 50% 50% 45% 45%;
+  background: linear-gradient(180deg, hsla(205, 85%, 60%, 0.85), hsla(210, 90%, 35%, 0.9));
+  box-shadow: 0 12px 24px hsla(210, 90%, 15%, 0.45);
+}
+
+.ufo-dish {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsla(190, 96%, 76%, 0.8), hsla(200, 95%, 46%, 0.55) 70%, hsla(210, 92%, 24%, 0.6));
+}
+
+.ufo-cabin {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 68px;
+  height: 44px;
+  border-radius: 48% 48% 40% 40%;
+  background: linear-gradient(180deg, hsla(195, 92%, 82%, 0.92), hsla(210, 80%, 40%, 0.65));
+  box-shadow: inset 0 -4px 12px hsla(210, 90%, 18%, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ufo-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 0 4px hsla(190, 90%, 72%, 0.6));
+}
+
+.ufo-beam {
+  position: absolute;
+  width: 210px;
+  height: 260px;
+  background: radial-gradient(circle at 50% 0%, hsla(195, 100%, 74%, 0.65), hsla(195, 98%, 55%, 0.15) 65%, transparent 75%);
+  clip-path: polygon(45% 10%, 55% 10%, 100% 100%, 0% 100%);
+  animation: tractorBeam 2.8s ease-in-out infinite;
+}
+
+.ufo-broadcast.reduced-motion .ufo-beam {
+  animation: none;
+  background: radial-gradient(circle at 50% 0%, hsla(195, 95%, 68%, 0.5), hsla(195, 92%, 40%, 0.1) 70%, transparent 80%);
+}
+
+.beam-core {
+  position: absolute;
+  inset: 18px;
+  background: linear-gradient(180deg, hsla(200, 95%, 78%, 0.35), hsla(200, 95%, 45%, 0.05));
+  filter: blur(6px);
+}
+
+.beam-sparkles {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(hsla(196, 100%, 90%, 0.8) 0.5px, transparent 0.5px);
+  background-size: 18px 18px;
+  animation: staticPulse 1.6s linear infinite;
+}
+
+.elvis-hologram {
+  position: absolute;
+  bottom: 24px;
+  width: 90px;
+  height: 120px;
+  border-radius: 40% 40% 35% 35%;
+  background: linear-gradient(180deg, hsla(286, 100%, 82%, 0.6), hsla(278, 92%, 55%, 0.3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 16px hsla(280, 86%, 65%, 0.65));
+  animation: hologramFlicker 1.9s ease-in-out infinite;
+}
+
+.ufo-broadcast.reduced-motion .elvis-hologram {
+  animation: none;
+}
+
+.elvis-body {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 6px hsla(280, 70%, 60%, 0.6));
+}
+
+.elvis-shadow {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  width: 90px;
+  height: 20px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, hsla(280, 90%, 20%, 0.4), transparent 70%);
+}
+
+.crt-banner {
+  position: absolute;
+  top: -52px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  background: linear-gradient(90deg, hsla(0, 92%, 62%, 0.92), hsla(0, 85%, 45%, 0.88));
+  border-radius: 6px;
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  animation: crtRoll 2.4s linear infinite;
+}
+
+.ufo-broadcast.reduced-motion .crt-banner {
+  animation: none;
+}
+
+.crt-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  text-transform: uppercase;
+}
+
+.crt-text::before {
+  content: '📡';
+}
+
+.set-list {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: hsla(220, 20%, 8%, 0.7);
+  border: 1px solid hsla(210, 90%, 70%, 0.35);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: hsla(195, 85%, 78%, 0.9);
+  box-shadow: inset 0 0 18px hsla(195, 100%, 70%, 0.18);
+}
+
+.set-list h4 {
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  margin-bottom: 6px;
+}
+
+.set-list ul {
+  list-style: none;
+  margin: 0 0 8px 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.truth-meter {
+  font-weight: 600;
+  color: hsla(45, 95%, 62%, 0.95);
+}
+
+.bigfoot-trailcam {
+  position: absolute;
+  width: 260px;
+  height: 200px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  border-radius: 12px;
+  background: hsla(150, 12%, 12%, 0.92);
+  border: 1px solid hsla(152, 28%, 40%, 0.65);
+  overflow: hidden;
+  box-shadow: 0 18px 28px hsla(160, 20%, 8%, 0.45);
+}
+
+.bigfoot-trailcam.reduced-motion {
+  box-shadow: 0 12px 18px hsla(160, 16%, 10%, 0.4);
+}
+
+.trailcam-header,
+.trailcam-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  background: hsla(152, 22%, 18%, 0.92);
+  color: hsla(150, 28%, 82%, 0.92);
+}
+
+.trailcam-title {
+  font-weight: 700;
+}
+
+.trailcam-body {
+  position: relative;
+  overflow: hidden;
+  background: hsla(150, 14%, 10%, 0.9);
+}
+
+.trailcam-noise {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(hsla(150, 20%, 90%, 0.15) 0.8px, transparent 0.8px);
+  background-size: 3px 3px;
+  opacity: 0.6;
+  animation: staticPulse 1.4s steps(4, end) infinite;
+}
+
+.trailcam-thermal {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 40% 60%, hsla(100, 84%, 65%, 0.55), hsla(40, 95%, 55%, 0.45) 35%, hsla(10, 90%, 50%, 0.25) 55%, transparent 75%);
+  mix-blend-mode: screen;
+  animation: thermalScan 3.4s ease-in-out infinite;
+}
+
+.bigfoot-trailcam.reduced-motion .trailcam-thermal {
+  animation: none;
+}
+
+.bigfoot-silhouette {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 3rem;
+  color: hsla(120, 20%, 30%, 0.85);
+  filter: drop-shadow(0 0 14px hsla(140, 70%, 50%, 0.35));
+  animation: bigfootThermal 2.8s ease-in-out infinite;
+}
+
+.bigfoot-trailcam.reduced-motion .bigfoot-silhouette {
+  animation: none;
+}
+
+.trailcam-reticle {
+  position: absolute;
+  inset: 20px;
+  border: 1px solid hsla(150, 35%, 85%, 0.45);
+  border-radius: 4px;
+  box-shadow: inset 0 0 12px hsla(150, 40%, 70%, 0.2);
+}
+
+.trailcam-meta {
+  display: grid;
+  gap: 2px;
+}
+
+.trailcam-label {
+  font-weight: 600;
+  color: hsla(152, 28%, 75%, 0.9);
+}
+
+.trailcam-value {
+  color: hsla(150, 45%, 88%, 0.95);
+}
+
+.quality-thermal .trailcam-thermal {
+  background: radial-gradient(circle at 45% 60%, hsla(120, 90%, 62%, 0.6), hsla(40, 95%, 55%, 0.5) 35%, hsla(5, 92%, 52%, 0.3) 60%, transparent 78%);
+}
+
+.quality-still .trailcam-thermal {
+  background: radial-gradient(circle at 50% 50%, hsla(150, 16%, 50%, 0.4), hsla(150, 12%, 22%, 0.8));
+}
+
+.sighting-highlight {
+  animation: sightingPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes tractorBeam {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes hologramFlicker {
+  0%, 100% {
+    opacity: 0.8;
+    filter: drop-shadow(0 0 14px hsla(280, 70%, 60%, 0.6));
+  }
+  50% {
+    opacity: 0.6;
+    filter: drop-shadow(0 0 18px hsla(280, 90%, 70%, 0.75));
+  }
+}
+
+@keyframes crtRoll {
+  0% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(2px);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes staticPulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes bigfootThermal {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
+@keyframes thermalScan {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translateY(-6px);
+    opacity: 0.4;
+  }
+}
+
+@keyframes sightingPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsla(45, 96%, 60%, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 12px 4px hsla(45, 96%, 60%, 0.45);
+  }
+}

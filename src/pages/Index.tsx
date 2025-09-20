@@ -39,6 +39,8 @@ import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
 import type { CardPlayRecord } from '@/hooks/gameStateTypes';
+import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
+import type { ParanormalSighting } from '@/types/paranormal';
 
 type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
 
@@ -87,6 +89,47 @@ interface EnrichedPlay {
   actorGain: number;
   opponentDrop: number;
 }
+
+const SYNERGY_SIGHTING_TAGLINES = [
+  'Operators swear sparks of +{BONUS} IP rained across the ops deck.',
+  'Combo uplink redlined at +{BONUS} IP before stabilizers kicked in.',
+  'Witnesses report neon corkboard materializing with +{BONUS} IP scribbles.',
+  'Analytics desk logged a phantom +{BONUS} IP surge and a chorus of high-fives.',
+];
+
+const BROADCAST_SIGHTING_TAGLINES = [
+  'Emergency feed hijacked by "{TRACK}"—intensity now at {INTENSITY}.',
+  'Viewers report tractor beams spelling out {INTENSITY} across the skyline.',
+  'Studio monitors loop Elvis crooning "{TRACK}" while truth hits {INTENSITY}.',
+  'Control room claims UFO spotlight synced perfectly to "{TRACK}".',
+];
+
+const CRYPTID_SIGHTING_TAGLINES = [
+  'Trail cam caught a hulking blur—classified as {QUALITY} evidence.',
+  'Footprint sensors lit up; agents dispatched toward {LOCATION}.',
+  'Local ham radio crackled: "Bigfoot just photobombed our {QUALITY} feed."',
+  'Thermal scanners near {LOCATION} pegged a 9-foot anomaly.',
+];
+
+const fillTemplate = (template: string, replacements: Record<string, string | number>): string => {
+  return template.replace(/\{(\w+)\}/g, (_match, key) => {
+    const replacement = replacements[key];
+    return replacement !== undefined ? String(replacement) : '';
+  });
+};
+
+const resolveStateName = (stateId: string): string => {
+  const normalized = stateId.toUpperCase();
+  const byId = getStateById(stateId);
+  if (byId?.name) {
+    return byId.name;
+  }
+  const byAbbr = getStateByAbbreviation(normalized);
+  if (byAbbr?.name) {
+    return byAbbr.name;
+  }
+  return stateId;
+};
 
 const inferFactionFromRecord = (
   record: CardPlayRecord,
@@ -329,6 +372,7 @@ const Index = () => {
   const [showCardCollection, setShowCardCollection] = useState(false);
   const [gameOverReport, setGameOverReport] = useState<GameOverReport | null>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
+  const [paranormalSightings, setParanormalSightings] = useState<ParanormalSighting[]>([]);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -338,6 +382,14 @@ const Index = () => {
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
+
+  const pushSighting = useCallback((entry: ParanormalSighting) => {
+    setParanormalSightings(prev => {
+      const merged = [...prev, entry];
+      const MAX_ENTRIES = 12;
+      return merged.length > MAX_ENTRIES ? merged.slice(merged.length - MAX_ENTRIES) : merged;
+    });
+  }, []);
 
   // Handle AI turns
   useEffect(() => {
@@ -499,6 +551,124 @@ const Index = () => {
       }
     }
   }, [gameState.controlledStates, checkSynergies, getActiveCombinations, getTotalBonusIP, audio]);
+
+  useEffect(() => {
+    const pickTemplate = (templates: string[]): string => {
+      if (!templates.length) {
+        return '';
+      }
+      const index = Math.floor(Math.random() * templates.length);
+      return templates[index];
+    };
+
+    const handleSynergyActivation = (event: Event) => {
+      const detail = (event as CustomEvent<{ bonusIP: number; comboName?: string }>).detail;
+      if (!detail) return;
+
+      const timestamp = Date.now();
+      const template = pickTemplate(SYNERGY_SIGHTING_TAGLINES);
+      const subtext = template
+        ? fillTemplate(template, { BONUS: detail.bonusIP })
+        : `Operations log a sudden +${detail.bonusIP} IP spike.`;
+
+      pushSighting({
+        id: `synergy-${timestamp}`,
+        timestamp,
+        category: 'synergy',
+        headline: detail.comboName
+          ? `${detail.comboName.toUpperCase()} SYNERGY SURGE`
+          : 'UNIDENTIFIED SYNERGY SURGE',
+        subtext,
+        location: 'Operations Deck',
+        metadata: {
+          bonusIP: detail.bonusIP,
+          comboName: detail.comboName,
+        },
+      });
+    };
+
+    const handleTruthMeltdownBroadcast = (event: Event) => {
+      const detail = (event as CustomEvent<{
+        intensity: 'surge' | 'collapse';
+        setList?: string[];
+        truthValue?: number;
+        source?: 'truth' | 'government';
+      }>).detail;
+      if (!detail) return;
+
+      const timestamp = Date.now();
+      const track = detail.setList?.[0] ?? 'Suspicious Minds?';
+      const template = pickTemplate(BROADCAST_SIGHTING_TAGLINES);
+      const subtext = template
+        ? fillTemplate(template, {
+          TRACK: track,
+          INTENSITY: detail.intensity.toUpperCase(),
+        })
+        : `Broadcast overwhelmed by Elvis feed (${detail.intensity}).`;
+
+      const headline = detail.intensity === 'surge'
+        ? 'UFO-ELVIS BROADCAST HIJACKED'
+        : 'ELVIS SIGNAL SCRAMBLES TRUTH FEED';
+
+      pushSighting({
+        id: `broadcast-${timestamp}`,
+        timestamp,
+        category: 'truth-meltdown',
+        headline,
+        subtext,
+        location: 'Truth-O-Meter Control Room',
+        metadata: {
+          intensity: detail.intensity,
+          setList: detail.setList,
+          truthValue: detail.truthValue,
+          source: detail.source,
+        },
+      });
+    };
+
+    const handleCryptidSighting = (event: Event) => {
+      const detail = (event as CustomEvent<{
+        stateId: string;
+        stateName?: string;
+        footageQuality: string;
+      }>).detail;
+      if (!detail) return;
+
+      const timestamp = Date.now();
+      const stateName = detail.stateName ?? resolveStateName(detail.stateId);
+      const template = pickTemplate(CRYPTID_SIGHTING_TAGLINES);
+      const subtext = template
+        ? fillTemplate(template, {
+          QUALITY: detail.footageQuality.toUpperCase(),
+          LOCATION: stateName.toUpperCase(),
+        })
+        : `Trail cam pinged in ${stateName} (${detail.footageQuality} footage).`;
+
+      pushSighting({
+        id: `cryptid-${detail.stateId}-${timestamp}`,
+        timestamp,
+        category: 'cryptid',
+        headline: `BIGFOOT TRAIL CAM ALERT – ${stateName.toUpperCase()}`,
+        subtext,
+        location: stateName,
+        metadata: {
+          stateId: detail.stateId,
+          stateName,
+          footageQuality: detail.footageQuality,
+        },
+      });
+    };
+
+    window.addEventListener('synergyActivation', handleSynergyActivation as EventListener);
+    window.addEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
+    window.addEventListener('cryptidSighting', handleCryptidSighting as EventListener);
+
+    return () => {
+      window.removeEventListener('synergyActivation', handleSynergyActivation as EventListener);
+      window.removeEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
+      window.removeEventListener('cryptidSighting', handleCryptidSighting as EventListener);
+    };
+  }, [pushSighting]);
 
   // Track cards being drawn to hand for collection discovery
   useEffect(() => {
@@ -1344,6 +1514,7 @@ const Index = () => {
           faction={gameState.faction}
           truth={gameState.truth}
           comboTruthDelta={gameState.comboTruthDeltaThisRound}
+          sightings={paranormalSightings}
           onClose={handleCloseNewspaper}
         />
       )}

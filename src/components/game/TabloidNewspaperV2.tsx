@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { Card as UICard } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,8 @@ import type { Card } from '@/types';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import { buildRoundContext, formatTruthDelta } from './tabloidRoundUtils';
+import { useAudioContext } from '@/contexts/AudioContext';
+import type { ParanormalSighting } from '@/types/paranormal';
 
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
 
@@ -26,6 +28,37 @@ const FALLBACK_DATA: NewspaperData = {
   mediaVerbs: ['GOES VIRAL'],
   zoneVerbs: ['SURGE'],
   stamps: { breaking: ['BREAKING'], classified: ['CLASSIFIED'] },
+};
+
+const SIGHTING_LABELS: Record<ParanormalSighting['category'], string> = {
+  synergy: 'Synergy Spike',
+  'truth-meltdown': 'Broadcast Hijack',
+  cryptid: 'Cryptid Alert'
+};
+
+const SIGHTING_ICONS: Record<ParanormalSighting['category'], string> = {
+  synergy: '🛰️',
+  'truth-meltdown': '📡',
+  cryptid: '🦶'
+};
+
+const SIGHTING_BADGE_VARIANTS: Record<ParanormalSighting['category'], string> = {
+  synergy: 'border-indigo-500 text-indigo-500',
+  'truth-meltdown': 'border-rose-500 text-rose-500',
+  cryptid: 'border-emerald-500 text-emerald-500'
+};
+
+const formatSightingTime = (timestamp: number) => {
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).format(new Date(timestamp));
+  } catch {
+    const date = new Date(timestamp);
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  }
 };
 
 const formatTarget = (entry: TabloidPlayedCard): string | null => {
@@ -167,12 +200,31 @@ const TabloidNewspaperV2 = ({
   truth,
   comboTruthDelta = 0,
   onClose,
+  sightings = [],
 }: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState('THE PARANOID TIMES');
   const [glitchText, setGlitchText] = useState<string | null>(null);
 
   const dataset = data ?? FALLBACK_DATA;
+  const audio = useAudioContext();
+  const [highlightedSightingId, setHighlightedSightingId] = useState<string | null>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [activeSightingIndex, setActiveSightingIndex] = useState(0);
+  const highlightTimeoutRef = useRef<number | null>(null);
+  const prevSightingsCountRef = useRef(0);
+  const lastSightingIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleChange = (event: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event.matches);
+    };
+    setPrefersReducedMotion(media.matches);
+    media.addEventListener('change', handleChange);
+    return () => media.removeEventListener('change', handleChange);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -222,6 +274,124 @@ const TabloidNewspaperV2 = ({
       }
     };
   }, []);
+
+  useEffect(() => () => {
+    if (highlightTimeoutRef.current) {
+      window.clearTimeout(highlightTimeoutRef.current);
+      highlightTimeoutRef.current = null;
+    }
+  }, []);
+
+  const recentSightings = useMemo<ParanormalSighting[]>(() => {
+    if (!sightings || sightings.length === 0) {
+      return [];
+    }
+    const ordered = [...sightings].sort((a, b) => a.timestamp - b.timestamp);
+    return ordered.slice(-8);
+  }, [sightings]);
+
+  useEffect(() => {
+    if (!recentSightings.length) {
+      setActiveSightingIndex(0);
+      setHighlightedSightingId(null);
+      lastSightingIdRef.current = null;
+      prevSightingsCountRef.current = 0;
+      return;
+    }
+
+    setActiveSightingIndex(prev => Math.min(prev, recentSightings.length - 1));
+  }, [recentSightings.length]);
+
+  useEffect(() => {
+    if (!recentSightings.length) {
+      return;
+    }
+
+    const latest = recentSightings[recentSightings.length - 1];
+    const prevCount = prevSightingsCountRef.current;
+    const prevLastId = lastSightingIdRef.current;
+
+    const isNewEntry = !prevLastId || latest.id !== prevLastId || recentSightings.length > prevCount;
+
+    prevSightingsCountRef.current = recentSightings.length;
+    lastSightingIdRef.current = latest.id;
+
+    if (isNewEntry) {
+      setActiveSightingIndex(recentSightings.length - 1);
+      setHighlightedSightingId(latest.id);
+      audio?.playSFX?.('radio-static');
+
+      if (highlightTimeoutRef.current) {
+        window.clearTimeout(highlightTimeoutRef.current);
+        highlightTimeoutRef.current = null;
+      }
+
+      if (!prefersReducedMotion) {
+        highlightTimeoutRef.current = window.setTimeout(() => {
+          setHighlightedSightingId(null);
+          highlightTimeoutRef.current = null;
+        }, 2600);
+      }
+    }
+  }, [recentSightings, audio, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (prefersReducedMotion || recentSightings.length <= 1) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setActiveSightingIndex(prev => {
+        if (!recentSightings.length) {
+          return 0;
+        }
+        return (prev + 1) % recentSightings.length;
+      });
+    }, 7000);
+
+    return () => window.clearInterval(interval);
+  }, [recentSightings.length, prefersReducedMotion]);
+
+  const boundedSightingIndex = recentSightings.length
+    ? Math.min(activeSightingIndex, recentSightings.length - 1)
+    : 0;
+
+  const activeSighting = recentSightings.length
+    ? recentSightings[boundedSightingIndex]
+    : null;
+
+  const supplementalSightings = useMemo(() => {
+    if (!recentSightings.length) {
+      return [];
+    }
+    const reversed = [...recentSightings].reverse();
+    if (!activeSighting) {
+      return reversed;
+    }
+    return reversed.filter(entry => entry.id !== activeSighting.id);
+  }, [recentSightings, activeSighting]);
+
+  const handleSightingSelect = useCallback((id: string) => {
+    const targetIndex = recentSightings.findIndex(entry => entry.id === id);
+    if (targetIndex === -1) {
+      return;
+    }
+
+    setActiveSightingIndex(targetIndex);
+    setHighlightedSightingId(id);
+
+    if (highlightTimeoutRef.current) {
+      window.clearTimeout(highlightTimeoutRef.current);
+      highlightTimeoutRef.current = null;
+    }
+
+    if (!prefersReducedMotion) {
+      highlightTimeoutRef.current = window.setTimeout(() => {
+        setHighlightedSightingId(null);
+        highlightTimeoutRef.current = null;
+      }, 1800);
+    }
+  }, [recentSightings, prefersReducedMotion]);
 
   const playerCards = useMemo(
     () => playedCards.filter(entry => entry.player === 'human'),
@@ -518,6 +688,97 @@ const TabloidNewspaperV2 = ({
                   </div>
                 </section>
               ) : null}
+              <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-sm font-black uppercase tracking-wide">Sightings Feed</h3>
+                  {activeSighting ? (
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                      {formatSightingTime(activeSighting.timestamp)}
+                    </span>
+                  ) : null}
+                </div>
+                {activeSighting ? (
+                  <div
+                    className={`space-y-2 rounded-md border border-dashed border-newspaper-border/60 bg-newspaper-header/10 p-3 transition ${
+                      highlightedSightingId === activeSighting.id ? 'sighting-highlight' : ''
+                    }`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/70">
+                      <span
+                        className={`inline-flex items-center gap-2 rounded-full border px-2 py-0.5 ${SIGHTING_BADGE_VARIANTS[activeSighting.category]}`}
+                      >
+                        <span aria-hidden="true">{SIGHTING_ICONS[activeSighting.category]}</span>
+                        {SIGHTING_LABELS[activeSighting.category]}
+                      </span>
+                      {activeSighting.location ? (
+                        <span className="rounded border border-newspaper-border px-2 py-0.5">
+                          {activeSighting.location}
+                        </span>
+                      ) : null}
+                    </div>
+                    <h4 className="text-base font-semibold leading-snug text-newspaper-text">
+                      {activeSighting.headline}
+                    </h4>
+                    <p className="text-xs italic text-newspaper-text/70">{activeSighting.subtext}</p>
+                    <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-wide text-newspaper-text/60">
+                      {activeSighting.metadata?.intensity ? (
+                        <span className="rounded border border-dashed border-newspaper-border px-2 py-0.5">
+                          Intensity: {activeSighting.metadata.intensity.toUpperCase()}
+                        </span>
+                      ) : null}
+                      {typeof activeSighting.metadata?.truthValue === 'number' ? (
+                        <span className="rounded border border-newspaper-border px-2 py-0.5">
+                          Truth {Math.round(activeSighting.metadata.truthValue)}%
+                        </span>
+                      ) : null}
+                      {typeof activeSighting.metadata?.bonusIP === 'number' ? (
+                        <span className="rounded border border-dashed border-newspaper-border px-2 py-0.5">
+                          Bonus IP +{activeSighting.metadata.bonusIP}
+                        </span>
+                      ) : null}
+                      {activeSighting.metadata?.footageQuality ? (
+                        <span className="rounded border border-newspaper-border px-2 py-0.5">
+                          Footage: {activeSighting.metadata.footageQuality.toUpperCase()}
+                        </span>
+                      ) : null}
+                    </div>
+                    {activeSighting.metadata?.setList?.length ? (
+                      <div className="rounded border border-dashed border-newspaper-border/60 bg-white/60 p-2 text-[10px] uppercase tracking-wide text-newspaper-text/70">
+                        {activeSighting.metadata.setList.join(' • ')}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className="text-xs italic text-newspaper-text/60">No paranormal activity logged this round.</p>
+                )}
+
+                {supplementalSightings.length ? (
+                  <div className="mt-3 space-y-2 text-xs text-newspaper-text/70">
+                    {supplementalSightings.slice(0, 4).map(sighting => (
+                      <button
+                        key={sighting.id}
+                        type="button"
+                        onClick={() => handleSightingSelect(sighting.id)}
+                        className={`w-full rounded border border-dashed border-newspaper-border/60 bg-white/40 px-3 py-2 text-left transition ${
+                          activeSighting?.id === sighting.id
+                            ? 'sighting-highlight'
+                            : 'hover:bg-white/70'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide">
+                          <span className="inline-flex items-center gap-1">
+                            <span aria-hidden="true">{SIGHTING_ICONS[sighting.category]}</span>
+                            {SIGHTING_LABELS[sighting.category]}
+                          </span>
+                          <span>{formatSightingTime(sighting.timestamp)}</span>
+                        </div>
+                        <p className="font-semibold leading-snug text-newspaper-text">{sighting.headline}</p>
+                        <p className="text-[11px] italic text-newspaper-text/60">{sighting.subtext}</p>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </section>
               {oppositionStories.length ? (
                 <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
                   <h3 className="mb-3 text-sm font-black uppercase tracking-wide">Opposition Moves</h3>

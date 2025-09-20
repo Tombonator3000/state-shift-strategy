@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 
 interface TruthMeterProps {
   value: number; // 0-100
@@ -6,11 +7,13 @@ interface TruthMeterProps {
 }
 
 const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
   const [meltdownActive, setMeltdownActive] = useState(false);
+  const lastBroadcastRef = useRef<'surge' | 'collapse' | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -35,6 +38,47 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
     const isExtreme = value >= 95 || value <= 5;
     setMeltdownActive(isExtreme);
   }, [value, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!containerRef.current) {
+      return;
+    }
+
+    const mode: 'surge' | 'collapse' | null = value >= 95 ? 'surge' : value <= 5 ? 'collapse' : null;
+
+    if (!mode) {
+      lastBroadcastRef.current = null;
+      return;
+    }
+
+    if (lastBroadcastRef.current === mode) {
+      return;
+    }
+
+    lastBroadcastRef.current = mode;
+
+    const position = VisualEffectsCoordinator.getElementCenter(containerRef.current);
+    const setList = mode === 'surge'
+      ? [
+        'Suspicious Minds (Disclosure Mix)',
+        'All Shook Up (Close Encounter Edit)',
+        'Blue Suede Tractor Beam',
+      ]
+      : [
+        'Heartbreak Hotel (Signal Lost)',
+        'Return to Sender (Government Edit)',
+        'Can\'t Help Falling in Static',
+      ];
+
+    VisualEffectsCoordinator.triggerTruthMeltdownBroadcast({
+      position,
+      intensity: mode,
+      setList,
+      truthValue: value,
+      reducedMotion: prefersReducedMotion,
+      source: faction === 'Truth' ? 'truth' : 'government',
+    });
+  }, [value, faction, prefersReducedMotion]);
   const getColor = () => {
     if (value >= 95) return 'bg-truth-red';
     if (value <= 5) return 'bg-government-blue';
@@ -86,7 +130,10 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
   };
 
   return (
-    <div className="flex items-center gap-4 bg-black/20 p-3 rounded-lg border border-secret-red/30">
+    <div
+      ref={containerRef}
+      className="flex items-center gap-4 bg-black/20 p-3 rounded-lg border border-secret-red/30"
+    >
       <div className="text-sm font-mono font-bold text-secret-red">TRUTH-O-METER™</div>
       
       <div className={`relative w-40 ${getGlowEffect()}`}>

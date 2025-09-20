@@ -4,12 +4,16 @@ import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import RedactionSweep from '@/components/effects/RedactionSweep';
 import TabloidFlashOverlay from '@/components/effects/TabloidFlashOverlay';
 import ConspiracyCorkboard from '@/components/effects/ConspiracyCorkboard';
+import UFOElvisBroadcast from '@/components/effects/UFOElvisBroadcast';
+import BigfootTrailCam from '@/components/effects/BigfootTrailCam';
+import { useAudioContext } from '@/contexts/AudioContext';
 
 interface CardAnimationLayerProps {
   children?: React.ReactNode;
 }
 
 const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => {
+  const audio = useAudioContext();
   const [particleEffects, setParticleEffects] = useState<Array<{
     id: number;
     x: number;
@@ -41,6 +45,24 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     y: number;
     comboName?: string;
     bonusIP?: number;
+  } | null>(null);
+  const [broadcastOverlay, setBroadcastOverlay] = useState<{
+    id: number;
+    x: number;
+    y: number;
+    intensity: 'surge' | 'collapse';
+    setList: string[];
+    truthValue?: number;
+    reducedMotion?: boolean;
+  } | null>(null);
+  const [cryptidOverlay, setCryptidOverlay] = useState<{
+    id: number;
+    x: number;
+    y: number;
+    stateId: string;
+    stateName?: string;
+    footageQuality: string;
+    reducedMotion?: boolean;
   } | null>(null);
 
   const spawnParticleEffect = useCallback((type: ParticleEffectType, x: number, y: number) => {
@@ -102,6 +124,54 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       }
     };
 
+    const handleTruthMeltdownBroadcast = (event: CustomEvent<{
+      position: { x: number; y: number };
+      intensity: 'surge' | 'collapse';
+      setList: string[];
+      truthValue?: number;
+      reducedMotion?: boolean;
+    }>) => {
+      if (!event?.detail) return;
+      const { position, intensity, setList, truthValue, reducedMotion } = event.detail;
+      if (position && !reducedMotion) {
+        spawnParticleEffect('broadcast', position.x, position.y);
+      }
+      setBroadcastOverlay({
+        id: Date.now(),
+        x: position?.x ?? window.innerWidth / 2,
+        y: position?.y ?? window.innerHeight / 2,
+        intensity,
+        setList,
+        truthValue,
+        reducedMotion,
+      });
+      audio?.playSFX?.('ufo-elvis');
+    };
+
+    const handleCryptidSighting = (event: CustomEvent<{
+      position: { x: number; y: number };
+      stateId: string;
+      stateName?: string;
+      footageQuality: string;
+      reducedMotion?: boolean;
+    }>) => {
+      if (!event?.detail) return;
+      const { position, stateId, stateName, footageQuality, reducedMotion } = event.detail;
+      if (position && !reducedMotion) {
+        spawnParticleEffect('cryptid', position.x, position.y);
+      }
+      setCryptidOverlay({
+        id: Date.now(),
+        x: position?.x ?? window.innerWidth / 2,
+        y: position?.y ?? window.innerHeight / 2,
+        stateId,
+        stateName,
+        footageQuality,
+        reducedMotion,
+      });
+      audio?.playSFX?.('cryptid-rumble');
+    };
+
     const handleFloatingNumber = (event: CustomEvent<{ value: number; type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain'; x: number; y: number }>) => {
       if (!event?.detail) return;
       setFloatingNumber({
@@ -146,6 +216,8 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     window.addEventListener('governmentRedaction', handleGovernmentRedaction as EventListener);
     window.addEventListener('truthFlash', handleTruthFlash as EventListener);
     window.addEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
+    window.addEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
+    window.addEventListener('cryptidSighting', handleCryptidSighting as EventListener);
 
     return () => {
       window.removeEventListener('cardDeployed', handleCardDeployed as EventListener);
@@ -156,8 +228,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('governmentRedaction', handleGovernmentRedaction as EventListener);
       window.removeEventListener('truthFlash', handleTruthFlash as EventListener);
       window.removeEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
+      window.removeEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
+      window.removeEventListener('cryptidSighting', handleCryptidSighting as EventListener);
     };
-  }, [spawnParticleEffect]);
+  }, [spawnParticleEffect, audio]);
 
   const handleParticleComplete = useCallback((id: number) => {
     setParticleEffects(prev => prev.filter(effect => effect.id !== id));
@@ -177,6 +251,14 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
 
   const handleCorkboardComplete = useCallback(() => {
     setCorkboardOverlay(null);
+  }, []);
+
+  const handleBroadcastComplete = useCallback(() => {
+    setBroadcastOverlay(null);
+  }, []);
+
+  const handleCryptidComplete = useCallback(() => {
+    setCryptidOverlay(null);
   }, []);
 
   return (
@@ -199,6 +281,29 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
             comboName={corkboardOverlay.comboName}
             bonusIP={corkboardOverlay.bonusIP}
             onComplete={handleCorkboardComplete}
+          />
+        )}
+        {broadcastOverlay && (
+          <UFOElvisBroadcast
+            key={broadcastOverlay.id}
+            x={broadcastOverlay.x}
+            y={broadcastOverlay.y}
+            intensity={broadcastOverlay.intensity}
+            setList={broadcastOverlay.setList}
+            truthValue={broadcastOverlay.truthValue}
+            reducedMotion={broadcastOverlay.reducedMotion}
+            onComplete={handleBroadcastComplete}
+          />
+        )}
+        {cryptidOverlay && (
+          <BigfootTrailCam
+            key={cryptidOverlay.id}
+            x={cryptidOverlay.x}
+            y={cryptidOverlay.y}
+            stateName={cryptidOverlay.stateName}
+            footageQuality={cryptidOverlay.footageQuality}
+            reducedMotion={cryptidOverlay.reducedMotion}
+            onComplete={handleCryptidComplete}
           />
         )}
       </div>
