@@ -251,10 +251,6 @@ export class EnhancedAIStrategist implements AIStrategist {
     return this.selectBestPlayWithSynergies(gameState, evaluation);
   }
 
-  public override selectBestPlay(gameState: any): CardPlay | null {
-    return this.selectOptimalPlay(gameState);
-  }
-
   private runMCTS(
     gameState: any,
     iterations: number,
