@@ -964,7 +964,8 @@ export class AchievementManager {
       const tally = categoryTallies[category];
       if (tally && tally > 0) {
         const statKey = COMBO_CATEGORY_STAT_KEYS[category];
-        updates[statKey] = (this.stats[statKey] as number) + tally;
+        const currentValue = (this.stats as any)[statKey] as number | undefined;
+        (updates as any)[statKey] = (currentValue || 0) + tally;
       }
     });
 

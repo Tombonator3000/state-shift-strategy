@@ -200,7 +200,7 @@ export class EnhancedAIStrategist implements AIStrategist {
     return this.base.getFactionGoalBonus(cardMeta, aiFaction);
   }
 
-  protected generateCardPlays(card: GameCard, gameState: any, evaluation: GameStateEvaluation): CardPlay[] {
+  public generateCardPlays(card: GameCard, gameState: any, evaluation: GameStateEvaluation): CardPlay[] {
     return this.base.generateCardPlays(card, gameState, evaluation);
   }
 

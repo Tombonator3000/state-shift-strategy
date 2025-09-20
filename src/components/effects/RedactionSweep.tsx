@@ -28,13 +28,17 @@ const RedactionSweep: React.FC<RedactionSweepProps> = ({ onComplete }) => {
       setPrefersReducedMotion(event.matches);
     };
 
-    if ('addEventListener' in mediaQuery) {
+    if ('addEventListener' in mediaQuery && typeof mediaQuery.addEventListener === 'function') {
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
 
-    mediaQuery.addListener(handleChange);
-    return () => mediaQuery.removeListener(handleChange);
+    // Fallback for older browsers - use any to bypass type issues
+    const legacyMQ = mediaQuery as any;
+    if (typeof legacyMQ.addListener === 'function') {
+      legacyMQ.addListener(handleChange);
+      return () => legacyMQ.removeListener && legacyMQ.removeListener(handleChange);
+    }
   }, []);
 
   useEffect(() => {

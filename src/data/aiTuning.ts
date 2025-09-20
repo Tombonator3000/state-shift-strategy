@@ -192,9 +192,9 @@ function mergeConfigs<T extends NestedNumberRecord>(base: T, override: Partial<T
 }
 
 function sanitizeConfig(config: AiTuningConfig): AiTuningConfig {
-  const merged = mergeConfigs(BASE_TUNING, config);
+  const merged = mergeConfigs(BASE_TUNING as any, config as any) as any;
 
-  const enforcePositive = (record: NestedNumberRecord): NestedNumberRecord => {
+  const enforcePositive = (record: any): any => {
     const entries = Object.entries(record).map(([key, value]) => {
       if (isRecord(value)) {
         return [key, enforcePositive(value)];
@@ -217,18 +217,18 @@ export function normalizeAiTuningConfig(config: AiTuningConfig): AiTuningConfig 
 
 export const DEFAULT_AI_TUNING: AiTuningConfig = sanitizeConfig(rawTuning as AiTuningConfig);
 
-let activeTuning: AiTuningConfig = cloneConfig(DEFAULT_AI_TUNING);
+let activeTuning: AiTuningConfig = cloneConfig(DEFAULT_AI_TUNING as any) as any;
 
 export function getAiTuningConfig(): AiTuningConfig {
   return activeTuning;
 }
 
 export function setAiTuningConfig(config: AiTuningConfig): void {
-  activeTuning = cloneConfig(sanitizeConfig(config));
+  activeTuning = cloneConfig(sanitizeConfig(config) as any) as any;
 }
 
 export function mergeAiTuningConfig(config: Partial<AiTuningConfig>): AiTuningConfig {
-  const merged = mergeConfigs(activeTuning, config as Partial<AiTuningConfig>);
-  activeTuning = cloneConfig(sanitizeConfig(merged as AiTuningConfig));
+  const merged = mergeConfigs(activeTuning as any, config as any) as any;
+  activeTuning = cloneConfig(sanitizeConfig(merged as AiTuningConfig) as any) as any;
   return activeTuning;
 }

@@ -35,13 +35,13 @@ type Node = { state: GameState; actions: Action[]; score: number; depth: number 
 // === Helpers for goal-aware bursts (Truth ≥95 / Gov ≤5) ===
 function availableIPAfterSeq(gs: GameState, me: PlayerId, seq: Action[]): number {
   const start = gs.players?.[me]?.ip ?? 0;
-  const spent = seq.reduce((acc, a) => acc + (a.card?.cost ?? 0), 0);
+  const spent = seq.reduce((acc, a) => acc + (a.type === 'play-card' ? a.card?.cost ?? 0 : 0), 0);
   return start - spent;
 }
 
 function canAfford(gs: GameState, me: PlayerId, seq: Action[], next: Action): boolean {
   const ipLeft = availableIPAfterSeq(gs, me, seq);
-  const cost = next.card?.cost ?? 0;
+  const cost = next.type === 'play-card' ? next.card?.cost ?? 0 : 0;
   return ipLeft >= cost;
 }
 
@@ -64,15 +64,19 @@ function planMediaBurstToGoal(ctx: { state: GameState; legal: Action[] }): Actio
     if (need <= 0) return null;
     // Sort descending by +truthDelta
     const plus = medias
-      .filter(a => (a.card!.effects!.truthDelta || 0) > 0)
-      .sort((a, b) => (b.card!.effects!.truthDelta || 0) - (a.card!.effects!.truthDelta || 0));
+      .filter(a => a.type === 'play-card' && (a.card!.effects!.truthDelta || 0) > 0)
+      .sort((a, b) => {
+        const deltaB = b.type === 'play-card' ? (b.card!.effects!.truthDelta || 0) : 0;
+        const deltaA = a.type === 'play-card' ? (a.card!.effects!.truthDelta || 0) : 0;
+        return deltaB - deltaA;
+      });
     let acc = 0;
     const seq: Action[] = [];
     for (const a of plus) {
       if (seq.length === 3) break;
       if (!canAfford(gs, me, seq, a)) continue;
       seq.push(a);
-      acc += a.card!.effects!.truthDelta || 0;
+      acc += a.type === 'play-card' ? (a.card!.effects!.truthDelta || 0) : 0;
       if (curTruth + acc >= 95) return seq;
     }
     return null;
@@ -84,15 +88,19 @@ function planMediaBurstToGoal(ctx: { state: GameState; legal: Action[] }): Actio
     if (needDown <= 0) return null;
     // Sort ascending by truthDelta (most negative first)
     const minus = medias
-      .filter(a => (a.card!.effects!.truthDelta || 0) < 0)
-      .sort((a, b) => (a.card!.effects!.truthDelta || 0) - (b.card!.effects!.truthDelta || 0));
+      .filter(a => a.type === 'play-card' && (a.card!.effects!.truthDelta || 0) < 0)
+      .sort((a, b) => {
+        const deltaA = a.type === 'play-card' ? (a.card!.effects!.truthDelta || 0) : 0;
+        const deltaB = b.type === 'play-card' ? (b.card!.effects!.truthDelta || 0) : 0;
+        return deltaA - deltaB;
+      });
     let acc = 0;
     const seq: Action[] = [];
     for (const a of minus) {
       if (seq.length === 3) break;
       if (!canAfford(gs, me, seq, a)) continue;
       seq.push(a);
-      acc += Math.abs(a.card!.effects!.truthDelta || 0);
+      acc += Math.abs(a.type === 'play-card' ? (a.card!.effects!.truthDelta || 0) : 0);
       if (curTruth - acc <= 5) return seq;
     }
     return null;
@@ -150,9 +158,9 @@ function actionBias(a: Action, s: GameState): number {
   const nearCap = nearCaptureScore(s, me);
   const oppHighIP = opponentIpHigh(s, me);
 
-  const type = a.card?.type ?? a.type;
-  const tDelta = (a.card?.effects?.truthDelta as number) ?? 0;
-  const cost = a.card?.cost ?? 0;
+  const type = a.type === 'play-card' ? a.card?.type : a.kind;
+  const tDelta = a.type === 'play-card' ? ((a.card?.effects?.truthDelta as number) ?? 0) : 0;
+  const cost = a.type === 'play-card' ? (a.card?.cost ?? 0) : 0;
 
   let bias = 0;
 
@@ -206,8 +214,8 @@ function biasedSort(s: GameState, cfg: AiConfig) {
     const saa = scoreAction(s, a, cfg) + actionBias(a, s);
     if (sab !== saa) return sab - saa;
     // tie-breaker: billigere kort først for lettere sekvenser
-    const cb = b.card?.cost ?? 0;
-    const ca = a.card?.cost ?? 0;
+    const cb = b.type === 'play-card' ? (b.card?.cost ?? 0) : 0;
+    const ca = a.type === 'play-card' ? (a.card?.cost ?? 0) : 0;
     return ca - cb;
   };
 }
@@ -221,7 +229,7 @@ export function legacyChooseTurnActions(state: GameState, level: Difficulty): Ac
   const legalNow = legalActionsFor(state);
   const burst = planMediaBurstToGoal({ state, legal: legalNow });
   if (burst && burst.length > 0) {
-    if (AI_DEBUG) console.info("[AI] Goal-burst chosen:", burst.map(x => x.card?.name ?? x.type));
+    if (AI_DEBUG) console.info("[AI] Goal-burst chosen:", burst.map(x => x.type === 'play-card' ? (x.card?.name ?? x.type) : x.kind));
     return burst;
   }
   const root: Node = {
