@@ -367,9 +367,12 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
 
   const handleExpansionToggle = async (expansionId: string) => {
     setUpdateError(null);
-    const nextIds = enabledExpansions.includes(expansionId)
+    const isCurrentlyEnabled = enabledExpansions.includes(expansionId);
+    const wasEmpty = enabledExpansions.length === 0;
+    const nextIds = isCurrentlyEnabled
       ? enabledExpansions.filter(id => id !== expansionId)
       : [...enabledExpansions, expansionId];
+    const willBeEmpty = nextIds.length === 0;
 
     setEnabledExpansions(nextIds);
     setPendingUpdates(prev => ({ ...prev, [expansionId]: true }));
@@ -378,6 +381,12 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
       const cards = await updateEnabledExpansions(nextIds);
       setExpansionCards(cards);
       setExpansionCounts(summarizeExpansionCards(cards));
+
+      if (!isCurrentlyEnabled && wasEmpty && settings.mode === 'core-only') {
+        setMode('balanced');
+      } else if (isCurrentlyEnabled && willBeEmpty && settings.mode !== 'core-only') {
+        setMode('core-only');
+      }
     } catch (error) {
       console.error('Failed to update expansions:', error);
       setUpdateError('Failed to update expansion selection. Restoring previous state.');
