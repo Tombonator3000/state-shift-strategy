@@ -8,13 +8,13 @@ The game's audio system is fully functional with the following sound effects:
 - **UI Sounds**: click, hover, lightClick, error
 - **Gameplay**: cardPlay, cardDraw, turnEnd, newspaper, stateCapture
 - **Music**: victory, defeat, typewriter
+- **Paranormal**: `ufo-elvis` (generated shortwave UFO/Elvis radio broadcast clip)
 - **Background Music**: Theme, Government, Truth, End Credits tracks
 
 ### 🔄 Paranormal Effects (Using Fallbacks)
 The following paranormal sound effects are currently using existing sounds as placeholders:
 
-- **`ufo-elvis`** → Using background music (for UFO/Elvis broadcasts)
-- **`cryptid-rumble`** → Using defeat sound (for cryptid encounters) 
+- **`cryptid-rumble`** → Using defeat sound (for cryptid encounters)
 - **`radio-static`** → Using typewriter sound (for radio interference)
 
 ## Adding Proper Paranormal Sound Effects
@@ -41,12 +41,15 @@ To replace the fallback sounds with proper paranormal audio:
 - **Volume**: Moderate level (will be controlled by game volume)
 
 ### 4. Installation
-Place the downloaded files in `public/audio/` with these exact names:
-```
-public/audio/ufo-elvis.mp3      # UFO/alien broadcast sound
-public/audio/radio-static.mp3   # Radio interference/static
-public/audio/cryptid-rumble.mp3 # Deep rumble/monster sound
-```
+- **Generated clip**: The repo ships a procedural broadcast sting stored as a base64 data URL in
+  `src/assets/audio/ufoElvisDataUrl.ts`. Replace that constant if you want to ship a custom asset without adding binary files.
+- **Optional file override**: If you prefer working with standalone audio assets, add `public/audio/ufo-elvis.mp3` and update the
+  mapping in `src/hooks/useAudio.ts` to point to your file path instead of the generated constant.
+- **Other effects**: Place the downloaded files in `public/audio/` with these exact names:
+  ```
+  public/audio/radio-static.mp3   # Radio interference/static
+  public/audio/cryptid-rumble.mp3 # Deep rumble/monster sound
+  ```
 
 ### 5. Testing
 Use the in-game audio controls (settings gear icon) to:
@@ -59,8 +62,10 @@ Use the in-game audio controls (settings gear icon) to:
 Until proper sounds are added, the system uses:
 
 ```javascript
-'ufo-elvis': '/audio/Background-music.mp3',      // → Proper alien/UFO sound needed
-'cryptid-rumble': '/audio/defeat.mp3',          // → Deep rumble/earthquake needed  
+import { UFO_ELVIS_DATA_URL } from '../assets/audio/ufoElvisDataUrl';
+
+'ufo-elvis': UFO_ELVIS_DATA_URL,                // → Generated broadcast sting ships with the repo
+'cryptid-rumble': '/audio/defeat.mp3',          // → Deep rumble/earthquake needed
 'radio-static': '/audio/typewriter.mp3'         // → Radio static/interference needed
 ```
 
