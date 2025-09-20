@@ -222,7 +222,7 @@ export const useAudio = () => {
 
     loadMusicTracks();
 
-    // Create sound effects with fallback handling - only load existing files
+    // Create sound effects with fallback handling - use existing files for paranormal effects
     const existingSfxFiles = {
       cardPlay: '/audio/card-play.mp3',
       flash: '/audio/card-play.mp3',
@@ -237,9 +237,10 @@ export const useAudio = () => {
       typewriter: '/audio/typewriter.mp3',
       lightClick: '/audio/click.mp3', // Reuse click sound
       error: '/audio/click.mp3', // Fallback for error sound
-      'ufo-elvis': '/audio/ufo-elvis.mp3',
-      'cryptid-rumble': '/audio/cryptid-rumble.mp3',
-      'radio-static': '/audio/radio-static.mp3'
+      // Paranormal effects - using creative fallbacks until proper sounds are added
+      'ufo-elvis': '/audio/Background-music.mp3', // Use background music as UFO sound
+      'cryptid-rumble': '/audio/defeat.mp3', // Use defeat sound as rumble
+      'radio-static': '/audio/typewriter.mp3' // Use typewriter as static
     };
 
     // Load SFX asynchronously with error handling

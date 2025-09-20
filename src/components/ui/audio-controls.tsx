@@ -254,11 +254,36 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
             </div>
           </div>
 
+          {/* Paranormal Sound Effects Status */}
+          <div className="pt-2 border-t space-y-2">
+            <div className="text-xs text-muted-foreground flex items-center gap-1">
+              <Info className="h-3 w-3" />
+              Paranormal Effects Status
+            </div>
+            <div className="text-xs space-y-1">
+              <div className="flex justify-between">
+                <span>UFO/Elvis broadcasts:</span>
+                <Badge variant="secondary" className="text-xs">Fallback</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span>Radio static:</span>
+                <Badge variant="secondary" className="text-xs">Fallback</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span>Cryptid rumble:</span>
+                <Badge variant="secondary" className="text-xs">Fallback</Badge>
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground p-2 bg-muted rounded">
+              💡 See public/audio/README.md for adding proper paranormal sound effects
+            </div>
+          </div>
+          
           {/* Debug Info */}
           <div className="pt-2 border-t space-y-1">
             <div className="text-xs text-muted-foreground flex items-center gap-1">
               <Info className="h-3 w-3" />
-              Debug Information
+              System Status
             </div>
             <div className="text-xs font-mono space-y-1 text-muted-foreground">
               <div>Volume sync: Settings auto-saved</div>
