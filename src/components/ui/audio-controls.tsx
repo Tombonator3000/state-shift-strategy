@@ -25,6 +25,7 @@ import {
 
 interface AudioControlsProps {
   volume: number;
+  musicVolume: number;
   muted: boolean;
   musicEnabled: boolean;
   sfxEnabled: boolean;
@@ -34,6 +35,7 @@ interface AudioControlsProps {
   tracksLoaded?: boolean;
   audioContextUnlocked?: boolean;
   onVolumeChange: (volume: number) => void;
+  onMusicVolumeChange: (volume: number) => void;
   onToggleMute: () => void;
   onToggleMusic: () => void;
   onToggleSFX: () => void;
@@ -46,6 +48,7 @@ interface AudioControlsProps {
 
 export const AudioControls: React.FC<AudioControlsProps> = ({
   volume,
+  musicVolume,
   muted,
   musicEnabled,
   sfxEnabled,
@@ -55,6 +58,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
   tracksLoaded = false,
   audioContextUnlocked = false,
   onVolumeChange,
+  onMusicVolumeChange,
   onToggleMute,
   onToggleMusic,
   onToggleSFX,
@@ -154,7 +158,19 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
                 </Button>
               </div>
             </div>
-            
+
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground">Music Volume ({Math.round(musicVolume * 100)}%)</span>
+              <Slider
+                value={[musicVolume * 100]}
+                onValueChange={values => onMusicVolumeChange(values[0] / 100)}
+                max={100}
+                step={1}
+                className="w-full"
+                disabled={!musicEnabled}
+              />
+            </div>
+
             {/* Playback Controls */}
             <div className="flex gap-1">
               <Button

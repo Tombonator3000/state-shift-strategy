@@ -117,7 +117,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
 
     const baseSettings: GameSettings = {
       masterVolume: Math.round(audio.config.volume * 100),
-      musicVolume: 50,
+      musicVolume: Math.round(audio.config.musicVolume * 100),
       sfxVolume: Math.round(audio.config.sfxVolume * 100),
       enableAnimations: true,
       autoEndTurn: false,
@@ -201,6 +201,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     }
   }, [settings.sfxVolume, audio]);
 
+  useEffect(() => {
+    const currentMusicVolume = Math.round(audio.config.musicVolume * 100);
+    if (currentMusicVolume !== settings.musicVolume) {
+      console.log('🎵 Options: Syncing music volume from', currentMusicVolume, 'to', settings.musicVolume);
+      audio.setMusicVolume(settings.musicVolume / 100);
+    }
+  }, [settings.musicVolume, audio]);
+
   const persistSettings = (nextSettings: GameSettings, nextComboSettings: ComboSettings) => {
     if (typeof localStorage === 'undefined') {
       return;
@@ -266,6 +274,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     setUiTheme('tabloid_bw');
     persistSettings(defaultSettings, defaultCombos);
     audio.setVolume(defaultSettings.masterVolume / 100);
+    audio.setMusicVolume(defaultSettings.musicVolume / 100);
     audio.setSfxVolume(defaultSettings.sfxVolume / 100);
   };
 
@@ -388,6 +397,22 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
 
               <div>
                 <label className="text-sm font-medium text-newspaper-text mb-2 block">
+                  Music Volume: {settings.musicVolume}%
+                </label>
+                <Slider
+                  value={[settings.musicVolume]}
+                  onValueChange={([value]) => {
+                    audio.setMusicVolume(value / 100);
+                    updateSettings({ musicVolume: value });
+                  }}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-newspaper-text mb-2 block">
                   Sound Effects: {settings.sfxVolume}%
                 </label>
                 <Slider
@@ -407,6 +432,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   <label className="text-sm font-medium text-newspaper-text">Advanced Audio Controls</label>
                   <AudioControls
                     volume={audio.config.volume}
+                    musicVolume={audio.config.musicVolume}
                     muted={audio.config.muted}
                     musicEnabled={audio.config.musicEnabled}
                     sfxEnabled={audio.config.sfxEnabled}
@@ -416,6 +442,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                     tracksLoaded={audio.tracksLoaded}
                     audioContextUnlocked={audio.audioContextUnlocked}
                     onVolumeChange={audio.setVolume}
+                    onMusicVolumeChange={audio.setMusicVolume}
                     onToggleMute={audio.toggleMute}
                     onToggleMusic={audio.toggleMusic}
                     onToggleSFX={audio.toggleSFX}
