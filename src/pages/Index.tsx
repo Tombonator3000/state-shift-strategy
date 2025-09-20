@@ -41,6 +41,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import type { CardPlayRecord } from '@/hooks/gameStateTypes';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
+import { areParanormalEffectsEnabled } from '@/state/settings';
 
 type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
 
@@ -596,6 +597,10 @@ const Index = () => {
       }>).detail;
       if (!detail) return;
 
+      if (!areParanormalEffectsEnabled()) {
+        return;
+      }
+
       const timestamp = Date.now();
       const track = detail.setList?.[0] ?? 'Suspicious Minds?';
       const template = pickTemplate(BROADCAST_SIGHTING_TAGLINES);
@@ -633,6 +638,10 @@ const Index = () => {
         footageQuality: string;
       }>).detail;
       if (!detail) return;
+
+      if (!areParanormalEffectsEnabled()) {
+        return;
+      }
 
       const timestamp = Date.now();
       const stateName = detail.stateName ?? resolveStateName(detail.stateId);

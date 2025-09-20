@@ -99,6 +99,7 @@ interface GameSettings {
   confirmActions: boolean;
   drawMode: 'standard' | 'classic' | 'momentum' | 'catchup' | 'fast';
   uiTheme: 'tabloid_bw' | 'government_classic';
+  paranormalEffectsEnabled: boolean;
 }
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
@@ -128,6 +129,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       confirmActions: true,
       drawMode: 'standard',
       uiTheme,
+      paranormalEffectsEnabled: true,
     };
 
     const stored = typeof localStorage !== 'undefined'
@@ -242,6 +244,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       confirmActions: true,
       drawMode: 'standard',
       uiTheme: 'tabloid_bw',
+      paranormalEffectsEnabled: true,
     };
 
     const defaultCombos = setComboSettings({
@@ -475,6 +478,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <Switch
                   checked={settings.screenShake}
                   onCheckedChange={checked => updateSettings({ screenShake: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-newspaper-text">Paranormal Overlays &amp; Sightings</label>
+                <Switch
+                  checked={settings.paranormalEffectsEnabled}
+                  onCheckedChange={checked => updateSettings({ paranormalEffectsEnabled: checked })}
                 />
               </div>
 

@@ -7,6 +7,7 @@ import ConspiracyCorkboard from '@/components/effects/ConspiracyCorkboard';
 import UFOElvisBroadcast from '@/components/effects/UFOElvisBroadcast';
 import BigfootTrailCam from '@/components/effects/BigfootTrailCam';
 import { useAudioContext } from '@/contexts/AudioContext';
+import { areParanormalEffectsEnabled } from '@/state/settings';
 
 interface CardAnimationLayerProps {
   children?: React.ReactNode;
@@ -145,7 +146,9 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         truthValue,
         reducedMotion,
       });
-      audio?.playSFX?.('ufo-elvis');
+      if (areParanormalEffectsEnabled()) {
+        audio?.playSFX?.('ufo-elvis');
+      }
     };
 
     const handleCryptidSighting = (event: CustomEvent<{
@@ -169,7 +172,9 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         footageQuality,
         reducedMotion,
       });
-      audio?.playSFX?.('cryptid-rumble');
+      if (areParanormalEffectsEnabled()) {
+        audio?.playSFX?.('cryptid-rumble');
+      }
     };
 
     const handleFloatingNumber = (event: CustomEvent<{ value: number; type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain'; x: number; y: number }>) => {
