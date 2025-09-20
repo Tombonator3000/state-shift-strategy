@@ -254,7 +254,7 @@ export class VisualEffectsCoordinator {
       caption: string;
       timestamp: string;
       caseNumber: string;
-    }>,
+    }> | undefined,
     position: EffectPosition
   ): void {
     window.dispatchEvent(new CustomEvent('evidenceGallery', {
@@ -306,7 +306,7 @@ export class VisualEffectsCoordinator {
       case 'evidence_leaked':
         this.triggerEvidenceGallery(
           `LEAKED: ${cardName} FILES`,
-          [], // Use default photos
+          undefined, // Use default photos
           position
         );
         break;

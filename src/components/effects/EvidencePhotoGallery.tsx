@@ -54,7 +54,7 @@ const EvidencePhotoGallery: React.FC<EvidencePhotoGalleryProps> = ({
     }
   ], []);
 
-  const displayPhotos = photos || defaultPhotos;
+  const displayPhotos = photos?.length ? photos : defaultPhotos;
 
   useEffect(() => {
     if (reducedMotion) {
@@ -86,19 +86,21 @@ const EvidencePhotoGallery: React.FC<EvidencePhotoGalleryProps> = ({
 
   const currentPhoto = displayPhotos[currentPhotoIndex];
 
-  if (reducedMotion) {
-    return (
-      <div
-        className="evidence-gallery-simple"
-        style={galleryStyle}
-        role="dialog"
-        aria-label={`Evidence gallery: ${caseTitle}`}
-      >
-        <div className="simple-evidence">
-          📸 Evidence Review: {caseTitle}
-        </div>
+  const simpleOverlay = (
+    <div
+      className="evidence-gallery-simple"
+      style={galleryStyle}
+      role="dialog"
+      aria-label={`Evidence gallery: ${caseTitle}`}
+    >
+      <div className="simple-evidence">
+        📸 Evidence Review: {caseTitle}
       </div>
-    );
+    </div>
+  );
+
+  if (reducedMotion || !currentPhoto) {
+    return simpleOverlay;
   }
 
   return (
