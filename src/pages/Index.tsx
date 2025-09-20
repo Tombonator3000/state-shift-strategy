@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
 import EnhancedGameHand from '@/components/game/EnhancedGameHand';
 import PlayedCardsDock from '@/components/game/PlayedCardsDock';
+import CardDetailOverlay from '@/components/game/CardDetailOverlay';
 import TabloidNewspaper from '@/components/game/TabloidNewspaper';
 import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
@@ -446,6 +447,7 @@ const Index = () => {
   const [gameOverReport, setGameOverReport] = useState<GameOverReport | null>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   const [paranormalSightings, setParanormalSightings] = useState<ParanormalSighting[]>([]);
+  const [inspectedPlayedCard, setInspectedPlayedCard] = useState<GameCard | null>(null);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -1487,7 +1489,10 @@ const Index = () => {
             </div>
           </div>
           <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
-            <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} />
+            <PlayedCardsDock
+              playedCards={gameState.cardsPlayedThisRound}
+              onInspectCard={(card) => setInspectedPlayedCard(card)}
+            />
           </div>
         </div>
       </div>
@@ -1554,6 +1559,14 @@ const Index = () => {
       />
 
       <CardAnimationLayer />
+
+      <CardDetailOverlay
+        card={inspectedPlayedCard}
+        canAfford={true}
+        disabled
+        onClose={() => setInspectedPlayedCard(null)}
+        onPlayCard={() => {}}
+      />
 
       <TabloidVictoryScreen
         isVisible={victoryState.isVictory}
