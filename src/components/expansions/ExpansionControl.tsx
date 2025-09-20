@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import {
   Card as UICard,
   CardContent,
@@ -25,6 +25,8 @@ import { getCoreCards } from '@/data/cardDatabase';
 import type { GameCard } from '@/rules/mvp';
 import { cn } from '@/lib/utils';
 import { updateEnabledExpansions } from '@/data/expansions/state';
+import { useDistributionSettings } from '@/hooks/useDistributionSettings';
+import type { DistributionMode } from '@/data/weightedCardDistribution';
 
 const DEFAULT_MODE: MixMode = 'BALANCED_MIX';
 const DEFAULT_WEIGHT = 100;
@@ -81,6 +83,42 @@ const buildWeightMap = (entries: ExpansionEntry[], coreWeight: number) => {
 
 const coreCardsForPreview = (): Card[] => getCoreCards().map(toCard);
 
+const mixModeToDistribution: Record<MixMode, DistributionMode> = {
+  CORE_ONLY: 'core-only',
+  BALANCED_MIX: 'balanced',
+  EXPANSION_ONLY: 'expansion-only',
+  CUSTOM_MIX: 'custom',
+};
+
+const distributionToMixMode = (mode?: DistributionMode): MixMode => {
+  if (!mode) return DEFAULT_MODE;
+  switch (mode) {
+    case 'core-only':
+      return 'CORE_ONLY';
+    case 'expansion-only':
+      return 'EXPANSION_ONLY';
+    case 'custom':
+      return 'CUSTOM_MIX';
+    case 'balanced':
+    default:
+      return 'BALANCED_MIX';
+  }
+};
+
+const toDistributionWeight = (uiWeight: number): number => {
+  if (typeof uiWeight !== 'number' || !Number.isFinite(uiWeight)) {
+    return 0;
+  }
+  return Math.max(0, uiWeight / DEFAULT_WEIGHT);
+};
+
+const fromDistributionWeight = (weight?: number): number | undefined => {
+  if (typeof weight !== 'number' || !Number.isFinite(weight)) {
+    return undefined;
+  }
+  return weight * DEFAULT_WEIGHT;
+};
+
 const buildPreview = (
   coreCards: Card[],
   expansions: ExpansionEntry[],
@@ -108,24 +146,69 @@ const buildPreview = (
 };
 
 const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
-  const [mode, setMode] = useState<MixMode>(DEFAULT_MODE);
-  const [coreWeight] = useState<number>(DEFAULT_WEIGHT);
+  const { settings, setMode: setDistributionMode, setSetWeight } = useDistributionSettings();
+
+  const [mode, setLocalMode] = useState<MixMode>(() => distributionToMixMode(settings.mode));
+  const [coreWeight, setCoreWeight] = useState<number>(
+    () => fromDistributionWeight(settings.setWeights.core) ?? DEFAULT_WEIGHT,
+  );
   const [expansions, setExpansions] = useState<ExpansionEntry[]>([]);
   const [preview, setPreview] = useState<PreviewState>({ weights: {}, poolsRemaining: {}, deckSize: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const initializedRef = useRef(false);
 
   const coreCards = useMemo(() => coreCardsForPreview(), []);
 
   const recalcPreview = useCallback(
-    (nextMode: MixMode, nextEntries: ExpansionEntry[]) => {
-      const weights = buildWeightMap(nextEntries, coreWeight);
+    (nextMode: MixMode, nextEntries: ExpansionEntry[], customCoreWeight?: number) => {
+      const weights = buildWeightMap(nextEntries, customCoreWeight ?? coreWeight);
       setPreview(buildPreview(coreCards, nextEntries, nextMode, weights));
     },
     [coreCards, coreWeight],
   );
 
   useEffect(() => {
+    const nextMode = distributionToMixMode(settings.mode);
+    setLocalMode(prev => (prev === nextMode ? prev : nextMode));
+  }, [settings.mode]);
+
+  useEffect(() => {
+    const resolvedCoreWeight = fromDistributionWeight(settings.setWeights.core);
+    if (typeof resolvedCoreWeight === 'number' && !Number.isNaN(resolvedCoreWeight)) {
+      setCoreWeight(prev => (Math.abs(prev - resolvedCoreWeight) < 0.01 ? prev : resolvedCoreWeight));
+    }
+  }, [settings.setWeights.core]);
+
+  useEffect(() => {
+    setExpansions(prev => {
+      if (prev.length === 0) {
+        return prev;
+      }
+
+      let changed = false;
+      const next = prev.map(entry => {
+        const hookWeight = fromDistributionWeight(settings.setWeights[entry.id]);
+        if (typeof hookWeight !== 'number') {
+          return entry;
+        }
+        if (Math.abs(entry.weight - hookWeight) <= 0.5) {
+          return entry;
+        }
+        changed = true;
+        return { ...entry, weight: hookWeight };
+      });
+
+      return changed ? next : prev;
+    });
+  }, [settings.setWeights]);
+
+  useEffect(() => {
+    if (initializedRef.current) {
+      return;
+    }
+    initializedRef.current = true;
+
     let cancelled = false;
 
     const init = async () => {
@@ -134,11 +217,13 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
 
       try {
         const prefs = (loadPrefs<StoredPrefs>() ?? {}) as StoredPrefs;
-        const nextMode = prefs.mode ?? DEFAULT_MODE;
         const enabled = prefs.enabled ?? {};
         const weights = prefs.customWeights ?? {};
-
-        setMode(nextMode);
+        const hookCoreWeight = fromDistributionWeight(settings.setWeights.core);
+        const resolvedCoreWeight =
+          typeof hookCoreWeight === 'number' ? hookCoreWeight : weights.core ?? DEFAULT_WEIGHT;
+        setCoreWeight(resolvedCoreWeight);
+        const initialMode = distributionToMixMode(settings.mode);
 
         const discovered = await discoverExpansions();
         if (cancelled) return;
@@ -146,11 +231,13 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
         const entries: ExpansionEntry[] = discovered.map(expansion => ({
           ...expansion,
           enabled: Boolean(enabled[expansion.id]),
-          weight: typeof weights[expansion.id] === 'number' ? weights[expansion.id] : DEFAULT_WEIGHT,
+          weight:
+            fromDistributionWeight(settings.setWeights[expansion.id]) ??
+            (typeof weights[expansion.id] === 'number' ? weights[expansion.id] : DEFAULT_WEIGHT),
         }));
 
         setExpansions(entries);
-        recalcPreview(nextMode, entries);
+        recalcPreview(initialMode, entries, resolvedCoreWeight);
       } catch (err) {
         console.warn('[ExpansionControl] failed to load expansions', err);
         if (!cancelled) {
@@ -168,7 +255,19 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
     return () => {
       cancelled = true;
     };
-  }, [recalcPreview]);
+  }, [recalcPreview, settings.mode, settings.setWeights]);
+
+  const applyDistributionWeights = useCallback(
+    (entries: ExpansionEntry[]) => {
+      const distributionCoreWeight = toDistributionWeight(coreWeight);
+      setSetWeight('core', distributionCoreWeight);
+      for (const entry of entries) {
+        if (!entry.enabled) continue;
+        setSetWeight(entry.id, toDistributionWeight(entry.weight));
+      }
+    },
+    [coreWeight, setSetWeight],
+  );
 
   const persist = useCallback(
     (nextMode: MixMode, nextEntries: ExpansionEntry[]) => {
@@ -178,9 +277,11 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
         customWeights: buildWeightMap(nextEntries, coreWeight),
       };
       savePrefs(prefs);
+      applyDistributionWeights(nextEntries);
       const enabledIds = nextEntries.filter(entry => entry.enabled).map(entry => entry.id);
       void updateEnabledExpansions(enabledIds)
         .then(() => {
+          applyDistributionWeights(nextEntries);
           setError(prev => (prev === SYNC_ERROR_MESSAGE ? null : prev));
         })
         .catch(err => {
@@ -191,7 +292,7 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
         });
       recalcPreview(nextMode, nextEntries);
     },
-    [coreWeight, recalcPreview],
+    [applyDistributionWeights, coreWeight, recalcPreview],
   );
 
   const handleToggle = useCallback(
@@ -226,11 +327,16 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
 
   const handleModeChange = useCallback(
     (nextMode: MixMode) => {
-      setMode(nextMode);
+      setLocalMode(nextMode);
+      setDistributionMode(mixModeToDistribution[nextMode]);
       persist(nextMode, expansions);
     },
-    [expansions, persist],
+    [expansions, persist, setDistributionMode],
   );
+
+  useEffect(() => {
+    recalcPreview(mode, expansions);
+  }, [mode, expansions, recalcPreview]);
 
   const totalCards = useMemo(() => {
     const coreCount = coreCards.length;
@@ -401,7 +507,7 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
                                 value={[entry.weight]}
                                 onValueChange={values => handleWeightChange(entry.id, values[0] ?? DEFAULT_WEIGHT)}
                                 min={0}
-                                max={100}
+                                max={300}
                                 step={5}
                                 aria-label={`Weight for ${entry.name}`}
                               />
