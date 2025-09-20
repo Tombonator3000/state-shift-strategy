@@ -3,6 +3,7 @@ import { UFO_ELVIS_DATA_URL } from '../assets/audio/ufoElvisDataUrl';
 
 interface AudioConfig {
   volume: number;
+  musicVolume: number;
   sfxVolume: number;
   muted: boolean;
   musicEnabled: boolean;
@@ -32,6 +33,9 @@ export const useAudio = () => {
         const rawSfxVolume = typeof parsed.sfxVolume === 'number'
           ? parsed.sfxVolume
           : 80;
+        const rawMusicVolume = typeof parsed.musicVolume === 'number'
+          ? parsed.musicVolume
+          : 50;
 
         const normalizeVolume = (value: number) => {
           const clamped = Math.max(0, Math.min(100, value));
@@ -40,6 +44,7 @@ export const useAudio = () => {
 
         return {
           volume: normalizeVolume(rawMasterVolume),
+          musicVolume: normalizeVolume(rawMusicVolume),
           sfxVolume: normalizeVolume(rawSfxVolume),
           muted: false,
           musicEnabled: parsed.musicEnabled !== false,
@@ -55,6 +60,7 @@ export const useAudio = () => {
     console.log('🎵 useAudio: Using default audio config');
     return {
       volume: 0.15, // Default to 15%
+      musicVolume: 0.5,
       sfxVolume: 0.8,
       muted: false,
       musicEnabled: true,
@@ -149,7 +155,8 @@ export const useAudio = () => {
         
         const onLoad = () => {
           audio.loop = false;
-          audio.volume = config.volume;
+          const baseMusicVolume = config.muted ? 0 : config.volume * config.musicVolume;
+          audio.volume = baseMusicVolume;
           console.log(`🎵 Audio loaded: ${src}`);
           cleanup();
           resolve(audio);
@@ -305,16 +312,21 @@ export const useAudio = () => {
 
   // Update volumes when config changes and sync to localStorage - but prevent excessive calls
   useEffect(() => {
-    console.log('🎵 Volume update triggered:', { volume: config.volume, sfxVolume: config.sfxVolume, muted: config.muted });
-    
-    const masterVolume = config.muted ? 0 : config.volume;
+    console.log('🎵 Volume update triggered:', {
+      volume: config.volume,
+      musicVolume: config.musicVolume,
+      sfxVolume: config.sfxVolume,
+      muted: config.muted
+    });
+
+    const musicVolume = config.muted ? 0 : config.volume * config.musicVolume;
     const sfxVolume = config.muted ? 0 : config.volume * config.sfxVolume;
 
     if (currentMusicRef.current) {
-      currentMusicRef.current.volume = masterVolume;
+      currentMusicRef.current.volume = musicVolume;
     }
     Object.values(musicTracks.current).flat().forEach(audio => {
-      audio.volume = masterVolume;
+      audio.volume = musicVolume;
     });
     Object.values(sfxRefs.current).forEach(audio => {
       audio.volume = sfxVolume;
@@ -326,6 +338,7 @@ export const useAudio = () => {
       try {
         const parsed = JSON.parse(saved);
         const newMasterVolume = Math.round(config.volume * 100);
+        const newMusicVolume = Math.round(config.musicVolume * 100);
         const newSfxVolume = Math.round(config.sfxVolume * 100);
         let shouldSync = false;
 
@@ -339,10 +352,16 @@ export const useAudio = () => {
           shouldSync = true;
         }
 
+        if (parsed.musicVolume !== newMusicVolume) {
+          parsed.musicVolume = newMusicVolume;
+          shouldSync = true;
+        }
+
         if (shouldSync) {
           localStorage.setItem('gameSettings', JSON.stringify(parsed));
           console.log('🎵 Synced volume to localStorage:', {
             masterVolume: newMasterVolume,
+            musicVolume: newMusicVolume,
             sfxVolume: newSfxVolume
           });
         }
@@ -350,7 +369,7 @@ export const useAudio = () => {
         console.warn('🎵 Failed to sync audio settings to localStorage');
       }
     }
-  }, [config.volume, config.sfxVolume, config.muted]);
+  }, [config.volume, config.musicVolume, config.sfxVolume, config.muted]);
 
   const getNextTrack = useCallback((musicType: MusicType): HTMLAudioElement | null => {
     console.log('🎵 getNextTrack called for:', musicType);
@@ -386,7 +405,8 @@ export const useAudio = () => {
     }
     
     if (config.musicEnabled) {
-      toAudio.volume = config.muted ? 0 : config.volume;
+      const musicVolume = config.muted ? 0 : config.volume * config.musicVolume;
+      toAudio.volume = musicVolume;
       toAudio.currentTime = 0;
       
       const trackName = toAudio.src.split('/').pop() || 'Unknown';
@@ -408,7 +428,7 @@ export const useAudio = () => {
           });
       }
     }
-  }, [config.musicEnabled, config.muted, config.volume, audioContextUnlocked]);
+  }, [config.musicEnabled, config.muted, config.volume, config.musicVolume, audioContextUnlocked]);
 
   // Play music based on current state
   const playMusic = useCallback((musicType?: MusicType) => {
@@ -507,6 +527,9 @@ export const useAudio = () => {
     });
     
     if (currentMusicRef.current && currentMusicRef.current.paused && audioContextUnlocked) {
+      currentMusicRef.current.volume = config.muted
+        ? 0
+        : config.volume * config.musicVolume;
       const playPromise = currentMusicRef.current.play();
       if (playPromise !== undefined) {
         playPromise
@@ -523,7 +546,7 @@ export const useAudio = () => {
     } else {
       console.log('🎵 Cannot resume - no paused music or audio context locked');
     }
-  }, [audioContextUnlocked, currentTrackName]);
+  }, [audioContextUnlocked, config.musicVolume, config.volume, config.muted, currentTrackName]);
 
   const playSFX = useCallback((soundName: string) => {
     if (!config.sfxEnabled || config.muted || !audioContextUnlocked) {
@@ -588,6 +611,24 @@ export const useAudio = () => {
       setConfig(prev => ({ ...prev, sfxVolume: clampedVolume }));
     }
   }, [config.sfxVolume]);
+
+  const setMusicVolume = useCallback((volume: number) => {
+    const clampedVolume = Math.max(0, Math.min(1, volume));
+    const currentMusicPercent = Math.round(config.musicVolume * 100);
+    const newMusicPercent = Math.round(clampedVolume * 100);
+
+    if (currentMusicPercent !== newMusicPercent) {
+      console.log('🎵 Setting music volume from', currentMusicPercent + '%', 'to:', newMusicPercent + '%');
+      const baseMusicVolume = config.muted ? 0 : config.volume * clampedVolume;
+      if (currentMusicRef.current) {
+        currentMusicRef.current.volume = baseMusicVolume;
+      }
+      Object.values(musicTracks.current).flat().forEach(audio => {
+        audio.volume = baseMusicVolume;
+      });
+      setConfig(prev => ({ ...prev, musicVolume: clampedVolume }));
+    }
+  }, [config.musicVolume, config.muted, config.volume]);
 
   const toggleMute = useCallback(() => {
     setConfig(prev => ({ ...prev, muted: !prev.muted }));
@@ -685,6 +726,7 @@ export const useAudio = () => {
     playSFX,
     testSFX,
     setVolume,
+    setMusicVolume,
     setSfxVolume,
     toggleMute,
     toggleMusic,

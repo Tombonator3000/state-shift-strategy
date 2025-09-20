@@ -184,12 +184,14 @@ const InGameOptions = ({
             
             <AudioControls
               volume={audio.config.volume}
+              musicVolume={audio.config.musicVolume}
               muted={audio.config.muted}
               musicEnabled={audio.config.musicEnabled}
               sfxEnabled={audio.config.sfxEnabled}
               isPlaying={audio.isPlaying}
               currentTrackName={audio.currentTrackName || 'None'}
               onVolumeChange={audio.setVolume}
+              onMusicVolumeChange={audio.setMusicVolume}
               onToggleMute={audio.toggleMute}
               onToggleMusic={audio.toggleMusic}
               onToggleSFX={audio.toggleSFX}
