@@ -56,7 +56,7 @@ export function makeBody(card: Card, data: NewspaperData): string {
   );
 
   const bank = para[card.type as keyof typeof para] ?? para.MEDIA;
-  const primary = pick(bank).replace('{buzz}', buzz);
+  const primary = pick([...bank], para.MEDIA[0]).replace('{buzz}', buzz);
 
   const investigationLines = [
     'Sources courier manila envelopes labeled "DO NOT PHOTOCOPY" straight to our newsroom bunker.',

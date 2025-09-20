@@ -25,7 +25,7 @@ export class CardEffectMigrator {
       text: legacyCard.text,
       flavorTruth: legacyCard.flavorTruth || '',
       flavorGov: legacyCard.flavorGov || '',
-      effects: legacyCard.effects || this.inferEffectsFromText(legacyCard),
+      effects: (legacyCard.effects || this.inferEffectsFromText(legacyCard)) as any,
       target: legacyCard.target
     };
 

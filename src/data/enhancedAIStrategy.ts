@@ -922,7 +922,7 @@ export class EnhancedAIStrategist implements AIStrategist {
     );
 
     const lastTwoTypes = recentAiPlays.slice(-2).map((record: any) => record.card.type);
-    if (lastTwoTypes.length === 2 && lastTwoTypes.every(type => type === lastTwoTypes[0])) {
+    if (lastTwoTypes.length === 2 && lastTwoTypes.every((type: any) => type === lastTwoTypes[0])) {
       if (cardMeta?.type && cardMeta.type !== lastTwoTypes[0]) {
         deceptionValue += 0.1;
       }

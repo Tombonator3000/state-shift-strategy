@@ -492,7 +492,7 @@ const Index = () => {
         statesGov: gameState.states.filter(s => s.owner === (gameState.faction === 'government' ? 'player' : 'ai')).length,
         statesTruth: gameState.states.filter(s => s.owner === (gameState.faction === 'truth' ? 'player' : 'ai')).length,
         agenda: gameState.agenda ? {
-          side: gameState.agenda.faction === 'truth' ? 'truth' : 'government',
+          side: (gameState.agenda.faction === 'truth' ? 'truth' : 'government') as "truth" | "government",
           name: gameState.agenda.title,
           success: gameState.agenda.complete
         } : undefined,

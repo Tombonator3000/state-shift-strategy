@@ -22,7 +22,7 @@ import { getComboSettings } from '@/game/comboEngine';
 import type { GameState } from './gameStateTypes';
 import {
   applyAiCardPlay,
-  buildStrategyLogEntries,
+  buildStrategyLogEntries as buildStrategyLogEntriesHelper,
   createPlayedCardRecord,
   createTurnPlayEntries,
   type AiCardPlayParams,
@@ -752,7 +752,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
     const turnPlan = chooseTurnActions({
       strategist: planningState.aiStrategist,
-      gameState: planningState,
+      gameState: planningState as any,
       maxActions: 3,
       priorityThreshold: 0.3,
     });

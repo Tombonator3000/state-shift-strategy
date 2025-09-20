@@ -298,7 +298,7 @@ export function resolveCardMVP(
     states: newStates,
     controlledStates: Array.from(nextControlledStates),
     aiControlledStates: Array.from(nextAiControlledStates),
-    targetState: actor === 'human' ? nextTargetState : gameState.targetState,
+    targetState: actor === 'human' ? nextTargetState : (gameState as any).targetState,
     selectedCard: null,
     logEntries,
     damageDealt,

@@ -1,3 +1,5 @@
+declare const window: any;
+
 import { computeMediaTruthDelta_MVP, warnIfMediaScaling, type MediaResolutionOptions } from '@/mvp/media';
 import { applyTruthDelta } from '@/utils/truth';
 import type {
@@ -59,8 +61,8 @@ function applyAttackEffect(
   const before = state.players[opponent].ip;
   state.players[opponent].ip = clampIP(before - damage);
   const delta = state.players[opponent].ip - before;
-  if (delta !== 0 && typeof window !== 'undefined' && window.uiToastIp) {
-    window.uiToastIp(opponent, delta);
+  if (delta !== 0 && typeof window !== 'undefined' && (window as any).uiToastIp) {
+    (window as any).uiToastIp(opponent, delta);
   }
   state.log.push(`Opponent loses ${damage} IP (${before} → ${state.players[opponent].ip})`);
 
@@ -118,8 +120,8 @@ function applyZoneEffect(
   state.players = updatedPlayers;
   state.pressureByState = pressureByState;
 
-  if (captured && typeof window !== 'undefined' && window.uiFlashState) {
-    window.uiFlashState(targetStateId, owner);
+  if (captured && typeof window !== 'undefined' && (window as any).uiFlashState) {
+    (window as any).uiFlashState(targetStateId, owner);
   }
 }
 

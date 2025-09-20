@@ -1,5 +1,6 @@
 import type { GameCard } from '@/rules/mvp';
 
+// @ts-ignore - Vite specific import.meta.glob
 const coreModules = import.meta.glob<true, string, { default: GameCard[] }>(
   '/src/data/core/**/[!_]*.ts',
   { eager: true },
@@ -15,7 +16,7 @@ const moduleEntries = Object.entries(coreModules)
 const CORE_CARDS: GameCard[] = [];
 
 for (const [path, mod] of moduleEntries) {
-  const cards = (mod as any).default ?? Object.values(mod)[0];
+  const cards = (mod as any).default ?? Object.values(mod as any)[0];
   if (!Array.isArray(cards)) continue;
 
   const before = CORE_CARDS.length;
@@ -33,7 +34,7 @@ for (const [path, mod] of moduleEntries) {
   }
 }
 
-if (typeof import.meta !== 'undefined' && import.meta.env?.MODE !== 'production') {
+if (typeof import.meta !== 'undefined' && (import.meta as any).env?.MODE !== 'production') {
   const total = CORE_CARDS.length;
   const truth = CORE_CARDS.filter(card => card.faction === 'truth').length;
   const government = CORE_CARDS.filter(card => card.faction === 'government').length;

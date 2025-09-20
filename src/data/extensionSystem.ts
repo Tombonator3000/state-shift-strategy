@@ -1,3 +1,6 @@
+declare const document: any;
+declare const window: any;
+
 import type { GameCard } from '@/rules/mvp';
 import { repairToMVP, validateCardMVP } from '@/mvp/validator';
 
@@ -107,24 +110,22 @@ export class ExtensionManager {
       
       // Try to load manifest first with cache-busting
       const manifestResponse = await fetch(`/extensions/manifest.json?t=${timestamp}`, { 
-        cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache' }
       });
       
       if (manifestResponse.ok) {
-        const manifest = await manifestResponse.json();
+        const manifest = (await manifestResponse.json()) as any;
         console.log(`📋 CDN Manifest loaded:`, manifest);
         
         for (const file of manifest.files || []) {
           try {
             console.log(`📥 Loading CDN extension: ${file}`);
             const extensionResponse = await fetch(`/extensions/${file}?t=${timestamp}`, { 
-              cache: 'no-store',
               headers: { 'Cache-Control': 'no-cache' }
             });
             
             if (extensionResponse.ok) {
-              const extension = await extensionResponse.json();
+              const extension = await extensionResponse.json() as any;
               console.log(`✅ CDN Extension loaded:`, extension.name, extension.version);
               
               if (this.validateExtension(extension)) {
@@ -145,11 +146,10 @@ export class ExtensionManager {
         for (const file of knownExtensions) {
           try {
             const response = await fetch(`/extensions/${file}?t=${timestamp}`, { 
-              cache: 'no-store',
               headers: { 'Cache-Control': 'no-cache' }
             });
             if (response.ok) {
-              const extension = await response.json();
+              const extension = await response.json() as any;
               if (this.validateExtension(extension)) {
                 extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
                 extensions.push(extension);
@@ -170,28 +170,28 @@ export class ExtensionManager {
 
   async loadFromFolderPicker(): Promise<Extension[]> {
     return new Promise((resolve) => {
-      const input = document.createElement('input');
+      const input = (typeof document !== 'undefined' ? document.createElement('input') : null);
       input.type = 'file';
       input.webkitdirectory = true;
       input.multiple = true;
       
-      input.onchange = async (e) => {
-        const files = (e.target as HTMLInputElement).files;
+      input.onchange = async (e: any) => {
+        const files = (e.target as any).files;
         if (!files) return resolve([]);
         
         const extensions: Extension[] = [];
         
-        for (const file of Array.from(files)) {
-          if (file.name.endsWith('.json')) {
+        for (const file of Array.from(files as any)) {
+          if ((file as any).name.endsWith('.json')) {
             try {
-              const text = await file.text();
-              const extension = JSON.parse(text);
+              const text = await (file as any).text();
+              const extension = JSON.parse(text) as any;
               if (this.validateExtension(extension)) {
                 extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
                 extensions.push(extension);
               }
             } catch (error) {
-              console.warn(`Failed to parse ${file.name}:`, error);
+              console.warn(`Failed to parse ${(file as any).name}:`, error);
             }
           }
         }
@@ -205,27 +205,27 @@ export class ExtensionManager {
 
   async loadFromFilePicker(): Promise<Extension[]> {
     return new Promise((resolve) => {
-      const input = document.createElement('input');
+      const input = (typeof document !== 'undefined' ? document.createElement('input') : null);
       input.type = 'file';
       input.multiple = true;
       input.accept = '.json';
       
-      input.onchange = async (e) => {
-        const files = (e.target as HTMLInputElement).files;
+      input.onchange = async (e: any) => {
+        const files = (e.target as any).files;
         if (!files) return resolve([]);
         
         const extensions: Extension[] = [];
         
-        for (const file of Array.from(files)) {
+        for (const file of Array.from(files as any)) {
           try {
-            const text = await file.text();
-            const extension = JSON.parse(text);
+            const text = await (file as any).text();
+            const extension = JSON.parse(text) as any;
             if (this.validateExtension(extension)) {
               extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
               extensions.push(extension);
             }
           } catch (error) {
-            console.warn(`Failed to parse ${file.name}:`, error);
+            console.warn(`Failed to parse ${(file as any).name}:`, error);
           }
         }
         

@@ -493,7 +493,7 @@ function perturbConfig(
     return Object.fromEntries(entries);
   };
 
-  return normalizeAiTuningConfig(walker(base) as AiTuningConfig);
+  return normalizeAiTuningConfig(walker(base as any) as any);
 }
 
 function summarizeBatch(

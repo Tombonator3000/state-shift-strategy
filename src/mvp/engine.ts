@@ -1,3 +1,5 @@
+declare const window: any;
+
 import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
 import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward } from '@/game/comboEngine';
 import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
@@ -319,9 +321,9 @@ export function endTurn(
   if (fxEnabled && comboEvaluation.results.length > 0) {
     for (const result of comboEvaluation.results) {
       callbacks?.onComboFx?.(result);
-      if (typeof window !== 'undefined' && typeof window.uiComboToast === 'function') {
+      if (typeof window !== 'undefined' && typeof (window as any).uiComboToast === 'function') {
         const rewardText = formatComboReward(result.appliedReward);
-        window.uiComboToast(
+        (window as any).uiComboToast(
           rewardText ? `${result.definition.name} ${rewardText}` : result.definition.name,
         );
       }
