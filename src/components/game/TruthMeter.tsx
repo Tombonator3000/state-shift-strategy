@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
+import { areParanormalEffectsEnabled } from '@/state/settings';
 
 interface TruthMeterProps {
   value: number; // 0-100
@@ -69,6 +70,10 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
         'Return to Sender (Government Edit)',
         'Can\'t Help Falling in Static',
       ];
+
+    if (!areParanormalEffectsEnabled()) {
+      return;
+    }
 
     VisualEffectsCoordinator.triggerTruthMeltdownBroadcast({
       position,

@@ -7,6 +7,7 @@ import * as topojson from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
+import { areParanormalEffectsEnabled } from '@/state/settings';
 
 
 interface EnhancedState {
@@ -418,16 +419,19 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
                   y: svgRect.top + centroid[1]
                 });
               }
-              VisualEffectsCoordinator.triggerCryptidSighting({
-                position: {
-                  x: svgRect.left + centroid[0],
-                  y: svgRect.top + centroid[1]
-                },
-                stateId: stateKey,
-                stateName,
-                footageQuality: prefersReducedMotion ? 'still' : Math.random() > 0.6 ? 'thermal' : 'grainy',
-                reducedMotion: prefersReducedMotion,
-              });
+
+              if (areParanormalEffectsEnabled()) {
+                VisualEffectsCoordinator.triggerCryptidSighting({
+                  position: {
+                    x: svgRect.left + centroid[0],
+                    y: svgRect.top + centroid[1]
+                  },
+                  stateId: stateKey,
+                  stateName,
+                  footageQuality: prefersReducedMotion ? 'still' : Math.random() > 0.6 ? 'thermal' : 'grainy',
+                  reducedMotion: prefersReducedMotion,
+                });
+              }
             }
           }
         }
