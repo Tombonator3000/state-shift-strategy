@@ -2,9 +2,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import * as topojson from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
+import { select } from 'd3-selection';
+import {
+  zoom,
+  zoomIdentity,
+  type ZoomTransform,
+  type ZoomBehavior,
+  type D3ZoomEvent
+} from 'd3-zoom';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { areParanormalEffectsEnabled } from '@/state/settings';
@@ -67,6 +76,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   });
   const contestedStatesRef = useRef<Record<string, boolean>>({});
   const contestedAnimationTimeoutsRef = useRef<number[]>([]);
+  const zoomBehaviorRef = useRef<ZoomBehavior<SVGSVGElement, unknown>>();
+  const transformRef = useRef<ZoomTransform>(zoomIdentity);
   const [governmentTarget, setGovernmentTarget] = useState<{
     active: boolean;
     cardId?: string;
@@ -177,6 +188,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     const handlePointerLeave = () => setHoveredState(null);
     svg.addEventListener('pointerleave', handlePointerLeave);
 
+    const svgSelection = select(svg);
+
     const projection = geoAlbersUsa()
       .scale(1000)
       .translate([width / 2, height / 2]);
@@ -187,13 +200,17 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     svg.innerHTML = '';
 
     // Create groups for different layers
+    const mapGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    mapGroup.setAttribute('class', 'map-group');
     const statesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     const pressureGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     const labelsGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    
-    svg.appendChild(statesGroup);
-    svg.appendChild(pressureGroup);
-    svg.appendChild(labelsGroup);
+
+    mapGroup.appendChild(statesGroup);
+    mapGroup.appendChild(pressureGroup);
+    mapGroup.appendChild(labelsGroup);
+    svg.appendChild(mapGroup);
+    mapGroup.setAttribute('transform', transformRef.current.toString());
 
     // Draw states
     const nextContestedStates: Record<string, boolean> = {};
@@ -490,10 +507,25 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
     contestedStatesRef.current = nextContestedStates;
 
+    const handleZoom = (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
+      transformRef.current = event.transform;
+      mapGroup.setAttribute('transform', event.transform.toString());
+    };
+
+    zoomBehaviorRef.current = zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.5, 4])
+      .translateExtent([[0, 0], [width, height]])
+      .on('zoom', handleZoom);
+
+    svgSelection.call(zoomBehaviorRef.current);
+    zoomBehaviorRef.current.transform(svgSelection, transformRef.current);
+
     return () => {
       svg.removeEventListener('pointerleave', handlePointerLeave);
+      svgSelection.on('.zoom', null);
       contestedAnimationTimeoutsRef.current.forEach(timeoutId => window.clearTimeout(timeoutId));
       contestedAnimationTimeoutsRef.current = [];
+      zoomBehaviorRef.current = undefined;
     };
 
   }, [
@@ -522,15 +554,26 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
   const stateInfo = getHoveredStateInfo();
 
+  const handleResetZoom = () => {
+    if (!svgRef.current || !zoomBehaviorRef.current) return;
+    const svgSelection = select(svgRef.current);
+    zoomBehaviorRef.current.transform(svgSelection, zoomIdentity);
+  };
+
   return (
     <div className="relative" ref={containerRef}>
       <Card className="p-4 bg-card border-border relative">
-        
+
         <div className="relative">
-          <svg 
+          <div className="absolute right-2 top-2 z-10 flex gap-2">
+            <Button size="sm" variant="secondary" onClick={handleResetZoom}>
+              Reset View
+            </Button>
+          </div>
+          <svg
             ref={svgRef}
-            width="800" 
-            height="500" 
+            width="800"
+            height="500"
             className="w-full h-full border border-border rounded bg-black/5"
             viewBox="0 0 800 500"
             preserveAspectRatio="xMidYMid meet"
