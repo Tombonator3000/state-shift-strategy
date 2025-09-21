@@ -19,6 +19,7 @@ import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
+import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import type { GameState } from './gameStateTypes';
 import {
   applyAiCardPlay,
@@ -592,6 +593,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         for (const message of comboResult.fxMessages) {
           window.uiComboToast(message);
         }
+      }
+
+      if (fxEnabled && comboResult.evaluation.results.length > 0) {
+        const comboNames = comboResult.evaluation.results.map(result => result.definition.name);
+        const effectPosition = VisualEffectsCoordinator.getRandomCenterPosition(160);
+        VisualEffectsCoordinator.triggerComboGlitch({
+          position: effectPosition,
+          comboNames,
+        });
       }
 
       if (isHumanTurn) {

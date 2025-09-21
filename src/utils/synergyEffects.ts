@@ -127,7 +127,8 @@ const KNOWN_PARTICLE_EFFECT_TYPES: ParticleEffectType[] = [
   'stateevent',
   'contested',
   'broadcast',
-  'cryptid'
+  'cryptid',
+  'glitch'
 ];
 
 export const resolveParticleEffectType = (
