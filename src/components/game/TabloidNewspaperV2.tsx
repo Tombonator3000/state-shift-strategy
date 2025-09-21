@@ -201,6 +201,7 @@ const TabloidNewspaperV2 = ({
   comboTruthDelta = 0,
   onClose,
   sightings = [],
+  glitchBadge = false,
 }: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState('THE PARANOID TIMES');
@@ -546,13 +547,18 @@ const TabloidNewspaperV2 = ({
     <div className="newspaper-layer flex items-center justify-center bg-black/40 p-4">
       <UICard className="ink-smudge relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden border-4 border-newspaper-border bg-newspaper-bg text-newspaper-text shadow-2xl">
         <header className="relative border-b-4 border-double border-newspaper-border bg-newspaper-header/90 px-6 py-5">
-          {breakingStamp ? (
-            <div className="stamp stamp--breaking absolute left-6 top-4">{breakingStamp}</div>
-          ) : null}
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close newspaper"
+        {breakingStamp ? (
+          <div className="stamp stamp--breaking absolute left-6 top-4">{breakingStamp}</div>
+        ) : null}
+        {glitchBadge ? (
+          <div className="absolute right-6 top-4 rotate-[-6deg] border-2 border-newspaper-text/40 bg-newspaper-bg px-3 py-1 text-[10px] font-bold uppercase tracking-[0.35em] text-newspaper-text shadow-md">
+            BREAKING: SIGNAL ANOMALY
+          </div>
+        ) : null}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close newspaper"
             className="absolute right-4 top-4 rounded-full border-2 border-newspaper-text/40 bg-newspaper-bg/40 p-1 text-newspaper-text transition hover:bg-newspaper-bg"
           >
             <X className="h-5 w-5" />

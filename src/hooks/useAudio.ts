@@ -87,6 +87,7 @@ export const useAudio = () => {
   const nextMusicRef = useRef<HTMLAudioElement | null>(null);
   const sfxRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const duckTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const playTokenRef = useRef(0);
   const resumeMenuAfterEndRef = useRef(false);
   const menuMusicCallbackRef = useRef<(() => void) | null>(null);
@@ -263,7 +264,23 @@ export const useAudio = () => {
       // Paranormal effects - using creative fallbacks until proper sounds are added
       'ufo-elvis': UFO_ELVIS_DATA_URL, // Generated shortwave broadcast sting for UFO/Elvis reports
       'cryptid-rumble': '/audio/defeat.mp3', // Use defeat sound as rumble
-      'radio-static': '/audio/typewriter.mp3' // Use typewriter as static
+      'radio-static': '/audio/typewriter.mp3', // Use typewriter as static
+      'radio-static-soft': '/audio/typewriter.mp3',
+      'typewriter-tick': '/audio/typewriter.mp3',
+      'scanline-fade': '/audio/card-play.mp3',
+      'relay-click': '/audio/click.mp3',
+      'alarm-ping': '/audio/hover.mp3',
+      'radio-cut': '/audio/click.mp3',
+      'sirene-muffled': '/audio/defeat.mp3',
+      'stamp-thud': '/audio/card-play.mp3',
+      'low-hum': '/audio/defeat.mp3',
+      'flashbulb': '/audio/card-play.mp3',
+      'folder-swish': '/audio/card-play.mp3',
+      'wire-buzz': '/audio/hover.mp3',
+      'tv-on': '/audio/card-play.mp3',
+      'glitch-chirp': '/audio/card-play.mp3',
+      'tv-off': '/audio/turn-end.mp3',
+      'camera-flash-burst': '/audio/card-play.mp3'
     };
 
     // Load SFX asynchronously with error handling
@@ -306,6 +323,10 @@ export const useAudio = () => {
       });
       if (fadeIntervalRef.current) {
         clearInterval(fadeIntervalRef.current);
+      }
+      if (duckTimeoutRef.current) {
+        clearTimeout(duckTimeoutRef.current);
+        duckTimeoutRef.current = null;
       }
     };
   }, []);
@@ -519,8 +540,8 @@ export const useAudio = () => {
   }, []);
 
   const resumeMusic = useCallback(() => {
-    console.log('🎵 resumeMusic called - current state:', { 
-      hasCurrentMusic: !!currentMusicRef.current, 
+    console.log('🎵 resumeMusic called - current state:', {
+      hasCurrentMusic: !!currentMusicRef.current,
       isPaused: currentMusicRef.current?.paused,
       audioContextUnlocked,
       currentTrackName 
@@ -547,6 +568,35 @@ export const useAudio = () => {
       console.log('🎵 Cannot resume - no paused music or audio context locked');
     }
   }, [audioContextUnlocked, config.musicVolume, config.volume, config.muted, currentTrackName]);
+
+  const duckMusic = useCallback((amountDb: number = 8, durationMs: number = 1000) => {
+    const attenuation = Math.pow(10, -Math.abs(amountDb) / 20);
+    const baseVolume = config.muted ? 0 : config.volume * config.musicVolume;
+    const targetVolume = baseVolume * attenuation;
+
+    const applyVolume = (element: HTMLAudioElement | null, volume: number) => {
+      if (!element) {
+        return;
+      }
+      element.volume = volume;
+    };
+
+    applyVolume(currentMusicRef.current, targetVolume);
+    applyVolume(nextMusicRef.current, targetVolume);
+
+    if (duckTimeoutRef.current) {
+      clearTimeout(duckTimeoutRef.current);
+      duckTimeoutRef.current = null;
+    }
+
+    const restoreDelay = Math.max(0, Math.round(durationMs));
+    duckTimeoutRef.current = setTimeout(() => {
+      const restored = config.muted ? 0 : config.volume * config.musicVolume;
+      applyVolume(currentMusicRef.current, restored);
+      applyVolume(nextMusicRef.current, restored);
+      duckTimeoutRef.current = null;
+    }, restoreDelay);
+  }, [config.muted, config.musicVolume, config.volume]);
 
   const playSFX = useCallback((soundName: string) => {
     if (!config.sfxEnabled || config.muted || !audioContextUnlocked) {
@@ -723,6 +773,7 @@ export const useAudio = () => {
     stopMusic,
     pauseMusic,
     resumeMusic,
+    duckMusic,
     playSFX,
     testSFX,
     setVolume,

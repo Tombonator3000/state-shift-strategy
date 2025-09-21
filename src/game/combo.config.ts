@@ -472,4 +472,5 @@ export const DEFAULT_COMBO_SETTINGS: ComboSettings = {
   comboToggles: Object.fromEntries(COMBO_DEFINITIONS.map(def => [def.id, def.enabledByDefault ?? true])),
   rng: Math.random,
   glitchMode: 'full',
+  glitchDucking: true,
 };

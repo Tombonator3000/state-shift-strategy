@@ -1,0 +1,42 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`comboGlitchTheme helpers applies, updates, and clears theme tokens 1`] = `
+{
+  "classes": [
+    "combo-glitching",
+    "interference",
+  ],
+  "styles": {
+    "--combo-glitch-duration": "1100ms",
+    "--glitch-blur": "0px",
+    "--glitch-halftone": "1",
+    "--glitch-jitter": "1px",
+    "--glitch-vignette": "0",
+    "--overlay-alpha": "0.16",
+  },
+}
+`;
+
+exports[`comboGlitchTheme helpers applies, updates, and clears theme tokens 2`] = `
+{
+  "classes": [
+    "combo-glitching",
+    "static",
+  ],
+  "styles": {
+    "--combo-glitch-duration": "1500ms",
+    "--glitch-blur": "1px",
+    "--glitch-halftone": "1",
+    "--glitch-jitter": "2px",
+    "--glitch-vignette": "1",
+    "--overlay-alpha": "0.2",
+  },
+}
+`;
+
+exports[`comboGlitchTheme helpers applies, updates, and clears theme tokens 3`] = `
+{
+  "classes": [],
+  "styles": {},
+}
+`;

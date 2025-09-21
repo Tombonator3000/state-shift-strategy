@@ -106,6 +106,7 @@ export interface ComboSettings {
   maxCombosPerTurn: number;
   rng?: () => number;
   glitchMode?: 'off' | 'minimal' | 'full';
+  glitchDucking?: boolean;
 }
 
 export interface ComboFXCallbacks {

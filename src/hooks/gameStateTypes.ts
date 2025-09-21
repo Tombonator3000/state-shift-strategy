@@ -65,6 +65,7 @@ export interface GameState {
   currentEvents: GameEvent[];
   eventManager?: EventManager;
   showNewspaper: boolean;
+  newspaperGlitchBadge?: boolean;
   log: string[];
   agenda?: SecretAgenda & {
     progress?: number;
