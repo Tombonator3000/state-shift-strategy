@@ -20,6 +20,18 @@ import {
   type SynergyEffectIdentifier
 } from '@/utils/synergyEffects';
 
+const COMBO_GLITCH_DURATIONS: Record<'minor' | 'major' | 'mega', number> = {
+  minor: 900,
+  major: 1200,
+  mega: 1500
+};
+
+const COMBO_GLITCH_SFX_DELAYS: Record<'minor' | 'major' | 'mega', number | null> = {
+  minor: null,
+  major: 140,
+  mega: 220
+};
+
 type FloatingNumberType = 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain' | SynergyEffectIdentifier;
 
 interface CardAnimationLayerProps {
@@ -66,6 +78,8 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     y: number;
     comboNames: string[];
     intensity: 'minor' | 'major' | 'mega';
+    magnitude: number;
+    duration: number;
     reducedMotion?: boolean;
   } | null>(null);
   const [broadcastOverlay, setBroadcastOverlay] = useState<{
@@ -263,6 +277,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       comboNames?: string[];
       comboCount?: number;
       intensity?: 'minor' | 'major' | 'mega';
+      magnitude?: number;
       reducedMotion?: boolean;
     }>) => {
       if (!event?.detail) return;
@@ -271,31 +286,29 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         x,
         y,
         comboNames = [],
-        comboCount,
         intensity,
+        magnitude,
         reducedMotion,
       } = event.detail;
 
       const prefersReducedMotion = reducedMotion ?? (typeof window !== 'undefined'
         && typeof window.matchMedia === 'function'
         && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      const resolvedIntensity = intensity ?? 'minor';
 
       if (!prefersReducedMotion) {
         audio?.playSFX?.('radio-static');
+        const sfxDelay = COMBO_GLITCH_SFX_DELAYS[resolvedIntensity];
+        if (typeof sfxDelay === 'number' && sfxDelay > 0) {
+          window.setTimeout(() => {
+            audio?.playSFX?.('radio-static');
+          }, sfxDelay);
+        }
       }
 
-      const resolvedIntensity = intensity
-        ?? (typeof comboCount === 'number'
-          ? comboCount >= 3
-            ? 'mega'
-            : comboCount === 2
-              ? 'major'
-              : 'minor'
-          : comboNames.length >= 3
-            ? 'mega'
-            : comboNames.length === 2
-              ? 'major'
-              : 'minor');
+      const sanitizedMagnitude = typeof magnitude === 'number' && !Number.isNaN(magnitude)
+        ? Math.max(0, magnitude)
+        : 0;
 
       setComboGlitchOverlay({
         id: Date.now(),
@@ -303,6 +316,8 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         y,
         comboNames,
         intensity: resolvedIntensity,
+        magnitude: sanitizedMagnitude,
+        duration: COMBO_GLITCH_DURATIONS[resolvedIntensity],
         reducedMotion: prefersReducedMotion,
       });
     };
@@ -624,6 +639,8 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
             y={comboGlitchOverlay.y}
             comboNames={comboGlitchOverlay.comboNames}
             intensity={comboGlitchOverlay.intensity}
+            magnitude={comboGlitchOverlay.magnitude}
+            duration={comboGlitchOverlay.duration}
             reducedMotion={comboGlitchOverlay.reducedMotion}
             onComplete={handleComboGlitchComplete}
           />

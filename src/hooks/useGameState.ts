@@ -597,10 +597,27 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       if (fxEnabled && comboResult.evaluation.results.length > 0) {
         const comboNames = comboResult.evaluation.results.map(result => result.definition.name);
+        const rewardStats = comboResult.evaluation.results.reduce(
+          (stats, result) => {
+            const reward = result.appliedReward ?? {};
+            const ip = typeof reward.ip === 'number' ? Math.abs(reward.ip) : 0;
+            const truth = typeof reward.truth === 'number' ? Math.abs(reward.truth) : 0;
+            const combined = ip + truth;
+
+            return {
+              total: stats.total + combined,
+              peak: Math.max(stats.peak, combined),
+            };
+          },
+          { total: 0, peak: 0 },
+        );
+
+        const magnitude = Math.max(rewardStats.total, rewardStats.peak);
         const effectPosition = VisualEffectsCoordinator.getRandomCenterPosition(160);
         VisualEffectsCoordinator.triggerComboGlitch({
           position: effectPosition,
           comboNames,
+          magnitude,
         });
       }
 

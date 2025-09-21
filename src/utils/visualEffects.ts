@@ -10,6 +10,11 @@ export interface EffectPosition {
   y: number;
 }
 
+const COMBO_MAGNITUDE_THRESHOLDS = {
+  major: 4,
+  mega: 8,
+} as const;
+
 export class VisualEffectsCoordinator {
   // Trigger particle effect at specific position
   static triggerParticleEffect(
@@ -29,24 +34,49 @@ export class VisualEffectsCoordinator {
     position: EffectPosition;
     comboNames: string[];
     intensity?: 'minor' | 'major' | 'mega';
+    magnitude?: number;
   }): void {
     if (typeof window === 'undefined') {
       return;
     }
 
     const comboNames = detail.comboNames ?? [];
-    const baseIntensity = detail.intensity
-      ?? (comboNames.length >= 3
-        ? 'mega'
-        : comboNames.length === 2
-          ? 'major'
-          : 'minor');
+    const magnitude = typeof detail.magnitude === 'number' && !Number.isNaN(detail.magnitude)
+      ? Math.max(0, detail.magnitude)
+      : undefined;
+    const resolvedIntensity = detail.intensity
+      ?? (typeof magnitude === 'number'
+        ? magnitude >= COMBO_MAGNITUDE_THRESHOLDS.mega
+          ? 'mega'
+          : magnitude >= COMBO_MAGNITUDE_THRESHOLDS.major
+            ? 'major'
+            : 'minor'
+        : comboNames.length >= 3
+          ? 'mega'
+          : comboNames.length === 2
+            ? 'major'
+            : 'minor');
 
     const reducedMotion = typeof window.matchMedia === 'function'
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (!reducedMotion) {
-      this.triggerParticleEffect('glitch', detail.position);
+      const bursts = resolvedIntensity === 'mega'
+        ? 3
+        : resolvedIntensity === 'major'
+          ? 2
+          : 1;
+
+      for (let i = 0; i < bursts; i += 1) {
+        const delay = i * 90;
+        if (delay === 0) {
+          this.triggerParticleEffect('glitch', detail.position);
+        } else {
+          window.setTimeout(() => {
+            this.triggerParticleEffect('glitch', detail.position);
+          }, delay);
+        }
+      }
     }
 
     window.dispatchEvent(new CustomEvent('comboGlitch', {
@@ -55,8 +85,9 @@ export class VisualEffectsCoordinator {
         y: detail.position.y,
         comboNames,
         comboCount: comboNames.length,
-        intensity: baseIntensity,
-        reducedMotion
+        intensity: resolvedIntensity,
+        magnitude: magnitude ?? 0,
+        reducedMotion,
       }
     }));
   }
