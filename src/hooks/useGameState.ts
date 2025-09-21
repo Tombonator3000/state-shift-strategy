@@ -19,7 +19,7 @@ import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
-import { VisualEffectsCoordinator } from '@/utils/visualEffects';
+import { playComboGlitchIfAny } from '@/utils/visualEffects';
 import type { GameState } from './gameStateTypes';
 import {
   applyAiCardPlay,
@@ -574,15 +574,23 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     setGameState(prev => ({ ...prev, targetState: stateId }));
   }, []);
 
-  const endTurn = useCallback(() => {
+  const endTurn = useCallback(async () => {
+    let glitchPayload: {
+      combos: string[];
+      magnitude: number;
+      messages: string[];
+      glitchMode?: 'off' | 'minimal' | 'full';
+    } | null = null;
+    let shouldShowNewspaper = false;
+
     setGameState(prev => {
-      // Don't allow turn ending if game is over
       if (prev.isGameOver) return prev;
-      
+
       const isHumanTurn = prev.currentPlayer === 'human';
       const comboResult = evaluateCombosForTurn(prev, isHumanTurn ? 'human' : 'ai');
       achievements.onCombosResolved(isHumanTurn ? 'human' : 'ai', comboResult.evaluation);
-      const fxEnabled = getComboSettings().fxEnabled;
+      const comboSettings = getComboSettings();
+      const fxEnabled = comboSettings.fxEnabled;
 
       if (
         fxEnabled &&
@@ -613,13 +621,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         );
 
         const magnitude = Math.max(rewardStats.total, rewardStats.peak);
-        const effectPosition = VisualEffectsCoordinator.getRandomCenterPosition(160);
-        VisualEffectsCoordinator.triggerComboGlitch({
-          position: effectPosition,
-          comboNames,
+        glitchPayload = {
+          combos: comboNames,
           magnitude,
-          fxMessages: comboResult.fxMessages,
-        });
+          messages: comboResult.fxMessages,
+          glitchMode: comboSettings.glitchMode,
+        };
       }
 
       if (isHumanTurn) {
@@ -712,12 +719,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const comboLog =
         comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
 
-      return {
+      const nextState = {
         ...prev,
         round: prev.round + 1,
         phase: 'newspaper',
         currentPlayer: 'human',
-        showNewspaper: true,
+        showNewspaper: false,
         truth: comboResult.updatedTruth,
         ip: comboResult.updatedOpponentIp,
         aiIP: comboResult.updatedPlayerIp,
@@ -726,8 +733,18 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboResult.truthDelta,
         log: [...comboLog, 'AI turn completed']
       };
+      shouldShowNewspaper = true;
+      return nextState;
     });
-  }, []);
+
+    if (glitchPayload) {
+      await playComboGlitchIfAny(glitchPayload);
+    }
+
+    if (shouldShowNewspaper) {
+      setGameState(prev => (prev.isGameOver ? prev : { ...prev, showNewspaper: true }));
+    }
+  }, [achievements]);
 
   const playAICard = useCallback((params: AiCardPlayParams) => {
     return new Promise<GameState>(resolve => {
@@ -883,8 +900,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return;
       }
 
-      endTurn();
-      setGameState(prev => (prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false }));
+      void endTurn().finally(() => {
+        setGameState(prev => (prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false }));
+      });
     }, 1000);
   }, [gameState, endTurn, playAICard]);
 

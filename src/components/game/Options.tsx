@@ -297,10 +297,15 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     if (update.comboToggles) {
       normalized.comboToggles = { ...update.comboToggles };
     }
+    if (update.glitchMode && !['off', 'minimal', 'full'].includes(update.glitchMode)) {
+      delete normalized.glitchMode;
+    }
     const merged = setComboSettings(normalized);
     setComboSettingsState(merged);
     persistSettings(settings, merged);
   };
+
+  const comboGlitchMode = comboSettingsState.glitchMode ?? 'full';
 
   const resetToDefaults = () => {
     const defaultSettings: GameSettings = {
@@ -692,6 +697,23 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   FX notifications ({comboSettingsState.fxEnabled ? 'on' : 'off'})
                 </span>
               </div>
+            </div>
+
+            <div className="mt-4 grid gap-2 sm:grid-cols-[auto,1fr] sm:items-center">
+              <label className="text-sm font-medium text-newspaper-text" htmlFor="combo-glitch-mode">
+                Show combo glitches
+              </label>
+              <select
+                id="combo-glitch-mode"
+                value={comboGlitchMode}
+                onChange={event => applyComboSettings({ glitchMode: event.target.value as typeof comboGlitchMode })}
+                className="w-full rounded border border-newspaper-text bg-newspaper-bg p-2 text-newspaper-text"
+                disabled={!comboSettingsState.enabled || !comboSettingsState.fxEnabled}
+              >
+                <option value="full">Full</option>
+                <option value="minimal">Minimal</option>
+                <option value="off">Off</option>
+              </select>
             </div>
 
             <div className="mt-4">

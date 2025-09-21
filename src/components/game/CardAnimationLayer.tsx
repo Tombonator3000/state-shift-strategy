@@ -14,6 +14,7 @@ import EvidencePhotoGallery from '@/components/effects/EvidencePhotoGallery';
 import ComboGlitchOverlay from '@/components/effects/ComboGlitchOverlay';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { areParanormalEffectsEnabled } from '@/state/settings';
+import { FXState } from '@/utils/visualEffects';
 import {
   isSynergyEffectIdentifier,
   resolveParticleEffectType,
@@ -82,6 +83,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     duration: number;
     reducedMotion?: boolean;
     fxMessages: string[];
+    mode: 'full' | 'minimal';
   } | null>(null);
   const [broadcastOverlay, setBroadcastOverlay] = useState<{
     id: number;
@@ -273,14 +275,16 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     };
 
     const handleComboGlitch = (event: CustomEvent<{
-      x: number;
-      y: number;
+      x?: number;
+      y?: number;
       comboNames?: string[];
       comboCount?: number;
       intensity?: 'minor' | 'major' | 'mega';
       magnitude?: number;
       reducedMotion?: boolean;
       fxMessages?: string[];
+      durationMs?: number;
+      mode?: 'minimal' | 'full';
     }>) => {
       if (!event?.detail) return;
 
@@ -292,14 +296,22 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         magnitude,
         reducedMotion,
         fxMessages,
+        durationMs,
+        mode,
       } = event.detail;
 
       const prefersReducedMotion = reducedMotion ?? (typeof window !== 'undefined'
         && typeof window.matchMedia === 'function'
         && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
       const resolvedIntensity = intensity ?? 'minor';
+      const variant = mode === 'minimal' ? 'minimal' : 'full';
+      const effectiveDuration = typeof durationMs === 'number' && Number.isFinite(durationMs)
+        ? Math.max(0, durationMs)
+        : COMBO_GLITCH_DURATIONS[resolvedIntensity];
 
       const rootElement = typeof document !== 'undefined' ? document.documentElement : null;
+
+      FXState.__internalSetActive?.(true);
 
       if (!prefersReducedMotion) {
         audio?.playSFX?.('radio-static');
@@ -310,7 +322,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
           }, sfxDelay);
         }
         rootElement?.classList.add('combo-glitching');
-        rootElement?.style.setProperty('--combo-glitch-duration', `${COMBO_GLITCH_DURATIONS[resolvedIntensity]}ms`);
+        rootElement?.style.setProperty('--combo-glitch-duration', `${effectiveDuration}ms`);
       } else {
         rootElement?.classList.remove('combo-glitching');
         rootElement?.style.removeProperty('--combo-glitch-duration');
@@ -322,12 +334,12 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
 
       setComboGlitchOverlay({
         id: Date.now(),
-        x,
-        y,
+        x: x ?? window.innerWidth / 2,
+        y: y ?? window.innerHeight / 2,
         comboNames,
         intensity: resolvedIntensity,
         magnitude: sanitizedMagnitude,
-        duration: COMBO_GLITCH_DURATIONS[resolvedIntensity],
+        duration: effectiveDuration,
         reducedMotion: prefersReducedMotion,
         fxMessages: Array.isArray(fxMessages)
           ? fxMessages
@@ -335,6 +347,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
             .map(message => message.trim())
             .filter(message => message.length > 0)
           : [],
+        mode: variant,
       });
     };
 
@@ -607,12 +620,46 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     setCryptidOverlay(null);
   }, []);
 
-  const handleComboGlitchComplete = useCallback(() => {
+  const finalizeComboGlitch = useCallback(() => {
     const rootElement = typeof document !== 'undefined' ? document.documentElement : null;
     rootElement?.classList.remove('combo-glitching');
     rootElement?.style.removeProperty('--combo-glitch-duration');
-    setComboGlitchOverlay(null);
+
+    let hadOverlay = false;
+    setComboGlitchOverlay(current => {
+      if (current) {
+        hadOverlay = true;
+      }
+      return null;
+    });
+
+    const shouldNotify = hadOverlay || FXState.isGlitchActive();
+    FXState.__internalSetActive?.(false);
+    if (shouldNotify) {
+      window.dispatchEvent(new Event('comboGlitchComplete'));
+    }
   }, []);
+
+  const handleComboGlitchComplete = useCallback(() => {
+    finalizeComboGlitch();
+  }, [finalizeComboGlitch]);
+
+  useEffect(() => {
+    if (!comboGlitchOverlay || typeof document === 'undefined') {
+      return;
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        finalizeComboGlitch();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [comboGlitchOverlay, finalizeComboGlitch]);
 
   // New enhanced effect completion handlers
   const handleBreakingNewsComplete = useCallback(() => {
@@ -668,6 +715,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
             duration={comboGlitchOverlay.duration}
             reducedMotion={comboGlitchOverlay.reducedMotion}
             fxMessages={comboGlitchOverlay.fxMessages}
+            mode={comboGlitchOverlay.mode}
             onComplete={handleComboGlitchComplete}
           />
         )}

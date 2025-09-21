@@ -637,6 +637,19 @@ All colors MUST be HSL.
     }
   }
 
+  .combo-glitch-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+  }
+
+  .newspaper-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+  }
+
   .combo-glitch-container {
     animation: combo-glitch-jitter 0.28s steps(2, end) infinite;
   }
@@ -3294,10 +3307,19 @@ html, body, #root {
   }
 }
 
+  html.combo-glitching {
+    filter: grayscale(1) contrast(1.05);
+  }
+
+  html.combo-glitching #root * {
+    transition-duration: 0.75s !important;
+    animation-play-state: paused !important;
+  }
+
 @media (prefers-reduced-motion: no-preference) {
   html.combo-glitching {
     --combo-glitch-duration: 900ms;
-    filter: contrast(1.12) saturate(1.28);
+    filter: grayscale(1) contrast(1.05);
   }
 
   html.combo-glitching body::after {
@@ -3326,7 +3348,7 @@ html, body, #root {
 
 @media (prefers-reduced-motion: reduce) {
   html.combo-glitching {
-    filter: none;
+    filter: grayscale(1) contrast(1.05);
   }
 
   html.combo-glitching body::after {

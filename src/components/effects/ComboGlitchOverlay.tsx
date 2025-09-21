@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ComboGlitchOverlayProps {
   x: number;
@@ -10,6 +11,7 @@ interface ComboGlitchOverlayProps {
   reducedMotion?: boolean;
   onComplete: () => void;
   duration?: number;
+  mode?: 'full' | 'minimal';
 }
 
 type ComboIntensity = ComboGlitchOverlayProps['intensity'];
@@ -125,7 +127,8 @@ const ComboGlitchOverlay: React.FC<ComboGlitchOverlayProps> = ({
   fxMessages = [],
   reducedMotion = false,
   onComplete,
-  duration
+  duration,
+  mode = 'full',
 }) => {
   const preset = INTENSITY_PRESETS[intensity];
   const computedDuration = duration ?? preset.defaultDuration;
@@ -137,6 +140,8 @@ const ComboGlitchOverlay: React.FC<ComboGlitchOverlayProps> = ({
       ? sanitizedMagnitude.toString()
       : sanitizedMagnitude.toFixed(1))
     : null;
+
+  const shouldAnimate = !reducedMotion && mode !== 'minimal';
 
   useEffect(() => {
     const timeout = window.setTimeout(onComplete, computedDuration);
@@ -171,8 +176,8 @@ const ComboGlitchOverlay: React.FC<ComboGlitchOverlayProps> = ({
     return selected.toUpperCase();
   }, [accentLabel, sanitizedFxMessages]);
 
-  const taglineAnimationClass = reducedMotion ? '' : 'combo-glitch-text-scramble';
-  const calloutAnimationClass = reducedMotion ? '' : 'combo-glitch-text-scanline';
+  const taglineAnimationClass = shouldAnimate ? 'combo-glitch-text-scramble' : '';
+  const calloutAnimationClass = shouldAnimate ? 'combo-glitch-text-scanline' : '';
   const taglineClasses = [
     'text-[0.55rem]',
     'font-semibold',
@@ -190,54 +195,68 @@ const ComboGlitchOverlay: React.FC<ComboGlitchOverlayProps> = ({
     calloutAnimationClass,
   ].filter(Boolean).join(' ');
 
-  return (
-    <div
-      className={`pointer-events-none fixed z-[970] ${reducedMotion ? '' : 'combo-glitch-container'}`}
-      style={{
-        left: x,
-        top: y,
-        width: size,
-        height: size,
-        transform: 'translate(-50%, -50%)'
-      }}
-    >
-      <div
-        className={`combo-glitch-core absolute inset-0 rounded-xl border ${preset.coreClass}`}
-      />
-      {!reducedMotion && (
-        <>
-          <div
-            className="combo-glitch-lines absolute inset-0 rounded-xl"
-            style={{
-              backgroundImage: `repeating-linear-gradient(to bottom, ${preset.lineColor} 0%, ${preset.lineColor} 2px, transparent 2px, transparent 8px)`,
-              opacity: preset.lineOpacity
-            }}
-          />
-          <div
-            className="combo-glitch-shard absolute inset-4 rounded-lg"
-            style={{
-              background: preset.shardLayers.join(', '),
-              opacity: preset.shardOpacity
-            }}
-          />
-        </>
-      )}
+  if (typeof document === 'undefined') {
+    return null;
+  }
 
-      <div className="absolute inset-0 flex flex-col items-center justify-between px-6 py-6 text-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className={taglineClasses}>
-            {glitchTagline}
+  const containerClasses = [
+    'pointer-events-none',
+    'absolute',
+    shouldAnimate ? 'combo-glitch-container' : '',
+  ].filter(Boolean).join(' ');
+
+  const overlay = (
+    <div className="combo-glitch-layer">
+      <div
+        className={containerClasses}
+        style={{
+          left: x,
+          top: y,
+          width: size,
+          height: size,
+          transform: 'translate(-50%, -50%)'
+        }}
+      >
+        <div
+          className={`absolute inset-0 rounded-xl border ${preset.coreClass} ${shouldAnimate ? 'combo-glitch-core' : ''}`}
+        />
+        {shouldAnimate && (
+          <>
+            <div
+              className="combo-glitch-lines absolute inset-0 rounded-xl"
+              style={{
+                backgroundImage: `repeating-linear-gradient(to bottom, ${preset.lineColor} 0%, ${preset.lineColor} 2px, transparent 2px, transparent 8px)`,
+                opacity: preset.lineOpacity
+              }}
+            />
+            <div
+              className="combo-glitch-shard absolute inset-4 rounded-lg"
+              style={{
+                background: preset.shardLayers.join(', '),
+                opacity: preset.shardOpacity
+              }}
+            />
+          </>
+        )}
+
+        <div className="absolute inset-0 flex flex-col items-center justify-between px-6 py-6 text-center">
+          <div className="flex flex-col items-center gap-2">
+            <div className={taglineClasses}>
+              {glitchTagline}
+            </div>
+            <div className={calloutClasses}>
+              {rewardCallout}
+            </div>
           </div>
-          <div className={calloutClasses}>
-            {rewardCallout}
+          <div className={`text-xs font-mono uppercase tracking-[0.32em] ${preset.labelClass}`}>
+            {label}
           </div>
-        </div>
-        <div className={`text-xs font-mono uppercase tracking-[0.32em] ${preset.labelClass}`}>
-          {label}
         </div>
       </div>
     </div>
   );
+
+  return createPortal(overlay, document.body);
 };
 
 export default ComboGlitchOverlay;

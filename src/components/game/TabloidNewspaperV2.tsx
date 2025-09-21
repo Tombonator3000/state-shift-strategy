@@ -543,7 +543,7 @@ const TabloidNewspaperV2 = ({
   const truthDeltaLabel = formatTruthDelta(roundContext.truthDeltaTotal);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="newspaper-layer flex items-center justify-center bg-black/40 p-4">
       <UICard className="ink-smudge relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden border-4 border-newspaper-border bg-newspaper-bg text-newspaper-text shadow-2xl">
         <header className="relative border-b-4 border-double border-newspaper-border bg-newspaper-header/90 px-6 py-5">
           {breakingStamp ? (
