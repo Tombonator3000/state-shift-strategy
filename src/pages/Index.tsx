@@ -1658,15 +1658,12 @@ const Index = () => {
 
       {uiNotificationsEnabled && (
         <Toaster
-          position="top-right"
+          position="bottom-right"
+          gutter={12}
+          containerClassName="game-toast-container"
           toastOptions={{
             duration: 3000,
-            style: {
-              background: '#1f2937',
-              color: '#f3f4f6',
-              border: '1px solid #374151',
-              fontFamily: 'monospace'
-            }
+            className: 'game-toast',
           }}
         />
       )}
