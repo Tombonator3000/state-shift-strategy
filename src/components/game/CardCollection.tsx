@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { useCardCollection } from '@/hooks/useCardCollection';
@@ -100,7 +101,7 @@ const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
         <Progress value={stats.completionPercentage} className="mb-4" />
         
         {/* Filters */}
-        <div className="flex gap-4 mb-4">
+        <div className="flex flex-wrap items-center gap-4 mb-4">
           <Input
             placeholder="Search cards..."
             value={searchTerm}
@@ -130,6 +131,17 @@ const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
               <SelectItem value="legendary">Legendary</SelectItem>
             </SelectContent>
           </Select>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSearchTerm('');
+              setFilterType('all');
+              setFilterRarity('all');
+            }}
+            className="flex-none whitespace-nowrap"
+          >
+            Reset filters
+          </Button>
         </div>
         
         {/* Cards Grid */}
