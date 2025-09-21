@@ -185,6 +185,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       reducedMotion?: boolean;
     }>) => {
       if (!event?.detail) return;
+      if (!areParanormalEffectsEnabled()) {
+        setBroadcastOverlay(null);
+        return;
+      }
       const { position, intensity, setList, truthValue, reducedMotion } = event.detail;
       if (position && !reducedMotion) {
         spawnParticleEffect('broadcast', position.x, position.y);
@@ -209,8 +213,12 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       stateName?: string;
       footageQuality: string;
       reducedMotion?: boolean;
-    }>) => {
+      }>) => {
       if (!event?.detail) return;
+      if (!areParanormalEffectsEnabled()) {
+        setCryptidOverlay(null);
+        return;
+      }
       const { position, stateId, stateName, footageQuality, reducedMotion } = event.detail;
       if (position && !reducedMotion) {
         spawnParticleEffect('cryptid', position.x, position.y);
@@ -236,6 +244,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       y: number;
     }>) => {
       if (!event?.detail) return;
+      if (!areParanormalEffectsEnabled()) {
+        setBreakingNewsOverlay(null);
+        return;
+      }
       const { newsText, x, y } = event.detail;
       setBreakingNewsOverlay({
         id: Date.now(),
@@ -254,6 +266,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       y: number;
     }>) => {
       if (!event?.detail) return;
+      if (!areParanormalEffectsEnabled()) {
+        setSurveillanceOverlay(null);
+        return;
+      }
       const { targetName, threatLevel, x, y } = event.detail;
       setSurveillanceOverlay({
         id: Date.now(),
@@ -274,6 +290,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       y: number;
     }>) => {
       if (!event?.detail) return;
+      if (!areParanormalEffectsEnabled()) {
+        setTypewriterOverlay(null);
+        return;
+      }
       const { documentTitle, documentContent, classificationLevel, x, y } = event.detail;
       setTypewriterOverlay({
         id: Date.now(),
@@ -293,6 +313,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       y: number;
     }>) => {
       if (!event?.detail) return;
+      if (!areParanormalEffectsEnabled()) {
+        setStaticOverlay(null);
+        return;
+      }
       const { intensity, message, x, y } = event.detail;
       setStaticOverlay({
         id: Date.now(),
@@ -318,6 +342,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       y: number;
     }>) => {
       if (!event?.detail) return;
+      if (!areParanormalEffectsEnabled()) {
+        setEvidenceOverlay(null);
+        return;
+      }
       const { caseTitle, photos, x, y } = event.detail;
       setEvidenceOverlay({
         id: Date.now(),
@@ -404,6 +432,43 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('evidenceGallery', handleEvidenceGallery as EventListener);
     };
   }, [spawnParticleEffect, audio]);
+
+  const clearParanormalOverlays = useCallback(() => {
+    setBreakingNewsOverlay(null);
+    setSurveillanceOverlay(null);
+    setTypewriterOverlay(null);
+    setStaticOverlay(null);
+    setEvidenceOverlay(null);
+    setBroadcastOverlay(null);
+    setCryptidOverlay(null);
+  }, []);
+
+  useEffect(() => {
+    const handleParanormalToggle = (event: Event) => {
+      const detail = (event as CustomEvent<{ enabled?: boolean }>).detail;
+      if (!detail?.enabled) {
+        clearParanormalOverlays();
+      }
+    };
+
+    const handleStorageSync = () => {
+      if (!areParanormalEffectsEnabled()) {
+        clearParanormalOverlays();
+      }
+    };
+
+    if (!areParanormalEffectsEnabled()) {
+      clearParanormalOverlays();
+    }
+
+    window.addEventListener('shadowgov:paranormal-effects-toggled', handleParanormalToggle);
+    window.addEventListener('storage', handleStorageSync);
+
+    return () => {
+      window.removeEventListener('shadowgov:paranormal-effects-toggled', handleParanormalToggle);
+      window.removeEventListener('storage', handleStorageSync);
+    };
+  }, [clearParanormalOverlays]);
 
   const handleParticleComplete = useCallback((id: number) => {
     setParticleEffects(prev => prev.filter(effect => effect.id !== id));

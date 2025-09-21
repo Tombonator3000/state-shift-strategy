@@ -1,3 +1,5 @@
+import { areParanormalEffectsEnabled } from '@/state/settings';
+
 // Visual Effects Integration Utilities
 // Centralized system for triggering coordinated visual effects
 
@@ -133,6 +135,10 @@ export class VisualEffectsCoordinator {
     reducedMotion?: boolean;
     source?: 'truth' | 'government';
   }): void {
+    if (!areParanormalEffectsEnabled()) {
+      return;
+    }
+
     window.dispatchEvent(new CustomEvent('truthMeltdownBroadcast', {
       detail: {
         ...detail,
@@ -148,6 +154,10 @@ export class VisualEffectsCoordinator {
     footageQuality: string;
     reducedMotion?: boolean;
   }): void {
+    if (!areParanormalEffectsEnabled()) {
+      return;
+    }
+
     window.dispatchEvent(new CustomEvent('cryptidSighting', {
       detail: {
         ...detail,
@@ -186,6 +196,10 @@ export class VisualEffectsCoordinator {
 
   // Trigger breaking news ticker overlay
   static triggerBreakingNews(newsText: string, position: EffectPosition): void {
+    if (!areParanormalEffectsEnabled()) {
+      return;
+    }
+
     window.dispatchEvent(new CustomEvent('breakingNews', {
       detail: {
         newsText,
@@ -201,6 +215,10 @@ export class VisualEffectsCoordinator {
     threatLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CLASSIFIED',
     position: EffectPosition
   ): void {
+    if (!areParanormalEffectsEnabled()) {
+      return;
+    }
+
     window.dispatchEvent(new CustomEvent('governmentSurveillance', {
       detail: {
         targetName,
@@ -218,6 +236,10 @@ export class VisualEffectsCoordinator {
     classificationLevel: 'UNCLASSIFIED' | 'CONFIDENTIAL' | 'SECRET' | 'TOP SECRET',
     position: EffectPosition
   ): void {
+    if (!areParanormalEffectsEnabled()) {
+      return;
+    }
+
     window.dispatchEvent(new CustomEvent('typewriterReveal', {
       detail: {
         documentTitle,
@@ -235,6 +257,10 @@ export class VisualEffectsCoordinator {
     message: string,
     position: EffectPosition
   ): void {
+    if (!areParanormalEffectsEnabled()) {
+      return;
+    }
+
     window.dispatchEvent(new CustomEvent('staticInterference', {
       detail: {
         intensity,
@@ -257,6 +283,10 @@ export class VisualEffectsCoordinator {
     }> | undefined,
     position: EffectPosition
   ): void {
+    if (!areParanormalEffectsEnabled()) {
+      return;
+    }
+
     window.dispatchEvent(new CustomEvent('evidenceGallery', {
       detail: {
         caseTitle,
@@ -273,6 +303,10 @@ export class VisualEffectsCoordinator {
     cardName: string,
     position: EffectPosition
   ): void {
+    if (!areParanormalEffectsEnabled()) {
+      return;
+    }
+
     switch (eventType) {
       case 'media_blast':
         this.triggerBreakingNews(
