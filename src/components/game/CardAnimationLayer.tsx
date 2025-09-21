@@ -299,6 +299,8 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
       const resolvedIntensity = intensity ?? 'minor';
 
+      const rootElement = typeof document !== 'undefined' ? document.documentElement : null;
+
       if (!prefersReducedMotion) {
         audio?.playSFX?.('radio-static');
         const sfxDelay = COMBO_GLITCH_SFX_DELAYS[resolvedIntensity];
@@ -307,6 +309,11 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
             audio?.playSFX?.('radio-static');
           }, sfxDelay);
         }
+        rootElement?.classList.add('combo-glitching');
+        rootElement?.style.setProperty('--combo-glitch-duration', `${COMBO_GLITCH_DURATIONS[resolvedIntensity]}ms`);
+      } else {
+        rootElement?.classList.remove('combo-glitching');
+        rootElement?.style.removeProperty('--combo-glitch-duration');
       }
 
       const sanitizedMagnitude = typeof magnitude === 'number' && !Number.isNaN(magnitude)
@@ -566,6 +573,12 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     };
   }, [clearParanormalOverlays]);
 
+  useEffect(() => () => {
+    const rootElement = typeof document !== 'undefined' ? document.documentElement : null;
+    rootElement?.classList.remove('combo-glitching');
+    rootElement?.style.removeProperty('--combo-glitch-duration');
+  }, []);
+
   const handleParticleComplete = useCallback((id: number) => {
     setParticleEffects(prev => prev.filter(effect => effect.id !== id));
   }, []);
@@ -595,6 +608,9 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
   }, []);
 
   const handleComboGlitchComplete = useCallback(() => {
+    const rootElement = typeof document !== 'undefined' ? document.documentElement : null;
+    rootElement?.classList.remove('combo-glitching');
+    rootElement?.style.removeProperty('--combo-glitch-duration');
     setComboGlitchOverlay(null);
   }, []);
 
