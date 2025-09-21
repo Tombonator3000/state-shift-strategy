@@ -25,6 +25,7 @@ export interface TabloidNewspaperProps {
   comboTruthDelta?: number;
   onClose: () => void;
   sightings?: ParanormalSighting[];
+  glitchBadge?: boolean;
 }
 
 interface NewspaperData {
@@ -41,7 +42,7 @@ interface Article {
   player?: 'human' | 'ai';
 }
 
-const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: TabloidNewspaperProps) => {
+const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose, glitchBadge = false }: TabloidNewspaperProps) => {
   const [glitching, setGlitching] = useState(false);
   const [masthead, setMasthead] = useState('THE SHEEPLE DAILY');
   const [newspaperData, setNewspaperData] = useState<NewspaperData | null>(null);
@@ -358,6 +359,11 @@ const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }
           
           {/* Main masthead */}
           <div className="bg-red-600 text-white px-6 py-6 text-center relative">
+            {glitchBadge ? (
+              <div className="absolute left-6 top-6 rotate-[-8deg] border-2 border-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.35em] bg-black text-white shadow-lg">
+                BREAKING: SIGNAL ANOMALY
+              </div>
+            ) : null}
             <div className={`text-6xl font-black tracking-wider transform ${
               glitching ? 'text-green-400 animate-bounce' : 'text-white'
             }`} style={{ fontFamily: 'Anton, Impact, sans-serif' }}>

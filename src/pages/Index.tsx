@@ -1771,6 +1771,7 @@ const Index = () => {
           truth={gameState.truth}
           comboTruthDelta={gameState.comboTruthDeltaThisRound}
           sightings={paranormalSightings}
+          glitchBadge={gameState.newspaperGlitchBadge}
           onClose={handleCloseNewspaper}
         />
       )}

@@ -1,4 +1,5 @@
 import { areParanormalEffectsEnabled } from '@/state/settings';
+import { ComboThemeMap, type ComboKind } from '@/data/combos/themes';
 import type { SynergyEffectIdentifier } from '@/utils/synergyEffects';
 import type { ParticleEffectType } from '@/components/effects/ParticleSystem';
 
@@ -24,13 +25,39 @@ const COMBO_MAGNITUDE_THRESHOLDS = {
   mega: 8,
 } as const;
 
+const mulberry32 = (seed: number) => {
+  let t = seed >>> 0;
+  return () => {
+    t += 0x6D2B79F5;
+    let result = Math.imul(t ^ (t >>> 15), 1 | t);
+    result ^= result + Math.imul(result ^ (result >>> 7), 61 | result);
+    return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const resolveSeed = (turnNumber?: number, playerId?: 'human' | 'ai'): number => {
+  const turnComponent = Number.isFinite(turnNumber) ? Math.max(0, Math.floor(turnNumber as number)) : 0;
+  const playerComponent = playerId === 'human' ? 0x9E3779B1 : playerId === 'ai' ? 0x7F4A7C15 : 0x52DCE729;
+  return (turnComponent * 0x85EBCA6B + playerComponent) >>> 0;
+};
+
 interface ComboGlitchPayload {
   combos?: string[];
   magnitude?: number;
   messages?: string[];
-  comboKind?: string;
+  comboKind?: ComboKind;
+  themeId?: string;
   glitchMode?: 'off' | 'minimal' | 'full';
   position?: EffectPosition;
+  ipGain?: number;
+  truthGain?: number;
+  totalReward?: number;
+  uniqueTypes?: number;
+  totalCards?: number;
+  affectedStates?: string[];
+  turnNumber?: number;
+  playerId?: 'human' | 'ai';
+  duckAudio?: boolean;
 }
 
 export async function playComboGlitchIfAny(payload: ComboGlitchPayload): Promise<void> {
@@ -55,15 +82,28 @@ export async function playComboGlitchIfAny(payload: ComboGlitchPayload): Promise
     return;
   }
 
-  const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
-  const computedDuration = prefersReducedMotion
-    ? Math.min(700, Math.max(480, Math.floor(magnitude * 120) + 360))
-    : Math.min(2200, 900 + Math.floor(magnitude * 250));
-  const durationMs = mode === 'minimal' ? 500 : computedDuration;
-
   FXState.__internalSetActive?.(true);
 
   const origin = payload.position ?? VisualEffectsCoordinator.getRandomCenterPosition(160);
+
+  const durationMs = VisualEffectsCoordinator.triggerComboGlitch({
+    position: origin,
+    comboNames,
+    magnitude,
+    fxMessages: payload.messages,
+    comboKind: payload.comboKind,
+    themeId: payload.themeId,
+    mode,
+    ipGain: payload.ipGain,
+    truthGain: payload.truthGain,
+    totalReward: payload.totalReward ?? magnitude,
+    uniqueTypes: payload.uniqueTypes,
+    totalCards: payload.totalCards,
+    affectedStates: payload.affectedStates,
+    turnNumber: payload.turnNumber,
+    playerId: payload.playerId,
+    duckAudio: payload.duckAudio,
+  });
 
   await new Promise<void>(resolve => {
     let settled = false;
@@ -79,30 +119,8 @@ export async function playComboGlitchIfAny(payload: ComboGlitchPayload): Promise
 
     window.addEventListener('comboGlitchComplete', handleComplete as EventListener, { once: true });
 
-    const fallback = window.setTimeout(handleComplete, durationMs + 400);
-
-    const detail = {
-      x: origin.x,
-      y: origin.y,
-      comboNames,
-      comboCount: comboNames.length,
-      intensity: magnitude >= COMBO_MAGNITUDE_THRESHOLDS.mega
-        ? 'mega'
-        : magnitude >= COMBO_MAGNITUDE_THRESHOLDS.major
-          ? 'major'
-          : 'minor',
-      magnitude,
-      reducedMotion: prefersReducedMotion,
-      fxMessages: Array.isArray(payload.messages)
-        ? payload.messages.filter((message): message is string => typeof message === 'string' && message.trim().length > 0)
-        : [],
-      durationMs,
-      comboKind: payload.comboKind,
-      mode,
-    } as const;
-
-    const event = new CustomEvent('comboGlitch', { detail });
-    window.dispatchEvent(event);
+    const fallbackDuration = Number.isFinite(durationMs) && durationMs > 0 ? durationMs : 900;
+    const fallback = window.setTimeout(handleComplete, fallbackDuration + 400);
 
     if (fallback) {
       window.addEventListener('comboGlitchComplete', () => window.clearTimeout(fallback), { once: true });
@@ -116,6 +134,9 @@ export class VisualEffectsCoordinator {
     type: ParticleEffectType,
     position: EffectPosition
   ): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
     window.dispatchEvent(new CustomEvent('cardDeployed', {
       detail: {
         type,
@@ -131,41 +152,69 @@ export class VisualEffectsCoordinator {
     intensity?: 'minor' | 'major' | 'mega';
     magnitude?: number;
     fxMessages?: string[];
-  }): void {
+    comboKind?: ComboKind;
+    themeId?: string;
+    mode?: 'minimal' | 'full' | 'off';
+    ipGain?: number;
+    truthGain?: number;
+    totalReward?: number;
+    uniqueTypes?: number;
+    totalCards?: number;
+    affectedStates?: string[];
+    turnNumber?: number;
+    playerId?: 'human' | 'ai';
+    duckAudio?: boolean;
+  }): number {
     if (typeof window === 'undefined') {
-      return;
+      return 0;
     }
 
-    const comboNames = detail.comboNames ?? [];
+    const comboNames = Array.isArray(detail.comboNames)
+      ? detail.comboNames.map(name => `${name}`.trim()).filter(name => name.length > 0)
+      : [];
     const fxMessages = Array.isArray(detail.fxMessages)
       ? detail.fxMessages
         .filter((message): message is string => typeof message === 'string')
         .map(message => message.trim())
         .filter(message => message.length > 0)
       : [];
-    const magnitude = typeof detail.magnitude === 'number' && !Number.isNaN(detail.magnitude)
+    const rawMagnitude = typeof detail.magnitude === 'number' && !Number.isNaN(detail.magnitude)
       ? Math.max(0, detail.magnitude)
-      : undefined;
-    const resolvedIntensity = detail.intensity
-      ?? (typeof magnitude === 'number'
-        ? magnitude >= COMBO_MAGNITUDE_THRESHOLDS.mega
-          ? 'mega'
-          : magnitude >= COMBO_MAGNITUDE_THRESHOLDS.major
-            ? 'major'
-            : 'minor'
-        : comboNames.length >= 3
-          ? 'mega'
-          : comboNames.length === 2
-            ? 'major'
-            : 'minor');
-
+      : 0;
+    const totalReward = typeof detail.totalReward === 'number' && !Number.isNaN(detail.totalReward)
+      ? Math.max(0, detail.totalReward)
+      : rawMagnitude;
+    const uniqueTypes = typeof detail.uniqueTypes === 'number' && Number.isFinite(detail.uniqueTypes)
+      ? Math.max(0, Math.floor(detail.uniqueTypes))
+      : 0;
+    const baseIntensity = detail.intensity
+      ?? ((uniqueTypes >= 3 || totalReward >= 6)
+        ? 'mega'
+        : totalReward >= 3
+          ? 'major'
+          : 'minor');
     const reducedMotion = typeof window.matchMedia === 'function'
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const seed = resolveSeed(detail.turnNumber, detail.playerId);
+    const rng = mulberry32(seed);
+    const mode = detail.mode ?? 'full';
 
-    if (!reducedMotion) {
-      const bursts = resolvedIntensity === 'mega'
+    let durationMs = mode === 'minimal'
+      ? 600
+      : baseIntensity === 'mega'
+        ? Math.round(1800 + rng() * 400)
+        : baseIntensity === 'major'
+          ? Math.round(1300 + rng() * 300)
+          : Math.round(900 + rng() * 300);
+
+    if (reducedMotion) {
+      durationMs = Math.min(durationMs, 900);
+    }
+
+    if (!reducedMotion && mode !== 'minimal') {
+      const bursts = baseIntensity === 'mega'
         ? 3
-        : resolvedIntensity === 'major'
+        : baseIntensity === 'major'
           ? 2
           : 1;
 
@@ -181,18 +230,45 @@ export class VisualEffectsCoordinator {
       }
     }
 
+    const totalCards = typeof detail.totalCards === 'number' && Number.isFinite(detail.totalCards)
+      ? Math.max(0, Math.floor(detail.totalCards))
+      : comboNames.length;
+    const affectedStates = Array.isArray(detail.affectedStates)
+      ? detail.affectedStates.filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+      : [];
+
+    let resolvedThemeId = detail.themeId;
+    if (!resolvedThemeId && detail.comboKind) {
+      resolvedThemeId = ComboThemeMap[detail.comboKind]?.id;
+    }
+
     window.dispatchEvent(new CustomEvent('comboGlitch', {
       detail: {
         x: detail.position.x,
         y: detail.position.y,
         comboNames,
         comboCount: comboNames.length,
-        intensity: resolvedIntensity,
-        magnitude: magnitude ?? 0,
+        intensity: baseIntensity,
+        magnitude: rawMagnitude,
         reducedMotion,
         fxMessages,
+        messages: fxMessages,
+        durationMs,
+        comboKind: detail.comboKind,
+        mode,
+        themeId: resolvedThemeId,
+        ipGain: detail.ipGain ?? 0,
+        truthGain: detail.truthGain ?? 0,
+        totalReward,
+        uniqueTypes,
+        totalCards,
+        affectedStates,
+        seed,
+        duckAudio: detail.duckAudio ?? false,
       }
     }));
+
+    return durationMs;
   }
 
   // Trigger full-screen government redaction sweep

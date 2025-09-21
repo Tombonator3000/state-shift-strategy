@@ -701,7 +701,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
 
             <div className="mt-4 grid gap-2 sm:grid-cols-[auto,1fr] sm:items-center">
               <label className="text-sm font-medium text-newspaper-text" htmlFor="combo-glitch-mode">
-                Show combo glitches
+                Combo Glitches
               </label>
               <select
                 id="combo-glitch-mode"
@@ -710,10 +710,19 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 className="w-full rounded border border-newspaper-text bg-newspaper-bg p-2 text-newspaper-text"
                 disabled={!comboSettingsState.enabled || !comboSettingsState.fxEnabled}
               >
-                <option value="full">Full</option>
-                <option value="minimal">Minimal</option>
                 <option value="off">Off</option>
+                <option value="minimal">Minimal</option>
+                <option value="full">Full</option>
               </select>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <span className="text-sm font-medium text-newspaper-text">SFX Ducking During Glitch</span>
+              <Switch
+                checked={comboSettingsState.glitchDucking !== false}
+                onCheckedChange={checked => applyComboSettings({ glitchDucking: checked })}
+                disabled={!comboSettingsState.enabled || !comboSettingsState.fxEnabled}
+              />
             </div>
 
             <div className="mt-4">

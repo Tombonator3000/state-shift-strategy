@@ -261,6 +261,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     currentEvents: [],
     eventManager,
     showNewspaper: false,
+    newspaperGlitchBadge: false,
     log: [
       'Game started - Truth Seekers faction selected',
       'Starting Truth: 50%',
@@ -354,6 +355,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       aiTurnInProgress: false,
       selectedCard: null,
       targetState: null,
+      newspaperGlitchBadge: false,
       states: USA_STATES.map(state => {
         let owner: 'player' | 'ai' | 'neutral' = 'neutral';
 
@@ -575,12 +577,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   }, []);
 
   const endTurn = useCallback(async () => {
-    let glitchPayload: {
-      combos: string[];
-      magnitude: number;
-      messages: string[];
-      glitchMode?: 'off' | 'minimal' | 'full';
-    } | null = null;
+    let glitchPayload: Parameters<typeof playComboGlitchIfAny>[0] | null = null;
+    let shouldFlagGlitchBadge = false;
     let shouldShowNewspaper = false;
 
     setGameState(prev => {
@@ -621,11 +619,25 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         );
 
         const magnitude = Math.max(rewardStats.total, rewardStats.peak);
+        shouldFlagGlitchBadge = comboResult.comboKinds.some(kind =>
+          kind === 'TIMELINE_FRAGMENT' || kind === 'MEGA_SPREAD',
+        );
         glitchPayload = {
           combos: comboNames,
           magnitude,
           messages: comboResult.fxMessages,
           glitchMode: comboSettings.glitchMode,
+          comboKind: comboResult.primaryComboKind,
+          themeId: comboResult.comboThemeId,
+          ipGain: comboResult.rewardSummary.ipGain,
+          truthGain: comboResult.rewardSummary.truthGain,
+          totalReward: comboResult.rewardSummary.totalMagnitude,
+          uniqueTypes: comboResult.uniqueCardTypes,
+          totalCards: comboResult.totalCardsInvolved,
+          affectedStates: comboResult.affectedStateIds,
+          turnNumber: prev.turn,
+          playerId: isHumanTurn ? 'human' : 'ai',
+          duckAudio: comboSettings.glitchDucking !== false,
         };
       }
 
@@ -695,6 +707,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           phase: 'ai_turn',
           currentPlayer: 'ai',
           showNewspaper: false,
+          newspaperGlitchBadge: prev.newspaperGlitchBadge || shouldFlagGlitchBadge,
           cardsPlayedThisTurn: 0,
           truth: truthAfterCombos,
           ip: humanIpAfterCombos + totalIncome + ipModifier,
@@ -725,6 +738,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         phase: 'newspaper',
         currentPlayer: 'human',
         showNewspaper: false,
+        newspaperGlitchBadge: prev.newspaperGlitchBadge || shouldFlagGlitchBadge,
         truth: comboResult.updatedTruth,
         ip: comboResult.updatedOpponentIp,
         aiIP: comboResult.updatedPlayerIp,
@@ -933,6 +947,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         hand: newHand,
         deck: remainingDeck,
         showNewspaper: false,
+        newspaperGlitchBadge: false,
         cardsPlayedThisRound: [],
         comboTruthDeltaThisRound: 0,
         phase: 'action',
