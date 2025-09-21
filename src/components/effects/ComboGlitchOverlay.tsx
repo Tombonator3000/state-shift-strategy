@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 interface ComboGlitchOverlayProps {
   x: number;
@@ -6,12 +6,41 @@ interface ComboGlitchOverlayProps {
   comboNames: string[];
   intensity: 'minor' | 'major' | 'mega';
   magnitude?: number;
+  fxMessages?: string[];
   reducedMotion?: boolean;
   onComplete: () => void;
   duration?: number;
 }
 
 type ComboIntensity = ComboGlitchOverlayProps['intensity'];
+
+const INTENSITY_TAGLINES: Record<ComboIntensity, readonly string[]> = {
+  minor: [
+    'Signal Drift Detected',
+    'Channel Disruption',
+    'Minor Data Echo',
+    'Low-Level Frequency Warp',
+  ],
+  major: [
+    'Timeline Fragmentation',
+    'Spectral Cascade Event',
+    'Channel 7 Break-In',
+    'Major Reality Skew',
+  ],
+  mega: [
+    'Catastrophic Anomaly Surge',
+    'Full Spectrum Overwrite',
+    'Reality Anchor Offline',
+    'Prime Timeline Collapse',
+  ],
+};
+
+const FALLBACK_TAGLINES: readonly string[] = [
+  'Combo Glitch Detected',
+  'Unauthorized Broadcast',
+  'Broadcast Integrity Failure',
+  'Signal Chain Reaction',
+];
 
 const INTENSITY_PRESETS: Record<ComboIntensity, {
   size: number;
@@ -79,12 +108,21 @@ const INTENSITY_PRESETS: Record<ComboIntensity, {
   }
 };
 
+const pickRandom = <T,>(list: readonly T[]): T | undefined => {
+  if (!Array.isArray(list) || list.length === 0) {
+    return undefined;
+  }
+  const index = Math.floor(Math.random() * list.length);
+  return list[index];
+};
+
 const ComboGlitchOverlay: React.FC<ComboGlitchOverlayProps> = ({
   x,
   y,
   comboNames,
   intensity,
   magnitude,
+  fxMessages = [],
   reducedMotion = false,
   onComplete,
   duration
@@ -110,6 +148,47 @@ const ComboGlitchOverlay: React.FC<ComboGlitchOverlayProps> = ({
   const accentLabel = formattedMagnitude
     ? `${preset.rewardPrefix} +${formattedMagnitude}`
     : preset.accentFallback;
+
+  const sanitizedFxMessages = useMemo(
+    () => fxMessages.map(message => message.trim()).filter(message => message.length > 0),
+    [fxMessages]
+  );
+
+  const glitchTagline = useMemo(() => {
+    const intensityPool = INTENSITY_TAGLINES[intensity];
+    const comboHighlight = pickRandom(comboNames);
+    const baseTagline = pickRandom([...(intensityPool ?? []), ...FALLBACK_TAGLINES])
+      ?? FALLBACK_TAGLINES[0];
+
+    return comboHighlight
+      ? `${baseTagline} // ${comboHighlight.toUpperCase()}`
+      : baseTagline;
+  }, [comboNames, intensity]);
+
+  const rewardCallout = useMemo(() => {
+    const source = sanitizedFxMessages.length > 0 ? sanitizedFxMessages : [accentLabel];
+    const selected = pickRandom(source) ?? accentLabel;
+    return selected.toUpperCase();
+  }, [accentLabel, sanitizedFxMessages]);
+
+  const taglineAnimationClass = reducedMotion ? '' : 'combo-glitch-text-scramble';
+  const calloutAnimationClass = reducedMotion ? '' : 'combo-glitch-text-scanline';
+  const taglineClasses = [
+    'text-[0.55rem]',
+    'font-semibold',
+    'uppercase',
+    'tracking-[0.6em]',
+    preset.labelClass,
+    taglineAnimationClass,
+  ].filter(Boolean).join(' ');
+  const calloutClasses = [
+    'text-[0.68rem]',
+    'font-bold',
+    'uppercase',
+    'tracking-[0.48em]',
+    preset.accentClass,
+    calloutAnimationClass,
+  ].filter(Boolean).join(' ');
 
   return (
     <div
@@ -144,11 +223,18 @@ const ComboGlitchOverlay: React.FC<ComboGlitchOverlayProps> = ({
         </>
       )}
 
-      <div className={`absolute inset-x-4 bottom-6 text-center text-xs font-mono uppercase tracking-[0.32em] ${preset.labelClass}`}>
-        {label}
-      </div>
-      <div className={`absolute inset-x-6 top-6 text-center text-[0.65rem] font-semibold uppercase tracking-[0.48em] ${preset.accentClass}`}>
-        {accentLabel}
+      <div className="absolute inset-0 flex flex-col items-center justify-between px-6 py-6 text-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className={taglineClasses}>
+            {glitchTagline}
+          </div>
+          <div className={calloutClasses}>
+            {rewardCallout}
+          </div>
+        </div>
+        <div className={`text-xs font-mono uppercase tracking-[0.32em] ${preset.labelClass}`}>
+          {label}
+        </div>
       </div>
     </div>
   );

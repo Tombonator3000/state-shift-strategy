@@ -618,6 +618,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           position: effectPosition,
           comboNames,
           magnitude,
+          fxMessages: comboResult.fxMessages,
         });
       }
 

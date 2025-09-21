@@ -35,12 +35,19 @@ export class VisualEffectsCoordinator {
     comboNames: string[];
     intensity?: 'minor' | 'major' | 'mega';
     magnitude?: number;
+    fxMessages?: string[];
   }): void {
     if (typeof window === 'undefined') {
       return;
     }
 
     const comboNames = detail.comboNames ?? [];
+    const fxMessages = Array.isArray(detail.fxMessages)
+      ? detail.fxMessages
+        .filter((message): message is string => typeof message === 'string')
+        .map(message => message.trim())
+        .filter(message => message.length > 0)
+      : [];
     const magnitude = typeof detail.magnitude === 'number' && !Number.isNaN(detail.magnitude)
       ? Math.max(0, detail.magnitude)
       : undefined;
@@ -88,6 +95,7 @@ export class VisualEffectsCoordinator {
         intensity: resolvedIntensity,
         magnitude: magnitude ?? 0,
         reducedMotion,
+        fxMessages,
       }
     }));
   }
