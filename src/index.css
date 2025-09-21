@@ -959,6 +959,8 @@ All colors MUST be HSL.
   position: absolute;
   inset: 0;
   pointer-events: none;
+  transform-origin: top left;
+  transform: scale(var(--card-scale, 1));
 }
 
 /* Polaroid frame */
