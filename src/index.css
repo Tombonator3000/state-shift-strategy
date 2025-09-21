@@ -3050,3 +3050,19 @@ html, body, #root {
   0%, 100% { opacity: 0.8; }
   50% { opacity: 1; }
 }
+
+@layer components {
+  .game-toast-container {
+    @apply pointer-events-none pr-6 pb-6;
+    padding-right: calc(env(safe-area-inset-right) + 1.5rem);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
+  }
+
+  .game-toast-container > * {
+    @apply pointer-events-auto;
+  }
+
+  .game-toast {
+    @apply pointer-events-auto max-w-xs border border-slate-700 bg-slate-900/95 font-mono text-sm leading-snug text-slate-100 shadow-2xl;
+  }
+}
