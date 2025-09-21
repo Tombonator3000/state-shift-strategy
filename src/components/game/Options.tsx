@@ -100,6 +100,7 @@ interface GameSettings {
   drawMode: 'standard' | 'classic' | 'momentum' | 'catchup' | 'fast';
   uiTheme: 'tabloid_bw' | 'government_classic';
   paranormalEffectsEnabled: boolean;
+  uiNotificationsEnabled: boolean;
 }
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
@@ -131,6 +132,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       drawMode: 'standard',
       uiTheme,
       paranormalEffectsEnabled: false,
+      uiNotificationsEnabled: false,
     };
 
     const stored = typeof localStorage !== 'undefined'
@@ -243,10 +245,18 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
         setDifficultyFromLabel(newSettings.difficulty);
       }
       persistSettings(updated, comboSettingsState);
-      if (typeof window !== 'undefined' && prev.paranormalEffectsEnabled !== updated.paranormalEffectsEnabled) {
-        window.dispatchEvent(new CustomEvent('shadowgov:paranormal-effects-toggled', {
-          detail: { enabled: updated.paranormalEffectsEnabled }
-        }));
+      if (typeof window !== 'undefined') {
+        if (prev.paranormalEffectsEnabled !== updated.paranormalEffectsEnabled) {
+          window.dispatchEvent(new CustomEvent('shadowgov:paranormal-effects-toggled', {
+            detail: { enabled: updated.paranormalEffectsEnabled }
+          }));
+        }
+
+        if (prev.uiNotificationsEnabled !== updated.uiNotificationsEnabled) {
+          window.dispatchEvent(new CustomEvent('shadowgov:ui-notifications-toggled', {
+            detail: { enabled: updated.uiNotificationsEnabled }
+          }));
+        }
       }
       return updated;
     });
@@ -308,6 +318,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       drawMode: 'standard',
       uiTheme: 'tabloid_bw',
       paranormalEffectsEnabled: false,
+      uiNotificationsEnabled: false,
     };
 
     const defaultCombos = setComboSettings({
@@ -324,6 +335,16 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     audio.setVolume(defaultSettings.masterVolume / 100);
     audio.setMusicVolume(defaultSettings.musicVolume / 100);
     audio.setSfxVolume(defaultSettings.sfxVolume / 100);
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('shadowgov:paranormal-effects-toggled', {
+        detail: { enabled: defaultSettings.paranormalEffectsEnabled }
+      }));
+
+      window.dispatchEvent(new CustomEvent('shadowgov:ui-notifications-toggled', {
+        detail: { enabled: defaultSettings.uiNotificationsEnabled }
+      }));
+    }
   };
 
   const handleSaveGame = () => {
@@ -573,6 +594,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <Switch
                   checked={settings.paranormalEffectsEnabled}
                   onCheckedChange={checked => updateSettings({ paranormalEffectsEnabled: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-newspaper-text">UI Overlays &amp; Toast Notifications</label>
+                <Switch
+                  checked={settings.uiNotificationsEnabled}
+                  onCheckedChange={checked => updateSettings({ uiNotificationsEnabled: checked })}
                 />
               </div>
 

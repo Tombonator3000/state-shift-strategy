@@ -42,7 +42,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import type { CardPlayRecord } from '@/hooks/gameStateTypes';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
-import { areParanormalEffectsEnabled } from '@/state/settings';
+import { areParanormalEffectsEnabled, areUiNotificationsEnabled } from '@/state/settings';
 import type { GameCard } from '@/rules/mvp';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
@@ -451,6 +451,7 @@ const Index = () => {
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [uiNotificationsEnabled, setUiNotificationsEnabled] = useState(() => areUiNotificationsEnabled());
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
   const audio = useAudioContext();
@@ -472,6 +473,35 @@ const Index = () => {
       executeAITurn();
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const handleToggle = (event: Event) => {
+      const detail = (event as CustomEvent<{ enabled?: boolean }>).detail;
+      if (detail && typeof detail.enabled === 'boolean') {
+        setUiNotificationsEnabled(detail.enabled);
+      } else {
+        setUiNotificationsEnabled(areUiNotificationsEnabled());
+      }
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'gameSettings') {
+        setUiNotificationsEnabled(areUiNotificationsEnabled());
+      }
+    };
+
+    window.addEventListener('shadowgov:ui-notifications-toggled', handleToggle);
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener('shadowgov:ui-notifications-toggled', handleToggle);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
 
   // Track IP changes for floating numbers
   useEffect(() => {
@@ -601,10 +631,12 @@ const Index = () => {
           audio?.playSFX?.('state-capture');
 
           // Toast notification for synergy activation
-          toast.success(`🔗 Synergy Activated: ${combo.name} (+${combo.bonusIP} IP)`, {
-            duration: 3000,
-            position: 'top-center'
-          });
+          if (uiNotificationsEnabled) {
+            toast.success(`🔗 Synergy Activated: ${combo.name} (+${combo.bonusIP} IP)`, {
+              duration: 3000,
+              position: 'top-center'
+            });
+          }
         },
         (type, x, y) => {
           // Particle effect callback
@@ -625,7 +657,7 @@ const Index = () => {
         console.log('💰 Total bonus IP:', getTotalBonusIP());
       }
     }
-  }, [gameState.controlledStates, checkSynergies, getActiveCombinations, getTotalBonusIP, audio]);
+  }, [gameState.controlledStates, checkSynergies, getActiveCombinations, getTotalBonusIP, audio, uiNotificationsEnabled]);
 
   useEffect(() => {
     const pickTemplate = (templates: string[]): string => {
@@ -837,31 +869,41 @@ const Index = () => {
   const toggleFullscreen = useCallback(async () => {
     try {
       if (!document.fullscreenEnabled) {
-        toast.error('Fullskjerm støttes ikke i denne nettleseren');
+        if (uiNotificationsEnabled) {
+          toast.error('Fullskjerm støttes ikke i denne nettleseren');
+        }
         audio.playSFX('click');
         return;
       }
-      
+
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
         setIsFullscreen(true);
-        toast.success('Fullskjerm aktivert!');
+        if (uiNotificationsEnabled) {
+          toast.success('Fullskjerm aktivert!');
+        }
       } else {
         await document.exitFullscreen();
         setIsFullscreen(false);
-        toast.success('Fullskjerm deaktivert');
+        if (uiNotificationsEnabled) {
+          toast.success('Fullskjerm deaktivert');
+        }
       }
       audio.playSFX('click');
     } catch (error) {
       console.error('Fullscreen error:', error);
       if (error.name === 'NotAllowedError') {
-        toast.error('Fullskjerm ble blokkert av nettleseren. Prøv F11 eller tillat fullskjerm i nettleserinnstillingene.');
+        if (uiNotificationsEnabled) {
+          toast.error('Fullskjerm ble blokkert av nettleseren. Prøv F11 eller tillat fullskjerm i nettleserinnstillingene.');
+        }
       } else {
-        toast.error('Kunne ikke bytte fullskjerm-modus');
+        if (uiNotificationsEnabled) {
+          toast.error('Kunne ikke bytte fullskjerm-modus');
+        }
       }
       audio.playSFX('click');
     }
-  }, [audio]);
+  }, [audio, uiNotificationsEnabled]);
 
   // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
@@ -949,11 +991,15 @@ const Index = () => {
       if (document.fullscreenEnabled && !document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
         setIsFullscreen(true);
-        toast.success('Fullskjerm aktivert!');
+        if (uiNotificationsEnabled) {
+          toast.success('Fullskjerm aktivert!');
+        }
       }
     } catch (error) {
       console.log('Fullscreen auto-entry failed:', error);
-      toast.error('Kunne ikke aktivere fullskjerm automatisk');
+      if (uiNotificationsEnabled) {
+        toast.error('Kunne ikke aktivere fullskjerm automatisk');
+      }
     }
   };
 
@@ -973,20 +1019,24 @@ const Index = () => {
         
         // Validate target - cannot target own states with zone cards
         if (targetState?.owner === 'player') {
-          toast.error('🚫 Cannot target your own states with zone cards!', {
-            duration: 3000,
-            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
-          });
+          if (uiNotificationsEnabled) {
+            toast.error('🚫 Cannot target your own states with zone cards!', {
+              duration: 3000,
+              style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+            });
+          }
           audio.playSFX('error');
           return;
         }
-        
+
         selectTargetState(stateId); // keep state in store for logs/UX
         audio.playSFX('click');
-        toast.success(`🎯 Targeting ${targetState?.name}! Deploying zone card...`, {
-          duration: 2000,
-          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
-        });
+        if (uiNotificationsEnabled) {
+          toast.success(`🎯 Targeting ${targetState?.name}! Deploying zone card...`, {
+            duration: 2000,
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+          });
+        }
         
         // Play immediately with explicit target (no extra clicks)
         setLoadingCard(gameState.selectedCard);
@@ -1012,20 +1062,24 @@ const Index = () => {
 
     // Check if player can afford the card
     if (gameState.ip < card.cost) {
-      toast.error(`💰 Insufficient IP! Need ${card.cost}, have ${gameState.ip}`, {
-        duration: 3000,
-        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
-      });
+      if (uiNotificationsEnabled) {
+        toast.error(`💰 Insufficient IP! Need ${card.cost}, have ${gameState.ip}`, {
+          duration: 3000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+        });
+      }
       audio.playSFX('error');
       return;
     }
 
     // Check if max cards played this turn
     if (gameState.cardsPlayedThisTurn >= 3) {
-      toast.error('📋 Maximum 3 cards per turn!', {
-        duration: 3000,
-        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
-      });
+      if (uiNotificationsEnabled) {
+        toast.error('📋 Maximum 3 cards per turn!', {
+          duration: 3000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+        });
+      }
       audio.playSFX('error');
       return;
     }
@@ -1034,10 +1088,12 @@ const Index = () => {
     if (card.type === 'ZONE' && !gameState.targetState && !targetStateArg) {
       selectCard(cardId);
       audio.playSFX('hover');
-      toast('🎯 Zone card selected - click a state to target it!', {
-        duration: 4000,
-        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
-      });
+      if (uiNotificationsEnabled) {
+        toast('🎯 Zone card selected - click a state to target it!', {
+          duration: 4000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
+        });
+      }
 
       if (card.faction === 'government') {
         const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
@@ -1096,10 +1152,12 @@ const Index = () => {
           selectCard(cardId);
         }
         audio.playSFX('error');
-        toast('🎯 Select a valid state target before deploying this zone card!', {
-          duration: 4000,
-          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
-        });
+        if (uiNotificationsEnabled) {
+          toast('🎯 Select a valid state target before deploying this zone card!', {
+            duration: 4000,
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
+          });
+        }
         return;
       }
 
@@ -1159,15 +1217,19 @@ const Index = () => {
         audio.playSFX('flash');
       }
 
-      toast.success(`✅ ${card.name} deployed successfully!`, {
-        duration: 2000,
-        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
-      });
+      if (uiNotificationsEnabled) {
+        toast.success(`✅ ${card.name} deployed successfully!`, {
+          duration: 2000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+        });
+      }
     } catch (error) {
-      toast.error('❌ Card deployment failed!', {
-        duration: 3000,
-        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
-      });
+      if (uiNotificationsEnabled) {
+        toast.error('❌ Card deployment failed!', {
+          duration: 3000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+        });
+      }
       audio.playSFX('error');
     } finally {
       setLoadingCard(null);
@@ -1594,18 +1656,20 @@ const Index = () => {
         rightPane={rightPaneContent}
       />
 
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#1f2937',
-            color: '#f3f4f6',
-            border: '1px solid #374151',
-            fontFamily: 'monospace'
-          }
-        }}
-      />
+      {uiNotificationsEnabled && (
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#1f2937',
+              color: '#f3f4f6',
+              border: '1px solid #374151',
+              fontFamily: 'monospace'
+            }
+          }}
+        />
+      )}
 
       <CardAnimationLayer />
 
@@ -1670,10 +1734,12 @@ const Index = () => {
         playerIP={gameState.ip}
         controlledStates={gameState.controlledStates.length}
         onSuggestMove={(suggestion) => {
-          toast(suggestion, {
-            duration: 4000,
-            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
-          });
+          if (uiNotificationsEnabled) {
+            toast(suggestion, {
+              duration: 4000,
+              style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+            });
+          }
         }}
       />
 

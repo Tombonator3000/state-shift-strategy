@@ -1,4 +1,5 @@
 import React from "react";
+import { areUiNotificationsEnabled } from "@/state/settings";
 
 type AnyCard = {
   id: string;
@@ -38,6 +39,10 @@ export default function UiOverlays() {
 
   const addToast = React.useCallback(
     (slot: Toast["slot"], text: string, duration = DEFAULT_TOAST_LIFETIME) => {
+      if (!areUiNotificationsEnabled()) {
+        return;
+      }
+
       const id = Date.now() + Math.random();
       setToasts((prev) => {
         const slotCount = prev.reduce(
@@ -91,6 +96,10 @@ export default function UiOverlays() {
       formatter: (delta: number) => string,
       duration = DEFAULT_TOAST_LIFETIME,
     ) => {
+      if (!areUiNotificationsEnabled()) {
+        return;
+      }
+
       if (!delta) {
         return;
       }
@@ -110,7 +119,14 @@ export default function UiOverlays() {
   );
 
   React.useEffect(() => {
+    if (!areUiNotificationsEnabled()) {
+      return;
+    }
+
     window.uiShowOpponentCard = (card: AnyCard) => {
+      if (!areUiNotificationsEnabled()) {
+        return;
+      }
       try {
         if (revealTimer.current) {
           window.clearTimeout(revealTimer.current);
@@ -123,6 +139,9 @@ export default function UiOverlays() {
     };
 
     window.uiToastTruth = (delta: number) => {
+      if (!areUiNotificationsEnabled()) {
+        return;
+      }
       queueDeltaToast(
         "truth",
         "truth",
@@ -133,6 +152,9 @@ export default function UiOverlays() {
     };
 
     window.uiToastIp = (playerId: "P1" | "P2", delta: number) => {
+      if (!areUiNotificationsEnabled()) {
+        return;
+      }
       const slot = playerId === "P1" ? "ip-left" : "ip-right";
       queueDeltaToast(
         `ip-${playerId}`,
@@ -144,10 +166,16 @@ export default function UiOverlays() {
     };
 
     window.uiComboToast = (message: string) => {
+      if (!areUiNotificationsEnabled()) {
+        return;
+      }
       addToast("combo", message, COMBO_TOAST_LIFETIME);
     };
 
     window.uiFlashState = (stateId: string, by: "P1" | "P2") => {
+      if (!areUiNotificationsEnabled()) {
+        return;
+      }
       const el =
         document.querySelector(`[data-state-id="${stateId}"]`) ||
         document.querySelector(`[data-state="${stateId}"]`) ||
