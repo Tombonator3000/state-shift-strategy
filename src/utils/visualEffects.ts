@@ -1,4 +1,5 @@
 import { areParanormalEffectsEnabled } from '@/state/settings';
+import type { SynergyEffectIdentifier } from '@/utils/synergyEffects';
 
 // Visual Effects Integration Utilities
 // Centralized system for triggering coordinated visual effects
@@ -47,7 +48,7 @@ export class VisualEffectsCoordinator {
   static triggerSynergyActivation(
     bonusIP: number,
     position: EffectPosition,
-    effectType: 'synergy' | 'bigwin' | 'chain' = 'synergy',
+    effectType: ('synergy' | 'bigwin' | 'chain' | SynergyEffectIdentifier) = 'synergy',
     comboName?: string
   ): void {
     window.dispatchEvent(new CustomEvent('synergyActivation', {
@@ -65,7 +66,7 @@ export class VisualEffectsCoordinator {
   // Trigger floating number display
   static showFloatingNumber(
     value: number,
-    type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain',
+    type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain' | SynergyEffectIdentifier,
     position: EffectPosition
   ): void {
     window.dispatchEvent(new CustomEvent('showFloatingNumber', {
