@@ -13,6 +13,13 @@ import StaticInterference from '@/components/effects/StaticInterference';
 import EvidencePhotoGallery from '@/components/effects/EvidencePhotoGallery';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { areParanormalEffectsEnabled } from '@/state/settings';
+import {
+  isSynergyEffectIdentifier,
+  resolveParticleEffectType,
+  type SynergyEffectIdentifier
+} from '@/utils/synergyEffects';
+
+type FloatingNumberType = 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain' | SynergyEffectIdentifier;
 
 interface CardAnimationLayerProps {
   children?: React.ReactNode;
@@ -29,7 +36,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
 
   const [floatingNumber, setFloatingNumber] = useState<{
     value: number;
-    type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain';
+    type: FloatingNumberType;
     x?: number;
     y?: number;
   } | null>(null);
@@ -146,11 +153,15 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       spawnParticleEffect('stateloss', event.detail.x, event.detail.y);
     };
 
-    const handleSynergyActivation = (event: CustomEvent<{ bonusIP: number; numberType?: 'synergy' | 'combo' | 'chain'; effectType?: ParticleEffectType; x: number; y: number; comboName?: string }>) => {
+    const handleSynergyActivation = (event: CustomEvent<{ bonusIP: number; numberType?: FloatingNumberType; effectType?: string; x: number; y: number; comboName?: string }>) => {
       if (!event?.detail) return;
-      const effectType = event.detail.effectType || 'synergy';
-      const numberType = event.detail.numberType ?? 'synergy';
-      spawnParticleEffect(effectType, event.detail.x, event.detail.y);
+      const rawEffectType = event.detail.effectType ?? event.detail.numberType ?? 'synergy';
+      const particleType = resolveParticleEffectType(rawEffectType, 'synergy');
+      const numberType: FloatingNumberType = isSynergyEffectIdentifier(rawEffectType)
+        ? rawEffectType
+        : event.detail.numberType ?? 'synergy';
+
+      spawnParticleEffect(particleType, event.detail.x, event.detail.y);
 
       // Also show floating number for synergy bonus
       setFloatingNumber({
@@ -358,7 +369,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       audio?.playSFX?.('cardPlay');
     };
 
-    const handleFloatingNumber = (event: CustomEvent<{ value: number; type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain'; x: number; y: number }>) => {
+    const handleFloatingNumber = (event: CustomEvent<{ value: number; type: FloatingNumberType; x: number; y: number }>) => {
       if (!event?.detail) return;
       setFloatingNumber({
         value: event.detail.value,

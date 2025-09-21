@@ -33,6 +33,10 @@ import { getRandomAgenda } from '@/data/agendaDatabase';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
+import {
+  getSynergyEffectIdentifier,
+  resolveParticleEffectType
+} from '@/utils/synergyEffects';
 import ExtraEditionNewspaper from '@/components/game/ExtraEditionNewspaper';
 import InGameOptions from '@/components/game/InGameOptions';
 import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
@@ -48,6 +52,7 @@ import type { GameCard } from '@/rules/mvp';
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
 type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
+
 
 interface MVPReport {
   cardId: string;
@@ -619,10 +624,11 @@ const Index = () => {
           console.log(`🔗 New synergy activated: ${combo.name} (+${combo.bonusIP} IP)`);
 
           if (position) {
+            const effectIdentifier = getSynergyEffectIdentifier(combo.category);
             VisualEffectsCoordinator.triggerSynergyActivation(
               combo.bonusIP,
               position,
-              'synergy',
+              effectIdentifier,
               combo.name
             );
           }
@@ -640,12 +646,13 @@ const Index = () => {
         },
         (type, x, y) => {
           // Particle effect callback
-          VisualEffectsCoordinator.triggerParticleEffect(type as any, { x, y });
+          const resolvedType = resolveParticleEffectType(type);
+          VisualEffectsCoordinator.triggerParticleEffect(resolvedType, { x, y });
         },
         (value, type, x, y) => {
           // Floating number callback
           if (x && y) {
-            VisualEffectsCoordinator.showFloatingNumber(value, type as any, { x, y });
+            VisualEffectsCoordinator.showFloatingNumber(value, type, { x, y });
           }
         }
       );

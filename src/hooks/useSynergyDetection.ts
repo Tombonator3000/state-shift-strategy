@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 import { StateCombinationManager, StateCombination } from '@/data/stateCombinations';
+import { getSynergyEffectIdentifier } from '@/utils/synergyEffects';
 import { useScreenShake } from '@/components/effects/ScreenShake';
 import { useHapticFeedback } from './useHapticFeedback';
 
@@ -26,6 +27,9 @@ export const useSynergyDetection = () => {
         const delay = index * 200; // Stagger multiple combo activations
         
         setTimeout(() => {
+          const effectIdentifier = getSynergyEffectIdentifier(combo.category);
+          const effectType = effectIdentifier ?? 'synergy';
+
           // Screen shake based on combo value
           if (combo.bonusIP >= 5) {
             shake({ intensity, duration: 400 });
@@ -39,11 +43,11 @@ export const useSynergyDetection = () => {
           const centerX = window.innerWidth / 2 + (Math.random() - 0.5) * 200;
           const centerY = window.innerHeight / 2 + (Math.random() - 0.5) * 100;
           
-          // Trigger particle effects
-          onParticleEffect?.('synergy', centerX, centerY);
-          
-          // Show floating number for bonus IP
-          onFloatingNumber?.(combo.bonusIP, 'synergy', centerX, centerY - 50);
+          // Trigger particle effects using category-specific identifier
+          onParticleEffect?.(effectType, centerX, centerY);
+
+          // Show floating number for bonus IP with themed styling
+          onFloatingNumber?.(combo.bonusIP, effectType, centerX, centerY - 50);
           
           // Notify parent component
           onSynergyActivated?.(combo, { x: centerX, y: centerY });
