@@ -732,10 +732,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const comboLog =
         comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
 
-      const nextState = {
+      const nextState: GameState = {
         ...prev,
         round: prev.round + 1,
-        phase: 'newspaper',
+        phase: 'newspaper' as const,
         currentPlayer: 'human',
         showNewspaper: false,
         newspaperGlitchBadge: prev.newspaperGlitchBadge || shouldFlagGlitchBadge,
@@ -1111,7 +1111,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         round: normalizedRound,
         phase: migrated.phase,
         truth: migrated.truth,
-        timestamp: migrated.timestamp,
         exists: true
       };
     } catch {

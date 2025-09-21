@@ -652,7 +652,7 @@ const Index = () => {
         (value, type, x, y) => {
           // Floating number callback
           if (x && y) {
-            VisualEffectsCoordinator.showFloatingNumber(value, type, { x, y });
+            VisualEffectsCoordinator.showFloatingNumber(value, type as 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain', { x, y });
           }
         }
       );
