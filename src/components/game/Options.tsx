@@ -130,7 +130,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       confirmActions: true,
       drawMode: 'standard',
       uiTheme,
-      paranormalEffectsEnabled: true,
+      paranormalEffectsEnabled: false,
     };
 
     const stored = typeof localStorage !== 'undefined'
@@ -302,7 +302,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       confirmActions: true,
       drawMode: 'standard',
       uiTheme: 'tabloid_bw',
-      paranormalEffectsEnabled: true,
+      paranormalEffectsEnabled: false,
     };
 
     const defaultCombos = setComboSettings({

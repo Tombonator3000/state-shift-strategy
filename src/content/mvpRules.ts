@@ -54,8 +54,9 @@ export const MVP_RULES_SECTIONS: MvpRulesSection[] = [
     title: 'Setup',
     bullets: [
       'Each player draws 5 cards after shuffling their deck.',
-      'Set national Truth to 50% and both Influence Point tracks to 0.',
+      'Set national Truth to 50% and give both factions 5 starting IP.',
       'Every state begins with 0 Pressure for both factions.',
+      'Paranormal overlays & sightings are disabled by default—enable them from Options if desired.',
     ],
   },
   {

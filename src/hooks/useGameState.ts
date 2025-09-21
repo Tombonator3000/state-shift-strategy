@@ -47,7 +47,7 @@ const sanitizeCardDrawState = (value: Partial<CardDrawState> | undefined | null)
   lastTurnWithoutPlay: Boolean(value?.lastTurnWithoutPlay),
 });
 
-const MIGRATION_LOG_ENTRY = 'Save migrated to v1.1 baseline (0 IP start, five-card opener).';
+const MIGRATION_LOG_ENTRY = 'Save migrated to v1.1 baseline (5 IP start, five-card opener).';
 
 type RawSaveData = Partial<GameState> & {
   version?: string;
@@ -69,11 +69,11 @@ const migrateSaveData = (raw: RawSaveData): RawSaveData & { version: string; dra
   };
 
   if (!Number.isFinite(migrated.ip as number)) {
-    migrated.ip = 0;
+    migrated.ip = 5;
   }
 
   if (!Number.isFinite(migrated.aiIP as number)) {
-    migrated.aiIP = 0;
+    migrated.aiIP = 5;
   }
 
   if (!Array.isArray(migrated.log)) {
@@ -228,8 +228,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     currentPlayer: 'human',
     aiDifficulty,
     truth: 50,
-    ip: 0,
-    aiIP: 0,
+    ip: 5,
+    aiIP: 5,
     // Use all available cards to ensure proper deck building
     hand: getRandomCards(HAND_LIMIT, { faction: 'truth' }),
     aiHand: getRandomCards(HAND_LIMIT, { faction: 'government' }),
@@ -306,8 +306,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
   const initGame = useCallback((faction: 'government' | 'truth') => {
     const startingTruth = 50;
-    const startingIP = 0;
-    const aiStartingIP = 0;
+    const startingIP = 5;
+    const aiStartingIP = 5;
     
     // Get draw mode from localStorage
     const savedSettings = localStorage.getItem('gameSettings');
