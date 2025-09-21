@@ -1,4 +1,5 @@
 import type { GameCard } from '@/rules/mvp';
+import { CORE_FLOOR } from '@/lib/decks/expansions';
 import { ensureMvpCosts, getCoreCards, isMvpCard } from './cardDatabase';
 import { EXPANSION_MANIFEST } from './expansions';
 import {
@@ -222,37 +223,85 @@ class WeightedCardDistribution {
   private getEffectiveWeights(): SetWeights {
     const weights: SetWeights = { core: 0 };
     const availableSets = this.getAvailableCardSets();
+    const coreSet = availableSets.find(set => set.isCore && set.cards.length > 0);
+    const activeExpansions = availableSets.filter(set => !set.isCore && set.cards.length > 0);
+
+    const setWeight = (setId: string, weight: number) => {
+      if (setId === 'core') {
+        weights.core = Math.max(0, weight);
+        return;
+      }
+
+      if (weight > 0) {
+        weights[setId] = weight;
+      }
+    };
 
     switch (this.settings.mode) {
-      case 'core-only':
-        weights.core = 1.0;
-        availableSets.forEach(set => {
-          if (!set.isCore && set.id in weights) {
-            delete weights[set.id];
+      case 'core-only': {
+        if (coreSet) {
+          setWeight('core', 1);
+        }
+        break;
+      }
+
+      case 'expansion-only': {
+        if (activeExpansions.length === 0) {
+          if (coreSet) {
+            setWeight('core', 1);
+          }
+          break;
+        }
+
+        setWeight('core', 0);
+        activeExpansions.forEach(set => setWeight(set.id, 1));
+        break;
+      }
+
+      case 'balanced': {
+        if (coreSet) {
+          setWeight('core', 1);
+        }
+
+        activeExpansions.forEach(set => setWeight(set.id, 1));
+
+        if (coreSet && activeExpansions.length > 0) {
+          const expansionSum = activeExpansions.reduce(
+            (sum, set) => sum + (weights[set.id] ?? 0),
+            0,
+          );
+          const requiredCoreWeight = (CORE_FLOOR * expansionSum) / (1 - CORE_FLOOR);
+          setWeight('core', Math.max(weights.core ?? 0, requiredCoreWeight));
+        } else if (coreSet) {
+          setWeight('core', Math.max(weights.core ?? 0, 1));
+        }
+
+        break;
+      }
+
+      case 'custom': {
+        const normalize = (value?: number) =>
+          typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : 0;
+
+        setWeight('core', normalize(this.settings.setWeights.core));
+
+        activeExpansions.forEach(set => {
+          const weight = normalize(this.settings.setWeights[set.id]);
+          if (weight > 0) {
+            setWeight(set.id, weight);
           }
         });
+
         break;
-      
-      case 'expansion-only':
-        availableSets.forEach(set => {
-          if (!set.isCore && set.cards.length > 0) {
-            weights[set.id] = 1.0;
-          }
-        });
-        break;
-      
-      case 'balanced':
-        weights.core = 2.0;
-        availableSets.forEach(set => {
-          if (!set.isCore && set.cards.length > 0) {
-            weights[set.id] = 1.0;
-          }
-        });
-        break;
-      
-      case 'custom':
-        Object.assign(weights, this.settings.setWeights);
-        break;
+      }
+    }
+
+    const totalActiveWeight = Object.entries(weights)
+      .filter(([setId]) => setId === 'core' || activeExpansions.some(set => set.id === setId))
+      .reduce((sum, [, value]) => sum + (Number.isFinite(value) ? value : 0), 0);
+
+    if (totalActiveWeight <= 0 && coreSet) {
+      setWeight('core', 1);
     }
 
     return weights;
@@ -488,6 +537,10 @@ class WeightedCardDistribution {
 
   getSettings(): DistributionSettings {
     return { ...this.settings };
+  }
+
+  getCurrentSetWeights(): SetWeights {
+    return { ...this.getEffectiveWeights() };
   }
 
   setMode(mode: DistributionMode): void {

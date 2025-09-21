@@ -105,4 +105,51 @@ describe('summarizeExpansionCards', () => {
     expect(deck.length).toBeGreaterThan(0);
     expect(deck.every(card => card.extId === 'cryptids')).toBe(true);
   });
+
+  it('aligns balanced mix weights with the deck builder core floor', async () => {
+    const cryptidsCards: GameCard[] = [
+      {
+        id: 'cryptid-alpha',
+        name: 'Mothman',
+        type: 'ATTACK',
+        faction: 'truth',
+        rarity: 'common',
+        cost: 2,
+        extId: 'cryptids',
+      },
+      {
+        id: 'cryptid-beta',
+        name: 'Jersey Devil',
+        type: 'MEDIA',
+        faction: 'truth',
+        rarity: 'uncommon',
+        cost: 3,
+        extId: 'cryptids',
+      },
+    ];
+
+    EXPANSION_MANIFEST.push({
+      id: 'cryptids',
+      title: 'Cryptids',
+      fileName: 'cryptids.json',
+      cardCount: cryptidsCards.length,
+      cards: cryptidsCards,
+      metadata: { name: 'Cryptids' },
+    });
+
+    await updateEnabledExpansions(['cryptids']);
+
+    weightedDistribution.updateSettings({
+      ...DEFAULT_DISTRIBUTION_SETTINGS,
+      mode: 'balanced',
+      duplicateLimit: 10,
+      setWeights: { core: 1, cryptids: 1 },
+    });
+
+    const weights = weightedDistribution.getCurrentSetWeights();
+
+    expect(weights.core).toBeGreaterThan(0);
+    expect(weights.cryptids).toBeGreaterThan(0);
+    expect(weights.core).toBeCloseTo(weights.cryptids, 5);
+  });
 });
