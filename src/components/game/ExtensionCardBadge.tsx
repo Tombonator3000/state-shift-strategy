@@ -127,8 +127,10 @@ export const ExtensionCardBadge = ({ cardId, card, variant = 'inline' }: Extensi
     : `${badgeLabel} Card`;
 
   if (variant === 'overlay') {
+    const scaledInset = 'calc(0.25rem * var(--card-scale, 1))';
+
     return (
-      <div className="absolute top-1 right-1 z-10">
+      <div className="absolute z-10" style={{ top: scaledInset, right: scaledInset }}>
         <Badge className={`${faction === 'truth' ? 'bg-truth-blue/90 border-truth-blue' : 'bg-government-blue/90 border-government-blue'} text-white text-xs px-1 py-0.5 animate-fade-in`}>
           {symbol}
         </Badge>
