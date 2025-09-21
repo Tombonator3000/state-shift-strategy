@@ -44,7 +44,7 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     {
       id: 'ip',
       title: '💰 Influence Points (IP)',
-      description: 'IP starts at 0 for both factions. End turns to collect 5 + controlled states, then spend it to deploy cards.',
+      description: 'IP starts at 5 for both factions. End turns to collect 5 + controlled states, then spend it to deploy cards.',
       target: '#ip-display'
     },
     {

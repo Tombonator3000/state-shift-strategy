@@ -30,13 +30,13 @@ export function setDifficultyFromLabel(label: string) {
 
 export function areParanormalEffectsEnabled(): boolean {
   if (typeof localStorage === "undefined") {
-    return true;
+    return false;
   }
 
   try {
     const stored = localStorage.getItem(OPTIONS_STORAGE_KEY);
     if (!stored) {
-      return true;
+      return false;
     }
 
     const parsed = JSON.parse(stored) as { paranormalEffectsEnabled?: unknown } | null;
@@ -47,5 +47,5 @@ export function areParanormalEffectsEnabled(): boolean {
     console.warn("Failed to read paranormal effects setting: ", error);
   }
 
-  return true;
+  return false;
 }
