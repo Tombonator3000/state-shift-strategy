@@ -243,6 +243,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
         setDifficultyFromLabel(newSettings.difficulty);
       }
       persistSettings(updated, comboSettingsState);
+      if (typeof window !== 'undefined' && prev.paranormalEffectsEnabled !== updated.paranormalEffectsEnabled) {
+        window.dispatchEvent(new CustomEvent('shadowgov:paranormal-effects-toggled', {
+          detail: { enabled: updated.paranormalEffectsEnabled }
+        }));
+      }
       return updated;
     });
   };
