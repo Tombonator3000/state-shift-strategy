@@ -81,6 +81,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     magnitude: number;
     duration: number;
     reducedMotion?: boolean;
+    fxMessages: string[];
   } | null>(null);
   const [broadcastOverlay, setBroadcastOverlay] = useState<{
     id: number;
@@ -279,6 +280,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       intensity?: 'minor' | 'major' | 'mega';
       magnitude?: number;
       reducedMotion?: boolean;
+      fxMessages?: string[];
     }>) => {
       if (!event?.detail) return;
 
@@ -289,6 +291,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         intensity,
         magnitude,
         reducedMotion,
+        fxMessages,
       } = event.detail;
 
       const prefersReducedMotion = reducedMotion ?? (typeof window !== 'undefined'
@@ -319,6 +322,12 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         magnitude: sanitizedMagnitude,
         duration: COMBO_GLITCH_DURATIONS[resolvedIntensity],
         reducedMotion: prefersReducedMotion,
+        fxMessages: Array.isArray(fxMessages)
+          ? fxMessages
+            .filter((message): message is string => typeof message === 'string')
+            .map(message => message.trim())
+            .filter(message => message.length > 0)
+          : [],
       });
     };
 
@@ -642,6 +651,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
             magnitude={comboGlitchOverlay.magnitude}
             duration={comboGlitchOverlay.duration}
             reducedMotion={comboGlitchOverlay.reducedMotion}
+            fxMessages={comboGlitchOverlay.fxMessages}
             onComplete={handleComboGlitchComplete}
           />
         )}

@@ -668,6 +668,29 @@ All colors MUST be HSL.
     animation: combo-glitch-shard 0.6s ease-in-out infinite alternate;
   }
 
+  .combo-glitch-text-scramble {
+    animation: combo-glitch-text-scramble 0.78s cubic-bezier(0.22, 0.61, 0.36, 1);
+    will-change: transform, filter, opacity;
+  }
+
+  .combo-glitch-text-scanline {
+    position: relative;
+    overflow: hidden;
+    animation: combo-glitch-text-scanline 0.88s cubic-bezier(0.19, 1, 0.22, 1);
+    will-change: clip-path, opacity;
+  }
+
+  .combo-glitch-text-scanline::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+    mix-blend-mode: screen;
+    transform: translateY(-120%);
+    animation: combo-glitch-text-sheen 0.88s cubic-bezier(0.19, 1, 0.22, 1);
+    pointer-events: none;
+  }
+
   @keyframes combo-glitch-jitter {
     0% {
       transform: translate(-50%, -50%) scale(1) skewX(0deg);
@@ -716,11 +739,70 @@ All colors MUST be HSL.
     }
   }
 
+  @keyframes combo-glitch-text-scramble {
+    0% {
+      opacity: 0;
+      transform: translateY(-8px);
+      filter: blur(6px) saturate(160%);
+    }
+    35% {
+      opacity: 0.6;
+      transform: translateY(3px);
+      filter: blur(3px) saturate(180%);
+    }
+    70% {
+      opacity: 0.95;
+      transform: translateY(-2px);
+      filter: blur(1.2px) saturate(120%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0) saturate(100%);
+    }
+  }
+
+  @keyframes combo-glitch-text-scanline {
+    0% {
+      opacity: 0;
+      clip-path: inset(0 0 100% 0);
+    }
+    40% {
+      opacity: 0.85;
+      clip-path: inset(0 0 40% 0);
+    }
+    70% {
+      opacity: 0.95;
+      clip-path: inset(0 0 12% 0);
+    }
+    100% {
+      opacity: 1;
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes combo-glitch-text-sheen {
+    0% {
+      opacity: 0;
+      transform: translateY(-120%);
+    }
+    30% {
+      opacity: 0.9;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(120%);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .combo-glitch-container,
     .combo-glitch-core,
     .combo-glitch-lines,
-    .combo-glitch-shard {
+    .combo-glitch-shard,
+    .combo-glitch-text-scramble,
+    .combo-glitch-text-scanline,
+    .combo-glitch-text-scanline::after {
       animation-duration: 0.001ms !important;
       animation-iteration-count: 1 !important;
     }
