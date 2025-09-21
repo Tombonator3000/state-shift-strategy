@@ -11,6 +11,7 @@ import GovernmentSurveillance from '@/components/effects/GovernmentSurveillance'
 import TypewriterReveal from '@/components/effects/TypewriterReveal';
 import StaticInterference from '@/components/effects/StaticInterference';
 import EvidencePhotoGallery from '@/components/effects/EvidencePhotoGallery';
+import ComboGlitchOverlay from '@/components/effects/ComboGlitchOverlay';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { areParanormalEffectsEnabled } from '@/state/settings';
 import {
@@ -58,6 +59,14 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     y: number;
     comboName?: string;
     bonusIP?: number;
+  } | null>(null);
+  const [comboGlitchOverlay, setComboGlitchOverlay] = useState<{
+    id: number;
+    x: number;
+    y: number;
+    comboNames: string[];
+    intensity: 'minor' | 'major' | 'mega';
+    reducedMotion?: boolean;
   } | null>(null);
   const [broadcastOverlay, setBroadcastOverlay] = useState<{
     id: number;
@@ -248,6 +257,56 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       }
     };
 
+    const handleComboGlitch = (event: CustomEvent<{
+      x: number;
+      y: number;
+      comboNames?: string[];
+      comboCount?: number;
+      intensity?: 'minor' | 'major' | 'mega';
+      reducedMotion?: boolean;
+    }>) => {
+      if (!event?.detail) return;
+
+      const {
+        x,
+        y,
+        comboNames = [],
+        comboCount,
+        intensity,
+        reducedMotion,
+      } = event.detail;
+
+      const prefersReducedMotion = reducedMotion ?? (typeof window !== 'undefined'
+        && typeof window.matchMedia === 'function'
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+      if (!prefersReducedMotion) {
+        audio?.playSFX?.('radio-static');
+      }
+
+      const resolvedIntensity = intensity
+        ?? (typeof comboCount === 'number'
+          ? comboCount >= 3
+            ? 'mega'
+            : comboCount === 2
+              ? 'major'
+              : 'minor'
+          : comboNames.length >= 3
+            ? 'mega'
+            : comboNames.length === 2
+              ? 'major'
+              : 'minor');
+
+      setComboGlitchOverlay({
+        id: Date.now(),
+        x,
+        y,
+        comboNames,
+        intensity: resolvedIntensity,
+        reducedMotion: prefersReducedMotion,
+      });
+    };
+
     // New enhanced effect handlers
     const handleBreakingNews = (event: CustomEvent<{
       newsText: string;
@@ -415,7 +474,8 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     window.addEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
     window.addEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
     window.addEventListener('cryptidSighting', handleCryptidSighting as EventListener);
-    
+    window.addEventListener('comboGlitch', handleComboGlitch as EventListener);
+
     // New enhanced effect listeners
     window.addEventListener('breakingNews', handleBreakingNews as EventListener);
     window.addEventListener('governmentSurveillance', handleGovernmentSurveillance as EventListener);
@@ -434,7 +494,8 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
       window.removeEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
       window.removeEventListener('cryptidSighting', handleCryptidSighting as EventListener);
-      
+      window.removeEventListener('comboGlitch', handleComboGlitch as EventListener);
+
       // New enhanced effect listeners
       window.removeEventListener('breakingNews', handleBreakingNews as EventListener);
       window.removeEventListener('governmentSurveillance', handleGovernmentSurveillance as EventListener);
@@ -509,6 +570,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     setCryptidOverlay(null);
   }, []);
 
+  const handleComboGlitchComplete = useCallback(() => {
+    setComboGlitchOverlay(null);
+  }, []);
+
   // New enhanced effect completion handlers
   const handleBreakingNewsComplete = useCallback(() => {
     setBreakingNewsOverlay(null);
@@ -550,6 +615,17 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
             comboName={corkboardOverlay.comboName}
             bonusIP={corkboardOverlay.bonusIP}
             onComplete={handleCorkboardComplete}
+          />
+        )}
+        {comboGlitchOverlay && (
+          <ComboGlitchOverlay
+            key={comboGlitchOverlay.id}
+            x={comboGlitchOverlay.x}
+            y={comboGlitchOverlay.y}
+            comboNames={comboGlitchOverlay.comboNames}
+            intensity={comboGlitchOverlay.intensity}
+            reducedMotion={comboGlitchOverlay.reducedMotion}
+            onComplete={handleComboGlitchComplete}
           />
         )}
         {broadcastOverlay && (

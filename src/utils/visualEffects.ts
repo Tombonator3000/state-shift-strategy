@@ -1,5 +1,6 @@
 import { areParanormalEffectsEnabled } from '@/state/settings';
 import type { SynergyEffectIdentifier } from '@/utils/synergyEffects';
+import type { ParticleEffectType } from '@/components/effects/ParticleSystem';
 
 // Visual Effects Integration Utilities
 // Centralized system for triggering coordinated visual effects
@@ -12,14 +13,50 @@ export interface EffectPosition {
 export class VisualEffectsCoordinator {
   // Trigger particle effect at specific position
   static triggerParticleEffect(
-    type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain' | 'stateevent' | 'contested' | 'flash' | 'broadcast' | 'cryptid',
+    type: ParticleEffectType,
     position: EffectPosition
   ): void {
     window.dispatchEvent(new CustomEvent('cardDeployed', {
       detail: {
         type,
-        x: position.x, 
-        y: position.y 
+        x: position.x,
+        y: position.y
+      }
+    }));
+  }
+
+  static triggerComboGlitch(detail: {
+    position: EffectPosition;
+    comboNames: string[];
+    intensity?: 'minor' | 'major' | 'mega';
+  }): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const comboNames = detail.comboNames ?? [];
+    const baseIntensity = detail.intensity
+      ?? (comboNames.length >= 3
+        ? 'mega'
+        : comboNames.length === 2
+          ? 'major'
+          : 'minor');
+
+    const reducedMotion = typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!reducedMotion) {
+      this.triggerParticleEffect('glitch', detail.position);
+    }
+
+    window.dispatchEvent(new CustomEvent('comboGlitch', {
+      detail: {
+        x: detail.position.x,
+        y: detail.position.y,
+        comboNames,
+        comboCount: comboNames.length,
+        intensity: baseIntensity,
+        reducedMotion
       }
     }));
   }

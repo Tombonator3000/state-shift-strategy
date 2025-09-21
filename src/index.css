@@ -637,6 +637,95 @@ All colors MUST be HSL.
     }
   }
 
+  .combo-glitch-container {
+    animation: combo-glitch-jitter 0.28s steps(2, end) infinite;
+  }
+
+  .combo-glitch-core {
+    animation: combo-glitch-pulse 0.48s ease-in-out infinite alternate;
+  }
+
+  .combo-glitch-lines {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(56, 189, 248, 0.25) 0%,
+      rgba(56, 189, 248, 0.25) 2px,
+      transparent 2px,
+      transparent 8px
+    );
+    opacity: 0.65;
+    mix-blend-mode: screen;
+    animation: combo-glitch-scan 0.42s linear infinite;
+  }
+
+  .combo-glitch-shard {
+    background:
+      radial-gradient(circle at 20% 20%, rgba(236, 72, 153, 0.35), transparent 55%),
+      radial-gradient(circle at 80% 60%, rgba(129, 140, 248, 0.28), transparent 65%),
+      linear-gradient(135deg, rgba(56, 189, 248, 0.25), transparent 60%);
+    mix-blend-mode: lighten;
+    filter: blur(0.4px);
+    animation: combo-glitch-shard 0.6s ease-in-out infinite alternate;
+  }
+
+  @keyframes combo-glitch-jitter {
+    0% {
+      transform: translate(-50%, -50%) scale(1) skewX(0deg);
+    }
+    50% {
+      transform: translate(calc(-50% + 2px), calc(-50% + 1px)) scale(1.015) skewX(-1.5deg);
+    }
+    100% {
+      transform: translate(calc(-50% - 1px), calc(-50% - 2px)) scale(0.99) skewX(1.5deg);
+    }
+  }
+
+  @keyframes combo-glitch-pulse {
+    0% {
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
+      opacity: 0.75;
+    }
+    100% {
+      box-shadow: 0 0 40px rgba(236, 72, 153, 0.55);
+      opacity: 1;
+    }
+  }
+
+  @keyframes combo-glitch-scan {
+    0% {
+      background-position: 0 0;
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 0.85;
+    }
+    100% {
+      background-position: 0 24px;
+      opacity: 0.4;
+    }
+  }
+
+  @keyframes combo-glitch-shard {
+    0% {
+      opacity: 0.35;
+      transform: rotate(0deg) scale(1);
+    }
+    100% {
+      opacity: 0.75;
+      transform: rotate(2.5deg) scale(1.05);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .combo-glitch-container,
+    .combo-glitch-core,
+    .combo-glitch-lines,
+    .combo-glitch-shard {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+
   @keyframes legendary-pulse {
     0%, 100% {
       opacity: 0.4;
