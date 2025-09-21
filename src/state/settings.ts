@@ -49,3 +49,25 @@ export function areParanormalEffectsEnabled(): boolean {
 
   return false;
 }
+
+export function areUiNotificationsEnabled(): boolean {
+  if (typeof localStorage === "undefined") {
+    return false;
+  }
+
+  try {
+    const stored = localStorage.getItem(OPTIONS_STORAGE_KEY);
+    if (!stored) {
+      return false;
+    }
+
+    const parsed = JSON.parse(stored) as { uiNotificationsEnabled?: unknown } | null;
+    if (parsed && typeof parsed.uiNotificationsEnabled === "boolean") {
+      return parsed.uiNotificationsEnabled;
+    }
+  } catch (error) {
+    console.warn("Failed to read UI notifications setting: ", error);
+  }
+
+  return false;
+}
