@@ -342,7 +342,7 @@ const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }
   const truthStatus = getTruthMeterStatus();
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-2">
+    <div className="newspaper-layer flex items-center justify-center bg-black/90 p-2">
       <Card className={`max-w-6xl w-full max-h-[90vh] overflow-y-auto bg-white border-8 border-black shadow-2xl ${
         glitching ? 'animate-pulse' : ''
       }`} style={{ fontFamily: 'serif' }}>

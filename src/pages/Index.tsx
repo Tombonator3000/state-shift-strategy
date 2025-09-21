@@ -1248,7 +1248,7 @@ const Index = () => {
   };
 
   const handleEndTurn = () => {
-    endTurn();
+    void endTurn();
     audio.playSFX('turnEnd');
     // Play card draw sound after a short delay
     setTimeout(() => {

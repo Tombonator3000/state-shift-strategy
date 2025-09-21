@@ -471,4 +471,5 @@ export const DEFAULT_COMBO_SETTINGS: ComboSettings = {
   maxCombosPerTurn: 2,
   comboToggles: Object.fromEntries(COMBO_DEFINITIONS.map(def => [def.id, def.enabledByDefault ?? true])),
   rng: Math.random,
+  glitchMode: 'full',
 };

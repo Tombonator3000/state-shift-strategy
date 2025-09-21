@@ -49,7 +49,8 @@ function ensureToggleCoverage(settings: ComboSettings): ComboSettings {
     }
   }
   const rng = settings.rng ?? DEFAULT_COMBO_SETTINGS.rng ?? Math.random;
-  return { ...settings, comboToggles: toggles, rng };
+  const glitchMode = settings.glitchMode ?? DEFAULT_COMBO_SETTINGS.glitchMode ?? 'full';
+  return { ...settings, comboToggles: toggles, rng, glitchMode };
 }
 
 export function getComboSettings(): ComboSettings {
@@ -66,6 +67,7 @@ export function setComboSettings(update: Partial<ComboSettings>): ComboSettings 
     ...base,
     ...update,
     comboToggles: { ...base.comboToggles },
+    glitchMode: update.glitchMode ?? base.glitchMode ?? 'full',
   };
 
   if (update.comboToggles) {
@@ -99,6 +101,10 @@ function resolveSettings(overrides?: ComboOptions): ComboSettings {
     for (const [key, value] of Object.entries(overrides.comboToggles)) {
       merged.comboToggles[key] = value;
     }
+  }
+
+  if (overrides.glitchMode) {
+    merged.glitchMode = overrides.glitchMode;
   }
 
   if (overrides.disabledCombos) {

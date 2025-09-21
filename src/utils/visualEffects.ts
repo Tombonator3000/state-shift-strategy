@@ -2,6 +2,15 @@ import { areParanormalEffectsEnabled } from '@/state/settings';
 import type { SynergyEffectIdentifier } from '@/utils/synergyEffects';
 import type { ParticleEffectType } from '@/components/effects/ParticleSystem';
 
+let glitchActive = false;
+
+export const FXState = {
+  isGlitchActive: () => glitchActive,
+  __internalSetActive(active: boolean) {
+    glitchActive = active;
+  },
+};
+
 // Visual Effects Integration Utilities
 // Centralized system for triggering coordinated visual effects
 
@@ -14,6 +23,92 @@ const COMBO_MAGNITUDE_THRESHOLDS = {
   major: 4,
   mega: 8,
 } as const;
+
+interface ComboGlitchPayload {
+  combos?: string[];
+  magnitude?: number;
+  messages?: string[];
+  comboKind?: string;
+  glitchMode?: 'off' | 'minimal' | 'full';
+  position?: EffectPosition;
+}
+
+export async function playComboGlitchIfAny(payload: ComboGlitchPayload): Promise<void> {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const comboNames = Array.isArray(payload.combos)
+    ? payload.combos.map(name => `${name}`.trim()).filter(name => name.length > 0)
+    : [];
+  const magnitude = typeof payload.magnitude === 'number' && !Number.isNaN(payload.magnitude)
+    ? Math.abs(payload.magnitude)
+    : 0;
+  const hasCombos = comboNames.length > 0 && magnitude > 0;
+
+  if (!hasCombos) {
+    return;
+  }
+
+  const mode = payload.glitchMode ?? 'full';
+  if (mode === 'off') {
+    return;
+  }
+
+  const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+  const computedDuration = prefersReducedMotion
+    ? Math.min(700, Math.max(480, Math.floor(magnitude * 120) + 360))
+    : Math.min(2200, 900 + Math.floor(magnitude * 250));
+  const durationMs = mode === 'minimal' ? 500 : computedDuration;
+
+  FXState.__internalSetActive?.(true);
+
+  const origin = payload.position ?? VisualEffectsCoordinator.getRandomCenterPosition(160);
+
+  await new Promise<void>(resolve => {
+    let settled = false;
+    const handleComplete = () => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      FXState.__internalSetActive?.(false);
+      window.removeEventListener('comboGlitchComplete', handleComplete as EventListener);
+      resolve();
+    };
+
+    window.addEventListener('comboGlitchComplete', handleComplete as EventListener, { once: true });
+
+    const fallback = window.setTimeout(handleComplete, durationMs + 400);
+
+    const detail = {
+      x: origin.x,
+      y: origin.y,
+      comboNames,
+      comboCount: comboNames.length,
+      intensity: magnitude >= COMBO_MAGNITUDE_THRESHOLDS.mega
+        ? 'mega'
+        : magnitude >= COMBO_MAGNITUDE_THRESHOLDS.major
+          ? 'major'
+          : 'minor',
+      magnitude,
+      reducedMotion: prefersReducedMotion,
+      fxMessages: Array.isArray(payload.messages)
+        ? payload.messages.filter((message): message is string => typeof message === 'string' && message.trim().length > 0)
+        : [],
+      durationMs,
+      comboKind: payload.comboKind,
+      mode,
+    } as const;
+
+    const event = new CustomEvent('comboGlitch', { detail });
+    window.dispatchEvent(event);
+
+    if (fallback) {
+      window.addEventListener('comboGlitchComplete', () => window.clearTimeout(fallback), { once: true });
+    }
+  });
+}
 
 export class VisualEffectsCoordinator {
   // Trigger particle effect at specific position
