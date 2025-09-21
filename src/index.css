@@ -3237,3 +3237,104 @@ html, body, #root {
     @apply pointer-events-auto max-w-xs border border-slate-700 bg-slate-900/95 font-mono text-sm leading-snug text-slate-100 shadow-2xl;
   }
 }
+
+@keyframes combo-hit-stop {
+  0% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(0.965);
+  }
+  32% {
+    transform: scale(0.982);
+  }
+  60% {
+    transform: scale(0.992);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes combo-rgb-offset {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  18% {
+    opacity: 0.36;
+    transform: translate3d(-3px, 2px, 0);
+  }
+  42% {
+    opacity: 0.28;
+    transform: translate3d(3px, -2px, 0);
+  }
+  68% {
+    opacity: 0.22;
+    transform: translate3d(-2px, 1px, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes combo-rgb-flicker {
+  0%, 100% {
+    opacity: 0.05;
+  }
+  20% {
+    opacity: 0.25;
+  }
+  45% {
+    opacity: 0.18;
+  }
+  72% {
+    opacity: 0.14;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.combo-glitching {
+    --combo-glitch-duration: 900ms;
+    filter: contrast(1.12) saturate(1.28);
+  }
+
+  html.combo-glitching body::after {
+    content: '';
+    position: fixed;
+    inset: -6px;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    z-index: 999;
+    background: linear-gradient(120deg,
+      rgba(59, 130, 246, 0.22) 10%,
+      rgba(236, 72, 153, 0.22) 50%,
+      rgba(34, 197, 94, 0.18) 90%
+    );
+    opacity: 0;
+    animation:
+      combo-rgb-offset var(--combo-glitch-duration, 900ms) cubic-bezier(0.3, 0, 0.2, 1) both,
+      combo-rgb-flicker 140ms steps(2, end) infinite;
+  }
+
+  html.combo-glitching #root {
+    will-change: transform;
+    animation: combo-hit-stop var(--combo-glitch-duration, 900ms) cubic-bezier(0.32, 0.72, 0.18, 1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.combo-glitching {
+    filter: none;
+  }
+
+  html.combo-glitching body::after {
+    animation: none;
+    opacity: 0;
+  }
+
+  html.combo-glitching #root {
+    animation: none;
+  }
+}
