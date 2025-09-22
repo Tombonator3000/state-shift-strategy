@@ -3,6 +3,8 @@ import { MVP_COST_TABLE, MVP_CARD_TYPES } from '@/rules/mvp';
 import { COMBO_DEFINITIONS } from '@/game/combo.config';
 import { formatComboReward } from '@/game/comboEngine';
 import type { ComboCategory } from '@/game/combo.types';
+import type { StateCombination } from '@/data/stateCombinations';
+import { STATE_COMBINATIONS } from '@/data/stateCombinations';
 
 export interface MvpRulesSection {
   title: string;
@@ -22,6 +24,21 @@ export interface MvpComboSummaryEntry {
 export interface MvpComboOverview {
   category: ComboCategory;
   combos: MvpComboSummaryEntry[];
+}
+
+export interface MvpSynergyEntry {
+  id: string;
+  name: string;
+  requiredStates: string[];
+  bonusIp: number;
+  bonusEffect?: string;
+}
+
+export interface MvpSynergyGroup {
+  id: SynergyGroupId;
+  title: string;
+  description: string;
+  combos: MvpSynergyEntry[];
 }
 
 export interface MvpCostTableRow {
@@ -71,13 +88,13 @@ export const MVP_RULES_SECTIONS: MvpRulesSection[] = [
   {
     title: 'Combo System',
     description:
-      'Combos award bonus IP or Truth when you meet card pattern goals within a single turn. Toggle individual combos, the FX channel, or the global system from the Options menu.',
+      'Combos evaluate every card you play during a turn, then award bonus IP or Truth once their pattern triggers fire. Each combo respects its own payout cap and the engine enforces a default limit of two combo rewards per turn (adjustable from Options). Toggle individual combos, the FX channel, or the global system in the Options menu.',
     bullets: [
-      'Sequence combos check for specific card type orders as you resolve plays.',
-      'Count combos reward playing several cards of a type, rarity, or overall volume.',
-      'Threshold combos measure total IP spent, high/low cost usage, and unique targets.',
-      'State combos focus on hitting the same location repeatedly or spreading across regions.',
-      'Hybrid combos mix multiple triggers. All rewards respect each combo’s cap and your per-turn limit (default 2).',
+      'Sequence: Attack Blitz (ATTACK → ATTACK → ATTACK) pays +5 IP for executing the full order.',
+      'Count: Attack Barrage grants +6 IP once you play three ATTACK cards during the turn.',
+      'Threshold: Strategic Budget delivers +4 IP after you spend at least 12 IP in a single turn.',
+      'State: Lockdown awards +4 IP when you slam the same state with three ZONE plays.',
+      'Hybrid: Precision Strike combines an ATTACK → ZONE sequence with 6 IP of ATTACK spending for +3 IP.',
     ],
   },
   {
@@ -95,6 +112,45 @@ export const MVP_RULES_SECTIONS: MvpRulesSection[] = [
 ];
 
 const COMBO_CATEGORY_ORDER: ComboCategory[] = ['sequence', 'count', 'threshold', 'state', 'hybrid'];
+
+type SynergyGroupId = 'economic' | 'energy' | 'military' | 'intelCultural' | 'transport';
+
+const SYNERGY_CATEGORY_ROUTES: Record<StateCombination['category'], SynergyGroupId> = {
+  economic: 'economic',
+  energy: 'energy',
+  military: 'military',
+  intelligence: 'intelCultural',
+  cultural: 'intelCultural',
+  transport: 'transport',
+};
+
+const SYNERGY_GROUP_METADATA: Record<SynergyGroupId, { title: string; description: string; priority: number }> = {
+  economic: {
+    title: 'Economic Networks',
+    description: 'Financial hubs and industrial belts stack extra IP income and local resilience.',
+    priority: 1,
+  },
+  energy: {
+    title: 'Energy Cartels',
+    description: 'Energy-state monopolies supercharge your influence production.',
+    priority: 2,
+  },
+  military: {
+    title: 'Military Infrastructure',
+    description: 'Strategic bases and borders reinforce pressure plays and territorial defense.',
+    priority: 3,
+  },
+  intelCultural: {
+    title: 'Intelligence & Cultural Blocks',
+    description: 'Information webs and cultural footholds amplify card draw and Truth swings.',
+    priority: 4,
+  },
+  transport: {
+    title: 'Transport & Logistics',
+    description: 'National supply chains keep pressure moving between adjacent fronts.',
+    priority: 5,
+  },
+};
 
 export const MVP_COMBO_OVERVIEW: MvpComboOverview[] = (() => {
   const grouped = new Map<ComboCategory, { category: ComboCategory; combos: Array<MvpComboSummaryEntry & { priority: number }>; }>();
@@ -135,6 +191,38 @@ export const MVP_COMBO_OVERVIEW: MvpComboOverview[] = (() => {
 
     return { category, combos } satisfies MvpComboOverview;
   });
+})();
+
+export const MVP_SYNERGY_GROUPS: MvpSynergyGroup[] = (() => {
+  const groups = new Map<SynergyGroupId, MvpSynergyGroup>();
+
+  for (const [id, meta] of Object.entries(SYNERGY_GROUP_METADATA) as Array<[SynergyGroupId, typeof SYNERGY_GROUP_METADATA[SynergyGroupId]]>) {
+    groups.set(id, { id, title: meta.title, description: meta.description, combos: [] });
+  }
+
+  for (const combo of STATE_COMBINATIONS) {
+    const groupId = SYNERGY_CATEGORY_ROUTES[combo.category];
+    const group = groups.get(groupId);
+
+    if (!group) {
+      continue;
+    }
+
+    group.combos.push({
+      id: combo.id,
+      name: combo.name,
+      requiredStates: [...combo.requiredStates],
+      bonusIp: combo.bonusIP,
+      bonusEffect: combo.bonusEffect,
+    });
+  }
+
+  return Array.from(groups.values())
+    .sort((a, b) => SYNERGY_GROUP_METADATA[a.id].priority - SYNERGY_GROUP_METADATA[b.id].priority)
+    .map(group => ({
+      ...group,
+      combos: [...group.combos].sort((a, b) => a.name.localeCompare(b.name)),
+    }));
 })();
 
 export const MVP_COST_TABLE_ROWS: MvpCostTableRow[] = MVP_RARITIES.map((rarity) => ({
