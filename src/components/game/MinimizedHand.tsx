@@ -14,6 +14,7 @@ interface MinimizedHandProps {
   selectedCard?: string | null;
   onSelectCard: (cardId: string) => void;
   onPlayCard: (cardId: string) => void;
+  onEndTurn: () => void;
   playerIP: number;
   isMaximized: boolean;
   onToggleMaximize: () => void;
@@ -21,6 +22,8 @@ interface MinimizedHandProps {
   onClose: () => void;
   disabled?: boolean;
   onCardHover?: (card: GameCard | null) => void;
+  endTurnDisabled?: boolean;
+  isAiProcessing?: boolean;
 }
 
 const MinimizedHand = ({
@@ -28,18 +31,17 @@ const MinimizedHand = ({
   selectedCard,
   onSelectCard,
   onPlayCard,
+  onEndTurn,
   playerIP,
   isMaximized,
   onToggleMaximize,
   isOpen,
   onClose,
   disabled,
-  onCardHover
+  onCardHover,
+  endTurnDisabled = false,
+  isAiProcessing = false
 }: MinimizedHandProps) => {
-  if (!isOpen) {
-    return null;
-  }
-
   const normalizeCardType = (type: string): MVPCardType => {
     return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
   };
@@ -83,34 +85,62 @@ const MinimizedHand = ({
 
   const cardIsInteractive = (cost: number) => !disabled && canAffordCard(cost);
 
+  if (!isOpen) {
+    return null;
+  }
+
+  const endTurnAriaLabel = isAiProcessing ? 'AI is currently taking its turn' : 'End your turn';
+  const endTurnButtonClass = 'touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60';
+  const renderEndTurnButtonContent = () => (
+    isAiProcessing ? (
+      <span className="flex items-center justify-center gap-2 text-sm">
+        <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
+        AI Thinking...
+      </span>
+    ) : (
+      'End Turn'
+    )
+  );
+
   if (isMaximized) {
     // Full-size hand display
     return (
       <div className="fixed bottom-4 left-4 right-4 z-40 rounded-lg border-2 border-newspaper-text bg-newspaper-bg/95 p-4 backdrop-blur">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-bold text-newspaper-text font-mono">
-            HAND ({cards.length}/5) • IP: {playerIP}
-          </h3>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={onToggleMaximize}
-              variant="outline"
-              size="sm"
-              className="border-newspaper-text text-newspaper-text"
-            >
-              <Minimize2 className="h-4 w-4" />
-              <span className="sr-only">Collapse hand</span>
-            </Button>
-            <Button
-              onClick={handleClose}
-              variant="outline"
-              size="sm"
-              className="border-newspaper-text text-newspaper-text"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close hand</span>
-            </Button>
+        <div className="mb-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-newspaper-text font-mono">
+              HAND ({cards.length}/5) • IP: {playerIP}
+            </h3>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={onToggleMaximize}
+                variant="outline"
+                size="sm"
+                className="border-newspaper-text text-newspaper-text"
+              >
+                <Minimize2 className="h-4 w-4" />
+                <span className="sr-only">Collapse hand</span>
+              </Button>
+              <Button
+                onClick={handleClose}
+                variant="outline"
+                size="sm"
+                className="border-newspaper-text text-newspaper-text"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close hand</span>
+              </Button>
+            </div>
           </div>
+          <Button
+            type="button"
+            onClick={onEndTurn}
+            className={endTurnButtonClass}
+            disabled={endTurnDisabled}
+            aria-label={endTurnAriaLabel}
+          >
+            {renderEndTurnButtonContent()}
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
@@ -177,39 +207,51 @@ const MinimizedHand = ({
   // Minimized hand display
   return (
     <div className="fixed bottom-4 left-4 z-40 max-w-sm rounded-lg border-2 border-newspaper-text bg-newspaper-bg/95 p-3 backdrop-blur">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="font-bold text-newspaper-text font-mono text-sm">
-            HAND
-          </h3>
-          <Badge variant="outline" className="text-xs">
-            {cards.length}/5
-          </Badge>
-          <Badge variant="outline" className="text-xs text-government-blue border-government-blue">
-            {playerIP} IP
-          </Badge>
+      <div className="mb-3 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-newspaper-text font-mono text-sm">
+              HAND
+            </h3>
+            <Badge variant="outline" className="text-xs">
+              {cards.length}/5
+            </Badge>
+            <Badge variant="outline" className="text-xs text-government-blue border-government-blue">
+              {playerIP} IP
+            </Badge>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={onToggleMaximize}
+              variant="outline"
+              size="sm"
+              className="border-newspaper-text text-newspaper-text"
+            >
+              <Maximize2 className="h-4 w-4" />
+              <span className="sr-only">Expand hand</span>
+            </Button>
+            <Button
+              onClick={handleClose}
+              variant="outline"
+              size="sm"
+              className="border-newspaper-text text-newspaper-text"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close hand</span>
+            </Button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={onToggleMaximize}
-            variant="outline"
-            size="sm"
-            className="border-newspaper-text text-newspaper-text"
-          >
-            <Maximize2 className="h-4 w-4" />
-            <span className="sr-only">Expand hand</span>
-          </Button>
-          <Button
-            onClick={handleClose}
-            variant="outline"
-            size="sm"
-            className="border-newspaper-text text-newspaper-text"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close hand</span>
-          </Button>
-        </div>
+        <Button
+          type="button"
+          onClick={onEndTurn}
+          className={endTurnButtonClass}
+          disabled={endTurnDisabled}
+          aria-label={endTurnAriaLabel}
+        >
+          {renderEndTurnButtonContent()}
+        </Button>
       </div>
 
       <div className="flex flex-wrap gap-1">
