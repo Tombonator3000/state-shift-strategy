@@ -1588,34 +1588,34 @@ const Index = () => {
             ⚙️
           </button>
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto text-[11px] font-mono text-newspaper-text/80">
-          <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
+        <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-newspaper-text/80 sm:flex-nowrap">
+          <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
             <span className="font-bold uppercase tracking-wide">Round</span>
             <span>{gameState.turn}</span>
           </div>
           <MechanicsTooltip mechanic="ip">
-            <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
+            <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
               <span className="font-bold uppercase tracking-wide">Your IP</span>
               <span>{gameState.ip}</span>
             </div>
           </MechanicsTooltip>
           <MechanicsTooltip mechanic="truth">
-            <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
+            <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
               <span className="font-bold uppercase tracking-wide">Truth</span>
               <span>{gameState.truth}%</span>
             </div>
           </MechanicsTooltip>
           <MechanicsTooltip mechanic="zone">
-            <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
+            <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
               <span className="font-bold uppercase tracking-wide">Your States</span>
               <span>{gameState.controlledStates.length}</span>
             </div>
           </MechanicsTooltip>
-          <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
+          <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
             <span className="font-bold uppercase tracking-wide">AI IP</span>
             <span>{gameState.aiIP}</span>
           </div>
-          <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
+          <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
             <span className="font-bold uppercase tracking-wide">AI States</span>
             <span>{gameState.states.filter(s => s.owner === 'ai').length}</span>
           </div>
