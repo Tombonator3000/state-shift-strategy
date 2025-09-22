@@ -1750,6 +1750,7 @@ const Index = () => {
           selectedCard={gameState.selectedCard}
           onSelectCard={handleSelectCard}
           onPlayCard={(cardId) => { void handlePlayCard(cardId); }}
+          onEndTurn={handleEndTurn}
           playerIP={gameState.ip}
           isMaximized={isMobileHandExpanded}
           onToggleMaximize={handleToggleMobileHandExpansion}
@@ -1757,6 +1758,8 @@ const Index = () => {
           onClose={handleCloseMobileHand}
           disabled={handInteractionDisabled}
           onCardHover={(card) => setHoveredCard(card)}
+          endTurnDisabled={isPlayerActionLocked}
+          isAiProcessing={gameState.currentPlayer === 'ai'}
         />
       )}
 
