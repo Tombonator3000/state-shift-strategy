@@ -34,16 +34,16 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
             paddingRight: "var(--safe-right)",
           }}
         >
-          <div className="app-scroll flex flex-1 flex-col p-2 sm:p-4 md:p-6">
+          <div className="app-scroll flex flex-1 min-h-0 flex-col p-2 sm:p-4 md:p-6">
             <div
               className={clsx(
-                "flex flex-1 flex-col gap-4",
+                "flex flex-1 flex-col gap-4 min-h-0",
                 hasRightPane &&
                   "lg:grid lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-6 lg:[&>*]:min-h-0 xl:grid-cols-[minmax(0,1fr)_480px]"
               )}
             >
-              <main className="flex min-w-0 flex-col gap-4 lg:min-h-0 lg:overflow-hidden">
-                <div className="flex min-w-0 flex-col gap-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+              <main className="flex min-h-0 flex-1 min-w-0 flex-col gap-4 overflow-hidden">
+                <div className="flex min-h-0 flex-1 min-w-0 flex-col gap-4 overflow-y-auto">
                   {leftPane}
                 </div>
               </main>

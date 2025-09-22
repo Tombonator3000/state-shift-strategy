@@ -1305,9 +1305,15 @@ html, body, #root {
 
 .app-scroll {
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: var(--safe-bottom);
+}
+
+@media (min-width: 1024px) {
+  .app-scroll {
+    overflow-y: hidden;
+  }
 }
 
 .touch-target {
