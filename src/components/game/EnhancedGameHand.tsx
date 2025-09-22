@@ -114,123 +114,127 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       ref={handRef}
       onPointerLeave={() => onCardHover?.(null)}
     >
-      <div className="grid w-full grid-cols-3 gap-3 justify-items-start items-start content-start">
-        {cards.length === 0 ? (
-          <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
-            No assets available
-          </div>
-        ) : (
-          cards.map((card, index) => {
-            const isSelected = selectedCard === card.id;
-            const isPlaying = playingCard === card.id;
-            const isLoading = loadingCard === card.id;
-            const canAfford = canAffordCard(card);
-            const displayType = normalizeCardType(card.type);
+      <div className="w-full overflow-x-auto">
+        <div
+          className="grid w-full grid-cols-1 gap-3 auto-rows-[minmax(0,_1fr)] justify-items-stretch items-stretch content-start sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+        >
+          {cards.length === 0 ? (
+            <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
+              No assets available
+            </div>
+          ) : (
+            cards.map((card, index) => {
+              const isSelected = selectedCard === card.id;
+              const isPlaying = playingCard === card.id;
+              const isLoading = loadingCard === card.id;
+              const canAfford = canAffordCard(card);
+              const displayType = normalizeCardType(card.type);
 
-            const overlay = (
-              <>
-                {(isLoading || isPlaying || isSelected) && (
-                  <div
-                    className={clsx(
-                      'pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-sm',
-                      isSelected && !isPlaying && !isLoading && 'bg-yellow-400/15 text-yellow-100'
-                    )}
-                    style={{ borderRadius: 'calc(var(--pt-radius) * var(--card-scale))' }}
-                  >
-                    <Loader2
+              const overlay = (
+                <>
+                  {(isLoading || isPlaying || isSelected) && (
+                    <div
                       className={clsx(
-                        'mb-1 h-5 w-5',
-                        isSelected ? 'animate-pulse text-yellow-200' : 'animate-spin text-primary'
+                        'pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-sm',
+                        isSelected && !isPlaying && !isLoading && 'bg-yellow-400/15 text-yellow-100'
                       )}
-                    />
-                    <span className="text-xs font-mono font-bold">
-                      {isPlaying
-                        ? 'DEPLOYING'
-                        : isSelected && displayType === 'ZONE'
-                          ? 'TARGETING'
-                          : 'PROCESSING'}
-                    </span>
-                  </div>
-                )}
-
-                {isSelected && displayType === 'ZONE' && (
-                  <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-black ring-2 ring-yellow-300 animate-pulse">
-                    🎯
-                  </div>
-                )}
-
-                {isSelected && displayType !== 'ZONE' && (
-                  <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-yellow-300 ring-2 ring-yellow-200" />
-                )}
-
-                <div className="pointer-events-none">
-                  <ExtensionCardBadge cardId={card.id} card={card} variant="overlay" />
-                </div>
-              </>
-            );
-
-            return (
-              <button
-                key={`${card.id}-${index}`}
-                type="button"
-                className={clsx(
-                  'group/card relative flex w-full items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
-                  !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
-                  disabled && 'cursor-default'
-                )}
-                style={{ animationDelay: `${index * 0.03}s` }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  audio.playSFX('click');
-                  triggerHaptic('selection');
-                  setExaminedCard(prev => (prev === card.id ? null : card.id));
-                }}
-                onPointerEnter={(e) => {
-                  const handEl = handRef.current;
-                  if (handEl) {
-                    const hb = handEl.getBoundingClientRect();
-                    const mx = e.clientX;
-                    const my = e.clientY;
-                    if (mx < hb.left || mx > hb.right || my < hb.top || my > hb.bottom) {
-                      return;
-                    }
-                  }
-                  audio.playSFX('lightClick');
-                  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                  const tooltipWidth = 300;
-                  let left = rect.right + 10;
-                  if (left + tooltipWidth > window.innerWidth) {
-                    left = Math.max(16, rect.left - tooltipWidth - 10);
-                  }
-                  let top = rect.top + rect.height / 2;
-                  top = Math.min(window.innerHeight - 16, Math.max(16, top));
-                  onCardHover?.({
-                    ...card,
-                    _hoverPosition: { x: left, y: top }
-                  });
-                }}
-                onPointerLeave={() => {
-                  onCardHover?.(null);
-                }}
-              >
-                <BaseCard
-                  card={card}
-                  hideStamp
-                  polaroidHover={false}
-                  size="handMini"
-                  className="pointer-events-none select-none"
-                  frameClassName={clsx(
-                    'drop-shadow-[0_12px_22px_rgba(0,0,0,0.32)] transition-transform duration-200',
-                    !disabled && canAfford && 'group-hover/card:-translate-y-1 group-hover/card:drop-shadow-[0_22px_30px_rgba(0,0,0,0.35)]',
-                    (isPlaying || isLoading) && 'ring-2 ring-primary shadow-primary/40',
-                    isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40'
+                      style={{ borderRadius: 'calc(var(--pt-radius) * var(--card-scale))' }}
+                    >
+                      <Loader2
+                        className={clsx(
+                          'mb-1 h-5 w-5',
+                          isSelected ? 'animate-pulse text-yellow-200' : 'animate-spin text-primary'
+                        )}
+                      />
+                      <span className="text-xs font-mono font-bold">
+                        {isPlaying
+                          ? 'DEPLOYING'
+                          : isSelected && displayType === 'ZONE'
+                            ? 'TARGETING'
+                            : 'PROCESSING'}
+                      </span>
+                    </div>
                   )}
-                  overlay={overlay}
-                />
-              </button>
-            );
-          })
-        )}
+
+                  {isSelected && displayType === 'ZONE' && (
+                    <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-black ring-2 ring-yellow-300 animate-pulse">
+                      🎯
+                    </div>
+                  )}
+
+                  {isSelected && displayType !== 'ZONE' && (
+                    <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-yellow-300 ring-2 ring-yellow-200" />
+                  )}
+
+                  <div className="pointer-events-none">
+                    <ExtensionCardBadge cardId={card.id} card={card} variant="overlay" />
+                  </div>
+                </>
+              );
+
+              return (
+                <button
+                  key={`${card.id}-${index}`}
+                  type="button"
+                  className={clsx(
+                    'group/card relative flex aspect-[3/4] w-full min-w-[200px] max-w-[320px] items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 sm:min-w-[220px] xl:min-w-[240px]',
+                    !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
+                    disabled && 'cursor-default'
+                  )}
+                  style={{ animationDelay: `${index * 0.03}s` }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    audio.playSFX('click');
+                    triggerHaptic('selection');
+                    setExaminedCard(prev => (prev === card.id ? null : card.id));
+                  }}
+                  onPointerEnter={(e) => {
+                    const handEl = handRef.current;
+                    if (handEl) {
+                      const hb = handEl.getBoundingClientRect();
+                      const mx = e.clientX;
+                      const my = e.clientY;
+                      if (mx < hb.left || mx > hb.right || my < hb.top || my > hb.bottom) {
+                        return;
+                      }
+                    }
+                    audio.playSFX('lightClick');
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    const tooltipWidth = 300;
+                    let left = rect.right + 10;
+                    if (left + tooltipWidth > window.innerWidth) {
+                      left = Math.max(16, rect.left - tooltipWidth - 10);
+                    }
+                    let top = rect.top + rect.height / 2;
+                    top = Math.min(window.innerHeight - 16, Math.max(16, top));
+                    onCardHover?.({
+                      ...card,
+                      _hoverPosition: { x: left, y: top }
+                    });
+                  }}
+                  onPointerLeave={() => {
+                    onCardHover?.(null);
+                  }}
+                >
+                  <BaseCard
+                    card={card}
+                    hideStamp
+                    polaroidHover={false}
+                    size="handMini"
+                    className="pointer-events-none select-none h-full w-full"
+                    frameClassName={clsx(
+                      'drop-shadow-[0_12px_22px_rgba(0,0,0,0.32)] transition-transform duration-200',
+                      !disabled && canAfford && 'group-hover/card:-translate-y-1 group-hover/card:drop-shadow-[0_22px_30px_rgba(0,0,0,0.35)]',
+                      (isPlaying || isLoading) && 'ring-2 ring-primary shadow-primary/40',
+                      isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40'
+                    )}
+                    overlay={overlay}
+                  />
+                </button>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {/* Card Detail Overlay - Redesigned */}
