@@ -4,6 +4,8 @@ import type { CardPlayRecord } from '@/hooks/gameStateTypes';
 import type { GameCard } from '@/rules/mvp';
 import BaseCard from '@/components/game/cards/BaseCard';
 
+const BOARD_MINI_CARD_WIDTH = 160; // 320px base width * 0.5 boardMini scale
+
 interface PlayedCardsDockProps {
   playedCards: CardPlayRecord[];
   onInspectCard?: (card: GameCard) => void;
@@ -42,16 +44,17 @@ const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, e
   >
     <h4 className="mb-2 text-[12px] font-extrabold uppercase tracking-[0.2em] text-black/70">{title}</h4>
     {cards.length > 0 ? (
-      <div className="overflow-x-auto pb-1">
-        <div className="grid place-items-start gap-2 [grid-template-columns:repeat(auto-fit,minmax(140px,_1fr))]">
-          {cards.map((entry, index) => (
-            <CardsInPlayCard
-              key={`${entry.card.id}-${index}`}
-              card={entry.card}
-              onInspect={onInspectCard}
-            />
-          ))}
-        </div>
+      <div
+        className="grid items-start justify-items-center gap-2"
+        style={{ gridTemplateColumns: `repeat(auto-fit, minmax(${BOARD_MINI_CARD_WIDTH}px, 1fr))` }}
+      >
+        {cards.map((entry, index) => (
+          <CardsInPlayCard
+            key={`${entry.card.id}-${index}`}
+            card={entry.card}
+            onInspect={onInspectCard}
+          />
+        ))}
       </div>
     ) : (
       <div className="grid min-h-[120px] place-items-center rounded border border-dashed border-black/20 bg-white/40 p-4 text-center text-[11px] font-mono uppercase tracking-wide text-black/50">
