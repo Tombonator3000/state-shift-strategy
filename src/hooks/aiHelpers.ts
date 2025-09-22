@@ -1,5 +1,6 @@
 import type { GameCard, Rarity } from '@/rules/mvp';
 import { featureFlags } from '@/state/featureFlags';
+import { normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 import { resolveCardMVP, type AchievementTracker, type CardPlayResolution } from '@/systems/cardResolution';
 import type { TurnPlay } from '@/game/combo.types';
 import type { PlayerId } from '@/mvp/validator';
@@ -251,6 +252,21 @@ export const applyAiCardPlay = (
   achievements: AchievementTracker,
 ): AiCardPlayResult => {
   const { cardId, card: providedCard, targetState, reasoning, strategyDetails } = params;
+  const maxCardsThisTurn = normalizeMaxCardsPerTurn(prev.maxCardsPerTurn);
+
+  if (prev.cardsPlayedThisTurn >= maxCardsThisTurn) {
+    return {
+      nextState: {
+        ...prev,
+        log: [
+          ...prev.log,
+          `AI held actions after reaching the ${maxCardsThisTurn}-card limit.`,
+        ],
+      },
+      failed: true,
+    };
+  }
+
   const resolvedCard = prev.aiHand.find(handCard => handCard.id === (providedCard?.id ?? cardId));
 
   if (!resolvedCard) {
@@ -306,6 +322,7 @@ export const applyAiCardPlay = (
     aiControlledStates: resolution.aiControlledStates,
     targetState: resolution.targetState,
     aiHand: prev.aiHand.filter(c => c.id !== resolvedCard.id),
+    cardsPlayedThisTurn: Math.min(maxCardsThisTurn, prev.cardsPlayedThisTurn + 1),
     cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
     playHistory: [...prev.playHistory, playedCardRecord],
     turnPlays: [...prev.turnPlays, ...turnPlayEntries],

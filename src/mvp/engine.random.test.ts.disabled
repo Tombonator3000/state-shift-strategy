@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { playCard } from '@/mvp/engine';
 import type { Card, GameState } from '@/mvp/validator';
+import { DEFAULT_MAX_CARDS_PER_TURN } from '@/config/turnLimits';
 
 const createSeededRng = (seed: number): (() => number) => {
   let state = seed % 2147483647;
@@ -52,6 +53,7 @@ const createState = (): GameState => {
     turn: 1,
     currentPlayer: 'P1',
     truth: 50,
+    maxPlaysPerTurn: DEFAULT_MAX_CARDS_PER_TURN,
     playsThisTurn: 0,
     turnPlays: [],
     log: [],

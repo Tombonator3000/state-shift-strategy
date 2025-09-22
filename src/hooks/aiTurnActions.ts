@@ -1,4 +1,5 @@
 import type { GameCard } from '@/rules/mvp';
+import { normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 import type { GameState } from './gameStateTypes';
 import type { AiCardPlayParams } from './aiHelpers';
 
@@ -50,6 +51,11 @@ export const processAiActions = async ({
     const latestAfterAction = await readLatestState();
     if (latestAfterAction.isGameOver) {
       return { gameOver: true };
+    }
+
+    const maxActionsThisTurn = normalizeMaxCardsPerTurn(latestAfterAction.maxCardsPerTurn);
+    if (latestAfterAction.cardsPlayedThisTurn >= maxActionsThisTurn) {
+      break;
     }
 
     if (index < actions.length - 1) {

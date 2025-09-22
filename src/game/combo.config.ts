@@ -139,22 +139,22 @@ const countCombos: ComboDefinition[] = [
   {
     id: 'count_full_press',
     name: 'Full Press',
-    description: 'Play four or more cards of any type in a turn.',
+    description: 'Play three cards of any type in a turn to keep pressure high.',
     category: 'count',
     priority: 85,
-    trigger: { kind: 'count', type: 'ANY', count: 4 },
+    trigger: { kind: 'threshold', metric: 'plays', value: 3 },
     reward: { ip: 2, log: 'Full press exhausts the opposition' },
-    fxText: 'Full press accomplished.'
+    fxText: 'Full press sustained across the front.'
   },
   {
     id: 'count_relentless',
     name: 'Relentless Pressure',
-    description: 'Play five or more cards regardless of type.',
+    description: 'Invest at least nine IP into plays regardless of type.',
     category: 'count',
     priority: 84,
-    trigger: { kind: 'count', type: 'ANY', count: 5 },
-    reward: { ip: 3, log: 'Relentless drive yields dividends' },
-    fxText: 'Relentless momentum maintained.'
+    trigger: { kind: 'threshold', metric: 'ipSpent', value: 9 },
+    reward: { ip: 3, log: 'Relentless spending yields dividends' },
+    fxText: 'Relentless spending grinds them down.'
   },
   {
     id: 'count_rare_circle',
@@ -266,12 +266,12 @@ const thresholdCombos: ComboDefinition[] = [
   {
     id: 'threshold_low_cost_4',
     name: 'Grassroots Push',
-    description: 'Deploy four low-cost cards (cost ≤ 2).',
+    description: 'Deploy three low-cost cards (cost ≤ 2).',
     category: 'threshold',
     priority: 79,
-    trigger: { kind: 'threshold', metric: 'lowCostCount', value: 4 },
+    trigger: { kind: 'threshold', metric: 'lowCostCount', value: 3 },
     reward: { truth: 2, log: 'Grassroots push builds trust' },
-    fxText: 'Grassroots surge mobilised.'
+    fxText: 'Grassroots surge mobilised quickly.'
   },
   {
     id: 'threshold_high_cost_2',
