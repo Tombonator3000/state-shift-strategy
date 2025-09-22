@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { StateCombinationManager } from '@/data/stateCombinations';
+import type { CombinationEffectSummary } from '@/mvp/validator';
 
 interface EnhancedHUDProps {
   currentPlayer: 'human' | 'ai';
@@ -18,6 +19,7 @@ interface EnhancedHUDProps {
     neutral: string[];
   };
   combinationManager?: StateCombinationManager;
+  combinationSummary?: CombinationEffectSummary;
   className?: string;
 }
 
@@ -30,6 +32,7 @@ const EnhancedHUD: React.FC<EnhancedHUDProps> = ({
   truthMeter,
   controlledStates,
   combinationManager,
+  combinationSummary,
   className
 }) => {
   const playerStateCount = controlledStates.player.length;
@@ -40,8 +43,17 @@ const EnhancedHUD: React.FC<EnhancedHUDProps> = ({
   const playerControl = Math.round((playerStateCount / totalStates) * 100);
   const aiControl = Math.round((aiStateCount / totalStates) * 100);
   
-  const activeCombinations = combinationManager?.getActiveCombinations() || [];
-  const combinationBonus = combinationManager?.getTotalBonusIP() || 0;
+  const managerActive = combinationManager?.getActiveCombinations() || [];
+  const summaryActive = combinationSummary?.activeCombinations ?? [];
+  const activeCombinations = summaryActive.length > 0 ? summaryActive : managerActive;
+
+  const managerBonus = combinationManager?.getTotalBonusIP() || 0;
+  const computedBonus = combinationSummary?.computedTurnBonus ?? managerBonus;
+  const appliedBonus =
+    combinationSummary?.appliedTurnBonus ?? combinationSummary?.computedTurnBonus ?? managerBonus;
+  const baseComboBonus = combinationSummary?.totalBonusIP ?? managerBonus;
+  const effectBonus = Math.max(0, appliedBonus - baseComboBonus);
+  const baseIpDisplay = Math.max(0, playerIP - appliedBonus);
 
   const getPhaseDisplay = (phase: string) => {
     switch (phase) {
@@ -104,8 +116,13 @@ const EnhancedHUD: React.FC<EnhancedHUDProps> = ({
                 <div className="font-bold">Territory Control</div>
                 <div className="text-xs">States: {controlledStates.player.join(', ') || 'None'}</div>
                 <div className="text-xs">IP Generation: {playerIP}/turn</div>
-                {combinationBonus > 0 && (
-                  <div className="text-xs text-success">Synergy Bonus: +{combinationBonus} IP</div>
+                {(appliedBonus > 0 || computedBonus > 0) && (
+                  <div className="text-xs text-success">
+                    Synergy Bonus: +{appliedBonus} IP/turn
+                    {effectBonus > 0 && (
+                      <span className="text-muted-foreground"> (effects +{effectBonus})</span>
+                    )}
+                  </div>
                 )}
               </div>
             </TooltipContent>
@@ -195,9 +212,9 @@ const EnhancedHUD: React.FC<EnhancedHUDProps> = ({
             <TooltipContent className="enhanced-tooltip">
               <div className="space-y-1">
                 <div className="font-bold">Your Resources</div>
-                <div className="text-xs">Base IP: {playerIP - combinationBonus}/turn</div>
-                {combinationBonus > 0 && (
-                  <div className="text-xs text-success">Synergy: +{combinationBonus}/turn</div>
+                <div className="text-xs">Base IP: {baseIpDisplay}/turn</div>
+                {appliedBonus > 0 && (
+                  <div className="text-xs text-success">Synergy: +{appliedBonus}/turn</div>
                 )}
                 <div className="text-xs text-muted-foreground">Use IP to deploy cards</div>
               </div>
@@ -220,8 +237,8 @@ const EnhancedHUD: React.FC<EnhancedHUDProps> = ({
               {activeCombinations.slice(0, 3).map((combo) => (
                 <Tooltip key={combo.id}>
                   <TooltipTrigger asChild>
-                    <Badge 
-                      variant="outline" 
+                    <Badge
+                      variant="outline"
                       className="text-xs bg-success/20 text-success border-success/50 synergy-unlock"
                     >
                       {combo.name}
@@ -230,7 +247,9 @@ const EnhancedHUD: React.FC<EnhancedHUDProps> = ({
                   <TooltipContent className="enhanced-tooltip">
                     <div className="space-y-1 max-w-48">
                       <div className="font-bold">{combo.name}</div>
-                      <div className="text-xs">{combo.description}</div>
+                      {combo.description && (
+                        <div className="text-xs">{combo.description}</div>
+                      )}
                       <div className="text-xs text-success">+{combo.bonusIP} IP/turn</div>
                       {combo.bonusEffect && (
                         <div className="text-xs text-accent italic">{combo.bonusEffect}</div>
@@ -245,6 +264,38 @@ const EnhancedHUD: React.FC<EnhancedHUDProps> = ({
                 </Badge>
               )}
             </div>
+          </div>
+        )}
+
+        {combinationSummary && (
+          <div className="p-3 bg-muted/10 border border-muted/20 rounded-lg space-y-1">
+            <div className="text-xs font-mono text-muted-foreground uppercase tracking-wide">
+              Synergy Breakdown
+            </div>
+            <div className="text-xs text-success font-mono">
+              Applied this turn: +{appliedBonus} IP (Base +{baseComboBonus}
+              {effectBonus > 0 && <> | Effects +{effectBonus}</>})
+            </div>
+            {combinationSummary.breakdown.extraCardDraw > 0 && (
+              <div className="text-xs text-muted-foreground">
+                +{combinationSummary.breakdown.extraCardDraw} card draw capacity
+              </div>
+            )}
+            {combinationSummary.breakdown.mediaCostModifier !== 0 && (
+              <div className="text-xs text-muted-foreground">
+                MEDIA cost modifier: {combinationSummary.breakdown.mediaCostModifier}
+              </div>
+            )}
+            {combinationSummary.breakdown.stateDefenseBonus > 0 && (
+              <div className="text-xs text-muted-foreground">
+                State defense +{combinationSummary.breakdown.stateDefenseBonus}
+              </div>
+            )}
+            {combinationSummary.breakdown.attackDamageBonus > 0 && (
+              <div className="text-xs text-muted-foreground">
+                Attack pressure bonus +{combinationSummary.breakdown.attackDamageBonus}
+              </div>
+            )}
           </div>
         )}
       </Card>

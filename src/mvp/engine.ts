@@ -4,23 +4,74 @@ import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
 import { normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward } from '@/game/comboEngine';
 import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
+import { recalculateCombinationEffects } from './combinationEffects';
 import { cloneGameState } from './validator';
-import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
+import type {
+  Card,
+  CombinationEffectSummary,
+  EffectsATTACK,
+  EffectsMEDIA,
+  EffectsZONE,
+  GameState,
+  PlayerState,
+} from './validator';
 import type { MediaResolutionOptions } from './media';
 
 const otherPlayer = (id: PlayerId): PlayerId => (id === 'P1' ? 'P2' : 'P1');
 
-const drawUpToFive = (player: PlayerState): PlayerState => {
+interface DrawOptions {
+  targetHandSize: number;
+  rareBias: boolean;
+}
+
+const drawUpToHandSize = (player: PlayerState, options: DrawOptions): PlayerState => {
   const deck = [...player.deck];
   const hand = [...player.hand];
-  while (hand.length < 5 && deck.length > 0) {
+  const { targetHandSize, rareBias } = options;
+
+  const limit = Math.max(targetHandSize, hand.length);
+  let rareDrawUsed = false;
+
+  while (hand.length < limit && deck.length > 0) {
+    if (rareBias && !rareDrawUsed) {
+      const rareIndex = deck.findIndex(card => card.rarity === 'rare' || card.rarity === 'legendary');
+      if (rareIndex >= 0) {
+        const [rareCard] = deck.splice(rareIndex, 1);
+        hand.push(rareCard);
+        rareDrawUsed = true;
+        continue;
+      }
+    }
+
     hand.push(deck.shift()!);
   }
+
   return {
     ...player,
     deck,
     hand,
   };
+};
+
+const getCombinationSummary = (state: GameState, playerId: PlayerId): CombinationEffectSummary | undefined => {
+  if (!state.combinationEffects) {
+    recalculateCombinationEffects(state);
+  }
+  return state.combinationEffects?.[playerId];
+};
+
+const getEffectiveCardCost = (state: GameState, playerId: PlayerId, card: Card): number => {
+  const summary = getCombinationSummary(state, playerId);
+  let modifier = 0;
+
+  if (summary) {
+    if (card.type === 'MEDIA') {
+      modifier += summary.breakdown.mediaCostModifier;
+    }
+  }
+
+  const effective = Math.max(0, card.cost + modifier);
+  return effective;
 };
 
 export type WinResult = { winner?: PlayerId; reason?: 'states' | 'truth' | 'ip' };
@@ -52,10 +103,35 @@ export function startTurn(state: GameState): GameState {
   const cloned = cloneGameState(state);
   const currentId = cloned.currentPlayer;
   const me = cloned.players[currentId];
-  const ipGain = 5 + me.states.length;
+
+  const combinationEffects = recalculateCombinationEffects(cloned);
+  const summary = combinationEffects[currentId];
+  const baseIpGain = 5 + me.states.length;
+  const comboIpGain = summary.computedTurnBonus;
+  const totalIpGain = baseIpGain + comboIpGain;
+
+  const targetHandSize = 5 + Math.max(0, summary.breakdown.extraCardDraw);
   const updatedPlayer: PlayerState = {
-    ...drawUpToFive(me),
-    ip: me.ip + ipGain,
+    ...drawUpToHandSize(me, {
+      targetHandSize,
+      rareBias: summary.breakdown.rareDrawBias,
+    }),
+    ip: me.ip + totalIpGain,
+  };
+
+  if (comboIpGain > 0) {
+    cloned.log.push(
+      `Synergy bonus applied: +${comboIpGain} IP (${summary.activeCombinations
+        .map(combo => combo.name)
+        .join(', ')})`,
+    );
+  }
+
+  combinationEffects[currentId] = {
+    ...summary,
+    activeCombinations: summary.activeCombinations.map(combo => ({ ...combo })),
+    breakdown: { ...summary.breakdown },
+    appliedTurnBonus: comboIpGain,
   };
 
   return {
@@ -64,6 +140,7 @@ export function startTurn(state: GameState): GameState {
       ...cloned.players,
       [currentId]: updatedPlayer,
     },
+    combinationEffects,
     playsThisTurn: 0,
     turnPlays: [],
   };
@@ -85,7 +162,8 @@ export function canPlay(
     return { ok: false, reason: 'invalid-player' };
   }
 
-  if (player.ip < card.cost) {
+  const effectiveCost = getEffectiveCardCost(state, state.currentPlayer, card);
+  if (player.ip < effectiveCost) {
     return { ok: false, reason: 'insufficient-ip' };
   }
 
@@ -125,11 +203,13 @@ export function playCard(
   const newHand = [...player.hand];
   newHand.splice(cardIndex, 1);
 
+  const effectiveCost = getEffectiveCardCost(cloned, currentId, card);
+
   const updatedPlayer: PlayerState = {
     ...player,
     hand: newHand,
     discard: [...player.discard, card],
-    ip: player.ip - card.cost,
+    ip: player.ip - effectiveCost,
   };
 
   const playEntry: TurnPlay = {
@@ -140,7 +220,7 @@ export function playCard(
     cardName: card.name,
     cardType: card.type,
     cardRarity: card.rarity,
-    cost: card.cost,
+    cost: effectiveCost,
     targetStateId,
   };
 
@@ -349,6 +429,8 @@ export function endTurn(
     playsThisTurn: 0,
     turnPlays: [],
   };
+
+  recalculateCombinationEffects(finalState);
 
   const summary: EndTurnSummary = {
     player: currentId,
