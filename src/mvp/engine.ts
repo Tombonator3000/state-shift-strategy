@@ -1,6 +1,7 @@
 declare const window: any;
 
 import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
+import { normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward } from '@/game/comboEngine';
 import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
 import { cloneGameState } from './validator';
@@ -73,7 +74,9 @@ export function canPlay(
   card: Card,
   targetStateId?: string,
 ): { ok: boolean; reason?: string } {
-  if (state.playsThisTurn >= 3) {
+  const maxPlaysPerTurn = normalizeMaxCardsPerTurn(state.maxPlaysPerTurn);
+
+  if (state.playsThisTurn >= maxPlaysPerTurn) {
     return { ok: false, reason: 'play-limit' };
   }
 

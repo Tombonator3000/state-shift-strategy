@@ -42,6 +42,7 @@ export type GameState = {
   players: Record<PlayerId, PlayerState>;
   pressureByState: Record<string, { P1: number; P2: number }>;
   stateDefense: Record<string, number>;
+  maxPlaysPerTurn: number;
   playsThisTurn: number;
   turnPlays: TurnPlay[];
   log: string[];

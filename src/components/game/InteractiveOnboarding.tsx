@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, ArrowLeft, X, CheckCircle2, Play } from 'lucide-react';
+import { normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 
 interface OnboardingStep {
   id: string;
@@ -25,6 +26,7 @@ interface InteractiveOnboardingProps {
 const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: InteractiveOnboardingProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const maxCardsPerTurn = normalizeMaxCardsPerTurn(gameState?.maxCardsPerTurn);
 
   const onboardingSteps: OnboardingStep[] = [
     {
@@ -63,7 +65,7 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     {
       id: 'turn-end',
       title: '⏭️ End Turn',
-      description: 'When you\'re done playing cards, click "End Turn". You can play up to 3 cards per turn.',
+      description: `When you're done playing cards, click "End Turn". You can play up to ${maxCardsPerTurn} cards per turn.`,
       target: '#end-turn-button'
     },
     {

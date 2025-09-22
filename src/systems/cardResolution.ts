@@ -1,4 +1,5 @@
 import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
+import { normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 import type { MediaResolutionOptions } from '@/mvp/media';
 import { cloneGameState, type Card, type GameState as EngineGameState } from '@/mvp';
 import type { GameCard } from '@/rules/mvp';
@@ -46,6 +47,7 @@ export interface GameSnapshot {
   aiIP: number;
   hand: GameCard[];
   aiHand: GameCard[];
+  maxCardsPerTurn?: number;
   controlledStates: string[];
   aiControlledStates?: string[];
   round: number;
@@ -138,6 +140,12 @@ const toEngineState = (
     aiStates.add(id);
   }
 
+  const candidateMax =
+    typeof snapshot.maxCardsPerTurn === 'number'
+      ? snapshot.maxCardsPerTurn
+      : (snapshot as unknown as { maxPlaysPerTurn?: number }).maxPlaysPerTurn;
+  const normalizedMax = normalizeMaxCardsPerTurn(candidateMax);
+
   return {
     turn: snapshot.turn,
     currentPlayer: PLAYER_ID,
@@ -164,6 +172,7 @@ const toEngineState = (
     },
     pressureByState,
     stateDefense,
+    maxPlaysPerTurn: normalizedMax,
     playsThisTurn: 0,
     turnPlays: [],
     log,

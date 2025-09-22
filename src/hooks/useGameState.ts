@@ -20,6 +20,7 @@ import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
 import { playComboGlitchIfAny } from '@/utils/visualEffects';
+import { DEFAULT_MAX_CARDS_PER_TURN, normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 import type { GameState } from './gameStateTypes';
 import {
   applyAiCardPlay,
@@ -68,6 +69,12 @@ const migrateSaveData = (raw: RawSaveData): RawSaveData & { version: string; dra
     drawMode: resolvedDrawMode,
     cardDrawState: sanitizeCardDrawState(raw.cardDrawState),
   };
+
+  const legacyLimit =
+    typeof raw.maxCardsPerTurn === 'number'
+      ? raw.maxCardsPerTurn
+      : (raw as { maxPlaysPerTurn?: number }).maxPlaysPerTurn;
+  migrated.maxCardsPerTurn = normalizeMaxCardsPerTurn(legacyLimit);
 
   if (!Number.isFinite(migrated.ip as number)) {
     migrated.ip = 5;
@@ -231,6 +238,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     truth: 50,
     ip: 5,
     aiIP: 5,
+    maxCardsPerTurn: DEFAULT_MAX_CARDS_PER_TURN,
     // Use all available cards to ensure proper deck building
     hand: getRandomCards(HAND_LIMIT, { faction: 'truth' }),
     aiHand: getRandomCards(HAND_LIMIT, { faction: 'government' }),
@@ -336,6 +344,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       truth: startingTruth,
       ip: startingIP,
       aiIP: aiStartingIP,
+      maxCardsPerTurn: DEFAULT_MAX_CARDS_PER_TURN,
       hand: startingHand,
       deck: newDeck.slice(handSize),
       // AI gets opposite faction cards
@@ -391,7 +400,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const playCard = useCallback((cardId: string, targetOverride?: string | null) => {
     setGameState(prev => {
       const card = prev.hand.find(c => c.id === cardId);
-      if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
+      const maxCardsThisTurn = normalizeMaxCardsPerTurn(prev.maxCardsPerTurn);
+      if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= maxCardsThisTurn || prev.animating) {
         return prev;
       }
 
@@ -429,7 +439,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         states: resolution.states,
         controlledStates: resolution.controlledStates,
         aiControlledStates: resolution.aiControlledStates,
-        cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+        cardsPlayedThisTurn: Math.min(
+          maxCardsThisTurn,
+          prev.cardsPlayedThisTurn + 1,
+        ),
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
         playHistory: [...prev.playHistory, playedCardRecord],
         turnPlays: [...prev.turnPlays, ...turnPlayEntries],
@@ -446,7 +459,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     explicitTargetState?: string
   ) => {
     const card = gameState.hand.find(c => c.id === cardId);
-    if (!card || gameState.ip < card.cost || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
+    const maxCardsThisTurn = normalizeMaxCardsPerTurn(gameState.maxCardsPerTurn);
+    if (
+      !card ||
+      gameState.ip < card.cost ||
+      gameState.cardsPlayedThisTurn >= maxCardsThisTurn ||
+      gameState.animating
+    ) {
       return;
     }
 
@@ -520,15 +539,18 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           timestamp: Date.now(),
           logEntries: [],
         };
-        return {
-          ...prev,
-          hand: prev.hand.filter(c => c.id !== cardId),
-          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-          cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
-          playHistory: [...prev.playHistory, record],
-          turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
-          selectedCard: null,
-          targetState: null,
+      return {
+        ...prev,
+        hand: prev.hand.filter(c => c.id !== cardId),
+        cardsPlayedThisTurn: Math.min(
+          normalizeMaxCardsPerTurn(prev.maxCardsPerTurn),
+          prev.cardsPlayedThisTurn + 1,
+        ),
+        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
+        playHistory: [...prev.playHistory, record],
+        turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
+        selectedCard: null,
+        targetState: null,
           animating: false,
         };
       });
@@ -553,7 +575,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),
-          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+          cardsPlayedThisTurn: Math.min(
+            normalizeMaxCardsPerTurn(prev.maxCardsPerTurn),
+            prev.cardsPlayedThisTurn + 1,
+          ),
           cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
           playHistory: [...prev.playHistory, record],
           turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
@@ -869,10 +894,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       return;
     }
 
+    const maxAiActions = normalizeMaxCardsPerTurn(planningState.maxCardsPerTurn);
     const turnPlan = chooseTurnActions({
       strategist: planningState.aiStrategist,
       gameState: planningState as any,
-      maxActions: 3,
+      maxActions: maxAiActions,
       priorityThreshold: 0.3,
     });
 

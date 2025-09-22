@@ -33,6 +33,7 @@ import { getRandomAgenda } from '@/data/agendaDatabase';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
+import { normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 import {
   getSynergyEffectIdentifier,
   resolveParticleEffectType
@@ -459,6 +460,7 @@ const Index = () => {
   const [uiNotificationsEnabled, setUiNotificationsEnabled] = useState(() => areUiNotificationsEnabled());
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
+  const maxCardsPerTurn = normalizeMaxCardsPerTurn(gameState.maxCardsPerTurn);
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -1080,9 +1082,9 @@ const Index = () => {
     }
 
     // Check if max cards played this turn
-    if (gameState.cardsPlayedThisTurn >= 3) {
+    if (gameState.cardsPlayedThisTurn >= maxCardsPerTurn) {
       if (uiNotificationsEnabled) {
-        toast.error('📋 Maximum 3 cards per turn!', {
+        toast.error(`📋 Maximum ${maxCardsPerTurn} cards per turn!`, {
           duration: 3000,
           style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
         });
@@ -1365,7 +1367,7 @@ const Index = () => {
   }
 
   const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
-  const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
+  const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= maxCardsPerTurn;
 
   const renderIntelLog = (limit: number) => (
     <div className="space-y-1 text-xs text-newspaper-text/80">

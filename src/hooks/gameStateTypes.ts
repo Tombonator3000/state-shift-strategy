@@ -33,6 +33,7 @@ export interface GameState {
   truth: number;
   ip: number;
   aiIP: number;
+  maxCardsPerTurn: number;
   hand: GameCard[];
   aiHand: GameCard[];
   isGameOver: boolean;

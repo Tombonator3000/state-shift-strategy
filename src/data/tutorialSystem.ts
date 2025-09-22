@@ -1,3 +1,5 @@
+import { DEFAULT_MAX_CARDS_PER_TURN } from '@/config/turnLimits';
+
 export interface TutorialStep {
   id: string;
   title: string;
@@ -84,7 +86,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'first_card_play',
         title: 'Play Your First Card',
-        description: 'Click on a card in your hand to select it. Cards show their IP cost and effects. You can play up to 3 cards per turn.',
+        description: `Click on a card in your hand to select it. Cards show their IP cost and effects. You can play up to ${DEFAULT_MAX_CARDS_PER_TURN} cards per turn.`,
         targetElement: '.game-hand .card:first-child',
         position: 'top',
         action: 'click',
