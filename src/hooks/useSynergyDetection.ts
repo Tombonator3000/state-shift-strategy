@@ -8,6 +8,7 @@ export const useSynergyDetection = () => {
   const combinationManagerRef = useRef(new StateCombinationManager());
   const { shake } = useScreenShake();
   const { triggerHaptic } = useHapticFeedback();
+  const appliedBonusRef = useRef<Record<'human' | 'ai', number>>({ human: 0, ai: 0 });
 
   const checkSynergies = useCallback((
     controlledStates: string[], 
@@ -16,11 +17,12 @@ export const useSynergyDetection = () => {
     onFloatingNumber?: (value: number, type: string, x?: number, y?: number) => void
   ): StateCombination[] => {
     const newCombinations = combinationManagerRef.current.checkCombinations(controlledStates);
+    const totalBonus = combinationManagerRef.current.getTotalBonusIP();
     
     if (newCombinations.length > 0) {
       // Calculate intensity based on number and value of combinations
-      const totalBonus = newCombinations.reduce((sum, combo) => sum + combo.bonusIP, 0);
-      const intensity = totalBonus >= 10 ? 'heavy' : totalBonus >= 5 ? 'medium' : 'light';
+      const comboBonus = newCombinations.reduce((sum, combo) => sum + combo.bonusIP, 0);
+      const intensity = comboBonus >= 10 ? 'heavy' : comboBonus >= 5 ? 'medium' : 'light';
       
       // Trigger coordinated effects for each new combination
       newCombinations.forEach((combo, index) => {
@@ -65,11 +67,15 @@ export const useSynergyDetection = () => {
       if (newCombinations.length >= 3) {
         setTimeout(() => {
           onParticleEffect?.('bigwin', window.innerWidth / 2, window.innerHeight / 2);
-          onFloatingNumber?.(totalBonus, 'combo', window.innerWidth / 2, window.innerHeight / 3);
+          onFloatingNumber?.(comboBonus, 'combo', window.innerWidth / 2, window.innerHeight / 3);
         }, newCombinations.length * 200 + 500);
       }
     }
-    
+
+    if (totalBonus > 0) {
+      console.log(`🧮 Current total synergy IP bonus: +${totalBonus}`);
+    }
+
     return newCombinations;
   }, [shake, triggerHaptic]);
 
@@ -89,11 +95,25 @@ export const useSynergyDetection = () => {
     combinationManagerRef.current.reset();
   }, []);
 
+  const recordAppliedBonus = useCallback((owner: 'human' | 'ai', value: number) => {
+    appliedBonusRef.current = {
+      ...appliedBonusRef.current,
+      [owner]: value,
+    };
+    console.log(`🔢 Synergy applied for ${owner}: +${value} IP this turn`);
+  }, []);
+
+  const getAppliedBonus = useCallback((owner: 'human' | 'ai') => {
+    return appliedBonusRef.current[owner] ?? 0;
+  }, []);
+
   return {
     checkSynergies,
     getActiveCombinations,
     getTotalBonusIP,
     getPotentialCombinations,
-    reset
+    reset,
+    recordAppliedBonus,
+    getAppliedBonus
   };
 };
