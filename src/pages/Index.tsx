@@ -1685,7 +1685,7 @@ const Index = () => {
               />
             </div>
           </div>
-          <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
+          <div className="flex-shrink-0 overflow-hidden rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
             <PlayedCardsDock
               playedCards={gameState.cardsPlayedThisRound}
               onInspectCard={(card) => setInspectedPlayedCard(card)}

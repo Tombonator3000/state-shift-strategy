@@ -69,8 +69,8 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards, onInspec
   const aiCards = playedCards.filter(card => card.player === 'ai');
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <header className="border-b border-black/10 px-3 py-2 text-sm font-extrabold tracking-wide text-newspaper-text">
+    <div className="flex h-full min-h-[220px] flex-col">
+      <header className="border-b border-newspaper-border/60 bg-newspaper-text px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.35em] text-newspaper-bg">
         CARDS IN PLAY THIS ROUND
       </header>
       <div className="grid grid-cols-1 gap-2 p-2 lg:grid-cols-2">
