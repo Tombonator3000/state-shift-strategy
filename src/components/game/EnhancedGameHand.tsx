@@ -50,8 +50,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     }
 
     const BASE_CARD_WIDTH = 320;
-    const BASE_CARD_HEIGHT = 460;
     const MAX_SCALE = 0.78;
+    const MIN_SCALE = 0.4;
     const GRID_GAP_PX = 12; // Tailwind gap-3 (0.75rem)
     const EPSILON = 0.001;
 
@@ -73,16 +73,15 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       let bestScale = 0;
 
       for (let columns = 1; columns <= cards.length; columns += 1) {
-        const rows = Math.ceil(cards.length / columns);
         const horizontalSpace = availableWidth - GRID_GAP_PX * (columns - 1);
-        const verticalSpace = availableHeight - GRID_GAP_PX * (rows - 1);
+        if (horizontalSpace <= 0) {
+          continue;
+        }
 
-        const widthScale = horizontalSpace / (columns * BASE_CARD_WIDTH);
-        const heightScale = verticalSpace / (rows * BASE_CARD_HEIGHT);
-        const nextScaleRaw = Math.min(widthScale, heightScale, MAX_SCALE);
-        const nextScale = Number.isFinite(nextScaleRaw) ? nextScaleRaw : 0;
+        const widthScaleRaw = horizontalSpace / (columns * BASE_CARD_WIDTH);
+        const nextScale = Math.min(widthScaleRaw, MAX_SCALE);
 
-        if (nextScale <= 0) {
+        if (nextScale + EPSILON < MIN_SCALE) {
           continue;
         }
 
@@ -92,10 +91,18 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
         }
       }
 
-      if (bestScale <= 0) {
-        bestColumns = Math.min(cards.length, Math.max(1, Math.floor(availableWidth / (BASE_CARD_WIDTH * MAX_SCALE))));
-        bestColumns = bestColumns > 0 ? bestColumns : 1;
-        bestScale = Math.max(Math.min(availableWidth / (bestColumns * BASE_CARD_WIDTH), MAX_SCALE), 0.1);
+      if (bestScale < MIN_SCALE) {
+        const maxColumnsAtMinScale = Math.max(
+          1,
+          Math.floor((availableWidth + GRID_GAP_PX) / (BASE_CARD_WIDTH * MIN_SCALE + GRID_GAP_PX))
+        );
+        const fallbackColumns = Math.min(cards.length, maxColumnsAtMinScale);
+        const fallbackHorizontalSpace = availableWidth - GRID_GAP_PX * (fallbackColumns - 1);
+        const fallbackScaleRaw = fallbackHorizontalSpace / (fallbackColumns * BASE_CARD_WIDTH);
+        const fallbackScale = Math.max(Math.min(fallbackScaleRaw, MAX_SCALE), MIN_SCALE);
+
+        bestColumns = fallbackColumns;
+        bestScale = fallbackScale > 0 ? fallbackScale : MIN_SCALE;
       }
 
       setLayout(prev => {
@@ -135,6 +142,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       cards.length > 0
         ? `repeat(${layout.columns}, minmax(0, var(--hand-card-width)))`
         : undefined,
+    gridAutoRows: 'var(--hand-card-height)'
   } as CSSProperties;
 
   const normalizeCardType = (type: string): MVPCardType => {
@@ -211,95 +219,95 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       onPointerLeave={() => onCardHover?.(null)}
     >
       <div
-        className="grid h-full w-full gap-3 auto-rows-[minmax(0,_1fr)] justify-items-stretch items-start content-start"
+        className="grid h-full w-full content-start justify-start gap-3 overflow-y-auto pr-1 pb-4"
         style={gridStyle}
       >
-          {cards.length === 0 ? (
-            <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
-              No assets available
-            </div>
-          ) : (
-            cards.map((card, index) => {
-              const isSelected = selectedCard === card.id;
-              const isPlaying = playingCard === card.id;
-              const isLoading = loadingCard === card.id;
-              const canAfford = canAffordCard(card);
-              const displayType = normalizeCardType(card.type);
+        {cards.length === 0 ? (
+          <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
+            No assets available
+          </div>
+        ) : (
+          cards.map((card, index) => {
+            const isSelected = selectedCard === card.id;
+            const isPlaying = playingCard === card.id;
+            const isLoading = loadingCard === card.id;
+            const canAfford = canAffordCard(card);
+            const displayType = normalizeCardType(card.type);
 
-              const overlay = (
-                <>
-                  {(isLoading || isPlaying || isSelected) && (
-                    <div
+            const overlay = (
+              <>
+                {(isLoading || isPlaying || isSelected) && (
+                  <div
+                    className={clsx(
+                      'pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-sm',
+                      isSelected && !isPlaying && !isLoading && 'bg-yellow-400/15 text-yellow-100'
+                    )}
+                    style={{ borderRadius: 'calc(var(--pt-radius) * var(--card-scale))' }}
+                  >
+                    <Loader2
                       className={clsx(
-                        'pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-sm',
-                        isSelected && !isPlaying && !isLoading && 'bg-yellow-400/15 text-yellow-100'
+                        'mb-1 h-5 w-5',
+                        isSelected ? 'animate-pulse text-yellow-200' : 'animate-spin text-primary'
                       )}
-                      style={{ borderRadius: 'calc(var(--pt-radius) * var(--card-scale))' }}
-                    >
-                      <Loader2
-                        className={clsx(
-                          'mb-1 h-5 w-5',
-                          isSelected ? 'animate-pulse text-yellow-200' : 'animate-spin text-primary'
-                        )}
-                      />
-                      <span className="text-xs font-mono font-bold">
-                        {isPlaying
-                          ? 'DEPLOYING'
-                          : isSelected && displayType === 'ZONE'
-                            ? 'TARGETING'
-                            : 'PROCESSING'}
-                      </span>
-                    </div>
-                  )}
-
-                  {isSelected && displayType === 'ZONE' && (
-                    <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-black ring-2 ring-yellow-300 animate-pulse">
-                      🎯
-                    </div>
-                  )}
-
-                  {isSelected && displayType !== 'ZONE' && (
-                    <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-yellow-300 ring-2 ring-yellow-200" />
-                  )}
-
-                  <div className="pointer-events-none">
-                    <ExtensionCardBadge cardId={card.id} card={card} variant="overlay" />
+                    />
+                    <span className="text-xs font-mono font-bold">
+                      {isPlaying
+                        ? 'DEPLOYING'
+                        : isSelected && displayType === 'ZONE'
+                          ? 'TARGETING'
+                          : 'PROCESSING'}
+                    </span>
                   </div>
-                </>
-              );
+                )}
 
-              return (
-                <button
-                  key={`${card.id}-${index}`}
-                  type="button"
-                  className={clsx(
-                    'group/card relative flex flex-shrink-0 items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
-                    !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
-                    disabled && 'cursor-default'
-                  )}
-                  style={{
-                    animationDelay: `${index * 0.03}s`,
-                    width: 'var(--hand-card-width)',
-                    height: 'var(--hand-card-height)',
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    audio.playSFX('click');
-                    triggerHaptic('selection');
-                    setExaminedCard(prev => (prev === card.id ? null : card.id));
-                  }}
-                  onPointerEnter={(e) => {
-                    const handEl = handRef.current;
-                    if (handEl) {
-                      const hb = handEl.getBoundingClientRect();
-                      const mx = e.clientX;
-                      const my = e.clientY;
-                      if (mx < hb.left || mx > hb.right || my < hb.top || my > hb.bottom) {
-                        return;
-                      }
+                {isSelected && displayType === 'ZONE' && (
+                  <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-black ring-2 ring-yellow-300 animate-pulse">
+                    🎯
+                  </div>
+                )}
+
+                {isSelected && displayType !== 'ZONE' && (
+                  <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-yellow-300 ring-2 ring-yellow-200" />
+                )}
+
+                <div className="pointer-events-none">
+                  <ExtensionCardBadge cardId={card.id} card={card} variant="overlay" />
+                </div>
+              </>
+            );
+
+            return (
+              <button
+                key={`${card.id}-${index}`}
+                type="button"
+                className={clsx(
+                  'group/card relative flex flex-shrink-0 items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
+                  !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
+                  disabled && 'cursor-default'
+                )}
+                style={{
+                  animationDelay: `${index * 0.03}s`,
+                  width: 'var(--hand-card-width)',
+                  height: 'var(--hand-card-height)',
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  audio.playSFX('click');
+                  triggerHaptic('selection');
+                  setExaminedCard(prev => (prev === card.id ? null : card.id));
+                }}
+                onPointerEnter={(e) => {
+                  const handEl = handRef.current;
+                  if (handEl) {
+                    const hb = handEl.getBoundingClientRect();
+                    const mx = e.clientX;
+                    const my = e.clientY;
+                    if (mx < hb.left || mx > hb.right || my < hb.top || my > hb.bottom) {
+                      return;
                     }
-                    audio.playSFX('lightClick');
-                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                  }
+                  audio.playSFX('lightClick');
+                  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                     const tooltipWidth = 300;
                     let left = rect.right + 10;
                     if (left + tooltipWidth > window.innerWidth) {
