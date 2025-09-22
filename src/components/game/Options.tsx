@@ -13,8 +13,16 @@ import { getDifficulty, setDifficultyFromLabel } from '@/state/settings';
 import { COMBO_DEFINITIONS, DEFAULT_COMBO_SETTINGS } from '@/game/combo.config';
 import { formatComboReward, getComboSettings, setComboSettings } from '@/game/comboEngine';
 import type { ComboCategory, ComboSettings } from '@/game/combo.types';
+import {
+  applyUiScale,
+  DEFAULT_UI_SCALE,
+  GAME_SETTINGS_STORAGE_KEY,
+  normalizeUiScale,
+  UI_SCALE_OPTIONS,
+  type UiScale,
+} from '@/state/uiScale';
 
-const SETTINGS_STORAGE_KEY = 'gameSettings';
+const SETTINGS_STORAGE_KEY = GAME_SETTINGS_STORAGE_KEY;
 
 type DifficultyLabel =
   | 'EASY - Intelligence Leak'
@@ -101,6 +109,7 @@ interface GameSettings {
   uiTheme: 'tabloid_bw' | 'government_classic';
   paranormalEffectsEnabled: boolean;
   uiNotificationsEnabled: boolean;
+  uiScale: UiScale;
 }
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
@@ -133,6 +142,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       uiTheme,
       paranormalEffectsEnabled: false,
       uiNotificationsEnabled: false,
+      uiScale: DEFAULT_UI_SCALE,
     };
 
     const stored = typeof localStorage !== 'undefined'
@@ -144,13 +154,19 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
         const parsed = JSON.parse(stored) as (Partial<GameSettings> & { comboSettings?: ComboSettings }) | null;
         const { comboSettings: storedComboSettings, ...rest } = parsed ?? {};
         const difficultyLabel = resolveStoredDifficultyLabel(rest?.difficulty);
+        const sanitizedSettings: Partial<GameSettings> = {
+          ...rest,
+          uiScale: normalizeUiScale(rest?.uiScale, baseSettings.uiScale),
+        };
+
         const mergedSettings: GameSettings = {
           ...baseSettings,
-          ...rest,
+          ...sanitizedSettings,
           difficulty: difficultyLabel,
         };
 
         setDifficultyFromLabel(mergedSettings.difficulty);
+        applyUiScale(mergedSettings.uiScale);
 
         const combo = storedComboSettings
           ? setComboSettings({
@@ -172,6 +188,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     }
 
     setDifficultyFromLabel(baseSettings.difficulty);
+    applyUiScale(baseSettings.uiScale);
     const combo = setComboSettings({
       ...getComboSettings(),
       comboToggles: { ...DEFAULT_COMBO_SETTINGS.comboToggles },
@@ -240,10 +257,16 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     }
 
     setSettings(prev => {
-      const updated = { ...prev, ...newSettings };
-      if (newSettings.difficulty) {
-        setDifficultyFromLabel(newSettings.difficulty);
+      const normalizedUpdates: Partial<GameSettings> = { ...newSettings };
+      if (normalizedUpdates.uiScale !== undefined) {
+        normalizedUpdates.uiScale = normalizeUiScale(normalizedUpdates.uiScale, prev.uiScale);
       }
+
+      const updated = { ...prev, ...normalizedUpdates };
+      if (normalizedUpdates.difficulty) {
+        setDifficultyFromLabel(normalizedUpdates.difficulty);
+      }
+      applyUiScale(updated.uiScale);
       persistSettings(updated, comboSettingsState);
       if (typeof window !== 'undefined') {
         if (prev.paranormalEffectsEnabled !== updated.paranormalEffectsEnabled) {
@@ -255,6 +278,12 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
         if (prev.uiNotificationsEnabled !== updated.uiNotificationsEnabled) {
           window.dispatchEvent(new CustomEvent('shadowgov:ui-notifications-toggled', {
             detail: { enabled: updated.uiNotificationsEnabled }
+          }));
+        }
+
+        if (prev.uiScale !== updated.uiScale) {
+          window.dispatchEvent(new CustomEvent('shadowgov:ui-scale-changed', {
+            detail: { value: updated.uiScale }
           }));
         }
       }
@@ -324,6 +353,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       uiTheme: 'tabloid_bw',
       paranormalEffectsEnabled: false,
       uiNotificationsEnabled: false,
+      uiScale: DEFAULT_UI_SCALE,
     };
 
     const defaultCombos = setComboSettings({
@@ -332,7 +362,17 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     });
 
     masterVolumeUpdateSource.current = 'settings';
-    setSettings(defaultSettings);
+    setSettings(prev => {
+      if (prev.uiScale !== defaultSettings.uiScale) {
+        applyUiScale(defaultSettings.uiScale);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('shadowgov:ui-scale-changed', {
+            detail: { value: defaultSettings.uiScale }
+          }));
+        }
+      }
+      return defaultSettings;
+    });
     setComboSettingsState(defaultCombos);
     setDifficultyFromLabel(defaultSettings.difficulty);
     setUiTheme('tabloid_bw');
@@ -340,7 +380,6 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     audio.setVolume(defaultSettings.masterVolume / 100);
     audio.setMusicVolume(defaultSettings.musicVolume / 100);
     audio.setSfxVolume(defaultSettings.sfxVolume / 100);
-
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('shadowgov:paranormal-effects-toggled', {
         detail: { enabled: defaultSettings.paranormalEffectsEnabled }
@@ -668,6 +707,26 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   <option value="government_classic">GOVERNMENT CLASSIC (Legacy Layout)</option>
                 </select>
                 <div className="text-xs text-newspaper-text/70 mt-1">Changes the visual appearance of menus and screens</div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-newspaper-text mb-2 block">Interface Scale</label>
+                <select
+                  value={settings.uiScale}
+                  onChange={event => {
+                    updateSettings({ uiScale: normalizeUiScale(event.target.value, settings.uiScale) });
+                  }}
+                  className="w-full p-2 border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded"
+                >
+                  {UI_SCALE_OPTIONS.map(option => (
+                    <option key={option} value={option}>
+                      {option}%
+                    </option>
+                  ))}
+                </select>
+                <div className="text-xs text-newspaper-text/70 mt-1">
+                  Adjusts global UI size for improved readability on high-resolution displays
+                </div>
               </div>
             </div>
           </Card>

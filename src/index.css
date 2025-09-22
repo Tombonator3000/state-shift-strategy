@@ -10,6 +10,9 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    --ui-scale: 1;
+    font-size: calc(16px * var(--ui-scale));
+
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 

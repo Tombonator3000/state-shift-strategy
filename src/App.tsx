@@ -13,6 +13,7 @@ import { initializeExtensionsOnStartup } from './data/extensionIntegration';
 import { AchievementProvider } from './contexts/AchievementContext';
 import UiOverlays from "./ui/UiOverlays";
 import { areUiNotificationsEnabled } from './state/settings';
+import { applyUiScale, getStoredUiScale, normalizeUiScale } from './state/uiScale';
 
 const queryClient = new QueryClient();
 
@@ -38,17 +39,29 @@ const App = () => {
       }
     };
 
+    const handleUiScaleChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ value?: unknown }>).detail;
+      if (detail && typeof detail.value !== 'undefined') {
+        applyUiScale(normalizeUiScale(detail.value, getStoredUiScale()));
+      } else {
+        applyUiScale(getStoredUiScale());
+      }
+    };
+
     const handleStorage = (event: StorageEvent) => {
       if (event.key === 'gameSettings') {
         setUiNotificationsEnabled(areUiNotificationsEnabled());
+        applyUiScale(getStoredUiScale());
       }
     };
 
     window.addEventListener('shadowgov:ui-notifications-toggled', handleToggle);
+    window.addEventListener('shadowgov:ui-scale-changed', handleUiScaleChange);
     window.addEventListener('storage', handleStorage);
 
     return () => {
       window.removeEventListener('shadowgov:ui-notifications-toggled', handleToggle);
+      window.removeEventListener('shadowgov:ui-scale-changed', handleUiScaleChange);
       window.removeEventListener('storage', handleStorage);
     };
   }, []);
