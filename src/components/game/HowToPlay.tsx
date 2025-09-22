@@ -8,6 +8,7 @@ import {
   MVP_COST_TABLE_ROWS,
   MVP_RULES_SECTIONS,
   MVP_RULES_TITLE,
+  MVP_SYNERGY_GROUPS,
 } from '@/content/mvpRules';
 
 interface HowToPlayProps {
@@ -230,6 +231,47 @@ const HowToPlay = ({ onClose }: HowToPlayProps) => {
                             </div>
                           );
                         })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="space-y-3">
+                <h2 className="text-2xl font-bold text-newspaper-text font-mono">
+                  Territorial Synergies
+                </h2>
+                <p className="text-newspaper-text/80 leading-relaxed">
+                  Control every state in a listed combination to activate its passive bonus. IP gains stack with normal income and each bonus effect persists as long as you keep the entire set.
+                </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {MVP_SYNERGY_GROUPS.map(group => (
+                    <div
+                      key={group.id}
+                      className="border border-newspaper-text/30 bg-newspaper-text/5 p-3 rounded space-y-3"
+                    >
+                      <div>
+                        <div className="text-lg font-semibold text-newspaper-text">
+                          {group.title}
+                        </div>
+                        <p className="text-xs text-newspaper-text/70 mt-1 leading-relaxed">
+                          {group.description}
+                        </p>
+                      </div>
+                      <div className="space-y-3">
+                        {group.combos.map(combo => (
+                          <div key={combo.id} className="border-t border-dashed border-newspaper-text/30 pt-2 first:border-t-0 first:pt-0">
+                            <div className="font-semibold text-newspaper-text text-sm">
+                              {combo.name}
+                            </div>
+                            <div className="text-xs text-newspaper-text/70">
+                              States: {combo.requiredStates.join(', ')}
+                            </div>
+                            <div className="text-xs text-newspaper-text/80">
+                              Reward: +{combo.bonusIp} IP{combo.bonusEffect ? ` · ${combo.bonusEffect}` : ''}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
