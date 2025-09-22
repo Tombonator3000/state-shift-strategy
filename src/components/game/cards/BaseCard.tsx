@@ -30,6 +30,7 @@ interface BaseCardProps {
   size?: CardFrameSize;
   frameClassName?: string;
   overlay?: ReactNode;
+  scaleOverride?: number;
 }
 
 export const BaseCard = ({
@@ -41,6 +42,7 @@ export const BaseCard = ({
   size = 'modal',
   frameClassName,
   overlay,
+  scaleOverride,
 }: BaseCardProps) => {
   const effectText = formatEffect(card);
   const flavor = getFlavorText(card);
@@ -48,7 +50,8 @@ export const BaseCard = ({
   const typeLabel = normalizeCardType(card.type);
   const showCardText = card.text && card.text !== effectText;
 
-  const wrapperStyle = { '--card-scale': String(SIZE_TO_SCALE[size]) } as CSSProperties;
+  const cardScale = typeof scaleOverride === 'number' ? scaleOverride : SIZE_TO_SCALE[size];
+  const wrapperStyle = { '--card-scale': String(cardScale) } as CSSProperties;
 
   return (
     <div
@@ -56,7 +59,7 @@ export const BaseCard = ({
       style={wrapperStyle}
       data-testid="tabloid-card"
     >
-      <CardFrame size={size}>
+      <CardFrame size={size} scaleOverride={cardScale}>
         <>
           <div className="card-header text-[color:var(--ink)]">
             <div className="text-3xl leading-none uppercase font-headline">

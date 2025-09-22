@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import clsx from 'clsx';
 import CardDetailOverlay from './CardDetailOverlay';
 import BaseCard from '@/components/game/cards/BaseCard';
@@ -40,6 +41,101 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const { triggerHaptic } = useHapticFeedback();
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);
+  const [layout, setLayout] = useState(() => ({ columns: 1, scale: 0.78 }));
+
+  useEffect(() => {
+    const element = handRef.current;
+    if (!element) {
+      return;
+    }
+
+    const BASE_CARD_WIDTH = 320;
+    const BASE_CARD_HEIGHT = 460;
+    const MAX_SCALE = 0.78;
+    const GRID_GAP_PX = 12; // Tailwind gap-3 (0.75rem)
+    const EPSILON = 0.001;
+
+    const computeLayout = () => {
+      const rect = element.getBoundingClientRect();
+      const availableWidth = rect.width;
+      const availableHeight = rect.height;
+
+      if (availableWidth <= 0 || availableHeight <= 0) {
+        return;
+      }
+
+      if (cards.length === 0) {
+        setLayout(prev => (prev.columns === 1 && Math.abs(prev.scale - MAX_SCALE) < EPSILON ? prev : { columns: 1, scale: MAX_SCALE }));
+        return;
+      }
+
+      let bestColumns = 1;
+      let bestScale = 0;
+
+      for (let columns = 1; columns <= cards.length; columns += 1) {
+        const rows = Math.ceil(cards.length / columns);
+        const horizontalSpace = availableWidth - GRID_GAP_PX * (columns - 1);
+        const verticalSpace = availableHeight - GRID_GAP_PX * (rows - 1);
+
+        const widthScale = horizontalSpace / (columns * BASE_CARD_WIDTH);
+        const heightScale = verticalSpace / (rows * BASE_CARD_HEIGHT);
+        const nextScaleRaw = Math.min(widthScale, heightScale, MAX_SCALE);
+        const nextScale = Number.isFinite(nextScaleRaw) ? nextScaleRaw : 0;
+
+        if (nextScale <= 0) {
+          continue;
+        }
+
+        if (nextScale > bestScale + EPSILON || (Math.abs(nextScale - bestScale) < EPSILON && columns > bestColumns)) {
+          bestColumns = columns;
+          bestScale = nextScale;
+        }
+      }
+
+      if (bestScale <= 0) {
+        bestColumns = Math.min(cards.length, Math.max(1, Math.floor(availableWidth / (BASE_CARD_WIDTH * MAX_SCALE))));
+        bestColumns = bestColumns > 0 ? bestColumns : 1;
+        bestScale = Math.max(Math.min(availableWidth / (bestColumns * BASE_CARD_WIDTH), MAX_SCALE), 0.1);
+      }
+
+      setLayout(prev => {
+        if (prev.columns === bestColumns && Math.abs(prev.scale - bestScale) < EPSILON) {
+          return prev;
+        }
+
+        return { columns: bestColumns, scale: bestScale };
+      });
+    };
+
+    computeLayout();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(computeLayout);
+      observer.observe(element);
+      return () => {
+        observer.disconnect();
+      };
+    }
+
+    const handleResize = () => computeLayout();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [cards.length]);
+
+  const cardScale = layout.scale;
+  const cardWidth = 320 * cardScale;
+  const cardHeight = 460 * cardScale;
+
+  const gridStyle = {
+    '--hand-card-width': `${cardWidth}px`,
+    '--hand-card-height': `${cardHeight}px`,
+    gridTemplateColumns:
+      cards.length > 0
+        ? `repeat(${layout.columns}, minmax(0, var(--hand-card-width)))`
+        : undefined,
+  } as CSSProperties;
 
   const normalizeCardType = (type: string): MVPCardType => {
     return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
@@ -110,14 +206,14 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 
   return (
     <div
-      className="relative h-full"
+      className="relative h-full overflow-hidden"
       ref={handRef}
       onPointerLeave={() => onCardHover?.(null)}
     >
-      <div className="w-full overflow-x-auto">
-        <div
-          className="grid w-full grid-cols-1 gap-3 auto-rows-[minmax(0,_1fr)] justify-items-stretch items-stretch content-start sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-        >
+      <div
+        className="grid h-full w-full gap-3 auto-rows-[minmax(0,_1fr)] justify-items-stretch items-start content-start"
+        style={gridStyle}
+      >
           {cards.length === 0 ? (
             <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
               No assets available
@@ -177,11 +273,15 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   key={`${card.id}-${index}`}
                   type="button"
                   className={clsx(
-                    'group/card relative flex aspect-[3/4] w-full min-w-[200px] max-w-[320px] items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 sm:min-w-[220px] xl:min-w-[240px]',
+                    'group/card relative flex flex-shrink-0 items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
                     !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
                     disabled && 'cursor-default'
                   )}
-                  style={{ animationDelay: `${index * 0.03}s` }}
+                  style={{
+                    animationDelay: `${index * 0.03}s`,
+                    width: 'var(--hand-card-width)',
+                    height: 'var(--hand-card-height)',
+                  }}
                   onClick={(e) => {
                     e.preventDefault();
                     audio.playSFX('click');
@@ -221,6 +321,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     hideStamp
                     polaroidHover={false}
                     size="handMini"
+                    scaleOverride={cardScale}
                     className="pointer-events-none select-none h-full w-full"
                     frameClassName={clsx(
                       'drop-shadow-[0_12px_22px_rgba(0,0,0,0.32)] transition-transform duration-200',
@@ -234,7 +335,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               );
             })
           )}
-        </div>
       </div>
 
       {/* Card Detail Overlay - Redesigned */}

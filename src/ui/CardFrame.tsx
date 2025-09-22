@@ -1,21 +1,26 @@
 import React from "react";
 
 type Size = "modal" | "boardMini" | "handMini";
-type Props = { children: React.ReactNode; size?: Size };
+type Props = {
+  children: React.ReactNode;
+  size?: Size;
+  scaleOverride?: number;
+};
 
-export default function CardFrame({ children, size = "modal" }: Props) {
+export default function CardFrame({ children, size = "modal", scaleOverride }: Props) {
   // FINJUSTÉR SKALA HER:
   // - boardMini: senket til 0.56 for å unngå scroll i "Cards in Play"
   // - handMini: beholdt 0.78 (god lesbarhet i Your Hand)
-  const scale = size === "modal" ? 1 : size === "boardMini" ? 0.56 : 0.78;
+  const defaultScale = size === "modal" ? 1 : size === "boardMini" ? 0.56 : 0.78;
+  const scale = typeof scaleOverride === "number" ? scaleOverride : defaultScale;
 
   // Basemål MÅ matche fullkortets outer size (inkl. border)
   const BASE_W = 320;
   const BASE_H = 460;
 
   const cellStyle: React.CSSProperties = {
-    width: `calc(${BASE_W}px * ${scale})`,
-    height: `calc(${BASE_H}px * ${scale})`,
+    width: BASE_W * scale,
+    height: BASE_H * scale,
     position: "relative",
     flex: "0 0 auto",
     overflow: "hidden",

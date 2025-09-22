@@ -1705,7 +1705,7 @@ const Index = () => {
           <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Your Hand</h3>
           <span className="text-xs font-mono">IP {gameState.ip}</span>
         </header>
-        <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
+        <div className="flex-1 min-h-0 min-w-0 overflow-hidden px-3 py-3">
           <EnhancedGameHand
             cards={gameState.hand}
             onPlayCard={handlePlayCard}
