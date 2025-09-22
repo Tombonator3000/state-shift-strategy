@@ -18,6 +18,7 @@ import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
@@ -458,6 +459,15 @@ const Index = () => {
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [uiNotificationsEnabled, setUiNotificationsEnabled] = useState(() => areUiNotificationsEnabled());
+  const isMobile = useIsMobile();
+  const [isLgAndUp, setIsLgAndUp] = useState(() => {
+    if (typeof window === 'undefined') {
+      return true;
+    }
+    return window.matchMedia('(min-width: 1024px)').matches;
+  });
+  const [isMobileHandOpen, setIsMobileHandOpen] = useState(false);
+  const [isMobileHandExpanded, setIsMobileHandExpanded] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
   const maxCardsPerTurn = normalizeMaxCardsPerTurn(gameState.maxCardsPerTurn);
@@ -480,6 +490,42 @@ const Index = () => {
       executeAITurn();
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+    const handleChange = (event: MediaQueryListEvent) => {
+      setIsLgAndUp(event.matches);
+    };
+
+    setIsLgAndUp(mediaQuery.matches);
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+
+  useEffect(() => {
+    if (isLgAndUp) {
+      setIsMobileHandOpen(false);
+      setIsMobileHandExpanded(false);
+      setHoveredCard(null);
+    }
+  }, [isLgAndUp]);
+
+  useEffect(() => {
+    if (!isMobileHandOpen) {
+      setIsMobileHandExpanded(false);
+      setHoveredCard(null);
+    }
+  }, [isMobileHandOpen]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -1368,6 +1414,28 @@ const Index = () => {
 
   const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
   const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= maxCardsPerTurn;
+  const showDesktopHand = isLgAndUp && !isMobile;
+  const shouldShowMobileHandUI = !showDesktopHand;
+
+  const handleMobileHandToggle = () => {
+    setIsMobileHandOpen(prev => {
+      const next = !prev;
+      if (!next) {
+        setHoveredCard(null);
+      }
+      return next;
+    });
+  };
+
+  const handleCloseMobileHand = () => {
+    setIsMobileHandOpen(false);
+    setIsMobileHandExpanded(false);
+    setHoveredCard(null);
+  };
+
+  const handleToggleMobileHandExpansion = () => {
+    setIsMobileHandExpanded(prev => !prev);
+  };
 
   const renderIntelLog = (limit: number) => (
     <div className="space-y-1 text-xs text-newspaper-text/80">
@@ -1446,6 +1514,17 @@ const Index = () => {
       </div>
       <div className="flex flex-1 flex-col justify-center gap-1 overflow-hidden">
         <div className="flex items-center justify-end gap-2">
+          {shouldShowMobileHandUI && (
+            <button
+              type="button"
+              onClick={handleMobileHandToggle}
+              className={`${mastheadButtonClass} lg:hidden ${isMobileHandOpen ? 'bg-white text-newspaper-text' : ''}`}
+              aria-pressed={isMobileHandOpen}
+            >
+              <span aria-hidden="true">🃏</span>
+              <span className="sr-only">{isMobileHandOpen ? 'Hide hand' : 'Show hand'}</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={toggleFullscreen}
@@ -1618,42 +1697,44 @@ const Index = () => {
     </div>
   );
 
-  const rightPaneContent = (
-    <aside className="h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
-      <header className="flex items-center justify-between gap-2 border-b border-newspaper-border/60 px-4 py-3">
-        <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Your Hand</h3>
-        <span className="text-xs font-mono">IP {gameState.ip}</span>
-      </header>
-      <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
-        <EnhancedGameHand
-          cards={gameState.hand}
-          onPlayCard={handlePlayCard}
-          onSelectCard={handleSelectCard}
-          selectedCard={gameState.selectedCard}
-          disabled={handInteractionDisabled}
-          currentIP={gameState.ip}
-          loadingCard={loadingCard}
-          onCardHover={setHoveredCard}
-        />
-      </div>
-      <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
-        <Button
-          onClick={handleEndTurn}
-          className="touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60"
-          disabled={isPlayerActionLocked}
-        >
-          {gameState.currentPlayer === 'ai' ? (
-            <span className="flex items-center justify-center gap-2 text-sm">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
-              AI Thinking...
-            </span>
-          ) : (
-            'End Turn'
-          )}
-        </Button>
-      </footer>
-    </aside>
-  );
+  const rightPaneContent = !showDesktopHand
+    ? null
+    : (
+      <aside className="flex min-h-0 min-w-0 flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
+        <header className="flex items-center justify-between gap-2 border-b border-newspaper-border/60 px-4 py-3">
+          <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Your Hand</h3>
+          <span className="text-xs font-mono">IP {gameState.ip}</span>
+        </header>
+        <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
+          <EnhancedGameHand
+            cards={gameState.hand}
+            onPlayCard={handlePlayCard}
+            onSelectCard={handleSelectCard}
+            selectedCard={gameState.selectedCard}
+            disabled={handInteractionDisabled}
+            currentIP={gameState.ip}
+            loadingCard={loadingCard}
+            onCardHover={setHoveredCard}
+          />
+        </div>
+        <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
+          <Button
+            onClick={handleEndTurn}
+            className="touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60"
+            disabled={isPlayerActionLocked}
+          >
+            {gameState.currentPlayer === 'ai' ? (
+              <span className="flex items-center justify-center gap-2 text-sm">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
+                AI Thinking...
+              </span>
+            ) : (
+              'End Turn'
+            )}
+          </Button>
+        </footer>
+      </aside>
+    );
 
   return (
     <>
@@ -1662,6 +1743,22 @@ const Index = () => {
         leftPane={leftPaneContent}
         rightPane={rightPaneContent}
       />
+
+      {shouldShowMobileHandUI && (
+        <MinimizedHand
+          cards={gameState.hand}
+          selectedCard={gameState.selectedCard}
+          onSelectCard={handleSelectCard}
+          onPlayCard={(cardId) => { void handlePlayCard(cardId); }}
+          playerIP={gameState.ip}
+          isMaximized={isMobileHandExpanded}
+          onToggleMaximize={handleToggleMobileHandExpansion}
+          isOpen={isMobileHandOpen}
+          onClose={handleCloseMobileHand}
+          disabled={handInteractionDisabled}
+          onCardHover={(card) => setHoveredCard(card)}
+        />
+      )}
 
       {uiNotificationsEnabled && (
         <Toaster
