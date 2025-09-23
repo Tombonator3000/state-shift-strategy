@@ -4,10 +4,12 @@ import type { CardPlayRecord } from '@/hooks/gameStateTypes';
 import type { GameCard } from '@/rules/mvp';
 import BaseCard from '@/components/game/cards/BaseCard';
 
-const BOARD_MINI_CARD_WIDTH = 160; // 320px base width * 0.5 boardMini scale
 const BASE_CARD_WIDTH = 320;
+const DEFAULT_CARD_SCALE = 0.5; // boardMini scale
+const BOARD_MINI_CARD_WIDTH = BASE_CARD_WIDTH * DEFAULT_CARD_SCALE;
+const MIN_CARD_SCALE = 0.35;
+const MIN_CARD_WIDTH = BASE_CARD_WIDTH * MIN_CARD_SCALE;
 const GRID_GAP_PX = 8; // Tailwind gap-2 spacing
-const DEFAULT_CARD_SCALE = BOARD_MINI_CARD_WIDTH / BASE_CARD_WIDTH;
 
 interface PlayedCardsDockProps {
   playedCards: CardPlayRecord[];
@@ -103,16 +105,16 @@ const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, e
 
     const maxColumns = Math.max(
       1,
-      Math.floor((containerWidth + GRID_GAP_PX) / (BOARD_MINI_CARD_WIDTH + GRID_GAP_PX)),
+      Math.floor((containerWidth + GRID_GAP_PX) / (MIN_CARD_WIDTH + GRID_GAP_PX)),
     );
     const columnCount = Math.min(maxColumns, Math.max(cards.length, 1));
     const totalGapWidth = GRID_GAP_PX * (columnCount - 1);
     const availableForColumns = Math.max(containerWidth - totalGapWidth, 0);
     const rawColumnWidth = availableForColumns / columnCount;
-    const safeColumnWidth = Math.max(rawColumnWidth, 0);
-    const cardScale = Math.min(safeColumnWidth / BASE_CARD_WIDTH, 1);
-    const finalScale = cardScale > 0 ? cardScale : DEFAULT_CARD_SCALE;
-    const cardWidth = Math.max(BASE_CARD_WIDTH * finalScale, 0);
+    const safeColumnWidth = Math.max(rawColumnWidth, MIN_CARD_WIDTH);
+    const unclampedScale = safeColumnWidth / BASE_CARD_WIDTH;
+    const finalScale = Math.max(unclampedScale, MIN_CARD_SCALE);
+    const cardWidth = BASE_CARD_WIDTH * finalScale;
 
     return {
       columnCount,
