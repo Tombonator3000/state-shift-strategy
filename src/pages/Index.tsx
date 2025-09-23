@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -44,6 +44,7 @@ import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
 import { areParanormalEffectsEnabled } from '@/state/settings';
 import type { GameCard } from '@/rules/mvp';
+import { getCombinationContextFromControlledStates, getCardCostAdjustment } from '@/game/combinationEffects';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
@@ -457,6 +458,21 @@ const Index = () => {
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
+
+  const playerCombinationContext = useMemo(
+    () => getCombinationContextFromControlledStates(gameState.controlledStates),
+    [gameState.controlledStates],
+  );
+
+  const getEffectiveCardCost = useCallback(
+    (card: GameCard) => getCardCostAdjustment(card, playerCombinationContext).adjustedCost,
+    [playerCombinationContext],
+  );
+
+  const getCardDiscount = useCallback(
+    (card: GameCard) => getCardCostAdjustment(card, playerCombinationContext).discount,
+    [playerCombinationContext],
+  );
 
   const pushSighting = useCallback((entry: ParanormalSighting) => {
     setParanormalSightings(prev => {
@@ -1010,9 +1026,13 @@ const Index = () => {
       VisualEffectsCoordinator.triggerGovernmentZoneTarget({ active: false, mode: 'complete' });
     }
 
+    const effectiveCost = getEffectiveCardCost(card);
+    const discount = getCardDiscount(card);
+
     // Check if player can afford the card
-    if (gameState.ip < card.cost) {
-      toast.error(`💰 Insufficient IP! Need ${card.cost}, have ${gameState.ip}`, {
+    if (gameState.ip < effectiveCost) {
+      const discountText = discount > 0 ? ` (after ${discount} synergy discount)` : '';
+      toast.error(`💰 Insufficient IP! Need ${effectiveCost}${discountText}, have ${gameState.ip}`, {
         duration: 3000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
       });
@@ -1565,6 +1585,7 @@ const Index = () => {
           currentIP={gameState.ip}
           loadingCard={loadingCard}
           onCardHover={setHoveredCard}
+          getEffectiveCost={getEffectiveCardCost}
         />
       </div>
       <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">

@@ -11,7 +11,7 @@ import { chooseTurnActions } from '@/ai/enhancedController';
 import { EventManager, type GameEvent } from '@/data/eventDatabase';
 import { processAiActions } from './aiTurnActions';
 import { buildEditionEvents } from './eventEdition';
-import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
+import { DRAW_MODE_CONFIGS, getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardMVP, type CardPlayResolution } from '@/systems/cardResolution';
 import { applyTruthDelta } from '@/utils/truth';
@@ -19,6 +19,14 @@ import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
+import {
+  buildCardWithAdjustedCost,
+  calculateIncomeWithCombination,
+  countNeutralStates,
+  getCardCostAdjustment,
+  getCombinationContextFromControlledStates,
+  type IncomeBreakdown,
+} from '@/game/combinationEffects';
 import type { GameState } from './gameStateTypes';
 import {
   applyAiCardPlay,
@@ -38,6 +46,25 @@ const DIFFICULTY_TO_AI_DIFFICULTY: Record<Difficulty, AIDifficulty> = {
   NORMAL: 'medium',
   HARD: 'hard',
   TOP_SECRET_PLUS: 'legendary',
+};
+
+const isValidDrawMode = (mode: unknown): mode is DrawMode => {
+  return typeof mode === 'string' && Object.prototype.hasOwnProperty.call(DRAW_MODE_CONFIGS, mode);
+};
+
+const formatIncomeBreakdown = (components: IncomeBreakdown['components']): string => {
+  const parts: string[] = [];
+  if (components.flat > 0) {
+    parts.push(`flat +${components.flat}`);
+  }
+  if (components.perControlled > 0) {
+    parts.push(`controlled +${components.perControlled}`);
+  }
+  if (components.perNeutral > 0) {
+    parts.push(`neutral +${components.perNeutral}`);
+  }
+
+  return parts.length > 0 ? ` (${parts.join(', ')})` : '';
 };
 
 const normalizeRoundFromSave = (saveData: Partial<GameState>): number => {
@@ -253,9 +280,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     
     // Get draw mode from localStorage
     const savedSettings = localStorage.getItem('gameSettings');
-    const drawMode: DrawMode = savedSettings ? 
-      (JSON.parse(savedSettings).drawMode || 'standard') : 'standard';
-    
+    let drawMode: DrawMode = 'standard';
+
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings);
+        if (isValidDrawMode(parsed?.drawMode)) {
+          drawMode = parsed.drawMode;
+        }
+      } catch (error) {
+        console.warn('Failed to parse saved game settings, defaulting draw mode to standard.', error);
+      }
+    }
+
     const handSize = getStartingHandSize(drawMode, faction);
     // CRITICAL: Pass faction to deck generation
     const newDeck = generateWeightedDeck(40, faction);
@@ -327,17 +364,27 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
   const playCard = useCallback((cardId: string, targetOverride?: string | null) => {
     setGameState(prev => {
-      const card = prev.hand.find(c => c.id === cardId);
-      if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
+      const cardInHand = prev.hand.find(c => c.id === cardId);
+      if (!cardInHand || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
         return prev;
       }
 
-      achievements.onCardPlayed(cardId, card.type, card.rarity);
+      const combinationContext = getCombinationContextFromControlledStates(prev.controlledStates);
+      const { card: adjustedCard, adjustedCost, discount } = buildCardWithAdjustedCost(
+        cardInHand,
+        combinationContext,
+      );
+
+      if (prev.ip < adjustedCost) {
+        return prev;
+      }
+
+      achievements.onCardPlayed(cardId, adjustedCard.type, adjustedCard.rarity);
 
       const targetState = targetOverride ?? prev.targetState ?? null;
-      const resolution = resolveCardEffects(prev, card, targetState);
+      const resolution = resolveCardEffects(prev, adjustedCard, targetState);
       const playedCardRecord = createPlayedCardRecord({
-        card,
+        card: adjustedCard,
         player: 'human',
         faction: prev.faction,
         targetState,
@@ -351,11 +398,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const turnPlayEntries = createTurnPlayEntries({
         state: prev,
-        card,
+        card: adjustedCard,
         owner: 'human',
         targetState,
         resolution,
       });
+
+      const discountLogEntries = discount > 0
+        ? [`💸 Synergy bonus: ${adjustedCard.name} cost reduced by ${discount} IP (paid ${adjustedCost})`]
+        : [];
 
       return {
         ...prev,
@@ -372,7 +423,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         turnPlays: [...prev.turnPlays, ...turnPlayEntries],
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
-        log: [...prev.log, ...resolution.logEntries]
+        log: [...prev.log, ...discountLogEntries, ...resolution.logEntries]
       };
     });
   }, [achievements, resolveCardEffects]);
@@ -383,24 +434,42 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     explicitTargetState?: string
   ) => {
     const card = gameState.hand.find(c => c.id === cardId);
-    if (!card || gameState.ip < card.cost || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
+    if (!card || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
       return;
     }
 
-    achievements.onCardPlayed(cardId, card.type, card.rarity);
+    const currentContext = getCombinationContextFromControlledStates(gameState.controlledStates);
+    const { adjustedCost: immediateCost } = getCardCostAdjustment(card, currentContext);
+
+    if (gameState.ip < immediateCost) {
+      return;
+    }
 
     const targetState = explicitTargetState ?? gameState.targetState ?? null;
     let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
     let pendingTurnPlays: ReturnType<typeof createTurnPlayEntries> | null = null;
+    let pendingDiscountLog: string[] = [];
 
     setGameState(prev => {
       if (prev.animating) {
         return prev;
       }
 
-      const resolution = resolveCardEffects(prev, card, targetState);
-      pendingRecord = createPlayedCardRecord({
+      const combinationContext = getCombinationContextFromControlledStates(prev.controlledStates);
+      const { card: adjustedCard, adjustedCost, discount } = buildCardWithAdjustedCost(
         card,
+        combinationContext,
+      );
+
+      if (prev.ip < adjustedCost) {
+        return prev;
+      }
+
+      achievements.onCardPlayed(cardId, adjustedCard.type, adjustedCard.rarity);
+
+      const resolution = resolveCardEffects(prev, adjustedCard, targetState);
+      pendingRecord = createPlayedCardRecord({
+        card: adjustedCard,
         player: 'human',
         faction: prev.faction,
         targetState,
@@ -414,11 +483,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       pendingTurnPlays = createTurnPlayEntries({
         state: prev,
-        card,
+        card: adjustedCard,
         owner: 'human',
         targetState,
         resolution,
       });
+
+      pendingDiscountLog = discount > 0
+        ? [`💸 Synergy bonus: ${adjustedCard.name} cost reduced by ${discount} IP (paid ${adjustedCost})`]
+        : [];
 
       return {
         ...prev,
@@ -431,9 +504,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         aiControlledStates: resolution.aiControlledStates,
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
-        log: [...prev.log, ...resolution.logEntries]
+        log: [...prev.log, ...pendingDiscountLog, ...resolution.logEntries]
       };
     });
+
+    if (!pendingRecord) {
+      return;
+    }
 
     try {
       await animateCard(cardId, card, {
@@ -443,7 +520,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       setGameState(prev => {
         const record = pendingRecord ?? {
-          card,
+          card: pendingRecord?.card ?? card,
           player: 'human' as const,
           faction: prev.faction,
           targetState: targetState ?? null,
@@ -473,7 +550,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       console.error('Card animation failed:', error);
       setGameState(prev => {
         const record = pendingRecord ?? {
-          card,
+          card: pendingRecord?.card ?? card,
           player: 'human' as const,
           faction: prev.faction,
           targetState: targetState ?? null,
@@ -538,10 +615,22 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         // Human player ending turn - switch to AI (no card draw here anymore)
         // Card drawing will happen after newspaper at start of new turn
 
-        // Calculate IP income from controlled states
+        // Calculate IP income from controlled states and combinations
         const stateIncome = getTotalIPFromStates(prev.controlledStates);
         const baseIncome = 5;
-        const totalIncome = baseIncome + stateIncome;
+        const combinationContext = getCombinationContextFromControlledStates(prev.controlledStates);
+        const neutralStates = countNeutralStates(prev);
+        const incomeResult = calculateIncomeWithCombination(
+          baseIncome,
+          stateIncome,
+          combinationContext,
+          prev.controlledStates.length,
+          neutralStates,
+        );
+        const totalIncome = incomeResult.totalIncome;
+        const comboIncomeLog = incomeResult.comboBonus > 0
+          ? [`Combination income: +${incomeResult.comboBonus} IP${formatIncomeBreakdown(incomeResult.components)}`]
+          : [];
 
         // Update event manager with current turn
         prev.eventManager?.updateTurn(prev.turn);
@@ -590,6 +679,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           `Turn ${prev.turn} ended`,
           `Base income: ${baseIncome} IP`,
           `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
+          ...comboIncomeLog,
           `Total income: ${totalIncome + ipModifier} IP`,
           ...eventEffectLog,
         ];
@@ -708,7 +798,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
         const aiStateIncome = getTotalIPFromStates(aiControlledStates);
         const aiBaseIncome = 5;
-        const aiTotalIncome = aiBaseIncome + aiStateIncome;
+        const aiCombinationContext = getCombinationContextFromControlledStates(aiControlledStates);
+        const aiNeutralStates = countNeutralStates(prev);
+        const aiIncomeResult = calculateIncomeWithCombination(
+          aiBaseIncome,
+          aiStateIncome,
+          aiCombinationContext,
+          aiControlledStates.length,
+          aiNeutralStates,
+        );
+        const aiTotalIncome = aiIncomeResult.totalIncome;
+        const aiComboLogEntry = aiIncomeResult.comboBonus > 0
+          ? `AI combo bonus: +${aiIncomeResult.comboBonus} IP${formatIncomeBreakdown(aiIncomeResult.components)}`
+          : null;
 
         const aiFaction = prev.faction === 'government' ? 'truth' : 'government';
         const aiCardsNeeded = Math.max(0, HAND_LIMIT - prev.aiHand.length);
@@ -722,7 +824,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           aiIP: prev.aiIP + aiTotalIncome,
           log: [
             ...prev.log,
-            `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStates.length} states = ${aiTotalIncome} IP`,
+            `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStates.length} states${aiIncomeResult.comboBonus > 0 ? ` + ${aiIncomeResult.comboBonus} combo` : ''} = ${aiTotalIncome} IP`,
+            ...(aiComboLogEntry ? [aiComboLogEntry] : []),
             `AI drew ${aiDrawnCards.length} card${aiDrawnCards.length === 1 ? '' : 's'} (hand ${aiHandSizeAfterDraw}/${HAND_LIMIT})`,
           ],
         };
