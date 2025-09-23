@@ -1438,6 +1438,10 @@ const Index = () => {
     setIsMobileHandExpanded(prev => !prev);
   };
 
+  const handleOpenMobileHand = () => {
+    setIsMobileHandOpen(true);
+  };
+
   const renderIntelLog = (limit: number) => (
     <div className="space-y-1 text-xs text-newspaper-text/80">
       {gameState.log.slice(-limit).map((entry, index) => (
@@ -1775,6 +1779,7 @@ const Index = () => {
           onToggleMaximize={handleToggleMobileHandExpansion}
           isOpen={isMobileHandOpen}
           onClose={handleCloseMobileHand}
+          onOpen={handleOpenMobileHand}
           disabled={handInteractionDisabled}
           onCardHover={(card) => setHoveredCard(card)}
           endTurnDisabled={isPlayerActionLocked}
