@@ -42,7 +42,7 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
                   "lg:grid lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-6 lg:[&>*]:min-h-0 xl:grid-cols-[minmax(0,1fr)_480px]"
               )}
             >
-              <main className="flex min-h-0 flex-1 min-w-0 flex-col gap-4 overflow-hidden">
+              <main className="flex min-h-0 flex-1 min-w-0 flex-col gap-4">
                 <div className="flex min-h-0 flex-1 min-w-0 flex-col gap-4 overflow-y-auto">
                   {leftPane}
                 </div>
