@@ -3,7 +3,7 @@ import { normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 import type { MediaResolutionOptions } from '@/mvp/media';
 import { cloneGameState, type Card, type GameState as EngineGameState } from '@/mvp';
 import type { GameCard } from '@/rules/mvp';
-import { setStateOccupation } from '@/data/usaStates';
+import { clearStateOccupation, setStateOccupation } from '@/data/usaStates';
 import type { PlayerStats } from '@/data/achievementSystem';
 
 type Faction = 'government' | 'truth';
@@ -244,6 +244,7 @@ export function resolveCardMVP(
       nextControlledStates.delete(state.abbreviation);
       nextAiControlledStates.add(state.abbreviation);
     } else {
+      clearStateOccupation(state);
       nextControlledStates.delete(state.abbreviation);
       nextAiControlledStates.delete(state.abbreviation);
     }
