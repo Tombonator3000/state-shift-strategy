@@ -1,6 +1,31 @@
 import type { Difficulty } from "../ai";
+import type { DrawMode } from "@/data/cardDrawingSystem";
 
 const OPTIONS_STORAGE_KEY = "gameSettings";
+
+const VALID_DRAW_MODES: DrawMode[] = ['standard', 'classic', 'momentum', 'catchup', 'fast'];
+
+export const DEFAULT_DRAW_MODE: DrawMode = 'standard';
+
+const isRecognizedDrawMode = (mode: unknown): mode is DrawMode =>
+  typeof mode === 'string' && (VALID_DRAW_MODES as readonly string[]).includes(mode);
+
+export const parseDrawModeSetting = (rawSettings: string | null | undefined): DrawMode => {
+  if (!rawSettings) {
+    return DEFAULT_DRAW_MODE;
+  }
+
+  try {
+    const parsed = JSON.parse(rawSettings) as { drawMode?: unknown } | null;
+    if (parsed && isRecognizedDrawMode(parsed.drawMode)) {
+      return parsed.drawMode;
+    }
+  } catch (error) {
+    console.warn('Failed to parse draw mode from saved settings, defaulting to standard.', error);
+  }
+
+  return DEFAULT_DRAW_MODE;
+};
 
 export function getDifficulty(): Difficulty {
   const storage = typeof localStorage !== "undefined" ? localStorage : null;
