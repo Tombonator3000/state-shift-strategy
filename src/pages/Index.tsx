@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import type { CSSProperties } from 'react';
 import { Button } from '@/components/ui/button';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -1624,6 +1625,12 @@ const Index = () => {
     </div>
   );
 
+  const mapRowHeight = 'clamp(320px, 55vh, 540px)';
+  const dockRowHeight = 'clamp(220px, 28vh, 300px)';
+  const mapDockGridStyle = {
+    gridTemplateRows: `minmax(0, ${mapRowHeight}) minmax(0, ${dockRowHeight})`,
+  } as CSSProperties;
+
   const leftPaneContent = (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <div className="flex min-h-0 flex-1 flex-col gap-4 xl:flex-row">
@@ -1674,22 +1681,34 @@ const Index = () => {
               </div>
             </div>
           )}
-          <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
-            <div className="relative flex-1">
-              <EnhancedUSAMap
-                states={gameState.states}
-                onStateClick={handleStateClick}
-                selectedZoneCard={gameState.selectedCard}
-                selectedState={gameState.targetState}
-                audio={audio}
+          <div
+            className="grid min-h-0 flex-1 gap-4"
+            style={mapDockGridStyle}
+          >
+            <div className="overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
+              <div className="flex h-full w-full items-center justify-center">
+                <div
+                  className="relative mx-auto w-full max-h-full"
+                  style={{ aspectRatio: '16 / 10' }}
+                >
+                  <div className="absolute inset-0 [&>div]:h-full [&>div]:w-full">
+                    <EnhancedUSAMap
+                      states={gameState.states}
+                      onStateClick={handleStateClick}
+                      selectedZoneCard={gameState.selectedCard}
+                      selectedState={gameState.targetState}
+                      audio={audio}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="overflow-hidden rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
+              <PlayedCardsDock
+                playedCards={gameState.cardsPlayedThisRound}
+                onInspectCard={(card) => setInspectedPlayedCard(card)}
               />
             </div>
-          </div>
-          <div className="flex-shrink-0 overflow-hidden rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
-            <PlayedCardsDock
-              playedCards={gameState.cardsPlayedThisRound}
-              onInspectCard={(card) => setInspectedPlayedCard(card)}
-            />
           </div>
         </div>
       </div>
