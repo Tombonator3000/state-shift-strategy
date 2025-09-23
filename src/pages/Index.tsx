@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import FixedGameLayout from '@/components/layout/FixedGameLayout';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
-import FixedPlayerHand from '@/components/game/FixedPlayerHand';
+import EnhancedGameHand from '@/components/game/EnhancedGameHand';
 import PlayedCardsDock from '@/components/game/PlayedCardsDock';
 import CardDetailOverlay from '@/components/game/CardDetailOverlay';
 import TabloidNewspaper from '@/components/game/TabloidNewspaper';
@@ -1706,7 +1706,16 @@ const Index = () => {
           <span className="text-xs font-mono">IP {gameState.ip}</span>
         </header>
         <div className="flex-1 min-h-0 min-w-0 overflow-hidden px-3 py-3">
-          {/* Using FixedGameLayout now - this is removed */}
+          <EnhancedGameHand
+            cards={gameState.hand}
+            onPlayCard={handlePlayCard}
+            onSelectCard={handleSelectCard}
+            selectedCard={gameState.selectedCard}
+            disabled={handInteractionDisabled}
+            currentIP={gameState.ip}
+            loadingCard={loadingCard}
+            onCardHover={setHoveredCard}
+          />
         </div>
         <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
           <Button
@@ -1729,43 +1738,10 @@ const Index = () => {
 
   return (
     <>
-      <FixedGameLayout
+      <ResponsiveLayout
         masthead={mastheadContent}
-        usaMap={
-          <EnhancedUSAMap
-            states={gameState.states}
-            onStateClick={handleStateClick}
-          />
-        }
-        cardsInPlayTray={
-          <PlayedCardsDock 
-            playedCards={gameState.cardsPlayedThisRound}
-            onInspectCard={setInspectedPlayedCard}
-          />
-        }
-        leftSidebar={
-          <div className="flex flex-col gap-4 h-full overflow-hidden p-4">
-            <div className="text-sm font-mono">
-              <div>Truth: {gameState.truth}%</div>
-              <div>Your IP: {gameState.ip}</div>
-              <div>AI IP: {gameState.aiIP}</div>
-              <div>States: {gameState.controlledStates.length} vs {gameState.aiControlledStates.length}</div>
-            </div>
-          </div>
-        }
-        playerHand={
-          <FixedPlayerHand
-            cards={gameState.hand}
-            onPlayCard={handlePlayCard}
-            onEndTurn={handleEndTurn}
-            onSelectCard={handleSelectCard}
-            selectedCard={gameState.selectedCard}
-            disabled={handInteractionDisabled}
-            currentIP={gameState.ip}
-            loadingCard={loadingCard}
-            onCardHover={setHoveredCard}
-          />
-        }
+        leftPane={leftPaneContent}
+        rightPane={rightPaneContent}
       />
 
       {shouldShowMobileHandUI && (
