@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import clsx from 'clsx';
 import CardDetailOverlay from './CardDetailOverlay';
@@ -13,6 +13,11 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ExtensionCardBadge } from './ExtensionCardBadge';
+
+const HAND_CARD_SCALE = 0.78;
+const CARD_BASE_WIDTH = 320;
+const CARD_BASE_HEIGHT = 460;
+const GRID_GAP = 12; // Tailwind gap-3
 
 interface EnhancedGameHandProps {
   cards: GameCard[];
@@ -41,18 +46,101 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const { triggerHaptic } = useHapticFeedback();
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);
-  const HAND_CARD_SCALE = 0.78;
-  const CARD_BASE_WIDTH = 320;
-  const CARD_BASE_HEIGHT = 460;
-  const cardScale = HAND_CARD_SCALE;
+  const [containerSize, setContainerSize] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+
+  useEffect(() => {
+    const node = handRef.current;
+    if (!node) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const { width, height } = entry.contentRect;
+      setContainerSize((prev) => {
+        if (prev.width === width && prev.height === height) {
+          return prev;
+        }
+        return { width, height };
+      });
+    });
+
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const layout = useMemo(() => {
+    const cardCount = cards.length;
+    const { width, height } = containerSize;
+
+    if (cardCount === 0) {
+      return {
+        scale: HAND_CARD_SCALE,
+        columns: 1,
+      };
+    }
+
+    if (width <= 0 || height <= 0) {
+      return {
+        scale: HAND_CARD_SCALE,
+        columns: Math.min(cardCount, 3) || 1,
+      };
+    }
+
+    let bestScale = 0;
+    let bestColumns = 1;
+
+    for (let columns = 1; columns <= cardCount; columns += 1) {
+      const rows = Math.ceil(cardCount / columns);
+      const horizontalGap = (columns - 1) * GRID_GAP;
+      const verticalGap = (rows - 1) * GRID_GAP;
+
+      const widthScale = (width - horizontalGap) / (columns * CARD_BASE_WIDTH);
+      const heightScale = (height - verticalGap) / (rows * CARD_BASE_HEIGHT);
+      const candidateScale = Math.min(HAND_CARD_SCALE, widthScale, heightScale);
+
+      if (candidateScale <= 0) {
+        continue;
+      }
+
+      if (
+        candidateScale > bestScale + 0.0001 ||
+        (Math.abs(candidateScale - bestScale) <= 0.0001 && columns > bestColumns)
+      ) {
+        bestScale = candidateScale;
+        bestColumns = columns;
+      }
+    }
+
+    if (bestScale <= 0) {
+      return {
+        scale: HAND_CARD_SCALE,
+        columns: Math.min(cardCount, 3) || 1,
+      };
+    }
+
+    return {
+      scale: bestScale,
+      columns: bestColumns,
+    };
+  }, [cards.length, containerSize]);
+
+  const cardScale = layout.scale;
   const cardWidth = CARD_BASE_WIDTH * cardScale;
   const cardHeight = CARD_BASE_HEIGHT * cardScale;
+  const gridColumns = Math.max(1, layout.columns);
 
   const gridStyle = {
+    '--hand-card-scale': `${cardScale}`,
     '--hand-card-width': `${cardWidth}px`,
     '--hand-card-height': `${cardHeight}px`,
-    gridTemplateColumns: 'repeat(3, minmax(0, var(--hand-card-width)))',
-    gridAutoRows: 'var(--hand-card-height)'
+    gridTemplateColumns: `repeat(${gridColumns}, minmax(0, var(--hand-card-width)))`,
+    gridAutoRows: 'var(--hand-card-height)',
   } as CSSProperties;
 
   const normalizeCardType = (type: string): MVPCardType => {
@@ -217,17 +305,17 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   }
                   audio.playSFX('lightClick');
                   const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                    const tooltipWidth = 300;
-                    let left = rect.right + 10;
-                    if (left + tooltipWidth > window.innerWidth) {
-                      left = Math.max(16, rect.left - tooltipWidth - 10);
-                    }
-                    let top = rect.top + rect.height / 2;
-                    top = Math.min(window.innerHeight - 16, Math.max(16, top));
-                    onCardHover?.({
-                      ...card,
-                      _hoverPosition: { x: left, y: top }
-                    });
+                  const tooltipWidth = 300;
+                  let left = rect.right + 10;
+                  if (left + tooltipWidth > window.innerWidth) {
+                    left = Math.max(16, rect.left - tooltipWidth - 10);
+                  }
+                  let top = rect.top + rect.height / 2;
+                  top = Math.min(window.innerHeight - 16, Math.max(16, top));
+                  onCardHover?.({
+                    ...card,
+                    _hoverPosition: { x: left, y: top }
+                  });
                   }}
                   onPointerLeave={() => {
                     onCardHover?.(null);
@@ -246,6 +334,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                       isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40'
                     )}
                     overlay={overlay}
+                    scaleOverride={cardScale}
                   />
                 </button>
               );
