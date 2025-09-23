@@ -21,6 +21,12 @@ import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
 import { playComboGlitchIfAny } from '@/utils/visualEffects';
 import { DEFAULT_MAX_CARDS_PER_TURN, normalizeMaxCardsPerTurn } from '@/config/turnLimits';
+import {
+  calculateComboIncome,
+  collectUnhandledCombinationEffects,
+  deriveCombinationEffectSummaries,
+  getEffectiveCardCost,
+} from '@/game/combinationEffectUtils';
 import type { GameState } from './gameStateTypes';
 import {
   applyAiCardPlay,
@@ -401,7 +407,17 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     setGameState(prev => {
       const card = prev.hand.find(c => c.id === cardId);
       const maxCardsThisTurn = normalizeMaxCardsPerTurn(prev.maxCardsPerTurn);
-      if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= maxCardsThisTurn || prev.animating) {
+      if (!card || prev.cardsPlayedThisTurn >= maxCardsThisTurn || prev.animating) {
+        return prev;
+      }
+
+      const { human: humanComboSummary } = deriveCombinationEffectSummaries({
+        faction: prev.faction,
+        controlledStates: prev.controlledStates,
+        aiControlledStates: prev.aiControlledStates,
+      });
+      const effectiveCost = getEffectiveCardCost(card, humanComboSummary.breakdown);
+      if (prev.ip < effectiveCost) {
         return prev;
       }
 
@@ -460,9 +476,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   ) => {
     const card = gameState.hand.find(c => c.id === cardId);
     const maxCardsThisTurn = normalizeMaxCardsPerTurn(gameState.maxCardsPerTurn);
+    if (!card) {
+      return;
+    }
+
+    const { human: humanComboSummary } = deriveCombinationEffectSummaries({
+      faction: gameState.faction,
+      controlledStates: gameState.controlledStates,
+      aiControlledStates: gameState.aiControlledStates,
+    });
+    const effectiveCost = getEffectiveCardCost(card, humanComboSummary.breakdown);
+
     if (
-      !card ||
-      gameState.ip < card.cost ||
+      gameState.ip < effectiveCost ||
       gameState.cardsPlayedThisTurn >= maxCardsThisTurn ||
       gameState.animating
     ) {
@@ -480,9 +506,24 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return prev;
       }
 
-      const resolution = resolveCardEffects(prev, card, targetState);
+      const handCard = prev.hand.find(c => c.id === cardId);
+      if (!handCard) {
+        return prev;
+      }
+
+      const { human: latestHumanCombo } = deriveCombinationEffectSummaries({
+        faction: prev.faction,
+        controlledStates: prev.controlledStates,
+        aiControlledStates: prev.aiControlledStates,
+      });
+      const currentEffectiveCost = getEffectiveCardCost(handCard, latestHumanCombo.breakdown);
+      if (prev.ip < currentEffectiveCost) {
+        return prev;
+      }
+
+      const resolution = resolveCardEffects(prev, handCard, targetState);
       pendingRecord = createPlayedCardRecord({
-        card,
+        card: handCard,
         player: 'human',
         faction: prev.faction,
         targetState,
@@ -496,7 +537,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       pendingTurnPlays = createTurnPlayEntries({
         state: prev,
-        card,
+        card: handCard,
         owner: 'human',
         targetState,
         resolution,
@@ -610,6 +651,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (prev.isGameOver) return prev;
 
       const isHumanTurn = prev.currentPlayer === 'human';
+      const combinationSummaries = deriveCombinationEffectSummaries({
+        faction: prev.faction,
+        controlledStates: prev.controlledStates,
+        aiControlledStates: prev.aiControlledStates,
+      });
+      const humanComboSummary = combinationSummaries.human;
+      const pendingComboEffects = collectUnhandledCombinationEffects(humanComboSummary.breakdown);
       const comboResult = evaluateCombosForTurn(prev, isHumanTurn ? 'human' : 'ai');
       achievements.onCombosResolved(isHumanTurn ? 'human' : 'ai', comboResult.evaluation);
       const comboSettings = getComboSettings();
@@ -673,7 +721,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         // Calculate IP income from controlled states
         const stateIncome = getTotalIPFromStates(prev.controlledStates);
         const baseIncome = 5;
-        const totalIncome = baseIncome + stateIncome;
+        const comboIncome = calculateComboIncome(humanComboSummary);
+        const totalIncome = baseIncome + stateIncome + comboIncome;
 
         // Update event manager with current turn
         prev.eventManager?.updateTurn(prev.turn);
@@ -707,7 +756,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const newEvents = buildEditionEvents(prev, triggeredEvent);
 
         // Store pending card draw for after newspaper
-        const pendingCardDraw = bonusCardDraw;
+        const comboDrawBonus = Math.max(0, humanComboSummary.breakdown.extraCardDraw);
+        const pendingCardDraw = bonusCardDraw + comboDrawBonus;
 
         const comboLog =
           comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
@@ -717,13 +767,33 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const truthAfterCombos = comboResult.updatedTruth;
         const comboTruthDelta = comboResult.truthDelta;
 
+        const comboIncomeLog =
+          comboIncome !== 0
+            ? [
+                `Combo income: ${comboIncome} IP (${humanComboSummary.activeCombinations
+                  .map(combo => combo.name)
+                  .join(', ') || 'combo bonuses'})`,
+              ]
+            : [];
+        const comboDrawLog =
+          comboDrawBonus > 0
+            ? [`Combo draw bonus: +${comboDrawBonus} card${comboDrawBonus === 1 ? '' : 's'} next turn`]
+            : [];
+        const unresolvedComboLog =
+          pendingComboEffects.length > 0
+            ? [`Combo effects pending implementation: ${pendingComboEffects.join(', ')}`]
+            : [];
+
         const logEntries = [
           ...comboLog,
           `Turn ${prev.turn} ended`,
           `Base income: ${baseIncome} IP`,
           `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
+          ...comboIncomeLog,
           `Total income: ${totalIncome + ipModifier} IP`,
           ...eventEffectLog,
+          ...comboDrawLog,
+          ...unresolvedComboLog,
         ];
 
         const nextState: GameState = {
@@ -852,23 +922,51 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
         const aiStateIncome = getTotalIPFromStates(aiControlledStates);
         const aiBaseIncome = 5;
-        const aiTotalIncome = aiBaseIncome + aiStateIncome;
+        const aiComboSummary = deriveCombinationEffectSummaries({
+          faction: prev.faction,
+          controlledStates: prev.controlledStates,
+          aiControlledStates,
+        }).ai;
+        const aiComboIncome = calculateComboIncome(aiComboSummary);
+        const aiTotalIncome = aiBaseIncome + aiStateIncome + aiComboIncome;
 
         const aiFaction = prev.faction === 'government' ? 'truth' : 'government';
-        const aiCardsNeeded = Math.max(0, HAND_LIMIT - prev.aiHand.length);
+        const aiExtraDraw = Math.max(0, aiComboSummary.breakdown.extraCardDraw);
+        const aiTargetHandSize = HAND_LIMIT + aiExtraDraw;
+        const aiCardsNeeded = Math.max(0, aiTargetHandSize - prev.aiHand.length);
         const { drawn: aiDrawnCards, deck: aiRemainingDeck } = drawCardsFromDeck(prev.aiDeck, aiCardsNeeded, aiFaction);
         const aiHandSizeAfterDraw = prev.aiHand.length + aiDrawnCards.length;
+        const aiUnresolvedComboEffects = collectUnhandledCombinationEffects(aiComboSummary.breakdown);
+
+        const incomeParts = [
+          `${aiBaseIncome} base`,
+          `${aiStateIncome} from ${aiControlledStates.length} states`,
+        ];
+        if (aiComboIncome !== 0) {
+          incomeParts.push(`${aiComboIncome} from combinations`);
+        }
+
+        const aiLogEntries = [
+          ...prev.log,
+          `AI Income: ${incomeParts.join(' + ')} = ${aiTotalIncome} IP`,
+          `AI drew ${aiDrawnCards.length} card${aiDrawnCards.length === 1 ? '' : 's'}${
+            aiExtraDraw > 0 ? ` (target ${aiTargetHandSize} with combo bonus)` : ''
+          } (hand ${aiHandSizeAfterDraw}/${aiTargetHandSize})`,
+        ];
+
+        if (aiUnresolvedComboEffects.length > 0) {
+          aiLogEntries.push(
+            `AI combo effects pending implementation: ${aiUnresolvedComboEffects.join(', ')}`,
+          );
+        }
 
         const nextState: GameState = {
           ...prev,
           aiHand: [...prev.aiHand, ...aiDrawnCards],
           aiDeck: aiRemainingDeck,
           aiIP: prev.aiIP + aiTotalIncome,
-          log: [
-            ...prev.log,
-            `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStates.length} states = ${aiTotalIncome} IP`,
-            `AI drew ${aiDrawnCards.length} card${aiDrawnCards.length === 1 ? '' : 's'} (hand ${aiHandSizeAfterDraw}/${HAND_LIMIT})`,
-          ],
+          aiControlledStates,
+          log: aiLogEntries,
         };
 
         resolve(nextState);
