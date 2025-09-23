@@ -20,6 +20,7 @@ interface MinimizedHandProps {
   onToggleMaximize: () => void;
   isOpen: boolean;
   onClose: () => void;
+  onOpen?: () => void;
   disabled?: boolean;
   onCardHover?: (card: GameCard | null) => void;
   endTurnDisabled?: boolean;
@@ -37,6 +38,7 @@ const MinimizedHand = ({
   onToggleMaximize,
   isOpen,
   onClose,
+  onOpen,
   disabled,
   onCardHover,
   endTurnDisabled = false,
@@ -85,22 +87,50 @@ const MinimizedHand = ({
 
   const cardIsInteractive = (cost: number) => !disabled && canAffordCard(cost);
 
-  if (!isOpen) {
-    return null;
-  }
-
   const endTurnAriaLabel = isAiProcessing ? 'AI is currently taking its turn' : 'End your turn';
-  const endTurnButtonClass = 'touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60';
-  const renderEndTurnButtonContent = () => (
+  const baseEndTurnButtonClass = 'touch-target border-2 border-black bg-black font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60';
+  const expandedEndTurnButtonClass = `${baseEndTurnButtonClass} w-full py-3`;
+  const compactEndTurnButtonClass = `${baseEndTurnButtonClass} px-4 py-2 text-sm`;
+  const renderEndTurnButtonContent = (variant: 'full' | 'compact' = 'full') => (
     isAiProcessing ? (
-      <span className="flex items-center justify-center gap-2 text-sm">
+      <span
+        className={`flex items-center justify-center gap-2 ${variant === 'compact' ? 'text-xs' : 'text-sm'}`}
+      >
         <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
-        AI Thinking...
+        {variant === 'compact' ? 'AI…' : 'AI Thinking...'}
       </span>
     ) : (
       'End Turn'
     )
   );
+
+  if (!isOpen) {
+    return (
+      <div className="fixed bottom-4 left-4 z-40 flex items-center gap-2 rounded-lg border-2 border-newspaper-text bg-newspaper-bg/95 p-2 shadow-lg backdrop-blur">
+        {onOpen && (
+          <Button
+            onClick={onOpen}
+            variant="outline"
+            size="sm"
+            className="border-newspaper-text text-newspaper-text"
+            type="button"
+          >
+            <span aria-hidden="true">🃏</span>
+            <span className="sr-only">Open hand</span>
+          </Button>
+        )}
+        <Button
+          type="button"
+          onClick={onEndTurn}
+          className={compactEndTurnButtonClass}
+          disabled={endTurnDisabled}
+          aria-label={endTurnAriaLabel}
+        >
+          {renderEndTurnButtonContent('compact')}
+        </Button>
+      </div>
+    );
+  }
 
   if (isMaximized) {
     // Full-size hand display
@@ -135,11 +165,11 @@ const MinimizedHand = ({
           <Button
             type="button"
             onClick={onEndTurn}
-            className={endTurnButtonClass}
+            className={expandedEndTurnButtonClass}
             disabled={endTurnDisabled}
             aria-label={endTurnAriaLabel}
           >
-            {renderEndTurnButtonContent()}
+            {renderEndTurnButtonContent('full')}
           </Button>
         </div>
 
@@ -246,11 +276,11 @@ const MinimizedHand = ({
         <Button
           type="button"
           onClick={onEndTurn}
-          className={endTurnButtonClass}
+          className={expandedEndTurnButtonClass}
           disabled={endTurnDisabled}
           aria-label={endTurnAriaLabel}
         >
-          {renderEndTurnButtonContent()}
+          {renderEndTurnButtonContent('full')}
         </Button>
       </div>
 
