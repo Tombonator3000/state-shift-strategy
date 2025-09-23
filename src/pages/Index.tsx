@@ -1719,12 +1719,12 @@ const Index = () => {
   const rightPaneContent = !showDesktopHand
     ? null
     : (
-      <aside className="flex min-h-0 min-w-0 flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
+      <aside className="grid min-h-0 min-w-0 grid-rows-[auto_1fr_auto] rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
         <header className="flex items-center justify-between gap-2 border-b border-newspaper-border/60 px-4 py-3">
           <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Your Hand</h3>
           <span className="text-xs font-mono">IP {gameState.ip}</span>
         </header>
-        <div className="flex-1 min-h-0 min-w-0 overflow-hidden px-3 py-3">
+        <div className="min-h-0 min-w-0 overflow-y-auto px-3 py-3">
           <EnhancedGameHand
             cards={gameState.hand}
             onPlayCard={handlePlayCard}
@@ -1736,7 +1736,7 @@ const Index = () => {
             onCardHover={setHoveredCard}
           />
         </div>
-        <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
+        <footer className="sticky bottom-[var(--safe-bottom)] border-t border-newspaper-border/60 bg-newspaper-text px-3 pb-3 pt-2 sm:pt-3">
           <Button
             onClick={handleEndTurn}
             className="touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60"
