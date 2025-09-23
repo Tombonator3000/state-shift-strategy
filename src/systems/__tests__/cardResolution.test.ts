@@ -147,4 +147,47 @@ describe('resolveCardMVP', () => {
       max_states_controlled_single_game: 1,
     });
   });
+
+  it('clears occupation metadata when a state resolves to neutral', () => {
+    const tracker = createTracker();
+    const gameState = createBaseSnapshot({
+      states: [
+        {
+          id: 'NM',
+          name: 'New Mexico',
+          abbreviation: 'NM',
+          baseIP: 2,
+          defense: 2,
+          pressure: 0,
+          contested: false,
+          owner: 'neutral',
+          occupierCardId: 'zone-keeper',
+          occupierCardName: 'Zone Keeper',
+          occupierLabel: '👁️ Truth Beacon: Zone Keeper',
+          occupierIcon: '👁️',
+          occupierUpdatedAt: 123456789,
+        },
+      ],
+    });
+
+    const card: GameCard = {
+      id: 'noop-attack',
+      name: 'Quiet Watch',
+      type: 'ATTACK',
+      faction: 'truth',
+      rarity: 'common',
+      cost: 0,
+      effects: {},
+    };
+
+    const result = resolveCardMVP(gameState, card, null, actor, tracker);
+    const resolvedState = result.states[0];
+
+    expect(resolvedState?.owner).toBe('neutral');
+    expect(resolvedState?.occupierCardId).toBeNull();
+    expect(resolvedState?.occupierCardName).toBeNull();
+    expect(resolvedState?.occupierLabel).toBeNull();
+    expect(resolvedState?.occupierIcon).toBeNull();
+    expect(resolvedState?.occupierUpdatedAt).toBeUndefined();
+  });
 });
