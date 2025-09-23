@@ -1,7 +1,6 @@
 import * as React from "react";
 
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
-import { areUiNotificationsEnabled } from "@/state/settings";
 
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
@@ -135,17 +134,7 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">;
 
-const createNoopToast = () => ({
-  id: "noop",
-  dismiss: () => undefined,
-  update: () => undefined,
-});
-
 function toast({ ...props }: Toast) {
-  if (!areUiNotificationsEnabled()) {
-    return createNoopToast();
-  }
-
   const id = genId();
 
   const update = (props: ToasterToast) =>
@@ -176,7 +165,6 @@ function toast({ ...props }: Toast) {
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState);
-  const [notificationsEnabled, setNotificationsEnabled] = React.useState(() => areUiNotificationsEnabled());
 
   React.useEffect(() => {
     listeners.push(setState);
@@ -188,40 +176,10 @@ function useToast() {
     };
   }, [state]);
 
-  React.useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const handleToggle = (event: Event) => {
-      const detail = (event as CustomEvent<{ enabled?: boolean }>).detail;
-      if (detail && typeof detail.enabled === "boolean") {
-        setNotificationsEnabled(detail.enabled);
-      } else {
-        setNotificationsEnabled(areUiNotificationsEnabled());
-      }
-    };
-
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === "gameSettings") {
-        setNotificationsEnabled(areUiNotificationsEnabled());
-      }
-    };
-
-    window.addEventListener("shadowgov:ui-notifications-toggled", handleToggle);
-    window.addEventListener("storage", handleStorage);
-
-    return () => {
-      window.removeEventListener("shadowgov:ui-notifications-toggled", handleToggle);
-      window.removeEventListener("storage", handleStorage);
-    };
-  }, []);
-
   return {
     ...state,
-    toasts: notificationsEnabled ? state.toasts : [],
-    toast: notificationsEnabled ? toast : createNoopToast,
-    dismiss: notificationsEnabled ? (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }) : () => undefined,
+    toast,
+    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   };
 }
 

@@ -12,7 +12,7 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
 
   return (
     <div
-      className="app-shell flex min-h-screen flex-col"
+      className="app-shell flex h-screen min-h-0 flex-col"
       style={{
         paddingTop: "var(--safe-top)",
       }}
@@ -28,29 +28,27 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
       {/* Content area */}
       <div className="flex-1 min-h-0">
         <div
-          className="flex min-h-0 flex-col"
+          className="h-full"
           style={{
             paddingLeft: "var(--safe-left)",
             paddingRight: "var(--safe-right)",
           }}
         >
-          <div className="app-scroll flex flex-1 min-h-0 flex-col p-2 sm:p-4 md:p-6">
+          <div className="app-scroll h-full p-2 sm:p-4 md:p-6">
             <div
               className={clsx(
-                "flex flex-1 flex-col gap-4 min-h-0",
-                hasRightPane &&
-                  "lg:grid lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-6 lg:[&>*]:min-h-0 xl:grid-cols-[minmax(0,1fr)_480px]"
+                "grid h-full min-h-0 gap-4",
+                "grid-cols-1",
+                hasRightPane && "lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_480px]"
               )}
             >
-              <main className="flex min-h-0 flex-1 min-w-0 flex-col gap-4">
-                <div className="flex min-h-0 flex-1 min-w-0 flex-col gap-4 overflow-y-auto">
+              <main className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+                <div className="flex h-full min-h-0 min-w-0 flex-col overflow-y-auto">
                   {leftPane}
                 </div>
               </main>
               {hasRightPane && (
-                <div className="min-w-0 lg:flex lg:min-h-0 lg:flex-col lg:[&>*]:min-h-0 lg:[&>*]:flex-1">
-                  {rightPane}
-                </div>
+                <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">{rightPane}</div>
               )}
             </div>
           </div>

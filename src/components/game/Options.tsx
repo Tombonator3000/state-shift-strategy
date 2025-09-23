@@ -13,16 +13,8 @@ import { getDifficulty, setDifficultyFromLabel } from '@/state/settings';
 import { COMBO_DEFINITIONS, DEFAULT_COMBO_SETTINGS } from '@/game/combo.config';
 import { formatComboReward, getComboSettings, setComboSettings } from '@/game/comboEngine';
 import type { ComboCategory, ComboSettings } from '@/game/combo.types';
-import {
-  applyUiScale,
-  DEFAULT_UI_SCALE,
-  GAME_SETTINGS_STORAGE_KEY,
-  normalizeUiScale,
-  UI_SCALE_OPTIONS,
-  type UiScale,
-} from '@/state/uiScale';
 
-const SETTINGS_STORAGE_KEY = GAME_SETTINGS_STORAGE_KEY;
+const SETTINGS_STORAGE_KEY = 'gameSettings';
 
 type DifficultyLabel =
   | 'EASY - Intelligence Leak'
@@ -108,8 +100,6 @@ interface GameSettings {
   drawMode: 'standard' | 'classic' | 'momentum' | 'catchup' | 'fast';
   uiTheme: 'tabloid_bw' | 'government_classic';
   paranormalEffectsEnabled: boolean;
-  uiNotificationsEnabled: boolean;
-  uiScale: UiScale;
 }
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
@@ -140,9 +130,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       confirmActions: true,
       drawMode: 'standard',
       uiTheme,
-      paranormalEffectsEnabled: false,
-      uiNotificationsEnabled: false,
-      uiScale: DEFAULT_UI_SCALE,
+      paranormalEffectsEnabled: true,
     };
 
     const stored = typeof localStorage !== 'undefined'
@@ -154,19 +142,13 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
         const parsed = JSON.parse(stored) as (Partial<GameSettings> & { comboSettings?: ComboSettings }) | null;
         const { comboSettings: storedComboSettings, ...rest } = parsed ?? {};
         const difficultyLabel = resolveStoredDifficultyLabel(rest?.difficulty);
-        const sanitizedSettings: Partial<GameSettings> = {
-          ...rest,
-          uiScale: normalizeUiScale(rest?.uiScale, baseSettings.uiScale),
-        };
-
         const mergedSettings: GameSettings = {
           ...baseSettings,
-          ...sanitizedSettings,
+          ...rest,
           difficulty: difficultyLabel,
         };
 
         setDifficultyFromLabel(mergedSettings.difficulty);
-        applyUiScale(mergedSettings.uiScale);
 
         const combo = storedComboSettings
           ? setComboSettings({
@@ -188,7 +170,6 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     }
 
     setDifficultyFromLabel(baseSettings.difficulty);
-    applyUiScale(baseSettings.uiScale);
     const combo = setComboSettings({
       ...getComboSettings(),
       comboToggles: { ...DEFAULT_COMBO_SETTINGS.comboToggles },
@@ -257,36 +238,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     }
 
     setSettings(prev => {
-      const normalizedUpdates: Partial<GameSettings> = { ...newSettings };
-      if (normalizedUpdates.uiScale !== undefined) {
-        normalizedUpdates.uiScale = normalizeUiScale(normalizedUpdates.uiScale, prev.uiScale);
+      const updated = { ...prev, ...newSettings };
+      if (newSettings.difficulty) {
+        setDifficultyFromLabel(newSettings.difficulty);
       }
-
-      const updated = { ...prev, ...normalizedUpdates };
-      if (normalizedUpdates.difficulty) {
-        setDifficultyFromLabel(normalizedUpdates.difficulty);
-      }
-      applyUiScale(updated.uiScale);
       persistSettings(updated, comboSettingsState);
-      if (typeof window !== 'undefined') {
-        if (prev.paranormalEffectsEnabled !== updated.paranormalEffectsEnabled) {
-          window.dispatchEvent(new CustomEvent('shadowgov:paranormal-effects-toggled', {
-            detail: { enabled: updated.paranormalEffectsEnabled }
-          }));
-        }
-
-        if (prev.uiNotificationsEnabled !== updated.uiNotificationsEnabled) {
-          window.dispatchEvent(new CustomEvent('shadowgov:ui-notifications-toggled', {
-            detail: { enabled: updated.uiNotificationsEnabled }
-          }));
-        }
-
-        if (prev.uiScale !== updated.uiScale) {
-          window.dispatchEvent(new CustomEvent('shadowgov:ui-scale-changed', {
-            detail: { value: updated.uiScale }
-          }));
-        }
-      }
       return updated;
     });
   };
@@ -326,15 +282,10 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     if (update.comboToggles) {
       normalized.comboToggles = { ...update.comboToggles };
     }
-    if (update.glitchMode && !['off', 'minimal', 'full'].includes(update.glitchMode)) {
-      delete normalized.glitchMode;
-    }
     const merged = setComboSettings(normalized);
     setComboSettingsState(merged);
     persistSettings(settings, merged);
   };
-
-  const comboGlitchMode = comboSettingsState.glitchMode ?? 'full';
 
   const resetToDefaults = () => {
     const defaultSettings: GameSettings = {
@@ -351,9 +302,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       confirmActions: true,
       drawMode: 'standard',
       uiTheme: 'tabloid_bw',
-      paranormalEffectsEnabled: false,
-      uiNotificationsEnabled: false,
-      uiScale: DEFAULT_UI_SCALE,
+      paranormalEffectsEnabled: true,
     };
 
     const defaultCombos = setComboSettings({
@@ -362,17 +311,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     });
 
     masterVolumeUpdateSource.current = 'settings';
-    setSettings(prev => {
-      if (prev.uiScale !== defaultSettings.uiScale) {
-        applyUiScale(defaultSettings.uiScale);
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('shadowgov:ui-scale-changed', {
-            detail: { value: defaultSettings.uiScale }
-          }));
-        }
-      }
-      return defaultSettings;
-    });
+    setSettings(defaultSettings);
     setComboSettingsState(defaultCombos);
     setDifficultyFromLabel(defaultSettings.difficulty);
     setUiTheme('tabloid_bw');
@@ -380,15 +319,6 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     audio.setVolume(defaultSettings.masterVolume / 100);
     audio.setMusicVolume(defaultSettings.musicVolume / 100);
     audio.setSfxVolume(defaultSettings.sfxVolume / 100);
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('shadowgov:paranormal-effects-toggled', {
-        detail: { enabled: defaultSettings.paranormalEffectsEnabled }
-      }));
-
-      window.dispatchEvent(new CustomEvent('shadowgov:ui-notifications-toggled', {
-        detail: { enabled: defaultSettings.uiNotificationsEnabled }
-      }));
-    }
   };
 
   const handleSaveGame = () => {
@@ -642,14 +572,6 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">UI Overlays &amp; Toast Notifications</label>
-                <Switch
-                  checked={settings.uiNotificationsEnabled}
-                  onCheckedChange={checked => updateSettings({ uiNotificationsEnabled: checked })}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-newspaper-text">Confirm Destructive Actions</label>
                 <Switch
                   checked={settings.confirmActions}
@@ -708,26 +630,6 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 </select>
                 <div className="text-xs text-newspaper-text/70 mt-1">Changes the visual appearance of menus and screens</div>
               </div>
-
-              <div>
-                <label className="text-sm font-medium text-newspaper-text mb-2 block">Interface Scale</label>
-                <select
-                  value={settings.uiScale}
-                  onChange={event => {
-                    updateSettings({ uiScale: normalizeUiScale(event.target.value, settings.uiScale) });
-                  }}
-                  className="w-full p-2 border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded"
-                >
-                  {UI_SCALE_OPTIONS.map(option => (
-                    <option key={option} value={option}>
-                      {option}%
-                    </option>
-                  ))}
-                </select>
-                <div className="text-xs text-newspaper-text/70 mt-1">
-                  Adjusts global UI size for improved readability on high-resolution displays
-                </div>
-              </div>
             </div>
           </Card>
 
@@ -756,32 +658,6 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   FX notifications ({comboSettingsState.fxEnabled ? 'on' : 'off'})
                 </span>
               </div>
-            </div>
-
-            <div className="mt-4 grid gap-2 sm:grid-cols-[auto,1fr] sm:items-center">
-              <label className="text-sm font-medium text-newspaper-text" htmlFor="combo-glitch-mode">
-                Combo Glitches
-              </label>
-              <select
-                id="combo-glitch-mode"
-                value={comboGlitchMode}
-                onChange={event => applyComboSettings({ glitchMode: event.target.value as typeof comboGlitchMode })}
-                className="w-full rounded border border-newspaper-text bg-newspaper-bg p-2 text-newspaper-text"
-                disabled={!comboSettingsState.enabled || !comboSettingsState.fxEnabled}
-              >
-                <option value="off">Off</option>
-                <option value="minimal">Minimal</option>
-                <option value="full">Full</option>
-              </select>
-            </div>
-
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <span className="text-sm font-medium text-newspaper-text">SFX Ducking During Glitch</span>
-              <Switch
-                checked={comboSettingsState.glitchDucking !== false}
-                onCheckedChange={checked => applyComboSettings({ glitchDucking: checked })}
-                disabled={!comboSettingsState.enabled || !comboSettingsState.fxEnabled}
-              />
             </div>
 
             <div className="mt-4">

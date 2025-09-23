@@ -2,17 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-@import './styles/comboGlitch.css';
-
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    --ui-scale: 1;
-    font-size: calc(16px * var(--ui-scale));
-
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -60,7 +55,7 @@ All colors MUST be HSL.
     --h1: clamp(28px, 6vh, 64px);
     --h2: clamp(18px, 3.2vh, 40px);
     --btn: clamp(14px, 2.6vh, 28px);
-    --cap: clamp(10px, calc(1.2vh + 0.2vw), 20px);
+    --cap: clamp(10px, 1.6vh, 13px);
 
     /* Tabloid newspaper theme tokens */
     --paper: #f4f3f1;
@@ -154,7 +149,7 @@ All colors MUST be HSL.
       --h1: clamp(24px, 5.2vh, 52px);
       --h2: clamp(16px, 2.6vh, 34px);
       --btn: clamp(12px, 2.2vh, 22px);
-      --cap: clamp(9px, calc(1.1vh + 0.15vw), 14px);
+      --cap: clamp(9px, 1.4vh, 12px);
     }
   }
 
@@ -642,190 +637,6 @@ All colors MUST be HSL.
     }
   }
 
-  .combo-glitch-layer {
-    position: fixed;
-    inset: 0;
-    z-index: 60;
-    pointer-events: none;
-  }
-
-  .newspaper-layer {
-    position: fixed;
-    inset: 0;
-    z-index: 40;
-  }
-
-  .combo-glitch-container {
-    animation: combo-glitch-jitter 0.28s steps(2, end) infinite;
-  }
-
-  .combo-glitch-core {
-    animation: combo-glitch-pulse 0.48s ease-in-out infinite alternate;
-  }
-
-  .combo-glitch-lines {
-    background-image: repeating-linear-gradient(
-      to bottom,
-      rgba(56, 189, 248, 0.25) 0%,
-      rgba(56, 189, 248, 0.25) 2px,
-      transparent 2px,
-      transparent 8px
-    );
-    opacity: 0.65;
-    mix-blend-mode: screen;
-    animation: combo-glitch-scan 0.42s linear infinite;
-  }
-
-  .combo-glitch-shard {
-    background:
-      radial-gradient(circle at 20% 20%, rgba(236, 72, 153, 0.35), transparent 55%),
-      radial-gradient(circle at 80% 60%, rgba(129, 140, 248, 0.28), transparent 65%),
-      linear-gradient(135deg, rgba(56, 189, 248, 0.25), transparent 60%);
-    mix-blend-mode: lighten;
-    filter: blur(0.4px);
-    animation: combo-glitch-shard 0.6s ease-in-out infinite alternate;
-  }
-
-  .combo-glitch-text-scramble {
-    animation: combo-glitch-text-scramble 0.78s cubic-bezier(0.22, 0.61, 0.36, 1);
-    will-change: transform, filter, opacity;
-  }
-
-  .combo-glitch-text-scanline {
-    position: relative;
-    overflow: hidden;
-    animation: combo-glitch-text-scanline 0.88s cubic-bezier(0.19, 1, 0.22, 1);
-    will-change: clip-path, opacity;
-  }
-
-  .combo-glitch-text-scanline::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
-    mix-blend-mode: screen;
-    transform: translateY(-120%);
-    animation: combo-glitch-text-sheen 0.88s cubic-bezier(0.19, 1, 0.22, 1);
-    pointer-events: none;
-  }
-
-  @keyframes combo-glitch-jitter {
-    0% {
-      transform: translate(-50%, -50%) scale(1) skewX(0deg);
-    }
-    50% {
-      transform: translate(calc(-50% + 2px), calc(-50% + 1px)) scale(1.015) skewX(-1.5deg);
-    }
-    100% {
-      transform: translate(calc(-50% - 1px), calc(-50% - 2px)) scale(0.99) skewX(1.5deg);
-    }
-  }
-
-  @keyframes combo-glitch-pulse {
-    0% {
-      box-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
-      opacity: 0.75;
-    }
-    100% {
-      box-shadow: 0 0 40px rgba(236, 72, 153, 0.55);
-      opacity: 1;
-    }
-  }
-
-  @keyframes combo-glitch-scan {
-    0% {
-      background-position: 0 0;
-      opacity: 0.35;
-    }
-    50% {
-      opacity: 0.85;
-    }
-    100% {
-      background-position: 0 24px;
-      opacity: 0.4;
-    }
-  }
-
-  @keyframes combo-glitch-shard {
-    0% {
-      opacity: 0.35;
-      transform: rotate(0deg) scale(1);
-    }
-    100% {
-      opacity: 0.75;
-      transform: rotate(2.5deg) scale(1.05);
-    }
-  }
-
-  @keyframes combo-glitch-text-scramble {
-    0% {
-      opacity: 0;
-      transform: translateY(-8px);
-      filter: blur(6px) saturate(160%);
-    }
-    35% {
-      opacity: 0.6;
-      transform: translateY(3px);
-      filter: blur(3px) saturate(180%);
-    }
-    70% {
-      opacity: 0.95;
-      transform: translateY(-2px);
-      filter: blur(1.2px) saturate(120%);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-      filter: blur(0) saturate(100%);
-    }
-  }
-
-  @keyframes combo-glitch-text-scanline {
-    0% {
-      opacity: 0;
-      clip-path: inset(0 0 100% 0);
-    }
-    40% {
-      opacity: 0.85;
-      clip-path: inset(0 0 40% 0);
-    }
-    70% {
-      opacity: 0.95;
-      clip-path: inset(0 0 12% 0);
-    }
-    100% {
-      opacity: 1;
-      clip-path: inset(0 0 0 0);
-    }
-  }
-
-  @keyframes combo-glitch-text-sheen {
-    0% {
-      opacity: 0;
-      transform: translateY(-120%);
-    }
-    30% {
-      opacity: 0.9;
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(120%);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .combo-glitch-container,
-    .combo-glitch-core,
-    .combo-glitch-lines,
-    .combo-glitch-shard,
-    .combo-glitch-text-scramble,
-    .combo-glitch-text-scanline,
-    .combo-glitch-text-scanline::after {
-      animation-duration: 0.001ms !important;
-      animation-iteration-count: 1 !important;
-    }
-  }
-
   @keyframes legendary-pulse {
     0%, 100% {
       opacity: 0.4;
@@ -1148,8 +959,6 @@ All colors MUST be HSL.
   position: absolute;
   inset: 0;
   pointer-events: none;
-  transform-origin: top left;
-  transform: scale(var(--card-scale, 1));
 }
 
 /* Polaroid frame */
@@ -1305,15 +1114,9 @@ html, body, #root {
 
 .app-scroll {
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   -webkit-overflow-scrolling: touch;
   padding-bottom: var(--safe-bottom);
-}
-
-@media (min-width: 1024px) {
-  .app-scroll {
-    overflow-y: auto;
-  }
 }
 
 .touch-target {
@@ -3245,76 +3048,3 @@ html, body, #root {
   0%, 100% { opacity: 0.8; }
   50% { opacity: 1; }
 }
-
-@layer components {
-  .game-toast-container {
-    @apply pointer-events-none pr-6 pb-6;
-    padding-right: calc(env(safe-area-inset-right) + 1.5rem);
-    padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
-  }
-
-  .game-toast-container > * {
-    @apply pointer-events-auto;
-  }
-
-  .game-toast {
-    @apply pointer-events-auto max-w-xs border border-slate-700 bg-slate-900/95 font-mono text-sm leading-snug text-slate-100 shadow-2xl;
-  }
-}
-
-@keyframes combo-hit-stop {
-  0% {
-    transform: scale(1);
-  }
-  12% {
-    transform: scale(0.965);
-  }
-  32% {
-    transform: scale(0.982);
-  }
-  60% {
-    transform: scale(0.992);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes combo-rgb-offset {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0);
-  }
-  18% {
-    opacity: 0.36;
-    transform: translate3d(-3px, 2px, 0);
-  }
-  42% {
-    opacity: 0.28;
-    transform: translate3d(3px, -2px, 0);
-  }
-  68% {
-    opacity: 0.22;
-    transform: translate3d(-2px, 1px, 0);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes combo-rgb-flicker {
-  0%, 100% {
-    opacity: 0.05;
-  }
-  20% {
-    opacity: 0.25;
-  }
-  45% {
-    opacity: 0.18;
-  }
-  72% {
-    opacity: 0.14;
-  }
-}
-

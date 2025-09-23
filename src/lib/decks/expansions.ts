@@ -27,7 +27,7 @@ export type MixMode =
 
 const CORE_SET_ID = 'core';
 const CORE_SET_NAME = 'Core Deck';
-export const CORE_FLOOR = 0.5; // TODO: expose via settings if playtesting demands a different baseline.
+const CORE_FLOOR = 0.5; // TODO: expose via settings if playtesting demands a different baseline.
 
 type WeightMap = Record<string, number>;
 

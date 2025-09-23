@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { CardEffectValidator, CardTextGenerator } from '@/systems/CardTextGenerator';
 import { applyEffectsMvp } from '@/engine/applyEffects-mvp';
-import { DEFAULT_MAX_CARDS_PER_TURN } from '@/config/turnLimits';
 import { cloneGameState, type Card as EngineCard, type GameState as EngineGameState } from '@/mvp';
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import type { Card as CardType } from '@/types/cardEffects';
@@ -36,7 +35,6 @@ const EffectTestPanel: React.FC = () => {
     turn: gameState.turn,
     currentPlayer: 'P1',
     truth: gameState.truth,
-    maxPlaysPerTurn: DEFAULT_MAX_CARDS_PER_TURN,
     playsThisTurn: 0,
     turnPlays: [],
     log: engineLog,

@@ -49,11 +49,7 @@ function ensureToggleCoverage(settings: ComboSettings): ComboSettings {
     }
   }
   const rng = settings.rng ?? DEFAULT_COMBO_SETTINGS.rng ?? Math.random;
-  const glitchMode = settings.glitchMode ?? DEFAULT_COMBO_SETTINGS.glitchMode ?? 'full';
-  const glitchDucking = typeof settings.glitchDucking === 'boolean'
-    ? settings.glitchDucking
-    : DEFAULT_COMBO_SETTINGS.glitchDucking ?? true;
-  return { ...settings, comboToggles: toggles, rng, glitchMode, glitchDucking };
+  return { ...settings, comboToggles: toggles, rng };
 }
 
 export function getComboSettings(): ComboSettings {
@@ -70,10 +66,6 @@ export function setComboSettings(update: Partial<ComboSettings>): ComboSettings 
     ...base,
     ...update,
     comboToggles: { ...base.comboToggles },
-    glitchMode: update.glitchMode ?? base.glitchMode ?? 'full',
-    glitchDucking: typeof update.glitchDucking === 'boolean'
-      ? update.glitchDucking
-      : base.glitchDucking ?? true,
   };
 
   if (update.comboToggles) {
@@ -107,14 +99,6 @@ function resolveSettings(overrides?: ComboOptions): ComboSettings {
     for (const [key, value] of Object.entries(overrides.comboToggles)) {
       merged.comboToggles[key] = value;
     }
-  }
-
-  if (overrides.glitchMode) {
-    merged.glitchMode = overrides.glitchMode;
-  }
-
-  if (typeof overrides.glitchDucking === 'boolean') {
-    merged.glitchDucking = overrides.glitchDucking;
   }
 
   if (overrides.disabledCombos) {

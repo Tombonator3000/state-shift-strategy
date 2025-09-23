@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import type { CSSProperties } from 'react';
 import { Button } from '@/components/ui/button';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -19,7 +18,6 @@ import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
-import { useIsMobile } from '@/hooks/use-mobile';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
@@ -35,11 +33,6 @@ import { getRandomAgenda } from '@/data/agendaDatabase';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
-import { normalizeMaxCardsPerTurn } from '@/config/turnLimits';
-import {
-  getSynergyEffectIdentifier,
-  resolveParticleEffectType
-} from '@/utils/synergyEffects';
 import ExtraEditionNewspaper from '@/components/game/ExtraEditionNewspaper';
 import InGameOptions from '@/components/game/InGameOptions';
 import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
@@ -49,13 +42,12 @@ import toast, { Toaster } from 'react-hot-toast';
 import type { CardPlayRecord } from '@/hooks/gameStateTypes';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
-import { areParanormalEffectsEnabled, areUiNotificationsEnabled } from '@/state/settings';
+import { areParanormalEffectsEnabled } from '@/state/settings';
 import type { GameCard } from '@/rules/mvp';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
 type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
-
 
 interface MVPReport {
   cardId: string;
@@ -459,19 +451,8 @@ const Index = () => {
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [uiNotificationsEnabled, setUiNotificationsEnabled] = useState(() => areUiNotificationsEnabled());
-  const isMobile = useIsMobile();
-  const [isLgAndUp, setIsLgAndUp] = useState(() => {
-    if (typeof window === 'undefined') {
-      return true;
-    }
-    return window.matchMedia('(min-width: 1024px)').matches;
-  });
-  const [isMobileHandOpen, setIsMobileHandOpen] = useState(false);
-  const [isMobileHandExpanded, setIsMobileHandExpanded] = useState(false);
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
-  const maxCardsPerTurn = normalizeMaxCardsPerTurn(gameState.maxCardsPerTurn);
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -491,71 +472,6 @@ const Index = () => {
       executeAITurn();
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia('(min-width: 1024px)');
-    const handleChange = (event: MediaQueryListEvent) => {
-      setIsLgAndUp(event.matches);
-    };
-
-    setIsLgAndUp(mediaQuery.matches);
-
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
-    }
-
-    mediaQuery.addListener(handleChange);
-    return () => mediaQuery.removeListener(handleChange);
-  }, []);
-
-  useEffect(() => {
-    if (isLgAndUp) {
-      setIsMobileHandOpen(false);
-      setIsMobileHandExpanded(false);
-      setHoveredCard(null);
-    }
-  }, [isLgAndUp]);
-
-  useEffect(() => {
-    if (!isMobileHandOpen) {
-      setIsMobileHandExpanded(false);
-      setHoveredCard(null);
-    }
-  }, [isMobileHandOpen]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const handleToggle = (event: Event) => {
-      const detail = (event as CustomEvent<{ enabled?: boolean }>).detail;
-      if (detail && typeof detail.enabled === 'boolean') {
-        setUiNotificationsEnabled(detail.enabled);
-      } else {
-        setUiNotificationsEnabled(areUiNotificationsEnabled());
-      }
-    };
-
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === 'gameSettings') {
-        setUiNotificationsEnabled(areUiNotificationsEnabled());
-      }
-    };
-
-    window.addEventListener('shadowgov:ui-notifications-toggled', handleToggle);
-    window.addEventListener('storage', handleStorage);
-
-    return () => {
-      window.removeEventListener('shadowgov:ui-notifications-toggled', handleToggle);
-      window.removeEventListener('storage', handleStorage);
-    };
-  }, []);
 
   // Track IP changes for floating numbers
   useEffect(() => {
@@ -673,11 +589,10 @@ const Index = () => {
           console.log(`🔗 New synergy activated: ${combo.name} (+${combo.bonusIP} IP)`);
 
           if (position) {
-            const effectIdentifier = getSynergyEffectIdentifier(combo.category);
             VisualEffectsCoordinator.triggerSynergyActivation(
               combo.bonusIP,
               position,
-              effectIdentifier,
+              'synergy',
               combo.name
             );
           }
@@ -686,22 +601,19 @@ const Index = () => {
           audio?.playSFX?.('state-capture');
 
           // Toast notification for synergy activation
-          if (uiNotificationsEnabled) {
-            toast.success(`🔗 Synergy Activated: ${combo.name} (+${combo.bonusIP} IP)`, {
-              duration: 3000,
-              position: 'top-center'
-            });
-          }
+          toast.success(`🔗 Synergy Activated: ${combo.name} (+${combo.bonusIP} IP)`, {
+            duration: 3000,
+            position: 'top-center'
+          });
         },
         (type, x, y) => {
           // Particle effect callback
-          const resolvedType = resolveParticleEffectType(type);
-          VisualEffectsCoordinator.triggerParticleEffect(resolvedType, { x, y });
+          VisualEffectsCoordinator.triggerParticleEffect(type as any, { x, y });
         },
         (value, type, x, y) => {
           // Floating number callback
           if (x && y) {
-            VisualEffectsCoordinator.showFloatingNumber(value, type as 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain', { x, y });
+            VisualEffectsCoordinator.showFloatingNumber(value, type as any, { x, y });
           }
         }
       );
@@ -713,7 +625,7 @@ const Index = () => {
         console.log('💰 Total bonus IP:', getTotalBonusIP());
       }
     }
-  }, [gameState.controlledStates, checkSynergies, getActiveCombinations, getTotalBonusIP, audio, uiNotificationsEnabled]);
+  }, [gameState.controlledStates, checkSynergies, getActiveCombinations, getTotalBonusIP, audio]);
 
   useEffect(() => {
     const pickTemplate = (templates: string[]): string => {
@@ -925,41 +837,31 @@ const Index = () => {
   const toggleFullscreen = useCallback(async () => {
     try {
       if (!document.fullscreenEnabled) {
-        if (uiNotificationsEnabled) {
-          toast.error('Fullskjerm støttes ikke i denne nettleseren');
-        }
+        toast.error('Fullskjerm støttes ikke i denne nettleseren');
         audio.playSFX('click');
         return;
       }
-
+      
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
         setIsFullscreen(true);
-        if (uiNotificationsEnabled) {
-          toast.success('Fullskjerm aktivert!');
-        }
+        toast.success('Fullskjerm aktivert!');
       } else {
         await document.exitFullscreen();
         setIsFullscreen(false);
-        if (uiNotificationsEnabled) {
-          toast.success('Fullskjerm deaktivert');
-        }
+        toast.success('Fullskjerm deaktivert');
       }
       audio.playSFX('click');
     } catch (error) {
       console.error('Fullscreen error:', error);
       if (error.name === 'NotAllowedError') {
-        if (uiNotificationsEnabled) {
-          toast.error('Fullskjerm ble blokkert av nettleseren. Prøv F11 eller tillat fullskjerm i nettleserinnstillingene.');
-        }
+        toast.error('Fullskjerm ble blokkert av nettleseren. Prøv F11 eller tillat fullskjerm i nettleserinnstillingene.');
       } else {
-        if (uiNotificationsEnabled) {
-          toast.error('Kunne ikke bytte fullskjerm-modus');
-        }
+        toast.error('Kunne ikke bytte fullskjerm-modus');
       }
       audio.playSFX('click');
     }
-  }, [audio, uiNotificationsEnabled]);
+  }, [audio]);
 
   // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
@@ -1047,15 +949,11 @@ const Index = () => {
       if (document.fullscreenEnabled && !document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
         setIsFullscreen(true);
-        if (uiNotificationsEnabled) {
-          toast.success('Fullskjerm aktivert!');
-        }
+        toast.success('Fullskjerm aktivert!');
       }
     } catch (error) {
       console.log('Fullscreen auto-entry failed:', error);
-      if (uiNotificationsEnabled) {
-        toast.error('Kunne ikke aktivere fullskjerm automatisk');
-      }
+      toast.error('Kunne ikke aktivere fullskjerm automatisk');
     }
   };
 
@@ -1075,24 +973,20 @@ const Index = () => {
         
         // Validate target - cannot target own states with zone cards
         if (targetState?.owner === 'player') {
-          if (uiNotificationsEnabled) {
-            toast.error('🚫 Cannot target your own states with zone cards!', {
-              duration: 3000,
-              style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
-            });
-          }
+          toast.error('🚫 Cannot target your own states with zone cards!', {
+            duration: 3000,
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+          });
           audio.playSFX('error');
           return;
         }
-
+        
         selectTargetState(stateId); // keep state in store for logs/UX
         audio.playSFX('click');
-        if (uiNotificationsEnabled) {
-          toast.success(`🎯 Targeting ${targetState?.name}! Deploying zone card...`, {
-            duration: 2000,
-            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
-          });
-        }
+        toast.success(`🎯 Targeting ${targetState?.name}! Deploying zone card...`, {
+          duration: 2000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+        });
         
         // Play immediately with explicit target (no extra clicks)
         setLoadingCard(gameState.selectedCard);
@@ -1118,24 +1012,20 @@ const Index = () => {
 
     // Check if player can afford the card
     if (gameState.ip < card.cost) {
-      if (uiNotificationsEnabled) {
-        toast.error(`💰 Insufficient IP! Need ${card.cost}, have ${gameState.ip}`, {
-          duration: 3000,
-          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
-        });
-      }
+      toast.error(`💰 Insufficient IP! Need ${card.cost}, have ${gameState.ip}`, {
+        duration: 3000,
+        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+      });
       audio.playSFX('error');
       return;
     }
 
     // Check if max cards played this turn
-    if (gameState.cardsPlayedThisTurn >= maxCardsPerTurn) {
-      if (uiNotificationsEnabled) {
-        toast.error(`📋 Maximum ${maxCardsPerTurn} cards per turn!`, {
-          duration: 3000,
-          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
-        });
-      }
+    if (gameState.cardsPlayedThisTurn >= 3) {
+      toast.error('📋 Maximum 3 cards per turn!', {
+        duration: 3000,
+        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+      });
       audio.playSFX('error');
       return;
     }
@@ -1144,12 +1034,10 @@ const Index = () => {
     if (card.type === 'ZONE' && !gameState.targetState && !targetStateArg) {
       selectCard(cardId);
       audio.playSFX('hover');
-      if (uiNotificationsEnabled) {
-        toast('🎯 Zone card selected - click a state to target it!', {
-          duration: 4000,
-          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
-        });
-      }
+      toast('🎯 Zone card selected - click a state to target it!', {
+        duration: 4000,
+        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
+      });
 
       if (card.faction === 'government') {
         const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
@@ -1208,12 +1096,10 @@ const Index = () => {
           selectCard(cardId);
         }
         audio.playSFX('error');
-        if (uiNotificationsEnabled) {
-          toast('🎯 Select a valid state target before deploying this zone card!', {
-            duration: 4000,
-            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
-          });
-        }
+        toast('🎯 Select a valid state target before deploying this zone card!', {
+          duration: 4000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
+        });
         return;
       }
 
@@ -1273,19 +1159,15 @@ const Index = () => {
         audio.playSFX('flash');
       }
 
-      if (uiNotificationsEnabled) {
-        toast.success(`✅ ${card.name} deployed successfully!`, {
-          duration: 2000,
-          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
-        });
-      }
+      toast.success(`✅ ${card.name} deployed successfully!`, {
+        duration: 2000,
+        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+      });
     } catch (error) {
-      if (uiNotificationsEnabled) {
-        toast.error('❌ Card deployment failed!', {
-          duration: 3000,
-          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
-        });
-      }
+      toast.error('❌ Card deployment failed!', {
+        duration: 3000,
+        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+      });
       audio.playSFX('error');
     } finally {
       setLoadingCard(null);
@@ -1297,7 +1179,7 @@ const Index = () => {
   };
 
   const handleEndTurn = () => {
-    void endTurn();
+    endTurn();
     audio.playSFX('turnEnd');
     // Play card draw sound after a short delay
     setTimeout(() => {
@@ -1414,33 +1296,7 @@ const Index = () => {
   }
 
   const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
-  const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= maxCardsPerTurn;
-  const showDesktopHand = isLgAndUp && !isMobile;
-  const shouldShowMobileHandUI = !showDesktopHand;
-
-  const handleMobileHandToggle = () => {
-    setIsMobileHandOpen(prev => {
-      const next = !prev;
-      if (!next) {
-        setHoveredCard(null);
-      }
-      return next;
-    });
-  };
-
-  const handleCloseMobileHand = () => {
-    setIsMobileHandOpen(false);
-    setIsMobileHandExpanded(false);
-    setHoveredCard(null);
-  };
-
-  const handleToggleMobileHandExpansion = () => {
-    setIsMobileHandExpanded(prev => !prev);
-  };
-
-  const handleOpenMobileHand = () => {
-    setIsMobileHandOpen(true);
-  };
+  const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
 
   const renderIntelLog = (limit: number) => (
     <div className="space-y-1 text-xs text-newspaper-text/80">
@@ -1519,17 +1375,6 @@ const Index = () => {
       </div>
       <div className="flex flex-1 flex-col justify-center gap-1 overflow-hidden">
         <div className="flex items-center justify-end gap-2">
-          {shouldShowMobileHandUI && (
-            <button
-              type="button"
-              onClick={handleMobileHandToggle}
-              className={`${mastheadButtonClass} lg:hidden ${isMobileHandOpen ? 'bg-white text-newspaper-text' : ''}`}
-              aria-pressed={isMobileHandOpen}
-            >
-              <span aria-hidden="true">🃏</span>
-              <span className="sr-only">{isMobileHandOpen ? 'Hide hand' : 'Show hand'}</span>
-            </button>
-          )}
           <button
             type="button"
             onClick={toggleFullscreen}
@@ -1593,34 +1438,34 @@ const Index = () => {
             ⚙️
           </button>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-newspaper-text/80 sm:flex-nowrap">
-          <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
+        <div className="flex items-center gap-2 overflow-x-auto text-[11px] font-mono text-newspaper-text/80">
+          <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
             <span className="font-bold uppercase tracking-wide">Round</span>
             <span>{gameState.turn}</span>
           </div>
           <MechanicsTooltip mechanic="ip">
-            <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
+            <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
               <span className="font-bold uppercase tracking-wide">Your IP</span>
               <span>{gameState.ip}</span>
             </div>
           </MechanicsTooltip>
           <MechanicsTooltip mechanic="truth">
-            <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
+            <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
               <span className="font-bold uppercase tracking-wide">Truth</span>
               <span>{gameState.truth}%</span>
             </div>
           </MechanicsTooltip>
           <MechanicsTooltip mechanic="zone">
-            <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
+            <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
               <span className="font-bold uppercase tracking-wide">Your States</span>
               <span>{gameState.controlledStates.length}</span>
             </div>
           </MechanicsTooltip>
-          <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
+          <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
             <span className="font-bold uppercase tracking-wide">AI IP</span>
             <span>{gameState.aiIP}</span>
           </div>
-          <div className="flex items-center gap-1 rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm sm:whitespace-nowrap">
+          <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
             <span className="font-bold uppercase tracking-wide">AI States</span>
             <span>{gameState.states.filter(s => s.owner === 'ai').length}</span>
           </div>
@@ -1628,12 +1473,6 @@ const Index = () => {
       </div>
     </div>
   );
-
-  const mapRowHeight = 'clamp(320px, 55vh, 540px)';
-  const dockRowHeight = 'clamp(220px, 28vh, 300px)';
-  const mapDockGridStyle = {
-    gridTemplateRows: `minmax(0, ${mapRowHeight}) minmax(0, ${dockRowHeight})`,
-  } as CSSProperties;
 
   const leftPaneContent = (
     <div className="flex h-full min-h-0 flex-col gap-4">
@@ -1669,50 +1508,40 @@ const Index = () => {
           </div>
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-4">
-          {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-            <div className="rounded border-2 border-newspaper-border bg-newspaper-text p-4 font-mono text-newspaper-bg shadow-2xl">
-              <div className="mb-2 flex items-center gap-2 text-lg">
-                🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
-              </div>
-              <div className="mb-3 text-sm">
-                Click any <span className="font-bold text-yellow-400">NEUTRAL</span> or <span className="font-bold text-red-500">ENEMY</span> state to target
-              </div>
-              <div className="mb-2 rounded bg-black/20 p-2 text-xs">
-                Card will deploy automatically when target is selected
-              </div>
-              <div className="flex items-center gap-1 text-xs text-yellow-400">
-                ⚠️ Cannot target your own states
-              </div>
-            </div>
-          )}
-          <div
-            className="grid min-h-0 flex-1 gap-4"
-            style={mapDockGridStyle}
-          >
-            <div className="overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
-              <div className="flex h-full w-full items-center justify-center">
-                <div
-                  className="relative mx-auto w-full max-h-full"
-                  style={{ aspectRatio: '16 / 10' }}
-                >
-                  <div className="absolute inset-0 [&>div]:h-full [&>div]:w-full">
-                    <EnhancedUSAMap
-                      states={gameState.states}
-                      onStateClick={handleStateClick}
-                      selectedZoneCard={gameState.selectedCard}
-                      selectedState={gameState.targetState}
-                      audio={audio}
-                    />
+          <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
+            {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
+              <div className="pointer-events-none absolute top-4 right-4 z-20">
+                <div className="max-w-sm animate-pulse border-2 border-newspaper-border bg-newspaper-text p-4 font-mono text-newspaper-bg shadow-2xl">
+                  <div className="mb-2 flex items-center gap-2 text-lg">
+                    🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
+                  </div>
+                  <div className="mb-3 text-sm">
+                    Click any <span className="font-bold text-yellow-400">NEUTRAL</span> or <span className="font-bold text-red-500">ENEMY</span> state to target
+                  </div>
+                  <div className="mb-2 rounded bg-black/20 p-2 text-xs">
+                    Card will deploy automatically when target is selected
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-yellow-400">
+                    ⚠️ Cannot target your own states
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="overflow-hidden rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
-              <PlayedCardsDock
-                playedCards={gameState.cardsPlayedThisRound}
-                onInspectCard={(card) => setInspectedPlayedCard(card)}
+            )}
+            <div className="relative flex-1">
+              <EnhancedUSAMap
+                states={gameState.states}
+                onStateClick={handleStateClick}
+                selectedZoneCard={gameState.selectedCard}
+                selectedState={gameState.targetState}
+                audio={audio}
               />
             </div>
+          </div>
+          <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
+            <PlayedCardsDock
+              playedCards={gameState.cardsPlayedThisRound}
+              onInspectCard={(card) => setInspectedPlayedCard(card)}
+            />
           </div>
         </div>
       </div>
@@ -1720,44 +1549,42 @@ const Index = () => {
     </div>
   );
 
-  const rightPaneContent = !showDesktopHand
-    ? null
-    : (
-      <aside className="flex min-h-0 min-w-0 flex-1 flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
-        <header className="flex items-center justify-between gap-2 border-b border-newspaper-border/60 px-4 py-3">
-          <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Your Hand</h3>
-          <span className="text-xs font-mono">IP {gameState.ip}</span>
-        </header>
-        <div className="flex-1 min-h-0 overflow-y-auto px-3 py-3">
-          <EnhancedGameHand
-            cards={gameState.hand}
-            onPlayCard={handlePlayCard}
-            onSelectCard={handleSelectCard}
-            selectedCard={gameState.selectedCard}
-            disabled={handInteractionDisabled}
-            currentIP={gameState.ip}
-            loadingCard={loadingCard}
-            onCardHover={setHoveredCard}
-          />
-        </div>
-        <footer className="shrink-0 sticky bottom-[var(--safe-bottom)] border-t border-newspaper-border/60 bg-newspaper-text px-3 pb-3 pt-2 sm:pt-3">
-          <Button
-            onClick={handleEndTurn}
-            className="touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60"
-            disabled={isPlayerActionLocked}
-          >
-            {gameState.currentPlayer === 'ai' ? (
-              <span className="flex items-center justify-center gap-2 text-sm">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
-                AI Thinking...
-              </span>
-            ) : (
-              'End Turn'
-            )}
-          </Button>
-        </footer>
-      </aside>
-    );
+  const rightPaneContent = (
+    <aside className="h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
+      <header className="flex items-center justify-between gap-2 border-b border-newspaper-border/60 px-4 py-3">
+        <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Your Hand</h3>
+        <span className="text-xs font-mono">IP {gameState.ip}</span>
+      </header>
+      <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
+        <EnhancedGameHand
+          cards={gameState.hand}
+          onPlayCard={handlePlayCard}
+          onSelectCard={handleSelectCard}
+          selectedCard={gameState.selectedCard}
+          disabled={handInteractionDisabled}
+          currentIP={gameState.ip}
+          loadingCard={loadingCard}
+          onCardHover={setHoveredCard}
+        />
+      </div>
+      <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
+        <Button
+          onClick={handleEndTurn}
+          className="touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60"
+          disabled={isPlayerActionLocked}
+        >
+          {gameState.currentPlayer === 'ai' ? (
+            <span className="flex items-center justify-center gap-2 text-sm">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
+              AI Thinking...
+            </span>
+          ) : (
+            'End Turn'
+          )}
+        </Button>
+      </footer>
+    </aside>
+  );
 
   return (
     <>
@@ -1767,37 +1594,18 @@ const Index = () => {
         rightPane={rightPaneContent}
       />
 
-      {shouldShowMobileHandUI && (
-        <MinimizedHand
-          cards={gameState.hand}
-          selectedCard={gameState.selectedCard}
-          onSelectCard={handleSelectCard}
-          onPlayCard={(cardId) => { void handlePlayCard(cardId); }}
-          onEndTurn={handleEndTurn}
-          playerIP={gameState.ip}
-          isMaximized={isMobileHandExpanded}
-          onToggleMaximize={handleToggleMobileHandExpansion}
-          isOpen={isMobileHandOpen}
-          onClose={handleCloseMobileHand}
-          onOpen={handleOpenMobileHand}
-          disabled={handInteractionDisabled}
-          onCardHover={(card) => setHoveredCard(card)}
-          endTurnDisabled={isPlayerActionLocked}
-          isAiProcessing={gameState.currentPlayer === 'ai'}
-        />
-      )}
-
-      {uiNotificationsEnabled && (
-        <Toaster
-          position="bottom-right"
-          gutter={12}
-          containerClassName="game-toast-container"
-          toastOptions={{
-            duration: 3000,
-            className: 'game-toast',
-          }}
-        />
-      )}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#1f2937',
+            color: '#f3f4f6',
+            border: '1px solid #374151',
+            fontFamily: 'monospace'
+          }
+        }}
+      />
 
       <CardAnimationLayer />
 
@@ -1862,12 +1670,10 @@ const Index = () => {
         playerIP={gameState.ip}
         controlledStates={gameState.controlledStates.length}
         onSuggestMove={(suggestion) => {
-          if (uiNotificationsEnabled) {
-            toast(suggestion, {
-              duration: 4000,
-              style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
-            });
-          }
+          toast(suggestion, {
+            duration: 4000,
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+          });
         }}
       />
 
@@ -1897,7 +1703,6 @@ const Index = () => {
           truth={gameState.truth}
           comboTruthDelta={gameState.comboTruthDeltaThisRound}
           sightings={paranormalSightings}
-          glitchBadge={gameState.newspaperGlitchBadge}
           onClose={handleCloseNewspaper}
         />
       )}

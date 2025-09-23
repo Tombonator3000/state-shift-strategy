@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,6 @@ import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { areParanormalEffectsEnabled } from '@/state/settings';
-import { ComboThemeMap, type ComboKind, type ComboTheme } from '@/data/combos/themes';
 
 
 interface EnhancedState {
@@ -35,24 +34,6 @@ interface PlayedCard {
   player: 'human' | 'ai';
 }
 
-const COMBO_THEMES_BY_ID: Record<string, ComboTheme> = Object.values(ComboThemeMap).reduce(
-  (accumulator, theme) => {
-    accumulator[theme.id] = theme;
-    return accumulator;
-  },
-  {} as Record<string, ComboTheme>,
-);
-
-const resolveComboTheme = (comboKind?: ComboKind, themeId?: string): ComboTheme | undefined => {
-  if (themeId && COMBO_THEMES_BY_ID[themeId]) {
-    return COMBO_THEMES_BY_ID[themeId];
-  }
-  if (comboKind && ComboThemeMap[comboKind]) {
-    return ComboThemeMap[comboKind];
-  }
-  return undefined;
-};
-
 interface EnhancedUSAMapProps {
   states: EnhancedState[];
   onStateClick: (stateId: string) => void;
@@ -61,15 +42,6 @@ interface EnhancedUSAMapProps {
   selectedState?: string | null;
   audio?: any;
   playedCards?: PlayedCard[];
-}
-
-interface ComboGlitchEventDetail {
-  affectedStates?: string[];
-  durationMs?: number;
-  reducedMotion?: boolean;
-  comboKind?: ComboKind;
-  themeId?: string;
-  mode?: 'minimal' | 'full' | 'off';
 }
 
 const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
@@ -102,20 +74,6 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     stateId?: string;
     mode?: 'select' | 'lock' | 'complete';
   } | null>(null);
-
-  const glitchHighlightRef = useRef<{
-    rawStateIds: string[];
-    elements: Set<SVGPathElement>;
-    timeouts: number[];
-    reducedMotion: boolean;
-    expiresAt: number | null;
-  }>({
-    rawStateIds: [],
-    elements: new Set(),
-    timeouts: [],
-    reducedMotion: false,
-    expiresAt: null,
-  });
 
   const getTooltipPosition = () => {
     const tooltipWidth = tooltipRef.current?.offsetWidth ?? 384;
@@ -156,204 +114,6 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
     return { left, top };
   };
-
-  const removeGlitchHighlightClasses = useCallback(() => {
-    glitchHighlightRef.current.elements.forEach(element => {
-      element.classList.remove(
-        'combo-glitch-map-highlight',
-        'combo-glitch-map-highlight--animated',
-        'combo-glitch-map-highlight--reduced',
-      );
-    });
-    glitchHighlightRef.current.elements.clear();
-  }, []);
-
-  const findElementsForStates = useCallback((rawStateIds: string[]): SVGPathElement[] => {
-    if (!svgRef.current) {
-      return [];
-    }
-
-    const svg = svgRef.current;
-    const results = new Set<SVGPathElement>();
-    const sanitizedIds = rawStateIds
-      .map(value => `${value}`.trim())
-      .filter(value => value.length > 0);
-
-    sanitizedIds.forEach(value => {
-      const upper = value.toUpperCase();
-      const match = states.find(state =>
-        state.id === value
-        || state.abbreviation === value
-        || state.abbreviation === upper
-        || state.name.toLowerCase() === value.toLowerCase()
-      );
-
-      const tokens = new Set<string>();
-      tokens.add(value);
-      tokens.add(upper);
-      if (match) {
-        tokens.add(match.id);
-        tokens.add(match.abbreviation);
-      }
-
-      tokens.forEach(token => {
-        if (!token) {
-          return;
-        }
-        svg.querySelectorAll<SVGPathElement>(`[data-state-id="${token}"]`).forEach(element => {
-          results.add(element);
-        });
-        svg.querySelectorAll<SVGPathElement>(`[data-state-abbr="${token}"]`).forEach(element => {
-          results.add(element);
-        });
-      });
-    });
-
-    return Array.from(results);
-  }, [states]);
-
-  const finalizeGlitchHighlight = useCallback(() => {
-    glitchHighlightRef.current.timeouts.forEach(timeoutId => window.clearTimeout(timeoutId));
-    glitchHighlightRef.current.timeouts = [];
-    removeGlitchHighlightClasses();
-    glitchHighlightRef.current.rawStateIds = [];
-    glitchHighlightRef.current.reducedMotion = false;
-    glitchHighlightRef.current.expiresAt = null;
-  }, [removeGlitchHighlightClasses]);
-
-  const applyGlitchHighlight = useCallback((rawStateIds: string[], reducedMotion: boolean, durationMs: number) => {
-    const sanitizedIds = rawStateIds
-      .map(value => `${value}`.trim())
-      .filter(value => value.length > 0);
-
-    if (sanitizedIds.length === 0) {
-      finalizeGlitchHighlight();
-      return;
-    }
-
-    glitchHighlightRef.current.timeouts.forEach(timeoutId => window.clearTimeout(timeoutId));
-    glitchHighlightRef.current.timeouts = [];
-    removeGlitchHighlightClasses();
-
-    glitchHighlightRef.current.rawStateIds = sanitizedIds;
-    glitchHighlightRef.current.reducedMotion = reducedMotion;
-
-    const safeDuration = Number.isFinite(durationMs) && durationMs > 0 ? durationMs : 1200;
-    glitchHighlightRef.current.expiresAt = Date.now() + safeDuration;
-
-    const elements = findElementsForStates(sanitizedIds);
-    const variantClass = reducedMotion
-      ? 'combo-glitch-map-highlight--reduced'
-      : 'combo-glitch-map-highlight--animated';
-
-    elements.forEach(element => {
-      element.classList.add('combo-glitch-map-highlight');
-      element.classList.remove('combo-glitch-map-highlight--animated', 'combo-glitch-map-highlight--reduced');
-      element.classList.add(variantClass);
-    });
-
-    glitchHighlightRef.current.elements = new Set(elements);
-
-    if (safeDuration > 0) {
-      const timeoutId = window.setTimeout(() => {
-        finalizeGlitchHighlight();
-      }, safeDuration);
-      glitchHighlightRef.current.timeouts = [timeoutId];
-    }
-  }, [findElementsForStates, finalizeGlitchHighlight, removeGlitchHighlightClasses]);
-
-  const reapplyGlitchHighlight = useCallback(() => {
-    const { rawStateIds, reducedMotion, expiresAt } = glitchHighlightRef.current;
-    if (rawStateIds.length === 0) {
-      return;
-    }
-
-    if (typeof expiresAt === 'number' && Date.now() >= expiresAt) {
-      finalizeGlitchHighlight();
-      return;
-    }
-
-    const elements = findElementsForStates(rawStateIds);
-    const variantClass = reducedMotion
-      ? 'combo-glitch-map-highlight--reduced'
-      : 'combo-glitch-map-highlight--animated';
-
-    removeGlitchHighlightClasses();
-
-    elements.forEach(element => {
-      element.classList.add('combo-glitch-map-highlight');
-      element.classList.remove('combo-glitch-map-highlight--animated', 'combo-glitch-map-highlight--reduced');
-      element.classList.add(variantClass);
-    });
-
-    glitchHighlightRef.current.elements = new Set(elements);
-    glitchHighlightRef.current.timeouts.forEach(timeoutId => window.clearTimeout(timeoutId));
-    glitchHighlightRef.current.timeouts = [];
-
-    if (typeof expiresAt === 'number') {
-      const remaining = Math.max(0, expiresAt - Date.now());
-      if (remaining > 0) {
-        const timeoutId = window.setTimeout(() => {
-          finalizeGlitchHighlight();
-        }, remaining);
-        glitchHighlightRef.current.timeouts = [timeoutId];
-      }
-    }
-  }, [findElementsForStates, finalizeGlitchHighlight, removeGlitchHighlightClasses]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const handleComboGlitch = (event: Event) => {
-      const detail = (event as CustomEvent<ComboGlitchEventDetail>).detail;
-      if (!detail) {
-        finalizeGlitchHighlight();
-        return;
-      }
-
-      if (detail.mode === 'off') {
-        finalizeGlitchHighlight();
-        return;
-      }
-
-      const theme = resolveComboTheme(detail.comboKind, detail.themeId);
-      if (!theme || theme.glyph !== 'map-blink') {
-        finalizeGlitchHighlight();
-        return;
-      }
-
-      const statesToHighlight = Array.isArray(detail.affectedStates)
-        ? detail.affectedStates.map(value => `${value}`.trim()).filter(value => value.length > 0)
-        : [];
-
-      if (statesToHighlight.length === 0) {
-        finalizeGlitchHighlight();
-        return;
-      }
-
-      const highlightDuration = typeof detail.durationMs === 'number' && detail.durationMs > 0
-        ? detail.durationMs + 180
-        : 1200;
-      const effectiveReducedMotion = detail.reducedMotion ?? detail.mode === 'minimal';
-
-      applyGlitchHighlight(statesToHighlight, Boolean(effectiveReducedMotion), highlightDuration);
-    };
-
-    const handleComboGlitchComplete = () => {
-      finalizeGlitchHighlight();
-    };
-
-    window.addEventListener('comboGlitch', handleComboGlitch as EventListener);
-    window.addEventListener('comboGlitchComplete', handleComboGlitchComplete);
-
-    return () => {
-      window.removeEventListener('comboGlitch', handleComboGlitch as EventListener);
-      window.removeEventListener('comboGlitchComplete', handleComboGlitchComplete);
-      finalizeGlitchHighlight();
-    };
-  }, [applyGlitchHighlight, finalizeGlitchHighlight]);
 
   useEffect(() => {
     const loadUSData = async () => {
@@ -729,7 +489,6 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     });
 
     contestedStatesRef.current = nextContestedStates;
-    reapplyGlitchHighlight();
 
     return () => {
       svg.removeEventListener('pointerleave', handlePointerLeave);
@@ -744,8 +503,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     selectedZoneCard,
     selectedState,
     governmentTarget?.active,
-    governmentTarget?.stateId,
-    reapplyGlitchHighlight
+    governmentTarget?.stateId
   ]);
 
   const getStateOwnerClass = (state?: EnhancedState) => {

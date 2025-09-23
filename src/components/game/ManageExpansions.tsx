@@ -23,7 +23,6 @@ import { useDistributionSettings } from '@/hooks/useDistributionSettings';
 import type { DistributionMode } from '@/data/weightedCardDistribution';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { summarizeExpansionCards } from './manageExpansions.helpers';
 
 interface ManageExpansionsProps {
   onClose: () => void;
@@ -71,6 +70,20 @@ const computeStats = (cards: GameCard[]): StatBlock => {
     factions,
     rarities: Array.from(rarityCounts.entries()),
   };
+};
+
+const EXPANSION_ID_SET = new Set(EXPANSION_MANIFEST.map(pack => pack.id));
+
+const summarizeExpansionCards = (cards: GameCard[]): Record<string, number> => {
+  const counts: Record<string, number> = {};
+  cards.forEach(card => {
+    const extId = card.extId;
+    if (!extId || !EXPANSION_ID_SET.has(extId)) {
+      return;
+    }
+    counts[extId] = (counts[extId] ?? 0) + 1;
+  });
+  return counts;
 };
 
 interface ExpansionDetail {
@@ -259,7 +272,7 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
     ];
 
     expansionDetails
-      .filter(detail => detail.enabled)
+      .filter(detail => detail.enabled && detail.loadedCount > 0)
       .forEach(detail => {
         sets.push({
           id: detail.pack.id,
@@ -300,7 +313,7 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
   );
 
   const activeExpansionNames = expansionDetails
-    .filter(detail => detail.enabled)
+    .filter(detail => detail.enabled && detail.loadedCount > 0)
     .map(detail => detail.pack.title)
     .join(', ');
 

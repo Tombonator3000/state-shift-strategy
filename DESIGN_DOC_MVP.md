@@ -250,54 +250,6 @@ Forsøk på å spille et 4. kort avvises; du må vente til neste tur.
 
 
 
-6.1 Kombo-kategorier (MVP)
-
-
-
-Kombomotoren sjekker alle kort du spiller i løpet av din tur og betaler ut bonus IP eller Truth når definerte mønstre treffer. Hver komb definert i MVP har en individuell “cap”, og spilleren kan normalt bare utløse to komboutbetalinger per tur (kan økes via innstillinger).
-
-
-
-Sequence (rekkefølge)
-
-
-
-* Trigger: Fast rekkefølge av korttyper. Eksempel: «Attack Blitz» (ATTACK → ATTACK → ATTACK) som gir +5 IP når tre angrep spilles etter hverandre.
-
-
-
-Count (volum)
-
-
-
-* Trigger: N kort av en type/raritet i løpet av turen. Eksempel: «Attack Barrage» som krever tre ATTACK-spill og betaler +6 IP.
-
-
-
-Threshold (terskel)
-
-
-
-* Trigger: Nå definerte tallverdier (IP-forbruk, ulike mål, antall dyre kort). Eksempel: «Strategic Budget» gir +4 IP når du investerer minst 12 IP på kort samme tur.
-
-
-
-State (territorium)
-
-
-
-* Trigger: Gjentatte eller spredd ZONE-spill på bestemte stater. Eksempel: «Lockdown» utløses av tre treff på samme stat i én tur og gir +4 IP.
-
-
-
-Hybrid (samensatt)
-
-
-
-* Trigger: Kombinasjon av flere betingelser (sekvenser + terskler, type-miks + målspredning). Eksempel: «Precision Strike» krever ATTACK → ZONE-sekvens og minst 6 IP brukt på ATTACK samme tur for +3 IP.
-
-
-
 7\. Kortdesign (for designere)
 
 7.1 Kortmal (metadata og effekter)
@@ -683,63 +635,6 @@ ZONE (Common, 4 IP): +1 Pressure på OH → når Defense 3 neste runde med flere
 
 
 Slutt: Du discarder 1 dødt kort gratis.
-
-
-
-Vedlegg A – Territorielle synergier
-
-
-
-Kontroller alle stater som er listet for en kombinasjon for å aktivere bonusen permanent. IP-bonusen legges oppå vanlig inntekt, og eventuelle spesialeffekter gjelder så lenge du holder hele settet.
-
-
-
-Økonomiske nettverk
-
-
-
-* Wall Street Empire (NY, CT, NJ) → +5 IP og «Additional +2 IP per turn from financial manipulation».
-* Silicon Valley Network (CA, WA, OR) → +4 IP og «All MEDIA cards cost -1 IP».
-* Midwest Backbone (IL, OH, MI, IN, WI) → +4 IP og «States are harder to capture (-1 pressure from enemy)».
-* Food Supply Chain (IA, NE, KS, MO, IL) → +3 IP og «Population unrest immunity - no pressure loss from events».
-
-
-
-Energikarteller
-
-
-
-* Oil Cartel (TX, AK, ND, OK) → +6 IP og «Generate +1 IP for each state you control».
-
-
-
-Militær infrastruktur
-
-
-
-* Military Triangle (VA, MD, DC) → +4 IP og «All ATTACK cards deal +1 pressure».
-* Nuclear Triad (WY, MT, ND) → +3 IP og «Defense of all your states +1».
-* Space Program (FL, TX, AL, CA) → +5 IP og «Can see AI hand once per turn».
-* Southern Border (CA, AZ, NM, TX) → +4 IP og «Generate +1 IP for each neutral state».
-
-
-
-Etterretnings- og kulturblokker
-
-
-
-* Intelligence Web (VA, MD, UT, NV) → +4 IP og «Draw +1 card per turn».
-* Academic Elite (MA, CT, NY, CA) → +3 IP og «All cards give +50% Truth/Government effect».
-* Deep South Network (GA, AL, MS, SC, LA) → +3 IP og «Government cards are more effective (+2 Truth manipulation)».
-* New England Conspiracy (MA, NH, VT, ME, RI, CT) → +4 IP og «Secret societies activated - draw rare cards more often».
-
-
-
-Transport og logistikk
-
-
-
-* Transport Control (IL, MO, IN, OH) → +3 IP og «Can move pressure between adjacent states once per turn».
 
 
 

@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
+import React, { useState, useRef } from 'react';
 import clsx from 'clsx';
 import CardDetailOverlay from './CardDetailOverlay';
 import BaseCard from '@/components/game/cards/BaseCard';
@@ -13,11 +12,6 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ExtensionCardBadge } from './ExtensionCardBadge';
-
-const HAND_CARD_SCALE = 0.78;
-const CARD_BASE_WIDTH = 320;
-const CARD_BASE_HEIGHT = 460;
-const GRID_GAP = 12; // Tailwind gap-3
 
 interface EnhancedGameHandProps {
   cards: GameCard[];
@@ -46,102 +40,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const { triggerHaptic } = useHapticFeedback();
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);
-  const [containerSize, setContainerSize] = useState<{ width: number; height: number }>({
-    width: 0,
-    height: 0,
-  });
-
-  useEffect(() => {
-    const node = handRef.current;
-    if (!node) return;
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      const { width, height } = entry.contentRect;
-      setContainerSize((prev) => {
-        if (prev.width === width && prev.height === height) {
-          return prev;
-        }
-        return { width, height };
-      });
-    });
-
-    observer.observe(node);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  const layout = useMemo(() => {
-    const cardCount = cards.length;
-    const { width, height } = containerSize;
-
-    if (cardCount === 0) {
-      return {
-        scale: HAND_CARD_SCALE,
-        columns: 1,
-      };
-    }
-
-    if (width <= 0 || height <= 0) {
-      return {
-        scale: HAND_CARD_SCALE,
-        columns: Math.min(cardCount, 3) || 1,
-      };
-    }
-
-    let bestScale = 0;
-    let bestColumns = 1;
-
-    for (let columns = 1; columns <= cardCount; columns += 1) {
-      const rows = Math.ceil(cardCount / columns);
-      const horizontalGap = (columns - 1) * GRID_GAP;
-      const verticalGap = (rows - 1) * GRID_GAP;
-
-      const widthScale = (width - horizontalGap) / (columns * CARD_BASE_WIDTH);
-      const heightScale = (height - verticalGap) / (rows * CARD_BASE_HEIGHT);
-      const candidateScale = Math.min(HAND_CARD_SCALE, widthScale, heightScale);
-
-      if (candidateScale <= 0) {
-        continue;
-      }
-
-      if (
-        candidateScale > bestScale + 0.0001 ||
-        (Math.abs(candidateScale - bestScale) <= 0.0001 && columns > bestColumns)
-      ) {
-        bestScale = candidateScale;
-        bestColumns = columns;
-      }
-    }
-
-    if (bestScale <= 0) {
-      return {
-        scale: HAND_CARD_SCALE,
-        columns: Math.min(cardCount, 3) || 1,
-      };
-    }
-
-    return {
-      scale: bestScale,
-      columns: bestColumns,
-    };
-  }, [cards.length, containerSize]);
-
-  const cardScale = layout.scale;
-  const cardWidth = CARD_BASE_WIDTH * cardScale;
-  const cardHeight = CARD_BASE_HEIGHT * cardScale;
-  const gridColumns = Math.max(1, layout.columns);
-
-  const gridStyle = {
-    '--hand-card-scale': `${cardScale}`,
-    '--hand-card-width': `${cardWidth}px`,
-    '--hand-card-height': `${cardHeight}px`,
-    gridTemplateColumns: `repeat(${gridColumns}, minmax(0, var(--hand-card-width)))`,
-    gridAutoRows: 'var(--hand-card-height)',
-  } as CSSProperties;
 
   const normalizeCardType = (type: string): MVPCardType => {
     return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
@@ -212,11 +110,11 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 
   return (
     <div
-      className="relative h-full overflow-hidden"
+      className="relative h-full"
       ref={handRef}
       onPointerLeave={() => onCardHover?.(null)}
     >
-      <div className="grid h-full w-full content-start justify-start gap-3 pr-1 pb-4" style={gridStyle}>
+      <div className="grid w-full grid-cols-3 gap-3 justify-items-start items-start content-start">
         {cards.length === 0 ? (
           <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
             No assets available
@@ -276,17 +174,11 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 key={`${card.id}-${index}`}
                 type="button"
                 className={clsx(
-                  'group/card relative flex flex-shrink-0 items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
+                  'group/card relative flex w-full items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
                   !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
                   disabled && 'cursor-default'
                 )}
-                style={{
-                  animationDelay: `${index * 0.03}s`,
-                  width: 'var(--hand-card-width)',
-                  height: 'var(--hand-card-height)',
-                  minWidth: 'var(--hand-card-width)',
-                  minHeight: 'var(--hand-card-height)',
-                }}
+                style={{ animationDelay: `${index * 0.03}s` }}
                 onClick={(e) => {
                   e.preventDefault();
                   audio.playSFX('click');
@@ -316,30 +208,29 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     ...card,
                     _hoverPosition: { x: left, y: top }
                   });
-                  }}
-                  onPointerLeave={() => {
-                    onCardHover?.(null);
-                  }}
-                >
-                  <BaseCard
-                    card={card}
-                    hideStamp
-                    polaroidHover={false}
-                    size="handMini"
-                    className="pointer-events-none select-none h-full w-full"
-                    frameClassName={clsx(
-                      'drop-shadow-[0_12px_22px_rgba(0,0,0,0.32)] transition-transform duration-200',
-                      !disabled && canAfford && 'group-hover/card:-translate-y-1 group-hover/card:drop-shadow-[0_22px_30px_rgba(0,0,0,0.35)]',
-                      (isPlaying || isLoading) && 'ring-2 ring-primary shadow-primary/40',
-                      isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40'
-                    )}
-                    overlay={overlay}
-                    scaleOverride={cardScale}
-                  />
-                </button>
-              );
-            })
-          )}
+                }}
+                onPointerLeave={() => {
+                  onCardHover?.(null);
+                }}
+              >
+                <BaseCard
+                  card={card}
+                  hideStamp
+                  polaroidHover={false}
+                  size="handMini"
+                  className="pointer-events-none select-none"
+                  frameClassName={clsx(
+                    'drop-shadow-[0_12px_22px_rgba(0,0,0,0.32)] transition-transform duration-200',
+                    !disabled && canAfford && 'group-hover/card:-translate-y-1 group-hover/card:drop-shadow-[0_22px_30px_rgba(0,0,0,0.35)]',
+                    (isPlaying || isLoading) && 'ring-2 ring-primary shadow-primary/40',
+                    isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40'
+                  )}
+                  overlay={overlay}
+                />
+              </button>
+            );
+          })
+        )}
       </div>
 
       {/* Card Detail Overlay - Redesigned */}

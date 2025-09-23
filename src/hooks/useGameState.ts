@@ -16,17 +16,9 @@ import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardMVP, type CardPlayResolution } from '@/systems/cardResolution';
 import { applyTruthDelta } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
-import { DEFAULT_DRAW_MODE, getDifficulty } from '@/state/settings';
+import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
-import { playComboGlitchIfAny } from '@/utils/visualEffects';
-import { DEFAULT_MAX_CARDS_PER_TURN, normalizeMaxCardsPerTurn } from '@/config/turnLimits';
-import {
-  calculateComboIncome,
-  collectUnhandledCombinationEffects,
-  deriveCombinationEffectSummaries,
-  getEffectiveCardCost,
-} from '@/game/combinationEffectUtils';
 import type { GameState } from './gameStateTypes';
 import {
   applyAiCardPlay,
@@ -36,74 +28,10 @@ import {
   type AiCardPlayParams,
 } from './aiHelpers';
 import { evaluateCombosForTurn } from './comboAdapter';
-import { createDefaultCardDrawState, initGame as runInitGame } from './initGame';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
 const HAND_LIMIT = 5;
-const CURRENT_SAVE_VERSION = '1.1';
-const SUPPORTED_SAVE_VERSIONS = new Set(['1.0', CURRENT_SAVE_VERSION]);
-
-const sanitizeCardDrawState = (value: Partial<CardDrawState> | undefined | null): CardDrawState => ({
-  cardsPlayedLastTurn: typeof value?.cardsPlayedLastTurn === 'number' && Number.isFinite(value.cardsPlayedLastTurn)
-    ? value.cardsPlayedLastTurn
-    : 0,
-  lastTurnWithoutPlay: Boolean(value?.lastTurnWithoutPlay),
-});
-
-const MIGRATION_LOG_ENTRY = 'Save migrated to v1.1 baseline (5 IP start, five-card opener).';
-
-type RawSaveData = Partial<GameState> & {
-  version?: string;
-  drawMode?: DrawMode;
-  cardDrawState?: Partial<CardDrawState>;
-};
-
-
-const isValidDrawMode = (mode: unknown): mode is DrawMode =>
-  typeof mode === 'string' && (['standard', 'classic', 'momentum', 'catchup', 'fast'] as DrawMode[]).includes(mode as DrawMode);
-
-const migrateSaveData = (raw: RawSaveData): RawSaveData & { version: string; drawMode: DrawMode; cardDrawState: CardDrawState } => {
-  const version = typeof raw.version === 'string' ? raw.version : '1.0';
-  const resolvedDrawMode = isValidDrawMode(raw.drawMode) ? raw.drawMode : DEFAULT_DRAW_MODE;
-  const migrated: RawSaveData & { version: string; drawMode: DrawMode; cardDrawState: CardDrawState } = {
-    ...raw,
-    version,
-    drawMode: resolvedDrawMode,
-    cardDrawState: sanitizeCardDrawState(raw.cardDrawState),
-  };
-
-  const legacyLimit =
-    typeof raw.maxCardsPerTurn === 'number'
-      ? raw.maxCardsPerTurn
-      : (raw as { maxPlaysPerTurn?: number }).maxPlaysPerTurn;
-  migrated.maxCardsPerTurn = normalizeMaxCardsPerTurn(legacyLimit);
-
-  if (!Number.isFinite(migrated.ip as number)) {
-    migrated.ip = 5;
-  }
-
-  if (!Number.isFinite(migrated.aiIP as number)) {
-    migrated.aiIP = 5;
-  }
-
-  if (!Array.isArray(migrated.log)) {
-    migrated.log = [];
-  }
-
-  if (version === '1.0') {
-    migrated.version = CURRENT_SAVE_VERSION;
-    if (Array.isArray(migrated.log) && !migrated.log.includes(MIGRATION_LOG_ENTRY)) {
-      migrated.log = [...migrated.log, MIGRATION_LOG_ENTRY];
-    }
-  }
-
-  if (!SUPPORTED_SAVE_VERSIONS.has(migrated.version)) {
-    migrated.version = CURRENT_SAVE_VERSION;
-  }
-
-  return migrated;
-};
 
 const DIFFICULTY_TO_AI_DIFFICULTY: Record<Difficulty, AIDifficulty> = {
   EASY: 'easy',
@@ -239,12 +167,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     currentPlayer: 'human',
     aiDifficulty,
     truth: 50,
-    ip: 5,
-    aiIP: 5,
-    maxCardsPerTurn: DEFAULT_MAX_CARDS_PER_TURN,
+    ip: 15,
+    aiIP: 15,
     // Use all available cards to ensure proper deck building
-    hand: getRandomCards(HAND_LIMIT, { faction: 'truth' }),
-    aiHand: getRandomCards(HAND_LIMIT, { faction: 'government' }),
+    hand: getRandomCards(3, { faction: 'truth' }),
+    aiHand: getRandomCards(3, { faction: 'government' }),
     isGameOver: false,
     deck: generateWeightedDeck(40, 'truth'),
     aiDeck: generateWeightedDeck(40, 'government'),
@@ -272,11 +199,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     currentEvents: [],
     eventManager,
     showNewspaper: false,
-    newspaperGlitchBadge: false,
     log: [
       'Game started - Truth Seekers faction selected',
       'Starting Truth: 50%',
-      `Opening hand: ${HAND_LIMIT} cards`,
+      'Cards drawn: 3',
       `AI Difficulty: ${aiDifficulty}`
     ],
     agenda: {
@@ -302,8 +228,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     selectedCard: null,
     targetState: null,
     aiStrategist: AIFactory.createStrategist(aiDifficulty),
-    drawMode: DEFAULT_DRAW_MODE,
-    cardDrawState: createDefaultCardDrawState()
+    drawMode: 'standard',
+    cardDrawState: {
+      cardsPlayedLastTurn: 0,
+      lastTurnWithoutPlay: false
+    }
   });
 
   const resolveCardEffects = useCallback(
@@ -317,38 +246,89 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     [achievements],
   );
 
-  const initGameHandler = useCallback((faction: 'government' | 'truth') => {
-    let savedSettings: string | null = null;
-    try {
-      savedSettings = localStorage.getItem('gameSettings');
-    } catch (error) {
-      console.warn('Failed to read saved draw mode settings, defaulting to standard.', error);
-    }
+  const initGame = useCallback((faction: 'government' | 'truth') => {
+    const startingTruth = 50;
+    const startingIP = faction === 'government' ? 20 : 10; // Player IP
+    const aiStartingIP = faction === 'government' ? 10 : 20; // AI starts as the opposite faction
+    
+    // Get draw mode from localStorage
+    const savedSettings = localStorage.getItem('gameSettings');
+    const drawMode: DrawMode = savedSettings ? 
+      (JSON.parse(savedSettings).drawMode || 'standard') : 'standard';
+    
+    const handSize = getStartingHandSize(drawMode, faction);
+    // CRITICAL: Pass faction to deck generation
+    const newDeck = generateWeightedDeck(40, faction);
+    const startingHand = newDeck.slice(0, handSize);
+    const initialControl = getInitialStateControl(faction);
 
-    runInitGame({
+    // Track game start in achievements
+    achievements.onGameStart(faction, aiDifficulty);
+    achievements.manager.onNewGameStart();
+
+    setGameState(prev => ({
+      ...prev,
       faction,
-      aiDifficulty,
-      achievements,
-      setGameState,
-      savedSettings,
-    });
-  }, [achievements, aiDifficulty, setGameState]);
+      truth: startingTruth,
+      ip: startingIP,
+      aiIP: aiStartingIP,
+      hand: startingHand,
+      deck: newDeck.slice(handSize),
+      // AI gets opposite faction cards
+      aiHand: getRandomCards(handSize, { faction: faction === 'government' ? 'truth' : 'government' }),
+      aiDeck: generateWeightedDeck(40, faction === 'government' ? 'truth' : 'government'),
+      controlledStates: initialControl.player,
+      aiControlledStates: initialControl.ai,
+      isGameOver: false, // CRITICAL: Reset game over state
+      phase: 'action', // Reset to proper starting phase
+      turn: 1,
+      round: 1,
+      cardsPlayedThisTurn: 0,
+      cardsPlayedThisRound: [],
+      playHistory: [],
+      turnPlays: [],
+      animating: false,
+      aiTurnInProgress: false,
+      selectedCard: null,
+      targetState: null,
+      states: USA_STATES.map(state => {
+        let owner: 'player' | 'ai' | 'neutral' = 'neutral';
+
+        if (initialControl.player.includes(state.abbreviation)) owner = 'player';
+        else if (initialControl.ai.includes(state.abbreviation)) owner = 'ai';
+
+        return {
+          id: state.id,
+          name: state.name,
+          abbreviation: state.abbreviation,
+          baseIP: state.baseIP,
+          defense: state.defense,
+          pressure: 0,
+          contested: false,
+          owner,
+          specialBonus: state.specialBonus,
+          bonusValue: state.bonusValue,
+        };
+      }),
+      log: [
+        `Game started - ${faction} faction selected`,
+        `Starting Truth: ${startingTruth}%`,
+        `Starting IP: ${startingIP}`,
+        `Cards drawn: ${handSize} (${drawMode} mode)`,
+        `Controlled states: ${initialControl.player.join(', ')}`
+      ],
+      drawMode,
+      cardDrawState: {
+        cardsPlayedLastTurn: 0,
+        lastTurnWithoutPlay: false
+      }
+    }));
+  }, [achievements, aiDifficulty]);
 
   const playCard = useCallback((cardId: string, targetOverride?: string | null) => {
     setGameState(prev => {
       const card = prev.hand.find(c => c.id === cardId);
-      const maxCardsThisTurn = normalizeMaxCardsPerTurn(prev.maxCardsPerTurn);
-      if (!card || prev.cardsPlayedThisTurn >= maxCardsThisTurn || prev.animating) {
-        return prev;
-      }
-
-      const { human: humanComboSummary } = deriveCombinationEffectSummaries({
-        faction: prev.faction,
-        controlledStates: prev.controlledStates,
-        aiControlledStates: prev.aiControlledStates,
-      });
-      const effectiveCost = getEffectiveCardCost(card, humanComboSummary.breakdown);
-      if (prev.ip < effectiveCost) {
+      if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
         return prev;
       }
 
@@ -386,10 +366,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         states: resolution.states,
         controlledStates: resolution.controlledStates,
         aiControlledStates: resolution.aiControlledStates,
-        cardsPlayedThisTurn: Math.min(
-          maxCardsThisTurn,
-          prev.cardsPlayedThisTurn + 1,
-        ),
+        cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
         playHistory: [...prev.playHistory, playedCardRecord],
         turnPlays: [...prev.turnPlays, ...turnPlayEntries],
@@ -406,23 +383,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     explicitTargetState?: string
   ) => {
     const card = gameState.hand.find(c => c.id === cardId);
-    const maxCardsThisTurn = normalizeMaxCardsPerTurn(gameState.maxCardsPerTurn);
-    if (!card) {
-      return;
-    }
-
-    const { human: humanComboSummary } = deriveCombinationEffectSummaries({
-      faction: gameState.faction,
-      controlledStates: gameState.controlledStates,
-      aiControlledStates: gameState.aiControlledStates,
-    });
-    const effectiveCost = getEffectiveCardCost(card, humanComboSummary.breakdown);
-
-    if (
-      gameState.ip < effectiveCost ||
-      gameState.cardsPlayedThisTurn >= maxCardsThisTurn ||
-      gameState.animating
-    ) {
+    if (!card || gameState.ip < card.cost || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
       return;
     }
 
@@ -437,24 +398,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return prev;
       }
 
-      const handCard = prev.hand.find(c => c.id === cardId);
-      if (!handCard) {
-        return prev;
-      }
-
-      const { human: latestHumanCombo } = deriveCombinationEffectSummaries({
-        faction: prev.faction,
-        controlledStates: prev.controlledStates,
-        aiControlledStates: prev.aiControlledStates,
-      });
-      const currentEffectiveCost = getEffectiveCardCost(handCard, latestHumanCombo.breakdown);
-      if (prev.ip < currentEffectiveCost) {
-        return prev;
-      }
-
-      const resolution = resolveCardEffects(prev, handCard, targetState);
+      const resolution = resolveCardEffects(prev, card, targetState);
       pendingRecord = createPlayedCardRecord({
-        card: handCard,
+        card,
         player: 'human',
         faction: prev.faction,
         targetState,
@@ -468,7 +414,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       pendingTurnPlays = createTurnPlayEntries({
         state: prev,
-        card: handCard,
+        card,
         owner: 'human',
         targetState,
         resolution,
@@ -511,18 +457,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           timestamp: Date.now(),
           logEntries: [],
         };
-      return {
-        ...prev,
-        hand: prev.hand.filter(c => c.id !== cardId),
-        cardsPlayedThisTurn: Math.min(
-          normalizeMaxCardsPerTurn(prev.maxCardsPerTurn),
-          prev.cardsPlayedThisTurn + 1,
-        ),
-        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
-        playHistory: [...prev.playHistory, record],
-        turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
-        selectedCard: null,
-        targetState: null,
+        return {
+          ...prev,
+          hand: prev.hand.filter(c => c.id !== cardId),
+          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+          cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
+          playHistory: [...prev.playHistory, record],
+          turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
+          selectedCard: null,
+          targetState: null,
           animating: false,
         };
       });
@@ -547,10 +490,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),
-          cardsPlayedThisTurn: Math.min(
-            normalizeMaxCardsPerTurn(prev.maxCardsPerTurn),
-            prev.cardsPlayedThisTurn + 1,
-          ),
+          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
           cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
           playHistory: [...prev.playHistory, record],
           turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
@@ -573,26 +513,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     setGameState(prev => ({ ...prev, targetState: stateId }));
   }, []);
 
-  const endTurn = useCallback(async () => {
-    let glitchPayload: Parameters<typeof playComboGlitchIfAny>[0] | null = null;
-    let shouldFlagGlitchBadge = false;
-    let shouldShowNewspaper = false;
-
+  const endTurn = useCallback(() => {
     setGameState(prev => {
+      // Don't allow turn ending if game is over
       if (prev.isGameOver) return prev;
-
+      
       const isHumanTurn = prev.currentPlayer === 'human';
-      const combinationSummaries = deriveCombinationEffectSummaries({
-        faction: prev.faction,
-        controlledStates: prev.controlledStates,
-        aiControlledStates: prev.aiControlledStates,
-      });
-      const humanComboSummary = combinationSummaries.human;
-      const pendingComboEffects = collectUnhandledCombinationEffects(humanComboSummary.breakdown);
       const comboResult = evaluateCombosForTurn(prev, isHumanTurn ? 'human' : 'ai');
       achievements.onCombosResolved(isHumanTurn ? 'human' : 'ai', comboResult.evaluation);
-      const comboSettings = getComboSettings();
-      const fxEnabled = comboSettings.fxEnabled;
+      const fxEnabled = getComboSettings().fxEnabled;
 
       if (
         fxEnabled &&
@@ -605,46 +534,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         }
       }
 
-      if (fxEnabled && comboResult.evaluation.results.length > 0) {
-        const comboNames = comboResult.evaluation.results.map(result => result.definition.name);
-        const rewardStats = comboResult.evaluation.results.reduce(
-          (stats, result) => {
-            const reward = result.appliedReward ?? {};
-            const ip = typeof reward.ip === 'number' ? Math.abs(reward.ip) : 0;
-            const truth = typeof reward.truth === 'number' ? Math.abs(reward.truth) : 0;
-            const combined = ip + truth;
-
-            return {
-              total: stats.total + combined,
-              peak: Math.max(stats.peak, combined),
-            };
-          },
-          { total: 0, peak: 0 },
-        );
-
-        const magnitude = Math.max(rewardStats.total, rewardStats.peak);
-        shouldFlagGlitchBadge = comboResult.comboKinds.some(kind =>
-          kind === 'TIMELINE_FRAGMENT' || kind === 'MEGA_SPREAD',
-        );
-        glitchPayload = {
-          combos: comboNames,
-          magnitude,
-          messages: comboResult.fxMessages,
-          glitchMode: comboSettings.glitchMode,
-          comboKind: comboResult.primaryComboKind,
-          themeId: comboResult.comboThemeId,
-          ipGain: comboResult.rewardSummary.ipGain,
-          truthGain: comboResult.rewardSummary.truthGain,
-          totalReward: comboResult.rewardSummary.totalMagnitude,
-          uniqueTypes: comboResult.uniqueCardTypes,
-          totalCards: comboResult.totalCardsInvolved,
-          affectedStates: comboResult.affectedStateIds,
-          turnNumber: prev.turn,
-          playerId: isHumanTurn ? 'human' : 'ai',
-          duckAudio: comboSettings.glitchDucking !== false,
-        };
-      }
-
       if (isHumanTurn) {
         // Human player ending turn - switch to AI (no card draw here anymore)
         // Card drawing will happen after newspaper at start of new turn
@@ -652,8 +541,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         // Calculate IP income from controlled states
         const stateIncome = getTotalIPFromStates(prev.controlledStates);
         const baseIncome = 5;
-        const comboIncome = calculateComboIncome(humanComboSummary);
-        const totalIncome = baseIncome + stateIncome + comboIncome;
+        const totalIncome = baseIncome + stateIncome;
 
         // Update event manager with current turn
         prev.eventManager?.updateTurn(prev.turn);
@@ -687,8 +575,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const newEvents = buildEditionEvents(prev, triggeredEvent);
 
         // Store pending card draw for after newspaper
-        const comboDrawBonus = Math.max(0, humanComboSummary.breakdown.extraCardDraw);
-        const pendingCardDraw = bonusCardDraw + comboDrawBonus;
+        const pendingCardDraw = bonusCardDraw;
 
         const comboLog =
           comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
@@ -698,33 +585,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const truthAfterCombos = comboResult.updatedTruth;
         const comboTruthDelta = comboResult.truthDelta;
 
-        const comboIncomeLog =
-          comboIncome !== 0
-            ? [
-                `Combo income: ${comboIncome} IP (${humanComboSummary.activeCombinations
-                  .map(combo => combo.name)
-                  .join(', ') || 'combo bonuses'})`,
-              ]
-            : [];
-        const comboDrawLog =
-          comboDrawBonus > 0
-            ? [`Combo draw bonus: +${comboDrawBonus} card${comboDrawBonus === 1 ? '' : 's'} next turn`]
-            : [];
-        const unresolvedComboLog =
-          pendingComboEffects.length > 0
-            ? [`Combo effects pending implementation: ${pendingComboEffects.join(', ')}`]
-            : [];
-
         const logEntries = [
           ...comboLog,
           `Turn ${prev.turn} ended`,
           `Base income: ${baseIncome} IP`,
           `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
-          ...comboIncomeLog,
           `Total income: ${totalIncome + ipModifier} IP`,
           ...eventEffectLog,
-          ...comboDrawLog,
-          ...unresolvedComboLog,
         ];
 
         const nextState: GameState = {
@@ -733,7 +600,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           phase: 'ai_turn',
           currentPlayer: 'ai',
           showNewspaper: false,
-          newspaperGlitchBadge: prev.newspaperGlitchBadge || shouldFlagGlitchBadge,
           cardsPlayedThisTurn: 0,
           truth: truthAfterCombos,
           ip: humanIpAfterCombos + totalIncome + ipModifier,
@@ -758,13 +624,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const comboLog =
         comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
 
-      const nextState: GameState = {
+      return {
         ...prev,
         round: prev.round + 1,
-        phase: 'newspaper' as const,
+        phase: 'newspaper',
         currentPlayer: 'human',
-        showNewspaper: false,
-        newspaperGlitchBadge: prev.newspaperGlitchBadge || shouldFlagGlitchBadge,
+        showNewspaper: true,
         truth: comboResult.updatedTruth,
         ip: comboResult.updatedOpponentIp,
         aiIP: comboResult.updatedPlayerIp,
@@ -773,18 +638,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboResult.truthDelta,
         log: [...comboLog, 'AI turn completed']
       };
-      shouldShowNewspaper = true;
-      return nextState;
     });
-
-    if (glitchPayload) {
-      await playComboGlitchIfAny(glitchPayload);
-    }
-
-    if (shouldShowNewspaper) {
-      setGameState(prev => (prev.isGameOver ? prev : { ...prev, showNewspaper: true }));
-    }
-  }, [achievements]);
+  }, []);
 
   const playAICard = useCallback((params: AiCardPlayParams) => {
     return new Promise<GameState>(resolve => {
@@ -853,51 +708,23 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
         const aiStateIncome = getTotalIPFromStates(aiControlledStates);
         const aiBaseIncome = 5;
-        const aiComboSummary = deriveCombinationEffectSummaries({
-          faction: prev.faction,
-          controlledStates: prev.controlledStates,
-          aiControlledStates,
-        }).ai;
-        const aiComboIncome = calculateComboIncome(aiComboSummary);
-        const aiTotalIncome = aiBaseIncome + aiStateIncome + aiComboIncome;
+        const aiTotalIncome = aiBaseIncome + aiStateIncome;
 
         const aiFaction = prev.faction === 'government' ? 'truth' : 'government';
-        const aiExtraDraw = Math.max(0, aiComboSummary.breakdown.extraCardDraw);
-        const aiTargetHandSize = HAND_LIMIT + aiExtraDraw;
-        const aiCardsNeeded = Math.max(0, aiTargetHandSize - prev.aiHand.length);
+        const aiCardsNeeded = Math.max(0, HAND_LIMIT - prev.aiHand.length);
         const { drawn: aiDrawnCards, deck: aiRemainingDeck } = drawCardsFromDeck(prev.aiDeck, aiCardsNeeded, aiFaction);
         const aiHandSizeAfterDraw = prev.aiHand.length + aiDrawnCards.length;
-        const aiUnresolvedComboEffects = collectUnhandledCombinationEffects(aiComboSummary.breakdown);
-
-        const incomeParts = [
-          `${aiBaseIncome} base`,
-          `${aiStateIncome} from ${aiControlledStates.length} states`,
-        ];
-        if (aiComboIncome !== 0) {
-          incomeParts.push(`${aiComboIncome} from combinations`);
-        }
-
-        const aiLogEntries = [
-          ...prev.log,
-          `AI Income: ${incomeParts.join(' + ')} = ${aiTotalIncome} IP`,
-          `AI drew ${aiDrawnCards.length} card${aiDrawnCards.length === 1 ? '' : 's'}${
-            aiExtraDraw > 0 ? ` (target ${aiTargetHandSize} with combo bonus)` : ''
-          } (hand ${aiHandSizeAfterDraw}/${aiTargetHandSize})`,
-        ];
-
-        if (aiUnresolvedComboEffects.length > 0) {
-          aiLogEntries.push(
-            `AI combo effects pending implementation: ${aiUnresolvedComboEffects.join(', ')}`,
-          );
-        }
 
         const nextState: GameState = {
           ...prev,
           aiHand: [...prev.aiHand, ...aiDrawnCards],
           aiDeck: aiRemainingDeck,
           aiIP: prev.aiIP + aiTotalIncome,
-          aiControlledStates,
-          log: aiLogEntries,
+          log: [
+            ...prev.log,
+            `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStates.length} states = ${aiTotalIncome} IP`,
+            `AI drew ${aiDrawnCards.length} card${aiDrawnCards.length === 1 ? '' : 's'} (hand ${aiHandSizeAfterDraw}/${HAND_LIMIT})`,
+          ],
         };
 
         resolve(nextState);
@@ -923,11 +750,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       return;
     }
 
-    const maxAiActions = normalizeMaxCardsPerTurn(planningState.maxCardsPerTurn);
     const turnPlan = chooseTurnActions({
       strategist: planningState.aiStrategist,
       gameState: planningState as any,
-      maxActions: maxAiActions,
+      maxActions: 3,
       priorityThreshold: 0.3,
     });
 
@@ -969,9 +795,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return;
       }
 
-      void endTurn().finally(() => {
-        setGameState(prev => (prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false }));
-      });
+      endTurn();
+      setGameState(prev => (prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false }));
     }, 1000);
   }, [gameState, endTurn, playAICard]);
 
@@ -1002,7 +827,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         hand: newHand,
         deck: remainingDeck,
         showNewspaper: false,
-        newspaperGlitchBadge: false,
         cardsPlayedThisRound: [],
         comboTruthDeltaThisRound: 0,
         phase: 'action',
@@ -1087,7 +911,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const saveData = {
       ...gameState,
       timestamp: Date.now(),
-      version: CURRENT_SAVE_VERSION
+      version: '1.0'
     };
 
     try {
@@ -1105,43 +929,39 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (!savedData) return false;
 
       const saveData = JSON.parse(savedData, omitClashKey);
-      const rawVersion = typeof saveData.version === 'string' ? saveData.version : '1.0';
-      if (!saveData.faction || !saveData.phase || !SUPPORTED_SAVE_VERSIONS.has(rawVersion)) {
+      const normalizedRound = normalizeRoundFromSave(saveData);
+      const normalizedTurn = typeof saveData.turn === 'number' && Number.isFinite(saveData.turn)
+        ? Math.max(1, saveData.turn)
+        : 1;
+
+      // Validate save data structure
+      if (!saveData.faction || !saveData.phase || saveData.version !== '1.0') {
         console.warn('Invalid or incompatible save data');
         return false;
       }
 
-      const migrated = migrateSaveData(saveData);
-      const normalizedRound = normalizeRoundFromSave(migrated);
-      const migratedTurn = typeof migrated.turn === 'number' && Number.isFinite(migrated.turn)
-        ? Math.max(1, migrated.turn)
-        : 1;
-
-      // Validate save data structure
       // Reconstruct the game state
       setGameState(prev => ({
         ...prev,
-        ...migrated,
-        turn: migratedTurn,
+        ...saveData,
+        turn: normalizedTurn,
         round: normalizedRound,
-        cardsPlayedThisRound: Array.isArray(migrated.cardsPlayedThisRound)
-          ? migrated.cardsPlayedThisRound
+        cardsPlayedThisRound: Array.isArray(saveData.cardsPlayedThisRound)
+          ? saveData.cardsPlayedThisRound
           : [],
-        playHistory: Array.isArray(migrated.playHistory)
-          ? migrated.playHistory
+        playHistory: Array.isArray(saveData.playHistory)
+          ? saveData.playHistory
           : [],
-        turnPlays: Array.isArray(migrated.turnPlays)
-          ? migrated.turnPlays
+        turnPlays: Array.isArray(saveData.turnPlays)
+          ? saveData.turnPlays
           : [],
         comboTruthDeltaThisRound:
-          typeof migrated.comboTruthDeltaThisRound === 'number' ? migrated.comboTruthDeltaThisRound : 0,
+          typeof saveData.comboTruthDeltaThisRound === 'number' ? saveData.comboTruthDeltaThisRound : 0,
         // Ensure objects are properly reconstructed
         eventManager: prev.eventManager, // Keep the current event manager
-        aiStrategist: prev.aiStrategist || AIFactory.createStrategist(migrated.aiDifficulty || 'medium'),
-        drawMode: migrated.drawMode,
-        cardDrawState: migrated.cardDrawState ?? createDefaultCardDrawState()
+        aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium')
       }));
-
+      
       return true;
     } catch (error) {
       console.error('Failed to load game:', error);
@@ -1155,17 +975,17 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (!savedData) return null;
 
       const saveData = JSON.parse(savedData, omitClashKey);
-      const migrated = migrateSaveData(saveData);
-      const normalizedRound = normalizeRoundFromSave(migrated);
-      const normalizedTurn = typeof migrated.turn === 'number' && Number.isFinite(migrated.turn)
-        ? Math.max(1, migrated.turn)
+      const normalizedRound = normalizeRoundFromSave(saveData);
+      const normalizedTurn = typeof saveData.turn === 'number' && Number.isFinite(saveData.turn)
+        ? Math.max(1, saveData.turn)
         : 1;
       return {
-        faction: migrated.faction,
+        faction: saveData.faction,
         turn: normalizedTurn,
         round: normalizedRound,
-        phase: migrated.phase,
-        truth: migrated.truth,
+        phase: saveData.phase,
+        truth: saveData.truth,
+        timestamp: saveData.timestamp,
         exists: true
       };
     } catch {
@@ -1185,7 +1005,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
   return {
     gameState,
-    initGame: initGameHandler,
+    initGame,
     playCard,
     playCardAnimated,
     selectCard,

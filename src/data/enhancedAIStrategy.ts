@@ -1,6 +1,5 @@
 import type { GameCard } from '@/rules/mvp';
 import { resolveCardMVP, type CardPlayResolution, type GameSnapshot } from '@/systems/cardResolution';
-import { DEFAULT_MAX_CARDS_PER_TURN, normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 import { CARD_DATABASE } from './cardDatabase';
 import { getAiTuningConfig, type AiTuningConfig } from './aiTuning';
 import {
@@ -1216,11 +1215,6 @@ export class EnhancedAIStrategist implements AIStrategist {
       aiIP: gameState.aiIP ?? 0,
       hand: playerHand,
       aiHand,
-      maxCardsPerTurn: normalizeMaxCardsPerTurn(
-        typeof gameState.maxCardsPerTurn === 'number'
-          ? gameState.maxCardsPerTurn
-          : (gameState.maxPlaysPerTurn ?? DEFAULT_MAX_CARDS_PER_TURN),
-      ),
       controlledStates: playerControlledStates,
       aiControlledStates,
       round: gameState.round ?? 0,

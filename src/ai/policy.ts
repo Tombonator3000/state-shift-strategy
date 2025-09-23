@@ -8,7 +8,6 @@ import {
   type GameState,
   type Card,
 } from "../mvp";
-import { DEFAULT_MAX_CARDS_PER_TURN, normalizeMaxCardsPerTurn } from "@/config/turnLimits";
 
 const AI_DEBUG = false;
 
@@ -46,13 +45,12 @@ function canAfford(gs: GameState, me: PlayerId, seq: Action[], next: Action): bo
   return ipLeft >= cost;
 }
 
-/** Picks MEDIA cards up to the per-turn limit to reach Truth goals. */
+/** Picks up to 3 MEDIA cards to reach Truth ≥95 (truth faction) or ≤5 (government faction). */
 function planMediaBurstToGoal(ctx: { state: GameState; legal: Action[] }): Action[] | null {
   const gs = ctx.state;
   const me = gs.currentPlayer as PlayerId;
   const faction = gs.players?.[me]?.faction; // "truth" | "government"
   const curTruth = gs.truth;
-  const maxBurstSize = normalizeMaxCardsPerTurn(gs.maxPlaysPerTurn ?? DEFAULT_MAX_CARDS_PER_TURN);
 
   // Partition medias by sign
   const medias = ctx.legal.filter(
@@ -75,7 +73,7 @@ function planMediaBurstToGoal(ctx: { state: GameState; legal: Action[] }): Actio
     let acc = 0;
     const seq: Action[] = [];
     for (const a of plus) {
-      if (seq.length === maxBurstSize) break;
+      if (seq.length === 3) break;
       if (!canAfford(gs, me, seq, a)) continue;
       seq.push(a);
       acc += a.type === 'play-card' ? (a.card!.effects!.truthDelta || 0) : 0;
@@ -99,7 +97,7 @@ function planMediaBurstToGoal(ctx: { state: GameState; legal: Action[] }): Actio
     let acc = 0;
     const seq: Action[] = [];
     for (const a of minus) {
-      if (seq.length === maxBurstSize) break;
+      if (seq.length === 3) break;
       if (!canAfford(gs, me, seq, a)) continue;
       seq.push(a);
       acc += Math.abs(a.type === 'play-card' ? (a.card!.effects!.truthDelta || 0) : 0);

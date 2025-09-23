@@ -13,7 +13,6 @@ import { CheckCircle, XCircle, AlertTriangle, Bug, Zap } from 'lucide-react';
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import { CardEffectValidator, CardTextGenerator } from '@/systems/CardTextGenerator';
 import { applyEffectsMvp } from '@/engine/applyEffects-mvp';
-import { DEFAULT_MAX_CARDS_PER_TURN } from '@/config/turnLimits';
 import { cloneGameState, type Card as EngineCard, type GameState as EngineGameState } from '@/mvp';
 import type { GameCard } from '@/rules/mvp';
 
@@ -51,7 +50,6 @@ const CardEffectValidatorPanel: React.FC = () => {
       turn: testGameState.turn,
       currentPlayer: 'P1',
       truth: testGameState.truth,
-      maxPlaysPerTurn: DEFAULT_MAX_CARDS_PER_TURN,
       playsThisTurn: 0,
       turnPlays: [],
       log: engineLog,

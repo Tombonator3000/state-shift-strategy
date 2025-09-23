@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ParticleEffectType, ParticleSystem } from '@/components/effects/ParticleSystem';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import RedactionSweep from '@/components/effects/RedactionSweep';
@@ -11,25 +11,8 @@ import GovernmentSurveillance from '@/components/effects/GovernmentSurveillance'
 import TypewriterReveal from '@/components/effects/TypewriterReveal';
 import StaticInterference from '@/components/effects/StaticInterference';
 import EvidencePhotoGallery from '@/components/effects/EvidencePhotoGallery';
-import ComboGlitchOverlay from '@/components/effects/ComboGlitchOverlay';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { areParanormalEffectsEnabled } from '@/state/settings';
-import { FXState } from '@/utils/visualEffects';
-import {
-  isSynergyEffectIdentifier,
-  resolveParticleEffectType,
-  type SynergyEffectIdentifier
-} from '@/utils/synergyEffects';
-import { ComboThemeMap, type ComboTheme, type ComboKind } from '@/data/combos/themes';
-import { applyComboThemeToRoot, clearComboThemeFromRoot } from './comboGlitchTheme';
-
-const COMBO_GLITCH_DURATIONS: Record<'minor' | 'major' | 'mega', number> = {
-  minor: 900,
-  major: 1200,
-  mega: 1500
-};
-
-type FloatingNumberType = 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain' | SynergyEffectIdentifier;
 
 interface CardAnimationLayerProps {
   children?: React.ReactNode;
@@ -46,7 +29,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
 
   const [floatingNumber, setFloatingNumber] = useState<{
     value: number;
-    type: FloatingNumberType;
+    type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain';
     x?: number;
     y?: number;
   } | null>(null);
@@ -68,29 +51,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     y: number;
     comboName?: string;
     bonusIP?: number;
-  } | null>(null);
-  const [comboGlitchOverlay, setComboGlitchOverlay] = useState<{
-    id: number;
-    x: number;
-    y: number;
-    comboNames: string[];
-    intensity: 'minor' | 'major' | 'mega';
-    magnitude: number;
-    duration: number;
-    reducedMotion?: boolean;
-    fxMessages: string[];
-    mode: 'full' | 'minimal';
-    theme: ComboTheme;
-    themeId: string;
-    comboKind?: ComboKind;
-    ipGain: number;
-    truthGain: number;
-    totalReward: number;
-    uniqueTypes: number;
-    totalCards: number;
-    affectedStates: string[];
-    seed: number;
-    duckAudio: boolean;
   } | null>(null);
   const [broadcastOverlay, setBroadcastOverlay] = useState<{
     id: number;
@@ -158,9 +118,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     }>;
   } | null>(null);
 
-  const activeGlitchThemeRef = useRef<string | null>(null);
-  const glitchSfxTimeouts = useRef<number[]>([]);
-
   const spawnParticleEffect = useCallback((type: ParticleEffectType, x: number, y: number) => {
     setParticleEffects(prev => [
       ...prev,
@@ -189,15 +146,11 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       spawnParticleEffect('stateloss', event.detail.x, event.detail.y);
     };
 
-    const handleSynergyActivation = (event: CustomEvent<{ bonusIP: number; numberType?: FloatingNumberType; effectType?: string; x: number; y: number; comboName?: string }>) => {
+    const handleSynergyActivation = (event: CustomEvent<{ bonusIP: number; numberType?: 'synergy' | 'combo' | 'chain'; effectType?: ParticleEffectType; x: number; y: number; comboName?: string }>) => {
       if (!event?.detail) return;
-      const rawEffectType = event.detail.effectType ?? event.detail.numberType ?? 'synergy';
-      const particleType = resolveParticleEffectType(rawEffectType, 'synergy');
-      const numberType: FloatingNumberType = isSynergyEffectIdentifier(rawEffectType)
-        ? rawEffectType
-        : event.detail.numberType ?? 'synergy';
-
-      spawnParticleEffect(particleType, event.detail.x, event.detail.y);
+      const effectType = event.detail.effectType || 'synergy';
+      const numberType = event.detail.numberType ?? 'synergy';
+      spawnParticleEffect(effectType, event.detail.x, event.detail.y);
 
       // Also show floating number for synergy bonus
       setFloatingNumber({
@@ -232,10 +185,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       reducedMotion?: boolean;
     }>) => {
       if (!event?.detail) return;
-      if (!areParanormalEffectsEnabled()) {
-        setBroadcastOverlay(null);
-        return;
-      }
       const { position, intensity, setList, truthValue, reducedMotion } = event.detail;
       if (position && !reducedMotion) {
         spawnParticleEffect('broadcast', position.x, position.y);
@@ -260,12 +209,8 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       stateName?: string;
       footageQuality: string;
       reducedMotion?: boolean;
-      }>) => {
+    }>) => {
       if (!event?.detail) return;
-      if (!areParanormalEffectsEnabled()) {
-        setCryptidOverlay(null);
-        return;
-      }
       const { position, stateId, stateName, footageQuality, reducedMotion } = event.detail;
       if (position && !reducedMotion) {
         spawnParticleEffect('cryptid', position.x, position.y);
@@ -284,167 +229,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       }
     };
 
-    const handleComboGlitch = (event: CustomEvent<{
-      x?: number;
-      y?: number;
-      comboNames?: string[];
-      comboCount?: number;
-      intensity?: 'minor' | 'major' | 'mega';
-      magnitude?: number;
-      reducedMotion?: boolean;
-      fxMessages?: string[];
-      messages?: string[];
-      durationMs?: number;
-      mode?: 'minimal' | 'full';
-      comboKind?: ComboKind;
-      themeId?: string;
-      ipGain?: number;
-      truthGain?: number;
-      totalReward?: number;
-      uniqueTypes?: number;
-      totalCards?: number;
-      affectedStates?: string[];
-      seed?: number;
-      duckAudio?: boolean;
-    }>) => {
-      if (!event?.detail) return;
-
-      const {
-        x,
-        y,
-        comboNames = [],
-        intensity,
-        magnitude,
-        reducedMotion,
-        fxMessages,
-        messages,
-        durationMs,
-        mode,
-        comboKind,
-        themeId,
-        ipGain = 0,
-        truthGain = 0,
-        totalReward = magnitude ?? 0,
-        uniqueTypes = 0,
-        totalCards = comboNames.length,
-        affectedStates = [],
-        seed,
-        duckAudio = false,
-      } = event.detail;
-
-      const prefersReducedMotion = reducedMotion ?? (typeof window !== 'undefined'
-        && typeof window.matchMedia === 'function'
-        && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-      const resolvedIntensity = intensity ?? 'minor';
-      const variant = mode === 'minimal' ? 'minimal' : 'full';
-      const effectiveDuration = typeof durationMs === 'number' && Number.isFinite(durationMs)
-        ? Math.max(0, durationMs)
-        : COMBO_GLITCH_DURATIONS[resolvedIntensity];
-
-      const rootElement = typeof document !== 'undefined' ? document.documentElement : null;
-
-      FXState.__internalSetActive?.(true);
-
-      const sanitizedMagnitude = typeof magnitude === 'number' && !Number.isNaN(magnitude)
-        ? Math.max(0, magnitude)
-        : 0;
-      const sanitizeMessageList = (list?: string[]): string[] => {
-        if (!Array.isArray(list)) {
-          return [];
-        }
-        return list
-          .filter((message): message is string => typeof message === 'string')
-          .map(message => message.trim())
-          .filter(message => message.length > 0);
-      };
-
-      const primaryMessages = sanitizeMessageList(fxMessages);
-      const legacyMessages = sanitizeMessageList(messages);
-      const sanitizedMessages: string[] = [];
-      for (const entry of [...primaryMessages, ...legacyMessages]) {
-        if (!sanitizedMessages.includes(entry)) {
-          sanitizedMessages.push(entry);
-        }
-      }
-
-      const resolvedKind: ComboKind = comboKind ?? (comboNames.length >= 3 ? 'MEGA_SPREAD' : 'CHAIN_REACTION');
-      const themeOverride = themeId
-        ? Object.values(ComboThemeMap).find(candidate => candidate.id === themeId)
-        : undefined;
-      const theme = themeOverride ?? ComboThemeMap[resolvedKind] ?? ComboThemeMap.MEDIA_WAVE;
-
-      if (rootElement) {
-        const jitterValue = prefersReducedMotion || variant === 'minimal' ? 0 : theme.tokens.jitterPx;
-        const blurValue = prefersReducedMotion || variant === 'minimal' ? 0 : theme.tokens.blurPx;
-        const vignetteEnabled = !prefersReducedMotion && variant !== 'minimal' && theme.tokens.vignette;
-        const halftoneEnabled = !prefersReducedMotion && variant !== 'minimal' && theme.tokens.halftone;
-
-        applyComboThemeToRoot({
-          root: rootElement,
-          theme,
-          durationMs: effectiveDuration,
-          jitterPx: jitterValue,
-          blurPx: blurValue,
-          overlayAlpha: theme.tokens.bgAlpha,
-          vignette: Boolean(vignetteEnabled),
-          halftone: Boolean(halftoneEnabled),
-          previousThemeId: activeGlitchThemeRef.current,
-        });
-        activeGlitchThemeRef.current = theme.id;
-      }
-
-      glitchSfxTimeouts.current.forEach(timeoutId => window.clearTimeout(timeoutId));
-      glitchSfxTimeouts.current = [];
-
-      if (theme.sfx.start) {
-        audio?.playSFX?.(theme.sfx.start);
-      }
-      if (!prefersReducedMotion && theme.sfx.peak) {
-        const peakDelay = resolvedIntensity === 'mega'
-          ? 500
-          : resolvedIntensity === 'major'
-            ? 420
-            : 320;
-        glitchSfxTimeouts.current.push(window.setTimeout(() => {
-          audio?.playSFX?.(theme.sfx.peak!);
-        }, peakDelay));
-      }
-      if (!prefersReducedMotion && theme.sfx.end) {
-        const endDelay = Math.max(0, effectiveDuration - 150);
-        glitchSfxTimeouts.current.push(window.setTimeout(() => {
-          audio?.playSFX?.(theme.sfx.end!);
-        }, endDelay));
-      }
-
-      if (duckAudio && typeof audio?.duckMusic === 'function') {
-        audio.duckMusic(8, effectiveDuration + 150);
-      }
-
-      setComboGlitchOverlay({
-        id: Date.now(),
-        x: x ?? window.innerWidth / 2,
-        y: y ?? window.innerHeight / 2,
-        comboNames,
-        intensity: resolvedIntensity,
-        magnitude: sanitizedMagnitude,
-        duration: effectiveDuration,
-        reducedMotion: prefersReducedMotion,
-        fxMessages: sanitizedMessages,
-        mode: variant,
-        theme,
-        themeId: theme.id,
-        comboKind: resolvedKind,
-        ipGain,
-        truthGain,
-        totalReward,
-        uniqueTypes,
-        totalCards,
-        affectedStates,
-        seed: typeof seed === 'number' ? seed : Date.now(),
-        duckAudio,
-      });
-    };
-
     // New enhanced effect handlers
     const handleBreakingNews = (event: CustomEvent<{
       newsText: string;
@@ -452,10 +236,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       y: number;
     }>) => {
       if (!event?.detail) return;
-      if (!areParanormalEffectsEnabled()) {
-        setBreakingNewsOverlay(null);
-        return;
-      }
       const { newsText, x, y } = event.detail;
       setBreakingNewsOverlay({
         id: Date.now(),
@@ -474,10 +254,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       y: number;
     }>) => {
       if (!event?.detail) return;
-      if (!areParanormalEffectsEnabled()) {
-        setSurveillanceOverlay(null);
-        return;
-      }
       const { targetName, threatLevel, x, y } = event.detail;
       setSurveillanceOverlay({
         id: Date.now(),
@@ -498,10 +274,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       y: number;
     }>) => {
       if (!event?.detail) return;
-      if (!areParanormalEffectsEnabled()) {
-        setTypewriterOverlay(null);
-        return;
-      }
       const { documentTitle, documentContent, classificationLevel, x, y } = event.detail;
       setTypewriterOverlay({
         id: Date.now(),
@@ -521,10 +293,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       y: number;
     }>) => {
       if (!event?.detail) return;
-      if (!areParanormalEffectsEnabled()) {
-        setStaticOverlay(null);
-        return;
-      }
       const { intensity, message, x, y } = event.detail;
       setStaticOverlay({
         id: Date.now(),
@@ -550,10 +318,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       y: number;
     }>) => {
       if (!event?.detail) return;
-      if (!areParanormalEffectsEnabled()) {
-        setEvidenceOverlay(null);
-        return;
-      }
       const { caseTitle, photos, x, y } = event.detail;
       setEvidenceOverlay({
         id: Date.now(),
@@ -566,7 +330,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       audio?.playSFX?.('cardPlay');
     };
 
-    const handleFloatingNumber = (event: CustomEvent<{ value: number; type: FloatingNumberType; x: number; y: number }>) => {
+    const handleFloatingNumber = (event: CustomEvent<{ value: number; type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain'; x: number; y: number }>) => {
       if (!event?.detail) return;
       setFloatingNumber({
         value: event.detail.value,
@@ -612,8 +376,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     window.addEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
     window.addEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
     window.addEventListener('cryptidSighting', handleCryptidSighting as EventListener);
-    window.addEventListener('comboGlitch', handleComboGlitch as EventListener);
-
+    
     // New enhanced effect listeners
     window.addEventListener('breakingNews', handleBreakingNews as EventListener);
     window.addEventListener('governmentSurveillance', handleGovernmentSurveillance as EventListener);
@@ -632,8 +395,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
       window.removeEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
       window.removeEventListener('cryptidSighting', handleCryptidSighting as EventListener);
-      window.removeEventListener('comboGlitch', handleComboGlitch as EventListener);
-
+      
       // New enhanced effect listeners
       window.removeEventListener('breakingNews', handleBreakingNews as EventListener);
       window.removeEventListener('governmentSurveillance', handleGovernmentSurveillance as EventListener);
@@ -642,51 +404,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('evidenceGallery', handleEvidenceGallery as EventListener);
     };
   }, [spawnParticleEffect, audio]);
-
-  const clearParanormalOverlays = useCallback(() => {
-    setBreakingNewsOverlay(null);
-    setSurveillanceOverlay(null);
-    setTypewriterOverlay(null);
-    setStaticOverlay(null);
-    setEvidenceOverlay(null);
-    setBroadcastOverlay(null);
-    setCryptidOverlay(null);
-  }, []);
-
-  useEffect(() => {
-    const handleParanormalToggle = (event: Event) => {
-      const detail = (event as CustomEvent<{ enabled?: boolean }>).detail;
-      if (!detail?.enabled) {
-        clearParanormalOverlays();
-      }
-    };
-
-    const handleStorageSync = () => {
-      if (!areParanormalEffectsEnabled()) {
-        clearParanormalOverlays();
-      }
-    };
-
-    if (!areParanormalEffectsEnabled()) {
-      clearParanormalOverlays();
-    }
-
-    window.addEventListener('shadowgov:paranormal-effects-toggled', handleParanormalToggle);
-    window.addEventListener('storage', handleStorageSync);
-
-    return () => {
-      window.removeEventListener('shadowgov:paranormal-effects-toggled', handleParanormalToggle);
-      window.removeEventListener('storage', handleStorageSync);
-    };
-  }, [clearParanormalOverlays]);
-
-  useEffect(() => () => {
-    const rootElement = typeof document !== 'undefined' ? document.documentElement : null;
-    if (rootElement) {
-      clearComboThemeFromRoot(rootElement, activeGlitchThemeRef.current);
-    }
-    activeGlitchThemeRef.current = null;
-  }, []);
 
   const handleParticleComplete = useCallback((id: number) => {
     setParticleEffects(prev => prev.filter(effect => effect.id !== id));
@@ -715,51 +432,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
   const handleCryptidComplete = useCallback(() => {
     setCryptidOverlay(null);
   }, []);
-
-  const finalizeComboGlitch = useCallback(() => {
-    const rootElement = typeof document !== 'undefined' ? document.documentElement : null;
-    glitchSfxTimeouts.current.forEach(timeoutId => window.clearTimeout(timeoutId));
-    glitchSfxTimeouts.current = [];
-    if (rootElement) {
-      clearComboThemeFromRoot(rootElement, activeGlitchThemeRef.current);
-    }
-    activeGlitchThemeRef.current = null;
-
-    let hadOverlay = false;
-    setComboGlitchOverlay(current => {
-      if (current) {
-        hadOverlay = true;
-      }
-      return null;
-    });
-
-    const shouldNotify = hadOverlay || FXState.isGlitchActive();
-    FXState.__internalSetActive?.(false);
-    if (shouldNotify) {
-      window.dispatchEvent(new Event('comboGlitchComplete'));
-    }
-  }, []);
-
-  const handleComboGlitchComplete = useCallback(() => {
-    finalizeComboGlitch();
-  }, [finalizeComboGlitch]);
-
-  useEffect(() => {
-    if (!comboGlitchOverlay || typeof document === 'undefined') {
-      return;
-    }
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        finalizeComboGlitch();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [comboGlitchOverlay, finalizeComboGlitch]);
 
   // New enhanced effect completion handlers
   const handleBreakingNewsComplete = useCallback(() => {
@@ -802,29 +474,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
             comboName={corkboardOverlay.comboName}
             bonusIP={corkboardOverlay.bonusIP}
             onComplete={handleCorkboardComplete}
-          />
-        )}
-        {comboGlitchOverlay && (
-          <ComboGlitchOverlay
-            key={comboGlitchOverlay.id}
-            x={comboGlitchOverlay.x}
-            y={comboGlitchOverlay.y}
-            comboNames={comboGlitchOverlay.comboNames}
-            intensity={comboGlitchOverlay.intensity}
-            magnitude={comboGlitchOverlay.magnitude}
-            duration={comboGlitchOverlay.duration}
-            reducedMotion={comboGlitchOverlay.reducedMotion}
-            fxMessages={comboGlitchOverlay.fxMessages}
-            mode={comboGlitchOverlay.mode}
-            theme={comboGlitchOverlay.theme}
-            ipGain={comboGlitchOverlay.ipGain}
-            truthGain={comboGlitchOverlay.truthGain}
-            totalReward={comboGlitchOverlay.totalReward}
-            uniqueTypes={comboGlitchOverlay.uniqueTypes}
-            totalCards={comboGlitchOverlay.totalCards}
-            affectedStates={comboGlitchOverlay.affectedStates}
-            seed={comboGlitchOverlay.seed}
-            onComplete={handleComboGlitchComplete}
           />
         )}
         {broadcastOverlay && (

@@ -139,22 +139,22 @@ const countCombos: ComboDefinition[] = [
   {
     id: 'count_full_press',
     name: 'Full Press',
-    description: 'Play three cards of any type in a turn to keep pressure high.',
+    description: 'Play four or more cards of any type in a turn.',
     category: 'count',
     priority: 85,
-    trigger: { kind: 'threshold', metric: 'plays', value: 3 },
+    trigger: { kind: 'count', type: 'ANY', count: 4 },
     reward: { ip: 2, log: 'Full press exhausts the opposition' },
-    fxText: 'Full press sustained across the front.'
+    fxText: 'Full press accomplished.'
   },
   {
     id: 'count_relentless',
     name: 'Relentless Pressure',
-    description: 'Invest at least nine IP into plays regardless of type.',
+    description: 'Play five or more cards regardless of type.',
     category: 'count',
     priority: 84,
-    trigger: { kind: 'threshold', metric: 'ipSpent', value: 9 },
-    reward: { ip: 3, log: 'Relentless spending yields dividends' },
-    fxText: 'Relentless spending grinds them down.'
+    trigger: { kind: 'count', type: 'ANY', count: 5 },
+    reward: { ip: 3, log: 'Relentless drive yields dividends' },
+    fxText: 'Relentless momentum maintained.'
   },
   {
     id: 'count_rare_circle',
@@ -266,12 +266,12 @@ const thresholdCombos: ComboDefinition[] = [
   {
     id: 'threshold_low_cost_4',
     name: 'Grassroots Push',
-    description: 'Deploy three low-cost cards (cost ≤ 2).',
+    description: 'Deploy four low-cost cards (cost ≤ 2).',
     category: 'threshold',
     priority: 79,
-    trigger: { kind: 'threshold', metric: 'lowCostCount', value: 3 },
+    trigger: { kind: 'threshold', metric: 'lowCostCount', value: 4 },
     reward: { truth: 2, log: 'Grassroots push builds trust' },
-    fxText: 'Grassroots surge mobilised quickly.'
+    fxText: 'Grassroots surge mobilised.'
   },
   {
     id: 'threshold_high_cost_2',
@@ -471,6 +471,4 @@ export const DEFAULT_COMBO_SETTINGS: ComboSettings = {
   maxCombosPerTurn: 2,
   comboToggles: Object.fromEntries(COMBO_DEFINITIONS.map(def => [def.id, def.enabledByDefault ?? true])),
   rng: Math.random,
-  glitchMode: 'full',
-  glitchDucking: true,
 };

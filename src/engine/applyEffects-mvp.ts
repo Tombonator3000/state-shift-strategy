@@ -1,7 +1,6 @@
 declare const window: any;
 
 import { computeMediaTruthDelta_MVP, warnIfMediaScaling, type MediaResolutionOptions } from '@/mvp/media';
-import { recalculateCombinationEffects } from '@/mvp/combinationEffects';
 import { applyTruthDelta } from '@/utils/truth';
 import type {
   Card,
@@ -51,13 +50,6 @@ export function discardRandom(
   } satisfies PlayerState;
 }
 
-function getCombinationBreakdown(state: GameState, player: PlayerId) {
-  if (!state.combinationEffects) {
-    recalculateCombinationEffects(state);
-  }
-  return state.combinationEffects?.[player]?.breakdown;
-}
-
 function applyAttackEffect(
   state: GameState,
   owner: PlayerId,
@@ -65,9 +57,7 @@ function applyAttackEffect(
   rng: () => number,
 ) {
   const opponent = otherPlayer(owner);
-  const breakdown = getCombinationBreakdown(state, owner);
-  const bonusDamage = breakdown?.attackDamageBonus ?? 0;
-  const damage = Math.max(0, (effects.ipDelta?.opponent ?? 0) + bonusDamage);
+  const damage = Math.max(0, effects.ipDelta?.opponent ?? 0);
   const before = state.players[opponent].ip;
   state.players[opponent].ip = clampIP(before - damage);
   const delta = state.players[opponent].ip - before;
@@ -89,12 +79,7 @@ function applyZoneEffect(
 ) {
   const opponent = otherPlayer(owner);
   const currentPressure = state.pressureByState[targetStateId] ?? { P1: 0, P2: 0 };
-  const ownerBreakdown = getCombinationBreakdown(state, owner);
-  const opponentBreakdown = getCombinationBreakdown(state, opponent);
-  const bonusPressure = ownerBreakdown?.zonePressureBonus ?? 0;
-  const resistance = opponentBreakdown?.incomingPressureReduction ?? 0;
-  const appliedPressure = Math.max(0, effects.pressureDelta + bonusPressure - resistance);
-  const updatedOwnerPressure = (currentPressure[owner] ?? 0) + appliedPressure;
+  const updatedOwnerPressure = (currentPressure[owner] ?? 0) + effects.pressureDelta;
 
   let pressureByState: GameState['pressureByState'] = {
     ...state.pressureByState,
@@ -107,8 +92,7 @@ function applyZoneEffect(
     [opponent]: { ...state.players[opponent] },
   };
 
-  const defenseBonus = opponentBreakdown?.stateDefenseBonus ?? 0;
-  const defense = (state.stateDefense[targetStateId] ?? Infinity) + defenseBonus;
+  const defense = state.stateDefense[targetStateId] ?? Infinity;
   const captured = updatedOwnerPressure >= defense;
   if (captured) {
     pressureByState = {
@@ -139,10 +123,6 @@ function applyZoneEffect(
   if (captured && typeof window !== 'undefined' && (window as any).uiFlashState) {
     (window as any).uiFlashState(targetStateId, owner);
   }
-
-  if (captured) {
-    recalculateCombinationEffects(state);
-  }
 }
 
 export function applyEffectsMvp(
@@ -159,17 +139,7 @@ export function applyEffectsMvp(
   }
 
   if (card.type === 'MEDIA') {
-    const baseDelta = computeMediaTruthDelta_MVP(state.players[owner], card, opts);
-    const breakdown = getCombinationBreakdown(state, owner);
-    let delta = baseDelta;
-    if (breakdown) {
-      delta *= breakdown.truthMultiplier;
-      if (card.faction === 'government' && breakdown.governmentTruthBonus !== 0) {
-        const adjustment = breakdown.governmentTruthBonus;
-        delta += delta >= 0 ? adjustment : -adjustment;
-      }
-    }
-    delta = Math.round(delta);
+    const delta = computeMediaTruthDelta_MVP(state.players[owner], card, opts);
     warnIfMediaScaling(card, delta);
     applyTruthDelta(state, delta, owner);
     return state;

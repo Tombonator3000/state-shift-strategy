@@ -1,5 +1,4 @@
 import { EnhancedAIStrategist, type EnhancedCardPlay } from '@/data/enhancedAIStrategy';
-import { DEFAULT_MAX_CARDS_PER_TURN, normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 import type { GameCard } from '@/rules/mvp';
 
 interface AIPlanningState {
@@ -35,7 +34,7 @@ export interface ChooseTurnActionsParams {
 }
 
 const DEFAULT_PRIORITY_THRESHOLD = 0.3;
-const DEFAULT_MAX_ACTIONS = DEFAULT_MAX_CARDS_PER_TURN;
+const DEFAULT_MAX_ACTIONS = 3;
 const ABSOLUTE_PRIORITY_FLOOR = 0.18;
 
 const DIFFICULTY_PRIORITY_FLOORS: Record<EnhancedAIStrategist['difficulty'], number> = {
@@ -114,7 +113,6 @@ export const chooseTurnActions = ({
     sequenceDetails.push(...adaptiveSummary);
   }
 
-  const actionLimit = normalizeMaxCardsPerTurn(maxActions);
   const actions: PlannedCardAction[] = [];
   const synergyHighlights = new Set<string>();
   const chosenIds = new Set<string>();
@@ -161,7 +159,7 @@ export const chooseTurnActions = ({
     };
   };
 
-  while (actions.length < actionLimit) {
+  while (actions.length < maxActions) {
     const remainingHand = initialHand.filter(
       card => !chosenIds.has(card.id) && !attemptedIds.has(card.id),
     );

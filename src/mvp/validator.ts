@@ -35,43 +35,6 @@ export type PlayerState = {
   states: string[];
 };
 
-export type CombinationEffectInfo = {
-  id: string;
-  name: string;
-  bonusIP: number;
-  bonusEffect?: string;
-  category?: string;
-  description?: string;
-};
-
-export interface CombinationEffectBreakdown {
-  flatIpBonus: number;
-  ipPerControlledState: number;
-  ipPerNeutralState: number;
-  extraCardDraw: number;
-  mediaCostModifier: number;
-  attackDamageBonus: number;
-  zonePressureBonus: number;
-  incomingPressureReduction: number;
-  stateDefenseBonus: number;
-  truthMultiplier: number;
-  governmentTruthBonus: number;
-  rareDrawBias: boolean;
-  canPeekOpponentHand: boolean;
-  canTransferPressure: boolean;
-  preventEventPressureLoss: boolean;
-}
-
-export interface CombinationEffectSummary {
-  activeCombinations: CombinationEffectInfo[];
-  totalBonusIP: number;
-  breakdown: CombinationEffectBreakdown;
-  computedTurnBonus: number;
-  appliedTurnBonus?: number;
-  controlledStateCount: number;
-  neutralStateCount: number;
-}
-
 export type GameState = {
   turn: number;
   currentPlayer: PlayerId;
@@ -79,11 +42,9 @@ export type GameState = {
   players: Record<PlayerId, PlayerState>;
   pressureByState: Record<string, { P1: number; P2: number }>;
   stateDefense: Record<string, number>;
-  maxPlaysPerTurn: number;
   playsThisTurn: number;
   turnPlays: TurnPlay[];
   log: string[];
-  combinationEffects?: Record<PlayerId, CombinationEffectSummary>;
 };
 
 export const ALLOWED_FACTIONS: readonly Faction[] = ['truth', 'government'];
@@ -506,23 +467,6 @@ export function clonePlayer(player: PlayerState): PlayerState {
   };
 }
 
-const cloneCombinationInfo = (info: CombinationEffectInfo[]): CombinationEffectInfo[] =>
-  info.map(entry => ({ ...entry }));
-
-const cloneCombinationEffects = (
-  summary: CombinationEffectSummary | undefined,
-): CombinationEffectSummary | undefined => {
-  if (!summary) {
-    return undefined;
-  }
-
-  return {
-    ...summary,
-    activeCombinations: cloneCombinationInfo(summary.activeCombinations),
-    breakdown: { ...summary.breakdown },
-  } satisfies CombinationEffectSummary;
-};
-
 export function cloneGameState(state: GameState): GameState {
   return {
     ...state,
@@ -539,12 +483,6 @@ export function cloneGameState(state: GameState): GameState {
       Object.entries(state.pressureByState).map(([id, value]) => [id, { ...value }]),
     ),
     stateDefense: { ...state.stateDefense },
-    combinationEffects: state.combinationEffects
-      ? {
-          P1: cloneCombinationEffects(state.combinationEffects.P1)!,
-          P2: cloneCombinationEffects(state.combinationEffects.P2)!,
-        }
-      : undefined,
   };
 }
 

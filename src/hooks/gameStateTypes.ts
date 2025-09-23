@@ -33,7 +33,6 @@ export interface GameState {
   truth: number;
   ip: number;
   aiIP: number;
-  maxCardsPerTurn: number;
   hand: GameCard[];
   aiHand: GameCard[];
   isGameOver: boolean;
@@ -66,7 +65,6 @@ export interface GameState {
   currentEvents: GameEvent[];
   eventManager?: EventManager;
   showNewspaper: boolean;
-  newspaperGlitchBadge?: boolean;
   log: string[];
   agenda?: SecretAgenda & {
     progress?: number;

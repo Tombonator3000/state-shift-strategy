@@ -2,7 +2,6 @@
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import { CardTextGenerator } from '@/systems/CardTextGenerator';
 import { applyEffectsMvp } from '@/engine/applyEffects-mvp';
-import { DEFAULT_MAX_CARDS_PER_TURN } from '@/config/turnLimits';
 import { cloneGameState, type Card as EngineCard, type GameState as EngineGameState } from '@/mvp';
 
 // Test a few specific cards to verify they work correctly
@@ -29,7 +28,6 @@ export function validateFixedEffectSystem() {
       turn: 1,
       currentPlayer: 'P1',
       truth: 50,
-      maxPlaysPerTurn: DEFAULT_MAX_CARDS_PER_TURN,
       playsThisTurn: 0,
       turnPlays: [],
       log,

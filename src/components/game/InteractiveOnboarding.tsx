@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, ArrowLeft, X, CheckCircle2, Play } from 'lucide-react';
-import { normalizeMaxCardsPerTurn } from '@/config/turnLimits';
 
 interface OnboardingStep {
   id: string;
@@ -26,7 +25,6 @@ interface InteractiveOnboardingProps {
 const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: InteractiveOnboardingProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  const maxCardsPerTurn = normalizeMaxCardsPerTurn(gameState?.maxCardsPerTurn);
 
   const onboardingSteps: OnboardingStep[] = [
     {
@@ -39,14 +37,14 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     {
       id: 'hand',
       title: '🎴 Your Hand',
-      description: 'Every op opens with five cards. Each shows its cost (circle) and type — click a card to inspect the details.',
+      description: 'These are your cards. Each has a cost (circle) and type. Click cards to examine them closely.',
       target: '#enhanced-hand',
       action: 'Click on a card to examine it'
     },
     {
       id: 'ip',
       title: '💰 Influence Points (IP)',
-      description: 'IP starts at 5 for both factions. End turns to collect 5 + controlled states, then spend it to deploy cards.',
+      description: 'IP is your currency. You gain IP each turn based on controlled states. Spend it to play cards.',
       target: '#ip-display'
     },
     {
@@ -65,7 +63,7 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     {
       id: 'turn-end',
       title: '⏭️ End Turn',
-      description: `When you're done playing cards, click "End Turn". You can play up to ${maxCardsPerTurn} cards per turn.`,
+      description: 'When you\'re done playing cards, click "End Turn". You can play up to 3 cards per turn.',
       target: '#end-turn-button'
     },
     {

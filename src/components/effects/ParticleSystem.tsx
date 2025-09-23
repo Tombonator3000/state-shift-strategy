@@ -11,9 +11,6 @@ interface Particle {
   size: number;
   color: string;
   opacity: number;
-  type: ParticleEffectType;
-  glitchPhase?: number;
-  glitchAmplitude?: number;
 }
 
 export type ParticleEffectType =
@@ -29,8 +26,7 @@ export type ParticleEffectType =
   | 'stateevent'
   | 'contested'
   | 'broadcast'
-  | 'cryptid'
-  | 'glitch';
+  | 'cryptid';
 
 interface ParticleSystemProps {
   active: boolean;
@@ -121,8 +117,6 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
       case 'contested':
       case 'cryptid':
         return 35;
-      case 'glitch':
-        return 52;
       case 'deploy':
       case 'stateloss':
         return 30;
@@ -134,40 +128,25 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
   };
 
   const createParticle = (id: number, centerX: number, centerY: number, effectType: ParticleEffectType): Particle => {
+    const angle = (Math.PI * 2 * id) / 20 + Math.random() * 0.5;
+    const speed = getParticleSpeed(effectType);
+
     const color = getParticleColor(effectType);
 
     const spread = getParticleSpread(effectType);
     const lifespan = getParticleLifespan(effectType);
 
-    const baseSize = getParticleSize(effectType);
-
-    const angle = (Math.PI * 2 * id) / 20 + Math.random() * 0.5;
-    const speed = getParticleSpeed(effectType);
-
-    let vx = Math.cos(angle) * speed;
-    let vy = Math.sin(angle) * speed - Math.random() * 2;
-
-    if (effectType === 'glitch') {
-      vx = (Math.random() - 0.5) * speed * 2.4;
-      vy = (Math.random() - 0.5) * speed * 2.4;
-    }
-
     return {
       id,
       x: centerX + (Math.random() - 0.5) * spread,
       y: centerY + (Math.random() - 0.5) * spread,
-      vx,
-      vy,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - Math.random() * 2,
       life: lifespan,
       maxLife: lifespan,
-      size: effectType === 'glitch'
-        ? baseSize * (0.6 + Math.random() * 1.4)
-        : baseSize,
+      size: getParticleSize(effectType),
       color,
-      opacity: 1,
-      type: effectType,
-      glitchPhase: effectType === 'glitch' ? Math.random() * Math.PI * 2 : undefined,
-      glitchAmplitude: effectType === 'glitch' ? 2 + Math.random() * 4 : undefined
+      opacity: 1
     };
   };
 
@@ -186,8 +165,6 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
       case 'contested':
       case 'cryptid':
         return 2.5 + Math.random() * 3;
-      case 'glitch':
-        return 2.2 + Math.random() * 2.8;
       case 'stateloss':
         return 1.5 + Math.random() * 2;
       default:
@@ -221,15 +198,6 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
         return `hsl(${200 + Math.random() * 20}, 72%, ${58 + Math.random() * 10}%)`;
       case 'cryptid':
         return `hsl(${135 + Math.random() * 30}, 60%, ${50 + Math.random() * 15}%)`;
-      case 'glitch': {
-        const palette = [
-          'rgba(34,211,238,0.9)',
-          'rgba(244,114,182,0.85)',
-          'rgba(190,242,100,0.8)',
-          'rgba(248,250,252,0.85)'
-        ];
-        return palette[Math.floor(Math.random() * palette.length)];
-      }
       default:
         return `hsl(${Math.random() * 360}, 70%, 60%)`;
     }
@@ -250,8 +218,6 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
       case 'contested':
       case 'cryptid':
         return 60;
-      case 'glitch':
-        return 90;
       default:
         return 50;
     }
@@ -273,8 +239,6 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
       case 'contested':
       case 'cryptid':
         return base * 1.1;
-      case 'glitch':
-        return base * 0.9;
       case 'stateloss':
         return base * 0.8;
       default:
@@ -297,8 +261,6 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
       case 'contested':
       case 'cryptid':
         return 3 + Math.random() * 3;
-      case 'glitch':
-        return 3 + Math.random() * 2;
       case 'stateloss':
         return 2 + Math.random() * 2;
       default:
@@ -307,78 +269,29 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
   };
 
   const updateParticle = (particle: Particle) => {
-    if (particle.type === 'glitch') {
-      const amplitude = particle.glitchAmplitude ?? 3;
-      particle.glitchPhase = (particle.glitchPhase ?? 0) + 0.9 + Math.random() * 0.4;
-      const jitterX = Math.sin(particle.glitchPhase) * amplitude;
-      const jitterY = Math.cos(particle.glitchPhase * 1.3) * (amplitude * 0.6);
-
-      particle.x += particle.vx + jitterX;
-      particle.y += particle.vy + jitterY;
-
-      // Rapid, erratic velocity adjustments to sell the digital spark feel
-      particle.vx = (particle.vx + (Math.random() - 0.5) * 1.4) * 0.82;
-      particle.vy = (particle.vy + (Math.random() - 0.5) * 1.4) * 0.82;
-
-      // Randomly shift hue for extra glitchiness
-      if (Math.random() < 0.18) {
-        particle.color = getParticleColor('glitch');
-      }
-    } else {
-      particle.x += particle.vx;
-      particle.y += particle.vy;
-      particle.vy += 0.1; // Gravity
-      particle.vx *= 0.99; // Air resistance
-    }
+    particle.x += particle.vx;
+    particle.y += particle.vy;
+    particle.vy += 0.1; // Gravity
+    particle.vx *= 0.99; // Air resistance
     particle.life--;
     particle.opacity = Math.max(0, particle.life / particle.maxLife);
-    if (particle.type === 'glitch') {
-      particle.opacity *= 0.7 + Math.random() * 0.3;
-    }
   };
 
   const drawParticle = (ctx: CanvasRenderingContext2D, particle: Particle) => {
     ctx.save();
     ctx.globalAlpha = particle.opacity;
-
-    if (particle.type === 'glitch') {
-      ctx.globalCompositeOperation = 'lighter';
-      const width = particle.size * (1.4 + Math.random() * 1.6);
-      const height = particle.size * (0.6 + Math.random() * 1.2);
-      ctx.fillStyle = particle.color;
-      ctx.fillRect(particle.x - width / 2, particle.y - height / 2, width, height);
-
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.35)';
-      if (Math.random() < 0.5) {
-        ctx.fillRect(
-          particle.x - width / 2,
-          particle.y - height / 2 - height * 0.4,
-          width * (0.5 + Math.random() * 0.5),
-          height * 0.35
-        );
-      }
-
-      ctx.fillStyle = 'rgba(255,255,255,0.55)';
-      ctx.fillRect(
-        particle.x - width / 2 + Math.random() * 4,
-        particle.y - height / 2 + Math.random() * 4,
-        width * 0.35,
-        height * 0.2
-      );
-    } else {
-      ctx.fillStyle = particle.color;
-      ctx.beginPath();
-      ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Add inner glow
-      ctx.globalAlpha = particle.opacity * 0.3;
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(particle.x, particle.y, particle.size * 0.3, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
+    ctx.fillStyle = particle.color;
+    ctx.beginPath();
+    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Add inner glow
+    ctx.globalAlpha = particle.opacity * 0.3;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(particle.x, particle.y, particle.size * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    
     ctx.restore();
   };
 
