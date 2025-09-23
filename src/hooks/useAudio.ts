@@ -379,10 +379,11 @@ export const useAudio = () => {
       return null;
     }
     const currentIndex = currentTrackIndex.current[musicType];
+    const trackToPlay = tracks[currentIndex];
     const nextIndex = (currentIndex + 1) % tracks.length;
     currentTrackIndex.current[musicType] = nextIndex;
-    console.log('🎵 Selected track index:', nextIndex, 'of', tracks.length);
-    return tracks[nextIndex];
+    console.log('🎵 Selected track index:', currentIndex, 'of', tracks.length);
+    return trackToPlay;
   }, []);
 
   const switchTrack = useCallback((fromAudio: HTMLAudioElement | null, toAudio: HTMLAudioElement | null) => {
