@@ -93,4 +93,5 @@ export interface GameState {
   showNewCardsPresentation?: boolean;
   drawMode: DrawMode;
   cardDrawState: CardDrawState;
+  maxPlaysPerTurn: number;
 }

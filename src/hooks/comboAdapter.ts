@@ -197,6 +197,7 @@ export const evaluateCombosForTurn = (
     playsThisTurn: state.cardsPlayedThisTurn,
     turnPlays: state.turnPlays.map(play => ({ ...play })),
     log: [...state.log],
+    maxPlaysPerTurn: state.maxPlaysPerTurn,
   } satisfies EngineGameState;
 
   const logStart = engineState.log.length;

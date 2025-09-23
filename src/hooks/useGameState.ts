@@ -300,7 +300,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     targetState: null,
     aiStrategist: AIFactory.createStrategist(aiDifficulty),
     drawMode: 'standard',
-    cardDrawState: createDefaultCardDrawState()
+    cardDrawState: createDefaultCardDrawState(),
+    maxPlaysPerTurn: 3
   });
 
   const resolveCardEffects = useCallback(
