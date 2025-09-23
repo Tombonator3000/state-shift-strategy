@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import clsx from 'clsx';
 import CardDetailOverlay from './CardDetailOverlay';
@@ -41,107 +41,17 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const { triggerHaptic } = useHapticFeedback();
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);
-  const [layout, setLayout] = useState(() => ({ columns: 1, scale: 0.78 }));
-
-  useEffect(() => {
-    const element = handRef.current;
-    if (!element) {
-      return;
-    }
-
-    const BASE_CARD_WIDTH = 320;
-    const MAX_SCALE = 0.78;
-    const MIN_SCALE = 0.4;
-    const GRID_GAP_PX = 12; // Tailwind gap-3 (0.75rem)
-    const EPSILON = 0.001;
-
-    const computeLayout = () => {
-      const rect = element.getBoundingClientRect();
-      const availableWidth = rect.width;
-      const availableHeight = rect.height;
-
-      if (availableWidth <= 0 || availableHeight <= 0) {
-        return;
-      }
-
-      if (cards.length === 0) {
-        setLayout(prev => (prev.columns === 1 && Math.abs(prev.scale - MAX_SCALE) < EPSILON ? prev : { columns: 1, scale: MAX_SCALE }));
-        return;
-      }
-
-      let bestColumns = 1;
-      let bestScale = 0;
-
-      for (let columns = 1; columns <= cards.length; columns += 1) {
-        const horizontalSpace = availableWidth - GRID_GAP_PX * (columns - 1);
-        if (horizontalSpace <= 0) {
-          continue;
-        }
-
-        const widthScaleRaw = horizontalSpace / (columns * BASE_CARD_WIDTH);
-        const nextScale = Math.min(widthScaleRaw, MAX_SCALE);
-
-        if (nextScale + EPSILON < MIN_SCALE) {
-          continue;
-        }
-
-        if (nextScale > bestScale + EPSILON || (Math.abs(nextScale - bestScale) < EPSILON && columns > bestColumns)) {
-          bestColumns = columns;
-          bestScale = nextScale;
-        }
-      }
-
-      if (bestScale < MIN_SCALE) {
-        const maxColumnsAtMinScale = Math.max(
-          1,
-          Math.floor((availableWidth + GRID_GAP_PX) / (BASE_CARD_WIDTH * MIN_SCALE + GRID_GAP_PX))
-        );
-        const fallbackColumns = Math.min(cards.length, maxColumnsAtMinScale);
-        const fallbackHorizontalSpace = availableWidth - GRID_GAP_PX * (fallbackColumns - 1);
-        const fallbackScaleRaw = fallbackHorizontalSpace / (fallbackColumns * BASE_CARD_WIDTH);
-        const fallbackScale = Math.max(Math.min(fallbackScaleRaw, MAX_SCALE), MIN_SCALE);
-
-        bestColumns = fallbackColumns;
-        bestScale = fallbackScale > 0 ? fallbackScale : MIN_SCALE;
-      }
-
-      setLayout(prev => {
-        if (prev.columns === bestColumns && Math.abs(prev.scale - bestScale) < EPSILON) {
-          return prev;
-        }
-
-        return { columns: bestColumns, scale: bestScale };
-      });
-    };
-
-    computeLayout();
-
-    if (typeof ResizeObserver !== 'undefined') {
-      const observer = new ResizeObserver(computeLayout);
-      observer.observe(element);
-      return () => {
-        observer.disconnect();
-      };
-    }
-
-    const handleResize = () => computeLayout();
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [cards.length]);
-
-  const cardScale = layout.scale;
-  const cardWidth = 320 * cardScale;
-  const cardHeight = 460 * cardScale;
+  const HAND_CARD_SCALE = 0.78;
+  const CARD_BASE_WIDTH = 320;
+  const CARD_BASE_HEIGHT = 460;
+  const cardScale = HAND_CARD_SCALE;
+  const cardWidth = CARD_BASE_WIDTH * cardScale;
+  const cardHeight = CARD_BASE_HEIGHT * cardScale;
 
   const gridStyle = {
     '--hand-card-width': `${cardWidth}px`,
     '--hand-card-height': `${cardHeight}px`,
-    gridTemplateColumns:
-      cards.length > 0
-        ? `repeat(${layout.columns}, minmax(0, var(--hand-card-width)))`
-        : undefined,
+    gridTemplateColumns: 'repeat(3, minmax(0, var(--hand-card-width)))',
     gridAutoRows: 'var(--hand-card-height)'
   } as CSSProperties;
 
@@ -218,10 +128,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       ref={handRef}
       onPointerLeave={() => onCardHover?.(null)}
     >
-      <div
-        className="grid h-full w-full content-start justify-start gap-3 overflow-y-auto pr-1 pb-4"
-        style={gridStyle}
-      >
+      <div className="grid h-full w-full content-start justify-start gap-3 pr-1 pb-4" style={gridStyle}>
         {cards.length === 0 ? (
           <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
             No assets available
@@ -289,6 +196,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   animationDelay: `${index * 0.03}s`,
                   width: 'var(--hand-card-width)',
                   height: 'var(--hand-card-height)',
+                  minWidth: 'var(--hand-card-width)',
+                  minHeight: 'var(--hand-card-height)',
                 }}
                 onClick={(e) => {
                   e.preventDefault();
@@ -329,7 +238,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     hideStamp
                     polaroidHover={false}
                     size="handMini"
-                    scaleOverride={cardScale}
                     className="pointer-events-none select-none h-full w-full"
                     frameClassName={clsx(
                       'drop-shadow-[0_12px_22px_rgba(0,0,0,0.32)] transition-transform duration-200',
