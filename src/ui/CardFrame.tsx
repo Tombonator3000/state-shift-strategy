@@ -9,9 +9,9 @@ type Props = {
 
 export default function CardFrame({ children, size = "modal", scaleOverride }: Props) {
   // FINJUSTÉR SKALA HER:
-  // - boardMini: senket til 0.5 for å passe gridbredden i "Cards in Play"
+  // - boardMini: senket til 0.45 for å passe gridbredden i "Cards in Play"
   // - handMini: beholdt 0.78 (god lesbarhet i Your Hand)
-  const defaultScale = size === "modal" ? 1 : size === "boardMini" ? 0.5 : 0.78;
+  const defaultScale = size === "modal" ? 1 : size === "boardMini" ? 0.45 : 0.78;
   const scale = typeof scaleOverride === "number" ? scaleOverride : defaultScale;
 
   // Basemål MÅ matche fullkortets outer size (inkl. border)

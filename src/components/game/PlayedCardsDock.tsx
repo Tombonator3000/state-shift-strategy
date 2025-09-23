@@ -5,11 +5,8 @@ import type { GameCard } from '@/rules/mvp';
 import BaseCard from '@/components/game/cards/BaseCard';
 
 const BASE_CARD_WIDTH = 320;
-const DEFAULT_CARD_SCALE = 0.5; // boardMini scale
+const DEFAULT_CARD_SCALE = 0.45; // boardMini scale
 const BOARD_MINI_CARD_WIDTH = BASE_CARD_WIDTH * DEFAULT_CARD_SCALE;
-const MIN_CARD_SCALE = 0.35;
-const MIN_CARD_WIDTH = BASE_CARD_WIDTH * MIN_CARD_SCALE;
-const GRID_GAP_PX = 8; // Tailwind gap-2 spacing
 
 interface PlayedCardsDockProps {
   playedCards: CardPlayRecord[];
@@ -19,16 +16,13 @@ interface PlayedCardsDockProps {
 interface CardsInPlayCardProps {
   card: GameCard;
   onInspect?: (card: GameCard) => void;
-  cardWidth: number;
-  cardScale: number;
 }
 
-const CardsInPlayCard = ({ card, onInspect, cardWidth, cardScale }: CardsInPlayCardProps) => (
+const CardsInPlayCard = ({ card, onInspect }: CardsInPlayCardProps) => (
   <button
     type="button"
     onClick={() => onInspect?.(card)}
-    className="group relative flex items-center justify-center rounded-lg border border-transparent bg-transparent p-0 transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-yellow-200 focus-visible:ring-yellow-400"
-    style={{ width: cardWidth }}
+    className="group relative flex w-full items-center justify-center rounded-lg border border-transparent bg-transparent p-0 transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-yellow-200 focus-visible:ring-yellow-400"
   >
     <span className="sr-only">View {card.name}</span>
     <BaseCard
@@ -37,7 +31,7 @@ const CardsInPlayCard = ({ card, onInspect, cardWidth, cardScale }: CardsInPlayC
       polaroidHover={false}
       size="boardMini"
       className="pointer-events-none select-none transition-transform duration-200 group-hover:scale-[1.04]"
-      scaleOverride={cardScale}
+      scaleOverride={DEFAULT_CARD_SCALE}
     />
   </button>
 );
@@ -52,77 +46,6 @@ interface SectionProps {
 }
 
 const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, emptyMessage, ariaLabel, onInspectCard }) => {
-  const [gridNode, setGridNode] = React.useState<HTMLDivElement | null>(null);
-  const [containerWidth, setContainerWidth] = React.useState(0);
-
-  React.useEffect(() => {
-    if (!gridNode) {
-      return;
-    }
-
-    const updateWidth = () => {
-      const nextWidth = gridNode.getBoundingClientRect().width;
-      setContainerWidth(prev => (prev !== nextWidth ? nextWidth : prev));
-    };
-
-    updateWidth();
-
-    if (typeof ResizeObserver === 'undefined') {
-      if (typeof window !== 'undefined') {
-        window.addEventListener('resize', updateWidth);
-        return () => {
-          window.removeEventListener('resize', updateWidth);
-        };
-      }
-
-      return;
-    }
-
-    const observer = new ResizeObserver(entries => {
-      const entry = entries[0];
-      if (entry) {
-        const nextWidth = entry.contentRect.width;
-        setContainerWidth(prev => (prev !== nextWidth ? nextWidth : prev));
-      }
-    });
-
-    observer.observe(gridNode);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [gridNode]);
-
-  const layout = React.useMemo(() => {
-    if (containerWidth <= 0) {
-      const cardWidth = BASE_CARD_WIDTH * DEFAULT_CARD_SCALE;
-      return {
-        columnCount: 1,
-        cardWidth,
-        cardScale: DEFAULT_CARD_SCALE,
-      };
-    }
-
-    const maxColumns = Math.max(
-      1,
-      Math.floor((containerWidth + GRID_GAP_PX) / (MIN_CARD_WIDTH + GRID_GAP_PX)),
-    );
-    const columnCount = Math.min(maxColumns, Math.max(cards.length, 1));
-    const totalGapWidth = GRID_GAP_PX * (columnCount - 1);
-    const availableForColumns = Math.max(containerWidth - totalGapWidth, 0);
-    const rawColumnWidth = availableForColumns / columnCount;
-    const safeColumnWidth = Math.max(rawColumnWidth, MIN_CARD_WIDTH);
-    const unclampedScale = safeColumnWidth / BASE_CARD_WIDTH;
-    const finalScale = Math.max(unclampedScale, MIN_CARD_SCALE);
-    const cardWidth = BASE_CARD_WIDTH * finalScale;
-
-    return {
-      columnCount,
-      cardWidth,
-      cardScale: finalScale,
-    };
-  }, [cards.length, containerWidth]);
-
   return (
     <section
       aria-label={ariaLabel}
@@ -131,17 +54,16 @@ const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, e
       <h4 className="mb-2 text-[12px] font-extrabold uppercase tracking-[0.2em] text-black/70">{title}</h4>
       {cards.length > 0 ? (
         <div
-          ref={setGridNode}
-          className="grid items-start justify-center justify-items-center gap-2"
-          style={{ gridTemplateColumns: `repeat(${layout.columnCount}, ${layout.cardWidth}px)` }}
+          className="grid items-start justify-items-center gap-2"
+          style={{
+            gridTemplateColumns: `repeat(auto-fit, minmax(${BOARD_MINI_CARD_WIDTH}px, 1fr))`,
+          }}
         >
           {cards.map((entry, index) => (
             <CardsInPlayCard
               key={`${entry.card.id}-${index}`}
               card={entry.card}
               onInspect={onInspectCard}
-              cardWidth={layout.cardWidth}
-              cardScale={layout.cardScale}
             />
           ))}
         </div>

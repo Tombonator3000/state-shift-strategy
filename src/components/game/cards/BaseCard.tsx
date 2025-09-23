@@ -17,7 +17,7 @@ export type CardFrameSize = 'modal' | 'boardMini' | 'handMini';
 
 const SIZE_TO_SCALE: Record<CardFrameSize, number> = {
   modal: 1,
-  boardMini: 0.5,
+  boardMini: 0.45,
   handMini: 0.78,
 };
 
