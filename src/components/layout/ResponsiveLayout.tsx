@@ -48,7 +48,9 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
                 </div>
               </main>
               {hasRightPane && (
-                <div className="min-w-0 lg:flex lg:min-h-0 lg:flex-col lg:overflow-hidden">{rightPane}</div>
+                <div className="min-w-0 lg:flex lg:min-h-0 lg:flex-col lg:[&>*]:min-h-0 lg:[&>*]:flex-1">
+                  {rightPane}
+                </div>
               )}
             </div>
           </div>
