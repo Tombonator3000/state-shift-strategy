@@ -16,7 +16,7 @@ import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardMVP, type CardPlayResolution } from '@/systems/cardResolution';
 import { applyTruthDelta } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
-import { getDifficulty } from '@/state/settings';
+import { DEFAULT_DRAW_MODE, getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
 import { playComboGlitchIfAny } from '@/utils/visualEffects';
@@ -36,17 +36,13 @@ import {
   type AiCardPlayParams,
 } from './aiHelpers';
 import { evaluateCombosForTurn } from './comboAdapter';
+import { createDefaultCardDrawState, initGame as runInitGame } from './initGame';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
 const HAND_LIMIT = 5;
 const CURRENT_SAVE_VERSION = '1.1';
 const SUPPORTED_SAVE_VERSIONS = new Set(['1.0', CURRENT_SAVE_VERSION]);
-
-const createDefaultCardDrawState = (): CardDrawState => ({
-  cardsPlayedLastTurn: 0,
-  lastTurnWithoutPlay: false,
-});
 
 const sanitizeCardDrawState = (value: Partial<CardDrawState> | undefined | null): CardDrawState => ({
   cardsPlayedLastTurn: typeof value?.cardsPlayedLastTurn === 'number' && Number.isFinite(value.cardsPlayedLastTurn)
@@ -63,12 +59,13 @@ type RawSaveData = Partial<GameState> & {
   cardDrawState?: Partial<CardDrawState>;
 };
 
+
 const isValidDrawMode = (mode: unknown): mode is DrawMode =>
   typeof mode === 'string' && (['standard', 'classic', 'momentum', 'catchup', 'fast'] as DrawMode[]).includes(mode as DrawMode);
 
 const migrateSaveData = (raw: RawSaveData): RawSaveData & { version: string; drawMode: DrawMode; cardDrawState: CardDrawState } => {
   const version = typeof raw.version === 'string' ? raw.version : '1.0';
-  const resolvedDrawMode = isValidDrawMode(raw.drawMode) ? raw.drawMode : 'standard';
+  const resolvedDrawMode = isValidDrawMode(raw.drawMode) ? raw.drawMode : DEFAULT_DRAW_MODE;
   const migrated: RawSaveData & { version: string; drawMode: DrawMode; cardDrawState: CardDrawState } = {
     ...raw,
     version,
@@ -305,7 +302,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     selectedCard: null,
     targetState: null,
     aiStrategist: AIFactory.createStrategist(aiDifficulty),
-    drawMode: 'standard',
+    drawMode: DEFAULT_DRAW_MODE,
     cardDrawState: createDefaultCardDrawState()
   });
 
@@ -320,88 +317,22 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     [achievements],
   );
 
-  const initGame = useCallback((faction: 'government' | 'truth') => {
-    const startingTruth = 50;
-    const startingIP = 5;
-    const aiStartingIP = 5;
-    
-    // Get draw mode from localStorage
-    const savedSettings = localStorage.getItem('gameSettings');
-    const drawMode: DrawMode = savedSettings ? 
-      (JSON.parse(savedSettings).drawMode || 'standard') : 'standard';
-    
-    const handSize = getStartingHandSize(drawMode, faction);
-    const opposingFaction = faction === 'government' ? 'truth' : 'government';
-    const aiHandSize = getStartingHandSize(drawMode, opposingFaction);
-    // CRITICAL: Pass faction to deck generation
-    const newDeck = generateWeightedDeck(40, faction);
-    const startingHand = newDeck.slice(0, handSize);
-    const aiStartingDeck = generateWeightedDeck(40, opposingFaction);
-    const aiStartingHand = aiStartingDeck.slice(0, aiHandSize);
-    const initialControl = getInitialStateControl(faction);
+  const initGameHandler = useCallback((faction: 'government' | 'truth') => {
+    let savedSettings: string | null = null;
+    try {
+      savedSettings = localStorage.getItem('gameSettings');
+    } catch (error) {
+      console.warn('Failed to read saved draw mode settings, defaulting to standard.', error);
+    }
 
-    // Track game start in achievements
-    achievements.onGameStart(faction, aiDifficulty);
-    achievements.manager.onNewGameStart();
-
-    setGameState(prev => ({
-      ...prev,
+    runInitGame({
       faction,
-      truth: startingTruth,
-      ip: startingIP,
-      aiIP: aiStartingIP,
-      maxCardsPerTurn: DEFAULT_MAX_CARDS_PER_TURN,
-      hand: startingHand,
-      deck: newDeck.slice(handSize),
-      // AI gets opposite faction cards
-      aiHand: aiStartingHand,
-      aiDeck: aiStartingDeck.slice(aiHandSize),
-      controlledStates: initialControl.player,
-      aiControlledStates: initialControl.ai,
-      isGameOver: false, // CRITICAL: Reset game over state
-      phase: 'action', // Reset to proper starting phase
-      turn: 1,
-      round: 1,
-      cardsPlayedThisTurn: 0,
-      cardsPlayedThisRound: [],
-      playHistory: [],
-      turnPlays: [],
-      animating: false,
-      aiTurnInProgress: false,
-      selectedCard: null,
-      targetState: null,
-      newspaperGlitchBadge: false,
-      states: USA_STATES.map(state => {
-        let owner: 'player' | 'ai' | 'neutral' = 'neutral';
-
-        if (initialControl.player.includes(state.abbreviation)) owner = 'player';
-        else if (initialControl.ai.includes(state.abbreviation)) owner = 'ai';
-
-        return {
-          id: state.id,
-          name: state.name,
-          abbreviation: state.abbreviation,
-          baseIP: state.baseIP,
-          defense: state.defense,
-          pressure: 0,
-          contested: false,
-          owner,
-          specialBonus: state.specialBonus,
-          bonusValue: state.bonusValue,
-        };
-      }),
-      log: [
-        `Game started - ${faction} faction selected`,
-        `Starting Truth: ${startingTruth}%`,
-        `Starting IP: ${startingIP} (gain 5 + controlled states each income phase)`,
-        `Cards drawn: ${handSize} (${drawMode} mode)`,
-        `AI opening hand: ${aiHandSize}`,
-        `Controlled states: ${initialControl.player.join(', ')}`
-      ],
-      drawMode,
-      cardDrawState: createDefaultCardDrawState()
-    }));
-  }, [achievements, aiDifficulty]);
+      aiDifficulty,
+      achievements,
+      setGameState,
+      savedSettings,
+    });
+  }, [achievements, aiDifficulty, setGameState]);
 
   const playCard = useCallback((cardId: string, targetOverride?: string | null) => {
     setGameState(prev => {
@@ -1254,7 +1185,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
   return {
     gameState,
-    initGame,
+    initGame: initGameHandler,
     playCard,
     playCardAnimated,
     selectCard,

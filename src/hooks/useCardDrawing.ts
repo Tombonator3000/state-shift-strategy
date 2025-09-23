@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { calculateCardDraw, getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
+import { DEFAULT_DRAW_MODE, parseDrawModeSetting } from '@/state/settings';
 
 export interface DrawingSettings {
   drawMode: DrawMode;
 }
 
 export const useCardDrawing = () => {
-  const [settings, setSettings] = useState<DrawingSettings>({ drawMode: 'standard' });
+  const [settings, setSettings] = useState<DrawingSettings>({ drawMode: DEFAULT_DRAW_MODE });
   const [drawState, setDrawState] = useState<CardDrawState>({
     cardsPlayedLastTurn: 0,
     lastTurnWithoutPlay: false
@@ -15,12 +16,8 @@ export const useCardDrawing = () => {
   // Load settings from localStorage
   useEffect(() => {
     const savedSettings = localStorage.getItem('gameSettings');
-    if (savedSettings) {
-      const parsed = JSON.parse(savedSettings);
-      if (parsed.drawMode) {
-        setSettings({ drawMode: parsed.drawMode });
-      }
-    }
+    const resolvedDrawMode = parseDrawModeSetting(savedSettings);
+    setSettings(prev => (prev.drawMode === resolvedDrawMode ? prev : { drawMode: resolvedDrawMode }));
   }, []);
 
   // Update draw state when cards are played
