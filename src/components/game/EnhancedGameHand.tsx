@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import clsx from 'clsx';
 import CardDetailOverlay from './CardDetailOverlay';
 import BaseCard from '@/components/game/cards/BaseCard';
@@ -22,6 +22,7 @@ interface EnhancedGameHandProps {
   currentIP: number;
   loadingCard?: string | null;
   onCardHover?: (card: (GameCard & { _hoverPosition?: { x: number; y: number } }) | null) => void;
+  getEffectiveCost?: (card: GameCard) => number;
 }
 
 const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
@@ -32,7 +33,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   onSelectCard,
   currentIP,
   loadingCard,
-  onCardHover
+  onCardHover,
+  getEffectiveCost
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
@@ -41,12 +43,23 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);
 
+  const displayedCards = useMemo(() => {
+    if (!getEffectiveCost) {
+      return cards;
+    }
+
+    return cards.map(card => {
+      const cost = getEffectiveCost(card);
+      return typeof cost === 'number' && cost !== card.cost ? { ...card, cost } : card;
+    });
+  }, [cards, getEffectiveCost]);
+
   const normalizeCardType = (type: string): MVPCardType => {
     return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
   };
 
   const handlePlayCard = async (cardId: string) => {
-    const card = cards.find(c => c.id === cardId);
+    const card = displayedCards.find(c => c.id === cardId);
     if (!card) return;
     
     if (!canAffordCard(card)) {
@@ -86,17 +99,17 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const swipeHandlers = useSwipeGestures({
     onSwipeLeft: () => {
       if (examinedCard) {
-        const currentIndex = cards.findIndex(c => c.id === examinedCard);
-        const nextIndex = (currentIndex + 1) % cards.length;
-        setExaminedCard(cards[nextIndex].id);
+        const currentIndex = displayedCards.findIndex(c => c.id === examinedCard);
+        const nextIndex = (currentIndex + 1) % displayedCards.length;
+        setExaminedCard(displayedCards[nextIndex].id);
         triggerHaptic('selection');
       }
     },
     onSwipeRight: () => {
       if (examinedCard) {
-        const currentIndex = cards.findIndex(c => c.id === examinedCard);
-        const prevIndex = currentIndex === 0 ? cards.length - 1 : currentIndex - 1;
-        setExaminedCard(cards[prevIndex].id);
+        const currentIndex = displayedCards.findIndex(c => c.id === examinedCard);
+        const prevIndex = currentIndex === 0 ? displayedCards.length - 1 : currentIndex - 1;
+        setExaminedCard(displayedCards[prevIndex].id);
         triggerHaptic('selection');
       }
     },
@@ -115,12 +128,12 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       onPointerLeave={() => onCardHover?.(null)}
     >
       <div className="grid w-full grid-cols-3 gap-3 justify-items-start items-start content-start">
-        {cards.length === 0 ? (
+        {displayedCards.length === 0 ? (
           <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
             No assets available
           </div>
         ) : (
-          cards.map((card, index) => {
+          displayedCards.map((card, index) => {
             const isSelected = selectedCard === card.id;
             const isPlaying = playingCard === card.id;
             const isLoading = loadingCard === card.id;
@@ -236,15 +249,15 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       {/* Card Detail Overlay - Redesigned */}
       {examinedCard && (
         <CardDetailOverlay
-          card={cards.find(c => c.id === examinedCard) || null}
-          canAfford={cards.find(c => c.id === examinedCard) ? canAffordCard(cards.find(c => c.id === examinedCard)!) : false}
+          card={displayedCards.find(c => c.id === examinedCard) || null}
+          canAfford={displayedCards.find(c => c.id === examinedCard) ? canAffordCard(displayedCards.find(c => c.id === examinedCard)!) : false}
           disabled={disabled}
           onClose={() => {
             setExaminedCard(null);
             triggerHaptic('light');
           }}
           onPlayCard={() => {
-            const card = cards.find(c => c.id === examinedCard);
+            const card = displayedCards.find(c => c.id === examinedCard);
             if (!card) return;
             
             if (!canAffordCard(card)) {
@@ -297,7 +310,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               </div>
               <div className="text-sm text-muted-foreground font-mono">
                 {(() => {
-                  const card = cards.find(c => c.id === playingCard);
+                  const card = displayedCards.find(c => c.id === playingCard);
                   return card ? `"${card.name}"` : 'Unknown Asset';
                 })()}
               </div>
