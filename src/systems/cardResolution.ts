@@ -4,6 +4,7 @@ import { cloneGameState, type Card, type GameState as EngineGameState } from '@/
 import type { GameCard } from '@/rules/mvp';
 import { setStateOccupation } from '@/data/usaStates';
 import type { PlayerStats } from '@/data/achievementSystem';
+import type { PublicFrenzyState } from '@/hooks/gameStateTypes';
 
 type Faction = 'government' | 'truth';
 
@@ -52,6 +53,7 @@ export interface GameSnapshot {
   turn: number;
   faction: Faction;
   states: StateForResolution[];
+  publicFrenzy?: PublicFrenzyState;
 }
 
 export interface CardPlayResolution {
@@ -65,6 +67,7 @@ export interface CardPlayResolution {
   selectedCard: string | null;
   logEntries: string[];
   damageDealt: number;
+  underReviewApplied?: boolean;
 }
 
 const PLAYER_ID: PlayerId = 'P1';
@@ -204,7 +207,41 @@ export function resolveCardMVP(
   const beforeState = cloneGameState(engineState);
   const targetStateId = resolveTargetStateId(gameState, targetState);
 
-  applyEffectsMvp(engineState, ownerId, card as Card, targetStateId, mediaOptions);
+  const truthActor = gameState.faction === 'truth' ? 'human' : 'ai';
+  const governmentActor = truthActor === 'human' ? 'ai' : 'human';
+  const frenzy = gameState.publicFrenzy;
+  let cardForResolution: GameCard = card;
+  let underReviewApplied = false;
+
+  if (
+    card.type === 'ZONE' &&
+    targetStateId &&
+    frenzy?.governmentInitiativeActiveFor === governmentActor &&
+    frenzy?.underReviewState &&
+    actor === truthActor &&
+    frenzy.underReviewState.toLowerCase() === targetStateId.toLowerCase()
+  ) {
+    const originalEffects = (card.effects ?? {}) as { pressureDelta?: number };
+    const pressureDelta = originalEffects.pressureDelta;
+    if (typeof pressureDelta === 'number' && pressureDelta !== 0) {
+      const halved = pressureDelta > 0
+        ? Math.max(1, Math.floor(pressureDelta / 2))
+        : Math.min(-1, Math.ceil(pressureDelta / 2));
+      cardForResolution = {
+        ...card,
+        effects: {
+          ...card.effects,
+          pressureDelta: halved,
+        },
+      };
+      const targetState = gameState.states.find(state => state.id === targetStateId);
+      const label = targetState?.name ?? targetState?.abbreviation ?? targetStateId;
+      engineLog.push(`UNDER REVIEW clamps pressure on ${label} (halved to ${halved}).`);
+      underReviewApplied = true;
+    }
+  }
+
+  applyEffectsMvp(engineState, ownerId, cardForResolution as Card, targetStateId, mediaOptions);
 
   const logEntries: string[] = engineLog.map(message => `${card.name}: ${message}`);
   const newStates = gameState.states.map(state => ({ ...state }));
@@ -302,6 +339,7 @@ export function resolveCardMVP(
     selectedCard: null,
     logEntries,
     damageDealt,
+    underReviewApplied,
   };
 }
 

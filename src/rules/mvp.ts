@@ -29,6 +29,8 @@ export interface CardTarget {
   count: number;
 }
 
+export type FrontPageSlot = 'top-banner' | 'main-photo' | 'sidebar';
+
 export interface GameCard {
   id: string;
   name: string;
@@ -43,6 +45,7 @@ export interface GameCard {
   effects?: CardEffects;
   target?: CardTarget;
   extId?: string;
+  frontPageSlot?: FrontPageSlot;
 }
 
 export const MVP_COST_TABLE: Record<MVPCardType, Record<Rarity, number>> = {

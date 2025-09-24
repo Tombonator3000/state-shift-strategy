@@ -11,6 +11,8 @@ import {
   type GameSnapshot,
   type StateForResolution,
 } from '@/systems/cardResolution';
+import { createPublicFrenzyState } from '@/game/momentum';
+import type { PublicFrenzyState } from '@/hooks/gameStateTypes';
 import {
   createAiStrategist,
   type AIStrategist,
@@ -75,6 +77,7 @@ interface SimulationState {
   factions: SideRecord<'truth' | 'government'>;
   cardsPlayedThisRound: SimulationPlayRecord[];
   lastPlays: SimulationPlayRecord[];
+  publicFrenzy?: PublicFrenzyState;
 }
 
 interface EvaluationLogEntry {
@@ -312,6 +315,7 @@ function buildSnapshot(state: SimulationState, perspective: Side): GameSnapshot 
     turn: state.turn,
     faction: state.factions[perspective],
     states: resolutionStates,
+    publicFrenzy: state.publicFrenzy ?? createPublicFrenzyState(state.truth),
   };
 }
 
