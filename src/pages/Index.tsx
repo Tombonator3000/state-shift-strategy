@@ -1196,6 +1196,50 @@ const Index = () => {
     }, 500);
   }, [endTurn, audio]);
 
+  // Move auto-end-turn useEffect here to prevent hooks order violation
+  useEffect(() => {
+    if (!settings.autoEndTurn) {
+      return;
+    }
+
+    if (isPlayerActionLocked) {
+      return;
+    }
+
+    if (gameState.currentPlayer !== 'human' || gameState.phase !== 'action') {
+      return;
+    }
+
+    if (gameState.selectedCard && !gameState.targetState) {
+      return;
+    }
+
+    const turnKey = `${gameState.round}-${gameState.turn}`;
+    if (autoEndTurnMarkerRef.current === turnKey) {
+      return;
+    }
+
+    const limitReached = gameState.cardsPlayedThisTurn >= 3;
+    const noPlayableCards = !hasPlayableCard;
+
+    if (limitReached || noPlayableCards) {
+      autoEndTurnMarkerRef.current = turnKey;
+      handleEndTurn();
+    }
+  }, [
+    settings.autoEndTurn,
+    isPlayerActionLocked,
+    gameState.currentPlayer,
+    gameState.phase,
+    gameState.selectedCard,
+    gameState.targetState,
+    gameState.cardsPlayedThisTurn,
+    gameState.round,
+    gameState.turn,
+    hasPlayableCard,
+    handleEndTurn,
+  ]);
+
   useEffect(() => {
     if (!settings.enableKeyboardShortcuts) {
       return;
@@ -1394,49 +1438,6 @@ const Index = () => {
       )}
     </div>
   );
-
-  useEffect(() => {
-    if (!settings.autoEndTurn) {
-      return;
-    }
-
-    if (isPlayerActionLocked) {
-      return;
-    }
-
-    if (gameState.currentPlayer !== 'human' || gameState.phase !== 'action') {
-      return;
-    }
-
-    if (gameState.selectedCard && !gameState.targetState) {
-      return;
-    }
-
-    const turnKey = `${gameState.round}-${gameState.turn}`;
-    if (autoEndTurnMarkerRef.current === turnKey) {
-      return;
-    }
-
-    const limitReached = gameState.cardsPlayedThisTurn >= 3;
-    const noPlayableCards = !hasPlayableCard;
-
-    if (limitReached || noPlayableCards) {
-      autoEndTurnMarkerRef.current = turnKey;
-      handleEndTurn();
-    }
-  }, [
-    settings.autoEndTurn,
-    isPlayerActionLocked,
-    gameState.currentPlayer,
-    gameState.phase,
-    gameState.selectedCard,
-    gameState.targetState,
-    gameState.cardsPlayedThisTurn,
-    gameState.round,
-    gameState.turn,
-    hasPlayableCard,
-    handleEndTurn,
-  ]);
 
   const renderSidebar = () => (
     <div className="flex h-full flex-col gap-4">
