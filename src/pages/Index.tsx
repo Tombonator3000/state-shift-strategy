@@ -40,7 +40,7 @@ import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
 import type { CardPlayRecord } from '@/hooks/gameStateTypes';
-import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
+import { resolveStateIdentity } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
 import { areParanormalEffectsEnabled } from '@/state/settings';
 import type { GameCard } from '@/rules/mvp';
@@ -124,16 +124,7 @@ const fillTemplate = (template: string, replacements: Record<string, string | nu
 };
 
 const resolveStateName = (stateId: string): string => {
-  const normalized = stateId.toUpperCase();
-  const byId = getStateById(stateId);
-  if (byId?.name) {
-    return byId.name;
-  }
-  const byAbbr = getStateByAbbreviation(normalized);
-  if (byAbbr?.name) {
-    return byAbbr.name;
-  }
-  return stateId;
+  return resolveStateIdentity(stateId)?.label ?? stateId;
 };
 
 const inferFactionFromRecord = (
@@ -1541,6 +1532,10 @@ const Index = () => {
             <PlayedCardsDock
               playedCards={gameState.cardsPlayedThisRound}
               onInspectCard={(card) => setInspectedPlayedCard(card)}
+              faction={gameState.faction}
+              evidence={gameState.evidenceTrack}
+              publicFrenzy={gameState.publicFrenzy}
+              truth={gameState.truth}
             />
           </div>
         </div>

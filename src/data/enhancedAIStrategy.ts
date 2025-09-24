@@ -1,5 +1,6 @@
 import type { GameCard } from '@/rules/mvp';
 import { resolveCardMVP, type CardPlayResolution, type GameSnapshot } from '@/systems/cardResolution';
+import { createPublicFrenzyState } from '@/game/momentum';
 import { CARD_DATABASE } from './cardDatabase';
 import { getAiTuningConfig, type AiTuningConfig } from './aiTuning';
 import {
@@ -1221,6 +1222,7 @@ export class EnhancedAIStrategist implements AIStrategist {
       turn: gameState.turn ?? 0,
       faction: gameState.faction ?? 'truth',
       states,
+      publicFrenzy: gameState.publicFrenzy ?? createPublicFrenzyState(gameState.truth ?? 50),
     };
   }
 

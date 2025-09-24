@@ -28,6 +28,18 @@ import {
   type AiCardPlayParams,
 } from './aiHelpers';
 import { evaluateCombosForTurn } from './comboAdapter';
+import {
+  createEvidenceTrackState,
+  createPublicFrenzyState,
+  withTruthMomentum,
+  consumeExpose,
+  consumeObfuscate,
+  clearHeadlineBonus,
+  clearGovernmentInitiative,
+  getMaxPlaysForTurn,
+  resolveStateReference,
+} from '@/game/momentum';
+import { isFrontPageSlot, resolveFrontPageSlot } from '@/game/frontPage';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
@@ -54,45 +66,7 @@ const normalizeRoundFromSave = (saveData: Partial<GameState>): number => {
   return Math.max(expectedRound, rawRound);
 };
 
-const summarizeStrategy = (reasoning?: string, strategyDetails?: string[]): string | undefined => {
-  const source = reasoning ?? strategyDetails?.[0];
-  if (!source) {
-    return undefined;
-  }
-
-  const cleaned = source.replace(/^AI Strategy:\s*/i, '').replace(/^AI Synergy Bonus:\s*/i, '').trim();
-  const normalized = cleaned.replace(/\s+/g, ' ');
-
-  if (!normalized.length) {
-    return 'AI executed a strategic play.';
-  }
-
-  const firstSentenceMatch = normalized.match(/^[^.?!]*(?:[.?!]|$)/);
-  const firstSentence = (firstSentenceMatch ? firstSentenceMatch[0] : normalized).trim();
-  if (!firstSentence.length) {
-    return 'AI executed a strategic play.';
-  }
-
-  return firstSentence.length > 100 ? `${firstSentence.slice(0, 97).trimEnd()}…` : firstSentence;
-};
-
 const isDebugEnvironment = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV ?? false;
-
-const buildStrategyLogEntries = (reasoning?: string, strategyDetails?: string[]): string[] => {
-  if (featureFlags.aiVerboseStrategyLog) {
-    const verboseEntries: string[] = [];
-    if (reasoning) {
-      verboseEntries.push(`AI Strategy: ${reasoning}`);
-    }
-    if (strategyDetails?.length) {
-      verboseEntries.push(...strategyDetails);
-    }
-    return verboseEntries;
-  }
-
-  const summary = summarizeStrategy(reasoning, strategyDetails);
-  return summary ? [`AI focus: ${summary}`] : [];
-};
 
 const debugStrategyToConsole = (reasoning?: string, strategyDetails?: string[]) => {
   if (featureFlags.aiVerboseStrategyLog || !isDebugEnvironment) {
@@ -151,6 +125,49 @@ const drawCardsFromDeck = (
   return { drawn, deck: nextDeck };
 };
 
+const sanitizeCardPlayRecord = (record: any): CardPlayRecord | null => {
+  if (!record || typeof record !== 'object') {
+    return null;
+  }
+
+  const card = record.card as GameCard | undefined;
+  if (!card) {
+    return null;
+  }
+
+  const slotCandidate = typeof record.frontPageSlot === 'string' ? record.frontPageSlot : null;
+  const normalizedSlot = slotCandidate && isFrontPageSlot(slotCandidate)
+    ? slotCandidate
+    : resolveFrontPageSlot(card);
+
+  return {
+    card,
+    player: record.player === 'ai' ? 'ai' : 'human',
+    faction: record.faction === 'government' ? 'government' : 'truth',
+    targetState: typeof record.targetState === 'string' ? record.targetState : null,
+    truthDelta: typeof record.truthDelta === 'number' ? record.truthDelta : 0,
+    ipDelta: typeof record.ipDelta === 'number' ? record.ipDelta : 0,
+    aiIpDelta: typeof record.aiIpDelta === 'number' ? record.aiIpDelta : 0,
+    capturedStates: Array.isArray(record.capturedStates) ? [...record.capturedStates] : [],
+    damageDealt: typeof record.damageDealt === 'number' ? record.damageDealt : 0,
+    round: typeof record.round === 'number' ? record.round : 0,
+    turn: typeof record.turn === 'number' ? record.turn : 0,
+    timestamp: typeof record.timestamp === 'number' ? record.timestamp : Date.now(),
+    logEntries: Array.isArray(record.logEntries) ? [...record.logEntries] : [],
+    frontPageSlot: normalizedSlot,
+  };
+};
+
+const sanitizeCardPlayRecords = (records: unknown): CardPlayRecord[] => {
+  if (!Array.isArray(records)) {
+    return [];
+  }
+
+  return records
+    .map(entry => sanitizeCardPlayRecord(entry))
+    .filter((entry): entry is CardPlayRecord => entry !== null);
+};
+
 export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const aiDifficulty = resolveAiDifficulty(aiDifficultyOverride);
   const [eventManager] = useState(() => new EventManager());
@@ -199,6 +216,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     currentEvents: [],
     eventManager,
     showNewspaper: false,
+    evidenceTrack: createEvidenceTrackState(),
+    publicFrenzy: createPublicFrenzyState(50),
     log: [
       'Game started - Truth Seekers faction selected',
       'Starting Truth: 50%',
@@ -317,6 +336,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         `Cards drawn: ${handSize} (${drawMode} mode)`,
         `Controlled states: ${initialControl.player.join(', ')}`
       ],
+      evidenceTrack: createEvidenceTrackState(),
+      publicFrenzy: createPublicFrenzyState(startingTruth),
       drawMode,
       cardDrawState: {
         cardsPlayedLastTurn: 0,
@@ -325,55 +346,132 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     }));
   }, [achievements, aiDifficulty]);
 
+  const finalizeHumanPlay = (
+    prev: GameState,
+    card: GameCard,
+    targetState: string | null,
+    baseResolution: CardPlayResolution,
+  ): GameState => {
+    const resolution = {
+      ...baseResolution,
+      logEntries: [...(baseResolution.logEntries ?? [])],
+    };
+
+    const exposeActive = prev.evidenceTrack.exposeReady && prev.evidenceTrack.exposeOwner === 'human';
+    if (exposeActive) {
+      resolution.ip = resolution.ip + 1;
+      resolution.logEntries.push('Expose! Coupon clipped the tabloid budget (+1 IP).');
+    }
+
+    const initiativeActive = prev.publicFrenzy.governmentInitiativeActiveFor === 'human';
+    if (initiativeActive) {
+      resolution.ip = resolution.ip + 1;
+      resolution.logEntries.push('Initiative bonus: bureaucracy fast-tracked +1 IP.');
+    }
+
+    const obfuscateActive = prev.evidenceTrack.obfuscateReady && prev.evidenceTrack.obfuscateOwner === 'human';
+    let updatedDeck = prev.deck;
+    let bonusCards: GameCard[] = [];
+    if (obfuscateActive) {
+      const drawResult = drawCardsFromDeck(updatedDeck, 1, prev.faction);
+      bonusCards = drawResult.drawn;
+      updatedDeck = drawResult.deck;
+      if (bonusCards.length > 0) {
+        resolution.logEntries.push('Obfuscate! Red tape unearthed a replacement dossier (+1 card).');
+      }
+    }
+
+    const resolvedTargetInfo = resolveStateReference(prev, targetState);
+    const momentumTarget = resolvedTargetInfo?.id ?? targetState ?? null;
+
+    const playedCardRecord = createPlayedCardRecord({
+      card,
+      player: 'human',
+      faction: prev.faction,
+      targetState,
+      resolution,
+      previousTruth: prev.truth,
+      previousIp: prev.ip,
+      previousAiIP: prev.aiIP,
+      round: prev.round,
+      turn: prev.turn,
+    });
+
+    const turnPlayEntries = createTurnPlayEntries({
+      state: prev,
+      card,
+      owner: 'human',
+      targetState,
+      resolution,
+    });
+
+    const handWithoutCard = prev.hand.filter(c => c.id !== card.id);
+    let nextState: GameState = {
+      ...prev,
+      hand: bonusCards.length > 0 ? [...handWithoutCard, ...bonusCards] : handWithoutCard,
+      deck: updatedDeck,
+      ip: resolution.ip,
+      aiIP: resolution.aiIP,
+      truth: resolution.truth,
+      states: resolution.states,
+      controlledStates: resolution.controlledStates,
+      aiControlledStates: resolution.aiControlledStates,
+      cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+      cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
+      playHistory: [...prev.playHistory, playedCardRecord],
+      turnPlays: [...prev.turnPlays, ...turnPlayEntries],
+      targetState: resolution.targetState,
+      selectedCard: resolution.selectedCard,
+      log: [...prev.log, ...resolution.logEntries],
+    };
+
+    if (initiativeActive) {
+      nextState = clearGovernmentInitiative(nextState, 'human');
+    }
+
+    if (exposeActive) {
+      nextState = consumeExpose(nextState, 'human');
+    }
+
+    if (obfuscateActive) {
+      nextState = consumeObfuscate(nextState, 'human');
+    }
+
+    const hadHeadlineBonus = prev.publicFrenzy.bonusHeadlineActiveFor === 'human';
+    const previousMax = getMaxPlaysForTurn(prev, 'human');
+    if (hadHeadlineBonus && prev.cardsPlayedThisTurn + 1 >= previousMax) {
+      nextState = clearHeadlineBonus(nextState, 'human');
+    }
+
+    nextState = withTruthMomentum({
+      previousTruth: prev.truth,
+      newTruth: resolution.truth,
+      state: nextState,
+      actor: 'human',
+      card,
+      targetState: momentumTarget,
+    });
+
+    if (resolution.underReviewApplied && prev.publicFrenzy.governmentInitiativeActiveFor) {
+      nextState = clearGovernmentInitiative(nextState, prev.publicFrenzy.governmentInitiativeActiveFor);
+    }
+
+    return nextState;
+  };
+
   const playCard = useCallback((cardId: string, targetOverride?: string | null) => {
     setGameState(prev => {
       const card = prev.hand.find(c => c.id === cardId);
-      if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
+      const maxPlays = getMaxPlaysForTurn(prev, 'human');
+      if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= maxPlays || prev.animating) {
         return prev;
       }
 
       achievements.onCardPlayed(cardId, card.type, card.rarity);
 
       const targetState = targetOverride ?? prev.targetState ?? null;
-      const resolution = resolveCardEffects(prev, card, targetState);
-      const playedCardRecord = createPlayedCardRecord({
-        card,
-        player: 'human',
-        faction: prev.faction,
-        targetState,
-        resolution,
-        previousTruth: prev.truth,
-        previousIp: prev.ip,
-        previousAiIP: prev.aiIP,
-        round: prev.round,
-        turn: prev.turn,
-      });
-
-      const turnPlayEntries = createTurnPlayEntries({
-        state: prev,
-        card,
-        owner: 'human',
-        targetState,
-        resolution,
-      });
-
-      return {
-        ...prev,
-        hand: prev.hand.filter(c => c.id !== cardId),
-        ip: resolution.ip,
-        aiIP: resolution.aiIP,
-        truth: resolution.truth,
-        states: resolution.states,
-        controlledStates: resolution.controlledStates,
-        aiControlledStates: resolution.aiControlledStates,
-        cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-        cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
-        playHistory: [...prev.playHistory, playedCardRecord],
-        turnPlays: [...prev.turnPlays, ...turnPlayEntries],
-        targetState: resolution.targetState,
-        selectedCard: resolution.selectedCard,
-        log: [...prev.log, ...resolution.logEntries]
-      };
+      const baseResolution = resolveCardEffects(prev, card, targetState);
+      return finalizeHumanPlay(prev, card, targetState, baseResolution);
     });
   }, [achievements, resolveCardEffects]);
 
@@ -383,15 +481,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     explicitTargetState?: string
   ) => {
     const card = gameState.hand.find(c => c.id === cardId);
-    if (!card || gameState.ip < card.cost || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
+    const maxPlays = getMaxPlaysForTurn(gameState, 'human');
+    if (!card || gameState.ip < card.cost || gameState.cardsPlayedThisTurn >= maxPlays || gameState.animating) {
       return;
     }
 
     achievements.onCardPlayed(cardId, card.type, card.rarity);
 
     const targetState = explicitTargetState ?? gameState.targetState ?? null;
-    let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
-    let pendingTurnPlays: ReturnType<typeof createTurnPlayEntries> | null = null;
+    let pendingResolution: CardPlayResolution | null = null;
 
     setGameState(prev => {
       if (prev.animating) {
@@ -399,26 +497,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }
 
       const resolution = resolveCardEffects(prev, card, targetState);
-      pendingRecord = createPlayedCardRecord({
-        card,
-        player: 'human',
-        faction: prev.faction,
-        targetState,
-        resolution,
-        previousTruth: prev.truth,
-        previousIp: prev.ip,
-        previousAiIP: prev.aiIP,
-        round: prev.round,
-        turn: prev.turn,
-      });
-
-      pendingTurnPlays = createTurnPlayEntries({
-        state: prev,
-        card,
-        owner: 'human',
-        targetState,
-        resolution,
-      });
+      pendingResolution = resolution;
 
       return {
         ...prev,
@@ -442,61 +521,25 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       });
 
       setGameState(prev => {
-        const record = pendingRecord ?? {
-          card,
-          player: 'human' as const,
-          faction: prev.faction,
-          targetState: targetState ?? null,
-          truthDelta: 0,
-          ipDelta: 0,
-          aiIpDelta: 0,
-          capturedStates: [],
-          damageDealt: 0,
-          round: prev.round,
-          turn: prev.turn,
-          timestamp: Date.now(),
-          logEntries: [],
-        };
+        const baseResolution = pendingResolution ?? resolveCardEffects(prev, card, targetState);
+        const finalized = finalizeHumanPlay(prev, card, targetState ?? null, baseResolution);
         return {
-          ...prev,
-          hand: prev.hand.filter(c => c.id !== cardId),
-          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-          cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
-          playHistory: [...prev.playHistory, record],
-          turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
+          ...finalized,
+          animating: false,
           selectedCard: null,
           targetState: null,
-          animating: false,
         };
       });
     } catch (error) {
       console.error('Card animation failed:', error);
       setGameState(prev => {
-        const record = pendingRecord ?? {
-          card,
-          player: 'human' as const,
-          faction: prev.faction,
-          targetState: targetState ?? null,
-          truthDelta: 0,
-          ipDelta: 0,
-          aiIpDelta: 0,
-          capturedStates: [],
-          damageDealt: 0,
-          round: prev.round,
-          turn: prev.turn,
-          timestamp: Date.now(),
-          logEntries: [],
-        };
+        const baseResolution = pendingResolution ?? resolveCardEffects(prev, card, targetState);
+        const finalized = finalizeHumanPlay(prev, card, targetState ?? null, baseResolution);
         return {
-          ...prev,
-          hand: prev.hand.filter(c => c.id !== cardId),
-          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-          cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
-          playHistory: [...prev.playHistory, record],
-          turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
+          ...finalized,
+          animating: false,
           selectedCard: null,
           targetState: null,
-          animating: false,
         };
       });
     }
@@ -618,13 +661,21 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         applyTruthDelta(nextState, truthModifier, 'human');
         nextState.log.push(`AI ${prev.aiStrategist?.personality.name} is thinking...`);
 
-        return nextState;
+        let adjusted = nextState;
+        if (nextState.publicFrenzy.bonusHeadlineActiveFor === 'human') {
+          adjusted = clearHeadlineBonus(adjusted, 'human');
+        }
+        if (nextState.publicFrenzy.governmentInitiativeActiveFor === 'human') {
+          adjusted = clearGovernmentInitiative(adjusted, 'human');
+        }
+
+        return adjusted;
       }
 
       const comboLog =
         comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
 
-      return {
+      let aiPhaseState: GameState = {
         ...prev,
         round: prev.round + 1,
         phase: 'newspaper',
@@ -638,6 +689,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboResult.truthDelta,
         log: [...comboLog, 'AI turn completed']
       };
+
+      if (aiPhaseState.publicFrenzy.bonusHeadlineActiveFor === 'ai') {
+        aiPhaseState = clearHeadlineBonus(aiPhaseState, 'ai');
+      }
+      if (aiPhaseState.publicFrenzy.governmentInitiativeActiveFor === 'ai') {
+        aiPhaseState = clearGovernmentInitiative(aiPhaseState, 'ai');
+      }
+
+      return aiPhaseState;
     });
   }, []);
 
@@ -760,7 +820,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     if (turnPlan.actions.length === 0 && turnPlan.sequenceDetails.length) {
       setGameState(prev => ({
         ...prev,
-        log: [...prev.log, ...buildStrategyLogEntries(undefined, turnPlan.sequenceDetails)],
+        log: [...prev.log, ...buildStrategyLogEntriesHelper(undefined, turnPlan.sequenceDetails)],
       }));
     }
 
@@ -941,22 +1001,27 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }
 
       // Reconstruct the game state
+      const cardsPlayedThisRound = sanitizeCardPlayRecords(saveData.cardsPlayedThisRound);
+      const playHistory = sanitizeCardPlayRecords(saveData.playHistory);
+
       setGameState(prev => ({
         ...prev,
         ...saveData,
         turn: normalizedTurn,
         round: normalizedRound,
-        cardsPlayedThisRound: Array.isArray(saveData.cardsPlayedThisRound)
-          ? saveData.cardsPlayedThisRound
-          : [],
-        playHistory: Array.isArray(saveData.playHistory)
-          ? saveData.playHistory
-          : [],
+        cardsPlayedThisRound,
+        playHistory,
         turnPlays: Array.isArray(saveData.turnPlays)
           ? saveData.turnPlays
           : [],
         comboTruthDeltaThisRound:
           typeof saveData.comboTruthDeltaThisRound === 'number' ? saveData.comboTruthDeltaThisRound : 0,
+        evidenceTrack: saveData.evidenceTrack
+          ? { ...createEvidenceTrackState(), ...saveData.evidenceTrack }
+          : createEvidenceTrackState(),
+        publicFrenzy: saveData.publicFrenzy
+          ? { ...createPublicFrenzyState(saveData.truth ?? prev.truth ?? 50), ...saveData.publicFrenzy }
+          : createPublicFrenzyState(saveData.truth ?? prev.truth ?? 50),
         // Ensure objects are properly reconstructed
         eventManager: prev.eventManager, // Keep the current event manager
         aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium')

@@ -4,7 +4,10 @@ import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
 import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward } from '@/game/comboEngine';
 import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
 import { cloneGameState } from './validator';
+import { resolveFrontPageSlot } from '@/game/frontPage';
 import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
+
+const DEV = typeof import.meta !== 'undefined' && (import.meta as any)?.env?.DEV;
 import type { MediaResolutionOptions } from './media';
 
 const otherPlayer = (id: PlayerId): PlayerId => (id === 'P1' ? 'P2' : 'P1');
@@ -207,6 +210,29 @@ export function resolve(
     targetStateId,
     metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
   };
+
+  if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+    try {
+      const slot = resolveFrontPageSlot(card);
+      window.dispatchEvent(
+        new CustomEvent('frontPageSlotReveal', {
+          detail: {
+            stage: resolveEntry.stage,
+            owner,
+            slot,
+            cardId: card.id,
+            cardName: card.name,
+            cardType: card.type,
+            metadata: resolveEntry.metadata,
+          },
+        }),
+      );
+    } catch (error) {
+      if (DEV) {
+        console.warn('[MVP] Failed to emit frontPageSlotReveal event', error);
+      }
+    }
+  }
 
   return {
     ...resolved,
