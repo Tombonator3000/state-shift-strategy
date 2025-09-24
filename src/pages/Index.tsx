@@ -496,6 +496,13 @@ const Index = () => {
     [playerCombinationContext],
   );
 
+  // Call all hooks that need to be consistent across renders BEFORE any conditional returns
+  const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
+  const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
+  const hasPlayableCard = useMemo(() => {
+    return gameState.hand.some(card => getEffectiveCardCost(card) <= gameState.ip);
+  }, [gameState.hand, gameState.ip, getEffectiveCardCost]);
+
   const pushSighting = useCallback((entry: ParanormalSighting) => {
     setParanormalSightings(prev => {
       const merged = [...prev, entry];
@@ -1373,12 +1380,6 @@ const Index = () => {
       />
     );
   }
-
-  const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
-  const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
-  const hasPlayableCard = useMemo(() => {
-    return gameState.hand.some(card => getEffectiveCardCost(card) <= gameState.ip);
-  }, [gameState.hand, gameState.ip, getEffectiveCardCost]);
 
   const renderIntelLog = (limit: number) => (
     <div className="space-y-1 text-xs text-newspaper-text/80">
