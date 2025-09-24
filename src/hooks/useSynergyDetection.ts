@@ -90,6 +90,7 @@ export const useSynergyDetection = () => {
     getActiveCombinations,
     getTotalBonusIP,
     getPotentialCombinations,
-    reset
+    reset,
+    combinationManager: combinationManagerRef.current,
   };
 };

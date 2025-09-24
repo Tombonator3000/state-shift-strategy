@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useGameSettings } from '@/contexts/GameSettingsContext';
 
 interface FloatingNumber {
   id: string;
@@ -19,6 +20,7 @@ interface FloatingNumbersProps {
 }
 
 const FloatingNumbers = ({ trigger }: FloatingNumbersProps) => {
+  const { settings } = useGameSettings();
   const [numbers, setNumbers] = useState<FloatingNumber[]>([]);
 
   const getSmartPosition = (existingNumbers: FloatingNumber[]): { x: number; y: number } => {
@@ -53,6 +55,10 @@ const FloatingNumbers = ({ trigger }: FloatingNumbersProps) => {
   };
 
   useEffect(() => {
+    if (!settings.enableAnimations || !trigger) {
+      return;
+    }
+
     if (trigger) {
       setNumbers(prev => {
         const position = getSmartPosition(prev);
@@ -74,7 +80,11 @@ const FloatingNumbers = ({ trigger }: FloatingNumbersProps) => {
         return [...prev, newNumber];
       });
     }
-  }, [trigger]);
+  }, [trigger, settings.enableAnimations]);
+
+  if (!settings.enableAnimations) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50">
