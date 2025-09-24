@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -7,17 +7,48 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { AudioControls } from '@/components/ui/audio-controls';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
-import { useUiTheme } from '@/hooks/useTheme';
-import { COMBO_DEFINITIONS } from '@/game/combo.config';
-import { formatComboReward } from '@/game/comboEngine';
-import type { ComboCategory } from '@/game/combo.types';
-import { useGameSettings } from '@/contexts/GameSettingsContext';
-import {
-  DEFAULT_GAME_SETTINGS,
-  DIFFICULTY_LABELS,
-  DIFFICULTY_OPTIONS,
-  type DifficultyLabel,
-} from '@/state/gameSettings';
+import { useUiTheme, type UiTheme } from '@/hooks/useTheme';
+import type { Difficulty } from '@/ai';
+import { getDifficulty, setDifficultyFromLabel } from '@/state/settings';
+import { COMBO_DEFINITIONS, DEFAULT_COMBO_SETTINGS } from '@/game/combo.config';
+import { formatComboReward, getComboSettings, setComboSettings } from '@/game/comboEngine';
+import type { ComboCategory, ComboSettings } from '@/game/combo.types';
+
+const SETTINGS_STORAGE_KEY = 'gameSettings';
+
+type DifficultyLabel =
+  | 'EASY - Intelligence Leak'
+  | 'NORMAL - Classified'
+  | 'HARD - Top Secret'
+  | 'TOP SECRET+ - Meta-Cheating';
+
+const DIFFICULTY_LABELS: Record<Difficulty, DifficultyLabel> = {
+  EASY: 'EASY - Intelligence Leak',
+  NORMAL: 'NORMAL - Classified',
+  HARD: 'HARD - Top Secret',
+  TOP_SECRET_PLUS: 'TOP SECRET+ - Meta-Cheating',
+};
+
+const LEGACY_DIFFICULTY_LABELS: Record<string, DifficultyLabel> = {
+  easy: DIFFICULTY_LABELS.EASY,
+  'easy - intelligence leak': DIFFICULTY_LABELS.EASY,
+  normal: DIFFICULTY_LABELS.NORMAL,
+  medium: DIFFICULTY_LABELS.NORMAL,
+  'normal - classified': DIFFICULTY_LABELS.NORMAL,
+  hard: DIFFICULTY_LABELS.HARD,
+  'hard - top secret': DIFFICULTY_LABELS.HARD,
+  legendary: DIFFICULTY_LABELS.TOP_SECRET_PLUS,
+  top_secret_plus: DIFFICULTY_LABELS.TOP_SECRET_PLUS,
+  'top secret+ - meta-cheating': DIFFICULTY_LABELS.TOP_SECRET_PLUS,
+};
+
+const DIFFICULTY_LABEL_SET = new Set<DifficultyLabel>(Object.values(DIFFICULTY_LABELS));
+const DIFFICULTY_OPTIONS: DifficultyLabel[] = [
+  DIFFICULTY_LABELS.EASY,
+  DIFFICULTY_LABELS.NORMAL,
+  DIFFICULTY_LABELS.HARD,
+  DIFFICULTY_LABELS.TOP_SECRET_PLUS,
+];
 
 const CATEGORY_LABELS: Record<ComboCategory, string> = {
   sequence: 'Sequence Chains',
@@ -29,24 +60,132 @@ const CATEGORY_LABELS: Record<ComboCategory, string> = {
 
 const CATEGORY_ORDER: ComboCategory[] = ['sequence', 'count', 'threshold', 'state', 'hybrid'];
 
+const resolveStoredDifficultyLabel = (value: unknown): DifficultyLabel => {
+  if (typeof value === 'string') {
+    if (DIFFICULTY_LABEL_SET.has(value as DifficultyLabel)) {
+      return value as DifficultyLabel;
+    }
+
+    const normalized = LEGACY_DIFFICULTY_LABELS[value.toLowerCase()];
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  try {
+    return DIFFICULTY_LABELS[getDifficulty()];
+  } catch {
+    return DIFFICULTY_LABELS.NORMAL;
+  }
+};
+
 interface OptionsProps {
   onClose: () => void;
   onBackToMainMenu?: () => void;
   onSaveGame?: () => boolean;
 }
 
+interface GameSettings {
+  masterVolume: number;
+  musicVolume: number;
+  sfxVolume: number;
+  enableAnimations: boolean;
+  autoEndTurn: boolean;
+  fastMode: boolean;
+  showTooltips: boolean;
+  enableKeyboardShortcuts: boolean;
+  difficulty: DifficultyLabel;
+  screenShake: boolean;
+  confirmActions: boolean;
+  drawMode: 'standard' | 'classic' | 'momentum' | 'catchup' | 'fast';
+  uiTheme: 'tabloid_bw' | 'government_classic';
+  paranormalEffectsEnabled: boolean;
+}
+
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const audio = useAudioContext();
-  const { settings, comboSettings, updateSettings, updateComboSettings, resetToDefaults } = useGameSettings();
   const [uiTheme, setUiTheme] = useUiTheme();
   const { volume: audioMasterVolume } = audio.config;
-  const masterVolumeUpdateSource = useRef<'settings' | null>(null);
 
-  useEffect(() => {
-    if (uiTheme !== settings.uiTheme) {
-      setUiTheme(settings.uiTheme);
+  const resolveInitialState = (): { settings: GameSettings; combo: ComboSettings } => {
+    const defaultDifficulty = (() => {
+      try {
+        return DIFFICULTY_LABELS[getDifficulty()];
+      } catch {
+        return DIFFICULTY_LABELS.NORMAL;
+      }
+    })();
+
+    const baseSettings: GameSettings = {
+      masterVolume: Math.round(audio.config.volume * 100),
+      musicVolume: Math.round(audio.config.musicVolume * 100),
+      sfxVolume: Math.round(audio.config.sfxVolume * 100),
+      enableAnimations: true,
+      autoEndTurn: false,
+      fastMode: false,
+      showTooltips: true,
+      enableKeyboardShortcuts: true,
+      difficulty: defaultDifficulty,
+      screenShake: true,
+      confirmActions: true,
+      drawMode: 'standard',
+      uiTheme,
+      paranormalEffectsEnabled: true,
+    };
+
+    const stored = typeof localStorage !== 'undefined'
+      ? localStorage.getItem(SETTINGS_STORAGE_KEY)
+      : null;
+
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as (Partial<GameSettings> & { comboSettings?: ComboSettings }) | null;
+        const { comboSettings: storedComboSettings, ...rest } = parsed ?? {};
+        const difficultyLabel = resolveStoredDifficultyLabel(rest?.difficulty);
+        const mergedSettings: GameSettings = {
+          ...baseSettings,
+          ...rest,
+          difficulty: difficultyLabel,
+        };
+
+        setDifficultyFromLabel(mergedSettings.difficulty);
+
+        const combo = storedComboSettings
+          ? setComboSettings({
+              ...storedComboSettings,
+              comboToggles: {
+                ...DEFAULT_COMBO_SETTINGS.comboToggles,
+                ...(storedComboSettings.comboToggles ?? {}),
+              },
+            })
+          : setComboSettings({
+              ...DEFAULT_COMBO_SETTINGS,
+              comboToggles: { ...DEFAULT_COMBO_SETTINGS.comboToggles },
+            });
+
+        return { settings: mergedSettings, combo };
+      } catch (error) {
+        console.error('Failed to parse saved settings:', error);
+      }
     }
-  }, [settings.uiTheme, uiTheme, setUiTheme]);
+
+    setDifficultyFromLabel(baseSettings.difficulty);
+    const combo = setComboSettings({
+      ...getComboSettings(),
+      comboToggles: { ...DEFAULT_COMBO_SETTINGS.comboToggles },
+    });
+
+    return { settings: baseSettings, combo };
+  };
+
+  const initialStateRef = useRef<{ settings: GameSettings; combo: ComboSettings }>();
+  if (!initialStateRef.current) {
+    initialStateRef.current = resolveInitialState();
+  }
+
+  const [settings, setSettings] = useState<GameSettings>(initialStateRef.current.settings);
+  const [comboSettingsState, setComboSettingsState] = useState<ComboSettings>(initialStateRef.current.combo);
+  const masterVolumeUpdateSource = useRef<'settings' | null>(null);
 
   useEffect(() => {
     if (masterVolumeUpdateSource.current !== 'settings') {
@@ -78,6 +217,36 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     }
   }, [settings.musicVolume, audio]);
 
+  const persistSettings = useCallback((nextSettings: GameSettings, nextComboSettings: ComboSettings) => {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
+    try {
+      localStorage.setItem(
+        SETTINGS_STORAGE_KEY,
+        JSON.stringify({ ...nextSettings, comboSettings: nextComboSettings }),
+      );
+    } catch (error) {
+      console.error('Failed to persist settings:', error);
+    }
+  }, []);
+
+  const updateSettings = (newSettings: Partial<GameSettings>) => {
+    if (typeof newSettings.masterVolume === 'number') {
+      masterVolumeUpdateSource.current = 'settings';
+    }
+
+    setSettings(prev => {
+      const updated = { ...prev, ...newSettings };
+      if (newSettings.difficulty) {
+        setDifficultyFromLabel(newSettings.difficulty);
+      }
+      persistSettings(updated, comboSettingsState);
+      return updated;
+    });
+  };
+
   const handleMasterVolumeChange = (volume: number) => {
     const clampedVolume = Math.min(1, Math.max(0, volume));
     const percentValue = Math.round(clampedVolume * 100);
@@ -89,23 +258,67 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
 
   useEffect(() => {
     if (masterVolumeUpdateSource.current === 'settings') {
-      masterVolumeUpdateSource.current = null;
       return;
     }
 
     const currentAudioVolume = Math.round(audioMasterVolume * 100);
-    if (currentAudioVolume !== settings.masterVolume) {
-      updateSettings({ masterVolume: currentAudioVolume });
+    if (currentAudioVolume === settings.masterVolume) {
+      return;
     }
-  }, [audioMasterVolume, settings.masterVolume, updateSettings]);
 
-  const handleResetToDefaults = () => {
+    setSettings(prev => {
+      if (prev.masterVolume === currentAudioVolume) {
+        return prev;
+      }
+
+      const updated = { ...prev, masterVolume: currentAudioVolume };
+      persistSettings(updated, comboSettingsState);
+      return updated;
+    });
+  }, [audioMasterVolume, comboSettingsState, persistSettings, settings.masterVolume]);
+
+  const applyComboSettings = (update: Partial<ComboSettings>) => {
+    const normalized: Partial<ComboSettings> = { ...update };
+    if (update.comboToggles) {
+      normalized.comboToggles = { ...update.comboToggles };
+    }
+    const merged = setComboSettings(normalized);
+    setComboSettingsState(merged);
+    persistSettings(settings, merged);
+  };
+
+  const resetToDefaults = () => {
+    const defaultSettings: GameSettings = {
+      masterVolume: 80,
+      musicVolume: 20,
+      sfxVolume: 80,
+      enableAnimations: true,
+      autoEndTurn: false,
+      fastMode: false,
+      showTooltips: true,
+      enableKeyboardShortcuts: true,
+      difficulty: DIFFICULTY_LABELS.NORMAL,
+      screenShake: true,
+      confirmActions: true,
+      drawMode: 'standard',
+      uiTheme: 'tabloid_bw',
+      paranormalEffectsEnabled: true,
+    };
+
+    const defaultCombos = setComboSettings({
+      ...DEFAULT_COMBO_SETTINGS,
+      comboToggles: { ...DEFAULT_COMBO_SETTINGS.comboToggles },
+    });
+
     masterVolumeUpdateSource.current = 'settings';
-    resetToDefaults();
+    setSettings(defaultSettings);
+    setComboSettingsState(defaultCombos);
+    setDifficultyFromLabel(defaultSettings.difficulty);
     setUiTheme('tabloid_bw');
-    audio.setVolume(DEFAULT_GAME_SETTINGS.masterVolume / 100);
-    audio.setMusicVolume(DEFAULT_GAME_SETTINGS.musicVolume / 100);
-    audio.setSfxVolume(DEFAULT_GAME_SETTINGS.sfxVolume / 100);
+    persistSettings(defaultSettings, defaultCombos);
+    audio.setVolume(defaultSettings.masterVolume / 100);
+    audio.setMusicVolume(defaultSettings.musicVolume / 100);
+    audio.setSfxVolume(defaultSettings.sfxVolume / 100);
   };
 
   const handleSaveGame = () => {
@@ -429,36 +642,36 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-3">
                 <Switch
-                  checked={comboSettings.enabled}
-                  onCheckedChange={checked => updateComboSettings({ enabled: checked })}
+                  checked={comboSettingsState.enabled}
+                  onCheckedChange={checked => applyComboSettings({ enabled: checked })}
                 />
                 <span className="text-sm text-newspaper-text font-medium">Enable combo engine</span>
               </div>
 
               <div className="flex items-center gap-3">
                 <Switch
-                  checked={comboSettings.fxEnabled}
-                  onCheckedChange={checked => updateComboSettings({ fxEnabled: checked })}
-                  disabled={!comboSettings.enabled}
+                  checked={comboSettingsState.fxEnabled}
+                  onCheckedChange={checked => applyComboSettings({ fxEnabled: checked })}
+                  disabled={!comboSettingsState.enabled}
                 />
                 <span className="text-sm text-newspaper-text font-medium">
-                  FX notifications ({comboSettings.fxEnabled ? 'on' : 'off'})
+                  FX notifications ({comboSettingsState.fxEnabled ? 'on' : 'off'})
                 </span>
               </div>
             </div>
 
             <div className="mt-4">
               <label className="text-sm font-medium text-newspaper-text mb-2 block">
-                Max combos per turn: {comboSettings.maxCombosPerTurn}
+                Max combos per turn: {comboSettingsState.maxCombosPerTurn}
               </label>
               <Slider
-                value={[comboSettings.maxCombosPerTurn]}
-                onValueChange={([value]) => updateComboSettings({ maxCombosPerTurn: value })}
+                value={[comboSettingsState.maxCombosPerTurn]}
+                onValueChange={([value]) => applyComboSettings({ maxCombosPerTurn: value })}
                 min={1}
                 max={5}
                 step={1}
                 className="w-full"
-                disabled={!comboSettings.enabled}
+                disabled={!comboSettingsState.enabled}
               />
             </div>
 
@@ -471,7 +684,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                     </div>
                     <div className="mt-2 space-y-3">
                       {group.combos.map(combo => {
-                        const enabled = comboSettings.comboToggles[combo.id] ?? true;
+                        const enabled = comboSettingsState.comboToggles[combo.id] ?? true;
                         const rewardLabel = combo.reward;
                         return (
                           <div
@@ -495,9 +708,9 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                               <Switch
                                 checked={enabled}
                                 onCheckedChange={checked =>
-                                  updateComboSettings({ comboToggles: { [combo.id]: checked } })
+                                  applyComboSettings({ comboToggles: { [combo.id]: checked } })
                                 }
-                                disabled={!comboSettings.enabled}
+                                disabled={!comboSettingsState.enabled}
                               />
                             </div>
                           </div>
@@ -523,7 +736,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
               </Button>
             )}
             <Button
-              onClick={handleResetToDefaults}
+              onClick={resetToDefaults}
               variant="outline"
               className="border-yellow-600 text-yellow-600 hover:bg-yellow-600/10"
             >
@@ -548,7 +761,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
             )}
             <Button
               onClick={() => {
-                const exportPayload = { ...settings, comboSettings };
+                const exportPayload = { ...settings, comboSettings: comboSettingsState };
                 navigator.clipboard?.writeText(JSON.stringify(exportPayload, null, 2));
                 const exportIndicator = document.createElement('div');
                 exportIndicator.textContent = '📋 Settings copied to clipboard';

@@ -1,7 +1,6 @@
 import { useCallback, useRef } from 'react';
 import type { GameCard } from '@/rules/mvp';
 import { useScreenShake } from '@/components/effects/ScreenShake';
-import { useGameSettings } from '@/contexts/GameSettingsContext';
 
 interface AnimationRect {
   x: number;
@@ -24,7 +23,6 @@ interface AnimationOptions {
 export const useCardAnimation = () => {
   const animatingRef = useRef(false);
   const { shake } = useScreenShake();
-  const { settings } = useGameSettings();
 
   const getBoundingRect = (element: Element): AnimationRect => {
     const rect = element.getBoundingClientRect();
@@ -90,9 +88,9 @@ export const useCardAnimation = () => {
   };
 
   const tweenTransform = (
-    element: HTMLElement,
-    fromRect: AnimationRect,
-    toRect: AnimationRect,
+    element: HTMLElement, 
+    fromRect: AnimationRect, 
+    toRect: AnimationRect, 
     options: { duration: number; withTrail?: boolean }
   ): Promise<void> => {
     return new Promise((resolve) => {
@@ -105,7 +103,7 @@ export const useCardAnimation = () => {
       }
 
       // Add trail effect for dramatic card movement
-      if (options.withTrail && settings.enableAnimations) {
+      if (options.withTrail) {
         createTrailEffect(element, fromRect, toRect);
       }
 
@@ -114,14 +112,13 @@ export const useCardAnimation = () => {
       const scaleY = toRect.height / fromRect.height;
       const translateX = toRect.x - fromRect.x;
       const translateY = toRect.y - fromRect.y;
-      const adjustedDuration = Math.max(120, options.duration * (settings.fastMode ? 0.6 : 1));
 
       // Enhanced shadow and glow during animation
       const originalFilter = element.style.filter;
-
+      
       const animate = (currentTime: number) => {
         const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / adjustedDuration, 1);
+        const progress = Math.min(elapsed / options.duration, 1);
         
         // Enhanced easing with bounce effect
         const easeProgress = progress < 0.5 
@@ -271,16 +268,6 @@ export const useCardAnimation = () => {
 
     try {
       // Find the card element in the hand
-      if (!settings.enableAnimations) {
-        if (options.onResolve) {
-          if (card.type === 'ZONE') {
-            shake({ intensity: 'medium', duration: 200 });
-          }
-          await options.onResolve(card);
-        }
-        return { cancelled: false, countered: false };
-      }
-
       const cardElement = document.querySelector(`[data-card-id="${cardUid}"]`) as HTMLElement;
       if (!cardElement) {
         return { cancelled: true, countered: false };
@@ -299,10 +286,10 @@ export const useCardAnimation = () => {
       clone.style.willChange = 'transform, opacity, filter';
       clone.style.filter = 'drop-shadow(0 8px 24px rgba(0,0,0,0.35))';
       clone.style.transition = 'transform 220ms cubic-bezier(0.2,0.8,0.2,1), opacity 150ms linear';
-
+      
       // Store card data for played pile display
       clone.dataset.cardData = JSON.stringify(card);
-
+      
       layer.appendChild(clone);
       positionElementFromRect(clone, startRect);
 
@@ -320,7 +307,7 @@ export const useCardAnimation = () => {
 
       // Animate to full size with dramatic trail
       await tweenTransform(clone, startRect, destRect, { duration: 220, withTrail: true });
-
+      
       // Add fullsize styling
       clone.classList.add('play-card-fullsize');
       clone.style.filter = 'drop-shadow(0 16px 40px rgba(0,0,0,0.5))';
@@ -352,7 +339,7 @@ export const useCardAnimation = () => {
 
       // Fly to played pile with particle effect
       await flyToPlayedPile(clone);
-
+      
       // Trigger particle effect at final position
       const event = new CustomEvent('cardDeployed', {
         detail: {
@@ -379,7 +366,7 @@ export const useCardAnimation = () => {
         options.onComplete();
       }
     }
-  }, [settings.enableAnimations, shake, tweenTransform]);
+  }, []);
 
   const isAnimating = () => animatingRef.current;
 

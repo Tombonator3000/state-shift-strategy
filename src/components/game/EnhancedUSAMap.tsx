@@ -7,7 +7,7 @@ import * as topojson from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
-import { useGameSettings } from '@/contexts/GameSettingsContext';
+import { areParanormalEffectsEnabled } from '@/state/settings';
 
 
 interface EnhancedState {
@@ -53,9 +53,6 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   audio,
   playedCards = []
 }) => {
-  const { settings } = useGameSettings();
-  const animationsEnabled = settings.enableAnimations;
-  const paranormalEnabled = settings.paranormalEffectsEnabled;
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [geoData, setGeoData] = useState<any>(null);
@@ -423,7 +420,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
                 });
               }
 
-              if (paranormalEnabled && animationsEnabled) {
+              if (areParanormalEffectsEnabled()) {
                 VisualEffectsCoordinator.triggerCryptidSighting({
                   position: {
                     x: svgRect.left + centroid[0],

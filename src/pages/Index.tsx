@@ -15,7 +15,6 @@ import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
 import Options from '@/components/game/Options';
-import EnhancedHUD from '@/components/game/EnhancedHUD';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
@@ -43,9 +42,9 @@ import toast, { Toaster } from 'react-hot-toast';
 import type { CardPlayRecord } from '@/hooks/gameStateTypes';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
+import { areParanormalEffectsEnabled } from '@/state/settings';
 import type { GameCard } from '@/rules/mvp';
 import { getCombinationContextFromControlledStates, getCardCostAdjustment } from '@/game/combinationEffects';
-import { useGameSettings } from '@/contexts/GameSettingsContext';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
@@ -450,41 +449,20 @@ const Index = () => {
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   const [paranormalSightings, setParanormalSightings] = useState<ParanormalSighting[]>([]);
   const [inspectedPlayedCard, setInspectedPlayedCard] = useState<GameCard | null>(null);
-  const autoEndTurnMarkerRef = useRef<string | null>(null);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const { settings } = useGameSettings();
+  
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
-  const { checkSynergies, getActiveCombinations, getTotalBonusIP, combinationManager } = useSynergyDetection();
+  const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
 
   const playerCombinationContext = useMemo(
     () => getCombinationContextFromControlledStates(gameState.controlledStates),
     [gameState.controlledStates],
   );
-
-  const controlledStateBuckets = useMemo(() => {
-    const player: string[] = [];
-    const ai: string[] = [];
-    const neutral: string[] = [];
-
-    for (const state of gameState.states) {
-      const id = state.abbreviation ?? state.id;
-      if (state.owner === 'player') {
-        player.push(id);
-      } else if (state.owner === 'ai') {
-        ai.push(id);
-      } else {
-        neutral.push(id);
-      }
-    }
-
-    return { player, ai, neutral };
-  }, [gameState.states]);
 
   const getEffectiveCardCost = useCallback(
     (card: GameCard) => getCardCostAdjustment(card, playerCombinationContext).adjustedCost,
@@ -515,15 +493,15 @@ const Index = () => {
   useEffect(() => {
     const currentIP = gameState.ip;
     const prevIP = parseInt(localStorage.getItem('prevIP') || '0');
-
-    if (settings.enableAnimations && currentIP !== prevIP && prevIP > 0) {
+    
+    if (currentIP !== prevIP && prevIP > 0) {
       const change = currentIP - prevIP;
       setFloatingNumbers({ value: change, type: 'ip' });
       setTimeout(() => setFloatingNumbers(null), 100);
     }
-
+    
     localStorage.setItem('prevIP', currentIP.toString());
-  }, [gameState.ip, settings.enableAnimations]);
+  }, [gameState.ip]);
 
   // Track phase changes for context
   useEffect(() => {
@@ -709,7 +687,7 @@ const Index = () => {
       }>).detail;
       if (!detail) return;
 
-      if (!settings.paranormalEffectsEnabled || !settings.enableAnimations) {
+      if (!areParanormalEffectsEnabled()) {
         return;
       }
 
@@ -760,7 +738,7 @@ const Index = () => {
       }>).detail;
       if (!detail) return;
 
-      if (!settings.paranormalEffectsEnabled || !settings.enableAnimations) {
+      if (!areParanormalEffectsEnabled()) {
         return;
       }
 
@@ -798,7 +776,7 @@ const Index = () => {
       window.removeEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
       window.removeEventListener('cryptidSighting', handleCryptidSighting as EventListener);
     };
-  }, [pushSighting, settings.enableAnimations, settings.paranormalEffectsEnabled]);
+  }, [pushSighting]);
 
   useEffect(() => {
     const handleStateEventEffect = (event: Event) => {
@@ -901,7 +879,58 @@ const Index = () => {
     }
   }, [audio]);
 
-  const handleSaveGame = useCallback(() => {
+  // Update Index.tsx to use enhanced components and add keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (showMenu || showIntro || showInGameOptions || showHowToPlay) return;
+      
+      // Number keys for playing cards (1-9)
+      const cardNumber = parseInt(e.key);
+      if (cardNumber >= 1 && cardNumber <= 9 && gameState.hand[cardNumber - 1]) {
+        const card = gameState.hand[cardNumber - 1];
+        handlePlayCard(card.id);
+        return;
+      }
+      
+      switch (e.key.toLowerCase()) {
+        case 'f11':
+          e.preventDefault();
+          toggleFullscreen();
+          break;
+        case 'escape':
+          setShowInGameOptions(true);
+          audio.playSFX('click');
+          break;
+        case 's':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            handleSaveGame();
+          }
+          break;
+        case 'l':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            handleLoadGame();
+          }
+          break;
+        case 'h':
+          setShowHowToPlay(true);
+          audio.playSFX('click');
+          break;
+        case ' ':
+          e.preventDefault();
+          if (gameState.phase === 'action' && !gameState.animating) {
+            handleEndTurn();
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [showMenu, showIntro, showInGameOptions, showHowToPlay, gameState.phase, gameState.animating, gameState.hand, audio]);
+
+  const handleSaveGame = () => {
     if (saveGame) {
       const success = saveGame();
       const indicator = document.createElement('div');
@@ -910,9 +939,9 @@ const Index = () => {
       document.body.appendChild(indicator);
       setTimeout(() => indicator.remove(), 2000);
     }
-  }, [saveGame]);
+  };
 
-  const handleLoadGame = useCallback(() => {
+  const handleLoadGame = () => {
     if (loadGame && getSaveInfo?.()) {
       const success = loadGame();
       const indicator = document.createElement('div');
@@ -921,7 +950,7 @@ const Index = () => {
       document.body.appendChild(indicator);
       setTimeout(() => indicator.remove(), 2000);
     }
-  }, [loadGame, getSaveInfo]);
+  };
 
   const startNewGame = async (faction: 'government' | 'truth') => {
     console.log('🎵 Index: Starting new game with faction:', faction);
@@ -989,7 +1018,7 @@ const Index = () => {
     audio.playSFX('hover');
   };
 
-  const handlePlayCard = useCallback(async (cardId: string, targetStateArg?: string) => {
+  const handlePlayCard = async (cardId: string, targetStateArg?: string) => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || isAnimating()) return;
 
@@ -1167,104 +1196,16 @@ const Index = () => {
         VisualEffectsCoordinator.triggerGovernmentZoneTarget({ active: false, mode: 'complete' });
       }
     }
-  }, [
-    gameState,
-    isAnimating,
-    getEffectiveCardCost,
-    getCardDiscount,
-    selectCard,
-    selectTargetState,
-    audio,
-    playCardAnimated,
-    animatePlayCard,
-    recordCardPlay,
-  ]);
+  };
 
-  const handleEndTurn = useCallback(() => {
+  const handleEndTurn = () => {
     endTurn();
     audio.playSFX('turnEnd');
     // Play card draw sound after a short delay
     setTimeout(() => {
       audio.playSFX('cardDraw');
     }, 500);
-  }, [endTurn, audio]);
-
-  useEffect(() => {
-    if (!settings.enableKeyboardShortcuts) {
-      return;
-    }
-
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (showMenu || showIntro || showInGameOptions || showHowToPlay) return;
-
-      // Number keys for playing cards (1-9)
-      const cardNumber = parseInt(e.key, 10);
-      if (cardNumber >= 1 && cardNumber <= 9 && gameState.hand[cardNumber - 1]) {
-        const card = gameState.hand[cardNumber - 1];
-        handlePlayCard(card.id);
-        return;
-      }
-
-      switch (e.key.toLowerCase()) {
-        case 'f11': {
-          e.preventDefault();
-          toggleFullscreen();
-          break;
-        }
-        case 'escape': {
-          setShowInGameOptions(true);
-          audio.playSFX('click');
-          break;
-        }
-        case 's': {
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            handleSaveGame();
-          }
-          break;
-        }
-        case 'l': {
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            handleLoadGame();
-          }
-          break;
-        }
-        case 'h': {
-          setShowHowToPlay(true);
-          audio.playSFX('click');
-          break;
-        }
-        case ' ': {
-          e.preventDefault();
-          if (gameState.phase === 'action' && !gameState.animating) {
-            handleEndTurn();
-          }
-          break;
-        }
-        default:
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [
-    audio,
-    gameState.animating,
-    gameState.hand,
-    gameState.phase,
-    handleEndTurn,
-    handleLoadGame,
-    handlePlayCard,
-    handleSaveGame,
-    settings.enableKeyboardShortcuts,
-    showHowToPlay,
-    showInGameOptions,
-    showIntro,
-    showMenu,
-    toggleFullscreen,
-  ]);
+  };
 
   const handleCloseNewspaper = () => {
     closeNewspaper();
@@ -1376,9 +1317,6 @@ const Index = () => {
 
   const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
   const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
-  const hasPlayableCard = useMemo(() => {
-    return gameState.hand.some(card => getEffectiveCardCost(card) <= gameState.ip);
-  }, [gameState.hand, gameState.ip, getEffectiveCardCost]);
 
   const renderIntelLog = (limit: number) => (
     <div className="space-y-1 text-xs text-newspaper-text/80">
@@ -1393,49 +1331,6 @@ const Index = () => {
       )}
     </div>
   );
-
-  useEffect(() => {
-    if (!settings.autoEndTurn) {
-      return;
-    }
-
-    if (isPlayerActionLocked) {
-      return;
-    }
-
-    if (gameState.currentPlayer !== 'human' || gameState.phase !== 'action') {
-      return;
-    }
-
-    if (gameState.selectedCard && !gameState.targetState) {
-      return;
-    }
-
-    const turnKey = `${gameState.round}-${gameState.turn}`;
-    if (autoEndTurnMarkerRef.current === turnKey) {
-      return;
-    }
-
-    const limitReached = gameState.cardsPlayedThisTurn >= 3;
-    const noPlayableCards = !hasPlayableCard;
-
-    if (limitReached || noPlayableCards) {
-      autoEndTurnMarkerRef.current = turnKey;
-      handleEndTurn();
-    }
-  }, [
-    settings.autoEndTurn,
-    isPlayerActionLocked,
-    gameState.currentPlayer,
-    gameState.phase,
-    gameState.selectedCard,
-    gameState.targetState,
-    gameState.cardsPlayedThisTurn,
-    gameState.round,
-    gameState.turn,
-    hasPlayableCard,
-    handleEndTurn,
-  ]);
 
   const renderSidebar = () => (
     <div className="flex h-full flex-col gap-4">
@@ -1601,17 +1496,6 @@ const Index = () => {
 
   const leftPaneContent = (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <EnhancedHUD
-        currentPlayer={gameState.currentPlayer}
-        phase={gameState.phase}
-        turn={gameState.turn}
-        playerIP={gameState.ip}
-        aiIP={gameState.aiIP}
-        truthMeter={gameState.truth}
-        controlledStates={controlledStateBuckets}
-        combinationManager={combinationManager}
-        className="border-2 border-newspaper-border bg-newspaper-bg/95 shadow-sm"
-      />
       <div className="flex min-h-0 flex-1 flex-col gap-4 xl:flex-row">
         <div className="hidden xl:flex xl:w-72 xl:flex-col xl:gap-4">
           <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">

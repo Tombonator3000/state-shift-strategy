@@ -2,7 +2,6 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useGameSettings } from '@/contexts/GameSettingsContext';
 import { HelpCircle, Target, Zap, Shield, TrendingUp } from 'lucide-react';
 
 interface MechanicsTooltipProps {
@@ -12,12 +11,6 @@ interface MechanicsTooltipProps {
 }
 
 const MechanicsTooltip = ({ children, mechanic, customContent }: MechanicsTooltipProps) => {
-  const { settings } = useGameSettings();
-
-  if (!settings.showTooltips) {
-    return <>{children}</>;
-  }
-
   const getMechanicInfo = () => {
     const mechanics = {
       zone: {

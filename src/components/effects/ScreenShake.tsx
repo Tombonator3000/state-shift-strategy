@@ -1,4 +1,4 @@
-import { useGameSettings } from '@/contexts/GameSettingsContext';
+import { useEffect } from 'react';
 
 interface ScreenShakeProps {
   active: boolean;
@@ -8,18 +8,17 @@ interface ScreenShakeProps {
 }
 
 export const useScreenShake = () => {
-  const { settings } = useGameSettings();
-  const shake = ({
-    intensity = 'medium',
+  const shake = ({ 
+    intensity = 'medium', 
     duration = 300,
-    onComplete
+    onComplete 
   }: {
     intensity?: 'light' | 'medium' | 'heavy';
     duration?: number;
     onComplete?: () => void;
   }) => {
     // Skip if user prefers reduced motion
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !settings.screenShake) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       onComplete?.();
       return;
     }

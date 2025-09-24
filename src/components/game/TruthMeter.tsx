@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
-import { useGameSettings } from '@/contexts/GameSettingsContext';
+import { areParanormalEffectsEnabled } from '@/state/settings';
 
 interface TruthMeterProps {
   value: number; // 0-100
@@ -15,9 +15,6 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
   });
   const [meltdownActive, setMeltdownActive] = useState(false);
   const lastBroadcastRef = useRef<'surge' | 'collapse' | null>(null);
-  const { settings } = useGameSettings();
-  const paranormalEnabled = settings.paranormalEffectsEnabled;
-  const animationsEnabled = settings.enableAnimations;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -74,7 +71,7 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
         'Can\'t Help Falling in Static',
       ];
 
-    if (!paranormalEnabled || !animationsEnabled) {
+    if (!areParanormalEffectsEnabled()) {
       return;
     }
 
@@ -86,7 +83,7 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
       reducedMotion: prefersReducedMotion,
       source: faction === 'Truth' ? 'truth' : 'government',
     });
-  }, [value, faction, prefersReducedMotion, paranormalEnabled, animationsEnabled]);
+  }, [value, faction, prefersReducedMotion]);
   const getColor = () => {
     if (value >= 95) return 'bg-truth-red';
     if (value <= 5) return 'bg-government-blue';

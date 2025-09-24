@@ -12,7 +12,7 @@ import TypewriterReveal from '@/components/effects/TypewriterReveal';
 import StaticInterference from '@/components/effects/StaticInterference';
 import EvidencePhotoGallery from '@/components/effects/EvidencePhotoGallery';
 import { useAudioContext } from '@/contexts/AudioContext';
-import { useGameSettings } from '@/contexts/GameSettingsContext';
+import { areParanormalEffectsEnabled } from '@/state/settings';
 
 interface CardAnimationLayerProps {
   children?: React.ReactNode;
@@ -20,9 +20,6 @@ interface CardAnimationLayerProps {
 
 const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => {
   const audio = useAudioContext();
-  const { settings } = useGameSettings();
-  const animationsEnabled = settings.enableAnimations;
-  const paranormalEnabled = settings.paranormalEffectsEnabled;
   const [particleEffects, setParticleEffects] = useState<Array<{
     id: number;
     x: number;
@@ -121,27 +118,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     }>;
   } | null>(null);
 
-  useEffect(() => {
-    if (!animationsEnabled) {
-      setParticleEffects([]);
-      setFloatingNumber(null);
-      setRedactionSweep(null);
-      setTruthFlash(null);
-      setCorkboardOverlay(null);
-      setBroadcastOverlay(null);
-      setCryptidOverlay(null);
-      setBreakingNewsOverlay(null);
-      setSurveillanceOverlay(null);
-      setTypewriterOverlay(null);
-      setStaticOverlay(null);
-      setEvidenceOverlay(null);
-    }
-  }, [animationsEnabled]);
-
   const spawnParticleEffect = useCallback((type: ParticleEffectType, x: number, y: number) => {
-    if (!animationsEnabled) {
-      return;
-    }
     setParticleEffects(prev => [
       ...prev,
       {
@@ -151,13 +128,9 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         y
       }
     ]);
-  }, [animationsEnabled]);
+  }, []);
 
   useEffect(() => {
-    if (!animationsEnabled) {
-      return;
-    }
-
     const handleCardDeployed = (event: CustomEvent<{ type: ParticleEffectType; x: number; y: number }>) => {
       if (!event?.detail) return;
       spawnParticleEffect(event.detail.type, event.detail.x, event.detail.y);
@@ -211,7 +184,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       truthValue?: number;
       reducedMotion?: boolean;
     }>) => {
-      if (!event?.detail || !paranormalEnabled) return;
+      if (!event?.detail) return;
       const { position, intensity, setList, truthValue, reducedMotion } = event.detail;
       if (position && !reducedMotion) {
         spawnParticleEffect('broadcast', position.x, position.y);
@@ -225,7 +198,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         truthValue,
         reducedMotion,
       });
-      if (paranormalEnabled) {
+      if (areParanormalEffectsEnabled()) {
         audio?.playSFX?.('ufo-elvis');
       }
     };
@@ -237,7 +210,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       footageQuality: string;
       reducedMotion?: boolean;
     }>) => {
-      if (!event?.detail || !paranormalEnabled) return;
+      if (!event?.detail) return;
       const { position, stateId, stateName, footageQuality, reducedMotion } = event.detail;
       if (position && !reducedMotion) {
         spawnParticleEffect('cryptid', position.x, position.y);
@@ -251,7 +224,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         footageQuality,
         reducedMotion,
       });
-      if (paranormalEnabled) {
+      if (areParanormalEffectsEnabled()) {
         audio?.playSFX?.('cryptid-rumble');
       }
     };
@@ -430,7 +403,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('staticInterference', handleStaticInterference as EventListener);
       window.removeEventListener('evidenceGallery', handleEvidenceGallery as EventListener);
     };
-  }, [animationsEnabled, paranormalEnabled, spawnParticleEffect, audio]);
+  }, [spawnParticleEffect, audio]);
 
   const handleParticleComplete = useCallback((id: number) => {
     setParticleEffects(prev => prev.filter(effect => effect.id !== id));
@@ -480,10 +453,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
   const handleEvidenceComplete = useCallback(() => {
     setEvidenceOverlay(null);
   }, []);
-
-  if (!animationsEnabled) {
-    return <>{children}</>;
-  }
 
   return (
     <>
