@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { AudioControls } from '@/components/ui/audio-controls';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
-import { useUiTheme, type UiTheme } from '@/hooks/useTheme';
+import { useUiTheme } from '@/hooks/useTheme';
 import { COMBO_DEFINITIONS } from '@/game/combo.config';
 import { formatComboReward } from '@/game/comboEngine';
 import type { ComboCategory } from '@/game/combo.types';

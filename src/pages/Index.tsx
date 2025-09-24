@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -495,13 +495,6 @@ const Index = () => {
     (card: GameCard) => getCardCostAdjustment(card, playerCombinationContext).discount,
     [playerCombinationContext],
   );
-
-  // Call all hooks that need to be consistent across renders BEFORE any conditional returns
-  const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
-  const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
-  const hasPlayableCard = useMemo(() => {
-    return gameState.hand.some(card => getEffectiveCardCost(card) <= gameState.ip);
-  }, [gameState.hand, gameState.ip, getEffectiveCardCost]);
 
   const pushSighting = useCallback((entry: ParanormalSighting) => {
     setParanormalSightings(prev => {
@@ -1196,50 +1189,6 @@ const Index = () => {
     }, 500);
   }, [endTurn, audio]);
 
-  // Move auto-end-turn useEffect here to prevent hooks order violation
-  useEffect(() => {
-    if (!settings.autoEndTurn) {
-      return;
-    }
-
-    if (isPlayerActionLocked) {
-      return;
-    }
-
-    if (gameState.currentPlayer !== 'human' || gameState.phase !== 'action') {
-      return;
-    }
-
-    if (gameState.selectedCard && !gameState.targetState) {
-      return;
-    }
-
-    const turnKey = `${gameState.round}-${gameState.turn}`;
-    if (autoEndTurnMarkerRef.current === turnKey) {
-      return;
-    }
-
-    const limitReached = gameState.cardsPlayedThisTurn >= 3;
-    const noPlayableCards = !hasPlayableCard;
-
-    if (limitReached || noPlayableCards) {
-      autoEndTurnMarkerRef.current = turnKey;
-      handleEndTurn();
-    }
-  }, [
-    settings.autoEndTurn,
-    isPlayerActionLocked,
-    gameState.currentPlayer,
-    gameState.phase,
-    gameState.selectedCard,
-    gameState.targetState,
-    gameState.cardsPlayedThisTurn,
-    gameState.round,
-    gameState.turn,
-    hasPlayableCard,
-    handleEndTurn,
-  ]);
-
   useEffect(() => {
     if (!settings.enableKeyboardShortcuts) {
       return;
@@ -1425,6 +1374,12 @@ const Index = () => {
     );
   }
 
+  const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
+  const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
+  const hasPlayableCard = useMemo(() => {
+    return gameState.hand.some(card => getEffectiveCardCost(card) <= gameState.ip);
+  }, [gameState.hand, gameState.ip, getEffectiveCardCost]);
+
   const renderIntelLog = (limit: number) => (
     <div className="space-y-1 text-xs text-newspaper-text/80">
       {gameState.log.slice(-limit).map((entry, index) => (
@@ -1438,6 +1393,49 @@ const Index = () => {
       )}
     </div>
   );
+
+  useEffect(() => {
+    if (!settings.autoEndTurn) {
+      return;
+    }
+
+    if (isPlayerActionLocked) {
+      return;
+    }
+
+    if (gameState.currentPlayer !== 'human' || gameState.phase !== 'action') {
+      return;
+    }
+
+    if (gameState.selectedCard && !gameState.targetState) {
+      return;
+    }
+
+    const turnKey = `${gameState.round}-${gameState.turn}`;
+    if (autoEndTurnMarkerRef.current === turnKey) {
+      return;
+    }
+
+    const limitReached = gameState.cardsPlayedThisTurn >= 3;
+    const noPlayableCards = !hasPlayableCard;
+
+    if (limitReached || noPlayableCards) {
+      autoEndTurnMarkerRef.current = turnKey;
+      handleEndTurn();
+    }
+  }, [
+    settings.autoEndTurn,
+    isPlayerActionLocked,
+    gameState.currentPlayer,
+    gameState.phase,
+    gameState.selectedCard,
+    gameState.targetState,
+    gameState.cardsPlayedThisTurn,
+    gameState.round,
+    gameState.turn,
+    hasPlayableCard,
+    handleEndTurn,
+  ]);
 
   const renderSidebar = () => (
     <div className="flex h-full flex-col gap-4">
