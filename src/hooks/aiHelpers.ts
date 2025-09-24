@@ -1,7 +1,6 @@
 import type { GameCard, Rarity } from '@/rules/mvp';
 import { featureFlags } from '@/state/featureFlags';
 import { resolveCardMVP, type AchievementTracker, type CardPlayResolution } from '@/systems/cardResolution';
-import { buildCardWithAdjustedCost, getCombinationContextFromControlledStates } from '@/game/combinationEffects';
 import type { TurnPlay } from '@/game/combo.types';
 import type { PlayerId } from '@/mvp/validator';
 
@@ -268,20 +267,8 @@ export const applyAiCardPlay = (
     };
   }
 
-  const combinationContext = getCombinationContextFromControlledStates(prev.aiControlledStates ?? []);
-  const { card: adjustedCard, adjustedCost, discount } = buildCardWithAdjustedCost(
-    resolvedCard,
-    combinationContext,
-  );
-
-  const resolution = resolveCardMVP(prev, adjustedCard, targetState ?? null, 'ai', achievements);
-  const logEntries = [
-    ...prev.log,
-    ...(discount > 0
-      ? [`AI synergy bonus: ${resolvedCard.name} cost reduced by ${discount} IP (paid ${adjustedCost})`]
-      : []),
-    ...resolution.logEntries,
-  ];
+  const resolution = resolveCardMVP(prev, resolvedCard, targetState ?? null, 'ai', achievements);
+  const logEntries = [...prev.log, ...resolution.logEntries];
   const strategyLogEntries = buildStrategyLogEntries(reasoning, strategyDetails);
 
   if (strategyLogEntries.length) {
@@ -289,7 +276,7 @@ export const applyAiCardPlay = (
   }
 
   const playedCardRecord = createPlayedCardRecord({
-    card: adjustedCard,
+    card: resolvedCard,
     player: 'ai',
     faction: prev.faction === 'truth' ? 'government' : 'truth',
     targetState,
@@ -303,7 +290,7 @@ export const applyAiCardPlay = (
 
   const turnPlayEntries = createTurnPlayEntries({
     state: prev,
-    card: adjustedCard,
+    card: resolvedCard,
     owner: 'ai',
     targetState,
     resolution,

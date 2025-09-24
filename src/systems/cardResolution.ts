@@ -2,7 +2,7 @@ import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
 import type { MediaResolutionOptions } from '@/mvp/media';
 import { cloneGameState, type Card, type GameState as EngineGameState } from '@/mvp';
 import type { GameCard } from '@/rules/mvp';
-import { clearStateOccupation, setStateOccupation } from '@/data/usaStates';
+import { setStateOccupation } from '@/data/usaStates';
 import type { PlayerStats } from '@/data/achievementSystem';
 
 type Faction = 'government' | 'truth';
@@ -237,12 +237,6 @@ export function resolveCardMVP(
     } else {
       nextControlledStates.delete(state.abbreviation);
       nextAiControlledStates.delete(state.abbreviation);
-      if (
-        owner === 'neutral' &&
-        (state.occupierCardId || state.occupierCardName || state.occupierLabel || state.occupierIcon)
-      ) {
-        clearStateOccupation(state);
-      }
     }
 
     if (previousOwner !== 'player' && owner === 'player') {
