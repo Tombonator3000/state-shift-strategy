@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import BaseCard from '@/components/game/cards/BaseCard';
 import type { CardPlayRecord } from '@/hooks/gameStateTypes';
 import type { GameCard } from '@/rules/mvp';
-import { FRONT_PAGE_SLOT_META } from '@/game/frontPage';
+import { FRONT_PAGE_SLOT_META, isFrontPageSlot, resolveFrontPageSlot } from '@/game/frontPage';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import { EvidenceTrackMeter } from './EvidenceTrackMeter';
 import { PublicFrenzyMeter } from './PublicFrenzyMeter';
@@ -120,7 +120,15 @@ export const FrontPageLayout = ({
   const grouped = useMemo(() => {
     return cards.reduce<Record<'top-banner' | 'main-photo' | 'sidebar', CardPlayRecord[]>>(
       (acc, record) => {
-        acc[record.frontPageSlot].push(record);
+        const slot = isFrontPageSlot(record.frontPageSlot)
+          ? record.frontPageSlot
+          : resolveFrontPageSlot(record.card);
+        const bucket = acc[slot] ?? acc.sidebar;
+        if (slot === record.frontPageSlot) {
+          bucket.push(record);
+        } else {
+          bucket.push({ ...record, frontPageSlot: slot });
+        }
         return acc;
       },
       { 'top-banner': [], 'main-photo': [], sidebar: [] },

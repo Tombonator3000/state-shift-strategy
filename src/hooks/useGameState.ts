@@ -39,6 +39,7 @@ import {
   getMaxPlaysForTurn,
   resolveStateReference,
 } from '@/game/momentum';
+import { isFrontPageSlot, resolveFrontPageSlot } from '@/game/frontPage';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
@@ -160,6 +161,49 @@ const drawCardsFromDeck = (
   }
 
   return { drawn, deck: nextDeck };
+};
+
+const sanitizeCardPlayRecord = (record: any): CardPlayRecord | null => {
+  if (!record || typeof record !== 'object') {
+    return null;
+  }
+
+  const card = record.card as GameCard | undefined;
+  if (!card) {
+    return null;
+  }
+
+  const slotCandidate = typeof record.frontPageSlot === 'string' ? record.frontPageSlot : null;
+  const normalizedSlot = slotCandidate && isFrontPageSlot(slotCandidate)
+    ? slotCandidate
+    : resolveFrontPageSlot(card);
+
+  return {
+    card,
+    player: record.player === 'ai' ? 'ai' : 'human',
+    faction: record.faction === 'government' ? 'government' : 'truth',
+    targetState: typeof record.targetState === 'string' ? record.targetState : null,
+    truthDelta: typeof record.truthDelta === 'number' ? record.truthDelta : 0,
+    ipDelta: typeof record.ipDelta === 'number' ? record.ipDelta : 0,
+    aiIpDelta: typeof record.aiIpDelta === 'number' ? record.aiIpDelta : 0,
+    capturedStates: Array.isArray(record.capturedStates) ? [...record.capturedStates] : [],
+    damageDealt: typeof record.damageDealt === 'number' ? record.damageDealt : 0,
+    round: typeof record.round === 'number' ? record.round : 0,
+    turn: typeof record.turn === 'number' ? record.turn : 0,
+    timestamp: typeof record.timestamp === 'number' ? record.timestamp : Date.now(),
+    logEntries: Array.isArray(record.logEntries) ? [...record.logEntries] : [],
+    frontPageSlot: normalizedSlot,
+  };
+};
+
+const sanitizeCardPlayRecords = (records: unknown): CardPlayRecord[] => {
+  if (!Array.isArray(records)) {
+    return [];
+  }
+
+  return records
+    .map(entry => sanitizeCardPlayRecord(entry))
+    .filter((entry): entry is CardPlayRecord => entry !== null);
 };
 
 export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
@@ -995,17 +1039,16 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }
 
       // Reconstruct the game state
+      const cardsPlayedThisRound = sanitizeCardPlayRecords(saveData.cardsPlayedThisRound);
+      const playHistory = sanitizeCardPlayRecords(saveData.playHistory);
+
       setGameState(prev => ({
         ...prev,
         ...saveData,
         turn: normalizedTurn,
         round: normalizedRound,
-        cardsPlayedThisRound: Array.isArray(saveData.cardsPlayedThisRound)
-          ? saveData.cardsPlayedThisRound
-          : [],
-        playHistory: Array.isArray(saveData.playHistory)
-          ? saveData.playHistory
-          : [],
+        cardsPlayedThisRound,
+        playHistory,
         turnPlays: Array.isArray(saveData.turnPlays)
           ? saveData.turnPlays
           : [],
