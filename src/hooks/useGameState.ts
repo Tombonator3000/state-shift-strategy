@@ -66,45 +66,7 @@ const normalizeRoundFromSave = (saveData: Partial<GameState>): number => {
   return Math.max(expectedRound, rawRound);
 };
 
-const summarizeStrategy = (reasoning?: string, strategyDetails?: string[]): string | undefined => {
-  const source = reasoning ?? strategyDetails?.[0];
-  if (!source) {
-    return undefined;
-  }
-
-  const cleaned = source.replace(/^AI Strategy:\s*/i, '').replace(/^AI Synergy Bonus:\s*/i, '').trim();
-  const normalized = cleaned.replace(/\s+/g, ' ');
-
-  if (!normalized.length) {
-    return 'AI executed a strategic play.';
-  }
-
-  const firstSentenceMatch = normalized.match(/^[^.?!]*(?:[.?!]|$)/);
-  const firstSentence = (firstSentenceMatch ? firstSentenceMatch[0] : normalized).trim();
-  if (!firstSentence.length) {
-    return 'AI executed a strategic play.';
-  }
-
-  return firstSentence.length > 100 ? `${firstSentence.slice(0, 97).trimEnd()}…` : firstSentence;
-};
-
 const isDebugEnvironment = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV ?? false;
-
-const buildStrategyLogEntries = (reasoning?: string, strategyDetails?: string[]): string[] => {
-  if (featureFlags.aiVerboseStrategyLog) {
-    const verboseEntries: string[] = [];
-    if (reasoning) {
-      verboseEntries.push(`AI Strategy: ${reasoning}`);
-    }
-    if (strategyDetails?.length) {
-      verboseEntries.push(...strategyDetails);
-    }
-    return verboseEntries;
-  }
-
-  const summary = summarizeStrategy(reasoning, strategyDetails);
-  return summary ? [`AI focus: ${summary}`] : [];
-};
 
 const debugStrategyToConsole = (reasoning?: string, strategyDetails?: string[]) => {
   if (featureFlags.aiVerboseStrategyLog || !isDebugEnvironment) {
@@ -858,7 +820,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     if (turnPlan.actions.length === 0 && turnPlan.sequenceDetails.length) {
       setGameState(prev => ({
         ...prev,
-        log: [...prev.log, ...buildStrategyLogEntries(undefined, turnPlan.sequenceDetails)],
+        log: [...prev.log, ...buildStrategyLogEntriesHelper(undefined, turnPlan.sequenceDetails)],
       }));
     }
 
