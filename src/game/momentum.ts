@@ -4,6 +4,7 @@ import type {
   GameState,
   PublicFrenzyState,
 } from '@/hooks/gameStateTypes';
+import { resolveStateIdentity } from '@/data/usaStates';
 
 const clamp = (value: number, min: number, max: number): number => {
   if (Number.isNaN(value)) {
@@ -33,32 +34,17 @@ export const resolveStateReference = (
   state: GameState,
   reference?: string | null,
 ): { id: string; label: string } | null => {
-  if (!reference) {
+  const identity = resolveStateIdentity(reference);
+  if (!identity) {
     return null;
   }
 
-  const trimmed = reference.trim();
-  if (!trimmed.length) {
-    return null;
+  const knownState = state.states.find(candidate => candidate.id === identity.id);
+  if (knownState?.name) {
+    return { id: knownState.id, label: knownState.name };
   }
 
-  const lowered = trimmed.toLowerCase();
-  const byId = state.states.find(candidate => candidate.id.toLowerCase() === lowered);
-  if (byId) {
-    return { id: byId.id, label: byId.name ?? byId.id };
-  }
-
-  const byAbbreviation = state.states.find(candidate => candidate.abbreviation.toLowerCase() === lowered);
-  if (byAbbreviation) {
-    return { id: byAbbreviation.id, label: byAbbreviation.name ?? byAbbreviation.id };
-  }
-
-  const byName = state.states.find(candidate => candidate.name?.toLowerCase() === lowered);
-  if (byName) {
-    return { id: byName.id, label: byName.name ?? byName.id };
-  }
-
-  return { id: trimmed.toUpperCase(), label: trimmed };
+  return identity;
 };
 
 const TRUTH_THRESHOLD_EXPOSE = 70;

@@ -113,6 +113,38 @@ export const getTotalIPFromStates = (controlledStates: string[]): number => {
   }, 0);
 };
 
+export const resolveStateIdentity = (
+  reference?: string | null,
+): { id: string; label: string } | null => {
+  if (!reference) {
+    return null;
+  }
+
+  const trimmed = reference.trim();
+  if (!trimmed.length) {
+    return null;
+  }
+
+  const lowered = trimmed.toLowerCase();
+
+  const byId = USA_STATES.find(candidate => candidate.id.toLowerCase() === lowered);
+  if (byId) {
+    return { id: byId.id, label: byId.name ?? byId.id };
+  }
+
+  const byAbbreviation = USA_STATES.find(candidate => candidate.abbreviation.toLowerCase() === lowered);
+  if (byAbbreviation) {
+    return { id: byAbbreviation.id, label: byAbbreviation.name ?? byAbbreviation.id };
+  }
+
+  const byName = USA_STATES.find(candidate => candidate.name.toLowerCase() === lowered);
+  if (byName) {
+    return { id: byName.id, label: byName.name ?? byName.id };
+  }
+
+  return { id: trimmed.toUpperCase(), label: trimmed };
+};
+
 // Occupation label generation
 const GOV_LABELS = [
   "Black Site: ${cardName}",

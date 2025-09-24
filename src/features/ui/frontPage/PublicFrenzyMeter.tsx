@@ -1,5 +1,5 @@
 import type { PublicFrenzyState } from '@/hooks/gameStateTypes';
-import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
+import { resolveStateIdentity } from '@/data/usaStates';
 
 interface PublicFrenzyMeterProps {
   frenzy: PublicFrenzyState;
@@ -13,22 +13,7 @@ export const PublicFrenzyMeter = ({ frenzy }: PublicFrenzyMeterProps) => {
   const initiativeActive = frenzy.governmentInitiativeActiveFor;
   const underReview = frenzy.underReviewState ?? null;
 
-  const resolveUnderReviewLabel = (stateId: string | null): string | null => {
-    if (!stateId) {
-      return null;
-    }
-    const byId = getStateById(stateId);
-    if (byId?.name) {
-      return byId.name;
-    }
-    const byAbbr = getStateByAbbreviation(stateId.toUpperCase());
-    if (byAbbr?.name) {
-      return byAbbr.name;
-    }
-    return stateId;
-  };
-
-  const underReviewLabel = resolveUnderReviewLabel(underReview);
+  const underReviewLabel = resolveStateIdentity(underReview)?.label ?? underReview;
   const underReviewActive = Boolean(initiativeActive && underReview);
 
   return (
