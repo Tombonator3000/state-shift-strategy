@@ -1541,6 +1541,10 @@ const Index = () => {
             <PlayedCardsDock
               playedCards={gameState.cardsPlayedThisRound}
               onInspectCard={(card) => setInspectedPlayedCard(card)}
+              faction={gameState.faction}
+              evidence={gameState.evidenceTrack}
+              publicFrenzy={gameState.publicFrenzy}
+              truth={gameState.truth}
             />
           </div>
         </div>
