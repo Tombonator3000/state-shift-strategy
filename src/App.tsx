@@ -12,6 +12,7 @@ import EffectSystemDashboard from "./pages/EffectSystemDashboard";
 import DatabaseRecovery from "./pages/DatabaseRecovery";
 import { initializeExtensionsOnStartup } from './data/extensionIntegration';
 import { AchievementProvider } from './contexts/AchievementContext';
+import { GameSettingsProvider } from './contexts/GameSettingsContext';
 import UiOverlays from "./ui/UiOverlays";
 
 const queryClient = new QueryClient();
@@ -26,20 +27,22 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AudioProvider>
-          <AchievementProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/dev/effects" element={<EffectSystemDashboard />} />
-                <Route path="/dev/recovery" element={<DatabaseRecovery />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-            <UiOverlays />
-          </AchievementProvider>
+          <GameSettingsProvider>
+            <AchievementProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/dev/effects" element={<EffectSystemDashboard />} />
+                  <Route path="/dev/recovery" element={<DatabaseRecovery />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+              <UiOverlays />
+            </AchievementProvider>
+          </GameSettingsProvider>
         </AudioProvider>
       </TooltipProvider>
     </QueryClientProvider>
