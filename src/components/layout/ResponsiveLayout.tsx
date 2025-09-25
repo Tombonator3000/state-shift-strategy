@@ -3,12 +3,14 @@ import clsx from "clsx";
 
 type Props = {
   masthead?: React.ReactNode;
-  leftPane?: React.ReactNode; // spillbrett/kart/avisside + paneler
-  rightPane?: React.ReactNode; // spillerhånd, handlinger
+  leftPane?: React.ReactNode;
+  rightPane?: React.ReactNode;
+  utilityPane?: React.ReactNode;
 };
 
-export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Props) {
+export default function ResponsiveLayout({ masthead, leftPane, rightPane, utilityPane }: Props) {
   const hasRightPane = Boolean(rightPane);
+  const hasUtilityPane = Boolean(utilityPane);
 
   return (
     <div
@@ -39,7 +41,10 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
               className={clsx(
                 "grid h-full min-h-0 gap-4",
                 "grid-cols-1",
-                hasRightPane && "lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_480px]"
+                (hasRightPane || hasUtilityPane) &&
+                  "lg:grid-cols-[minmax(0,1fr)_minmax(280px,380px)]",
+                hasRightPane && hasUtilityPane &&
+                  "xl:grid-cols-[minmax(0,1fr)_minmax(300px,420px)_minmax(220px,320px)]"
               )}
             >
               <main className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
@@ -49,6 +54,11 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
               </main>
               {hasRightPane && (
                 <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">{rightPane}</div>
+              )}
+              {hasUtilityPane && (
+                <aside className="hidden h-full min-h-0 min-w-0 flex-col overflow-hidden xl:flex">
+                  {utilityPane}
+                </aside>
               )}
             </div>
           </div>

@@ -15,6 +15,10 @@ import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
 import Options from '@/components/game/Options';
+import TurnSummaryStrip from '@/components/game/TurnSummaryStrip';
+import MapLegend from '@/components/game/MapLegend';
+import StateDetailPanel from '@/components/game/StateDetailPanel';
+import RulesReferenceDrawer from '@/components/game/RulesReferenceDrawer';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
@@ -28,7 +32,7 @@ import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
 import MechanicsTooltip from '@/components/game/MechanicsTooltip';
 import CardCollection from '@/components/game/CardCollection';
 import NewCardsPresentation from '@/components/game/NewCardsPresentation';
-import { Maximize, Menu, Minimize } from 'lucide-react';
+import { BookOpen, Maximize, Menu, Minimize } from 'lucide-react';
 import { getRandomAgenda } from '@/data/agendaDatabase';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
@@ -448,6 +452,8 @@ const Index = () => {
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   const [paranormalSightings, setParanormalSightings] = useState<ParanormalSighting[]>([]);
   const [inspectedPlayedCard, setInspectedPlayedCard] = useState<GameCard | null>(null);
+  const [rulesDrawerOpen, setRulesDrawerOpen] = useState(false);
+  const [mapFocusState, setMapFocusState] = useState<string | null>(null);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -1296,7 +1302,9 @@ const Index = () => {
   }
 
   const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
-  const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
+  const maxPlaysPerTurn = 3;
+  const playsRemaining = Math.max(0, maxPlaysPerTurn - (gameState.cardsPlayedThisTurn ?? 0));
+  const handInteractionDisabled = isPlayerActionLocked || playsRemaining <= 0;
 
   const renderIntelLog = (limit: number) => (
     <div className="space-y-1 text-xs text-newspaper-text/80">
@@ -1312,36 +1320,41 @@ const Index = () => {
     </div>
   );
 
-  const renderSidebar = () => (
+  const renderStrategicRail = (mobile = false) => (
     <div className="flex h-full flex-col gap-4">
-      <div className="space-y-4 xl:hidden">
-        <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-          <VictoryConditions
-            controlledStates={gameState.controlledStates.length}
-            truth={gameState.truth}
-            ip={gameState.ip}
-            isMobile
-          />
-        </div>
-        <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-          <SecretAgenda agenda={gameState.secretAgenda} isPlayer />
-        </div>
-        <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-          <AIStatus
-            difficulty={gameState.aiDifficulty}
-            personalityName={gameState.aiStrategist?.personality.name}
-            isThinking={gameState.phase === 'ai_turn'}
-            currentPlayer={gameState.currentPlayer}
-            aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
-            assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
-            aiHandSize={gameState.aiHand.length}
-            aiObjectiveProgress={gameState.aiSecretAgenda ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100 : 0}
-          />
-        </div>
-        <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-          <h3 className="text-xs font-bold uppercase tracking-wide text-newspaper-text">Intel Log</h3>
-          <div className="mt-2">{renderIntelLog(6)}</div>
-        </div>
+      <StateDetailPanel
+        states={gameState.states}
+        focusedStateId={mapFocusState}
+        selectedStateId={gameState.targetState}
+        zoneCardActive={Boolean(gameState.selectedCard && gameState.hand.find(card => card.id === gameState.selectedCard)?.type === 'ZONE')}
+      />
+      <MapLegend />
+      <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
+        <VictoryConditions
+          controlledStates={gameState.controlledStates.length}
+          truth={gameState.truth}
+          ip={gameState.ip}
+          isMobile={mobile}
+        />
+      </div>
+      <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
+        <SecretAgenda agenda={gameState.secretAgenda} isPlayer />
+      </div>
+      <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
+        <AIStatus
+          difficulty={gameState.aiDifficulty}
+          personalityName={gameState.aiStrategist?.personality.name}
+          isThinking={gameState.phase === 'ai_turn'}
+          currentPlayer={gameState.currentPlayer}
+          aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
+          assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
+          aiHandSize={gameState.aiHand.length}
+          aiObjectiveProgress={gameState.aiSecretAgenda ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100 : 0}
+        />
+      </div>
+      <div className="flex-1 rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
+        <h3 className="text-xs font-bold uppercase tracking-wide text-newspaper-text">Intel Log</h3>
+        <div className="mt-2 h-full overflow-hidden">{renderIntelLog(mobile ? 6 : 12)}</div>
       </div>
     </div>
   );
@@ -1363,7 +1376,7 @@ const Index = () => {
           </SheetTrigger>
           <SheetContent side="right" className="w-full p-0 sm:max-w-sm">
             <div className="app-scroll h-full p-4">
-              {renderSidebar()}
+              {renderStrategicRail(true)}
             </div>
           </SheetContent>
         </Sheet>
@@ -1429,6 +1442,17 @@ const Index = () => {
           <button
             type="button"
             onClick={() => {
+              setRulesDrawerOpen(true);
+              audio.playSFX('click');
+            }}
+            className={mastheadButtonClass}
+            title="Rules Reference"
+          >
+            📖
+          </button>
+          <button
+            type="button"
+            onClick={() => {
               setShowInGameOptions(true);
               audio.playSFX('click');
             }}
@@ -1476,78 +1500,50 @@ const Index = () => {
 
   const leftPaneContent = (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <div className="flex min-h-0 flex-1 flex-col gap-4 xl:flex-row">
-        <div className="hidden xl:flex xl:w-72 xl:flex-col xl:gap-4">
-          <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-            <VictoryConditions
-              controlledStates={gameState.controlledStates.length}
-              truth={gameState.truth}
-              ip={gameState.ip}
-            />
-          </div>
-          <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-            <SecretAgenda agenda={gameState.secretAgenda} isPlayer />
-          </div>
-          <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-            <AIStatus
-              difficulty={gameState.aiDifficulty}
-              personalityName={gameState.aiStrategist?.personality.name}
-              isThinking={gameState.phase === 'ai_turn'}
-              currentPlayer={gameState.currentPlayer}
-              aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
-              assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
-              aiHandSize={gameState.aiHand.length}
-              aiObjectiveProgress={gameState.aiSecretAgenda ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100 : 0}
-            />
-          </div>
-          <div className="flex-1 rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-            <h3 className="text-xs font-bold uppercase tracking-wide text-newspaper-text">Intel Log</h3>
-            <div className="mt-2 h-full overflow-hidden">
-              {renderIntelLog(12)}
-            </div>
-          </div>
-        </div>
-        <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
-            {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-              <div className="pointer-events-none absolute top-4 right-4 z-20">
-                <div className="max-w-sm animate-pulse border-2 border-newspaper-border bg-newspaper-text p-4 font-mono text-newspaper-bg shadow-2xl">
-                  <div className="mb-2 flex items-center gap-2 text-lg">
-                    🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
-                  </div>
-                  <div className="mb-3 text-sm">
-                    Click any <span className="font-bold text-yellow-400">NEUTRAL</span> or <span className="font-bold text-red-500">ENEMY</span> state to target
-                  </div>
-                  <div className="mb-2 rounded bg-black/20 p-2 text-xs">
-                    Card will deploy automatically when target is selected
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-yellow-400">
-                    ⚠️ Cannot target your own states
-                  </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
+          {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
+            <div className="pointer-events-none absolute top-4 right-4 z-20">
+              <div className="max-w-sm animate-pulse border-2 border-newspaper-border bg-newspaper-text p-4 font-mono text-newspaper-bg shadow-2xl">
+                <div className="mb-2 flex items-center gap-2 text-lg">
+                  🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
+                </div>
+                <div className="mb-3 text-sm">
+                  Click any <span className="font-bold text-yellow-400">NEUTRAL</span> or <span className="font-bold text-red-500">ENEMY</span> state to target
+                </div>
+                <div className="mb-2 rounded bg-black/20 p-2 text-xs">
+                  Card will deploy automatically when target is selected
+                </div>
+                <div className="flex items-center gap-1 text-xs text-yellow-400">
+                  ⚠️ Cannot target your own states
                 </div>
               </div>
-            )}
-            <div className="relative flex-1">
-              <EnhancedUSAMap
-                states={gameState.states}
-                onStateClick={handleStateClick}
-                selectedZoneCard={gameState.selectedCard}
-                selectedState={gameState.targetState}
-                audio={audio}
-              />
             </div>
-          </div>
-          <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
-            <PlayedCardsDock
-              playedCards={gameState.cardsPlayedThisRound}
-              onInspectCard={(card) => setInspectedPlayedCard(card)}
-              faction={gameState.faction}
-              evidence={gameState.evidenceTrack}
-              publicFrenzy={gameState.publicFrenzy}
-              truth={gameState.truth}
+          )}
+          <div className="relative flex-1">
+            <EnhancedUSAMap
+              states={gameState.states}
+              onStateClick={handleStateClick}
+              selectedZoneCard={gameState.selectedCard}
+              selectedState={gameState.targetState}
+              audio={audio}
+              onStateHover={setMapFocusState}
             />
           </div>
         </div>
+        <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
+          <PlayedCardsDock
+            playedCards={gameState.cardsPlayedThisRound}
+            onInspectCard={(card) => setInspectedPlayedCard(card)}
+            faction={gameState.faction}
+            evidence={gameState.evidenceTrack}
+            publicFrenzy={gameState.publicFrenzy}
+            truth={gameState.truth}
+          />
+        </div>
+      </div>
+      <div className="xl:hidden">
+        {renderStrategicRail(true)}
       </div>
       <CardPreviewOverlay card={hoveredCard} />
     </div>
@@ -1555,38 +1551,66 @@ const Index = () => {
 
   const rightPaneContent = (
     <aside className="h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
-      <header className="flex items-center justify-between gap-2 border-b border-newspaper-border/60 px-4 py-3">
-        <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Your Hand</h3>
-        <span className="text-xs font-mono">IP {gameState.ip}</span>
-      </header>
-      <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
-        <EnhancedGameHand
-          cards={gameState.hand}
-          onPlayCard={handlePlayCard}
-          onSelectCard={handleSelectCard}
-          selectedCard={gameState.selectedCard}
-          disabled={handInteractionDisabled}
-          currentIP={gameState.ip}
-          loadingCard={loadingCard}
-          onCardHover={setHoveredCard}
-        />
+      <div className="flex h-full flex-col">
+        <header className="border-b border-newspaper-border/60 px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Command Deck</h3>
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded border border-newspaper-border/80 bg-newspaper-bg px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-newspaper-text transition hover:bg-newspaper-bg/80"
+              onClick={() => {
+                setRulesDrawerOpen(true);
+                audio.playSFX('click');
+              }}
+            >
+              <BookOpen className="h-3.5 w-3.5" />
+              Rules
+            </button>
+          </div>
+          <p className="mt-2 text-[11px] font-mono uppercase tracking-[0.22em] text-newspaper-text/70">
+            Spend IP, obey the three-play limit, capture the front page.
+          </p>
+        </header>
+        <div className="border-b border-newspaper-border/60 px-3 py-3">
+          <TurnSummaryStrip
+            currentIP={gameState.ip}
+            playsRemaining={playsRemaining}
+            maxPlays={maxPlaysPerTurn}
+            truth={gameState.truth}
+            controlledStates={gameState.controlledStates.length}
+          />
+        </div>
+        <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
+          <EnhancedGameHand
+            cards={gameState.hand}
+            onPlayCard={handlePlayCard}
+            onSelectCard={handleSelectCard}
+            selectedCard={gameState.selectedCard}
+            disabled={handInteractionDisabled}
+            currentIP={gameState.ip}
+            loadingCard={loadingCard}
+            onCardHover={setHoveredCard}
+            playsRemaining={playsRemaining}
+            maxPlays={maxPlaysPerTurn}
+          />
+        </div>
+        <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
+          <Button
+            onClick={handleEndTurn}
+            className="touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60"
+            disabled={isPlayerActionLocked}
+          >
+            {gameState.currentPlayer === 'ai' ? (
+              <span className="flex items-center justify-center gap-2 text-sm">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
+                AI Thinking...
+              </span>
+            ) : (
+              'End Turn'
+            )}
+          </Button>
+        </footer>
       </div>
-      <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
-        <Button
-          onClick={handleEndTurn}
-          className="touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60"
-          disabled={isPlayerActionLocked}
-        >
-          {gameState.currentPlayer === 'ai' ? (
-            <span className="flex items-center justify-center gap-2 text-sm">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
-              AI Thinking...
-            </span>
-          ) : (
-            'End Turn'
-          )}
-        </Button>
-      </footer>
     </aside>
   );
 
@@ -1596,7 +1620,10 @@ const Index = () => {
         masthead={mastheadContent}
         leftPane={leftPaneContent}
         rightPane={rightPaneContent}
+        utilityPane={renderStrategicRail()}
       />
+
+      <RulesReferenceDrawer open={rulesDrawerOpen} onOpenChange={setRulesDrawerOpen} />
 
       <Toaster
         position="top-right"

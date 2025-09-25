@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import * as topojson from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
-import { AlertTriangle, Target, Shield } from 'lucide-react';
+import { AlertTriangle, Target, Shield, Loader2 } from 'lucide-react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { areParanormalEffectsEnabled } from '@/state/settings';
 
@@ -42,6 +42,7 @@ interface EnhancedUSAMapProps {
   selectedState?: string | null;
   audio?: any;
   playedCards?: PlayedCard[];
+  onStateHover?: (stateId: string | null) => void;
 }
 
 const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
@@ -51,7 +52,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   hoveredStateId,
   selectedState,
   audio,
-  playedCards = []
+  playedCards = [],
+  onStateHover,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -67,6 +69,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   });
   const contestedStatesRef = useRef<Record<string, boolean>>({});
   const contestedAnimationTimeoutsRef = useRef<number[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [governmentTarget, setGovernmentTarget] = useState<{
     active: boolean;
     cardId?: string;
@@ -116,31 +119,43 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   };
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadUSData = async () => {
+      setIsLoading(true);
       try {
         const response = await fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
         const topology = await response.json();
         const geojson = topojson.feature(topology, topology.objects.states);
-        setGeoData(geojson);
+        if (!cancelled) {
+          setGeoData(geojson);
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error('Failed to load US map data:', error);
-        // Fallback mock data
-        setGeoData({
-          type: 'FeatureCollection',
-          features: states.map(state => ({
-            type: 'Feature',
-            id: state.id,
-            properties: { name: state.name, STUSPS: state.abbreviation },
-            geometry: {
-              type: 'Polygon',
-              coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]
-            }
-          }))
-        });
+        if (!cancelled) {
+          setGeoData({
+            type: 'FeatureCollection',
+            features: states.map(state => ({
+              type: 'Feature',
+              id: state.id,
+              properties: { name: state.name, STUSPS: state.abbreviation },
+              geometry: {
+                type: 'Polygon',
+                coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]
+              }
+            }))
+          });
+          setIsLoading(false);
+        }
       }
     };
 
     loadUSData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [states]);
 
   useEffect(() => {
@@ -174,7 +189,10 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     contestedAnimationTimeoutsRef.current = [];
 
     // Global pointerleave to hide tooltip when exiting the map
-    const handlePointerLeave = () => setHoveredState(null);
+    const handlePointerLeave = () => {
+      setHoveredState(null);
+      onStateHover?.(null);
+    };
     svg.addEventListener('pointerleave', handlePointerLeave);
 
     const projection = geoAlbersUsa()
@@ -266,8 +284,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           clearTimeout(tooltipStableRef.current.timeout);
           tooltipStableRef.current.timeout = null;
         }
-        
+
         setHoveredState(stateId);
+        onStateHover?.(gameState?.abbreviation || stateId);
         pathElement.setAttribute('aria-describedby', 'map-state-tooltip');
         
         // Initial position update without throttling for better responsiveness
@@ -302,6 +321,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         // Add small delay before hiding to prevent flicker from micro-movements
         tooltipStableRef.current.timeout = setTimeout(() => {
           setHoveredState(null);
+          onStateHover?.(null);
           pathElement.removeAttribute('aria-describedby');
         }, 50);
 
@@ -525,12 +545,18 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   return (
     <div className="relative" ref={containerRef}>
       <Card className="p-4 bg-card border-border relative">
-        
+
         <div className="relative">
-          <svg 
+          {isLoading && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded border border-dashed border-border/80 bg-background/90 backdrop-blur-sm">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+              <span className="text-xs font-mono uppercase tracking-[0.28em] text-muted-foreground">Loading map data…</span>
+            </div>
+          )}
+          <svg
             ref={svgRef}
-            width="800" 
-            height="500" 
+            width="800"
+            height="500"
             className="w-full h-full border border-border rounded bg-black/5"
             viewBox="0 0 800 500"
             preserveAspectRatio="xMidYMid meet"
