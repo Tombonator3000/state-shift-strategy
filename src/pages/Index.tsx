@@ -1532,7 +1532,10 @@ const Index = () => {
   const mastheadButtonClass = "touch-target inline-flex items-center justify-center rounded-md border border-newspaper-border bg-newspaper-text px-3 text-sm font-semibold text-newspaper-bg shadow-sm transition hover:bg-newspaper-text/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg";
 
   const mastheadContent = (
-    <div className="flex h-full items-center gap-4 border-b-4 border-newspaper-border bg-newspaper-bg px-2 sm:px-4">
+    <div
+      className="flex h-full items-center gap-4 border-b-4 border-newspaper-border px-2 sm:px-4"
+      style={{ background: "var(--paper)" }}
+    >
       <div className="flex items-center gap-3">
         <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
           <SheetTrigger asChild>

@@ -19,8 +19,11 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
     >
       {/* Masthead */}
       <header
-        className="shrink-0 bg-newspaper-bg"
-        style={{ height: "var(--masthead-h)" }}
+        className="shrink-0"
+        style={{
+          height: "var(--masthead-h)",
+          background: "var(--paper)",
+        }}
       >
         {masthead}
       </header>
