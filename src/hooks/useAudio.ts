@@ -35,17 +35,21 @@ export const useAudio = () => {
           : 80;
         const rawMusicVolume = typeof parsed.musicVolume === 'number'
           ? parsed.musicVolume
-          : 20;
+          : 12;
 
         const normalizeVolume = (value: number) => {
           const clamped = Math.max(0, Math.min(100, value));
           return clamped > 1 ? clamped / 100 : clamped;
         };
 
+        const normalizedMasterVolume = normalizeVolume(rawMasterVolume);
+        const normalizedMusicVolume = normalizeVolume(rawMusicVolume);
+        const normalizedSfxVolume = normalizeVolume(rawSfxVolume);
+
         return {
-          volume: normalizeVolume(rawMasterVolume),
-          musicVolume: normalizeVolume(rawMusicVolume),
-          sfxVolume: normalizeVolume(rawSfxVolume),
+          volume: normalizedMasterVolume,
+          musicVolume: normalizedMusicVolume,
+          sfxVolume: normalizedSfxVolume,
           muted: false,
           musicEnabled: parsed.musicEnabled !== false,
           sfxEnabled: parsed.sfxEnabled !== false,
@@ -60,7 +64,7 @@ export const useAudio = () => {
     console.log('🎵 useAudio: Using default audio config');
     return {
       volume: 0.8, // Default to 80%
-      musicVolume: 0.2,
+      musicVolume: 0.12,
       sfxVolume: 0.8,
       muted: false,
       musicEnabled: true,
@@ -90,6 +94,7 @@ export const useAudio = () => {
   const playTokenRef = useRef(0);
   const resumeMenuAfterEndRef = useRef(false);
   const menuMusicCallbackRef = useRef<(() => void) | null>(null);
+  const lastMusicVolumeRef = useRef(config.muted ? 0 : config.volume * config.musicVolume);
   // Music track arrays
   const musicTracks = useRef<{ [key in MusicType]: HTMLAudioElement[] }>({
     theme: [],
@@ -155,7 +160,7 @@ export const useAudio = () => {
         
         const onLoad = () => {
           audio.loop = false;
-          const baseMusicVolume = config.muted ? 0 : config.volume * config.musicVolume;
+          const baseMusicVolume = config.muted ? 0 : lastMusicVolumeRef.current;
           audio.volume = baseMusicVolume;
           console.log(`🎵 Audio loaded: ${src}`);
           cleanup();
@@ -320,6 +325,7 @@ export const useAudio = () => {
     });
 
     const musicVolume = config.muted ? 0 : config.volume * config.musicVolume;
+    lastMusicVolumeRef.current = musicVolume;
     const sfxVolume = config.muted ? 0 : config.volume * config.sfxVolume;
 
     if (currentMusicRef.current) {
@@ -406,7 +412,7 @@ export const useAudio = () => {
     }
     
     if (config.musicEnabled) {
-      const musicVolume = config.muted ? 0 : config.volume * config.musicVolume;
+      const musicVolume = config.muted ? 0 : lastMusicVolumeRef.current;
       toAudio.volume = musicVolume;
       toAudio.currentTime = 0;
       
@@ -598,7 +604,13 @@ export const useAudio = () => {
     // Only update if volume actually changed to prevent spam
     if (currentVolumePercent !== newVolumePercent) {
       console.log('🎵 Setting volume from', currentVolumePercent + '%', 'to:', newVolumePercent + '%');
-      setConfig(prev => ({ ...prev, volume: clampedVolume }));
+      setConfig(prev => {
+        const nextConfig = { ...prev, volume: clampedVolume };
+        lastMusicVolumeRef.current = nextConfig.muted
+          ? 0
+          : nextConfig.volume * nextConfig.musicVolume;
+        return nextConfig;
+      });
     }
   }, [config.volume]);
 
@@ -627,12 +639,18 @@ export const useAudio = () => {
       Object.values(musicTracks.current).flat().forEach(audio => {
         audio.volume = baseMusicVolume;
       });
+      lastMusicVolumeRef.current = baseMusicVolume;
       setConfig(prev => ({ ...prev, musicVolume: clampedVolume }));
     }
   }, [config.musicVolume, config.muted, config.volume]);
 
   const toggleMute = useCallback(() => {
-    setConfig(prev => ({ ...prev, muted: !prev.muted }));
+    setConfig(prev => {
+      const newMuted = !prev.muted;
+      const nextConfig = { ...prev, muted: newMuted };
+      lastMusicVolumeRef.current = newMuted ? 0 : nextConfig.volume * nextConfig.musicVolume;
+      return nextConfig;
+    });
   }, []);
 
   const toggleMusic = useCallback(() => {
