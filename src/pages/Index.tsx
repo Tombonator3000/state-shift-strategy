@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
+import FoldoutOverlayPanel from '@/components/layout/FoldoutOverlayPanel';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
 import EnhancedGameHand from '@/components/game/EnhancedGameHand';
@@ -1312,9 +1313,46 @@ const Index = () => {
     </div>
   );
 
-  const renderSidebar = () => (
-    <div className="flex h-full flex-col gap-4">
-      <div className="space-y-4 xl:hidden">
+  const playerAgenda = gameState.secretAgenda;
+  const agendaProgress = playerAgenda ? Math.min(100, Math.round((playerAgenda.progress / playerAgenda.target) * 100)) : 0;
+  const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
+  const aiObjectiveProgress = gameState.aiSecretAgenda
+    ? Math.min(100, (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100)
+    : 0;
+  const aiAssessment = gameState.aiStrategist?.getStrategicAssessment(gameState);
+
+  const statusPanelConfigs = [
+    {
+      id: 'victory',
+      title: 'Victory Conditions',
+      defaultOpen: true,
+      overlay: () => (
+        <div className="space-y-3 text-[11px] text-newspaper-text/90">
+          <p className="font-semibold uppercase tracking-[0.25em] text-[10px] text-newspaper-text/60">
+            Mission Targets
+          </p>
+          <ul className="space-y-1 font-mono">
+            <li>• Control 10 states</li>
+            <li>• Reach 300 IP</li>
+            <li>• Truth ≥95% / ≤5%</li>
+          </ul>
+          <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
+            <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
+              <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">States</div>
+              <div className="text-sm font-mono text-newspaper-text">{gameState.controlledStates.length}/10</div>
+            </div>
+            <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
+              <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">Truth</div>
+              <div className="text-sm font-mono text-newspaper-text">{Math.round(gameState.truth)}%</div>
+            </div>
+            <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
+              <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">IP</div>
+              <div className="text-sm font-mono text-newspaper-text">{gameState.ip}/300</div>
+            </div>
+          </div>
+        </div>
+      ),
+      mobile: () => (
         <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
           <VictoryConditions
             controlledStates={gameState.controlledStates.length}
@@ -1323,25 +1361,140 @@ const Index = () => {
             isMobile
           />
         </div>
-        <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-          <SecretAgenda agenda={gameState.secretAgenda} isPlayer />
+      ),
+    },
+    {
+      id: 'secret-agenda',
+      title: 'Secret Agenda',
+      defaultOpen: false,
+      overlay: () => (
+        <div className="space-y-3 text-[11px] text-newspaper-text/90">
+          {playerAgenda ? (
+            <>
+              <div className="text-[10px] uppercase tracking-[0.3em] text-secret-red/70">Covert Operation</div>
+              <div className="text-sm font-semibold text-secret-red">{playerAgenda.title}</div>
+              <p className="font-mono text-newspaper-text/80">{playerAgenda.description}</p>
+              <div className="flex items-center justify-between text-[11px] text-newspaper-text/70">
+                <span>Progress</span>
+                <span className="font-mono text-secret-red">
+                  {playerAgenda.progress}/{playerAgenda.target} ({agendaProgress}%)
+                </span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-secret-red/20">
+                <div className="h-full bg-secret-red transition-all" style={{ width: `${agendaProgress}%` }} />
+              </div>
+              {playerAgenda.completed && (
+                <div className="text-[11px] font-bold uppercase tracking-wide text-secret-red/80">
+                  Objective Complete
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="font-mono text-newspaper-text/60">No secret agenda assigned.</div>
+          )}
         </div>
+      ),
+      mobile: () => (
+        <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
+          {playerAgenda ? (
+            <SecretAgenda agenda={playerAgenda} isPlayer />
+          ) : (
+            <div className="text-xs font-mono text-newspaper-text/60">No secret agenda assigned.</div>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: 'ai-status',
+      title: 'AI Opponent',
+      defaultOpen: false,
+      overlay: () => (
+        <div className="space-y-3 text-[11px] text-newspaper-text/90">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">Handler</span>
+            <span className="font-mono text-newspaper-text">
+              {gameState.aiStrategist?.personality.name || 'Unknown'}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-center">
+            <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
+              <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">Difficulty</div>
+              <div className="font-mono text-newspaper-text">{gameState.aiDifficulty.toUpperCase()}</div>
+            </div>
+            <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
+              <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">Territory</div>
+              <div className="font-mono text-newspaper-text">{aiControlledStates} states</div>
+            </div>
+          </div>
+          <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/20 px-3 py-2">
+            <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-newspaper-text/60">
+              <span>Status</span>
+              <span className={`font-mono ${gameState.currentPlayer === 'ai' ? 'text-secret-red' : 'text-newspaper-text/70'}`}>
+                {gameState.currentPlayer === 'ai'
+                  ? (gameState.phase === 'ai_turn' ? 'Calculating' : 'Active')
+                  : 'Waiting'}
+              </span>
+            </div>
+            {gameState.phase === 'ai_turn' && (
+              <div className="mt-1 text-[11px] text-secret-red/80">Processing strategy...</div>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center justify-between text-[11px] text-newspaper-text/70">
+              <span>Objective</span>
+              <span className="font-mono text-newspaper-text">{Math.floor(aiObjectiveProgress)}%</span>
+            </div>
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-newspaper-border/40">
+              <div className="h-full bg-newspaper-text/80" style={{ width: `${aiObjectiveProgress}%` }} />
+            </div>
+          </div>
+          {aiAssessment && (
+            <p className="text-[11px] italic text-newspaper-text/60">“{aiAssessment}”</p>
+          )}
+        </div>
+      ),
+      mobile: () => (
         <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
           <AIStatus
             difficulty={gameState.aiDifficulty}
             personalityName={gameState.aiStrategist?.personality.name}
             isThinking={gameState.phase === 'ai_turn'}
             currentPlayer={gameState.currentPlayer}
-            aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
-            assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
+            aiControlledStates={aiControlledStates}
+            assessmentText={aiAssessment}
             aiHandSize={gameState.aiHand.length}
-            aiObjectiveProgress={gameState.aiSecretAgenda ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100 : 0}
+            aiObjectiveProgress={aiObjectiveProgress}
           />
         </div>
+      ),
+    },
+    {
+      id: 'intel-log',
+      title: 'Intel Log',
+      defaultOpen: false,
+      overlay: () => (
+        <div className="space-y-2 text-[11px] text-newspaper-text/90">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">Latest Briefings</p>
+          <div className="max-h-60 overflow-y-auto pr-1">
+            {renderIntelLog(12)}
+          </div>
+        </div>
+      ),
+      mobile: () => (
         <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
           <h3 className="text-xs font-bold uppercase tracking-wide text-newspaper-text">Intel Log</h3>
           <div className="mt-2">{renderIntelLog(6)}</div>
         </div>
+      ),
+    },
+  ];
+
+  const renderSidebar = () => (
+    <div className="flex h-full flex-col gap-4">
+      <div className="space-y-4">
+        {statusPanelConfigs.map(panel => (
+          <div key={panel.id}>{panel.mobile()}</div>
+        ))}
       </div>
     </div>
   );
@@ -1476,73 +1629,57 @@ const Index = () => {
 
   const leftPaneContent = (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <div className="flex min-h-0 flex-1 flex-col gap-4 xl:flex-row">
-        <div className="hidden xl:flex xl:w-72 xl:flex-col xl:gap-4">
-          <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-            <VictoryConditions
-              controlledStates={gameState.controlledStates.length}
-              truth={gameState.truth}
-              ip={gameState.ip}
+      <div className="space-y-4 md:hidden">
+        {statusPanelConfigs.map(panel => (
+          <div key={`${panel.id}-mobile`}>{panel.mobile()}</div>
+        ))}
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
+          {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
+            <div className="pointer-events-none absolute top-4 right-4 z-30">
+              <div className="max-w-sm animate-pulse border-2 border-newspaper-border bg-newspaper-text p-4 font-mono text-newspaper-bg shadow-2xl">
+                <div className="mb-2 flex items-center gap-2 text-lg">
+                  🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
+                </div>
+                <div className="mb-3 text-sm">
+                  Click any <span className="font-bold text-yellow-400">NEUTRAL</span> or <span className="font-bold text-red-500">ENEMY</span> state to target
+                </div>
+                <div className="mb-2 rounded bg-black/20 p-2 text-xs">
+                  Card will deploy automatically when target is selected
+                </div>
+                <div className="flex items-center gap-1 text-xs text-yellow-400">
+                  ⚠️ Cannot target your own states
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="relative flex-1">
+            <EnhancedUSAMap
+              states={gameState.states}
+              onStateClick={handleStateClick}
+              selectedZoneCard={gameState.selectedCard}
+              selectedState={gameState.targetState}
+              audio={audio}
             />
-          </div>
-          <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-            <SecretAgenda agenda={gameState.secretAgenda} isPlayer />
-          </div>
-          <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-            <AIStatus
-              difficulty={gameState.aiDifficulty}
-              personalityName={gameState.aiStrategist?.personality.name}
-              isThinking={gameState.phase === 'ai_turn'}
-              currentPlayer={gameState.currentPlayer}
-              aiControlledStates={gameState.states.filter(s => s.owner === 'ai').length}
-              assessmentText={gameState.aiStrategist?.getStrategicAssessment(gameState)}
-              aiHandSize={gameState.aiHand.length}
-              aiObjectiveProgress={gameState.aiSecretAgenda ? (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100 : 0}
-            />
-          </div>
-          <div className="flex-1 rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-            <h3 className="text-xs font-bold uppercase tracking-wide text-newspaper-text">Intel Log</h3>
-            <div className="mt-2 h-full overflow-hidden">
-              {renderIntelLog(12)}
+            <div className="pointer-events-none absolute inset-0 z-20 hidden md:flex flex-col items-start gap-3 p-4">
+              {statusPanelConfigs.map(panel => (
+                <FoldoutOverlayPanel
+                  key={panel.id}
+                  title={panel.title}
+                  defaultOpen={panel.defaultOpen}
+                >
+                  {panel.overlay()}
+                </FoldoutOverlayPanel>
+              ))}
             </div>
           </div>
         </div>
-        <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
-            {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-              <div className="pointer-events-none absolute top-4 right-4 z-20">
-                <div className="max-w-sm animate-pulse border-2 border-newspaper-border bg-newspaper-text p-4 font-mono text-newspaper-bg shadow-2xl">
-                  <div className="mb-2 flex items-center gap-2 text-lg">
-                    🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
-                  </div>
-                  <div className="mb-3 text-sm">
-                    Click any <span className="font-bold text-yellow-400">NEUTRAL</span> or <span className="font-bold text-red-500">ENEMY</span> state to target
-                  </div>
-                  <div className="mb-2 rounded bg-black/20 p-2 text-xs">
-                    Card will deploy automatically when target is selected
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-yellow-400">
-                    ⚠️ Cannot target your own states
-                  </div>
-                </div>
-              </div>
-            )}
-            <div className="relative flex-1">
-              <EnhancedUSAMap
-                states={gameState.states}
-                onStateClick={handleStateClick}
-                selectedZoneCard={gameState.selectedCard}
-                selectedState={gameState.targetState}
-                audio={audio}
-              />
-            </div>
-          </div>
-          <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
-            <PlayedCardsDock
-              playedCards={gameState.cardsPlayedThisRound}
-              onInspectCard={(card) => setInspectedPlayedCard(card)}
-            />
-          </div>
+        <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
+          <PlayedCardsDock
+            playedCards={gameState.cardsPlayedThisRound}
+            onInspectCard={(card) => setInspectedPlayedCard(card)}
+          />
         </div>
       </div>
       <CardPreviewOverlay card={hoveredCard} />
