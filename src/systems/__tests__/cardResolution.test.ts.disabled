@@ -8,6 +8,7 @@ import {
   type CardActor,
   type GameSnapshot,
 } from '../cardResolution';
+import { createPublicFrenzyState } from '@/game/momentum';
 
 const createBaseSnapshot = (overrides: Partial<GameSnapshot> = {}): GameSnapshot => ({
   truth: 50,
@@ -33,6 +34,7 @@ const createBaseSnapshot = (overrides: Partial<GameSnapshot> = {}): GameSnapshot
       owner: 'neutral',
     },
   ],
+  publicFrenzy: createPublicFrenzyState(50),
   ...overrides,
 });
 

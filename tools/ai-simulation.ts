@@ -11,6 +11,9 @@ import {
   type GameSnapshot,
   type StateForResolution,
 } from '@/systems/cardResolution';
+import { createPublicFrenzyState } from '@/game/momentum';
+import { resolveFrontPageSlot } from '@/game/frontPage';
+import type { PublicFrenzyState } from '@/hooks/gameStateTypes';
 import {
   createAiStrategist,
   type AIStrategist,
@@ -75,6 +78,7 @@ interface SimulationState {
   factions: SideRecord<'truth' | 'government'>;
   cardsPlayedThisRound: SimulationPlayRecord[];
   lastPlays: SimulationPlayRecord[];
+  publicFrenzy?: PublicFrenzyState;
 }
 
 interface EvaluationLogEntry {
@@ -312,6 +316,7 @@ function buildSnapshot(state: SimulationState, perspective: Side): GameSnapshot 
     turn: state.turn,
     faction: state.factions[perspective],
     states: resolutionStates,
+    publicFrenzy: state.publicFrenzy ?? createPublicFrenzyState(state.truth),
   };
 }
 
@@ -321,8 +326,19 @@ function toStrategistState(simulation: SimulationState, perspective: Side): Reco
 
   const cardsPlayed = simulation.cardsPlayedThisRound.map(play => ({
     player: play.actor === perspective ? 'ai' : 'human',
+    faction: play.actor === perspective ? simulation.factions[perspective] : simulation.factions[opponent],
     card: cloneCard(play.card),
     targetState: play.targetState ?? null,
+    truthDelta: 0,
+    ipDelta: 0,
+    aiIpDelta: 0,
+    capturedStates: [],
+    damageDealt: 0,
+    round: simulation.round,
+    turn: simulation.turn,
+    timestamp: Date.now(),
+    logEntries: [],
+    frontPageSlot: resolveFrontPageSlot(play.card),
   }));
 
   const lastCards = simulation.lastPlays.slice(-6).map(play => ({
