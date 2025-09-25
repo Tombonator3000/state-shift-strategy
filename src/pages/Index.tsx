@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import clsx from 'clsx';
 import { Button } from '@/components/ui/button';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import FoldoutOverlayPanel from '@/components/layout/FoldoutOverlayPanel';
@@ -49,6 +50,8 @@ import type { GameCard } from '@/rules/mvp';
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
 type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
+
+type ObjectiveSectionId = 'victory' | 'secret-agenda';
 
 interface MVPReport {
   cardId: string;
@@ -452,6 +455,7 @@ const Index = () => {
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeObjectivePanel, setActiveObjectivePanel] = useState<ObjectiveSectionId>('victory');
   
   const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
   const audio = useAudioContext();
@@ -1321,13 +1325,12 @@ const Index = () => {
     : 0;
   const aiAssessment = gameState.aiStrategist?.getStrategicAssessment(gameState);
 
-  const statusPanelConfigs = [
+  const objectiveSections = [
     {
-      id: 'victory',
-      title: 'Victory Conditions',
-      defaultOpen: true,
-      overlay: () => (
-        <div className="space-y-3 text-[11px] text-newspaper-text/90">
+      id: 'victory' as const,
+      label: 'Victory Conditions',
+      overlayContent: (
+        <>
           <p className="font-semibold uppercase tracking-[0.25em] text-[10px] text-newspaper-text/60">
             Mission Targets
           </p>
@@ -1350,57 +1353,109 @@ const Index = () => {
               <div className="text-sm font-mono text-newspaper-text">{gameState.ip}/300</div>
             </div>
           </div>
-        </div>
+        </>
       ),
-      mobile: () => (
-        <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-          <VictoryConditions
-            controlledStates={gameState.controlledStates.length}
-            truth={gameState.truth}
-            ip={gameState.ip}
-            isMobile
-          />
-        </div>
+      mobileContent: (
+        <VictoryConditions
+          controlledStates={gameState.controlledStates.length}
+          truth={gameState.truth}
+          ip={gameState.ip}
+          isMobile
+        />
       ),
     },
     {
-      id: 'secret-agenda',
-      title: 'Secret Agenda',
-      defaultOpen: false,
-      overlay: () => (
-        <div className="space-y-3 text-[11px] text-newspaper-text/90">
-          {playerAgenda ? (
-            <>
-              <div className="text-[10px] uppercase tracking-[0.3em] text-secret-red/70">Covert Operation</div>
-              <div className="text-sm font-semibold text-secret-red">{playerAgenda.title}</div>
-              <p className="font-mono text-newspaper-text/80">{playerAgenda.description}</p>
-              <div className="flex items-center justify-between text-[11px] text-newspaper-text/70">
-                <span>Progress</span>
-                <span className="font-mono text-secret-red">
-                  {playerAgenda.progress}/{playerAgenda.target} ({agendaProgress}%)
-                </span>
-              </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-secret-red/20">
-                <div className="h-full bg-secret-red transition-all" style={{ width: `${agendaProgress}%` }} />
-              </div>
-              {playerAgenda.completed && (
-                <div className="text-[11px] font-bold uppercase tracking-wide text-secret-red/80">
-                  Objective Complete
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="font-mono text-newspaper-text/60">No secret agenda assigned.</div>
+      id: 'secret-agenda' as const,
+      label: 'Secret Agenda',
+      overlayContent: playerAgenda ? (
+        <>
+          <div className="text-[10px] uppercase tracking-[0.3em] text-secret-red/70">Covert Operation</div>
+          <div className="text-sm font-semibold text-secret-red">{playerAgenda.title}</div>
+          <p className="font-mono text-newspaper-text/80">{playerAgenda.description}</p>
+          <div className="flex items-center justify-between text-[11px] text-newspaper-text/70">
+            <span>Progress</span>
+            <span className="font-mono text-secret-red">
+              {playerAgenda.progress}/{playerAgenda.target} ({agendaProgress}%)
+            </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-secret-red/20">
+            <div className="h-full bg-secret-red transition-all" style={{ width: `${agendaProgress}%` }} />
+          </div>
+          {playerAgenda.completed && (
+            <div className="text-[11px] font-bold uppercase tracking-wide text-secret-red/80">
+              Objective Complete
+            </div>
           )}
-        </div>
+        </>
+      ) : (
+        <div className="font-mono text-newspaper-text/60">No secret agenda assigned.</div>
       ),
+      mobileContent: playerAgenda ? (
+        <SecretAgenda agenda={playerAgenda} isPlayer />
+      ) : (
+        <div className="text-xs font-mono text-newspaper-text/60">No secret agenda assigned.</div>
+      ),
+    },
+  ];
+
+  const renderObjectiveMenu = (variant: 'overlay' | 'mobile') => {
+    const isOverlay = variant === 'overlay';
+    const activeSection =
+      objectiveSections.find(section => section.id === activeObjectivePanel) ?? objectiveSections[0];
+
+    return (
+      <div className={clsx('space-y-3', isOverlay && 'text-[11px] text-newspaper-text/90')}>
+        <div
+          className={clsx(
+            'flex gap-2',
+            isOverlay && 'rounded border border-newspaper-border/60 bg-newspaper-bg/40 p-1'
+          )}
+        >
+          {objectiveSections.map(section => {
+            const isActive = activeObjectivePanel === section.id;
+            const isSecret = section.id === 'secret-agenda';
+
+            return (
+              <button
+                key={section.id}
+                type="button"
+                onClick={() => setActiveObjectivePanel(section.id)}
+                className={clsx(
+                  'flex-1 rounded-md border font-semibold uppercase transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                  isOverlay
+                    ? 'px-2 py-1 text-[10px] tracking-[0.2em]'
+                    : 'px-3 py-2 text-[11px] tracking-[0.15em]',
+                  isSecret ? 'focus-visible:ring-secret-red/40' : 'focus-visible:ring-newspaper-text/40',
+                  isActive
+                    ? isSecret
+                      ? 'border-secret-red/80 bg-secret-red text-newspaper-bg shadow-sm'
+                      : 'border-newspaper-text bg-newspaper-text text-newspaper-bg shadow-sm'
+                    : isSecret
+                      ? 'border-secret-red/40 bg-secret-red/10 text-secret-red hover:bg-secret-red/20'
+                      : 'border-newspaper-border/60 bg-newspaper-bg/40 text-newspaper-text hover:bg-newspaper-bg/60'
+                )}
+              >
+                {section.label}
+              </button>
+            );
+          })}
+        </div>
+        <div className={clsx(isOverlay && 'space-y-3')}>
+          {isOverlay ? activeSection.overlayContent : activeSection.mobileContent}
+        </div>
+      </div>
+    );
+  };
+
+  const statusPanelConfigs = [
+    {
+      id: 'objectives',
+      title: 'Objectives',
+      defaultOpen: true,
+      overlay: () => renderObjectiveMenu('overlay'),
       mobile: () => (
         <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-          {playerAgenda ? (
-            <SecretAgenda agenda={playerAgenda} isPlayer />
-          ) : (
-            <div className="text-xs font-mono text-newspaper-text/60">No secret agenda assigned.</div>
-          )}
+          {renderObjectiveMenu('mobile')}
         </div>
       ),
     },
