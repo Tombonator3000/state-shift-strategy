@@ -1665,44 +1665,47 @@ const Index = () => {
         ))}
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-4">
-        <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
-          {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-            <div className="pointer-events-none absolute top-4 right-4 z-30">
-              <div className="max-w-sm animate-pulse border-2 border-newspaper-border bg-newspaper-text p-4 font-mono text-newspaper-bg shadow-2xl">
-                <div className="mb-2 flex items-center gap-2 text-lg">
-                  🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
-                </div>
-                <div className="mb-3 text-sm">
-                  Click any <span className="font-bold text-yellow-400">NEUTRAL</span> or <span className="font-bold text-red-500">ENEMY</span> state to target
-                </div>
-                <div className="mb-2 rounded bg-black/20 p-2 text-xs">
-                  Card will deploy automatically when target is selected
-                </div>
-                <div className="flex items-center gap-1 text-xs text-yellow-400">
-                  ⚠️ Cannot target your own states
+        <div className="flex min-h-[320px] flex-1 flex-col gap-4 md:flex-row">
+          <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
+            {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
+              <div className="pointer-events-none absolute top-4 right-4 z-30">
+                <div className="max-w-sm animate-pulse border-2 border-newspaper-border bg-newspaper-text p-4 font-mono text-newspaper-bg shadow-2xl">
+                  <div className="mb-2 flex items-center gap-2 text-lg">
+                    🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
+                  </div>
+                  <div className="mb-3 text-sm">
+                    Click any <span className="font-bold text-yellow-400">NEUTRAL</span> or <span className="font-bold text-red-500">ENEMY</span> state to target
+                  </div>
+                  <div className="mb-2 rounded bg-black/20 p-2 text-xs">
+                    Card will deploy automatically when target is selected
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-yellow-400">
+                    ⚠️ Cannot target your own states
+                  </div>
                 </div>
               </div>
+            )}
+            <div className="relative flex-1">
+              <EnhancedUSAMap
+                states={gameState.states}
+                onStateClick={handleStateClick}
+                selectedZoneCard={gameState.selectedCard}
+                selectedState={gameState.targetState}
+                audio={audio}
+              />
             </div>
-          )}
-          <div className="relative flex-1">
-            <EnhancedUSAMap
-              states={gameState.states}
-              onStateClick={handleStateClick}
-              selectedZoneCard={gameState.selectedCard}
-              selectedState={gameState.targetState}
-              audio={audio}
-            />
-            <div className="pointer-events-none absolute inset-0 z-20 hidden md:flex flex-col items-start gap-3 p-4">
-              {statusPanelConfigs.map(panel => (
-                <FoldoutOverlayPanel
-                  key={panel.id}
-                  title={panel.title}
-                  defaultOpen={panel.defaultOpen}
-                >
-                  {panel.overlay()}
-                </FoldoutOverlayPanel>
-              ))}
-            </div>
+          </div>
+          <div className="hidden w-72 shrink-0 flex-col gap-3 md:flex">
+            {statusPanelConfigs.map(panel => (
+              <FoldoutOverlayPanel
+                key={panel.id}
+                title={panel.title}
+                defaultOpen={panel.defaultOpen}
+                variant="sidebar"
+              >
+                {panel.overlay()}
+              </FoldoutOverlayPanel>
+            ))}
           </div>
         </div>
         <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
