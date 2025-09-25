@@ -1635,7 +1635,7 @@ const Index = () => {
         ))}
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-4">
-        <div className="relative flex min-h-[320px] flex-1 flex-col rounded border-2 border-newspaper-border bg-white/80 md:flex-row">
+        <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
           {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
             <div className="pointer-events-none absolute top-4 right-4 z-30">
               <div className="max-w-sm animate-pulse border-2 border-newspaper-border bg-newspaper-text p-4 font-mono text-newspaper-bg shadow-2xl">
@@ -1654,18 +1654,7 @@ const Index = () => {
               </div>
             </div>
           )}
-          <div className="relative hidden border-r-2 border-newspaper-border/60 bg-newspaper-bg/30 p-3 md:flex md:w-72 md:flex-shrink-0 md:flex-col md:gap-3 md:overflow-y-auto">
-            {statusPanelConfigs.map(panel => (
-              <FoldoutOverlayPanel
-                key={panel.id}
-                title={panel.title}
-                defaultOpen={panel.defaultOpen}
-              >
-                {panel.overlay()}
-              </FoldoutOverlayPanel>
-            ))}
-          </div>
-          <div className="relative flex-1 overflow-hidden">
+          <div className="relative flex-1">
             <EnhancedUSAMap
               states={gameState.states}
               onStateClick={handleStateClick}
@@ -1673,6 +1662,17 @@ const Index = () => {
               selectedState={gameState.targetState}
               audio={audio}
             />
+            <div className="pointer-events-none absolute inset-0 z-20 hidden md:flex flex-col items-start gap-3 p-4">
+              {statusPanelConfigs.map(panel => (
+                <FoldoutOverlayPanel
+                  key={panel.id}
+                  title={panel.title}
+                  defaultOpen={panel.defaultOpen}
+                >
+                  {panel.overlay()}
+                </FoldoutOverlayPanel>
+              ))}
+            </div>
           </div>
         </div>
         <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
