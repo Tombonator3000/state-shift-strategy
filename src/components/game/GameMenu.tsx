@@ -395,7 +395,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
               HOTKEYS:
             </div>
             <div className="text-xs font-mono text-newspaper-text/60">
-              Space = End Turn | T = Select Card
+              Space = Go To Press | T = Select Card
             </div>
             <div className="text-xs font-mono text-newspaper-text/60">
               U = Upgrades | S = Stats | Q/L = Save/Load

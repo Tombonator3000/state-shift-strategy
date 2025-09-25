@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import clsx from 'clsx';
 import { Button } from '@/components/ui/button';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
@@ -1214,6 +1214,16 @@ const Index = () => {
     }
   }, [showIntro, showMenu, audio]);
 
+  const tabloidDateline = useMemo(() => {
+    const now = new Date();
+    return now.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }, []);
+
   if (showIntro) {
     return (
       <div 
@@ -1319,10 +1329,11 @@ const Index = () => {
   const objectiveSections = [
     {
       id: 'victory' as const,
-      label: 'Victory Conditions',
+      label: 'Mission Brief (Editorial Desk)',
       overlayContent: (
         <>
-          <p className="font-semibold uppercase tracking-[0.25em] text-[10px] text-newspaper-text/60">
+          <div className="text-[9px] uppercase tracking-[0.4em] text-newspaper-text/50">Editorial Desk Dispatch</div>
+          <p className="mt-1 font-semibold uppercase tracking-[0.25em] text-[10px] text-newspaper-text">
             Mission Targets
           </p>
           <ul className="space-y-1 font-mono">
@@ -1532,28 +1543,35 @@ const Index = () => {
   const mastheadButtonClass = "touch-target inline-flex items-center justify-center rounded-md border border-newspaper-border bg-newspaper-text px-3 text-sm font-semibold text-newspaper-bg shadow-sm transition hover:bg-newspaper-text/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg";
 
   const mastheadContent = (
-    <div className="flex h-full items-center gap-4 border-b-4 border-newspaper-border bg-newspaper-bg px-2 sm:px-4">
-      <div className="flex items-center gap-3">
-        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-          <SheetTrigger asChild>
-            <button type="button" className={`${mastheadButtonClass} md:hidden`}>
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Open command panel</span>
-            </button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-full p-0 sm:max-w-sm">
-            <div className="app-scroll h-full p-4">
-              {renderSidebar()}
-            </div>
-          </SheetContent>
-        </Sheet>
-        <div className="leading-tight">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">The Paranoid Times</p>
-          <h1 className="text-lg font-bold text-newspaper-text sm:text-2xl">THE PARANOID TIMES</h1>
-          <p className="text-[11px] font-medium text-newspaper-text/70 sm:text-xs">{subtitle}</p>
+    <div className="flex h-full flex-col justify-center gap-2 border-b-4 border-newspaper-border bg-newspaper-bg px-2 py-2 sm:px-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+            <SheetTrigger asChild>
+              <button type="button" className={`${mastheadButtonClass} md:hidden`}>
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open command panel</span>
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full p-0 sm:max-w-sm">
+              <div className="app-scroll h-full p-4">
+                {renderSidebar()}
+              </div>
+            </SheetContent>
+          </Sheet>
+          <div className="leading-tight">
+            <p className="text-[9px] uppercase tracking-[0.45em] text-newspaper-text/50">The Paranoid Times</p>
+            <h1 className="font-black uppercase tracking-[0.25em] text-newspaper-text text-2xl sm:text-3xl">THE PARANOID TIMES</h1>
+            <p className="text-[11px] font-medium italic text-newspaper-text/70 sm:text-xs">{subtitle}</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-end text-right text-newspaper-text">
+          <div className="text-[9px] uppercase tracking-[0.45em] text-newspaper-text/60">Vol. 13</div>
+          <div className="text-xs font-semibold uppercase tracking-wide sm:text-sm">{tabloidDateline}</div>
+          <div className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/70">Round {currentRoundNumber}</div>
         </div>
       </div>
-      <div className="flex flex-1 flex-col justify-center gap-1 overflow-hidden">
+      <div className="flex flex-col gap-2">
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"
@@ -1620,18 +1638,18 @@ const Index = () => {
         </div>
         <div className="flex items-center gap-2 overflow-x-auto text-[11px] font-mono text-newspaper-text/80">
           <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
-            <span className="font-bold uppercase tracking-wide">Round</span>
-            <span>{gameState.turn}</span>
+            <span className="font-bold uppercase tracking-wide">Edition</span>
+            <span>Round {currentRoundNumber}</span>
           </div>
           <MechanicsTooltip mechanic="ip">
             <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
-              <span className="font-bold uppercase tracking-wide">Your IP</span>
+              <span className="flex items-center gap-1 font-bold uppercase tracking-wide"><span aria-hidden>🗞️</span>Circulation</span>
               <span>{gameState.ip}</span>
             </div>
           </MechanicsTooltip>
           <MechanicsTooltip mechanic="truth">
             <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
-              <span className="font-bold uppercase tracking-wide">Truth</span>
+              <span className="flex items-center gap-1 font-bold uppercase tracking-wide"><span aria-hidden>📰</span>Credibility</span>
               <span>{gameState.truth}%</span>
             </div>
           </MechanicsTooltip>
@@ -1716,8 +1734,8 @@ const Index = () => {
   const rightPaneContent = (
     <aside className="h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
       <header className="flex items-center justify-between gap-2 border-b border-newspaper-border/60 px-4 py-3">
-        <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Your Hand</h3>
-        <span className="text-xs font-mono">IP {gameState.ip}</span>
+        <h3 className="text-xs font-bold uppercase tracking-[0.35em]">NEWSROOM DESK</h3>
+        <span className="text-xs font-mono flex items-center gap-1"><span aria-hidden>🗞️</span>{gameState.ip}</span>
       </header>
       <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
         <EnhancedGameHand
@@ -1733,6 +1751,7 @@ const Index = () => {
       </div>
       <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
         <Button
+          id="end-turn-button"
           onClick={handleEndTurn}
           className="touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60"
           disabled={isPlayerActionLocked}
@@ -1743,7 +1762,7 @@ const Index = () => {
               AI Thinking...
             </span>
           ) : (
-            'End Turn'
+            'GO TO PRESS'
           )}
         </Button>
       </footer>

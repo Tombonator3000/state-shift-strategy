@@ -17,19 +17,22 @@ export const VictoryConditions: React.FC<VictoryConditionsProps> = ({
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border">
-      <div 
+    <div id="victory-conditions" className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border">
+      <div
         className="flex items-center justify-between cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <h3 className="font-bold text-xs text-center flex-1">VICTORY CONDITIONS</h3>
+        <div className="flex-1 text-center">
+          <div className="text-[8px] uppercase tracking-[0.35em] text-newspaper-bg/70">Editorial Desk</div>
+          <h3 className="font-bold text-xs tracking-[0.25em]">MISSION BRIEF</h3>
+        </div>
         {isExpanded ? (
           <ChevronUp className="w-3 h-3 ml-1" />
         ) : (
           <ChevronDown className="w-3 h-3 ml-1" />
         )}
       </div>
-      
+
       {isExpanded && (
         <div className="mt-2">
           {isMobile ? (
