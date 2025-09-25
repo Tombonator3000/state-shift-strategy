@@ -4,10 +4,12 @@ import CardImage from '@/components/game/CardImage';
 import type { GameCard } from '@/rules/mvp';
 import {
   formatEffect,
+  getFactionLabel,
+  getFactionVar,
   getFlavorText,
   getRarityLabel,
+  getRarityVar,
   normalizeCardType,
-  normalizeFaction,
 } from '@/lib/cardUi';
 import CardFrame from '@/ui/CardFrame';
 
@@ -45,17 +47,6 @@ export const BaseCard = ({
   const rarityLabel = getRarityLabel(card.rarity);
   const typeLabel = normalizeCardType(card.type);
   const showCardText = card.text && card.text !== effectText;
-  const factionLabel = normalizeFaction(card.faction) === 'government' ? 'GOVERNMENT FILE' : 'TRUTH DOSSIER';
-  const deckLine = showCardText ? card.text! : effectText;
-  const effectLines = effectText
-    .split(' · ')
-    .map(line => line.trim())
-    .filter(Boolean);
-  const effectItems = effectLines.length > 0 ? effectLines : [effectText];
-  if (showCardText) {
-    effectItems.push(card.text!);
-  }
-  const typeIcon = typeLabel === 'ATTACK' ? '⚡' : typeLabel === 'MEDIA' ? '🗞' : '📍';
 
   const wrapperStyle = { '--card-scale': String(SIZE_TO_SCALE[size]) } as CSSProperties;
 
@@ -67,62 +58,59 @@ export const BaseCard = ({
     >
       <CardFrame size={size}>
         <>
-          <div className="card-header sg-card__header text-[color:var(--ink)]">
-            <div className="sg-card__topline">
-              <span className="sg-pill" data-card-type={typeLabel} tabIndex={0}>
-                {typeLabel}
+          <div className="card-header text-[color:var(--ink)]">
+            <div className="text-3xl leading-none uppercase font-headline">
+              {card.name}
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <span
+                className="px-2 py-0.5 text-[11px] uppercase tracking-wide text-white rounded font-tabloid"
+                style={{ background: getFactionVar(card.faction) }}
+              >
+                {getFactionLabel(card.faction)}
               </span>
-              <span className="sg-sticker" data-rarity={rarityLabel}>
-                {rarityLabel.toUpperCase()}
+              <span
+                className="px-2 py-0.5 text-[11px] uppercase tracking-wide text-white rounded font-tabloid"
+                style={{ background: getRarityVar(card.rarity) }}
+              >
+                {rarityLabel}
               </span>
-              <span className="sg-ip" aria-label={`IP cost ${card.cost}`} tabIndex={0}>
-                <span className="sg-ip__value">{card.cost}</span>
-                <span className="sg-ip__label" aria-hidden>
-                  IP
-                </span>
+              <span
+                className="ml-auto text-xs font-semibold px-2 py-0.5 rounded"
+                style={{ background: 'var(--pt-ink)', color: 'var(--pt-paper)' }}
+              >
+                IP {card.cost}
               </span>
             </div>
-            <div className="sg-card__kicker">{factionLabel}</div>
-            <div className="sg-card__title">{card.name}</div>
-            {deckLine && <div className="sg-card__deck">{deckLine}</div>}
           </div>
 
           <div
             className={cn(
-              'card-art sg-card__art overflow-hidden transition-transform duration-200',
+              'card-art overflow-hidden transition-transform duration-200',
               polaroidHover && 'group-hover:-rotate-[0.75deg] group-hover:-translate-y-1',
             )}
           >
-            <div className="aspect-[4/3] w-full sg-card__photo-frame">
-              <CardImage cardId={card.id} className="sg-card__photo" />
+            <div className="aspect-[4/3] w-full">
+              <CardImage cardId={card.id} className="h-full w-full grayscale" />
             </div>
-            <div className="sg-card__caption">AP WIRE — {card.name}</div>
           </div>
 
-          <div className="card-effects sg-effect">
-            <div className="sg-effect__title">{typeLabel}</div>
-            <ul className="sg-effect__text" aria-label={`${typeLabel} effect`}>
-              {effectItems.map((line, index) => (
-                <li key={`${index}-${line}`} className="sg-effect__item">
-                  {index === 0 && (
-                    <span aria-hidden className="sg-effect__icon">
-                      {typeIcon}
-                    </span>
-                  )}
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
+          <div className="card-effects space-y-2 text-sm leading-snug">
+            <div className="text-[11px] uppercase tracking-[0.18em] text-white/70">{typeLabel}</div>
+            <div className="font-semibold">{effectText}</div>
+            {showCardText && <div className="text-xs leading-snug text-white/80">{card.text}</div>}
           </div>
 
           {flavor && (
-            <div className="card-flavor sg-card__footer text-[12px]">
-              <span className="sg-card__footer-label">CLASSIFIED INTELLIGENCE:</span>
-              <span className="sg-card__footer-text">{flavor}</span>
+            <div className="card-flavor text-[12px]">
+              <span className="mr-1 font-mono not-italic uppercase tracking-wide opacity-70 text-[color:var(--ink)]">
+                CLASSIFIED INTELLIGENCE:
+              </span>
+              {flavor}
             </div>
           )}
 
-          {!hideStamp && <div className="sg-stamp select-none">{stampText}</div>}
+          {!hideStamp && <div className="pt-stamp select-none">{stampText}</div>}
         </>
       </CardFrame>
       {overlay ? <div className="card-frame-overlay">{overlay}</div> : null}
