@@ -1715,9 +1715,9 @@ const Index = () => {
 
   const rightPaneContent = (
     <aside className="h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
-      <header className="flex items-center justify-between gap-2 border-b border-newspaper-border/60 px-4 py-3">
-        <h3 className="text-xs font-bold uppercase tracking-[0.35em]">Your Hand</h3>
-        <span className="text-xs font-mono">IP {gameState.ip}</span>
+      <header className="relative flex items-center justify-between gap-2 border-b border-newspaper-border/60 bg-[image:var(--halftone-blue)] bg-[length:6px_6px] bg-repeat px-4 py-3">
+        <h3 className="text-xs font-black uppercase tracking-[0.5em]">NEWSROOM DESK</h3>
+        <span className="rounded border border-current px-2 py-1 text-[0.65rem] font-mono font-semibold">IP {gameState.ip}</span>
       </header>
       <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
         <EnhancedGameHand
@@ -1733,8 +1733,9 @@ const Index = () => {
       </div>
       <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
         <Button
+          id="end-turn-button"
           onClick={handleEndTurn}
-          className="touch-target w-full border-2 border-black bg-black py-3 font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-white hover:text-black disabled:opacity-60"
+          className="end-turn-button touch-target w-full border-2 border-black bg-truth-red py-3 font-black uppercase tracking-[0.4em] text-white transition duration-200 hover:bg-white hover:text-truth-red disabled:opacity-60"
           disabled={isPlayerActionLocked}
         >
           {gameState.currentPlayer === 'ai' ? (
@@ -1743,7 +1744,7 @@ const Index = () => {
               AI Thinking...
             </span>
           ) : (
-            'End Turn'
+            'GO TO PRESS'
           )}
         </Button>
       </footer>

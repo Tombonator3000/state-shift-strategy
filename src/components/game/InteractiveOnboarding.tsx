@@ -36,8 +36,8 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     },
     {
       id: 'hand',
-      title: '🎴 Your Hand',
-      description: 'These are your cards. Each has a cost (circle) and type. Click cards to examine them closely.',
+      title: '📰 Newsroom Desk',
+      description: 'This is your NEWSROOM DESK—where headline-worthy scoops live. Each card shows cost, type, and flavor copy. Click a card to get the full brief.',
       target: '#enhanced-hand',
       action: 'Click on a card to examine it'
     },
@@ -62,8 +62,8 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     },
     {
       id: 'turn-end',
-      title: '⏭️ End Turn',
-      description: 'When you\'re done playing cards, click "End Turn". You can play up to 3 cards per turn.',
+      title: '🗞️ Go To Press',
+      description: 'Ready to publish the edition? Hit "GO TO PRESS" after playing up to three cards and let the headlines fly.',
       target: '#end-turn-button'
     },
     {
