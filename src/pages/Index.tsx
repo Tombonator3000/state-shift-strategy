@@ -1256,7 +1256,12 @@ const Index = () => {
   }
 
   if (showBalancing) {
-    return <EnhancedBalancingDashboard onClose={() => setShowBalancing(false)} />;
+    return (
+      <EnhancedBalancingDashboard
+        onClose={() => setShowBalancing(false)}
+        logEntries={gameState.log}
+      />
+    );
   }
 
   if (showMenu) {
@@ -1302,20 +1307,6 @@ const Index = () => {
 
   const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
   const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
-
-  const renderIntelLog = (limit: number) => (
-    <div className="space-y-1 text-xs text-newspaper-text/80">
-      {gameState.log.slice(-limit).map((entry, index) => (
-        <div key={`${entry}-${index}`} className="flex items-start gap-1">
-          <span className="font-mono text-newspaper-text">▲</span>
-          <span className="flex-1 leading-snug">{entry}</span>
-        </div>
-      ))}
-      {gameState.log.length === 0 && (
-        <div className="text-newspaper-text/50">No intel yet.</div>
-      )}
-    </div>
-  );
 
   const playerAgenda = gameState.secretAgenda;
   const agendaProgress = playerAgenda ? Math.min(100, Math.round((playerAgenda.progress / playerAgenda.target) * 100)) : 0;
@@ -1520,25 +1511,6 @@ const Index = () => {
             aiHandSize={gameState.aiHand.length}
             aiObjectiveProgress={aiObjectiveProgress}
           />
-        </div>
-      ),
-    },
-    {
-      id: 'intel-log',
-      title: 'Intel Log',
-      defaultOpen: false,
-      overlay: () => (
-        <div className="space-y-2 text-[11px] text-newspaper-text/90">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">Latest Briefings</p>
-          <div className="max-h-60 overflow-y-auto pr-1">
-            {renderIntelLog(12)}
-          </div>
-        </div>
-      ),
-      mobile: () => (
-        <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-          <h3 className="text-xs font-bold uppercase tracking-wide text-newspaper-text">Intel Log</h3>
-          <div className="mt-2">{renderIntelLog(6)}</div>
         </div>
       ),
     },
