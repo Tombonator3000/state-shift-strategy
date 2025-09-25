@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 44 43% 93%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -58,10 +58,10 @@ All colors MUST be HSL.
     --cap: clamp(10px, 1.6vh, 13px);
 
     /* Tabloid newspaper theme tokens */
-    --paper: #f4f3f1;
-    --ink: #111111;
-    --ink-80: #1a1a1a;
-    --panel: #0b0b0b;
+    --paper: hsl(44 43% 93%);
+    --ink: hsl(0 0% 6.7%);
+    --ink-80: hsl(0 0% 10.2%);
+    --panel: hsl(0 0% 4.3%);
     --line: 0 0% 6.7%;
     --lineSoft: 0 0% 13.3%;
     --grey: 0 0% 80%;
@@ -108,21 +108,21 @@ All colors MUST be HSL.
     --rarity-legendary: 25 95% 53%;
 
     /* === Paranoid Times – Tabloid Card Theme === */
-    --pt-paper: #f2f0ea;
-    --pt-ink: #111111;
-    --pt-halftone: rgba(0, 0, 0, 0.06);
+    --pt-paper: hsl(45 24% 93%);
+    --pt-ink: hsl(0 0% 6.7%);
+    --pt-halftone: hsla(0, 0%, 0%, 0.06);
 
-    --pt-truth: #0ea5e9;
-    --pt-gov: #ef4444;
+    --pt-truth: hsl(199 89% 48%);
+    --pt-gov: hsl(0 84% 60%);
 
-    --pt-rarity-common: #9ca3af;
-    --pt-rarity-uncommon: #3b82f6;
-    --pt-rarity-rare: #8b5cf6;
-    --pt-rarity-legendary: #eab308;
+    --pt-rarity-common: hsl(218 11% 65%);
+    --pt-rarity-uncommon: hsl(217 91% 60%);
+    --pt-rarity-rare: hsl(258 90% 66%);
+    --pt-rarity-legendary: hsl(45 93% 48%);
 
-    --pt-border: #222222;
-    --pt-border-soft: rgba(17, 17, 17, 0.2);
-    --pt-shadow: rgba(0, 0, 0, 0.25);
+    --pt-border: hsl(0 0% 13%);
+    --pt-border-soft: hsla(0, 0%, 6.7%, 0.2);
+    --pt-shadow: hsla(0, 0%, 0%, 0.25);
 
     --pt-card-w: 320px;
     --pt-card-h: 460px;
@@ -230,7 +230,24 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .paper-overlay {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 20%, hsla(0, 0%, 0%, 0.05) 0, transparent 55%),
+      radial-gradient(circle at 80% 0%, hsla(0, 0%, 0%, 0.035) 0, transparent 50%),
+      radial-gradient(circle at 0% 75%, hsla(0, 0%, 0%, 0.04) 0, transparent 60%),
+      repeating-linear-gradient(0deg, hsla(0, 0%, 0%, 0.02) 0 2px, transparent 2px 6px),
+      repeating-linear-gradient(90deg, hsla(0, 0%, 0%, 0.015) 0 1px, transparent 1px 5px);
+    background-blend-mode: multiply;
+    mix-blend-mode: multiply;
+    opacity: 0.12;
+    filter: contrast(105%);
   }
 }
 
