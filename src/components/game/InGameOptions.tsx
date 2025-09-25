@@ -243,7 +243,7 @@ const InGameOptions = ({
             <div className="grid md:grid-cols-2 gap-4 text-sm font-mono text-newspaper-text/80">
               <div>
                 <div><kbd className="bg-newspaper-text/20 px-2 py-1 rounded">ESC</kbd> - Options Menu</div>
-                <div><kbd className="bg-newspaper-text/20 px-2 py-1 rounded">SPACE</kbd> - Go To Press</div>
+                <div><kbd className="bg-newspaper-text/20 px-2 py-1 rounded">SPACE</kbd> - End Turn</div>
                 <div><kbd className="bg-newspaper-text/20 px-2 py-1 rounded">1-9</kbd> - Play Card</div>
               </div>
               <div>

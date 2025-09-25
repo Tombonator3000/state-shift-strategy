@@ -36,8 +36,8 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     },
     {
       id: 'hand',
-      title: '🎴 Newsroom Desk',
-      description: 'These are your cards. Each has a cost (circle) and type. Click cards to examine them closely before they hit the presses.',
+      title: '🎴 Your Hand',
+      description: 'These are your cards. Each has a cost (circle) and type. Click cards to examine them closely.',
       target: '#enhanced-hand',
       action: 'Click on a card to examine it'
     },
@@ -62,14 +62,14 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     },
     {
       id: 'turn-end',
-      title: '🗞️ Go To Press',
-      description: 'When you\'re done playing cards, click "Go To Press". You can play up to 3 cards per turn before filing the edition.',
+      title: '⏭️ End Turn',
+      description: 'When you\'re done playing cards, click "End Turn". You can play up to 3 cards per turn.',
       target: '#end-turn-button'
     },
     {
       id: 'victory',
-      title: '📰 Mission Brief',
-      description: 'Win by controlling 10 states, reaching 300 IP, or hitting your truth threshold (95% for Truth, 5% for Government). Read the Mission Brief banner for live progress!',
+      title: '🏆 Victory Conditions',
+      description: 'Win by controlling 10 states, reaching 300 IP, or hitting your truth threshold (95% for Truth, 5% for Government). Watch these in the header!',
       target: '#victory-conditions'
     }
   ];
