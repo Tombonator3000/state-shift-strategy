@@ -22,10 +22,48 @@ interface USAMapProps {
   audio?: any;
 }
 
+const ASPECT_RATIO = 500 / 800;
+
 const USAMap: React.FC<USAMapProps> = ({ states, onStateClick, selectedCard, audio }) => {
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [geoData, setGeoData] = useState<any>(null);
   const [hoveredState, setHoveredState] = useState<string | null>(null);
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({ width: 800, height: 500 });
+
+  useEffect(() => {
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const computeDimensions = (entry?: ResizeObserverEntry) => {
+      const width = entry?.contentRect?.width ?? containerRef.current?.clientWidth ?? 800;
+      const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 900;
+      const idealHeight = width * ASPECT_RATIO;
+      const maxHeight = viewportHeight * 0.7;
+      const height = Math.min(Math.max(idealHeight, 240), maxHeight > 0 ? maxHeight : idealHeight);
+      setDimensions(prev => {
+        if (prev.width === width && prev.height === height) {
+          return prev;
+        }
+        return { width, height };
+      });
+    };
+
+    // Initial measurement
+    computeDimensions();
+
+    const observer = new ResizeObserver(entries => {
+      if (entries.length === 0) return;
+      computeDimensions(entries[0]);
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     // Load US states TopoJSON data
@@ -60,16 +98,18 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick, selectedCard, aud
   }, [states]);
 
   useEffect(() => {
-    if (!geoData || !svgRef.current) return;
+    if (!geoData || !svgRef.current || dimensions.width === 0 || dimensions.height === 0) return;
 
     const svg = svgRef.current;
-    const width = 800;
-    const height = 500;
+    const width = dimensions.width;
+    const height = dimensions.height;
+
+    svg.setAttribute('width', `${width}`);
+    svg.setAttribute('height', `${height}`);
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 
     // Set up Albers USA projection
-    const projection = geoAlbersUsa()
-      .scale(1000)
-      .translate([width / 2, height / 2]);
+    const projection = geoAlbersUsa().fitSize([width, height], geoData);
 
     const path = geoPath(projection);
 
@@ -134,7 +174,7 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick, selectedCard, aud
       }
     });
 
-  }, [geoData, states, onStateClick]);
+  }, [geoData, states, onStateClick, dimensions]);
 
   const getStateClass = (state?: State) => {
     if (!state) return 'neutral';
@@ -148,19 +188,22 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick, selectedCard, aud
   };
 
   return (
-    <Card className="p-4 bg-card border-border relative">
+    <Card className="p-4 bg-card border-border relative" ref={containerRef}>
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-foreground">United States - Shadow Government Control</h3>
       </div>
-      
-      <div className="relative">
-        <svg 
+
+      <div className="relative w-full" style={{ minHeight: `${Math.round(dimensions.height)}px` }}>
+        <svg
           ref={svgRef}
-          width="800" 
-          height="500" 
-          className="w-full h-full border border-border rounded"
-          style={{ backgroundColor: 'hsl(var(--muted))' }}
-          viewBox="0 0 800 500"
+          className="w-full border border-border rounded"
+          style={{
+            backgroundColor: 'hsl(var(--muted))',
+            maxHeight: '70vh',
+            height: 'auto',
+            aspectRatio: `${dimensions.width} / ${dimensions.height}`
+          }}
+          viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
           preserveAspectRatio="xMidYMid meet"
         >
         </svg>
