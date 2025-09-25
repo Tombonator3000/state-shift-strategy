@@ -527,7 +527,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">Auto End Turn</label>
+                <label className="text-sm font-medium text-newspaper-text">Auto Go To Press</label>
                 <Switch
                   checked={settings.autoEndTurn}
                   onCheckedChange={checked => updateSettings({ autoEndTurn: checked })}
@@ -781,7 +781,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
           <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">⌨️ COVERT OPERATIONS MANUAL</h3>
           <div className="grid md:grid-cols-2 gap-4 text-sm text-newspaper-text">
             <div>
-              <div className="font-mono">SPACE - End Turn</div>
+              <div className="font-mono">SPACE - Go To Press</div>
               <div className="font-mono">T - Select Card</div>
               <div className="font-mono">U - View Upgrades</div>
               <div className="font-mono">S - View Statistics</div>

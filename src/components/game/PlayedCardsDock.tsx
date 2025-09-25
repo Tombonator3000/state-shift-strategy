@@ -65,8 +65,8 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards, onInspec
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <header className="border-b border-black/10 px-3 py-2 text-sm font-extrabold tracking-wide text-newspaper-text">
-        CARDS IN PLAY THIS ROUND
+      <header className="border-b border-black/20 bg-newspaper-bg bg-[image:var(--halftone-red)] bg-[length:6px_6px] bg-repeat px-3 py-2 text-[0.7rem] font-black uppercase tracking-[0.5em] text-newspaper-text shadow-[0_2px_0_rgba(0,0,0,0.25)]">
+        FRONT PAGE LAYOUT
       </header>
       <div className="grid grid-cols-1 gap-2 p-2 lg:grid-cols-2">
         <PlayedCardsSection
