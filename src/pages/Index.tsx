@@ -1327,7 +1327,7 @@ const Index = () => {
       title: 'Victory Conditions',
       defaultOpen: true,
       overlay: () => (
-        <div className="space-y-3 text-[11px] text-newspaper-text/90" aria-live="polite">
+        <div className="space-y-3 text-[11px] text-newspaper-text/90">
           <p className="font-semibold uppercase tracking-[0.25em] text-[10px] text-newspaper-text/60">
             Mission Targets
           </p>
@@ -1628,74 +1628,62 @@ const Index = () => {
   );
 
   const leftPaneContent = (
-    <>
-      <div className="playfield">
-        <div className="playfield__header">
-          <div className="space-y-4 md:hidden">
-            {statusPanelConfigs.map(panel => (
-              <div key={`${panel.id}-mobile`}>{panel.mobile()}</div>
-            ))}
-          </div>
-        </div>
-
-        <div id="ui-rails">
-          <aside id="left-rail" aria-label="Game intelligence panels" />
-          {statusPanelConfigs.map(panel => (
-            <FoldoutOverlayPanel
-              key={panel.id}
-              id={panel.id}
-              title={panel.title}
-              defaultOpen={panel.defaultOpen}
-            >
-              {panel.overlay()}
-            </FoldoutOverlayPanel>
-          ))}
-        </div>
-
-        <div id="map-box" className="relative flex min-h-0 min-w-0 flex-col">
-          <div className="map-shell relative flex min-h-[320px] flex-1 flex-col">
-            <div className="map-surface relative flex flex-1 flex-col overflow-visible rounded border-2 border-newspaper-border bg-white/80">
-              {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
-                <div className="pointer-events-none absolute top-4 right-4 z-30">
-                  <div className="max-w-sm animate-pulse border-2 border-newspaper-border bg-newspaper-text p-4 font-mono text-newspaper-bg shadow-2xl">
-                    <div className="mb-2 flex items-center gap-2 text-lg">
-                      🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
-                    </div>
-                    <div className="mb-3 text-sm">
-                      Click any <span className="font-bold text-yellow-400">NEUTRAL</span> or <span className="font-bold text-red-500">ENEMY</span> state to target
-                    </div>
-                    <div className="mb-2 rounded bg-black/20 p-2 text-xs">
-                      Card will deploy automatically when target is selected
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-yellow-400">
-                      ⚠️ Cannot target your own states
-                    </div>
-                  </div>
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <div className="space-y-4 md:hidden">
+        {statusPanelConfigs.map(panel => (
+          <div key={`${panel.id}-mobile`}>{panel.mobile()}</div>
+        ))}
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
+          {gameState.selectedCard && gameState.hand.find(c => c.id === gameState.selectedCard)?.type === 'ZONE' && !gameState.targetState && (
+            <div className="pointer-events-none absolute top-4 right-4 z-30">
+              <div className="max-w-sm animate-pulse border-2 border-newspaper-border bg-newspaper-text p-4 font-mono text-newspaper-bg shadow-2xl">
+                <div className="mb-2 flex items-center gap-2 text-lg">
+                  🎯 <span className="font-bold">ZONE CARD ACTIVE</span>
                 </div>
-              )}
-              <div className="relative flex-1">
-                <EnhancedUSAMap
-                  states={gameState.states}
-                  onStateClick={handleStateClick}
-                  selectedZoneCard={gameState.selectedCard}
-                  selectedState={gameState.targetState}
-                  audio={audio}
-                />
+                <div className="mb-3 text-sm">
+                  Click any <span className="font-bold text-yellow-400">NEUTRAL</span> or <span className="font-bold text-red-500">ENEMY</span> state to target
+                </div>
+                <div className="mb-2 rounded bg-black/20 p-2 text-xs">
+                  Card will deploy automatically when target is selected
+                </div>
+                <div className="flex items-center gap-1 text-xs text-yellow-400">
+                  ⚠️ Cannot target your own states
+                </div>
               </div>
+            </div>
+          )}
+          <div className="relative flex-1">
+            <EnhancedUSAMap
+              states={gameState.states}
+              onStateClick={handleStateClick}
+              selectedZoneCard={gameState.selectedCard}
+              selectedState={gameState.targetState}
+              audio={audio}
+            />
+            <div className="pointer-events-none absolute inset-0 z-20 hidden md:flex flex-col items-start gap-3 p-4">
+              {statusPanelConfigs.map(panel => (
+                <FoldoutOverlayPanel
+                  key={panel.id}
+                  title={panel.title}
+                  defaultOpen={panel.defaultOpen}
+                >
+                  {panel.overlay()}
+                </FoldoutOverlayPanel>
+              ))}
             </div>
           </div>
         </div>
-
-        <div id="tray" className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
+        <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
           <PlayedCardsDock
             playedCards={gameState.cardsPlayedThisRound}
             onInspectCard={(card) => setInspectedPlayedCard(card)}
           />
         </div>
       </div>
-
       <CardPreviewOverlay card={hoveredCard} />
-    </>
+    </div>
   );
 
   const rightPaneContent = (
