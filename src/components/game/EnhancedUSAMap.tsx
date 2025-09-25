@@ -44,7 +44,9 @@ interface EnhancedUSAMapProps {
   playedCards?: PlayedCard[];
 }
 
-const ASPECT_RATIO = 500 / 800;
+const MAP_BASE_WIDTH = 975;
+const MAP_BASE_HEIGHT = 610;
+const MAP_ASPECT_RATIO = MAP_BASE_HEIGHT / MAP_BASE_WIDTH;
 
 const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   states,
@@ -76,7 +78,10 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     stateId?: string;
     mode?: 'select' | 'lock' | 'complete';
   } | null>(null);
-  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({ width: 800, height: 500 });
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
+    width: MAP_BASE_WIDTH,
+    height: MAP_BASE_HEIGHT
+  });
 
   useEffect(() => {
     if (typeof ResizeObserver === 'undefined') {
@@ -84,9 +89,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     }
 
     const computeDimensions = (entry?: ResizeObserverEntry) => {
-      const width = entry?.contentRect?.width ?? containerRef.current?.clientWidth ?? 800;
+      const width = entry?.contentRect?.width ?? containerRef.current?.clientWidth ?? MAP_BASE_WIDTH;
       const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 900;
-      const idealHeight = width * ASPECT_RATIO;
+      const idealHeight = width * MAP_ASPECT_RATIO;
       const maxHeight = viewportHeight * 0.7;
       const height = Math.min(Math.max(idealHeight, 260), maxHeight > 0 ? maxHeight : idealHeight);
       setDimensions(prev => {
@@ -202,12 +207,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     if (!geoData || !svgRef.current || dimensions.width === 0 || dimensions.height === 0) return;
 
     const svg = svgRef.current;
-    const width = dimensions.width;
-    const height = dimensions.height;
 
-    svg.setAttribute('width', `${width}`);
-    svg.setAttribute('height', `${height}`);
-    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    svg.setAttribute('viewBox', `0 0 ${MAP_BASE_WIDTH} ${MAP_BASE_HEIGHT}`);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
     // Clear any pending contested animation retries before rebuilding the scene
     contestedAnimationTimeoutsRef.current.forEach(timeoutId => window.clearTimeout(timeoutId));
@@ -217,7 +219,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     const handlePointerLeave = () => setHoveredState(null);
     svg.addEventListener('pointerleave', handlePointerLeave);
 
-    const projection = geoAlbersUsa().fitSize([width, height], geoData);
+    const projection = geoAlbersUsa().fitSize([MAP_BASE_WIDTH, MAP_BASE_HEIGHT], geoData);
 
     const path = geoPath(projection);
 
@@ -562,19 +564,23 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const stateInfo = getHoveredStateInfo();
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="relative">
       <Card className="p-4 bg-card border-border relative">
 
-        <div className="relative w-full" style={{ minHeight: `${Math.round(dimensions.height)}px` }}>
+        <div
+          id="us-map-stage"
+          ref={containerRef}
+          className="relative w-full overflow-hidden rounded border border-border bg-black/5"
+          style={{
+            height: `${Math.round(dimensions.height)}px`,
+            maxHeight: '70vh'
+          }}
+        >
           <svg
             ref={svgRef}
-            className="w-full border border-border rounded bg-black/5"
-            style={{
-              maxHeight: '70vh',
-              height: 'auto',
-              aspectRatio: `${dimensions.width} / ${dimensions.height}`
-            }}
-            viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+            id="us-map"
+            className="block h-full w-full"
+            viewBox={`0 0 ${MAP_BASE_WIDTH} ${MAP_BASE_HEIGHT}`}
             preserveAspectRatio="xMidYMid meet"
           >
           </svg>
@@ -668,8 +674,22 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
       <style>
         {`
+        #us-map-stage {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+
+        #us-map {
+          display: block;
+          width: 100%;
+          height: 100%;
+          transform-origin: center;
+        }
+
         /* Firefox/LibreWolf flickering fix */
-        #map-container, svg {
+        #us-map-stage, #us-map {
           will-change: transform;
           transform: translateZ(0);
           backface-visibility: hidden;
