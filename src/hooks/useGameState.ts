@@ -3,6 +3,11 @@ import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
 import { generateWeightedDeck } from '@/data/weightedCardDistribution';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
+import {
+  applyStateCombinationCostModifiers,
+  calculateDynamicIpBonus,
+  createDefaultCombinationEffects,
+} from '@/data/stateCombinations';
 import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
 import { type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
@@ -178,6 +183,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     cardsPlayedThisTurn: 0,
     cardsPlayedThisRound: [],
     comboTruthDeltaThisRound: 0,
+    stateCombinationBonusIP: 0,
+    activeStateCombinationIds: [],
+    stateCombinationEffects: createDefaultCombinationEffects(),
     playHistory: [],
     turnPlays: [],
     controlledStates: [],
@@ -287,6 +295,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       cardsPlayedThisRound: [],
       playHistory: [],
       turnPlays: [],
+      stateCombinationBonusIP: 0,
+      activeStateCombinationIds: [],
+      stateCombinationEffects: createDefaultCombinationEffects(),
       animating: false,
       aiTurnInProgress: false,
       selectedCard: null,
@@ -328,16 +339,29 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const playCard = useCallback((cardId: string, targetOverride?: string | null) => {
     setGameState(prev => {
       const card = prev.hand.find(c => c.id === cardId);
-      if (!card || prev.ip < card.cost || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
+      if (!card || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
         return prev;
       }
+
+      const effectiveCost = applyStateCombinationCostModifiers(
+        card.cost,
+        card.type,
+        'human',
+        prev.stateCombinationEffects,
+      );
+
+      if (prev.ip < effectiveCost) {
+        return prev;
+      }
+
+      const resolvedCard = effectiveCost === card.cost ? card : { ...card, cost: effectiveCost };
 
       achievements.onCardPlayed(cardId, card.type, card.rarity);
 
       const targetState = targetOverride ?? prev.targetState ?? null;
-      const resolution = resolveCardEffects(prev, card, targetState);
+      const resolution = resolveCardEffects(prev, resolvedCard, targetState);
       const playedCardRecord = createPlayedCardRecord({
-        card,
+        card: resolvedCard,
         player: 'human',
         faction: prev.faction,
         targetState,
@@ -351,7 +375,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const turnPlayEntries = createTurnPlayEntries({
         state: prev,
-        card,
+        card: resolvedCard,
         owner: 'human',
         targetState,
         resolution,
@@ -383,7 +407,18 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     explicitTargetState?: string
   ) => {
     const card = gameState.hand.find(c => c.id === cardId);
-    if (!card || gameState.ip < card.cost || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
+    if (!card || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
+      return;
+    }
+
+    const initialCost = applyStateCombinationCostModifiers(
+      card.cost,
+      card.type,
+      'human',
+      gameState.stateCombinationEffects,
+    );
+
+    if (gameState.ip < initialCost) {
       return;
     }
 
@@ -392,15 +427,30 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const targetState = explicitTargetState ?? gameState.targetState ?? null;
     let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
     let pendingTurnPlays: ReturnType<typeof createTurnPlayEntries> | null = null;
+    let pendingResolvedCard: GameCard | null = null;
 
     setGameState(prev => {
       if (prev.animating) {
         return prev;
       }
 
-      const resolution = resolveCardEffects(prev, card, targetState);
+      const effectiveCost = applyStateCombinationCostModifiers(
+        card.cost,
+        card.type,
+        'human',
+        prev.stateCombinationEffects,
+      );
+
+      if (prev.ip < effectiveCost) {
+        return prev;
+      }
+
+      const resolvedCard = effectiveCost === card.cost ? card : { ...card, cost: effectiveCost };
+      pendingResolvedCard = resolvedCard;
+
+      const resolution = resolveCardEffects(prev, resolvedCard, targetState);
       pendingRecord = createPlayedCardRecord({
-        card,
+        card: resolvedCard,
         player: 'human',
         faction: prev.faction,
         targetState,
@@ -414,7 +464,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       pendingTurnPlays = createTurnPlayEntries({
         state: prev,
-        card,
+        card: resolvedCard,
         owner: 'human',
         targetState,
         resolution,
@@ -443,7 +493,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       setGameState(prev => {
         const record = pendingRecord ?? {
-          card,
+          card: pendingResolvedCard ?? card,
           player: 'human' as const,
           faction: prev.faction,
           targetState: targetState ?? null,
@@ -473,7 +523,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       console.error('Card animation failed:', error);
       setGameState(prev => {
         const record = pendingRecord ?? {
-          card,
+          card: pendingResolvedCard ?? card,
           player: 'human' as const,
           faction: prev.faction,
           targetState: targetState ?? null,
@@ -541,7 +591,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         // Calculate IP income from controlled states
         const stateIncome = getTotalIPFromStates(prev.controlledStates);
         const baseIncome = 5;
-        const totalIncome = baseIncome + stateIncome;
+        const synergyIncome = prev.stateCombinationBonusIP;
+        const neutralStates = prev.states.filter(state => state.owner === 'neutral').length;
+        const comboEffectIncome = calculateDynamicIpBonus(
+          prev.stateCombinationEffects,
+          prev.controlledStates.length,
+          neutralStates,
+        );
+        const totalIncome = baseIncome + stateIncome + synergyIncome + comboEffectIncome;
 
         // Update event manager with current turn
         prev.eventManager?.updateTurn(prev.turn);
@@ -575,7 +632,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const newEvents = buildEditionEvents(prev, triggeredEvent);
 
         // Store pending card draw for after newspaper
-        const pendingCardDraw = bonusCardDraw;
+        const comboDrawBonus = Math.max(0, prev.stateCombinationEffects.extraCardDraw);
+        const pendingCardDraw = bonusCardDraw + comboDrawBonus;
 
         const comboLog =
           comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
@@ -590,8 +648,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           `Turn ${prev.turn} ended`,
           `Base income: ${baseIncome} IP`,
           `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
+          ...(synergyIncome > 0 ? [`State synergy bonus: +${synergyIncome} IP`] : []),
+          ...(comboEffectIncome > 0
+            ? [`Combo effects bonus: +${comboEffectIncome} IP`]
+            : []),
           `Total income: ${totalIncome + ipModifier} IP`,
           ...eventEffectLog,
+          ...(comboDrawBonus > 0 ? [`Synergy draw bonus: +${comboDrawBonus} card${comboDrawBonus === 1 ? '' : 's'}`] : []),
         ];
 
         const nextState: GameState = {
@@ -957,6 +1020,17 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           : [],
         comboTruthDeltaThisRound:
           typeof saveData.comboTruthDeltaThisRound === 'number' ? saveData.comboTruthDeltaThisRound : 0,
+        stateCombinationBonusIP:
+          typeof saveData.stateCombinationBonusIP === 'number' ? saveData.stateCombinationBonusIP : 0,
+        activeStateCombinationIds: Array.isArray(saveData.activeStateCombinationIds)
+          ? saveData.activeStateCombinationIds
+          : [],
+        stateCombinationEffects: saveData.stateCombinationEffects
+          ? {
+            ...createDefaultCombinationEffects(),
+            ...saveData.stateCombinationEffects,
+          }
+          : createDefaultCombinationEffects(),
         // Ensure objects are properly reconstructed
         eventManager: prev.eventManager, // Keep the current event manager
         aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium')

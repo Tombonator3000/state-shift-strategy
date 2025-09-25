@@ -5,6 +5,7 @@ import type { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import type { DrawMode, CardDrawState } from '@/data/cardDrawingSystem';
 import type { AIDifficulty } from '@/data/aiStrategy';
 import type { TurnPlay } from '@/game/combo.types';
+import type { StateCombinationEffects } from '@/data/stateCombinations';
 
 export interface CardPlayRecord {
   card: GameCard;
@@ -91,4 +92,7 @@ export interface GameState {
   showNewCardsPresentation?: boolean;
   drawMode: DrawMode;
   cardDrawState: CardDrawState;
+  stateCombinationBonusIP: number;
+  activeStateCombinationIds: string[];
+  stateCombinationEffects: StateCombinationEffects;
 }
