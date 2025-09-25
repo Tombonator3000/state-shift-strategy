@@ -44,6 +44,8 @@ interface EnhancedUSAMapProps {
   playedCards?: PlayedCard[];
 }
 
+const ASPECT_RATIO = 500 / 800;
+
 const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   states,
   onStateClick,
@@ -74,6 +76,40 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     stateId?: string;
     mode?: 'select' | 'lock' | 'complete';
   } | null>(null);
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({ width: 800, height: 500 });
+
+  useEffect(() => {
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const computeDimensions = (entry?: ResizeObserverEntry) => {
+      const width = entry?.contentRect?.width ?? containerRef.current?.clientWidth ?? 800;
+      const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 900;
+      const idealHeight = width * ASPECT_RATIO;
+      const maxHeight = viewportHeight * 0.7;
+      const height = Math.min(Math.max(idealHeight, 260), maxHeight > 0 ? maxHeight : idealHeight);
+      setDimensions(prev => {
+        if (prev.width === width && prev.height === height) {
+          return prev;
+        }
+        return { width, height };
+      });
+    };
+
+    computeDimensions();
+
+    const observer = new ResizeObserver(entries => {
+      if (entries.length === 0) return;
+      computeDimensions(entries[0]);
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const getTooltipPosition = () => {
     const tooltipWidth = tooltipRef.current?.offsetWidth ?? 384;
@@ -163,11 +199,15 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!geoData || !svgRef.current) return;
+    if (!geoData || !svgRef.current || dimensions.width === 0 || dimensions.height === 0) return;
 
     const svg = svgRef.current;
-    const width = 800;
-    const height = 500;
+    const width = dimensions.width;
+    const height = dimensions.height;
+
+    svg.setAttribute('width', `${width}`);
+    svg.setAttribute('height', `${height}`);
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 
     // Clear any pending contested animation retries before rebuilding the scene
     contestedAnimationTimeoutsRef.current.forEach(timeoutId => window.clearTimeout(timeoutId));
@@ -177,9 +217,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     const handlePointerLeave = () => setHoveredState(null);
     svg.addEventListener('pointerleave', handlePointerLeave);
 
-    const projection = geoAlbersUsa()
-      .scale(1000)
-      .translate([width / 2, height / 2]);
+    const projection = geoAlbersUsa().fitSize([width, height], geoData);
 
     const path = geoPath(projection);
 
@@ -503,7 +541,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     selectedZoneCard,
     selectedState,
     governmentTarget?.active,
-    governmentTarget?.stateId
+    governmentTarget?.stateId,
+    dimensions
   ]);
 
   const getStateOwnerClass = (state?: EnhancedState) => {
@@ -525,14 +564,17 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   return (
     <div className="relative" ref={containerRef}>
       <Card className="p-4 bg-card border-border relative">
-        
-        <div className="relative">
-          <svg 
+
+        <div className="relative w-full" style={{ minHeight: `${Math.round(dimensions.height)}px` }}>
+          <svg
             ref={svgRef}
-            width="800" 
-            height="500" 
-            className="w-full h-full border border-border rounded bg-black/5"
-            viewBox="0 0 800 500"
+            className="w-full border border-border rounded bg-black/5"
+            style={{
+              maxHeight: '70vh',
+              height: 'auto',
+              aspectRatio: `${dimensions.width} / ${dimensions.height}`
+            }}
+            viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
             preserveAspectRatio="xMidYMid meet"
           >
           </svg>
