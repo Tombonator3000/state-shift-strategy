@@ -44,6 +44,14 @@ export const useCardCollection = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
   }, [collection]);
 
+  const resetCollection = () => {
+    setCollection({
+      discoveredCards: new Set(),
+      playedCards: new Map(),
+      lastUpdated: Date.now()
+    });
+  };
+
   const discoverCard = (cardId: string) => {
     setCollection(prev => ({
       ...prev,
@@ -90,6 +98,7 @@ export const useCardCollection = () => {
     collection,
     discoverCard,
     playCard,
+    resetCollection,
     getDiscoveredCards,
     getCardStats,
     getCollectionStats
