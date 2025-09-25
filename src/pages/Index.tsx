@@ -2,8 +2,8 @@ import { useEffect, useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { Button } from '@/components/ui/button';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
-import FoldoutOverlayPanel from '@/components/layout/FoldoutOverlayPanel';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
 import EnhancedGameHand from '@/components/game/EnhancedGameHand';
 import PlayedCardsDock from '@/components/game/PlayedCardsDock';
@@ -1438,12 +1438,61 @@ const Index = () => {
     );
   };
 
+  const renderAiStatusPanel = () => (
+    <div className="space-y-3 text-[11px] text-newspaper-text/90">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">Handler</span>
+        <span className="font-mono text-newspaper-text">
+          {gameState.aiStrategist?.personality.name || 'Unknown'}
+        </span>
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-center">
+        <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
+          <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">Difficulty</div>
+          <div className="font-mono text-newspaper-text">{gameState.aiDifficulty.toUpperCase()}</div>
+        </div>
+        <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
+          <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">Territory</div>
+          <div className="font-mono text-newspaper-text">{aiControlledStates} states</div>
+        </div>
+      </div>
+      <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/20 px-3 py-2">
+        <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-newspaper-text/60">
+          <span>Status</span>
+          <span
+            className={`font-mono ${
+              gameState.currentPlayer === 'ai' ? 'text-secret-red' : 'text-newspaper-text/70'
+            }`}
+          >
+            {gameState.currentPlayer === 'ai'
+              ? gameState.phase === 'ai_turn'
+                ? 'Calculating'
+                : 'Active'
+              : 'Waiting'}
+          </span>
+        </div>
+        {gameState.phase === 'ai_turn' && (
+          <div className="mt-1 text-[11px] text-secret-red/80">Processing strategy...</div>
+        )}
+      </div>
+      <div>
+        <div className="flex items-center justify-between text-[11px] text-newspaper-text/70">
+          <span>Objective</span>
+          <span className="font-mono text-newspaper-text">{Math.floor(aiObjectiveProgress)}%</span>
+        </div>
+        <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-newspaper-border/40">
+          <div className="h-full bg-newspaper-text/80" style={{ width: `${aiObjectiveProgress}%` }} />
+        </div>
+      </div>
+      {aiAssessment && (
+        <p className="text-[11px] italic text-newspaper-text/60">“{aiAssessment}”</p>
+      )}
+    </div>
+  );
+
   const statusPanelConfigs = [
     {
       id: 'objectives',
-      title: 'Objectives',
-      defaultOpen: true,
-      overlay: () => renderObjectiveMenu('overlay'),
       mobile: () => (
         <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
           {renderObjectiveMenu('mobile')}
@@ -1452,53 +1501,6 @@ const Index = () => {
     },
     {
       id: 'ai-status',
-      title: 'AI Opponent',
-      defaultOpen: false,
-      overlay: () => (
-        <div className="space-y-3 text-[11px] text-newspaper-text/90">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">Handler</span>
-            <span className="font-mono text-newspaper-text">
-              {gameState.aiStrategist?.personality.name || 'Unknown'}
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-center">
-            <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
-              <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">Difficulty</div>
-              <div className="font-mono text-newspaper-text">{gameState.aiDifficulty.toUpperCase()}</div>
-            </div>
-            <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
-              <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">Territory</div>
-              <div className="font-mono text-newspaper-text">{aiControlledStates} states</div>
-            </div>
-          </div>
-          <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/20 px-3 py-2">
-            <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-newspaper-text/60">
-              <span>Status</span>
-              <span className={`font-mono ${gameState.currentPlayer === 'ai' ? 'text-secret-red' : 'text-newspaper-text/70'}`}>
-                {gameState.currentPlayer === 'ai'
-                  ? (gameState.phase === 'ai_turn' ? 'Calculating' : 'Active')
-                  : 'Waiting'}
-              </span>
-            </div>
-            {gameState.phase === 'ai_turn' && (
-              <div className="mt-1 text-[11px] text-secret-red/80">Processing strategy...</div>
-            )}
-          </div>
-          <div>
-            <div className="flex items-center justify-between text-[11px] text-newspaper-text/70">
-              <span>Objective</span>
-              <span className="font-mono text-newspaper-text">{Math.floor(aiObjectiveProgress)}%</span>
-            </div>
-            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-newspaper-border/40">
-              <div className="h-full bg-newspaper-text/80" style={{ width: `${aiObjectiveProgress}%` }} />
-            </div>
-          </div>
-          {aiAssessment && (
-            <p className="text-[11px] italic text-newspaper-text/60">“{aiAssessment}”</p>
-          )}
-        </div>
-      ),
       mobile: () => (
         <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
           <AIStatus
@@ -1530,6 +1532,7 @@ const Index = () => {
   const currentRoundNumber = Math.max(1, gameState.round);
 
   const mastheadButtonClass = "touch-target inline-flex items-center justify-center rounded-md border border-newspaper-border bg-newspaper-text px-3 text-sm font-semibold text-newspaper-bg shadow-sm transition hover:bg-newspaper-text/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg";
+  const statusBadgeClass = 'flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm';
 
   const mastheadContent = (
     <div
@@ -1652,6 +1655,54 @@ const Index = () => {
             <span className="font-bold uppercase tracking-wide">AI States</span>
             <span>{gameState.states.filter(s => s.owner === 'ai').length}</span>
           </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={clsx(
+                  statusBadgeClass,
+                  'text-[10px] font-bold uppercase tracking-wide transition hover:bg-newspaper-text/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg'
+                )}
+              >
+                Objectives
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="end"
+              className="z-50 w-80 max-w-[min(18rem,calc(100vw-2rem))] border border-newspaper-border bg-newspaper-bg p-4 text-newspaper-text shadow-lg"
+            >
+              <div className="space-y-3">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/60">
+                  Objectives
+                </div>
+                {renderObjectiveMenu('overlay')}
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={clsx(
+                  statusBadgeClass,
+                  'text-[10px] font-bold uppercase tracking-wide transition hover:bg-newspaper-text/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg'
+                )}
+              >
+                AI Opponent
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="end"
+              className="z-50 w-80 max-w-[min(18rem,calc(100vw-2rem))] border border-newspaper-border bg-newspaper-bg p-4 text-newspaper-text shadow-lg"
+            >
+              <div className="space-y-3">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/60">
+                  AI Opponent
+                </div>
+                {renderAiStatusPanel()}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
     </div>
@@ -1694,18 +1745,6 @@ const Index = () => {
                 audio={audio}
               />
             </div>
-          </div>
-          <div className="hidden w-72 shrink-0 flex-col gap-3 md:flex">
-            {statusPanelConfigs.map(panel => (
-              <FoldoutOverlayPanel
-                key={panel.id}
-                title={panel.title}
-                defaultOpen={panel.defaultOpen}
-                variant="sidebar"
-              >
-                {panel.overlay()}
-              </FoldoutOverlayPanel>
-            ))}
           </div>
         </div>
         <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
