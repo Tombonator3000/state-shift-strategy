@@ -62,9 +62,10 @@ const HistogramCard = ({
 
 interface EnhancedBalancingDashboardProps {
   onClose: () => void;
+  logEntries: string[];
 }
 
-const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps) => {
+const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDashboardProps) => {
   const report = useMemo(() => analyzeCardBalanceEnhanced(false), []);
   const simulation = useMemo(() => runBalanceSimulationEnhanced(500, false), []);
   const [expansionState, setExpansionState] = useState(() => ({
@@ -137,6 +138,11 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
     return bins;
   }, [metrics.hist.pressure]);
 
+  const latestIntelEntries = useMemo(
+    () => logEntries.slice(-20).reverse(),
+    [logEntries],
+  );
+
   const formatDelta = (card: EnhancedCardAnalysis) => {
     if (card.costDelta === null) return '—';
     const symbol = card.costDelta > 0 ? '+' : '';
@@ -188,6 +194,25 @@ const EnhancedBalancingDashboard = ({ onClose }: EnhancedBalancingDashboardProps
                 {metrics.counts.truth}/{metrics.counts.government}
               </div>
               <p className="text-xs text-slate-400">Truth / Government card counts in the active pool.</p>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h3 className="text-lg font-semibold text-white font-mono">Intel Log</h3>
+            <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
+              {latestIntelEntries.length > 0 ? (
+                latestIntelEntries.map((entry, index) => (
+                  <div
+                    key={`${entry}-${index}`}
+                    className="flex items-start gap-3 text-xs text-slate-300"
+                  >
+                    <span className="font-mono text-emerald-400 mt-0.5">▲</span>
+                    <span className="leading-snug flex-1">{entry}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-slate-500 italic">No intel recorded yet.</p>
+              )}
             </div>
           </section>
 
