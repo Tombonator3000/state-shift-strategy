@@ -1,4 +1,4 @@
-import type { RoundContext } from '@/features/newspaper/generate';
+import type { NarrativeContext } from '@/engine/newspaper/IssueGenerator';
 import type { Card } from '@/types';
 import type { TabloidPlayedCard } from './TabloidNewspaperLegacy';
 
@@ -16,7 +16,7 @@ export const buildRoundContext = (
   opponentCards: TabloidPlayedCard[],
   eventsTruthDelta: number,
   comboTruthDelta = 0,
-): RoundContext => {
+): NarrativeContext => {
   const truthFromPlayer = playerCards.reduce((sum, entry) => sum + (entry.truthDelta ?? 0), 0);
   const truthFromOpponent = opponentCards.reduce((sum, entry) => sum + (entry.truthDelta ?? 0), 0);
   const capturedStates = playerCards.flatMap(entry => entry.capturedStates ?? []);

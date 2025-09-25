@@ -5,10 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import CardImage from '@/components/game/CardImage';
 import { loadNewspaperData, pick, shuffle, type NewspaperData } from '@/lib/newspaperData';
-import { makeBody, makeHeadline, makeSubhead, shouldStampBreaking, type RoundContext } from '@/features/newspaper/generate';
-import type { TabloidNewspaperProps, TabloidPlayedCard } from './TabloidNewspaperLegacy';
+import { generateIssue, type NarrativeIssue, type PlayedCardInput } from '@/engine/newspaper/IssueGenerator';
+import type { TabloidNewspaperProps } from './TabloidNewspaperLegacy';
 import type { Card } from '@/types';
-import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import { buildRoundContext, formatTruthDelta } from './tabloidRoundUtils';
 import { useAudioContext } from '@/contexts/AudioContext';
@@ -61,62 +60,11 @@ const formatSightingTime = (timestamp: number) => {
   }
 };
 
-const formatTarget = (entry: TabloidPlayedCard): string | null => {
-  if (entry.card.type !== 'ZONE') {
-    return null;
-  }
-
-  const target = entry.targetState;
-  if (!target) {
-    return null;
-  }
-
-  const stateById = getStateById(target);
-  const stateByAbbr = getStateByAbbreviation(target.toUpperCase());
-  const name = stateById?.name ?? stateByAbbr?.name ?? target;
-  return `Target: ${name}`;
-};
-
 const computeEventTruthDelta = (events: TabloidNewspaperProps['events']): number => {
   return events.reduce((sum, event) => {
     const delta = (event.effects?.truth ?? 0) + (event.effects?.truthChange ?? 0);
     return sum + delta;
   }, 0);
-};
-
-const createSecondaryStory = (
-  entry: TabloidPlayedCard,
-  data: NewspaperData,
-): {
-  id: string;
-  cardId: string;
-  headline: string;
-  subhead: string;
-  summary: string;
-  typeLabel: string;
-  player: 'human' | 'ai';
-  truthDeltaLabel: string | null;
-  targetLabel: string | null;
-  capturedStates: string[];
-} => {
-  const headline = makeHeadline(entry.card as Card, data);
-  const subhead = makeSubhead(entry.card as Card, data);
-  const body = makeBody(entry.card as Card, data);
-  const summary = body.split('\n\n')[0];
-  const truthDeltaLabel = formatTruthDelta(entry.truthDelta);
-  const targetLabel = formatTarget(entry);
-  return {
-    id: entry.card.id,
-    cardId: entry.card.id,
-    headline,
-    subhead,
-    summary,
-    typeLabel: `[${entry.card.type}]`,
-    player: entry.player,
-    truthDeltaLabel,
-    targetLabel,
-    capturedStates: entry.capturedStates ?? [],
-  };
 };
 
 const formatEventEffects = (
@@ -188,11 +136,6 @@ const createEventStory = (
   };
 };
 
-type SecondaryCardStory = ReturnType<typeof createSecondaryStory>;
-type SecondaryStory = SecondaryCardStory | ReturnType<typeof createEventStory>;
-
-const isCardStory = (story: SecondaryStory): story is SecondaryCardStory => 'player' in story;
-
 const TabloidNewspaperV2 = ({
   events,
   playedCards,
@@ -207,6 +150,7 @@ const TabloidNewspaperV2 = ({
   const [glitchText, setGlitchText] = useState<string | null>(null);
 
   const dataset = data ?? FALLBACK_DATA;
+  const [issue, setIssue] = useState<NarrativeIssue | null>(null);
   const audio = useAudioContext();
   const [highlightedSightingId, setHighlightedSightingId] = useState<string | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -402,6 +346,28 @@ const TabloidNewspaperV2 = ({
     [playedCards],
   );
 
+  const narrativePlayedCards = useMemo<PlayedCardInput[]>(
+    () =>
+      playedCards.map(entry => ({
+        card: entry.card as Card,
+        player: entry.player,
+        targetState: entry.targetState ?? null,
+        truthDelta: entry.truthDelta,
+        capturedStates: entry.capturedStates ?? [],
+      })),
+    [playedCards],
+  );
+
+  const playerNarrativeCards = useMemo(
+    () => narrativePlayedCards.filter(entry => entry.player === 'human'),
+    [narrativePlayedCards],
+  );
+
+  const opponentNarrativeCards = useMemo(
+    () => narrativePlayedCards.filter(entry => entry.player === 'ai'),
+    [narrativePlayedCards],
+  );
+
   const comboSummary = useMemo(() => getLastComboSummary(), [events, playedCards]);
   const comboReport = useMemo(() => {
     if (!comboSummary || comboSummary.results.length === 0) {
@@ -433,28 +399,49 @@ const TabloidNewspaperV2 = ({
     return comboReport.player;
   }, [comboReport]);
 
-  const heroCardEntry = useMemo(() => {
-    const capture = playerCards.find(entry => (entry.capturedStates ?? []).length > 0);
-    if (capture) {
-      return capture;
-    }
-    const byTruth = [...playerCards].sort((a, b) => Math.abs((b.truthDelta ?? 0)) - Math.abs((a.truthDelta ?? 0)));
-    if (byTruth.length > 0 && Math.abs(byTruth[0].truthDelta ?? 0) > 0) {
-      return byTruth[0];
-    }
-    return playerCards[0] ?? null;
-  }, [playerCards]);
-
   const eventsTruthDelta = useMemo(() => computeEventTruthDelta(events), [events]);
-  const roundContext = useMemo(
-    () => buildRoundContext(playerCards, opponentCards, eventsTruthDelta, comboTruthDelta),
-    [playerCards, opponentCards, eventsTruthDelta, comboTruthDelta],
+
+  useEffect(() => {
+    let cancelled = false;
+    const activeDataset = dataset;
+
+    const run = async () => {
+      try {
+        const generated = await generateIssue({
+          dataset: activeDataset,
+          playedCards: narrativePlayedCards,
+          eventsTruthDelta,
+          comboTruthDelta,
+          comboSummary: comboSummary ?? null,
+        });
+        if (!cancelled) {
+          setIssue(generated);
+        }
+      } catch (error) {
+        console.warn('Failed to generate narrative issue', error);
+        if (!cancelled) {
+          setIssue(null);
+        }
+      }
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dataset, narrativePlayedCards, eventsTruthDelta, comboTruthDelta, comboSummary]);
+
+  const narrativeContext = useMemo(
+    () => buildRoundContext(playerNarrativeCards, opponentNarrativeCards, eventsTruthDelta, comboTruthDelta),
+    [playerNarrativeCards, opponentNarrativeCards, eventsTruthDelta, comboTruthDelta],
   );
 
-  const heroEvent = heroCardEntry ? null : events[0];
+  const heroArticle = issue?.hero ?? null;
+  const heroEvent = heroArticle ? null : events[0];
 
-  const heroHeadline = heroCardEntry
-    ? makeHeadline(heroCardEntry.card as Card, dataset)
+  const heroHeadline = heroArticle
+    ? heroArticle.headline
     : (() => {
         const base = (heroEvent?.headline ?? heroEvent?.title ?? 'UNIDENTIFIED INCIDENT').toUpperCase();
         if (!heroEvent) {
@@ -464,44 +451,42 @@ const TabloidNewspaperV2 = ({
         return effectsLabel ? `${base} (${effectsLabel})` : base;
       })();
 
-  const heroSubhead = heroCardEntry
-    ? makeSubhead(heroCardEntry.card as Card, dataset)
+  const heroSubhead = heroArticle
+    ? heroArticle.deck
     : heroEvent?.content ?? 'Developing situation under intense scrutiny.';
 
-  const heroBody = heroCardEntry
-    ? makeBody(heroCardEntry.card as Card, dataset).split('\n\n')
-    : [heroEvent?.content ?? 'Witness reports remain fragmentary; authorities maintain deliberate silence.'];
+  const heroBody = heroArticle?.paragraphs ?? [
+    heroEvent?.content ?? 'Witness reports remain fragmentary; authorities maintain deliberate silence.',
+  ];
 
-  const heroIsEvent = !heroCardEntry;
-  const heroTypeLabel = heroCardEntry ? `[${heroCardEntry.card.type}]` : `[EVENT]`;
-  const heroTarget = heroCardEntry ? formatTarget(heroCardEntry) : null;
-  const heroCaptured = heroCardEntry?.capturedStates ?? [];
+  const heroIsEvent = !heroArticle;
+  const heroTypeLabel = heroArticle?.typeLabel ?? '[EVENT]';
+  const heroTarget = heroArticle?.stateLabel ?? null;
+  const heroCaptured = heroArticle?.capturedStates ?? [];
+  const heroTags = heroArticle?.tags ?? [];
+  const heroTruthImpact = heroArticle?.truthDeltaLabel ?? null;
+  const heroIpImpact = heroArticle?.ipDeltaLabel ?? null;
+  const heroPressureImpact = heroArticle?.pressureDeltaLabel ?? null;
+  const heroArtHint = heroArticle?.artHint ?? null;
+  const comboNarrative = issue?.comboArticle ?? null;
 
   const bylinePool = dataset.bylines && dataset.bylines.length ? dataset.bylines : FALLBACK_DATA.bylines;
   const sourcePool = dataset.sources && dataset.sources.length ? dataset.sources : FALLBACK_DATA.sources;
-  const byline = pick(bylinePool, 'By: Anonymous Insider');
-  const sourceLine = pick(sourcePool, 'Source: Redacted');
-  const breakingStamp = shouldStampBreaking(roundContext)
-    ? pick(dataset.stamps?.breaking ?? FALLBACK_DATA.stamps?.breaking ?? ['BREAKING'], 'BREAKING')
-    : null;
-  const classifiedStamp = useMemo(() => {
-    if (Math.random() >= 0.3) {
-      return null;
-    }
-    const pool = dataset.stamps?.classified ?? FALLBACK_DATA.stamps?.classified ?? ['CLASSIFIED'];
-    return pick(pool, 'CLASSIFIED');
-  }, [dataset]);
+  const byline = issue?.byline ?? pick(bylinePool, FALLBACK_DATA.bylines?.[0] ?? 'By: Anonymous Insider');
+  const sourceLine = issue?.sourceLine ?? pick(sourcePool, FALLBACK_DATA.sources?.[0] ?? 'Source: Redacted Dossier');
+  const breakingStamp = issue?.stamps.breaking ?? null;
+  const classifiedStamp = issue?.stamps.classified ?? null;
 
-  const ads = useMemo(() => {
+  const ads = issue?.supplements.ads ?? (() => {
     const pool = dataset.ads ?? FALLBACK_DATA.ads;
     if (!pool.length) {
       return FALLBACK_DATA.ads;
     }
     const desired = pool.length < 3 ? pool.length : 3 + (Math.random() < 0.5 ? 0 : 1);
     return shuffle(pool).slice(0, desired);
-  }, [dataset]);
+  })();
 
-  const conspiracies = useMemo(() => {
+  const conspiracies = issue?.supplements.conspiracies ?? (() => {
     const pool = dataset.conspiracyCorner ?? FALLBACK_DATA.conspiracyCorner ?? [];
     if (!pool.length) {
       return FALLBACK_DATA.conspiracyCorner ?? [];
@@ -514,33 +499,67 @@ const TabloidNewspaperV2 = ({
     const min = Math.min(shuffled.length, 4);
     const desired = min === max ? max : Math.floor(Math.random() * (max - min + 1)) + min;
     return shuffled.slice(0, desired);
-  }, [dataset]);
+  })();
 
-  const weatherLine = pick(dataset.weather ?? FALLBACK_DATA.weather ?? [], 'Today: Classified Cloud Cover');
+  const weatherLine = issue?.supplements.weather ?? pick(dataset.weather ?? FALLBACK_DATA.weather ?? [], FALLBACK_DATA.weather?.[0] ?? 'Today: Classified Cloud Cover');
 
-  const secondaryCardStories = useMemo(() => {
-    const remaining = heroCardEntry ? playerCards.filter(entry => entry.card.id !== heroCardEntry.card.id) : playerCards;
-    return remaining.map(entry => createSecondaryStory(entry, dataset));
-  }, [heroCardEntry, playerCards, dataset]);
-
-  const eventStories = useMemo(() => events.map(createEventStory), [events]);
-
-  const secondaryStories = useMemo<SecondaryStory[]>(() => {
-    if (secondaryCardStories.length >= 2) {
-      return secondaryCardStories;
-    }
-    const needed = 2 - secondaryCardStories.length;
-    return [...secondaryCardStories, ...eventStories.slice(0, needed)];
-  }, [secondaryCardStories, eventStories]);
-
-  const oppositionStories = useMemo(
-    () => opponentCards.map(entry => createSecondaryStory(entry, dataset)),
-    [opponentCards, dataset],
+  const eventStories = useMemo(
+    () =>
+      events.map(event => ({
+        kind: 'event' as const,
+        ...createEventStory(event),
+      })),
+    [events],
   );
+
+  const playerStorySummaries = useMemo(() => {
+    const stories = issue?.playerArticles ?? [];
+    return stories.map(story => ({
+      kind: 'card' as const,
+      id: story.id,
+      cardId: story.cardId,
+      headline: story.headline,
+      subhead: story.deck,
+      summary: story.paragraphs[0] ?? '',
+      typeLabel: story.typeLabel,
+      player: story.player,
+      truthDeltaLabel: story.truthDeltaLabel,
+      stateLabel: story.stateLabel,
+      capturedStates: story.capturedStates,
+      tags: story.tags,
+      artHint: story.artHint,
+    }));
+  }, [issue?.playerArticles]);
+
+  const secondaryStories = useMemo(() => {
+    if (playerStorySummaries.length >= 2) {
+      return playerStorySummaries.slice(0, 2);
+    }
+    const needed = 2 - playerStorySummaries.length;
+    return [...playerStorySummaries, ...eventStories.slice(0, needed)];
+  }, [playerStorySummaries, eventStories]);
+
+  const oppositionStories = useMemo(() => {
+    const stories = issue?.oppositionArticles ?? [];
+    return stories.map(story => ({
+      kind: 'card' as const,
+      id: story.id,
+      cardId: story.cardId,
+      headline: story.headline,
+      subhead: story.deck,
+      summary: story.paragraphs[0] ?? '',
+      typeLabel: story.typeLabel,
+      truthDeltaLabel: story.truthDeltaLabel,
+      stateLabel: story.stateLabel,
+      tags: story.tags,
+      artHint: story.artHint,
+      player: story.player,
+    }));
+  }, [issue?.oppositionArticles]);
 
   const displayMasthead = glitchText ?? masthead;
   const truthProgress = Math.max(0, Math.min(100, Math.round(truth)));
-  const truthDeltaLabel = formatTruthDelta(roundContext.truthDeltaTotal);
+  const truthDeltaLabel = formatTruthDelta(narrativeContext.truthDeltaTotal);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -589,7 +608,7 @@ const TabloidNewspaperV2 = ({
               <div className="flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/70">
                 <span>Your Cards: {playerCards.length}</span>
                 <span>Opposition: {opponentCards.length}</span>
-                <span>Captured: {roundContext.capturedStates.length || '—'}</span>
+                <span>Captured: {narrativeContext.capturedStates.length || '—'}</span>
                 <span>Events: {events.length || '—'}</span>
                 <span>
                   Clearance: <span className="redaction align-middle">CLASSIFIED</span>
@@ -625,8 +644,8 @@ const TabloidNewspaperV2 = ({
                 <span>{sourceLine}</span>
               </div>
               <div className="relative overflow-hidden rounded-md border border-newspaper-border bg-newspaper-header/20">
-                {heroCardEntry ? (
-                  <CardImage cardId={heroCardEntry.card.id} className="h-52 w-full object-cover" />
+                {heroArticle?.cardId ? (
+                  <CardImage cardId={heroArticle.cardId} className="h-52 w-full object-cover" />
                 ) : (
                   <div className="flex h-52 items-center justify-center text-sm font-semibold uppercase tracking-wide text-newspaper-text/60">
                     Archival footage pending clearance.
@@ -636,6 +655,15 @@ const TabloidNewspaperV2 = ({
                   <div className="stamp stamp--classified absolute right-3 top-3">{classifiedStamp}</div>
                 ) : null}
               </div>
+              {heroTags.length ? (
+                <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
+                  {heroTags.slice(0, 3).map(tag => (
+                    <span key={tag} className="rounded border border-newspaper-border px-2 py-0.5">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
               <div
                 className={`space-y-4 text-sm leading-relaxed ${
                   heroIsEvent ? 'text-secret-red/90' : ''
@@ -645,40 +673,79 @@ const TabloidNewspaperV2 = ({
                   <p key={index}>{paragraph}</p>
                 ))}
               </div>
+              {!heroIsEvent && (heroTruthImpact || heroIpImpact || heroPressureImpact) ? (
+                <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
+                  {heroTruthImpact ? (
+                    <span className="rounded border border-newspaper-border px-2 py-0.5">{heroTruthImpact}</span>
+                  ) : null}
+                  {heroIpImpact ? (
+                    <span className="rounded border border-newspaper-border px-2 py-0.5">{heroIpImpact}</span>
+                  ) : null}
+                  {heroPressureImpact ? (
+                    <span className="rounded border border-newspaper-border px-2 py-0.5">{heroPressureImpact}</span>
+                  ) : null}
+                </div>
+              ) : null}
               {heroCaptured.length ? (
                 <div className="text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
                   Captured: {heroCaptured.join(', ')}
                 </div>
               ) : null}
+              {heroArtHint ? (
+                <p className="text-[11px] italic text-newspaper-text/50">Illustration brief: {heroArtHint}</p>
+              ) : null}
             </article>
 
             <aside className="space-y-4">
-              {comboReport?.entries.length ? (
+              {comboNarrative ? (
                 <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
                   <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
                     Combo Dispatch
                   </h3>
                   <div className="text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                    {comboOwnerLabel ? `${comboOwnerLabel} · ` : ''}Turn {comboReport.turn}
+                    Chain: {comboNarrative.magnitude} · {comboNarrative.tags.join(' • ')}
                   </div>
-                  <div className="mt-2 space-y-3 text-sm">
-                    {comboReport.entries.map(entry => {
-                      const rewardLabel = entry.reward;
-                      return (
-                        <div
-                          key={entry.id}
-                          className="border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0"
-                        >
-                          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                            <span>{entry.name}</span>
-                            {rewardLabel ? <span>{rewardLabel}</span> : null}
-                          </div>
-                          <p className="text-xs italic text-newspaper-text/70">{entry.description}</p>
-                          {entry.matchedPlays.length ? (
-                            <div className="text-[11px] font-mono text-newspaper-text/60">
-                              Plays: {entry.matchedPlays.join(' → ')}
+                  <h4 className="mt-2 text-base font-semibold leading-snug text-newspaper-text">{comboNarrative.headline}</h4>
+                  <p className="text-xs italic text-newspaper-text/70">{comboNarrative.deck}</p>
+                  <div className="mt-2 space-y-2 text-sm leading-relaxed text-newspaper-text/80">
+                    {comboNarrative.paragraphs.map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                  {comboNarrative.summary ? (
+                    <div className="mt-2 rounded border border-dashed border-newspaper-border/60 bg-white/60 p-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
+                      {comboNarrative.summary}
+                    </div>
+                  ) : null}
+                  {comboReport?.entries.length ? (
+                    <div className="mt-3 space-y-3 text-sm">
+                      {comboReport.entries.map(entry => {
+                        const rewardLabel = entry.reward;
+                        return (
+                          <div
+                            key={entry.id}
+                            className="border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0"
+                          >
+                            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                              <span>{entry.name}</span>
+                              {rewardLabel ? <span>{rewardLabel}</span> : null}
                             </div>
-                          ) : null}
+                            <p className="text-xs italic text-newspaper-text/70">{entry.description}</p>
+                            {entry.matchedPlays.length ? (
+                              <div className="text-[11px] font-mono text-newspaper-text/60">
+                                Plays: {entry.matchedPlays.join(' → ')}
+                              </div>
+                            ) : null}
+                            {entry.fxText ? (
+                              <div className="text-[10px] uppercase tracking-wide text-newspaper-text/50">FX: {entry.fxText}</div>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </section>
+              ) : null}
                           {entry.fxText ? (
                             <div className="text-[10px] uppercase tracking-wide text-newspaper-text/50">FX: {entry.fxText}</div>
                           ) : null}
@@ -832,54 +899,63 @@ const TabloidNewspaperV2 = ({
             <section className="mt-6 space-y-4 rounded-md border border-newspaper-border bg-white/70 p-6 shadow-sm">
               <h3 className="text-lg font-black uppercase tracking-wide">Secondary Reports</h3>
               <div className="grid gap-4 md:grid-cols-2">
-                {secondaryStories.map(story => (
-                  <article key={story.id} className="space-y-2 border-b border-dashed border-newspaper-border/60 pb-3 last:border-0 last:pb-0">
-                    <div
-                      className={`flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide ${
-                        isCardStory(story) ? 'text-newspaper-text/60' : 'text-secret-red/80'
-                      }`}
-                    >
-                      <span className={isCardStory(story) ? '' : 'text-secret-red'}>{story.typeLabel}</span>
-                      {isCardStory(story) ? (
-                        <span>{story.player === 'ai' ? 'Opposition' : 'Dispatch'}</span>
-                      ) : (
-                        <span className="text-secret-red">Event</span>
-                      )}
-                    </div>
-                    <h4
-                      className={`text-lg font-semibold leading-snug ${
-                        isCardStory(story) ? '' : 'text-secret-red'
-                      }`}
-                    >
-                      {story.headline}
-                    </h4>
-                    <p
-                      className={`text-xs italic ${
-                        isCardStory(story) ? 'text-newspaper-text/70' : 'text-secret-red/80'
-                      }`}
-                    >
-                      {story.subhead}
-                    </p>
-                    <p
-                      className={`text-sm leading-relaxed ${
-                        isCardStory(story) ? 'text-newspaper-text/80' : 'text-secret-red/90'
-                      }`}
-                    >
-                      {story.summary}
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
-                      {isCardStory(story) && story.truthDeltaLabel ? (
-                        <span className="rounded border border-newspaper-border px-2 py-0.5">Truth {story.truthDeltaLabel}</span>
+                {secondaryStories.map(story => {
+                  const isCard = story.kind === 'card';
+                  return (
+                    <article key={story.id} className="space-y-2 border-b border-dashed border-newspaper-border/60 pb-3 last:border-0 last:pb-0">
+                      <div
+                        className={`flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide ${
+                          isCard ? 'text-newspaper-text/60' : 'text-secret-red/80'
+                        }`}
+                      >
+                        <span className={isCard ? '' : 'text-secret-red'}>{story.typeLabel}</span>
+                        {isCard ? (
+                          <span>{story.player === 'ai' ? 'Opposition' : 'Dispatch'}</span>
+                        ) : (
+                          <span className="text-secret-red">Event</span>
+                        )}
+                      </div>
+                      <h4
+                        className={`text-lg font-semibold leading-snug ${
+                          isCard ? '' : 'text-secret-red'
+                        }`}
+                      >
+                        {story.headline}
+                      </h4>
+                      <p
+                        className={`text-xs italic ${
+                          isCard ? 'text-newspaper-text/70' : 'text-secret-red/80'
+                        }`}
+                      >
+                        {story.subhead}
+                      </p>
+                      <p
+                        className={`text-sm leading-relaxed ${
+                          isCard ? 'text-newspaper-text/80' : 'text-secret-red/90'
+                        }`}
+                      >
+                        {story.summary}
+                      </p>
+                      <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
+                        {isCard && story.truthDeltaLabel ? (
+                          <span className="rounded border border-newspaper-border px-2 py-0.5">{story.truthDeltaLabel}</span>
+                        ) : null}
+                        {isCard && story.stateLabel ? (
+                          <span className="rounded border border-dashed border-newspaper-border px-2 py-0.5">{story.stateLabel}</span>
+                        ) : null}
+                        {isCard && story.capturedStates?.length ? (
+                          <span className="rounded border border-newspaper-border px-2 py-0.5">Captured: {story.capturedStates.join(', ')}</span>
+                        ) : null}
+                        {isCard && story.tags?.length ? (
+                          <span className="rounded border border-newspaper-border px-2 py-0.5">{story.tags.slice(0, 2).join(' • ')}</span>
+                        ) : null}
+                      </div>
+                      {isCard && story.artHint ? (
+                        <p className="text-[10px] italic text-newspaper-text/50">Art hint: {story.artHint}</p>
                       ) : null}
-                      {isCardStory(story) && story.targetLabel ? (
-                        <span className="rounded border border-dashed border-newspaper-border px-2 py-0.5">{story.targetLabel}</span>
-                      ) : null}
-                      {isCardStory(story) && story.capturedStates?.length ? (
-                        <span className="rounded border border-newspaper-border px-2 py-0.5">Captured: {story.capturedStates.join(', ')}</span>
-                      ) : null}
-                    </div>
-                  </article>
-                ))}
+                    </article>
+                  );
+                })}
               </div>
             </section>
           ) : null}
