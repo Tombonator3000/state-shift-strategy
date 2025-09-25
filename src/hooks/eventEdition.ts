@@ -10,16 +10,16 @@ export const buildEditionEvents = (
   state: EditionEventSnapshot,
   triggeredEvent: GameEvent | null,
 ): GameEvent[] => {
-  const events: GameEvent[] = [];
-
   const isFirstEdition = state.turn === 1 && state.round === 1;
-  if (isFirstEdition && state.currentEvents.length > 0 && triggeredEvent) {
-    events.push(...state.currentEvents);
+
+  if (!triggeredEvent) {
+    return [];
   }
 
-  if (triggeredEvent) {
-    events.push(triggeredEvent);
+  if (isFirstEdition) {
+    return [triggeredEvent];
   }
 
-  return events;
+  const wasAlreadyPresent = state.currentEvents.some(event => event.id === triggeredEvent.id);
+  return wasAlreadyPresent ? state.currentEvents : [triggeredEvent];
 };
