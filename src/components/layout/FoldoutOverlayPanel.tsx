@@ -6,6 +6,7 @@ interface FoldoutOverlayPanelProps {
   children: ReactNode;
   defaultOpen?: boolean;
   widthClassName?: string;
+  variant?: "overlay" | "sidebar";
 }
 
 export default function FoldoutOverlayPanel({
@@ -13,8 +14,10 @@ export default function FoldoutOverlayPanel({
   children,
   defaultOpen = false,
   widthClassName = "w-72",
+  variant = "overlay",
 }: FoldoutOverlayPanelProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const isOverlay = variant === "overlay";
 
   return (
     <div className="pointer-events-auto">
@@ -22,7 +25,9 @@ export default function FoldoutOverlayPanel({
         className={clsx(
           "relative transition-all duration-300 ease-out",
           widthClassName,
-          isOpen ? "translate-x-0" : "-translate-x-[calc(100%-3.75rem)]"
+          isOverlay
+            ? (isOpen ? "translate-x-0" : "-translate-x-[calc(100%-3.75rem)]")
+            : "translate-x-0"
         )}
       >
         <div
