@@ -22,8 +22,6 @@ interface EnhancedGameHandProps {
   currentIP: number;
   loadingCard?: string | null;
   onCardHover?: (card: (GameCard & { _hoverPosition?: { x: number; y: number } }) | null) => void;
-  playsRemaining?: number;
-  maxPlays?: number;
 }
 
 const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
@@ -34,9 +32,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   onSelectCard,
   currentIP,
   loadingCard,
-  onCardHover,
-  playsRemaining = 3,
-  maxPlays = 3,
+  onCardHover
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
@@ -44,7 +40,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const { triggerHaptic } = useHapticFeedback();
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);
-  const effectivePlays = Math.max(0, Math.min(maxPlays, playsRemaining));
 
   const normalizeCardType = (type: string): MVPCardType => {
     return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
@@ -53,18 +48,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const handlePlayCard = async (cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return;
-
-    if (effectivePlays <= 0) {
-      audio.playSFX('lightClick');
-      triggerHaptic('error');
-      toast({
-        title: 'Play limit reached',
-        description: 'You have already deployed three cards this turn. End your turn to refresh plays.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
+    
     if (!canAffordCard(card)) {
       audio.playSFX('lightClick'); // Error sound - light click
       triggerHaptic('error');
@@ -124,30 +108,13 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     }
   });
 
-  const isPlayCapReached = effectivePlays <= 0;
-  const formatShortfall = (cost: number) => {
-    const gap = cost - currentIP;
-    return gap > 0 ? gap : 0;
-  };
-
   return (
     <div
       className="relative h-full"
       ref={handRef}
       onPointerLeave={() => onCardHover?.(null)}
     >
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
-        <span
-          className={clsx(
-            'rounded border px-2 py-1',
-            isPlayCapReached ? 'border-red-400/70 text-red-600' : 'border-emerald-400/70 text-emerald-600'
-          )}
-        >
-          Plays left: {effectivePlays}/{maxPlays}
-        </span>
-        <span className="rounded border border-border/70 px-2 py-1 text-foreground">IP: {currentIP}</span>
-      </div>
-      <div className="grid w-full auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      <div className="grid w-full grid-cols-3 gap-3 justify-items-start items-start content-start">
         {cards.length === 0 ? (
           <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
             No assets available
@@ -196,21 +163,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-yellow-300 ring-2 ring-yellow-200" />
                 )}
 
-                {isPlayCapReached && !isPlaying && !isLoading && (
-                  <div
-                    className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 rounded-[calc(var(--pt-radius)*var(--card-scale))] bg-black/60 text-center font-mono text-xs uppercase tracking-[0.3em] text-red-200"
-                  >
-                    <span>Play cap reached</span>
-                    <span className="text-[10px] normal-case tracking-[0.1em]">End turn to refresh</span>
-                  </div>
-                )}
-
-                {!canAfford && !isPlaying && !isLoading && (
-                  <div className="pointer-events-none absolute bottom-3 left-3 right-3 z-10 rounded border border-red-400/60 bg-red-500/20 p-2 text-center text-[11px] font-mono text-red-100 shadow-md">
-                    Need {formatShortfall(card.cost)} more IP
-                  </div>
-                )}
-
                 <div className="pointer-events-none">
                   <ExtensionCardBadge cardId={card.id} card={card} variant="overlay" />
                 </div>
@@ -223,7 +175,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 type="button"
                 className={clsx(
                   'group/card relative flex w-full items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
-                  (!canAfford || isPlayCapReached) && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
+                  !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
                   disabled && 'cursor-default'
                 )}
                 style={{ animationDelay: `${index * 0.03}s` }}
@@ -271,15 +223,10 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     'drop-shadow-[0_12px_22px_rgba(0,0,0,0.32)] transition-transform duration-200',
                     !disabled && canAfford && 'group-hover/card:-translate-y-1 group-hover/card:drop-shadow-[0_22px_30px_rgba(0,0,0,0.35)]',
                     (isPlaying || isLoading) && 'ring-2 ring-primary shadow-primary/40',
-                    isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40',
-                    (!canAfford || isPlayCapReached) && 'grayscale'
+                    isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40'
                   )}
                   overlay={overlay}
                 />
-                <div className="pointer-events-none absolute left-3 top-3 z-10 flex items-center gap-2 rounded-full border border-border/70 bg-background/90 px-2 py-1 text-[11px] font-mono text-foreground shadow">
-                  <span className="font-bold">IP</span>
-                  <span>{card.cost}</span>
-                </div>
               </button>
             );
           })

@@ -1,15 +1,6 @@
 import type { GameCard, Rarity } from '@/rules/mvp';
 import { featureFlags } from '@/state/featureFlags';
 import { resolveCardMVP, type AchievementTracker, type CardPlayResolution } from '@/systems/cardResolution';
-import { generateWeightedDeck } from '@/data/weightedCardDistribution';
-import {
-  consumeExpose,
-  consumeObfuscate,
-  clearHeadlineBonus,
-  clearGovernmentInitiative,
-  withTruthMomentum,
-} from '@/game/momentum';
-import { resolveFrontPageSlot } from '@/game/frontPage';
 import type { TurnPlay } from '@/game/combo.types';
 import type { PlayerId } from '@/mvp/validator';
 
@@ -60,7 +51,6 @@ export const createPlayedCardRecord = (params: {
     turn: params.turn,
     timestamp: Date.now(),
     logEntries: [...logEntries],
-    frontPageSlot: resolveFrontPageSlot(params.card),
   };
 };
 
@@ -277,41 +267,10 @@ export const applyAiCardPlay = (
     };
   }
 
-  const baseResolution = resolveCardMVP(prev, resolvedCard, targetState ?? null, 'ai', achievements);
-  const resolution = {
-    ...baseResolution,
-    logEntries: [...(baseResolution.logEntries ?? [])],
-  };
-
-  const exposeActive = prev.evidenceTrack.exposeReady && prev.evidenceTrack.exposeOwner === 'ai';
-  if (exposeActive) {
-    resolution.aiIP = resolution.aiIP + 1;
-    resolution.logEntries.push('Expose! Agency accountants skimmed +1 IP for the AI.');
-  }
-
-  const initiativeActive = prev.publicFrenzy.governmentInitiativeActiveFor === 'ai';
-  if (initiativeActive) {
-    resolution.aiIP = resolution.aiIP + 1;
-    resolution.logEntries.push('Initiative bonus: dossier stamped before the humans reacted (+1 IP).');
-  }
-
-  const obfuscateActive = prev.evidenceTrack.obfuscateReady && prev.evidenceTrack.obfuscateOwner === 'ai';
-  let updatedAiDeck = prev.aiDeck;
-  let bonusAiCards: GameCard[] = [];
-  if (obfuscateActive) {
-    if (updatedAiDeck.length === 0) {
-      const refillFaction = prev.faction === 'truth' ? 'government' : 'truth';
-      updatedAiDeck = generateWeightedDeck(40, refillFaction);
-    }
-    if (updatedAiDeck.length > 0) {
-      bonusAiCards = [updatedAiDeck[0]];
-      updatedAiDeck = updatedAiDeck.slice(1);
-      resolution.logEntries.push('Obfuscate! Bureaucrats slipped an extra directive into the AI dossier (+1 card).');
-    }
-  }
-
+  const resolution = resolveCardMVP(prev, resolvedCard, targetState ?? null, 'ai', achievements);
   const logEntries = [...prev.log, ...resolution.logEntries];
   const strategyLogEntries = buildStrategyLogEntries(reasoning, strategyDetails);
+
   if (strategyLogEntries.length) {
     logEntries.push(...strategyLogEntries);
   }
@@ -337,7 +296,7 @@ export const applyAiCardPlay = (
     resolution,
   });
 
-  let nextState: GameState = {
+  const nextState: GameState = {
     ...prev,
     ip: resolution.ip,
     aiIP: resolution.aiIP,
@@ -346,37 +305,12 @@ export const applyAiCardPlay = (
     controlledStates: resolution.controlledStates,
     aiControlledStates: resolution.aiControlledStates,
     targetState: resolution.targetState,
-    aiHand: [...prev.aiHand.filter(c => c.id !== resolvedCard.id), ...bonusAiCards],
-    aiDeck: updatedAiDeck,
+    aiHand: prev.aiHand.filter(c => c.id !== resolvedCard.id),
     cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
     playHistory: [...prev.playHistory, playedCardRecord],
     turnPlays: [...prev.turnPlays, ...turnPlayEntries],
     log: logEntries,
   };
-
-  if (initiativeActive) {
-    nextState = clearGovernmentInitiative(nextState, 'ai');
-  }
-
-  if (exposeActive) {
-    nextState = consumeExpose(nextState, 'ai');
-  }
-
-  if (obfuscateActive) {
-    nextState = consumeObfuscate(nextState, 'ai');
-  }
-
-  if (prev.publicFrenzy.bonusHeadlineActiveFor === 'ai') {
-    nextState = clearHeadlineBonus(nextState, 'ai');
-  }
-
-  nextState = withTruthMomentum({
-    previousTruth: prev.truth,
-    newTruth: resolution.truth,
-    state: nextState,
-    actor: 'ai',
-    card: resolvedCard,
-  });
 
   return {
     nextState,

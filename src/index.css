@@ -2202,15 +2202,6 @@ html, body, #root {
 
 /* === Enhanced Special Effects Styles === */
 
-@keyframes ticker {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
 /* Breaking News Ticker */
 .breaking-news-ticker {
   position: fixed;

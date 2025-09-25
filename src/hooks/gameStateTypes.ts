@@ -1,4 +1,4 @@
-import type { FrontPageSlot, GameCard } from '@/rules/mvp';
+import type { GameCard } from '@/rules/mvp';
 import type { EventManager, GameEvent } from '@/data/eventDatabase';
 import type { SecretAgenda } from '@/data/agendaDatabase';
 import type { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
@@ -20,24 +20,6 @@ export interface CardPlayRecord {
   turn: number;
   timestamp: number;
   logEntries: string[];
-  frontPageSlot: FrontPageSlot;
-}
-
-export interface EvidenceTrackState {
-  exposeReady: boolean;
-  exposeOwner: 'human' | 'ai' | null;
-  exposeTriggered: boolean;
-  obfuscateReady: boolean;
-  obfuscateOwner: 'human' | 'ai' | null;
-  obfuscateTriggered: boolean;
-}
-
-export interface PublicFrenzyState {
-  value: number;
-  bonusHeadlineActiveFor: 'human' | 'ai' | null;
-  governmentInitiativeActiveFor: 'human' | 'ai' | null;
-  lastTruthSample: number;
-  underReviewState?: string | null;
 }
 
 export interface GameState {
@@ -84,8 +66,6 @@ export interface GameState {
   eventManager?: EventManager;
   showNewspaper: boolean;
   log: string[];
-  evidenceTrack: EvidenceTrackState;
-  publicFrenzy: PublicFrenzyState;
   agenda?: SecretAgenda & {
     progress?: number;
     complete?: boolean;
