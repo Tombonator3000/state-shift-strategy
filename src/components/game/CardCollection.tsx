@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/components/ui/progress';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import type { GameCard, MVPCardType } from '@/rules/mvp';
-import { CARD_DATABASE } from '@/data/cardDatabase';
 import { MVP_CARD_TYPES } from '@/rules/mvp';
+import CardDetailOverlay from '@/components/game/CardDetailOverlay';
 
 interface CardCollectionProps {
   open: boolean;
@@ -19,6 +19,13 @@ const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterRarity, setFilterRarity] = useState<string>('all');
+  const [selectedCard, setSelectedCard] = useState<GameCard | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedCard(null);
+    }
+  }, [open]);
   
   const stats = getCollectionStats();
   const discoveredCards = getDiscoveredCards();
@@ -39,33 +46,40 @@ const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
 
   const CardItem = ({ card }: { card: GameCard }) => {
     const cardStats = getCardStats(card.id);
-    
+
     return (
-      <div className="bg-card border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors">
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="font-bold text-lg text-foreground">{card.name}</h3>
-          <div className="flex gap-2">
-            <Badge variant={card.rarity === 'legendary' ? 'destructive' : 
-                           card.rarity === 'rare' ? 'secondary' : 'outline'}>
-              {card.rarity}
-            </Badge>
-            <Badge variant="outline">{normalizeCardType(card.type)}</Badge>
+      <button
+        type="button"
+        onClick={() => setSelectedCard(card)}
+        className="w-full text-left"
+        aria-label={`View details for ${card.name}`}
+      >
+        <div className="bg-card border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+          <div className="flex items-start justify-between mb-2">
+            <h3 className="font-bold text-lg text-foreground">{card.name}</h3>
+            <div className="flex gap-2">
+              <Badge variant={card.rarity === 'legendary' ? 'destructive' :
+                             card.rarity === 'rare' ? 'secondary' : 'outline'}>
+                {card.rarity}
+              </Badge>
+              <Badge variant="outline">{normalizeCardType(card.type)}</Badge>
+            </div>
           </div>
-        </div>
-        
-        <p className="text-sm text-muted-foreground mb-3">{card.text}</p>
-        
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Cost: {card.cost} IP</span>
-          <span>Played: {cardStats.timesPlayed} times</span>
-        </div>
-        
-        {(card.flavor ?? card.flavorGov ?? card.flavorTruth) && (
-          <div className="mt-2 p-2 bg-accent/30 rounded text-xs italic text-muted-foreground">
-            "{card.flavor ?? card.flavorGov ?? card.flavorTruth}"
+
+          <p className="text-sm text-muted-foreground mb-3">{card.text}</p>
+
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Cost: {card.cost} IP</span>
+            <span>Played: {cardStats.timesPlayed} times</span>
           </div>
-        )}
-      </div>
+
+          {(card.flavor ?? card.flavorGov ?? card.flavorTruth) && (
+            <div className="mt-2 p-2 bg-accent/30 rounded text-xs italic text-muted-foreground">
+              "{card.flavor ?? card.flavorGov ?? card.flavorTruth}"
+            </div>
+          )}
+        </div>
+      </button>
     );
   };
 
@@ -150,6 +164,15 @@ const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
           )}
         </div>
       </DialogContent>
+      {selectedCard && (
+        <CardDetailOverlay
+          card={selectedCard}
+          canAfford={false}
+          disabled
+          onClose={() => setSelectedCard(null)}
+          onPlayCard={() => setSelectedCard(null)}
+        />
+      )}
     </Dialog>
   );
 };
