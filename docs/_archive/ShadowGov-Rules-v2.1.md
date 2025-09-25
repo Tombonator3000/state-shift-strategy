@@ -150,7 +150,7 @@ Humor: 10% chance to make a “stupid” move with a funny log.
 - ZONE captures immediate.  
 - Defense prompt: Yes/No (4s).  
 - Newspaper capped to 3–4 articles.  
-- Hotkeys: 1–9 play cards, Space = End Turn, Esc = Cancel.  
+- Hotkeys: 1–9 play cards, Space = Go To Press, Esc = Cancel.
 
 ---
 
