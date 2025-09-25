@@ -705,7 +705,9 @@ const TabloidNewspaperV2 = ({
                   <div className="text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
                     Chain: {comboNarrative.magnitude} · {comboNarrative.tags.join(' • ')}
                   </div>
-                  <h4 className="mt-2 text-base font-semibold leading-snug text-newspaper-text">{comboNarrative.headline}</h4>
+                  <h4 className="mt-2 text-base font-semibold leading-snug text-newspaper-text">
+                    {comboNarrative.headline}
+                  </h4>
                   <p className="text-xs italic text-newspaper-text/70">{comboNarrative.deck}</p>
                   <div className="mt-2 space-y-2 text-sm leading-relaxed text-newspaper-text/80">
                     {comboNarrative.paragraphs.map((paragraph, index) => (
@@ -737,22 +739,15 @@ const TabloidNewspaperV2 = ({
                               </div>
                             ) : null}
                             {entry.fxText ? (
-                              <div className="text-[10px] uppercase tracking-wide text-newspaper-text/50">FX: {entry.fxText}</div>
+                              <div className="text-[10px] uppercase tracking-wide text-newspaper-text/50">
+                                FX: {entry.fxText}
+                              </div>
                             ) : null}
                           </div>
                         );
                       })}
                     </div>
                   ) : null}
-                </section>
-              ) : null}
-                          {entry.fxText ? (
-                            <div className="text-[10px] uppercase tracking-wide text-newspaper-text/50">FX: {entry.fxText}</div>
-                          ) : null}
-                        </div>
-                      );
-                    })}
-                  </div>
                 </section>
               ) : null}
               <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
