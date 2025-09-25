@@ -34,6 +34,10 @@ import { Maximize, Menu, Minimize } from 'lucide-react';
 import { getRandomAgenda } from '@/data/agendaDatabase';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
+import {
+  aggregateStateCombinationEffects,
+  createDefaultCombinationEffects,
+} from '@/data/stateCombinations';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import ExtraEditionNewspaper from '@/components/game/ExtraEditionNewspaper';
 import InGameOptions from '@/components/game/InGameOptions';
@@ -586,10 +590,9 @@ const Index = () => {
 
   // Enhanced synergy detection with coordinated visual effects
   useEffect(() => {
-    if (gameState.controlledStates.length > 0) {
-      const newCombinations = checkSynergies(
-        gameState.controlledStates,
-        (combo, position) => {
+    const newCombinations = checkSynergies(
+      gameState.controlledStates,
+      (combo, position) => {
           // Synergy activation callback
           console.log(`🔗 New synergy activated: ${combo.name} (+${combo.bonusIP} IP)`);
 
@@ -610,27 +613,76 @@ const Index = () => {
             duration: 3000,
             position: 'top-center'
           });
-        },
-        (type, x, y) => {
-          // Particle effect callback
-          VisualEffectsCoordinator.triggerParticleEffect(type as any, { x, y });
-        },
-        (value, type, x, y) => {
-          // Floating number callback
-          if (x && y) {
-            VisualEffectsCoordinator.showFloatingNumber(value, type as any, { x, y });
-          }
+      },
+      (type, x, y) => {
+        // Particle effect callback
+        VisualEffectsCoordinator.triggerParticleEffect(type as any, { x, y });
+      },
+      (value, type, x, y) => {
+        // Floating number callback
+        if (x && y) {
+          VisualEffectsCoordinator.showFloatingNumber(value, type as any, { x, y });
         }
-      );
-
-      // Log active combinations for debugging
-      const activeCombos = getActiveCombinations();
-      if (activeCombos.length > 0) {
-        console.log('🎯 Active synergies:', activeCombos.map(c => `${c.name} (+${c.bonusIP})`).join(', '));
-        console.log('💰 Total bonus IP:', getTotalBonusIP());
       }
+    );
+
+    const activeCombos = getActiveCombinations();
+    const totalBonusIp = getTotalBonusIP();
+    const aggregatedEffects = aggregateStateCombinationEffects(activeCombos);
+    const activeIds = activeCombos.map(combo => combo.id).sort();
+
+    setGameState(prev => {
+      const previousIds = [...prev.activeStateCombinationIds].sort();
+      const idsChanged =
+        activeIds.length !== previousIds.length ||
+        activeIds.some((id, index) => id !== previousIds[index]);
+      const bonusChanged = prev.stateCombinationBonusIP !== totalBonusIp;
+      const effects = aggregatedEffects;
+      const effectsChanged =
+        prev.stateCombinationEffects.mediaCostModifier !== effects.mediaCostModifier ||
+        prev.stateCombinationEffects.extraCardDraw !== effects.extraCardDraw ||
+        prev.stateCombinationEffects.ipPerStateBonus !== effects.ipPerStateBonus ||
+        prev.stateCombinationEffects.ipPerNeutralStateBonus !== effects.ipPerNeutralStateBonus;
+
+      if (!idsChanged && !bonusChanged && !effectsChanged) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        activeStateCombinationIds: activeIds,
+        stateCombinationBonusIP: totalBonusIp,
+        stateCombinationEffects: effects,
+      };
+    });
+
+    if (activeCombos.length > 0) {
+      console.log('🎯 Active synergies:', activeCombos.map(c => `${c.name} (+${c.bonusIP})`).join(', '));
+      console.log('💰 Total bonus IP:', totalBonusIp);
     }
-  }, [gameState.controlledStates, checkSynergies, getActiveCombinations, getTotalBonusIP, audio]);
+
+    if (newCombinations.length === 0 && activeCombos.length === 0) {
+      setGameState(prev => {
+        if (prev.activeStateCombinationIds.length === 0 && prev.stateCombinationBonusIP === 0) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          activeStateCombinationIds: [],
+          stateCombinationBonusIP: 0,
+          stateCombinationEffects: createDefaultCombinationEffects(),
+        };
+      });
+    }
+  }, [
+    gameState.controlledStates,
+    checkSynergies,
+    getActiveCombinations,
+    getTotalBonusIP,
+    audio,
+    setGameState,
+  ]);
 
   useEffect(() => {
     const pickTemplate = (templates: string[]): string => {

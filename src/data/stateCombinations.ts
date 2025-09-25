@@ -11,6 +11,24 @@ export interface StateCombination {
   category: 'economic' | 'military' | 'intelligence' | 'cultural' | 'energy' | 'transport';
 }
 
+export interface StateCombinationEffects {
+  mediaCostModifier: number;
+  extraCardDraw: number;
+  ipPerStateBonus: number;
+  ipPerNeutralStateBonus: number;
+}
+
+export const DEFAULT_STATE_COMBINATION_EFFECTS: StateCombinationEffects = {
+  mediaCostModifier: 0,
+  extraCardDraw: 0,
+  ipPerStateBonus: 0,
+  ipPerNeutralStateBonus: 0,
+};
+
+export const createDefaultCombinationEffects = (): StateCombinationEffects => ({
+  ...DEFAULT_STATE_COMBINATION_EFFECTS,
+});
+
 export const STATE_COMBINATIONS: StateCombination[] = [
   // Economic Powerhouses
   {
@@ -219,3 +237,57 @@ export class StateCombinationManager {
       .sort((a, b) => b.progress - a.progress);
   }
 }
+
+export const aggregateStateCombinationEffects = (
+  combinations: StateCombination[],
+): StateCombinationEffects => {
+  return combinations.reduce<StateCombinationEffects>((effects, combo) => {
+    switch (combo.id) {
+      case 'silicon_valley_network': {
+        effects.mediaCostModifier -= 1;
+        break;
+      }
+      case 'intel_web': {
+        effects.extraCardDraw += 1;
+        break;
+      }
+      case 'oil_cartel': {
+        effects.ipPerStateBonus += 1;
+        break;
+      }
+      case 'southern_border': {
+        effects.ipPerNeutralStateBonus += 1;
+        break;
+      }
+      default:
+        break;
+    }
+
+    return effects;
+  }, createDefaultCombinationEffects());
+};
+
+export const calculateDynamicIpBonus = (
+  effects: StateCombinationEffects,
+  controlledStatesCount: number,
+  neutralStatesCount: number,
+): number => {
+  const perState = effects.ipPerStateBonus * controlledStatesCount;
+  const perNeutral = effects.ipPerNeutralStateBonus * neutralStatesCount;
+  return perState + perNeutral;
+};
+
+export const applyStateCombinationCostModifiers = (
+  baseCost: number,
+  cardType: string,
+  owner: 'human' | 'ai',
+  effects: StateCombinationEffects,
+): number => {
+  let cost = baseCost;
+
+  if (owner === 'human' && cardType === 'MEDIA') {
+    cost += effects.mediaCostModifier;
+  }
+
+  return Math.max(0, Math.floor(cost));
+};
