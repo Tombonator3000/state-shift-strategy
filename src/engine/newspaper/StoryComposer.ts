@@ -43,6 +43,25 @@ const ensureSentence = (value: string): string => {
   return trimmed;
 };
 
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const ensureConnectorSpacing = (value: string): string => {
+  if (!value) {
+    return value;
+  }
+  let result = value;
+  for (const joiner of connectors.joiners) {
+    const pattern = new RegExp(`\\s*${escapeRegExp(joiner)}`, 'gi');
+    result = result.replace(pattern, match => {
+      const trimmed = match.trim();
+      return ` ${trimmed}`;
+    });
+  }
+  return result.trim();
+};
+
+const normalizeBodySentence = (value: string): string => ensureSentence(ensureConnectorSpacing(value));
+
 const pickDeltaTemplate = (
   value: number,
   bank: Record<'positive' | 'negative' | 'neutral', string[]>,
@@ -120,22 +139,123 @@ const buildTargetSentence = (
   return null;
 };
 
-const buildTagSentence = (tags: string[]): string => {
-  for (const tag of tags) {
-    const options = tagInserts[tag];
-    if (options && options.length) {
-      return pick(options, options[0]);
+const selectRandomItems = <T,>(source: T[], count: number): T[] => {
+  if (count <= 0 || source.length === 0) {
+    return [];
+  }
+  const pool = [...source];
+  const selected: T[] = [];
+  while (pool.length && selected.length < count) {
+    const index = Math.floor(Math.random() * pool.length);
+    const [choice] = pool.splice(index, 1);
+    if (choice !== undefined) {
+      selected.push(choice);
     }
   }
-  const fallback = tagInserts.default ?? [];
-  return pick(fallback, fallback[0] ?? 'Atmospheric sensors detect elevated levels of dramatic irony.');
+  return selected;
 };
 
-const normalizeCount = (value: Maybe<number>, fallback: number): number => {
-  if (typeof value === 'number' && Number.isFinite(value)) {
+const lowercaseFirst = (value: string): string => {
+  if (!value) {
     return value;
   }
-  return fallback;
+  return value.charAt(0).toLowerCase() + value.slice(1);
+};
+
+const fuseSentences = (base: string, extra: string): string => {
+  if (!base) {
+    return ensureSentence(extra);
+  }
+  if (!extra) {
+    return ensureSentence(base);
+  }
+  const joiner = pick(connectors.joiners, connectors.joiners[0] ?? 'and');
+  const baseTrimmed = base.replace(/\.+$/, '');
+  const extraTrimmed = extra.trim().replace(/\.+$/, '');
+  const fused = `${baseTrimmed} ${joiner} ${lowercaseFirst(extraTrimmed)}`;
+  return ensureSentence(fused);
+};
+
+const gatherTagLines = (tags: string[], maxCount: number): string[] => {
+  if (maxCount <= 0) {
+    return [];
+  }
+  const seen = new Set<string>();
+  const prioritized: string[] = [];
+  for (const tag of tags) {
+    const options = tagInserts[tag] ?? [];
+    for (const option of options) {
+      if (!seen.has(option)) {
+        prioritized.push(option);
+        seen.add(option);
+      }
+    }
+  }
+  const fallbackOptions = tagInserts.default ?? [];
+  for (const option of fallbackOptions) {
+    if (!seen.has(option)) {
+      prioritized.push(option);
+      seen.add(option);
+    }
+  }
+  return selectRandomItems(prioritized, maxCount);
+};
+
+const collectEffectPhrases = (
+  card: Card,
+  truthDelta?: Maybe<number>,
+  ipDeltaOpponent?: Maybe<number>,
+  pressureDelta?: Maybe<number>,
+): string[] => {
+  const phrases: string[] = [];
+  if (typeof truthDelta === 'number' && Number.isFinite(truthDelta)) {
+    phrases.push(applyDeltaTemplate(pickDeltaTemplate(truthDelta, deltaPhrases.truth), truthDelta));
+  }
+  if (typeof ipDeltaOpponent === 'number' && Number.isFinite(ipDeltaOpponent)) {
+    const template = pickDeltaTemplate(ipDeltaOpponent, deltaPhrases.ip);
+    const label = card.faction === 'government' || card.faction === 'Government' ? 'toward containment ledgers' : 'toward the leak ledger';
+    phrases.push(`${applyDeltaTemplate(template, ipDeltaOpponent)} ${label}`);
+  }
+  if (typeof pressureDelta === 'number' && Number.isFinite(pressureDelta)) {
+    phrases.push(applyDeltaTemplate(pickDeltaTemplate(pressureDelta, deltaPhrases.pressure), pressureDelta));
+  }
+  if (!phrases.length) {
+    const fallback = deltaPhrases.summary;
+    phrases.push(pick(fallback, fallback[0] ?? 'Analysts report phantom metrics ricocheting through the dashboards.'));
+  }
+  return phrases;
+};
+
+const buildArtFallback = (card: Card, effects: { truth?: Maybe<number>; ip?: Maybe<number>; pressure?: Maybe<number> }): string => {
+  const factionPalette =
+    card.faction === 'truth' || card.faction === 'Truth'
+      ? 'chaotic tabloid collage energy'
+      : 'cold surveillance-room lighting';
+  const toneDescription =
+    card.type === 'ATTACK'
+      ? 'caught mid-raid with motion blur typography'
+      : card.type === 'MEDIA'
+        ? 'broadcast monitors buzzing with glitch overlays'
+        : card.type === 'ZONE'
+          ? 'field maps strewn with string, flyers and coffee cups'
+          : 'reinforced control center lined with emergency dossiers';
+  const fragments: string[] = [];
+  const truth = effects.truth;
+  const ip = effects.ip;
+  const pressure = effects.pressure;
+  if (typeof truth === 'number' && Number.isFinite(truth) && truth !== 0) {
+    fragments.push(`truth delta ${truth > 0 ? '+' : '−'}${Math.abs(truth)}`);
+  }
+  if (typeof ip === 'number' && Number.isFinite(ip) && ip !== 0) {
+    fragments.push(`IP swing ${ip > 0 ? '+' : '−'}${Math.abs(ip)}`);
+  }
+  if (typeof pressure === 'number' && Number.isFinite(pressure) && pressure !== 0) {
+    fragments.push(`pressure shift ${pressure > 0 ? '+' : '−'}${Math.abs(pressure)}`);
+  }
+  const effectLine = fragments.length
+    ? `highlighted telemetry for ${fragments.join(', ')}`
+    : 'subtle redacted numerology tucked into the margins';
+  return `Illustrate "${card.name}" as a ${factionPalette} tableau ${toneDescription} with ${effectLine}.`;
 };
 
 export interface CardStoryInput {
@@ -163,40 +283,51 @@ export function composeCardStory(input: CardStoryInput): CardStory {
     ? card.type
     : 'MEDIA') as Card['type'];
   const verbPool = verbs.headline[toneKey] ?? verbs.headline.MEDIA;
-  const headline = `${card.name.toUpperCase()} ${pick(verbPool, verbPool[0])}!`;
+  const verb = pick(verbPool, verbPool[0] ?? 'OVERRIDES PRIME TIME');
+  const cardName = card.name.toUpperCase();
+  const headline = toneKey === 'ATTACK'
+    ? `${verb}: ${cardName}`
+    : toneKey === 'MEDIA' || toneKey === 'ZONE'
+      ? `${cardName} ${verb}`
+      : `${verb}: ${cardName}`;
 
   const faction = (card.faction ?? 'truth').toString();
-  const factionPool = subheads.truth && faction.toLowerCase().includes('truth')
-    ? subheads.truth
-    : subheads.government;
-  const typePool = toneKey === 'ATTACK' || toneKey === 'MEDIA' || toneKey === 'ZONE'
-    ? subheads.type[toneKey]
-    : [];
-  const deckCandidates = [...factionPool, ...typePool, ...subheads.generic];
-  const deck = pick(deckCandidates, deckCandidates[0] ?? 'Officials refuse to elaborate.');
+  const isTruthFaction = faction.toLowerCase().includes('truth');
+  const factionPool = isTruthFaction ? subheads.truth : subheads.government;
 
   const truth = input.truthDelta ?? lexicon?.effects.truthDelta ?? null;
   const ip = input.ipDeltaOpponent ?? lexicon?.effects.ipOpponent ?? null;
   const pressure = input.pressureDelta ?? lexicon?.effects.pressureDelta ?? null;
   const captured = input.capturedStateNames ?? [];
 
-  const effectSentence = buildEffectSentence(card, truth, ip, pressure);
-  const targetSentence = buildTargetSentence(input.targetStateName, captured);
+  const effectPhrases = collectEffectPhrases(card, truth, ip, pressure);
+  const selectedEffects = selectRandomItems(effectPhrases, Math.min(2, Math.max(1, effectPhrases.length)));
+  const deckParts: string[] = [
+    ensureSentence(pick(factionPool, factionPool[0] ?? 'Sources insist it’s totally normal.')),
+    ...selectedEffects.map(ensureSentence),
+  ];
+  const deckStateLine = buildTargetSentence(input.targetStateName, captured);
+  if (deckStateLine) {
+    deckParts.push(deckStateLine);
+  }
+  const deck = deckParts.join(' ').replace(/\s+/g, ' ').trim();
 
   const playerLabel = playerLabels[player] ?? 'Operative team';
   const launchVerbs = verbs.launch;
-  const opener = `${playerLabel} ${pick(launchVerbs, launchVerbs[0])} ${card.name.toLowerCase()} straight into the narrative jetstream.`;
+  const coda = pick(connectors.codas, connectors.codas[0] ?? 'before the dashboards sprout sparks.').replace(/\.+$/, '');
+  const opener = ensureSentence(`${playerLabel} ${pick(launchVerbs, launchVerbs[0] ?? 'deploys')} ${card.name.toLowerCase()} ${coda}`);
 
-  const truthFaction = faction.toLowerCase().includes('truth');
-  const bodySource = truthFaction ? bodyTruth : bodyGov;
+  const bodySource = isTruthFaction ? bodyTruth : bodyGov;
   const toneBankKey = toneKey === 'ATTACK' || toneKey === 'MEDIA' || toneKey === 'ZONE' ? toneKey : 'NEUTRAL';
-  const toneBank = bodySource[toneBankKey] ?? bodySource.NEUTRAL;
+  const toneBank = (bodySource[toneBankKey] ?? bodySource.NEUTRAL) as string[];
   const neutralBank = bodySource.NEUTRAL;
 
-  const desiredSentenceCount = normalizeCount(Math.floor(Math.random() * 3) + 4, 4);
-  const sentences: string[] = [ensureSentence(opener), ensureSentence(effectSentence)];
-  if (targetSentence) {
-    sentences.push(ensureSentence(targetSentence));
+  const baseSentenceCount = toneBank.length && Math.random() > 0.5 ? 4 : 3;
+  const bodySentences: string[] = [];
+  for (let index = 0; index < baseSentenceCount; index += 1) {
+    const bank = index % 2 === 0 && toneBank.length ? toneBank : neutralBank;
+    const choice = pick(bank, bank[0] ?? 'Sources refuse to cooperate with this paragraph.');
+    bodySentences.push(normalizeBodySentence(choice));
   }
 
   const allowedTags = new Set<string>();
@@ -209,31 +340,41 @@ export function composeCardStory(input: CardStoryInput): CardStory {
     }
   }
 
-  while (sentences.length < desiredSentenceCount - 1) {
-    const bank = sentences.length % 2 === 0 ? toneBank : neutralBank;
-    const chosen = pick(bank, bank[0] ?? 'Sources refuse to cooperate with this paragraph.');
-    sentences.push(chosen);
+  const factionValue = card.faction ? card.faction.toString().replace(/\s+/g, '') : '';
+  const factionTag = factionValue
+    ? `#Faction${factionValue.charAt(0).toUpperCase()}${factionValue.slice(1)}`
+    : null;
+  if (factionTag) {
+    allowedTags.add(factionTag);
+  }
+  const typeTag = `#Type${card.type.charAt(0)}${card.type.slice(1).toLowerCase()}`;
+  allowedTags.add(typeTag);
+
+  const gagLines = gatherTagLines(Array.from(allowedTags), 2);
+  const bodyTargetSentence = card.type === 'ZONE' ? buildTargetSentence(input.targetStateName, captured) : null;
+  const effectSentence = buildEffectSentence(card, truth, ip, pressure);
+  const extras = [effectSentence, ...gagLines, bodyTargetSentence].filter((value): value is string => Boolean(value));
+
+  for (let index = 0; index < extras.length && bodySentences.length; index += 1) {
+    const slot = index % bodySentences.length;
+    bodySentences[slot] = fuseSentences(bodySentences[slot], extras[index] ?? '');
   }
 
-  const tagSentence = buildTagSentence(Array.from(allowedTags));
-  sentences.push(ensureSentence(tagSentence));
-
-  if (sentences.length < desiredSentenceCount) {
-    const padding = pick(neutralBank, neutralBank[0] ?? 'Editors refill emergency ink reserves.');
-    sentences.push(ensureSentence(padding));
-  }
+  const sentences: string[] = [opener, ...bodySentences];
 
   const tags = Array.from(allowedTags);
   if (!tags.length) {
     tags.push('#ParanoidPress');
   }
 
+  const artHint = lexicon?.artHint ?? buildArtFallback(card, { truth, ip, pressure });
+
   return {
     headline,
     deck,
-    paragraphs: chunkSentences(sentences),
+    paragraphs: chunkSentences(sentences.map(ensureSentence)),
     tags,
-    artHint: lexicon?.artHint ?? `Illustrate ${card.name} with improvised paranoia.`,
+    artHint,
   } satisfies CardStory;
 }
 
