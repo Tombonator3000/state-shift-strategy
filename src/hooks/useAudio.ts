@@ -25,6 +25,9 @@ type TrackMetadata = {
 
 type TrackLibrary = Record<MusicType, TrackMetadata[]>;
 
+const SILENT_AUDIO_DATA_URL =
+  'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=';
+
 const formatTrackLabel = (src: string): string => {
   const fileName = decodeURIComponent(src.split('/').pop() ?? 'Track');
   return fileName
@@ -120,6 +123,13 @@ export const useAudio = () => {
   const manualStopRef = useRef(false);
   const menuMusicCallbackRef = useRef<(() => void) | null>(null);
   const lastMusicVolumeRef = useRef(config.muted ? 0 : config.volume * config.musicVolume);
+  const pendingAutoplayRef = useRef(false);
+  const configRef = useRef(config);
+  const tracksLoadedRef = useRef(tracksLoaded);
+  const audioContextUnlockedRef = useRef(audioContextUnlocked);
+  const currentMusicTypeRef = useRef(currentMusicType);
+  const gestureUnlockAudioRef = useRef<HTMLAudioElement | null>(null);
+  const beginPlaybackFromGestureRef = useRef<() => void>();
   // Music track arrays
   const musicTracks = useRef<{ [key in MusicType]: HTMLAudioElement[] }>({
     theme: [],
@@ -135,6 +145,22 @@ export const useAudio = () => {
     endcredits: 0
   });
 
+  useEffect(() => {
+    configRef.current = config;
+  }, [config]);
+
+  useEffect(() => {
+    tracksLoadedRef.current = tracksLoaded;
+  }, [tracksLoaded]);
+
+  useEffect(() => {
+    audioContextUnlockedRef.current = audioContextUnlocked;
+  }, [audioContextUnlocked]);
+
+  useEffect(() => {
+    currentMusicTypeRef.current = currentMusicType;
+  }, [currentMusicType]);
+
   // Initialize audio context - only run once
   useEffect(() => {
     // Prevent duplicate initialization
@@ -147,10 +173,11 @@ export const useAudio = () => {
 
     // Mobile audio context unlock function
     const unlockAudioContext = () => {
-      if (audioContextUnlocked) {
+      if (audioContextUnlockedRef.current) {
         console.log('🎵 Audio context already unlocked');
         return;
       }
+      audioContextUnlockedRef.current = true;
       setAudioContextUnlocked(true);
       setAudioStatus('Audio context unlocked - ready to play');
       console.log('🎵 Audio context unlocked via user interaction - will auto-start menu music');
@@ -161,15 +188,35 @@ export const useAudio = () => {
       unlockAudioContext();
       setAudioStatus('Audio context unlocked - starting menu music');
       console.log('🎵 Audio context unlocked via user interaction');
-      
-      // Auto-start menu music after audio context unlock
-      setTimeout(() => {
-        if (config.musicEnabled && currentMusicType === 'theme') {
-          console.log('🎵 Auto-starting menu music after user interaction');
-          playMusic('theme');
+
+      if (!gestureUnlockAudioRef.current) {
+        const unlockAudio = new Audio(SILENT_AUDIO_DATA_URL);
+        unlockAudio.loop = false;
+        unlockAudio.volume = 0;
+        gestureUnlockAudioRef.current = unlockAudio;
+      }
+
+      const unlockAudio = gestureUnlockAudioRef.current;
+      if (unlockAudio) {
+        unlockAudio.currentTime = 0;
+        unlockAudio.play().catch(error => {
+          console.debug('🎵 Silent unlock audio failed to play:', error);
+        });
+      }
+
+      if (configRef.current.musicEnabled && !configRef.current.muted) {
+        if (tracksLoadedRef.current) {
+          console.log('🎵 Starting playback immediately after user interaction');
+          beginPlaybackFromGestureRef.current?.();
+        } else {
+          console.log('🎵 Tracks not ready - deferring autoplay until loaded');
+          pendingAutoplayRef.current = true;
+          setAudioStatus('Autoplay pending - tracks loading');
         }
-      }, 500);
-      
+      } else {
+        pendingAutoplayRef.current = false;
+      }
+
       document.removeEventListener('click', handleUserInteraction);
       document.removeEventListener('touchstart', handleUserInteraction);
       document.removeEventListener('pointerdown', handleUserInteraction);
@@ -339,8 +386,14 @@ export const useAudio = () => {
         endcredits: endCreditsMetadata
       });
 
+      tracksLoadedRef.current = true;
       setTracksLoaded(true);
       setAudioStatus('Ready - All tracks loaded');
+
+      if (pendingAutoplayRef.current && audioContextUnlockedRef.current) {
+        console.log('🎵 Pending autoplay detected after track load - starting playback');
+        beginPlaybackFromGestureRef.current?.();
+      }
     };
 
     loadMusicTracks();
@@ -490,7 +543,7 @@ export const useAudio = () => {
   const switchTrack = useCallback((fromAudio: HTMLAudioElement | null, toAudio: HTMLAudioElement | null) => {
     console.log('🎵 switchTrack called', { fromAudio: !!fromAudio, toAudio: !!toAudio });
     
-    if (!toAudio || !audioContextUnlocked) {
+    if (!toAudio || !audioContextUnlockedRef.current) {
       console.warn('🎵 Cannot play: toAudio is null or audio context not unlocked');
       setAudioStatus('Cannot play - audio locked');
       return;
@@ -530,31 +583,36 @@ export const useAudio = () => {
           });
       }
     }
-  }, [config.musicEnabled, config.muted, config.volume, config.musicVolume, audioContextUnlocked]);
+  }, [config.musicEnabled, config.muted, config.volume, config.musicVolume]);
 
   // Play music based on current state
   const playMusic = useCallback((musicType?: MusicType) => {
     console.log('🎵 playMusic called with type:', musicType, 'current state:', {
-      musicEnabled: config.musicEnabled,
-      muted: config.muted,
-      tracksLoaded,
-      audioContextUnlocked,
+      musicEnabled: configRef.current.musicEnabled,
+      muted: configRef.current.muted,
+      tracksLoaded: tracksLoadedRef.current,
+      audioContextUnlocked: audioContextUnlockedRef.current,
       currentlyPlaying: !!currentMusicRef.current
     });
-    
+
     // Don't play music until tracks are loaded and audio context is unlocked (mobile requirement)
-    if (!config.musicEnabled || config.muted || !tracksLoaded || !audioContextUnlocked) {
-      console.log('🎵 Music playback blocked:', { 
-        musicEnabled: config.musicEnabled, 
-        muted: config.muted, 
-        tracksLoaded, 
-        audioContextUnlocked 
+    if (
+      !configRef.current.musicEnabled ||
+      configRef.current.muted ||
+      !tracksLoadedRef.current ||
+      !audioContextUnlockedRef.current
+    ) {
+      console.log('🎵 Music playback blocked:', {
+        musicEnabled: configRef.current.musicEnabled,
+        muted: configRef.current.muted,
+        tracksLoaded: tracksLoadedRef.current,
+        audioContextUnlocked: audioContextUnlockedRef.current
       });
       setAudioStatus('Music blocked - check settings');
       return;
     }
 
-    const typeToPlay = musicType || currentMusicType;
+    const typeToPlay = musicType || currentMusicTypeRef.current;
     const nextTrack = getNextTrack(typeToPlay);
 
     if (!nextTrack) {
@@ -592,7 +650,24 @@ export const useAudio = () => {
     };
     
     console.log('🎵 playMusic completed for type:', typeToPlay);
-  }, [config.musicEnabled, config.muted, currentMusicType, gameState, getNextTrack, switchTrack, tracksLoaded, audioContextUnlocked]);
+  }, [getNextTrack, switchTrack]);
+
+  const beginPlaybackFromGesture = useCallback(() => {
+    console.log('🎵 beginPlaybackFromGesture called');
+    const { musicEnabled, muted } = configRef.current;
+    if (!musicEnabled || muted) {
+      pendingAutoplayRef.current = false;
+      console.log('🎵 beginPlaybackFromGesture aborted - music disabled or muted');
+      return;
+    }
+
+    pendingAutoplayRef.current = false;
+    manualStopRef.current = false;
+    const typeToPlay = currentMusicTypeRef.current || 'theme';
+    playMusic(typeToPlay);
+  }, [playMusic]);
+
+  beginPlaybackFromGestureRef.current = beginPlaybackFromGesture;
 
   const selectTrack = useCallback(
     (musicType: MusicType, trackIndex: number) => {
@@ -615,6 +690,7 @@ export const useAudio = () => {
   const stopMusic = useCallback(() => {
     console.log('🎵 Stopping music');
     manualStopRef.current = true;
+    pendingAutoplayRef.current = false;
     if (fadeIntervalRef.current) {
       clearInterval(fadeIntervalRef.current);
     }
@@ -775,11 +851,14 @@ export const useAudio = () => {
       const newMusicEnabled = !prev.musicEnabled;
       console.log('🎵 Music toggled to:', newMusicEnabled);
       
-      if (!newMusicEnabled && currentMusicRef.current) {
-        console.log('🎵 Stopping music due to toggle off');
-        currentMusicRef.current.onended = null;
-        currentMusicRef.current.pause();
-        currentMusicRef.current.currentTime = 0;
+      if (!newMusicEnabled) {
+        pendingAutoplayRef.current = false;
+        if (currentMusicRef.current) {
+          console.log('🎵 Stopping music due to toggle off');
+          currentMusicRef.current.onended = null;
+          currentMusicRef.current.pause();
+          currentMusicRef.current.currentTime = 0;
+        }
         setIsPlaying(false);
         setAudioStatus('Music disabled');
       } else if (newMusicEnabled) {
