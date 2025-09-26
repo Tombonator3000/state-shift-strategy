@@ -50,6 +50,19 @@ export const CardCollectionContent = ({
     return matchesSearch && matchesType && matchesRarity;
   });
 
+  const getRarityClasses = (rarity: string) => {
+    switch (rarity) {
+      case 'legendary':
+        return 'border border-fuchsia-400/60 bg-fuchsia-500/10 text-fuchsia-200';
+      case 'rare':
+        return 'border border-sky-400/60 bg-sky-500/10 text-sky-200';
+      case 'uncommon':
+        return 'border border-emerald-400/60 bg-emerald-500/10 text-emerald-200';
+      default:
+        return 'border border-slate-500/60 bg-slate-900/60 text-slate-300';
+    }
+  };
+
   const CardItem = ({ card }: { card: GameCard }) => {
     const cardStats = getCardStats(card.id);
 
@@ -60,27 +73,29 @@ export const CardCollectionContent = ({
         className="w-full text-left"
         aria-label={`View details for ${card.name}`}
       >
-        <div className="rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent/50">
-          <div className="mb-2 flex items-start justify-between">
-            <h3 className="text-lg font-bold text-foreground">{card.name}</h3>
-            <div className="flex gap-2">
-              <Badge variant={card.rarity === 'legendary' ? 'destructive'
-                : card.rarity === 'rare' ? 'secondary' : 'outline'}>
-                {card.rarity}
+        <div className="group relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-slate-950/70 p-5 transition-all hover:border-emerald-400/40 hover:bg-slate-950/80 hover:shadow-[0_0_25px_rgba(16,185,129,0.25)]">
+          <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-60">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.2),_transparent_60%)]" />
+          </div>
+          <div className="relative mb-3 flex flex-wrap items-start justify-between gap-3">
+            <h3 className="text-lg font-semibold text-emerald-100">{card.name}</h3>
+            <div className="flex flex-wrap gap-2">
+              <Badge className={getRarityClasses(card.rarity)}>{card.rarity}</Badge>
+              <Badge className="border border-slate-500/60 bg-slate-900/60 text-slate-300">
+                {normalizeCardType(card.type)}
               </Badge>
-              <Badge variant="outline">{normalizeCardType(card.type)}</Badge>
             </div>
           </div>
 
-          <p className="mb-3 text-sm text-muted-foreground">{card.text}</p>
+          <p className="mb-3 text-sm text-slate-300">{card.text}</p>
 
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-emerald-200/80">
             <span>Cost: {card.cost} IP</span>
             <span>Played: {cardStats.timesPlayed} times</span>
           </div>
 
           {(card.flavor ?? card.flavorGov ?? card.flavorTruth) && (
-            <div className="mt-2 rounded bg-accent/30 p-2 text-xs italic text-muted-foreground">
+            <div className="mt-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs italic text-emerald-100/70">
               "{card.flavor ?? card.flavorGov ?? card.flavorTruth}"
             </div>
           )}
@@ -90,61 +105,64 @@ export const CardCollectionContent = ({
   };
 
   return (
-    <div className={`flex h-full flex-col ${className ?? ''}`}>
-      <div className="flex items-start justify-between gap-4 pb-4">
-        <div>
-          <h2 className="flex items-center gap-3 text-xl font-bold text-foreground">
-            📚 Card Collection
-            <span className="text-sm font-normal text-muted-foreground">
-              {stats.discoveredCards}/{stats.totalCards} cards ({stats.completionPercentage}%)
-            </span>
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Browse discovered cards, filter by type or rarity, and review usage stats.
-          </p>
+    <div className={`flex h-full flex-col gap-5 text-slate-200 ${className ?? ''}`}>
+      <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-slate-950/85 px-5 py-4 shadow-[0_0_35px_rgba(16,185,129,0.2)]">
+        <div className="pointer-events-none absolute inset-0 opacity-45">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.25),_transparent_60%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgba(16,185,129,0.16),_transparent_50%,_rgba(56,189,248,0.14))]" />
         </div>
-        {onClose && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            aria-label="Close card collection"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 pb-4 sm:grid-cols-3">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-primary">{stats.discoveredCards}</div>
-          <div className="text-sm text-muted-foreground">Cards Discovered</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-secondary">{stats.totalPlays}</div>
-          <div className="text-sm text-muted-foreground">Total Plays</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-accent">{stats.completionPercentage}%</div>
-          <div className="text-sm text-muted-foreground">Complete</div>
+        <div className="relative flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-2">
+            <div className="font-mono text-xs uppercase tracking-[0.35em] text-emerald-200/80">Card Intelligence</div>
+            <h2 className="font-mono text-xl font-semibold uppercase tracking-[0.2em] text-emerald-100">CARD COLLECTION</h2>
+            <p className="max-w-xl text-sm text-emerald-100/70">
+              Browse discovered cards, filter by type or rarity, and review usage stats across the operation.
+            </p>
+          </div>
+          {onClose && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onClose}
+              aria-label="Close card collection"
+              className="border-emerald-400/30 bg-slate-950/60 text-slate-300 transition hover:bg-emerald-500/20 hover:text-emerald-100"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </div>
 
-      <Progress value={stats.completionPercentage} className="mb-4" />
+      <div className="grid grid-cols-1 gap-4 pb-2 sm:grid-cols-3">
+        <div className="rounded-2xl border border-emerald-500/20 bg-slate-950/75 p-4 text-center shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+          <div className="text-2xl font-bold text-emerald-200">{stats.discoveredCards}</div>
+          <div className="text-xs uppercase tracking-[0.3em] text-slate-400">Cards Discovered</div>
+        </div>
+        <div className="rounded-2xl border border-emerald-500/20 bg-slate-950/75 p-4 text-center shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+          <div className="text-2xl font-bold text-sky-200">{stats.totalPlays}</div>
+          <div className="text-xs uppercase tracking-[0.3em] text-slate-400">Total Plays</div>
+        </div>
+        <div className="rounded-2xl border border-emerald-500/20 bg-slate-950/75 p-4 text-center shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+          <div className="text-2xl font-bold text-emerald-100">{stats.completionPercentage}%</div>
+          <div className="text-xs uppercase tracking-[0.3em] text-slate-400">Complete</div>
+        </div>
+      </div>
 
-      <div className="mb-4 flex flex-col gap-4 sm:flex-row">
+      <Progress value={stats.completionPercentage} className="h-2 rounded-full bg-slate-900/60" />
+
+      <div className="flex flex-col gap-4 sm:flex-row">
         <Input
           placeholder="Search cards..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1"
+          className="flex-1 rounded-xl border border-emerald-500/30 bg-slate-950/70 px-4 py-2 text-slate-200 placeholder:text-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40"
         />
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-full sm:w-40">
+          <SelectTrigger className="w-full rounded-xl border border-emerald-500/30 bg-slate-950/70 px-4 py-2 text-slate-200 sm:w-40">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="border border-emerald-500/30 bg-slate-950/95 text-slate-200">
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="MEDIA">Media</SelectItem>
             <SelectItem value="ZONE">Zone</SelectItem>
@@ -152,10 +170,10 @@ export const CardCollectionContent = ({
           </SelectContent>
         </Select>
         <Select value={filterRarity} onValueChange={setFilterRarity}>
-          <SelectTrigger className="w-full sm:w-40">
+          <SelectTrigger className="w-full rounded-xl border border-emerald-500/30 bg-slate-950/70 px-4 py-2 text-slate-200 sm:w-40">
             <SelectValue placeholder="Rarity" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="border border-emerald-500/30 bg-slate-950/95 text-slate-200">
             <SelectItem value="all">All Rarities</SelectItem>
             <SelectItem value="common">Common</SelectItem>
             <SelectItem value="uncommon">Uncommon</SelectItem>
@@ -167,7 +185,7 @@ export const CardCollectionContent = ({
 
       <div className="flex-1 overflow-y-auto">
         {filteredCards.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
+          <div className="flex h-full items-center justify-center rounded-2xl border border-emerald-500/20 bg-slate-950/70 text-slate-400">
             {discoveredCards.length === 0
               ? 'Start playing to discover cards!'
               : 'No cards match your search criteria.'}
@@ -202,7 +220,7 @@ interface CardCollectionProps {
 const CardCollection = ({ open, onOpenChange }: CardCollectionProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] max-w-4xl flex-col">
+      <DialogContent className="flex max-h-[90vh] max-w-4xl flex-col border border-emerald-500/30 bg-slate-950/95 text-slate-100 shadow-[0_0_60px_rgba(16,185,129,0.25)]">
         <CardCollectionContent
           isActive={open}
           onClose={() => onOpenChange(false)}
