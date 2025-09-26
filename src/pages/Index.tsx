@@ -13,8 +13,6 @@ import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
 import AIStatus from '@/components/game/AIStatus';
 import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashboard';
-import TutorialOverlay from '@/components/game/TutorialOverlay';
-import AchievementPanel from '@/components/game/AchievementPanel';
 import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudioContext } from '@/contexts/AudioContext';
@@ -27,9 +25,9 @@ import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
 import ContextualHelp from '@/components/game/ContextualHelp';
 import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
 import MechanicsTooltip from '@/components/game/MechanicsTooltip';
-import CardCollection from '@/components/game/CardCollection';
+import PlayerHubOverlay from '@/components/game/PlayerHubOverlay';
 import NewCardsPresentation from '@/components/game/NewCardsPresentation';
-import { Maximize, Menu, Minimize } from 'lucide-react';
+import { Maximize, Menu, Minimize, UserCircle2 } from 'lucide-react';
 import { getRandomAgenda } from '@/data/agendaDatabase';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
@@ -432,8 +430,7 @@ const Index = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showBalancing, setShowBalancing] = useState(false);
   const [balancingInitialView, setBalancingInitialView] = useState<'analysis' | 'dev-tools'>('analysis');
-  const [showTutorial, setShowTutorial] = useState(false);
-  const [showAchievements, setShowAchievements] = useState(false);
+  const [showPlayerHub, setShowPlayerHub] = useState(false);
   const [loadingCard, setLoadingCard] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [subtitle, setSubtitle] = useState('Truth Seeker Operative');
@@ -450,7 +447,6 @@ const Index = () => {
   const [victoryState, setVictoryState] = useState<{ isVictory: boolean; type: 'states' | 'ip' | 'truth' | 'agenda' | null }>({ isVictory: false, type: null });
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showInGameOptions, setShowInGameOptions] = useState(false);
-  const [showCardCollection, setShowCardCollection] = useState(false);
   const [gameOverReport, setGameOverReport] = useState<GameOverReport | null>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   const [paranormalSightings, setParanormalSightings] = useState<ParanormalSighting[]>([]);
@@ -1294,12 +1290,15 @@ const Index = () => {
     );
   }
 
-  if (showAchievements) {
-    return <AchievementPanel onClose={() => setShowAchievements(false)} />;
-  }
-
-  if (showTutorial) {
-    return <TutorialOverlay onClose={() => setShowTutorial(false)} />;
+  if (showPlayerHub) {
+    return (
+      <PlayerHubOverlay
+        onClose={() => {
+          setShowPlayerHub(false);
+          audio.playSFX('click');
+        }}
+      />
+    );
   }
 
   if (showBalancing) {
@@ -1322,7 +1321,10 @@ const Index = () => {
         }
       }}
       audio={audio}
-      onShowCardCollection={() => setShowCardCollection(true)}
+      onShowCardCollection={() => {
+        setShowPlayerHub(true);
+        audio.playSFX('click');
+      }}
       onBackToMainMenu={() => {
         setShowMenu(true);
         // Reset any game state if needed
@@ -1641,30 +1643,14 @@ const Index = () => {
           </button>
           <button
             type="button"
-            onClick={() => setShowTutorial(true)}
-            className={mastheadButtonClass}
-            title="Tutorial & Training"
-          >
-            🎓
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowAchievements(true)}
-            className={mastheadButtonClass}
-            title="Achievements"
-          >
-            🏆
-          </button>
-          <button
-            type="button"
             onClick={() => {
-              setShowCardCollection(true);
+              setShowPlayerHub(true);
               audio.playSFX('click');
             }}
             className={mastheadButtonClass}
-            title="Card Collection"
+            title="Player Hub"
           >
-            📚
+            <UserCircle2 className="h-4 w-4" />
           </button>
           <button
             type="button"
@@ -1946,11 +1932,6 @@ const Index = () => {
         onComplete={() => setShowOnboarding(false)}
         onSkip={() => setShowOnboarding(false)}
         gameState={gameState}
-      />
-
-      <CardCollection
-        open={showCardCollection}
-        onOpenChange={setShowCardCollection}
       />
 
       <NewCardsPresentation
