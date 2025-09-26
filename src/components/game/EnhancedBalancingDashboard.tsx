@@ -24,6 +24,111 @@ import type { GameCard } from '@/rules/mvp';
 
 type HistogramBin = { label: string; count: number };
 
+const BalanceGauge = ({
+  score,
+  label,
+}: {
+  score: number;
+  label: string;
+}) => {
+  const normalized = Math.min(100, Math.max(0, Math.round(score)));
+  const hue = normalized > 70 ? 150 : normalized > 40 ? 45 : 0;
+  const gradient = `conic-gradient(hsl(${hue} 70% 60%) ${normalized * 3.6}deg, rgba(30,41,59,0.35) ${normalized * 3.6}deg)`;
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative h-28 w-28 rounded-full border border-emerald-500/40 bg-gray-950 shadow-[0_0_40px_rgba(16,185,129,0.2)]">
+        <div
+          className="absolute inset-2 rounded-full border border-emerald-500/20 bg-gray-950"
+          style={{ backgroundImage: gradient }}
+        />
+        <div className="absolute inset-7 rounded-full bg-gray-950/95 border border-gray-800 flex flex-col items-center justify-center">
+          <span className="text-2xl font-bold text-emerald-200">{normalized}</span>
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Score</span>
+        </div>
+      </div>
+      <span className="text-xs uppercase tracking-wide text-slate-400">{label}</span>
+    </div>
+  );
+};
+
+const VictorySpectrum = ({
+  truth,
+  government,
+  stalemate,
+}: {
+  truth: number;
+  government: number;
+  stalemate: number;
+}) => {
+  const total = Math.max(1, truth + government + stalemate);
+  const truthPct = (truth / total) * 100;
+  const govPct = (government / total) * 100;
+  const stalePct = (stalemate / total) * 100;
+
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-3">
+      <div>
+        <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Victory Spectrum</div>
+        <p className="text-xs text-slate-500">Projected win slice split across {total.toLocaleString()} simulations.</p>
+      </div>
+      <div className="h-3 rounded-full overflow-hidden border border-gray-800">
+        <div className="flex h-full w-full">
+          <div className="h-full bg-emerald-400/80" style={{ width: `${truthPct}%` }} />
+          <div className="h-full bg-rose-400/80" style={{ width: `${govPct}%` }} />
+          <div className="h-full bg-slate-500/80" style={{ width: `${stalePct}%` }} />
+        </div>
+      </div>
+      <div className="grid grid-cols-3 text-[11px] uppercase tracking-wide text-center text-slate-400 gap-2">
+        <span className="bg-emerald-500/10 border border-emerald-500/30 rounded-md py-1">Truth {truth.toFixed(1)}%</span>
+        <span className="bg-rose-500/10 border border-rose-500/30 rounded-md py-1">Gov {government.toFixed(1)}%</span>
+        <span className="bg-slate-500/10 border border-slate-500/30 rounded-md py-1">Stalemate {stalemate.toFixed(1)}%</span>
+      </div>
+    </div>
+  );
+};
+
+const SystemsDiagram = ({
+  activeTypes,
+}: {
+  activeTypes: string[];
+}) => {
+  const nodes = [
+    { key: 'truth', label: 'Truth Ops', accent: 'text-emerald-300', active: activeTypes.includes('MEDIA') },
+    { key: 'attack', label: 'Influence Pressure', accent: 'text-sky-300', active: activeTypes.includes('ATTACK') },
+    { key: 'zone', label: 'Zone Control', accent: 'text-amber-300', active: activeTypes.includes('ZONE') },
+  ];
+
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4">
+      <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Systems Map</div>
+      <p className="text-xs text-slate-500">Hover grid outlines how MVP lanes feed the balance core.</p>
+      <div className="mt-4 grid grid-cols-3 gap-3 relative">
+        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-emerald-500/20" />
+        <div className="absolute top-1/2 left-0 right-0 h-px bg-emerald-500/20" />
+        {nodes.map(node => (
+          <div
+            key={node.key}
+            className={`relative bg-gray-950/80 border rounded-lg p-3 transition-all duration-500 hover:border-emerald-400/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.35)] ${
+              node.active ? 'border-emerald-400/50' : 'border-gray-800'
+            }`}
+          >
+            <span className={`text-[11px] uppercase tracking-[0.2em] ${node.accent}`}>{node.label}</span>
+            <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+              {node.key === 'truth'
+                ? 'Media cards adjust narrative deltas and truth control.'
+                : node.key === 'attack'
+                  ? 'Attack suite drains influence through direct IP attrition.'
+                  : 'Zone presence modulates pressure lanes and staging tempo.'}
+            </p>
+            <div className="absolute -inset-0.5 border border-emerald-500/10 rounded-lg" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const HistogramCard = ({
   title,
   subtitle,
@@ -221,10 +326,26 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
     return bins;
   }, [metrics.hist.pressure]);
 
+  const neutralTruthEntries = metrics.hist.truthDelta?.[0] ?? 0;
+  const highIpSwings = (metrics.hist.attackIp?.[3] ?? 0) + (metrics.hist.attackIp?.[4] ?? 0);
+  const pressurePeak = useMemo(() => {
+    const entries = Object.keys(metrics.hist.pressure ?? {}).map(value => Number(value));
+    if (entries.length === 0) return 0;
+    return Math.max(...entries.filter(value => Number.isFinite(value)));
+  }, [metrics.hist.pressure]);
+
   const latestIntelEntries = useMemo(
     () => logEntries.slice(-20).reverse(),
     [logEntries],
   );
+
+  const winSpread = Math.abs(simulation.truthWinRate - simulation.governmentWinRate);
+  const balanceHealthScore = useMemo(() => {
+    const costScore = metrics.costConformity.pct;
+    const winBalanceScore = Math.max(0, 100 - winSpread * 2);
+    const pressureScore = Math.min(100, Math.max(0, metrics.avgMvpWeight * 18));
+    return (costScore * 0.5 + winBalanceScore * 0.3 + pressureScore * 0.2) / 1;
+  }, [metrics.avgMvpWeight, metrics.costConformity.pct, winSpread]);
 
   const expansionStatusMessage = useMemo(() => {
     if (!includeExpansions) {
@@ -289,6 +410,50 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6 text-sm text-slate-200">
+          <section className="relative overflow-hidden rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-900/40 via-gray-950 to-slate-950 p-6">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,197,94,0.25),transparent_55%)]" />
+            <div className="absolute inset-0 opacity-30 mix-blend-screen" style={{ backgroundImage: 'linear-gradient(120deg, transparent 0%, rgba(56,189,248,0.15) 50%, transparent 100%)' }} />
+            <div className="relative grid gap-6 md:grid-cols-5 items-center">
+              <div className="md:col-span-3 space-y-3">
+                <Badge variant="outline" className="uppercase tracking-[0.3em] text-xs">Real-time Analysis Uplink</Badge>
+                <h3 className="text-2xl md:text-3xl font-semibold text-emerald-100 font-mono leading-tight">
+                  Balance Health Synopsis
+                </h3>
+                <p className="text-sm text-emerald-200/80 leading-relaxed">
+                  Monitoring MVP deltas across truth, influence and staging pressure. Adaptive sampling calibrates against
+                  enabled expansion packs to surface emergent imbalances before they hit the table.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3 text-xs uppercase tracking-wide">
+                  <div className="bg-gray-900/60 border border-emerald-500/30 rounded-lg p-3">
+                    <div className="text-[11px] text-emerald-300">Cost Integrity</div>
+                    <div className="text-lg font-bold text-white">{metrics.costConformity.pct.toFixed(0)}%</div>
+                    <p className="text-[11px] text-emerald-200/70 mt-1">{metrics.costConformity.ok} aligned entries</p>
+                  </div>
+                  <div className="bg-gray-900/60 border border-sky-500/30 rounded-lg p-3">
+                    <div className="text-[11px] text-sky-300">Avg MVP Weight</div>
+                    <div className="text-lg font-bold text-white">{metrics.avgMvpWeight.toFixed(1)}</div>
+                    <p className="text-[11px] text-sky-200/70 mt-1">Truth/IP/Pressure composite</p>
+                  </div>
+                  <div className="bg-gray-900/60 border border-amber-500/30 rounded-lg p-3">
+                    <div className="text-[11px] text-amber-300">Win Delta Spread</div>
+                    <div className="text-lg font-bold text-white">{winSpread.toFixed(1)}%</div>
+                    <p className="text-[11px] text-amber-200/70 mt-1">Truth vs Government gap</p>
+                  </div>
+                </div>
+              </div>
+              <div className="md:col-span-2 flex flex-col items-center gap-4">
+                <BalanceGauge score={balanceHealthScore} label="Balance Health" />
+                <div className="w-full max-w-xs">
+                  <VictorySpectrum
+                    truth={simulation.truthWinRate}
+                    government={simulation.governmentWinRate}
+                    stalemate={simulation.drawRate}
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+
           <section className="grid gap-3 md:grid-cols-3">
             <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-3">
               <div className="flex items-start justify-between gap-3">
@@ -367,6 +532,49 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
                   Select at least one card type to populate the dashboard.
                 </p>
               )}
+            </div>
+          </section>
+
+          <section className="grid gap-3 md:grid-cols-3">
+            <SystemsDiagram activeTypes={activeTypes} />
+            <div className="md:col-span-2 bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Operational Directives</div>
+                  <p className="text-xs text-slate-500">Use these readouts to rebalance lanes before escalation.</p>
+                </div>
+                <Badge variant="outline" className="uppercase tracking-wide text-[11px]">Deck Lab Feed</Badge>
+              </div>
+              <div className="grid gap-2 md:grid-cols-2 text-[13px] text-slate-200">
+                <div className="bg-gray-950/70 border border-emerald-500/20 rounded-lg p-3">
+                  <p className="font-semibold text-emerald-300 uppercase tracking-wide text-[11px]">Truth Control</p>
+                  <p className="mt-1 leading-relaxed text-slate-300">
+                    Media deltas net {neutralTruthEntries} neutral entries. Track spikes beyond ±2 for targeted edits.
+                  </p>
+                </div>
+                <div className="bg-gray-950/70 border border-sky-500/20 rounded-lg p-3">
+                  <p className="font-semibold text-sky-300 uppercase tracking-wide text-[11px]">IP Attrition</p>
+                  <p className="mt-1 leading-relaxed text-slate-300">
+                    Attack suites average {highIpSwings} high IP swings. Ensure counterplay exists in the enabled packs.
+                  </p>
+                </div>
+                <div className="bg-gray-950/70 border border-amber-500/20 rounded-lg p-3">
+                  <p className="font-semibold text-amber-300 uppercase tracking-wide text-[11px]">Zone Pressure</p>
+                  <p className="mt-1 leading-relaxed text-slate-300">
+                    Pressure curve peaks at +{pressurePeak} stacks. Highlight zone locks during playtest briefings.
+                  </p>
+                </div>
+                <div className="bg-gray-950/70 border border-rose-500/20 rounded-lg p-3">
+                  <p className="font-semibold text-rose-300 uppercase tracking-wide text-[11px]">Expansion Pulse</p>
+                  <p className="mt-1 leading-relaxed text-slate-300">
+                    {includeExpansions && hasEnabledExpansions
+                      ? activeExpansionNames
+                        ? `Active packs broadcasting: ${activeExpansionNames}.`
+                        : 'Expansions enabled — awaiting pack selection.'
+                      : 'Core-only mode, expansions muted for this pass.'}
+                  </p>
+                </div>
+              </div>
             </div>
           </section>
 
