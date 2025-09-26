@@ -387,19 +387,26 @@ export interface ComboStory {
   summary: string;
 }
 
-const formatComboReward = (value: number | undefined, label: string): string | null => {
-  if (!value || Number.isNaN(value)) {
-    return null;
+const formatList = (items: string[]): string => {
+  if (!items.length) {
+    return '';
   }
-  return `${value > 0 ? '+' : '−'}${Math.abs(value)} ${label}`;
+  if (items.length === 1) {
+    return items[0] ?? '';
+  }
+  const start = items.slice(0, -1).join(', ');
+  const end = items[items.length - 1] ?? '';
+  return `${start} og ${end}`;
 };
 
 export function composeComboStory(summary: ComboSummary): ComboStory {
   const magnitude = summary.results.length;
   const topCombo = summary.results[0]?.definition;
   const reward = summary.totalReward;
-  const truthLabel = formatComboReward(reward.truth, 'Truth');
-  const ipLabel = formatComboReward(reward.ip, 'IP');
+  const truthDefined = typeof reward.truth === 'number' && Number.isFinite(reward.truth);
+  const ipDefined = typeof reward.ip === 'number' && Number.isFinite(reward.ip);
+  const truthTotal = truthDefined ? (reward.truth as number) : 0;
+  const ipTotal = ipDefined ? (reward.ip as number) : 0;
   const logs = summary.logs ?? [];
   const hasResults = magnitude > 0;
 
@@ -429,40 +436,110 @@ export function composeComboStory(summary: ComboSummary): ComboStory {
     } satisfies ComboStory;
   }
 
-  const headVerb = magnitude > 1 ? 'CHAIN DETONATES' : 'COMBO TRIGGERS';
-  const headline = topCombo
-    ? `${topCombo.name.toUpperCase()} ${headVerb}!`
-    : `COMBO ENGINE ${headVerb}!`;
+  const headlineLabel = topCombo?.name ? topCombo.name.toUpperCase() : 'SYSTEM LINK';
+  const headline = `COMBO: ${headlineLabel} UNFOLDS LIVE`;
 
-  const rewardLine = [truthLabel, ipLabel].filter(Boolean).join(', ');
-  const deck = rewardLine ? `Rewards ripple across the board (${rewardLine}).` : 'Combo meter spikes off the chart.';
+  const rewardSegments: string[] = [];
+  if (truthDefined) {
+    rewardSegments.push(applyDeltaTemplate(pickDeltaTemplate(truthTotal, deltaPhrases.truth), truthTotal));
+  }
+  if (ipDefined) {
+    rewardSegments.push(applyDeltaTemplate(pickDeltaTemplate(ipTotal, deltaPhrases.ip), ipTotal));
+  }
+  const magnitudeFragment = `Magnitude ${magnitude} registrert på konsoll`;
+  const deckLead = rewardSegments.length
+    ? rewardSegments.join(' & ')
+    : pick(deltaPhrases.summary, deltaPhrases.summary[0] ?? 'Analysts report phantom metrics ricocheting through the dashboards.');
+  const deck = ensureSentence(`${deckLead}${deckLead ? '; ' : ''}${magnitudeFragment}`);
 
   const sentences: string[] = [];
+  const comboNames = summary.results.map(result => result.definition.name);
+  const comboLead = comboNames.length
+    ? `${formatList(comboNames.map(name => name ?? 'Uten navn'))}`
+    : 'ukjente protokoller';
   sentences.push(
-    `Combo console lights up as ${summary.results.length} definition${summary.results.length === 1 ? '' : 's'} chain together on turn ${summary.turn}.`,
+    `Magnitude ${magnitude} kjede tennes på tur ${summary.turn} idet ${comboLead} låser seg sammen.`,
   );
 
-  for (const result of summary.results.slice(0, 3)) {
-    const plays = result.details.matchedPlays.map(play => play.cardName).filter(Boolean);
-    const playList = plays.length ? `${plays.slice(0, 3).join(', ')}${plays.length > 3 ? '…' : ''}` : 'classified maneuvers';
-    const comboLine = `${result.definition.name} escalates via ${playList}.`;
-    sentences.push(comboLine);
+  const playsByType: Record<'ATTACK' | 'MEDIA' | 'ZONE', string[]> = {
+    ATTACK: [],
+    MEDIA: [],
+    ZONE: [],
+  };
+  const targetStates = new Set<string>();
+
+  for (const result of summary.results) {
+    for (const play of result.details.matchedPlays) {
+      if (play.cardType === 'ATTACK' || play.cardType === 'MEDIA' || play.cardType === 'ZONE') {
+        if (play.cardName) {
+          if (!playsByType[play.cardType].includes(play.cardName)) {
+            playsByType[play.cardType].push(play.cardName);
+          }
+        }
+      }
+      if (play.targetStateId) {
+        targetStates.add(play.targetStateId);
+      }
+    }
   }
 
-  if (summary.results.length > 3) {
-    sentences.push('Additional combo logs remain under review pending clearance.');
+  const attackSentence = playsByType.ATTACK.length
+    ? `ATTACK-kortene ${formatList(playsByType.ATTACK)} driver lekkasje og avsløring gjennom hver lenke.`
+    : 'Ingen ATTACK-kort er i spill, så lekkasjeplanen må improviseres i bakrommet.';
+  sentences.push(attackSentence);
+
+  const mediaSentence = playsByType.MEDIA.length
+    ? `MEDIA-kortene ${formatList(playsByType.MEDIA)} pumper viralitet til konsollen.`
+    : 'MEDIA-kanalene forblir dempet, og viraliteten må lånes fra ryktebørsen.';
+  sentences.push(mediaSentence);
+
+  const zoneTargets = Array.from(targetStates).slice(0, 3);
+  const zoneTargetText = zoneTargets.length
+    ? `mot målstat${zoneTargets.length > 1 ? 'er' : 'en'} ${formatList(zoneTargets)}`
+    : 'over en tilslørt målstat';
+  const zoneSentence = playsByType.ZONE.length
+    ? `ZONE-kortene ${formatList(playsByType.ZONE)} sender feltbølgen ${zoneTargetText}.`
+    : `Feltbølgen holder pusten ${zoneTargetText}.`;
+  sentences.push(zoneSentence);
+
+  const rewardWrap = rewardSegments.length
+    ? `Konsollens logg noterer ${rewardSegments.join(' og ')}.`
+    : 'Konsollens logg noterer at belønningene foreløpig er uplottet.';
+  sentences.push(rewardWrap);
+
+  if (sentences.length > 5) {
+    sentences.splice(5);
   }
 
   const tags = ['#ComboWatch', `#Turn${summary.turn}`, '#NarrativeCascade'];
-  const summaryLine = summary.results
-    .map(result => `${result.definition.name} (${result.definition.category})`)
-    .join(' • ');
+  const categoryTags = new Set<string>();
+  for (const result of summary.results) {
+    categoryTags.add(`#ComboCat${result.definition.category.charAt(0).toUpperCase()}${result.definition.category.slice(1)}`);
+  }
+  const typeTags = new Set<string>();
+  (['ATTACK', 'MEDIA', 'ZONE'] as const).forEach(type => {
+    if (playsByType[type].length) {
+      typeTags.add(`#Type${type.charAt(0)}${type.slice(1).toLowerCase()}`);
+    }
+  });
+  const uniqueTags = Array.from(new Set([...tags, ...categoryTags, ...typeTags, `#Magnitude${magnitude}`]));
+
+  const summaryParts = summary.results.map(result => {
+    const matchedNames = result.details.matchedPlays
+      .map(play => (play.cardName ? `${play.cardName} (${play.cardType})` : null))
+      .filter((value): value is string => Boolean(value));
+    const cardsText = matchedNames.length ? formatList(matchedNames) : 'ukjente kort';
+    return `${result.definition.name} (${result.definition.category}) via ${cardsText}`;
+  });
+  const summaryLine = summaryParts.length
+    ? `Magnitude ${magnitude}: ${summaryParts.join(' • ')}`
+    : `Magnitude ${magnitude}: Ingen kort registrert.`;
 
   return {
     headline,
     deck,
     paragraphs: chunkSentences(sentences.map(ensureSentence)),
-    tags,
+    tags: uniqueTags,
     magnitude,
     summary: summaryLine,
   } satisfies ComboStory;
