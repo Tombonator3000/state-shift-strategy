@@ -1633,17 +1633,6 @@ const Index = () => {
           <button
             type="button"
             onClick={() => {
-              setBalancingInitialView('dev-tools');
-              setShowBalancing(true);
-            }}
-            className={mastheadButtonClass}
-            title="Event Database"
-          >
-            📰
-          </button>
-          <button
-            type="button"
-            onClick={() => {
               setShowPlayerHub(true);
               audio.playSFX('click');
             }}
