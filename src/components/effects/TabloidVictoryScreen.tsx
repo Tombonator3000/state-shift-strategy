@@ -6,6 +6,15 @@ import EndCredits from '@/components/game/EndCredits';
 
 type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
 
+interface AgendaSummary {
+  title: string;
+  faction: 'truth' | 'government' | 'both';
+  progress: number;
+  target: number;
+  completed: boolean;
+  revealed: boolean;
+}
+
 interface MVPDetails {
   cardId: string;
   cardName: string;
@@ -38,7 +47,8 @@ interface TabloidVictoryScreenProps {
     playerStates: number;
     aiStates: number;
     mvp?: MVPDetails;
-    agenda?: { name: string; complete: boolean };
+    playerSecretAgenda?: AgendaSummary;
+    aiSecretAgenda?: AgendaSummary;
   };
   onClose: () => void;
   onMainMenu: () => void;
@@ -118,6 +128,10 @@ const TabloidVictoryScreen = ({
     }
   };
 
+  const formatAgendaProgress = (agenda: AgendaSummary): string => {
+    return agenda.target > 0 ? `${agenda.progress}/${agenda.target}` : `${agenda.progress}`;
+  };
+
   const getMvpStatLines = (mvp: MVPDetails): string[] => {
     const lines: string[] = [];
     if (mvp.truthDelta !== 0) {
@@ -186,10 +200,12 @@ const TabloidVictoryScreen = ({
             headlines.push(`OPERATIONAL FUNDING MAXIMIZED! Network Power: ${gameStats.playerIP} IP!`);
             headlines.push(`SHADOW BUDGET APPROVED — Pentagon Takes Notes!`);
             break;
-          case 'agenda':
-            headlines.push(`CLASSIFIED MISSION SUCCESS! Operation: ${gameStats.agenda?.name}!`);
+          case 'agenda': {
+            const mission = gameStats.playerSecretAgenda?.title ?? 'CLASSIFIED MISSION';
+            headlines.push(`CLASSIFIED MISSION SUCCESS! Operation: ${mission}!`);
             headlines.push(`MEN IN BLACK CELEBRATE — With Decaf Coffee!`);
             break;
+          }
         }
       } else {
         switch (victoryType) {
@@ -205,15 +221,34 @@ const TabloidVictoryScreen = ({
             headlines.push(`RESISTANCE FUNDING PEAKS! Network Power: ${gameStats.playerIP} IP!`);
             headlines.push(`GRASSROOTS REVOLUTION — Aliens Take Notice!`);
             break;
-          case 'agenda':
-            headlines.push(`TRUTH MISSION ACCOMPLISHED! Operation: ${gameStats.agenda?.name}!`);
+          case 'agenda': {
+            const mission = gameStats.playerSecretAgenda?.title ?? 'TRUTH MISSION';
+            headlines.push(`TRUTH MISSION ACCOMPLISHED! Operation: ${mission}!`);
             headlines.push(`WHISTLEBLOWERS UNITE — Reality TV Show Imminent!`);
             break;
+          }
         }
       }
     } else {
-      // Faction-aware defeat headlines
-      if (playerFaction === 'government') {
+      const aiAgendaTitle = (() => {
+        if (!gameStats.aiSecretAgenda) {
+          return undefined;
+        }
+        if (gameStats.aiSecretAgenda.revealed || gameStats.aiSecretAgenda.completed) {
+          return gameStats.aiSecretAgenda.title;
+        }
+        return 'Classified Operation';
+      })();
+
+      if (victoryType === 'agenda' && aiAgendaTitle) {
+        if (playerFaction === 'government') {
+          headlines.push(`TRUTH OPERATION "${aiAgendaTitle.toUpperCase()}" TOPPLES COVER STORY!`);
+          headlines.push(`CITIZENS DEMAND RECEIPTS — AND THEY HAVE THEM.`);
+        } else {
+          headlines.push(`DEEP STATE OPERATION "${aiAgendaTitle.toUpperCase()}" EXECUTED FLAWLESSLY!`);
+          headlines.push(`BLACK BUDGET PARTY — INVITATION DENIED.`);
+        }
+      } else if (playerFaction === 'government') {
         headlines.push(`TRUTH RUNS RAMPANT! Cover Story In Tatters.`);
         headlines.push(`LOCAL MAN (YOU) DISCOVERS CONSEQUENCES.`);
       } else {
@@ -510,15 +545,33 @@ const TabloidVictoryScreen = ({
                       </div>
                     </div>
                   )}
-                  {gameStats.agenda && (
-                    <div className="border-t border-newspaper-border pt-2 mt-2 text-center">
-                      <div className="text-xs font-bold opacity-80">SECRET MISSION</div>
-                      <div className={`font-bold text-sm ${gameStats.agenda.complete ? 'text-newspaper-accent' : 'text-red-600'}`}>
-                        {gameStats.agenda.name}
-                      </div>
-                      <div className="text-xs font-bold">
-                        {gameStats.agenda.complete ? '✓ PASSED' : '✗ FAILED'}
-                      </div>
+                  {(gameStats.playerSecretAgenda || gameStats.aiSecretAgenda) && (
+                    <div className="border-t border-newspaper-border pt-2 mt-2 text-center space-y-2">
+                      <div className="text-xs font-bold opacity-80">SECRET OPERATIONS</div>
+                      {gameStats.playerSecretAgenda && (
+                        <div>
+                          <div className="text-[11px] uppercase tracking-wide opacity-70">Player Objective</div>
+                          <div className={`font-bold text-sm ${gameStats.playerSecretAgenda.completed ? 'text-newspaper-accent' : 'text-red-600'}`}>
+                            {gameStats.playerSecretAgenda.title}
+                          </div>
+                          <div className="text-xs font-bold">
+                            {gameStats.playerSecretAgenda.completed ? '✓ PASSED' : '✗ FAILED'} ({formatAgendaProgress(gameStats.playerSecretAgenda)})
+                          </div>
+                        </div>
+                      )}
+                      {gameStats.aiSecretAgenda && (
+                        <div>
+                          <div className="text-[11px] uppercase tracking-wide opacity-70">AI Objective</div>
+                          <div className={`font-bold text-sm ${gameStats.aiSecretAgenda.completed ? 'text-newspaper-accent' : 'text-red-600'}`}>
+                            {(gameStats.aiSecretAgenda.revealed || gameStats.aiSecretAgenda.completed)
+                              ? gameStats.aiSecretAgenda.title
+                              : 'CLASSIFIED OPERATION'}
+                          </div>
+                          <div className="text-xs font-bold">
+                            {gameStats.aiSecretAgenda.completed ? '✓ PASSED' : '✗ FAILED'} ({formatAgendaProgress(gameStats.aiSecretAgenda)})
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

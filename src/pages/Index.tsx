@@ -28,7 +28,6 @@ import MechanicsTooltip from '@/components/game/MechanicsTooltip';
 import PlayerHubOverlay from '@/components/game/PlayerHubOverlay';
 import NewCardsPresentation from '@/components/game/NewCardsPresentation';
 import { Maximize, Menu, Minimize, UserCircle2 } from 'lucide-react';
-import { getRandomAgenda } from '@/data/agendaDatabase';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import {
@@ -53,6 +52,15 @@ type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerCo
 type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
 
 type ObjectiveSectionId = 'victory' | 'secret-agenda';
+
+interface AgendaSummary {
+  title: string;
+  faction: 'truth' | 'government' | 'both';
+  progress: number;
+  target: number;
+  completed: boolean;
+  revealed: boolean;
+}
 
 interface MVPReport {
   cardId: string;
@@ -80,11 +88,8 @@ interface GameOverReport {
   ipAI: number;
   statesGov: number;
   statesTruth: number;
-  agenda?: {
-    side: 'truth' | 'government';
-    name: string;
-    success: boolean;
-  };
+  playerSecretAgenda?: AgendaSummary;
+  aiSecretAgenda?: AgendaSummary;
   mvp?: MVPReport | null;
   legendaryUsed: string[];
 }
@@ -514,9 +519,15 @@ const Index = () => {
 
     if (!shouldEvaluate) return;
 
+    const playerSecretAgenda = gameState.secretAgenda;
+    const aiSecretAgenda = gameState.aiSecretAgenda;
+
     // Priority 1: Secret Agenda (highest priority)
-    if (gameState.agenda?.complete) {
-      winner = gameState.agenda.faction === 'truth' ? 'truth' : 'government';
+    if (playerSecretAgenda?.completed) {
+      winner = gameState.faction;
+      victoryType = 'agenda';
+    } else if (aiSecretAgenda?.completed) {
+      winner = gameState.faction === 'truth' ? 'government' : 'truth';
       victoryType = 'agenda';
     }
     
@@ -561,7 +572,22 @@ const Index = () => {
           .filter(entry => entry.card.rarity === 'legendary')
           .map(entry => entry.card.name),
       ));
-      const report = {
+      const summarizeAgenda = (source?: typeof playerSecretAgenda) => {
+        if (!source) {
+          return undefined;
+        }
+
+        return {
+          title: source.title,
+          faction: source.faction,
+          progress: source.progress,
+          target: source.target,
+          completed: source.completed,
+          revealed: source.revealed,
+        } satisfies AgendaSummary;
+      };
+
+      const report: GameOverReport = {
         winner,
         rounds: gameState.round,
         finalTruth: Math.round(gameState.truth),
@@ -569,11 +595,8 @@ const Index = () => {
         ipAI: gameState.aiIP,
         statesGov: gameState.states.filter(s => s.owner === (gameState.faction === 'government' ? 'player' : 'ai')).length,
         statesTruth: gameState.states.filter(s => s.owner === (gameState.faction === 'truth' ? 'player' : 'ai')).length,
-        agenda: gameState.agenda ? {
-          side: (gameState.agenda.faction === 'truth' ? 'truth' : 'government') as "truth" | "government",
-          name: gameState.agenda.title,
-          success: gameState.agenda.complete
-        } : undefined,
+        playerSecretAgenda: summarizeAgenda(playerSecretAgenda),
+        aiSecretAgenda: summarizeAgenda(aiSecretAgenda),
         mvp,
         legendaryUsed,
       };
@@ -581,7 +604,7 @@ const Index = () => {
       setGameOverReport(report);
       setVictoryState({ isVictory: true, type: victoryType });
     }
-  }, [gameState.controlledStates.length, gameState.ip, gameState.aiIP, gameState.truth, gameState.agenda?.complete, gameState.states, gameState.faction, gameState.isGameOver]);
+  }, [gameState.controlledStates.length, gameState.ip, gameState.aiIP, gameState.truth, gameState.secretAgenda?.completed, gameState.aiSecretAgenda?.completed, gameState.states, gameState.faction, gameState.isGameOver]);
 
   // Enhanced synergy detection with coordinated visual effects
   useEffect(() => {
@@ -1360,10 +1383,27 @@ const Index = () => {
 
   const playerAgenda = gameState.secretAgenda;
   const agendaProgress = playerAgenda ? Math.min(100, Math.round((playerAgenda.progress / playerAgenda.target) * 100)) : 0;
+  const playerAgendaSummary = playerAgenda ? {
+    title: playerAgenda.title,
+    faction: playerAgenda.faction,
+    progress: playerAgenda.progress,
+    target: playerAgenda.target,
+    completed: playerAgenda.completed,
+    revealed: playerAgenda.revealed,
+  } : undefined;
   const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
-  const aiObjectiveProgress = gameState.aiSecretAgenda
-    ? Math.min(100, (gameState.aiSecretAgenda.progress / gameState.aiSecretAgenda.target) * 100)
+  const aiAgenda = gameState.aiSecretAgenda;
+  const aiObjectiveProgress = aiAgenda
+    ? Math.min(100, (aiAgenda.progress / aiAgenda.target) * 100)
     : 0;
+  const aiAgendaSummary = aiAgenda ? {
+    title: aiAgenda.title,
+    faction: aiAgenda.faction,
+    progress: aiAgenda.progress,
+    target: aiAgenda.target,
+    completed: aiAgenda.completed,
+    revealed: aiAgenda.revealed,
+  } : undefined;
   const aiAssessment = gameState.aiStrategist?.getStrategicAssessment(gameState);
 
   const objectiveSections = [
@@ -1852,10 +1892,8 @@ const Index = () => {
           playerStates: gameState.states.filter(s => s.owner === 'player').length,
           aiStates: gameState.states.filter(s => s.owner === 'ai').length,
           mvp: gameOverReport?.mvp ?? undefined,
-          agenda: gameState.agenda ? {
-            name: gameState.agenda.title,
-            complete: gameState.agenda.complete || false
-          } : undefined
+          playerSecretAgenda: playerAgendaSummary,
+          aiSecretAgenda: aiAgendaSummary
         }}
         onClose={() => {
           setVictoryState({ isVictory: false, type: null });
