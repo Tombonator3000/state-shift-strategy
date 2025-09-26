@@ -478,7 +478,11 @@ startTurn(s):
 
 
 
-me.ip += 5 + me.states.length
+me.ip += max(0, (5 + me.states.length) - upkeep)
+
+upkeep = max(0, floor((me.ip - 40) / 10))
+
+(40 og 10 er standardverdier; juster DEFAULT_IP_MAINTENANCE i engine.ts ved behov)
 
 
 

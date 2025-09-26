@@ -11,7 +11,7 @@
 ## Game loop fundamentals
 The MVP design defines a duel between the Truth Seekers and the Government, each managing Influence Points (IP), a shared Truth meter, and pressure on individual U.S. states. Win conditions include controlling 10 states, pushing Truth to faction-specific thresholds, or accumulating 300 IP.【F:DESIGN_DOC_MVP.md†L7-L63】 These core concepts are implemented directly in the runtime engine:
 
-- **Turn start:** `startTurn` clones game state, awards `5 + controlledStates` IP to the active player, and refills their hand to five cards.【F:src/mvp/engine.ts†L50-L68】
+- **Turn start:** `startTurn` clones game state, uses `computeTurnIpIncome` to award `5 + controlledStates` IP minus any maintenance for stockpiled reserves, logs upkeep when applied, and refills the active player's hand to five cards.【F:src/mvp/engine.ts†L50-L91】
 - **Card play gating:** `canPlay` enforces the three-card-per-turn limit, IP costs, and ZONE targeting rules before a card resolves.【F:src/mvp/engine.ts†L71-L99】
 - **Playing a card:** `playCard` removes the card from hand, deducts IP, logs the play, and calls `resolve` to apply effects.【F:src/mvp/engine.ts†L101-L215】
 - **Effect resolution:** `resolve` relies on `applyEffectsMvp` to adjust IP, Truth, and pressure while tracking capture metadata for end-of-turn summaries.【F:src/mvp/engine.ts†L157-L215】【F:src/engine/applyEffects-mvp.ts†L53-L157】
