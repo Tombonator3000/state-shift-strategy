@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,8 +10,14 @@ import { Slider } from '@/components/ui/slider';
 import { EventManager, EVENT_DATABASE, type GameEvent } from '@/data/eventDatabase';
 import { AlertTriangle, Zap, Eye, Crown, Calendar, Filter, Play, BarChart3, TestTube, Dice6, RefreshCw } from 'lucide-react';
 
+type EventViewerTab = 'browser' | 'statistics' | 'testing';
+type EventViewerVariant = 'modal' | 'embedded';
+
 interface EventViewerProps {
-  onClose: () => void;
+  onClose?: () => void;
+  variant?: EventViewerVariant;
+  defaultTab?: EventViewerTab;
+  className?: string;
 }
 
 interface TestGameState {
@@ -23,11 +29,17 @@ interface TestGameState {
   faction: 'truth' | 'government';
 }
 
-const EventViewer = ({ onClose }: EventViewerProps) => {
+const EventViewer = ({
+  onClose,
+  variant = 'modal',
+  defaultTab = 'browser',
+  className,
+}: EventViewerProps) => {
+  const [activeTab, setActiveTab] = useState<EventViewerTab>(defaultTab);
   const [selectedEvent, setSelectedEvent] = useState<GameEvent | null>(null);
   const [filterRarity, setFilterRarity] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
-  
+
   // Testing tools state
   const [testGameState, setTestGameState] = useState<TestGameState>({
     turn: 1,
@@ -46,7 +58,15 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
   const [simulationResults, setSimulationResults] = useState<{[key: string]: number}>({});
   const [simulationIterations, setSimulationIterations] = useState(1000);
   const [simulationTriggerCount, setSimulationTriggerCount] = useState(0);
-  
+
+  useEffect(() => {
+    setActiveTab(defaultTab);
+  }, [defaultTab]);
+
+  const isModal = variant === 'modal';
+  const listHeightClass = isModal ? 'h-[60vh]' : 'h-[52vh]';
+  const detailHeightClass = isModal ? 'h-[60vh]' : 'h-[52vh]';
+
   const eventManager = new EventManager();
   const eventStats = eventManager.getEventStats();
 
@@ -269,11 +289,30 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
     setSimulationTriggerCount(0);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-      <Card className="w-full max-w-7xl h-[90vh] bg-gray-900 border-gray-700 overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h2 className="text-xl font-bold text-white font-mono">EVENT DATABASE</h2>
+  const renderHeader = () => (
+    <div
+      className={`flex items-center justify-between ${
+        isModal
+          ? 'p-4 border-b border-gray-700'
+          : 'p-4 border-b border-gray-800 bg-gray-900/60'
+      }`}
+    >
+      <div>
+        <h2
+          className={`text-xl font-bold font-mono ${
+            isModal ? 'text-white' : 'text-emerald-200'
+          }`}
+        >
+          EVENT DATABASE
+        </h2>
+        {!isModal && (
+          <p className="text-[11px] uppercase tracking-[0.3em] text-emerald-400">
+            Dev Tool Access
+          </p>
+        )}
+      </div>
+      {isModal ? (
+        onClose ? (
           <Button
             onClick={onClose}
             variant="outline"
@@ -282,20 +321,50 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
           >
             Close
           </Button>
-        </div>
+        ) : null
+      ) : (
+        <Badge
+          variant="outline"
+          className="uppercase tracking-wide text-[11px] text-emerald-300 border-emerald-500/40"
+        >
+          Dev Tool
+        </Badge>
+      )}
+    </div>
+  );
 
-        <div className="p-4 h-full overflow-hidden">
-          <Tabs defaultValue="browser" className="h-full">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-800">
-              <TabsTrigger value="browser">Event Browser</TabsTrigger>
-              <TabsTrigger value="statistics">Statistics</TabsTrigger>
-              <TabsTrigger value="testing">Testing Tools</TabsTrigger>
-            </TabsList>
+  const renderContent = () => (
+    <div className={`${isModal ? 'p-4 h-full' : 'p-4 flex-1'} overflow-hidden`}> 
+      <Tabs
+        value={activeTab}
+        onValueChange={value => setActiveTab(value as EventViewerTab)}
+        className="flex h-full flex-col"
+      >
+        <TabsList
+          className={`${
+            isModal
+              ? 'grid w-full grid-cols-3 bg-gray-800'
+              : 'grid w-full grid-cols-3 gap-1 rounded-md border border-gray-800 bg-gray-900/60 p-1'
+          }`}
+        >
+          <TabsTrigger value="browser" className="text-xs uppercase tracking-wide">
+            Event Browser
+          </TabsTrigger>
+          <TabsTrigger value="statistics" className="text-xs uppercase tracking-wide">
+            Statistics
+          </TabsTrigger>
+          <TabsTrigger value="testing" className="text-xs uppercase tracking-wide">
+            Testing Tools
+          </TabsTrigger>
+        </TabsList>
 
-            <TabsContent value="browser" className="mt-4 h-full">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
-                <div className="lg:col-span-2">
-                  <Card className="p-4 bg-gray-800 border-gray-700 h-full">
+        <TabsContent
+          value="browser"
+          className="mt-4 flex-1 overflow-hidden focus-visible:outline-none"
+        >
+          <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <Card className="h-full border-gray-700 bg-gray-800 p-4">
                     <div className="flex items-center gap-4 mb-4">
                       <div className="flex items-center gap-2">
                         <Filter size={16} className="text-gray-400" />
@@ -328,7 +397,7 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
                       </div>
                     </div>
 
-                    <ScrollArea className="h-[60vh]">
+                    <ScrollArea className={listHeightClass}>
                       <div className="space-y-2">
                         {filteredEvents.map(event => (
                           <div 
@@ -362,12 +431,12 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
                 </div>
 
                 <div>
-                  <Card className="p-4 bg-gray-800 border-gray-700 h-full">
+                  <Card className="h-full border-gray-700 bg-gray-800 p-4">
                     <h3 className="text-lg font-semibold text-white mb-4">
                       {selectedEvent ? 'Event Details' : 'Select an Event'}
                     </h3>
                     {selectedEvent ? (
-                      <ScrollArea className="h-[60vh]">
+                      <ScrollArea className={detailHeightClass}>
                         <div className="space-y-4">
                           <div>
                             <div className="text-lg font-bold text-white">{selectedEvent.title}</div>
@@ -424,11 +493,14 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
                     )}
                   </Card>
                 </div>
-              </div>
-            </TabsContent>
+                </div>
+              </TabsContent>
 
-            <TabsContent value="statistics" className="mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <TabsContent
+          value="statistics"
+          className="mt-4 flex-1 overflow-y-auto space-y-6 focus-visible:outline-none"
+        >
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="p-4 bg-gray-800 border-gray-700">
                   <div className="text-2xl font-bold text-white">{eventStats.total}</div>
                   <div className="text-sm text-gray-400">Total Events</div>
@@ -451,23 +523,26 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
                 </Card>
               </div>
 
-              <div className="mt-6">
-                <Card className="p-4 bg-gray-800 border-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-4">Events by Type</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {Object.entries(eventStats.byType).map(([type, count]) => (
-                      <div key={type} className="text-center">
-                        <div className="text-xl font-bold text-white">{count}</div>
-                        <div className="text-sm text-gray-400 capitalize">{type}</div>
-                      </div>
-                    ))}
+          <div>
+            <Card className="border-gray-700 bg-gray-800 p-4">
+              <h3 className="mb-4 text-lg font-semibold text-white">Events by Type</h3>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                {Object.entries(eventStats.byType).map(([type, count]) => (
+                  <div key={type} className="text-center">
+                    <div className="text-xl font-bold text-white">{count}</div>
+                    <div className="text-sm capitalize text-gray-400">{type}</div>
                   </div>
-                </Card>
+                ))}
               </div>
-            </TabsContent>
+            </Card>
+          </div>
+        </TabsContent>
 
-            <TabsContent value="testing" className="mt-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <TabsContent
+          value="testing"
+          className="mt-4 flex-1 overflow-y-auto focus-visible:outline-none"
+        >
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {/* Game State Simulator */}
                 <Card className="p-4 bg-gray-800 border-gray-700">
                   <div className="flex items-center gap-2 mb-4">
@@ -708,7 +783,26 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
             </TabsContent>
           </Tabs>
         </div>
-      </Card>
+      );
+
+  if (isModal) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+        <Card className="h-[90vh] w-full max-w-7xl overflow-hidden border-gray-700 bg-gray-900">
+          {renderHeader()}
+          {renderContent()}
+        </Card>
+      </div>
+    );
+  }
+
+  const baseEmbeddedClass = 'flex h-full flex-col overflow-hidden rounded-lg border border-gray-800/80 bg-gray-950/80';
+  const combinedClassName = className ? `${baseEmbeddedClass} ${className}` : baseEmbeddedClass;
+
+  return (
+    <div className={combinedClassName}>
+      {renderHeader()}
+      {renderContent()}
     </div>
   );
 };

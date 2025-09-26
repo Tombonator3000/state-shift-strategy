@@ -13,7 +13,6 @@ import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
 import AIStatus from '@/components/game/AIStatus';
 import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashboard';
-import EventViewer from '@/components/game/EventViewer';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import AchievementPanel from '@/components/game/AchievementPanel';
 import Options from '@/components/game/Options';
@@ -432,7 +431,7 @@ const Index = () => {
   const [showIntro, setShowIntro] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showBalancing, setShowBalancing] = useState(false);
-  const [showEvents, setShowEvents] = useState(false);
+  const [balancingInitialView, setBalancingInitialView] = useState<'analysis' | 'dev-tools'>('analysis');
   const [showTutorial, setShowTutorial] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [loadingCard, setLoadingCard] = useState<string | null>(null);
@@ -1303,15 +1302,12 @@ const Index = () => {
     return <TutorialOverlay onClose={() => setShowTutorial(false)} />;
   }
 
-  if (showEvents) {
-    return <EventViewer onClose={() => setShowEvents(false)} />;
-  }
-
   if (showBalancing) {
     return (
       <EnhancedBalancingDashboard
         onClose={() => setShowBalancing(false)}
         logEntries={gameState.log}
+        initialView={balancingInitialView}
       />
     );
   }
@@ -1623,7 +1619,10 @@ const Index = () => {
           </button>
           <button
             type="button"
-            onClick={() => setShowBalancing(true)}
+            onClick={() => {
+              setBalancingInitialView('analysis');
+              setShowBalancing(true);
+            }}
             className={mastheadButtonClass}
             title="Card Balancing Dashboard"
           >
@@ -1631,7 +1630,10 @@ const Index = () => {
           </button>
           <button
             type="button"
-            onClick={() => setShowEvents(true)}
+            onClick={() => {
+              setBalancingInitialView('dev-tools');
+              setShowBalancing(true);
+            }}
             className={mastheadButtonClass}
             title="Event Database"
           >
