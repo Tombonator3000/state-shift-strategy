@@ -47,14 +47,54 @@ export interface EndTurnResult {
   summary: EndTurnSummary;
 }
 
+export interface IpMaintenanceSettings {
+  threshold: number;
+  divisor: number;
+}
+
+export interface IpIncomeBreakdown {
+  baseIncome: number;
+  maintenance: number;
+  netIncome: number;
+}
+
+export const DEFAULT_IP_MAINTENANCE: IpMaintenanceSettings = {
+  threshold: 40,
+  divisor: 10,
+};
+
+export function computeTurnIpIncome(
+  player: PlayerState,
+  settings: IpMaintenanceSettings = DEFAULT_IP_MAINTENANCE,
+): IpIncomeBreakdown {
+  const baseIncome = 5 + player.states.length;
+  const overage = Math.max(0, player.ip - settings.threshold);
+  const rawMaintenance = settings.divisor > 0 ? Math.floor(overage / settings.divisor) : 0;
+  const maintenance = Math.max(0, rawMaintenance);
+  const netIncome = Math.max(0, baseIncome - maintenance);
+
+  return {
+    baseIncome,
+    maintenance,
+    netIncome,
+  };
+}
+
 export function startTurn(state: GameState): GameState {
   const cloned = cloneGameState(state);
   const currentId = cloned.currentPlayer;
   const me = cloned.players[currentId];
-  const ipGain = 5 + me.states.length;
+  const { maintenance, netIncome } = computeTurnIpIncome(me);
+  const logEntries = [...cloned.log];
+
+  if (maintenance > 0) {
+    logEntries.push(
+      `${currentId} maintenance -${maintenance} IP (reserves ${me.ip} > threshold ${DEFAULT_IP_MAINTENANCE.threshold}, divisor ${DEFAULT_IP_MAINTENANCE.divisor})`,
+    );
+  }
   const updatedPlayer: PlayerState = {
     ...drawUpToFive(me),
-    ip: me.ip + ipGain,
+    ip: me.ip + netIncome,
   };
 
   return {
@@ -65,6 +105,7 @@ export function startTurn(state: GameState): GameState {
     },
     playsThisTurn: 0,
     turnPlays: [],
+    log: logEntries,
   };
 }
 
