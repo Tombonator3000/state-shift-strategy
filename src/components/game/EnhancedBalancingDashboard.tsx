@@ -21,6 +21,8 @@ import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import type { GameCard } from '@/rules/mvp';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import EventViewer from '@/components/game/EventViewer';
 
 type HistogramBin = { label: string; count: number };
 
@@ -173,9 +175,14 @@ const HistogramCard = ({
 interface EnhancedBalancingDashboardProps {
   onClose: () => void;
   logEntries: string[];
+  initialView?: 'analysis' | 'dev-tools';
 }
 
-const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDashboardProps) => {
+const EnhancedBalancingDashboard = ({
+  onClose,
+  logEntries,
+  initialView = 'analysis',
+}: EnhancedBalancingDashboardProps) => {
   const [expansionState, setExpansionState] = useState(() => ({
     ids: getEnabledExpansionIdsSnapshot(),
     cards: getExpansionCardsSnapshot(),
@@ -189,6 +196,7 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
     MEDIA: true,
     ZONE: true,
   });
+  const [activeView, setActiveView] = useState<'analysis' | 'dev-tools'>(initialView);
 
   useEffect(() => {
     const unsubscribe = subscribeToExpansionChanges(payload => {
@@ -202,6 +210,10 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
       setIncludeExpansions(false);
     }
   }, [expansionState.ids.length]);
+
+  useEffect(() => {
+    setActiveView(initialView);
+  }, [initialView]);
 
   const activeTypes = useMemo(
     () =>
@@ -393,8 +405,8 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-      <Card className="w-full max-w-5xl max-h-[90vh] bg-gray-950 border border-gray-700 overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+      <Card className="flex h-full max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden border border-gray-700 bg-gray-950">
         <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900/80">
           <div>
             <h2 className="text-lg font-semibold text-white font-mono tracking-wide">
@@ -409,7 +421,33 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 text-sm text-slate-200">
+        <Tabs
+          value={activeView}
+          onValueChange={value => setActiveView(value as 'analysis' | 'dev-tools')}
+          className="flex flex-1 flex-col overflow-hidden"
+        >
+          <div className="px-6 pt-4">
+            <TabsList className="grid w-full grid-cols-2 gap-1 rounded-md border border-gray-800 bg-gray-900/60 p-1">
+              <TabsTrigger
+                value="analysis"
+                className="text-xs uppercase tracking-wide text-slate-400 data-[state=active]:bg-gray-800 data-[state=active]:text-emerald-300"
+              >
+                Balance Intel
+              </TabsTrigger>
+              <TabsTrigger
+                value="dev-tools"
+                className="text-xs uppercase tracking-wide text-slate-400 data-[state=active]:bg-gray-800 data-[state=active]:text-emerald-300"
+              >
+                Dev Tool Menu
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent
+            value="analysis"
+            className="flex-1 overflow-hidden focus-visible:outline-none"
+          >
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 text-sm text-slate-200">
           <section className="relative overflow-hidden rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-900/40 via-gray-950 to-slate-950 p-6">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,197,94,0.25),transparent_55%)]" />
             <div className="absolute inset-0 opacity-30 mix-blend-screen" style={{ backgroundImage: 'linear-gradient(120deg, transparent 0%, rgba(56,189,248,0.15) 50%, transparent 100%)' }} />
@@ -820,7 +858,18 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
               <li>Legacy export formats and extension data have been retired for the MVP build.</li>
             </ul>
           </section>
-        </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent
+            value="dev-tools"
+            className="flex-1 overflow-hidden focus-visible:outline-none"
+          >
+            <div className="h-full p-6">
+              <EventViewer variant="embedded" className="h-full" />
+            </div>
+          </TabsContent>
+        </Tabs>
       </Card>
     </div>
   );
