@@ -8,7 +8,7 @@ import {
   calculateDynamicIpBonus,
   createDefaultCombinationEffects,
 } from '@/data/stateCombinations';
-import { getRandomAgenda, SecretAgenda } from '@/data/agendaDatabase';
+import { getRandomAgenda } from '@/data/agendaDatabase';
 import { type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
@@ -180,7 +180,6 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
   let logUpdates: string[] = [];
   let updatedSecretAgenda = state.secretAgenda;
   let updatedAiSecretAgenda = state.aiSecretAgenda;
-  let updatedAgenda = state.agenda;
 
   if (updatedSecretAgenda) {
     const snapshot = buildAgendaSnapshot(state, 'player');
@@ -257,36 +256,15 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
     }
   }
 
-  if (updatedAgenda) {
-    const snapshot = buildAgendaSnapshot(state, 'player');
-    const computedProgressRaw = Number(updatedAgenda.checkProgress?.(snapshot) ?? updatedAgenda.progress ?? 0);
-    const computedProgress = Number.isFinite(computedProgressRaw)
-      ? Math.max(0, computedProgressRaw)
-      : updatedAgenda.progress ?? 0;
-    const previousProgress = updatedAgenda.progress ?? 0;
-    const target = updatedAgenda.target ?? 0;
-    const isCompleted = computedProgress >= target;
-
-    if (computedProgress !== previousProgress || isCompleted !== !!updatedAgenda.complete) {
-      updatedAgenda = {
-        ...updatedAgenda,
-        progress: computedProgress,
-        complete: isCompleted,
-      };
-    }
-  }
-
   if (
     updatedSecretAgenda !== state.secretAgenda ||
     updatedAiSecretAgenda !== state.aiSecretAgenda ||
-    updatedAgenda !== state.agenda ||
     logUpdates.length > 0
   ) {
     return {
       ...state,
       secretAgenda: updatedSecretAgenda,
       aiSecretAgenda: updatedAiSecretAgenda,
-      agenda: updatedAgenda,
       log: logUpdates.length > 0 ? [...state.log, ...logUpdates] : state.log,
     };
   }
@@ -351,12 +329,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       'Cards drawn: 5',
       `AI Difficulty: ${aiDifficulty}`
     ],
-    agenda: {
-      ...getRandomAgenda('truth'),
-      progress: 0,
-      complete: false,
-      revealed: false
-    },
     secretAgenda: {
       ...getRandomAgenda('truth'),
       progress: 0,

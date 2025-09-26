@@ -67,11 +67,6 @@ export interface GameState {
   eventManager?: EventManager;
   showNewspaper: boolean;
   log: string[];
-  agenda?: SecretAgenda & {
-    progress?: number;
-    complete?: boolean;
-    revealed?: boolean;
-  };
   secretAgenda?: SecretAgenda & {
     progress: number;
     completed: boolean;

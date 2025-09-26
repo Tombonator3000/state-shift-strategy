@@ -5,6 +5,15 @@ import { X } from 'lucide-react';
 
 type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
 
+interface AgendaSummary {
+  title: string;
+  faction: 'truth' | 'government' | 'both';
+  progress: number;
+  target: number;
+  completed: boolean;
+  revealed: boolean;
+}
+
 interface MVPDetails {
   cardId: string;
   cardName: string;
@@ -31,7 +40,8 @@ interface GameOverReport {
   ipAI: number;
   statesGov: number;
   statesTruth: number;
-  agenda?: { side: "government" | "truth"; name: string; success: boolean };
+  playerSecretAgenda?: AgendaSummary;
+  aiSecretAgenda?: AgendaSummary;
   topPlays?: string[];
   legendaryUsed?: string[];
   funniestEvent?: string;
@@ -56,6 +66,10 @@ const formatPercent = (value: number) => {
   if (rounded > 0) return `+${rounded}%`;
   if (rounded < 0) return `${rounded}%`;
   return '0%';
+};
+
+const formatAgendaProgress = (agenda: AgendaSummary): string => {
+  return agenda.target > 0 ? `${agenda.progress}/${agenda.target}` : `${agenda.progress}`;
 };
 
 const describeMvpImpact = (mvp: MVPDetails): string => {
@@ -120,7 +134,17 @@ const ExtraEditionNewspaper = ({ report, onClose }: ExtraEditionNewspaperProps) 
 
   // Generate headlines based on winner
   const generateHeadlines = () => {
-    const { winner, finalTruth, statesGov, statesTruth, rounds, legendaryUsed, mvp } = report;
+    const {
+      winner,
+      finalTruth,
+      statesGov,
+      statesTruth,
+      rounds,
+      legendaryUsed,
+      mvp,
+      playerSecretAgenda,
+      aiSecretAgenda,
+    } = report;
     const headlines: string[] = [];
 
     if (winner === "truth") {
@@ -136,6 +160,14 @@ const ExtraEditionNewspaper = ({ report, onClose }: ExtraEditionNewspaperProps) 
     } else {
       headlines.push(`STALEMATE! Round ${rounds} Ends in Confusion`);
       headlines.push(`Both Sides Claim Victory; Reality Unclear`);
+    }
+
+    if (playerSecretAgenda?.completed) {
+      const factionLabel = playerSecretAgenda.faction === 'government' ? 'Government' : 'Truth';
+      headlines.push(`${factionLabel.toUpperCase()} SECRET AGENDA COMPLETE: ${playerSecretAgenda.title}!`);
+    } else if (aiSecretAgenda?.completed) {
+      const factionLabel = aiSecretAgenda.faction === 'government' ? 'Government' : 'Truth';
+      headlines.push(`${factionLabel.toUpperCase()} SHADOW PLAN "${aiSecretAgenda.title.toUpperCase()}" SUCCEEDS!`);
     }
 
     // Add universal headlines
@@ -284,17 +316,33 @@ const ExtraEditionNewspaper = ({ report, onClose }: ExtraEditionNewspaperProps) 
                     ))}
                   </div>
                 )}
-                {report.agenda && (
-                  <div className="border-t border-newspaper-text/20 pt-2 mt-2">
-                    <div className="text-center">
-                      <div className="text-xs opacity-80">SECRET AGENDA</div>
-                      <div className={`font-bold ${report.agenda.success ? 'text-green-400' : 'text-red-400'}`}>
-                        {report.agenda.name}
+                {(report.playerSecretAgenda || report.aiSecretAgenda) && (
+                  <div className="border-t border-newspaper-text/20 pt-2 mt-2 space-y-2">
+                    <div className="text-center text-xs opacity-80">SECRET OPERATIONS</div>
+                    {report.playerSecretAgenda && (
+                      <div className="text-center text-xs">
+                        <div className="uppercase tracking-wide opacity-70">Player Objective</div>
+                        <div className={`font-bold text-sm ${report.playerSecretAgenda.completed ? 'text-green-400' : 'text-red-400'}`}>
+                          {report.playerSecretAgenda.title}
+                        </div>
+                        <div>
+                          {report.playerSecretAgenda.completed ? '✅ SUCCESS' : '❌ FAILED'} ({formatAgendaProgress(report.playerSecretAgenda)})
+                        </div>
                       </div>
-                      <div className="text-xs">
-                        {report.agenda.success ? '✅ SUCCESS' : '❌ FAILED'}
+                    )}
+                    {report.aiSecretAgenda && (
+                      <div className="text-center text-xs">
+                        <div className="uppercase tracking-wide opacity-70">AI Objective</div>
+                        <div className={`font-bold text-sm ${report.aiSecretAgenda.completed ? 'text-green-400' : 'text-red-400'}`}>
+                          {(report.aiSecretAgenda.revealed || report.aiSecretAgenda.completed)
+                            ? report.aiSecretAgenda.title
+                            : 'CLASSIFIED OPERATION'}
+                        </div>
+                        <div>
+                          {report.aiSecretAgenda.completed ? '✅ SUCCESS' : '❌ FAILED'} ({formatAgendaProgress(report.aiSecretAgenda)})
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 )}
               </div>
