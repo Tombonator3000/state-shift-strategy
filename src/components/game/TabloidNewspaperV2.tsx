@@ -67,6 +67,31 @@ const computeEventTruthDelta = (events: TabloidNewspaperProps['events']): number
   }, 0);
 };
 
+const formatChance = (chance?: number | null): string | null => {
+  if (typeof chance !== 'number' || !Number.isFinite(chance) || chance <= 0) {
+    return null;
+  }
+
+  const percent = chance * 100;
+  let precision = 2;
+
+  if (percent >= 10) {
+    precision = 0;
+  } else if (percent >= 1) {
+    precision = 1;
+  } else if (percent >= 0.1) {
+    precision = 2;
+  } else {
+    precision = 3;
+  }
+
+  const formatted = percent.toFixed(precision)
+    .replace(/\.0+$/, '')
+    .replace(/(\.\d*?)0+$/, '$1');
+
+  return `${formatted}%`;
+};
+
 const formatEventEffects = (
   effects?: TabloidNewspaperProps['events'][number]['effects'],
 ): string | null => {
@@ -121,18 +146,24 @@ const createEventStory = (
   subhead: string;
   summary: string;
   typeLabel: string;
+  triggerChance: number | null;
+  conditionalChance: number | null;
 } => {
   const baseHeadline = (event.headline ?? event.title).toUpperCase();
   const effectsLabel = formatEventEffects(event.effects);
   const headline = effectsLabel ? `${baseHeadline} (${effectsLabel})` : baseHeadline;
   const summary = event.content;
   const subhead = event.flavorText ?? event.flavorTruth ?? event.flavorGov ?? 'Officials decline additional comment.';
+  const triggerChance = typeof event.triggerChance === 'number' ? event.triggerChance : null;
+  const conditionalChance = typeof event.conditionalChance === 'number' ? event.conditionalChance : null;
   return {
     id: event.id,
     headline,
     subhead,
     summary,
     typeLabel: `[${event.type.toUpperCase()}]`,
+    triggerChance,
+    conditionalChance,
   };
 };
 
@@ -468,6 +499,8 @@ const TabloidNewspaperV2 = ({
   const heroIpImpact = heroArticle?.ipDeltaLabel ?? null;
   const heroPressureImpact = heroArticle?.pressureDeltaLabel ?? null;
   const heroArtHint = heroArticle?.artHint ?? null;
+  const heroTriggerChance = heroEvent?.triggerChance ?? null;
+  const heroConditionalChance = heroEvent?.conditionalChance ?? null;
   const comboNarrative = issue?.comboArticle ?? null;
 
   const bylinePool = dataset.bylines && dataset.bylines.length ? dataset.bylines : FALLBACK_DATA.bylines;
@@ -528,6 +561,8 @@ const TabloidNewspaperV2 = ({
       capturedStates: story.capturedStates,
       tags: story.tags,
       artHint: story.artHint,
+      triggerChance: undefined,
+      conditionalChance: undefined,
     }));
   }, [issue?.playerArticles]);
 
@@ -554,6 +589,8 @@ const TabloidNewspaperV2 = ({
       tags: story.tags,
       artHint: story.artHint,
       player: story.player,
+      triggerChance: undefined,
+      conditionalChance: undefined,
     }));
   }, [issue?.oppositionArticles]);
 
@@ -643,6 +680,20 @@ const TabloidNewspaperV2 = ({
                 <span>{byline}</span>
                 <span>{sourceLine}</span>
               </div>
+              {heroIsEvent && (heroTriggerChance || heroConditionalChance) ? (
+                <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-wide text-secret-red/80">
+                  {formatChance(heroTriggerChance) ? (
+                    <span className="rounded border border-secret-red/50 px-2 py-0.5">
+                      Chance This Turn: {formatChance(heroTriggerChance)}
+                    </span>
+                  ) : null}
+                  {formatChance(heroConditionalChance) ? (
+                    <span className="rounded border border-dashed border-secret-red/50 px-2 py-0.5">
+                      If Triggered: {formatChance(heroConditionalChance)}
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
               <div className="relative overflow-hidden rounded-md border border-newspaper-border bg-newspaper-header/20">
                 {heroArticle?.cardId ? (
                   <CardImage cardId={heroArticle.cardId} className="h-52 w-full object-cover" />
@@ -882,6 +933,19 @@ const TabloidNewspaperV2 = ({
                         <div className="text-[11px] font-semibold uppercase tracking-wide text-secret-red/80">{story.typeLabel}</div>
                         <p className="font-semibold leading-snug text-secret-red">{story.headline}</p>
                         <p className="text-xs italic text-secret-red/80">{story.subhead}</p>
+                        {formatChance(story.triggerChance) || formatChance(story.conditionalChance) ? (
+                          <div className="text-[10px] font-semibold uppercase tracking-wide text-secret-red/70">
+                            {formatChance(story.triggerChance) ? (
+                              <span>Chance This Turn: {formatChance(story.triggerChance)}</span>
+                            ) : null}
+                            {formatChance(story.triggerChance) && formatChance(story.conditionalChance) ? (
+                              <span> · </span>
+                            ) : null}
+                            {formatChance(story.conditionalChance) ? (
+                              <span>If Triggered: {formatChance(story.conditionalChance)}</span>
+                            ) : null}
+                          </div>
+                        ) : null}
                       </div>
                     ))}
                   </div>
@@ -931,6 +995,19 @@ const TabloidNewspaperV2 = ({
                       >
                         {story.summary}
                       </p>
+                      {!isCard && (formatChance(story.triggerChance) || formatChance(story.conditionalChance)) ? (
+                        <div className="text-[10px] font-semibold uppercase tracking-wide text-secret-red/80">
+                          {formatChance(story.triggerChance) ? (
+                            <span>Chance This Turn: {formatChance(story.triggerChance)}</span>
+                          ) : null}
+                          {formatChance(story.triggerChance) && formatChance(story.conditionalChance) ? (
+                            <span> · </span>
+                          ) : null}
+                          {formatChance(story.conditionalChance) ? (
+                            <span>If Triggered: {formatChance(story.conditionalChance)}</span>
+                          ) : null}
+                        </div>
+                      ) : null}
                       <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
                         {isCard && story.truthDeltaLabel ? (
                           <span className="rounded border border-newspaper-border px-2 py-0.5">{story.truthDeltaLabel}</span>

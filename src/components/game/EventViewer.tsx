@@ -19,6 +19,8 @@ interface TestGameState {
   truth: number;
   ip: number;
   controlledStates: number;
+  controlledStateIds: string;
+  faction: 'truth' | 'government';
 }
 
 const EventViewer = ({ onClose }: EventViewerProps) => {
@@ -31,14 +33,67 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
     turn: 1,
     truth: 50,
     ip: 10,
-    controlledStates: 3
+    controlledStates: 3,
+    controlledStateIds: '',
+    faction: 'truth'
   });
   const [triggerResults, setTriggerResults] = useState<string[]>([]);
-  const [probabilityResults, setProbabilityResults] = useState<{event: GameEvent, probability: number}[]>([]);
+  const [probabilityResults, setProbabilityResults] = useState<{
+    event: GameEvent;
+    triggerChance: number;
+    conditionalChance: number;
+  }[]>([]);
   const [simulationResults, setSimulationResults] = useState<{[key: string]: number}>({});
+  const [simulationIterations, setSimulationIterations] = useState(1000);
+  const [simulationTriggerCount, setSimulationTriggerCount] = useState(0);
   
   const eventManager = new EventManager();
   const eventStats = eventManager.getEventStats();
+
+  const parseControlledStateIds = (raw: string): string[] =>
+    raw
+      .split(',')
+      .map(value => value.trim().toUpperCase())
+      .filter(Boolean);
+
+  const buildControlledStatesArray = (): string[] => {
+    const specifiedIds = parseControlledStateIds(testGameState.controlledStateIds);
+    const placeholdersNeeded = Math.max(0, testGameState.controlledStates - specifiedIds.length);
+    const placeholders = Array.from({ length: placeholdersNeeded }, (_, index) => `PLACEHOLDER_${index}`);
+    return [...specifiedIds, ...placeholders];
+  };
+
+  const buildManagerGameState = () => ({
+    truth: testGameState.truth,
+    ip: testGameState.ip,
+    controlledStates: buildControlledStatesArray(),
+    faction: testGameState.faction,
+  });
+
+  const formatPercent = (value: number): string => {
+    if (!Number.isFinite(value) || value <= 0) {
+      return '0%';
+    }
+
+    const percent = value * 100;
+    let precision = 2;
+
+    if (percent >= 10) {
+      precision = 0;
+    } else if (percent >= 1) {
+      precision = 1;
+    } else if (percent >= 0.1) {
+      precision = 2;
+    } else {
+      precision = 3;
+    }
+
+    const formatted = percent.toFixed(precision)
+      .replace(/\.0+$/, '')
+      .replace(/(\.\d*?)0+$/, '$1');
+
+    return `${formatted}%`;
+  };
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
@@ -113,7 +168,7 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
   const checkEventConditions = (event: GameEvent, gameState: TestGameState): boolean => {
     const conditions = event.conditions;
     if (!conditions) return true;
-    
+
     if (conditions.minTurn && gameState.turn < conditions.minTurn) return false;
     if (conditions.maxTurn && gameState.turn > conditions.maxTurn) return false;
     if (conditions.truthAbove && gameState.truth <= conditions.truthAbove) return false;
@@ -121,7 +176,18 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
     if (conditions.ipAbove && gameState.ip <= conditions.ipAbove) return false;
     if (conditions.ipBelow && gameState.ip >= conditions.ipBelow) return false;
     if (conditions.controlledStates && gameState.controlledStates < conditions.controlledStates) return false;
-    
+
+    if (conditions.requiresState) {
+      const controlledIds = parseControlledStateIds(gameState.controlledStateIds);
+      if (!controlledIds.includes(conditions.requiresState.toUpperCase())) {
+        return false;
+      }
+    }
+
+    if (event.faction && event.faction !== 'neutral' && event.faction !== gameState.faction) {
+      return false;
+    }
+
     return true;
   };
 
@@ -134,55 +200,73 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
 
     const canTrigger = checkEventConditions(event, testGameState);
     if (canTrigger) {
-      setTriggerResults(prev => [...prev, `✅ Triggered: ${event.title} - ${formatEffects(event.effects)}`]);
+      eventManager.updateTurn(testGameState.turn);
+      const managerState = buildManagerGameState();
+      const availableEvents = eventManager.getAvailableEvents(managerState);
+      const conditionalChance = eventManager.calculateConditionalChance(event, availableEvents);
+      const triggerChance = eventManager.calculateTriggerChance(event, availableEvents);
+      const conditionalLabel = conditionalChance > 0 ? formatPercent(conditionalChance) : null;
+      const triggerLabel = formatPercent(triggerChance);
+
+      setTriggerResults(prev => [
+        ...prev,
+        `✅ Triggered: ${event.title} - ${formatEffects(event.effects)} (Chance This Turn: ${triggerLabel}${conditionalLabel ? `, If Triggered: ${conditionalLabel}` : ''})`,
+      ]);
     } else {
       setTriggerResults(prev => [...prev, `❌ Cannot trigger ${event.title} - Conditions not met: ${formatConditions(event.conditions)}`]);
     }
   };
 
   const analyzeWeightDistribution = () => {
-    const availableEvents = EVENT_DATABASE.filter(event => 
-      checkEventConditions(event, testGameState)
-    );
-    
-    const totalWeight = availableEvents.reduce((sum, event) => sum + event.weight, 0);
-    
-    const probabilities = availableEvents.map(event => ({
-      event,
-      probability: totalWeight > 0 ? (event.weight / totalWeight) * 100 : 0
-    })).sort((a, b) => b.probability - a.probability);
-    
+    eventManager.updateTurn(testGameState.turn);
+    const managerState = buildManagerGameState();
+    const availableEvents = eventManager.getAvailableEvents(managerState);
+
+    if (!availableEvents.length) {
+      setProbabilityResults([]);
+      return;
+    }
+
+    const probabilities = availableEvents
+      .map(event => ({
+        event,
+        conditionalChance: eventManager.calculateConditionalChance(event, availableEvents),
+        triggerChance: eventManager.calculateTriggerChance(event, availableEvents),
+      }))
+      .sort((a, b) => b.triggerChance - a.triggerChance);
+
     setProbabilityResults(probabilities);
   };
 
   const runSimulation = (iterations: number = 1000) => {
     const testManager = new EventManager();
-    testManager.updateTurn(testGameState.turn);
-    
+
     const results: {[key: string]: number} = {};
-    
+    let triggeredCount = 0;
+
     for (let i = 0; i < iterations; i++) {
-      const mockGameState = {
-        turn: testGameState.turn,
-        truth: testGameState.truth,
-        ip: testGameState.ip,
-        controlledStates: testGameState.controlledStates,
-        // Add other required properties for game state
-      };
-      
-      const selectedEvent = testManager.selectRandomEvent(mockGameState);
+      testManager.reset();
+      testManager.updateTurn(testGameState.turn);
+      const mockGameState = buildManagerGameState();
+
+      const selectedEvent = testManager.maybeSelectRandomEvent(mockGameState);
       if (selectedEvent) {
+        triggeredCount += 1;
         results[selectedEvent.id] = (results[selectedEvent.id] || 0) + 1;
       }
     }
-    
+
     setSimulationResults(results);
+    setSimulationIterations(iterations);
+    setSimulationTriggerCount(triggeredCount);
   };
 
   const clearTestingResults = () => {
     setTriggerResults([]);
     setProbabilityResults([]);
     setSimulationResults({});
+    setSimulationIterations(1000);
+    setSimulationTriggerCount(0);
   };
 
   return (
@@ -440,6 +524,31 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
                       />
                     </div>
 
+                    <div>
+                      <Label className="text-sm text-gray-300">Faction</Label>
+                      <select
+                        value={testGameState.faction}
+                        onChange={(event) => setTestGameState(prev => ({ ...prev, faction: event.target.value as TestGameState['faction'] }))}
+                        className="mt-2 w-full rounded border border-gray-600 bg-gray-700 px-2 py-1 text-sm text-white"
+                      >
+                        <option value="truth">Truth</option>
+                        <option value="government">Government</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm text-gray-300">Specific Controlled States (comma separated)</Label>
+                      <Input
+                        value={testGameState.controlledStateIds}
+                        onChange={(event) => setTestGameState(prev => ({ ...prev, controlledStateIds: event.target.value }))}
+                        placeholder="e.g. CA, NY, TX"
+                        className="mt-2 bg-gray-700 text-white"
+                      />
+                      <p className="mt-1 text-[11px] text-gray-400">
+                        Include state abbreviations to satisfy events that require specific territories.
+                      </p>
+                    </div>
+
                     <div className="flex gap-2 pt-4">
                       <Button
                         onClick={analyzeWeightDistribution}
@@ -516,7 +625,11 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
                     <BarChart3 size={20} className="text-yellow-400" />
                     <h3 className="text-lg font-semibold text-white">Event Probability Analysis</h3>
                   </div>
-                  
+
+                  <div className="text-xs text-gray-400 mb-4">
+                    Base event roll chance: {formatPercent(eventManager.getBaseEventChance())}
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Weight Distribution */}
                     <div>
@@ -524,14 +637,17 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
                       <ScrollArea className="h-48 border border-gray-700 rounded">
                         <div className="p-2 space-y-1">
                           {probabilityResults.length > 0 ? (
-                            probabilityResults.slice(0, 10).map(({ event, probability }) => (
+                            probabilityResults.slice(0, 10).map(({ event, triggerChance, conditionalChance }) => (
                               <div key={event.id} className="flex justify-between text-xs">
                                 <span className="text-gray-300 truncate mr-2">{event.title}</span>
                                 <div className="flex items-center gap-2">
                                   <Badge className={getRarityColor(event.rarity)}>
                                     {event.rarity}
                                   </Badge>
-                                  <span className="text-white font-mono">{probability.toFixed(1)}%</span>
+                                  <div className="text-right">
+                                    <div className="text-white font-mono">{formatPercent(triggerChance)}</div>
+                                    <div className="text-[10px] text-gray-400">If triggered: {formatPercent(conditionalChance)}</div>
+                                  </div>
                                 </div>
                               </div>
                             ))
@@ -546,7 +662,7 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
 
                     {/* Simulation Results */}
                     <div>
-                      <h4 className="text-sm font-medium text-gray-300 mb-2">Simulation Results (1000 iterations)</h4>
+                      <h4 className="text-sm font-medium text-gray-300 mb-2">Simulation Results ({simulationIterations} iterations)</h4>
                       <ScrollArea className="h-48 border border-gray-700 rounded">
                         <div className="p-2 space-y-1">
                           {Object.keys(simulationResults).length > 0 ? (
@@ -556,6 +672,8 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
                               .map(([eventId, count]) => {
                                 const event = EVENT_DATABASE.find(e => e.id === eventId);
                                 if (!event) return null;
+                                const perTurn = count / simulationIterations;
+                                const shareOfTriggers = simulationTriggerCount > 0 ? count / simulationTriggerCount : 0;
                                 return (
                                   <div key={eventId} className="flex justify-between text-xs">
                                     <span className="text-gray-300 truncate mr-2">{event.title}</span>
@@ -564,7 +682,8 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
                                         {event.rarity}
                                       </Badge>
                                       <span className="text-white font-mono">
-                                        {count} ({((count / 1000) * 100).toFixed(1)}%)
+                                        {count} ({formatPercent(perTurn)}
+                                        {simulationTriggerCount > 0 ? ` · ${formatPercent(shareOfTriggers)} of triggers` : ''})
                                       </span>
                                     </div>
                                   </div>
@@ -577,6 +696,11 @@ const EventViewer = ({ onClose }: EventViewerProps) => {
                           )}
                         </div>
                       </ScrollArea>
+                      {simulationTriggerCount > 0 ? (
+                        <div className="mt-2 text-[11px] text-gray-400">
+                          Triggered {simulationTriggerCount} times out of {simulationIterations} iterations.
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 </Card>
