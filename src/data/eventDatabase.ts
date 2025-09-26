@@ -36,6 +36,10 @@ export interface GameEvent {
   flavorText?: string;
   flavorTruth?: string;
   flavorGov?: string;
+  /** Probability that this specific event occurred on the triggering turn (0-1). */
+  triggerChance?: number;
+  /** Probability of this event being chosen once an event triggers (0-1). */
+  conditionalChance?: number;
 }
 
 export const EVENT_DATABASE: GameEvent[] = [
@@ -2702,15 +2706,18 @@ export class EventManager {
   // Select random event based on weights and rarity
   selectRandomEvent(gameState: any): GameEvent | null {
     const availableEvents = this.getAvailableEvents(gameState);
-    
+
     if (availableEvents.length === 0) return null;
 
     // Calculate total weight
     const totalWeight = availableEvents.reduce((sum, event) => sum + event.weight, 0);
-    
+    if (totalWeight <= 0) {
+      return null;
+    }
+
     // Random selection based on weight
     let random = Math.random() * totalWeight;
-    
+
     for (const event of availableEvents) {
       random -= event.weight;
       if (random <= 0) {
@@ -2719,12 +2726,42 @@ export class EventManager {
         if (this.eventHistory.length > 20) {
           this.eventHistory = this.eventHistory.slice(-15);
         }
-        return event;
+        const conditionalChance = event.weight / totalWeight;
+        const triggerChance = this.baseEventChance * conditionalChance;
+        return {
+          ...event,
+          conditionalChance,
+          triggerChance,
+        };
       }
     }
 
     // Fallback to first available event
-    return availableEvents[0];
+    const fallback = availableEvents[0];
+    const conditionalChance = fallback.weight / totalWeight;
+    const triggerChance = this.baseEventChance * conditionalChance;
+    return {
+      ...fallback,
+      conditionalChance,
+      triggerChance,
+    };
+  }
+
+  getBaseEventChance(): number {
+    return this.baseEventChance;
+  }
+
+  calculateConditionalChance(event: GameEvent, availableEvents: GameEvent[]): number {
+    const totalWeight = availableEvents.reduce((sum, current) => sum + current.weight, 0);
+    if (totalWeight <= 0) {
+      return 0;
+    }
+    return event.weight / totalWeight;
+  }
+
+  calculateTriggerChance(event: GameEvent, availableEvents: GameEvent[]): number {
+    const conditional = this.calculateConditionalChance(event, availableEvents);
+    return this.baseEventChance * conditional;
   }
 
   // Get events by rarity for testing/debugging

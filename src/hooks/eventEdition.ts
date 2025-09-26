@@ -21,5 +21,11 @@ export const buildEditionEvents = (
   }
 
   const wasAlreadyPresent = state.currentEvents.some(event => event.id === triggeredEvent.id);
-  return wasAlreadyPresent ? state.currentEvents : [triggeredEvent];
+  if (!wasAlreadyPresent) {
+    return [triggeredEvent];
+  }
+
+  return state.currentEvents.map(event =>
+    event.id === triggeredEvent.id ? triggeredEvent : event,
+  );
 };
