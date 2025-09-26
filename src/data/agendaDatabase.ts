@@ -77,8 +77,15 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     target: 3,
     difficulty: 'hard',
     checkProgress: (gameState) => {
-      // This would need turn-based tracking logic
-      return gameState.truth >= 80 ? 1 : 0;
+      if (typeof gameState.truthAbove80Streak === 'number') {
+        return gameState.truthAbove80Streak;
+      }
+
+      if (typeof gameState.timeBasedGoalCounters?.truthAbove80Streak === 'number') {
+        return gameState.timeBasedGoalCounters.truthAbove80Streak;
+      }
+
+      return 0;
     },
     flavorText: 'When truth reaches critical mass, reality shifts.'
   },
@@ -217,8 +224,15 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     target: 3,
     difficulty: 'hard',
     checkProgress: (gameState) => {
-      // This would need turn-based tracking logic
-      return gameState.truth <= 20 ? 1 : 0;
+      if (typeof gameState.truthBelow20Streak === 'number') {
+        return gameState.truthBelow20Streak;
+      }
+
+      if (typeof gameState.timeBasedGoalCounters?.truthBelow20Streak === 'number') {
+        return gameState.timeBasedGoalCounters.truthBelow20Streak;
+      }
+
+      return 0;
     },
     flavorText: 'Some truths are too dangerous for public consumption.'
   },

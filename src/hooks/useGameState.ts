@@ -38,6 +38,39 @@ const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefin
 
 const HAND_LIMIT = 5;
 
+const computeTruthStreaks = (
+  prev: Pick<GameState, 'truthAbove80Streak' | 'truthBelow20Streak'>,
+  truth: number,
+) => {
+  const previousAbove = Number.isFinite(prev.truthAbove80Streak)
+    ? prev.truthAbove80Streak
+    : 0;
+  const previousBelow = Number.isFinite(prev.truthBelow20Streak)
+    ? prev.truthBelow20Streak
+    : 0;
+
+  if (truth >= 80) {
+    return {
+      truthAbove80Streak: previousAbove + 1,
+      truthBelow20Streak: 0,
+    };
+  }
+
+  if (truth <= 20) {
+    return {
+      truthAbove80Streak: 0,
+      truthBelow20Streak: previousBelow + 1,
+    };
+  }
+
+  return {
+    truthAbove80Streak: 0,
+    truthBelow20Streak: 0,
+  };
+};
+
+const STREAK_AGENDA_IDS = new Set(['truth_truth_threshold', 'gov_truth_suppression']);
+
 const DIFFICULTY_TO_AI_DIFFICULTY: Record<Difficulty, AIDifficulty> = {
   EASY: 'easy',
   NORMAL: 'medium',
@@ -167,6 +200,9 @@ const buildAgendaSnapshot = (state: GameState, perspective: AgendaPerspective) =
     aiControlledStates: isPlayer ? state.aiControlledStates : state.controlledStates,
     states: state.states,
     truth: state.truth,
+    truthAbove80Streak: state.truthAbove80Streak,
+    truthBelow20Streak: state.truthBelow20Streak,
+    timeBasedGoalCounters: state.timeBasedGoalCounters,
     ip: isPlayer ? state.ip : state.aiIP,
     aiIP: isPlayer ? state.aiIP : state.ip,
     round: state.round,
@@ -192,11 +228,18 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
     const isCompleted = computedProgress >= target;
 
     if (computedProgress !== previousProgress || isCompleted !== updatedSecretAgenda.completed) {
+      const isStreakAgenda = STREAK_AGENDA_IDS.has(updatedSecretAgenda.id);
+
       if (computedProgress > previousProgress) {
         const delta = computedProgress - previousProgress;
+        const progressMessage = isStreakAgenda
+          ? `Secret Agenda streak increased to ${computedProgress}: ${updatedSecretAgenda.title} (${computedProgress}/${target})`
+          : `Secret Agenda progress +${delta}: ${updatedSecretAgenda.title} (${computedProgress}/${target})`;
+        logUpdates = [...logUpdates, progressMessage];
+      } else if (computedProgress < previousProgress && isStreakAgenda) {
         logUpdates = [
           ...logUpdates,
-          `Secret Agenda progress +${delta}: ${updatedSecretAgenda.title} (${computedProgress}/${target})`,
+          `Secret Agenda streak dropped to ${computedProgress}: ${updatedSecretAgenda.title} (${computedProgress}/${target})`,
         ];
       }
 
@@ -227,14 +270,25 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
     const isCompleted = computedProgress >= target;
 
     if (computedProgress !== previousProgress || isCompleted !== updatedAiSecretAgenda.completed) {
+      const isStreakAgenda = STREAK_AGENDA_IDS.has(updatedAiSecretAgenda.id);
+
       if (computedProgress > previousProgress) {
         const delta = computedProgress - previousProgress;
         if (updatedAiSecretAgenda.revealed) {
-          logUpdates = [
-            ...logUpdates,
-            `AI secret agenda advanced by ${delta}: ${computedProgress}/${target}`,
-          ];
+          const progressMessage = isStreakAgenda
+            ? `AI secret agenda streak increased to ${computedProgress}/${target}`
+            : `AI secret agenda advanced by ${delta}: ${computedProgress}/${target}`;
+          logUpdates = [...logUpdates, progressMessage];
         }
+      } else if (
+        computedProgress < previousProgress &&
+        updatedAiSecretAgenda.revealed &&
+        isStreakAgenda
+      ) {
+        logUpdates = [
+          ...logUpdates,
+          `AI secret agenda streak dropped to ${computedProgress}/${target}`,
+        ];
       }
 
       if (isCompleted && !updatedAiSecretAgenda.completed) {
@@ -302,6 +356,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     stateCombinationBonusIP: 0,
     activeStateCombinationIds: [],
     stateCombinationEffects: createDefaultCombinationEffects(),
+    truthAbove80Streak: 0,
+    truthBelow20Streak: 0,
+    timeBasedGoalCounters: {
+      truthAbove80Streak: 0,
+      truthBelow20Streak: 0,
+    },
     playHistory: [],
     turnPlays: [],
     controlledStates: [],
@@ -408,6 +468,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       stateCombinationBonusIP: 0,
       activeStateCombinationIds: [],
       stateCombinationEffects: createDefaultCombinationEffects(),
+      truthAbove80Streak: 0,
+      truthBelow20Streak: 0,
+      timeBasedGoalCounters: {
+        truthAbove80Streak: 0,
+        truthBelow20Streak: 0,
+      },
       animating: false,
       aiTurnInProgress: false,
       selectedCard: null,
@@ -797,6 +863,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         };
 
         applyTruthDelta(nextState, truthModifier, 'human');
+        const finalTruth = nextState.truth;
+        const truthStreaks = computeTruthStreaks(prev, finalTruth);
+        const previousCounters = prev.timeBasedGoalCounters ?? {};
+        nextState = {
+          ...nextState,
+          truthAbove80Streak: truthStreaks.truthAbove80Streak,
+          truthBelow20Streak: truthStreaks.truthBelow20Streak,
+          timeBasedGoalCounters: {
+            ...previousCounters,
+            truthAbove80Streak: truthStreaks.truthAbove80Streak,
+            truthBelow20Streak: truthStreaks.truthBelow20Streak,
+          },
+        };
         nextState.log.push(`AI ${prev.aiStrategist?.personality.name} is thinking...`);
 
         return updateSecretAgendaProgress(nextState);
@@ -805,7 +884,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const comboLog =
         comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
 
-      const nextState: GameState = {
+      const nextStateBase: GameState = {
         ...prev,
         round: prev.round + 1,
         phase: 'newspaper',
@@ -820,7 +899,20 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         log: [...comboLog, 'AI turn completed']
       };
 
-      return updateSecretAgendaProgress(nextState);
+      const truthStreaks = computeTruthStreaks(prev, nextStateBase.truth);
+      const previousCounters = prev.timeBasedGoalCounters ?? {};
+      const timeBasedGoalCounters = {
+        ...previousCounters,
+        truthAbove80Streak: truthStreaks.truthAbove80Streak,
+        truthBelow20Streak: truthStreaks.truthBelow20Streak,
+      };
+
+      return updateSecretAgendaProgress({
+        ...nextStateBase,
+        truthAbove80Streak: truthStreaks.truthAbove80Streak,
+        truthBelow20Streak: truthStreaks.truthBelow20Streak,
+        timeBasedGoalCounters,
+      });
     });
   }, []);
 
@@ -1127,6 +1219,22 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }
 
       // Reconstruct the game state
+      const savedTruthAboveStreak =
+        typeof saveData.truthAbove80Streak === 'number' && Number.isFinite(saveData.truthAbove80Streak)
+          ? saveData.truthAbove80Streak
+          : typeof saveData.timeBasedGoalCounters?.truthAbove80Streak === 'number' &&
+              Number.isFinite(saveData.timeBasedGoalCounters.truthAbove80Streak)
+            ? saveData.timeBasedGoalCounters.truthAbove80Streak
+            : 0;
+
+      const savedTruthBelowStreak =
+        typeof saveData.truthBelow20Streak === 'number' && Number.isFinite(saveData.truthBelow20Streak)
+          ? saveData.truthBelow20Streak
+          : typeof saveData.timeBasedGoalCounters?.truthBelow20Streak === 'number' &&
+              Number.isFinite(saveData.timeBasedGoalCounters.truthBelow20Streak)
+            ? saveData.timeBasedGoalCounters.truthBelow20Streak
+            : 0;
+
       setGameState(prev => ({
         ...prev,
         ...saveData,
@@ -1156,7 +1264,16 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           : createDefaultCombinationEffects(),
         // Ensure objects are properly reconstructed
         eventManager: prev.eventManager, // Keep the current event manager
-        aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium')
+        aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium'),
+        truthAbove80Streak: savedTruthAboveStreak,
+        truthBelow20Streak: savedTruthBelowStreak,
+        timeBasedGoalCounters: {
+          ...(saveData.timeBasedGoalCounters && typeof saveData.timeBasedGoalCounters === 'object'
+            ? saveData.timeBasedGoalCounters
+            : {}),
+          truthAbove80Streak: savedTruthAboveStreak,
+          truthBelow20Streak: savedTruthBelowStreak,
+        },
       }));
       
       return true;

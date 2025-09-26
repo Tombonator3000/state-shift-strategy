@@ -90,4 +90,7 @@ export interface GameState {
   stateCombinationBonusIP: number;
   activeStateCombinationIds: string[];
   stateCombinationEffects: StateCombinationEffects;
+  truthAbove80Streak: number;
+  truthBelow20Streak: number;
+  timeBasedGoalCounters: Record<string, number>;
 }
