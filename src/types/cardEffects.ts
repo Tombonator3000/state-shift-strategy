@@ -28,6 +28,7 @@ export type CardEffects = {
   ipDelta?: {                       // IP changes
     self?: number;                  // Player IP change
     opponent?: number;              // Opponent IP change
+    opponentPercent?: number;       // Percent of opponent IP to remove (0-1)
   };
   
   // Card draw/discard

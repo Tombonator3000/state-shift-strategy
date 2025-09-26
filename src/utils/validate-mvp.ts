@@ -170,12 +170,14 @@ export function validateMvpCard(card: GameCard): ValidationResult {
           break;
         }
 
-        const extraKeys = Object.keys(ipDelta).filter(key => key !== 'opponent');
+        const extraKeys = Object.keys(ipDelta).filter(
+          key => !['opponent', 'opponentPercent'].includes(key),
+        );
         if (extraKeys.length > 0) {
           effectValuesOk = false;
           issues.push({
             code: 'invalid-effect-key',
-            message: `ipDelta may only include "opponent". Found: ${extraKeys.join(', ')}.`,
+            message: `ipDelta may only include "opponent" and optional "opponentPercent". Found: ${extraKeys.join(', ')}.`,
           });
         }
 
@@ -186,6 +188,22 @@ export function validateMvpCard(card: GameCard): ValidationResult {
             code: 'invalid-effect-value',
             message: `ipDelta.opponent must be a positive integer. Found: ${ipDelta.opponent ?? 'missing'}.`,
           });
+        }
+
+        if (Object.prototype.hasOwnProperty.call(ipDelta, 'opponentPercent')) {
+          const percentValue = toNumber(ipDelta.opponentPercent);
+          if (
+            percentValue === null ||
+            Number.isNaN(percentValue) ||
+            percentValue < 0 ||
+            percentValue > 1
+          ) {
+            effectValuesOk = false;
+            issues.push({
+              code: 'invalid-effect-value',
+              message: `ipDelta.opponentPercent must be between 0 and 1. Found: ${ipDelta.opponentPercent}.`,
+            });
+          }
         }
 
         if ('discardOpponent' in (effects as Record<string, unknown>)) {

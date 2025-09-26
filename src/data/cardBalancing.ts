@@ -188,9 +188,13 @@ export function generateBalanceReport(cards: GameCard[]): string {
     .filter(card => card.costStatus !== 'On Curve')
     .map(card => {
       const deltaText = card.costDelta !== null ? `${card.costDelta > 0 ? '+' : ''}${card.costDelta.toFixed(1)} IP` : 'n/a';
+      const percentText =
+        card.effectSummary.ipDeltaOpponentPercent > 0
+          ? ` + ${Math.round(card.effectSummary.ipDeltaOpponentPercent * 100)}%`
+          : '';
       return `\n### ${card.name} (${card.type}${card.rarity ? ` • ${card.rarity}` : ''})\n` +
         `Current Cost: ${card.cost} (expected ${card.expectedCost ?? 'n/a'}) | Delta: ${deltaText}\n` +
-        `Effects → Truth ${card.effectSummary.truthDelta}, Opponent IP ${card.effectSummary.ipDeltaOpponent}, Pressure ${card.effectSummary.pressureDelta}\n` +
+        `Effects → Truth ${card.effectSummary.truthDelta}, Opponent IP ${card.effectSummary.ipDeltaOpponent}${percentText} (≈${card.effectSummary.ipDeltaOpponentExpected} late-game), Pressure ${card.effectSummary.pressureDelta}\n` +
         card.recommendations.map(rec => `- ${rec}\n`).join('');
     })
     .join('');

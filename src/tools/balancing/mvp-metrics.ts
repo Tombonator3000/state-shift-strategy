@@ -55,7 +55,7 @@ export function computeMvpMetrics(cards: GameCard[], coreCount: number): MvpMetr
       const delta = summary.truthDelta | 0;
       res.hist.truthDelta[delta] = (res.hist.truthDelta[delta] ?? 0) + 1;
     } else if (card.type === 'ATTACK') {
-      const ip = summary.ipDeltaOpponent | 0;
+      const ip = summary.ipDeltaOpponentExpected | 0;
       res.hist.attackIp[ip] = (res.hist.attackIp[ip] ?? 0) + 1;
     } else if (card.type === 'ZONE') {
       const pressure = summary.pressureDelta | 0;

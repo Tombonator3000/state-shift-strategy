@@ -273,7 +273,8 @@
     "cost": 4,
     "effects": {
       "ipDelta": {
-        "opponent": 3
+        "opponent": 3,
+        "opponentPercent": 0.1
       }
     },
     "flavor": "Zeroes are patriotic."
@@ -463,7 +464,8 @@
     "cost": 4,
     "effects": {
       "ipDelta": {
-        "opponent": 3
+        "opponent": 3,
+        "opponentPercent": 0.08
       },
       "discardOpponent": 1
     },

@@ -57,14 +57,23 @@ function applyAttackEffect(
   rng: () => number,
 ) {
   const opponent = otherPlayer(owner);
-  const damage = Math.max(0, effects.ipDelta?.opponent ?? 0);
   const before = state.players[opponent].ip;
-  state.players[opponent].ip = clampIP(before - damage);
-  const delta = state.players[opponent].ip - before;
+  const flatDamage = Math.max(0, effects.ipDelta?.opponent ?? 0);
+  const percentFactor = Math.max(0, Math.min(1, effects.ipDelta?.opponentPercent ?? 0));
+  const percentDamage = percentFactor > 0 ? Math.floor(before * percentFactor) : 0;
+  const damage = flatDamage + percentDamage;
+  const after = clampIP(before - damage);
+  state.players[opponent].ip = after;
+  const delta = after - before;
   if (delta !== 0 && typeof window !== 'undefined' && (window as any).uiToastIp) {
     (window as any).uiToastIp(opponent, delta);
   }
-  state.log.push(`Opponent loses ${damage} IP (${before} → ${state.players[opponent].ip})`);
+  const components: string[] = [];
+  components.push(`flat ${flatDamage}`);
+  components.push(`scaled ${percentDamage}`);
+  state.log.push(
+    `Opponent loses ${damage} IP (${before} → ${after}) [${components.join(', ')}]`,
+  );
 
   if ((effects.discardOpponent ?? 0) > 0) {
     discardRandom(state, opponent, effects.discardOpponent ?? 0, rng);

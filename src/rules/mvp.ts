@@ -9,6 +9,7 @@ export interface CardEffects {
   ipDelta?: {
     self?: number;
     opponent?: number;
+    opponentPercent?: number;
   };
   draw?: number;
   discardOpponent?: number;

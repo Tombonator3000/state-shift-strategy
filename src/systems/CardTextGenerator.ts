@@ -20,6 +20,9 @@ const renderEffects = (e: CardEffects): string[] => {
       parts.push('No IP change');
     }
   }
+  if (typeof e.ipDelta?.opponentPercent === 'number' && e.ipDelta.opponentPercent > 0) {
+    parts.push(`Opponent loses ${Math.round(e.ipDelta.opponentPercent * 100)}% current IP`);
+  }
   if (typeof e.draw === 'number') parts.push(`Draw ${e.draw}`);
   if (typeof e.discardOpponent === 'number') parts.push(`Opponent discards ${e.discardOpponent}`);
   if (typeof e.pressureDelta === 'number') parts.push(`${e.pressureDelta >= 0 ? '+' : ''}${e.pressureDelta} Pressure`);
@@ -60,6 +63,12 @@ export class CardTextGenerator {
         } else {
           parts.push('No IP change');
         }
+      }
+      if (
+        typeof effects.ipDelta.opponentPercent === 'number' &&
+        effects.ipDelta.opponentPercent > 0
+      ) {
+        parts.push(`Opponent loses ${Math.round(effects.ipDelta.opponentPercent * 100)}% current IP`);
       }
     }
     
