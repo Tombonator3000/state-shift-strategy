@@ -1,4 +1,10 @@
 import type { GameCard } from '@/rules/mvp';
+import {
+  classifyMvpCost,
+  computeMvpEffectScore,
+  getExpectedMvpCost,
+  getMvpEffectSummary,
+} from '@/data/mvpAnalysisUtils';
 
 export type MvpMetrics = {
   counts: {
@@ -36,19 +42,23 @@ export function computeMvpMetrics(cards: GameCard[], coreCount: number): MvpMetr
     if (card.faction === 'truth') res.counts.truth++;
     if (card.faction === 'government') res.counts.government++;
 
-    res.costConformity.ok++;
+    const expectedCost = getExpectedMvpCost(card);
+    const { status } = classifyMvpCost(card, expectedCost);
+    if (status === 'On Curve') {
+      res.costConformity.ok++;
+    }
+
+    const summary = getMvpEffectSummary(card);
+    weightSum += computeMvpEffectScore(summary);
 
     if (card.type === 'MEDIA') {
-      const delta = (card.effects as any).truthDelta | 0;
-      weightSum += Math.abs(delta);
+      const delta = summary.truthDelta | 0;
       res.hist.truthDelta[delta] = (res.hist.truthDelta[delta] ?? 0) + 1;
     } else if (card.type === 'ATTACK') {
-      const ip = (card.effects as any).ipDelta?.opponent | 0;
-      weightSum += ip;
+      const ip = summary.ipDeltaOpponent | 0;
       res.hist.attackIp[ip] = (res.hist.attackIp[ip] ?? 0) + 1;
     } else if (card.type === 'ZONE') {
-      const pressure = (card.effects as any).pressureDelta | 0;
-      weightSum += pressure;
+      const pressure = summary.pressureDelta | 0;
       res.hist.pressure[pressure] = (res.hist.pressure[pressure] ?? 0) + 1;
     }
   }

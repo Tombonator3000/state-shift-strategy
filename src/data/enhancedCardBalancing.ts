@@ -1,5 +1,5 @@
 import type { GameCard } from '@/rules/mvp';
-import { CARD_DATABASE } from './cardDatabase';
+import { getAllCardsSnapshot, getCoreCards } from './cardDatabase';
 import {
   classifyMvpCost,
   computeMvpEffectScore,
@@ -53,12 +53,24 @@ const EXPECTED_CORE_TOTAL = 400;
 const EXPECTED_TRUTH_COUNT = 200;
 const EXPECTED_GOVERNMENT_COUNT = 200;
 
+type BalancerOptions = {
+  includeExtensions?: boolean;
+  cards?: GameCard[];
+};
+
 export class EnhancedCardBalancer {
   private cards: GameCard[];
 
-  constructor(includeExtensions: boolean = false) {
-    // MVP build ignores extension cards entirely. The flag remains for compatibility with callers.
-    this.cards = CARD_DATABASE;
+  constructor(options: BalancerOptions = {}) {
+    const { includeExtensions = false, cards } = options;
+
+    if (cards) {
+      this.cards = cards.map(card => ({ ...card }));
+      return;
+    }
+
+    const pool = includeExtensions ? getAllCardsSnapshot() : getCoreCards();
+    this.cards = pool.map(card => ({ ...card }));
   }
 
   private analyzeCard(card: GameCard): EnhancedCardAnalysis {
@@ -210,7 +222,7 @@ export class EnhancedCardBalancer {
 }
 
 export function analyzeCardBalanceEnhanced(includeExtensions: boolean = false): EnhancedBalanceReport {
-  const balancer = new EnhancedCardBalancer(includeExtensions);
+  const balancer = new EnhancedCardBalancer({ includeExtensions });
   return balancer.generateEnhancedReport();
 }
 
@@ -218,6 +230,19 @@ export function runBalanceSimulationEnhanced(
   iterations: number = 1000,
   includeExtensions: boolean = false
 ): SimulationReport {
-  const balancer = new EnhancedCardBalancer(includeExtensions);
+  const balancer = new EnhancedCardBalancer({ includeExtensions });
+  return balancer.runEnhancedSimulation(iterations);
+}
+
+export function analyzeCardBalanceForCards(cards: GameCard[]): EnhancedBalanceReport {
+  const balancer = new EnhancedCardBalancer({ cards });
+  return balancer.generateEnhancedReport();
+}
+
+export function runBalanceSimulationForCards(
+  cards: GameCard[],
+  iterations: number = 1000,
+): SimulationReport {
+  const balancer = new EnhancedCardBalancer({ cards });
   return balancer.runEnhancedSimulation(iterations);
 }
