@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  analyzeCardBalanceEnhanced,
-  runBalanceSimulationEnhanced,
+  analyzeCardBalanceForCards,
+  runBalanceSimulationForCards,
   type EnhancedCardAnalysis,
 } from '@/data/enhancedCardBalancing';
 import { MVP_COST_TABLE_ROWS, MVP_RULES_SECTIONS } from '@/content/mvpRules';
@@ -16,6 +16,11 @@ import {
   subscribeToExpansionChanges,
 } from '@/data/expansions/state';
 import { computeMvpMetrics } from '@/tools/balancing/mvp-metrics';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import type { GameCard } from '@/rules/mvp';
 
 type HistogramBin = { label: string; count: number };
 
@@ -66,12 +71,19 @@ interface EnhancedBalancingDashboardProps {
 }
 
 const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDashboardProps) => {
-  const report = useMemo(() => analyzeCardBalanceEnhanced(false), []);
-  const simulation = useMemo(() => runBalanceSimulationEnhanced(500, false), []);
   const [expansionState, setExpansionState] = useState(() => ({
     ids: getEnabledExpansionIdsSnapshot(),
     cards: getExpansionCardsSnapshot(),
   }));
+  const [includeExpansions, setIncludeExpansions] = useState(
+    () => getEnabledExpansionIdsSnapshot().length > 0,
+  );
+  const [simulationIterations, setSimulationIterations] = useState(500);
+  const [typeFilters, setTypeFilters] = useState<Record<GameCard['type'], boolean>>({
+    ATTACK: true,
+    MEDIA: true,
+    ZONE: true,
+  });
 
   useEffect(() => {
     const unsubscribe = subscribeToExpansionChanges(payload => {
@@ -79,6 +91,63 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
     });
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (expansionState.ids.length === 0) {
+      setIncludeExpansions(false);
+    }
+  }, [expansionState.ids.length]);
+
+  const activeTypes = useMemo(
+    () =>
+      (Object.entries(typeFilters) as Array<[GameCard['type'], boolean]>).
+        filter(([, enabled]) => enabled).
+        map(([type]) => type),
+    [typeFilters],
+  );
+
+  const filterByTypes = useCallback(
+    (cards: GameCard[]) => {
+      if (activeTypes.length === 0) {
+        return [];
+      }
+      return cards.filter(card => activeTypes.includes(card.type));
+    },
+    [activeTypes],
+  );
+
+  const filteredCoreCards = useMemo(
+    () => filterByTypes(CARD_DATABASE_CORE as GameCard[]),
+    [filterByTypes],
+  );
+
+  const filteredExpansionCards = useMemo(
+    () => filterByTypes(expansionState.cards),
+    [filterByTypes, expansionState.cards],
+  );
+
+  const activePool = useMemo(
+    () =>
+      includeExpansions
+        ? [...filteredCoreCards, ...filteredExpansionCards]
+        : filteredCoreCards,
+    [includeExpansions, filteredCoreCards, filteredExpansionCards],
+  );
+
+  const filteredCoreCount = filteredCoreCards.length;
+  const report = useMemo(
+    () => analyzeCardBalanceForCards(activePool),
+    [activePool],
+  );
+  const simulation = useMemo(
+    () => runBalanceSimulationForCards(activePool, simulationIterations),
+    [activePool, simulationIterations],
+  );
+
+  const metrics = useMemo(
+    () => computeMvpMetrics(activePool, filteredCoreCount),
+    [activePool, filteredCoreCount],
+  );
 
   const effectSection = MVP_RULES_SECTIONS.find(
     section => section.title === 'Effect Whitelist (MVP)'
@@ -88,6 +157,31 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
     section => section.title === 'Card Roles'
   );
 
+  const expansionCount = Math.max(0, metrics.counts.exp);
+  const totalCount = metrics.counts.total;
+  const activeExpansionNames = expansionState.ids
+    .map(id => EXPANSION_MANIFEST.find(pack => pack.id === id)?.title ?? id)
+    .filter(Boolean)
+    .join(', ');
+  const hasEnabledExpansions = expansionState.ids.length > 0;
+  const hasActiveTypes = activeTypes.length > 0;
+  const hasCardData = activePool.length > 0;
+  const poolScopeLabel = includeExpansions ? 'Core + enabled expansions' : 'Core set only';
+  const actionableRecommendations = report.totalCards > 0
+    ? report.globalRecommendations
+    : ['No cards match the current filters yet. Adjust scope to view analysis.'];
+
+  const typeOptions: Array<{
+    type: GameCard['type'];
+    label: string;
+    description: string;
+    accent: string;
+  }> = [
+    { type: 'ATTACK', label: 'Attack', description: 'IP pressure & tempo hits', accent: 'text-sky-300' },
+    { type: 'MEDIA', label: 'Media', description: 'Truth swings & narrative wins', accent: 'text-emerald-300' },
+    { type: 'ZONE', label: 'Zone', description: 'Board presence & pressure', accent: 'text-amber-300' },
+  ];
+
   const costOutliers = useMemo(() => {
     return report.cardAnalysis
       .filter(card => card.costStatus !== 'On Curve' && card.costDelta !== null)
@@ -95,23 +189,12 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
       .slice(0, 6);
   }, [report.cardAnalysis]);
 
-  const winDrivers = simulation.winConditionBreakdown.sort((a, b) => b.weight - a.weight);
-
-  const coreCount = CARD_DATABASE_CORE.length;
-  const combinedCards = useMemo(
-    () => [...CARD_DATABASE_CORE, ...expansionState.cards],
-    [expansionState.cards],
+  const winDrivers = useMemo(
+    () =>
+      [...simulation.winConditionBreakdown].sort((a, b) => b.weight - a.weight),
+    [simulation.winConditionBreakdown],
   );
-  const metrics = useMemo(
-    () => computeMvpMetrics(combinedCards, coreCount),
-    [combinedCards, coreCount],
-  );
-  const expansionCount = Math.max(0, metrics.counts.exp);
-  const totalCount = metrics.counts.total;
-  const activeExpansionNames = expansionState.ids
-    .map(id => EXPANSION_MANIFEST.find(pack => pack.id === id)?.title ?? id)
-    .filter(Boolean)
-    .join(', ');
+  const filteredWinDrivers = hasCardData ? winDrivers : [];
 
   const truthBins = useMemo(() => {
     const bins: HistogramBin[] = [];
@@ -143,6 +226,45 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
     [logEntries],
   );
 
+  const expansionStatusMessage = useMemo(() => {
+    if (!includeExpansions) {
+      return 'Expansion cards excluded from calculations.';
+    }
+    if (!hasEnabledExpansions) {
+      return 'Enable an expansion pack to include it in analysis.';
+    }
+    return activeExpansionNames
+      ? `Active packs: ${activeExpansionNames}.`
+      : 'Expansions toggle is on with no packs selected.';
+  }, [includeExpansions, hasEnabledExpansions, activeExpansionNames]);
+
+  const typeSummary = useMemo(
+    () => (hasActiveTypes ? activeTypes.join(', ') : 'None selected'),
+    [activeTypes, hasActiveTypes],
+  );
+
+  const handleExpansionToggle = (checked: boolean) => {
+    if (!hasEnabledExpansions) return;
+    setIncludeExpansions(Boolean(checked));
+  };
+
+  const handleIterationsChange = (value: number[]) => {
+    const next = value[0];
+    if (typeof next === 'number' && Number.isFinite(next)) {
+      setSimulationIterations(Math.round(next));
+    }
+  };
+
+  const handleTypeFilterChange = (
+    type: GameCard['type'],
+    checked: boolean | 'indeterminate',
+  ) => {
+    setTypeFilters(prev => ({
+      ...prev,
+      [type]: Boolean(checked),
+    }));
+  };
+
   const formatDelta = (card: EnhancedCardAnalysis) => {
     if (card.costDelta === null) return '—';
     const symbol = card.costDelta > 0 ? '+' : '';
@@ -167,22 +289,111 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6 text-sm text-slate-200">
-        <section className="grid gap-3 md:grid-cols-4">
-          <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Card pool</div>
-            <div className="text-2xl font-bold text-emerald-300">
-              {metrics.counts.core}/{expansionCount}/{totalCount}
+          <section className="grid gap-3 md:grid-cols-3">
+            <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Card pool scope
+                  </div>
+                  <p className="text-xs text-slate-400">{poolScopeLabel}. {expansionStatusMessage}</p>
+                </div>
+                <Switch
+                  checked={includeExpansions && hasEnabledExpansions}
+                  onCheckedChange={handleExpansionToggle}
+                  disabled={!hasEnabledExpansions}
+                />
+              </div>
+              {!hasEnabledExpansions && (
+                <p className="text-[11px] text-amber-400">
+                  Enable packs in Deck Lab to pull their cards into this analysis.
+                </p>
+              )}
             </div>
-            <p className="text-xs text-slate-400">
-              Core / Expansions / Total.{' '}
-              {activeExpansionNames ? `Active packs: ${activeExpansionNames}.` : 'No expansions enabled.'}
-            </p>
-          </div>
-          <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Cost table conformity</div>
-            <div className="text-2xl font-bold text-emerald-300">{metrics.costConformity.pct.toFixed(0)}%</div>
-            <p className="text-xs text-slate-400">{metrics.costConformity.ok} of {metrics.costConformity.total} cards match MVP expectations.</p>
-          </div>
+            <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Simulation passes
+                  </div>
+                  <p className="text-xs text-slate-400">Adjust win-condition weighting sample size.</p>
+                </div>
+                <span className="text-sm font-mono text-slate-200">
+                  {simulationIterations.toLocaleString()}
+                </span>
+              </div>
+              <Slider
+                value={[simulationIterations]}
+                min={100}
+                max={5000}
+                step={100}
+                onValueChange={handleIterationsChange}
+              />
+            </div>
+            <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-3">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Card type filters
+                </div>
+                <p className="text-xs text-slate-400">
+                  Focus the dashboard on specific MVP lanes.
+                </p>
+              </div>
+              <div className="space-y-2">
+                {typeOptions.map(option => {
+                  const checkboxId = `type-filter-${option.type.toLowerCase()}`;
+                  return (
+                    <div key={option.type} className="flex items-start gap-2">
+                      <Checkbox
+                        id={checkboxId}
+                        checked={typeFilters[option.type]}
+                        onCheckedChange={value => handleTypeFilterChange(option.type, value)}
+                      />
+                      <Label
+                        htmlFor={checkboxId}
+                        className="cursor-pointer text-xs text-slate-300 leading-tight"
+                      >
+                        <span className={`block font-semibold uppercase tracking-wide ${option.accent}`}>
+                          {option.label}
+                        </span>
+                        <span className="text-[11px] text-slate-500">{option.description}</span>
+                      </Label>
+                    </div>
+                  );
+                })}
+              </div>
+              {!hasActiveTypes && (
+                <p className="text-[11px] text-amber-400">
+                  Select at least one card type to populate the dashboard.
+                </p>
+              )}
+            </div>
+          </section>
+
+          <section className="grid gap-3 md:grid-cols-4">
+            <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
+              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Card pool</div>
+              <div className="text-2xl font-bold text-emerald-300">
+                {metrics.counts.core}/{expansionCount}/{totalCount}
+              </div>
+              <p className="text-xs text-slate-400">
+                Core / Expansions / Total. Type focus: {typeSummary}.
+              </p>
+              <p className="text-xs text-slate-500">
+                {includeExpansions && hasEnabledExpansions
+                  ? activeExpansionNames
+                    ? `Expansions: ${activeExpansionNames}.`
+                    : 'Expansions enabled but no packs active.'
+                  : 'Expansions excluded.'}
+              </p>
+            </div>
+            <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
+              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Cost table conformity</div>
+              <div className="text-2xl font-bold text-emerald-300">{metrics.costConformity.pct.toFixed(0)}%</div>
+              <p className="text-xs text-slate-400">
+                {metrics.costConformity.ok} of {metrics.costConformity.total} cards match MVP expectations.
+              </p>
+            </div>
             <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-4 space-y-1">
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Average MVP score</div>
               <div className="text-2xl font-bold text-sky-300">{metrics.avgMvpWeight.toFixed(1)}</div>
@@ -240,11 +451,11 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
             </div>
           </section>
 
-          {report.globalRecommendations.length > 0 && (
+          {actionableRecommendations.length > 0 && (
             <section className="space-y-3">
               <h3 className="text-lg font-semibold text-white font-mono">Action Items</h3>
               <ul className="space-y-2 text-slate-300">
-                {report.globalRecommendations.map(rec => (
+                {actionableRecommendations.map(rec => (
                   <li key={rec} className="pl-4 relative">
                     <span className="absolute left-0 text-emerald-400">•</span>
                     <span>{rec}</span>
@@ -324,7 +535,9 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
 
           <section className="space-y-3">
             <h3 className="text-lg font-semibold text-white font-mono">Top Cost Deviations</h3>
-            {costOutliers.length === 0 ? (
+            {!hasCardData ? (
+              <p className="text-slate-300">No cards match the current filters.</p>
+            ) : costOutliers.length === 0 ? (
               <p className="text-slate-300">All cards are currently on curve.</p>
             ) : (
               <div className="overflow-x-auto">
@@ -374,13 +587,21 @@ const EnhancedBalancingDashboard = ({ onClose, logEntries }: EnhancedBalancingDa
                 <div className="text-2xl font-bold text-slate-200">{simulation.drawRate.toFixed(1)}%</div>
               </div>
             </div>
+            <p className="text-xs text-slate-500">
+              Model weighted across {simulation.iterations.toLocaleString()} passes.
+            </p>
             <div className="flex flex-wrap gap-2">
-              {winDrivers.map(driver => (
+              {filteredWinDrivers.map(driver => (
                 <Badge key={driver.condition} variant="outline" className="uppercase tracking-wide text-xs">
                   {driver.condition.toUpperCase()}: {driver.weight.toFixed(1)}%
                 </Badge>
               ))}
             </div>
+            {!hasCardData && (
+              <p className="text-xs text-amber-400">
+                Add at least one card type above to surface win condition signals.
+              </p>
+            )}
           </section>
 
           <section className="space-y-2">
