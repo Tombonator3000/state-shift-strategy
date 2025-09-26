@@ -53,12 +53,22 @@ export const formatEffect = (card: GameCard): string => {
 
   if (type === 'ATTACK') {
     const opponentLoss = effects.ipDelta?.opponent;
-    if (typeof opponentLoss === 'number') {
+    const opponentPercent = effects.ipDelta?.opponentPercent;
+    const parts: string[] = [];
+    if (typeof opponentLoss === 'number' && opponentLoss !== 0) {
       const absoluteLoss = Math.abs(opponentLoss);
-      const parts = [`Opponent loses ${absoluteLoss} IP`];
-      if (typeof effects.discardOpponent === 'number' && effects.discardOpponent > 0) {
-        parts.push(`Discard ${effects.discardOpponent}`);
-      }
+      parts.push(`Opponent loses ${absoluteLoss} IP`);
+    }
+    if (typeof opponentPercent === 'number' && opponentPercent > 0) {
+      parts.push(`Opponent loses ${Math.round(opponentPercent * 100)}% current IP`);
+    }
+    if (!parts.length && typeof opponentLoss === 'number') {
+      parts.push(`Opponent loses ${Math.abs(opponentLoss)} IP`);
+    }
+    if (typeof effects.discardOpponent === 'number' && effects.discardOpponent > 0) {
+      parts.push(`Discard ${effects.discardOpponent}`);
+    }
+    if (parts.length) {
       return parts.join(' · ');
     }
   }

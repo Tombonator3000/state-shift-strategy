@@ -146,7 +146,7 @@ Bytt aktiv spiller.
 
 ATTACK:
 
-ipDelta.opponent (obligatorisk, >0), discardOpponent? (0–2).
+ipDelta.opponent (obligatorisk, >0), opponentPercent? (0–1), discardOpponent? (0–2).
 
 
 
@@ -182,7 +182,7 @@ Krydder (valgfritt, fortsatt enkelt):
 
 
 
-ATTACK Rare/Legendary kan også ha discardOpponent: 1 (Legendary kan få 2).
+ATTACK Rare/Legendary kan også ha discardOpponent: 1 (Legendary kan få 2) og opponentPercent (0–1) for IP-skalering.
 
 
 
@@ -199,6 +199,8 @@ ATTACK
 
 
 Betal kost → motstander mister oppgitt IP.
+
+Høyraritetskort kan i tillegg ha opponentPercent (0–1). Damage = flat IP + ⌊motstanders nåværende IP × percent⌋, så effekten skalerer hardere når de sitter på mye kapital.
 
 
 
@@ -380,7 +382,7 @@ type Rarity  = "common" | "uncommon" | "rare" | "legendary";
 
 
 
-type EffectsATTACK = { ipDelta:{opponent:number}; discardOpponent?:number };
+type EffectsATTACK = { ipDelta:{opponent:number; opponentPercent?:number}; discardOpponent?:number };
 
 type EffectsMEDIA  = { truthDelta:number };
 
@@ -548,11 +550,11 @@ ZONE må alltid sende targetStateId (USPS, f.eks. "OH").
 
 Play-knapp: disabled + tooltip med whyNotPlayable årsaker.
 
-
-
 Etter spill: kort fjernes fra hånd via id-sammenligning (ikke objektreferanse), legges i discard.
 
+8.5 Balansetesting (sen-spill IP)
 
+Bruk `node scripts/run-attack-scaling-sim.mjs` for å kartlegge hvor mye ekstra skade opponentPercent gir ved ulike IP-nivåer (30/50/80/110). Scriptet rapporterer både komponentene og snittet ved 80 IP, slik at vi kan følge med på hvor hardt høyraritetskort svinger kampene sent i spillet uten å spinne opp full AI-simulering.
 
 Statspanel leser pressureByState\[SID]\[viewer].
 

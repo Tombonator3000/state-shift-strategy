@@ -198,7 +198,8 @@ export const truthBatch1: GameCard[] = [
     "cost": 4,
     "effects": {
       "ipDelta": {
-        "opponent": 3
+        "opponent": 3,
+        "opponentPercent": 0.08
       }
     },
     "flavor": "The squeak heard round the world."
@@ -436,7 +437,8 @@ export const truthBatch1: GameCard[] = [
     "cost": 4,
     "effects": {
       "ipDelta": {
-        "opponent": 3
+        "opponent": 3,
+        "opponentPercent": 0.08
       }
     },
     "flavor": "Keynote featuring laser pointer to Orion."
@@ -464,7 +466,8 @@ export const truthBatch1: GameCard[] = [
     "cost": 4,
     "effects": {
       "ipDelta": {
-        "opponent": 3
+        "opponent": 3,
+        "opponentPercent": 0.1
       }
     },
     "flavor": "Uploaded by user 'ghost_admin'."
@@ -492,7 +495,8 @@ export const truthBatch1: GameCard[] = [
     "cost": 4,
     "effects": {
       "ipDelta": {
-        "opponent": 3
+        "opponent": 3,
+        "opponentPercent": 0.1
       },
       "discardOpponent": 1
     },

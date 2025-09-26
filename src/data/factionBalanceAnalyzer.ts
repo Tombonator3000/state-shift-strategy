@@ -70,7 +70,7 @@ export class FactionBalanceAnalyzer {
   private buildNetUtility(effects: MvpEffectSummary): NetUtilityScore {
     const breakdown = {
       truth: effects.truthDelta,
-      ip: effects.ipDeltaOpponent,
+      ip: effects.ipDeltaOpponentExpected,
       pressure: effects.pressureDelta * 5,
     };
 
@@ -96,7 +96,11 @@ export class FactionBalanceAnalyzer {
         };
       }
 
-      if (effects.truthDelta === 0 && effects.ipDeltaOpponent <= 0 && effects.pressureDelta <= 0) {
+      if (
+        effects.truthDelta === 0 &&
+        effects.ipDeltaOpponentExpected <= 0 &&
+        effects.pressureDelta <= 0
+      ) {
         return {
           alignment: 'Mixed',
           reason: 'Limited truth gain or disruption — verify intent.',
@@ -117,7 +121,11 @@ export class FactionBalanceAnalyzer {
       };
     }
 
-    if (effects.truthDelta === 0 && effects.ipDeltaOpponent <= 0 && effects.pressureDelta <= 0) {
+    if (
+      effects.truthDelta === 0 &&
+      effects.ipDeltaOpponentExpected <= 0 &&
+      effects.pressureDelta <= 0
+    ) {
       return {
         alignment: 'Mixed',
         reason: 'Minimal suppression or board impact — double-check purpose.',
@@ -263,7 +271,10 @@ export class FactionBalanceAnalyzer {
     const drawRate = Math.max(0, 100 - truthWinRate - governmentWinRate);
 
     const truthWeight = analysis.reduce((sum, card) => sum + Math.max(0, card.effects.truthDelta), 0);
-    const ipWeight = analysis.reduce((sum, card) => sum + Math.max(0, card.effects.ipDeltaOpponent), 0);
+    const ipWeight = analysis.reduce(
+      (sum, card) => sum + Math.max(0, card.effects.ipDeltaOpponentExpected),
+      0,
+    );
     const pressureWeight = analysis.reduce((sum, card) => sum + Math.max(0, card.effects.pressureDelta), 0);
     const totalWeight = truthWeight + ipWeight + pressureWeight;
 

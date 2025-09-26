@@ -2,6 +2,7 @@ import { AI_PRESETS, type AiConfig } from '@/ai/difficulty';
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE } from './cardDatabase';
 import { getAiTuningConfig, normalizeAiTuningConfig, type AiTuningConfig } from './aiTuning';
+import { LATE_GAME_REFERENCE_IP } from './mvpAnalysisUtils';
 
 export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'legendary';
 
@@ -511,6 +512,12 @@ class LegacyAIStrategist {
     if (effects.ipDelta?.opponent) {
       bonus += (effects.ipDelta.opponent / 8) * this.personality.aggressiveness;
     }
+    if (effects.ipDelta?.opponentPercent) {
+      const scaled = Math.floor(effects.ipDelta.opponentPercent * LATE_GAME_REFERENCE_IP);
+      if (scaled > 0) {
+        bonus += (scaled / 8) * this.personality.aggressiveness;
+      }
+    }
 
     if (effects.discardOpponent) {
       bonus += effects.discardOpponent * 0.08 * this.personality.defensiveness;
@@ -761,6 +768,12 @@ class LegacyAIStrategist {
 
     if (cardMeta.effects?.ipDelta?.opponent) {
       priority += (cardMeta.effects.ipDelta.opponent / 6) * (0.8 + this.personality.aggressiveness) * attackWeights.ipDamageMultiplier;
+    }
+    if (cardMeta.effects?.ipDelta?.opponentPercent) {
+      const scaled = Math.floor(cardMeta.effects.ipDelta.opponentPercent * LATE_GAME_REFERENCE_IP);
+      if (scaled > 0) {
+        priority += (scaled / 6) * (0.8 + this.personality.aggressiveness) * attackWeights.ipDamageMultiplier;
+      }
     }
 
     if (cardMeta.effects?.discardOpponent) {

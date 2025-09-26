@@ -82,7 +82,7 @@ export const MVP_RULES_SECTIONS: MvpRulesSection[] = [
   {
     title: 'Effect Whitelist (MVP)',
     bullets: [
-      'ATTACK: ipDelta.opponent (required) and optional discardOpponent (max 2).',
+      'ATTACK: ipDelta.opponent (required) with optional opponentPercent (0–1) and discardOpponent (max 2).',
       'MEDIA: truthDelta (positive or negative shifts).',
       'ZONE: pressureDelta (requires a target state).',
     ],

@@ -210,8 +210,11 @@ export function resolve(
   const metadata: Record<string, number | string | undefined> = {};
   if (card.type === 'ATTACK') {
     const effects = card.effects as EffectsATTACK | undefined;
-    if (effects?.ipDelta?.opponent) {
+    if (typeof effects?.ipDelta?.opponent === 'number') {
       metadata.damage = effects.ipDelta.opponent;
+    }
+    if (typeof effects?.ipDelta?.opponentPercent === 'number') {
+      metadata.damagePercent = effects.ipDelta.opponentPercent;
     }
     if (effects?.discardOpponent) {
       metadata.discard = effects.discardOpponent;

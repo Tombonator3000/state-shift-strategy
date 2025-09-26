@@ -3,7 +3,7 @@ import type { TurnPlay } from '@/game/combo.types';
 import { expectedCost, MVP_CARD_TYPES } from '@/rules/mvp';
 
 export type EffectsATTACK = {
-  ipDelta: { opponent: number };
+  ipDelta: { opponent: number; opponentPercent?: number };
   discardOpponent?: 0 | 1 | 2;
 };
 
@@ -121,6 +121,13 @@ const clampInteger = (value: number, min: number, max: number): number => {
   return Math.max(min, Math.min(max, rounded));
 };
 
+const clampFraction = (value: number, min: number, max: number): number => {
+  if (!Number.isFinite(value)) {
+    return min;
+  }
+  return Math.max(min, Math.min(max, value));
+};
+
 const sanitizeAttackEffects = (
   rawEffects: unknown,
   changes: string[],
@@ -131,12 +138,29 @@ const sanitizeAttackEffects = (
     : {}) as Record<string, unknown>;
 
   let opponentDelta: number | null = null;
+  let opponentPercent: number | null = null;
 
   if (typeof source.ipDelta === 'number') {
     opponentDelta = source.ipDelta;
     changes.push('normalized ATTACK ipDelta from number to object form');
   } else if (typeof source.ipDelta === 'object' && source.ipDelta !== null) {
-    opponentDelta = toNumber((source.ipDelta as Record<string, unknown>).opponent);
+    const ipDeltaSource = source.ipDelta as Record<string, unknown>;
+    opponentDelta = toNumber(ipDeltaSource.opponent);
+
+    if (Object.prototype.hasOwnProperty.call(ipDeltaSource, 'opponentPercent')) {
+      const rawPercent = toNumber(ipDeltaSource.opponentPercent);
+      if (rawPercent === null) {
+        warnings.push('ATTACK cards treat ipDelta.opponentPercent as number; removing invalid value');
+      } else {
+        const clamped = clampFraction(rawPercent, 0, 1);
+        if (clamped !== rawPercent) {
+          changes.push(`clamped opponentPercent from ${rawPercent} to ${clamped}`);
+        }
+        if (clamped > 0) {
+          opponentPercent = clamped;
+        }
+      }
+    }
   }
 
   if (opponentDelta === null || opponentDelta <= 0) {
@@ -147,6 +171,10 @@ const sanitizeAttackEffects = (
   const attack: EffectsATTACK = {
     ipDelta: { opponent: clampInteger(opponentDelta, 1, 9) },
   };
+
+  if (opponentPercent !== null) {
+    attack.ipDelta.opponentPercent = clampFraction(opponentPercent, 0, 1);
+  }
 
   if (Object.prototype.hasOwnProperty.call(source, 'discardOpponent')) {
     const discard = toNumber(source.discardOpponent);
@@ -164,6 +192,14 @@ const sanitizeAttackEffects = (
   }
 
   const allowedKeys = new Set(['ipDelta', 'discardOpponent']);
+  if (typeof source.ipDelta === 'object' && source.ipDelta !== null) {
+    const allowedIpKeys = new Set(['opponent', 'opponentPercent']);
+    const ipKeys = Object.keys(source.ipDelta as Record<string, unknown>);
+    const extraIpKeys = ipKeys.filter(key => !allowedIpKeys.has(key));
+    if (extraIpKeys.length > 0) {
+      changes.push(`removed unsupported ATTACK ipDelta keys: ${extraIpKeys.join(', ')}`);
+    }
+  }
   const extraKeys = Object.keys(source).filter(key => !allowedKeys.has(key));
   if (extraKeys.length > 0) {
     changes.push(`removed unsupported ATTACK effect keys: ${extraKeys.join(', ')}`);
@@ -271,6 +307,9 @@ const createMvpText = (
     case 'ATTACK': {
       const attack = effects as EffectsATTACK;
       const parts = [`Opponent -${attack.ipDelta.opponent} IP`];
+      if (attack.ipDelta.opponentPercent && attack.ipDelta.opponentPercent > 0) {
+        parts.push(`Opponent -${Math.round(attack.ipDelta.opponentPercent * 100)}% current IP`);
+      }
       if (attack.discardOpponent && attack.discardOpponent > 0) {
         parts.push(
           attack.discardOpponent === 1
@@ -422,6 +461,15 @@ export function validateCardMVP(card: MVPGameCard): { ok: boolean; errors: strin
       const effects = card.effects as EffectsATTACK;
       if (effects.ipDelta.opponent <= 0) {
         validationErrors.push('ATTACK cards require ipDelta.opponent > 0');
+      }
+      if (
+        typeof effects.ipDelta.opponentPercent !== 'undefined' &&
+        (typeof effects.ipDelta.opponentPercent !== 'number' ||
+          Number.isNaN(effects.ipDelta.opponentPercent) ||
+          effects.ipDelta.opponentPercent < 0 ||
+          effects.ipDelta.opponentPercent > 1)
+      ) {
+        validationErrors.push('ipDelta.opponentPercent must be between 0 and 1 when present');
       }
       if (
         typeof effects.discardOpponent !== 'undefined' &&

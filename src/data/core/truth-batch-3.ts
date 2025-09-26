@@ -10,7 +10,8 @@ export const truthBatch3: GameCard[] = [
     "cost": 4,
     "effects": {
       "ipDelta": {
-        "opponent": 3
+        "opponent": 3,
+        "opponentPercent": 0.12
       }
     },
     "flavor": "Three hackers, zero hygiene, one friend on the inside."
@@ -52,7 +53,8 @@ export const truthBatch3: GameCard[] = [
     "cost": 4,
     "effects": {
       "ipDelta": {
-        "opponent": 3
+        "opponent": 3,
+        "opponentPercent": 0.1
       }
     },
     "flavor": "Microscopes donated, miracles improvised."

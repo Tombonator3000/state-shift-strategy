@@ -177,10 +177,21 @@ export default function UiOverlays() {
 
   function renderEffects(card: AnyCard) {
     const eff = card?.effects || {};
-    if (card?.type === "ATTACK" && eff?.ipDelta?.opponent) {
-      const d = eff.ipDelta.opponent;
+    if (card?.type === "ATTACK" && eff?.ipDelta) {
+      const flat = eff.ipDelta.opponent ?? 0;
+      const percent = eff.ipDelta.opponentPercent ?? 0;
+      const parts: string[] = [];
+      if (flat > 0) {
+        parts.push(`Opponent −${flat} IP`);
+      }
+      if (percent > 0) {
+        parts.push(`Opponent −${Math.round(percent * 100)}% current IP`);
+      }
+      if (!parts.length) {
+        parts.push('Opponent −0 IP');
+      }
       const disc = eff.discardOpponent ? ` · discard ${eff.discardOpponent}` : "";
-      return `Opponent −${d} IP${disc}`;
+      return `${parts.join(' + ')}${disc}`;
     }
     if (card?.type === "MEDIA" && typeof eff?.truthDelta === "number") {
       const d = eff.truthDelta;

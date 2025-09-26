@@ -187,7 +187,7 @@ export class EnhancedCardBalancer {
       0
     );
     const ipWeight = cardAnalysis.reduce(
-      (sum, card) => sum + Math.max(0, card.effects.ipDeltaOpponent),
+      (sum, card) => sum + Math.max(0, card.effects.ipDeltaOpponentExpected),
       0
     );
     const pressureWeight = cardAnalysis.reduce(
