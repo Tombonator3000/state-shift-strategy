@@ -117,6 +117,7 @@ export const useAudio = () => {
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const playTokenRef = useRef(0);
   const resumeMenuAfterEndRef = useRef(false);
+  const manualStopRef = useRef(false);
   const menuMusicCallbackRef = useRef<(() => void) | null>(null);
   const lastMusicVolumeRef = useRef(config.muted ? 0 : config.volume * config.musicVolume);
   // Music track arrays
@@ -555,13 +556,15 @@ export const useAudio = () => {
 
     const typeToPlay = musicType || currentMusicType;
     const nextTrack = getNextTrack(typeToPlay);
-    
+
     if (!nextTrack) {
       console.warn(`🎵 No available track for music type: ${typeToPlay}`);
       setAudioStatus(`No tracks available for: ${typeToPlay}`);
       return;
     }
-    
+
+    manualStopRef.current = false;
+
     // Ensure only one track plays at a time
     if (currentMusicRef.current && currentMusicRef.current !== nextTrack) {
       currentMusicRef.current.onended = null;
@@ -611,6 +614,7 @@ export const useAudio = () => {
 
   const stopMusic = useCallback(() => {
     console.log('🎵 Stopping music');
+    manualStopRef.current = true;
     if (fadeIntervalRef.current) {
       clearInterval(fadeIntervalRef.current);
     }
@@ -648,6 +652,7 @@ export const useAudio = () => {
       currentMusicRef.current.volume = config.muted
         ? 0
         : config.volume * config.musicVolume;
+      manualStopRef.current = false;
       const playPromise = currentMusicRef.current.play();
       if (playPromise !== undefined) {
         playPromise
@@ -779,6 +784,7 @@ export const useAudio = () => {
         setAudioStatus('Music disabled');
       } else if (newMusicEnabled) {
         console.log('🎵 Starting music due to toggle on');
+        manualStopRef.current = false;
         playMusic();
       }
       return { ...prev, musicEnabled: newMusicEnabled };
@@ -846,6 +852,9 @@ export const useAudio = () => {
   }, []);
 
   useEffect(() => {
+    if (manualStopRef.current) {
+      return;
+    }
     if (tracksLoaded && audioContextUnlocked && config.musicEnabled && !config.muted && !isPlaying) {
       console.log('🎵 Auto-starting music after tracks loaded');
       playMusic(currentMusicType);
