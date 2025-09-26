@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Eye, Lock, ChevronDown, ChevronUp } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { SecretAgenda as AgendaType } from '@/data/agendaDatabase';
 
@@ -15,7 +15,46 @@ interface SecretAgendaProps {
 }
 
 const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
-  const progressPercent = (agenda.progress / agenda.target) * 100;
+  const progressPercent = useMemo(() => {
+    if (!agenda.target) {
+      return 0;
+    }
+
+    const raw = (agenda.progress / agenda.target) * 100;
+    return Math.max(0, Math.min(100, Number.isFinite(raw) ? raw : 0));
+  }, [agenda.progress, agenda.target]);
+
+  const difficultyBadgeClass = useMemo(() => {
+    switch (agenda.difficulty) {
+      case 'easy':
+        return 'bg-green-900/50 text-green-400';
+      case 'medium':
+        return 'bg-yellow-900/50 text-yellow-400';
+      case 'hard':
+        return 'bg-red-900/50 text-red-400';
+      default:
+        return 'bg-purple-900/50 text-purple-400';
+    }
+  }, [agenda.difficulty]);
+
+  const renderProgressBar = () => (
+    <div className="space-y-1">
+      <div className="flex justify-between items-center text-xs">
+        <span>Progress:</span>
+        <div className="flex items-center gap-2">
+          <span>{agenda.progress}/{agenda.target}</span>
+          <span className={`px-1 py-0.5 rounded text-xs font-bold ${difficultyBadgeClass}`}>
+            {agenda.difficulty.toUpperCase()}
+          </span>
+        </div>
+      </div>
+      <Progress
+        value={progressPercent}
+        className="h-2 bg-gray-800"
+      />
+    </div>
+  );
+
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Opponent view - just a progress bar
@@ -48,7 +87,7 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
 
   // Player view - expandable display
   return (
-    <Card 
+    <Card
       className={`bg-black text-white border-2 border-secret-red relative overflow-hidden cursor-pointer transition-all duration-300 ${
         isExpanded ? 'p-4' : 'p-2'
       }`}
@@ -72,9 +111,33 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
         </div>
 
         {!isExpanded ? (
-          // Minimized view - just show truncated description
-          <div className="text-xs font-mono text-gray-300 truncate">
-            {agenda.description}
+          // Minimized view - show quick summary
+          <div className="space-y-2 text-xs font-mono text-gray-300">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-secret-red/90 uppercase tracking-wide text-[10px]">
+                  {agenda.title}
+                </span>
+                <span className={`px-1 py-0.5 rounded text-[10px] font-bold ${difficultyBadgeClass}`}>
+                  {agenda.difficulty.toUpperCase()}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-gray-400">
+                <span>{agenda.progress}/{agenda.target}</span>
+                <span>{Math.round(progressPercent)}%</span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-secret-red/20">
+                <div className="h-full bg-secret-red transition-all" style={{ width: `${progressPercent}%` }} />
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-400 line-clamp-2">
+              {agenda.description}
+            </div>
+            {agenda.completed && (
+              <div className="text-[10px] text-secret-red font-bold">
+                Objective Complete
+              </div>
+            )}
           </div>
         ) : (
           // Expanded view - full details
@@ -90,27 +153,8 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
                 "{agenda.flavorText}"
               </div>
             </div>
-            
-            <div className="space-y-1">
-              <div className="flex justify-between items-center text-xs">
-                <span>Progress:</span>
-                <div className="flex items-center gap-2">
-                  <span>{agenda.progress}/{agenda.target}</span>
-                  <span className={`px-1 py-0.5 rounded text-xs font-bold ${
-                    agenda.difficulty === 'easy' ? 'bg-green-900/50 text-green-400' :
-                    agenda.difficulty === 'medium' ? 'bg-yellow-900/50 text-yellow-400' :
-                    agenda.difficulty === 'hard' ? 'bg-red-900/50 text-red-400' :
-                    'bg-purple-900/50 text-purple-400'
-                  }`}>
-                    {agenda.difficulty.toUpperCase()}
-                  </span>
-                </div>
-              </div>
-              <Progress 
-                value={progressPercent} 
-                className="h-2 bg-gray-800"
-              />
-            </div>
+
+            {renderProgressBar()}
 
             {agenda.completed && (
               <div className="text-xs text-center text-secret-red font-bold animate-pulse">
