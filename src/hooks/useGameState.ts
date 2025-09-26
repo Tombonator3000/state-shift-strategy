@@ -156,6 +156,144 @@ const drawCardsFromDeck = (
   return { drawn, deck: nextDeck };
 };
 
+type AgendaPerspective = 'player' | 'ai';
+
+const buildAgendaSnapshot = (state: GameState, perspective: AgendaPerspective) => {
+  const isPlayer = perspective === 'player';
+  const faction = isPlayer ? state.faction : state.faction === 'truth' ? 'government' : 'truth';
+
+  return {
+    controlledStates: isPlayer ? state.controlledStates : state.aiControlledStates,
+    aiControlledStates: isPlayer ? state.aiControlledStates : state.controlledStates,
+    states: state.states,
+    truth: state.truth,
+    ip: isPlayer ? state.ip : state.aiIP,
+    aiIP: isPlayer ? state.aiIP : state.ip,
+    round: state.round,
+    turn: state.turn,
+    currentPlayer: state.currentPlayer,
+    faction,
+  };
+};
+
+const updateSecretAgendaProgress = (state: GameState): GameState => {
+  let logUpdates: string[] = [];
+  let updatedSecretAgenda = state.secretAgenda;
+  let updatedAiSecretAgenda = state.aiSecretAgenda;
+  let updatedAgenda = state.agenda;
+
+  if (updatedSecretAgenda) {
+    const snapshot = buildAgendaSnapshot(state, 'player');
+    const computedProgressRaw = Number(updatedSecretAgenda.checkProgress?.(snapshot) ?? updatedSecretAgenda.progress ?? 0);
+    const computedProgress = Number.isFinite(computedProgressRaw)
+      ? Math.max(0, computedProgressRaw)
+      : updatedSecretAgenda.progress ?? 0;
+    const previousProgress = updatedSecretAgenda.progress ?? 0;
+    const target = updatedSecretAgenda.target ?? 0;
+    const isCompleted = computedProgress >= target;
+
+    if (computedProgress !== previousProgress || isCompleted !== updatedSecretAgenda.completed) {
+      if (computedProgress > previousProgress) {
+        const delta = computedProgress - previousProgress;
+        logUpdates = [
+          ...logUpdates,
+          `Secret Agenda progress +${delta}: ${updatedSecretAgenda.title} (${computedProgress}/${target})`,
+        ];
+      }
+
+      if (isCompleted && !updatedSecretAgenda.completed) {
+        logUpdates = [...logUpdates, `Secret Agenda complete: ${updatedSecretAgenda.title}`];
+      }
+
+      if (!isCompleted && updatedSecretAgenda.completed) {
+        logUpdates = [...logUpdates, `Secret Agenda progress lost: ${updatedSecretAgenda.title} (${computedProgress}/${target})`];
+      }
+
+      updatedSecretAgenda = {
+        ...updatedSecretAgenda,
+        progress: computedProgress,
+        completed: isCompleted,
+      };
+    }
+  }
+
+  if (updatedAiSecretAgenda) {
+    const snapshot = buildAgendaSnapshot(state, 'ai');
+    const computedProgressRaw = Number(updatedAiSecretAgenda.checkProgress?.(snapshot) ?? updatedAiSecretAgenda.progress ?? 0);
+    const computedProgress = Number.isFinite(computedProgressRaw)
+      ? Math.max(0, computedProgressRaw)
+      : updatedAiSecretAgenda.progress ?? 0;
+    const previousProgress = updatedAiSecretAgenda.progress ?? 0;
+    const target = updatedAiSecretAgenda.target ?? 0;
+    const isCompleted = computedProgress >= target;
+
+    if (computedProgress !== previousProgress || isCompleted !== updatedAiSecretAgenda.completed) {
+      if (computedProgress > previousProgress) {
+        const delta = computedProgress - previousProgress;
+        if (updatedAiSecretAgenda.revealed) {
+          logUpdates = [
+            ...logUpdates,
+            `AI secret agenda advanced by ${delta}: ${computedProgress}/${target}`,
+          ];
+        }
+      }
+
+      if (isCompleted && !updatedAiSecretAgenda.completed) {
+        logUpdates = [...logUpdates, 'AI secret agenda completed!'];
+      }
+
+      if (!isCompleted && updatedAiSecretAgenda.completed && updatedAiSecretAgenda.revealed) {
+        logUpdates = [
+          ...logUpdates,
+          `AI secret agenda progress lost: ${computedProgress}/${target}`,
+        ];
+      }
+
+      updatedAiSecretAgenda = {
+        ...updatedAiSecretAgenda,
+        progress: computedProgress,
+        completed: isCompleted,
+      };
+    }
+  }
+
+  if (updatedAgenda) {
+    const snapshot = buildAgendaSnapshot(state, 'player');
+    const computedProgressRaw = Number(updatedAgenda.checkProgress?.(snapshot) ?? updatedAgenda.progress ?? 0);
+    const computedProgress = Number.isFinite(computedProgressRaw)
+      ? Math.max(0, computedProgressRaw)
+      : updatedAgenda.progress ?? 0;
+    const previousProgress = updatedAgenda.progress ?? 0;
+    const target = updatedAgenda.target ?? 0;
+    const isCompleted = computedProgress >= target;
+
+    if (computedProgress !== previousProgress || isCompleted !== !!updatedAgenda.complete) {
+      updatedAgenda = {
+        ...updatedAgenda,
+        progress: computedProgress,
+        complete: isCompleted,
+      };
+    }
+  }
+
+  if (
+    updatedSecretAgenda !== state.secretAgenda ||
+    updatedAiSecretAgenda !== state.aiSecretAgenda ||
+    updatedAgenda !== state.agenda ||
+    logUpdates.length > 0
+  ) {
+    return {
+      ...state,
+      secretAgenda: updatedSecretAgenda,
+      aiSecretAgenda: updatedAiSecretAgenda,
+      agenda: updatedAgenda,
+      log: logUpdates.length > 0 ? [...state.log, ...logUpdates] : state.log,
+    };
+  }
+
+  return state;
+};
+
 export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const aiDifficulty = resolveAiDifficulty(aiDifficultyOverride);
   const [eventManager] = useState(() => new EventManager());
@@ -381,7 +519,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         resolution,
       });
 
-      return {
+      const nextState: GameState = {
         ...prev,
         hand: prev.hand.filter(c => c.id !== cardId),
         ip: resolution.ip,
@@ -398,6 +536,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         selectedCard: resolution.selectedCard,
         log: [...prev.log, ...resolution.logEntries]
       };
+
+      return updateSecretAgendaProgress(nextState);
     });
   }, [achievements, resolveCardEffects]);
 
@@ -470,7 +610,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         resolution,
       });
 
-      return {
+      const nextState: GameState = {
         ...prev,
         animating: true,
         ip: resolution.ip,
@@ -483,6 +623,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         selectedCard: resolution.selectedCard,
         log: [...prev.log, ...resolution.logEntries]
       };
+
+      return updateSecretAgendaProgress(nextState);
     });
 
     try {
@@ -507,7 +649,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           timestamp: Date.now(),
           logEntries: [],
         };
-        return {
+        const nextState: GameState = {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),
           cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
@@ -518,6 +660,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           targetState: null,
           animating: false,
         };
+
+        return updateSecretAgendaProgress(nextState);
       });
     } catch (error) {
       console.error('Card animation failed:', error);
@@ -537,7 +681,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           timestamp: Date.now(),
           logEntries: [],
         };
-        return {
+        const nextState: GameState = {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),
           cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
@@ -548,6 +692,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           targetState: null,
           animating: false,
         };
+
+        return updateSecretAgendaProgress(nextState);
       });
     }
   }, [gameState, achievements, resolveCardEffects]);
@@ -657,7 +803,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           ...(comboDrawBonus > 0 ? [`Synergy draw bonus: +${comboDrawBonus} card${comboDrawBonus === 1 ? '' : 's'}`] : []),
         ];
 
-        const nextState: GameState = {
+        let nextState: GameState = {
           ...prev,
           turn: prev.turn + 1,
           phase: 'ai_turn',
@@ -681,13 +827,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         applyTruthDelta(nextState, truthModifier, 'human');
         nextState.log.push(`AI ${prev.aiStrategist?.personality.name} is thinking...`);
 
-        return nextState;
+        return updateSecretAgendaProgress(nextState);
       }
 
       const comboLog =
         comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
 
-      return {
+      const nextState: GameState = {
         ...prev,
         round: prev.round + 1,
         phase: 'newspaper',
@@ -701,6 +847,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboResult.truthDelta,
         log: [...comboLog, 'AI turn completed']
       };
+
+      return updateSecretAgendaProgress(nextState);
     });
   }, []);
 
@@ -713,6 +861,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         }
 
         const result = applyAiCardPlay(prev, params, achievements);
+        const nextStateWithAgendas = updateSecretAgendaProgress(result.nextState);
 
         if (result.card && typeof window !== 'undefined' && window.uiShowOpponentCard) {
           window.uiShowOpponentCard(result.card);
@@ -731,8 +880,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           debugStrategyToConsole(params.reasoning, params.strategyDetails);
         }
 
-        resolve(result.nextState);
-        return result.nextState;
+        resolve(nextStateWithAgendas);
+        return nextStateWithAgendas;
       });
     });
   }, [achievements]);
@@ -885,7 +1034,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         drawLogEntry = `Ready to act (hand ${newHand.length})`;
       }
 
-      return {
+      const nextState: GameState = {
         ...prev,
         hand: newHand,
         deck: remainingDeck,
@@ -904,6 +1053,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         aiTurnInProgress: false,
         log: [...prev.log, drawLogEntry]
       };
+
+      return updateSecretAgendaProgress(nextState);
     });
   }, []);
 
