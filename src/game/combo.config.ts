@@ -9,8 +9,8 @@ const sequenceCombos: ComboDefinition[] = [
     priority: 100,
     cap: 4,
     trigger: { kind: 'sequence', sequence: ['ATTACK', 'ATTACK', 'ATTACK'] },
-    reward: { ip: 5, log: '+IP from attack blitz' },
-    fxText: 'Chain of strikes detonated!'
+    reward: { nextAttackMultiplier: 2, log: 'Attack Blitz primes your next strike for double damage.' },
+    fxText: 'Chain of strikes primed—next blow hits twice as hard!'
   },
   {
     id: 'sequence_media_wave',

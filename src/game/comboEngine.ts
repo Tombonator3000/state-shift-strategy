@@ -423,6 +423,11 @@ function formatReward(reward: ComboReward): string {
   if (typeof truth === 'number' && truth !== 0) {
     parts.push(`${truth > 0 ? `±${truth}` : truth} Truth`);
   }
+
+  const nextAttackMultiplier = reward.nextAttackMultiplier;
+  if (typeof nextAttackMultiplier === 'number' && nextAttackMultiplier > 1) {
+    parts.push(`Next attack x${nextAttackMultiplier}`);
+  }
   return parts.length > 0 ? `(${parts.join(', ')})` : '';
 }
 
@@ -527,10 +532,27 @@ export function applyComboRewards(
     applyTruthDelta(updated, signedTruthDelta, player);
   }
 
+  let pendingAttackMultiplier: number | undefined;
+
   for (const result of evaluation.results) {
     if (result.reward.log) {
       updated.log.push(result.reward.log);
     }
+
+    const multiplier = result.appliedReward.nextAttackMultiplier;
+    if (typeof multiplier === 'number' && multiplier > 0) {
+      pendingAttackMultiplier = Math.max(pendingAttackMultiplier ?? 0, multiplier);
+    }
+  }
+
+  if (pendingAttackMultiplier !== undefined) {
+    const playerState = updated.players[player];
+    const existing = playerState.nextAttackMultiplier;
+    const effective = Math.max(existing ?? 0, pendingAttackMultiplier);
+    updated.players[player] = {
+      ...playerState,
+      nextAttackMultiplier: effective > 0 ? effective : undefined,
+    };
   }
 
   return updated;

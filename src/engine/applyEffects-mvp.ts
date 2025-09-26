@@ -61,9 +61,17 @@ function applyAttackEffect(
   const flatDamage = Math.max(0, effects.ipDelta?.opponent ?? 0);
   const percentFactor = Math.max(0, Math.min(1, effects.ipDelta?.opponentPercent ?? 0));
   const percentDamage = percentFactor > 0 ? Math.floor(before * percentFactor) : 0;
-  const damage = flatDamage + percentDamage;
+  const baseDamage = flatDamage + percentDamage;
+
+  const attacker = state.players[owner];
+  const buff = attacker.nextAttackMultiplier;
+  const multiplier = typeof buff === 'number' && buff > 0 ? buff : undefined;
+  const damage = multiplier ? Math.max(0, Math.floor(baseDamage * multiplier)) : baseDamage;
   const after = clampIP(before - damage);
   state.players[opponent].ip = after;
+  if (typeof buff !== 'undefined') {
+    state.players[owner] = { ...attacker, nextAttackMultiplier: undefined } satisfies PlayerState;
+  }
   const delta = after - before;
   if (delta !== 0 && typeof window !== 'undefined' && (window as any).uiToastIp) {
     (window as any).uiToastIp(opponent, delta);
@@ -71,6 +79,9 @@ function applyAttackEffect(
   const components: string[] = [];
   components.push(`flat ${flatDamage}`);
   components.push(`scaled ${percentDamage}`);
+  if (multiplier) {
+    components.push(`combo x${multiplier}`);
+  }
   state.log.push(
     `Opponent loses ${damage} IP (${before} → ${after}) [${components.join(', ')}]`,
   );
