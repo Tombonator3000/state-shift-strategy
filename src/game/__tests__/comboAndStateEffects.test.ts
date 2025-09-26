@@ -77,7 +77,12 @@ describe('combo and state synergy integration', () => {
     const comboIds = result.evaluation.results.map(entry => entry.definition.id);
     expect(comboIds).toContain('sequence_attack_blitz');
     expect(comboIds).toContain('count_attack_barrage');
-    expect(result.evaluation.totalReward.ip).toBe(8);
+    expect(result.evaluation.totalReward.ip).toBe(4);
+
+    const blitzResult = result.evaluation.results.find(
+      entry => entry.definition.id === 'sequence_attack_blitz',
+    );
+    expect(blitzResult?.appliedReward.nextAttackMultiplier).toBe(2);
     expect(result.updatedPlayerIp).toBe(state.ip + (result.evaluation.totalReward.ip ?? 0));
   });
 

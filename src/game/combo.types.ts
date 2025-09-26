@@ -68,6 +68,7 @@ export interface ComboReward {
   ip?: number;
   truth?: number;
   log?: string;
+  nextAttackMultiplier?: number;
 }
 
 export interface ComboDefinition {

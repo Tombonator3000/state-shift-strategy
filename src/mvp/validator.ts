@@ -33,6 +33,7 @@ export type PlayerState = {
   discard: Card[];
   ip: number;
   states: string[];
+  nextAttackMultiplier?: number;
 };
 
 export type GameState = {
