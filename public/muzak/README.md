@@ -6,19 +6,21 @@ This directory contains the dynamic background music system for the game.
 
 ### Theme Music (Menu/Neutral)
 - `Theme-1.mp3` - Main theme track 1
-- `Theme-2.mp3` - Main theme track 2  
-- `Theme-3.mp3` - Main theme track 3
-- `Theme-4.mp3` - Main theme track 4
+- `Theme-2.mp3` - Main theme track 2
 
 ### Government Faction Music
 - `Government-1.mp3` - Deep State track 1
 - `Government-2.mp3` - Deep State track 2
 - `Government-3.mp3` - Deep State track 3
+- `Government-4.mp3` - Deep State track 4
+- `Government-5.mp3` - Deep State track 5
 
 ### Truth Seekers Faction Music
 - `Truth-1.mp3` - Truth Seekers track 1
 - `Truth-2.mp3` - Truth Seekers track 2
 - `Truth-3.mp3` - Truth Seekers track 3
+- `Truth-4.mp3` - Truth Seekers track 4
+- `Truth-5.mp3` - Truth Seekers track 5
 
 ## How It Works
 
@@ -52,3 +54,4 @@ This directory contains the dynamic background music system for the game.
 - Alternative, underground vibe
 - Rebellious, investigative mood
 - Rock, electronic, or folk elements
+
