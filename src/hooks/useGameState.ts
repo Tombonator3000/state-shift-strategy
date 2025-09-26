@@ -172,11 +172,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     currentPlayer: 'human',
     aiDifficulty,
     truth: 50,
-    ip: 15,
-    aiIP: 15,
+    ip: 5,
+    aiIP: 5,
     // Use all available cards to ensure proper deck building
-    hand: getRandomCards(3, { faction: 'truth' }),
-    aiHand: getRandomCards(3, { faction: 'government' }),
+    hand: getRandomCards(5, { faction: 'truth' }),
+    aiHand: getRandomCards(5, { faction: 'government' }),
     isGameOver: false,
     deck: generateWeightedDeck(40, 'truth'),
     aiDeck: generateWeightedDeck(40, 'government'),
@@ -210,7 +210,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     log: [
       'Game started - Truth Seekers faction selected',
       'Starting Truth: 50%',
-      'Cards drawn: 3',
+      'Cards drawn: 5',
       `AI Difficulty: ${aiDifficulty}`
     ],
     agenda: {
@@ -256,15 +256,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
   const initGame = useCallback((faction: 'government' | 'truth') => {
     const startingTruth = 50;
-    const startingIP = faction === 'government' ? 20 : 10; // Player IP
-    const aiStartingIP = faction === 'government' ? 10 : 20; // AI starts as the opposite faction
+    const startingIP = 5;
+    const aiStartingIP = 5;
     
     // Get draw mode from localStorage
     const savedSettings = localStorage.getItem('gameSettings');
     const drawMode: DrawMode = savedSettings ? 
       (JSON.parse(savedSettings).drawMode || 'standard') : 'standard';
     
-    const handSize = getStartingHandSize(drawMode, faction);
+    const handSize = Math.max(5, getStartingHandSize(drawMode, faction));
     // CRITICAL: Pass faction to deck generation
     const newDeck = generateWeightedDeck(40, faction);
     const startingHand = newDeck.slice(0, handSize);
