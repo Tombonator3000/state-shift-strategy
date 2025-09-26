@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AudioControls } from '@/components/ui/audio-controls';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { DRAW_MODE_CONFIGS, type DrawMode } from '@/data/cardDrawingSystem';
 import { useUiTheme, type UiTheme } from '@/hooks/useTheme';
@@ -13,6 +12,14 @@ import { getDifficulty, setDifficultyFromLabel } from '@/state/settings';
 import { COMBO_DEFINITIONS, DEFAULT_COMBO_SETTINGS } from '@/game/combo.config';
 import { formatComboReward, getComboSettings, setComboSettings } from '@/game/comboEngine';
 import type { ComboCategory, ComboSettings } from '@/game/combo.types';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const SETTINGS_STORAGE_KEY = 'gameSettings';
 
@@ -106,6 +113,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const audio = useAudioContext();
   const [uiTheme, setUiTheme] = useUiTheme();
   const { volume: audioMasterVolume } = audio.config;
+  type MusicCollectionKey = keyof typeof audio.availableTracks;
+  const [selectedMusicCollection, setSelectedMusicCollection] = useState<MusicCollectionKey>(
+    audio.currentMusicType,
+  );
+  const [selectedTrackIndex, setSelectedTrackIndex] = useState<number>(0);
 
   const resolveInitialState = (): { settings: GameSettings; combo: ComboSettings } => {
     const defaultDifficulty = (() => {
@@ -216,6 +228,63 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       audio.setMusicVolume(settings.musicVolume / 100);
     }
   }, [settings.musicVolume, audio]);
+
+  useEffect(() => {
+    const tracks = audio.availableTracks[selectedMusicCollection];
+    if (tracks && tracks.length > 0) {
+      const found = tracks.find(track => track.index === selectedTrackIndex);
+      if (!found) {
+        setSelectedTrackIndex(tracks[0].index);
+      }
+      return;
+    }
+
+    const fallbackEntry = (Object.entries(audio.availableTracks) as Array<[
+      MusicCollectionKey,
+      typeof audio.availableTracks[MusicCollectionKey],
+    ]>).find(([, list]) => list.length > 0);
+
+    if (fallbackEntry) {
+      const [collection, list] = fallbackEntry;
+      if (collection !== selectedMusicCollection) {
+        setSelectedMusicCollection(collection);
+      }
+      setSelectedTrackIndex(list[0].index);
+    }
+  }, [audio.availableTracks, selectedMusicCollection, selectedTrackIndex]);
+
+  useEffect(() => {
+    const currentName = audio.currentTrackName?.toLowerCase();
+    if (!currentName) {
+      return;
+    }
+
+    for (const [collection, tracks] of Object.entries(audio.availableTracks) as Array<[
+      MusicCollectionKey,
+      typeof audio.availableTracks[MusicCollectionKey],
+    ]>) {
+      const match = tracks.find(track => track.src.split('/').pop()?.toLowerCase() === currentName);
+      if (match) {
+        if (collection !== selectedMusicCollection) {
+          setSelectedMusicCollection(collection);
+        }
+        if (match.index !== selectedTrackIndex) {
+          setSelectedTrackIndex(match.index);
+        }
+        break;
+      }
+    }
+  }, [audio.currentTrackName, audio.availableTracks, selectedMusicCollection, selectedTrackIndex]);
+
+  useEffect(() => {
+    if (audio.currentTrackName) {
+      return;
+    }
+
+    if (audio.availableTracks[audio.currentMusicType]?.length) {
+      setSelectedMusicCollection(audio.currentMusicType);
+    }
+  }, [audio.currentMusicType, audio.currentTrackName, audio.availableTracks]);
 
   const persistSettings = useCallback((nextSettings: GameSettings, nextComboSettings: ComboSettings) => {
     if (typeof localStorage === 'undefined') {
@@ -337,6 +406,39 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       setTimeout(() => errorIndicator.remove(), 2000);
     }
   };
+
+  const collectionEntries = useMemo(
+    () =>
+      Object.entries(audio.availableTracks) as Array<[
+        MusicCollectionKey,
+        typeof audio.availableTracks[MusicCollectionKey],
+      ]>,
+    [audio.availableTracks],
+  );
+
+  const selectedCollectionTracks = audio.availableTracks[selectedMusicCollection] ?? [];
+
+  const currentTrackLabel = useMemo(() => {
+    if (!audio.currentTrackName) {
+      return 'No track selected';
+    }
+
+    const normalized = audio.currentTrackName.toLowerCase();
+    for (const [, tracks] of collectionEntries) {
+      const match = tracks.find(track => track.src.split('/').pop()?.toLowerCase() === normalized);
+      if (match) {
+        return match.label;
+      }
+    }
+
+    return audio.currentTrackName
+      .replace(/\.mp3$/i, '')
+      .replace(/[-_]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }, [audio.currentTrackName, collectionEntries]);
+
+  const isAudioReady = audio.tracksLoaded && audio.audioContextUnlocked;
 
   const comboGroups = useMemo(() => {
     const grouped = new Map<ComboCategory, Array<{
@@ -470,45 +572,158 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 />
               </div>
 
-              <div className="border-t border-newspaper-text/20 pt-4">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-newspaper-text">Advanced Audio Controls</label>
-                  <AudioControls
-                    volume={settings.masterVolume / 100}
-                    musicVolume={audio.config.musicVolume}
-                    muted={audio.config.muted}
-                    musicEnabled={audio.config.musicEnabled}
-                    sfxEnabled={audio.config.sfxEnabled}
-                    isPlaying={audio.isPlaying}
-                    currentTrackName={audio.currentTrackName}
-                    audioStatus={audio.audioStatus}
-                    tracksLoaded={audio.tracksLoaded}
-                    audioContextUnlocked={audio.audioContextUnlocked}
-                    onVolumeChange={handleMasterVolumeChange}
-                    onMusicVolumeChange={audio.setMusicVolume}
-                    onToggleMute={audio.toggleMute}
-                    onToggleMusic={audio.toggleMusic}
-                    onToggleSFX={audio.toggleSFX}
-                    onPlayMusic={() => {
-                      console.log('🎵 Play button clicked');
-                      audio.playMusic();
-                    }}
-                    onPauseMusic={() => {
-                      console.log('🎵 Pause button clicked');
-                      audio.pauseMusic();
-                    }}
-                    onStopMusic={() => {
-                      console.log('🎵 Stop button clicked');
-                      audio.stopMusic();
-                    }}
-                    onTestSFX={() => {
-                      console.log('🎵 Test SFX button clicked');
-                      audio.testSFX();
-                    }}
-                  />
+              <div className="border-t border-newspaper-text/20 pt-4 space-y-4">
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div className="border border-newspaper-text/30 bg-white/80 p-3 shadow-sm flex items-center justify-between">
+                    <div>
+                      <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-newspaper-text/60">Music Channel</div>
+                      <div className="text-lg font-bold text-newspaper-text">
+                        {audio.config.musicEnabled ? 'ONLINE' : 'OFFLINE'}
+                      </div>
+                    </div>
+                    <Switch
+                      checked={audio.config.musicEnabled}
+                      onCheckedChange={() => audio.toggleMusic()}
+                    />
+                  </div>
+                  <div className="border border-newspaper-text/30 bg-white/80 p-3 shadow-sm flex items-center justify-between">
+                    <div>
+                      <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-newspaper-text/60">SFX Channel</div>
+                      <div className="text-lg font-bold text-newspaper-text">
+                        {audio.config.sfxEnabled ? 'READY' : 'DISABLED'}
+                      </div>
+                    </div>
+                    <Switch
+                      checked={audio.config.sfxEnabled}
+                      onCheckedChange={() => audio.toggleSFX()}
+                    />
+                  </div>
+                  <div className="border border-newspaper-text/30 bg-white/80 p-3 shadow-sm flex items-center justify-between">
+                    <div>
+                      <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-newspaper-text/60">Master Mute</div>
+                      <div className="text-lg font-bold text-newspaper-text">
+                        {audio.config.muted ? 'SILENCED' : 'ACTIVE'}
+                      </div>
+                    </div>
+                    <Switch
+                      checked={audio.config.muted}
+                      onCheckedChange={() => audio.toggleMute()}
+                    />
+                  </div>
                 </div>
-                <div className="text-xs text-newspaper-text/70">
-                  Use the settings icon above for play/pause/stop controls, SFX testing, and real-time audio debugging.
+
+                <div className="border border-newspaper-text/30 bg-white/80 p-4 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-mono uppercase tracking-[0.2em] text-newspaper-text/60">
+                        Currently Broadcasting
+                      </div>
+                      <div className="text-lg font-bold text-newspaper-text">
+                        {currentTrackLabel}
+                      </div>
+                      <div className="text-[11px] font-mono text-newspaper-text/60">
+                        Status: {audio.audioStatus}
+                      </div>
+                    </div>
+                    <Badge
+                      variant={audio.isPlaying ? 'default' : 'secondary'}
+                      className="font-mono tracking-[0.2em] uppercase"
+                    >
+                      {audio.isPlaying ? 'LIVE' : 'STANDBY'}
+                    </Badge>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <div className="text-xs font-mono uppercase tracking-[0.2em] text-newspaper-text/60 mb-1">
+                        Music Collection
+                      </div>
+                      <Select
+                        value={selectedMusicCollection}
+                        onValueChange={value => setSelectedMusicCollection(value as MusicCollectionKey)}
+                        disabled={!collectionEntries.some(([, tracks]) => tracks.length > 0)}
+                      >
+                        <SelectTrigger className="border-2 border-newspaper-text bg-newspaper-bg text-newspaper-text font-mono uppercase tracking-[0.2em] text-xs">
+                          <SelectValue placeholder="Select playlist" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-newspaper-bg text-newspaper-text">
+                          {collectionEntries.map(([collection, tracks]) => (
+                            <SelectItem
+                              key={collection}
+                              value={collection}
+                              disabled={tracks.length === 0}
+                              className="font-mono uppercase tracking-[0.2em] text-xs"
+                            >
+                              {collection.replace(/_/g, ' ')} ({tracks.length})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <div className="text-xs font-mono uppercase tracking-[0.2em] text-newspaper-text/60 mb-1">
+                        Track Selection
+                      </div>
+                      <Select
+                        value={String(selectedTrackIndex)}
+                        onValueChange={value => {
+                          const parsed = Number(value);
+                          if (!Number.isNaN(parsed)) {
+                            setSelectedTrackIndex(parsed);
+                            audio.selectTrack(selectedMusicCollection, parsed);
+                          }
+                        }}
+                        disabled={selectedCollectionTracks.length === 0}
+                      >
+                        <SelectTrigger className="border-2 border-newspaper-text bg-newspaper-bg text-newspaper-text font-mono uppercase tracking-[0.2em] text-xs">
+                          <SelectValue placeholder="Select track" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-newspaper-bg text-newspaper-text">
+                          {selectedCollectionTracks.map(track => (
+                            <SelectItem
+                              key={track.index}
+                              value={String(track.index)}
+                              className="font-mono uppercase tracking-[0.2em] text-xs"
+                            >
+                              {track.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      onClick={() => audio.playMusic(selectedMusicCollection)}
+                      className="bg-government-blue text-white hover:bg-government-blue/80 font-mono uppercase tracking-[0.2em]"
+                      disabled={!isAudioReady}
+                    >
+                      ▶︎ Play
+                    </Button>
+                    <Button
+                      onClick={() => audio.pauseMusic()}
+                      variant="outline"
+                      className="border-newspaper-text text-newspaper-text font-mono uppercase tracking-[0.2em]"
+                      disabled={!audio.isPlaying}
+                    >
+                      ❚❚ Pause
+                    </Button>
+                    <Button
+                      onClick={() => audio.stopMusic()}
+                      variant="outline"
+                      className="border-newspaper-text text-newspaper-text font-mono uppercase tracking-[0.2em]"
+                    >
+                      ■ Stop
+                    </Button>
+                    <Button
+                      onClick={() => audio.testSFX()}
+                      variant="outline"
+                      className="border-newspaper-text text-newspaper-text font-mono uppercase tracking-[0.2em]"
+                    >
+                      🔊 Test SFX
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

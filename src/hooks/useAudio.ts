@@ -16,6 +16,24 @@ interface AudioConfig {
 type MusicType = 'theme' | 'government' | 'truth' | 'endcredits';
 type GameState = 'menu' | 'factionSelect' | 'playing';
 
+type TrackMetadata = {
+  index: number;
+  src: string;
+  label: string;
+};
+
+
+type TrackLibrary = Record<MusicType, TrackMetadata[]>;
+
+const formatTrackLabel = (src: string): string => {
+  const fileName = decodeURIComponent(src.split('/').pop() ?? 'Track');
+  return fileName
+    .replace(/\.mp3$/i, '')
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 export const useAudio = () => {
   console.log('🎵 useAudio: Hook called - initializing...');
   
@@ -84,6 +102,12 @@ export const useAudio = () => {
   const [audioStatus, setAudioStatus] = useState<string>('Initializing...');
   const [previousTrackRef, setPreviousTrackRef] = useState<HTMLAudioElement | null>(null);
   const [hoverPreventRestart, setHoverPreventRestart] = useState(false);
+  const [availableTracks, setAvailableTracks] = useState<TrackLibrary>({
+    theme: [],
+    government: [],
+    truth: [],
+    endcredits: []
+  });
   
   console.log('🎵 useAudio: State initialized');
   
@@ -198,17 +222,34 @@ export const useAudio = () => {
 
     const loadMusicTracks = async () => {
       console.log('🎵 Loading music tracks...');
-      
+
       // Load theme music tracks for start screen
       const themeTracks = ['/muzak/Theme-1.mp3', '/muzak/Theme-2.mp3'];
       console.log('🎵 Attempting to load theme tracks:', themeTracks);
       const themePromises = themeTracks.map(track => loadAudioTrack(track));
-      
+
       const themeResults = await Promise.all(themePromises);
-      const validThemeTracks = themeResults.filter(audio => audio !== null) as HTMLAudioElement[];
-      
-      musicTracks.current.theme = validThemeTracks;
-      console.log('🎵 Theme tracks loaded:', validThemeTracks.length, 'out of', themeTracks.length);
+      const themeMetadata: TrackMetadata[] = [];
+      musicTracks.current.theme = [];
+      themeTracks.forEach((src, index) => {
+        const result = themeResults[index];
+        if (result) {
+          const audioElement = result as HTMLAudioElement;
+          musicTracks.current.theme.push(audioElement);
+          const trackIndex = musicTracks.current.theme.length - 1;
+          themeMetadata.push({
+            index: trackIndex,
+            src,
+            label: formatTrackLabel(src)
+          });
+        }
+      });
+
+      if (themeMetadata.length > 0) {
+        currentTrackIndex.current.theme = Math.floor(Math.random() * themeMetadata.length);
+      }
+
+      console.log('🎵 Theme tracks loaded:', themeMetadata.length, 'out of', themeTracks.length);
 
       // Load government faction music tracks in specific order
       const govTracks = [
@@ -221,7 +262,21 @@ export const useAudio = () => {
       console.log('🎵 Attempting to load government tracks:', govTracks);
       const govPromises = govTracks.map(track => loadAudioTrack(track));
       const govResults = await Promise.all(govPromises);
-      musicTracks.current.government = govResults.filter(audio => audio !== null) as HTMLAudioElement[];
+      const governmentMetadata: TrackMetadata[] = [];
+      musicTracks.current.government = [];
+      govTracks.forEach((src, index) => {
+        const result = govResults[index];
+        if (result) {
+          const audioElement = result as HTMLAudioElement;
+          musicTracks.current.government.push(audioElement);
+          const trackIndex = musicTracks.current.government.length - 1;
+          governmentMetadata.push({
+            index: trackIndex,
+            src,
+            label: formatTrackLabel(src)
+          });
+        }
+      });
       console.log('🎵 Government tracks loaded:', musicTracks.current.government.length, 'out of', govTracks.length);
 
       // Load truth faction music tracks in specific order
@@ -235,13 +290,33 @@ export const useAudio = () => {
       console.log('🎵 Attempting to load truth tracks:', truthTracks);
       const truthPromises = truthTracks.map(track => loadAudioTrack(track));
       const truthResults = await Promise.all(truthPromises);
-      musicTracks.current.truth = truthResults.filter(audio => audio !== null) as HTMLAudioElement[];
+      const truthMetadata: TrackMetadata[] = [];
+      musicTracks.current.truth = [];
+      truthTracks.forEach((src, index) => {
+        const result = truthResults[index];
+        if (result) {
+          const audioElement = result as HTMLAudioElement;
+          musicTracks.current.truth.push(audioElement);
+          const trackIndex = musicTracks.current.truth.length - 1;
+          truthMetadata.push({
+            index: trackIndex,
+            src,
+            label: formatTrackLabel(src)
+          });
+        }
+      });
       console.log('🎵 Truth tracks loaded:', musicTracks.current.truth.length, 'out of', truthTracks.length);
 
       // Load end credits music
       const endCreditsAudio = await loadAudioTrack('/muzak/endcredits-theme.mp3');
+      const endCreditsMetadata: TrackMetadata[] = [];
       if (endCreditsAudio) {
         musicTracks.current.endcredits = [endCreditsAudio];
+        endCreditsMetadata.push({
+          index: 0,
+          src: '/muzak/endcredits-theme.mp3',
+          label: formatTrackLabel('/muzak/endcredits-theme.mp3')
+        });
       }
 
       console.log('🎵 Final loaded music tracks:', {
@@ -255,6 +330,13 @@ export const useAudio = () => {
       console.log('🎵 Successfully loaded theme tracks:', musicTracks.current.theme.map(audio => audio.src));
       console.log('🎵 Successfully loaded government tracks:', musicTracks.current.government.map(audio => audio.src));
       console.log('🎵 Successfully loaded truth tracks:', musicTracks.current.truth.map(audio => audio.src));
+
+      setAvailableTracks({
+        theme: themeMetadata,
+        government: governmentMetadata,
+        truth: truthMetadata,
+        endcredits: endCreditsMetadata
+      });
 
       setTracksLoaded(true);
       setAudioStatus('Ready - All tracks loaded');
@@ -509,6 +591,23 @@ export const useAudio = () => {
     console.log('🎵 playMusic completed for type:', typeToPlay);
   }, [config.musicEnabled, config.muted, currentMusicType, gameState, getNextTrack, switchTrack, tracksLoaded, audioContextUnlocked]);
 
+  const selectTrack = useCallback(
+    (musicType: MusicType, trackIndex: number) => {
+      const tracks = musicTracks.current[musicType];
+      if (!tracks || tracks.length === 0) {
+        console.warn(`🎵 selectTrack: No tracks available for ${musicType}`);
+        return false;
+      }
+
+      const normalizedIndex = ((trackIndex % tracks.length) + tracks.length) % tracks.length;
+      currentTrackIndex.current[musicType] = normalizedIndex;
+      setCurrentMusicType(musicType);
+      playMusic(musicType);
+      return true;
+    },
+    [playMusic]
+  );
+
 
   const stopMusic = useCallback(() => {
     console.log('🎵 Stopping music');
@@ -746,8 +845,15 @@ export const useAudio = () => {
     resumeMenuAfterEndRef.current = false;
   }, []);
 
+  useEffect(() => {
+    if (tracksLoaded && audioContextUnlocked && config.musicEnabled && !config.muted && !isPlaying) {
+      console.log('🎵 Auto-starting music after tracks loaded');
+      playMusic(currentMusicType);
+    }
+  }, [tracksLoaded, audioContextUnlocked, config.musicEnabled, config.muted, isPlaying, playMusic, currentMusicType]);
+
   console.log('🎵 useAudio: Returning audio system object');
-  
+
   return {
     config,
     playMusic,
@@ -774,6 +880,8 @@ export const useAudio = () => {
     currentTrackName,
     audioStatus,
     tracksLoaded,
-    audioContextUnlocked
+    audioContextUnlocked,
+    availableTracks,
+    selectTrack
   };
 };
