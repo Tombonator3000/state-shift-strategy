@@ -25,9 +25,21 @@ function dbg(...args: any[]) {
   }
 }
 
-const sanitizeSetCards = (cards: GameCard[], setId: string): GameCard[] => {
+const sanitizeSetCards = (cards: GameCard[], setId: string, setName?: string): GameCard[] => {
   return cards
     .map(ensureMvpCosts)
+    .map(card => {
+      if (card.extId && card.extId === setId && (card as any)._setId) {
+        return card;
+      }
+
+      return {
+        ...card,
+        extId: card.extId ?? setId,
+        _setId: (card as any)._setId ?? setId,
+        _setName: (card as any)._setName ?? setName ?? setId,
+      };
+    })
     .filter(card => {
       if (!isMvpCard(card)) {
         if (DEV) {
@@ -159,7 +171,7 @@ class WeightedCardDistribution {
       {
         id: 'core',
         name: 'Core Set',
-        cards: sanitizeSetCards(getCoreCards(), 'core'),
+        cards: sanitizeSetCards(getCoreCards(), 'core', 'Core Set'),
         isCore: true,
       },
     ];
@@ -171,7 +183,7 @@ class WeightedCardDistribution {
 
     const cardsByExpansion = new Map<string, GameCard[]>();
     for (const card of expansionCards) {
-      const extId = card.extId;
+      const extId = card.extId ?? (card as { _setId?: string })._setId;
       if (!extId) continue;
       if (!cardsByExpansion.has(extId)) {
         cardsByExpansion.set(extId, []);
@@ -188,10 +200,11 @@ class WeightedCardDistribution {
       }
 
       const manifest = EXPANSION_MANIFEST.find(pack => pack.id === expansionId);
+      const setName = manifest?.title ?? expansionId;
       sets.push({
         id: expansionId,
-        name: manifest?.title ?? expansionId,
-        cards: sanitizeSetCards(cards, expansionId),
+        name: setName,
+        cards: sanitizeSetCards(cards, expansionId, setName),
         isCore: false,
       });
     }
