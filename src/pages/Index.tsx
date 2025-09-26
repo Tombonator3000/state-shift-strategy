@@ -1382,7 +1382,6 @@ const Index = () => {
   const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
 
   const playerAgenda = gameState.secretAgenda;
-  const agendaProgress = playerAgenda ? Math.min(100, Math.round((playerAgenda.progress / playerAgenda.target) * 100)) : 0;
   const playerAgendaSummary = playerAgenda ? {
     title: playerAgenda.title,
     faction: playerAgenda.faction,
@@ -1405,6 +1404,27 @@ const Index = () => {
     revealed: aiAgenda.revealed,
   } : undefined;
   const aiAssessment = gameState.aiStrategist?.getStrategicAssessment(gameState);
+
+  const renderSecretAgendaPanel = (variant: 'overlay' | 'mobile') => {
+    const content = playerAgenda ? (
+      <SecretAgenda agenda={playerAgenda} isPlayer />
+    ) : (
+      <div
+        className={clsx(
+          'rounded border border-dashed border-newspaper-border/60 bg-newspaper-bg/40 p-3 text-xs font-mono text-newspaper-text/60',
+          variant === 'overlay' && 'text-[11px]'
+        )}
+      >
+        No secret agenda assigned.
+      </div>
+    );
+
+    return (
+      <div className="secret-agenda rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
+        {content}
+      </div>
+    );
+  };
 
   const objectiveSections = [
     {
@@ -1448,34 +1468,8 @@ const Index = () => {
     {
       id: 'secret-agenda' as const,
       label: 'Secret Agenda',
-      overlayContent: playerAgenda ? (
-        <>
-          <div className="text-[10px] uppercase tracking-[0.3em] text-secret-red/70">Covert Operation</div>
-          <div className="text-sm font-semibold text-secret-red">{playerAgenda.title}</div>
-          <p className="font-mono text-newspaper-text/80">{playerAgenda.description}</p>
-          <div className="flex items-center justify-between text-[11px] text-newspaper-text/70">
-            <span>Progress</span>
-            <span className="font-mono text-secret-red">
-              {playerAgenda.progress}/{playerAgenda.target} ({agendaProgress}%)
-            </span>
-          </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-secret-red/20">
-            <div className="h-full bg-secret-red transition-all" style={{ width: `${agendaProgress}%` }} />
-          </div>
-          {playerAgenda.completed && (
-            <div className="text-[11px] font-bold uppercase tracking-wide text-secret-red/80">
-              Objective Complete
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="font-mono text-newspaper-text/60">No secret agenda assigned.</div>
-      ),
-      mobileContent: playerAgenda ? (
-        <SecretAgenda agenda={playerAgenda} isPlayer />
-      ) : (
-        <div className="text-xs font-mono text-newspaper-text/60">No secret agenda assigned.</div>
-      ),
+      overlayContent: renderSecretAgendaPanel('overlay'),
+      mobileContent: renderSecretAgendaPanel('mobile'),
     },
   ];
 
@@ -1588,6 +1582,10 @@ const Index = () => {
           {renderObjectiveMenu('mobile')}
         </div>
       ),
+    },
+    {
+      id: 'player-secret-agenda',
+      mobile: () => renderSecretAgendaPanel('mobile'),
     },
     {
       id: 'ai-status',
