@@ -20,6 +20,7 @@ export interface GameEvent {
     };
     skipTurn?: boolean;
     doubleIncome?: boolean;
+    revealSecretAgenda?: boolean;
   };
   conditions?: {
     minTurn?: number;
@@ -70,12 +71,12 @@ export const EVENT_DATABASE: GameEvent[] = [
     id: 'deepfile_dump_crochet_forum',
     title: 'Files on the Loose',
     headline: 'TOP SECRET PDFS UPLOADED TO CROCHET FORUM',
-    content: 'Redacted docs (with cat gifs) surface overnight. Spokesperson: "That\'s... not our watermark."',
+    content: 'Redacted docs (with cat gifs) surface overnight—including a spreadsheet literally titled "Secret Agenda - Do Not Share." Spokesperson: "That\'s... not our watermark."',
     type: 'truth',
     rarity: 'common',
-    effects: { truth: 8, ip: -1 },
+    effects: { truth: 8, ip: -1, revealSecretAgenda: true },
     weight: 6,
-    flavorText: 'BREAKING: Forum moderators created a new thread called "Chain Stitch, Chain of Custody." Downloads quadrupled after someone posted a granny-square pattern named "Annex B." Several diagrams now include tasteful yarn arrows.'
+    flavorText: 'BREAKING: Forum moderators created a new thread called "Chain Stitch, Chain of Custody." Downloads quadrupled after someone posted a granny-square pattern named "Annex B." The pinned comment now walks readers through the leaked agenda bullet points row by row.'
   },
   {
     id: 'algorithm_memeflood',

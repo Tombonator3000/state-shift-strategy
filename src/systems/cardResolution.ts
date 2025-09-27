@@ -65,6 +65,7 @@ export interface CardPlayResolution {
   selectedCard: string | null;
   logEntries: string[];
   damageDealt: number;
+  aiSecretAgendaRevealed?: boolean;
 }
 
 const PLAYER_ID: PlayerId = 'P1';
@@ -195,6 +196,9 @@ export function resolveCardMVP(
   const engineState = toEngineState(gameState, engineLog);
   const ownerId = actor === 'human' ? PLAYER_ID : AI_ID;
   const opponentId = ownerId === PLAYER_ID ? AI_ID : PLAYER_ID;
+  const revealsSecretAgenda =
+    actor === 'human' &&
+    Boolean((card.effects as { revealSecretAgenda?: boolean } | undefined)?.revealSecretAgenda);
 
   engineState.players[ownerId] = {
     ...engineState.players[ownerId],
@@ -302,6 +306,7 @@ export function resolveCardMVP(
     selectedCard: null,
     logEntries,
     damageDealt,
+    aiSecretAgendaRevealed: revealsSecretAgenda,
   };
 }
 

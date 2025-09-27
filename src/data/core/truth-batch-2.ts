@@ -99,9 +99,10 @@ export const truthBatch2: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 2
-      }
+      },
+      "revealSecretAgenda": true
     },
-    "flavor": "Sprinkles cover more than sugar."
+    "flavor": "Sprinkles cover more than sugar—the icing spells out the secret plan."
   },
   {
     "id": "TRUTH-059",
