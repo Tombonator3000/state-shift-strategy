@@ -337,6 +337,7 @@ const createMvpText = (
             ? 'Opponent discards 1 card'
             : `Opponent discards ${attack.discardOpponent} cards`,
         );
+      }
       if (attack.revealSecretAgenda) {
         parts.push('Reveal enemy secret agenda');
       }

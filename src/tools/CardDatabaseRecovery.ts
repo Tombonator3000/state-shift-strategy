@@ -3,14 +3,14 @@
 
 import { CARD_DATABASE } from '@/data/cardDatabase';
 import { ExtensionEffectMigrator } from './ExtensionEffectMigrator';
-import { CardEffectValidator } from '@/systems/CardTextGenerator';
+import { CardEffectValidator, type ValidationSummary } from '@/systems/CardTextGenerator';
 import type { GameCard } from '@/rules/mvp';
 
-interface RecoveryReport {
+export interface RecoveryReport {
   totalCards: number;
   coreCards: number;
   extensionCards: number;
-  validationSummary: any;
+  validationSummary: ValidationSummary | null;
   issues: Array<{
     cardId: string;
     cardName: string;
@@ -81,7 +81,7 @@ export class CardDatabaseRecovery {
 
     // Step 2: Validate all cards
     console.log('🔍 Validating all cards...');
-    const validationResults = CardEffectValidator.validateCards(allCards as GameCard[]);
+    const validationResults: ValidationSummary = CardEffectValidator.validateCards(allCards as GameCard[]);
     report.validationSummary = validationResults;
 
     // Step 3: Identify critical issues
@@ -155,6 +155,15 @@ export { RECOVERED_CARD_DATABASE as CARD_DATABASE };
   }
 
   static generateRecoveryReport(report: RecoveryReport): string {
+    const validationSummary = report.validationSummary;
+    const totalValidated = validationSummary?.totalCards ?? 0;
+    const validCards = validationSummary?.validCards ?? 0;
+    const invalidCards = validationSummary?.invalidCards ?? 0;
+    const warningCards = validationSummary?.warningCards ?? 0;
+    const validationSuccessRate = totalValidated === 0
+      ? 0
+      : (validCards / totalValidated) * 100;
+
     const lines = [
       '# Card Database Recovery Report',
       `Generated: ${new Date().toISOString()}`,
@@ -171,9 +180,11 @@ export { RECOVERED_CARD_DATABASE as CARD_DATABASE };
       ),
       '',
       '## Validation Summary',
-      `- **Valid Cards**: ${report.validationSummary?.successCount || 0}`,
-      `- **Invalid Cards**: ${report.validationSummary?.errorCount || 0}`,
-      `- **Success Rate**: ${report.validationSummary?.successRate?.toFixed(1) || 0}%`,
+      `- **Total Validated**: ${totalValidated}`,
+      `- **Valid Cards**: ${validCards}`,
+      `- **Invalid Cards**: ${invalidCards}`,
+      `- **Cards With Warnings**: ${warningCards}`,
+      `- **Validation Success Rate**: ${validationSuccessRate.toFixed(1)}%`,
       ''
     ];
 
