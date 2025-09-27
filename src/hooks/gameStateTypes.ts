@@ -1,6 +1,7 @@
 import type { GameCard } from '@/rules/mvp';
 import type { EventManager, GameEvent } from '@/data/eventDatabase';
 import type { SecretAgenda } from '@/data/agendaDatabase';
+import type { AgendaIssueState } from '@/data/agendaIssues';
 import type { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import type { DrawMode, CardDrawState } from '@/data/cardDrawingSystem';
 import type { AIDifficulty } from '@/data/aiStrategy';
@@ -67,6 +68,9 @@ export interface GameState {
   eventManager?: EventManager;
   showNewspaper: boolean;
   log: string[];
+  agendaIssue: AgendaIssueState;
+  agendaIssueCounters: Record<string, number>;
+  agendaRoundCounters: Record<string, number>;
   secretAgenda?: SecretAgenda & {
     progress: number;
     completed: boolean;

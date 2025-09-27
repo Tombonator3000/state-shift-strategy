@@ -1,3 +1,5 @@
+import { weightForIssue } from './agendaIssues';
+
 export interface SecretAgenda {
   id: string;
   faction: 'truth' | 'government' | 'both';
@@ -503,23 +505,42 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
   }
 ];
 
-export const getRandomAgenda = (faction: 'truth' | 'government'): SecretAgenda => {
-  const factionAgendas = AGENDA_DATABASE.filter(agenda =>
-    agenda.faction === faction || agenda.faction === 'both'
-  );
+export interface AgendaSelectionOptions {
+  issueId?: string;
+  excludeIds?: string[];
+}
 
-  // Weight by difficulty - easier agendas more likely
-  const weightedAgendas: SecretAgenda[] = [];
-  factionAgendas.forEach(agenda => {
-    const weight = agenda.difficulty === 'easy' ? 4 :
-                   agenda.difficulty === 'medium' ? 3 :
-                   agenda.difficulty === 'hard' ? 2 : 1;
-    for (let i = 0; i < weight; i++) {
-      weightedAgendas.push(agenda);
+export const getRandomAgenda = (
+  faction: 'truth' | 'government',
+  options?: AgendaSelectionOptions,
+): SecretAgenda => {
+  const excluded = new Set(options?.excludeIds ?? []);
+  const factionAgendas = AGENDA_DATABASE.filter(agenda => {
+    if (excluded.has(agenda.id)) {
+      return false;
     }
+    return agenda.faction === faction || agenda.faction === 'both';
   });
 
-  return weightedAgendas[Math.floor(Math.random() * weightedAgendas.length)];
+  if (factionAgendas.length === 0) {
+    return AGENDA_DATABASE[Math.floor(Math.random() * AGENDA_DATABASE.length)];
+  }
+
+  const issueId = options?.issueId;
+  const weightedPool = factionAgendas.flatMap(agenda => {
+    const baseWeight = agenda.difficulty === 'easy'
+      ? 4
+      : agenda.difficulty === 'medium'
+        ? 3
+        : agenda.difficulty === 'hard'
+          ? 2
+          : 1;
+    const multiplier = weightForIssue(issueId, agenda.issueTheme);
+    const effectiveWeight = Math.max(1, Math.round(baseWeight * multiplier));
+    return Array.from({ length: effectiveWeight }, () => agenda);
+  });
+
+  return weightedPool[Math.floor(Math.random() * weightedPool.length)];
 };
 
 export const getAgendaById = (id: string): SecretAgenda | undefined => {

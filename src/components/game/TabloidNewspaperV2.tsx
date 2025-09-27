@@ -175,6 +175,7 @@ const TabloidNewspaperV2 = ({
   comboTruthDelta = 0,
   onClose,
   sightings = [],
+  agendaIssue,
 }: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState('THE PARANOID TIMES');
@@ -444,6 +445,7 @@ const TabloidNewspaperV2 = ({
           eventsTruthDelta,
           comboTruthDelta,
           comboSummary: comboSummary ?? null,
+          agendaIssueId: agendaIssue?.id,
         });
         if (!cancelled) {
           setIssue(generated);
@@ -461,7 +463,7 @@ const TabloidNewspaperV2 = ({
     return () => {
       cancelled = true;
     };
-  }, [dataset, narrativePlayedCards, eventsTruthDelta, comboTruthDelta, comboSummary]);
+  }, [dataset, narrativePlayedCards, eventsTruthDelta, comboTruthDelta, comboSummary, agendaIssue?.id]);
 
   const narrativeContext = useMemo(
     () => buildRoundContext(playerNarrativeCards, opponentNarrativeCards, eventsTruthDelta, comboTruthDelta),
@@ -624,6 +626,11 @@ const TabloidNewspaperV2 = ({
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-newspaper-text/60">
               {faction === 'truth' ? 'Truth Coalition Dispatch' : 'Official Government Bulletin'}
             </p>
+            {agendaIssue ? (
+              <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-newspaper-text/50">
+                Issue Focus: {agendaIssue.label}
+              </p>
+            ) : null}
           </div>
         </header>
 

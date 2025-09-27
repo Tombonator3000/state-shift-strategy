@@ -469,7 +469,23 @@ const Index = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeObjectivePanel, setActiveObjectivePanel] = useState<ObjectiveSectionId>('victory');
   
-  const { gameState, initGame, playCard, playCardAnimated, selectCard, selectTargetState, endTurn, closeNewspaper, executeAITurn, confirmNewCards, setGameState, saveGame, loadGame, getSaveInfo } = useGameState();
+  const {
+    gameState,
+    initGame,
+    playCard,
+    playCardAnimated,
+    selectCard,
+    selectTargetState,
+    endTurn,
+    closeNewspaper,
+    executeAITurn,
+    confirmNewCards,
+    setGameState,
+    saveGame,
+    loadGame,
+    getSaveInfo,
+    registerParanormalSighting,
+  } = useGameState();
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
@@ -481,7 +497,8 @@ const Index = () => {
       const MAX_ENTRIES = 12;
       return merged.length > MAX_ENTRIES ? merged.slice(merged.length - MAX_ENTRIES) : merged;
     });
-  }, []);
+    registerParanormalSighting(entry.metadata?.source ?? undefined);
+  }, [registerParanormalSighting]);
 
   // Handle AI turns
   useEffect(() => {
@@ -1977,6 +1994,7 @@ const Index = () => {
           truth={gameState.truth}
           comboTruthDelta={gameState.comboTruthDeltaThisRound}
           sightings={paranormalSightings}
+          agendaIssue={gameState.agendaIssue}
           onClose={handleCloseNewspaper}
         />
       )}

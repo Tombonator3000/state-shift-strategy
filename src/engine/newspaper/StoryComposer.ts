@@ -1,6 +1,12 @@
 import type { Card } from '@/types';
 import type { CardLexiconEntry } from './CardLexicon';
 import {
+  applyIssueSubheadOverlay,
+  applyIssueVerbOverlay,
+  getIssueHeroKicker,
+  getIssueTags,
+} from '@/data/agendaIssues';
+import {
   bodyGov,
   bodyTruth,
   connectors,
@@ -267,6 +273,7 @@ export interface CardStoryInput {
   pressureDelta?: Maybe<number>;
   targetStateName?: Maybe<string>;
   capturedStateNames?: string[];
+  issueId?: string;
 }
 
 export interface CardStory {
@@ -282,7 +289,8 @@ export function composeCardStory(input: CardStoryInput): CardStory {
   const toneKey = (card.type === 'ATTACK' || card.type === 'MEDIA' || card.type === 'ZONE' || card.type === 'DEFENSIVE'
     ? card.type
     : 'MEDIA') as Card['type'];
-  const verbPool = verbs.headline[toneKey] ?? verbs.headline.MEDIA;
+  const verbPoolBase = verbs.headline[toneKey] ?? verbs.headline.MEDIA;
+  const verbPool = applyIssueVerbOverlay(verbPoolBase, input.issueId, toneKey);
   const verb = pick(verbPool, verbPool[0] ?? 'OVERRIDES PRIME TIME');
   const cardName = card.name.toUpperCase();
   const headline = toneKey === 'ATTACK'
@@ -293,7 +301,12 @@ export function composeCardStory(input: CardStoryInput): CardStory {
 
   const faction = (card.faction ?? 'truth').toString();
   const isTruthFaction = faction.toLowerCase().includes('truth');
-  const factionPool = isTruthFaction ? subheads.truth : subheads.government;
+  const baseFactionPool = isTruthFaction ? subheads.truth : subheads.government;
+  const factionPool = applyIssueSubheadOverlay(
+    baseFactionPool,
+    input.issueId,
+    isTruthFaction ? 'truth' : 'government',
+  );
 
   const truth = input.truthDelta ?? lexicon?.effects.truthDelta ?? null;
   const ip = input.ipDeltaOpponent ?? lexicon?.effects.ipOpponent ?? null;
@@ -306,6 +319,10 @@ export function composeCardStory(input: CardStoryInput): CardStory {
     ensureSentence(pick(factionPool, factionPool[0] ?? 'Sources insist it’s totally normal.')),
     ...selectedEffects.map(ensureSentence),
   ];
+  const issueKicker = getIssueHeroKicker(input.issueId);
+  if (issueKicker) {
+    deckParts.unshift(ensureSentence(issueKicker));
+  }
   const deckStateLine = buildTargetSentence(input.targetStateName, captured);
   if (deckStateLine) {
     deckParts.push(deckStateLine);
@@ -349,6 +366,10 @@ export function composeCardStory(input: CardStoryInput): CardStory {
   }
   const typeTag = `#Type${card.type.charAt(0)}${card.type.slice(1).toLowerCase()}`;
   allowedTags.add(typeTag);
+  const issueTags = getIssueTags(input.issueId);
+  for (const tag of issueTags) {
+    allowedTags.add(tag);
+  }
 
   const gagLines = gatherTagLines(Array.from(allowedTags), 2);
   const bodyTargetSentence = card.type === 'ZONE' ? buildTargetSentence(input.targetStateName, captured) : null;
