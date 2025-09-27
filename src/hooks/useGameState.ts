@@ -21,7 +21,7 @@ import { type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import { chooseTurnActions } from '@/ai/enhancedController';
-import { EventManager, type GameEvent } from '@/data/eventDatabase';
+import { EventManager, type GameEvent, type ParanormalHotspotPayload } from '@/data/eventDatabase';
 import { processAiActions } from './aiTurnActions';
 import { buildEditionEvents } from './eventEdition';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
@@ -32,7 +32,7 @@ import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
-import type { GameState } from './gameStateTypes';
+import type { ActiveParanormalHotspot, GameState, StateParanormalHotspot } from './gameStateTypes';
 import {
   applyAiCardPlay,
   buildStrategyLogEntries as buildStrategyLogEntriesHelper,
@@ -158,6 +158,127 @@ const computeTruthStreaks = (
 };
 
 const STREAK_AGENDA_IDS = new Set(['truth_moonbeam_marmalade', 'gov_coverup_casserole']);
+
+const DEFAULT_HOTSPOT_SOURCE: NonNullable<ParanormalHotspotPayload['source']> = 'neutral';
+
+const computeHotspotTurnsRemaining = (currentTurn: number, expiresOnTurn: number) =>
+  Math.max(0, expiresOnTurn - currentTurn);
+
+const resolveHotspotSource = (
+  payload: ParanormalHotspotPayload,
+): NonNullable<ParanormalHotspotPayload['source']> => payload.source ?? DEFAULT_HOTSPOT_SOURCE;
+
+const ownerToFaction = (
+  owner: 'player' | 'ai' | 'neutral',
+  playerFaction: 'truth' | 'government',
+): 'truth' | 'government' | 'neutral' => {
+  if (owner === 'neutral') return 'neutral';
+  if (owner === 'player') return playerFaction;
+  return playerFaction === 'truth' ? 'government' : 'truth';
+};
+
+const selectHotspotTargetState = (params: {
+  states: GameState['states'];
+  activeHotspots: Record<string, ActiveParanormalHotspot>;
+  payload: ParanormalHotspotPayload;
+  playerFaction: 'truth' | 'government';
+}): GameState['states'][number] | undefined => {
+  const { states, activeHotspots, payload, playerFaction } = params;
+  const activeSet = new Set(Object.keys(activeHotspots));
+  const sourceFaction = resolveHotspotSource(payload);
+  const avoidFaction = sourceFaction === 'neutral' ? null : sourceFaction;
+
+  if (payload.stateId) {
+    const target = states.find(state =>
+      state.id === payload.stateId ||
+      state.abbreviation === payload.stateId ||
+      state.abbreviation === payload.stateId.toUpperCase() ||
+      state.name.toLowerCase() === payload.stateId.toLowerCase(),
+    );
+    if (target && !activeSet.has(target.abbreviation)) {
+      return target;
+    }
+  }
+
+  const available = states.filter(state => !activeSet.has(state.abbreviation));
+  if (available.length === 0) {
+    return undefined;
+  }
+
+  const filtered = avoidFaction
+    ? available.filter(state => ownerToFaction(state.owner, playerFaction) !== avoidFaction)
+    : available;
+  const pool = filtered.length > 0 ? filtered : available;
+
+  const contested = pool.filter(state => state.contested);
+  const neutral = pool.filter(state => state.owner === 'neutral');
+  const opponentOwned = pool.filter(state => {
+    const faction = ownerToFaction(state.owner, playerFaction);
+    return faction !== 'neutral' && faction !== playerFaction;
+  });
+  const playerOwned = pool.filter(state => ownerToFaction(state.owner, playerFaction) === playerFaction);
+
+  const buckets = [contested, neutral, opponentOwned, playerOwned, pool];
+  for (const bucket of buckets) {
+    if (bucket.length > 0) {
+      const index = Math.floor(Math.random() * bucket.length);
+      return bucket[index];
+    }
+  }
+
+  return pool[0];
+};
+
+const toStateHotspot = (
+  hotspot: ActiveParanormalHotspot,
+  currentTurn: number,
+): StateParanormalHotspot => ({
+  id: hotspot.id,
+  eventId: hotspot.eventId,
+  label: hotspot.label,
+  description: hotspot.description,
+  icon: hotspot.icon,
+  defenseBoost: hotspot.defenseBoost,
+  truthReward: hotspot.truthReward,
+  expiresOnTurn: hotspot.expiresOnTurn,
+  turnsRemaining: computeHotspotTurnsRemaining(currentTurn, hotspot.expiresOnTurn),
+  source: hotspot.source,
+});
+
+const createHotspotEntries = (params: {
+  event: GameEvent;
+  payload: ParanormalHotspotPayload;
+  state: GameState['states'][number];
+  currentTurn: number;
+}): { active: ActiveParanormalHotspot; stateHotspot: StateParanormalHotspot } => {
+  const { event, payload, state, currentTurn } = params;
+  const duration = Math.max(1, payload.duration);
+  const expiresOnTurn = currentTurn + duration;
+  const source = resolveHotspotSource(payload);
+  const id = `${event.id}:${state.abbreviation}:${currentTurn}`;
+
+  const active: ActiveParanormalHotspot = {
+    id,
+    eventId: event.id,
+    stateId: state.id,
+    stateName: state.name,
+    stateAbbreviation: state.abbreviation,
+    label: payload.label,
+    description: payload.description,
+    icon: payload.icon,
+    duration,
+    defenseBoost: payload.defenseBoost,
+    truthReward: payload.truthReward,
+    expiresOnTurn,
+    createdOnTurn: currentTurn,
+    source,
+  };
+
+  return {
+    active,
+    stateHotspot: toStateHotspot(active, currentTurn),
+  };
+};
 
 const revealAiSecretAgenda = (
   state: GameState,
@@ -478,6 +599,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         truthAbove80Streak: 0,
         truthBelow20Streak: 0,
       },
+      paranormalHotspots: {},
       playHistory: [],
       turnPlays: [],
       controlledStates: [],
@@ -488,12 +610,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           name: state.name,
           abbreviation: state.abbreviation,
           baseIP: state.baseIP,
+          baseDefense: state.defense,
           defense: state.defense,
           pressure: 0,
           contested: false,
           owner: 'neutral' as const,
           specialBonus: state.specialBonus,
           bonusValue: state.bonusValue,
+          paranormalHotspot: undefined,
         };
       }),
       currentEvents: [],
@@ -603,6 +727,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         truthAbove80Streak: 0,
         truthBelow20Streak: 0,
       },
+      paranormalHotspots: {},
       agendaIssue: issueState,
       agendaIssueCounters: {},
       agendaRoundCounters: {},
@@ -621,12 +746,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           name: state.name,
           abbreviation: state.abbreviation,
           baseIP: state.baseIP,
+          baseDefense: state.defense,
           defense: state.defense,
           pressure: 0,
           contested: false,
           owner,
           specialBonus: state.specialBonus,
           bonusValue: state.bonusValue,
+          paranormalHotspot: undefined,
         };
       }),
       log: [
@@ -682,6 +809,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const targetState = targetOverride ?? prev.targetState ?? null;
       const resolution = resolveCardEffects(prev, resolvedCard, targetState);
+      const updatedHotspots = { ...prev.paranormalHotspots };
+      if (resolution.resolvedHotspots) {
+        for (const abbr of resolution.resolvedHotspots) {
+          delete updatedHotspots[abbr];
+        }
+      }
       const counterSnapshot = applyAgendaCardCounters(prev, 'human', resolvedCard);
       const playedCardRecord = createPlayedCardRecord({
         card: resolvedCard,
@@ -722,6 +855,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         log: [...prev.log, ...resolution.logEntries],
         agendaIssueCounters: counterSnapshot.issueCounters,
         agendaRoundCounters: counterSnapshot.roundCounters,
+        paranormalHotspots: updatedHotspots,
       };
 
       const stateWithReveal = resolution.aiSecretAgendaRevealed
@@ -780,6 +914,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       pendingResolvedCard = resolvedCard;
 
       const resolution = resolveCardEffects(prev, resolvedCard, targetState);
+      const updatedHotspots = { ...prev.paranormalHotspots };
+      if (resolution.resolvedHotspots) {
+        for (const abbr of resolution.resolvedHotspots) {
+          delete updatedHotspots[abbr];
+        }
+      }
       const counterSnapshot = applyAgendaCardCounters(prev, 'human', resolvedCard);
       pendingRecord = createPlayedCardRecord({
         card: resolvedCard,
@@ -816,6 +956,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         log: [...prev.log, ...resolution.logEntries],
         agendaIssueCounters: counterSnapshot.issueCounters,
         agendaRoundCounters: counterSnapshot.roundCounters,
+        paranormalHotspots: updatedHotspots,
       };
 
       const stateWithReveal = resolution.aiSecretAgendaRevealed
@@ -907,12 +1048,58 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     setGameState(prev => ({ ...prev, targetState: stateId }));
   }, []);
 
-  const endTurn = useCallback(() => {
+  const registerParanormalSighting = useCallback((source?: 'truth' | 'government' | 'neutral') => {
     setGameState(prev => {
-      // Don't allow turn ending if game is over
+      const factionSource = source ?? prev.faction;
+      const owner: AgendaOwner = factionSource === prev.faction
+        ? 'human'
+        : factionSource === (prev.faction === 'truth' ? 'government' : 'truth')
+          ? 'ai'
+          : 'human';
+      const counters = applyAgendaSightingCounters(prev, owner);
+      return {
+        ...prev,
+        agendaIssueCounters: counters.issueCounters,
+        agendaRoundCounters: counters.roundCounters,
+      };
+    });
+  }, []);
+
+  const endTurn = useCallback(() => {
+    let hotspotSourceToRegister: 'truth' | 'government' | 'neutral' | null = null;
+
+    setGameState(prev => {
       if (prev.isGameOver) return prev;
-      
+
       const isHumanTurn = prev.currentPlayer === 'human';
+      const statesAfterHotspot = prev.states.map(state => ({ ...state }));
+      let hotspotsAfterHotspot: Record<string, ActiveParanormalHotspot> = { ...prev.paranormalHotspots };
+      const hotspotLogs: string[] = [];
+
+      for (const [abbr, hotspot] of Object.entries(hotspotsAfterHotspot)) {
+        const state = statesAfterHotspot.find(candidate => candidate.abbreviation === abbr);
+        if (!state) {
+          delete hotspotsAfterHotspot[abbr];
+          continue;
+        }
+
+        if (prev.turn >= hotspot.expiresOnTurn) {
+          const adjustedDefense = Math.max(1, state.defense - hotspot.defenseBoost);
+          state.defense = Math.max(1, adjustedDefense);
+          state.paranormalHotspot = undefined;
+          delete hotspotsAfterHotspot[abbr];
+          hotspotLogs.push(`🕯️ ${hotspot.label} in ${state.name} fizzles out. Defenses return to normal.`);
+        } else {
+          state.paranormalHotspot = toStateHotspot(hotspot, prev.turn);
+        }
+      }
+
+      for (const state of statesAfterHotspot) {
+        if (state.paranormalHotspot && !hotspotsAfterHotspot[state.abbreviation]) {
+          state.paranormalHotspot = undefined;
+        }
+      }
+
       const comboResult = evaluateCombosForTurn(prev, isHumanTurn ? 'human' : 'ai');
       achievements.onCombosResolved(isHumanTurn ? 'human' : 'ai', comboResult.evaluation);
       const fxEnabled = getComboSettings().fxEnabled;
@@ -929,14 +1116,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }
 
       if (isHumanTurn) {
-        // Human player ending turn - switch to AI (no card draw here anymore)
-        // Card drawing will happen after newspaper at start of new turn
-
-        // Calculate IP income from controlled states
         const stateIncome = getTotalIPFromStates(prev.controlledStates);
         const baseIncome = 5;
         const synergyIncome = prev.stateCombinationBonusIP;
-        const neutralStates = prev.states.filter(state => state.owner === 'neutral').length;
+        const neutralStates = statesAfterHotspot.filter(state => state.owner === 'neutral').length;
         const comboEffectIncome = calculateDynamicIpBonus(
           prev.stateCombinationEffects,
           prev.controlledStates.length,
@@ -944,28 +1127,28 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         );
         const totalIncome = baseIncome + stateIncome + synergyIncome + comboEffectIncome;
 
-        // Update event manager with current turn
         prev.eventManager?.updateTurn(prev.turn);
 
-        // Trigger random event using event manager gating
-        let eventEffectLog: string[] = [];
+        let eventEffectLog: string[] = [...hotspotLogs];
         let truthModifier = 0;
         let ipModifier = 0;
         let bonusCardDraw = 0;
         let triggeredEvent: GameEvent | null = null;
+        let eventForEdition: GameEvent | null = null;
 
         if (prev.eventManager) {
-          triggeredEvent = prev.eventManager.maybeSelectRandomEvent(prev);
-          if (triggeredEvent) {
+          const maybeEvent = prev.eventManager.maybeSelectRandomEvent(prev);
+          if (maybeEvent) {
+            triggeredEvent = maybeEvent;
+            eventForEdition = maybeEvent;
 
-            // Apply event effects
-            if (triggeredEvent.effects) {
-              const effects = triggeredEvent.effects;
+            if (maybeEvent.effects) {
+              const effects = maybeEvent.effects;
               if (effects.truth) truthModifier = effects.truth;
               if (effects.ip) ipModifier = effects.ip;
               if (effects.cardDraw) bonusCardDraw = effects.cardDraw;
 
-              eventEffectLog.push(`EVENT: ${triggeredEvent.title} triggered!`);
+              eventEffectLog.push(`EVENT: ${maybeEvent.title} triggered!`);
               if (effects.truth) eventEffectLog.push(`Truth ${effects.truth > 0 ? '+' : ''}${effects.truth}%`);
               if (effects.ip) eventEffectLog.push(`IP ${effects.ip > 0 ? '+' : ''}${effects.ip}`);
               if (effects.cardDraw) eventEffectLog.push(`Draw ${effects.cardDraw} extra cards`);
@@ -973,12 +1156,51 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
                 eventEffectLog.push('Enemy secret agenda exposed!');
               }
             }
+
+            if (maybeEvent.paranormalHotspot) {
+              const target = selectHotspotTargetState({
+                states: statesAfterHotspot,
+                activeHotspots: hotspotsAfterHotspot,
+                payload: maybeEvent.paranormalHotspot,
+                playerFaction: prev.faction,
+              });
+
+              if (target) {
+                const { active, stateHotspot } = createHotspotEntries({
+                  event: maybeEvent,
+                  payload: maybeEvent.paranormalHotspot,
+                  state: target,
+                  currentTurn: prev.turn,
+                });
+
+                target.defense = target.defense + maybeEvent.paranormalHotspot.defenseBoost;
+                target.paranormalHotspot = stateHotspot;
+                hotspotsAfterHotspot = {
+                  ...hotspotsAfterHotspot,
+                  [target.abbreviation]: active,
+                };
+
+                eventEffectLog.push(
+                  `👻 ${stateHotspot.label} erupts in ${target.name}! Defense +${stateHotspot.defenseBoost} for ${maybeEvent.paranormalHotspot.duration} turn${maybeEvent.paranormalHotspot.duration === 1 ? '' : 's'}. Capture swings truth by ±${stateHotspot.truthReward}%.`,
+                );
+                hotspotSourceToRegister = active.source;
+
+                if (maybeEvent.paranormalHotspot.headlineTemplate) {
+                  const dynamicHeadline = maybeEvent.paranormalHotspot.headlineTemplate.replace(
+                    /\{\{STATE\}\}/g,
+                    target.name.toUpperCase(),
+                  );
+                  eventForEdition = { ...maybeEvent, headline: dynamicHeadline };
+                }
+              } else {
+                eventEffectLog.push('👻 Paranormal surge failed to find a viable hotspot target.');
+              }
+            }
           }
         }
 
-        const newEvents = buildEditionEvents(prev, triggeredEvent);
+        const newEvents = buildEditionEvents(prev, eventForEdition ?? triggeredEvent);
 
-        // Store pending card draw for after newspaper
         const comboDrawBonus = Math.max(0, prev.stateCombinationEffects.extraCardDraw);
         const pendingCardDraw = bonusCardDraw + comboDrawBonus;
 
@@ -996,12 +1218,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           `Base income: ${baseIncome} IP`,
           `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
           ...(synergyIncome > 0 ? [`State synergy bonus: +${synergyIncome} IP`] : []),
-          ...(comboEffectIncome > 0
-            ? [`Combo effects bonus: +${comboEffectIncome} IP`]
-            : []),
+          ...(comboEffectIncome > 0 ? [`Combo effects bonus: +${comboEffectIncome} IP`] : []),
           `Total income: ${totalIncome + ipModifier} IP`,
           ...eventEffectLog,
-          ...(comboDrawBonus > 0 ? [`Synergy draw bonus: +${comboDrawBonus} card${comboDrawBonus === 1 ? '' : 's'}`] : []),
+          ...(comboDrawBonus > 0
+            ? [`Synergy draw bonus: +${comboDrawBonus} card${comboDrawBonus === 1 ? '' : 's'}`]
+            : []),
         ];
 
         let nextState: GameState = {
@@ -1019,14 +1241,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboTruthDelta,
           cardDrawState: {
             cardsPlayedLastTurn: prev.cardsPlayedThisTurn,
-            lastTurnWithoutPlay: prev.cardsPlayedThisTurn === 0
+            lastTurnWithoutPlay: prev.cardsPlayedThisTurn === 0,
           },
           log: logEntries,
           turnPlays: [],
+          states: statesAfterHotspot,
+          paranormalHotspots: hotspotsAfterHotspot,
         };
 
-        if (triggeredEvent?.effects?.revealSecretAgenda) {
-          nextState = revealAiSecretAgenda(nextState, { type: 'event', name: triggeredEvent.title });
+        if ((eventForEdition ?? triggeredEvent)?.effects?.revealSecretAgenda) {
+          nextState = revealAiSecretAgenda(nextState, {
+            type: 'event',
+            name: (eventForEdition ?? triggeredEvent)!.title,
+          });
         }
 
         applyTruthDelta(nextState, truthModifier, 'human');
@@ -1049,7 +1276,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }
 
       const comboLog =
-        comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
+        comboResult.logEntries.length > 0
+          ? [...prev.log, ...comboResult.logEntries, ...hotspotLogs]
+          : [...prev.log, ...hotspotLogs];
 
       const nextStateBase: GameState = {
         ...prev,
@@ -1063,7 +1292,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         cardsPlayedThisTurn: 0,
         turnPlays: [],
         comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboResult.truthDelta,
-        log: [...comboLog, 'AI turn completed']
+        log: [...comboLog, 'AI turn completed'],
+        states: statesAfterHotspot,
+        paranormalHotspots: hotspotsAfterHotspot,
       };
 
       const truthStreaks = computeTruthStreaks(prev, nextStateBase.truth);
@@ -1081,7 +1312,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         timeBasedGoalCounters,
       });
     });
-  }, []);
+
+    if (hotspotSourceToRegister) {
+      registerParanormalSighting(hotspotSourceToRegister);
+    }
+  }, [achievements, registerParanormalSighting]);
+
 
   const playAICard = useCallback((params: AiCardPlayParams) => {
     return new Promise<GameState>(resolve => {
@@ -1314,22 +1550,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     }));
   }, []);
 
-  const registerParanormalSighting = useCallback((source?: 'truth' | 'government' | 'neutral') => {
-    setGameState(prev => {
-      const factionSource = source ?? prev.faction;
-      const owner: AgendaOwner = factionSource === prev.faction
-        ? 'human'
-        : factionSource === (prev.faction === 'truth' ? 'government' : 'truth')
-          ? 'ai'
-          : 'human';
-      const counters = applyAgendaSightingCounters(prev, owner);
-      return {
-        ...prev,
-        agendaIssueCounters: counters.issueCounters,
-        agendaRoundCounters: counters.roundCounters,
-      };
-    });
-  }, []);
+
 
   const checkVictoryConditions = useCallback((state: GameState) => {
     // Check for victory conditions and update achievements
@@ -1456,6 +1677,165 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }
 
       // Reconstruct the game state
+      const stateByAbbreviation = Object.fromEntries(USA_STATES.map(state => [state.abbreviation, state]));
+      const stateById = Object.fromEntries(USA_STATES.map(state => [state.id, state]));
+      const rawStates = Array.isArray(saveData.states) ? saveData.states : [];
+      const normalizedStates = rawStates.map(rawState => {
+        const abbreviation = typeof rawState?.abbreviation === 'string'
+          ? rawState.abbreviation
+          : typeof rawState?.id === 'string'
+            ? rawState.id
+            : '';
+        const lookupBase = stateByAbbreviation[abbreviation] ?? (typeof rawState?.id === 'string' ? stateById[rawState.id] : undefined);
+        const defense = typeof rawState?.defense === 'number' && Number.isFinite(rawState.defense)
+          ? rawState.defense
+          : lookupBase?.defense ?? 0;
+        const baseDefense = typeof (rawState as any)?.baseDefense === 'number' && Number.isFinite((rawState as any).baseDefense)
+          ? (rawState as any).baseDefense
+          : lookupBase?.defense ?? defense;
+        const owner = rawState?.owner === 'player'
+          ? 'player'
+          : rawState?.owner === 'ai'
+            ? 'ai'
+            : 'neutral';
+
+        return {
+          id: typeof rawState?.id === 'string' ? rawState.id : lookupBase?.id ?? abbreviation,
+          name: typeof rawState?.name === 'string' ? rawState.name : lookupBase?.name ?? abbreviation,
+          abbreviation: abbreviation || lookupBase?.abbreviation || '',
+          baseIP: typeof rawState?.baseIP === 'number' && Number.isFinite(rawState.baseIP)
+            ? rawState.baseIP
+            : lookupBase?.baseIP ?? 0,
+          baseDefense,
+          defense,
+          pressure: typeof rawState?.pressure === 'number' && Number.isFinite(rawState.pressure)
+            ? rawState.pressure
+            : 0,
+          contested: Boolean(rawState?.contested),
+          owner,
+          specialBonus: rawState?.specialBonus ?? lookupBase?.specialBonus,
+          bonusValue: typeof rawState?.bonusValue === 'number' && Number.isFinite(rawState.bonusValue)
+            ? rawState.bonusValue
+            : lookupBase?.bonusValue,
+          occupierCardId: rawState?.occupierCardId ?? null,
+          occupierCardName: rawState?.occupierCardName ?? null,
+          occupierLabel: rawState?.occupierLabel ?? null,
+          occupierIcon: rawState?.occupierIcon ?? null,
+          occupierUpdatedAt: typeof rawState?.occupierUpdatedAt === 'number'
+            ? rawState.occupierUpdatedAt
+            : undefined,
+          paranormalHotspot: undefined,
+        } as GameState['states'][number];
+      });
+
+      const normalizedHotspots: Record<string, ActiveParanormalHotspot> = {};
+      if (saveData.paranormalHotspots && typeof saveData.paranormalHotspots === 'object') {
+        for (const [abbr, rawHotspot] of Object.entries(saveData.paranormalHotspots as Record<string, any>)) {
+          if (!rawHotspot || typeof rawHotspot !== 'object') continue;
+          const state = normalizedStates.find(entry => entry.abbreviation === abbr);
+          if (!state) continue;
+          const eventId = typeof rawHotspot.eventId === 'string' ? rawHotspot.eventId : undefined;
+          if (!eventId) continue;
+          const defenseBoost = typeof rawHotspot.defenseBoost === 'number' && Number.isFinite(rawHotspot.defenseBoost)
+            ? rawHotspot.defenseBoost
+            : 0;
+          const truthReward = typeof rawHotspot.truthReward === 'number' && Number.isFinite(rawHotspot.truthReward)
+            ? rawHotspot.truthReward
+            : 0;
+          const duration = typeof rawHotspot.duration === 'number' && Number.isFinite(rawHotspot.duration)
+            ? Math.max(1, rawHotspot.duration)
+            : 1;
+          const expiresOnTurn = typeof rawHotspot.expiresOnTurn === 'number' && Number.isFinite(rawHotspot.expiresOnTurn)
+            ? rawHotspot.expiresOnTurn
+            : normalizedTurn + duration;
+          const createdOnTurn = typeof rawHotspot.createdOnTurn === 'number' && Number.isFinite(rawHotspot.createdOnTurn)
+            ? rawHotspot.createdOnTurn
+            : normalizedTurn;
+          const source = (rawHotspot.source === 'truth' || rawHotspot.source === 'government' || rawHotspot.source === 'neutral')
+            ? rawHotspot.source
+            : 'neutral';
+
+          normalizedHotspots[state.abbreviation] = {
+            id: typeof rawHotspot.id === 'string' ? rawHotspot.id : `${eventId}:${state.abbreviation}:${createdOnTurn}`,
+            eventId,
+            stateId: typeof rawHotspot.stateId === 'string' ? rawHotspot.stateId : state.id,
+            stateName: typeof rawHotspot.stateName === 'string' ? rawHotspot.stateName : state.name,
+            stateAbbreviation: state.abbreviation,
+            label: typeof rawHotspot.label === 'string'
+              ? rawHotspot.label
+              : (typeof rawHotspot.description === 'string' ? rawHotspot.description : 'Paranormal Hotspot'),
+            description: typeof rawHotspot.description === 'string' ? rawHotspot.description : undefined,
+            icon: typeof rawHotspot.icon === 'string' ? rawHotspot.icon : undefined,
+            duration,
+            defenseBoost,
+            truthReward,
+            expiresOnTurn,
+            createdOnTurn,
+            source,
+          };
+        }
+      }
+
+      if (Object.keys(normalizedHotspots).length === 0) {
+        for (const rawState of rawStates) {
+          if (!rawState || typeof rawState !== 'object') continue;
+          const embedded = (rawState as any).paranormalHotspot;
+          if (!embedded || typeof embedded !== 'object') continue;
+          const abbreviation = typeof rawState?.abbreviation === 'string'
+            ? rawState.abbreviation
+            : typeof rawState?.id === 'string'
+              ? rawState.id
+              : '';
+          const state = normalizedStates.find(entry => entry.abbreviation === abbreviation);
+          if (!state) continue;
+          const eventId = typeof embedded.eventId === 'string' ? embedded.eventId : undefined;
+          if (!eventId) continue;
+          const defenseBoost = typeof embedded.defenseBoost === 'number' && Number.isFinite(embedded.defenseBoost)
+            ? embedded.defenseBoost
+            : 0;
+          const truthReward = typeof embedded.truthReward === 'number' && Number.isFinite(embedded.truthReward)
+            ? embedded.truthReward
+            : 0;
+          const duration = typeof embedded.duration === 'number' && Number.isFinite(embedded.duration)
+            ? Math.max(1, embedded.duration)
+            : 1;
+          const expiresOnTurn = typeof embedded.expiresOnTurn === 'number' && Number.isFinite(embedded.expiresOnTurn)
+            ? embedded.expiresOnTurn
+            : normalizedTurn + duration;
+          const createdOnTurn = typeof embedded.createdOnTurn === 'number' && Number.isFinite(embedded.createdOnTurn)
+            ? embedded.createdOnTurn
+            : normalizedTurn;
+          const source = (embedded.source === 'truth' || embedded.source === 'government' || embedded.source === 'neutral')
+            ? embedded.source
+            : 'neutral';
+
+          normalizedHotspots[state.abbreviation] = {
+            id: typeof embedded.id === 'string' ? embedded.id : `${eventId}:${state.abbreviation}:${createdOnTurn}`,
+            eventId,
+            stateId: typeof embedded.stateId === 'string' ? embedded.stateId : state.id,
+            stateName: typeof embedded.stateName === 'string' ? embedded.stateName : state.name,
+            stateAbbreviation: state.abbreviation,
+            label: typeof embedded.label === 'string' ? embedded.label : 'Paranormal Hotspot',
+            description: typeof embedded.description === 'string' ? embedded.description : undefined,
+            icon: typeof embedded.icon === 'string' ? embedded.icon : undefined,
+            duration,
+            defenseBoost,
+            truthReward,
+            expiresOnTurn,
+            createdOnTurn,
+            source,
+          };
+        }
+      }
+
+      const statesWithHotspot = normalizedStates.map(state => {
+        const active = normalizedHotspots[state.abbreviation];
+        return {
+          ...state,
+          paranormalHotspot: active ? toStateHotspot(active, normalizedTurn) : undefined,
+        };
+      });
+
       const savedTruthAboveStreak =
         typeof saveData.truthAbove80Streak === 'number' && Number.isFinite(saveData.truthAbove80Streak)
           ? saveData.truthAbove80Streak
@@ -1477,6 +1857,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         ...saveData,
         turn: normalizedTurn,
         round: normalizedRound,
+        states: statesWithHotspot.length > 0 ? statesWithHotspot : prev.states,
+        paranormalHotspots: normalizedHotspots,
         secretAgenda,
         aiSecretAgenda,
         agendaIssue: agendaIssueState,
