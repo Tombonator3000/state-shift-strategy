@@ -625,6 +625,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           baseDefense: state.defense,
           defense: state.defense,
           pressure: 0,
+          pressurePlayer: 0,
+          pressureAi: 0,
           contested: false,
           owner: 'neutral' as const,
           specialBonus: state.specialBonus,
@@ -766,6 +768,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           baseDefense: state.defense,
           defense: state.defense,
           pressure: 0,
+          pressurePlayer: 0,
+          pressureAi: 0,
           contested: false,
           owner,
           specialBonus: state.specialBonus,
@@ -1735,6 +1739,17 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           : rawState?.owner === 'ai'
             ? 'ai'
             : 'neutral';
+        const basePressure = typeof rawState?.pressure === 'number' && Number.isFinite(rawState.pressure)
+          ? rawState.pressure
+          : 0;
+        const rawPressurePlayer = (rawState as { pressurePlayer?: unknown } | null | undefined)?.pressurePlayer;
+        const rawPressureAi = (rawState as { pressureAi?: unknown } | null | undefined)?.pressureAi;
+        const pressurePlayer = typeof rawPressurePlayer === 'number' && Number.isFinite(rawPressurePlayer)
+          ? rawPressurePlayer
+          : basePressure;
+        const pressureAi = typeof rawPressureAi === 'number' && Number.isFinite(rawPressureAi)
+          ? rawPressureAi
+          : basePressure;
 
         return {
           id: typeof rawState?.id === 'string' ? rawState.id : lookupBase?.id ?? abbreviation,
@@ -1745,9 +1760,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             : lookupBase?.baseIP ?? 0,
           baseDefense,
           defense,
-          pressure: typeof rawState?.pressure === 'number' && Number.isFinite(rawState.pressure)
-            ? rawState.pressure
-            : 0,
+          pressure: Math.max(basePressure, pressurePlayer, pressureAi),
+          pressurePlayer,
+          pressureAi,
           contested: Boolean(rawState?.contested),
           owner,
           specialBonus: rawState?.specialBonus ?? lookupBase?.specialBonus,
