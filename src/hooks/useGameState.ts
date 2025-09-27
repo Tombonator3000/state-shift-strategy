@@ -1165,14 +1165,159 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
             if (maybeEvent.effects) {
               const effects = maybeEvent.effects;
-              if (effects.truth) truthModifier = effects.truth;
-              if (effects.ip) ipModifier = effects.ip;
-              if (effects.cardDraw) bonusCardDraw = effects.cardDraw;
+              const formatSigned = (value: number) => (value > 0 ? `+${value}` : `${value}`);
+              const truthDeltaFromEffects = (effects.truth ?? 0) + (effects.truthChange ?? 0);
+              const ipDeltaFromEffects = (effects.ip ?? 0) + (effects.ipChange ?? 0);
+
+              const collectStateIdentifiers = (...identifiers: Array<string | undefined | null>) => {
+                const set = new Set<string>();
+                for (const identifier of identifiers) {
+                  if (typeof identifier === 'string' && identifier.trim().length > 0) {
+                    set.add(identifier.trim());
+                  }
+                }
+                return set;
+              };
+
+              const findStatesByIdentifiers = (identifiers: Set<string>) => {
+                if (identifiers.size === 0) {
+                  return [] as GameState['states'];
+                }
+
+                const identifierList = Array.from(identifiers);
+                return statesAfterHotspot.filter(candidate =>
+                  identifierList.some(identifier => {
+                    const normalized = identifier.toUpperCase();
+                    return (
+                      candidate.id === identifier ||
+                      candidate.abbreviation === identifier ||
+                      candidate.abbreviation === normalized ||
+                      candidate.name.toUpperCase() === normalized
+                    );
+                  }),
+                );
+              };
+
+              const defenseLogMap = new Map<string, { name: string; delta: number }>();
+              const pressureLogMap = new Map<string, { name: string; delta: number }>();
+              const globalStateEffectLogs: string[] = [];
+
+              const recordDefenseDelta = (state: GameState['states'][number], delta: number) => {
+                if (delta === 0) return;
+                const existing = defenseLogMap.get(state.id) ?? { name: state.name, delta: 0 };
+                existing.delta += delta;
+                defenseLogMap.set(state.id, existing);
+              };
+
+              const recordPressureDelta = (state: GameState['states'][number], delta: number) => {
+                if (delta === 0) return;
+                const existing = pressureLogMap.get(state.id) ?? { name: state.name, delta: 0 };
+                existing.delta += delta;
+                pressureLogMap.set(state.id, existing);
+              };
+
+              const eventStateContext = maybeEvent as GameEvent & {
+                stateId?: string;
+                state?: string;
+                stateAbbreviation?: string;
+              };
+
+              const stateIdentifiers = collectStateIdentifiers(
+                effects.stateEffects?.stateId,
+                eventStateContext.stateId,
+                eventStateContext.state,
+                eventStateContext.stateAbbreviation,
+                maybeEvent.conditions?.requiresState,
+              );
+
+              if (truthDeltaFromEffects !== 0) {
+                truthModifier = truthDeltaFromEffects;
+              }
+
+              if (ipDeltaFromEffects !== 0) {
+                ipModifier = ipDeltaFromEffects;
+              }
+
+              if (effects.cardDraw) {
+                bonusCardDraw = effects.cardDraw;
+              }
+
+              if (typeof effects.defenseChange === 'number') {
+                const defenseTargets = findStatesByIdentifiers(stateIdentifiers);
+                for (const state of defenseTargets) {
+                  const updatedDefense = Math.max(1, state.defense + effects.defenseChange);
+                  state.defense = updatedDefense;
+                  recordDefenseDelta(state, effects.defenseChange);
+                }
+              }
+
+              if (effects.stateEffects) {
+                const { stateEffects } = effects;
+                const hasSpecificState = typeof stateEffects.stateId === 'string' && stateEffects.stateId.length > 0;
+                const stateEffectTargets = hasSpecificState
+                  ? findStatesByIdentifiers(new Set([stateEffects.stateId!]))
+                  : statesAfterHotspot;
+
+                if (typeof stateEffects.defense === 'number') {
+                  if (hasSpecificState) {
+                    for (const state of stateEffectTargets) {
+                      const updatedDefense = Math.max(1, state.defense + stateEffects.defense);
+                      state.defense = updatedDefense;
+                      recordDefenseDelta(state, stateEffects.defense);
+                    }
+                  } else {
+                    for (const state of stateEffectTargets) {
+                      const updatedDefense = Math.max(1, state.defense + stateEffects.defense);
+                      state.defense = updatedDefense;
+                    }
+                    if (stateEffectTargets.length > 0 && stateEffects.defense !== 0) {
+                      globalStateEffectLogs.push(`All states defense ${formatSigned(stateEffects.defense)}`);
+                    }
+                  }
+                }
+
+                if (typeof stateEffects.pressure === 'number') {
+                  if (hasSpecificState) {
+                    for (const state of stateEffectTargets) {
+                      const nextPressure = Math.max(0, (state.pressure ?? 0) + stateEffects.pressure);
+                      state.pressure = nextPressure;
+                      recordPressureDelta(state, stateEffects.pressure);
+                    }
+                  } else {
+                    for (const state of stateEffectTargets) {
+                      const nextPressure = Math.max(0, (state.pressure ?? 0) + stateEffects.pressure);
+                      state.pressure = nextPressure;
+                    }
+                    if (stateEffectTargets.length > 0 && stateEffects.pressure !== 0) {
+                      globalStateEffectLogs.push(`All states pressure ${formatSigned(stateEffects.pressure)}`);
+                    }
+                  }
+                }
+              }
 
               eventEffectLog.push(`EVENT: ${maybeEvent.title} triggered!`);
-              if (effects.truth) eventEffectLog.push(`Truth ${effects.truth > 0 ? '+' : ''}${effects.truth}%`);
-              if (effects.ip) eventEffectLog.push(`IP ${effects.ip > 0 ? '+' : ''}${effects.ip}`);
-              if (effects.cardDraw) eventEffectLog.push(`Draw ${effects.cardDraw} extra cards`);
+              if (truthDeltaFromEffects !== 0) {
+                eventEffectLog.push(`Truth ${formatSigned(truthDeltaFromEffects)}%`);
+              }
+              if (ipDeltaFromEffects !== 0) {
+                eventEffectLog.push(`IP ${formatSigned(ipDeltaFromEffects)}`);
+              }
+              if (effects.cardDraw) {
+                eventEffectLog.push(`Draw ${effects.cardDraw} extra cards`);
+              }
+              for (const message of globalStateEffectLogs) {
+                eventEffectLog.push(message);
+              }
+              for (const { name, delta } of defenseLogMap.values()) {
+                if (delta !== 0) {
+                  eventEffectLog.push(`${name} defense ${formatSigned(delta)}`);
+                }
+              }
+              for (const { name, delta } of pressureLogMap.values()) {
+                if (delta !== 0) {
+                  eventEffectLog.push(`${name} pressure ${formatSigned(delta)}`);
+                }
+              }
               if (effects.revealSecretAgenda) {
                 eventEffectLog.push('Enemy secret agenda exposed!');
               }
