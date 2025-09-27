@@ -574,6 +574,11 @@ const Index = () => {
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
   const { issues: pressArchive, archiveEdition, removeEditionFromArchive } = usePressArchive();
 
+  const executeAITurnRef = useRef(executeAITurn);
+  useEffect(() => {
+    executeAITurnRef.current = executeAITurn;
+  }, [executeAITurn]);
+
   const isEditionArchived = useCallback(
     (edition: GameOverReport | null) => {
       if (!edition) {
@@ -639,9 +644,9 @@ const Index = () => {
   // Handle AI turns
   useEffect(() => {
     if (gameState.phase === 'ai_turn' && gameState.currentPlayer === 'ai' && !gameState.aiTurnInProgress) {
-      executeAITurn();
+      executeAITurnRef.current?.();
     }
-  }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress, executeAITurn]);
+  }, [gameState.phase, gameState.currentPlayer, gameState.aiTurnInProgress]);
 
   // Track IP changes for floating numbers
   useEffect(() => {

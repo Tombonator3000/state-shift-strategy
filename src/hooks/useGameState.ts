@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
 import { generateWeightedDeck } from '@/data/weightedCardDistribution';
@@ -670,6 +670,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     };
   });
 
+  const gameStateRef = useRef(gameState);
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
+
   const resolveCardEffects = useCallback(
     (
       prev: GameState,
@@ -1330,6 +1335,18 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     }
   }, [achievements, registerParanormalSighting]);
 
+  const endTurnRef = useRef(endTurn);
+  useEffect(() => {
+    endTurnRef.current = endTurn;
+  }, [endTurn]);
+
+  const pendingAiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (pendingAiTimeoutRef.current) {
+      clearTimeout(pendingAiTimeoutRef.current);
+      pendingAiTimeoutRef.current = null;
+    }
+  }, []);
 
   const playAICard = useCallback((params: AiCardPlayParams) => {
     return new Promise<GameState>(resolve => {
@@ -1378,13 +1395,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     });
   }, [achievements]);
 
+  const playAICardRef = useRef(playAICard);
+  useEffect(() => {
+    playAICardRef.current = playAICard;
+  }, [playAICard]);
+
   // AI Turn Management
   const executeAITurn = useCallback(async () => {
+    const currentState = gameStateRef.current;
     if (
-      !gameState.aiStrategist ||
-      gameState.currentPlayer !== 'ai' ||
-      gameState.aiTurnInProgress ||
-      gameState.isGameOver
+      !currentState?.aiStrategist ||
+      currentState.currentPlayer !== 'ai' ||
+      currentState.aiTurnInProgress ||
+      currentState.isGameOver
     ) {
       return;
     }
@@ -1472,7 +1495,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       actions: turnPlan.actions,
       sequenceDetails: turnPlan.sequenceDetails,
       readLatestState,
-      playCard: playAICard,
+      playCard: params => {
+        const playCardFn = playAICardRef.current;
+        return playCardFn ? playCardFn(params) : readLatestState();
+      },
       waitBetweenActions: () => new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400)),
     });
 
@@ -1485,24 +1511,23 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       return;
     }
 
-    setTimeout(() => {
-      let shouldProceed = true;
-      setGameState(prev => {
-        if (prev.isGameOver) {
-          shouldProceed = false;
-          return prev;
-        }
-        return prev;
-      });
+    if (pendingAiTimeoutRef.current) {
+      clearTimeout(pendingAiTimeoutRef.current);
+    }
 
-      if (!shouldProceed) {
+    pendingAiTimeoutRef.current = setTimeout(() => {
+      pendingAiTimeoutRef.current = null;
+
+      const stateSnapshot = gameStateRef.current;
+      if (!stateSnapshot || stateSnapshot.isGameOver || stateSnapshot.currentPlayer !== 'ai') {
+        setGameState(prev => (prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false }));
         return;
       }
 
-      endTurn();
+      endTurnRef.current?.();
       setGameState(prev => (prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false }));
     }, 1000);
-  }, [gameState, endTurn, playAICard]);
+  }, []);
 
   const closeNewspaper = useCallback(() => {
     setGameState(prev => {
