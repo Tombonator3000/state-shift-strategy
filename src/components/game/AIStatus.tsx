@@ -1,9 +1,11 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Bot, Brain, Zap, Shield, Target, ChevronDown, ChevronUp, Lock } from 'lucide-react';
+import { Bot, Brain, Zap, Target, ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { type AIDifficulty } from '@/data/aiStrategy';
 import { useState } from 'react';
+import SecretAgendaCard from './SecretAgenda';
+import { SecretAgenda as AgendaType } from '@/data/agendaDatabase';
 
 interface AIStatusProps {
   difficulty: AIDifficulty;
@@ -14,17 +16,23 @@ interface AIStatusProps {
   assessmentText?: string;
   aiHandSize?: number;
   aiObjectiveProgress?: number;
+  secretAgenda?: (AgendaType & {
+    progress: number;
+    completed: boolean;
+    revealed: boolean;
+  }) | null;
 }
 
-const AIStatus = ({ 
-  difficulty, 
-  personalityName, 
-  isThinking = false, 
+const AIStatus = ({
+  difficulty,
+  personalityName,
+  isThinking = false,
   currentPlayer,
   aiControlledStates,
   assessmentText,
   aiHandSize = 0,
-  aiObjectiveProgress = 0
+  aiObjectiveProgress = 0,
+  secretAgenda = null
 }: AIStatusProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const getDifficultyColor = (diff: AIDifficulty) => {
@@ -44,6 +52,8 @@ const AIStatus = ({
       case 'legendary': return <Target size={16} />;
     }
   };
+
+  const isAgendaRevealed = Boolean(secretAgenda?.revealed);
 
   return (
     <Card className="p-3 bg-gray-900 border-gray-700 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
@@ -110,28 +120,32 @@ const AIStatus = ({
             </div>
 
             {/* AI Objective Section */}
-            <div className="bg-black p-2 rounded border border-red-900/50 relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 to-transparent rounded"></div>
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-2">
-                  <Lock size={12} className="text-red-400/70" />
-                  <h4 className="font-bold text-xs font-mono text-red-400/70">
-                    AI OBJECTIVE
-                  </h4>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gray-800 rounded">
-                    <div 
-                      className="h-full bg-red-400/70 rounded transition-all"
-                      style={{ width: `${aiObjectiveProgress}%` }}
-                    />
+            {isAgendaRevealed && secretAgenda ? (
+              <SecretAgendaCard agenda={secretAgenda} isPlayer={false} />
+            ) : (
+              <div className="bg-black p-2 rounded border border-red-900/50 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 to-transparent rounded"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Lock size={12} className="text-red-400/70" />
+                    <h4 className="font-bold text-xs font-mono text-red-400/70">
+                      AI OBJECTIVE
+                    </h4>
                   </div>
-                  <div className="text-xs text-gray-400 font-mono">
-                    {Math.floor(aiObjectiveProgress)}%
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 bg-gray-800 rounded">
+                      <div
+                        className="h-full bg-red-400/70 rounded transition-all"
+                        style={{ width: `${aiObjectiveProgress}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-gray-400 font-mono">
+                      {Math.floor(aiObjectiveProgress)}%
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
