@@ -2,6 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Eye, Lock, ChevronDown, ChevronUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 
 import { SecretAgenda as AgendaType } from '@/data/agendaDatabase';
 
@@ -57,6 +58,15 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const toggleExpanded = () => setIsExpanded((prev) => !prev);
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggleExpanded();
+    }
+  };
+
   const statusLabel = agenda.revealed ? 'REVEALED' : 'HIDDEN';
   const statusClasses = agenda.revealed
     ? 'border-secret-red/60 bg-secret-red/15 text-secret-red'
@@ -94,8 +104,15 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
 
   // Opponent view - just a progress bar
   if (!isPlayer) {
+    const opponentAriaLabel = agenda.revealed
+      ? undefined
+      : `AI objective hidden. Progress ${Math.floor(progressPercent)} percent.`;
+
     return (
-      <Card className="p-2 bg-black text-white border border-secret-red/50 relative">
+      <Card
+        className="p-2 bg-black text-white border border-secret-red/50 relative"
+        aria-label={opponentAriaLabel}
+      >
         <div className="absolute inset-0 bg-gradient-to-br from-secret-red/5 to-transparent"></div>
         <div className="relative z-10 space-y-2">
           <div className="flex items-center justify-between">
@@ -137,10 +154,14 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
   // Player view - expandable display
   return (
     <Card
-      className={`bg-black text-white border-2 border-secret-red relative overflow-hidden cursor-pointer transition-all duration-300 ${
+      role="button"
+      tabIndex={0}
+      aria-expanded={isExpanded}
+      onKeyDown={handleKeyDown}
+      className={`bg-black text-white border-2 border-secret-red relative overflow-hidden cursor-pointer transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secret-red/80 focus-visible:shadow-[0_0_0_3px_rgba(220,38,38,0.35)] ${
         isExpanded ? 'p-4' : 'p-2'
       }`}
-      onClick={() => setIsExpanded(!isExpanded)}
+      onClick={toggleExpanded}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-secret-red/10 to-transparent"></div>
       
