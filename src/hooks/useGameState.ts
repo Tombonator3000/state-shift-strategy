@@ -8,7 +8,7 @@ import {
   calculateDynamicIpBonus,
   createDefaultCombinationEffects,
 } from '@/data/stateCombinations';
-import { getRandomAgenda } from '@/data/agendaDatabase';
+import { getRandomAgenda, getAgendaById } from '@/data/agendaDatabase';
 import { type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
@@ -1245,6 +1245,42 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (!savedData) return false;
 
       const saveData = JSON.parse(savedData, omitClashKey);
+
+      const rehydrateAgenda = (
+        storedAgenda: unknown,
+      ): GameState['secretAgenda'] | undefined => {
+        if (!storedAgenda || typeof storedAgenda !== 'object') {
+          return undefined;
+        }
+
+        const agendaData = storedAgenda as Partial<GameState['secretAgenda']> & { id?: unknown };
+        if (typeof agendaData.id !== 'string') {
+          return undefined;
+        }
+
+        const baseAgenda = getAgendaById(agendaData.id);
+        if (!baseAgenda) {
+          console.warn(`Unknown agenda ID in save data: ${agendaData.id}`);
+          return undefined;
+        }
+
+        const progress =
+          typeof agendaData.progress === 'number' && Number.isFinite(agendaData.progress)
+            ? agendaData.progress
+            : 0;
+        const completed = typeof agendaData.completed === 'boolean' ? agendaData.completed : false;
+        const revealed = typeof agendaData.revealed === 'boolean' ? agendaData.revealed : false;
+
+        return {
+          ...baseAgenda,
+          progress,
+          completed,
+          revealed,
+        };
+      };
+
+      const secretAgenda = rehydrateAgenda(saveData.secretAgenda);
+      const aiSecretAgenda = rehydrateAgenda(saveData.aiSecretAgenda);
       const normalizedRound = normalizeRoundFromSave(saveData);
       const normalizedTurn = typeof saveData.turn === 'number' && Number.isFinite(saveData.turn)
         ? Math.max(1, saveData.turn)
@@ -1278,6 +1314,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         ...saveData,
         turn: normalizedTurn,
         round: normalizedRound,
+        secretAgenda,
+        aiSecretAgenda,
         cardsPlayedThisRound: Array.isArray(saveData.cardsPlayedThisRound)
           ? saveData.cardsPlayedThisRound
           : [],
