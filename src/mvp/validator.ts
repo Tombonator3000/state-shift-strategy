@@ -2,18 +2,22 @@ import type { Faction, GameCard, MVPCardType, Rarity } from '@/rules/mvp';
 import type { TurnPlay } from '@/game/combo.types';
 import { expectedCost, MVP_CARD_TYPES } from '@/rules/mvp';
 
+type BaseEffects = {
+  revealSecretAgenda?: boolean;
+};
+
 export type EffectsATTACK = {
   ipDelta: { opponent: number; opponentPercent?: number };
   discardOpponent?: 0 | 1 | 2;
-};
+} & BaseEffects;
 
 export type EffectsMEDIA = {
   truthDelta: number;
-};
+} & BaseEffects;
 
 export type EffectsZONE = {
   pressureDelta: number;
-};
+} & BaseEffects;
 
 export type MVPGameCard = GameCard & {
   rarity: Rarity;
@@ -177,6 +181,10 @@ const sanitizeAttackEffects = (
     attack.ipDelta.opponentPercent = clampFraction(opponentPercent, 0, 1);
   }
 
+  if ((source as { revealSecretAgenda?: unknown }).revealSecretAgenda) {
+    attack.revealSecretAgenda = true;
+  }
+
   if (Object.prototype.hasOwnProperty.call(source, 'discardOpponent')) {
     const discard = toNumber(source.discardOpponent);
     if (discard === null) {
@@ -192,7 +200,7 @@ const sanitizeAttackEffects = (
     }
   }
 
-  const allowedKeys = new Set(['ipDelta', 'discardOpponent']);
+  const allowedKeys = new Set(['ipDelta', 'discardOpponent', 'revealSecretAgenda']);
   if (typeof source.ipDelta === 'object' && source.ipDelta !== null) {
     const allowedIpKeys = new Set(['opponent', 'opponentPercent']);
     const ipKeys = Object.keys(source.ipDelta as Record<string, unknown>);
@@ -230,9 +238,15 @@ const sanitizeMediaEffects = (
 
   const media: EffectsMEDIA = { truthDelta: Math.round(delta) };
 
+  if ((rawEffects as { revealSecretAgenda?: unknown })?.revealSecretAgenda) {
+    media.revealSecretAgenda = true;
+  }
+
   const extraKeys =
     rawEffects && typeof rawEffects === 'object'
-      ? Object.keys(rawEffects as Record<string, unknown>).filter(key => key !== 'truthDelta')
+      ? Object.keys(rawEffects as Record<string, unknown>).filter(
+          key => !['truthDelta', 'revealSecretAgenda'].includes(key),
+        )
       : [];
   if (extraKeys.length > 0) {
     changes.push(`removed unsupported MEDIA effect keys: ${extraKeys.join(', ')}`);
@@ -254,7 +268,7 @@ const sanitizeZoneEffects = (
   } else if (typeof rawEffects === 'object' && rawEffects !== null) {
     delta = toNumber((rawEffects as Record<string, unknown>).pressureDelta);
     const extraKeys = Object.keys(rawEffects as Record<string, unknown>).filter(
-      key => key !== 'pressureDelta',
+      key => !['pressureDelta', 'revealSecretAgenda'].includes(key),
     );
     if (extraKeys.length > 0) {
       changes.push(`removed unsupported ZONE effect keys: ${extraKeys.join(', ')}`);
@@ -266,7 +280,13 @@ const sanitizeZoneEffects = (
     delta = 1;
   }
 
-  return { pressureDelta: clampInteger(delta, 1, 9) };
+  const zone: EffectsZONE = { pressureDelta: clampInteger(delta, 1, 9) };
+
+  if ((rawEffects as { revealSecretAgenda?: unknown })?.revealSecretAgenda) {
+    zone.revealSecretAgenda = true;
+  }
+
+  return zone;
 };
 
 const normalizeFlavor = (value: unknown): string | undefined => {
@@ -317,6 +337,8 @@ const createMvpText = (
             ? 'Opponent discards 1 card'
             : `Opponent discards ${attack.discardOpponent} cards`,
         );
+      if (attack.revealSecretAgenda) {
+        parts.push('Reveal enemy secret agenda');
       }
       return `${parts.join('. ')}.`;
     }
@@ -324,11 +346,19 @@ const createMvpText = (
       const media = effects as EffectsMEDIA;
       const value = media.truthDelta;
       const sign = value >= 0 ? '+' : '';
-      return `${sign}${value}% Truth.`;
+      const parts = [`${sign}${value}% Truth`];
+      if (media.revealSecretAgenda) {
+        parts.push('Reveal enemy secret agenda');
+      }
+      return `${parts.join('. ')}.`;
     }
     case 'ZONE': {
       const zone = effects as EffectsZONE;
-      return `+${zone.pressureDelta} Pressure to a state.`;
+      const parts = [`+${zone.pressureDelta} Pressure to a state`];
+      if (zone.revealSecretAgenda) {
+        parts.push('Reveal enemy secret agenda');
+      }
+      return `${parts.join('. ')}.`;
     }
     default:
       return undefined;

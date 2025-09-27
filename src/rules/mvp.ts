@@ -16,6 +16,8 @@ export interface CardEffects {
   pressureDelta?: number;
   zoneDefense?: number;
   reduceFactor?: number;
+  /** Reveals the opponent's secret agenda to the player when triggered. */
+  revealSecretAgenda?: boolean;
   conditional?: {
     ifTruthAtLeast?: number;
     ifZonesControlledAtLeast?: number;

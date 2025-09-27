@@ -71,6 +71,25 @@ const computeTruthStreaks = (
 
 const STREAK_AGENDA_IDS = new Set(['truth_truth_threshold', 'gov_truth_suppression']);
 
+const revealAiSecretAgenda = (
+  state: GameState,
+  context: { type: 'card' | 'event'; name: string },
+): GameState => {
+  const agenda = state.aiSecretAgenda;
+  if (!agenda || agenda.revealed) {
+    return state;
+  }
+
+  const sourceLabel = context.type === 'event' ? 'Event' : 'Card';
+  const message = `🔍 ${sourceLabel} "${context.name}" exposed the enemy secret agenda: ${agenda.title}.`;
+
+  return {
+    ...state,
+    aiSecretAgenda: { ...agenda, revealed: true },
+    log: [...state.log, message],
+  };
+};
+
 const DIFFICULTY_TO_AI_DIFFICULTY: Record<Difficulty, AIDifficulty> = {
   EASY: 'easy',
   NORMAL: 'medium',
@@ -575,7 +594,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         log: [...prev.log, ...resolution.logEntries]
       };
 
-      return updateSecretAgendaProgress(nextState);
+      const stateWithReveal = resolution.aiSecretAgendaRevealed
+        ? revealAiSecretAgenda(nextState, { type: 'card', name: resolvedCard.name })
+        : nextState;
+
+      return updateSecretAgendaProgress(stateWithReveal);
     });
   }, [achievements, resolveCardEffects]);
 
@@ -662,7 +685,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         log: [...prev.log, ...resolution.logEntries]
       };
 
-      return updateSecretAgendaProgress(nextState);
+      const stateWithReveal = resolution.aiSecretAgendaRevealed
+        ? revealAiSecretAgenda(nextState, { type: 'card', name: resolvedCard.name })
+        : nextState;
+
+      return updateSecretAgendaProgress(stateWithReveal);
     });
 
     try {
@@ -809,6 +836,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
               if (effects.truth) eventEffectLog.push(`Truth ${effects.truth > 0 ? '+' : ''}${effects.truth}%`);
               if (effects.ip) eventEffectLog.push(`IP ${effects.ip > 0 ? '+' : ''}${effects.ip}`);
               if (effects.cardDraw) eventEffectLog.push(`Draw ${effects.cardDraw} extra cards`);
+              if (effects.revealSecretAgenda) {
+                eventEffectLog.push('Enemy secret agenda exposed!');
+              }
             }
           }
         }
@@ -861,6 +891,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           log: logEntries,
           turnPlays: [],
         };
+
+        if (triggeredEvent?.effects?.revealSecretAgenda) {
+          nextState = revealAiSecretAgenda(nextState, { type: 'event', name: triggeredEvent.title });
+        }
 
         applyTruthDelta(nextState, truthModifier, 'human');
         const finalTruth = nextState.truth;
@@ -925,7 +959,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         }
 
         const result = applyAiCardPlay(prev, params, achievements);
-        const nextStateWithAgendas = updateSecretAgendaProgress(result.nextState);
+        const nextStateAfterReveal =
+          result.resolution?.aiSecretAgendaRevealed && result.card
+            ? revealAiSecretAgenda(result.nextState, { type: 'card', name: result.card.name })
+            : result.nextState;
+        const nextStateWithAgendas = updateSecretAgendaProgress(nextStateAfterReveal);
 
         if (result.card && typeof window !== 'undefined' && window.uiShowOpponentCard) {
           window.uiShowOpponentCard(result.card);
