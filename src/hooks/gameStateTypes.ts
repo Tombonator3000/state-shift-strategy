@@ -55,6 +55,8 @@ export interface GameState {
     baseDefense: number;
     defense: number;
     pressure: number;
+    pressurePlayer: number;
+    pressureAi: number;
     contested: boolean;
     owner: 'player' | 'ai' | 'neutral';
     specialBonus?: string;

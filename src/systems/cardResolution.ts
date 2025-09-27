@@ -31,6 +31,8 @@ export interface StateForResolution {
   baseDefense: number;
   defense: number;
   pressure: number;
+  pressurePlayer: number;
+  pressureAi: number;
   contested: boolean;
   owner: StateOwner;
   specialBonus?: string;
@@ -118,8 +120,18 @@ const toEngineState = (
 
   for (const state of snapshot.states) {
     stateDefense[state.id] = state.defense;
-    const pressure = Math.max(0, state.pressure ?? 0);
     const owner = state.owner;
+    const fallbackPressure = Math.max(0, state.pressure ?? 0);
+    const playerPressure = Number.isFinite(state.pressurePlayer)
+      ? Math.max(0, state.pressurePlayer)
+      : owner === 'player'
+        ? 0
+        : fallbackPressure;
+    const aiPressure = Number.isFinite(state.pressureAi)
+      ? Math.max(0, state.pressureAi)
+      : owner === 'ai'
+        ? fallbackPressure
+        : 0;
 
     if (owner === 'player') {
       playerStates.add(state.id);
@@ -128,8 +140,8 @@ const toEngineState = (
     }
 
     pressureByState[state.id] = {
-      P1: owner === 'player' ? 0 : pressure,
-      P2: owner === 'ai' ? pressure : 0,
+      P1: playerPressure,
+      P2: aiPressure,
     };
   }
 
@@ -234,6 +246,8 @@ export function resolveCardMVP(
     const owner: StateOwner = playerOwns ? 'player' : aiOwns ? 'ai' : 'neutral';
 
     state.owner = owner;
+    state.pressurePlayer = afterPressurePlayer;
+    state.pressureAi = afterPressureAi;
     state.pressure = Math.max(afterPressurePlayer, afterPressureAi);
     const isContested = afterPressurePlayer > 0 && afterPressureAi > 0;
     state.contested = previousOwner !== owner ? false : isContested;
