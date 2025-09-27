@@ -430,3 +430,11 @@ export class ExtensionManager {
 }
 
 export const extensionManager = new ExtensionManager();
+
+export function getExtensionCardsSnapshot(): ExtensionCard[] {
+  try {
+    return extensionManager.getAllExtensionCards();
+  } catch {
+    return [];
+  }
+}

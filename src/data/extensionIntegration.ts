@@ -1,4 +1,4 @@
-import { extensionManager } from './extensionSystem';
+import { extensionManager, getExtensionCardsSnapshot } from './extensionSystem';
 
 // Initialize extensions on app startup
 export const initializeExtensionsOnStartup = async () => {
@@ -8,7 +8,7 @@ export const initializeExtensionsOnStartup = async () => {
     
     // Log the current state
     const enabledExtensions = extensionManager.getEnabledExtensions();
-    const allCards = extensionManager.getAllExtensionCards();
+    const allCards = getExtensionCardsSnapshot();
     
     console.log(`✅ Extensions initialized successfully:`, {
       enabledExtensions: enabledExtensions.length,
@@ -34,12 +34,12 @@ export const initializeExtensionsOnStartup = async () => {
 
 // Check if a card is from an extension
 export const isExtensionCard = (cardId: string): boolean => {
-  return extensionManager.getAllExtensionCards().some(card => card.id === cardId);
+  return getExtensionCardsSnapshot().some(card => card.id === cardId);
 };
 
 // Get extension info for a card
 export const getCardExtensionInfo = (cardId: string) => {
-  const extensionCard = extensionManager.getAllExtensionCards().find(card => card.id === cardId);
+  const extensionCard = getExtensionCardsSnapshot().find(card => card.id === cardId);
   if (!extensionCard?.extId) return null;
   
   const extension = extensionManager.getExtension(extensionCard.extId);
