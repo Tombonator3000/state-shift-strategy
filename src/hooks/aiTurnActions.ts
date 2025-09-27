@@ -29,6 +29,10 @@ export const processAiActions = async ({
       return { gameOver: true };
     }
 
+    if (latestBeforeAction.cardsPlayedThisTurn >= 3) {
+      return { gameOver: false };
+    }
+
     const action = actions[index];
     const detailEntries = [
       ...(index === 0 ? sequenceDetails : []),
@@ -50,6 +54,10 @@ export const processAiActions = async ({
     const latestAfterAction = await readLatestState();
     if (latestAfterAction.isGameOver) {
       return { gameOver: true };
+    }
+
+    if (latestAfterAction.cardsPlayedThisTurn >= 3) {
+      return { gameOver: false };
     }
 
     if (index < actions.length - 1) {
