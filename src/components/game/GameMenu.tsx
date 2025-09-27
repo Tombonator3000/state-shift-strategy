@@ -46,6 +46,14 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
   })));
   const [showCollection, setShowCollection] = useState(false);
 
+  const handleShowCollection = () => {
+    if (onShowCardCollection) {
+      onShowCardCollection();
+    } else {
+      setShowCollection(true);
+    }
+  };
+
   useEffect(() => {
     const glitchTexts = {
       title: ['SHEEPLE TIMES', 'THE TRUTH DAILY', 'CONSPIRACY NEWS', 'SHADOW GOVERNMENT', 'DEEP STATE WEEKLY', 'LIZARD PEOPLE POST', 'WEEKLY WORLD NEWS', 'TABLOID TRUTH', 'PARANOID PLANET'],
@@ -327,16 +335,18 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
         onHowToPlay={() => setShowHowToPlay(true)}
         onOptions={() => setShowOptions(true)}
         onCredits={() => setShowCredits(true)}
-        onCardCollection={() => setShowCollection(true)}
+        onCardCollection={handleShowCollection}
         onLoadGame={onLoadGame}
         getSaveInfo={getSaveInfo}
         audio={audio}
         onStartNewGameFallback={() => setShowFactionSelect(true)}
       />
-      {uiTheme === 'tabloid_bw' ? (
-        <CardCollectionTabloid open={showCollection} onOpenChange={setShowCollection} />
-      ) : (
-        <CardCollection open={showCollection} onOpenChange={setShowCollection} />
+      {!onShowCardCollection && (
+        uiTheme === 'tabloid_bw' ? (
+          <CardCollectionTabloid open={showCollection} onOpenChange={setShowCollection} />
+        ) : (
+          <CardCollection open={showCollection} onOpenChange={setShowCollection} />
+        )
       )}
     </>
   ) : (
@@ -468,7 +478,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
             <Button 
               onClick={() => {
                 audio?.playSFX?.('click');
-                setShowCollection(true);
+                handleShowCollection();
               }}
               variant="outline" 
               className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
@@ -499,10 +509,12 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
           </div>
         </div>
       </Card>
-      {(uiTheme as string) === 'tabloid_bw' ? (
-        <CardCollectionTabloid open={showCollection} onOpenChange={setShowCollection} />
-      ) : (
-        <CardCollection open={showCollection} onOpenChange={setShowCollection} />
+      {!onShowCardCollection && (
+        (uiTheme as string) === 'tabloid_bw' ? (
+          <CardCollectionTabloid open={showCollection} onOpenChange={setShowCollection} />
+        ) : (
+          <CardCollection open={showCollection} onOpenChange={setShowCollection} />
+        )
       )}
     </div>
   );
