@@ -1522,57 +1522,63 @@ const Index = () => {
     );
   };
 
-  const renderAiStatusPanel = () => (
-    <div className="space-y-3 text-[11px] text-newspaper-text/90">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">Handler</span>
-        <span className="font-mono text-newspaper-text">
-          {gameState.aiStrategist?.personality.name || 'Unknown'}
-        </span>
-      </div>
-      <div className="grid grid-cols-2 gap-2 text-center">
-        <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
-          <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">Difficulty</div>
-          <div className="font-mono text-newspaper-text">{gameState.aiDifficulty.toUpperCase()}</div>
-        </div>
-        <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
-          <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">Territory</div>
-          <div className="font-mono text-newspaper-text">{aiControlledStates} states</div>
-        </div>
-      </div>
-      <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/20 px-3 py-2">
-        <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-newspaper-text/60">
-          <span>Status</span>
-          <span
-            className={`font-mono ${
-              gameState.currentPlayer === 'ai' ? 'text-secret-red' : 'text-newspaper-text/70'
-            }`}
-          >
-            {gameState.currentPlayer === 'ai'
-              ? gameState.phase === 'ai_turn'
-                ? 'Calculating'
-                : 'Active'
-              : 'Waiting'}
+  const renderAiStatusPanel = () => {
+    return (
+      <div className="space-y-3 text-[11px] text-newspaper-text/90">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">Handler</span>
+          <span className="font-mono text-newspaper-text">
+            {gameState.aiStrategist?.personality.name || 'Unknown'}
           </span>
         </div>
-        {gameState.phase === 'ai_turn' && (
-          <div className="mt-1 text-[11px] text-secret-red/80">Processing strategy...</div>
+        <div className="grid grid-cols-2 gap-2 text-center">
+          <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
+            <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">Difficulty</div>
+            <div className="font-mono text-newspaper-text">{gameState.aiDifficulty.toUpperCase()}</div>
+          </div>
+          <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
+            <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">Territory</div>
+            <div className="font-mono text-newspaper-text">{aiControlledStates} states</div>
+          </div>
+        </div>
+        <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/20 px-3 py-2">
+          <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-newspaper-text/60">
+            <span>Status</span>
+            <span
+              className={`font-mono ${
+                gameState.currentPlayer === 'ai' ? 'text-secret-red' : 'text-newspaper-text/70'
+              }`}
+            >
+              {gameState.currentPlayer === 'ai'
+                ? gameState.phase === 'ai_turn'
+                  ? 'Calculating'
+                  : 'Active'
+                : 'Waiting'}
+            </span>
+          </div>
+          {gameState.phase === 'ai_turn' && (
+            <div className="mt-1 text-[11px] text-secret-red/80">Processing strategy...</div>
+          )}
+        </div>
+        {aiAgenda && aiAgenda.revealed ? (
+          <SecretAgenda agenda={aiAgenda} isPlayer={false} />
+        ) : (
+          <div>
+            <div className="flex items-center justify-between text-[11px] text-newspaper-text/70">
+              <span>Objective</span>
+              <span className="font-mono text-newspaper-text">{Math.floor(aiObjectiveProgress)}%</span>
+            </div>
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-newspaper-border/40">
+              <div className="h-full bg-newspaper-text/80" style={{ width: `${aiObjectiveProgress}%` }} />
+            </div>
+          </div>
+        )}
+        {aiAssessment && (
+          <p className="text-[11px] italic text-newspaper-text/60">“{aiAssessment}”</p>
         )}
       </div>
-      <div>
-        <div className="flex items-center justify-between text-[11px] text-newspaper-text/70">
-          <span>Objective</span>
-          <span className="font-mono text-newspaper-text">{Math.floor(aiObjectiveProgress)}%</span>
-        </div>
-        <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-newspaper-border/40">
-          <div className="h-full bg-newspaper-text/80" style={{ width: `${aiObjectiveProgress}%` }} />
-        </div>
-      </div>
-      {aiAssessment && (
-        <p className="text-[11px] italic text-newspaper-text/60">“{aiAssessment}”</p>
-      )}
-    </div>
-  );
+    );
+  };
 
   const statusPanelConfigs = [
     {
@@ -1600,6 +1606,7 @@ const Index = () => {
             assessmentText={aiAssessment}
             aiHandSize={gameState.aiHand.length}
             aiObjectiveProgress={aiObjectiveProgress}
+            secretAgenda={aiAgenda && aiAgenda.revealed ? aiAgenda : null}
           />
         </div>
       ),
