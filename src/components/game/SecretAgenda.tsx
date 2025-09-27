@@ -1,5 +1,4 @@
 import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Eye, Lock, ChevronDown, ChevronUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { KeyboardEvent } from 'react';
@@ -25,36 +24,53 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
     return Math.max(0, Math.min(100, Number.isFinite(raw) ? raw : 0));
   }, [agenda.progress, agenda.target]);
 
+  const isGovernmentAgenda = agenda.faction === 'government';
   const difficultyBadgeClass = useMemo(() => {
     switch (agenda.difficulty) {
       case 'easy':
-        return 'bg-green-900/50 text-green-400';
+        return isGovernmentAgenda
+          ? 'bg-emerald-900/30 text-emerald-300 border border-emerald-400/40'
+          : 'bg-green-900/50 text-green-300 border border-green-500/50';
       case 'medium':
-        return 'bg-yellow-900/50 text-yellow-400';
+        return isGovernmentAgenda
+          ? 'bg-amber-900/30 text-amber-200 border border-amber-400/40'
+          : 'bg-yellow-900/50 text-yellow-300 border border-yellow-500/50';
       case 'hard':
-        return 'bg-red-900/50 text-red-400';
+        return isGovernmentAgenda
+          ? 'bg-rose-900/30 text-rose-200 border border-rose-500/40'
+          : 'bg-red-900/50 text-red-300 border border-red-500/50';
       default:
-        return 'bg-purple-900/50 text-purple-400';
+        return isGovernmentAgenda
+          ? 'bg-indigo-900/30 text-indigo-200 border border-indigo-400/40'
+          : 'bg-purple-900/50 text-purple-300 border border-purple-500/50';
     }
-  }, [agenda.difficulty]);
+  }, [agenda.difficulty, isGovernmentAgenda]);
 
-  const renderProgressBar = () => (
-    <div className="space-y-1">
-      <div className="flex justify-between items-center text-xs">
-        <span>Progress:</span>
-        <div className="flex items-center gap-2">
-          <span>{agenda.progress}/{agenda.target}</span>
-          <span className={`px-1 py-0.5 rounded text-xs font-bold ${difficultyBadgeClass}`}>
-            {agenda.difficulty.toUpperCase()}
-          </span>
+  const renderProgressBar = () => {
+    const trackClass = isGovernmentAgenda ? 'bg-slate-800' : 'bg-secret-red/20';
+    const fillClass = isGovernmentAgenda ? 'bg-government-blue' : 'bg-secret-red';
+    const textClass = isGovernmentAgenda ? 'text-slate-300' : 'text-gray-300';
+
+    return (
+      <div className="space-y-1">
+        <div className={`flex justify-between items-center text-xs font-mono ${textClass}`}>
+          <span>Progress:</span>
+          <div className="flex items-center gap-2">
+            <span>{agenda.progress}/{agenda.target}</span>
+            <span className={`px-1 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${difficultyBadgeClass}`}>
+              {agenda.difficulty.toUpperCase()}
+            </span>
+          </div>
+        </div>
+        <div className={`h-2 w-full overflow-hidden rounded-full ${trackClass}`}>
+          <div
+            className={`h-full transition-all duration-500 ease-out ${fillClass}`}
+            style={{ width: `${progressPercent}%` }}
+          />
         </div>
       </div>
-      <Progress
-        value={progressPercent}
-        className="h-2 bg-gray-800"
-      />
-    </div>
-  );
+    );
+  };
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -69,38 +85,104 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
 
   const statusLabel = agenda.revealed ? 'REVEALED' : 'HIDDEN';
   const statusClasses = agenda.revealed
-    ? 'border-secret-red/60 bg-secret-red/15 text-secret-red'
-    : 'border-gray-700 bg-gray-900/80 text-gray-400';
+    ? (isGovernmentAgenda
+      ? 'border-government-blue/60 bg-government-blue/15 text-government-blue'
+      : 'border-secret-red/60 bg-secret-red/15 text-secret-red')
+    : (isGovernmentAgenda
+      ? 'border-slate-700 bg-slate-900/80 text-slate-300'
+      : 'border-gray-700 bg-gray-900/80 text-gray-400');
 
-  const renderCompactContent = () => (
-    <div className="space-y-2 text-xs font-mono text-gray-300">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-between gap-2">
-          <span className="font-bold text-secret-red/90 uppercase tracking-wide text-[10px]">
-            {agenda.title}
-          </span>
-          <span className={`px-1 py-0.5 rounded text-[10px] font-bold ${difficultyBadgeClass}`}>
-            {agenda.difficulty.toUpperCase()}
-          </span>
+  const renderCompactContent = () => {
+    if (isGovernmentAgenda) {
+      return (
+        <div className="space-y-3 text-xs text-slate-200">
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1">
+              <div className="text-[10px] uppercase tracking-[0.35em] text-slate-400 font-mono">Case File</div>
+              <div className="text-sm font-semibold text-slate-100 font-mono leading-tight">
+                {agenda.operationName}
+              </div>
+            </div>
+            {agenda.artCue?.icon && (
+              <img
+                src={agenda.artCue.icon}
+                alt={agenda.artCue.alt ?? 'Clearance stamp'}
+                className="h-10 w-10 opacity-70"
+                loading="lazy"
+              />
+            )}
+          </div>
+          <div className="rounded border border-slate-700/70 bg-slate-900/60 px-2 py-1 text-[11px] uppercase tracking-widest font-semibold text-slate-200">
+            {agenda.headline}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-wider text-slate-400 font-mono">
+            <span className="font-semibold text-slate-200">Issue Theme</span>
+            <span>{agenda.issueTheme}</span>
+          </div>
+          {agenda.pullQuote && (
+            <div className="text-[10px] italic text-slate-400 line-clamp-2">
+              {agenda.pullQuote}
+            </div>
+          )}
+          <div className="text-[10px] text-slate-400 line-clamp-2 font-mono">
+            {agenda.description}
+          </div>
+          {renderProgressBar()}
+          {agenda.completed && (
+            <div className="text-[10px] text-government-blue font-bold">
+              Objective Complete
+            </div>
+          )}
         </div>
-        <div className="flex items-center justify-between text-[11px] text-gray-400">
-          <span>{agenda.progress}/{agenda.target}</span>
-          <span>{Math.round(progressPercent)}%</span>
+      );
+    }
+
+    return (
+      <div className="space-y-3 text-xs text-white">
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-1">
+            <div className="text-[11px] font-black uppercase tracking-[0.25em] text-secret-red">
+              {agenda.operationName}
+            </div>
+            <div className="text-base font-black uppercase leading-tight drop-shadow-[0_1px_0_rgba(0,0,0,0.45)]">
+              {agenda.headline}
+            </div>
+          </div>
+          {agenda.artCue?.icon && (
+            <img
+              src={agenda.artCue.icon}
+              alt={agenda.artCue.alt ?? 'Tabloid accent graphic'}
+              className="h-12 w-12 drop-shadow-[0_0_12px_rgba(248,113,113,0.65)]"
+              loading="lazy"
+            />
+          )}
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-secret-red/20">
-          <div className="h-full bg-secret-red transition-all" style={{ width: `${progressPercent}%` }} />
+        <div className="text-[10px] uppercase tracking-[0.35em] text-orange-200/80 font-semibold">
+          {agenda.issueTheme}
         </div>
+        <div className="text-[10px] italic text-amber-100/80 line-clamp-2">
+          {agenda.pullQuote ?? agenda.flavorText}
+        </div>
+        <div className="text-[10px] text-rose-100/80 line-clamp-2 font-mono">
+          {agenda.description}
+        </div>
+        {renderProgressBar()}
+        {agenda.completed && (
+          <div className="text-[10px] text-secret-red font-bold">
+            Objective Complete
+          </div>
+        )}
       </div>
-      <div className="text-[10px] text-gray-400 line-clamp-2">
-        {agenda.description}
-      </div>
-      {agenda.completed && (
-        <div className="text-[10px] text-secret-red font-bold">
-          Objective Complete
-        </div>
-      )}
-    </div>
-  );
+    );
+  };
+
+  const cardVariantClasses = isGovernmentAgenda
+    ? 'bg-slate-950 text-slate-100 border border-slate-700 shadow-[0_0_24px_rgba(8,47,73,0.35)]'
+    : 'bg-gradient-to-br from-black via-slate-950 to-black text-white border-2 border-secret-red shadow-[0_0_24px_rgba(190,24,60,0.35)]';
+  const headerIconColor = isGovernmentAgenda ? 'text-government-blue' : 'text-secret-red';
+  const overlayGradientClass = isGovernmentAgenda
+    ? 'absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-950 to-slate-950/60'
+    : 'absolute inset-0 bg-gradient-to-br from-secret-red/15 via-transparent to-black';
 
   // Opponent view - just a progress bar
   if (!isPlayer) {
@@ -110,19 +192,32 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
 
     return (
       <Card
-        className="p-2 bg-black text-white border border-secret-red/50 relative"
+        className={`p-2 relative ${isGovernmentAgenda ? 'bg-slate-950 text-slate-100 border border-government-blue/40' : 'bg-black text-white border border-secret-red/50'}`}
         aria-label={opponentAriaLabel}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-secret-red/5 to-transparent"></div>
+        <div className={overlayGradientClass}></div>
+        {agenda.artCue?.texture && (
+          <div
+            className={`absolute inset-0 pointer-events-none ${
+              isGovernmentAgenda ? 'opacity-25 mix-blend-multiply' : 'opacity-30 mix-blend-screen'
+            }`}
+            style={{
+              backgroundImage: `url(${agenda.artCue.texture})`,
+              backgroundSize: isGovernmentAgenda ? '220px' : '180px',
+              backgroundRepeat: 'repeat'
+            }}
+            aria-hidden="true"
+          />
+        )}
         <div className="relative z-10 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {agenda.revealed ? (
-                <Eye size={12} className="text-secret-red/70" />
+                <Eye size={12} className={isGovernmentAgenda ? 'text-government-blue/70' : 'text-secret-red/70'} />
               ) : (
-                <Lock size={12} className="text-secret-red/70" />
+                <Lock size={12} className={isGovernmentAgenda ? 'text-government-blue/70' : 'text-secret-red/70'} />
               )}
-              <h3 className="font-bold text-xs font-mono text-secret-red/70">
+              <h3 className={`font-bold text-xs font-mono ${isGovernmentAgenda ? 'text-government-blue/70' : 'text-secret-red/70'}`}>
                 AI OBJECTIVE
               </h3>
             </div>
@@ -158,18 +253,31 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
       tabIndex={0}
       aria-expanded={isExpanded}
       onKeyDown={handleKeyDown}
-      className={`bg-black text-white border-2 border-secret-red relative overflow-hidden cursor-pointer transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secret-red/80 focus-visible:shadow-[0_0_0_3px_rgba(220,38,38,0.35)] ${
-        isExpanded ? 'p-4' : 'p-2'
-      }`}
+      className={`${cardVariantClasses} relative overflow-hidden cursor-pointer transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
+        isGovernmentAgenda
+          ? 'focus-visible:outline-government-blue/70 focus-visible:shadow-[0_0_0_3px_rgba(37,99,235,0.25)]'
+          : 'focus-visible:outline-secret-red/80 focus-visible:shadow-[0_0_0_3px_rgba(220,38,38,0.35)]'
+      } ${isExpanded ? 'p-4' : 'p-2'}`}
       onClick={toggleExpanded}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-secret-red/10 to-transparent"></div>
-      
+      <div className={overlayGradientClass}></div>
+      {agenda.artCue?.texture && (
+        <div
+          className={`absolute inset-0 pointer-events-none ${isGovernmentAgenda ? 'opacity-25 mix-blend-multiply' : 'opacity-30 mix-blend-screen'}`}
+          style={{
+            backgroundImage: `url(${agenda.artCue.texture})`,
+            backgroundSize: isGovernmentAgenda ? '240px' : '200px',
+            backgroundRepeat: 'repeat'
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       <div className="relative z-10">
         <div className={`flex items-center justify-between ${isExpanded ? 'mb-3' : 'mb-0'}`}>
           <div className="flex items-center gap-2">
-            <Eye size={isExpanded ? 16 : 12} className="text-secret-red" />
-            <h3 className={`font-bold font-mono text-secret-red ${isExpanded ? 'text-sm' : 'text-xs'}`}>
+            <Eye size={isExpanded ? 18 : 14} className={headerIconColor} />
+            <h3 className={`font-bold font-mono ${headerIconColor} ${isExpanded ? 'text-sm' : 'text-xs'}`}>
               SECRET AGENDA
             </h3>
             <span className={`hidden sm:flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${statusClasses}`}>
@@ -183,9 +291,9 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
               {statusLabel}
             </span>
             {isExpanded ? (
-              <ChevronUp size={14} className="text-secret-red" />
+              <ChevronUp size={14} className={headerIconColor} />
             ) : (
-              <ChevronDown size={14} className="text-secret-red" />
+              <ChevronDown size={14} className={headerIconColor} />
             )}
           </div>
         </div>
@@ -195,23 +303,75 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
           renderCompactContent()
         ) : (
           // Expanded view - full details
-          <div className="space-y-3">
-            <div className="space-y-2">
-              <div className="text-xs font-bold text-secret-red/90 uppercase tracking-wider">
-                {agenda.title}
+          <div className="space-y-4">
+            {isGovernmentAgenda ? (
+              <div className="space-y-3 text-slate-200">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="text-[11px] uppercase tracking-[0.35em] text-slate-400 font-mono">Operation</div>
+                    <div className="text-lg font-semibold font-mono leading-tight">{agenda.operationName}</div>
+                    <div className="text-[11px] uppercase tracking-[0.4em] text-slate-400 font-mono">Case ID</div>
+                    <div className="text-sm font-semibold text-slate-100 font-mono">{agenda.title}</div>
+                  </div>
+                  {agenda.artCue?.icon && (
+                    <img
+                      src={agenda.artCue.icon}
+                      alt={agenda.artCue.alt ?? 'Clearance stamp'}
+                      className="h-16 w-16 opacity-80"
+                      loading="lazy"
+                    />
+                  )}
+                </div>
+                <div className="rounded border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm font-semibold uppercase tracking-[0.3em]">
+                  {agenda.headline}
+                </div>
+                <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-wider text-slate-300 font-mono">
+                  <span className="font-semibold text-slate-100">Issue Theme</span>
+                  <span>{agenda.issueTheme}</span>
+                </div>
+                <div className="text-sm font-mono text-slate-300 leading-relaxed">
+                  {agenda.description}
+                </div>
+                {agenda.pullQuote && (
+                  <blockquote className="border-l-2 border-government-blue/60 pl-3 text-sm italic text-slate-300/80">
+                    {agenda.pullQuote}
+                  </blockquote>
+                )}
+                <div className="text-xs text-slate-400 font-mono italic">
+                  "{agenda.flavorText}"
+                </div>
               </div>
-              <div className="text-xs font-mono text-gray-300">
-                {agenda.description}
+            ) : (
+              <div className="space-y-3 text-white">
+                <div className="space-y-1">
+                  <div className="text-[12px] uppercase tracking-[0.4em] text-secret-red font-bold">{agenda.operationName}</div>
+                  <div className="text-2xl font-black uppercase leading-tight drop-shadow-[0_2px_0_rgba(0,0,0,0.45)]">
+                    {agenda.headline}
+                  </div>
+                  <div className="text-sm uppercase tracking-[0.3em] text-orange-200/80 font-semibold">
+                    {agenda.issueTheme}
+                  </div>
+                </div>
+                <div className="text-sm text-rose-100/90 font-mono leading-relaxed">
+                  {agenda.description}
+                </div>
+                <blockquote className="border-l-4 border-secret-red/70 pl-3 text-base italic text-amber-100/90">
+                  {agenda.pullQuote ?? agenda.flavorText}
+                </blockquote>
+                <div className="text-xs text-rose-200/80 font-mono">
+                  "{agenda.flavorText}"
+                </div>
               </div>
-              <div className="text-xs text-gray-500 italic">
-                "{agenda.flavorText}"
-              </div>
-            </div>
+            )}
 
             {renderProgressBar()}
 
             {agenda.completed && (
-              <div className="text-xs text-center text-secret-red font-bold animate-pulse">
+              <div
+                className={`text-xs text-center font-bold animate-pulse ${
+                  isGovernmentAgenda ? 'text-government-blue' : 'text-secret-red'
+                }`}
+              >
                 *** OBJECTIVE COMPLETE ***
               </div>
             )}
@@ -221,11 +381,11 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
 
       {/* Glitch effect overlay - only when expanded */}
       {isExpanded && (
-        <div className="absolute inset-0 pointer-events-none opacity-20">
+        <div className={`absolute inset-0 pointer-events-none ${isGovernmentAgenda ? 'opacity-10' : 'opacity-20'}`}>
           {Array.from({ length: 3 }).map((_, i) => (
-            <div 
+            <div
               key={i}
-              className="absolute bg-secret-red h-px"
+              className={`absolute h-px ${isGovernmentAgenda ? 'bg-government-blue' : 'bg-secret-red'}`}
               style={{
                 width: '100%',
                 top: `${30 + i * 20}%`,
