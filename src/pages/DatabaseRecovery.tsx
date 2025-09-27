@@ -5,28 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { CardDatabaseRecovery } from '@/tools/CardDatabaseRecovery';
+import { CardDatabaseRecovery, type RecoveryReport } from '@/tools/CardDatabaseRecovery';
 import { ExtensionEffectMigrator } from '@/tools/ExtensionEffectMigrator';
 import { AlertTriangle, Download, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
-
-interface RecoveryReport {
-  totalCards: number;
-  coreCards: number;
-  extensionCards: number;
-  validationSummary: any;
-  issues: Array<{
-    cardId: string;
-    cardName: string;
-    issue: string;
-    severity: 'low' | 'medium' | 'high';
-  }>;
-  extensions: Array<{
-    id: string;
-    name: string;
-    cardCount: number;
-    migrationSuccess: boolean;
-  }>;
-}
+import type { ValidationSummary } from '@/systems/CardTextGenerator';
 
 export default function DatabaseRecovery() {
   const [loading, setLoading] = useState(false);
@@ -76,7 +58,17 @@ export default function DatabaseRecovery() {
     }
   };
 
-  const successRate = report ? ((report.totalCards - report.issues.filter(i => i.severity === 'high').length) / report.totalCards * 100) : 0;
+  const validationSummary: ValidationSummary | null = report?.validationSummary ?? null;
+  const overallSuccessRate = report && report.totalCards > 0
+    ? ((report.totalCards - report.issues.filter(i => i.severity === 'high').length) / report.totalCards) * 100
+    : 0;
+  const validationSuccessRate = validationSummary && validationSummary.totalCards > 0
+    ? (validationSummary.validCards / validationSummary.totalCards) * 100
+    : 0;
+  const totalValidated = validationSummary?.totalCards ?? 0;
+  const validCards = validationSummary?.validCards ?? 0;
+  const invalidCards = validationSummary?.invalidCards ?? 0;
+  const warningCards = validationSummary?.warningCards ?? 0;
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -173,17 +165,17 @@ export default function DatabaseRecovery() {
                       <div className="text-sm text-muted-foreground">Extension Cards</div>
                     </div>
                     <div className="text-center space-y-2">
-                      <div className="text-3xl font-bold text-purple-600">{successRate.toFixed(1)}%</div>
-                      <div className="text-sm text-muted-foreground">Success Rate</div>
+                      <div className="text-3xl font-bold text-purple-600">{overallSuccessRate.toFixed(1)}%</div>
+                      <div className="text-sm text-muted-foreground">Overall Success Rate</div>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Recovery Progress</span>
-                      <span>{successRate.toFixed(1)}%</span>
+                      <span>{overallSuccessRate.toFixed(1)}%</span>
                     </div>
-                    <Progress value={successRate} className="h-2" />
+                    <Progress value={overallSuccessRate} className="h-2" />
                   </div>
 
                   {report.issues.length === 0 ? (
@@ -278,33 +270,37 @@ export default function DatabaseRecovery() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {report.validationSummary ? (
+                  {validationSummary ? (
                     <div className="space-y-4">
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center space-y-2">
-                          <div className="text-2xl font-bold text-green-600">
-                            {report.validationSummary.successCount}
-                          </div>
+                          <div className="text-2xl font-bold text-foreground">{totalValidated}</div>
+                          <div className="text-sm text-muted-foreground">Total Validated</div>
+                        </div>
+                        <div className="text-center space-y-2">
+                          <div className="text-2xl font-bold text-green-600">{validCards}</div>
                           <div className="text-sm text-muted-foreground">Valid Cards</div>
                         </div>
                         <div className="text-center space-y-2">
-                          <div className="text-2xl font-bold text-red-600">
-                            {report.validationSummary.errorCount}
-                          </div>
+                          <div className="text-2xl font-bold text-red-600">{invalidCards}</div>
                           <div className="text-sm text-muted-foreground">Invalid Cards</div>
                         </div>
                         <div className="text-center space-y-2">
-                          <div className="text-2xl font-bold text-blue-600">
-                            {report.validationSummary.successRate?.toFixed(1)}%
-                          </div>
-                          <div className="text-sm text-muted-foreground">Success Rate</div>
+                          <div className="text-2xl font-bold text-amber-500">{warningCards}</div>
+                          <div className="text-sm text-muted-foreground">Warnings</div>
                         </div>
                       </div>
 
-                      <Progress 
-                        value={report.validationSummary.successRate || 0} 
-                        className="h-2" 
-                      />
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Validation Success Rate</span>
+                          <span>{validationSuccessRate.toFixed(1)}%</span>
+                        </div>
+                        <Progress
+                          value={validationSuccessRate}
+                          className="h-2"
+                        />
+                      </div>
                     </div>
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
