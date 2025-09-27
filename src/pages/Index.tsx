@@ -543,6 +543,7 @@ const Index = () => {
   const [finalEdition, setFinalEdition] = useState<GameOverReport | null>(null);
   const [readingEdition, setReadingEdition] = useState<GameOverReport | null>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
+  const [isEndingTurn, setIsEndingTurn] = useState(false);
   const [paranormalSightings, setParanormalSightings] = useState<ParanormalSighting[]>([]);
   const [inspectedPlayedCard, setInspectedPlayedCard] = useState<GameCard | null>(null);
 
@@ -1325,7 +1326,7 @@ const Index = () => {
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (showMenu || showIntro || showInGameOptions || showHowToPlay) return;
-      
+
       // Number keys for playing cards (1-9)
       const cardNumber = parseInt(e.key);
       if (cardNumber >= 1 && cardNumber <= 9 && gameState.hand[cardNumber - 1]) {
@@ -1333,7 +1334,7 @@ const Index = () => {
         handlePlayCard(card.id);
         return;
       }
-      
+
       switch (e.key.toLowerCase()) {
         case 'f11':
           e.preventDefault();
@@ -1361,7 +1362,7 @@ const Index = () => {
           break;
         case ' ':
           e.preventDefault();
-          if (gameState.phase === 'action' && !gameState.animating) {
+          if (gameState.phase === 'action' && !gameState.animating && !isEndingTurn) {
             handleEndTurn();
           }
           break;
@@ -1370,7 +1371,24 @@ const Index = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showMenu, showIntro, showInGameOptions, showHowToPlay, gameState.phase, gameState.animating, gameState.hand, audio]);
+  }, [
+    showMenu,
+    showIntro,
+    showInGameOptions,
+    showHowToPlay,
+    gameState.phase,
+    gameState.animating,
+    gameState.hand,
+    audio,
+    handleEndTurn,
+    isEndingTurn,
+  ]);
+
+  useEffect(() => {
+    if (gameState.phase === 'action' && gameState.currentPlayer === 'human' && !gameState.animating) {
+      setIsEndingTurn(false);
+    }
+  }, [gameState.phase, gameState.currentPlayer, gameState.animating]);
 
   const handleSaveGame = () => {
     if (saveGame) {
@@ -1636,14 +1654,19 @@ const Index = () => {
     }
   };
 
-  const handleEndTurn = () => {
+  const handleEndTurn = useCallback(() => {
+    if (isEndingTurn) {
+      return;
+    }
+
+    setIsEndingTurn(true);
     endTurn();
     audio.playSFX('turnEnd');
     // Play card draw sound after a short delay
     setTimeout(() => {
       audio.playSFX('cardDraw');
     }, 500);
-  };
+  }, [audio, endTurn, isEndingTurn]);
 
   const handleCloseNewspaper = () => {
     closeNewspaper();
@@ -2209,7 +2232,7 @@ const Index = () => {
           id="end-turn-button"
           onClick={handleEndTurn}
           className="end-turn-button touch-target w-full border-2 border-black bg-truth-red py-3 font-black uppercase tracking-[0.4em] text-white transition duration-200 hover:bg-white hover:text-truth-red disabled:opacity-60"
-          disabled={isPlayerActionLocked}
+          disabled={isPlayerActionLocked || isEndingTurn}
         >
           {gameState.currentPlayer === 'ai' ? (
             <span className="flex items-center justify-center gap-2 text-sm">
