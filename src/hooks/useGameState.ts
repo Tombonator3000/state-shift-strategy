@@ -168,6 +168,17 @@ const resolveHotspotSource = (
   payload: ParanormalHotspotPayload,
 ): NonNullable<ParanormalHotspotPayload['source']> => payload.source ?? DEFAULT_HOTSPOT_SOURCE;
 
+const resolveHotspotAvoidFaction = (
+  payload: ParanormalHotspotPayload,
+  playerFaction: 'truth' | 'government',
+): 'truth' | 'government' => {
+  if (payload.source === 'truth' || payload.source === 'government') {
+    return payload.source;
+  }
+
+  return playerFaction;
+};
+
 const ownerToFaction = (
   owner: 'player' | 'ai' | 'neutral',
   playerFaction: 'truth' | 'government',
@@ -185,6 +196,8 @@ const selectHotspotTargetState = (params: {
 }): GameState['states'][number] | undefined => {
   const { states, activeHotspots, payload, playerFaction } = params;
   const activeSet = new Set(Object.keys(activeHotspots));
+
+  const avoidFaction = resolveHotspotAvoidFaction(payload, playerFaction);
 
   if (payload.stateId) {
     const target = states.find(state =>
@@ -207,11 +220,12 @@ const selectHotspotTargetState = (params: {
   const neutral = available.filter(state => state.owner === 'neutral');
   const opponentOwned = available.filter(state => {
     const faction = ownerToFaction(state.owner, playerFaction);
-    return faction !== 'neutral' && faction !== playerFaction;
+    return faction !== 'neutral' && faction !== avoidFaction;
   });
-  const playerOwned = available.filter(state => ownerToFaction(state.owner, playerFaction) === playerFaction);
 
-  const buckets = [contested, neutral, opponentOwned, playerOwned, available];
+  const fallback = available.filter(state => ownerToFaction(state.owner, playerFaction) !== avoidFaction);
+
+  const buckets = [contested, neutral, opponentOwned];
   for (const bucket of buckets) {
     if (bucket.length > 0) {
       const index = Math.floor(Math.random() * bucket.length);
@@ -219,7 +233,12 @@ const selectHotspotTargetState = (params: {
     }
   }
 
-  return available[0];
+  if (fallback.length > 0) {
+    const index = Math.floor(Math.random() * fallback.length);
+    return fallback[index];
+  }
+
+  return undefined;
 };
 
 const toStateHotspot = (
