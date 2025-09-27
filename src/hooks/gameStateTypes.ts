@@ -1,5 +1,5 @@
 import type { GameCard } from '@/rules/mvp';
-import type { EventManager, GameEvent } from '@/data/eventDatabase';
+import type { EventManager, GameEvent, ParanormalHotspotPayload } from '@/data/eventDatabase';
 import type { SecretAgenda } from '@/data/agendaDatabase';
 import type { AgendaIssueState } from '@/data/agendaIssues';
 import type { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
@@ -52,6 +52,7 @@ export interface GameState {
     name: string;
     abbreviation: string;
     baseIP: number;
+    baseDefense: number;
     defense: number;
     pressure: number;
     contested: boolean;
@@ -63,6 +64,7 @@ export interface GameState {
     occupierLabel?: string | null;
     occupierIcon?: string | null;
     occupierUpdatedAt?: number;
+    paranormalHotspot?: StateParanormalHotspot;
   }>;
   currentEvents: GameEvent[];
   eventManager?: EventManager;
@@ -97,4 +99,35 @@ export interface GameState {
   truthAbove80Streak: number;
   truthBelow20Streak: number;
   timeBasedGoalCounters: Record<string, number>;
+  paranormalHotspots: Record<string, ActiveParanormalHotspot>;
+}
+
+export interface ActiveParanormalHotspot {
+  id: string;
+  eventId: string;
+  stateId: string;
+  stateName: string;
+  stateAbbreviation: string;
+  label: string;
+  description?: string;
+  icon?: string;
+  duration: number;
+  defenseBoost: number;
+  truthReward: number;
+  expiresOnTurn: number;
+  createdOnTurn: number;
+  source: NonNullable<ParanormalHotspotPayload['source']>;
+}
+
+export interface StateParanormalHotspot {
+  id: string;
+  eventId: string;
+  label: string;
+  description?: string;
+  icon?: string;
+  defenseBoost: number;
+  truthReward: number;
+  expiresOnTurn: number;
+  turnsRemaining: number;
+  source: NonNullable<ParanormalHotspotPayload['source']>;
 }
