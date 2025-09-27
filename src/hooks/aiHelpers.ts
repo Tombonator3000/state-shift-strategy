@@ -250,6 +250,19 @@ export const applyAiCardPlay = (
   params: AiCardPlayParams,
   achievements: AchievementTracker,
 ): AiCardPlayResult => {
+  if (prev.cardsPlayedThisTurn >= 3) {
+    return {
+      nextState: {
+        ...prev,
+        log: [
+          ...prev.log,
+          'AI attempted to play an additional card but already reached the turn limit of 3.',
+        ],
+      },
+      failed: true,
+    };
+  }
+
   const { cardId, card: providedCard, targetState, reasoning, strategyDetails } = params;
   const resolvedCard = prev.aiHand.find(handCard => handCard.id === (providedCard?.id ?? cardId));
 
@@ -318,6 +331,7 @@ export const applyAiCardPlay = (
     turnPlays: [...prev.turnPlays, ...turnPlayEntries],
     log: logEntries,
     paranormalHotspots: updatedHotspots,
+    cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
   };
 
   return {
