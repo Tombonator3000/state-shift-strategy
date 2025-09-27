@@ -10,364 +10,353 @@ export interface SecretAgenda {
   flavorText: string;
 }
 
+const ensureArray = <T>(value: T[] | undefined | null): T[] => {
+  return Array.isArray(value) ? value : [];
+};
+
+const resolveStreak = (
+  gameState: any,
+  key: 'truthAbove80Streak' | 'truthBelow20Streak',
+): number => {
+  const direct = gameState?.[key];
+  if (typeof direct === 'number' && Number.isFinite(direct)) {
+    return direct;
+  }
+
+  const counters = gameState?.timeBasedGoalCounters;
+  const fallback = counters?.[key];
+  if (typeof fallback === 'number' && Number.isFinite(fallback)) {
+    return fallback;
+  }
+
+  return 0;
+};
+
+const normalizeStateId = (
+  value: unknown,
+  states?: Array<{ id?: string; abbreviation?: string; name?: string }>,
+): string => {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed.length) {
+    return '';
+  }
+
+  const uppercase = trimmed.toUpperCase();
+  if (!Array.isArray(states)) {
+    return uppercase;
+  }
+
+  const match = states.find(candidate => {
+    if (!candidate) {
+      return false;
+    }
+
+    const id = String(candidate.id ?? '').toUpperCase();
+    const abbreviation = String(candidate.abbreviation ?? '').toUpperCase();
+    const name = String(candidate.name ?? '').toUpperCase();
+
+    return uppercase === id || uppercase === abbreviation || uppercase === name;
+  });
+
+  if (match) {
+    const abbr = String(match.abbreviation ?? '').trim();
+    if (abbr) {
+      return abbr.toUpperCase();
+    }
+
+    const id = String(match.id ?? '').trim();
+    if (id) {
+      return id.toUpperCase();
+    }
+  }
+
+  return uppercase;
+};
+
+const countControlledMatches = (gameState: any, targets: string[]): number => {
+  const normalizedTargets = new Set(
+    targets.map(target => normalizeStateId(target, gameState?.states)).filter(Boolean),
+  );
+
+  if (normalizedTargets.size === 0) {
+    return 0;
+  }
+
+  return ensureArray(gameState?.controlledStates).reduce((total, stateId) => {
+    const normalized = normalizeStateId(stateId, gameState?.states);
+    return normalizedTargets.has(normalized) ? total + 1 : total;
+  }, 0);
+};
+
+const countCapturedMatches = (gameState: any, targets?: Set<string>): number => {
+  const plays = ensureArray(gameState?.factionPlayHistory);
+  let total = 0;
+
+  for (const record of plays) {
+    const capturedStates = ensureArray(record?.capturedStates);
+    for (const entry of capturedStates) {
+      const normalized = normalizeStateId(entry, gameState?.states);
+      if (!normalized) {
+        continue;
+      }
+
+      if (!targets || targets.has(normalized)) {
+        total += 1;
+      }
+    }
+  }
+
+  return total;
+};
+
+const countCardTypePlays = (gameState: any, type: string): number => {
+  return ensureArray(gameState?.factionPlayHistory).filter(
+    record => record?.card?.type === type,
+  ).length;
+};
+
+const sumPositiveTruthDelta = (gameState: any): number => {
+  return ensureArray(gameState?.factionPlayHistory).reduce((total, record) => {
+    const delta = typeof record?.truthDelta === 'number' ? record.truthDelta : 0;
+    return delta > 0 ? total + delta : total;
+  }, 0);
+};
+
+const countZonePlaysOnStates = (gameState: any, targets: Set<string>): number => {
+  return ensureArray(gameState?.factionPlayHistory).filter(record => {
+    if (record?.card?.type !== 'ZONE') {
+      return false;
+    }
+
+    const normalized = normalizeStateId(record?.targetState, gameState?.states);
+    return normalized && targets.has(normalized);
+  }).length;
+};
+
+const countMediaAndAttackPairs = (gameState: any): number => {
+  const plays = ensureArray(gameState?.factionPlayHistory);
+  const media = plays.filter(record => record?.card?.type === 'MEDIA').length;
+  const attack = plays.filter(record => record?.card?.type === 'ATTACK').length;
+  return Math.min(media, attack);
+};
+
 export const AGENDA_DATABASE: SecretAgenda[] = [
   // TRUTH FACTION AGENDAS
   {
-    id: 'truth_coastal_dominance',
+    id: 'truth_bat_boy_brunch',
     faction: 'truth',
     category: 'territorial',
-    title: 'Coastal Enlightenment',
-    description: 'Control 4 coastal states to spread truth through maritime networks',
-    target: 4,
-    difficulty: 'medium',
-    checkProgress: (gameState) => {
-      const coastalStates = ['CA', 'FL', 'NY', 'TX', 'WA', 'ME', 'OR', 'NC', 'SC', 'GA', 'VA', 'MD', 'DE', 'NJ', 'CT', 'RI', 'MA', 'NH', 'LA', 'MS', 'AL'];
-      return gameState.controlledStates.filter((state: string) => coastalStates.includes(state)).length;
-    },
-    flavorText: 'The seas have always carried truth across continents.'
-  },
-  {
-    id: 'truth_media_centers',
-    faction: 'truth',
-    category: 'influence',
-    title: 'Media Liberation',
-    description: 'Control NY, CA, and IL to dominate mainstream media',
+    title: "Bat Boy's Brunch Brigade",
+    description: 'Control three Appalachian pantry states (WV, KY, TN, or PA) to host Bat Boy\'s roaming brunch buffet.',
     target: 3,
-    difficulty: 'hard',
-    checkProgress: (gameState) => {
-      const mediaCenters = ['NY', 'CA', 'IL'];
-      return gameState.controlledStates.filter((state: string) => mediaCenters.includes(state)).length;
-    },
-    flavorText: 'Control the narrative, control reality.'
-  },
-  {
-    id: 'truth_tech_triangle',
-    faction: 'truth',
-    category: 'strategic',
-    title: 'Silicon Awakening',
-    description: 'Control CA, WA, and TX to dominate tech infrastructure',
-    target: 3,
-    difficulty: 'hard',
-    checkProgress: (gameState) => {
-      const techStates = ['CA', 'WA', 'TX'];
-      return gameState.controlledStates.filter((state: string) => techStates.includes(state)).length;
-    },
-    flavorText: 'Technology is the ultimate truth amplifier.'
-  },
-  {
-    id: 'truth_heartland_awakening',
-    faction: 'truth',
-    category: 'territorial',
-    title: 'Heartland Awakening',
-    description: 'Control 5 midwest states to awaken rural America',
-    target: 5,
     difficulty: 'medium',
-    checkProgress: (gameState) => {
-      const midwestStates = ['OH', 'IN', 'IL', 'MI', 'WI', 'MN', 'IA', 'MO', 'ND', 'SD', 'NE', 'KS'];
-      return gameState.controlledStates.filter((state: string) => midwestStates.includes(state)).length;
-    },
-    flavorText: 'The heartland holds the soul of America.'
+    checkProgress: gameState => countControlledMatches(gameState, ['WV', 'KY', 'TN', 'PA']),
+    flavorText: 'He only eats waffles shaped like conspiracy charts.'
   },
   {
-    id: 'truth_truth_threshold',
+    id: 'truth_moonbeam_marmalade',
     faction: 'truth',
     category: 'resource',
-    title: 'Truth Cascade',
-    description: 'Maintain Truth level above 80% for 3 consecutive turns',
+    title: 'Moonbeam Marmalade Slow-Cook',
+    description: 'Keep the Truth meter above 80% for three consecutive turns so the lunar marmalade can properly set.',
     target: 3,
     difficulty: 'hard',
-    checkProgress: (gameState) => {
-      if (typeof gameState.truthAbove80Streak === 'number') {
-        return gameState.truthAbove80Streak;
-      }
-
-      if (typeof gameState.timeBasedGoalCounters?.truthAbove80Streak === 'number') {
-        return gameState.timeBasedGoalCounters.truthAbove80Streak;
-      }
-
-      return 0;
-    },
-    flavorText: 'When truth reaches critical mass, reality shifts.'
+    checkProgress: gameState => resolveStreak(gameState, 'truthAbove80Streak'),
+    flavorText: 'Stir only under full moons and while humming the numbers station jingle.'
   },
   {
-    id: 'truth_resource_independence',
-    faction: 'truth',
-    category: 'resource',
-    title: 'Resource Independence',
-    description: 'Accumulate 150 IP while maintaining Truth above 70%',
-    target: 150,
-    difficulty: 'hard',
-    checkProgress: (gameState) => {
-      return gameState.truth >= 70 ? gameState.ip : 0;
-    },
-    flavorText: 'True power comes from self-sufficiency.'
-  },
-  {
-    id: 'truth_dc_liberation',
+    id: 'truth_ufo_retrieval_log',
     faction: 'truth',
     category: 'strategic',
-    title: 'Capital Liberation',
-    description: 'Control DC and all 3 surrounding states (VA, MD, WV)',
-    target: 4,
-    difficulty: 'legendary',
-    checkProgress: (gameState) => {
-      const capitalRegion = ['DC', 'VA', 'MD', 'WV'];
-      return gameState.controlledStates.filter((state: string) => capitalRegion.includes(state)).length;
-    },
-    flavorText: 'Strike at the heart of the conspiracy.'
-  },
-  {
-    id: 'truth_border_control',
-    faction: 'truth',
-    category: 'territorial',
-    title: 'Border Truth',
-    description: 'Control 4 border states to stop information flow',
+    title: 'UFO Retrieval Mise en Place',
+    description: 'Run four ZONE recipes on desert crash sites (NV, NM, AZ, UT) to stock the crash cart pantry.',
     target: 4,
     difficulty: 'medium',
-    checkProgress: (gameState) => {
-      const borderStates = ['TX', 'NM', 'AZ', 'CA', 'WA', 'MT', 'ND', 'MN', 'MI', 'NY', 'VT', 'NH', 'ME'];
-      return gameState.controlledStates.filter((state: string) => borderStates.includes(state)).length;
-    },
-    flavorText: 'Truth knows no borders, but control does.'
+    checkProgress: gameState =>
+      countZonePlaysOnStates(gameState, new Set(['NV', 'NM', 'AZ', 'UT'])),
+    flavorText: 'Every saucer comes with a complimentary spice rack of stardust.'
   },
   {
-    id: 'truth_energy_grid',
-    faction: 'truth',
-    category: 'strategic',
-    title: 'Energy Truth',
-    description: 'Control TX, ND, and WV to control energy narrative',
-    target: 3,
-    difficulty: 'medium',
-    checkProgress: (gameState) => {
-      const energyStates = ['TX', 'ND', 'WV'];
-      return gameState.controlledStates.filter((state: string) => energyStates.includes(state)).length;
-    },
-    flavorText: 'Control energy, control civilization.'
-  },
-  {
-    id: 'truth_university_network',
+    id: 'truth_tabloid_taste_test',
     faction: 'truth',
     category: 'influence',
-    title: 'Academic Awakening',
-    description: 'Control MA, CT, and NH to influence education',
-    target: 3,
+    title: 'Tabloid Taste Test Kitchen',
+    description: 'Publish six MEDIA spreads to convince readers that every recipe doubles as emergency disclosure protocol.',
+    target: 6,
     difficulty: 'easy',
-    checkProgress: (gameState) => {
-      const academicStates = ['MA', 'CT', 'NH'];
-      return gameState.controlledStates.filter((state: string) => academicStates.includes(state)).length;
-    },
-    flavorText: 'Education is the foundation of enlightenment.'
+    checkProgress: gameState => countCardTypePlays(gameState, 'MEDIA'),
+    flavorText: 'Step one: preheat the presses until they glow government-issue green.'
+  },
+  {
+    id: 'truth_cryptid_potluck',
+    faction: 'truth',
+    category: 'territorial',
+    title: 'Cryptid Potluck Planning',
+    description: 'Secure four cryptid hotspots (WA, OR, WV, NJ, MT, or NH) so every monster brings its signature casserole.',
+    target: 4,
+    difficulty: 'hard',
+    checkProgress: gameState => countControlledMatches(gameState, ['WA', 'OR', 'WV', 'NJ', 'MT', 'NH']),
+    flavorText: 'Please label any dishes that contain silver or government tracking powder.'
+  },
+  {
+    id: 'truth_abduction_bakeoff',
+    faction: 'truth',
+    category: 'strategic',
+    title: 'Abduction Bake-Off',
+    description: 'Capture three states with any recipe card to prove your soufflé can levitate swing voters.',
+    target: 3,
+    difficulty: 'medium',
+    checkProgress: gameState => countCapturedMatches(gameState),
+    flavorText: 'Judges deduct points if the probe frosting deflates before plating.'
+  },
+  {
+    id: 'truth_cosmic_conserve',
+    faction: 'truth',
+    category: 'resource',
+    title: 'Cosmic Conserve Drive',
+    description: 'Accumulate +25 Truth from your card plays to bottle enough nebula jelly for the next newsletter drop.',
+    target: 25,
+    difficulty: 'legendary',
+    checkProgress: gameState => sumPositiveTruthDelta(gameState),
+    flavorText: 'Pairs nicely with pancakes and interdimensional whistleblowing.'
   },
 
   // GOVERNMENT FACTION AGENDAS
   {
-    id: 'gov_military_complex',
-    faction: 'government',
-    category: 'strategic',
-    title: 'Military Supremacy',
-    description: 'Control VA, TX, and CO to dominate military infrastructure',
-    target: 3,
-    difficulty: 'hard',
-    checkProgress: (gameState) => {
-      const militaryStates = ['VA', 'TX', 'CO'];
-      return gameState.controlledStates.filter((state: string) => militaryStates.includes(state)).length;
-    },
-    flavorText: 'Security through strength, order through control.'
-  },
-  {
-    id: 'gov_intelligence_triangle',
-    faction: 'government',
-    category: 'strategic',
-    title: 'Intelligence Network',
-    description: 'Control VA, MD, and DC to secure intelligence agencies',
-    target: 3,
-    difficulty: 'hard',
-    checkProgress: (gameState) => {
-      const intelStates = ['VA', 'MD', 'DC'];
-      return gameState.controlledStates.filter((state: string) => intelStates.includes(state)).length;
-    },
-    flavorText: 'Information is the ultimate weapon.'
-  },
-  {
-    id: 'gov_economic_control',
-    faction: 'government',
-    category: 'resource',
-    title: 'Economic Dominance',
-    description: 'Control NY, IL, and CA to dominate financial centers',
-    target: 3,
-    difficulty: 'legendary',
-    checkProgress: (gameState) => {
-      const economicStates = ['NY', 'IL', 'CA'];
-      return gameState.controlledStates.filter((state: string) => economicStates.includes(state)).length;
-    },
-    flavorText: 'Control the markets, control the masses.'
-  },
-  {
-    id: 'gov_resource_monopoly',
-    faction: 'government',
-    category: 'resource',
-    title: 'Resource Monopoly',
-    description: 'Accumulate 300 IP through systematic exploitation',
-    target: 300,
-    difficulty: 'hard',
-    checkProgress: (gameState) => {
-      return gameState.ip;
-    },
-    flavorText: 'Efficiency through centralization.'
-  },
-  {
-    id: 'gov_truth_suppression',
-    faction: 'government',
-    category: 'sabotage',
-    title: 'Truth Suppression',
-    description: 'Maintain Truth level below 20% for 3 consecutive turns',
-    target: 3,
-    difficulty: 'hard',
-    checkProgress: (gameState) => {
-      if (typeof gameState.truthBelow20Streak === 'number') {
-        return gameState.truthBelow20Streak;
-      }
-
-      if (typeof gameState.timeBasedGoalCounters?.truthBelow20Streak === 'number') {
-        return gameState.timeBasedGoalCounters.truthBelow20Streak;
-      }
-
-      return 0;
-    },
-    flavorText: 'Some truths are too dangerous for public consumption.'
-  },
-  {
-    id: 'gov_southern_strategy',
+    id: 'gov_capitol_stew',
     faction: 'government',
     category: 'territorial',
-    title: 'Southern Strategy',
-    description: 'Control 6 southern states to maintain traditional power',
-    target: 6,
-    difficulty: 'medium',
-    checkProgress: (gameState) => {
-      const southernStates = ['TX', 'FL', 'GA', 'NC', 'SC', 'TN', 'AL', 'MS', 'LA', 'AR', 'KY', 'WV', 'VA'];
-      return gameState.controlledStates.filter((state: string) => southernStates.includes(state)).length;
-    },
-    flavorText: 'The South remembers, and the South endures.'
-  },
-  {
-    id: 'gov_industrial_control',
-    faction: 'government',
-    category: 'strategic',
-    title: 'Industrial Control',
-    description: 'Control OH, PA, and MI to dominate manufacturing',
+    title: 'Capitol Cafeteria Stew',
+    description: 'Control any three beltway kitchen hubs (DC, VA, MD, or CO) to keep the staff soup on-message.',
     target: 3,
-    difficulty: 'medium',
-    checkProgress: (gameState) => {
-      const industrialStates = ['OH', 'PA', 'MI'];
-      return gameState.controlledStates.filter((state: string) => industrialStates.includes(state)).length;
-    },
-    flavorText: 'Industry is the backbone of power.'
+    difficulty: 'easy',
+    checkProgress: gameState => countControlledMatches(gameState, ['DC', 'VA', 'MD', 'CO']),
+    flavorText: 'Simmer for six hours or until all whistleblowers dissolve.'
   },
   {
-    id: 'gov_agriculture_control',
-    faction: 'government',
-    category: 'resource',
-    title: 'Agricultural Control',
-    description: 'Control 5 agricultural states to control food supply',
-    target: 5,
-    difficulty: 'medium',
-    checkProgress: (gameState) => {
-      const agStates = ['IA', 'IL', 'NE', 'KS', 'MN', 'IN', 'OH', 'WI', 'SD', 'ND'];
-      return gameState.controlledStates.filter((state: string) => agStates.includes(state)).length;
-    },
-    flavorText: 'Control the food, control the people.'
-  },
-  {
-    id: 'gov_surveillance_network',
+    id: 'gov_field_ration_redactions',
     faction: 'government',
     category: 'influence',
-    title: 'Surveillance State',
-    description: 'Control NY, CA, TX, and FL to monitor 60% of population',
-    target: 4,
-    difficulty: 'hard',
-    checkProgress: (gameState) => {
-      const surveillanceStates = ['NY', 'CA', 'TX', 'FL'];
-      return gameState.controlledStates.filter((state: string) => surveillanceStates.includes(state)).length;
-    },
-    flavorText: 'Safety requires sacrifice of privacy.'
+    title: 'Field-Ration Redactions',
+    description: 'Broadcast six MEDIA briefings so every mess hall placemat matches the official talking points.',
+    target: 6,
+    difficulty: 'medium',
+    checkProgress: gameState => countCardTypePlays(gameState, 'MEDIA'),
+    flavorText: 'Each serving includes a complimentary marker to black out inconvenient ingredients.'
   },
   {
-    id: 'gov_western_expansion',
+    id: 'gov_supply_chain_soup',
     faction: 'government',
-    category: 'territorial',
-    title: 'Western Expansion',
-    description: 'Control 4 western states to maintain frontier control',
+    category: 'resource',
+    title: 'Supply Chain Soup',
+    description: 'Lock down four heartland depots (IA, NE, KS, MO, OK, or AR) to ration the mystery stock cubes.',
     target: 4,
-    difficulty: 'easy',
-    checkProgress: (gameState) => {
-      const westernStates = ['CA', 'NV', 'AZ', 'UT', 'CO', 'WY', 'MT', 'ID', 'WA', 'OR'];
-      return gameState.controlledStates.filter((state: string) => westernStates.includes(state)).length;
-    },
-    flavorText: 'Manifest Destiny never ended.'
+    difficulty: 'medium',
+    checkProgress: gameState => countControlledMatches(gameState, ['IA', 'NE', 'KS', 'MO', 'OK', 'AR']),
+    flavorText: 'Season liberally with bureaucracy and a dash of surveillance oregano.'
+  },
+  {
+    id: 'gov_ufo_recall_paperwork',
+    faction: 'government',
+    category: 'strategic',
+    title: 'UFO Recall Paperwork',
+    description: 'Repossess three desert crash sites through captures to ensure the saucer recall notices stay classified.',
+    target: 3,
+    difficulty: 'hard',
+    checkProgress: gameState =>
+      countCapturedMatches(gameState, new Set(['NV', 'NM', 'AZ', 'UT'])),
+    flavorText: 'Form 51-B must be filed in triplicate and glazed with hush-hush honey.'
+  },
+  {
+    id: 'gov_coverup_casserole',
+    faction: 'government',
+    category: 'sabotage',
+    title: 'Cover-Up Casserole',
+    description: 'Keep Truth under 20% for three consecutive turns to bake the cover crust before anyone peeks.',
+    target: 3,
+    difficulty: 'hard',
+    checkProgress: gameState => resolveStreak(gameState, 'truthBelow20Streak'),
+    flavorText: 'Serve piping hot with a garnish of shredded affidavits.'
+  },
+  {
+    id: 'gov_spice_rack_surveillance',
+    faction: 'government',
+    category: 'strategic',
+    title: 'Spice Rack Surveillance',
+    description: 'Control NY, CA, TX, and FL to monitor the nation\'s palate from coast to coast.',
+    target: 4,
+    difficulty: 'hard',
+    checkProgress: gameState => countControlledMatches(gameState, ['NY', 'CA', 'TX', 'FL']),
+    flavorText: 'Every shaker hides a listening device and a mild paprika aftertaste.'
+  },
+  {
+    id: 'gov_black_budget_bbq',
+    faction: 'government',
+    category: 'resource',
+    title: 'Black-Budget Barbecue',
+    description: 'Stockpile 220 IP to finance the annual classified cookout without triggering an audit.',
+    target: 220,
+    difficulty: 'legendary',
+    checkProgress: gameState => (typeof gameState?.ip === 'number' ? Math.max(0, gameState.ip) : 0),
+    flavorText: 'Secret sauce recipe: equal parts smoke, mirrors, and discretionary funds.'
   },
 
   // SHARED/NEUTRAL AGENDAS
   {
-    id: 'shared_population_centers',
+    id: 'shared_paranoid_picnic',
     faction: 'both',
     category: 'territorial',
-    title: 'Population Control',
-    description: 'Control the 5 most populous states',
-    target: 5,
-    difficulty: 'legendary',
-    checkProgress: (gameState) => {
-      const populousStates = ['CA', 'TX', 'FL', 'NY', 'PA'];
-      return gameState.controlledStates.filter((state: string) => populousStates.includes(state)).length;
-    },
-    flavorText: 'Numbers are power, population is destiny.'
+    title: 'Paranoid Picnic Tour',
+    description: 'Control four roadside delicacy states (WI, MN, NJ, LA, or NM) to keep the traveling potluck rolling.',
+    target: 4,
+    difficulty: 'medium',
+    checkProgress: gameState => countControlledMatches(gameState, ['WI', 'MN', 'NJ', 'LA', 'NM']),
+    flavorText: 'Pack extra foil hats so the ants can\'t read your recipes.'
   },
   {
-    id: 'shared_transport_network',
+    id: 'shared_midnight_press_run',
     faction: 'both',
-    category: 'strategic',
-    title: 'Transport Dominance',
-    description: 'Control key transport hubs: IL, TX, GA, NY, CA',
-    target: 5,
-    difficulty: 'legendary',
-    checkProgress: (gameState) => {
-      const transportStates = ['IL', 'TX', 'GA', 'NY', 'CA'];
-      return gameState.controlledStates.filter((state: string) => transportStates.includes(state)).length;
-    },
-    flavorText: 'Control the movement, control the nation.'
+    category: 'influence',
+    title: 'Midnight Press Run',
+    description: 'Serve three rounds of attack-and-media pairings to print a perfectly balanced conspiracy menu.',
+    target: 3,
+    difficulty: 'medium',
+    checkProgress: gameState => countMediaAndAttackPairs(gameState),
+    flavorText: 'Alternate bites of outrage and revelation for best mouthfeel.'
   },
   {
-    id: 'shared_electoral_dominance',
+    id: 'shared_combo_platter',
     faction: 'both',
     category: 'strategic',
-    title: 'Electoral Control',
-    description: 'Control states worth 270+ electoral votes',
-    target: 270,
+    title: 'Combo Platter Column',
+    description: 'Maintain two simultaneous state combination bonuses to keep the buffet table glowing.',
+    target: 2,
     difficulty: 'legendary',
-    checkProgress: (gameState) => {
-      // This would need electoral vote mapping
-      return gameState.controlledStates.length * 10; // Simplified
-    },
-    flavorText: 'Democracy is just counting, and we control the count.'
+    checkProgress: gameState => ensureArray(gameState?.activeStateCombinationIds).length,
+    flavorText: 'If the tray levitates, you\'ve hit the right flavor-frequency resonance.'
   }
 ];
 
 export const getRandomAgenda = (faction: 'truth' | 'government'): SecretAgenda => {
-  const factionAgendas = AGENDA_DATABASE.filter(agenda => 
+  const factionAgendas = AGENDA_DATABASE.filter(agenda =>
     agenda.faction === faction || agenda.faction === 'both'
   );
-  
+
   // Weight by difficulty - easier agendas more likely
   const weightedAgendas: SecretAgenda[] = [];
   factionAgendas.forEach(agenda => {
-    const weight = agenda.difficulty === 'easy' ? 4 : 
-                   agenda.difficulty === 'medium' ? 3 : 
+    const weight = agenda.difficulty === 'easy' ? 4 :
+                   agenda.difficulty === 'medium' ? 3 :
                    agenda.difficulty === 'hard' ? 2 : 1;
     for (let i = 0; i < weight; i++) {
       weightedAgendas.push(agenda);
     }
   });
-  
+
   return weightedAgendas[Math.floor(Math.random() * weightedAgendas.length)];
 };
 

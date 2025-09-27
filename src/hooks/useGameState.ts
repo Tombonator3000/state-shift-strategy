@@ -69,7 +69,7 @@ const computeTruthStreaks = (
   };
 };
 
-const STREAK_AGENDA_IDS = new Set(['truth_truth_threshold', 'gov_truth_suppression']);
+const STREAK_AGENDA_IDS = new Set(['truth_moonbeam_marmalade', 'gov_coverup_casserole']);
 
 const revealAiSecretAgenda = (
   state: GameState,
@@ -213,6 +213,7 @@ type AgendaPerspective = 'player' | 'ai';
 const buildAgendaSnapshot = (state: GameState, perspective: AgendaPerspective) => {
   const isPlayer = perspective === 'player';
   const faction = isPlayer ? state.faction : state.faction === 'truth' ? 'government' : 'truth';
+  const playOwner = isPlayer ? 'human' : 'ai';
 
   return {
     controlledStates: isPlayer ? state.controlledStates : state.aiControlledStates,
@@ -228,6 +229,11 @@ const buildAgendaSnapshot = (state: GameState, perspective: AgendaPerspective) =
     turn: state.turn,
     currentPlayer: state.currentPlayer,
     faction,
+    playHistory: state.playHistory,
+    factionPlayHistory: state.playHistory.filter(record => record.player === playOwner),
+    comboTruthDeltaThisRound: state.comboTruthDeltaThisRound,
+    activeStateCombinationIds: state.activeStateCombinationIds,
+    stateCombinationEffects: state.stateCombinationEffects,
   };
 };
 
