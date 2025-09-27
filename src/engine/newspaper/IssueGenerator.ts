@@ -4,6 +4,7 @@ import type { Card } from '@/types';
 import { loadCardLexicon } from './CardLexicon';
 import { composeCardStory, composeComboStory, type CardStory, type ComboStory } from './StoryComposer';
 import type { ComboSummary } from '@/game/combo.types';
+import type { AgendaIssueId } from '@/data/agendaIssues';
 
 export interface PlayedCardInput {
   card: Card;
@@ -50,6 +51,7 @@ export interface IssueGeneratorInput {
   eventsTruthDelta?: number;
   comboTruthDelta?: number;
   comboSummary?: ComboSummary | null;
+  agendaIssueId?: AgendaIssueId;
 }
 
 const FALLBACK_ADS = ['All advertising temporarily redacted.'];
@@ -268,6 +270,7 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
       pressureDelta: pressure ?? undefined,
       targetStateName: targetName ?? undefined,
       capturedStateNames: capturedNames,
+      issueId: input.agendaIssueId,
     });
 
     return mapCardToArticle(entry, story, truth, ip, pressure, targetName, capturedNames);

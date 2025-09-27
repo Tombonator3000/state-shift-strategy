@@ -6,6 +6,7 @@ import { X, TrendingUp, AlertTriangle } from 'lucide-react';
 import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
 import type { ParanormalSighting } from '@/types/paranormal';
+import type { AgendaIssueState } from '@/data/agendaIssues';
 import CardImage from '@/components/game/CardImage';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 
@@ -25,6 +26,7 @@ export interface TabloidNewspaperProps {
   comboTruthDelta?: number;
   onClose: () => void;
   sightings?: ParanormalSighting[];
+  agendaIssue?: AgendaIssueState;
 }
 
 interface NewspaperData {

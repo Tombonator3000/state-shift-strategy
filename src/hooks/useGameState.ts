@@ -9,6 +9,14 @@ import {
   createDefaultCombinationEffects,
 } from '@/data/stateCombinations';
 import { getRandomAgenda, getAgendaById } from '@/data/agendaDatabase';
+import type { SecretAgenda } from '@/data/agendaDatabase';
+import {
+  advanceAgendaIssue,
+  agendaIssueToState,
+  getIssueQuip,
+  peekActiveAgendaIssue,
+  resolveIssueStateById,
+} from '@/data/agendaIssues';
 import { type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
@@ -37,6 +45,86 @@ import { evaluateCombosForTurn } from './comboAdapter';
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
 const HAND_LIMIT = 5;
+
+type AgendaOwner = 'human' | 'ai';
+
+const OWNER_LABEL: Record<AgendaOwner, 'player' | 'ai'> = {
+  human: 'player',
+  ai: 'ai',
+};
+
+const MEDIA_TOTAL_SUFFIX = 'mediaTotal';
+const MEDIA_ROUND_SUFFIX = 'mediaThisRound';
+const SIGHTING_TOTAL_SUFFIX = 'sightingsTotal';
+const SIGHTING_ROUND_SUFFIX = 'sightingsThisRound';
+
+const incrementCounterMap = (
+  map: Record<string, number> | undefined,
+  key: string,
+  amount = 1,
+): Record<string, number> => {
+  if (!key) {
+    return map ?? {};
+  }
+  if (amount === 0) {
+    return map ?? {};
+  }
+  const source = map ?? {};
+  const current = typeof source[key] === 'number' && Number.isFinite(source[key]) ? source[key] : 0;
+  return {
+    ...source,
+    [key]: current + amount,
+  };
+};
+
+const applyAgendaCardCounters = (
+  state: GameState,
+  owner: AgendaOwner,
+  card: GameCard,
+): { issueCounters: Record<string, number>; roundCounters: Record<string, number> } => {
+  if (card.type !== 'MEDIA') {
+    return {
+      issueCounters: state.agendaIssueCounters ?? {},
+      roundCounters: state.agendaRoundCounters ?? {},
+    };
+  }
+  const ownerKey = OWNER_LABEL[owner];
+  const totalKey = `${ownerKey}:${MEDIA_TOTAL_SUFFIX}`;
+  const roundKey = `${ownerKey}:${MEDIA_ROUND_SUFFIX}`;
+  return {
+    issueCounters: incrementCounterMap(state.agendaIssueCounters, totalKey),
+    roundCounters: incrementCounterMap(state.agendaRoundCounters, roundKey),
+  };
+};
+
+const applyAgendaSightingCounters = (
+  state: GameState,
+  owner: AgendaOwner,
+): { issueCounters: Record<string, number>; roundCounters: Record<string, number> } => {
+  const ownerKey = OWNER_LABEL[owner];
+  const totalKey = `${ownerKey}:${SIGHTING_TOTAL_SUFFIX}`;
+  const roundKey = `${ownerKey}:${SIGHTING_ROUND_SUFFIX}`;
+  return {
+    issueCounters: incrementCounterMap(state.agendaIssueCounters, totalKey),
+    roundCounters: incrementCounterMap(state.agendaRoundCounters, roundKey),
+  };
+};
+
+const formatAgendaLogEntry = (
+  agenda: SecretAgenda,
+  message: string,
+  quip?: string | null,
+): string => {
+  const headline = agenda.headline?.trim().length ? agenda.headline.trim() : agenda.title;
+  const operation = agenda.operationName?.trim().length ? agenda.operationName.trim() : agenda.title;
+  const cleanedMessage = message.trim().replace(/\s+/g, ' ');
+  const base = `🗞️ ${headline} (${operation}) ${cleanedMessage}`.trim();
+  if (!quip) {
+    return base;
+  }
+  const trimmedQuip = quip.trim();
+  return trimmedQuip.length ? `${base} — ${trimmedQuip}` : base;
+};
 
 const computeTruthStreaks = (
   prev: Pick<GameState, 'truthAbove80Streak' | 'truthBelow20Streak'>,
@@ -214,6 +302,13 @@ const buildAgendaSnapshot = (state: GameState, perspective: AgendaPerspective) =
   const isPlayer = perspective === 'player';
   const faction = isPlayer ? state.faction : state.faction === 'truth' ? 'government' : 'truth';
   const playOwner = isPlayer ? 'human' : 'ai';
+  const ownerKey = OWNER_LABEL[playOwner];
+  const issueCounters = state.agendaIssueCounters ?? {};
+  const roundCounters = state.agendaRoundCounters ?? {};
+  const mediaRoundKey = `${ownerKey}:${MEDIA_ROUND_SUFFIX}`;
+  const mediaTotalKey = `${ownerKey}:${MEDIA_TOTAL_SUFFIX}`;
+  const sightingRoundKey = `${ownerKey}:${SIGHTING_ROUND_SUFFIX}`;
+  const sightingTotalKey = `${ownerKey}:${SIGHTING_TOTAL_SUFFIX}`;
 
   return {
     controlledStates: isPlayer ? state.controlledStates : state.aiControlledStates,
@@ -234,6 +329,23 @@ const buildAgendaSnapshot = (state: GameState, perspective: AgendaPerspective) =
     comboTruthDeltaThisRound: state.comboTruthDeltaThisRound,
     activeStateCombinationIds: state.activeStateCombinationIds,
     stateCombinationEffects: state.stateCombinationEffects,
+    agendaIssue: state.agendaIssue,
+    agendaIssueCounters: issueCounters,
+    agendaRoundCounters: roundCounters,
+    derivedCounters: {
+      mediaCardsPlayedThisRound: typeof roundCounters[mediaRoundKey] === 'number'
+        ? roundCounters[mediaRoundKey]
+        : 0,
+      mediaCardsPlayedTotal: typeof issueCounters[mediaTotalKey] === 'number'
+        ? issueCounters[mediaTotalKey]
+        : 0,
+      sightingsLoggedThisRound: typeof roundCounters[sightingRoundKey] === 'number'
+        ? roundCounters[sightingRoundKey]
+        : 0,
+      sightingsLoggedTotal: typeof issueCounters[sightingTotalKey] === 'number'
+        ? issueCounters[sightingTotalKey]
+        : 0,
+    },
   };
 };
 
@@ -242,97 +354,70 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
   let updatedSecretAgenda = state.secretAgenda;
   let updatedAiSecretAgenda = state.aiSecretAgenda;
 
-  if (updatedSecretAgenda) {
-    const snapshot = buildAgendaSnapshot(state, 'player');
-    const computedProgressRaw = Number(updatedSecretAgenda.checkProgress?.(snapshot) ?? updatedSecretAgenda.progress ?? 0);
+  const issueId = state.agendaIssue?.id;
+  const playerFaction = state.faction;
+  const aiFaction = state.faction === 'truth' ? 'government' : 'truth';
+
+  const processAgenda = <T extends NonNullable<GameState['secretAgenda']> | NonNullable<GameState['aiSecretAgenda']>>(
+    agenda: T,
+    perspective: AgendaPerspective,
+    faction: 'truth' | 'government',
+    actor: 'player' | 'opposition',
+    options: { requireRevealForProgress?: boolean } = {},
+  ): T => {
+    const snapshot = buildAgendaSnapshot(state, perspective);
+    const computedProgressRaw = Number(agenda.checkProgress?.(snapshot) ?? agenda.progress ?? 0);
     const computedProgress = Number.isFinite(computedProgressRaw)
       ? Math.max(0, computedProgressRaw)
-      : updatedSecretAgenda.progress ?? 0;
-    const previousProgress = updatedSecretAgenda.progress ?? 0;
-    const target = updatedSecretAgenda.target ?? 0;
+      : agenda.progress ?? 0;
+    const previousProgress = agenda.progress ?? 0;
+    const target = agenda.target ?? 0;
     const isCompleted = computedProgress >= target;
+    const isStreakAgenda = STREAK_AGENDA_IDS.has(agenda.id);
+    const shouldLogProgress = options.requireRevealForProgress ? Boolean(agenda.revealed) : true;
+    const actorPrefix = actor === 'opposition' ? 'Opposition ' : '';
+    const actorLabel = actor === 'opposition' ? 'Opposition' : 'Operatives';
 
-    if (computedProgress !== previousProgress || isCompleted !== updatedSecretAgenda.completed) {
-      const isStreakAgenda = STREAK_AGENDA_IDS.has(updatedSecretAgenda.id);
-
-      if (computedProgress > previousProgress) {
-        const delta = computedProgress - previousProgress;
-        const progressMessage = isStreakAgenda
-          ? `Secret Agenda streak increased to ${computedProgress}: ${updatedSecretAgenda.title} (${computedProgress}/${target})`
-          : `Secret Agenda progress +${delta}: ${updatedSecretAgenda.title} (${computedProgress}/${target})`;
-        logUpdates = [...logUpdates, progressMessage];
-      } else if (computedProgress < previousProgress && isStreakAgenda) {
-        logUpdates = [
-          ...logUpdates,
-          `Secret Agenda streak dropped to ${computedProgress}: ${updatedSecretAgenda.title} (${computedProgress}/${target})`,
-        ];
-      }
-
-      if (isCompleted && !updatedSecretAgenda.completed) {
-        logUpdates = [...logUpdates, `Secret Agenda complete: ${updatedSecretAgenda.title}`];
-      }
-
-      if (!isCompleted && updatedSecretAgenda.completed) {
-        logUpdates = [...logUpdates, `Secret Agenda progress lost: ${updatedSecretAgenda.title} (${computedProgress}/${target})`];
-      }
-
-      updatedSecretAgenda = {
-        ...updatedSecretAgenda,
-        progress: computedProgress,
-        completed: isCompleted,
-      };
+    if (computedProgress > previousProgress && shouldLogProgress) {
+      const delta = computedProgress - previousProgress;
+      const progressMessage = isStreakAgenda
+        ? `${actorPrefix}streak climbs to ${computedProgress}/${target}.`
+        : `${actorPrefix}progress hits ${computedProgress}/${target} (+${delta}).`;
+      const quip = getIssueQuip(issueId, faction, computedProgress);
+      logUpdates = [...logUpdates, formatAgendaLogEntry(agenda, progressMessage, quip)];
+    } else if (computedProgress < previousProgress && isStreakAgenda && shouldLogProgress) {
+      const dropMessage = `${actorPrefix}streak slips to ${computedProgress}/${target}.`;
+      const quip = getIssueQuip(issueId, faction, -computedProgress);
+      logUpdates = [...logUpdates, formatAgendaLogEntry(agenda, dropMessage, quip)];
     }
+
+    if (isCompleted && !agenda.completed) {
+      const completionMessage = `${actorLabel} secure the objective at ${computedProgress}/${target}!`;
+      const quip = getIssueQuip(issueId, faction, computedProgress * 2);
+      logUpdates = [...logUpdates, formatAgendaLogEntry(agenda, completionMessage, quip)];
+    } else if (!isCompleted && agenda.completed && (!options.requireRevealForProgress || agenda.revealed)) {
+      const regressionMessage = actor === 'opposition'
+        ? `${actorPrefix}momentum collapses to ${computedProgress}/${target}.`
+        : `${actorLabel} fall back to ${computedProgress}/${target}.`;
+      const quip = getIssueQuip(issueId, faction, -computedProgress * 2);
+      logUpdates = [...logUpdates, formatAgendaLogEntry(agenda, regressionMessage, quip)];
+    }
+
+    return {
+      ...agenda,
+      progress: computedProgress,
+      completed: isCompleted,
+    };
+  };
+
+  if (updatedSecretAgenda) {
+    updatedSecretAgenda = processAgenda(updatedSecretAgenda, 'player', playerFaction, 'player');
   }
 
   if (updatedAiSecretAgenda) {
-    const snapshot = buildAgendaSnapshot(state, 'ai');
-    const computedProgressRaw = Number(updatedAiSecretAgenda.checkProgress?.(snapshot) ?? updatedAiSecretAgenda.progress ?? 0);
-    const computedProgress = Number.isFinite(computedProgressRaw)
-      ? Math.max(0, computedProgressRaw)
-      : updatedAiSecretAgenda.progress ?? 0;
-    const previousProgress = updatedAiSecretAgenda.progress ?? 0;
-    const target = updatedAiSecretAgenda.target ?? 0;
-    const isCompleted = computedProgress >= target;
-
-    if (computedProgress !== previousProgress || isCompleted !== updatedAiSecretAgenda.completed) {
-      const isStreakAgenda = STREAK_AGENDA_IDS.has(updatedAiSecretAgenda.id);
-
-      if (computedProgress > previousProgress) {
-        const delta = computedProgress - previousProgress;
-        if (updatedAiSecretAgenda.revealed) {
-          const progressMessage = isStreakAgenda
-            ? `AI secret agenda streak increased to ${computedProgress}/${target}`
-            : `AI secret agenda advanced by ${delta}: ${computedProgress}/${target}`;
-          logUpdates = [...logUpdates, progressMessage];
-        }
-      } else if (
-        computedProgress < previousProgress &&
-        updatedAiSecretAgenda.revealed &&
-        isStreakAgenda
-      ) {
-        logUpdates = [
-          ...logUpdates,
-          `AI secret agenda streak dropped to ${computedProgress}/${target}`,
-        ];
-      }
-
-      if (isCompleted && !updatedAiSecretAgenda.completed) {
-        logUpdates = [...logUpdates, 'AI secret agenda completed!'];
-      }
-
-      if (!isCompleted && updatedAiSecretAgenda.completed && updatedAiSecretAgenda.revealed) {
-        logUpdates = [
-          ...logUpdates,
-          `AI secret agenda progress lost: ${computedProgress}/${target}`,
-        ];
-      }
-
-      updatedAiSecretAgenda = {
-        ...updatedAiSecretAgenda,
-        progress: computedProgress,
-        completed: isCompleted,
-      };
-    }
+    updatedAiSecretAgenda = processAgenda(updatedAiSecretAgenda, 'ai', aiFaction, 'opposition', {
+      requireRevealForProgress: true,
+    });
   }
 
   if (
@@ -359,83 +444,94 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const availableCards = [...CARD_DATABASE];
   console.log(`📊 Card Database Stats:\n  - Total available: ${availableCards.length}`);
   
-  const [gameState, setGameState] = useState<GameState>({
-    faction: 'truth',
-    phase: 'action',
-    turn: 1,
-    round: 1,
-    currentPlayer: 'human',
-    aiDifficulty,
-    truth: 50,
-    ip: 5,
-    aiIP: 5,
-    // Use all available cards to ensure proper deck building
-    hand: getRandomCards(5, { faction: 'truth' }),
-    aiHand: getRandomCards(5, { faction: 'government' }),
-    isGameOver: false,
-    deck: generateWeightedDeck(40, 'truth'),
-    aiDeck: generateWeightedDeck(40, 'government'),
-    cardsPlayedThisTurn: 0,
-    cardsPlayedThisRound: [],
-    comboTruthDeltaThisRound: 0,
-    stateCombinationBonusIP: 0,
-    activeStateCombinationIds: [],
-    stateCombinationEffects: createDefaultCombinationEffects(),
-    truthAbove80Streak: 0,
-    truthBelow20Streak: 0,
-    timeBasedGoalCounters: {
+  const [gameState, setGameState] = useState<GameState>(() => {
+    const initialIssueDefinition = peekActiveAgendaIssue();
+    const initialIssue = agendaIssueToState(initialIssueDefinition);
+    const initialPlayerAgenda = getRandomAgenda('truth', { issueId: initialIssue.id });
+    const initialAiAgenda = getRandomAgenda('government', { issueId: initialIssue.id });
+
+    return {
+      faction: 'truth',
+      phase: 'action',
+      turn: 1,
+      round: 1,
+      currentPlayer: 'human',
+      aiDifficulty,
+      truth: 50,
+      ip: 5,
+      aiIP: 5,
+      // Use all available cards to ensure proper deck building
+      hand: getRandomCards(5, { faction: 'truth' }),
+      aiHand: getRandomCards(5, { faction: 'government' }),
+      isGameOver: false,
+      deck: generateWeightedDeck(40, 'truth'),
+      aiDeck: generateWeightedDeck(40, 'government'),
+      cardsPlayedThisTurn: 0,
+      cardsPlayedThisRound: [],
+      comboTruthDeltaThisRound: 0,
+      stateCombinationBonusIP: 0,
+      activeStateCombinationIds: [],
+      stateCombinationEffects: createDefaultCombinationEffects(),
       truthAbove80Streak: 0,
       truthBelow20Streak: 0,
-    },
-    playHistory: [],
-    turnPlays: [],
-    controlledStates: [],
-    aiControlledStates: [],
-    states: USA_STATES.map(state => {
-      return {
-        id: state.id,
-        name: state.name,
-        abbreviation: state.abbreviation,
-        baseIP: state.baseIP,
-        defense: state.defense,
-        pressure: 0,
-        contested: false,
-        owner: 'neutral' as const,
-        specialBonus: state.specialBonus,
-        bonusValue: state.bonusValue,
-      };
-    }),
-    currentEvents: [],
-    eventManager,
-    showNewspaper: false,
-    log: [
-      'Game started - Truth Seekers faction selected',
-      'Starting Truth: 50%',
-      'Cards drawn: 5',
-      `AI Difficulty: ${aiDifficulty}`
-    ],
-    secretAgenda: {
-      ...getRandomAgenda('truth'),
-      progress: 0,
-      completed: false,
-      revealed: false
-    },
-    aiSecretAgenda: {
-      ...getRandomAgenda('government'),
-      progress: 0,
-      completed: false,
-      revealed: false
-    },
-    animating: false,
-    aiTurnInProgress: false,
-    selectedCard: null,
-    targetState: null,
-    aiStrategist: AIFactory.createStrategist(aiDifficulty),
-    drawMode: 'standard',
-    cardDrawState: {
-      cardsPlayedLastTurn: 0,
-      lastTurnWithoutPlay: false
-    }
+      timeBasedGoalCounters: {
+        truthAbove80Streak: 0,
+        truthBelow20Streak: 0,
+      },
+      playHistory: [],
+      turnPlays: [],
+      controlledStates: [],
+      aiControlledStates: [],
+      states: USA_STATES.map(state => {
+        return {
+          id: state.id,
+          name: state.name,
+          abbreviation: state.abbreviation,
+          baseIP: state.baseIP,
+          defense: state.defense,
+          pressure: 0,
+          contested: false,
+          owner: 'neutral' as const,
+          specialBonus: state.specialBonus,
+          bonusValue: state.bonusValue,
+        };
+      }),
+      currentEvents: [],
+      eventManager,
+      showNewspaper: false,
+      agendaIssue: initialIssue,
+      agendaIssueCounters: {},
+      agendaRoundCounters: {},
+      log: [
+        'Game started - Truth Seekers faction selected',
+        'Starting Truth: 50%',
+        'Cards drawn: 5',
+        `AI Difficulty: ${aiDifficulty}`,
+        `Weekly Issue: ${initialIssue.label}`,
+      ],
+      secretAgenda: {
+        ...initialPlayerAgenda,
+        progress: 0,
+        completed: false,
+        revealed: false,
+      },
+      aiSecretAgenda: {
+        ...initialAiAgenda,
+        progress: 0,
+        completed: false,
+        revealed: false,
+      },
+      animating: false,
+      aiTurnInProgress: false,
+      selectedCard: null,
+      targetState: null,
+      aiStrategist: AIFactory.createStrategist(aiDifficulty),
+      drawMode: 'standard',
+      cardDrawState: {
+        cardsPlayedLastTurn: 0,
+        lastTurnWithoutPlay: false,
+      },
+    };
   });
 
   const resolveCardEffects = useCallback(
@@ -460,10 +556,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       (JSON.parse(savedSettings).drawMode || 'standard') : 'standard';
     
     const handSize = Math.max(5, getStartingHandSize(drawMode, faction));
+    const aiFaction = faction === 'government' ? 'truth' : 'government';
     // CRITICAL: Pass faction to deck generation
     const newDeck = generateWeightedDeck(40, faction);
     const startingHand = newDeck.slice(0, handSize);
+    const remainingDeck = newDeck.slice(handSize);
+    const aiDeckSource = generateWeightedDeck(40, aiFaction);
+    const aiStartingHand = aiDeckSource.slice(0, handSize);
+    const aiRemainingDeck = aiDeckSource.slice(handSize);
     const initialControl = getInitialStateControl(faction);
+    const issueDefinition = advanceAgendaIssue();
+    const issueState = agendaIssueToState(issueDefinition);
+    const playerAgendaTemplate = getRandomAgenda(faction, { issueId: issueState.id });
+    const aiAgendaTemplate = getRandomAgenda(aiFaction, { issueId: issueState.id });
 
     // Track game start in achievements
     achievements.onGameStart(faction, aiDifficulty);
@@ -476,14 +581,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       ip: startingIP,
       aiIP: aiStartingIP,
       hand: startingHand,
-      deck: newDeck.slice(handSize),
-      // AI gets opposite faction cards
-      aiHand: getRandomCards(handSize, { faction: faction === 'government' ? 'truth' : 'government' }),
-      aiDeck: generateWeightedDeck(40, faction === 'government' ? 'truth' : 'government'),
+      deck: remainingDeck,
+      aiHand: aiStartingHand,
+      aiDeck: aiRemainingDeck,
       controlledStates: initialControl.player,
       aiControlledStates: initialControl.ai,
-      isGameOver: false, // CRITICAL: Reset game over state
-      phase: 'action', // Reset to proper starting phase
+      isGameOver: false,
+      phase: 'action',
       turn: 1,
       round: 1,
       cardsPlayedThisTurn: 0,
@@ -499,6 +603,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         truthAbove80Streak: 0,
         truthBelow20Streak: 0,
       },
+      agendaIssue: issueState,
+      agendaIssueCounters: {},
+      agendaRoundCounters: {},
       animating: false,
       aiTurnInProgress: false,
       selectedCard: null,
@@ -527,13 +634,27 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         `Starting Truth: ${startingTruth}%`,
         `Starting IP: ${startingIP}`,
         `Cards drawn: ${handSize} (${drawMode} mode)`,
-        `Controlled states: ${initialControl.player.join(', ')}`
+        `Controlled states: ${initialControl.player.join(', ')}`,
+        `Weekly Issue: ${issueState.label}`,
+        `Issue Spotlight: ${issueState.description}`,
       ],
       drawMode,
       cardDrawState: {
         cardsPlayedLastTurn: 0,
-        lastTurnWithoutPlay: false
-      }
+        lastTurnWithoutPlay: false,
+      },
+      secretAgenda: {
+        ...playerAgendaTemplate,
+        progress: 0,
+        completed: false,
+        revealed: false,
+      },
+      aiSecretAgenda: {
+        ...aiAgendaTemplate,
+        progress: 0,
+        completed: false,
+        revealed: false,
+      },
     }));
   }, [achievements, aiDifficulty]);
 
@@ -561,6 +682,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const targetState = targetOverride ?? prev.targetState ?? null;
       const resolution = resolveCardEffects(prev, resolvedCard, targetState);
+      const counterSnapshot = applyAgendaCardCounters(prev, 'human', resolvedCard);
       const playedCardRecord = createPlayedCardRecord({
         card: resolvedCard,
         player: 'human',
@@ -597,7 +719,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         turnPlays: [...prev.turnPlays, ...turnPlayEntries],
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
-        log: [...prev.log, ...resolution.logEntries]
+        log: [...prev.log, ...resolution.logEntries],
+        agendaIssueCounters: counterSnapshot.issueCounters,
+        agendaRoundCounters: counterSnapshot.roundCounters,
       };
 
       const stateWithReveal = resolution.aiSecretAgendaRevealed
@@ -656,6 +780,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       pendingResolvedCard = resolvedCard;
 
       const resolution = resolveCardEffects(prev, resolvedCard, targetState);
+      const counterSnapshot = applyAgendaCardCounters(prev, 'human', resolvedCard);
       pendingRecord = createPlayedCardRecord({
         card: resolvedCard,
         player: 'human',
@@ -688,7 +813,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         aiControlledStates: resolution.aiControlledStates,
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
-        log: [...prev.log, ...resolution.logEntries]
+        log: [...prev.log, ...resolution.logEntries],
+        agendaIssueCounters: counterSnapshot.issueCounters,
+        agendaRoundCounters: counterSnapshot.roundCounters,
       };
 
       const stateWithReveal = resolution.aiSecretAgendaRevealed
@@ -965,10 +1092,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         }
 
         const result = applyAiCardPlay(prev, params, achievements);
+        let nextStateBase = result.nextState;
+        if (result.card) {
+          const counterSnapshot = applyAgendaCardCounters(prev, 'ai', result.card);
+          nextStateBase = {
+            ...nextStateBase,
+            agendaIssueCounters: counterSnapshot.issueCounters,
+            agendaRoundCounters: counterSnapshot.roundCounters,
+          };
+        }
         const nextStateAfterReveal =
           result.resolution?.aiSecretAgendaRevealed && result.card
-            ? revealAiSecretAgenda(result.nextState, { type: 'card', name: result.card.name })
-            : result.nextState;
+            ? revealAiSecretAgenda(nextStateBase, { type: 'card', name: result.card.name })
+            : nextStateBase;
         const nextStateWithAgendas = updateSecretAgendaProgress(nextStateAfterReveal);
 
         if (result.card && typeof window !== 'undefined' && window.uiShowOpponentCard) {
@@ -1159,7 +1295,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         selectedCard: null,
         targetState: null,
         aiTurnInProgress: false,
-        log: [...prev.log, drawLogEntry]
+        log: [...prev.log, drawLogEntry],
+        agendaRoundCounters: {},
       };
 
       return updateSecretAgendaProgress(nextState);
@@ -1175,6 +1312,23 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       newCards: [],
       log: [...prev.log, `Added ${prev.newCards?.length || 0} cards to hand`]
     }));
+  }, []);
+
+  const registerParanormalSighting = useCallback((source?: 'truth' | 'government' | 'neutral') => {
+    setGameState(prev => {
+      const factionSource = source ?? prev.faction;
+      const owner: AgendaOwner = factionSource === prev.faction
+        ? 'human'
+        : factionSource === (prev.faction === 'truth' ? 'government' : 'truth')
+          ? 'ai'
+          : 'human';
+      const counters = applyAgendaSightingCounters(prev, owner);
+      return {
+        ...prev,
+        agendaIssueCounters: counters.issueCounters,
+        agendaRoundCounters: counters.roundCounters,
+      };
+    });
   }, []);
 
   const checkVictoryConditions = useCallback((state: GameState) => {
@@ -1287,6 +1441,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const secretAgenda = rehydrateAgenda(saveData.secretAgenda);
       const aiSecretAgenda = rehydrateAgenda(saveData.aiSecretAgenda);
+      const agendaIssueState = saveData.agendaIssue
+        ? resolveIssueStateById((saveData.agendaIssue as { id?: string })?.id)
+        : resolveIssueStateById((saveData as { agendaIssueId?: string }).agendaIssueId);
       const normalizedRound = normalizeRoundFromSave(saveData);
       const normalizedTurn = typeof saveData.turn === 'number' && Number.isFinite(saveData.turn)
         ? Math.max(1, saveData.turn)
@@ -1322,6 +1479,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         round: normalizedRound,
         secretAgenda,
         aiSecretAgenda,
+        agendaIssue: agendaIssueState,
+        agendaIssueCounters: (saveData.agendaIssueCounters && typeof saveData.agendaIssueCounters === 'object')
+          ? saveData.agendaIssueCounters as Record<string, number>
+          : {},
+        agendaRoundCounters: (saveData.agendaRoundCounters && typeof saveData.agendaRoundCounters === 'object')
+          ? saveData.agendaRoundCounters as Record<string, number>
+          : {},
         cardsPlayedThisRound: Array.isArray(saveData.cardsPlayedThisRound)
           ? saveData.cardsPlayedThisRound
           : [],
@@ -1415,6 +1579,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     loadGame,
     getSaveInfo,
     deleteSave,
-    checkVictoryConditions
+    checkVictoryConditions,
+    registerParanormalSighting,
   };
 };
