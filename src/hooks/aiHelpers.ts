@@ -296,6 +296,13 @@ export const applyAiCardPlay = (
     resolution,
   });
 
+  const updatedHotspots = { ...prev.paranormalHotspots };
+  if (resolution.resolvedHotspots) {
+    for (const abbr of resolution.resolvedHotspots) {
+      delete updatedHotspots[abbr];
+    }
+  }
+
   const nextState: GameState = {
     ...prev,
     ip: resolution.ip,
@@ -310,6 +317,7 @@ export const applyAiCardPlay = (
     playHistory: [...prev.playHistory, playedCardRecord],
     turnPlays: [...prev.turnPlays, ...turnPlayEntries],
     log: logEntries,
+    paranormalHotspots: updatedHotspots,
   };
 
   return {

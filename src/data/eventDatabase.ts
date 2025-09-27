@@ -1,3 +1,24 @@
+export interface ParanormalHotspotPayload {
+  /** Optional fixed state identifier (FIPS or abbreviation) to anchor the hotspot. */
+  stateId?: string;
+  /** Display label used for tooltips and overlays. */
+  label: string;
+  /** Optional descriptive blurb for UI surfaces. */
+  description?: string;
+  /** Emoji/icon shorthand for quick recognition on the map. */
+  icon?: string;
+  /** Number of turns the hotspot should remain active (minimum 1). */
+  duration: number;
+  /** Bonus truth awarded (or deducted) when the hotspot is captured. */
+  truthReward: number;
+  /** Temporary defense boost applied while the hotspot is active. */
+  defenseBoost: number;
+  /** Optional factional source used for narrative tracking. */
+  source?: 'truth' | 'government' | 'neutral';
+  /** Headline template with optional `{{STATE}}` replacement token. */
+  headlineTemplate?: string;
+}
+
 export interface GameEvent {
   id: string;
   title: string;
@@ -41,6 +62,8 @@ export interface GameEvent {
   triggerChance?: number;
   /** Probability of this event being chosen once an event triggers (0-1). */
   conditionalChance?: number;
+  /** Optional payload describing a temporary hotspot on the map. */
+  paranormalHotspot?: ParanormalHotspotPayload;
 }
 
 export const EVENT_DATABASE: GameEvent[] = [
@@ -198,6 +221,69 @@ export const EVENT_DATABASE: GameEvent[] = [
     effects: { ip: 2, truth: 2 },
     weight: 7,
     flavorText: 'FINANCE LIVE: Candlesticks were rebranded "candle-shticks." A bell rang itself, then apologized. Economists recommend diversifying into snacks and naps.'
+  },
+  {
+    id: 'paranormal_ufo_corridor',
+    title: 'Saucer Corridor',
+    headline: 'AIR TRAFFIC MAPS LASER GRID OVER FLYOVER COUNTRY',
+    content: 'Controllers reroute jets while news choppers chase synchronized saucers. Phones melt with footage labeled "DO NOT PANIC".',
+    type: 'random',
+    faction: 'neutral',
+    rarity: 'rare',
+    weight: 4,
+    paranormalHotspot: {
+      label: 'UFO Corridor',
+      description: 'Saucers bottleneck above this state, blasting the narrative with tractor beams.',
+      icon: '🛸',
+      duration: 3,
+      truthReward: 12,
+      defenseBoost: 2,
+      source: 'neutral',
+      headlineTemplate: 'UFO GRID LOCKS DOWN {{STATE}} AIRSPACE'
+    },
+    flavorText: 'AVIATION BLOGS: Pilots report "polite abductions" offering peanuts. FAA issues advisory: "If you see shimmering lanes, file form 404-B (Close Encounters)."'
+  },
+  {
+    id: 'paranormal_bigfoot_rally',
+    title: 'March of the Mythics',
+    headline: 'HUNDREDS OF BIGFOOT IMPOSTERS? DNA LAB OVERLOADED',
+    content: 'Tracks flood downtown as cryptids hold a pop-up parade. Park rangers barricade in with trail mix.',
+    type: 'random',
+    faction: 'neutral',
+    rarity: 'rare',
+    weight: 4,
+    paranormalHotspot: {
+      label: 'Cryptid Stampede',
+      description: 'Every footprint adds another guard post—and another tabloid freelancer.',
+      icon: '🦶',
+      duration: 3,
+      truthReward: 10,
+      defenseBoost: 2,
+      source: 'neutral',
+      headlineTemplate: 'CRYPTID PARADE CLAIMS MAIN STREET OF {{STATE}}'
+    },
+    flavorText: 'LOCAL NEWS: Residents sell plaster cast kits out of trunk pop-up shops. Someone live-streams a sasquatch DJ set titled "Loch Mix Monster."'
+  },
+  {
+    id: 'paranormal_elvis_residency',
+    title: 'Elvis Residency Returns?',
+    headline: 'KING SIGHTINGS SPIKE: 38 ELVISES ENTER, NONE EXIT',
+    content: 'Every diner booth books a sequined guest. Jukeboxes play unreleased tracks that shouldn\'t exist.',
+    type: 'random',
+    faction: 'neutral',
+    rarity: 'rare',
+    weight: 4,
+    paranormalHotspot: {
+      label: 'Cosmic Comeback Tour',
+      description: 'Stage lights burn so bright they harden agency armor.',
+      icon: '🎙️',
+      duration: 4,
+      truthReward: 14,
+      defenseBoost: 3,
+      source: 'neutral',
+      headlineTemplate: 'ELVIS RETURNS TO {{STATE}} — AGAIN, AGAIN'
+    },
+    flavorText: 'ENTERTAINMENT WIRES: Ticket scalpers accept tinfoil hats as currency. A hologram tech firm swears it is "not responsible for the encore."'
   },
   {
     id: 'exercises_everywhere',

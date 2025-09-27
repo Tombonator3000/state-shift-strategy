@@ -15,6 +15,7 @@ interface EnhancedState {
   name: string;
   abbreviation: string;
   baseIP: number;
+  baseDefense: number;
   defense: number;
   pressure: number;
   owner: 'player' | 'ai' | 'neutral';
@@ -27,6 +28,18 @@ interface EnhancedState {
   occupierLabel?: string | null;
   occupierIcon?: string | null;
   occupierUpdatedAt?: number;
+  paranormalHotspot?: {
+    id: string;
+    eventId: string;
+    label: string;
+    description?: string;
+    icon?: string;
+    defenseBoost: number;
+    truthReward: number;
+    expiresOnTurn: number;
+    turnsRemaining: number;
+    source: 'truth' | 'government' | 'neutral';
+  };
 }
 
 interface PlayedCard {
@@ -229,10 +242,13 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     // Create groups for different layers
     const statesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     const pressureGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const hotspotGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    hotspotGroup.setAttribute('class', 'hotspot-layer');
     const labelsGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    
+
     svg.appendChild(statesGroup);
     svg.appendChild(pressureGroup);
+    svg.appendChild(hotspotGroup);
     svg.appendChild(labelsGroup);
 
     // Draw states
@@ -476,6 +492,40 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           }
         }
 
+        if (gameState?.paranormalHotspot) {
+          const hotspotMarker = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          hotspotMarker.setAttribute('class', 'paranormal-hotspot-marker');
+          hotspotMarker.setAttribute('transform', `translate(${centroid[0]}, ${centroid[1]})`);
+          hotspotMarker.setAttribute('pointer-events', 'none');
+
+          const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          glow.setAttribute('class', 'paranormal-hotspot-glow');
+          glow.setAttribute('r', '24');
+          hotspotMarker.appendChild(glow);
+
+          const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ring.setAttribute('class', 'paranormal-hotspot-ring');
+          ring.setAttribute('r', '16');
+          hotspotMarker.appendChild(ring);
+
+          const icon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          icon.setAttribute('class', 'paranormal-hotspot-icon');
+          icon.setAttribute('text-anchor', 'middle');
+          icon.setAttribute('dominant-baseline', 'central');
+          icon.textContent = gameState.paranormalHotspot.icon ?? '👻';
+          hotspotMarker.appendChild(icon);
+
+          const counter = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          counter.setAttribute('class', 'paranormal-hotspot-counter');
+          counter.setAttribute('text-anchor', 'middle');
+          counter.setAttribute('y', '28');
+          const turnsRemaining = Math.max(0, gameState.paranormalHotspot.turnsRemaining);
+          counter.textContent = turnsRemaining > 0 ? `T-${turnsRemaining}` : 'LAST';
+          hotspotMarker.appendChild(counter);
+
+          hotspotGroup.appendChild(hotspotMarker);
+        }
+
         if (isGovernmentZoneTargeting && canTarget) {
           spotlightGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
           spotlightGroup.setAttribute('class', 'orbital-spotlight');
@@ -667,6 +717,41 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
                 </div>
               </div>
             )}
+
+            {stateInfo.paranormalHotspot && (
+              <div className="pt-2 border-t border-border">
+                <div className="flex items-center gap-2 text-sm font-bold text-foreground mb-1">
+                  <span>{stateInfo.paranormalHotspot.icon ?? '👻'}</span>
+                  <span>Paranormal Hotspot</span>
+                </div>
+                <div className="space-y-2 text-xs font-mono bg-purple-500/10 border border-purple-500/40 p-3 rounded shadow-sm">
+                  <div className="text-sm font-semibold text-foreground">
+                    {stateInfo.paranormalHotspot.label}
+                  </div>
+                  {stateInfo.paranormalHotspot.description && (
+                    <div className="text-muted-foreground leading-snug">
+                      {stateInfo.paranormalHotspot.description}
+                    </div>
+                  )}
+                  {(() => {
+                    const hotspot = stateInfo.paranormalHotspot!;
+                    const truthCaptureDelta = hotspot.truthReward;
+                    const governmentCaptureDelta = -truthCaptureDelta;
+                    const formatTruthDelta = (value: number) => `${value >= 0 ? '+' : ''}${value}%`;
+
+                    return (
+                      <div className="grid grid-cols-2 gap-2 pt-1 text-muted-foreground">
+                        <span>Defense +{hotspot.defenseBoost}</span>
+                        <span>Truth capture: {formatTruthDelta(truthCaptureDelta)}</span>
+                        <span>Gov capture: {formatTruthDelta(governmentCaptureDelta)}</span>
+                        <span>Turns left: {Math.max(0, hotspot.turnsRemaining)}</span>
+                        <span>Source: {hotspot.source.toUpperCase()}</span>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
           </div>
         </div>,
         document.body
@@ -821,6 +906,51 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           }
         }
 
+        .hotspot-layer {
+          pointer-events: none;
+        }
+
+        .paranormal-hotspot-marker {
+          animation: hotspotPulse 3s ease-in-out infinite;
+          transform-origin: center;
+        }
+
+        .paranormal-hotspot-glow {
+          fill: rgba(168, 85, 247, 0.18);
+        }
+
+        .paranormal-hotspot-ring {
+          stroke: rgba(168, 85, 247, 0.7);
+          stroke-width: 2;
+          fill: none;
+          filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.45));
+        }
+
+        .paranormal-hotspot-icon {
+          fill: #ffffff;
+          font-size: 16px;
+          font-weight: 600;
+          filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.65));
+        }
+
+        .paranormal-hotspot-counter {
+          fill: rgba(255, 255, 255, 0.85);
+          font-size: 9px;
+          font-family: 'JetBrains Mono', monospace;
+          letter-spacing: 0.08em;
+        }
+
+        @keyframes hotspotPulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.95;
+          }
+          50% {
+            transform: scale(1.12);
+            opacity: 0.7;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .contested-radar {
             animation: none !important;
@@ -828,6 +958,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             opacity: 0.8;
             filter: drop-shadow(0 0 14px rgba(57, 255, 20, 0.6));
             stroke-dasharray: 0;
+          }
+          .paranormal-hotspot-marker {
+            animation: none !important;
           }
         }
 
