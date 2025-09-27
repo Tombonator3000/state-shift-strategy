@@ -11,6 +11,7 @@ import GovernmentSurveillance from '@/components/effects/GovernmentSurveillance'
 import TypewriterReveal from '@/components/effects/TypewriterReveal';
 import StaticInterference from '@/components/effects/StaticInterference';
 import EvidencePhotoGallery from '@/components/effects/EvidencePhotoGallery';
+import ParanormalHotspotOverlay from '@/components/effects/ParanormalHotspotOverlay';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { areParanormalEffectsEnabled } from '@/state/settings';
 
@@ -69,6 +70,18 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     stateName?: string;
     footageQuality: string;
     reducedMotion?: boolean;
+  } | null>(null);
+
+  const [hotspotOverlay, setHotspotOverlay] = useState<{
+    id: number;
+    x: number;
+    y: number;
+    label: string;
+    stateName: string;
+    icon: string;
+    source: 'truth' | 'government' | 'neutral';
+    defenseBoost: number;
+    truthReward: number;
   } | null>(null);
 
   // New enhanced effect states
@@ -229,6 +242,42 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       }
     };
 
+    const handleParanormalHotspot = (event: CustomEvent<{
+      position?: { x: number; y: number };
+      label: string;
+      stateName: string;
+      stateId: string;
+      icon?: string;
+      source: 'truth' | 'government' | 'neutral';
+      defenseBoost: number;
+      truthReward: number;
+    }>) => {
+      if (!event?.detail) return;
+      const { position, label, stateName, icon, source, defenseBoost, truthReward } = event.detail;
+      const fallbackPosition = {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+      };
+      const resolvedPosition = position ?? fallbackPosition;
+
+      spawnParticleEffect('flash', resolvedPosition.x, resolvedPosition.y);
+      setHotspotOverlay({
+        id: Date.now(),
+        x: resolvedPosition.x,
+        y: resolvedPosition.y,
+        label,
+        stateName,
+        icon: icon ?? '👻',
+        source,
+        defenseBoost,
+        truthReward,
+      });
+
+      if (areParanormalEffectsEnabled()) {
+        audio?.playSFX?.('ufo-elvis');
+      }
+    };
+
     // New enhanced effect handlers
     const handleBreakingNews = (event: CustomEvent<{
       newsText: string;
@@ -376,7 +425,8 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     window.addEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
     window.addEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
     window.addEventListener('cryptidSighting', handleCryptidSighting as EventListener);
-    
+    window.addEventListener('paranormalHotspot', handleParanormalHotspot as EventListener);
+
     // New enhanced effect listeners
     window.addEventListener('breakingNews', handleBreakingNews as EventListener);
     window.addEventListener('governmentSurveillance', handleGovernmentSurveillance as EventListener);
@@ -395,6 +445,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
       window.removeEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
       window.removeEventListener('cryptidSighting', handleCryptidSighting as EventListener);
+      window.removeEventListener('paranormalHotspot', handleParanormalHotspot as EventListener);
       
       // New enhanced effect listeners
       window.removeEventListener('breakingNews', handleBreakingNews as EventListener);
@@ -431,6 +482,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
 
   const handleCryptidComplete = useCallback(() => {
     setCryptidOverlay(null);
+  }, []);
+
+  const handleHotspotComplete = useCallback(() => {
+    setHotspotOverlay(null);
   }, []);
 
   // New enhanced effect completion handlers
@@ -497,6 +552,21 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
             footageQuality={cryptidOverlay.footageQuality}
             reducedMotion={cryptidOverlay.reducedMotion}
             onComplete={handleCryptidComplete}
+          />
+        )}
+
+        {hotspotOverlay && (
+          <ParanormalHotspotOverlay
+            key={hotspotOverlay.id}
+            x={hotspotOverlay.x}
+            y={hotspotOverlay.y}
+            icon={hotspotOverlay.icon}
+            label={hotspotOverlay.label}
+            stateName={hotspotOverlay.stateName}
+            source={hotspotOverlay.source}
+            defenseBoost={hotspotOverlay.defenseBoost}
+            truthReward={hotspotOverlay.truthReward}
+            onComplete={handleHotspotComplete}
           />
         )}
 

@@ -156,6 +156,24 @@ export class VisualEffectsCoordinator {
     }));
   }
 
+  static triggerParanormalHotspot(detail: {
+    position: EffectPosition;
+    stateId: string;
+    stateName: string;
+    label: string;
+    icon?: string;
+    source: 'truth' | 'government' | 'neutral';
+    defenseBoost: number;
+    truthReward: number;
+  }): void {
+    window.dispatchEvent(new CustomEvent('paranormalHotspot', {
+      detail: {
+        ...detail,
+        position: { ...detail.position }
+      }
+    }));
+  }
+
   // Helper to get element center position
   static getElementCenter(element: Element): EffectPosition {
     const rect = element.getBoundingClientRect();
