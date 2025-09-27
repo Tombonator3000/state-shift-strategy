@@ -32,19 +32,22 @@ const FALLBACK_DATA: NewspaperData = {
 const SIGHTING_LABELS: Record<ParanormalSighting['category'], string> = {
   synergy: 'Synergy Spike',
   'truth-meltdown': 'Broadcast Hijack',
-  cryptid: 'Cryptid Alert'
+  cryptid: 'Cryptid Alert',
+  hotspot: 'Hotspot Alert'
 };
 
 const SIGHTING_ICONS: Record<ParanormalSighting['category'], string> = {
   synergy: '🛰️',
   'truth-meltdown': '📡',
-  cryptid: '🦶'
+  cryptid: '🦶',
+  hotspot: '👻'
 };
 
 const SIGHTING_BADGE_VARIANTS: Record<ParanormalSighting['category'], string> = {
   synergy: 'border-indigo-500 text-indigo-500',
   'truth-meltdown': 'border-rose-500 text-rose-500',
-  cryptid: 'border-emerald-500 text-emerald-500'
+  cryptid: 'border-emerald-500 text-emerald-500',
+  hotspot: 'border-purple-500 text-purple-500'
 };
 
 const formatSightingTime = (timestamp: number) => {
@@ -865,6 +868,30 @@ const TabloidNewspaperV2 = ({
                     {activeSighting.metadata?.setList?.length ? (
                       <div className="rounded border border-dashed border-newspaper-border/60 bg-white/60 p-2 text-[10px] uppercase tracking-wide text-newspaper-text/70">
                         {activeSighting.metadata.setList.join(' • ')}
+                      </div>
+                    ) : null}
+                    {activeSighting.category === 'hotspot' ? (
+                      <div className="grid grid-cols-2 gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/70">
+                        {typeof activeSighting.metadata?.defenseBoost === 'number' ? (
+                          <span>DEF +{activeSighting.metadata.defenseBoost}</span>
+                        ) : null}
+                        {typeof activeSighting.metadata?.truthReward === 'number' ? (
+                          <span>TRUTH ±{activeSighting.metadata.truthReward}%</span>
+                        ) : null}
+                        {activeSighting.metadata?.source ? (
+                          <span>Source {activeSighting.metadata.source.toUpperCase()}</span>
+                        ) : null}
+                        {typeof activeSighting.metadata?.turnsRemaining === 'number' ? (
+                          <span>Turns Left {Math.max(0, activeSighting.metadata.turnsRemaining)}</span>
+                        ) : null}
+                        {activeSighting.metadata?.outcome ? (
+                          <span className="col-span-2">
+                            Status {activeSighting.metadata.outcome.toUpperCase()}
+                            {typeof activeSighting.metadata.truthDelta === 'number' && activeSighting.metadata.truthDelta !== 0
+                              ? ` (${activeSighting.metadata.truthDelta > 0 ? '+' : ''}${activeSighting.metadata.truthDelta}% Truth)`
+                              : ''}
+                          </span>
+                        ) : null}
                       </div>
                     ) : null}
                   </div>

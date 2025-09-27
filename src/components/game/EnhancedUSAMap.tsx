@@ -84,6 +84,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   });
   const contestedStatesRef = useRef<Record<string, boolean>>({});
   const contestedAnimationTimeoutsRef = useRef<number[]>([]);
+  const hotspotPresenceRef = useRef<Record<string, string>>({});
   const [governmentTarget, setGovernmentTarget] = useState<{
     active: boolean;
     cardId?: string;
@@ -253,6 +254,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
     // Draw states
     const nextContestedStates: Record<string, boolean> = {};
+    const nextHotspotPresence: Record<string, string> = {};
     const svgRect = svg.getBoundingClientRect();
 
     const prefersReducedMotion = typeof window !== 'undefined'
@@ -492,7 +494,36 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           }
         }
 
-        if (gameState?.paranormalHotspot) {
+        const hotspot = gameState?.paranormalHotspot;
+        if (hotspot) {
+          nextHotspotPresence[stateKey] = hotspot.id;
+
+          const previousHotspotId = hotspotPresenceRef.current[stateKey];
+          const hotspotChanged = previousHotspotId !== hotspot.id;
+
+          if (
+            hotspotChanged &&
+            typeof window !== 'undefined' &&
+            areParanormalEffectsEnabled()
+          ) {
+            const prefersReducedMotionHotspot = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+            if (!prefersReducedMotionHotspot) {
+              VisualEffectsCoordinator.triggerParanormalHotspot({
+                position: {
+                  x: svgRect.left + centroid[0],
+                  y: svgRect.top + centroid[1],
+                },
+                label: hotspot.label,
+                stateName,
+                stateId: stateKey,
+                icon: hotspot.icon,
+                source: hotspot.source,
+                defenseBoost: hotspot.defenseBoost,
+                truthReward: hotspot.truthReward,
+              });
+            }
+          }
+
           const hotspotMarker = document.createElementNS('http://www.w3.org/2000/svg', 'g');
           hotspotMarker.setAttribute('class', 'paranormal-hotspot-marker');
           hotspotMarker.setAttribute('transform', `translate(${centroid[0]}, ${centroid[1]})`);
@@ -512,14 +543,14 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           icon.setAttribute('class', 'paranormal-hotspot-icon');
           icon.setAttribute('text-anchor', 'middle');
           icon.setAttribute('dominant-baseline', 'central');
-          icon.textContent = gameState.paranormalHotspot.icon ?? '👻';
+          icon.textContent = hotspot.icon ?? '👻';
           hotspotMarker.appendChild(icon);
 
           const counter = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           counter.setAttribute('class', 'paranormal-hotspot-counter');
           counter.setAttribute('text-anchor', 'middle');
           counter.setAttribute('y', '28');
-          const turnsRemaining = Math.max(0, gameState.paranormalHotspot.turnsRemaining);
+          const turnsRemaining = Math.max(0, hotspot.turnsRemaining);
           counter.textContent = turnsRemaining > 0 ? `T-${turnsRemaining}` : 'LAST';
           hotspotMarker.appendChild(counter);
 
@@ -579,6 +610,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     });
 
     contestedStatesRef.current = nextContestedStates;
+    hotspotPresenceRef.current = nextHotspotPresence;
 
     return () => {
       svg.removeEventListener('pointerleave', handlePointerLeave);

@@ -1,4 +1,4 @@
-export type SightingCategory = 'synergy' | 'truth-meltdown' | 'cryptid';
+export type SightingCategory = 'synergy' | 'truth-meltdown' | 'cryptid' | 'hotspot';
 
 export interface ParanormalSightingMetadata {
   setList?: string[];
@@ -11,6 +11,13 @@ export interface ParanormalSightingMetadata {
   bonusIP?: number;
   reducedMotion?: boolean;
   source?: 'truth' | 'government';
+  defenseBoost?: number;
+  truthReward?: number;
+  duration?: number;
+  turnsRemaining?: number;
+  hotspotId?: string;
+  outcome?: 'active' | 'captured' | 'expired';
+  truthDelta?: number;
 }
 
 export interface ParanormalSighting {
