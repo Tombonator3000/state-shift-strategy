@@ -7,6 +7,7 @@
 - [Combo engine integration](#combo-engine-integration)
 - [Card data normalization pipeline](#card-data-normalization-pipeline)
 - [Audio systems](#audio-systems)
+- [Secret agenda cookbook grid](#secret-agenda-cookbook-grid)
 
 ## Game loop fundamentals
 The MVP design defines a duel between the Truth Seekers and the Government, each managing Influence Points (IP), a shared Truth meter, and pressure on individual U.S. states. Win conditions include controlling 10 states, pushing Truth to faction-specific thresholds, or accumulating 300 IP.【F:DESIGN_DOC_MVP.md†L7-L63】 These core concepts are implemented directly in the runtime engine:
@@ -64,3 +65,35 @@ The `useAudio` hook centralizes music playlists, SFX loading, and playback APIs.
 The hook currently falls back to placeholder audio for `ufo-elvis`, `cryptid-rumble`, and `radio-static`, but no dedicated assets exist in `public/audio/`. Contributors should source royalty-free replacements—e.g., UFO ambience, low-frequency rumble, and shortwave static—from providers listed in the audio README, ensure MP3 format under the recommended size limits, and drop them into `public/audio/` with filenames that match the SFX keys. Update `existingSfxFiles` if the final filenames differ and verify licensing records per the project’s royalty-free guidance.【F:src/hooks/useAudio.ts†L225-L243】【F:public/audio/README.md†L1-L28】【F:public/audio/README.md†L30-L36】
 
 Music playback is orchestrated through stateful helpers (`setMenuMusic`, `setFactionMusic`, `setGameplayMusic`, `setEndCreditsMusic`) so UI layers can switch playlists without reinitializing the hook.【F:src/hooks/useAudio.ts†L320-L420】 Future contributors should call these helpers instead of manipulating HTMLAudioElements directly to keep crossfade and unlock logic intact.
+
+## Secret agenda cookbook grid
+The secret agenda database now leans into the “Paranoid Times” tabloid-cookbook tone. Each faction’s entries pair a pulp trope with concrete telemetry pulled from `GameState` snapshots, ensuring the themed goals remain trackable by AI and UI layers alike.
+
+### Truth Seekers menu
+| Agenda | Theme hook | Progress trigger |
+| --- | --- | --- |
+| Bat Boy’s Brunch Brigade | Bat Boy sightings go brunch-core | Counts Appalachian control via `controlledStates` to confirm WV/KY/TN/PA brunch venues. |
+| Moonbeam Marmalade Slow-Cook | Lunar jam session | Reads `truthAbove80Streak` / `timeBasedGoalCounters` to require three glowing turns. |
+| UFO Retrieval Mise en Place | Crash-site mise en place | Filters `factionPlayHistory` for ZONE plays targeting desert crash states (NV/NM/AZ/UT). |
+| Tabloid Taste Test Kitchen | Recipe-column media blitz | Tallies MEDIA cards from `factionPlayHistory` to model serialized taste tests. |
+| Cryptid Potluck Planning | Monster potluck RSVPs | Uses `controlledStates` to corral cryptid-haunted states like WA/OR/WV/NJ/MT/NH. |
+| Abduction Bake-Off | Levitation soufflé contest | Aggregates captured states reported in `factionPlayHistory.capturedStates`. |
+| Cosmic Conserve Drive | Nebula jam fundraiser | Sums positive `truthDelta` values from `factionPlayHistory` to bottle 25% Truth. |
+
+### Government test kitchen
+| Agenda | Theme hook | Progress trigger |
+| --- | --- | --- |
+| Capitol Cafeteria Stew | Beltway cafeteria chow | Requires `controlledStates` coverage of DC/VA/MD/CO ladles. |
+| Field-Ration Redactions | Press-release seasoning | Counts MEDIA plays from `factionPlayHistory` to keep the placemats censored. |
+| Supply Chain Soup | Heartland ration routing | Monitors agricultural depot control (IA/NE/KS/MO/OK/AR) via `controlledStates`. |
+| UFO Recall Paperwork | Crash-site compliance | Uses `capturedStates` extracted from `factionPlayHistory` to confirm confiscations in NV/NM/AZ/UT. |
+| Cover-Up Casserole | Lid-on truth suppression | Leans on `truthBelow20Streak` / `timeBasedGoalCounters` for streak-style baking. |
+| Spice Rack Surveillance | Coast-to-coast shakers | Checks `controlledStates` for NY/CA/TX/FL coverage. |
+| Black-Budget Barbecue | Classified cookout | Tracks raw IP reserves through the snapshot `ip` value. |
+
+### Shared potluck platter
+| Agenda | Theme hook | Progress trigger |
+| --- | --- | --- |
+| Paranoid Picnic Tour | Roadside oddities tailgate | Validates four foodie-state holdings (WI/MN/NJ/LA/NM) from `controlledStates`. |
+| Midnight Press Run | Alternating outrage courses | Uses paired MEDIA/ATTACK counts from `factionPlayHistory` (`Math.min` pairing). |
+| Combo Platter Column | Buffet-table resonance | Reads `activeStateCombinationIds.length` to demand two simultaneous combo bonuses. |
