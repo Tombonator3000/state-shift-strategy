@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import clsx from 'clsx';
 import { Button } from '@/components/ui/button';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
@@ -41,7 +41,7 @@ import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
 import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
-import type { CardPlayRecord } from '@/hooks/gameStateTypes';
+import type { ActiveParanormalHotspot, CardPlayRecord } from '@/hooks/gameStateTypes';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
 import { areParanormalEffectsEnabled } from '@/state/settings';
@@ -118,6 +118,24 @@ const SYNERGY_SIGHTING_TAGLINES = [
   'Combo uplink redlined at +{BONUS} IP before stabilizers kicked in.',
   'Witnesses report neon corkboard materializing with +{BONUS} IP scribbles.',
   'Analytics desk logged a phantom +{BONUS} IP surge and a chorus of high-fives.',
+];
+
+const HOTSPOT_SPAWN_TAGLINES = [
+  '{STATE} skies glow as defenses spike +{DEFENSE}. Command races for ±{TRUTH}% truth swing.',
+  'Field agents erect ecto-barriers in {STATE}. Whoever breaches first claims ±{TRUTH}% truth.',
+  'Spectral alarm: {STATE} grid hardens by +{DEFENSE}. News desk calls a hotspot scramble!',
+];
+
+const HOTSPOT_RESOLUTION_TAGLINES = [
+  '{STATE} anomaly captured—truth meter jolts {TRUTH_DELTA}%.',
+  'Task force secures {STATE} hotspot and rewrites the narrative {TRUTH_DELTA}% in their favor.',
+  'Hotspot lockdown lifted in {STATE}; truth sensors register {TRUTH_DELTA}% swing.',
+];
+
+const HOTSPOT_EXPIRE_TAGLINES = [
+  'Unstable portal in {STATE} flickers out before capture. Defenses normalize.',
+  '{STATE} anomaly dissipates quietly—no faction claims the truth swing.',
+  'Hotspot haze clears over {STATE}; analysts log a null capture.',
 ];
 
 const BROADCAST_SIGHTING_TAGLINES = [
@@ -499,6 +517,29 @@ const Index = () => {
     });
     registerParanormalSighting(entry.metadata?.source ?? undefined);
   }, [registerParanormalSighting]);
+
+  const hotspotHistoryRef = useRef<Record<string, ActiveParanormalHotspot>>({});
+  const activeHotspotByStateRef = useRef<Record<string, ActiveParanormalHotspot>>({});
+  const hotspotLogCursorRef = useRef<number>(0);
+  const hotspotLogInitializedRef = useRef<boolean>(false);
+
+  const stateLookupByName = useMemo(() => {
+    const lookup = new Map<string, (typeof gameState.states)[number]>();
+    gameState.states.forEach(state => {
+      lookup.set(state.name, state);
+      lookup.set(state.abbreviation, state);
+    });
+    return lookup;
+  }, [gameState.states]);
+
+  useEffect(() => {
+    const nextActive: Record<string, ActiveParanormalHotspot> = {};
+    Object.entries(gameState.paranormalHotspots ?? {}).forEach(([abbr, hotspot]) => {
+      nextActive[abbr] = hotspot;
+      hotspotHistoryRef.current[hotspot.id] = hotspot;
+    });
+    activeHotspotByStateRef.current = nextActive;
+  }, [gameState.paranormalHotspots]);
 
   // Handle AI turns
   useEffect(() => {
@@ -899,6 +940,199 @@ const Index = () => {
       window.removeEventListener('stateEvent', handleStateEventEffect as EventListener);
     };
   }, []);
+
+  useEffect(() => {
+    const logLength = gameState.log.length;
+
+    if (!areParanormalEffectsEnabled()) {
+      hotspotLogCursorRef.current = logLength;
+      hotspotLogInitializedRef.current = true;
+      return;
+    }
+
+    if (!hotspotLogInitializedRef.current) {
+      hotspotLogCursorRef.current = logLength;
+      hotspotLogInitializedRef.current = true;
+      return;
+    }
+
+    if (logLength <= hotspotLogCursorRef.current) {
+      hotspotLogCursorRef.current = logLength;
+      return;
+    }
+
+    const newEntries = gameState.log.slice(hotspotLogCursorRef.current);
+    hotspotLogCursorRef.current = logLength;
+
+    const pickTemplate = (templates: string[]): string => {
+      if (!templates.length) return '';
+      const index = Math.floor(Math.random() * templates.length);
+      return templates[index];
+    };
+
+    newEntries.forEach(entry => {
+      if (!entry.startsWith('👻') && !entry.startsWith('🕯️')) {
+        return;
+      }
+
+      const timestamp = Date.now();
+
+      if (entry.startsWith('👻 ') && entry.includes('erupts in')) {
+        const spawnMatch = entry.match(/^👻 (.+?) erupts in (.+?)!/);
+        if (!spawnMatch) {
+          return;
+        }
+
+        const [, label, stateName] = spawnMatch;
+        const stateRecord = stateLookupByName.get(stateName);
+        const abbreviation = stateRecord?.abbreviation;
+        const hotspot = abbreviation
+          ? activeHotspotByStateRef.current[abbreviation]
+          : Object.values(activeHotspotByStateRef.current).find(
+              candidate => candidate.stateName === stateName,
+            );
+
+        const defenseBoost = hotspot?.defenseBoost ?? (() => {
+          const match = entry.match(/Defense \+(\d+)/);
+          return match ? Number.parseInt(match[1], 10) : undefined;
+        })();
+        const truthReward = hotspot?.truthReward ?? (() => {
+          const match = entry.match(/±(\d+)%/);
+          return match ? Number.parseInt(match[1], 10) : undefined;
+        })();
+
+        const template = pickTemplate(HOTSPOT_SPAWN_TAGLINES);
+        const subtext = template
+          ? fillTemplate(template, {
+              STATE: stateName.toUpperCase(),
+              DEFENSE: defenseBoost ?? 0,
+              TRUTH: truthReward ?? 0,
+            })
+          : `Defense grid surges by +${defenseBoost ?? '?'} while ±${truthReward ?? '?'}% truth is up for grabs.`;
+
+        pushSighting({
+          id: `hotspot-${hotspot?.id ?? `${stateName}-${timestamp}`}`,
+          timestamp,
+          category: 'hotspot',
+          headline: `${hotspot?.icon ?? '👻'} ${label.toUpperCase()} IN ${stateName.toUpperCase()}`,
+          subtext,
+          location: stateName,
+          metadata: {
+            hotspotId: hotspot?.id,
+            stateId: stateRecord?.id ?? stateRecord?.abbreviation ?? stateName,
+            stateName,
+            source: hotspot?.source ?? 'neutral',
+            defenseBoost,
+            truthReward,
+            duration: hotspot?.duration,
+            turnsRemaining: hotspot ? Math.max(0, hotspot.expiresOnTurn - gameState.turn) : undefined,
+            outcome: 'active',
+          },
+        });
+        return;
+      }
+
+      if (entry.startsWith('👻 ') && entry.includes('resolved in')) {
+        const resolveMatch = entry.match(/^👻 (.+?) resolved in (.+?)!/);
+        if (!resolveMatch) {
+          return;
+        }
+
+        const [, label, stateName] = resolveMatch;
+        const truthMatch = entry.match(/Truth ([+-]?\d+)/);
+        const truthDelta = truthMatch ? Number.parseInt(truthMatch[1], 10) : 0;
+        const stateRecord = stateLookupByName.get(stateName);
+        const historyEntry = Object.values(hotspotHistoryRef.current).find(
+          hotspot => hotspot.label === label && hotspot.stateName === stateName,
+        );
+
+        const template = pickTemplate(HOTSPOT_RESOLUTION_TAGLINES);
+        const formattedDelta = `${truthDelta >= 0 ? '+' : ''}${truthDelta}`;
+        const subtext = template
+          ? fillTemplate(template, {
+              STATE: stateName.toUpperCase(),
+              TRUTH_DELTA: formattedDelta,
+            })
+          : truthDelta !== 0
+            ? `Truth ${formattedDelta}% swing recorded as the anomaly is secured.`
+            : 'Hotspot secured without shifting the truth meter.';
+
+        pushSighting({
+          id: `hotspot-${historyEntry?.id ?? `${stateName}-resolved-${timestamp}`}`,
+          timestamp,
+          category: 'hotspot',
+          headline: `${historyEntry?.icon ?? '👻'} ${label.toUpperCase()} CONTAINED`,
+          subtext,
+          location: stateName,
+          metadata: {
+            hotspotId: historyEntry?.id,
+            stateId: historyEntry?.stateId ?? stateRecord?.id ?? stateRecord?.abbreviation ?? stateName,
+            stateName,
+            source: historyEntry?.source ?? 'neutral',
+            defenseBoost: historyEntry?.defenseBoost,
+            truthReward: historyEntry?.truthReward,
+            outcome: 'captured',
+            truthDelta,
+          },
+        });
+
+        if (historyEntry) {
+          delete hotspotHistoryRef.current[historyEntry.id];
+        }
+
+        audio?.playSFX?.('cryptid-rumble');
+        return;
+      }
+
+      if (entry.startsWith('🕯️ ')) {
+        const expireMatch = entry.match(/^🕯️ (.+?) in (.+?) fizzles out\./);
+        if (!expireMatch) {
+          return;
+        }
+
+        const [, label, stateName] = expireMatch;
+        const stateRecord = stateLookupByName.get(stateName);
+        const historyEntry = Object.values(hotspotHistoryRef.current).find(
+          hotspot => hotspot.label === label && hotspot.stateName === stateName,
+        );
+
+        const template = pickTemplate(HOTSPOT_EXPIRE_TAGLINES);
+        const subtext = template
+          ? fillTemplate(template, { STATE: stateName.toUpperCase() })
+          : `Hotspot dissipates over ${stateName}; defenses return to baseline.`;
+
+        pushSighting({
+          id: `hotspot-${historyEntry?.id ?? `${stateName}-expired-${timestamp}`}`,
+          timestamp,
+          category: 'hotspot',
+          headline: `${historyEntry?.icon ?? '👻'} ${label.toUpperCase()} FADES`,
+          subtext,
+          location: stateName,
+          metadata: {
+            hotspotId: historyEntry?.id,
+            stateId: historyEntry?.stateId ?? stateRecord?.id ?? stateRecord?.abbreviation ?? stateName,
+            stateName,
+            source: historyEntry?.source ?? 'neutral',
+            defenseBoost: historyEntry?.defenseBoost,
+            truthReward: historyEntry?.truthReward,
+            outcome: 'expired',
+          },
+        });
+
+        if (historyEntry) {
+          delete hotspotHistoryRef.current[historyEntry.id];
+        }
+
+        audio?.playSFX?.('radio-static');
+      }
+    });
+  }, [
+    gameState.log,
+    gameState.turn,
+    stateLookupByName,
+    pushSighting,
+    audio,
+  ]);
 
   // Track cards being drawn to hand for collection discovery
   useEffect(() => {
