@@ -46,61 +46,21 @@ import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
 import { areParanormalEffectsEnabled } from '@/state/settings';
 import type { GameCard } from '@/rules/mvp';
+import type { GameEvent } from '@/data/eventDatabase';
+import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
+import { usePressArchive } from '@/hooks/usePressArchive';
+import type {
+  AgendaSummary,
+  ImpactType,
+  MVPReport,
+  GameOverReport,
+  FinalEditionComboHighlight,
+  FinalEditionEventHighlight,
+} from '@/types/finalEdition';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
-type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
-
 type ObjectiveSectionId = 'victory' | 'secret-agenda';
-
-interface AgendaSummary {
-  title: string;
-  headline: string;
-  operationName: string;
-  issueTheme: string;
-  pullQuote?: string;
-  artCue?: {
-    icon?: string;
-    alt?: string;
-  };
-  faction: 'truth' | 'government' | 'both';
-  progress: number;
-  target: number;
-  completed: boolean;
-  revealed: boolean;
-}
-
-interface MVPReport {
-  cardId: string;
-  cardName: string;
-  player: 'human' | 'ai';
-  faction: 'truth' | 'government';
-  truthDelta: number;
-  ipDelta: number;
-  aiIpDelta: number;
-  capturedStates: string[];
-  damageDealt: number;
-  round: number;
-  turn: number;
-  impactType: ImpactType;
-  impactValue: number;
-  impactLabel: string;
-  highlight: string;
-}
-
-interface GameOverReport {
-  winner: 'government' | 'truth' | 'draw';
-  rounds: number;
-  finalTruth: number;
-  ipPlayer: number;
-  ipAI: number;
-  statesGov: number;
-  statesTruth: number;
-  playerSecretAgenda?: AgendaSummary;
-  aiSecretAgenda?: AgendaSummary;
-  mvp?: MVPReport | null;
-  legendaryUsed: string[];
-}
 
 interface EnrichedPlay {
   play: CardPlayRecord;
@@ -170,6 +130,83 @@ const resolveStateName = (stateId: string): string => {
     return byAbbr.name;
   }
   return stateId;
+};
+
+const computeEventScore = (event: GameEvent): number => {
+  const effects = event.effects ?? {};
+  const truthMagnitude = Math.abs(effects.truth ?? 0) + Math.abs(effects.truthChange ?? 0);
+  const ipMagnitude = Math.abs(effects.ip ?? 0) + Math.abs(effects.ipChange ?? 0);
+  const defenseMagnitude = Math.abs(effects.defenseChange ?? 0) + Math.abs(effects.stateEffects?.defense ?? 0);
+  const rarityBoost = event.rarity === 'legendary'
+    ? 3
+    : event.rarity === 'rare'
+      ? 2
+      : event.rarity === 'uncommon'
+        ? 1
+        : 0;
+  return truthMagnitude * 2 + ipMagnitude * 1.5 + defenseMagnitude + rarityBoost;
+};
+
+const summarizeEventForFinalEdition = (event: GameEvent): FinalEditionEventHighlight => {
+  const headline = event.headline ?? event.title;
+  const effects = event.effects ?? {};
+  const truthDelta = (effects.truth ?? 0) + (effects.truthChange ?? 0);
+  const ipDelta = (effects.ip ?? 0) + (effects.ipChange ?? 0);
+  const stateName = effects.stateEffects?.stateId
+    ? resolveStateName(effects.stateEffects.stateId)
+    : undefined;
+
+  return {
+    id: event.id,
+    headline,
+    summary: event.content,
+    faction: event.faction ?? 'neutral',
+    rarity: event.rarity,
+    truthDelta,
+    ipDelta,
+    stateName,
+    kicker: event.flavorText ?? event.flavorTruth ?? event.flavorGov ?? undefined,
+  } satisfies FinalEditionEventHighlight;
+};
+
+const pickTopEvents = (events: GameEvent[], limit = 3): FinalEditionEventHighlight[] => {
+  return events
+    .map(event => ({ event, score: computeEventScore(event) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(entry => summarizeEventForFinalEdition(entry.event));
+};
+
+const resolveComboOwnerLabel = (owner: string | undefined): string => {
+  if (owner === 'P1') {
+    return 'Operative Team';
+  }
+  if (owner === 'P2') {
+    return 'Opposition Network';
+  }
+  return owner ?? 'Unknown Cell';
+};
+
+const buildComboHighlights = (
+  summary: ReturnType<typeof getLastComboSummary>,
+): FinalEditionComboHighlight[] => {
+  if (!summary || !summary.results || summary.results.length === 0) {
+    return [];
+  }
+
+  const ownerLabel = resolveComboOwnerLabel(summary.player);
+
+  return summary.results.map(result => {
+    const rewardLabel = formatComboReward(result.appliedReward).replace(/[()]/g, '').trim();
+    return {
+      id: result.definition.id,
+      name: result.definition.name ?? result.definition.id,
+      rewardLabel: rewardLabel.length > 0 ? rewardLabel : 'Momentum Bonus',
+      turn: summary.turn,
+      ownerLabel,
+      description: result.definition.description,
+    } satisfies FinalEditionComboHighlight;
+  });
 };
 
 const inferFactionFromRecord = (
@@ -396,63 +433,88 @@ const buildMvpReport = (candidate: EnrichedPlay, impactType: ImpactType, impactV
   };
 };
 
-const determineMVP = (
+const findTopCandidate = (
+  candidates: EnrichedPlay[],
+): { candidate: EnrichedPlay; impactType: ImpactType; impactValue: number } | null => {
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  const captureMax = Math.max(...candidates.map(entry => entry.captureCount), 0);
+  if (captureMax > 0) {
+    const captureCandidates = candidates.filter(entry => entry.captureCount === captureMax);
+    const best = pickBestCandidate(captureCandidates, 'truthImpact', ['ipImpact', 'damageImpact']);
+    if (best) {
+      return { candidate: best, impactType: 'capture', impactValue: captureMax };
+    }
+  }
+
+  const truthMax = Math.max(...candidates.map(entry => entry.truthImpact), 0);
+  if (truthMax > 0) {
+    const truthCandidates = candidates.filter(entry => entry.truthImpact === truthMax);
+    const best = pickBestCandidate(truthCandidates, 'captureCount', ['ipImpact', 'damageImpact']);
+    if (best) {
+      return { candidate: best, impactType: 'truth', impactValue: truthMax };
+    }
+  }
+
+  const ipMax = Math.max(...candidates.map(entry => entry.ipImpact), 0);
+  if (ipMax > 0) {
+    const ipCandidates = candidates.filter(entry => entry.ipImpact === ipMax);
+    const best = pickBestCandidate(ipCandidates, 'captureCount', ['truthImpact', 'damageImpact']);
+    if (best) {
+      return { candidate: best, impactType: 'ip', impactValue: ipMax };
+    }
+  }
+
+  const damageMax = Math.max(...candidates.map(entry => entry.damageImpact), 0);
+  if (damageMax > 0) {
+    const damageCandidates = candidates.filter(entry => entry.damageImpact === damageMax);
+    const best = pickBestCandidate(damageCandidates, 'truthImpact', ['ipImpact', 'captureCount']);
+    if (best) {
+      return { candidate: best, impactType: 'damage', impactValue: damageMax };
+    }
+  }
+
+  const fallback = pickBestCandidate(candidates, 'captureCount', ['truthImpact', 'ipImpact', 'damageImpact']);
+  return fallback ? { candidate: fallback, impactType: 'support', impactValue: 0 } : null;
+};
+
+const determineTopPlays = (
   history: CardPlayRecord[],
   winner: 'truth' | 'government' | 'draw' | null,
   playerFaction: 'truth' | 'government',
-): MVPReport | null => {
+): { mvp: MVPReport | null; runnerUp: MVPReport | null } => {
   if (!winner || winner === 'draw' || history.length === 0) {
-    return null;
+    return { mvp: null, runnerUp: null };
   }
 
-  const enrichedPlays: EnrichedPlay[] = history.map(play => {
-    const faction = inferFactionFromRecord(play, playerFaction);
-    const metrics = computePlayMetrics(play, faction);
-    return { play, faction, ...metrics };
-  }).filter(entry => entry.faction === winner);
+  const enrichedPlays: EnrichedPlay[] = history
+    .map(play => {
+      const faction = inferFactionFromRecord(play, playerFaction);
+      const metrics = computePlayMetrics(play, faction);
+      return { play, faction, ...metrics };
+    })
+    .filter(entry => entry.faction === winner);
 
   if (enrichedPlays.length === 0) {
-    return null;
+    return { mvp: null, runnerUp: null };
   }
 
-  const captureMax = Math.max(...enrichedPlays.map(entry => entry.captureCount), 0);
-  if (captureMax > 0) {
-    const captureCandidates = enrichedPlays.filter(entry => entry.captureCount === captureMax);
-    const best = pickBestCandidate(captureCandidates, 'truthImpact', ['ipImpact', 'damageImpact']);
-    if (best) {
-      return buildMvpReport(best, 'capture', captureMax);
-    }
+  const primary = findTopCandidate(enrichedPlays);
+  if (!primary) {
+    return { mvp: null, runnerUp: null };
   }
 
-  const truthMax = Math.max(...enrichedPlays.map(entry => entry.truthImpact), 0);
-  if (truthMax > 0) {
-    const truthCandidates = enrichedPlays.filter(entry => entry.truthImpact === truthMax);
-    const best = pickBestCandidate(truthCandidates, 'captureCount', ['ipImpact', 'damageImpact']);
-    if (best) {
-      return buildMvpReport(best, 'truth', truthMax);
-    }
-  }
+  const mvp = buildMvpReport(primary.candidate, primary.impactType, primary.impactValue);
 
-  const ipMax = Math.max(...enrichedPlays.map(entry => entry.ipImpact), 0);
-  if (ipMax > 0) {
-    const ipCandidates = enrichedPlays.filter(entry => entry.ipImpact === ipMax);
-    const best = pickBestCandidate(ipCandidates, 'captureCount', ['truthImpact', 'damageImpact']);
-    if (best) {
-      return buildMvpReport(best, 'ip', ipMax);
-    }
-  }
+  const remaining = enrichedPlays.filter(entry => entry !== primary.candidate);
+  const secondary = findTopCandidate(remaining);
+  const runnerUp = secondary
+    ? buildMvpReport(secondary.candidate, secondary.impactType, secondary.impactValue)
+    : null;
 
-  const damageMax = Math.max(...enrichedPlays.map(entry => entry.damageImpact), 0);
-  if (damageMax > 0) {
-    const damageCandidates = enrichedPlays.filter(entry => entry.damageImpact === damageMax);
-    const best = pickBestCandidate(damageCandidates, 'truthImpact', ['ipImpact', 'captureCount']);
-    if (best) {
-      return buildMvpReport(best, 'damage', damageMax);
-    }
-  }
-
-  const fallback = pickBestCandidate(enrichedPlays, 'captureCount', ['truthImpact', 'ipImpact', 'damageImpact']);
-  return fallback ? buildMvpReport(fallback, 'support', 0) : null;
+  return { mvp, runnerUp };
 };
 
 const Index = () => {
@@ -474,11 +536,12 @@ const Index = () => {
     y?: number;
   } | null>(null);
   const [previousPhase, setPreviousPhase] = useState('');
-  const [hoveredCard, setHoveredCard] = useState<any>(null);
+  const [hoveredCard, setHoveredCard] = useState<GameCard | null>(null);
   const [victoryState, setVictoryState] = useState<{ isVictory: boolean; type: 'states' | 'ip' | 'truth' | 'agenda' | null }>({ isVictory: false, type: null });
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showInGameOptions, setShowInGameOptions] = useState(false);
-  const [gameOverReport, setGameOverReport] = useState<GameOverReport | null>(null);
+  const [finalEdition, setFinalEdition] = useState<GameOverReport | null>(null);
+  const [readingEdition, setReadingEdition] = useState<GameOverReport | null>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   const [paranormalSightings, setParanormalSightings] = useState<ParanormalSighting[]>([]);
   const [inspectedPlayedCard, setInspectedPlayedCard] = useState<GameCard | null>(null);
@@ -508,6 +571,37 @@ const Index = () => {
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
+  const { issues: pressArchive, archiveEdition, removeEditionFromArchive } = usePressArchive();
+
+  const isEditionArchived = useCallback(
+    (edition: GameOverReport | null) => {
+      if (!edition) {
+        return false;
+      }
+      const id = `edition-${edition.recordedAt}`;
+      return pressArchive.some(entry => entry.id === id);
+    },
+    [pressArchive],
+  );
+
+  const archiveEditionWithToast = useCallback(
+    (edition: GameOverReport | null) => {
+      if (!edition) {
+        return;
+      }
+      if (isEditionArchived(edition)) {
+        toast('Edition already in archive', {
+          style: { background: '#0f172a', color: '#bbf7d0', border: '1px solid #10b981' },
+        });
+        return;
+      }
+      archiveEdition(edition);
+      toast.success('Final newspaper archived to Player Hub', {
+        style: { background: '#0f172a', color: '#bbf7d0', border: '1px solid #10b981' },
+      });
+    },
+    [archiveEdition, isEditionArchived],
+  );
 
   const pushSighting = useCallback((entry: ParanormalSighting) => {
     setParanormalSightings(prev => {
@@ -632,12 +726,16 @@ const Index = () => {
       setGameState(prev => ({ ...prev, isGameOver: true }));
 
       // Build game over report
-      const mvp = determineMVP(gameState.playHistory, winner, gameState.faction);
+      const { mvp, runnerUp } = determineTopPlays(gameState.playHistory, winner, gameState.faction);
       const legendaryUsed = Array.from(new Set(
         gameState.playHistory
           .filter(entry => entry.card.rarity === 'legendary')
           .map(entry => entry.card.name),
       ));
+      const topEvents = pickTopEvents(gameState.currentEvents ?? [], 4);
+      const comboSummary = getLastComboSummary();
+      const comboHighlights = buildComboHighlights(comboSummary);
+      const recordedAt = Date.now();
       const summarizeAgenda = (source?: typeof playerSecretAgenda) => {
         if (!source) {
           return undefined;
@@ -662,22 +760,41 @@ const Index = () => {
 
       const report: GameOverReport = {
         winner,
+        victoryType,
         rounds: gameState.round,
         finalTruth: Math.round(gameState.truth),
         ipPlayer: gameState.ip,
         ipAI: gameState.aiIP,
         statesGov: gameState.states.filter(s => s.owner === (gameState.faction === 'government' ? 'player' : 'ai')).length,
         statesTruth: gameState.states.filter(s => s.owner === (gameState.faction === 'truth' ? 'player' : 'ai')).length,
+        playerFaction: gameState.faction,
         playerSecretAgenda: summarizeAgenda(playerSecretAgenda),
         aiSecretAgenda: summarizeAgenda(aiSecretAgenda),
         mvp,
+        runnerUp,
         legendaryUsed,
+        topEvents,
+        comboHighlights,
+        sightings: [...paranormalSightings],
+        recordedAt,
       };
 
-      setGameOverReport(report);
+      setFinalEdition(report);
       setVictoryState({ isVictory: true, type: victoryType });
     }
-  }, [gameState.controlledStates.length, gameState.ip, gameState.aiIP, gameState.truth, gameState.secretAgenda?.completed, gameState.aiSecretAgenda?.completed, gameState.states, gameState.faction, gameState.isGameOver]);
+  }, [
+    gameState.controlledStates.length,
+    gameState.ip,
+    gameState.aiIP,
+    gameState.truth,
+    gameState.secretAgenda?.completed,
+    gameState.aiSecretAgenda?.completed,
+    gameState.states,
+    gameState.faction,
+    gameState.isGameOver,
+    gameState.currentEvents,
+    paranormalSightings,
+  ]);
 
   // Enhanced synergy detection with coordinated visual effects
   useEffect(() => {
@@ -1586,6 +1703,13 @@ const Index = () => {
           setShowPlayerHub(false);
           audio.playSFX('click');
         }}
+        pressIssues={pressArchive}
+        onOpenEdition={(issue) => {
+          setReadingEdition(issue.report);
+          setShowExtraEdition(true);
+          setShowPlayerHub(false);
+        }}
+        onDeleteEdition={(id) => removeEditionFromArchive(id)}
       />
     );
   }
@@ -1648,27 +1772,11 @@ const Index = () => {
   const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
 
   const playerAgenda = gameState.secretAgenda;
-  const playerAgendaSummary = playerAgenda ? {
-    title: playerAgenda.title,
-    faction: playerAgenda.faction,
-    progress: playerAgenda.progress,
-    target: playerAgenda.target,
-    completed: playerAgenda.completed,
-    revealed: playerAgenda.revealed,
-  } : undefined;
   const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
   const aiAgenda = gameState.aiSecretAgenda;
   const aiObjectiveProgress = aiAgenda
     ? Math.min(100, (aiAgenda.progress / aiAgenda.target) * 100)
     : 0;
-  const aiAgendaSummary = aiAgenda ? {
-    title: aiAgenda.title,
-    faction: aiAgenda.faction,
-    progress: aiAgenda.progress,
-    target: aiAgenda.target,
-    completed: aiAgenda.completed,
-    revealed: aiAgenda.revealed,
-  } : undefined;
   const aiAssessment = gameState.aiStrategist?.getStrategicAssessment(gameState);
 
   const renderSecretAgendaPanel = (variant: 'overlay' | 'mobile') => {
@@ -1889,8 +1997,6 @@ const Index = () => {
     </div>
   );
 
-  const roundsCompleted = Math.max(0, gameState.round - 1);
-  const currentRoundNumber = Math.max(1, gameState.round);
 
   const mastheadButtonClass = "touch-target inline-flex items-center justify-center rounded-md border border-newspaper-border bg-newspaper-text px-3 text-sm font-semibold text-newspaper-bg shadow-sm transition hover:bg-newspaper-text/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg";
   const statusBadgeClass = 'flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm';
@@ -2151,44 +2257,52 @@ const Index = () => {
 
       <TabloidVictoryScreen
         isVisible={victoryState.isVictory}
-        isVictory={gameState.faction === (gameOverReport?.winner || 'truth')}
-        victoryType={victoryState.type}
+        report={finalEdition}
         playerFaction={gameState.faction}
-        gameStats={{
-          rounds: roundsCompleted,
-          roundNumber: currentRoundNumber,
-          finalTruth: Math.round(gameState.truth),
-          playerIP: gameState.ip,
-          aiIP: gameState.aiIP,
-          playerStates: gameState.states.filter(s => s.owner === 'player').length,
-          aiStates: gameState.states.filter(s => s.owner === 'ai').length,
-          mvp: gameOverReport?.mvp ?? undefined,
-          playerSecretAgenda: playerAgendaSummary,
-          aiSecretAgenda: aiAgendaSummary
-        }}
+        victoryType={victoryState.type}
         onClose={() => {
           setVictoryState({ isVictory: false, type: null });
-          setGameOverReport(null);
+          setFinalEdition(null);
+          setReadingEdition(null);
           setShowMenu(true);
           setShowIntro(true);
         }}
         onMainMenu={() => {
           setVictoryState({ isVictory: false, type: null });
-          setGameOverReport(null);
+          setFinalEdition(null);
+          setReadingEdition(null);
+          setShowExtraEdition(false);
           setShowMenu(true);
           setShowIntro(true);
+          setGameState(prev => ({ ...prev, isGameOver: false }));
+          audio.playMusic('theme');
         }}
+        onViewFinalEdition={() => {
+          if (!finalEdition) return;
+          setReadingEdition(finalEdition);
+          setShowExtraEdition(true);
+        }}
+        onArchive={finalEdition ? () => archiveEditionWithToast(finalEdition) : undefined}
+        isArchived={isEditionArchived(finalEdition)}
       />
 
-      {showExtraEdition && gameOverReport && (
+      {showExtraEdition && readingEdition && (
         <ExtraEditionNewspaper
-          report={gameOverReport}
+          report={readingEdition}
+          isArchived={isEditionArchived(readingEdition)}
+          onArchive={() => archiveEditionWithToast(readingEdition)}
           onClose={() => {
             setShowExtraEdition(false);
-            setGameOverReport(null);
-            setShowMenu(true);
-            setGameState(prev => ({ ...prev, isGameOver: false }));
-            audio.playMusic('theme');
+            const closingActiveVictory = finalEdition && victoryState.isVictory && readingEdition.recordedAt === finalEdition.recordedAt;
+            setReadingEdition(null);
+            if (closingActiveVictory) {
+              setVictoryState({ isVictory: false, type: null });
+              setFinalEdition(null);
+              setShowMenu(true);
+              setShowIntro(true);
+              setGameState(prev => ({ ...prev, isGameOver: false }));
+              audio.playMusic('theme');
+            }
           }}
         />
       )}

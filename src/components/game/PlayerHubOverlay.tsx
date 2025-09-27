@@ -3,20 +3,25 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Library, GraduationCap, X } from 'lucide-react';
+import { Trophy, Library, GraduationCap, Newspaper, X } from 'lucide-react';
 import { AchievementsSection } from './AchievementPanel';
 import { CardCollectionContent } from './CardCollection';
 import { TutorialSection } from './TutorialOverlay';
+import PressArchivePanel from './PressArchivePanel';
+import type { ArchivedEdition } from '@/hooks/usePressArchive';
 
 interface PlayerHubOverlayProps {
   onClose: () => void;
   onStartTutorial?: (sequenceId: string) => void;
+  pressIssues: ArchivedEdition[];
+  onOpenEdition: (issue: ArchivedEdition) => void;
+  onDeleteEdition: (id: string) => void;
 }
 
-type HubTab = 'achievements' | 'cards' | 'tutorials';
+type HubTab = 'achievements' | 'cards' | 'tutorials' | 'press';
 
-const PlayerHubOverlay = ({ onClose, onStartTutorial }: PlayerHubOverlayProps) => {
-  const [activeTab, setActiveTab] = useState<HubTab>('achievements');
+const PlayerHubOverlay = ({ onClose, onStartTutorial, pressIssues, onOpenEdition, onDeleteEdition }: PlayerHubOverlayProps) => {
+  const [activeTab, setActiveTab] = useState<HubTab>(pressIssues.length > 0 ? 'press' : 'achievements');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
@@ -61,7 +66,7 @@ const PlayerHubOverlay = ({ onClose, onStartTutorial }: PlayerHubOverlayProps) =
           className="relative flex flex-1 flex-col overflow-hidden"
         >
           <div className="relative px-6 pt-6">
-            <TabsList className="grid w-full grid-cols-3 gap-2 rounded-lg border border-emerald-500/20 bg-slate-900/70 p-1 backdrop-blur">
+            <TabsList className="grid w-full grid-cols-4 gap-2 rounded-lg border border-emerald-500/20 bg-slate-900/70 p-1 backdrop-blur">
               <TabsTrigger
                 value="achievements"
                 className="flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-400 transition data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200"
@@ -82,6 +87,13 @@ const PlayerHubOverlay = ({ onClose, onStartTutorial }: PlayerHubOverlayProps) =
               >
                 <GraduationCap className="h-4 w-4" />
                 Shadow Academy
+              </TabsTrigger>
+              <TabsTrigger
+                value="press"
+                className="flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-400 transition data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200"
+              >
+                <Newspaper className="h-4 w-4" />
+                Press Archive
               </TabsTrigger>
             </TabsList>
           </div>
@@ -109,6 +121,15 @@ const PlayerHubOverlay = ({ onClose, onStartTutorial }: PlayerHubOverlayProps) =
                   isActive={activeTab === 'tutorials'}
                   onStartTutorial={onStartTutorial}
                   onClose={onClose}
+                  className="h-full"
+                />
+              </TabsContent>
+
+              <TabsContent value="press" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
+                <PressArchivePanel
+                  issues={pressIssues}
+                  onOpen={onOpenEdition}
+                  onDelete={onDeleteEdition}
                   className="h-full"
                 />
               </TabsContent>
