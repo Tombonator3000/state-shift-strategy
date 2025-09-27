@@ -8,6 +8,14 @@ type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
 
 interface AgendaSummary {
   title: string;
+  headline: string;
+  operationName: string;
+  issueTheme: string;
+  pullQuote?: string;
+  artCue?: {
+    icon?: string;
+    alt?: string;
+  };
   faction: 'truth' | 'government' | 'both';
   progress: number;
   target: number;
@@ -201,7 +209,7 @@ const TabloidVictoryScreen = ({
             headlines.push(`SHADOW BUDGET APPROVED — Pentagon Takes Notes!`);
             break;
           case 'agenda': {
-            const mission = gameStats.playerSecretAgenda?.title ?? 'CLASSIFIED MISSION';
+            const mission = gameStats.playerSecretAgenda?.operationName ?? gameStats.playerSecretAgenda?.headline ?? 'CLASSIFIED MISSION';
             headlines.push(`CLASSIFIED MISSION SUCCESS! Operation: ${mission}!`);
             headlines.push(`MEN IN BLACK CELEBRATE — With Decaf Coffee!`);
             break;
@@ -222,7 +230,7 @@ const TabloidVictoryScreen = ({
             headlines.push(`GRASSROOTS REVOLUTION — Aliens Take Notice!`);
             break;
           case 'agenda': {
-            const mission = gameStats.playerSecretAgenda?.title ?? 'TRUTH MISSION';
+            const mission = gameStats.playerSecretAgenda?.headline ?? gameStats.playerSecretAgenda?.operationName ?? 'TRUTH MISSION';
             headlines.push(`TRUTH MISSION ACCOMPLISHED! Operation: ${mission}!`);
             headlines.push(`WHISTLEBLOWERS UNITE — Reality TV Show Imminent!`);
             break;
@@ -546,27 +554,73 @@ const TabloidVictoryScreen = ({
                     </div>
                   )}
                   {(gameStats.playerSecretAgenda || gameStats.aiSecretAgenda) && (
-                    <div className="border-t border-newspaper-border pt-2 mt-2 text-center space-y-2">
+                    <div className="border-t border-newspaper-border pt-2 mt-2 text-center space-y-3">
                       <div className="text-xs font-bold opacity-80">SECRET OPERATIONS</div>
                       {gameStats.playerSecretAgenda && (
-                        <div>
+                        <div className="space-y-1 text-xs">
                           <div className="text-[11px] uppercase tracking-wide opacity-70">Player Objective</div>
+                          {gameStats.playerSecretAgenda.artCue?.icon && (
+                            <div className="flex justify-center">
+                              <img
+                                src={gameStats.playerSecretAgenda.artCue.icon}
+                                alt={gameStats.playerSecretAgenda.artCue.alt ?? 'Objective accent'}
+                                className="h-10 w-10 mx-auto opacity-80"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
                           <div className={`font-bold text-sm ${gameStats.playerSecretAgenda.completed ? 'text-newspaper-accent' : 'text-red-600'}`}>
-                            {gameStats.playerSecretAgenda.title}
+                            {gameStats.playerSecretAgenda.headline || gameStats.playerSecretAgenda.title}
                           </div>
+                          <div className="text-[11px] uppercase tracking-wide opacity-70">
+                            Operation: {gameStats.playerSecretAgenda.operationName}
+                          </div>
+                          <div className="text-[11px] uppercase tracking-wide opacity-70">
+                            Theme: {gameStats.playerSecretAgenda.issueTheme}
+                          </div>
+                          {gameStats.playerSecretAgenda.pullQuote && (
+                            <div className="italic opacity-80">
+                              “{gameStats.playerSecretAgenda.pullQuote.replace(/^"|"$/g, '')}”
+                            </div>
+                          )}
                           <div className="text-xs font-bold">
                             {gameStats.playerSecretAgenda.completed ? '✓ PASSED' : '✗ FAILED'} ({formatAgendaProgress(gameStats.playerSecretAgenda)})
                           </div>
                         </div>
                       )}
                       {gameStats.aiSecretAgenda && (
-                        <div>
+                        <div className="space-y-1 text-xs">
                           <div className="text-[11px] uppercase tracking-wide opacity-70">AI Objective</div>
+                          {(gameStats.aiSecretAgenda.revealed || gameStats.aiSecretAgenda.completed) && gameStats.aiSecretAgenda.artCue?.icon && (
+                            <div className="flex justify-center">
+                              <img
+                                src={gameStats.aiSecretAgenda.artCue.icon}
+                                alt={gameStats.aiSecretAgenda.artCue.alt ?? 'Objective accent'}
+                                className="h-10 w-10 mx-auto opacity-80"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
                           <div className={`font-bold text-sm ${gameStats.aiSecretAgenda.completed ? 'text-newspaper-accent' : 'text-red-600'}`}>
                             {(gameStats.aiSecretAgenda.revealed || gameStats.aiSecretAgenda.completed)
-                              ? gameStats.aiSecretAgenda.title
+                              ? (gameStats.aiSecretAgenda.headline || gameStats.aiSecretAgenda.title)
                               : 'CLASSIFIED OPERATION'}
                           </div>
+                          {(gameStats.aiSecretAgenda.revealed || gameStats.aiSecretAgenda.completed) && (
+                            <>
+                              <div className="text-[11px] uppercase tracking-wide opacity-70">
+                                Operation: {gameStats.aiSecretAgenda.operationName}
+                              </div>
+                              <div className="text-[11px] uppercase tracking-wide opacity-70">
+                                Theme: {gameStats.aiSecretAgenda.issueTheme}
+                              </div>
+                              {gameStats.aiSecretAgenda.pullQuote && (
+                                <div className="italic opacity-80">
+                                  “{gameStats.aiSecretAgenda.pullQuote.replace(/^"|"$/g, '')}”
+                                </div>
+                              )}
+                            </>
+                          )}
                           <div className="text-xs font-bold">
                             {gameStats.aiSecretAgenda.completed ? '✓ PASSED' : '✗ FAILED'} ({formatAgendaProgress(gameStats.aiSecretAgenda)})
                           </div>

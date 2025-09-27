@@ -55,6 +55,14 @@ type ObjectiveSectionId = 'victory' | 'secret-agenda';
 
 interface AgendaSummary {
   title: string;
+  headline: string;
+  operationName: string;
+  issueTheme: string;
+  pullQuote?: string;
+  artCue?: {
+    icon?: string;
+    alt?: string;
+  };
   faction: 'truth' | 'government' | 'both';
   progress: number;
   target: number;
@@ -579,6 +587,13 @@ const Index = () => {
 
         return {
           title: source.title,
+          headline: source.headline,
+          operationName: source.operationName,
+          issueTheme: source.issueTheme,
+          pullQuote: source.pullQuote,
+          artCue: source.artCue
+            ? { icon: source.artCue.icon, alt: source.artCue.alt }
+            : undefined,
           faction: source.faction,
           progress: source.progress,
           target: source.target,

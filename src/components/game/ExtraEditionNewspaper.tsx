@@ -7,6 +7,14 @@ type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
 
 interface AgendaSummary {
   title: string;
+  headline: string;
+  operationName: string;
+  issueTheme: string;
+  pullQuote?: string;
+  artCue?: {
+    icon?: string;
+    alt?: string;
+  };
   faction: 'truth' | 'government' | 'both';
   progress: number;
   target: number;
@@ -164,10 +172,12 @@ const ExtraEditionNewspaper = ({ report, onClose }: ExtraEditionNewspaperProps) 
 
     if (playerSecretAgenda?.completed) {
       const factionLabel = playerSecretAgenda.faction === 'government' ? 'Government' : 'Truth';
-      headlines.push(`${factionLabel.toUpperCase()} SECRET AGENDA COMPLETE: ${playerSecretAgenda.title}!`);
+      const agendaHeadline = playerSecretAgenda.headline || playerSecretAgenda.title;
+      headlines.push(`${factionLabel.toUpperCase()} SECRET AGENDA COMPLETE: ${agendaHeadline}!`);
     } else if (aiSecretAgenda?.completed) {
       const factionLabel = aiSecretAgenda.faction === 'government' ? 'Government' : 'Truth';
-      headlines.push(`${factionLabel.toUpperCase()} SHADOW PLAN "${aiSecretAgenda.title.toUpperCase()}" SUCCEEDS!`);
+      const agendaHeadline = aiSecretAgenda.headline || aiSecretAgenda.title;
+      headlines.push(`${factionLabel.toUpperCase()} SHADOW PLAN "${agendaHeadline.toUpperCase()}" SUCCEEDS!`);
     }
 
     // Add universal headlines
@@ -317,27 +327,73 @@ const ExtraEditionNewspaper = ({ report, onClose }: ExtraEditionNewspaperProps) 
                   </div>
                 )}
                 {(report.playerSecretAgenda || report.aiSecretAgenda) && (
-                  <div className="border-t border-newspaper-text/20 pt-2 mt-2 space-y-2">
+                  <div className="border-t border-newspaper-text/20 pt-2 mt-2 space-y-3">
                     <div className="text-center text-xs opacity-80">SECRET OPERATIONS</div>
                     {report.playerSecretAgenda && (
-                      <div className="text-center text-xs">
+                      <div className="text-xs space-y-1 text-center">
                         <div className="uppercase tracking-wide opacity-70">Player Objective</div>
+                        {report.playerSecretAgenda.artCue?.icon && (
+                          <div className="flex justify-center">
+                            <img
+                              src={report.playerSecretAgenda.artCue.icon}
+                              alt={report.playerSecretAgenda.artCue.alt ?? 'Objective accent'}
+                              className="h-10 w-10 mx-auto opacity-80"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
                         <div className={`font-bold text-sm ${report.playerSecretAgenda.completed ? 'text-green-400' : 'text-red-400'}`}>
-                          {report.playerSecretAgenda.title}
+                          {report.playerSecretAgenda.headline || report.playerSecretAgenda.title}
                         </div>
+                        <div className="text-[11px] uppercase tracking-wider opacity-70">
+                          Operation: {report.playerSecretAgenda.operationName}
+                        </div>
+                        <div className="text-[11px] uppercase tracking-wider opacity-70">
+                          Issue Theme: {report.playerSecretAgenda.issueTheme}
+                        </div>
+                        {report.playerSecretAgenda.pullQuote && (
+                          <div className="italic opacity-80">
+                            “{report.playerSecretAgenda.pullQuote.replace(/^"|"$/g, '')}”
+                          </div>
+                        )}
                         <div>
                           {report.playerSecretAgenda.completed ? '✅ SUCCESS' : '❌ FAILED'} ({formatAgendaProgress(report.playerSecretAgenda)})
                         </div>
                       </div>
                     )}
                     {report.aiSecretAgenda && (
-                      <div className="text-center text-xs">
+                      <div className="text-xs space-y-1 text-center">
                         <div className="uppercase tracking-wide opacity-70">AI Objective</div>
+                        {(report.aiSecretAgenda.revealed || report.aiSecretAgenda.completed) && report.aiSecretAgenda.artCue?.icon && (
+                          <div className="flex justify-center">
+                            <img
+                              src={report.aiSecretAgenda.artCue.icon}
+                              alt={report.aiSecretAgenda.artCue.alt ?? 'Objective accent'}
+                              className="h-10 w-10 mx-auto opacity-80"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
                         <div className={`font-bold text-sm ${report.aiSecretAgenda.completed ? 'text-green-400' : 'text-red-400'}`}>
                           {(report.aiSecretAgenda.revealed || report.aiSecretAgenda.completed)
-                            ? report.aiSecretAgenda.title
+                            ? (report.aiSecretAgenda.headline || report.aiSecretAgenda.title)
                             : 'CLASSIFIED OPERATION'}
                         </div>
+                        {(report.aiSecretAgenda.revealed || report.aiSecretAgenda.completed) && (
+                          <>
+                            <div className="text-[11px] uppercase tracking-wider opacity-70">
+                              Operation: {report.aiSecretAgenda.operationName}
+                            </div>
+                            <div className="text-[11px] uppercase tracking-wider opacity-70">
+                              Issue Theme: {report.aiSecretAgenda.issueTheme}
+                            </div>
+                            {report.aiSecretAgenda.pullQuote && (
+                              <div className="italic opacity-80">
+                                “{report.aiSecretAgenda.pullQuote.replace(/^"|"$/g, '')}”
+                              </div>
+                            )}
+                          </>
+                        )}
                         <div>
                           {report.aiSecretAgenda.completed ? '✅ SUCCESS' : '❌ FAILED'} ({formatAgendaProgress(report.aiSecretAgenda)})
                         </div>

@@ -1,0 +1,13 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Tabloid Starburst</title>
+  <desc id="desc">A jagged starburst accent used for truth faction headlines.</desc>
+  <defs>
+    <radialGradient id="burstGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fffbeb" />
+      <stop offset="55%" stop-color="#f87171" />
+      <stop offset="100%" stop-color="#b91c1c" />
+    </radialGradient>
+  </defs>
+  <polygon fill="url(#burstGradient)" stroke="#7f1d1d" stroke-width="4" stroke-linejoin="round"
+    points="60 4, 73 32, 104 18, 92 46, 116 60, 88 66, 100 96, 72 82, 60 112, 48 82, 20 96, 32 66, 4 60, 28 46, 16 18, 47 32" />
+</svg>
