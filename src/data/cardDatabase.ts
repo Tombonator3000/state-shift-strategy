@@ -1,7 +1,7 @@
 import type { GameCard, MVPCardType, Rarity } from '@/rules/mvp';
 import { expectedCost, MVP_COST_TABLE } from '@/rules/mvp';
 import { repairToMVP, validateCardMVP } from '@/mvp/validator';
-import { extensionManager } from './extensionSystem';
+import { getExtensionCardsSnapshot } from './extensionSystem';
 
 const DEV = typeof import.meta !== 'undefined' && (import.meta as any)?.env?.DEV;
 
@@ -164,7 +164,7 @@ loadCoreCards()
   });
 
 function getAllCards(): GameCard[] {
-  const extensionCards = extensionManager.getAllExtensionCards();
+  const extensionCards = getExtensionCardsSnapshot();
   return [...CORE_CARDS, ...extensionCards];
 }
 

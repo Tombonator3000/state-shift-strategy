@@ -1,6 +1,6 @@
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE } from './cardDatabase';
-import { extensionManager } from './extensionSystem';
+import { extensionManager, getExtensionCardsSnapshot } from './extensionSystem';
 
 type RarityType = 'common' | 'uncommon' | 'rare' | 'legendary';
 
@@ -339,7 +339,7 @@ export class PatchValidator {
     for (const card of patch.cards) {
       // Validate card exists
       const existingCard = CARD_DATABASE.find(c => c.id === card.cardId);
-      const extensionCards = extensionManager.getAllExtensionCards();
+      const extensionCards = getExtensionCardsSnapshot();
       const extensionCard = extensionCards.find(c => c.id === card.cardId);
       
       if (!existingCard && !extensionCard) {
@@ -407,7 +407,7 @@ export class PatchApplicator {
     const backupData = {
       timestamp,
       cards: CARD_DATABASE.map(card => ({ ...card })),
-      extensions: extensionManager.getAllExtensionCards().map(card => ({ ...card }))
+      extensions: getExtensionCardsSnapshot().map(card => ({ ...card }))
     };
     
     const backupJson = JSON.stringify(backupData, null, 2);
@@ -453,7 +453,7 @@ export class PatchApplicator {
         
         targetCard = CARD_DATABASE.find(c => c.id === patchCard.cardId);
         if (!targetCard) {
-          const extensionCards = extensionManager.getAllExtensionCards();
+          const extensionCards = getExtensionCardsSnapshot();
           targetCard = extensionCards.find(c => c.id === patchCard.cardId);
           isExtensionCard = true;
         }
