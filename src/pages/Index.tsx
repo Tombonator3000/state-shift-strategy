@@ -1300,7 +1300,7 @@ const Index = () => {
         audio.playSFX('click');
         return;
       }
-      
+
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
         setIsFullscreen(true);
@@ -1321,6 +1321,20 @@ const Index = () => {
       audio.playSFX('click');
     }
   }, [audio]);
+
+  const handleEndTurn = useCallback(() => {
+    if (isEndingTurn) {
+      return;
+    }
+
+    setIsEndingTurn(true);
+    endTurn();
+    audio.playSFX('turnEnd');
+    // Play card draw sound after a short delay
+    setTimeout(() => {
+      audio.playSFX('cardDraw');
+    }, 500);
+  }, [audio, endTurn, isEndingTurn]);
 
   // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
@@ -1380,8 +1394,8 @@ const Index = () => {
     gameState.animating,
     gameState.hand,
     audio,
-    handleEndTurn,
     isEndingTurn,
+    handleEndTurn,
   ]);
 
   useEffect(() => {
@@ -1653,20 +1667,6 @@ const Index = () => {
       }
     }
   };
-
-  const handleEndTurn = useCallback(() => {
-    if (isEndingTurn) {
-      return;
-    }
-
-    setIsEndingTurn(true);
-    endTurn();
-    audio.playSFX('turnEnd');
-    // Play card draw sound after a short delay
-    setTimeout(() => {
-      audio.playSFX('cardDraw');
-    }, 500);
-  }, [audio, endTurn, isEndingTurn]);
 
   const handleCloseNewspaper = () => {
     closeNewspaper();
