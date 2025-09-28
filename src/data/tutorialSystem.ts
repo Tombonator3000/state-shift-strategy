@@ -45,14 +45,14 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'game_interface',
         title: 'Your Command Center',
-        description: 'This is your operational interface. The map shows state control, your hand contains action cards, and the meters track Truth levels and Influence Points (IP).',
+        description: 'This is your operational interface. The map shows state control and hotspots, your hand holds action cards, the meters track Truth and IP, and side panels surface agendas, combos, and newspaper intel.',
         position: 'center',
         delay: 3000
       },
       {
         id: 'truth_meter',
         title: 'Truth Level Monitor',
-        description: 'This meter shows public awareness. Truth Seekers want high Truth (expose everything), Government wants low Truth (maintain secrets). Extreme levels can trigger victory conditions.',
+        description: 'This meter shows public awareness. Truth Seekers push toward 95% Truth, Government suppresses toward 5%. Crossing those thresholds triggers victory checks and fuels certain agendas.',
         targetElement: '.truth-meter',
         position: 'right',
         delay: 4000
@@ -60,7 +60,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'ip_display',
         title: 'Influence Points (IP)',
-        description: 'IP is your operational currency. Gain IP from controlled states and use it to play powerful cards. Accumulating 300+ IP can secure victory through resource dominance.',
+        description: 'IP is your operational currency. Gain it from controlled states, state combos, and events, then spend it to deploy cards. Banking 300 IP before the AI does secures an economic victory.',
         targetElement: '.ip-display',
         position: 'left',
         delay: 3000
@@ -68,7 +68,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'state_map',
         title: 'Territory Control',
-        description: 'Each state can be controlled by you (blue), the AI (red), or remain neutral (gray). Controlled states generate IP each turn. Control 10 states to win through territorial dominance.',
+        description: 'Each state can be controlled by you (blue), the AI (red), or remain neutral (gray). Capture states to earn their IP income, trigger special bonuses, and unlock regional combos. Watch for ghostly hotspot markers that boost defense until resolved.',
         targetElement: '.usa-map',
         position: 'bottom',
         delay: 4000
@@ -76,7 +76,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'card_hand',
         title: 'Your Action Cards',
-        description: 'These cards are your tools of influence. Media cards affect Truth, Zone cards target states, Attack cards damage opponents, and Defensive cards protect you.',
+        description: 'These cards are your tools of influence. MEDIA shifts Truth, ZONE applies pressure to seize states, and ATTACK drains enemy IP or hand resources. Plan around your IP budget before committing a card.',
         targetElement: '.game-hand',
         position: 'top',
         delay: 3000
@@ -93,7 +93,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'target_selection',
         title: 'Choose Your Target',
-        description: 'Zone cards require target selection. Click on a state to target it with pressure. When pressure meets or exceeds defense, you capture the state.',
+        description: 'ZONE cards require a target. Click a state to apply pressure; if your total meets its defense, you capture it immediately, reset pressure, and claim its income and combo progress.',
         targetElement: '.usa-map',
         position: 'bottom',
         action: 'click',
@@ -103,7 +103,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'secret_agenda',
         title: 'Your Secret Mission',
-        description: 'This is your hidden objective. Complete it for an alternative victory condition. Click to expand and see progress. Keep it secret from your opponents.',
+        description: 'This panel tracks your hidden objective. Agenda progress updates automatically; finishing it overrides every other victory path, so monitor both your milestones and the AI’s suspicious behaviour.',
         targetElement: '.secret-agenda',
         position: 'right',
         delay: 3000
@@ -111,7 +111,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'ai_opponent',
         title: 'AI Opposition',
-        description: 'Your AI opponent has its own agenda and strategy. The difficulty level affects its decision-making and tactical awareness. Watch its moves carefully.',
+        description: 'Your AI opponent plays by the same rules, pursues its own secret agenda, and obeys the same victory thresholds. Difficulty settings adjust how aggressively it pushes Truth, IP, and territory.',
         targetElement: '.ai-status',
         position: 'left',
         delay: 3000
@@ -128,7 +128,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'newspaper_events',
         title: 'Breaking News',
-        description: 'After each round, the newspaper shows recent events and played cards. Some events can dramatically shift the game state. Read carefully for strategic insights.',
+        description: 'After each round, the newspaper records card plays, combo highlights, and tabloid events. Legendary headlines can reveal agendas, spawn paranormal hotspots, or swing Truth—study them before the next turn.',
         targetElement: '.newspaper',
         position: 'center',
         delay: 4000,
@@ -137,7 +137,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'victory_conditions',
         title: 'Path to Victory',
-        description: 'Win by: 1) Controlling 10+ states, 2) Accumulating 300+ IP, 3) Achieving extreme Truth levels (95%+ or 5%-), or 4) Completing your Secret Agenda.',
+        description: 'Victory checks run in priority order: 1) finish your Secret Agenda, 2) hit Truth ≥95% (Truth) or ≤5% (Government), 3) bank 300 IP, 4) control 10 states. Deny the AI before it crosses any of these thresholds.',
         position: 'center',
         delay: 4000
       }
@@ -152,14 +152,14 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'card_types_deep',
         title: 'Master Card Categories',
-        description: 'Media cards have global effects on Truth. Zone cards build pressure regionally. Attack cards disrupt opponents directly. Defensive cards counter incoming threats.',
+        description: 'MEDIA cards swing the Truth meter, ZONE cards escalate pressure and unlock state combos, and ATTACK cards strip IP or hands. Chain them to trigger combo bonuses without overspending IP.',
         position: 'center',
         delay: 3000
       },
       {
         id: 'rarity_system',
         title: 'Card Rarity & Power',
-        description: 'Common cards (gray) are consistent tools. Uncommon (green) offer strong effects. Rare (blue) provide game-changing power. Legendary (purple) can decide entire matches.',
+        description: 'Commons (gray) fuel efficiency, Uncommons (green) add swingy plays, Rares (blue) shape turns, and Legendary cards (orange) create headline moments at steep IP costs. Curve your deck so you can afford them.',
         targetElement: '.game-hand',
         position: 'top',
         delay: 4000
@@ -167,7 +167,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'state_specialization',
         title: 'Strategic State Selection',
-        description: 'States have different IP values, defense levels, and special bonuses. California gives tech advantages, Texas provides energy bonuses, DC offers political power.',
+        description: 'States carry unique IP yields, defense values, and bonuses. California’s tech hubs lower MEDIA costs, Texas oil boosts income, DC amps political effects. Capture sets to unlock permanent combo rewards.',
         targetElement: '.usa-map',
         position: 'bottom',
         delay: 4000
@@ -175,14 +175,14 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'timing_strategy',
         title: 'Turn Timing Mastery',
-        description: 'Card order matters. Play setup cards first, then attacks, then defenses. Save reactive cards for opponent responses. Time your turn end to maximize income.',
+        description: 'Card order matters. Open with setup plays that establish combos, follow with disruptive ATTACKs, then close with ZONE captures. Leave IP for surprise plays triggered by events or hotspots before ending the turn.',
         position: 'center',
         delay: 4000
       },
       {
         id: 'ai_prediction',
         title: 'Reading AI Patterns',
-        description: 'Each AI difficulty has personality traits. Easy AI is predictable, Medium balances offense/defense, Hard plans ahead, Legendary sees all angles.',
+        description: 'Each AI difficulty has a distinct cadence. Easier modes telegraph Truth pushes, higher tiers pivot between agenda progress, state combos, and economic plays—track its Truth/IP spikes to anticipate the next strike.',
         targetElement: '.ai-status',
         position: 'left',
         delay: 4000
