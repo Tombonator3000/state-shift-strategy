@@ -17,9 +17,16 @@ This directory should contain the following audio files:
 - `click.mp3` - UI click sound
 - `typewriter.mp3` - Typewriter effect for text
 
-### Procedural Assets
-- `ufo-elvis` sting is bundled as an in-code base64 WAV data URL (`src/assets/audio/ufoElvisDataUrl.ts`). Override this file if you
-  want to ship a different broadcast clip.
+### Procedural Paranormal Effects
+- `paranormal-sfx.json` – Manifest describing the bundled procedural stingers.
+- The UFO, cryptid, and radio static clips are embedded as base64-encoded WAV data URLs in
+  [`src/assets/audio/paranormalSfx.ts`](../../src/assets/audio/paranormalSfx.ts).
+- Regenerate them with `python tools/generate_paranormal_sfx.py` if you want to tweak the synthesis
+  parameters.
+
+### Licensing Notes
+- The procedural paranormal clips are generated in-house via the Python script above and are released
+  under the Creative Commons Zero v1.0 Universal (CC0) license for unrestricted reuse.
 
 ## Audio Sources
 You can find royalty-free audio at:
