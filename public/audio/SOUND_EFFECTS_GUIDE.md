@@ -8,14 +8,8 @@ The game's audio system is fully functional with the following sound effects:
 - **UI Sounds**: click, hover, lightClick, error
 - **Gameplay**: cardPlay, cardDraw, turnEnd, newspaper, stateCapture
 - **Music**: victory, defeat, typewriter
-- **Paranormal**: `ufo-elvis` (generated shortwave UFO/Elvis radio broadcast clip)
+- **Paranormal**: `ufo-elvis`, `cryptid-rumble`, `radio-static` (procedural WAV data URLs)
 - **Background Music**: Theme, Government, Truth, End Credits tracks
-
-### 🔄 Paranormal Effects (Using Fallbacks)
-The following paranormal sound effects are currently using existing sounds as placeholders:
-
-- **`cryptid-rumble`** → Using defeat sound (for cryptid encounters)
-- **`radio-static`** → Using typewriter sound (for radio interference)
 
 ## Adding Proper Paranormal Sound Effects
 
@@ -41,14 +35,17 @@ To replace the fallback sounds with proper paranormal audio:
 - **Volume**: Moderate level (will be controlled by game volume)
 
 ### 4. Installation
-- **Generated clip**: The repo ships a procedural broadcast sting stored as a base64 data URL in
-  `src/assets/audio/ufoElvisDataUrl.ts`. Replace that constant if you want to ship a custom asset without adding binary files.
-- **Optional file override**: If you prefer working with standalone audio assets, add `public/audio/ufo-elvis.mp3` and update the
-  mapping in `src/hooks/useAudio.ts` to point to your file path instead of the generated constant.
-- **Other effects**: Place the downloaded files in `public/audio/` with these exact names:
+- **Bundled clips**: The repo ships synthesized paranormal effects encoded as base64 WAV data URLs in
+  `src/assets/audio/paranormalSfx.ts`. No extra binaries are required.
+- **Regenerating**: Run `python tools/generate_paranormal_sfx.py` to tweak or regenerate the procedural
+  stingers. The script updates both the TypeScript constants and a manifest file at
+  `public/audio/paranormal-sfx.json`.
+- **Custom replacements**: If you design new sounds, drop MP3 files into `public/audio/` with these exact
+  names and update the mapping in `src/hooks/useAudio.ts` to point at the new assets:
   ```
-  public/audio/radio-static.mp3   # Radio interference/static
+  public/audio/ufo-elvis.mp3      # Shortwave-style UFO bulletin sting
   public/audio/cryptid-rumble.mp3 # Deep rumble/monster sound
+  public/audio/radio-static.mp3   # Radio interference/static
   ```
 
 ### 5. Testing
@@ -57,25 +54,27 @@ Use the in-game audio controls (settings gear icon) to:
 - Verify volume levels
 - Check that paranormal sounds trigger properly
 
-## Current Fallback Mapping
-
-Until proper sounds are added, the system uses:
+## Current Mapping Snapshot
 
 ```javascript
-import { UFO_ELVIS_DATA_URL } from '../assets/audio/ufoElvisDataUrl';
+import {
+  UFO_ELVIS_SFX,
+  CRYPTID_RUMBLE_SFX,
+  RADIO_STATIC_SFX,
+} from '../assets/audio/paranormalSfx';
 
-'ufo-elvis': UFO_ELVIS_DATA_URL,                // → Generated broadcast sting ships with the repo
-'cryptid-rumble': '/audio/defeat.mp3',          // → Deep rumble/earthquake needed
-'radio-static': '/audio/typewriter.mp3'         // → Radio static/interference needed
+'ufo-elvis': UFO_ELVIS_SFX,
+'cryptid-rumble': CRYPTID_RUMBLE_SFX,
+'radio-static': RADIO_STATIC_SFX,
 ```
 
-## When Sounds Are Added
+## When Sounds Are Replaced
 
-The audio system will automatically:
-1. Detect the new files on next page load
-2. Replace fallback sounds with proper effects
+If you swap in new paranormal clips, the audio system will automatically:
+1. Detect the files on next page load
+2. Load them alongside the other effects
 3. Show "✅ Loaded" status in audio controls
-4. Play authentic paranormal sounds during gameplay
+4. Play your custom paranormal sounds during gameplay
 
 ## License Compliance
 

@@ -1,5 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { UFO_ELVIS_DATA_URL } from '../assets/audio/ufoElvisDataUrl';
+import {
+  UFO_ELVIS_SFX,
+  CRYPTID_RUMBLE_SFX,
+  RADIO_STATIC_SFX,
+} from '../assets/audio/paranormalSfx';
 
 interface AudioConfig {
   volume: number;
@@ -413,10 +417,10 @@ export const useAudio = () => {
       typewriter: '/audio/typewriter.mp3',
       lightClick: '/audio/click.mp3', // Reuse click sound
       error: '/audio/click.mp3', // Fallback for error sound
-      // Paranormal effects - using creative fallbacks until proper sounds are added
-      'ufo-elvis': UFO_ELVIS_DATA_URL, // Generated shortwave broadcast sting for UFO/Elvis reports
-      'cryptid-rumble': '/audio/defeat.mp3', // Use defeat sound as rumble
-      'radio-static': '/audio/typewriter.mp3' // Use typewriter as static
+      // Paranormal effects
+      'ufo-elvis': UFO_ELVIS_SFX,
+      'cryptid-rumble': CRYPTID_RUMBLE_SFX,
+      'radio-static': RADIO_STATIC_SFX
     };
 
     // Load SFX asynchronously with error handling
