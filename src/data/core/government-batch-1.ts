@@ -76,7 +76,7 @@ export const governmentBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": -3
+      "truthDelta": -2
     },
     "flavor": "Tonight's top story was approved at noon."
   },
@@ -178,7 +178,7 @@ export const governmentBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": -3
+      "truthDelta": -2
     },
     "flavor": "Your regularly scheduled reality will return shortly."
   },
@@ -320,7 +320,7 @@ export const governmentBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": -3
+      "truthDelta": -2
     },
     "flavor": "The smoke alarm is for show."
   },
@@ -625,7 +625,7 @@ export const governmentBatch1: GameCard[] = [
     "rarity": "legendary",
     "cost": 6,
     "effects": {
-      "truthDelta": -4
+      "truthDelta": -3
     },
     "flavor": "Minutes not taken. Decisions irreversible."
   },
@@ -637,7 +637,7 @@ export const governmentBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": -3
+      "truthDelta": -2
     },
     "flavor": "It's not a cover-up if it's a comforter."
   }
