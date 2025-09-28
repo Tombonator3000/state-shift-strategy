@@ -116,12 +116,21 @@ describe('combo and state synergy integration', () => {
     expect(effects.attackIpBonus).toBe(1);
     expect(effects.stateDefenseBonus).toBe(1);
     expect(effects.incomingPressureReduction).toBe(1);
+    expect(effects.truthSwingMultiplier).toBe(1);
 
     const dynamicBonus = calculateDynamicIpBonus(effects, 4, 10);
     expect(dynamicBonus).toBe(16);
 
     const reducedCost = applyStateCombinationCostModifiers(3, 'MEDIA', 'human', effects);
     expect(reducedCost).toBe(2);
+  });
+
+  it('applies a truth swing multiplier when Academic Elite is active', () => {
+    const combo = STATE_COMBINATIONS.find(entry => entry.id === 'academic_elite');
+    expect(combo).toBeTruthy();
+
+    const effects = aggregateStateCombinationEffects(combo ? [combo] : []);
+    expect(effects.truthSwingMultiplier).toBeGreaterThan(1);
   });
 
   it('applies defense modifiers only to player-held states', () => {
@@ -230,5 +239,27 @@ describe('combo and state synergy integration', () => {
     const california = result.states.find(entry => entry.abbreviation === 'CA');
     expect(california?.defense).toBe(5);
     expect(california?.comboDefenseBonus).toBe(1);
+  });
+
+  it('boosts media truth swings when Academic Elite is active', () => {
+    const state = buildBaseGameState();
+    state.truth = 40;
+    state.stateCombinationEffects = {
+      ...createDefaultCombinationEffects(),
+      truthSwingMultiplier: 1.5,
+    };
+
+    const mediaCard: GameCard = {
+      id: 'media-broadcast',
+      name: 'Academic Spotlight',
+      type: 'MEDIA',
+      faction: 'truth',
+      cost: 3,
+      effects: { truthDelta: 4 },
+    };
+
+    const result = resolveCardMVP(state, mediaCard, null, 'human');
+    expect(result.truth).toBe(46);
+    expect(result.logEntries.some(entry => entry.includes('Academic Elite'))).toBe(true);
   });
 });

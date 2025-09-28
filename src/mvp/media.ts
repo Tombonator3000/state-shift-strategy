@@ -3,6 +3,8 @@ import type { Card, EffectsMEDIA, PlayerState } from './validator';
 
 export interface MediaResolutionOptions {
   overrideSign?: 1 | -1;
+  truthMultiplier?: number;
+  truthMultiplierSource?: string;
 }
 
 export interface MediaActor {
