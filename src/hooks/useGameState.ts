@@ -6,6 +6,7 @@ import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateDat
 import {
   applyStateCombinationCostModifiers,
   calculateDynamicIpBonus,
+  applyDefenseBonusToStates,
   createDefaultCombinationEffects,
 } from '@/data/stateCombinations';
 import { getRandomAgenda, getAgendaById } from '@/data/agendaDatabase';
@@ -624,6 +625,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           baseIP: state.baseIP,
           baseDefense: state.defense,
           defense: state.defense,
+          comboDefenseBonus: 0,
           pressure: 0,
           pressurePlayer: 0,
           pressureAi: 0,
@@ -767,6 +769,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           baseIP: state.baseIP,
           baseDefense: state.defense,
           defense: state.defense,
+          comboDefenseBonus: 0,
           pressure: 0,
           pressurePlayer: 0,
           pressureAi: 0,
@@ -1879,6 +1882,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const baseDefense = typeof (rawState as any)?.baseDefense === 'number' && Number.isFinite((rawState as any).baseDefense)
           ? (rawState as any).baseDefense
           : lookupBase?.defense ?? defense;
+        const comboDefenseBonus = typeof (rawState as any)?.comboDefenseBonus === 'number' && Number.isFinite((rawState as any).comboDefenseBonus)
+          ? Math.max(0, Math.floor((rawState as any).comboDefenseBonus))
+          : 0;
         const owner = rawState?.owner === 'player'
           ? 'player'
           : rawState?.owner === 'ai'
@@ -1905,6 +1911,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             : lookupBase?.baseIP ?? 0,
           baseDefense,
           defense,
+          comboDefenseBonus,
           pressure: Math.max(basePressure, pressurePlayer, pressureAi),
           pressurePlayer,
           pressureAi,
@@ -2049,57 +2056,64 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             ? saveData.timeBasedGoalCounters.truthBelow20Streak
             : 0;
 
-      setGameState(prev => ({
-        ...prev,
-        ...saveData,
-        turn: normalizedTurn,
-        round: normalizedRound,
-        states: statesWithHotspot.length > 0 ? statesWithHotspot : prev.states,
-        paranormalHotspots: normalizedHotspots,
-        secretAgenda,
-        aiSecretAgenda,
-        agendaIssue: agendaIssueState,
-        agendaIssueCounters: (saveData.agendaIssueCounters && typeof saveData.agendaIssueCounters === 'object')
-          ? saveData.agendaIssueCounters as Record<string, number>
-          : {},
-        agendaRoundCounters: (saveData.agendaRoundCounters && typeof saveData.agendaRoundCounters === 'object')
-          ? saveData.agendaRoundCounters as Record<string, number>
-          : {},
-        cardsPlayedThisRound: Array.isArray(saveData.cardsPlayedThisRound)
-          ? saveData.cardsPlayedThisRound
-          : [],
-        playHistory: Array.isArray(saveData.playHistory)
-          ? saveData.playHistory
-          : [],
-        turnPlays: Array.isArray(saveData.turnPlays)
-          ? saveData.turnPlays
-          : [],
-        comboTruthDeltaThisRound:
-          typeof saveData.comboTruthDeltaThisRound === 'number' ? saveData.comboTruthDeltaThisRound : 0,
-        stateCombinationBonusIP:
-          typeof saveData.stateCombinationBonusIP === 'number' ? saveData.stateCombinationBonusIP : 0,
-        activeStateCombinationIds: Array.isArray(saveData.activeStateCombinationIds)
-          ? saveData.activeStateCombinationIds
-          : [],
-        stateCombinationEffects: saveData.stateCombinationEffects
+      setGameState(prev => {
+        const restoredEffects = saveData.stateCombinationEffects
           ? {
             ...createDefaultCombinationEffects(),
             ...saveData.stateCombinationEffects,
           }
-          : createDefaultCombinationEffects(),
-        // Ensure objects are properly reconstructed
-        eventManager: prev.eventManager, // Keep the current event manager
-        aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium'),
-        truthAbove80Streak: savedTruthAboveStreak,
-        truthBelow20Streak: savedTruthBelowStreak,
-        timeBasedGoalCounters: {
-          ...(saveData.timeBasedGoalCounters && typeof saveData.timeBasedGoalCounters === 'object'
-            ? saveData.timeBasedGoalCounters
-            : {}),
+          : createDefaultCombinationEffects();
+
+        const baseStates = statesWithHotspot.length > 0 ? statesWithHotspot : prev.states;
+        const statesWithDefense = applyDefenseBonusToStates(baseStates, restoredEffects.stateDefenseBonus);
+
+        return {
+          ...prev,
+          ...saveData,
+          turn: normalizedTurn,
+          round: normalizedRound,
+          paranormalHotspots: normalizedHotspots,
+          secretAgenda,
+          aiSecretAgenda,
+          agendaIssue: agendaIssueState,
+          agendaIssueCounters: (saveData.agendaIssueCounters && typeof saveData.agendaIssueCounters === 'object')
+            ? saveData.agendaIssueCounters as Record<string, number>
+            : {},
+          agendaRoundCounters: (saveData.agendaRoundCounters && typeof saveData.agendaRoundCounters === 'object')
+            ? saveData.agendaRoundCounters as Record<string, number>
+            : {},
+          cardsPlayedThisRound: Array.isArray(saveData.cardsPlayedThisRound)
+            ? saveData.cardsPlayedThisRound
+            : [],
+          playHistory: Array.isArray(saveData.playHistory)
+            ? saveData.playHistory
+            : [],
+          turnPlays: Array.isArray(saveData.turnPlays)
+            ? saveData.turnPlays
+            : [],
+          comboTruthDeltaThisRound:
+            typeof saveData.comboTruthDeltaThisRound === 'number' ? saveData.comboTruthDeltaThisRound : 0,
+          stateCombinationBonusIP:
+            typeof saveData.stateCombinationBonusIP === 'number' ? saveData.stateCombinationBonusIP : 0,
+          activeStateCombinationIds: Array.isArray(saveData.activeStateCombinationIds)
+            ? saveData.activeStateCombinationIds
+            : [],
+          stateCombinationEffects: restoredEffects,
+          states: statesWithDefense,
+          // Ensure objects are properly reconstructed
+          eventManager: prev.eventManager, // Keep the current event manager
+          aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium'),
           truthAbove80Streak: savedTruthAboveStreak,
           truthBelow20Streak: savedTruthBelowStreak,
-        },
-      }));
+          timeBasedGoalCounters: {
+            ...(saveData.timeBasedGoalCounters && typeof saveData.timeBasedGoalCounters === 'object'
+              ? saveData.timeBasedGoalCounters
+              : {}),
+            truthAbove80Streak: savedTruthAboveStreak,
+            truthBelow20Streak: savedTruthBelowStreak,
+          },
+        };
+      });
       
       return true;
     } catch (error) {

@@ -54,6 +54,7 @@ export interface GameState {
     baseIP: number;
     baseDefense: number;
     defense: number;
+    comboDefenseBonus?: number;
     pressure: number;
     pressurePlayer: number;
     pressureAi: number;

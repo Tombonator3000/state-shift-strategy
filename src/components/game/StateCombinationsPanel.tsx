@@ -2,7 +2,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { StateCombination, StateCombinationManager } from '@/data/stateCombinations';
+import { StateCombination, StateCombinationManager, aggregateStateCombinationEffects } from '@/data/stateCombinations';
 
 interface StateCombinationsPanelProps {
   combinationManager: StateCombinationManager;
@@ -18,6 +18,42 @@ const StateCombinationsPanel: React.FC<StateCombinationsPanelProps> = ({
   const activeCombinations = combinationManager.getActiveCombinations();
   const potentialCombinations = combinationManager.getPotentialCombinations(controlledStates);
   const totalBonusIP = combinationManager.getTotalBonusIP();
+  const aggregatedEffects = aggregateStateCombinationEffects(activeCombinations);
+
+  const synergyStats = [
+    aggregatedEffects.flatTurnIpBonus !== 0 && {
+      label: 'Flat IP',
+      value: `${aggregatedEffects.flatTurnIpBonus > 0 ? '+' : ''}${aggregatedEffects.flatTurnIpBonus}`,
+    },
+    aggregatedEffects.ipPerStateBonus !== 0 && {
+      label: 'IP / State',
+      value: `${aggregatedEffects.ipPerStateBonus > 0 ? '+' : ''}${aggregatedEffects.ipPerStateBonus}`,
+    },
+    aggregatedEffects.ipPerNeutralStateBonus !== 0 && {
+      label: 'IP / Neutral',
+      value: `${aggregatedEffects.ipPerNeutralStateBonus > 0 ? '+' : ''}${aggregatedEffects.ipPerNeutralStateBonus}`,
+    },
+    aggregatedEffects.mediaCostModifier !== 0 && {
+      label: 'Media Cost',
+      value: `${aggregatedEffects.mediaCostModifier > 0 ? '+' : ''}${aggregatedEffects.mediaCostModifier}`,
+    },
+    aggregatedEffects.extraCardDraw !== 0 && {
+      label: 'Cards / Turn',
+      value: `${aggregatedEffects.extraCardDraw > 0 ? '+' : ''}${aggregatedEffects.extraCardDraw}`,
+    },
+    aggregatedEffects.attackIpBonus !== 0 && {
+      label: 'Attack IP',
+      value: `+${aggregatedEffects.attackIpBonus}`,
+    },
+    aggregatedEffects.stateDefenseBonus !== 0 && {
+      label: 'Defense',
+      value: `+${aggregatedEffects.stateDefenseBonus}`,
+    },
+    aggregatedEffects.incomingPressureReduction !== 0 && {
+      label: 'Pressure Shield',
+      value: `-${aggregatedEffects.incomingPressureReduction}`,
+    },
+  ].filter(Boolean) as Array<{ label: string; value: string }>;
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -52,8 +88,18 @@ const StateCombinationsPanel: React.FC<StateCombinationsPanelProps> = ({
             <h4 className="text-xs font-mono text-muted-foreground uppercase tracking-wide">
               ACTIVE SYNERGIES
             </h4>
+            {synergyStats.length > 0 && (
+              <div className="grid grid-cols-2 gap-2">
+                {synergyStats.map(stat => (
+                  <div key={stat.label} className="flex items-center justify-between text-xs font-mono bg-muted/10 border border-muted/20 rounded px-2 py-1">
+                    <span className="text-muted-foreground">{stat.label}</span>
+                    <span className="text-primary font-semibold">{stat.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
             {activeCombinations.map((combo) => (
-              <div 
+              <div
                 key={combo.id}
                 className="p-3 bg-primary/10 border border-primary/30 rounded-lg animate-fade-in"
               >

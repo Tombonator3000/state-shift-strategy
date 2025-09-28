@@ -3,8 +3,10 @@ import { describe, expect, it } from 'bun:test';
 import { evaluateCombosForTurn } from '@/hooks/comboAdapter';
 import type { GameState } from '@/hooks/gameStateTypes';
 import type { AIDifficulty } from '@/data/aiStrategy';
-import { createDefaultCombinationEffects, STATE_COMBINATIONS, aggregateStateCombinationEffects, calculateDynamicIpBonus, applyStateCombinationCostModifiers } from '@/data/stateCombinations';
+import { createDefaultCombinationEffects, STATE_COMBINATIONS, aggregateStateCombinationEffects, calculateDynamicIpBonus, applyStateCombinationCostModifiers, applyDefenseBonusToStates } from '@/data/stateCombinations';
 import type { TurnPlay } from '@/game/combo.types';
+import { resolveCardMVP } from '@/systems/cardResolution';
+import type { GameCard } from '@/rules/mvp';
 
 const buildBaseGameState = (): GameState => ({
   faction: 'truth',
@@ -50,6 +52,10 @@ const buildBaseGameState = (): GameState => ({
   showNewCardsPresentation: false,
   drawMode: 'standard',
   cardDrawState: { cardsPlayedLastTurn: 0, lastTurnWithoutPlay: false },
+  truthAbove80Streak: 0,
+  truthBelow20Streak: 0,
+  timeBasedGoalCounters: { truthAbove80Streak: 0, truthBelow20Streak: 0 },
+  paranormalHotspots: {},
 });
 
 const makeTurnPlay = (index: number, cardType: TurnPlay['cardType'], cost: number): TurnPlay => ({
@@ -88,7 +94,16 @@ describe('combo and state synergy integration', () => {
 
   it('aggregates state combination effects for income, card draw, and cost modifiers', () => {
     const combos = STATE_COMBINATIONS.filter(combo =>
-      ['silicon_valley_network', 'intel_web', 'oil_cartel', 'southern_border'].includes(combo.id),
+      [
+        'silicon_valley_network',
+        'intel_web',
+        'oil_cartel',
+        'southern_border',
+        'wall_street_empire',
+        'military_triangle',
+        'nuclear_triad',
+        'midwest_backbone',
+      ].includes(combo.id),
     );
 
     const effects = aggregateStateCombinationEffects(combos);
@@ -97,11 +112,123 @@ describe('combo and state synergy integration', () => {
     expect(effects.extraCardDraw).toBe(1);
     expect(effects.ipPerStateBonus).toBe(1);
     expect(effects.ipPerNeutralStateBonus).toBe(1);
+    expect(effects.flatTurnIpBonus).toBe(2);
+    expect(effects.attackIpBonus).toBe(1);
+    expect(effects.stateDefenseBonus).toBe(1);
+    expect(effects.incomingPressureReduction).toBe(1);
 
     const dynamicBonus = calculateDynamicIpBonus(effects, 4, 10);
-    expect(dynamicBonus).toBe(14);
+    expect(dynamicBonus).toBe(16);
 
     const reducedCost = applyStateCombinationCostModifiers(3, 'MEDIA', 'human', effects);
     expect(reducedCost).toBe(2);
+  });
+
+  it('applies defense modifiers only to player-held states', () => {
+    const states = [
+      { defense: 3, owner: 'player' as const, comboDefenseBonus: 0 },
+      { defense: 4, owner: 'ai' as const, comboDefenseBonus: 1 },
+    ];
+
+    const buffed = applyDefenseBonusToStates(states, 2);
+
+    expect(buffed[0].defense).toBe(5);
+    expect(buffed[0].comboDefenseBonus).toBe(2);
+    expect(buffed[1].defense).toBe(3);
+    expect(buffed[1].comboDefenseBonus).toBe(0);
+  });
+
+  it('boosts attack card damage when combinations grant bonuses', () => {
+    const state = buildBaseGameState();
+    state.stateCombinationEffects = { ...createDefaultCombinationEffects(), attackIpBonus: 2 };
+    state.states = [];
+
+    const card: GameCard = {
+      id: 'attack-bonus',
+      name: 'Precision Strike',
+      type: 'ATTACK',
+      faction: 'truth',
+      cost: 2,
+      effects: { ipDelta: { opponent: 3 } },
+    };
+
+    const result = resolveCardMVP(state, card, null, 'human');
+    expect(result.aiIP).toBe(state.aiIP - 5);
+    expect(result.damageDealt).toBe(5);
+  });
+
+  it('reduces incoming pressure when the AI targets fortified states', () => {
+    const state = buildBaseGameState();
+    state.stateCombinationEffects = { ...createDefaultCombinationEffects(), incomingPressureReduction: 1 };
+    state.controlledStates = ['NV'];
+    state.states = [{
+      id: '32',
+      name: 'Nevada',
+      abbreviation: 'NV',
+      baseIP: 2,
+      baseDefense: 2,
+      defense: 2,
+      comboDefenseBonus: 0,
+      pressure: 0,
+      pressurePlayer: 0,
+      pressureAi: 0,
+      contested: false,
+      owner: 'player' as const,
+      specialBonus: undefined,
+      bonusValue: undefined,
+      paranormalHotspot: undefined,
+    }];
+
+    const zoneCard: GameCard = {
+      id: 'zone-pressure',
+      name: 'Siege Column',
+      type: 'ZONE',
+      faction: 'government',
+      cost: 3,
+      effects: { pressureDelta: 2 },
+      target: { scope: 'state', count: 1 },
+    };
+
+    const result = resolveCardMVP(state, zoneCard, 'NV', 'ai');
+    const target = result.states.find(entry => entry.abbreviation === 'NV');
+    expect(target?.pressureAi).toBe(1);
+    expect(target?.pressure).toBe(1);
+  });
+
+  it('reapplies defense bonuses to controlled states after card resolution', () => {
+    const state = buildBaseGameState();
+    state.stateCombinationEffects = { ...createDefaultCombinationEffects(), stateDefenseBonus: 1 };
+    state.controlledStates = ['CA'];
+    state.states = [{
+      id: '06',
+      name: 'California',
+      abbreviation: 'CA',
+      baseIP: 4,
+      baseDefense: 4,
+      defense: 4,
+      comboDefenseBonus: 0,
+      pressure: 0,
+      pressurePlayer: 0,
+      pressureAi: 0,
+      contested: false,
+      owner: 'player' as const,
+      specialBonus: undefined,
+      bonusValue: undefined,
+      paranormalHotspot: undefined,
+    }];
+
+    const mediaCard: GameCard = {
+      id: 'media-broadcast',
+      name: 'Breaking Bulletin',
+      type: 'MEDIA',
+      faction: 'truth',
+      cost: 3,
+      effects: { truthDelta: 5 },
+    };
+
+    const result = resolveCardMVP(state, mediaCard, null, 'human');
+    const california = result.states.find(entry => entry.abbreviation === 'CA');
+    expect(california?.defense).toBe(5);
+    expect(california?.comboDefenseBonus).toBe(1);
   });
 });

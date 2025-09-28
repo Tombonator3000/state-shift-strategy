@@ -16,6 +16,10 @@ export interface StateCombinationEffects {
   extraCardDraw: number;
   ipPerStateBonus: number;
   ipPerNeutralStateBonus: number;
+  flatTurnIpBonus: number;
+  attackIpBonus: number;
+  stateDefenseBonus: number;
+  incomingPressureReduction: number;
 }
 
 export const DEFAULT_STATE_COMBINATION_EFFECTS: StateCombinationEffects = {
@@ -23,6 +27,10 @@ export const DEFAULT_STATE_COMBINATION_EFFECTS: StateCombinationEffects = {
   extraCardDraw: 0,
   ipPerStateBonus: 0,
   ipPerNeutralStateBonus: 0,
+  flatTurnIpBonus: 0,
+  attackIpBonus: 0,
+  stateDefenseBonus: 0,
+  incomingPressureReduction: 0,
 };
 
 export const createDefaultCombinationEffects = (): StateCombinationEffects => ({
@@ -259,6 +267,22 @@ export const aggregateStateCombinationEffects = (
         effects.ipPerNeutralStateBonus += 1;
         break;
       }
+      case 'wall_street_empire': {
+        effects.flatTurnIpBonus += 2;
+        break;
+      }
+      case 'military_triangle': {
+        effects.attackIpBonus += 1;
+        break;
+      }
+      case 'nuclear_triad': {
+        effects.stateDefenseBonus += 1;
+        break;
+      }
+      case 'midwest_backbone': {
+        effects.incomingPressureReduction += 1;
+        break;
+      }
       default:
         break;
     }
@@ -274,7 +298,8 @@ export const calculateDynamicIpBonus = (
 ): number => {
   const perState = effects.ipPerStateBonus * controlledStatesCount;
   const perNeutral = effects.ipPerNeutralStateBonus * neutralStatesCount;
-  return perState + perNeutral;
+  const flat = effects.flatTurnIpBonus;
+  return flat + perState + perNeutral;
 };
 
 export const applyStateCombinationCostModifiers = (
@@ -290,4 +315,69 @@ export const applyStateCombinationCostModifiers = (
   }
 
   return Math.max(0, Math.floor(cost));
+};
+
+export interface CombinationDefenseState {
+  defense: number;
+  owner: 'player' | 'ai' | 'neutral';
+  comboDefenseBonus?: number;
+}
+
+export const applyDefenseBonusToStates = <T extends CombinationDefenseState>(
+  states: T[],
+  bonus: number,
+): T[] => {
+  const normalizedBonus = Number.isFinite(bonus) ? Math.max(0, Math.floor(bonus)) : 0;
+  let mutated = false;
+
+  const nextStates = states.map(state => {
+    const previousBonus = typeof state.comboDefenseBonus === 'number' ? state.comboDefenseBonus : 0;
+    const baseDefense = Math.max(1, state.defense - previousBonus);
+
+    if (state.owner === 'player') {
+      const desiredDefense = Math.max(1, baseDefense + normalizedBonus);
+      if (desiredDefense !== state.defense || previousBonus !== normalizedBonus) {
+        mutated = true;
+        return {
+          ...state,
+          defense: desiredDefense,
+          comboDefenseBonus: normalizedBonus,
+        };
+      }
+
+      if (state.comboDefenseBonus !== normalizedBonus) {
+        mutated = true;
+        return {
+          ...state,
+          comboDefenseBonus: normalizedBonus,
+        };
+      }
+
+      return state;
+    }
+
+    if (previousBonus !== 0 || state.comboDefenseBonus) {
+      const resetDefense = Math.max(1, baseDefense);
+      if (resetDefense !== state.defense || previousBonus !== 0 || state.comboDefenseBonus) {
+        mutated = true;
+        return {
+          ...state,
+          defense: resetDefense,
+          comboDefenseBonus: 0,
+        };
+      }
+    }
+
+    if (state.comboDefenseBonus) {
+      mutated = true;
+      return {
+        ...state,
+        comboDefenseBonus: 0,
+      };
+    }
+
+    return state;
+  });
+
+  return mutated ? nextStates : states;
 };

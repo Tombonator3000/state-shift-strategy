@@ -3,6 +3,11 @@ import type { MediaResolutionOptions } from '@/mvp/media';
 import { cloneGameState, type Card, type GameState as EngineGameState } from '@/mvp';
 import type { GameCard } from '@/rules/mvp';
 import { setStateOccupation } from '@/data/usaStates';
+import {
+  applyDefenseBonusToStates,
+  createDefaultCombinationEffects,
+  type StateCombinationEffects,
+} from '@/data/stateCombinations';
 import type { PlayerStats } from '@/data/achievementSystem';
 import type { StateParanormalHotspot } from '@/hooks/gameStateTypes';
 
@@ -57,6 +62,7 @@ export interface GameSnapshot {
   turn: number;
   faction: Faction;
   states: StateForResolution[];
+  stateCombinationEffects?: StateCombinationEffects;
 }
 
 export interface CardPlayResolution {
@@ -212,6 +218,7 @@ export function resolveCardMVP(
   const engineState = toEngineState(gameState, engineLog);
   const ownerId = actor === 'human' ? PLAYER_ID : AI_ID;
   const opponentId = ownerId === PLAYER_ID ? AI_ID : PLAYER_ID;
+  const comboEffects = gameState.stateCombinationEffects ?? createDefaultCombinationEffects();
   const revealsSecretAgenda =
     actor === 'human' &&
     Boolean((card.effects as { revealSecretAgenda?: boolean } | undefined)?.revealSecretAgenda);
@@ -224,7 +231,46 @@ export function resolveCardMVP(
   const beforeState = cloneGameState(engineState);
   const targetStateId = resolveTargetStateId(gameState, targetState);
 
-  applyEffectsMvp(engineState, ownerId, card as Card, targetStateId, mediaOptions);
+  let effectiveCard: GameCard = card;
+
+  if (actor === 'human' && comboEffects.attackIpBonus > 0 && card.type === 'ATTACK') {
+    const extraDamage = comboEffects.attackIpBonus;
+    const existingEffects = card.effects ?? {};
+    const updatedIpDelta = {
+      ...(existingEffects.ipDelta ?? {}),
+      opponent: ((existingEffects.ipDelta?.opponent ?? 0) as number) + extraDamage,
+    };
+    const updatedEffects = { ...existingEffects, ipDelta: updatedIpDelta };
+    effectiveCard = { ...card, effects: updatedEffects };
+  }
+
+  if (
+    actor === 'ai' &&
+    comboEffects.incomingPressureReduction > 0 &&
+    card.type === 'ZONE' &&
+    targetStateId
+  ) {
+    const targetStateData = gameState.states.find(candidate =>
+      candidate.id === targetStateId || candidate.abbreviation === targetStateId,
+    );
+    const targetOwnedByPlayer = targetStateData?.owner === 'player' ||
+      gameState.controlledStates.includes(targetStateData?.abbreviation ?? '');
+
+    if (targetStateData && targetOwnedByPlayer) {
+      const reduction = comboEffects.incomingPressureReduction;
+      const existingEffects = effectiveCard.effects ?? {};
+      const basePressure = (existingEffects.pressureDelta ?? 0) as number;
+      if (basePressure > 0) {
+        const adjustedPressure = Math.max(0, basePressure - reduction);
+        if (adjustedPressure !== basePressure) {
+          const updatedEffects = { ...existingEffects, pressureDelta: adjustedPressure };
+          effectiveCard = { ...effectiveCard, effects: updatedEffects };
+        }
+      }
+    }
+  }
+
+  applyEffectsMvp(engineState, ownerId, effectiveCard as Card, targetStateId, mediaOptions);
 
   const logEntries: string[] = engineLog.map(message => `${card.name}: ${message}`);
   const newStates = gameState.states.map(state => ({ ...state }));
@@ -321,6 +367,8 @@ export function resolveCardMVP(
   const truthAfterEffects = Math.max(0, Math.min(100, engineState.truth + truthBonusFromHotspots));
   const damageDealt = Math.max(0, beforeState.players[opponentId].ip - engineState.players[opponentId].ip);
 
+  const adjustedStates = applyDefenseBonusToStates(newStates, comboEffects.stateDefenseBonus);
+
   if (actor === 'human') {
     const achievementUpdates: Partial<PlayerStats> = {
       max_ip_reached: Math.max(achievements.stats.max_ip_reached, playerIPAfterEffects),
@@ -343,7 +391,7 @@ export function resolveCardMVP(
     ip: playerIPAfterEffects,
     aiIP: aiIPAfterEffects,
     truth: truthAfterEffects,
-    states: newStates,
+    states: adjustedStates,
     controlledStates: Array.from(nextControlledStates),
     aiControlledStates: Array.from(nextAiControlledStates),
     targetState: actor === 'human' ? nextTargetState : (gameState as any).targetState,
