@@ -1,12 +1,13 @@
-import { describe, expect, it } from 'bun:test';
-
-import { evaluateCombosForTurn } from '@/hooks/comboAdapter';
+import { beforeEach, describe, expect, it } from 'bun:test';
 import type { GameState } from '@/hooks/gameStateTypes';
 import type { AIDifficulty } from '@/data/aiStrategy';
 import { createDefaultCombinationEffects, STATE_COMBINATIONS, aggregateStateCombinationEffects, calculateDynamicIpBonus, applyStateCombinationCostModifiers, applyDefenseBonusToStates } from '@/data/stateCombinations';
 import type { TurnPlay } from '@/game/combo.types';
 import { resolveCardMVP } from '@/systems/cardResolution';
 import type { GameCard } from '@/rules/mvp';
+import { applyComboRewards, evaluateCombos, setComboSettings } from '@/game/comboEngine';
+import { DEFAULT_COMBO_SETTINGS } from '@/game/combo.config';
+import type { GameState as EngineGameState, PlayerId, PlayerState as EnginePlayerState } from '@/mvp/validator';
 
 const buildBaseGameState = (): GameState => ({
   faction: 'truth',
@@ -70,6 +71,13 @@ const makeTurnPlay = (index: number, cardType: TurnPlay['cardType'], cost: numbe
 });
 
 describe('combo and state synergy integration', () => {
+  beforeEach(() => {
+    setComboSettings({
+      ...DEFAULT_COMBO_SETTINGS,
+      comboToggles: { ...DEFAULT_COMBO_SETTINGS.comboToggles },
+    });
+  });
+
   it('awards combo IP bonuses to the active player', () => {
     const state = buildBaseGameState();
     state.turnPlays = [
@@ -78,18 +86,51 @@ describe('combo and state synergy integration', () => {
       makeTurnPlay(2, 'ATTACK', 3),
     ];
 
-    const result = evaluateCombosForTurn(state, 'human');
+    const engineState: EngineGameState = {
+      turn: state.turn,
+      currentPlayer: 'P1',
+      truth: state.truth,
+      players: {
+        P1: {
+          id: 'P1',
+          faction: state.faction,
+          deck: [],
+          hand: [],
+          discard: [],
+          ip: state.ip,
+          states: [],
+        } satisfies EnginePlayerState,
+        P2: {
+          id: 'P2',
+          faction: state.faction === 'truth' ? 'government' : 'truth',
+          deck: [],
+          hand: [],
+          discard: [],
+          ip: state.aiIP,
+          states: [],
+        } satisfies EnginePlayerState,
+      },
+      pressureByState: {},
+      stateDefense: {},
+      playsThisTurn: state.turnPlays.length,
+      turnPlays: state.turnPlays.map(play => ({ ...play })),
+      log: [],
+    } satisfies EngineGameState;
 
-    const comboIds = result.evaluation.results.map(entry => entry.definition.id);
+    const player: PlayerId = 'P1';
+    const evaluation = evaluateCombos(engineState, player);
+    applyComboRewards(engineState, player, evaluation);
+
+    const comboIds = evaluation.results.map(entry => entry.definition.id);
     expect(comboIds).toContain('sequence_attack_blitz');
     expect(comboIds).toContain('count_attack_barrage');
-    expect(result.evaluation.totalReward.ip).toBe(4);
+    expect(evaluation.totalReward.ip).toBe(4);
 
-    const blitzResult = result.evaluation.results.find(
+    const blitzResult = evaluation.results.find(
       entry => entry.definition.id === 'sequence_attack_blitz',
     );
     expect(blitzResult?.appliedReward.nextAttackMultiplier).toBe(2);
-    expect(result.updatedPlayerIp).toBe(state.ip + (result.evaluation.totalReward.ip ?? 0));
+    expect(engineState.players[player].ip).toBe(state.ip + (evaluation.totalReward.ip ?? 0));
   });
 
   it('aggregates state combination effects for income, card draw, and cost modifiers', () => {

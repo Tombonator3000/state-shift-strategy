@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, expect, it, beforeEach, afterEach, mock } from 'bun:test';
+import { describe, expect, it, beforeEach, afterEach, afterAll, mock } from 'bun:test';
 import TestRenderer, { act } from 'react-test-renderer';
 
 mock.module('@/hooks/comboAdapter', () => ({
@@ -179,6 +179,10 @@ describe('useGameState event effects', () => {
     resetMockEvents();
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete (globalThis as Partial<typeof globalThis>).localStorage;
+  });
+
+  afterAll(() => {
+    mock.restore();
   });
 
   it('applies truth, IP, and state modifiers from event effects', async () => {

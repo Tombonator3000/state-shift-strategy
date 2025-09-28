@@ -33,7 +33,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": 4
     },
     "flavor": "Sponsored by Doomsday Beans™."
   },
@@ -45,7 +45,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": 3
     },
     "flavor": "His platform: windows with no curtains."
   },
@@ -121,7 +121,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": 4
     },
     "flavor": "Ink smudges reveal more than black bars."
   },
@@ -133,7 +133,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": 4
     },
     "flavor": "Chat: 'first!'"
   },
@@ -212,7 +212,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": 4
     },
     "flavor": "Historic handshake, very furry."
   },
@@ -224,7 +224,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": 5
     },
     "flavor": "Thank you, interstellar much."
   },
@@ -536,7 +536,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": 3
     },
     "flavor": "Neighborhood eyes beat satellite spies."
   },
@@ -560,7 +560,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": 4
     },
     "flavor": "Invisible hands hold your hand."
   },
@@ -572,7 +572,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": 3
     },
     "flavor": "Broadcast jammed by cosmic drizzle."
   },
@@ -584,7 +584,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": 4
     },
     "flavor": "Many eyes, fewer lies."
   },
@@ -596,7 +596,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": 3
     },
     "flavor": "Coupons clipped from reality."
   },
@@ -620,7 +620,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": 4
     },
     "flavor": "All shook up… and tuned in."
   },
@@ -632,7 +632,7 @@ export const truthBatch1: GameCard[] = [
     "rarity": "legendary",
     "cost": 6,
     "effects": {
-      "truthDelta": 4
+      "truthDelta": 5
     },
     "flavor": "Running for Senate (again)."
   }
