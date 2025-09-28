@@ -20,6 +20,7 @@ export interface StateCombinationEffects {
   attackIpBonus: number;
   stateDefenseBonus: number;
   incomingPressureReduction: number;
+  truthSwingMultiplier: number;
 }
 
 export const DEFAULT_STATE_COMBINATION_EFFECTS: StateCombinationEffects = {
@@ -31,6 +32,7 @@ export const DEFAULT_STATE_COMBINATION_EFFECTS: StateCombinationEffects = {
   attackIpBonus: 0,
   stateDefenseBonus: 0,
   incomingPressureReduction: 0,
+  truthSwingMultiplier: 1,
 };
 
 export const createDefaultCombinationEffects = (): StateCombinationEffects => ({
@@ -281,6 +283,10 @@ export const aggregateStateCombinationEffects = (
       }
       case 'midwest_backbone': {
         effects.incomingPressureReduction += 1;
+        break;
+      }
+      case 'academic_elite': {
+        effects.truthSwingMultiplier = Math.max(effects.truthSwingMultiplier, 1.5);
         break;
       }
       default:

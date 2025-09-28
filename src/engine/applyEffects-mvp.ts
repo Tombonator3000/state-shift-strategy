@@ -159,9 +159,33 @@ export function applyEffectsMvp(
   }
 
   if (card.type === 'MEDIA') {
-    const delta = computeMediaTruthDelta_MVP(state.players[owner], card, opts);
-    warnIfMediaScaling(card, delta);
+    const baseDelta = computeMediaTruthDelta_MVP(state.players[owner], card, opts);
+    const multiplier = typeof opts.truthMultiplier === 'number' && opts.truthMultiplier > 0
+      ? opts.truthMultiplier
+      : 1;
+    const delta = multiplier === 1 ? baseDelta : Math.round(baseDelta * multiplier);
+
+    if (multiplier === 1) {
+      warnIfMediaScaling(card, delta);
+    } else {
+      warnIfMediaScaling(card, baseDelta);
+    }
+
     applyTruthDelta(state, delta, owner);
+
+    if (multiplier !== 1 && baseDelta !== 0) {
+      const bonus = delta - baseDelta;
+      if (bonus !== 0) {
+        const formattedMultiplier = Number.isInteger(multiplier)
+          ? multiplier.toFixed(0)
+          : multiplier.toFixed(2).replace(/\.0+$|0+$/, '');
+        const sourceLabel = opts.truthMultiplierSource ?? 'State combination';
+        state.log.push(
+          `${sourceLabel} amplifies MEDIA truth swing by ${bonus > 0 ? '+' : ''}${bonus} (x${formattedMultiplier})`,
+        );
+      }
+    }
+
     return state;
   }
 

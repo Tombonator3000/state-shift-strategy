@@ -861,7 +861,8 @@ const Index = () => {
         prev.stateCombinationEffects.flatTurnIpBonus !== effects.flatTurnIpBonus ||
         prev.stateCombinationEffects.attackIpBonus !== effects.attackIpBonus ||
         prev.stateCombinationEffects.stateDefenseBonus !== effects.stateDefenseBonus ||
-        prev.stateCombinationEffects.incomingPressureReduction !== effects.incomingPressureReduction;
+        prev.stateCombinationEffects.incomingPressureReduction !== effects.incomingPressureReduction ||
+        prev.stateCombinationEffects.truthSwingMultiplier !== effects.truthSwingMultiplier;
 
       if (!idsChanged && !bonusChanged && !effectsChanged) {
         return prev;

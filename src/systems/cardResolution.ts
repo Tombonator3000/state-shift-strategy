@@ -270,7 +270,16 @@ export function resolveCardMVP(
     }
   }
 
-  applyEffectsMvp(engineState, ownerId, effectiveCard as Card, targetStateId, mediaOptions);
+  let mediaOptionsWithCombos = mediaOptions;
+  if (actor === 'human' && card.type === 'MEDIA' && comboEffects.truthSwingMultiplier > 1) {
+    mediaOptionsWithCombos = {
+      ...mediaOptions,
+      truthMultiplier: comboEffects.truthSwingMultiplier,
+      truthMultiplierSource: 'Academic Elite',
+    };
+  }
+
+  applyEffectsMvp(engineState, ownerId, effectiveCard as Card, targetStateId, mediaOptionsWithCombos);
 
   const logEntries: string[] = engineLog.map(message => `${card.name}: ${message}`);
   const newStates = gameState.states.map(state => ({ ...state }));
