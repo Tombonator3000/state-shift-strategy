@@ -69,6 +69,7 @@ export interface GameState {
     occupierIcon?: string | null;
     occupierUpdatedAt?: number;
     paranormalHotspot?: StateParanormalHotspot;
+    stateEventBonus?: StateEventBonusSummary;
   }>;
   currentEvents: GameEvent[];
   eventManager?: EventManager;
@@ -104,6 +105,17 @@ export interface GameState {
   truthBelow20Streak: number;
   timeBasedGoalCounters: Record<string, number>;
   paranormalHotspots: Record<string, ActiveParanormalHotspot>;
+}
+
+export interface StateEventBonusSummary {
+  source: 'state-event';
+  eventId: string;
+  label: string;
+  description?: string;
+  triggeredOnTurn: number;
+  faction: 'truth' | 'government';
+  effects?: NonNullable<GameEvent['effects']>;
+  effectSummary?: string[];
 }
 
 export interface ActiveParanormalHotspot {

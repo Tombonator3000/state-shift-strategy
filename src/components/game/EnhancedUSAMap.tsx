@@ -8,6 +8,7 @@ import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { areParanormalEffectsEnabled } from '@/state/settings';
+import type { StateEventBonusSummary } from '@/hooks/gameStateTypes';
 
 
 interface EnhancedState {
@@ -40,6 +41,7 @@ interface EnhancedState {
     turnsRemaining: number;
     source: 'truth' | 'government' | 'neutral';
   };
+  stateEventBonus?: StateEventBonusSummary;
 }
 
 interface PlayedCard {
@@ -746,6 +748,34 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
                 <div className="text-sm font-bold text-foreground mb-1">Control</div>
                 <div className="text-sm font-mono bg-card/60 border border-border/40 p-2 rounded shadow-sm opacity-95">
                   <span className="font-bold text-foreground">{stateInfo.occupierLabel}</span>
+                </div>
+              </div>
+            )}
+
+            {stateInfo.stateEventBonus && (
+              <div className="pt-2 border-t border-border">
+                <div className="flex items-center gap-2 text-sm font-bold text-foreground mb-1">
+                  <span>🗞️</span>
+                  <span>{stateInfo.stateEventBonus.label}</span>
+                </div>
+                <div className="space-y-2 text-xs font-mono bg-amber-500/10 border border-amber-500/40 p-3 rounded shadow-sm">
+                  {stateInfo.stateEventBonus.description && (
+                    <div className="text-muted-foreground leading-snug">
+                      {stateInfo.stateEventBonus.description}
+                    </div>
+                  )}
+                  {stateInfo.stateEventBonus.effectSummary?.length ? (
+                    <ul className="list-disc pl-4 space-y-1 text-foreground/90">
+                      {stateInfo.stateEventBonus.effectSummary.map((effect, index) => (
+                        <li key={`${stateInfo.id}-event-effect-${index}`}>{effect}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="text-muted-foreground">Bonus active</div>
+                  )}
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
+                    Turn {stateInfo.stateEventBonus.triggeredOnTurn} · {stateInfo.stateEventBonus.faction.toUpperCase()}
+                  </div>
                 </div>
               </div>
             )}
