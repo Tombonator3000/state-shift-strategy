@@ -32,6 +32,7 @@ import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import {
   aggregateStateCombinationEffects,
+  applyDefenseBonusToStates,
   createDefaultCombinationEffects,
 } from '@/data/stateCombinations';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
@@ -856,17 +857,27 @@ const Index = () => {
         prev.stateCombinationEffects.mediaCostModifier !== effects.mediaCostModifier ||
         prev.stateCombinationEffects.extraCardDraw !== effects.extraCardDraw ||
         prev.stateCombinationEffects.ipPerStateBonus !== effects.ipPerStateBonus ||
-        prev.stateCombinationEffects.ipPerNeutralStateBonus !== effects.ipPerNeutralStateBonus;
+        prev.stateCombinationEffects.ipPerNeutralStateBonus !== effects.ipPerNeutralStateBonus ||
+        prev.stateCombinationEffects.flatTurnIpBonus !== effects.flatTurnIpBonus ||
+        prev.stateCombinationEffects.attackIpBonus !== effects.attackIpBonus ||
+        prev.stateCombinationEffects.stateDefenseBonus !== effects.stateDefenseBonus ||
+        prev.stateCombinationEffects.incomingPressureReduction !== effects.incomingPressureReduction;
 
       if (!idsChanged && !bonusChanged && !effectsChanged) {
         return prev;
       }
+
+      const states =
+        prev.stateCombinationEffects.stateDefenseBonus !== effects.stateDefenseBonus
+          ? applyDefenseBonusToStates(prev.states, effects.stateDefenseBonus)
+          : prev.states;
 
       return {
         ...prev,
         activeStateCombinationIds: activeIds,
         stateCombinationBonusIP: totalBonusIp,
         stateCombinationEffects: effects,
+        states,
       };
     });
 
