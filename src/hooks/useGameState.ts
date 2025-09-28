@@ -28,6 +28,7 @@ import { buildEditionEvents } from './eventEdition';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardMVP, type CardPlayResolution } from '@/systems/cardResolution';
+import { useStateEvents } from '@/hooks/useStateEvents';
 import { applyTruthDelta } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
@@ -574,6 +575,36 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const aiDifficulty = resolveAiDifficulty(aiDifficultyOverride);
   const [eventManager] = useState(() => new EventManager());
   const achievements = useAchievements();
+  const { triggerStateEvent } = useStateEvents();
+
+  const triggerCapturedStateEvents = useCallback(
+    (resolution: CardPlayResolution | undefined, nextState: GameState) => {
+      const capturedIds = resolution?.capturedStateIds ?? [];
+      if (!capturedIds.length) {
+        return;
+      }
+
+      for (const stateId of capturedIds) {
+        const resolvedState = resolution?.states.find(state => state.id === stateId);
+        if (!resolvedState) {
+          continue;
+        }
+
+        const capturingFaction = resolvedState.owner === 'player'
+          ? nextState.faction
+          : resolvedState.owner === 'ai'
+            ? (nextState.faction === 'truth' ? 'government' : 'truth')
+            : null;
+
+        if (!capturingFaction) {
+          continue;
+        }
+
+        triggerStateEvent(stateId, capturingFaction, nextState);
+      }
+    },
+    [triggerStateEvent],
+  );
   
   const availableCards = [...CARD_DATABASE];
   console.log(`📊 Card Database Stats:\n  - Total available: ${availableCards.length}`);
@@ -886,9 +917,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         ? revealAiSecretAgenda(nextState, { type: 'card', name: resolvedCard.name })
         : nextState;
 
-      return updateSecretAgendaProgress(stateWithReveal);
+      const resultState = updateSecretAgendaProgress(stateWithReveal);
+      triggerCapturedStateEvents(resolution, resultState);
+      return resultState;
     });
-  }, [achievements, resolveCardEffects]);
+  }, [achievements, resolveCardEffects, triggerCapturedStateEvents]);
 
   const playCardAnimated = useCallback(async (
     cardId: string,
@@ -987,7 +1020,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         ? revealAiSecretAgenda(nextState, { type: 'card', name: resolvedCard.name })
         : nextState;
 
-      return updateSecretAgendaProgress(stateWithReveal);
+      const resultState = updateSecretAgendaProgress(stateWithReveal);
+      triggerCapturedStateEvents(resolution, resultState);
+      return resultState;
     });
 
     try {
@@ -1006,6 +1041,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           ipDelta: 0,
           aiIpDelta: 0,
           capturedStates: [],
+          capturedStateIds: [],
           damageDealt: 0,
           round: prev.round,
           turn: prev.turn,
@@ -1038,6 +1074,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           ipDelta: 0,
           aiIpDelta: 0,
           capturedStates: [],
+          capturedStateIds: [],
           damageDealt: 0,
           round: prev.round,
           turn: prev.turn,
@@ -1059,7 +1096,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return updateSecretAgendaProgress(nextState);
       });
     }
-  }, [gameState, achievements, resolveCardEffects]);
+  }, [gameState, achievements, resolveCardEffects, triggerCapturedStateEvents]);
 
   const selectCard = useCallback((cardId: string | null) => {
     setGameState(prev => ({ 
@@ -1524,6 +1561,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             : nextStateBase;
         const nextStateWithAgendas = updateSecretAgendaProgress(nextStateAfterReveal);
 
+        triggerCapturedStateEvents(result.resolution, nextStateWithAgendas);
+
         if (result.card && typeof window !== 'undefined' && window.uiShowOpponentCard) {
           window.uiShowOpponentCard(result.card);
         }
@@ -1545,7 +1584,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return nextStateWithAgendas;
       });
     });
-  }, [achievements]);
+  }, [achievements, triggerCapturedStateEvents]);
 
   const playAICardRef = useRef(playAICard);
   useEffect(() => {

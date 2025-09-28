@@ -17,6 +17,7 @@ export interface CardPlayRecord {
   ipDelta: number;
   aiIpDelta: number;
   capturedStates: string[];
+  capturedStateIds: string[];
   damageDealt: number;
   round: number;
   turn: number;

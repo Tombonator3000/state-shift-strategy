@@ -35,7 +35,19 @@ export const createPlayedCardRecord = (params: {
   const truthDelta = params.resolution.truth - params.previousTruth;
   const ipDelta = params.resolution.ip - params.previousIp;
   const aiIpDelta = params.resolution.aiIP - params.previousAiIP;
-  const capturedStates = extractCapturedStates(logEntries);
+  const capturedStateIds = params.resolution.capturedStateIds ?? [];
+  const capturedStatesFromResolution = capturedStateIds
+    .map(stateId => {
+      const resolvedState = params.resolution.states.find(state => state.id === stateId);
+      if (!resolvedState) {
+        return stateId;
+      }
+      return resolvedState.name ?? resolvedState.abbreviation ?? stateId;
+    })
+    .filter((value): value is string => Boolean(value));
+  const capturedStates = capturedStatesFromResolution.length > 0
+    ? capturedStatesFromResolution
+    : extractCapturedStates(logEntries);
 
   return {
     card: params.card,
@@ -46,6 +58,7 @@ export const createPlayedCardRecord = (params: {
     ipDelta,
     aiIpDelta,
     capturedStates,
+    capturedStateIds,
     damageDealt: params.resolution.damageDealt ?? 0,
     round: params.round,
     turn: params.turn,
@@ -104,6 +117,19 @@ const buildResolveMetadata = (
   }
 
   const metadata: Record<string, number | string | undefined> = {};
+  const capturedStateIds = resolution.capturedStateIds ?? [];
+  if (capturedStateIds.length > 0) {
+    const capturedAbbreviations = capturedStateIds.map(stateId => {
+      const resolvedState = resolution.states.find(state => state.id === stateId);
+      if (resolvedState?.abbreviation) {
+        return resolvedState.abbreviation;
+      }
+      const previousState = state.states.find(candidate => candidate.id === stateId);
+      return previousState?.abbreviation ?? stateId;
+    });
+    metadata.capturedIds = capturedStateIds.join(',');
+    metadata.captured = capturedAbbreviations.join(',');
+  }
 
   if (card.type === 'ATTACK') {
     if (resolution.damageDealt > 0) {
@@ -132,9 +158,11 @@ const buildResolveMetadata = (
       metadata.target = targetStateId;
     }
 
-    const captured = computeZoneCaptures(owner, state, resolution);
-    if (captured.length > 0) {
-      metadata.captured = captured.join(',');
+    if (capturedStateIds.length === 0) {
+      const captured = computeZoneCaptures(owner, state, resolution);
+      if (captured.length > 0) {
+        metadata.captured = captured.join(',');
+      }
     }
   }
 
