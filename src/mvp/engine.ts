@@ -3,6 +3,7 @@ declare const window: any;
 import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
 import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward } from '@/game/comboEngine';
 import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
+import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import { cloneGameState } from './validator';
 import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
 import type { MediaResolutionOptions } from './media';
@@ -60,6 +61,16 @@ export interface IpIncomeBreakdown {
   netIncome: number;
   ipGap: number;
   stateGap: number;
+  stateIncomeDetails: StateIncomeContribution[];
+}
+
+export interface StateIncomeContribution {
+  state: string;
+  abbreviation: string;
+  baseIP: number;
+  bonusValue: number;
+  total: number;
+  fallback: boolean;
 }
 
 export const DEFAULT_IP_MAINTENANCE: IpMaintenanceSettings = {
@@ -140,13 +151,47 @@ export const evaluateCatchUpAdjustments = (
   };
 };
 
+const computeStateIncomeDetails = (states: string[]): StateIncomeContribution[] => {
+  return states.map(stateId => {
+    const trimmed = stateId.trim();
+    const upper = trimmed.toUpperCase();
+    const metadata = getStateByAbbreviation(upper) ?? getStateById(trimmed);
+
+    if (metadata) {
+      const baseIP = Number.isFinite(metadata.baseIP) ? metadata.baseIP : 0;
+      const bonusValue = Number.isFinite(metadata.bonusValue ?? 0) ? metadata.bonusValue ?? 0 : 0;
+      return {
+        state: trimmed,
+        abbreviation: metadata.abbreviation,
+        baseIP,
+        bonusValue,
+        total: baseIP + bonusValue,
+        fallback: false,
+      };
+    }
+
+    const abbreviation = upper || trimmed || 'UNKNOWN';
+
+    return {
+      state: trimmed,
+      abbreviation,
+      baseIP: 0,
+      bonusValue: 0,
+      total: 1,
+      fallback: true,
+    };
+  });
+};
+
 export function computeTurnIpIncome(
   player: PlayerState,
   opponent: PlayerState,
   maintenanceSettings: IpMaintenanceSettings = DEFAULT_IP_MAINTENANCE,
   catchUpSettings: CatchUpSettings = DEFAULT_CATCH_UP_SETTINGS,
 ): IpIncomeBreakdown {
-  const baseIncome = 5 + player.states.length;
+  const stateIncomeDetails = computeStateIncomeDetails(player.states);
+  const stateIncomeTotal = stateIncomeDetails.reduce((total, entry) => total + entry.total, 0);
+  const baseIncome = 5 + stateIncomeTotal;
   const overage = Math.max(0, player.ip - maintenanceSettings.threshold);
   const rawMaintenance = maintenanceSettings.divisor > 0 ? Math.floor(overage / maintenanceSettings.divisor) : 0;
   const maintenance = Math.max(0, rawMaintenance);
@@ -162,6 +207,7 @@ export function computeTurnIpIncome(
     netIncome,
     ipGap: catchUp.ipGap,
     stateGap: catchUp.stateGap,
+    stateIncomeDetails,
   };
 }
 
@@ -170,11 +216,27 @@ export function startTurn(state: GameState): GameState {
   const currentId = cloned.currentPlayer;
   const me = cloned.players[currentId];
   const opponent = cloned.players[otherPlayer(currentId)];
-  const { maintenance, swingTax, catchUpBonus, netIncome, ipGap, stateGap } = computeTurnIpIncome(
+  const { baseIncome, maintenance, swingTax, catchUpBonus, netIncome, ipGap, stateGap, stateIncomeDetails } = computeTurnIpIncome(
     me,
     opponent,
   );
   const logEntries = [...cloned.log];
+
+  const baseComponents: string[] = ['base 5'];
+  if (stateIncomeDetails.length > 0) {
+    const formattedStates = stateIncomeDetails.map(detail => {
+      if (detail.fallback) {
+        return `${detail.abbreviation} ${detail.total} (fallback)`;
+      }
+      const parts = [`base ${detail.baseIP}`];
+      if (detail.bonusValue) {
+        parts.push(`bonus ${detail.bonusValue}`);
+      }
+      return `${detail.abbreviation} ${detail.total} (${parts.join(' + ')})`;
+    });
+    baseComponents.push(`states ${formattedStates.join(', ')}`);
+  }
+  logEntries.push(`${currentId} income +${baseIncome} IP (${baseComponents.join('; ')})`);
 
   if (maintenance > 0) {
     logEntries.push(

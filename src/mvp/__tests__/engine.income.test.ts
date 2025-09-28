@@ -43,13 +43,31 @@ describe('computeTurnIpIncome', () => {
     const result = computeTurnIpIncome(player, opponent);
 
     expect(result).toEqual({
-      baseIncome: 7,
+      baseIncome: 20,
       maintenance: 0,
       swingTax: 0,
       catchUpBonus: 0,
-      netIncome: 7,
+      netIncome: 20,
       ipGap: -5,
       stateGap: 1,
+      stateIncomeDetails: [
+        {
+          state: 'ca',
+          abbreviation: 'CA',
+          baseIP: 4,
+          bonusValue: 2,
+          total: 6,
+          fallback: false,
+        },
+        {
+          state: 'ny',
+          abbreviation: 'NY',
+          baseIP: 5,
+          bonusValue: 4,
+          total: 9,
+          fallback: false,
+        },
+      ],
     });
   });
 
@@ -60,13 +78,23 @@ describe('computeTurnIpIncome', () => {
     const result = computeTurnIpIncome(player, opponent);
 
     expect(result).toEqual({
-      baseIncome: 6,
+      baseIncome: 12,
       maintenance: 2,
       swingTax: 0,
       catchUpBonus: 0,
-      netIncome: 4,
+      netIncome: 10,
       ipGap: 5,
       stateGap: -1,
+      stateIncomeDetails: [
+        {
+          state: 'tx',
+          abbreviation: 'TX',
+          baseIP: 4,
+          bonusValue: 3,
+          total: 7,
+          fallback: false,
+        },
+      ],
     });
   });
 
@@ -79,6 +107,7 @@ describe('computeTurnIpIncome', () => {
     expect(result.netIncome).toBe(0);
     expect(result.maintenance).toBeGreaterThanOrEqual(DEFAULT_IP_MAINTENANCE.divisor);
     expect(result.swingTax).toBeLessThanOrEqual(DEFAULT_CATCH_UP_SETTINGS.maxModifier);
+    expect(result.stateIncomeDetails).toEqual([]);
   });
 
   it('grants a catch-up bonus when trailing significantly', () => {
@@ -90,6 +119,16 @@ describe('computeTurnIpIncome', () => {
     expect(result.catchUpBonus).toBeGreaterThan(0);
     expect(result.swingTax).toBe(0);
     expect(result.netIncome).toBe(result.baseIncome + result.catchUpBonus);
+    expect(result.stateIncomeDetails).toEqual([
+      {
+        state: 'nm',
+        abbreviation: 'NM',
+        baseIP: 2,
+        bonusValue: 2,
+        total: 4,
+        fallback: false,
+      },
+    ]);
   });
 
   it('applies swing tax when leading by IP and states', () => {
@@ -101,6 +140,48 @@ describe('computeTurnIpIncome', () => {
     expect(result.swingTax).toBeGreaterThan(0);
     expect(result.catchUpBonus).toBe(0);
     expect(result.netIncome).toBeLessThan(result.baseIncome);
+    expect(result.stateIncomeDetails).toEqual([
+      {
+        state: 'ca',
+        abbreviation: 'CA',
+        baseIP: 4,
+        bonusValue: 2,
+        total: 6,
+        fallback: false,
+      },
+      {
+        state: 'ny',
+        abbreviation: 'NY',
+        baseIP: 5,
+        bonusValue: 4,
+        total: 9,
+        fallback: false,
+      },
+      {
+        state: 'tx',
+        abbreviation: 'TX',
+        baseIP: 4,
+        bonusValue: 3,
+        total: 7,
+        fallback: false,
+      },
+      {
+        state: 'wa',
+        abbreviation: 'WA',
+        baseIP: 3,
+        bonusValue: 2,
+        total: 5,
+        fallback: false,
+      },
+      {
+        state: 'fl',
+        abbreviation: 'FL',
+        baseIP: 2,
+        bonusValue: 1,
+        total: 3,
+        fallback: false,
+      },
+    ]);
   });
 });
 
@@ -112,7 +193,12 @@ describe('startTurn upkeep integration', () => {
     const updated = startTurn(state);
     const updatedPlayer = updated.players.P1;
 
-    expect(updatedPlayer.ip).toBe(65 + 4);
+    expect(updatedPlayer.ip).toBe(65 + 6);
+    const incomeLog = updated.log.at(-2);
+    expect(incomeLog).toBeDefined();
+    expect(incomeLog).toContain('income +8 IP');
+    expect(incomeLog).toContain('FL 3 (base 2 + bonus 1)');
+
     const maintenanceLog = updated.log.at(-1);
     expect(maintenanceLog).toBeDefined();
     expect(maintenanceLog).toContain('maintenance -2 IP');
