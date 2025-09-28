@@ -72,6 +72,7 @@ export interface CardPlayResolution {
   states: StateForResolution[];
   controlledStates: string[];
   aiControlledStates: string[];
+  capturedStateIds: string[];
   targetState: string | null;
   selectedCard: string | null;
   logEntries: string[];
@@ -286,6 +287,7 @@ export function resolveCardMVP(
   const nextControlledStates = new Set(gameState.controlledStates);
   const nextAiControlledStates = new Set(gameState.aiControlledStates ?? []);
   let capturedCount = 0;
+  const capturedStateIds: string[] = [];
   let nextTargetState: string | null = actor === 'human' && card.type === 'ZONE' ? targetState : null;
   const resolvedHotspots: string[] = [];
   let truthBonusFromHotspots = 0;
@@ -320,6 +322,7 @@ export function resolveCardMVP(
 
     if (previousOwner !== 'player' && owner === 'player') {
       capturedCount += 1;
+      capturedStateIds.push(state.id);
       setStateOccupation(state, gameState.faction, { id: card.id, name: card.name }, false);
       logEntries.push(`🚨 ${card.name} captured ${state.name}!`);
       if (targetStateId === state.id) {
@@ -327,6 +330,7 @@ export function resolveCardMVP(
       }
     } else if (previousOwner !== 'ai' && owner === 'ai') {
       const aiFaction = gameState.faction === 'truth' ? 'government' : 'truth';
+      capturedStateIds.push(state.id);
       setStateOccupation(state, aiFaction, { id: card.id, name: card.name }, false);
       logEntries.push(`⚠️ ${card.name} seized ${state.name} for the enemy!`);
       if (targetStateId === state.id) {
@@ -403,6 +407,7 @@ export function resolveCardMVP(
     states: adjustedStates,
     controlledStates: Array.from(nextControlledStates),
     aiControlledStates: Array.from(nextAiControlledStates),
+    capturedStateIds,
     targetState: actor === 'human' ? nextTargetState : (gameState as any).targetState,
     selectedCard: null,
     logEntries,
