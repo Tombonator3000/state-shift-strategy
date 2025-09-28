@@ -2,11 +2,13 @@ import { useState, useCallback } from 'react';
 import { EventManager, GameEvent } from '@/data/eventDatabase';
 import { useToast } from '@/hooks/use-toast';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
+import type { GameState } from './gameStateTypes';
 
 export interface StateEventTrigger {
   stateId: string;
   event: GameEvent;
-  capturingFaction: string;
+  capturingFaction: 'truth' | 'government';
+  triggeredOnTurn: number;
 }
 
 export const useStateEvents = () => {
@@ -15,12 +17,12 @@ export const useStateEvents = () => {
 
   const triggerStateEvent = useCallback((
     stateId: string, 
-    capturingFaction: string, 
-    gameState: any,
+    capturingFaction: 'truth' | 'government',
+    gameState: Pick<GameState, 'states' | 'turn'>,
     statePosition?: { x: number; y: number }
   ) => {
     const event = eventManager.selectStateEvent(stateId, capturingFaction, gameState);
-    
+
     if (!event) return null;
 
     // Get state name for display
@@ -42,8 +44,9 @@ export const useStateEvents = () => {
     return {
       stateId,
       event,
-      capturingFaction
-    } as StateEventTrigger;
+      capturingFaction,
+      triggeredOnTurn: typeof gameState.turn === 'number' ? Math.max(1, gameState.turn) : 1,
+    } satisfies StateEventTrigger;
   }, [eventManager, toast]);
 
   const triggerContestedStateEffects = useCallback((

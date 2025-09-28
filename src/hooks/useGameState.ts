@@ -34,7 +34,12 @@ import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
-import type { ActiveParanormalHotspot, GameState, StateParanormalHotspot } from './gameStateTypes';
+import type {
+  ActiveParanormalHotspot,
+  GameState,
+  StateEventBonusSummary,
+  StateParanormalHotspot,
+} from './gameStateTypes';
 import {
   applyAiCardPlay,
   buildStrategyLogEntries as buildStrategyLogEntriesHelper,
@@ -292,6 +297,201 @@ const createHotspotEntries = (params: {
     active,
     stateHotspot: toStateHotspot(active, currentTurn),
   };
+};
+
+const cloneEventEffects = (
+  effects: GameEvent['effects'] | undefined,
+): NonNullable<GameEvent['effects']> | undefined => {
+  if (!effects || typeof effects !== 'object') {
+    return undefined;
+  }
+
+  const cloned: Partial<NonNullable<GameEvent['effects']>> = {};
+  const assignNumber = <K extends keyof NonNullable<GameEvent['effects']>>(key: K, value: unknown) => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      cloned[key] = value as NonNullable<GameEvent['effects']>[K];
+    }
+  };
+
+  assignNumber('truth', effects.truth);
+  assignNumber('ip', effects.ip);
+  assignNumber('cardDraw', effects.cardDraw);
+  assignNumber('truthChange', effects.truthChange);
+  assignNumber('ipChange', effects.ipChange);
+  assignNumber('defenseChange', effects.defenseChange);
+
+  if (effects.stateEffects && typeof effects.stateEffects === 'object') {
+    const stateEffectsSource = effects.stateEffects;
+    const stateEffects: Partial<NonNullable<NonNullable<GameEvent['effects']>['stateEffects']>> = {};
+
+    if (typeof stateEffectsSource.stateId === 'string' && stateEffectsSource.stateId.trim().length > 0) {
+      stateEffects.stateId = stateEffectsSource.stateId.trim();
+    }
+
+    if (typeof stateEffectsSource.pressure === 'number' && Number.isFinite(stateEffectsSource.pressure)) {
+      stateEffects.pressure = stateEffectsSource.pressure;
+    }
+
+    if (typeof stateEffectsSource.defense === 'number' && Number.isFinite(stateEffectsSource.defense)) {
+      stateEffects.defense = stateEffectsSource.defense;
+    }
+
+    if (Object.keys(stateEffects).length > 0) {
+      cloned.stateEffects = stateEffects as NonNullable<NonNullable<GameEvent['effects']>['stateEffects']>;
+    }
+  }
+
+  if (typeof effects.skipTurn === 'boolean') {
+    cloned.skipTurn = effects.skipTurn;
+  }
+
+  if (typeof effects.doubleIncome === 'boolean') {
+    cloned.doubleIncome = effects.doubleIncome;
+  }
+
+  if (typeof effects.revealSecretAgenda === 'boolean') {
+    cloned.revealSecretAgenda = effects.revealSecretAgenda;
+  }
+
+  return Object.keys(cloned).length > 0
+    ? (cloned as NonNullable<GameEvent['effects']>)
+    : undefined;
+};
+
+const buildStateEventEffectSummary = (effects: GameEvent['effects'] | undefined): string[] => {
+  if (!effects || typeof effects !== 'object') {
+    return [];
+  }
+
+  const summary: string[] = [];
+  const formatSigned = (value: number) => (value >= 0 ? `+${value}` : `${value}`);
+
+  const truthDelta = (effects.truth ?? 0) + (effects.truthChange ?? 0);
+  if (truthDelta) {
+    summary.push(`Truth ${formatSigned(truthDelta)}%`);
+  }
+
+  const ipDelta = (effects.ip ?? 0) + (effects.ipChange ?? 0);
+  if (ipDelta) {
+    summary.push(`IP ${formatSigned(ipDelta)}`);
+  }
+
+  if (typeof effects.cardDraw === 'number' && Number.isFinite(effects.cardDraw) && effects.cardDraw !== 0) {
+    const amount = effects.cardDraw;
+    const cardLabel = Math.abs(amount) === 1 ? 'card' : 'cards';
+    summary.push(`Draw ${formatSigned(amount)} ${cardLabel}`);
+  }
+
+  if (typeof effects.defenseChange === 'number' && Number.isFinite(effects.defenseChange) && effects.defenseChange !== 0) {
+    summary.push(`Defense ${formatSigned(effects.defenseChange)}`);
+  }
+
+  if (effects.stateEffects && typeof effects.stateEffects === 'object') {
+    if (typeof effects.stateEffects.defense === 'number' && Number.isFinite(effects.stateEffects.defense) && effects.stateEffects.defense !== 0) {
+      summary.push(`Local defense ${formatSigned(effects.stateEffects.defense)}`);
+    }
+
+    if (typeof effects.stateEffects.pressure === 'number' && Number.isFinite(effects.stateEffects.pressure) && effects.stateEffects.pressure !== 0) {
+      summary.push(`State pressure ${formatSigned(effects.stateEffects.pressure)}`);
+    }
+  }
+
+  if (effects.doubleIncome) {
+    summary.push('Double income next turn');
+  }
+
+  if (effects.skipTurn) {
+    summary.push('Skip next turn');
+  }
+
+  if (effects.revealSecretAgenda) {
+    summary.push('Reveal secret agenda');
+  }
+
+  return summary;
+};
+
+const createStateEventBonusSummary = (params: {
+  event: GameEvent;
+  faction: 'truth' | 'government';
+  turn: number;
+}): StateEventBonusSummary => {
+  const { event, faction, turn } = params;
+  const labelSource = typeof event.title === 'string' && event.title.trim().length > 0
+    ? event.title.trim()
+    : typeof event.headline === 'string' && event.headline.trim().length > 0
+      ? event.headline.trim()
+      : 'State Event Bonus';
+  const descriptionSource = typeof event.headline === 'string' && event.headline.trim().length > 0
+    ? event.headline.trim()
+    : typeof event.content === 'string' && event.content.trim().length > 0
+      ? event.content.trim()
+      : undefined;
+  const effects = cloneEventEffects(event.effects);
+  const effectSummary = buildStateEventEffectSummary(event.effects);
+
+  return {
+    source: 'state-event',
+    eventId: event.id,
+    label: labelSource,
+    description: descriptionSource,
+    triggeredOnTurn: Math.max(1, turn),
+    faction,
+    effects,
+    effectSummary: effectSummary.length > 0 ? effectSummary : undefined,
+  } satisfies StateEventBonusSummary;
+};
+
+const normalizeStateEventBonus = (
+  raw: unknown,
+  fallbackTurn: number,
+): StateEventBonusSummary | undefined => {
+  if (!raw || typeof raw !== 'object') {
+    return undefined;
+  }
+
+  const data = raw as Partial<StateEventBonusSummary> & { source?: unknown };
+  if (data.source !== 'state-event') {
+    return undefined;
+  }
+
+  const eventId = typeof data.eventId === 'string' && data.eventId.trim().length > 0
+    ? data.eventId.trim()
+    : undefined;
+
+  if (!eventId) {
+    return undefined;
+  }
+
+  const label = typeof data.label === 'string' && data.label.trim().length > 0
+    ? data.label.trim()
+    : 'State Event Bonus';
+  const description = typeof data.description === 'string' && data.description.trim().length > 0
+    ? data.description.trim()
+    : undefined;
+  const triggeredOnTurn = typeof data.triggeredOnTurn === 'number' && Number.isFinite(data.triggeredOnTurn)
+    ? Math.max(1, Math.floor(data.triggeredOnTurn))
+    : Math.max(1, Math.floor(fallbackTurn));
+  const faction = data.faction === 'truth' || data.faction === 'government'
+    ? data.faction
+    : 'truth';
+  const effectSummary = Array.isArray(data.effectSummary)
+    ? data.effectSummary
+        .map(entry => (typeof entry === 'string' ? entry.trim() : ''))
+        .filter(entry => entry.length > 0)
+    : undefined;
+  const effects = cloneEventEffects((data as { effects?: GameEvent['effects'] }).effects);
+
+  return {
+    source: 'state-event',
+    eventId,
+    label,
+    description,
+    triggeredOnTurn,
+    faction,
+    effects,
+    effectSummary: effectSummary && effectSummary.length > 0 ? effectSummary : undefined,
+  } satisfies StateEventBonusSummary;
 };
 
 const revealAiSecretAgenda = (
@@ -584,6 +784,31 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return;
       }
 
+      let workingStates: GameState['states'] | null = null;
+      const ensureWorkingStates = () => {
+        if (!workingStates) {
+          workingStates = nextState.states.map(state => ({ ...state }));
+        }
+        return workingStates;
+      };
+
+      const findStateIndex = (states: GameState['states'], identifier: string | null | undefined) => {
+        if (!identifier) {
+          return -1;
+        }
+        return states.findIndex(state => state.id === identifier || state.abbreviation === identifier);
+      };
+
+      let truth = nextState.truth;
+      let ip = nextState.ip;
+      let aiIp = nextState.aiIP;
+      let pendingCardDraw = nextState.pendingCardDraw ?? 0;
+      let truthChanged = false;
+      let ipChanged = false;
+      let aiIpChanged = false;
+      let pendingCardDrawChanged = false;
+      const eventLogs: string[] = [];
+
       for (const stateId of capturedIds) {
         const resolvedState = resolution?.states.find(state => state.id === stateId);
         if (!resolvedState) {
@@ -600,7 +825,135 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           continue;
         }
 
-        triggerStateEvent(stateId, capturingFaction, nextState);
+        const trigger = triggerStateEvent(stateId, capturingFaction, nextState);
+        if (!trigger) {
+          continue;
+        }
+
+        const statesArray = ensureWorkingStates();
+        const indexCandidates = [resolvedState.id, resolvedState.abbreviation, trigger.stateId];
+        let stateIndex = -1;
+        for (const candidate of indexCandidates) {
+          stateIndex = findStateIndex(statesArray, candidate);
+          if (stateIndex !== -1) {
+            break;
+          }
+        }
+
+        if (stateIndex === -1) {
+          continue;
+        }
+
+        const targetState = { ...statesArray[stateIndex] };
+        const eventEffects = trigger.event.effects;
+
+        if (eventEffects && typeof eventEffects === 'object') {
+          const truthDelta = (eventEffects.truth ?? 0) + (eventEffects.truthChange ?? 0);
+          if (truthDelta) {
+            truth = applyTruthDelta(truth, truthDelta);
+            truthChanged = true;
+          }
+
+          const ipDelta = (eventEffects.ip ?? 0) + (eventEffects.ipChange ?? 0);
+          if (ipDelta) {
+            if (resolvedState.owner === 'player') {
+              ip = Math.max(0, ip + ipDelta);
+              ipChanged = true;
+            } else if (resolvedState.owner === 'ai') {
+              aiIp = Math.max(0, aiIp + ipDelta);
+              aiIpChanged = true;
+            } else {
+              ip = Math.max(0, ip + ipDelta);
+              aiIp = Math.max(0, aiIp + ipDelta);
+              ipChanged = true;
+              aiIpChanged = true;
+            }
+          }
+
+          if (typeof eventEffects.cardDraw === 'number' && Number.isFinite(eventEffects.cardDraw) && eventEffects.cardDraw > 0) {
+            if (resolvedState.owner === 'player') {
+              const drawAmount = Math.max(0, Math.floor(eventEffects.cardDraw));
+              if (drawAmount > 0) {
+                pendingCardDraw += drawAmount;
+                pendingCardDrawChanged = true;
+              }
+            }
+          }
+
+          if (typeof eventEffects.defenseChange === 'number' && Number.isFinite(eventEffects.defenseChange) && eventEffects.defenseChange !== 0) {
+            targetState.defense = Math.max(1, targetState.defense + eventEffects.defenseChange);
+          }
+
+          if (eventEffects.stateEffects && typeof eventEffects.stateEffects === 'object') {
+            const { stateEffects } = eventEffects;
+            const targetIndexes: number[] = [];
+
+            if (typeof stateEffects.stateId === 'string' && stateEffects.stateId.trim().length > 0) {
+              const explicitIndex = findStateIndex(statesArray, stateEffects.stateId.trim());
+              if (explicitIndex !== -1) {
+                targetIndexes.push(explicitIndex);
+              }
+            } else {
+              targetIndexes.push(stateIndex);
+            }
+
+            for (const index of targetIndexes) {
+              const candidateState = index === stateIndex ? targetState : { ...statesArray[index] };
+
+              if (typeof stateEffects.defense === 'number' && Number.isFinite(stateEffects.defense) && stateEffects.defense !== 0) {
+                candidateState.defense = Math.max(1, candidateState.defense + stateEffects.defense);
+              }
+
+              if (typeof stateEffects.pressure === 'number' && Number.isFinite(stateEffects.pressure) && stateEffects.pressure !== 0) {
+                const delta = stateEffects.pressure;
+                candidateState.pressure = Math.max(0, candidateState.pressure + delta);
+
+                if (candidateState.owner === 'player') {
+                  candidateState.pressurePlayer = Math.max(0, candidateState.pressurePlayer + delta);
+                } else if (candidateState.owner === 'ai') {
+                  candidateState.pressureAi = Math.max(0, candidateState.pressureAi + delta);
+                } else {
+                  candidateState.pressurePlayer = Math.max(0, candidateState.pressurePlayer + delta);
+                  candidateState.pressureAi = Math.max(0, candidateState.pressureAi + delta);
+                }
+              }
+
+              if (index !== stateIndex) {
+                statesArray[index] = candidateState;
+              }
+            }
+          }
+        }
+
+        targetState.stateEventBonus = createStateEventBonusSummary({
+          event: trigger.event,
+          faction: trigger.capturingFaction,
+          turn: trigger.triggeredOnTurn,
+        });
+        statesArray[stateIndex] = targetState;
+
+        const stateName = targetState.name ?? resolvedState.name ?? trigger.stateId;
+        const label = trigger.event.title ?? trigger.event.headline ?? trigger.event.id;
+        eventLogs.push(`State event triggered in ${stateName}: ${label}`);
+      }
+
+      if (workingStates) {
+        nextState.states = workingStates;
+      }
+      if (truthChanged) {
+        nextState.truth = truth;
+      }
+      if (ipChanged) {
+        nextState.ip = ip;
+      }
+      if (aiIpChanged) {
+        nextState.aiIP = aiIp;
+      }
+      if (pendingCardDrawChanged) {
+        nextState.pendingCardDraw = pendingCardDraw;
+      }
+      if (eventLogs.length > 0) {
+        nextState.log = [...nextState.log, ...eventLogs];
       }
     },
     [triggerStateEvent],
@@ -665,6 +1018,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           specialBonus: state.specialBonus,
           bonusValue: state.bonusValue,
           paranormalHotspot: undefined,
+          stateEventBonus: undefined,
         };
       }),
       currentEvents: [],
@@ -809,6 +1163,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           specialBonus: state.specialBonus,
           bonusValue: state.bonusValue,
           paranormalHotspot: undefined,
+          stateEventBonus: undefined,
         };
       }),
       log: [
@@ -1940,6 +2295,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const pressureAi = typeof rawPressureAi === 'number' && Number.isFinite(rawPressureAi)
           ? rawPressureAi
           : basePressure;
+        const stateEventBonus = normalizeStateEventBonus((rawState as { stateEventBonus?: unknown }).stateEventBonus, normalizedTurn);
 
         return {
           id: typeof rawState?.id === 'string' ? rawState.id : lookupBase?.id ?? abbreviation,
@@ -1968,6 +2324,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             ? rawState.occupierUpdatedAt
             : undefined,
           paranormalHotspot: undefined,
+          stateEventBonus,
         } as GameState['states'][number];
       });
 
