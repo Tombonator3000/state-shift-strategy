@@ -55,7 +55,11 @@ export interface IpMaintenanceSettings {
 export interface IpIncomeBreakdown {
   baseIncome: number;
   maintenance: number;
+  swingTax: number;
+  catchUpBonus: number;
   netIncome: number;
+  ipGap: number;
+  stateGap: number;
 }
 
 export const DEFAULT_IP_MAINTENANCE: IpMaintenanceSettings = {
@@ -63,20 +67,101 @@ export const DEFAULT_IP_MAINTENANCE: IpMaintenanceSettings = {
   divisor: 10,
 };
 
+export interface CatchUpSettings {
+  ipGrace: number;
+  ipStep: number;
+  stateGrace: number;
+  maxModifier: number;
+}
+
+export const DEFAULT_CATCH_UP_SETTINGS: CatchUpSettings = {
+  ipGrace: 10,
+  ipStep: 5,
+  stateGrace: 1,
+  maxModifier: 4,
+};
+
+export interface CatchUpEvaluation {
+  swingTax: number;
+  catchUpBonus: number;
+  ipGap: number;
+  stateGap: number;
+}
+
+export const evaluateCatchUpAdjustments = (
+  ipGap: number,
+  stateGap: number,
+  settings: CatchUpSettings = DEFAULT_CATCH_UP_SETTINGS,
+): CatchUpEvaluation => {
+  const normalizedSettings = {
+    ipGrace: Math.max(0, settings.ipGrace),
+    ipStep: Math.max(1, settings.ipStep),
+    stateGrace: Math.max(0, settings.stateGrace),
+    maxModifier: Math.max(0, settings.maxModifier),
+  };
+
+  const computeIpModifier = (gap: number): number => {
+    if (gap <= normalizedSettings.ipGrace) {
+      return 0;
+    }
+    return Math.floor((gap - normalizedSettings.ipGrace) / normalizedSettings.ipStep);
+  };
+
+  const computeStateModifier = (gap: number): number => {
+    if (gap <= normalizedSettings.stateGrace) {
+      return 0;
+    }
+    return gap - normalizedSettings.stateGrace;
+  };
+
+  let swingTax = 0;
+  let catchUpBonus = 0;
+
+  if (ipGap > 0) {
+    swingTax += computeIpModifier(ipGap);
+  } else if (ipGap < 0) {
+    catchUpBonus += computeIpModifier(-ipGap);
+  }
+
+  if (stateGap > 0) {
+    swingTax += computeStateModifier(stateGap);
+  } else if (stateGap < 0) {
+    catchUpBonus += computeStateModifier(-stateGap);
+  }
+
+  swingTax = Math.min(normalizedSettings.maxModifier, Math.max(0, swingTax));
+  catchUpBonus = Math.min(normalizedSettings.maxModifier, Math.max(0, catchUpBonus));
+
+  return {
+    swingTax,
+    catchUpBonus,
+    ipGap,
+    stateGap,
+  };
+};
+
 export function computeTurnIpIncome(
   player: PlayerState,
-  settings: IpMaintenanceSettings = DEFAULT_IP_MAINTENANCE,
+  opponent: PlayerState,
+  maintenanceSettings: IpMaintenanceSettings = DEFAULT_IP_MAINTENANCE,
+  catchUpSettings: CatchUpSettings = DEFAULT_CATCH_UP_SETTINGS,
 ): IpIncomeBreakdown {
   const baseIncome = 5 + player.states.length;
-  const overage = Math.max(0, player.ip - settings.threshold);
-  const rawMaintenance = settings.divisor > 0 ? Math.floor(overage / settings.divisor) : 0;
+  const overage = Math.max(0, player.ip - maintenanceSettings.threshold);
+  const rawMaintenance = maintenanceSettings.divisor > 0 ? Math.floor(overage / maintenanceSettings.divisor) : 0;
   const maintenance = Math.max(0, rawMaintenance);
-  const netIncome = Math.max(0, baseIncome - maintenance);
+  const catchUp = evaluateCatchUpAdjustments(player.ip - opponent.ip, player.states.length - opponent.states.length, catchUpSettings);
+  const grossIncome = baseIncome - maintenance - catchUp.swingTax + catchUp.catchUpBonus;
+  const netIncome = Math.max(0, grossIncome);
 
   return {
     baseIncome,
     maintenance,
+    swingTax: catchUp.swingTax,
+    catchUpBonus: catchUp.catchUpBonus,
     netIncome,
+    ipGap: catchUp.ipGap,
+    stateGap: catchUp.stateGap,
   };
 }
 
@@ -84,13 +169,42 @@ export function startTurn(state: GameState): GameState {
   const cloned = cloneGameState(state);
   const currentId = cloned.currentPlayer;
   const me = cloned.players[currentId];
-  const { maintenance, netIncome } = computeTurnIpIncome(me);
+  const opponent = cloned.players[otherPlayer(currentId)];
+  const { maintenance, swingTax, catchUpBonus, netIncome, ipGap, stateGap } = computeTurnIpIncome(
+    me,
+    opponent,
+  );
   const logEntries = [...cloned.log];
 
   if (maintenance > 0) {
     logEntries.push(
       `${currentId} maintenance -${maintenance} IP (reserves ${me.ip} > threshold ${DEFAULT_IP_MAINTENANCE.threshold}, divisor ${DEFAULT_IP_MAINTENANCE.divisor})`,
     );
+  }
+  if (swingTax > 0) {
+    const leadParts: string[] = [];
+    if (ipGap > 0) {
+      leadParts.push(`lead ${ipGap} IP`);
+    }
+    if (stateGap > 0) {
+      const label = stateGap === 1 ? 'state' : 'states';
+      leadParts.push(`lead ${stateGap} ${label}`);
+    }
+    const reason = leadParts.length ? ` (${leadParts.join(', ')})` : '';
+    logEntries.push(`${currentId} swing tax -${swingTax} IP${reason}`);
+  }
+  if (catchUpBonus > 0) {
+    const deficitParts: string[] = [];
+    if (ipGap < 0) {
+      deficitParts.push(`behind ${Math.abs(ipGap)} IP`);
+    }
+    if (stateGap < 0) {
+      const deficit = Math.abs(stateGap);
+      const label = deficit === 1 ? 'state' : 'states';
+      deficitParts.push(`behind ${deficit} ${label}`);
+    }
+    const reason = deficitParts.length ? ` (${deficitParts.join(', ')})` : '';
+    logEntries.push(`${currentId} catch-up bonus +${catchUpBonus} IP${reason}`);
   }
   const updatedPlayer: PlayerState = {
     ...drawUpToFive(me),

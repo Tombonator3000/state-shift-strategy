@@ -12,12 +12,15 @@
 ## Game loop fundamentals
 The MVP design defines a duel between the Truth Seekers and the Government, each managing Influence Points (IP), a shared Truth meter, and pressure on individual U.S. states. Win conditions include controlling 10 states, pushing Truth to faction-specific thresholds, or accumulating 300 IP.【F:DESIGN_DOC_MVP.md†L7-L63】 These core concepts are implemented directly in the runtime engine:
 
-- **Turn start:** `startTurn` clones game state, uses `computeTurnIpIncome` to award `5 + controlledStates` IP minus any maintenance for stockpiled reserves, logs upkeep when applied, and refills the active player's hand to five cards.【F:src/mvp/engine.ts†L50-L91】
+- **Turn start:** `startTurn` clones game state, uses `computeTurnIpIncome` to award `5 + controlledStates` IP, applies reserve maintenance, evaluates the swing-tax/catch-up module, logs every adjustment, and refills the active player's hand to five cards.【F:src/mvp/engine.ts†L50-L114】
 - **Card play gating:** `canPlay` enforces the three-card-per-turn limit, IP costs, and ZONE targeting rules before a card resolves.【F:src/mvp/engine.ts†L71-L99】
 - **Playing a card:** `playCard` removes the card from hand, deducts IP, logs the play, and calls `resolve` to apply effects.【F:src/mvp/engine.ts†L101-L215】
 - **Effect resolution:** `resolve` relies on `applyEffectsMvp` to adjust IP, Truth, and pressure while tracking capture metadata for end-of-turn summaries.【F:src/mvp/engine.ts†L157-L215】【F:src/engine/applyEffects-mvp.ts†L53-L157】
 - **Turn end:** Discards are processed with the “first one free, extras cost 1 IP each” rule, combo hooks are evaluated, logs are appended, and control passes to the other player.【F:src/mvp/engine.ts†L217-L348】
 - **Victory checks:** `winCheck` confirms state, Truth, and IP victory thresholds after every turn wrap-up, matching the MVP specification but using 95%/5% Truth buffers for runtime tuning.【F:src/mvp/engine.ts†L367-L395】【F:DESIGN_DOC_MVP.md†L55-L63】
+
+### Catch-up swing math
+`computeTurnIpIncome` now layers a swing-tax/catch-up module on top of the existing reserve maintenance. The routine compares the active player's reserves and state holdings to their opponent and scores two separate gaps: IP and controlled states. Gaps within the grace window (≤10 IP or ≤1 state) are ignored. Every additional 5 IP of lead beyond that window adds 1 swing tax, while every extra controlled state beyond the grace adds another point. Trailing players receive the same magnitude as a positive catch-up bonus. The combined modifier is capped at 4 IP in either direction before being applied to the base income of `5 + controlledStates`. This keeps small leads untouched, taxes runaway economies, and gives the underdog up to +4 IP when significantly behind.【F:src/mvp/engine.ts†L56-L114】
 
 ## MVP card schema
 MVP cards belong to the Truth or Government factions and are typed as ATTACK, MEDIA, or ZONE with rarities from common to legendary. The baseline design restricts each type to a concise whitelist of effect keys and ties costs to a rarity table.【F:DESIGN_DOC_MVP.md†L25-L178】【F:src/rules/mvp.ts†L1-L60】 The runtime validator codifies the schema:

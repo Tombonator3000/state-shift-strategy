@@ -1,4 +1,5 @@
 import { EnhancedAIStrategist, type EnhancedCardPlay } from '@/data/enhancedAIStrategy';
+import { evaluateCatchUpAdjustments } from '@/mvp/engine';
 import type { GameCard } from '@/rules/mvp';
 
 interface AIPlanningState {
@@ -94,14 +95,30 @@ export const chooseTurnActions = ({
         .filter(state => state.owner === 'ai')
         .map(state => state.abbreviation)
     : [];
+  const opponentStates = Array.isArray(gameState.states)
+    ? gameState.states.filter(state => state.owner === 'player').map(state => state.abbreviation)
+    : [];
+
+  const aiIp = gameState.aiIP ?? 0;
+  const playerIp = gameState.ip ?? 0;
+  const catchUp = evaluateCatchUpAdjustments(aiIp - playerIp, controlledStates.length - opponentStates.length);
+  const projectedBaseIncome = 5 + controlledStates.length;
+  const projectedNetIncome = Math.max(0, projectedBaseIncome - catchUp.swingTax + catchUp.catchUpBonus);
 
   const baseStrategistView: Record<string, unknown> = {
     ...gameState,
     ip: -(gameState.ip ?? 0),
-    aiIP: gameState.aiIP ?? 0,
+    aiIP: aiIp,
     hand: initialHand,
     aiHand: initialHand,
     controlledStates,
+    catchUpForecast: catchUp,
+    projectedIncome: {
+      base: projectedBaseIncome,
+      swingTax: catchUp.swingTax,
+      catchUpBonus: catchUp.catchUpBonus,
+      net: projectedNetIncome,
+    },
   };
 
   const evaluation = strategist.evaluateGameState(baseStrategistView);
@@ -111,6 +128,28 @@ export const chooseTurnActions = ({
   const adaptiveSummary = strategist.getAdaptiveSummary();
   if (adaptiveSummary.length) {
     sequenceDetails.push(...adaptiveSummary);
+  }
+  if (catchUp.swingTax > 0 || catchUp.catchUpBonus > 0) {
+    const modifiers: string[] = [];
+    if (catchUp.swingTax > 0) {
+      modifiers.push(`swing tax -${catchUp.swingTax} IP`);
+    }
+    if (catchUp.catchUpBonus > 0) {
+      modifiers.push(`catch-up +${catchUp.catchUpBonus} IP`);
+    }
+    const gapDetails: string[] = [];
+    if (catchUp.ipGap !== 0) {
+      const direction = catchUp.ipGap > 0 ? 'lead' : 'deficit';
+      gapDetails.push(`${direction} ${Math.abs(catchUp.ipGap)} IP`);
+    }
+    if (catchUp.stateGap !== 0) {
+      const count = Math.abs(catchUp.stateGap);
+      const label = count === 1 ? 'state' : 'states';
+      const direction = catchUp.stateGap > 0 ? 'lead' : 'deficit';
+      gapDetails.push(`${direction} ${count} ${label}`);
+    }
+    const reason = gapDetails.length ? ` (${gapDetails.join(', ')})` : '';
+    sequenceDetails.push(`Income modulation: ${modifiers.join(', ')}${reason}.`);
   }
 
   const actions: PlannedCardAction[] = [];
