@@ -12,59 +12,50 @@ const makeEvent = (id: string): GameEvent => ({
 });
 
 describe('buildEditionEvents', () => {
-  it('returns no events on the first edition when no trigger occurs', () => {
-    const result = buildEditionEvents(
-      { turn: 1, round: 1, currentEvents: [] },
-      null,
-    );
-
-    expect(result).toEqual([]);
-  });
-
-  it('returns only the triggered event on the first edition when a trigger occurs', () => {
-    const triggered = makeEvent('triggered');
-
-    const result = buildEditionEvents(
-      { turn: 1, round: 1, currentEvents: [] },
-      triggered,
-    );
-
-    expect(result).toEqual([triggered]);
-  });
-
-  it('returns no events when no trigger fires on later editions', () => {
-    const firstEdition = buildEditionEvents(
-      { turn: 1, round: 1, currentEvents: [] },
-      makeEvent('triggered'),
-    );
-
-    const result = buildEditionEvents(
-      { turn: 2, round: 1, currentEvents: firstEdition },
-      null,
-    );
-
-    expect(result).toEqual([]);
-  });
-
-  it('ignores pre-seeded events on the first edition when no trigger occurs', () => {
+  it('returns existing events when no new entries are provided', () => {
     const seededEvents = [makeEvent('seed-1'), makeEvent('seed-2')];
 
     const result = buildEditionEvents(
       { turn: 1, round: 1, currentEvents: seededEvents },
-      null,
+      [],
     );
 
-    expect(result).toEqual([]);
+    expect(result).toEqual(seededEvents);
   });
 
-  it('returns only the triggered event on later editions', () => {
-    const triggered = makeEvent('triggered');
+  it('merges new events with existing entries on the first edition', () => {
+    const seededEvents = [makeEvent('seed-1')];
+    const additions = [makeEvent('addition-1'), makeEvent('addition-2')];
 
     const result = buildEditionEvents(
-      { turn: 3, round: 1, currentEvents: [] },
-      triggered,
+      { turn: 1, round: 1, currentEvents: seededEvents },
+      additions,
     );
 
-    expect(result).toEqual([triggered]);
+    expect(result).toEqual([...seededEvents, ...additions]);
+  });
+
+  it('deduplicates by id when merging new events', () => {
+    const seededEvents = [makeEvent('existing'), makeEvent('keep-me')];
+    const replacement = { ...makeEvent('existing'), title: 'Updated existing' };
+
+    const result = buildEditionEvents(
+      { turn: 3, round: 1, currentEvents: seededEvents },
+      [replacement],
+    );
+
+    expect(result).toEqual([replacement, seededEvents[1]]);
+  });
+
+  it('appends multiple unique new events on later editions', () => {
+    const seededEvents = [makeEvent('existing')];
+    const additions = [makeEvent('new-1'), makeEvent('new-2')];
+
+    const result = buildEditionEvents(
+      { turn: 4, round: 2, currentEvents: seededEvents },
+      additions,
+    );
+
+    expect(result).toEqual([...seededEvents, ...additions]);
   });
 });

@@ -73,6 +73,7 @@ export interface GameState {
     stateEventHistory: StateEventBonusSummary[];
   }>;
   currentEvents: GameEvent[];
+  pendingEditionEvents: GameEvent[];
   eventManager?: EventManager;
   showNewspaper: boolean;
   log: string[];
