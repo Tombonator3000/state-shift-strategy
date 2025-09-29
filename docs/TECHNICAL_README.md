@@ -48,6 +48,15 @@ MVP cards belong to the Truth or Government factions and are typed as ATTACK, ME
 ## State map and territorial control
 `src/data/usaStates.ts` enumerates every state with base IP income, defense ratings, and thematic bonuses, plus helpers for lookups and occupation labels. These values populate the `stateDefense` map that ZONE cards challenge and govern income bonuses when `startTurn` tallies controlled states.【F:src/data/usaStates.ts†L1-L178】【F:src/mvp/engine.ts†L52-L58】 Helper utilities such as `buildOccupierLabel` and `setStateOccupation` standardize capture messaging, ensuring UI layers can display faction-flavored control markers.【F:src/data/usaStates.ts†L115-L169】
 
+### Hotspot lifecycle and map VFX
+Hotspots originate from end-of-turn tabloids and immediately mark their host state as contested: defense rises, the Truth reward is logged, and the UI posts a “resolve me” badge. While a hotspot is active, the Enhanced USA Map watches for three inputs:
+
+1. **Activation pulse** – the first frame after a hotspot spawns pings `CardAnimationLayer`, which queues the paranormal “flying saucer” sprite to traverse the targeted state. With full effects enabled, the UFO animates across the board and leaves a neon vapor trail; reduced-motion mode swaps this for a single-frame overlay and audio ping so photosensitive players still receive clear notice without camera movement.
+2. **State glow** – the owning map tile flips to a green phosphorescent outline as long as the hotspot flag is set. This glow persists for both animation profiles; in reduced-motion mode the glow fades in instantly instead of pulsing.
+3. **Resolution reset** – when either faction clears the hotspot, the glow, animation queues, and boosted defense are torn down, and the state reverts to its regular control palette. The animation stack also emits a final “resolved” flash (again single-frame in reduced-motion mode) to confirm the payout.
+
+These hooks let designers adjust paranormal pacing without rewriting the map: the lifecycle is just `spawn → animate → glow → resolve`, with each phase mirrored by a low-motion equivalent so accessibility settings never hide critical information.
+
 ## Combo engine integration
 After discards resolve, `endTurn` invokes `evaluateCombos` to detect synergies, logs any triggered definitions, applies rewards (e.g., extra IP) through `applyComboRewards`, and optionally fires VFX callbacks controlled by `ComboOptions`. The resulting `ComboSummary` is surfaced in the turn log for UI consumption.【F:src/mvp/engine.ts†L289-L333】 Components such as the main game page respond to these events with particle effects and SFX when a combo grants bonus resources.【F:src/pages/Index.tsx†L508-L544】
 
