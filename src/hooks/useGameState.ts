@@ -2269,12 +2269,16 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const stateById = Object.fromEntries(USA_STATES.map(state => [state.id, state]));
       const rawStates = Array.isArray(saveData.states) ? saveData.states : [];
       const normalizedStates = rawStates.map(rawState => {
-        const abbreviation = typeof rawState?.abbreviation === 'string'
-          ? rawState.abbreviation
-          : typeof rawState?.id === 'string'
-            ? rawState.id
-            : '';
-        const lookupBase = stateByAbbreviation[abbreviation] ?? (typeof rawState?.id === 'string' ? stateById[rawState.id] : undefined);
+        const providedAbbreviation = typeof rawState?.abbreviation === 'string'
+          ? rawState.abbreviation.trim()
+          : '';
+        const uppercaseAbbreviation = providedAbbreviation ? providedAbbreviation.toUpperCase() : '';
+        const lookupBase =
+          (uppercaseAbbreviation ? stateByAbbreviation[uppercaseAbbreviation] : undefined)
+          ?? (providedAbbreviation ? stateByAbbreviation[providedAbbreviation] : undefined)
+          ?? (typeof rawState?.id === 'string' ? stateById[rawState.id] : undefined);
+        const normalizedAbbreviation = uppercaseAbbreviation
+          || (lookupBase?.abbreviation ? lookupBase.abbreviation.toUpperCase() : '');
         const defense = typeof rawState?.defense === 'number' && Number.isFinite(rawState.defense)
           ? rawState.defense
           : lookupBase?.defense ?? 0;
@@ -2303,9 +2307,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const stateEventBonus = normalizeStateEventBonus((rawState as { stateEventBonus?: unknown }).stateEventBonus, normalizedTurn);
 
         return {
-          id: typeof rawState?.id === 'string' ? rawState.id : lookupBase?.id ?? abbreviation,
-          name: typeof rawState?.name === 'string' ? rawState.name : lookupBase?.name ?? abbreviation,
-          abbreviation: abbreviation || lookupBase?.abbreviation || '',
+          id: typeof rawState?.id === 'string' ? rawState.id : lookupBase?.id ?? normalizedAbbreviation,
+          name: typeof rawState?.name === 'string' ? rawState.name : lookupBase?.name ?? normalizedAbbreviation,
+          abbreviation: normalizedAbbreviation,
           baseIP: typeof rawState?.baseIP === 'number' && Number.isFinite(rawState.baseIP)
             ? rawState.baseIP
             : lookupBase?.baseIP ?? 0,
@@ -2337,7 +2341,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (saveData.paranormalHotspots && typeof saveData.paranormalHotspots === 'object') {
         for (const [abbr, rawHotspot] of Object.entries(saveData.paranormalHotspots as Record<string, any>)) {
           if (!rawHotspot || typeof rawHotspot !== 'object') continue;
-          const state = normalizedStates.find(entry => entry.abbreviation === abbr);
+          const normalizedKey = abbr.trim();
+          const uppercaseKey = normalizedKey.toUpperCase();
+          const state = normalizedStates.find(entry =>
+            entry.abbreviation === uppercaseKey
+            || entry.abbreviation === normalizedKey
+            || entry.id === normalizedKey,
+          );
           if (!state) continue;
           const eventId = typeof rawHotspot.eventId === 'string' ? rawHotspot.eventId : undefined;
           if (!eventId) continue;
@@ -2386,12 +2396,22 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           if (!rawState || typeof rawState !== 'object') continue;
           const embedded = (rawState as any).paranormalHotspot;
           if (!embedded || typeof embedded !== 'object') continue;
-          const abbreviation = typeof rawState?.abbreviation === 'string'
-            ? rawState.abbreviation
-            : typeof rawState?.id === 'string'
-              ? rawState.id
-              : '';
-          const state = normalizedStates.find(entry => entry.abbreviation === abbreviation);
+          const providedAbbreviation = typeof rawState?.abbreviation === 'string'
+            ? rawState.abbreviation.trim()
+            : '';
+          const uppercaseAbbreviation = providedAbbreviation ? providedAbbreviation.toUpperCase() : '';
+          const state = normalizedStates.find(entry => {
+            if (uppercaseAbbreviation && entry.abbreviation === uppercaseAbbreviation) {
+              return true;
+            }
+            if (providedAbbreviation && entry.abbreviation === providedAbbreviation) {
+              return true;
+            }
+            if (typeof rawState?.id === 'string' && entry.id === rawState.id) {
+              return true;
+            }
+            return false;
+          });
           if (!state) continue;
           const eventId = typeof embedded.eventId === 'string' ? embedded.eventId : undefined;
           if (!eventId) continue;
