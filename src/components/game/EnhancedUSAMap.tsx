@@ -58,6 +58,7 @@ interface EnhancedUSAMapProps {
   selectedState?: string | null;
   audio?: any;
   playedCards?: PlayedCard[];
+  playerFaction: 'truth' | 'government';
 }
 
 const MAP_BASE_WIDTH = 975;
@@ -71,7 +72,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   hoveredStateId,
   selectedState,
   audio,
-  playedCards = []
+  playedCards = [],
+  playerFaction
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -629,13 +631,22 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     selectedState,
     governmentTarget?.active,
     governmentTarget?.stateId,
-    dimensions
+    dimensions,
+    playerFaction
   ]);
+
+  const getOwnerFaction = (state?: EnhancedState): 'truth' | 'government' | null => {
+    if (!state) return null;
+    if (state.owner === 'player') return playerFaction;
+    if (state.owner === 'ai') return playerFaction === 'truth' ? 'government' : 'truth';
+    return null;
+  };
 
   const getStateOwnerClass = (state?: EnhancedState) => {
     if (!state) return 'neutral';
     if (state.contested) return 'contested';
-    return state.owner;
+    const ownerFaction = getOwnerFaction(state);
+    return ownerFaction ?? 'neutral';
   };
 
   const getHoveredStateInfo = () => {
@@ -687,18 +698,23 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="font-bold text-foreground font-mono">{stateInfo.name}</h4>
-              <Badge 
-                variant="outline" 
-                className={`${
-                  stateInfo.owner === 'player' ? 'border-blue-500 text-blue-500' :
-                  stateInfo.owner === 'ai' ? 'border-red-500 text-red-500' :
-                  stateInfo.contested ? 'border-orange-500 text-orange-500' :
-                  'border-gray-400 text-gray-400'
-                }`}
+              <Badge
+                variant="outline"
+                className={`${(() => {
+                  if (stateInfo.contested) return 'border-orange-500 text-orange-500';
+                  const ownerFaction = getOwnerFaction(stateInfo);
+                  if (ownerFaction === 'truth') return 'border-blue-500 text-blue-500';
+                  if (ownerFaction === 'government') return 'border-red-500 text-red-500';
+                  return 'border-gray-400 text-gray-400';
+                })()}`}
               >
-                {stateInfo.contested ? 'CONTESTED' : 
-                 stateInfo.owner === 'player' ? 'TRUTH' : 
-                 stateInfo.owner === 'ai' ? 'GOVERNMENT' : 'NEUTRAL'}
+                {(() => {
+                  if (stateInfo.contested) return 'CONTESTED';
+                  const ownerFaction = getOwnerFaction(stateInfo);
+                  if (ownerFaction === 'truth') return 'TRUTH';
+                  if (ownerFaction === 'government') return 'GOVERNMENT';
+                  return 'NEUTRAL';
+                })()}
               </Badge>
             </div>
             
@@ -874,11 +890,11 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           transform: translateZ(0);
         }
         
-        .state-path.player {
+        .state-path.truth {
           fill: #3b82f6;
         }
-        
-        .state-path.ai {
+
+        .state-path.government {
           fill: #ef4444;
         }
         
