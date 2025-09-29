@@ -1,9 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import {
-  UFO_ELVIS_SFX,
-  CRYPTID_RUMBLE_SFX,
-  RADIO_STATIC_SFX,
-} from '../assets/audio/paranormalSfx';
+import { SFX_MANIFEST } from '@/assets/audio/sfxManifest';
 
 interface AudioConfig {
   volume: number;
@@ -403,29 +399,9 @@ export const useAudio = () => {
     loadMusicTracks();
 
     // Create sound effects with fallback handling - use existing files for paranormal effects
-    const existingSfxFiles = {
-      cardPlay: '/audio/card-play.mp3',
-      flash: '/audio/card-play.mp3',
-      cardDraw: '/audio/card-draw.mp3',
-      stateCapture: '/audio/state-capture.mp3',
-      turnEnd: '/audio/turn-end.mp3',
-      newspaper: '/audio/newspaper.mp3',
-      victory: '/audio/victory.mp3',
-      defeat: '/audio/defeat.mp3',
-      hover: '/audio/hover.mp3',
-      click: '/audio/click.mp3',
-      typewriter: '/audio/typewriter.mp3',
-      lightClick: '/audio/click.mp3', // Reuse click sound
-      error: '/audio/click.mp3', // Fallback for error sound
-      // Paranormal effects
-      'ufo-elvis': UFO_ELVIS_SFX,
-      'cryptid-rumble': CRYPTID_RUMBLE_SFX,
-      'radio-static': RADIO_STATIC_SFX
-    };
-
     // Load SFX asynchronously with error handling
     const loadSFX = async () => {
-      const loadPromises = Object.entries(existingSfxFiles).map(async ([key, src]) => {
+      const loadPromises = Object.entries(SFX_MANIFEST).map(async ([key, src]) => {
         const audio = await loadAudioTrack(src);
         if (audio) {
           const baseSfxVolume = config.muted ? 0 : config.volume * config.sfxVolume;
