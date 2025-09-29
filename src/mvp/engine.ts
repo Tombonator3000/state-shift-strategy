@@ -99,6 +99,18 @@ export interface CatchUpEvaluation {
   stateGap: number;
 }
 
+/**
+ * Computes turn income modifiers for the swing-tax / catch-up system.
+ *
+ * Let `Δip = playerIp - opponentIp` and `Δstates = playerStates - opponentStates`.
+ * We ignore small advantages within the configured grace windows. For IP this means
+ * no modifier while `Δip <= graceIp`. Every *full* `ipStep` beyond the grace adds
+ * 1 point of swing tax (or bonus when trailing). State leads follow the same logic:
+ * no change while `Δstates <= graceStates`, then +1 per extra controlled state.
+ *
+ * The resulting modifier is capped symmetrically by `maxModifier`, yielding a final
+ * income of `5 + controlledStates - swingTax + catchUpBonus`.
+ */
 export const evaluateCatchUpAdjustments = (
   ipGap: number,
   stateGap: number,

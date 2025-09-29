@@ -98,11 +98,14 @@ Hver stat har en forhåndsdefinert Defense (f.eks. 2–5).
 
 Start of Turn
 
-
-
 Inntekt: Få +5 IP + +1 IP per stat du kontrollerer.
 
-
+- Reserver over 40 IP utløser vedlikehold: trekk `floor((IP - 40) / 10)` fra inntekten (aldri under 0).
+- Catch-up-modul: sammenlign egne og motstanders ressurser (`Δip` og `Δstates`).
+  - Ingen endring mens `Δip ≤ 10` og `Δstates ≤ 1`.
+  - Hver *fulle* 5 IP over 10-grensen gir ±1 justering.
+  - Hver ekstra stat over grensen gir ±1.
+  - Summen klippes til maks ±4 før den legges til (positivt når du ligger bak, negativt når du leder).
 
 Trekk: Trekk opp til 5 kort på hånd (fyll opp).
 

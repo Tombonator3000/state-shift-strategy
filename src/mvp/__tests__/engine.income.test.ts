@@ -4,6 +4,7 @@ import {
   DEFAULT_IP_MAINTENANCE,
   DEFAULT_CATCH_UP_SETTINGS,
   computeTurnIpIncome,
+  evaluateCatchUpAdjustments,
   startTurn,
 } from '@/mvp/engine';
 import type { GameState, PlayerState } from '@/mvp/validator';
@@ -33,6 +34,25 @@ const makeState = (currentPlayer: PlayerState, opponentIp = 0): GameState => ({
   playsThisTurn: 0,
   turnPlays: [],
   log: [],
+});
+
+describe('evaluateCatchUpAdjustments', () => {
+  it('ignores small gaps within the grace windows', () => {
+    const result = evaluateCatchUpAdjustments(8, 1);
+    expect(result).toEqual({ swingTax: 0, catchUpBonus: 0, ipGap: 8, stateGap: 1 });
+  });
+
+  it('applies swing tax in steps and respects the cap', () => {
+    const bigLead = evaluateCatchUpAdjustments(35, 4);
+    expect(bigLead.swingTax).toBe(DEFAULT_CATCH_UP_SETTINGS.maxModifier);
+    expect(bigLead.catchUpBonus).toBe(0);
+  });
+
+  it('awards catch-up bonuses symmetrically for large deficits', () => {
+    const trailer = evaluateCatchUpAdjustments(-28, -3);
+    expect(trailer.catchUpBonus).toBe(DEFAULT_CATCH_UP_SETTINGS.maxModifier);
+    expect(trailer.swingTax).toBe(0);
+  });
 });
 
 describe('computeTurnIpIncome', () => {
