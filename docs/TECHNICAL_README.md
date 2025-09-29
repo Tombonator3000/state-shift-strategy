@@ -6,6 +6,7 @@
 - [State map and territorial control](#state-map-and-territorial-control)
 - [Combo engine integration](#combo-engine-integration)
 - [Card data normalization pipeline](#card-data-normalization-pipeline)
+- [Expansion & Extension System](#expansion--extension-system)
 - [Audio systems](#audio-systems)
 - [Achievements system](#achievements-system)
 - [Secret agenda cookbook grid](#secret-agenda-cookbook-grid)
@@ -66,6 +67,15 @@ The state-combination manager aggregates multiple passive bonuses in addition to
 
 ## Card data normalization pipeline
 The card database wraps multiple sources behind `CARD_DATABASE`, loading fallback MVP cards immediately, attempting to import the core set asynchronously, and merging extension packs. Every card flows through `repairToMVP` and `validateCardMVP` during ingestion so gameplay always operates on sanitized MVP-compliant records. Normalization warnings and cost adjustments are logged in development builds for quick author feedback.【F:src/data/cardDatabase.ts†L1-L200】 Extension authors can rely on this pipeline to auto-correct casing, default targets, and baseline costs without hand-tuning individual files.
+
+## Expansion & Extension System
+`ExtensionManager` glues contributor packs into the runtime by validating payloads, persisting player preferences, and sharing the resulting card pool with the distribution engine.【F:src/data/extensionSystem.ts†L35-L168】【F:src/data/extensionSystem.ts†L227-L271】 When the singleton boots it rehydrates two `localStorage` snapshots—`sg_enabled_extensions` for enabled pack metadata and `sg_extension_payloads` for the sanitized card payloads—before replaying them into memory.【F:src/data/extensionSystem.ts†L31-L101】 Every card is funneled through `repairToMVP`/`validateCardMVP`; failures are dropped while successful entries are stamped with their `extId` for downstream tracking.【F:src/data/extensionSystem.ts†L189-L215】
+
+Remote packs can be shipped via CDN: `scanCDNExtensions` pulls `/extensions/manifest.json` with cache-busting, downloads each listed file, and falls back to a hard-coded list if the manifest is absent.【F:src/data/extensionSystem.ts†L104-L168】 Local creators can instead import JSON bundles through folder/file pickers, with accepted sets persisted so they survive reloads and still pass through the same sanitizer.【F:src/data/extensionSystem.ts†L171-L215】【F:src/data/extensionSystem.ts†L227-L271】 The `initializeExtensions` helper combines both paths, restoring CDN packs, rehydrating local payloads, and pruning stale entries before exposing the merged cards to deck builders.【F:src/data/extensionSystem.ts†L271-L318】
+
+The Expansion Control Room UI (`ManageExpansions`) surfaces these controls for designers and QA. It reports core/expansion totals, auto-detects `/extensions` JSON files, and lets you toggle packs while synchronizing with `updateEnabledExpansions`, which in turn refreshes cached cards for live previews and deck weighting.【F:src/components/game/ManageExpansions.tsx†L505-L592】【F:src/data/expansions/state.ts†L129-L160】 Distribution tabs expose mix modes, per-set weights, and rarity sliders that only unlock once at least one non-core set is active; the sanitized settings clamp to the active pack list so core-only runs stay stable.【F:src/components/game/ManageExpansions.tsx†L595-L745】【F:src/data/weightedCardDistribution.ts†L187-L235】
+
+Content teams should mirror the shipped manifest—`/public/extensions/manifest.json` lists every CDN-served bundle—when staging new packs, and can use `public/extensions/cryptids.json` as an annotated schema reference for field names and MVP card expectations.【F:public/extensions/manifest.json†L1-L5】【F:public/extensions/cryptids.json†L1-L60】
 
 ## Audio systems
 The `useAudio` hook centralizes music playlists, SFX loading, and playback APIs. It loads thematic track lists for the start menu, faction selection, in-game loops, and end credits, while registering a library of sound keys for UI and event feedback.【F:src/hooks/useAudio.ts†L171-L268】 Notable integration points include:
