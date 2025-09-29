@@ -27,8 +27,13 @@ export const normalizeCardType = (type?: GameCard['type']): 'ATTACK' | 'MEDIA' |
   return 'MEDIA';
 };
 
+const FACTION_VAR_MAP: Record<NormalizedFaction, string> = {
+  truth: 'var(--pt-truth)',
+  government: 'var(--pt-gov)',
+};
+
 export const getFactionVar = (faction?: GameCard['faction']): string => {
-  return `var(--pt-${normalizeFaction(faction)})`;
+  return FACTION_VAR_MAP[normalizeFaction(faction)];
 };
 
 export const getFactionLabel = (faction?: GameCard['faction']): string => {
