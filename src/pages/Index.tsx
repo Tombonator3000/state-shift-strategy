@@ -25,7 +25,7 @@ import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
 import ContextualHelp from '@/components/game/ContextualHelp';
 import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
 import MechanicsTooltip from '@/components/game/MechanicsTooltip';
-import PlayerHubOverlay from '@/components/game/PlayerHubOverlay';
+import PlayerHubOverlay, { type PlayerStateIntel } from '@/components/game/PlayerHubOverlay';
 import NewCardsPresentation from '@/components/game/NewCardsPresentation';
 import { Maximize, Menu, Minimize, UserCircle2 } from 'lucide-react';
 import { useCardCollection } from '@/hooks/useCardCollection';
@@ -632,6 +632,65 @@ const Index = () => {
     });
     return lookup;
   }, [gameState.states]);
+
+  const playerHubStateIntel = useMemo<PlayerStateIntel>(() => {
+    const states = Array.isArray(gameState.states) ? gameState.states : [];
+    const totals = states.reduce(
+      (acc, state) => {
+        if (state.owner === 'player') {
+          acc.player += 1;
+        } else if (state.owner === 'ai') {
+          acc.ai += 1;
+        } else {
+          acc.neutral += 1;
+        }
+        if (state.contested) {
+          acc.contested += 1;
+        }
+        return acc;
+      },
+      { player: 0, ai: 0, neutral: 0, contested: 0 },
+    );
+
+    const statesIntel: PlayerStateIntel['states'] = states.map(state => ({
+      id: state.id,
+      name: state.name,
+      abbreviation: state.abbreviation,
+      owner: state.owner,
+      contested: state.contested,
+      pressure: state.pressure ?? 0,
+      defense: state.defense ?? 0,
+      pressurePlayer: state.pressurePlayer ?? 0,
+      pressureAi: state.pressureAi ?? 0,
+      stateEventHistory: Array.isArray(state.stateEventHistory) ? [...state.stateEventHistory] : [],
+    }));
+
+    const recentEvents: PlayerStateIntel['recentEvents'] = statesIntel
+      .flatMap(state =>
+        state.stateEventHistory.map(event => ({
+          stateId: state.id,
+          stateName: state.name,
+          abbreviation: state.abbreviation,
+          owner: state.owner,
+          contested: state.contested,
+          pressure: state.pressure,
+          defense: state.defense,
+          pressurePlayer: state.pressurePlayer,
+          pressureAi: state.pressureAi,
+          event,
+        })),
+      )
+      .sort((a, b) => b.event.triggeredOnTurn - a.event.triggeredOnTurn)
+      .slice(0, 12);
+
+    return {
+      generatedAtTurn: gameState.turn,
+      round: gameState.round,
+      totals,
+      states: statesIntel,
+      recentEvents,
+    } satisfies PlayerStateIntel;
+  }, [gameState.states, gameState.turn, gameState.round]);
 
   useEffect(() => {
     const nextActive: Record<string, ActiveParanormalHotspot> = {};
@@ -1750,6 +1809,7 @@ const Index = () => {
           setShowPlayerHub(false);
         }}
         onDeleteEdition={(id) => removeEditionFromArchive(id)}
+        stateIntel={playerHubStateIntel}
       />
     );
   }
