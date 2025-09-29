@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,10 @@ interface EventViewerProps {
   className?: string;
 }
 
+export interface EventViewerHandle {
+  triggerEvent: (eventId: string) => void;
+}
+
 interface TestGameState {
   turn: number;
   truth: number;
@@ -29,12 +33,7 @@ interface TestGameState {
   faction: 'truth' | 'government';
 }
 
-const EventViewer = ({
-  onClose,
-  variant = 'modal',
-  defaultTab = 'browser',
-  className,
-}: EventViewerProps) => {
+const EventViewer = forwardRef<EventViewerHandle, EventViewerProps>(({ onClose, variant = 'modal', defaultTab = 'browser', className }, ref) => {
   const [activeTab, setActiveTab] = useState<EventViewerTab>(defaultTab);
   const [selectedEvent, setSelectedEvent] = useState<GameEvent | null>(null);
   const [filterRarity, setFilterRarity] = useState<string>('all');
@@ -67,28 +66,33 @@ const EventViewer = ({
   const listHeightClass = isModal ? 'h-[60vh]' : 'h-[52vh]';
   const detailHeightClass = isModal ? 'h-[60vh]' : 'h-[52vh]';
 
-  const eventManager = new EventManager();
+  const eventManagerRef = useRef<EventManager>();
+  if (!eventManagerRef.current) {
+    eventManagerRef.current = new EventManager();
+  }
+  const eventManager = eventManagerRef.current;
   const eventStats = eventManager.getEventStats();
 
-  const parseControlledStateIds = (raw: string): string[] =>
+  const parseControlledStateIds = useCallback((raw: string): string[] =>
     raw
       .split(',')
       .map(value => value.trim().toUpperCase())
-      .filter(Boolean);
+      .filter(Boolean),
+  []);
 
-  const buildControlledStatesArray = (): string[] => {
+  const buildControlledStatesArray = useCallback((): string[] => {
     const specifiedIds = parseControlledStateIds(testGameState.controlledStateIds);
     const placeholdersNeeded = Math.max(0, testGameState.controlledStates - specifiedIds.length);
     const placeholders = Array.from({ length: placeholdersNeeded }, (_, index) => `PLACEHOLDER_${index}`);
     return [...specifiedIds, ...placeholders];
-  };
+  }, [parseControlledStateIds, testGameState.controlledStateIds, testGameState.controlledStates]);
 
-  const buildManagerGameState = () => ({
+  const buildManagerGameState = useCallback(() => ({
     truth: testGameState.truth,
     ip: testGameState.ip,
     controlledStates: buildControlledStatesArray(),
     faction: testGameState.faction,
-  });
+  }), [buildControlledStatesArray, testGameState.faction, testGameState.ip, testGameState.truth]);
 
   const formatPercent = (value: number): string => {
     if (!Number.isFinite(value) || value <= 0) {
@@ -153,9 +157,9 @@ const EventViewer = ({
     return true;
   });
 
-  const formatConditions = (conditions: GameEvent['conditions']) => {
+  const formatConditions = useCallback((conditions: GameEvent['conditions']) => {
     if (!conditions) return 'None';
-    
+
     const parts = [];
     if (conditions.minTurn) parts.push(`Turn ≥ ${conditions.minTurn}`);
     if (conditions.maxTurn) parts.push(`Turn ≤ ${conditions.maxTurn}`);
@@ -165,13 +169,13 @@ const EventViewer = ({
     if (conditions.ipBelow) parts.push(`IP < ${conditions.ipBelow}`);
     if (conditions.controlledStates) parts.push(`States ≥ ${conditions.controlledStates}`);
     if (conditions.requiresState) parts.push(`Requires ${conditions.requiresState}`);
-    
-    return parts.length > 0 ? parts.join(', ') : 'None';
-  };
 
-  const formatEffects = (effects: GameEvent['effects']) => {
+    return parts.length > 0 ? parts.join(', ') : 'None';
+  }, []);
+
+  const formatEffects = useCallback((effects: GameEvent['effects']) => {
     if (!effects) return 'None';
-    
+
     const parts = [];
     if (effects.truth) parts.push(`Truth ${effects.truth > 0 ? '+' : ''}${effects.truth}%`);
     if (effects.ip) parts.push(`IP ${effects.ip > 0 ? '+' : ''}${effects.ip}`);
@@ -180,12 +184,12 @@ const EventViewer = ({
     if (effects.doubleIncome) parts.push('Double income next turn');
     if (effects.stateEffects?.pressure) parts.push(`State pressure +${effects.stateEffects.pressure}`);
     if (effects.stateEffects?.defense) parts.push(`State defense +${effects.stateEffects.defense}`);
-    
+
     return parts.length > 0 ? parts.join(', ') : 'None';
-  };
+  }, []);
 
   // Testing Tools Functions
-  const checkEventConditions = (event: GameEvent, gameState: TestGameState): boolean => {
+  const checkEventConditions = useCallback((event: GameEvent, gameState: TestGameState): boolean => {
     const conditions = event.conditions;
     if (!conditions) return true;
 
@@ -209,9 +213,9 @@ const EventViewer = ({
     }
 
     return true;
-  };
+  }, [parseControlledStateIds]);
 
-  const triggerEvent = (eventId: string) => {
+  const triggerEvent = useCallback((eventId: string) => {
     const event = EVENT_DATABASE.find(e => e.id === eventId);
     if (!event) {
       setTriggerResults(prev => [...prev, `❌ Event ${eventId} not found`]);
@@ -235,7 +239,11 @@ const EventViewer = ({
     } else {
       setTriggerResults(prev => [...prev, `❌ Cannot trigger ${event.title} - Conditions not met: ${formatConditions(event.conditions)}`]);
     }
-  };
+  }, [buildManagerGameState, checkEventConditions, eventManager, formatConditions, formatEffects, testGameState]);
+
+  useImperativeHandle(ref, () => ({
+    triggerEvent,
+  }), [triggerEvent]);
 
   const analyzeWeightDistribution = () => {
     eventManager.updateTurn(testGameState.turn);
@@ -805,6 +813,8 @@ const EventViewer = ({
       {renderContent()}
     </div>
   );
-};
+});
+
+EventViewer.displayName = 'EventViewer';
 
 export default EventViewer;

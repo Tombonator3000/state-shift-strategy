@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +22,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import type { GameCard } from '@/rules/mvp';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import EventViewer from '@/components/game/EventViewer';
+import EventViewer, { type EventViewerHandle } from '@/components/game/EventViewer';
+import ErrorLogPanel from '@/components/dev/ErrorLogPanel';
+import AudioQAControls from '@/components/dev/AudioQAControls';
+import HotspotInspector from '@/components/dev/HotspotInspector';
+import type { ActiveParanormalHotspot } from '@/hooks/gameStateTypes';
 
 type HistogramBin = { label: string; count: number };
 
@@ -176,12 +180,14 @@ interface EnhancedBalancingDashboardProps {
   onClose: () => void;
   logEntries: string[];
   initialView?: 'analysis' | 'dev-tools';
+  paranormalHotspots?: Record<string, ActiveParanormalHotspot>;
 }
 
 const EnhancedBalancingDashboard = ({
   onClose,
   logEntries,
   initialView = 'analysis',
+  paranormalHotspots,
 }: EnhancedBalancingDashboardProps) => {
   const [expansionState, setExpansionState] = useState(() => ({
     ids: getEnabledExpansionIdsSnapshot(),
@@ -197,6 +203,14 @@ const EnhancedBalancingDashboard = ({
     ZONE: true,
   });
   const [activeView, setActiveView] = useState<'analysis' | 'dev-tools'>(initialView);
+  const eventViewerRef = useRef<EventViewerHandle>(null);
+
+  const handleTriggerEvent = useCallback((eventId: string) => {
+    if (!eventId) {
+      return;
+    }
+    eventViewerRef.current?.triggerEvent(eventId);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = subscribeToExpansionChanges(payload => {
@@ -865,8 +879,22 @@ const EnhancedBalancingDashboard = ({
             value="dev-tools"
             className="flex-1 overflow-hidden focus-visible:outline-none"
           >
-            <div className="h-full p-6">
-              <EventViewer variant="embedded" className="h-full" />
+            <div className="h-full p-6 overflow-y-auto">
+              <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+                <EventViewer
+                  ref={eventViewerRef}
+                  variant="embedded"
+                  className="h-full min-h-[520px]"
+                />
+                <div className="flex flex-col gap-6">
+                  <ErrorLogPanel />
+                  <AudioQAControls />
+                  <HotspotInspector
+                    hotspots={paranormalHotspots}
+                    onTriggerEvent={handleTriggerEvent}
+                  />
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

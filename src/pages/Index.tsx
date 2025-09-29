@@ -1850,6 +1850,7 @@ const Index = () => {
         onClose={() => setShowBalancing(false)}
         logEntries={gameState.log}
         initialView={balancingInitialView}
+        paranormalHotspots={gameState.paranormalHotspots}
       />
     );
   }
