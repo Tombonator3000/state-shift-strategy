@@ -2998,7 +2998,19 @@ export class EventManager {
       return true;
     });
 
-    if (!availableEvents.length) return null;
+    if (!availableEvents.length) {
+      const fallbackEvent = this.createFallbackStateEvent(
+        stateId,
+        capturingFaction,
+        gameState
+      );
+      const eventKey = `${stateId}_${fallbackEvent.id}`;
+      if (!this.eventHistory.includes(eventKey)) {
+        this.eventHistory.push(eventKey);
+      }
+
+      return fallbackEvent;
+    }
 
     // Select weighted random event
     const totalWeight = availableEvents.reduce((sum, event) => sum + event.weight, 0);
