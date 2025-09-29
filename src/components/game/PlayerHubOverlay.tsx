@@ -3,12 +3,14 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Library, GraduationCap, Newspaper, X } from 'lucide-react';
+import { Trophy, Library, GraduationCap, Newspaper, X, MapPin } from 'lucide-react';
 import { AchievementsSection } from './AchievementPanel';
 import { CardCollectionContent } from './CardCollection';
 import { TutorialSection } from './TutorialOverlay';
 import PressArchivePanel from './PressArchivePanel';
 import type { ArchivedEdition } from '@/hooks/usePressArchive';
+import StateIntelBoard from './StateIntelBoard';
+import type { StateEventBonusSummary } from '@/hooks/gameStateTypes';
 
 interface PlayerHubOverlayProps {
   onClose: () => void;
@@ -16,12 +18,65 @@ interface PlayerHubOverlayProps {
   pressIssues: ArchivedEdition[];
   onOpenEdition: (issue: ArchivedEdition) => void;
   onDeleteEdition: (id: string) => void;
+  stateIntel?: PlayerStateIntel;
 }
 
-type HubTab = 'achievements' | 'cards' | 'tutorials' | 'press';
+export interface PlayerStateIntel {
+  generatedAtTurn: number;
+  round: number;
+  totals: {
+    player: number;
+    ai: number;
+    neutral: number;
+    contested: number;
+  };
+  states: Array<{
+    id: string;
+    name: string;
+    abbreviation: string;
+    owner: 'player' | 'ai' | 'neutral';
+    contested: boolean;
+    pressure: number;
+    defense: number;
+    pressurePlayer: number;
+    pressureAi: number;
+    stateEventHistory: StateEventBonusSummary[];
+  }>;
+  recentEvents: Array<{
+    stateId: string;
+    stateName: string;
+    abbreviation: string;
+    owner: 'player' | 'ai' | 'neutral';
+    contested: boolean;
+    pressure: number;
+    defense: number;
+    pressurePlayer: number;
+    pressureAi: number;
+    event: StateEventBonusSummary;
+  }>;
+}
 
-const PlayerHubOverlay = ({ onClose, onStartTutorial, pressIssues, onOpenEdition, onDeleteEdition }: PlayerHubOverlayProps) => {
-  const [activeTab, setActiveTab] = useState<HubTab>(pressIssues.length > 0 ? 'press' : 'achievements');
+type HubTab = 'achievements' | 'cards' | 'tutorials' | 'press' | 'intel';
+
+const PlayerHubOverlay = ({
+  onClose,
+  onStartTutorial,
+  pressIssues,
+  onOpenEdition,
+  onDeleteEdition,
+  stateIntel,
+}: PlayerHubOverlayProps) => {
+  const [activeTab, setActiveTab] = useState<HubTab>(() => {
+    if (pressIssues.length > 0) {
+      return 'press';
+    }
+
+    if (stateIntel && stateIntel.recentEvents.length > 0) {
+      return 'intel';
+    }
+
+    return 'achievements';
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
@@ -66,7 +121,7 @@ const PlayerHubOverlay = ({ onClose, onStartTutorial, pressIssues, onOpenEdition
           className="relative flex flex-1 flex-col overflow-hidden"
         >
           <div className="relative px-6 pt-6">
-            <TabsList className="grid w-full grid-cols-4 gap-2 rounded-lg border border-emerald-500/20 bg-slate-900/70 p-1 backdrop-blur">
+            <TabsList className="grid w-full grid-cols-5 gap-2 rounded-lg border border-emerald-500/20 bg-slate-900/70 p-1 backdrop-blur">
               <TabsTrigger
                 value="achievements"
                 className="flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-400 transition data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200"
@@ -94,6 +149,13 @@ const PlayerHubOverlay = ({ onClose, onStartTutorial, pressIssues, onOpenEdition
               >
                 <Newspaper className="h-4 w-4" />
                 Press Archive
+              </TabsTrigger>
+              <TabsTrigger
+                value="intel"
+                className="flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-400 transition data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200"
+              >
+                <MapPin className="h-4 w-4" />
+                Field Intel
               </TabsTrigger>
             </TabsList>
           </div>
@@ -132,6 +194,9 @@ const PlayerHubOverlay = ({ onClose, onStartTutorial, pressIssues, onOpenEdition
                   onDelete={onDeleteEdition}
                   className="h-full"
                 />
+              </TabsContent>
+              <TabsContent value="intel" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
+                <StateIntelBoard intel={stateIntel} />
               </TabsContent>
             </div>
           </div>
