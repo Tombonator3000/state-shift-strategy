@@ -1416,7 +1416,17 @@ const Index = () => {
     }
   }, [audio]);
 
+  const handleCloseNewspaper = useCallback(() => {
+    closeNewspaper();
+    audio.playSFX('newspaper');
+  }, [audio, closeNewspaper]);
+
   const handleEndTurn = useCallback(() => {
+    if (gameState.phase === 'newspaper') {
+      handleCloseNewspaper();
+      return;
+    }
+
     if (isEndingTurn) {
       return;
     }
@@ -1428,7 +1438,7 @@ const Index = () => {
     setTimeout(() => {
       audio.playSFX('cardDraw');
     }, 500);
-  }, [audio, endTurn, isEndingTurn]);
+  }, [audio, endTurn, gameState.phase, handleCloseNewspaper, isEndingTurn]);
 
   // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
@@ -1470,7 +1480,9 @@ const Index = () => {
           break;
         case ' ':
           e.preventDefault();
-          if (gameState.phase === 'action' && !gameState.animating && !isEndingTurn) {
+          if (!isEndingTurn && gameState.phase === 'newspaper') {
+            handleEndTurn();
+          } else if (gameState.phase === 'action' && !gameState.animating && !isEndingTurn) {
             handleEndTurn();
           }
           break;
@@ -1763,11 +1775,6 @@ const Index = () => {
     }
   };
 
-  const handleCloseNewspaper = () => {
-    closeNewspaper();
-    audio.playSFX('newspaper');
-  };
-
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -1900,6 +1907,7 @@ const Index = () => {
   }
 
   const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
+  const goToPressDisabled = gameState.phase === 'newspaper' ? false : isPlayerActionLocked || isEndingTurn;
   const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
 
   const playerAgenda = gameState.secretAgenda;
@@ -2342,7 +2350,7 @@ const Index = () => {
           id="end-turn-button"
           onClick={handleEndTurn}
           className="end-turn-button touch-target w-full border-2 border-black bg-truth-red py-3 font-black uppercase tracking-[0.4em] text-white transition duration-200 hover:bg-white hover:text-truth-red disabled:opacity-60"
-          disabled={isPlayerActionLocked || isEndingTurn}
+          disabled={goToPressDisabled}
         >
           {gameState.currentPlayer === 'ai' ? (
             <span className="flex items-center justify-center gap-2 text-sm">
