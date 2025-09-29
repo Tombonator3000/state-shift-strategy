@@ -879,6 +879,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         };
         const eventEffects = trigger.event.effects;
 
+        let immediateDrawNote: string | null = null;
+
         if (eventEffects && typeof eventEffects === 'object') {
           const truthDelta = (eventEffects.truth ?? 0) + (eventEffects.truthChange ?? 0);
           if (truthDelta) {
@@ -906,8 +908,31 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             if (resolvedState.owner === 'player') {
               const drawAmount = Math.max(0, Math.floor(eventEffects.cardDraw));
               if (drawAmount > 0) {
-                pendingCardDraw += drawAmount;
-                pendingCardDrawChanged = true;
+                const { drawn, deck: updatedDeck } = drawCardsFromDeck(
+                  nextState.deck,
+                  drawAmount,
+                  nextState.faction,
+                );
+
+                nextState.deck = updatedDeck;
+
+                if (drawn.length > 0) {
+                  nextState.hand = [...nextState.hand, ...drawn];
+                  const immediateMessage = `drew ${drawn.length} card${drawn.length === 1 ? '' : 's'} immediately (hand ${nextState.hand.length})`;
+                  immediateDrawNote = immediateDrawNote
+                    ? `${immediateDrawNote}; ${immediateMessage}`
+                    : immediateMessage;
+                }
+
+                const remainingDraw = drawAmount - drawn.length;
+                if (remainingDraw > 0) {
+                  pendingCardDraw += remainingDraw;
+                  pendingCardDrawChanged = true;
+                  const pendingMessage = `${remainingDraw} card${remainingDraw === 1 ? '' : 's'} queued for next turn`;
+                  immediateDrawNote = immediateDrawNote
+                    ? `${immediateDrawNote}; ${pendingMessage}`
+                    : pendingMessage;
+                }
               }
             }
           }
@@ -969,7 +994,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
         const stateName = targetState.name ?? resolvedState.name ?? trigger.stateId;
         const label = trigger.event.title ?? trigger.event.headline ?? trigger.event.id;
-        eventLogs.push(`State event triggered in ${stateName}: ${label}`);
+        const eventLogDetail = immediateDrawNote ? ` (${immediateDrawNote})` : '';
+        eventLogs.push(`State event triggered in ${stateName}: ${label}${eventLogDetail}`);
       }
 
       if (workingStates) {
