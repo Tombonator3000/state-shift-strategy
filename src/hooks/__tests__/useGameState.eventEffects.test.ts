@@ -31,6 +31,55 @@ mock.module('@/data/aiFactory', () => ({
   },
 }));
 
+mock.module('@/systems/cardResolution', () => ({
+  resolveCardMVP: (prev: any, card: any, targetState: string | null, owner: 'human' | 'ai') => {
+    const resolvedState = targetState
+      ? prev.states.find(
+          (state: any) =>
+            state.id === targetState ||
+            state.abbreviation === targetState ||
+            state.name === targetState,
+        )
+      : undefined;
+
+    const captureId = resolvedState?.id;
+    const updatedStates = prev.states.map((state: any) => {
+      if (captureId && state.id === captureId) {
+        const ownerLabel = owner === 'human' ? 'player' : 'ai';
+        return { ...state, owner: ownerLabel };
+      }
+      return { ...state };
+    });
+
+    const addControlledState = (states: string[], abbreviation: string | undefined) => {
+      if (!abbreviation) return states;
+      if (states.includes(abbreviation)) return states;
+      return [...states, abbreviation];
+    };
+
+    const controlledStates = owner === 'human' && resolvedState
+      ? addControlledState(prev.controlledStates, resolvedState.abbreviation)
+      : prev.controlledStates;
+    const aiControlledStates = owner === 'ai' && resolvedState
+      ? addControlledState(prev.aiControlledStates, resolvedState.abbreviation)
+      : prev.aiControlledStates;
+
+    return {
+      ip: prev.ip,
+      aiIP: prev.aiIP,
+      truth: prev.truth,
+      states: updatedStates,
+      controlledStates,
+      aiControlledStates,
+      capturedStateIds: captureId ? [captureId] : [],
+      targetState: captureId ?? null,
+      selectedCard: card?.id ?? null,
+      logEntries: [],
+      damageDealt: 0,
+    };
+  },
+}));
+
 mock.module('@/contexts/AchievementContext', () => ({
   useAchievements: () => ({
     manager: {
@@ -86,10 +135,21 @@ mock.module('@/data/eventDatabase', () => {
   };
 
   const eventQueue: MockGameEvent[] = [];
+  const stateEventQueue: Array<{ stateId: string; event: MockGameEvent }> = [];
 
   class MockEventManager {
     maybeSelectRandomEvent(): MockGameEvent | null {
       return eventQueue.shift() ?? null;
+    }
+
+    selectStateEvent(stateId: string): MockGameEvent | null {
+      if (!stateEventQueue.length) {
+        return null;
+      }
+
+      const index = stateEventQueue.findIndex(entry => entry.stateId === stateId);
+      const [match] = index >= 0 ? stateEventQueue.splice(index, 1) : stateEventQueue.splice(0, 1);
+      return match?.event ?? null;
     }
 
     updateTurn() {}
@@ -99,16 +159,23 @@ mock.module('@/data/eventDatabase', () => {
     eventQueue.push(event);
   };
 
+  const pushMockStateEvent = (stateId: string, event: MockGameEvent) => {
+    stateEventQueue.push({ stateId, event });
+  };
+
   const resetMockEvents = () => {
     eventQueue.splice(0, eventQueue.length);
+    stateEventQueue.splice(0, stateEventQueue.length);
   };
 
   (globalThis as any).__pushMockEvent = pushMockEvent;
   (globalThis as any).__resetMockEvents = resetMockEvents;
+  (globalThis as any).__pushMockStateEvent = pushMockStateEvent;
 
   return {
     EventManager: MockEventManager,
     pushMockEvent,
+    pushMockStateEvent,
     resetMockEvents,
     EVENT_DATABASE: [] as MockGameEvent[],
     STATE_EVENTS_DATABASE: {} as Record<string, MockGameEvent[]>,
@@ -118,6 +185,7 @@ mock.module('@/data/eventDatabase', () => {
 declare module '@/data/eventDatabase' {
   export function pushMockEvent(event: any): void;
   export function resetMockEvents(): void;
+  export function pushMockStateEvent(stateId: string, event: any): void;
 }
 
 import { useGameState } from '@/hooks/useGameState';
@@ -164,11 +232,13 @@ describe('useGameState event effects', () => {
   const originalRandom = Math.random;
 
   let pushMockEvent: (event: GameEvent) => void;
+  let pushMockStateEvent: (stateId: string, event: GameEvent) => void;
   let resetMockEvents: () => void;
 
   beforeEach(() => {
     globalThis.localStorage = createLocalStorageMock();
     pushMockEvent = (globalThis as any).__pushMockEvent as (event: GameEvent) => void;
+    pushMockStateEvent = (globalThis as any).__pushMockStateEvent as (stateId: string, event: GameEvent) => void;
     resetMockEvents = (globalThis as any).__resetMockEvents as () => void;
     resetMockEvents();
     Math.random = () => 0;
@@ -232,6 +302,68 @@ describe('useGameState event effects', () => {
     expect(latestState.log).toContain('IP -3');
     expect(latestState.log).toContain('California defense +3');
     expect(latestState.log).toContain('California pressure +3');
+  });
+
+  it('records multiple state events in history when captures trigger bonuses', async () => {
+    const hook = renderHook(() => useGameState());
+
+    const initialHand = hook.result.current?.gameState.hand ?? [];
+    expect(initialHand.length).toBeGreaterThanOrEqual(2);
+    const [firstCard, secondCard] = initialHand;
+    expect(firstCard).toBeDefined();
+    expect(secondCard).toBeDefined();
+
+    await act(async () => {
+      hook.result.current?.setGameState(prev => ({
+        ...prev,
+        ip: 50,
+        hand: prev.hand.map((card, index) =>
+          index === 0 || index === 1 ? { ...card, cost: 0 } : card,
+        ),
+      }));
+    });
+
+    const eventOne: GameEvent = {
+      id: 'history_event_1',
+      title: 'Liberty Beacon Ignites',
+      content: 'Local truth surge reshapes the narrative.',
+      type: 'state',
+      rarity: 'common',
+      weight: 1,
+    };
+
+    const eventTwo: GameEvent = {
+      id: 'history_event_2',
+      title: 'Counter-Intel Collapse',
+      content: 'Government cells routed overnight.',
+      type: 'state',
+      rarity: 'common',
+      weight: 1,
+    };
+
+    pushMockStateEvent('CA', eventOne);
+    await act(async () => {
+      hook.result.current?.playCard(firstCard!.id, 'CA');
+    });
+
+    pushMockStateEvent('CA', eventTwo);
+    await act(async () => {
+      hook.result.current?.playCard(secondCard!.id, 'CA');
+    });
+
+    const latestState = hook.result.current?.gameState;
+    expect(latestState).toBeDefined();
+    if (!latestState) return;
+
+    const california = latestState.states.find(state => state.abbreviation === 'CA');
+    expect(california).toBeDefined();
+    if (!california) return;
+
+    expect(california.stateEventHistory).toHaveLength(2);
+    expect(california.stateEventHistory[0].eventId).toBe('history_event_1');
+    expect(california.stateEventHistory[1].eventId).toBe('history_event_2');
+    expect(california.stateEventHistory[1].faction).toBe(latestState.faction);
+    expect(california.stateEventBonus?.eventId).toBe('history_event_2');
   });
 });
 

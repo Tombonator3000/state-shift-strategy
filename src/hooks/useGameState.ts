@@ -48,6 +48,7 @@ import {
   type AiCardPlayParams,
 } from './aiHelpers';
 import { evaluateCombosForTurn } from './comboAdapter';
+import { mergeStateEventHistories, trimStateEventHistory } from './stateEventHistory';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
@@ -494,6 +495,21 @@ const normalizeStateEventBonus = (
   } satisfies StateEventBonusSummary;
 };
 
+const normalizeStateEventHistory = (
+  raw: unknown,
+  fallbackTurn: number,
+): StateEventBonusSummary[] => {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  const normalized = raw
+    .map(entry => normalizeStateEventBonus(entry, fallbackTurn))
+    .filter((entry): entry is StateEventBonusSummary => Boolean(entry));
+
+  return trimStateEventHistory(normalized);
+};
+
 const revealAiSecretAgenda = (
   state: GameState,
   context: { type: 'card' | 'event'; name: string },
@@ -849,7 +865,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           continue;
         }
 
-        const targetState = { ...statesArray[stateIndex] };
+        const baseTargetState = statesArray[stateIndex];
+        const targetState = {
+          ...baseTargetState,
+          stateEventHistory: Array.isArray(baseTargetState.stateEventHistory)
+            ? [...baseTargetState.stateEventHistory]
+            : baseTargetState.stateEventBonus
+              ? [baseTargetState.stateEventBonus]
+              : [],
+        };
         const eventEffects = trigger.event.effects;
 
         if (eventEffects && typeof eventEffects === 'object') {
@@ -930,11 +954,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           }
         }
 
-        targetState.stateEventBonus = createStateEventBonusSummary({
+        const summary = createStateEventBonusSummary({
           event: trigger.event,
           faction: trigger.capturingFaction,
           turn: trigger.triggeredOnTurn,
         });
+        const updatedHistory = trimStateEventHistory([...targetState.stateEventHistory, summary]);
+        targetState.stateEventHistory = updatedHistory;
+        targetState.stateEventBonus = updatedHistory[updatedHistory.length - 1];
         statesArray[stateIndex] = targetState;
 
         const stateName = targetState.name ?? resolvedState.name ?? trigger.stateId;
@@ -1024,6 +1051,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           bonusValue: state.bonusValue,
           paranormalHotspot: undefined,
           stateEventBonus: undefined,
+          stateEventHistory: [],
         };
       }),
       currentEvents: [],
@@ -1188,6 +1216,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           bonusValue: state.bonusValue,
           paranormalHotspot: undefined,
           stateEventBonus: undefined,
+          stateEventHistory: [],
         };
       }),
       log: [
@@ -1271,13 +1300,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         resolution,
       });
 
+      const mergedStates = mergeStateEventHistories(prev.states, resolution.states);
+
       const nextState: GameState = {
         ...prev,
         hand: prev.hand.filter(c => c.id !== cardId),
         ip: resolution.ip,
         aiIP: resolution.aiIP,
         truth: resolution.truth,
-        states: resolution.states,
+        states: mergedStates,
         controlledStates: resolution.controlledStates,
         aiControlledStates: resolution.aiControlledStates,
         cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
@@ -1378,13 +1409,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         resolution,
       });
 
+      const mergedStates = mergeStateEventHistories(prev.states, resolution.states);
+
       const nextState: GameState = {
         ...prev,
         animating: true,
         ip: resolution.ip,
         aiIP: resolution.aiIP,
         truth: resolution.truth,
-        states: resolution.states,
+        states: mergedStates,
         controlledStates: resolution.controlledStates,
         aiControlledStates: resolution.aiControlledStates,
         targetState: resolution.targetState,
@@ -2390,7 +2423,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const pressureAi = typeof rawPressureAi === 'number' && Number.isFinite(rawPressureAi)
           ? rawPressureAi
           : basePressure;
-        const stateEventBonus = normalizeStateEventBonus((rawState as { stateEventBonus?: unknown }).stateEventBonus, normalizedTurn);
+        const rawStateEventHistory = (rawState as { stateEventHistory?: unknown }).stateEventHistory;
+        let stateEventHistory = normalizeStateEventHistory(rawStateEventHistory, normalizedTurn);
+        const normalizedBonus = normalizeStateEventBonus((rawState as { stateEventBonus?: unknown }).stateEventBonus, normalizedTurn);
+        if (stateEventHistory.length === 0 && normalizedBonus) {
+          stateEventHistory = trimStateEventHistory([...stateEventHistory, normalizedBonus]);
+        }
+        const stateEventBonus = stateEventHistory.length > 0
+          ? stateEventHistory[stateEventHistory.length - 1]
+          : normalizedBonus;
 
         return {
           id: typeof rawState?.id === 'string' ? rawState.id : lookupBase?.id ?? normalizedAbbreviation,
@@ -2420,6 +2461,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             : undefined,
           paranormalHotspot: undefined,
           stateEventBonus,
+          stateEventHistory,
         } as GameState['states'][number];
       });
 

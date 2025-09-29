@@ -42,6 +42,7 @@ interface EnhancedState {
     source: 'truth' | 'government' | 'neutral';
   };
   stateEventBonus?: StateEventBonusSummary;
+  stateEventHistory?: StateEventBonusSummary[];
 }
 
 interface PlayedCard {
@@ -776,6 +777,27 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
                   <div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
                     Turn {stateInfo.stateEventBonus.triggeredOnTurn} · {stateInfo.stateEventBonus.faction.toUpperCase()}
                   </div>
+                  {stateInfo.stateEventHistory?.length ? (
+                    <div className="mt-2 border-t border-amber-500/20 pt-2">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70">Event history</div>
+                      <ul className="mt-1 space-y-1 text-[11px] text-muted-foreground/90">
+                        {stateInfo.stateEventHistory
+                          .slice(-5)
+                          .reverse()
+                          .map((entry, index) => (
+                            <li
+                              key={`${stateInfo.id}-event-history-${entry.eventId}-${entry.triggeredOnTurn}-${index}`}
+                              className="flex items-center justify-between gap-2 rounded bg-amber-500/5 px-2 py-1"
+                            >
+                              <span className="truncate font-semibold text-foreground/90">{entry.label}</span>
+                              <span className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground/70">
+                                Turn {entry.triggeredOnTurn} · {entry.faction.toUpperCase()}
+                              </span>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             )}

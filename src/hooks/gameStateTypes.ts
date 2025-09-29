@@ -70,6 +70,7 @@ export interface GameState {
     occupierUpdatedAt?: number;
     paranormalHotspot?: StateParanormalHotspot;
     stateEventBonus?: StateEventBonusSummary;
+    stateEventHistory: StateEventBonusSummary[];
   }>;
   currentEvents: GameEvent[];
   eventManager?: EventManager;

@@ -9,7 +9,7 @@ import {
   type StateCombinationEffects,
 } from '@/data/stateCombinations';
 import type { PlayerStats } from '@/data/achievementSystem';
-import type { StateParanormalHotspot } from '@/hooks/gameStateTypes';
+import type { StateEventBonusSummary, StateParanormalHotspot } from '@/hooks/gameStateTypes';
 
 type Faction = 'government' | 'truth';
 
@@ -48,6 +48,8 @@ export interface StateForResolution {
   occupierIcon?: string | null;
   occupierUpdatedAt?: number;
   paranormalHotspot?: StateParanormalHotspot;
+  stateEventBonus?: StateEventBonusSummary;
+  stateEventHistory?: StateEventBonusSummary[];
 }
 
 export interface GameSnapshot {
