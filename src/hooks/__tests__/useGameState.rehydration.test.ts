@@ -249,8 +249,9 @@ describe('useGameState save rehydration', () => {
 
   afterEach(() => {
     Math.random = originalRandom;
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete (globalThis as Partial<typeof globalThis>).localStorage;
+    if (!Reflect.deleteProperty(globalThis as Record<string, unknown>, 'localStorage')) {
+      (globalThis as Partial<typeof globalThis>).localStorage = undefined;
+    }
   });
 
   afterAll(() => {

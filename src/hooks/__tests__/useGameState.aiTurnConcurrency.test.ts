@@ -138,8 +138,9 @@ describe('useGameState AI turn scheduling', () => {
     globalThis.setTimeout = originalSetTimeout;
     globalThis.clearTimeout = originalClearTimeout;
     timers.clear();
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete (globalThis as Partial<typeof globalThis>).localStorage;
+    if (!Reflect.deleteProperty(globalThis as Record<string, unknown>, 'localStorage')) {
+      (globalThis as Partial<typeof globalThis>).localStorage = undefined;
+    }
   });
 
   it('runs a single AI completion timeout and does not skip the human turn', async () => {
