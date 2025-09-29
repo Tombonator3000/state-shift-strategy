@@ -9,14 +9,14 @@ interface AnimationRect {
   height: number;
 }
 
-interface PlayResult {
+export interface PlayResult {
   cancelled: boolean;
   countered: boolean;
 }
 
-interface AnimationOptions {
-  targetState?: string;
-  onResolve?: (card: GameCard) => Promise<void>;
+export interface AnimationOptions {
+  targetState?: string | null;
+  onResolve?: (card: GameCard) => Promise<void | Partial<PlayResult>>;
   onComplete?: () => void;
 }
 
@@ -318,28 +318,46 @@ export const useCardAnimation = () => {
         highlightState(options.targetState);
       }
 
-      // Simulate reaction window (simplified for now)
-      const countered = false; // TODO: Implement actual counter logic
-
-      if (countered) {
-        await smallShake(clone);
-        await flyToPlayedPile(clone);
-        clone.remove();
-        highlightState(); // Remove highlight
-        return { cancelled: false, countered: true };
-      }
-
       // Resolve card effects with screen shake for zone cards
+      let resolveOutcome: PlayResult = { cancelled: false, countered: false };
       if (options.onResolve) {
         if (card.type === 'ZONE') {
           shake({ intensity: 'medium', duration: 200 });
         }
-        await options.onResolve(card);
+        const result = await options.onResolve(card);
+        if (result && typeof result === 'object') {
+          resolveOutcome = {
+            cancelled: result.cancelled ?? false,
+            countered: result.countered ?? false,
+          };
+        }
+      }
+
+      if (resolveOutcome.cancelled) {
+        clone.remove();
+        highlightState();
+        return resolveOutcome;
+      }
+
+      if (resolveOutcome.countered) {
+        await smallShake(clone);
+        await flyToPlayedPile(clone);
+        const counterEvent = new CustomEvent('cardDeployed', {
+          detail: {
+            x: destRect.x + destRect.width / 2,
+            y: destRect.y + destRect.height / 2,
+            type: 'counter' as const,
+          }
+        });
+        window.dispatchEvent(counterEvent);
+        clone.remove();
+        highlightState();
+        return resolveOutcome;
       }
 
       // Fly to played pile with particle effect
       await flyToPlayedPile(clone);
-      
+
       // Trigger particle effect at final position
       const event = new CustomEvent('cardDeployed', {
         detail: {
@@ -358,7 +376,7 @@ export const useCardAnimation = () => {
         playedPile.setAttribute('aria-label', `Played cards - ${card.name} was just played`);
       }
 
-      return { cancelled: false, countered: false };
+      return resolveOutcome;
 
     } finally {
       animatingRef.current = false;

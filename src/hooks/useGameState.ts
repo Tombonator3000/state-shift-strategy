@@ -24,6 +24,7 @@ import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import { chooseTurnActions } from '@/ai/enhancedController';
 import { EventManager, type GameEvent, type ParanormalHotspotPayload } from '@/data/eventDatabase';
 import { processAiActions } from './aiTurnActions';
+import type { AnimationOptions, PlayResult } from './useCardAnimation';
 import { buildEditionEvents } from './eventEdition';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
@@ -1432,7 +1433,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
   const playCardAnimated = useCallback(async (
     cardId: string,
-    animateCard: (cardId: string, card: any, options?: any) => Promise<any>,
+    animateCard: (
+      cardId: string,
+      card: GameCard,
+      options?: AnimationOptions
+    ) => Promise<PlayResult>,
     explicitTargetState?: string
   ) => {
     const card = gameState.hand.find(c => c.id === cardId);
@@ -1457,6 +1462,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
     let pendingTurnPlays: ReturnType<typeof createTurnPlayEntries> | null = null;
     let pendingResolvedCard: GameCard | null = null;
+    let pendingResolution: CardPlayResolution | null = null;
 
     setGameState(prev => {
       if (prev.animating) {
@@ -1478,6 +1484,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       pendingResolvedCard = resolvedCard;
 
       const resolution = resolveCardEffects(prev, resolvedCard, targetState);
+      pendingResolution = resolution;
       const updatedHotspots = { ...prev.paranormalHotspots };
       if (resolution.resolvedHotspots) {
         for (const abbr of resolution.resolvedHotspots) {
@@ -1534,10 +1541,17 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       return resultState;
     });
 
+    if (!pendingResolution) {
+      return;
+    }
+
     try {
       await animateCard(cardId, card, {
         targetState,
-        onResolve: async () => Promise.resolve()
+        onResolve: async () => ({
+          cancelled: pendingResolution?.cancelled ?? false,
+          countered: pendingResolution?.countered ?? false,
+        })
       });
 
       setGameState(prev => {
