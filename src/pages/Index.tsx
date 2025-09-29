@@ -525,6 +525,17 @@ const Index = () => {
   const [showBalancing, setShowBalancing] = useState(false);
   const [balancingInitialView, setBalancingInitialView] = useState<'analysis' | 'dev-tools'>('analysis');
   const [showPlayerHub, setShowPlayerHub] = useState(false);
+  const [playerHubSource, setPlayerHubSource] = useState<'menu' | 'game'>('menu');
+  const [lastSelectedFaction, setLastSelectedFaction] = useState<'truth' | 'government'>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = window.localStorage.getItem('shadowgov-last-faction');
+      if (stored === 'truth' || stored === 'government') {
+        return stored;
+      }
+    }
+
+    return 'government';
+  });
   const [loadingCard, setLoadingCard] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [subtitle, setSubtitle] = useState('Truth Seeker Operative');
@@ -574,6 +585,13 @@ const Index = () => {
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
   const { issues: pressArchive, archiveEdition, removeEditionFromArchive } = usePressArchive();
+
+  const persistFaction = useCallback((faction: 'truth' | 'government') => {
+    setLastSelectedFaction(faction);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('shadowgov-last-faction', faction);
+    }
+  }, []);
 
   const executeAITurnRef = useRef(executeAITurn);
   useEffect(() => {
@@ -1504,6 +1522,7 @@ const Index = () => {
 
   const startNewGame = async (faction: 'government' | 'truth') => {
     console.log('🎵 Index: Starting new game with faction:', faction);
+    persistFaction(faction);
     await initGame(faction);
     setShowMenu(false);
     setShowIntro(false);
@@ -1758,6 +1777,12 @@ const Index = () => {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  useEffect(() => {
+    if (!showMenu && (gameState.faction === 'truth' || gameState.faction === 'government')) {
+      persistFaction(gameState.faction);
+    }
+  }, [gameState.faction, showMenu, persistFaction]);
+
   // Start menu music after user interaction
   useEffect(() => {
     // Only start music when user clicks to dismiss intro
@@ -1796,8 +1821,13 @@ const Index = () => {
   }
 
   if (showPlayerHub) {
+    const derivedHubFaction = playerHubSource === 'menu'
+      ? lastSelectedFaction
+      : gameState.faction;
+
     return (
       <PlayerHubOverlay
+        faction={derivedHubFaction}
         onClose={() => {
           setShowPlayerHub(false);
           audio.playSFX('click');
@@ -1835,6 +1865,7 @@ const Index = () => {
       }}
       audio={audio}
       onShowCardCollection={() => {
+        setPlayerHubSource('menu');
         setShowPlayerHub(true);
         audio.playSFX('click');
       }}
@@ -2150,6 +2181,7 @@ const Index = () => {
           <button
             type="button"
             onClick={() => {
+              setPlayerHubSource('game');
               setShowPlayerHub(true);
               audio.playSFX('click');
             }}
