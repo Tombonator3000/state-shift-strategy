@@ -2900,10 +2900,88 @@ export class EventManager {
     return STATE_EVENTS_DATABASE[stateId] || [];
   }
 
+  private createFallbackStateEvent(stateId: string, capturingFaction: string, gameState: any): GameEvent {
+    const stateName: string =
+      gameState?.states?.find?.((state: any) => state?.id === stateId)?.name ?? stateId;
+
+    const normalizedFaction: 'truth' | 'government' | 'neutral' =
+      capturingFaction === 'truth'
+        ? 'truth'
+        : capturingFaction === 'government'
+        ? 'government'
+        : 'neutral';
+
+    const isTruthCapture = normalizedFaction === 'truth';
+    const isGovernmentCapture = normalizedFaction === 'government';
+
+    const title = isTruthCapture
+      ? `${stateName} Liberated by Truth Network`
+      : isGovernmentCapture
+      ? `${stateName} Falls Under Government Control`
+      : `${stateName} Changes Hands`;
+
+    const headline = isTruthCapture
+      ? `${stateName}: Pirate Broadcasts Overrun Official Feeds`
+      : isGovernmentCapture
+      ? `${stateName}: Federal Taskforce Declares "Stability Restored"`
+      : `${stateName}: Control Slips Through The Cracks`;
+
+    const content = isTruthCapture
+      ? `Grassroots transmitters flood ${stateName} with uncensored bulletins as locals celebrate their reclaimed narrative.`
+      : isGovernmentCapture
+      ? `A rapid response unit plants flags across ${stateName}, promising "order" while checkpoints blossom overnight.`
+      : `${stateName} wavers between factions while residents brace for whichever story sticks next.`;
+
+    const truthDelta = isTruthCapture ? 4 : isGovernmentCapture ? -3 : 1;
+    const ipDelta = isTruthCapture ? -1 : isGovernmentCapture ? 3 : 0;
+    const pressureDelta = isTruthCapture ? -2 : isGovernmentCapture ? 2 : 0;
+    const defenseDelta = isTruthCapture ? 1 : isGovernmentCapture ? 2 : 0;
+
+    if (typeof console !== 'undefined' && typeof console.info === 'function') {
+      console.info(
+        `[EventManager] Generated fallback state event for ${stateName} (${stateId}) captured by ${capturingFaction}`
+      );
+    }
+
+    return {
+      id: `fallback_${stateId}_${normalizedFaction}`,
+      title,
+      headline,
+      content,
+      type: 'capture',
+      faction: normalizedFaction === 'neutral' ? undefined : normalizedFaction,
+      rarity: 'common',
+      effects: {
+        truthChange: truthDelta,
+        ipChange: ipDelta,
+        stateEffects: {
+          stateId,
+          pressure: pressureDelta,
+          defense: defenseDelta,
+        },
+      },
+      flavorTruth: isTruthCapture
+        ? 'Citizen broadcasters toast a new foothold for the truth movement.'
+        : 'Truth hunters vow to pry the story back from the spin cycle.',
+      flavorGov: isGovernmentCapture
+        ? 'Official communiqués hail a textbook operation and advise residents to remain compliant.'
+        : 'Government strategists eye the map, wondering who blinked first.',
+      weight: 1,
+    };
+  }
+
   // Select random state event for a captured state
   selectStateEvent(stateId: string, capturingFaction: string, gameState: any): GameEvent | null {
     const stateEvents = this.getStateEvents(stateId);
-    if (!stateEvents.length) return null;
+    if (!stateEvents.length) {
+      const fallbackEvent = this.createFallbackStateEvent(stateId, capturingFaction, gameState);
+      const eventKey = `${stateId}_${fallbackEvent.id}`;
+      if (!this.eventHistory.includes(eventKey)) {
+        this.eventHistory.push(eventKey);
+      }
+
+      return fallbackEvent;
+    }
 
     // Filter events based on capturing faction and conditions
     const availableEvents = stateEvents.filter(event => {
