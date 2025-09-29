@@ -74,24 +74,38 @@ The `useAudio` hook centralizes music playlists, SFX loading, and playback APIs.
 - **Advanced effects:** `CardAnimationLayer` triggers paranormal SFX (`ufo-elvis`, `cryptid-rumble`) when optional overlays fire, and `TabloidNewspaperV2` plays `radio-static` when fresh sightings enter the log.【F:src/components/game/CardAnimationLayer.tsx†L128-L177】【F:src/components/game/TabloidNewspaperV2.tsx†L310-L336】
 
 ### SFX inventory and coverage
-| Key | Purpose | Primary triggers |
+| Keys | Asset | Usage |
 | --- | --- | --- |
-| `cardPlay` / `flash` | Card resolution feedback | Main game page during ATTACK/MEDIA plays【F:src/pages/Index.tsx†L946-L992】 |
-| `cardDraw` / `turnEnd` | Turn wrap-up | End turn handler on the main page【F:src/pages/Index.tsx†L1013-L1019】 |
-| `state-capture` | Combo/state capture events | Combo reward handling in main page logic【F:src/pages/Index.tsx†L520-L533】 |
-| `newspaper` | Opening/closing the tabloid view | Main page newspaper toggle【F:src/pages/Index.tsx†L1022-L1025】 |
-| `hover` / `lightClick` | Targeting and map hover cues | Zone targeting UX on EnhancedUSAMap【F:src/components/game/EnhancedUSAMap.tsx†L237-L263】 |
-| `click` | Standard UI confirmation | Start screen actions and menus【F:src/components/start/StartScreen.tsx†L59-L108】 |
-| `error` | Validation failures | IP/limit guards in the main game page【F:src/pages/Index.tsx†L900-L916】 |
-| `typewriter` | Text ambience | Loaded for future UI animations (not yet invoked)【F:src/hooks/useAudio.ts†L225-L243】 |
-| `victory` / `defeat` | Game over stingers | Preloaded; hook for victory modal integration【F:src/hooks/useAudio.ts†L225-L243】 |
-| `ufo-elvis` | Paranormal broadcast overlay | Triggered when Truth meltdowns broadcast and effects enabled【F:src/components/game/CardAnimationLayer.tsx†L128-L151】 |
-| `cryptid-rumble` | Cryptid sighting overlay | Triggered on cryptid events with effects enabled【F:src/components/game/CardAnimationLayer.tsx†L154-L177】 |
-| `radio-static` | Tabloid sighting alert | Plays when new sightings arrive【F:src/components/game/TabloidNewspaperV2.tsx†L310-L336】 |
+| `cardPlay`, `flash` | `/audio/card-play.mp3` | Fired when a card deploys or a Truth flash resolves, pairing the shared asset with visual effects on the main game board.【F:src/hooks/useAudio.ts†L406-L418】【F:src/pages/Index.tsx†L1694-L1745】 |
+| `cardDraw`, `turnEnd` | `/audio/card-draw.mp3`, `/audio/turn-end.mp3` | Wrap up turns by pinging the end-turn button and the delayed card draw cue in sequence.【F:src/hooks/useAudio.ts†L406-L413】【F:src/pages/Index.tsx†L1424-L1431】 |
+| `stateCapture` / `state-capture` | `/audio/state-capture.mp3` | Registered as `stateCapture` in the loader but invoked from combo logic as `'state-capture'` to celebrate new synergies with an animated capture flare.【F:src/hooks/useAudio.ts†L406-L414】【F:src/pages/Index.tsx†L900-L907】 |
+| `newspaper` | `/audio/newspaper.mp3` | Plays when the player closes or archives the in-game tabloid to emphasize the paper shuffling animation.【F:src/hooks/useAudio.ts†L406-L413】【F:src/pages/Index.tsx†L1766-L1769】 |
+| `hover`, `lightClick`, `click` | `/audio/hover.mp3`, `/audio/click.mp3` | Provides low-volume hover feedback on the map and card grid while reusing the stronger click for selections and surveillance overlays.【F:src/hooks/useAudio.ts†L415-L419】【F:src/components/game/EnhancedUSAMap.tsx†L302-L320】【F:src/components/game/EnhancedGameHand.tsx†L182-L211】【F:src/components/game/CardAnimationLayer.tsx†L299-L315】 |
+| `error` | `/audio/click.mp3` (fallback) | Signals invalid targets, unaffordable plays, and other rule violations during card handling.【F:src/hooks/useAudio.ts†L418-L419】【F:src/pages/Index.tsx†L1561-L1566】【F:src/pages/Index.tsx†L1600-L1605】 |
+| `typewriter` | `/audio/typewriter.mp3` | Reserved for dossier-style overlays triggered by the animation layer’s typewriter reveal events.【F:src/hooks/useAudio.ts†L417-L418】【F:src/components/game/CardAnimationLayer.tsx†L325-L335】 |
+| `victory`, `defeat` | `/audio/victory.mp3`, `/audio/defeat.mp3` | Preloaded stingers that the endgame modal can trigger once victory and defeat flows ship.【F:src/hooks/useAudio.ts†L412-L414】 |
+| `ufo-elvis`, `cryptid-rumble`, `radio-static` | Procedurally generated cues | Paranormal overlays request these clips for broadcasts, cryptid sightings, and static interference across the board and the newspaper feed.【F:src/hooks/useAudio.ts†L420-L423】【F:src/components/game/CardAnimationLayer.tsx†L214-L354】【F:src/components/game/TabloidNewspaperV2.tsx†L300-L315】 |
 
-The hook currently falls back to placeholder audio for `ufo-elvis`, `cryptid-rumble`, and `radio-static`, but no dedicated assets exist in `public/audio/`. Contributors should source royalty-free replacements—e.g., UFO ambience, low-frequency rumble, and shortwave static—from providers listed in the audio README, ensure MP3 format under the recommended size limits, and drop them into `public/audio/` with filenames that match the SFX keys. Update `existingSfxFiles` if the final filenames differ and verify licensing records per the project’s royalty-free guidance.【F:src/hooks/useAudio.ts†L225-L243】【F:public/audio/README.md†L1-L28】【F:public/audio/README.md†L30-L36】
+The loader currently falls back to placeholder audio for `ufo-elvis`, `cryptid-rumble`, and `radio-static`, so contributors should source royalty-free replacements—e.g., UFO ambience, low-frequency rumble, and shortwave static—from providers listed in the audio README, ensure MP3 format under the recommended size limits, and drop them into `public/audio/` with filenames that match the SFX keys. Update `existingSfxFiles` if the final filenames differ and verify licensing records per the project’s royalty-free guidance.【F:src/hooks/useAudio.ts†L406-L423】【F:public/audio/README.md†L1-L28】【F:public/audio/README.md†L30-L36】
 
 Music playback is orchestrated through stateful helpers (`setMenuMusic`, `setFactionMusic`, `setGameplayMusic`, `setEndCreditsMusic`) so UI layers can switch playlists without reinitializing the hook.【F:src/hooks/useAudio.ts†L320-L420】 Future contributors should call these helpers instead of manipulating HTMLAudioElements directly to keep crossfade and unlock logic intact.
+
+## Toast notification catalog
+The UI surfaces a consistent set of toast banners to reinforce player feedback. The table below maps each emitting module to its messages and why they appear.
+
+| Module | Messages | Purpose |
+| --- | --- | --- |
+| State event feed | <ul><li>`🗞️ BREAKING: ${event.title}`</li></ul> | Announces tabloid headlines whenever a state event is triggered by territory swings.【F:src/hooks/useStateEvents.ts†L31-L47】 |
+| Achievement lifecycle | <ul><li>`🏆 Achievement Unlocked!`</li><li>`Import Successful`</li><li>`Import Failed`</li><li>`Progress Reset`</li></ul> | Celebrates new achievements and reports import/export outcomes inside the provider that manages persistent stats.【F:src/contexts/AchievementContext.tsx†L58-L140】 |
+| Achievement control panel | <ul><li>`Progress Exported`</li><li>`Import Failed`</li></ul> | Confirms manual exports and flags invalid files from the achievements dashboard overlay.【F:src/components/game/AchievementPanel.tsx†L94-L118】 |
+| Hand interactions | <ul><li>`❌ Insufficient IP`</li><li>`❌ Deployment Failed`</li></ul> | Blocks unaffordable cards and warns about interrupted deployments when playing from the enhanced hand UI.【F:src/components/game/EnhancedGameHand.tsx†L52-L78】 |
+| USA map targeting | <ul><li>`❌ Invalid Target`</li></ul> | Reminds players that they cannot aim zone cards at states they already control when clicking on the map.【F:src/components/game/EnhancedUSAMap.tsx†L302-L318】 |
+| Archive & synergy updates | <ul><li>`Edition already in archive`</li><li>`Final newspaper archived to Player Hub`</li><li>`🔗 Synergy Activated: … (+IP)`</li></ul> | Handles press archive deduplication and highlights bonus IP when new state combinations form on the main board.【F:src/pages/Index.tsx†L612-L908】 |
+| Fullscreen controls | <ul><li>`Fullskjerm støttes ikke i denne nettleseren`</li><li>`Fullskjerm aktivert!`</li><li>`Fullskjerm deaktivert`</li><li>`Fullskjerm ble blokkert av nettleseren…`</li><li>`Kunne ikke bytte fullskjerm-modus`</li><li>`Kunne ikke aktivere fullskjerm automatisk`</li></ul> | Covers every manual and automatic fullscreen toggle outcome so players know why the mode changed or failed.【F:src/pages/Index.tsx†L1390-L1542】 |
+| Card gating & targeting | <ul><li>`🚫 Cannot target your own states with zone cards!`</li><li>`🎯 Targeting …! Deploying zone card...`</li><li>`💰 Insufficient IP! Need …`</li><li>`📋 Maximum 3 cards per turn!`</li><li>`🎯 Zone card selected - click a state to target it!`</li><li>`🎯 Select a valid state target before deploying this zone card!`</li></ul> | Guides the targeting workflow, enforcing cost and turn limits while steering players toward valid zone card selections.【F:src/pages/Index.tsx†L1545-L1687】 |
+| Card resolution results | <ul><li>`✅ ${card.name} deployed successfully!`</li><li>`❌ Card deployment failed!`</li></ul> | Summarizes the outcome of each play once animation completes or throws, mirroring the audio cues.【F:src/pages/Index.tsx†L1694-L1755】 |
+| Contextual guidance | <ul><li>Dynamic suggestions from `ContextualHelp`</li></ul> | Surfaces turn-by-turn hints from the contextual helper when the player requests assistance.【F:src/pages/Index.tsx†L2443-L2454】 |
+| Tutorial overlay | <ul><li>`Tutorial Started`</li><li>`Tutorial Unavailable`</li></ul> | Signals which tutorial sequence just launched or why the request was rejected from the training vault UI.【F:src/components/game/TutorialOverlay.tsx†L39-L55】 |
 
 ## Secret agenda cookbook grid
 The secret agenda database now leans into the “Paranoid Times” tabloid-cookbook tone. Each faction’s entries pair a pulp trope with concrete telemetry pulled from `GameState` snapshots, ensuring the themed goals remain trackable by AI and UI layers alike.
