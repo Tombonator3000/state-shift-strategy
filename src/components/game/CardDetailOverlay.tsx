@@ -20,6 +20,7 @@ interface CardDetailOverlayProps {
   onClose: () => void;
   onPlayCard: () => void;
   swipeHandlers?: any;
+  effectiveCost?: number;
 }
 
 const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
@@ -29,12 +30,14 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
   onClose,
   onPlayCard,
   swipeHandlers,
+  effectiveCost,
 }) => {
   const isMobile = useIsMobile();
   if (!card) return null;
 
   const displayType = normalizeTabloidCardType(card.type);
   const ActionIcon = displayType === 'ZONE' ? Target : displayType === 'ATTACK' ? Zap : Megaphone;
+  const displayedCost = typeof effectiveCost === 'number' ? effectiveCost : card.cost;
 
   return (
     <div
@@ -81,7 +84,7 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
 
           <div className="flex flex-wrap items-center justify-center gap-2 text-xs uppercase tracking-widest text-white/80">
             <span>
-              {canAfford ? 'CLEARED FOR DEPLOYMENT' : `NEED ${card.cost} IP`}
+              {canAfford ? 'CLEARED FOR DEPLOYMENT' : `NEED ${displayedCost} IP`}
             </span>
             <ExtensionCardBadge cardId={card.id} card={card} />
           </div>
@@ -98,6 +101,7 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
   onClose,
   onPlayCard,
   swipeHandlers,
+  effectiveCost,
 }) => {
   const isMobile = useIsMobile();
   if (!card) return null;
@@ -158,6 +162,7 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
   const faction = getLegacyFaction(card);
   const displayType = normalizeLegacyCardType(card.type);
   const flavorText = card.flavor ?? card.flavorGov ?? card.flavorTruth ?? 'No intelligence available.';
+  const displayedCost = typeof effectiveCost === 'number' ? effectiveCost : card.cost;
 
   return (
     <div
@@ -189,7 +194,7 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
                   canAfford ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'
                 }`}
               >
-                {card.cost} IP
+                {displayedCost} IP
               </div>
 
               <ExtensionCardBadge cardId={card.id} variant="overlay" />
@@ -251,7 +256,7 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
 
             {!canAfford && (
               <div className="absolute inset-0 flex items-center justify-center bg-destructive/10">
-                <span className="text-xs text-destructive font-medium">Need {card.cost} IP</span>
+                <span className="text-xs text-destructive font-medium">Need {displayedCost} IP</span>
               </div>
             )}
           </Button>
