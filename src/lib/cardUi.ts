@@ -39,8 +39,17 @@ export const getRarityVar = (rarity?: GameCard['rarity']): string => {
   return `var(--pt-rarity-${normalizeRarity(rarity)})`;
 };
 
+export const RARITY_EMOJI: Record<NormalizedRarity, string> = {
+  common: '⚪',
+  uncommon: '🟢',
+  rare: '🔷',
+  legendary: '✨',
+};
+
 export const getRarityLabel = (rarity?: GameCard['rarity']): string => {
-  return normalizeRarity(rarity);
+  const normalized = normalizeRarity(rarity);
+  const emoji = RARITY_EMOJI[normalized];
+  return `${normalized} ${emoji}`.trim();
 };
 
 export const getFlavorText = (card: GameCard): string | undefined => {
