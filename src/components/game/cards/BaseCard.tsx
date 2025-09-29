@@ -46,6 +46,20 @@ export const BaseCard = ({
   const flavor = getFlavorText(card);
   const rarityLabel = getRarityLabel(card.rarity);
   const typeLabel = normalizeCardType(card.type);
+  const headerIcon = (() => {
+    const extId = card.extId?.toLowerCase();
+    if (!extId) return null;
+
+    if (extId.includes('halloween')) {
+      return { icon: '🎃', label: 'Halloween Event' } as const;
+    }
+
+    if (extId.includes('cryptid')) {
+      return { icon: '🦎', label: 'Cryptid Event' } as const;
+    }
+
+    return null;
+  })();
   const showCardText = card.text && card.text !== effectText;
 
   const wrapperStyle = { '--card-scale': String(SIZE_TO_SCALE[size]) } as CSSProperties;
@@ -75,6 +89,16 @@ export const BaseCard = ({
               >
                 {rarityLabel}
               </span>
+              {headerIcon ? (
+                <span
+                  className="px-2 py-0.5 text-[11px] uppercase tracking-wide text-white rounded font-tabloid"
+                  aria-label={headerIcon.label}
+                  title={headerIcon.label}
+                  style={{ background: 'var(--pt-ink)', color: 'var(--pt-paper)' }}
+                >
+                  {headerIcon.icon}
+                </span>
+              ) : null}
               <span
                 className="ml-auto text-xs font-semibold px-2 py-0.5 rounded"
                 style={{ background: 'var(--pt-ink)', color: 'var(--pt-paper)' }}
