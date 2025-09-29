@@ -88,6 +88,11 @@ const AI_ID: PlayerId = 'P2';
 
 export type CardActor = 'human' | 'ai';
 
+/**
+ * Resolves a target string to a state id, matching case-insensitively against
+ * known identifiers. If no match is found we fall back to the trimmed input so
+ * downstream logic can decide how to handle the value.
+ */
 const resolveTargetStateId = (
   snapshot: GameSnapshot,
   target?: string | null,
@@ -96,14 +101,23 @@ const resolveTargetStateId = (
     return undefined;
   }
 
-  const match = snapshot.states.find(
-    state =>
-      state.id === target ||
-      state.abbreviation === target ||
-      state.name === target,
-  );
+  const trimmedTarget = target.trim();
+  if (!trimmedTarget) {
+    return undefined;
+  }
 
-  return match?.id;
+  const normalizedTarget = trimmedTarget.toLowerCase();
+
+  const normalize = (value: string) => value.trim().toLowerCase();
+
+  const match = snapshot.states.find(state => {
+    const candidates = [state.id, state.abbreviation, state.name].filter(
+      Boolean,
+    ) as string[];
+    return candidates.some(candidate => normalize(candidate) === normalizedTarget);
+  });
+
+  return match ? match.id : trimmedTarget;
 };
 
 const buildStateLookups = (states: StateForResolution[]) => {
