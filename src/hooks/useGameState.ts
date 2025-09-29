@@ -924,7 +924,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         if (eventEffects && typeof eventEffects === 'object') {
           const truthDelta = (eventEffects.truth ?? 0) + (eventEffects.truthChange ?? 0);
           if (truthDelta) {
-            truth = applyTruthDelta(truth, truthDelta);
+            const truthMutation = { truth, log: [] as string[] };
+            const truthActor = capturingFaction === nextState.faction ? 'human' : 'ai';
+            applyTruthDelta(truthMutation, truthDelta, truthActor);
+            if (truthMutation.log.length > 0) {
+              eventLogs.push(...truthMutation.log);
+            }
+            truth = truthMutation.truth;
             truthChanged = true;
           }
 
