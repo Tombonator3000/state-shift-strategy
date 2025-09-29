@@ -9,14 +9,14 @@ interface AnimationRect {
   height: number;
 }
 
-export interface PlayResult {
+interface PlayResult {
   cancelled: boolean;
   countered: boolean;
 }
 
-export interface AnimationOptions {
-  targetState?: string | null;
-  onResolve?: (card: GameCard) => Promise<void | Partial<PlayResult>>;
+interface AnimationOptions {
+  targetState?: string;
+  onResolve?: (card: GameCard) => Promise<void>;
   onComplete?: () => void;
 }
 
@@ -183,48 +183,62 @@ export const useCardAnimation = () => {
     const playedPile = document.getElementById('played-pile');
     if (!playedPile) return;
 
-    const playedCardElements = Array.from(playedPile.querySelectorAll<HTMLElement>('[data-played-card]'));
     const pileRect = playedPile.getBoundingClientRect();
-
-    let targetCardId: string | undefined;
-    if (element.dataset.cardData) {
-      try {
-        const parsedData = JSON.parse(element.dataset.cardData) as Partial<GameCard>;
-        if (parsedData && typeof parsedData.id === 'string') {
-          targetCardId = parsedData.id;
-        }
-      } catch (error) {
-        // Ignore parsing errors and fall back to layout-based positioning
-      }
-    }
-
-    const targetElement = targetCardId
-      ? playedCardElements.find(el => el.getAttribute('data-played-card-id') === targetCardId)
-      : playedCardElements[playedCardElements.length - 1];
-
-    let destRect: AnimationRect;
-
-    if (targetElement) {
-      destRect = getBoundingRect(targetElement);
-    } else {
-      const cardWidth = 200;
-      const cardHeight = 280;
-      const cols = 5;
-
-      const pileCards = playedCardElements.length;
-      const col = pileCards % cols;
-      const row = Math.floor(pileCards / cols);
-
-      destRect = {
-        x: pileRect.left + col * (cardWidth + 4),
-        y: pileRect.top + row * (cardHeight + 4),
-        width: cardWidth,
-        height: cardHeight
-      };
-    }
+    const pileCards = playedPile.children.length;
+    const cardWidth = 200;
+    const cardHeight = 280;
+    const cols = 5;
+    
+    const col = pileCards % cols;
+    const row = Math.floor(pileCards / cols);
+    
+    const destRect: AnimationRect = {
+      x: pileRect.left + col * (cardWidth + 4),
+      y: pileRect.top + row * (cardHeight + 4),
+      width: cardWidth,
+      height: cardHeight
+    };
 
     const currentRect = getBoundingRect(element);
     await tweenTransform(element, currentRect, destRect, { duration: 400 });
+
+    // Create permanent large played card element with full details
+    const playedCard = document.createElement('div');
+    playedCard.className = 'played-card bg-card border-2 border-border rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-transform';
+    playedCard.style.width = `${cardWidth}px`;
+    playedCard.style.height = `${cardHeight}px`;
+    
+    // Enhanced played card with full details
+    const cardData = JSON.parse(element.dataset.cardData || '{}');
+    playedCard.innerHTML = `
+      <div class="relative h-full">
+        <div class="absolute top-2 right-2 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold z-10">
+          ${cardData.cost || '?'}
+        </div>
+        <div class="p-3 pb-2 bg-gradient-to-r from-card to-card/80">
+          <h4 class="font-bold text-sm font-mono text-center">${cardData.name || 'Unknown'}</h4>
+        </div>
+        <div class="h-32 border-y overflow-hidden">
+          <img src="/lovable-uploads/e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png" alt="Card art" class="w-full h-full object-cover" />
+        </div>
+        <div class="p-3 space-y-2">
+          <div class="flex justify-center">
+            <span class="text-xs font-mono px-2 py-1 bg-accent/20 border border-accent rounded">${cardData.type || 'UNKNOWN'}</span>
+          </div>
+          <div class="text-xs text-center font-medium min-h-8 flex items-center justify-center">
+            ${cardData.text || 'Effect unknown'}
+          </div>
+          <div class="text-xs italic text-muted-foreground text-center min-h-6 border-t border-border pt-2">
+            "${cardData.flavor ?? cardData.flavorGov ?? cardData.flavorTruth ?? 'No flavor text'}"
+          </div>
+          <div class="text-xs text-center font-bold text-primary">
+            DEPLOYED
+          </div>
+        </div>
+      </div>
+    `;
+    
+    playedPile.appendChild(playedCard);
   };
 
   const highlightState = (stateId?: string) => {
@@ -304,46 +318,28 @@ export const useCardAnimation = () => {
         highlightState(options.targetState);
       }
 
+      // Simulate reaction window (simplified for now)
+      const countered = false; // TODO: Implement actual counter logic
+
+      if (countered) {
+        await smallShake(clone);
+        await flyToPlayedPile(clone);
+        clone.remove();
+        highlightState(); // Remove highlight
+        return { cancelled: false, countered: true };
+      }
+
       // Resolve card effects with screen shake for zone cards
-      let resolveOutcome: PlayResult = { cancelled: false, countered: false };
       if (options.onResolve) {
         if (card.type === 'ZONE') {
           shake({ intensity: 'medium', duration: 200 });
         }
-        const result = await options.onResolve(card);
-        if (result && typeof result === 'object') {
-          resolveOutcome = {
-            cancelled: result.cancelled ?? false,
-            countered: result.countered ?? false,
-          };
-        }
-      }
-
-      if (resolveOutcome.cancelled) {
-        clone.remove();
-        highlightState();
-        return resolveOutcome;
-      }
-
-      if (resolveOutcome.countered) {
-        await smallShake(clone);
-        await flyToPlayedPile(clone);
-        const counterEvent = new CustomEvent('cardDeployed', {
-          detail: {
-            x: destRect.x + destRect.width / 2,
-            y: destRect.y + destRect.height / 2,
-            type: 'counter' as const,
-          }
-        });
-        window.dispatchEvent(counterEvent);
-        clone.remove();
-        highlightState();
-        return resolveOutcome;
+        await options.onResolve(card);
       }
 
       // Fly to played pile with particle effect
       await flyToPlayedPile(clone);
-
+      
       // Trigger particle effect at final position
       const event = new CustomEvent('cardDeployed', {
         detail: {
@@ -362,7 +358,7 @@ export const useCardAnimation = () => {
         playedPile.setAttribute('aria-label', `Played cards - ${card.name} was just played`);
       }
 
-      return resolveOutcome;
+      return { cancelled: false, countered: false };
 
     } finally {
       animatingRef.current = false;

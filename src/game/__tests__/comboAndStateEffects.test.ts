@@ -218,7 +218,6 @@ describe('combo and state synergy integration', () => {
       baseIP: 2,
       baseDefense: 2,
       defense: 2,
-      stateEventHistory: [],
       comboDefenseBonus: 0,
       pressure: 0,
       pressurePlayer: 0,
@@ -257,7 +256,6 @@ describe('combo and state synergy integration', () => {
       baseIP: 2,
       baseDefense: 2,
       defense: 2,
-      stateEventHistory: [],
       comboDefenseBonus: 0,
       pressure: 0,
       pressurePlayer: 0,
@@ -296,7 +294,6 @@ describe('combo and state synergy integration', () => {
       baseIP: 4,
       baseDefense: 4,
       defense: 4,
-      stateEventHistory: [],
       comboDefenseBonus: 0,
       pressure: 0,
       pressurePlayer: 0,
@@ -343,35 +340,5 @@ describe('combo and state synergy integration', () => {
     const result = resolveCardMVP(state, mediaCard, null, 'human');
     expect(result.truth).toBe(46);
     expect(result.logEntries.some(entry => entry.includes('Academic Elite'))).toBe(true);
-  });
-
-  it('allows discounted media cards to match available IP', () => {
-    const effects = {
-      ...createDefaultCombinationEffects(),
-      mediaCostModifier: -2,
-    };
-
-    const baseCost = 5;
-    const discountedCost = applyStateCombinationCostModifiers(baseCost, 'MEDIA', 'human', effects);
-    const availableIp = 3;
-
-    expect(discountedCost).toBe(3);
-    expect(availableIp).toBeLessThan(baseCost);
-    expect(availableIp).toBeGreaterThanOrEqual(discountedCost);
-  });
-
-  it('still blocks cards when combination effects raise the cost', () => {
-    const effects = {
-      ...createDefaultCombinationEffects(),
-      mediaCostModifier: 2,
-    };
-
-    const baseCost = 4;
-    const increasedCost = applyStateCombinationCostModifiers(baseCost, 'MEDIA', 'human', effects);
-    const availableIp = 5;
-
-    expect(increasedCost).toBe(6);
-    expect(availableIp).toBeGreaterThan(baseCost);
-    expect(availableIp).toBeLessThan(increasedCost);
   });
 });

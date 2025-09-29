@@ -127,10 +127,10 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/60 z-50 animate-fade-in pointer-events-none">
+      <div className="fixed inset-0 bg-black/60 z-50 animate-fade-in">
         {/* Onboarding Card */}
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-60 animate-slide-in-right pointer-events-auto">
-          <Card className="p-6 max-w-md bg-newspaper-text text-newspaper-bg border-4 border-truth-red shadow-2xl pointer-events-auto">
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-60 animate-slide-in-right">
+          <Card className="p-6 max-w-md bg-newspaper-text text-newspaper-bg border-4 border-truth-red shadow-2xl">
             {/* Header */}
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-2">

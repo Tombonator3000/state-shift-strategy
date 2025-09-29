@@ -80,7 +80,7 @@ const pickDeltaTemplate = (
 const applyDeltaTemplate = (template: string, value: number): string => {
   const abs = Math.abs(value);
   const signed = value === 0 ? '±0' : `${value > 0 ? '+' : '−'}${abs}`;
-  return template.replace(/{value}/g, signed).replace(/{abs}/g, abs.toString());
+  return template.replaceAll('{value}', signed).replaceAll('{abs}', abs.toString());
 };
 
 const buildEffectSentence = (
@@ -127,7 +127,7 @@ const buildTargetSentence = (
   if (captures.length) {
     if (captures.length === 1) {
       const template = pick(statePhrases.capturedSingle, statePhrases.capturedSingle[0] ?? '{state} flips loudly.');
-      return ensureSentence(template.replace(/{state}/g, captures[0] ?? 'the state'));
+      return ensureSentence(template.replaceAll('{state}', captures[0] ?? 'the state'));
     }
     const list = captures.length === 2
       ? `${captures[0]} and ${captures[1]}`
@@ -136,11 +136,11 @@ const buildTargetSentence = (
       statePhrases.capturedMultiple,
       statePhrases.capturedMultiple[0] ?? 'Cartographers scramble as {list} all flip in unison.',
     );
-    return ensureSentence(template.replace(/{list}/g, list));
+    return ensureSentence(template.replaceAll('{list}', list));
   }
   if (targetStateName) {
     const template = pick(statePhrases.target, statePhrases.target[0] ?? 'Dispatch from {state} reports unusual commotion.');
-    return ensureSentence(template.replace(/{state}/g, targetStateName));
+    return ensureSentence(template.replaceAll('{state}', targetStateName));
   }
   return null;
 };

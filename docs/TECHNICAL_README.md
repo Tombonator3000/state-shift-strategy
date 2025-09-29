@@ -6,9 +6,7 @@
 - [State map and territorial control](#state-map-and-territorial-control)
 - [Combo engine integration](#combo-engine-integration)
 - [Card data normalization pipeline](#card-data-normalization-pipeline)
-- [Expansion & Extension System](#expansion--extension-system)
 - [Audio systems](#audio-systems)
-- [Achievements system](#achievements-system)
 - [Secret agenda cookbook grid](#secret-agenda-cookbook-grid)
 
 ## Game loop fundamentals
@@ -68,15 +66,6 @@ The state-combination manager aggregates multiple passive bonuses in addition to
 ## Card data normalization pipeline
 The card database wraps multiple sources behind `CARD_DATABASE`, loading fallback MVP cards immediately, attempting to import the core set asynchronously, and merging extension packs. Every card flows through `repairToMVP` and `validateCardMVP` during ingestion so gameplay always operates on sanitized MVP-compliant records. Normalization warnings and cost adjustments are logged in development builds for quick author feedback.【F:src/data/cardDatabase.ts†L1-L200】 Extension authors can rely on this pipeline to auto-correct casing, default targets, and baseline costs without hand-tuning individual files.
 
-## Expansion & Extension System
-`ExtensionManager` glues contributor packs into the runtime by validating payloads, persisting player preferences, and sharing the resulting card pool with the distribution engine.【F:src/data/extensionSystem.ts†L35-L168】【F:src/data/extensionSystem.ts†L227-L271】 When the singleton boots it rehydrates two `localStorage` snapshots—`sg_enabled_extensions` for enabled pack metadata and `sg_extension_payloads` for the sanitized card payloads—before replaying them into memory.【F:src/data/extensionSystem.ts†L31-L101】 Every card is funneled through `repairToMVP`/`validateCardMVP`; failures are dropped while successful entries are stamped with their `extId` for downstream tracking.【F:src/data/extensionSystem.ts†L189-L215】
-
-Remote packs can be shipped via CDN: `scanCDNExtensions` pulls `/extensions/manifest.json` with cache-busting, downloads each listed file, and falls back to a hard-coded list if the manifest is absent.【F:src/data/extensionSystem.ts†L104-L168】 Local creators can instead import JSON bundles through folder/file pickers, with accepted sets persisted so they survive reloads and still pass through the same sanitizer.【F:src/data/extensionSystem.ts†L171-L215】【F:src/data/extensionSystem.ts†L227-L271】 The `initializeExtensions` helper combines both paths, restoring CDN packs, rehydrating local payloads, and pruning stale entries before exposing the merged cards to deck builders.【F:src/data/extensionSystem.ts†L271-L318】
-
-The Expansion Control Room UI (`ManageExpansions`) surfaces these controls for designers and QA. It reports core/expansion totals, auto-detects `/extensions` JSON files, and lets you toggle packs while synchronizing with `updateEnabledExpansions`, which in turn refreshes cached cards for live previews and deck weighting.【F:src/components/game/ManageExpansions.tsx†L505-L592】【F:src/data/expansions/state.ts†L129-L160】 Distribution tabs expose mix modes, per-set weights, and rarity sliders that only unlock once at least one non-core set is active; the sanitized settings clamp to the active pack list so core-only runs stay stable.【F:src/components/game/ManageExpansions.tsx†L595-L745】【F:src/data/weightedCardDistribution.ts†L187-L235】
-
-Content teams should mirror the shipped manifest—`/public/extensions/manifest.json` lists every CDN-served bundle—when staging new packs, and can use `public/extensions/cryptids.json` as an annotated schema reference for field names and MVP card expectations.【F:public/extensions/manifest.json†L1-L5】【F:public/extensions/cryptids.json†L1-L60】
-
 ## Audio systems
 The `useAudio` hook centralizes music playlists, SFX loading, and playback APIs. It loads thematic track lists for the start menu, faction selection, in-game loops, and end credits, while registering a library of sound keys for UI and event feedback.【F:src/hooks/useAudio.ts†L171-L268】 Notable integration points include:
 
@@ -103,18 +92,6 @@ The `useAudio` hook centralizes music playlists, SFX loading, and playback APIs.
 The hook currently falls back to placeholder audio for `ufo-elvis`, `cryptid-rumble`, and `radio-static`, but no dedicated assets exist in `public/audio/`. Contributors should source royalty-free replacements—e.g., UFO ambience, low-frequency rumble, and shortwave static—from providers listed in the audio README, ensure MP3 format under the recommended size limits, and drop them into `public/audio/` with filenames that match the SFX keys. Update `existingSfxFiles` if the final filenames differ and verify licensing records per the project’s royalty-free guidance.【F:src/hooks/useAudio.ts†L225-L243】【F:public/audio/README.md†L1-L28】【F:public/audio/README.md†L30-L36】
 
 Music playback is orchestrated through stateful helpers (`setMenuMusic`, `setFactionMusic`, `setGameplayMusic`, `setEndCreditsMusic`) so UI layers can switch playlists without reinitializing the hook.【F:src/hooks/useAudio.ts†L320-L420】 Future contributors should call these helpers instead of manipulating HTMLAudioElements directly to keep crossfade and unlock logic intact.
-
-## Achievements system
-`AchievementManager` tracks lifetime player telemetry (wins, faction-specific clears, combo counts, card usage, and similar totals) and persists both the stats blob and unlocked IDs to `localStorage` under the `shadow_government_stats` and `shadow_government_achievements` keys.【F:src/data/achievementSystem.ts†L579-L739】 Every update funnels through helper methods (`updateStats`, `incrementStat`, `setMaxStat`, `setMinStat`), which recalculate unlocks and rewrite the stored snapshot so designers can add new achievements without changing the save surface.【F:src/data/achievementSystem.ts†L683-L727】
-
-The runtime exposes this manager through `AchievementProvider`, a React context that memoizes a singleton instance, refreshes derived stats after each call, and emits toast notifications whenever `getNewlyUnlocked` reports new badges.【F:src/contexts/AchievementContext.tsx†L37-L167】 Consumers (game hooks, UI overlays, tutorials) call the provided integration callbacks to advance progress:
-
-- `onGameStart(faction, aiDifficulty)` seeds the active run with faction/difficulty metadata.
-- `onGameEnd(won, victoryType, gameData)` records the outcome, turn length, resource totals, and state control snapshot.
-- `onCardPlayed(cardId, cardType, cardRarity)` increments per-card-type meters for deck mastery goals.
-- `onCombosResolved(owner, evaluation)` captures combo chains and awards tied to sequencing achievements.【F:src/contexts/AchievementContext.tsx†L69-L97】
-
-UI surfaces consume the context in the Player Hub’s Achievements tab, which renders the matrix view, detailed requirements, and management tools (export/import/reset) exposed by the provider.【F:src/components/game/PlayerHubOverlay.tsx†L187-L275】【F:src/components/game/AchievementPanel.tsx†L19-L215】 For the player-facing walkthrough, see the [Achievements and rewards section](../public/how-to-play-mvp.md#achievements-and-rewards) of the How to Play guide.
 
 ## Secret agenda cookbook grid
 The secret agenda database now leans into the “Paranoid Times” tabloid-cookbook tone. Each faction’s entries pair a pulp trope with concrete telemetry pulled from `GameState` snapshots, ensuring the themed goals remain trackable by AI and UI layers alike.

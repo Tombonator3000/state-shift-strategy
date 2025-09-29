@@ -195,7 +195,6 @@ const EnhancedBalancingDashboard = ({
     ATTACK: true,
     MEDIA: true,
     ZONE: true,
-    DEFENSIVE: true,
   });
   const [activeView, setActiveView] = useState<'analysis' | 'dev-tools'>(initialView);
 

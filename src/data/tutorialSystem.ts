@@ -529,8 +529,8 @@ export class TutorialManager {
   }
 
   // Get available sequences
-  getAvailableSequences(): string[] {
-    return TUTORIAL_SEQUENCES.filter(seq => this.isSequenceAvailable(seq.id)).map(seq => seq.id);
+  getAvailableSequences(): TutorialSequence[] {
+    return TUTORIAL_SEQUENCES.filter(seq => this.isSequenceAvailable(seq.id));
   }
 
   // Get completed sequences

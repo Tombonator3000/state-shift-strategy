@@ -12,7 +12,6 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ExtensionCardBadge } from './ExtensionCardBadge';
-import { applyStateCombinationCostModifiers, type StateCombinationEffects } from '@/data/stateCombinations';
 
 interface EnhancedGameHandProps {
   cards: GameCard[];
@@ -23,7 +22,6 @@ interface EnhancedGameHandProps {
   currentIP: number;
   loadingCard?: string | null;
   onCardHover?: (card: (GameCard & { _hoverPosition?: { x: number; y: number } }) | null) => void;
-  stateCombinationEffects: StateCombinationEffects;
 }
 
 const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
@@ -34,8 +32,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   onSelectCard,
   currentIP,
   loadingCard,
-  onCardHover,
-  stateCombinationEffects
+  onCardHover
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
@@ -48,26 +45,16 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
   };
 
-  const getEffectiveCost = (card: GameCard) =>
-    applyStateCombinationCostModifiers(
-      card.cost,
-      normalizeCardType(card.type),
-      'human',
-      stateCombinationEffects
-    );
-
   const handlePlayCard = async (cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return;
-
-    const effectiveCost = getEffectiveCost(card);
-
-    if (currentIP < effectiveCost) {
+    
+    if (!canAffordCard(card)) {
       audio.playSFX('lightClick'); // Error sound - light click
       triggerHaptic('error');
       toast({
         title: "❌ Insufficient IP",
-        description: `Need ${effectiveCost} IP to deploy "${card.name}". You have ${currentIP} IP.`,
+        description: `Need ${card.cost} IP to deploy "${card.name}". You have ${currentIP} IP.`,
         variant: "destructive",
       });
       return;
@@ -92,6 +79,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       setPlayingCard(null);
     }
   };
+
+  const canAffordCard = (card: GameCard) => currentIP >= card.cost;
 
   // Swipe handlers for card examination
   const swipeHandlers = useSwipeGestures({
@@ -119,10 +108,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     }
   });
 
-  const examinedCardData = examinedCard ? cards.find(c => c.id === examinedCard) ?? null : null;
-  const examinedCardEffectiveCost = examinedCardData ? getEffectiveCost(examinedCardData) : undefined;
-  const examinedCardAffordable = examinedCardData ? currentIP >= (examinedCardEffectiveCost ?? examinedCardData.cost) : false;
-
   return (
     <div
       className="relative h-full"
@@ -139,8 +124,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
             const isSelected = selectedCard === card.id;
             const isPlaying = playingCard === card.id;
             const isLoading = loadingCard === card.id;
-            const effectiveCost = getEffectiveCost(card);
-            const canAfford = currentIP >= effectiveCost;
+            const canAfford = canAffordCard(card);
             const displayType = normalizeCardType(card.type);
 
             const overlay = (
@@ -195,7 +179,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   disabled && 'cursor-default'
                 )}
                 style={{ animationDelay: `${index * 0.03}s` }}
-                data-card-id={card.id}
                 onClick={(e) => {
                   e.preventDefault();
                   audio.playSFX('click');
@@ -253,42 +236,39 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       {/* Card Detail Overlay - Redesigned */}
       {examinedCard && (
         <CardDetailOverlay
-          card={examinedCardData}
-          canAfford={examinedCardAffordable}
-          effectiveCost={examinedCardEffectiveCost}
+          card={cards.find(c => c.id === examinedCard) || null}
+          canAfford={cards.find(c => c.id === examinedCard) ? canAffordCard(cards.find(c => c.id === examinedCard)!) : false}
           disabled={disabled}
           onClose={() => {
             setExaminedCard(null);
             triggerHaptic('light');
           }}
           onPlayCard={() => {
-            const card = examinedCardData;
+            const card = cards.find(c => c.id === examinedCard);
             if (!card) return;
-
-            const effectiveCost = examinedCardEffectiveCost ?? getEffectiveCost(card);
-
-            if (currentIP < effectiveCost) {
+            
+            if (!canAffordCard(card)) {
               triggerHaptic('error');
               toast({
                 title: "❌ Insufficient IP",
-                description: `Need ${effectiveCost} IP to deploy this asset.`,
+                description: `Need ${card.cost} IP to deploy this asset.`,
                 variant: "destructive",
               });
               return;
             }
-
+            
             // Zone card targeting - direct activation
             if (normalizeCardType(card.type) === 'ZONE') {
               // Immediately activate targeting without closing modal
               audio.playSFX('click');
               triggerHaptic('medium');
               onSelectCard?.(card.id);
-
+              
               // Close modal after setting up targeting
               setTimeout(() => {
                 setExaminedCard(null);
               }, 100);
-
+              
             } else {
               // For all other cards, deploy immediately
               audio.playSFX('click');

@@ -3,7 +3,6 @@ import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
 import { generateWeightedDeck } from '@/data/weightedCardDistribution';
 import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
-import type { TurnPlay } from '@/game/combo.types';
 import {
   applyStateCombinationCostModifiers,
   calculateDynamicIpBonus,
@@ -25,7 +24,6 @@ import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import { chooseTurnActions } from '@/ai/enhancedController';
 import { EventManager, type GameEvent, type ParanormalHotspotPayload } from '@/data/eventDatabase';
 import { processAiActions } from './aiTurnActions';
-import type { AnimationOptions, PlayResult } from './useCardAnimation';
 import { buildEditionEvents } from './eventEdition';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
@@ -38,7 +36,6 @@ import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
 import type {
   ActiveParanormalHotspot,
-  CardPlayRecord,
   GameState,
   StateEventBonusSummary,
   StateParanormalHotspot,
@@ -1262,7 +1259,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       truth: startingTruth,
       ip: startingIP,
       aiIP: aiStartingIP,
-      currentPlayer: 'human',
       hand: startingHand,
       deck: remainingDeck,
       aiHand: aiStartingHand,
@@ -1436,145 +1432,120 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
   const playCardAnimated = useCallback(async (
     cardId: string,
-    animateCard: (
-      cardId: string,
-      card: GameCard,
-      options?: AnimationOptions
-    ) => Promise<PlayResult>,
+    animateCard: (cardId: string, card: any, options?: any) => Promise<any>,
     explicitTargetState?: string
   ) => {
     const card = gameState.hand.find(c => c.id === cardId);
-    if (!card) {
-      console.warn('[playCardAnimated] Card not found:', cardId);
-      setGameState(prev => ({ ...prev, animating: false }));
+    if (!card || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
       return;
     }
 
-    let pendingRecord: CardPlayRecord | null = null;
+    const initialCost = applyStateCombinationCostModifiers(
+      card.cost,
+      card.type,
+      'human',
+      gameState.stateCombinationEffects,
+    );
+
+    if (gameState.ip < initialCost) {
+      return;
+    }
+
+    achievements.onCardPlayed(cardId, card.type, card.rarity);
+
+    const targetState = explicitTargetState ?? gameState.targetState ?? null;
+    let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
+    let pendingTurnPlays: ReturnType<typeof createTurnPlayEntries> | null = null;
     let pendingResolvedCard: GameCard | null = null;
-    let pendingTurnPlays: TurnPlay[] | null = null;
 
-    try {
-      setGameState(prev => {
-        if (prev.cardsPlayedThisTurn >= 3 || prev.animating) {
-          console.warn('[playCardAnimated] Cannot play card - cardsPlayedThisTurn:', prev.cardsPlayedThisTurn, 'animating:', prev.animating);
-          return prev;
-        }
-
-        const effectiveCost = applyStateCombinationCostModifiers(
-          card.cost,
-          card.type,
-          'human',
-          prev.stateCombinationEffects,
-        );
-
-        if (prev.ip < effectiveCost) {
-          console.warn('[playCardAnimated] Insufficient IP:', prev.ip, 'cost:', effectiveCost);
-          return prev;
-        }
-
-        const resolvedCard = effectiveCost === card.cost ? card : { ...card, cost: effectiveCost };
-        pendingResolvedCard = resolvedCard;
-
-        achievements.onCardPlayed(cardId, card.type, card.rarity);
-
-        const targetState = explicitTargetState ?? prev.targetState ?? null;
-        const resolution = resolveCardEffects(prev, resolvedCard, targetState);
-
-        const updatedHotspots = { ...prev.paranormalHotspots };
-        if (resolution.resolvedHotspots) {
-          for (const abbr of resolution.resolvedHotspots) {
-            delete updatedHotspots[abbr];
-          }
-        }
-
-        const counterSnapshot = applyAgendaCardCounters(prev, 'human', resolvedCard);
-
-        const playedCardRecord = createPlayedCardRecord({
-          card: resolvedCard,
-          player: 'human',
-          faction: prev.faction,
-          targetState,
-          resolution,
-          previousTruth: prev.truth,
-          previousIp: prev.ip,
-          previousAiIP: prev.aiIP,
-          round: prev.round,
-          turn: prev.turn,
-        });
-        pendingRecord = playedCardRecord;
-
-        const turnPlayEntries = createTurnPlayEntries({
-          state: prev,
-          card: resolvedCard,
-          owner: 'human',
-          targetState,
-          resolution,
-        });
-        pendingTurnPlays = turnPlayEntries;
-
-        const mergedStates = mergeStateEventHistories(prev.states, resolution.states);
-
-        const nextState: GameState = {
-          ...prev,
-          animating: true,
-          ip: resolution.ip,
-          aiIP: resolution.aiIP,
-          truth: resolution.truth,
-          states: mergedStates,
-          controlledStates: resolution.controlledStates,
-          aiControlledStates: resolution.aiControlledStates,
-          targetState: resolution.targetState,
-          selectedCard: resolution.selectedCard,
-          log: [...prev.log, ...resolution.logEntries],
-          agendaIssueCounters: counterSnapshot.issueCounters,
-          agendaRoundCounters: counterSnapshot.roundCounters,
-          paranormalHotspots: updatedHotspots,
-        };
-
-        const stateWithReveal = resolution.aiSecretAgendaRevealed
-          ? revealAiSecretAgenda(nextState, { type: 'card', name: resolvedCard.name })
-          : nextState;
-
-        return updateSecretAgendaProgress(stateWithReveal);
-      });
-
-      const result = await animateCard(cardId, card, {
-        targetState: explicitTargetState ?? gameState.targetState,
-        onResolve: async () => {
-          triggerCapturedStateEvents(
-            {
-              states: gameState.states,
-              capturedStateIds: [],
-              resolvedHotspots: [],
-              truth: gameState.truth,
-              ip: gameState.ip,
-              aiIP: gameState.aiIP,
-              controlledStates: gameState.controlledStates,
-              aiControlledStates: gameState.aiControlledStates,
-              targetState: null,
-              selectedCard: null,
-              logEntries: [],
-              damageDealt: 0,
-            },
-            gameState
-          );
-          return { cancelled: false, countered: false };
-        },
-      });
-
-      if (result.cancelled) {
-        console.warn('[playCardAnimated] Animation cancelled');
-        setGameState(prev => ({ ...prev, animating: false }));
-        return;
+    setGameState(prev => {
+      if (prev.animating) {
+        return prev;
       }
 
+      const effectiveCost = applyStateCombinationCostModifiers(
+        card.cost,
+        card.type,
+        'human',
+        prev.stateCombinationEffects,
+      );
+
+      if (prev.ip < effectiveCost) {
+        return prev;
+      }
+
+      const resolvedCard = effectiveCost === card.cost ? card : { ...card, cost: effectiveCost };
+      pendingResolvedCard = resolvedCard;
+
+      const resolution = resolveCardEffects(prev, resolvedCard, targetState);
+      const updatedHotspots = { ...prev.paranormalHotspots };
+      if (resolution.resolvedHotspots) {
+        for (const abbr of resolution.resolvedHotspots) {
+          delete updatedHotspots[abbr];
+        }
+      }
+      const counterSnapshot = applyAgendaCardCounters(prev, 'human', resolvedCard);
+      pendingRecord = createPlayedCardRecord({
+        card: resolvedCard,
+        player: 'human',
+        faction: prev.faction,
+        targetState,
+        resolution,
+        previousTruth: prev.truth,
+        previousIp: prev.ip,
+        previousAiIP: prev.aiIP,
+        round: prev.round,
+        turn: prev.turn,
+      });
+
+      pendingTurnPlays = createTurnPlayEntries({
+        state: prev,
+        card: resolvedCard,
+        owner: 'human',
+        targetState,
+        resolution,
+      });
+
+      const mergedStates = mergeStateEventHistories(prev.states, resolution.states);
+
+      const nextState: GameState = {
+        ...prev,
+        animating: true,
+        ip: resolution.ip,
+        aiIP: resolution.aiIP,
+        truth: resolution.truth,
+        states: mergedStates,
+        controlledStates: resolution.controlledStates,
+        aiControlledStates: resolution.aiControlledStates,
+        targetState: resolution.targetState,
+        selectedCard: resolution.selectedCard,
+        log: [...prev.log, ...resolution.logEntries],
+        agendaIssueCounters: counterSnapshot.issueCounters,
+        agendaRoundCounters: counterSnapshot.roundCounters,
+        paranormalHotspots: updatedHotspots,
+      };
+
+      const stateWithReveal = resolution.aiSecretAgendaRevealed
+        ? revealAiSecretAgenda(nextState, { type: 'card', name: resolvedCard.name })
+        : nextState;
+
+      const resultState = updateSecretAgendaProgress(stateWithReveal);
+      triggerCapturedStateEvents(resolution, resultState);
+      return resultState;
+    });
+
+    try {
+      await animateCard(cardId, card, {
+        targetState,
+        onResolve: async () => Promise.resolve()
+      });
+
       setGameState(prev => {
-        const record: CardPlayRecord = pendingRecord ?? {
+        const record = pendingRecord ?? {
           card: pendingResolvedCard ?? card,
-          player: 'human',
+          player: 'human' as const,
           faction: prev.faction,
-          targetState: null,
+          targetState: targetState ?? null,
           truthDelta: 0,
           ipDelta: 0,
           aiIpDelta: 0,
@@ -1586,7 +1557,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           timestamp: Date.now(),
           logEntries: [],
         };
-
         const nextState: GameState = {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),
@@ -1602,13 +1572,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return updateSecretAgendaProgress(nextState);
       });
     } catch (error) {
-      console.error('[playCardAnimated] Error:', error);
+      console.error('Card animation failed:', error);
       setGameState(prev => {
-        const record: CardPlayRecord = pendingRecord ?? {
+        const record = pendingRecord ?? {
           card: pendingResolvedCard ?? card,
-          player: 'human',
+          player: 'human' as const,
           faction: prev.faction,
-          targetState: null,
+          targetState: targetState ?? null,
           truthDelta: 0,
           ipDelta: 0,
           aiIpDelta: 0,
@@ -1620,7 +1590,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           timestamp: Date.now(),
           logEntries: [],
         };
-
         const nextState: GameState = {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),

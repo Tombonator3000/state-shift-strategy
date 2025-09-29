@@ -52,19 +52,6 @@ Some events, cards, or investigative plays can expose the opponent’s agenda, r
 - **Paranormal Hotspots** temporarily raise a state’s defense while promising a Truth swing to whichever faction resolves the anomaly first. When a hotspot appears you’ll see a flying UFO skim the affected state and leave a green glow around it. If you’ve enabled reduced-motion mode, the UFO flashes in place without sweeping across the map, but the glow still locks on so you can track the target. Drop pressure there immediately or sabotage your opponent’s attempt—the glow clears the moment someone resolves the anomaly.
 - **Combo Engine** rewards coordinated turns with bonus IP, Truth swings, or additional card draws. Review combo summaries in the newspaper and adjust your play order to trigger the effects you need.
 
-## Expansion Control Room
-- **Opening the manager:** From the start screen, press **Manage Expansions** to launch the Expansion Control Room, or open the in-game pause menu and tap the **Expansions** tile to reach the same controls mid-campaign.【F:src/components/game/GameMenu.tsx†L330-L343】【F:src/components/game/InGameOptions.tsx†L151-L158】
-- **Enable or disable packs:** The manager lists the core set alongside every JSON pack discovered in `/extensions`. Toggle a pack to add or remove its cards; totals update immediately so you can see how many expansion cards are feeding the pool.【F:src/components/game/ManageExpansions.tsx†L513-L593】
-- **Deck construction impact:** Enabled packs feed automated deck building and unlock the mix/weighting tabs. Runs with zero expansions force a core-only distribution, while active packs let you bias modes and per-set sliders for custom drafts.【F:src/components/game/ManageExpansions.tsx†L595-L745】【F:src/data/weightedCardDistribution.ts†L187-L235】
-- **Author note:** Content creators should mirror the shipped [manifest template](./extensions/manifest.json) when adding CDN bundles so the scan picks them up automatically.【F:public/extensions/manifest.json†L1-L5】
-
-## Achievements and rewards
-- **Opening the panel:** Click the Player Hub button (the user silhouette in the top-right masthead) to open the overlay, then pick the **Achievements** tab with the trophy icon. This view is available both from the main menu and during matches, so you can check progress mid-campaign.【F:src/pages/Index.tsx†L2140-L2192】【F:src/components/game/PlayerHubOverlay.tsx†L187-L275】
-- **How progress unlocks:** The game automatically tracks wins, combo chains, card usage, and other milestones, firing `Achievement` toasts the moment you meet their conditions. You don’t need to claim anything manually—just keep playing and watch for the pop-ups when the manager confirms a new badge.【F:src/contexts/AchievementContext.tsx†L37-L167】
-- **Persistence & rewards:** Progress is saved between sessions, with lifetime stats and unlocked IDs stored locally. The Achievements panel also lets you export/import your dossier or reset it if you want a fresh run, and rewards such as titles or tutorial unlocks are listed alongside each badge.【F:src/data/achievementSystem.ts†L584-L739】【F:src/components/game/AchievementPanel.tsx†L84-L215】
-
-Looking under the hood? Contributors can find integration details in the [Technical Achievements overview](../docs/TECHNICAL_README.md#achievements-system).
-
 ## Tactical Tips
 - Spend early turns establishing IP-positive states before committing expensive legendary plays.
 - Use MEDIA to push Truth toward your victory thresholds while denying the opponent their extremes.

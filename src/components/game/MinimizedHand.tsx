@@ -8,7 +8,6 @@ import { ExtensionCardBadge } from './ExtensionCardBadge';
 import { isExtensionCard } from '@/data/extensionIntegration';
 import type { GameCard, MVPCardType } from '@/rules/mvp';
 import { MVP_CARD_TYPES } from '@/rules/mvp';
-import { applyStateCombinationCostModifiers, type StateCombinationEffects } from '@/data/stateCombinations';
 
 interface MinimizedHandProps {
   cards: GameCard[];
@@ -18,18 +17,16 @@ interface MinimizedHandProps {
   playerIP: number;
   isMaximized: boolean;
   onToggleMaximize: () => void;
-  stateCombinationEffects: StateCombinationEffects;
 }
 
-const MinimizedHand = ({
-  cards,
-  selectedCard,
-  onSelectCard,
-  onPlayCard,
+const MinimizedHand = ({ 
+  cards, 
+  selectedCard, 
+  onSelectCard, 
+  onPlayCard, 
   playerIP,
   isMaximized,
-  onToggleMaximize,
-  stateCombinationEffects
+  onToggleMaximize
 }: MinimizedHandProps) => {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
@@ -67,15 +64,7 @@ const MinimizedHand = ({
     }
   };
 
-  const getEffectiveCost = (card: GameCard) =>
-    applyStateCombinationCostModifiers(
-      card.cost,
-      normalizeCardType(card.type),
-      'human',
-      stateCombinationEffects
-    );
-
-  const canAffordCard = (card: GameCard) => playerIP >= getEffectiveCost(card);
+  const canAffordCard = (cost: number) => playerIP >= cost;
 
   if (isMaximized) {
     // Full-size hand display
@@ -96,20 +85,15 @@ const MinimizedHand = ({
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {cards.map((card, index) => {
-            const effectiveCost = getEffectiveCost(card);
-            const canAfford = canAffordCard(card);
-            const isDiscounted = effectiveCost !== card.cost;
-
-            return (
-            <Card
-              key={card.id}
+          {cards.map((card, index) => (
+            <Card 
+              key={card.id} 
               className={`p-4 cursor-pointer transition-all hover:scale-105 border-2 ${
-                selectedCard === card.id
-                  ? 'border-government-blue bg-government-blue/10 shadow-lg'
+                selectedCard === card.id 
+                  ? 'border-government-blue bg-government-blue/10 shadow-lg' 
                   : getRarityColor(card.rarity)
-              } ${!canAfford ? 'opacity-50' : ''}`}
-              onClick={() => canAfford && onSelectCard(card.id)}
+              } ${!canAffordCard(card.cost) ? 'opacity-50' : ''}`}
+              onClick={() => canAffordCard(card.cost) && onSelectCard(card.id)}
               data-card-id={card.id}
             >
               <div className="space-y-2">
@@ -121,14 +105,11 @@ const MinimizedHand = ({
                     {getCardIcon(card.type)}
                     <span className="ml-1">{normalizeCardType(card.type)}</span>
                   </Badge>
-                  <Badge variant="outline" className="text-xs font-bold flex items-center gap-1">
-                    {isDiscounted && (
-                      <span className="line-through opacity-70">{card.cost}</span>
-                    )}
-                    <span>{effectiveCost} IP</span>
+                  <Badge variant="outline" className="text-xs font-bold">
+                    {card.cost} IP
                   </Badge>
                 </div>
-
+                
                 <h4 className="font-bold text-sm text-newspaper-text leading-tight">
                   {card.name}
                 </h4>
@@ -148,7 +129,7 @@ const MinimizedHand = ({
                     e.stopPropagation();
                     onPlayCard(card.id);
                   }}
-                  disabled={!canAfford}
+                  disabled={!canAffordCard(card.cost)}
                   className="w-full text-xs bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80 disabled:opacity-50"
                   size="sm"
                 >
@@ -156,8 +137,7 @@ const MinimizedHand = ({
                 </Button>
               </div>
             </Card>
-            );
-          })}
+          ))}
         </div>
       </div>
     );
@@ -190,22 +170,17 @@ const MinimizedHand = ({
       </div>
       
       <div className="flex gap-1 flex-wrap">
-        {cards.map((card, index) => {
-          const effectiveCost = getEffectiveCost(card);
-          const canAfford = canAffordCard(card);
-          const isDiscounted = effectiveCost !== card.cost;
-
-          return (
+        {cards.map((card, index) => (
           <Tooltip key={card.id}>
             <TooltipTrigger asChild>
               <div
                 className={`relative w-8 h-12 border-2 rounded cursor-pointer transition-all hover:scale-110 hover:z-10 ${
-                  selectedCard === card.id
-                    ? 'border-government-blue bg-government-blue/20'
+                  selectedCard === card.id 
+                    ? 'border-government-blue bg-government-blue/20' 
                     : getRarityColor(card.rarity)
-                } ${!canAfford ? 'opacity-50 grayscale' : ''}`}
-                onClick={() => canAfford && onSelectCard(card.id)}
-                onDoubleClick={() => canAfford && onPlayCard(card.id)}
+                } ${!canAffordCard(card.cost) ? 'opacity-50 grayscale' : ''}`}
+                onClick={() => canAffordCard(card.cost) && onSelectCard(card.id)}
+                onDoubleClick={() => canAffordCard(card.cost) && onPlayCard(card.id)}
                 onMouseEnter={() => setHoveredCard(card.id)}
                  onMouseLeave={() => setHoveredCard(null)}
                  data-card-id={card.id}
@@ -218,13 +193,10 @@ const MinimizedHand = ({
                      {getCardIcon(card.type)}
                    </div>
                  )}
-
+                 
                  {/* Cost badge */}
-                 <div className="absolute top-0.5 right-0.5 bg-newspaper-text text-newspaper-bg text-[10px] font-bold rounded px-1 leading-none py-0.5 flex items-center gap-0.5">
-                   {isDiscounted && (
-                     <span className="line-through opacity-70">{card.cost}</span>
-                   )}
-                   <span>{effectiveCost}</span>
+                 <div className="absolute top-0.5 right-0.5 bg-newspaper-text text-newspaper-bg text-xs font-bold rounded px-1 leading-none py-0.5">
+                   {card.cost}
                  </div>
                  
                  {/* Keyboard shortcut */}
@@ -239,8 +211,8 @@ const MinimizedHand = ({
               </div>
             </TooltipTrigger>
             
-            <TooltipContent
-              side="top"
+            <TooltipContent 
+              side="top" 
               className="max-w-xs bg-newspaper-bg border-2 border-newspaper-text p-3"
             >
                <div className="space-y-2">
@@ -252,11 +224,8 @@ const MinimizedHand = ({
                       </Badge>
                      <ExtensionCardBadge cardId={card.id} card={card} variant="inline" />
                    </div>
-                   <Badge variant="outline" className="font-bold flex items-center gap-1">
-                     {isDiscounted && (
-                       <span className="line-through opacity-70">{card.cost}</span>
-                     )}
-                     <span>{effectiveCost} IP</span>
+                   <Badge variant="outline" className="font-bold">
+                     {card.cost} IP
                    </Badge>
                  </div>
                 
@@ -283,16 +252,15 @@ const MinimizedHand = ({
                   </span>
                 </div>
                 
-                {!canAfford && (
+                {!canAffordCard(card.cost) && (
                   <div className="text-red-600 text-xs font-bold">
-                    Insufficient IP (Need {effectiveCost}, have {playerIP})
+                    Insufficient IP (Need {card.cost}, have {playerIP})
                   </div>
                 )}
               </div>
             </TooltipContent>
           </Tooltip>
-          );
-        })}
+        ))}
       </div>
       
       {cards.length === 0 && (

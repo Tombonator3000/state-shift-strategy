@@ -33,7 +33,6 @@ import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import {
   aggregateStateCombinationEffects,
   applyDefenseBonusToStates,
-  applyStateCombinationCostModifiers,
   createDefaultCombinationEffects,
 } from '@/data/stateCombinations';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
@@ -1234,7 +1233,7 @@ const Index = () => {
             hotspotId: hotspot?.id,
             stateId: stateRecord?.id ?? stateRecord?.abbreviation ?? stateName,
             stateName,
-            source: (hotspot?.source === 'neutral' ? 'truth' : hotspot?.source) ?? 'truth',
+            source: hotspot?.source ?? 'neutral',
             defenseBoost,
             truthReward,
             duration: hotspot?.duration,
@@ -1281,7 +1280,7 @@ const Index = () => {
             hotspotId: historyEntry?.id,
             stateId: historyEntry?.stateId ?? stateRecord?.id ?? stateRecord?.abbreviation ?? stateName,
             stateName,
-            source: (historyEntry?.source === 'neutral' ? 'truth' : historyEntry?.source) ?? 'truth',
+            source: historyEntry?.source ?? 'neutral',
             defenseBoost: historyEntry?.defenseBoost,
             truthReward: historyEntry?.truthReward,
             outcome: 'captured',
@@ -1325,7 +1324,7 @@ const Index = () => {
             hotspotId: historyEntry?.id,
             stateId: historyEntry?.stateId ?? stateRecord?.id ?? stateRecord?.abbreviation ?? stateName,
             stateName,
-            source: (historyEntry?.source === 'neutral' ? 'truth' : historyEntry?.source) ?? 'truth',
+            source: historyEntry?.source ?? 'neutral',
             defenseBoost: historyEntry?.defenseBoost,
             truthReward: historyEntry?.truthReward,
             outcome: 'expired',
@@ -1417,17 +1416,7 @@ const Index = () => {
     }
   }, [audio]);
 
-  const handleCloseNewspaper = useCallback(() => {
-    closeNewspaper();
-    audio.playSFX('newspaper');
-  }, [audio, closeNewspaper]);
-
   const handleEndTurn = useCallback(() => {
-    if (gameState.phase === 'newspaper') {
-      handleCloseNewspaper();
-      return;
-    }
-
     if (isEndingTurn) {
       return;
     }
@@ -1439,7 +1428,7 @@ const Index = () => {
     setTimeout(() => {
       audio.playSFX('cardDraw');
     }, 500);
-  }, [audio, endTurn, gameState.phase, handleCloseNewspaper, isEndingTurn]);
+  }, [audio, endTurn, isEndingTurn]);
 
   // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
@@ -1481,9 +1470,7 @@ const Index = () => {
           break;
         case ' ':
           e.preventDefault();
-          if (!isEndingTurn && gameState.phase === 'newspaper') {
-            handleEndTurn();
-          } else if (gameState.phase === 'action' && !gameState.animating && !isEndingTurn) {
+          if (gameState.phase === 'action' && !gameState.animating && !isEndingTurn) {
             handleEndTurn();
           }
           break;
@@ -1509,16 +1496,7 @@ const Index = () => {
     if (gameState.phase === 'action' && gameState.currentPlayer === 'human' && !gameState.animating) {
       setIsEndingTurn(false);
     }
-    
-    // Safety: Reset animating if stuck for too long (5 seconds)
-    if (gameState.animating) {
-      const timeout = setTimeout(() => {
-        console.warn('[Safety] Resetting stuck animating state');
-        setGameState(prev => ({ ...prev, animating: false }));
-      }, 5000);
-      return () => clearTimeout(timeout);
-    }
-  }, [gameState.phase, gameState.currentPlayer, gameState.animating, setGameState]);
+  }, [gameState.phase, gameState.currentPlayer, gameState.animating]);
 
   const handleSaveGame = () => {
     if (saveGame) {
@@ -1617,16 +1595,9 @@ const Index = () => {
       VisualEffectsCoordinator.triggerGovernmentZoneTarget({ active: false, mode: 'complete' });
     }
 
-    const effectiveCost = applyStateCombinationCostModifiers(
-      card.cost,
-      card.type,
-      'human',
-      gameState.stateCombinationEffects,
-    );
-
     // Check if player can afford the card
-    if (gameState.ip < effectiveCost) {
-      toast.error(`💰 Insufficient IP! Need ${effectiveCost}, have ${gameState.ip}`, {
+    if (gameState.ip < card.cost) {
+      toast.error(`💰 Insufficient IP! Need ${card.cost}, have ${gameState.ip}`, {
         duration: 3000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
       });
@@ -1792,6 +1763,11 @@ const Index = () => {
     }
   };
 
+  const handleCloseNewspaper = () => {
+    closeNewspaper();
+    audio.playSFX('newspaper');
+  };
+
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -1924,7 +1900,6 @@ const Index = () => {
   }
 
   const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
-  const goToPressDisabled = gameState.phase === 'newspaper' ? false : isPlayerActionLocked || isEndingTurn;
   const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
 
   const playerAgenda = gameState.secretAgenda;
@@ -2360,7 +2335,6 @@ const Index = () => {
           currentIP={gameState.ip}
           loadingCard={loadingCard}
           onCardHover={setHoveredCard}
-          stateCombinationEffects={gameState.stateCombinationEffects}
         />
       </div>
       <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
@@ -2368,7 +2342,7 @@ const Index = () => {
           id="end-turn-button"
           onClick={handleEndTurn}
           className="end-turn-button touch-target w-full border-2 border-black bg-truth-red py-3 font-black uppercase tracking-[0.4em] text-white transition duration-200 hover:bg-white hover:text-truth-red disabled:opacity-60"
-          disabled={goToPressDisabled}
+          disabled={isPlayerActionLocked || isEndingTurn}
         >
           {gameState.currentPlayer === 'ai' ? (
             <span className="flex items-center justify-center gap-2 text-sm">
