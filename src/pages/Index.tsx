@@ -1509,7 +1509,16 @@ const Index = () => {
     if (gameState.phase === 'action' && gameState.currentPlayer === 'human' && !gameState.animating) {
       setIsEndingTurn(false);
     }
-  }, [gameState.phase, gameState.currentPlayer, gameState.animating]);
+    
+    // Safety: Reset animating if stuck for too long (5 seconds)
+    if (gameState.animating) {
+      const timeout = setTimeout(() => {
+        console.warn('[Safety] Resetting stuck animating state');
+        setGameState(prev => ({ ...prev, animating: false }));
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [gameState.phase, gameState.currentPlayer, gameState.animating, setGameState]);
 
   const handleSaveGame = () => {
     if (saveGame) {
