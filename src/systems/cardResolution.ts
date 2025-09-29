@@ -81,6 +81,8 @@ export interface CardPlayResolution {
   damageDealt: number;
   aiSecretAgendaRevealed?: boolean;
   resolvedHotspots?: string[];
+  cancelled?: boolean;
+  countered?: boolean;
 }
 
 const PLAYER_ID: PlayerId = 'P1';
@@ -298,6 +300,20 @@ export function resolveCardMVP(
 
   applyEffectsMvp(engineState, ownerId, effectiveCard as Card, targetStateId, mediaOptionsWithCombos);
 
+  const normalizedEngineLog = engineState.log.map(entry => entry.toLowerCase());
+  const wasCountered = normalizedEngineLog.some(entry =>
+    entry.includes('countered') ||
+    entry.includes('deflected') ||
+    entry.includes('negated') ||
+    entry.includes('nullified')
+  );
+  const wasCancelled = normalizedEngineLog.some(entry =>
+    entry.includes('cancelled') ||
+    entry.includes('canceled') ||
+    entry.includes('prevented') ||
+    entry.includes('fizzled')
+  );
+
   const logEntries: string[] = engineLog.map(message => `${card.name}: ${message}`);
   const newStates = gameState.states.map(state => ({ ...state }));
   const nextControlledStates = new Set(gameState.controlledStates);
@@ -430,6 +446,8 @@ export function resolveCardMVP(
     damageDealt,
     aiSecretAgendaRevealed: revealsSecretAgenda,
     resolvedHotspots: resolvedHotspots.length > 0 ? resolvedHotspots : undefined,
+    cancelled: wasCancelled,
+    countered: wasCountered,
   };
 }
 
