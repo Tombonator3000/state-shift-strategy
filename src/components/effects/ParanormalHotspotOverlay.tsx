@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 
 interface ParanormalHotspotOverlayProps {
@@ -19,6 +19,10 @@ const SOURCE_STYLES: Record<ParanormalHotspotOverlayProps['source'], string> = {
   neutral: 'border-purple-400/70 bg-purple-500/20 text-purple-50',
 };
 
+const UFO_FLIGHT_DURATION = 2200;
+const PANEL_FADE_DELAY = UFO_FLIGHT_DURATION + 200;
+const OVERLAY_TIMEOUT = UFO_FLIGHT_DURATION + 4200;
+
 const ParanormalHotspotOverlay: React.FC<ParanormalHotspotOverlayProps> = ({
   x,
   y,
@@ -30,25 +34,62 @@ const ParanormalHotspotOverlay: React.FC<ParanormalHotspotOverlayProps> = ({
   truthReward,
   onComplete,
 }) => {
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      onComplete?.();
-    }, 3200);
+  const [hasLanded, setHasLanded] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-    return () => window.clearTimeout(timeout);
+  useEffect(() => {
+    const reduceMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+    setPrefersReducedMotion(Boolean(reduceMotion));
+    setHasLanded(Boolean(reduceMotion));
+
+    const landTimer = reduceMotion
+      ? null
+      : window.setTimeout(() => {
+          setHasLanded(true);
+        }, PANEL_FADE_DELAY);
+
+    const completeTimer = window.setTimeout(() => {
+      onComplete?.();
+    }, OVERLAY_TIMEOUT);
+
+    return () => {
+      if (landTimer) {
+        window.clearTimeout(landTimer);
+      }
+      window.clearTimeout(completeTimer);
+    };
   }, [onComplete]);
 
+  const overlayStyle = useMemo(() => {
+    const startOffsetX = Math.max(36, x - 240);
+    const startOffsetY = Math.max(24, y - 220);
+
+    return {
+      '--hotspot-x': `${x}px`,
+      '--hotspot-y': `${y}px`,
+      '--ufo-start-x': `${startOffsetX}px`,
+      '--ufo-start-y': `${startOffsetY}px`,
+      '--ufo-flight-duration': prefersReducedMotion ? '0ms' : `${UFO_FLIGHT_DURATION}ms`,
+    } as React.CSSProperties;
+  }, [prefersReducedMotion, x, y]);
+
   return (
-    <div
-      className="absolute pointer-events-none"
-      style={{ transform: `translate(-50%, -50%) translate(${x}px, ${y}px)` }}
-    >
+    <div className="paranormal-hotspot-overlay" style={overlayStyle}>
+      <div className={clsx('paranormal-hotspot-ufo', hasLanded && 'landed')} aria-hidden="true">
+        <span className="paranormal-hotspot-ufo-body">🛸</span>
+        <span className="paranormal-hotspot-ufo-beam" />
+      </div>
       <div
         className={clsx(
-          'min-w-[220px] max-w-xs rounded-2xl border px-4 py-3 shadow-[0_0_35px_rgba(147,51,234,0.35)] backdrop-blur-xl',
+          'paranormal-hotspot-panel min-w-[220px] max-w-xs rounded-2xl border px-4 py-3',
+          'shadow-[0_0_35px_rgba(74,222,128,0.28)] backdrop-blur-xl',
           'bg-gradient-to-br from-black/70 via-black/60 to-black/70 ring-1 ring-white/10',
           'animate-[pulse_3s_ease-in-out_infinite]',
           SOURCE_STYLES[source],
+          hasLanded ? 'paranormal-hotspot-panel--visible' : 'paranormal-hotspot-panel--hidden',
         )}
       >
         <div className="flex items-center gap-3 text-lg font-extrabold tracking-wide">

@@ -289,9 +289,11 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       const isTargeting = selectedZoneCard && !isSelected;
       const canTarget = selectedZoneCard && gameState && gameState.owner !== 'player'; // Can't target own states
       let classes = `state-path ${getStateOwnerClass(gameState)}`;
+      const hasHotspot = Boolean(gameState?.paranormalHotspot);
       if (isSelected) classes += ' selected';
       if (isTargeting && canTarget) classes += ' targeting';
       if (isTargeting && !canTarget) classes += ' invalid-target';
+      if (hasHotspot) classes += ' hotspot-active';
       
       pathElement.setAttribute('class', classes);
       pathElement.setAttribute('data-state-id', stateId);
@@ -912,6 +914,13 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           stroke: hsl(var(--foreground));
         }
 
+        .state-path.hotspot-active {
+          stroke: rgba(74, 222, 128, 0.95);
+          stroke-width: 3;
+          filter: drop-shadow(0 0 16px rgba(74, 222, 128, 0.55));
+          transition: filter 200ms ease, stroke 200ms ease;
+        }
+
         .contested-radar {
           fill: rgba(57, 255, 20, 0.08);
           stroke: #39ff14;
@@ -1013,28 +1022,29 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         .paranormal-hotspot-marker {
           animation: hotspotPulse 3s ease-in-out infinite;
           transform-origin: center;
+          filter: drop-shadow(0 0 16px rgba(34, 197, 94, 0.6));
         }
 
         .paranormal-hotspot-glow {
-          fill: rgba(168, 85, 247, 0.18);
+          fill: rgba(34, 197, 94, 0.22);
         }
 
         .paranormal-hotspot-ring {
-          stroke: rgba(168, 85, 247, 0.7);
+          stroke: rgba(34, 197, 94, 0.85);
           stroke-width: 2;
           fill: none;
-          filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.45));
+          filter: drop-shadow(0 0 12px rgba(34, 197, 94, 0.55));
         }
 
         .paranormal-hotspot-icon {
-          fill: #ffffff;
+          fill: #ecfdf5;
           font-size: 16px;
           font-weight: 600;
-          filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.65));
+          filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.75));
         }
 
         .paranormal-hotspot-counter {
-          fill: rgba(255, 255, 255, 0.85);
+          fill: rgba(236, 253, 245, 0.9);
           font-size: 9px;
           font-family: 'JetBrains Mono', monospace;
           letter-spacing: 0.08em;

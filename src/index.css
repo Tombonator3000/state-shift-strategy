@@ -1431,6 +1431,165 @@ html, body, #root {
   }
 }
 
+/* === Paranormal Hotspot Overlay === */
+.paranormal-hotspot-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1250;
+  --hotspot-x: 0px;
+  --hotspot-y: 0px;
+  --ufo-start-x: 48px;
+  --ufo-start-y: 48px;
+  --ufo-flight-duration: 2200ms;
+}
+
+.paranormal-hotspot-ufo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(var(--ufo-start-x), var(--ufo-start-y)) scale(0.72);
+  filter: drop-shadow(0 0 20px rgba(34, 197, 94, 0.55));
+  animation: ufo-approach var(--ufo-flight-duration) cubic-bezier(0.33, 0, 0.2, 1) forwards;
+}
+
+.paranormal-hotspot-ufo.landed {
+  animation: ufo-hover 5.2s ease-in-out infinite;
+  transform: translate(var(--hotspot-x), var(--hotspot-y)) scale(1);
+}
+
+.paranormal-hotspot-ufo-body {
+  font-size: 28px;
+  text-shadow: 0 0 14px rgba(34, 197, 94, 0.55);
+}
+
+.paranormal-hotspot-ufo-beam {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 64px;
+  height: 120px;
+  transform: translate(-50%, -18%) scaleY(0.08);
+  transform-origin: top center;
+  border-radius: 999px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(187, 247, 208, 0.8) 0%,
+    rgba(74, 222, 128, 0.55) 42%,
+    rgba(22, 163, 74, 0.08) 72%,
+    transparent 100%
+  );
+  opacity: 0;
+  filter: blur(0.5px) drop-shadow(0 0 24px rgba(74, 222, 128, 0.45));
+  animation: ufo-beam-ignite 720ms ease-out forwards;
+  animation-delay: calc(var(--ufo-flight-duration) - 320ms);
+}
+
+.paranormal-hotspot-ufo.landed .paranormal-hotspot-ufo-beam {
+  animation: ufo-beam-pulse 2.6s ease-in-out infinite;
+}
+
+.paranormal-hotspot-panel {
+  position: absolute;
+  top: var(--hotspot-y);
+  left: var(--hotspot-x);
+  transform: translate(-50%, -58%) scale(0.94);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 360ms ease, transform 360ms ease;
+}
+
+.paranormal-hotspot-panel--visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.paranormal-hotspot-panel--hidden {
+  opacity: 0;
+}
+
+@keyframes ufo-approach {
+  0% {
+    opacity: 0;
+    transform: translate(var(--ufo-start-x), var(--ufo-start-y)) scale(0.6) rotate(-4deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(
+      calc((var(--ufo-start-x) + var(--hotspot-x)) / 2),
+      calc((var(--ufo-start-y) + var(--hotspot-y)) / 2)
+    )
+    scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(var(--hotspot-x), var(--hotspot-y)) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes ufo-hover {
+  0%, 100% {
+    transform: translate(var(--hotspot-x), calc(var(--hotspot-y) - 4px)) scale(1);
+  }
+  50% {
+    transform: translate(var(--hotspot-x), calc(var(--hotspot-y) + 3px)) scale(1.02);
+  }
+}
+
+@keyframes ufo-beam-ignite {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -28%) scaleY(0.05);
+  }
+  60% {
+    opacity: 0.85;
+    transform: translate(-50%, -6%) scaleY(1.05);
+  }
+  100% {
+    opacity: 0.65;
+    transform: translate(-50%, 4%) scaleY(1);
+  }
+}
+
+@keyframes ufo-beam-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translate(-50%, 2%) scaleY(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate(-50%, -2%) scaleY(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paranormal-hotspot-overlay {
+    --ufo-flight-duration: 0ms;
+  }
+
+  .paranormal-hotspot-ufo,
+  .paranormal-hotspot-ufo.landed {
+    animation: none !important;
+    transform: translate(var(--hotspot-x), var(--hotspot-y)) scale(1) !important;
+    filter: drop-shadow(0 0 16px rgba(74, 222, 128, 0.45));
+  }
+
+  .paranormal-hotspot-ufo-beam {
+    animation: none !important;
+    opacity: 0.75;
+    transform: translate(-50%, 4%) scaleY(1);
+  }
+
+  .paranormal-hotspot-panel {
+    transition: opacity 200ms ease;
+  }
+}
+
 /* === Conspiracy Corkboard Cascade === */
 .conspiracy-corkboard-overlay {
   position: fixed;
