@@ -33,6 +33,7 @@ import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import {
   aggregateStateCombinationEffects,
   applyDefenseBonusToStates,
+  applyStateCombinationCostModifiers,
   createDefaultCombinationEffects,
 } from '@/data/stateCombinations';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
@@ -1607,9 +1608,16 @@ const Index = () => {
       VisualEffectsCoordinator.triggerGovernmentZoneTarget({ active: false, mode: 'complete' });
     }
 
+    const effectiveCost = applyStateCombinationCostModifiers(
+      card.cost,
+      card.type,
+      'human',
+      gameState.stateCombinationEffects,
+    );
+
     // Check if player can afford the card
-    if (gameState.ip < card.cost) {
-      toast.error(`💰 Insufficient IP! Need ${card.cost}, have ${gameState.ip}`, {
+    if (gameState.ip < effectiveCost) {
+      toast.error(`💰 Insufficient IP! Need ${effectiveCost}, have ${gameState.ip}`, {
         duration: 3000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
       });
