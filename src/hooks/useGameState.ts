@@ -801,18 +801,58 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }
 
       let workingStates: GameState['states'] | null = null;
+      let normalizedStateLookup: { idLower: string; abbreviationLower: string | null }[] | null = null;
+
+      const buildLookupEntry = (state: GameState['states'][number]) => ({
+        idLower: typeof state.id === 'string' ? state.id.trim().toLowerCase() : '',
+        abbreviationLower: typeof state.abbreviation === 'string'
+          ? state.abbreviation.trim().toLowerCase()
+          : null,
+      });
+
+      const ensureStateLookup = (states: GameState['states']) => {
+        if (!normalizedStateLookup || normalizedStateLookup.length !== states.length) {
+          normalizedStateLookup = states.map(buildLookupEntry);
+        }
+        return normalizedStateLookup!;
+      };
+
+      const updateStateLookupEntry = (index: number, state: GameState['states'][number]) => {
+        if (!normalizedStateLookup) {
+          return;
+        }
+        normalizedStateLookup[index] = buildLookupEntry(state);
+      };
+
       const ensureWorkingStates = () => {
         if (!workingStates) {
           workingStates = nextState.states.map(state => ({ ...state }));
+          normalizedStateLookup = workingStates.map(buildLookupEntry);
+        } else if (!normalizedStateLookup || normalizedStateLookup.length !== workingStates.length) {
+          normalizedStateLookup = workingStates.map(buildLookupEntry);
         }
         return workingStates;
       };
 
       const findStateIndex = (states: GameState['states'], identifier: string | null | undefined) => {
-        if (!identifier) {
+        if (typeof identifier !== 'string') {
           return -1;
         }
-        return states.findIndex(state => state.id === identifier || state.abbreviation === identifier);
+        const normalizedIdentifier = identifier.trim().toLowerCase();
+        if (!normalizedIdentifier) {
+          return -1;
+        }
+        const lookup = ensureStateLookup(states);
+        for (let index = 0; index < lookup.length; index += 1) {
+          const entry = lookup[index];
+          if (entry.idLower === normalizedIdentifier) {
+            return index;
+          }
+          if (entry.abbreviationLower && entry.abbreviationLower === normalizedIdentifier) {
+            return index;
+          }
+        }
+        return -1;
       };
 
       let truth = nextState.truth;
@@ -977,6 +1017,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
               if (index !== stateIndex) {
                 statesArray[index] = candidateState;
+                updateStateLookupEntry(index, candidateState);
               }
             }
           }
@@ -991,6 +1032,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         targetState.stateEventHistory = updatedHistory;
         targetState.stateEventBonus = updatedHistory[updatedHistory.length - 1];
         statesArray[stateIndex] = targetState;
+        updateStateLookupEntry(stateIndex, targetState);
 
         const stateName = targetState.name ?? resolvedState.name ?? trigger.stateId;
         const label = trigger.event.title ?? trigger.event.headline ?? trigger.event.id;
