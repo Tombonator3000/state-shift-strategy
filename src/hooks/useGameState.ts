@@ -825,13 +825,18 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           continue;
         }
 
-        const trigger = triggerStateEvent(stateId, capturingFaction, nextState);
+        const eventStateKey = resolvedState.abbreviation ?? stateId;
+        const trigger = triggerStateEvent(eventStateKey, capturingFaction, nextState);
         if (!trigger) {
           continue;
         }
 
         const statesArray = ensureWorkingStates();
-        const indexCandidates = [resolvedState.id, resolvedState.abbreviation, trigger.stateId];
+        const indexCandidates = [resolvedState.id, resolvedState.abbreviation];
+        if (!indexCandidates.includes(eventStateKey)) {
+          indexCandidates.push(eventStateKey);
+        }
+        indexCandidates.push(trigger.stateId);
         let stateIndex = -1;
         for (const candidate of indexCandidates) {
           stateIndex = findStateIndex(statesArray, candidate);
