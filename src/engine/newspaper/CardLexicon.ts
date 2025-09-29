@@ -76,7 +76,7 @@ const BASE_FACTION_TAGS: Record<string, string> = {
   Government: '#ContainmentBureau',
 };
 
-const BASE_TYPE_TAGS: Record<Card['type'], string> = {
+const BASE_TYPE_TAGS: Partial<Record<Card['type'], string>> = {
   ATTACK: '#DirectAction',
   MEDIA: '#BroadcastSpin',
   ZONE: '#GroundSurge',

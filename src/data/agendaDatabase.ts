@@ -97,20 +97,21 @@ const countControlledMatches = (gameState: any, targets: string[]): number => {
     return 0;
   }
 
-  return ensureArray(gameState?.controlledStates).reduce((total, stateId) => {
-    const normalized = normalizeStateId(stateId, gameState?.states);
+  const result = ensureArray((gameState as any)?.controlledStates).reduce((total: number, stateId: any): number => {
+    const normalized = normalizeStateId(stateId, (gameState as any)?.states);
     return normalizedTargets.has(normalized) ? total + 1 : total;
-  }, 0);
+  }, 0) as number;
+  return result;
 };
 
-const countCapturedMatches = (gameState: any, targets?: Set<string>): number => {
-  const plays = ensureArray(gameState?.factionPlayHistory);
-  let total = 0;
+const countCapturedMatches = (gameState: unknown, targets?: Set<string>): number => {
+  const plays = ensureArray((gameState as any)?.factionPlayHistory);
+  let total: number = 0;
 
   for (const record of plays) {
-    const capturedStates = ensureArray(record?.capturedStates);
+    const capturedStates = ensureArray((record as any)?.capturedStates);
     for (const entry of capturedStates) {
-      const normalized = normalizeStateId(entry, gameState?.states);
+      const normalized = normalizeStateId(entry, (gameState as any)?.states);
       if (!normalized) {
         continue;
       }
@@ -124,34 +125,35 @@ const countCapturedMatches = (gameState: any, targets?: Set<string>): number => 
   return total;
 };
 
-const countCardTypePlays = (gameState: any, type: string): number => {
-  return ensureArray(gameState?.factionPlayHistory).filter(
-    record => record?.card?.type === type,
+const countCardTypePlays = (gameState: unknown, type: string): number => {
+  return ensureArray((gameState as any)?.factionPlayHistory).filter(
+    (record: any) => record?.card?.type === type,
   ).length;
 };
 
-const sumPositiveTruthDelta = (gameState: any): number => {
-  return ensureArray(gameState?.factionPlayHistory).reduce((total, record) => {
+const sumPositiveTruthDelta = (gameState: unknown): number => {
+  const result = ensureArray((gameState as any)?.factionPlayHistory).reduce((total: number, record: any): number => {
     const delta = typeof record?.truthDelta === 'number' ? record.truthDelta : 0;
     return delta > 0 ? total + delta : total;
-  }, 0);
+  }, 0) as number;
+  return result;
 };
 
-const countZonePlaysOnStates = (gameState: any, targets: Set<string>): number => {
-  return ensureArray(gameState?.factionPlayHistory).filter(record => {
+const countZonePlaysOnStates = (gameState: unknown, targets: Set<string>): number => {
+  return ensureArray((gameState as any)?.factionPlayHistory).filter((record: any) => {
     if (record?.card?.type !== 'ZONE') {
       return false;
     }
 
-    const normalized = normalizeStateId(record?.targetState, gameState?.states);
+    const normalized = normalizeStateId(record?.targetState, (gameState as any)?.states);
     return normalized && targets.has(normalized);
   }).length;
 };
 
-const countMediaAndAttackPairs = (gameState: any): number => {
-  const plays = ensureArray(gameState?.factionPlayHistory);
-  const media = plays.filter(record => record?.card?.type === 'MEDIA').length;
-  const attack = plays.filter(record => record?.card?.type === 'ATTACK').length;
+const countMediaAndAttackPairs = (gameState: unknown): number => {
+  const plays = ensureArray((gameState as any)?.factionPlayHistory);
+  const media = plays.filter((record: any) => record?.card?.type === 'MEDIA').length;
+  const attack = plays.filter((record: any) => record?.card?.type === 'ATTACK').length;
   return Math.min(media, attack);
 };
 
