@@ -47,6 +47,7 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
   const animationRef = useRef<number>();
   const particlesRef = useRef<Particle[]>([]);
   const startTimeRef = useRef<number>();
+  const effectDurationRef = useRef<number>();
 
   useEffect(() => {
     if (!active) return;
@@ -71,6 +72,9 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
     
     particlesRef.current = particles;
     startTimeRef.current = Date.now();
+    effectDurationRef.current = particles.length
+      ? particles.reduce((max, particle) => Math.max(max, particle.maxLife), 0) * (1000 / 60)
+      : undefined;
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -85,10 +89,14 @@ export const ParticleSystem: React.FC<ParticleSystemProps> = ({
         return particle.life > 0;
       });
 
-      // Continue animation if particles exist and not too much time has passed
-      if (particlesRef.current.length > 0 && elapsed < 3000) {
+      const hasLivingParticles = particlesRef.current.length > 0;
+      const expectedDuration = effectDurationRef.current ?? 0;
+      const exceededExpectedDuration = expectedDuration > 0 && elapsed >= expectedDuration + 120;
+
+      if (hasLivingParticles && !exceededExpectedDuration) {
         animationRef.current = requestAnimationFrame(animate);
       } else {
+        animationRef.current = undefined;
         onComplete?.();
       }
     };
