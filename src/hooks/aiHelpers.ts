@@ -5,6 +5,7 @@ import type { TurnPlay } from '@/game/combo.types';
 import type { PlayerId } from '@/mvp/validator';
 
 import type { CardPlayRecord, GameState } from './gameStateTypes';
+import { mergeStateEventHistories } from './stateEventHistory';
 
 const CAPTURE_REGEX = /(captured|seized)\s+([^!]+)!/i;
 
@@ -344,12 +345,14 @@ export const applyAiCardPlay = (
     }
   }
 
+  const mergedStates = mergeStateEventHistories(prev.states, resolution.states);
+
   const nextState: GameState = {
     ...prev,
     ip: resolution.ip,
     aiIP: resolution.aiIP,
     truth: resolution.truth,
-    states: resolution.states,
+    states: mergedStates,
     controlledStates: resolution.controlledStates,
     aiControlledStates: resolution.aiControlledStates,
     targetState: resolution.targetState,
