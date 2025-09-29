@@ -730,93 +730,99 @@ const TabloidNewspaperV2 = ({
                   <span className="rounded-full border border-dashed border-newspaper-border px-2 py-1">{heroTarget}</span>
                 ) : null}
               </div>
-              <h2
-                className={`text-3xl font-black leading-tight sm:text-4xl ${
-                  heroIsEvent ? 'text-secret-red' : 'text-newspaper-headline'
-                }`}
-              >
-                {heroHeadline}
-              </h2>
-              <p
-                className={`text-lg font-semibold italic ${
-                  heroIsEvent ? 'text-secret-red/80' : 'text-newspaper-text/80'
-                }`}
-              >
-                {heroSubhead}
-              </p>
-              <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/70">
-                <span>{byline}</span>
-                <span>{sourceLine}</span>
-              </div>
-              {heroIsEvent && (heroTriggerChance || heroConditionalChance) ? (
-                <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-wide text-secret-red/80">
-                  {formatChance(heroTriggerChance) ? (
-                    <span className="rounded border border-secret-red/50 px-2 py-0.5">
-                      Chance This Turn: {formatChance(heroTriggerChance)}
-                    </span>
-                  ) : null}
-                  {formatChance(heroConditionalChance) ? (
-                    <span className="rounded border border-dashed border-secret-red/50 px-2 py-0.5">
-                      If Triggered: {formatChance(heroConditionalChance)}
-                    </span>
-                  ) : null}
-                </div>
-              ) : null}
-              <div className="relative overflow-hidden rounded-md border border-newspaper-border bg-newspaper-header/20">
-                {heroArticle?.cardId ? (
-                  <CardImage
-                    cardId={heroArticle.cardId}
-                    fit="contain"
-                    className="w-full aspect-[63/88] max-h-80"
-                  />
-                ) : (
-                  <div className="flex aspect-[63/88] w-full max-h-80 items-center justify-center text-sm font-semibold uppercase tracking-wide text-newspaper-text/60">
-                    Archival footage pending clearance.
+              <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6">
+                <div className="space-y-4">
+                  <h2
+                    className={`text-3xl font-black leading-tight sm:text-4xl ${
+                      heroIsEvent ? 'text-secret-red' : 'text-newspaper-headline'
+                    }`}
+                  >
+                    {heroHeadline}
+                  </h2>
+                  <p
+                    className={`text-lg font-semibold italic ${
+                      heroIsEvent ? 'text-secret-red/80' : 'text-newspaper-text/80'
+                    }`}
+                  >
+                    {heroSubhead}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/70">
+                    <span>{byline}</span>
+                    <span>{sourceLine}</span>
                   </div>
-                )}
-                {classifiedStamp ? (
-                  <div className="stamp stamp--classified absolute right-3 top-3">{classifiedStamp}</div>
-                ) : null}
+                  {heroIsEvent && (heroTriggerChance || heroConditionalChance) ? (
+                    <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-wide text-secret-red/80">
+                      {formatChance(heroTriggerChance) ? (
+                        <span className="rounded border border-secret-red/50 px-2 py-0.5">
+                          Chance This Turn: {formatChance(heroTriggerChance)}
+                        </span>
+                      ) : null}
+                      {formatChance(heroConditionalChance) ? (
+                        <span className="rounded border border-dashed border-secret-red/50 px-2 py-0.5">
+                          If Triggered: {formatChance(heroConditionalChance)}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  <div
+                    className={`space-y-4 text-sm leading-relaxed ${
+                      heroIsEvent ? 'text-secret-red/90' : ''
+                    }`}
+                  >
+                    {heroBody.map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-6 space-y-4 lg:mt-0">
+                  <div className="relative overflow-hidden rounded-md border border-newspaper-border bg-newspaper-header/20">
+                    {heroArticle?.cardId ? (
+                      <CardImage
+                        cardId={heroArticle.cardId}
+                        fit="contain"
+                        className="w-full aspect-[63/88] max-h-80"
+                      />
+                    ) : (
+                      <div className="flex aspect-[63/88] w-full max-h-80 items-center justify-center text-sm font-semibold uppercase tracking-wide text-newspaper-text/60">
+                        Archival footage pending clearance.
+                      </div>
+                    )}
+                    {classifiedStamp ? (
+                      <div className="stamp stamp--classified absolute right-3 top-3">{classifiedStamp}</div>
+                    ) : null}
+                  </div>
+                  {heroTags.length ? (
+                    <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
+                      {heroTags.slice(0, 3).map(tag => (
+                        <span key={tag} className="rounded border border-newspaper-border px-2 py-0.5">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {!heroIsEvent && (heroTruthImpact || heroIpImpact || heroPressureImpact) ? (
+                    <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
+                      {heroTruthImpact ? (
+                        <span className="rounded border border-newspaper-border px-2 py-0.5">{heroTruthImpact}</span>
+                      ) : null}
+                      {heroIpImpact ? (
+                        <span className="rounded border border-newspaper-border px-2 py-0.5">{heroIpImpact}</span>
+                      ) : null}
+                      {heroPressureImpact ? (
+                        <span className="rounded border border-newspaper-border px-2 py-0.5">{heroPressureImpact}</span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {heroCaptured.length ? (
+                    <div className="text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
+                      Captured: {heroCaptured.join(', ')}
+                    </div>
+                  ) : null}
+                  {heroArtHint ? (
+                    <p className="text-[11px] italic text-newspaper-text/50">Illustration brief: {heroArtHint}</p>
+                  ) : null}
+                </div>
               </div>
-              {heroTags.length ? (
-                <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
-                  {heroTags.slice(0, 3).map(tag => (
-                    <span key={tag} className="rounded border border-newspaper-border px-2 py-0.5">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-              <div
-                className={`space-y-4 text-sm leading-relaxed ${
-                  heroIsEvent ? 'text-secret-red/90' : ''
-                }`}
-              >
-                {heroBody.map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
-              </div>
-              {!heroIsEvent && (heroTruthImpact || heroIpImpact || heroPressureImpact) ? (
-                <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
-                  {heroTruthImpact ? (
-                    <span className="rounded border border-newspaper-border px-2 py-0.5">{heroTruthImpact}</span>
-                  ) : null}
-                  {heroIpImpact ? (
-                    <span className="rounded border border-newspaper-border px-2 py-0.5">{heroIpImpact}</span>
-                  ) : null}
-                  {heroPressureImpact ? (
-                    <span className="rounded border border-newspaper-border px-2 py-0.5">{heroPressureImpact}</span>
-                  ) : null}
-                </div>
-              ) : null}
-              {heroCaptured.length ? (
-                <div className="text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
-                  Captured: {heroCaptured.join(', ')}
-                </div>
-              ) : null}
-              {heroArtHint ? (
-                <p className="text-[11px] italic text-newspaper-text/50">Illustration brief: {heroArtHint}</p>
-              ) : null}
             </article>
 
             <aside className="space-y-4">
