@@ -68,6 +68,11 @@ export const MVP_RULES_SECTIONS: MvpRulesSection[] = [
     ],
   },
   {
+    title: 'UFO Hotspot Alerts',
+    description:
+      'Paranormal hotspots temporarily raise a state’s defense while promising a Truth swing to whichever faction resolves the anomaly first. When a hotspot appears you’ll see a flying UFO skim the affected state and leave a green glow around it, plus you’ll hear the UFO bulletin sting so you can react even while scanning other panels. If you’ve enabled reduced-motion mode, the UFO flashes in place without sweeping across the map, but the glow still locks on—and the sting still plays—so you can track the target. Drop pressure there immediately or sabotage your opponent’s attempt—the glow clears the moment someone resolves the anomaly.',
+  },
+  {
     title: 'Combo System',
     description:
       'Combos award bonus IP or Truth when you meet card pattern goals within a single turn. Toggle individual combos, the FX channel, or the global system from the Options menu.',

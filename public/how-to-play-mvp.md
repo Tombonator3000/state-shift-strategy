@@ -49,7 +49,7 @@ Some events, cards, or investigative plays can expose the opponent’s agenda, r
 
 ## Events, Hotspots & Combos
 - **Tabloid Events** fire at the end of turns, twisting Truth, IP, defense, or card draw. Legendary events can even reveal agendas or reshuffle state control.
-- **Paranormal Hotspots** temporarily raise a state’s defense while promising a Truth swing to whichever faction resolves the anomaly first. When a hotspot appears you’ll see a flying UFO skim the affected state and leave a green glow around it. If you’ve enabled reduced-motion mode, the UFO flashes in place without sweeping across the map, but the glow still locks on so you can track the target. Drop pressure there immediately or sabotage your opponent’s attempt—the glow clears the moment someone resolves the anomaly.
+- **Paranormal Hotspots** temporarily raise a state’s defense while promising a Truth swing to whichever faction resolves the anomaly first. When a hotspot appears you’ll see a flying UFO skim the affected state and leave a green glow around it, plus you’ll hear the UFO bulletin sting so you can react even while scanning other panels. If you’ve enabled reduced-motion mode, the UFO flashes in place without sweeping across the map, but the glow still locks on—and the sting still plays—so you can track the target. Drop pressure there immediately or sabotage your opponent’s attempt—the glow clears the moment someone resolves the anomaly.
 - **Combo Engine** rewards coordinated turns with bonus IP, Truth swings, or additional card draws. Review combo summaries in the newspaper and adjust your play order to trigger the effects you need.
 
 ## Tactical Tips
