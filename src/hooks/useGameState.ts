@@ -794,10 +794,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const { triggerStateEvent } = useStateEvents();
 
   const triggerCapturedStateEvents = useCallback(
-    (resolution: CardPlayResolution | undefined, nextState: GameState) => {
+    (resolution: CardPlayResolution | undefined, nextState: GameState): GameEvent[] => {
       const capturedIds = resolution?.capturedStateIds ?? [];
       if (!capturedIds.length) {
-        return;
+        return [];
       }
 
       let workingStates: GameState['states'] | null = null;
@@ -824,6 +824,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       let aiIpChanged = false;
       let pendingCardDrawChanged = false;
       const eventLogs: string[] = [];
+      const triggeredEvents: GameEvent[] = [];
 
       for (const stateId of capturedIds) {
         const resolvedState = resolution?.states.find(state => state.id === stateId);
@@ -846,6 +847,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         if (!trigger) {
           continue;
         }
+
+        triggeredEvents.push(trigger.event);
 
         const statesArray = ensureWorkingStates();
         const indexCandidates = [resolvedState.id, resolvedState.abbreviation];
@@ -987,6 +990,25 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (eventLogs.length > 0) {
         nextState.log = [...nextState.log, ...eventLogs];
       }
+
+      if (triggeredEvents.length > 0) {
+        const existing = Array.isArray(nextState.pendingEditionEvents)
+          ? [...nextState.pendingEditionEvents]
+          : [];
+
+        for (const event of triggeredEvents) {
+          const existingIndex = existing.findIndex(candidate => candidate.id === event.id);
+          if (existingIndex === -1) {
+            existing.push(event);
+          } else {
+            existing[existingIndex] = event;
+          }
+        }
+
+        nextState.pendingEditionEvents = existing;
+      }
+
+      return triggeredEvents;
     },
     [triggerStateEvent],
   );
@@ -1055,6 +1077,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         };
       }),
       currentEvents: [],
+      pendingEditionEvents: [],
       eventManager,
       showNewspaper: false,
       agendaIssue: initialIssue,
@@ -1817,7 +1840,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           }
         }
 
-        const newEvents = buildEditionEvents(prev, eventForEdition ?? triggeredEvent);
+        const stateEventsForEdition = prev.pendingEditionEvents?.slice() ?? [];
+        const randomEventForEdition = eventForEdition ?? triggeredEvent;
+        if (randomEventForEdition) {
+          stateEventsForEdition.push(randomEventForEdition);
+        }
+
+        const newEvents = buildEditionEvents(prev, stateEventsForEdition);
 
         const comboDrawBonus = Math.max(0, prev.stateCombinationEffects.extraCardDraw);
         const pendingCardDraw = bonusCardDraw + comboDrawBonus;
@@ -1856,6 +1885,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           aiIP: aiIpAfterCombos,
           pendingCardDraw,
           currentEvents: newEvents,
+          pendingEditionEvents: [],
           comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboTruthDelta,
           cardDrawState: {
             cardsPlayedLastTurn: prev.cardsPlayedThisTurn,
@@ -2655,6 +2685,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             : [],
           stateCombinationEffects: restoredEffects,
           states: statesWithDefense,
+          pendingEditionEvents: Array.isArray(saveData.pendingEditionEvents)
+            ? saveData.pendingEditionEvents
+            : [],
           // Ensure objects are properly reconstructed
           eventManager: prev.eventManager, // Keep the current event manager
           aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium'),

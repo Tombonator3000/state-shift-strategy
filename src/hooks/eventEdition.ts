@@ -8,24 +8,22 @@ export interface EditionEventSnapshot {
 
 export const buildEditionEvents = (
   state: EditionEventSnapshot,
-  triggeredEvent: GameEvent | null,
+  newEvents: GameEvent[],
 ): GameEvent[] => {
-  const isFirstEdition = state.turn === 1 && state.round === 1;
-
-  if (!triggeredEvent) {
-    return [];
+  const existing = [...state.currentEvents];
+  if (!newEvents.length) {
+    return existing;
   }
 
-  if (isFirstEdition) {
-    return [triggeredEvent];
+  const merged = [...existing];
+  for (const event of newEvents) {
+    const existingIndex = merged.findIndex(candidate => candidate.id === event.id);
+    if (existingIndex === -1) {
+      merged.push(event);
+    } else {
+      merged[existingIndex] = event;
+    }
   }
 
-  const wasAlreadyPresent = state.currentEvents.some(event => event.id === triggeredEvent.id);
-  if (!wasAlreadyPresent) {
-    return [triggeredEvent];
-  }
-
-  return state.currentEvents.map(event =>
-    event.id === triggeredEvent.id ? triggeredEvent : event,
-  );
+  return merged;
 };
