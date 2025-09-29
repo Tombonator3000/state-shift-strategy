@@ -7,6 +7,12 @@ import {
 } from './index';
 import type { MixMode } from '@/lib/decks/expansions';
 import { loadPrefs, savePrefs } from '@/lib/persist';
+import {
+  DEFAULT_DISTRIBUTION_SETTINGS,
+  loadDistributionSettingsFromStorage,
+  sanitizeDistributionSettings,
+  weightedDistribution,
+} from '../weightedCardDistribution';
 
 type StoredPrefs = {
   mode?: MixMode;
@@ -146,5 +152,9 @@ export const initializeExpansions = async (): Promise<void> => {
   );
 
   rebuildEnabledMap();
+  const storedDistribution = loadDistributionSettingsFromStorage();
+  const distributionSettings =
+    storedDistribution ?? sanitizeDistributionSettings(DEFAULT_DISTRIBUTION_SETTINGS);
+  weightedDistribution.updateSettings(distributionSettings);
   await ensureCardsLoaded();
 };

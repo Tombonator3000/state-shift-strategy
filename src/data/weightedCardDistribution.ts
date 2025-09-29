@@ -6,6 +6,36 @@ import {
   getExpansionCardsSnapshot,
 } from './expansions/state';
 
+export const DISTRIBUTION_STORAGE_KEY = 'shadowgov-distribution-settings';
+
+const DEFAULT_EXPANSION_WEIGHT = 1;
+const MIN_WEIGHT = 0;
+const MAX_WEIGHT = 3;
+
+const getStorage = (): Storage | null => {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    return window.localStorage;
+  }
+
+  if (typeof globalThis !== 'undefined' && 'localStorage' in globalThis) {
+    return (globalThis as typeof globalThis & { localStorage?: Storage }).localStorage ?? null;
+  }
+
+  return null;
+};
+
+const clamp = (value: number, min: number, max: number) => {
+  return Math.max(min, Math.min(max, value));
+};
+
+const toValidWeight = (value: unknown, fallback: number) => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return clamp(value, MIN_WEIGHT, MAX_WEIGHT);
+  }
+
+  return clamp(fallback, MIN_WEIGHT, MAX_WEIGHT);
+};
+
 export const MVP_TYPE_WEIGHTS: Record<'ATTACK' | 'MEDIA' | 'ZONE', number> = {
   ATTACK: 0.33,
   MEDIA: 0.34,
@@ -152,6 +182,94 @@ export const DEFAULT_DISTRIBUTION_SETTINGS: DistributionSettings = {
   },
   duplicateLimit: 2,
   earlySeedCount: 4
+};
+
+export const sanitizeDistributionSettings = (
+  incoming?: Partial<DistributionSettings>,
+): DistributionSettings => {
+  const base = incoming ?? {};
+  const enabledExpansions = getEnabledExpansionIdsSnapshot();
+  const hasEnabledExpansions = enabledExpansions.length > 0;
+
+  const requestedMode = base.mode ?? DEFAULT_DISTRIBUTION_SETTINGS.mode;
+  const mode: DistributionMode = hasEnabledExpansions ? requestedMode : 'core-only';
+
+  const sourceWeights: Partial<DistributionSettings['setWeights']> = base.setWeights ?? {};
+  const sanitizedSetWeights: DistributionSettings['setWeights'] = {
+    core: toValidWeight(
+      sourceWeights.core,
+      DEFAULT_DISTRIBUTION_SETTINGS.setWeights.core,
+    ),
+  };
+
+  for (const expansionId of enabledExpansions) {
+    const fallback =
+      typeof DEFAULT_DISTRIBUTION_SETTINGS.setWeights[expansionId] === 'number'
+        ? DEFAULT_DISTRIBUTION_SETTINGS.setWeights[expansionId]
+        : DEFAULT_EXPANSION_WEIGHT;
+
+    sanitizedSetWeights[expansionId] = toValidWeight(
+      sourceWeights[expansionId],
+      fallback,
+    );
+  }
+
+  const rarityTargets = {
+    ...DEFAULT_DISTRIBUTION_SETTINGS.rarityTargets,
+    ...(base.rarityTargets ?? {}),
+  };
+
+  const typeBalancing = {
+    ...DEFAULT_DISTRIBUTION_SETTINGS.typeBalancing,
+    ...(base.typeBalancing ?? {}),
+  };
+
+  return {
+    ...DEFAULT_DISTRIBUTION_SETTINGS,
+    ...base,
+    mode,
+    setWeights: sanitizedSetWeights,
+    rarityTargets,
+    typeBalancing,
+  };
+};
+
+export const loadDistributionSettingsFromStorage = (): DistributionSettings | null => {
+  const storage = getStorage();
+  if (!storage) {
+    return null;
+  }
+
+  try {
+    const saved = storage.getItem(DISTRIBUTION_STORAGE_KEY);
+    if (!saved) {
+      return null;
+    }
+
+    const parsed = JSON.parse(saved) as DistributionSettings;
+    return sanitizeDistributionSettings(parsed);
+  } catch (error) {
+    console.error('Failed to load distribution settings:', error);
+    return null;
+  }
+};
+
+export const persistDistributionSettings = (
+  settings: DistributionSettings,
+): DistributionSettings => {
+  const sanitized = sanitizeDistributionSettings(settings);
+  const storage = getStorage();
+  if (!storage) {
+    return sanitized;
+  }
+
+  try {
+    storage.setItem(DISTRIBUTION_STORAGE_KEY, JSON.stringify(sanitized));
+  } catch (error) {
+    console.error('Failed to save distribution settings:', error);
+  }
+
+  return sanitized;
 };
 
 // Card set information
@@ -496,7 +614,7 @@ class WeightedCardDistribution {
 
   // Configuration methods
   updateSettings(newSettings: Partial<DistributionSettings>): void {
-    this.settings = { ...this.settings, ...newSettings };
+    this.settings = sanitizeDistributionSettings({ ...this.settings, ...newSettings });
   }
 
   getSettings(): DistributionSettings {

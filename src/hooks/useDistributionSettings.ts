@@ -4,75 +4,29 @@ import {
   DistributionMode,
   DEFAULT_DISTRIBUTION_SETTINGS,
   weightedDistribution,
+  sanitizeDistributionSettings,
+  loadDistributionSettingsFromStorage,
+  persistDistributionSettings,
 } from '@/data/weightedCardDistribution';
 import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
 
-const STORAGE_KEY = 'shadowgov-distribution-settings';
-
-const DEFAULT_EXPANSION_WEIGHT = 1;
-const MIN_WEIGHT = 0;
-const MAX_WEIGHT = 3;
-
-const clamp = (value: number, min: number, max: number) => {
-  return Math.max(min, Math.min(max, value));
-};
-
-const toValidWeight = (value: unknown, fallback: number) => {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return clamp(value, MIN_WEIGHT, MAX_WEIGHT);
-  }
-
-  return clamp(fallback, MIN_WEIGHT, MAX_WEIGHT);
-};
-
-const sanitizeSettings = (incoming: DistributionSettings): DistributionSettings => {
-  const enabledExpansions = getEnabledExpansionIdsSnapshot();
-  const hasEnabledExpansions = enabledExpansions.length > 0;
-
-  const requestedMode = incoming.mode ?? DEFAULT_DISTRIBUTION_SETTINGS.mode;
-  const mode = hasEnabledExpansions ? requestedMode : 'core-only';
-
-  const sourceWeights = incoming.setWeights ?? DEFAULT_DISTRIBUTION_SETTINGS.setWeights;
-  const sanitizedSetWeights: DistributionSettings['setWeights'] = {
-    core: toValidWeight(
-      sourceWeights.core,
-      DEFAULT_DISTRIBUTION_SETTINGS.setWeights.core,
-    ),
-  };
-
-  for (const expansionId of enabledExpansions) {
-    const fallback =
-      typeof DEFAULT_DISTRIBUTION_SETTINGS.setWeights[expansionId] === 'number'
-        ? DEFAULT_DISTRIBUTION_SETTINGS.setWeights[expansionId]
-        : DEFAULT_EXPANSION_WEIGHT;
-
-    sanitizedSetWeights[expansionId] = toValidWeight(sourceWeights[expansionId], fallback);
-  }
-
-  return {
-    ...DEFAULT_DISTRIBUTION_SETTINGS,
-    ...incoming,
-    mode,
-    setWeights: sanitizedSetWeights,
-  };
-};
-
 export const useDistributionSettings = () => {
-  const [settings, setSettings] = useState<DistributionSettings>(sanitizeSettings(DEFAULT_DISTRIBUTION_SETTINGS));
+  const [settings, setSettings] = useState<DistributionSettings>(
+    sanitizeDistributionSettings(DEFAULT_DISTRIBUTION_SETTINGS),
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadSettings = () => {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = loadDistributionSettingsFromStorage();
         if (saved) {
-          const savedSettings = JSON.parse(saved) as DistributionSettings;
-          const merged = sanitizeSettings(savedSettings);
-          setSettings(merged);
-          weightedDistribution.updateSettings(merged);
+          setSettings(saved);
+          weightedDistribution.updateSettings(saved);
+        } else {
+          const defaults = sanitizeDistributionSettings(DEFAULT_DISTRIBUTION_SETTINGS);
+          weightedDistribution.updateSettings(defaults);
         }
-      } catch (error) {
-        console.error('Failed to load distribution settings:', error);
       } finally {
         setIsLoading(false);
       }
@@ -83,13 +37,8 @@ export const useDistributionSettings = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      try {
-        const sanitized = sanitizeSettings(settings);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
-        weightedDistribution.updateSettings(sanitized);
-      } catch (error) {
-        console.error('Failed to save distribution settings:', error);
-      }
+      const sanitized = persistDistributionSettings(settings);
+      weightedDistribution.updateSettings(sanitized);
     }
   }, [settings, isLoading]);
 
@@ -97,7 +46,7 @@ export const useDistributionSettings = () => {
     const enabledExpansions = getEnabledExpansionIdsSnapshot();
     const resolvedMode = enabledExpansions.length > 0 ? targetMode : 'core-only';
 
-    setSettings(prev => sanitizeSettings({ ...prev, mode: resolvedMode }));
+    setSettings(prev => sanitizeDistributionSettings({ ...prev, mode: resolvedMode }));
   };
 
   const setSetWeight = (setId: string, weight: number) => {
@@ -106,14 +55,12 @@ export const useDistributionSettings = () => {
       return;
     }
 
-    const clampedWeight = clamp(weight, MIN_WEIGHT, MAX_WEIGHT);
-
     setSettings(prev =>
-      sanitizeSettings({
+      sanitizeDistributionSettings({
         ...prev,
         setWeights: {
           ...prev.setWeights,
-          [setId]: clampedWeight,
+          [setId]: weight,
         },
       }),
     );
@@ -154,7 +101,7 @@ export const useDistributionSettings = () => {
   };
 
   const resetToDefaults = () => {
-    const defaults = sanitizeSettings(DEFAULT_DISTRIBUTION_SETTINGS);
+    const defaults = sanitizeDistributionSettings(DEFAULT_DISTRIBUTION_SETTINGS);
     setSettings(defaults);
   };
 
