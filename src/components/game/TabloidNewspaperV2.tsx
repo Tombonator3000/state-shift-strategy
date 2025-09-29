@@ -764,9 +764,13 @@ const TabloidNewspaperV2 = ({
               ) : null}
               <div className="relative overflow-hidden rounded-md border border-newspaper-border bg-newspaper-header/20">
                 {heroArticle?.cardId ? (
-                  <CardImage cardId={heroArticle.cardId} className="h-52 w-full object-cover" />
+                  <CardImage
+                    cardId={heroArticle.cardId}
+                    fit="contain"
+                    className="w-full aspect-[63/88] max-h-80"
+                  />
                 ) : (
-                  <div className="flex h-52 items-center justify-center text-sm font-semibold uppercase tracking-wide text-newspaper-text/60">
+                  <div className="flex aspect-[63/88] w-full max-h-80 items-center justify-center text-sm font-semibold uppercase tracking-wide text-newspaper-text/60">
                     Archival footage pending clearance.
                   </div>
                 )}

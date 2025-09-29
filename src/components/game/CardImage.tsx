@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { isExtensionCard, getCardExtensionInfo } from '@/data/extensionIntegration';
 
 interface CardImageProps {
   cardId: string;
   className?: string;
+  fit?: 'cover' | 'contain';
 }
 
-const CardImage: React.FC<CardImageProps> = ({ cardId, className = '' }) => {
+const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'cover' }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageExtension, setImageExtension] = useState<'jpg' | 'png'>('jpg');
@@ -76,18 +78,34 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '' }) => {
     setImageLoaded(true);
   };
 
+  const containerClassName = cn(
+    'relative overflow-hidden',
+    fit === 'contain' && 'bg-muted/20',
+    className,
+  );
+
+  const loadingClassName = cn(
+    'absolute inset-0 flex items-center justify-center text-xs text-muted-foreground animate-pulse',
+    fit === 'contain' ? 'bg-muted/30' : 'bg-muted/20',
+  );
+
+  const imageClassName = cn(
+    'h-full w-full',
+    fit === 'contain' ? 'object-contain' : 'object-cover',
+  );
+
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div className={containerClassName}>
       {!imageLoaded && (
-        <div className="absolute inset-0 bg-muted/20 flex items-center justify-center text-xs text-muted-foreground animate-pulse">
+        <div className={loadingClassName}>
           Loading...
         </div>
       )}
-      
+
       <img
         src={imagePath}
         alt={`Card art for ${cardId}`}
-        className="w-full h-full object-cover"
+        className={imageClassName}
         onLoad={handleImageLoad}
         onError={handleImageError}
       />
