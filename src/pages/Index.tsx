@@ -2351,6 +2351,7 @@ const Index = () => {
           currentIP={gameState.ip}
           loadingCard={loadingCard}
           onCardHover={setHoveredCard}
+          stateCombinationEffects={gameState.stateCombinationEffects}
         />
       </div>
       <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
