@@ -280,4 +280,115 @@ describe('useGameState save rehydration', () => {
     expect(triggerStateEventCalls.length).toBe(1);
     expect(triggerStateEventCalls[0][0]).toBe('VA');
   });
+
+  it('captures states when save data uses lowercase identifiers', async () => {
+    triggerStateEventCalls.length = 0;
+    localStorage.clear();
+
+    const lowercaseSavedState = {
+      version: '1.0',
+      faction: 'truth',
+      phase: 'action',
+      turn: 5,
+      round: 2,
+      currentPlayer: 'human' as const,
+      aiDifficulty: 'medium' as const,
+      truth: 50,
+      ip: 12,
+      aiIP: 9,
+      hand: [testCard],
+      aiHand: [],
+      deck: [],
+      aiDeck: [],
+      states: [
+        {
+          id: 'va',
+          name: 'virginia',
+          owner: 'ai' as const,
+          baseIP: 3,
+          baseDefense: 3,
+          defense: 3,
+          pressure: 0,
+          pressurePlayer: 0,
+          pressureAi: 0,
+          contested: false,
+          comboDefenseBonus: 0,
+          abbreviation: 'va',
+        },
+      ],
+      controlledStates: [],
+      aiControlledStates: ['va'],
+      log: [],
+      currentEvents: [],
+      agendaIssueCounters: {},
+      agendaRoundCounters: {},
+      cardsPlayedThisRound: [],
+      playHistory: [],
+      turnPlays: [],
+      stateCombinationEffects: { stateDefenseBonus: 0 },
+    };
+
+    localStorage.setItem('shadowgov-savegame', JSON.stringify(lowercaseSavedState));
+
+    resolveCardMvpImpl = (prevState) => {
+      const updatedStates = prevState.states.map((state: any) => {
+        if (typeof state.id === 'string' && state.id.trim().toLowerCase() === 'va') {
+          return {
+            ...state,
+            owner: 'player',
+            abbreviation: 'VA',
+            stateEventBonus: undefined,
+          };
+        }
+        if (typeof state.abbreviation === 'string' && state.abbreviation.trim().toLowerCase() === 'va') {
+          return {
+            ...state,
+            owner: 'player',
+            abbreviation: 'VA',
+            stateEventBonus: undefined,
+          };
+        }
+        return state;
+      });
+
+      const playerControlled = new Set(prevState.controlledStates);
+      playerControlled.add('VA');
+
+      const aiControlled = prevState.aiControlledStates.filter((abbr: string) => abbr.toUpperCase() !== 'VA');
+
+      return {
+        ip: prevState.ip,
+        aiIP: prevState.aiIP,
+        truth: prevState.truth,
+        states: updatedStates,
+        controlledStates: Array.from(playerControlled),
+        aiControlledStates: aiControlled,
+        capturedStateIds: ['va'],
+        targetState: null,
+        selectedCard: null,
+        logEntries: ['Captured lowercase Virginia!'],
+        damageDealt: 0,
+      };
+    };
+
+    const hook = renderHook(() => useGameState());
+
+    await act(async () => {
+      const loaded = hook.result.current?.loadGame();
+      expect(loaded).toBe(true);
+    });
+
+    const beforeCapture = hook.result.current?.gameState.states.find(state => state.abbreviation === 'VA');
+    expect(beforeCapture?.id?.toLowerCase()).toBe('va');
+
+    await act(async () => {
+      hook.result.current?.playCard('capture-card');
+    });
+
+    const afterCapture = hook.result.current?.gameState.states.find(state => state.abbreviation === 'VA');
+    expect(afterCapture?.stateEventBonus).toBeDefined();
+    expect(afterCapture?.stateEventBonus?.eventId).toBe('test-state-event');
+    expect(triggerStateEventCalls.length).toBe(1);
+    expect(triggerStateEventCalls[0][0]).toBe('VA');
+  });
 });
