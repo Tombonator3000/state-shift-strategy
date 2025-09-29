@@ -245,6 +245,44 @@ describe('combo and state synergy integration', () => {
     expect(target?.pressure).toBe(1);
   });
 
+  it('normalizes zone card targets before applying pressure', () => {
+    const state = buildBaseGameState();
+    state.stateCombinationEffects = { ...createDefaultCombinationEffects(), incomingPressureReduction: 1 };
+    state.controlledStates = ['NV'];
+    state.states = [{
+      id: '32',
+      name: 'Nevada',
+      abbreviation: 'NV',
+      baseIP: 2,
+      baseDefense: 2,
+      defense: 2,
+      comboDefenseBonus: 0,
+      pressure: 0,
+      pressurePlayer: 0,
+      pressureAi: 0,
+      contested: false,
+      owner: 'player' as const,
+      specialBonus: undefined,
+      bonusValue: undefined,
+      paranormalHotspot: undefined,
+    }];
+
+    const zoneCard: GameCard = {
+      id: 'zone-pressure',
+      name: 'Siege Column',
+      type: 'ZONE',
+      faction: 'government',
+      cost: 3,
+      effects: { pressureDelta: 2 },
+      target: { scope: 'state', count: 1 },
+    };
+
+    const result = resolveCardMVP(state, zoneCard, 'nv', 'ai');
+    const target = result.states.find(entry => entry.abbreviation === 'NV');
+    expect(target?.pressureAi).toBe(1);
+    expect(target?.pressure).toBe(1);
+  });
+
   it('reapplies defense bonuses to controlled states after card resolution', () => {
     const state = buildBaseGameState();
     state.stateCombinationEffects = { ...createDefaultCombinationEffects(), stateDefenseBonus: 1 };
