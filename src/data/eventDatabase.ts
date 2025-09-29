@@ -2731,10 +2731,13 @@ export class EventManager {
   private eventHistory: string[] = [];
   private turnCount: number = 0;
   private baseEventChance: number = 0.12;
+  private readonly stateEventHistoryLimit: number = 3;
+  private stateEventHistoryByState: Map<string, string[]> = new Map();
 
   constructor() {
     this.eventHistory = [];
     this.turnCount = 0;
+    this.stateEventHistoryByState = new Map();
   }
 
   // Set (or tweak) the chance of triggering an event each turn
@@ -2893,11 +2896,36 @@ export class EventManager {
   reset() {
     this.eventHistory = [];
     this.turnCount = 0;
+    this.stateEventHistoryByState.clear();
   }
 
   // Get state-specific events for a state
   getStateEvents(stateId: string): GameEvent[] {
     return STATE_EVENTS_DATABASE[stateId] || [];
+  }
+
+  private getStateEventHistory(stateId: string): string[] {
+    const existing = this.stateEventHistoryByState.get(stateId);
+    if (existing) {
+      return existing;
+    }
+
+    const initialized: string[] = [];
+    this.stateEventHistoryByState.set(stateId, initialized);
+    return initialized;
+  }
+
+  private markStateEventAsUsed(stateId: string, eventId: string) {
+    const history = [...this.getStateEventHistory(stateId), eventId];
+    if (history.length > this.stateEventHistoryLimit) {
+      history.splice(0, history.length - this.stateEventHistoryLimit);
+    }
+    this.stateEventHistoryByState.set(stateId, history);
+  }
+
+  private hasStateEventBeenUsedRecently(stateId: string, eventId: string): boolean {
+    const history = this.stateEventHistoryByState.get(stateId);
+    return history ? history.includes(eventId) : false;
   }
 
   private createFallbackStateEvent(stateId: string, capturingFaction: string, gameState: any): GameEvent {
@@ -2988,11 +3016,9 @@ export class EventManager {
       if (event.conditions?.capturedBy && event.conditions.capturedBy !== capturingFaction) {
         return false;
       }
-      
-      // Check if event has already been triggered recently (simplified)
-      const eventKey = `${stateId}_${event.id}`;
-      if (this.eventHistory.includes(eventKey)) {
-        return false; // Don't repeat same state event
+
+      if (this.hasStateEventBeenUsedRecently(stateId, event.id)) {
+        return false;
       }
 
       return true;
@@ -3019,13 +3045,13 @@ export class EventManager {
     for (const event of availableEvents) {
       randomValue -= event.weight;
       if (randomValue <= 0) {
-        // Mark event as used
-        const eventKey = `${stateId}_${event.id}`;
-        this.eventHistory.push(eventKey);
+        this.markStateEventAsUsed(stateId, event.id);
         return event;
       }
     }
 
-    return availableEvents[0]; // Fallback
+    const fallbackEvent = availableEvents[0];
+    this.markStateEventAsUsed(stateId, fallbackEvent.id);
+    return fallbackEvent;
   }
 }
