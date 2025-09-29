@@ -37,10 +37,10 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
             paddingRight: "var(--safe-right)",
           }}
         >
-          <div className="app-scroll h-full p-2 sm:p-4 md:p-6">
+          <div className="app-scroll h-full p-2 sm:p-3 lg:p-4">
             <div
               className={clsx(
-                "grid h-full min-h-0 gap-4",
+                "grid h-full min-h-0 gap-3",
                 "grid-cols-1",
                 hasRightPane && "lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_480px]"
               )}

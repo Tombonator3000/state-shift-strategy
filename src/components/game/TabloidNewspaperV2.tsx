@@ -722,7 +722,7 @@ const TabloidNewspaperV2 = ({
             </div>
           </section>
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-4 lg:gap-5 lg:grid-cols-3">
             <article className="lg:col-span-2 space-y-4 rounded-md border border-newspaper-border bg-white/80 p-6 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
                 <span className="rounded-full border border-newspaper-border px-2 py-1">{heroTypeLabel}</span>
