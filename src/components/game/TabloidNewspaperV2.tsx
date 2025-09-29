@@ -663,7 +663,7 @@ const TabloidNewspaperV2 = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <UICard className="ink-smudge relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden border-4 border-newspaper-border bg-newspaper-bg text-newspaper-text shadow-2xl">
+      <UICard className="ink-smudge relative flex h-full max-h-[90vh] w-full max-w-[min(95vw,1280px)] flex-col overflow-hidden border-4 border-newspaper-border bg-newspaper-bg text-newspaper-text shadow-2xl">
         <header className="relative border-b-4 border-double border-newspaper-border bg-newspaper-header/90 px-6 py-5">
           {breakingStamp ? (
             <div className="stamp stamp--breaking absolute left-6 top-4">{breakingStamp}</div>
@@ -695,7 +695,7 @@ const TabloidNewspaperV2 = ({
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 xl:px-5 xl:py-5">
           <section className="mb-6 rounded-md border border-newspaper-border bg-white/70 px-4 py-3 text-sm text-newspaper-text shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
