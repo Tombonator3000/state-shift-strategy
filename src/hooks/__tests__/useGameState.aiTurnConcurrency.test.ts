@@ -231,6 +231,7 @@ describe('useGameState AI turn scheduling', () => {
     const postRestartState = hook.result.current?.gameState;
     expect(postRestartState?.turn).toBe(1);
     expect(postRestartState?.phase).toBe('action');
+    expect(postRestartState?.currentPlayer).toBe('human');
     expect(postRestartState?.aiTurnInProgress).toBe(false);
 
     expect(timersWithDelay(1000)).toHaveLength(0);
@@ -240,6 +241,7 @@ describe('useGameState AI turn scheduling', () => {
     const finalState = hook.result.current?.gameState;
     expect(finalState?.turn).toBe(1);
     expect(finalState?.phase).toBe('action');
+    expect(finalState?.currentPlayer).toBe('human');
     expect(finalState?.aiTurnInProgress).toBe(false);
     expect(timersWithDelay(1000)).toHaveLength(0);
   });

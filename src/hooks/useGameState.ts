@@ -1260,6 +1260,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       truth: startingTruth,
       ip: startingIP,
       aiIP: aiStartingIP,
+      currentPlayer: 'human',
       hand: startingHand,
       deck: remainingDeck,
       aiHand: aiStartingHand,
