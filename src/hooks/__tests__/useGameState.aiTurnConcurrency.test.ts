@@ -195,4 +195,51 @@ describe('useGameState AI turn scheduling', () => {
     expect(latestState?.aiTurnInProgress).toBe(false);
     expect(timersWithDelay(1000)).toHaveLength(0);
   });
+
+  it('ignores AI completion from a previous session after starting a new game', async () => {
+    const hook = renderHook(() => useGameState());
+    const aiPhaseSetup = {
+      phase: 'ai_turn' as const,
+      currentPlayer: 'ai' as const,
+      aiTurnInProgress: false,
+    };
+
+    await act(async () => {
+      hook.result.current?.setGameState(prev => ({
+        ...prev,
+        ...aiPhaseSetup,
+      }));
+    });
+
+    let aiTurnPromise: Promise<void> | undefined;
+    await act(async () => {
+      aiTurnPromise = hook.result.current?.executeAITurn();
+    });
+
+    expect(timersWithDelay(1000)).toHaveLength(0);
+    await flushTimersByDelay(500);
+
+    await aiTurnPromise;
+
+    expect(timersWithDelay(1000)).toHaveLength(1);
+
+    await act(async () => {
+      hook.result.current?.initGame('truth');
+    });
+
+    const postRestartState = hook.result.current?.gameState;
+    expect(postRestartState?.turn).toBe(1);
+    expect(postRestartState?.phase).toBe('action');
+    expect(postRestartState?.aiTurnInProgress).toBe(false);
+
+    expect(timersWithDelay(1000)).toHaveLength(0);
+
+    await flushTimersByDelay(1000);
+
+    const finalState = hook.result.current?.gameState;
+    expect(finalState?.turn).toBe(1);
+    expect(finalState?.phase).toBe('action');
+    expect(finalState?.aiTurnInProgress).toBe(false);
+    expect(timersWithDelay(1000)).toHaveLength(0);
+  });
 });
