@@ -683,7 +683,7 @@ const Index = () => {
       stateEventHistory: Array.isArray(state.stateEventHistory) ? [...state.stateEventHistory] : [],
     }));
 
-    const recentEvents: PlayerStateIntel['recentEvents'] = statesIntel
+    const fullEventHistory: PlayerStateIntel['eventHistory'] = statesIntel
       .flatMap(state =>
         state.stateEventHistory.map(event => ({
           stateId: state.id,
@@ -698,14 +698,16 @@ const Index = () => {
           event,
         })),
       )
-      .sort((a, b) => b.event.triggeredOnTurn - a.event.triggeredOnTurn)
-      .slice(0, 12);
+      .sort((a, b) => b.event.triggeredOnTurn - a.event.triggeredOnTurn);
+
+    const recentEvents: PlayerStateIntel['recentEvents'] = fullEventHistory.slice(0, 12);
 
     return {
       generatedAtTurn: gameState.turn,
       round: gameState.round,
       totals,
       states: statesIntel,
+      eventHistory: fullEventHistory,
       recentEvents,
     } satisfies PlayerStateIntel;
   }, [gameState.states, gameState.turn, gameState.round]);

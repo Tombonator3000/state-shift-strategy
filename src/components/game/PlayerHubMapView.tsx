@@ -18,7 +18,7 @@ type IntelEvent = PlayerStateIntel['recentEvents'][number];
 interface TooltipIntel {
   state: IntelState;
   recentEvent?: IntelEvent;
-  latestHistory?: StateEventBonusSummary;
+  historicalEvents: StateEventBonusSummary[];
 }
 
 const MAP_BASE_WIDTH = 975;
@@ -43,6 +43,7 @@ const PlayerHubMapView = ({ intel, faction, className }: PlayerHubMapViewProps) 
 
   const states = useMemo(() => intel?.states ?? [], [intel]);
   const recentEvents = useMemo(() => intel?.recentEvents ?? [], [intel]);
+  const currentTurn = intel?.generatedAtTurn ?? Number.POSITIVE_INFINITY;
 
   const recentEventLookup = useMemo(() => {
     const map = new Map<string, IntelEvent>();
@@ -203,13 +204,16 @@ const PlayerHubMapView = ({ intel, faction, className }: PlayerHubMapViewProps) 
       pathElement.addEventListener('pointerenter', event => {
         if (!gameState) return;
         updateTooltipPosition(event);
-        const latestHistory = gameState.stateEventHistory?.length
-          ? gameState.stateEventHistory[gameState.stateEventHistory.length - 1]
-          : undefined;
+        const filteredHistory = (gameState.stateEventHistory ?? [])
+          .filter(historyEvent => historyEvent.triggeredOnTurn < currentTurn)
+          .sort((a, b) => b.triggeredOnTurn - a.triggeredOnTurn);
+        const dedupedHistory = recentEvent
+          ? filteredHistory.filter(historyEvent => historyEvent.eventId !== recentEvent.event.eventId)
+          : filteredHistory;
         setTooltipIntel({
           state: gameState,
           recentEvent,
-          latestHistory,
+          historicalEvents: dedupedHistory,
         });
       });
 
@@ -278,10 +282,12 @@ const PlayerHubMapView = ({ intel, faction, className }: PlayerHubMapViewProps) 
         }
       }
     });
-  }, [geoData, dimensions, stateLookup, recentEventLookup]);
+  }, [geoData, dimensions, stateLookup, recentEventLookup, currentTurn]);
 
   const isTruth = faction === 'truth';
   const hasIntel = states.length > 0;
+  const historicalTimeline = tooltipIntel?.historicalEvents ?? [];
+  const timelineEntries = historicalTimeline.slice(0, 5);
 
   return (
     <Card
@@ -405,14 +411,42 @@ const PlayerHubMapView = ({ intel, faction, className }: PlayerHubMapViewProps) 
                     )}
                   </div>
                 )}
-                {!tooltipIntel.recentEvent && tooltipIntel.latestHistory && (
-                  <div className="mt-3 rounded-md border border-slate-700/60 bg-slate-900/70 p-3">
+                {timelineEntries.length > 0 && (
+                  <div className="mt-4">
                     <p className="font-mono text-[10px] uppercase tracking-[0.38em] text-slate-500">
-                      Historical Event · Turn {tooltipIntel.latestHistory.triggeredOnTurn}
+                      Archived Evidence Log
                     </p>
-                    <p className="text-sm font-semibold text-slate-100">
-                      {tooltipIntel.latestHistory.label}
-                    </p>
+                    <ul className="mt-2 flex max-h-40 flex-col gap-2 overflow-y-auto pr-1">
+                      {timelineEntries.map(entry => (
+                        <li
+                          key={`${entry.eventId}-${entry.triggeredOnTurn}`}
+                          className="rounded-md border border-slate-800/70 bg-slate-950/60 p-3"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="font-mono text-[10px] uppercase tracking-[0.36em] text-slate-500">
+                              Turn {entry.triggeredOnTurn}
+                            </span>
+                            <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-slate-600">
+                              Evidence File
+                            </span>
+                          </div>
+                          <p className="mt-2 text-sm font-semibold text-slate-100">{entry.label}</p>
+                          {entry.description && (
+                            <p className="mt-1 text-xs text-slate-400">{entry.description}</p>
+                          )}
+                          {Array.isArray(entry.effectSummary) && entry.effectSummary.length > 0 && (
+                            <ul className="mt-2 space-y-1 text-[11px] text-slate-400">
+                              {entry.effectSummary.map((summary, idx) => (
+                                <li key={idx} className="flex items-start gap-2">
+                                  <span aria-hidden className="mt-[2px] h-1 w-1 rounded-full bg-slate-500" />
+                                  <span>{summary}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </div>

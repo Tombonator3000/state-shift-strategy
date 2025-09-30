@@ -46,6 +46,18 @@ export interface PlayerStateIntel {
     pressureAi: number;
     stateEventHistory: StateEventBonusSummary[];
   }>;
+  eventHistory: Array<{
+    stateId: string;
+    stateName: string;
+    abbreviation: string;
+    owner: 'player' | 'ai' | 'neutral';
+    contested: boolean;
+    pressure: number;
+    defense: number;
+    pressurePlayer: number;
+    pressureAi: number;
+    event: StateEventBonusSummary;
+  }>;
   recentEvents: Array<{
     stateId: string;
     stateName: string;
