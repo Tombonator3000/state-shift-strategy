@@ -3212,6 +3212,7 @@ export class EventManager {
   private eventHistory: string[] = [];
   private turnCount: number = 0;
   private baseEventChance: number = 0.12;
+  private readonly paranormalHotspotChance: number = 0.2;
   private readonly stateEventHistoryLimit: number = 3;
   private stateEventHistoryByState: Map<string, string[]> = new Map();
 
@@ -3219,6 +3220,52 @@ export class EventManager {
     this.eventHistory = [];
     this.turnCount = 0;
     this.stateEventHistoryByState = new Map();
+  }
+
+  private selectEventFromPool(
+    pool: GameEvent[],
+    chanceFactor: number,
+  ): GameEvent | null {
+    if (pool.length === 0) {
+      return null;
+    }
+
+    const totalWeight = pool.reduce((sum, event) => sum + event.weight, 0);
+    if (totalWeight <= 0) {
+      return null;
+    }
+
+    let random = Math.random() * totalWeight;
+
+    for (const event of pool) {
+      random -= event.weight;
+      if (random <= 0) {
+        return this.finalizeEventSelection(event, totalWeight, chanceFactor);
+      }
+    }
+
+    const fallback = pool[0];
+    return this.finalizeEventSelection(fallback, totalWeight, chanceFactor);
+  }
+
+  private finalizeEventSelection(
+    event: GameEvent,
+    totalWeight: number,
+    chanceFactor: number,
+  ): GameEvent {
+    this.eventHistory.push(event.id);
+    if (this.eventHistory.length > 20) {
+      this.eventHistory = this.eventHistory.slice(-15);
+    }
+
+    const conditionalChance = totalWeight > 0 ? event.weight / totalWeight : 0;
+    const triggerChance = chanceFactor * conditionalChance;
+
+    return {
+      ...event,
+      conditionalChance,
+      triggerChance,
+    };
   }
 
   // Set (or tweak) the chance of triggering an event each turn
@@ -3233,8 +3280,27 @@ export class EventManager {
 
   // Attempt to select a random event only if the gating roll succeeds
   maybeSelectRandomEvent(gameState: any): GameEvent | null {
-    if (!this.rollEvent()) return null;
-    return this.selectRandomEvent(gameState);
+    const availableEvents = this.getAvailableEvents(gameState);
+    if (availableEvents.length === 0) {
+      return null;
+    }
+
+    const paranormalEvents = availableEvents.filter(event => Boolean(event.paranormalHotspot));
+    if (paranormalEvents.length > 0 && Math.random() < this.paranormalHotspotChance) {
+      const paranormalSelection = this.selectEventFromPool(
+        paranormalEvents,
+        this.paranormalHotspotChance,
+      );
+      if (paranormalSelection) {
+        return paranormalSelection;
+      }
+    }
+
+    if (!this.rollEvent()) {
+      return null;
+    }
+
+    return this.selectEventFromPool(availableEvents, this.baseEventChance);
   }
 
   // Update turn count for condition checking
@@ -3277,45 +3343,7 @@ export class EventManager {
   // Select random event based on weights and rarity
   selectRandomEvent(gameState: any): GameEvent | null {
     const availableEvents = this.getAvailableEvents(gameState);
-
-    if (availableEvents.length === 0) return null;
-
-    // Calculate total weight
-    const totalWeight = availableEvents.reduce((sum, event) => sum + event.weight, 0);
-    if (totalWeight <= 0) {
-      return null;
-    }
-
-    // Random selection based on weight
-    let random = Math.random() * totalWeight;
-
-    for (const event of availableEvents) {
-      random -= event.weight;
-      if (random <= 0) {
-        this.eventHistory.push(event.id);
-        // Keep history reasonable length
-        if (this.eventHistory.length > 20) {
-          this.eventHistory = this.eventHistory.slice(-15);
-        }
-        const conditionalChance = event.weight / totalWeight;
-        const triggerChance = this.baseEventChance * conditionalChance;
-        return {
-          ...event,
-          conditionalChance,
-          triggerChance,
-        };
-      }
-    }
-
-    // Fallback to first available event
-    const fallback = availableEvents[0];
-    const conditionalChance = fallback.weight / totalWeight;
-    const triggerChance = this.baseEventChance * conditionalChance;
-    return {
-      ...fallback,
-      conditionalChance,
-      triggerChance,
-    };
+    return this.selectEventFromPool(availableEvents, this.baseEventChance);
   }
 
   getBaseEventChance(): number {
