@@ -9,11 +9,55 @@ import { assetManifest } from './storage/AssetManifest';
 import { CacheManager } from './storage/CacheManager';
 import { hash } from './storage/Hash';
 import { mergeCredit, normalizeCredit } from './storage/Credit';
-import type { AssetContext, AssetProvider, AssetScope, ManifestEntry, ResolvedAsset } from './types';
+import type {
+  AssetCandidate,
+  AssetContext,
+  AssetProvider,
+  AssetScope,
+  ManifestEntry,
+  ResolvedAsset,
+} from './types';
 
 const providers: AssetProvider[] = [OfficialStore, PackStore, WikimediaProvider].sort(
   (a, b) => a.priority - b.priority,
 );
+
+const ALLOWED =
+  /\b(public\s*domain|cc[-\s]?(?:by(?:-sa)?|0)(?:[-\s]?\d(?:\.\d)?)?|creative\s+commons\s+attribution(?:[-\s]sharealike)?)\b/i;
+
+export function filterLicensed(candidates: AssetCandidate[], providerId: string): AssetCandidate[] {
+  if (providerId === 'official' || providerId === 'pack') {
+    return candidates;
+  }
+
+  const filtered: AssetCandidate[] = [];
+
+  for (const candidate of candidates) {
+    const license = candidate.license?.trim();
+    if (!license) {
+      console.warn(
+        '[AssetResolver] Dropping candidate without license metadata',
+        providerId,
+        candidate.id,
+      );
+      continue;
+    }
+
+    if (!ALLOWED.test(license)) {
+      console.warn(
+        '[AssetResolver] Dropping candidate with unsupported license',
+        providerId,
+        candidate.id,
+        license,
+      );
+      continue;
+    }
+
+    filtered.push(candidate);
+  }
+
+  return filtered;
+}
 
 type ProviderSnapshot = {
   id: string;
@@ -86,7 +130,12 @@ async function resolveWithProviders(context: AssetContext) {
     }
 
     const result = await provider.fetchAssets(query, context);
-    const ranked = rankCandidates(result.candidates, rankingContext);
+    const licensed = filterLicensed(result.candidates, provider.id);
+    if (licensed.length === 0) {
+      continue;
+    }
+
+    const ranked = rankCandidates(licensed, rankingContext);
     allCandidates.push(
       ...ranked.map(candidate => ({
         candidate,
