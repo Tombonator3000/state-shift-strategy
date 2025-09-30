@@ -71,6 +71,8 @@ export interface GameState {
     paranormalHotspot?: StateParanormalHotspot;
     stateEventBonus?: StateEventBonusSummary;
     stateEventHistory: StateEventBonusSummary[];
+    activeStateBonus?: ActiveStateBonus | null;
+    roundEvents: StateRoundEventLogEntry[];
   }>;
   currentEvents: GameEvent[];
   pendingEditionEvents: GameEvent[];
@@ -107,6 +109,9 @@ export interface GameState {
   truthBelow20Streak: number;
   timeBasedGoalCounters: Record<string, number>;
   paranormalHotspots: Record<string, ActiveParanormalHotspot>;
+  stateRoundSeed: number;
+  lastStateBonusRound: number;
+  stateRoundEvents: Record<string, StateRoundEventLogEntry[]>;
 }
 
 export interface StateEventBonusSummary {
@@ -118,6 +123,39 @@ export interface StateEventBonusSummary {
   faction: 'truth' | 'government';
   effects?: NonNullable<GameEvent['effects']>;
   effectSummary?: string[];
+}
+
+export interface ActiveStateBonus {
+  source: 'state-themed';
+  id: string;
+  stateId: string;
+  stateName: string;
+  stateAbbreviation: string;
+  round: number;
+  label: string;
+  summary: string;
+  headline: string;
+  subhead?: string;
+  icon?: string;
+  truthDelta?: number;
+  ipDelta?: number;
+  pressureDelta?: number;
+}
+
+export interface StateRoundEventLogEntry {
+  source: 'state-themed';
+  id: string;
+  stateId: string;
+  stateName: string;
+  stateAbbreviation: string;
+  round: number;
+  headline: string;
+  summary: string;
+  subhead?: string;
+  icon?: string;
+  truthDelta?: number;
+  ipDelta?: number;
+  pressureDelta?: number;
 }
 
 export interface ActiveParanormalHotspot {
