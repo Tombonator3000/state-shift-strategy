@@ -27,6 +27,9 @@ export interface GameEvent {
   type: 'conspiracy' | 'government' | 'truth' | 'random' | 'crisis' | 'opportunity' | 'capture';
   faction?: 'truth' | 'government' | 'neutral';
   rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
+  tags?: string[];
+  image?: string;
+  imageCredit?: string;
   effects?: {
     truth?: number;
     ip?: number;
@@ -2818,11 +2821,26 @@ export class EventManager {
         }
         const conditionalChance = event.weight / totalWeight;
         const triggerChance = this.baseEventChance * conditionalChance;
+        const normalizedTags = Array.isArray(event.tags)
+          ? event.tags
+              .map(tag => `${tag}`.trim())
+              .filter((tag): tag is string => tag.length > 0)
+          : [];
+        const normalizedImage = typeof event.image === 'string' && event.image.trim().length > 0
+          ? event.image
+          : undefined;
+        const normalizedImageCredit =
+          typeof event.imageCredit === 'string' && event.imageCredit.trim().length > 0
+            ? event.imageCredit.trim()
+            : undefined;
         return {
           ...event,
+          tags: normalizedTags,
+          image: normalizedImage,
+          imageCredit: normalizedImageCredit,
           conditionalChance,
           triggerChance,
-        };
+        } satisfies GameEvent;
       }
     }
 
@@ -2830,11 +2848,26 @@ export class EventManager {
     const fallback = availableEvents[0];
     const conditionalChance = fallback.weight / totalWeight;
     const triggerChance = this.baseEventChance * conditionalChance;
+    const normalizedTags = Array.isArray(fallback.tags)
+      ? fallback.tags
+          .map(tag => `${tag}`.trim())
+          .filter((tag): tag is string => tag.length > 0)
+      : [];
+    const normalizedImage = typeof fallback.image === 'string' && fallback.image.trim().length > 0
+      ? fallback.image
+      : undefined;
+    const normalizedImageCredit =
+      typeof fallback.imageCredit === 'string' && fallback.imageCredit.trim().length > 0
+        ? fallback.imageCredit.trim()
+        : undefined;
     return {
       ...fallback,
+      tags: normalizedTags,
+      image: normalizedImage,
+      imageCredit: normalizedImageCredit,
       conditionalChance,
       triggerChance,
-    };
+    } satisfies GameEvent;
   }
 
   getBaseEventChance(): number {
