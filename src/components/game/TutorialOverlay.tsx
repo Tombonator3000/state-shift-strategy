@@ -234,15 +234,15 @@ export const TutorialSection = ({
 
                   <div className="mt-auto border-t border-emerald-500/20 pt-4">
                     <Button
-                      onClick={() => handleStartTutorial(selectedSequence.id)}
-                      disabled={!availableSequences.includes(selectedSequence.id)}
+                      onClick={() => handleStartTutorial(selectedSequence.id as any)}
+                      disabled={!availableSequences.includes(selectedSequence.id as any)}
                       className="w-full rounded-xl border border-sky-400/50 bg-sky-500/20 text-sky-100 transition hover:bg-sky-500/30"
                     >
                       <Play size={16} className="mr-2" />
                       {completedSequences.includes(selectedSequence.id) ? 'Replay Tutorial' : 'Start Tutorial'}
                     </Button>
 
-                    {!availableSequences.includes(selectedSequence.id) && (
+                    {!availableSequences.includes(selectedSequence.id as any) && (
                       <div className="mt-2 text-center text-xs text-rose-200">
                         Complete prerequisite tutorials first
                       </div>

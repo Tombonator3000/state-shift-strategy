@@ -2206,7 +2206,7 @@ export const UFO_ELVIS_SFX = 'data:audio/wav;base64,'
   + 'Ov+5/hf+YP2m/Pv7cPsT++36A/tS+9T7ffxA/Q3+1/6T/zgAxgA8AaAB+AFMAqMCAQNoA9UDQgSlBPMEIQUkBfYElAQCBEcD'
   + 'bwKLAawA5P9B/87+j/6G/qv+8v5N/6v/+/8tADsAHQDV/2f/3v5H/rH9KP24/Gj8O/wv/ED8ZfyV/Mf89PwY/TT9S/1k/Yr9'
   + 'xv0i/qT+Tv8dAAwBDAIPAwEE0gRxBdQF8gXNBWoF1AQbBFEDhwLOATQBvwByAEoAQABJAFkAYwBeAEQAEgDL/3P/E/+2/mX+'
-  + 'KP4D/vf9AP4X/jH+Rf5G/i7+9v2g/TH9s/wz/MP7c/tQ+2f7vftT/CH9HP4=' as const;
+  + 'KP4D/vf9AP4X/jH+Rf5G/i7+9v2g/TH9s/wz/MP7c/tQ+2f7vftT/CH9HP4=';
 
 export const CRYPTID_RUMBLE_SFX = 'data:audio/wav;base64,'
   + 'UklGRgQ7AwBXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YeA6AwAAAAAAAAAAAAEA//8DAAQAAQADAAUABgAJAAgA'
@@ -5149,7 +5149,7 @@ export const CRYPTID_RUMBLE_SFX = 'data:audio/wav;base64,'
   + 'L+g/51zo1+fR6tjicOgW5pDlt+Gv5h3mE+E05nPp3edt5cTkyuAC6YDgEeVZ5MvkpehH6BvqW+nk6LbnHuJH4g3mzePU567m'
   + 'GOH/5RzoZuk86DTkv99f4TThRehg5i7gVeWo33boseh25+fgDeNa3Yben+Kj5wPjJ+Ve45Tf/OKP3y7kfeMU3c3iM+Ng49Dd'
   + 'KeTw4QXfNt135EXmBt4K5O7it+T84vPfw9+w53rcg9+O5YfcWuOZ5jzm+d4X44njruAa4HDgVOOi35zksdwL3wvdW+N23jLn'
-  + 'deWE3z7i/OWv32Pl9d6m3mPdOuQf4GPgduVz55TdU+d94oTfaOOZ56rmLOY=' as const;
+  + 'deWE3z7i/OWv32Pl9d6m3mPdOuQf4GPgduVz55TdU+d94oTfaOOZ56rmLOY=';
 
 export const RADIO_STATIC_SFX = 'data:audio/wav;base64,'
   + 'UklGRvAEAgBXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YcwEAgAAAP3/AgD///P/CgADAOv//P8AAOL/3f8LACUA'
@@ -6990,4 +6990,4 @@ export const RADIO_STATIC_SFX = 'data:audio/wav;base64,'
   + 'agKACv4U2+zH9GD3wfc3ASDz0OkK5Xn5VQds7yUMZRGYCYUUEOu7820WZxYzEz3nwAjkDWQXnghKCW/z5xAjB5sFvPlT8a4K'
   + '1ukB7vTn0fW9AHQHtwe5C4D7Vv479rvq9RxtEoP0fA0HDUcAMPxKFTnm9xUg/RwLkPZhAgfwqwhj5LkSAuPM5K/0JOrSGugX'
   + '2f+5CE7vtemq7R/t8A+C6AYNwg10DOEdtxWI5EsBsu7H8VfxSgRQ67IbFPxV9L/6GAmDDXgUBvu36fgTt/Uy8p/2RwNI83Ho'
-  + 'Y/Z0BWHuEw0=' as const;
+  + 'Y/Z0BWHuEw0=';

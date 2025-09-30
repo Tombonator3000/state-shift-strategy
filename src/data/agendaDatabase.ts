@@ -97,18 +97,19 @@ const countControlledMatches = (gameState: any, targets: string[]): number => {
     return 0;
   }
 
-  return ensureArray(gameState?.controlledStates).reduce((total, stateId) => {
+  const result = ensureArray(gameState?.controlledStates).reduce((total: number, stateId) => {
     const normalized = normalizeStateId(stateId, gameState?.states);
     return normalizedTargets.has(normalized) ? total + 1 : total;
-  }, 0);
+  }, 0 as number);
+  return result as number;
 };
 
 const countCapturedMatches = (gameState: any, targets?: Set<string>): number => {
   const plays = ensureArray(gameState?.factionPlayHistory);
-  let total = 0;
+  let total: number = 0;
 
   for (const record of plays) {
-    const capturedStates = ensureArray(record?.capturedStates);
+    const capturedStates = ensureArray((record as any)?.capturedStates);
     for (const entry of capturedStates) {
       const normalized = normalizeStateId(entry, gameState?.states);
       if (!normalized) {
@@ -126,32 +127,33 @@ const countCapturedMatches = (gameState: any, targets?: Set<string>): number => 
 
 const countCardTypePlays = (gameState: any, type: string): number => {
   return ensureArray(gameState?.factionPlayHistory).filter(
-    record => record?.card?.type === type,
+    (record: any) => record?.card?.type === type,
   ).length;
 };
 
 const sumPositiveTruthDelta = (gameState: any): number => {
-  return ensureArray(gameState?.factionPlayHistory).reduce((total, record) => {
+  const result = ensureArray(gameState?.factionPlayHistory).reduce((total: number, record: any) => {
     const delta = typeof record?.truthDelta === 'number' ? record.truthDelta : 0;
     return delta > 0 ? total + delta : total;
-  }, 0);
+  }, 0 as number);
+  return result as number;
 };
 
 const countZonePlaysOnStates = (gameState: any, targets: Set<string>): number => {
-  return ensureArray(gameState?.factionPlayHistory).filter(record => {
+  return ensureArray(gameState?.factionPlayHistory).filter((record: any) => {
     if (record?.card?.type !== 'ZONE') {
       return false;
     }
 
-    const normalized = normalizeStateId(record?.targetState, gameState?.states);
+    const normalized = normalizeStateId((record as any)?.targetState, gameState?.states);
     return normalized && targets.has(normalized);
   }).length;
 };
 
 const countMediaAndAttackPairs = (gameState: any): number => {
   const plays = ensureArray(gameState?.factionPlayHistory);
-  const media = plays.filter(record => record?.card?.type === 'MEDIA').length;
-  const attack = plays.filter(record => record?.card?.type === 'ATTACK').length;
+  const media = plays.filter((record: any) => record?.card?.type === 'MEDIA').length;
+  const attack = plays.filter((record: any) => record?.card?.type === 'ATTACK').length;
   return Math.min(media, attack);
 };
 

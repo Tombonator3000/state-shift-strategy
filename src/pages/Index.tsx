@@ -1315,7 +1315,7 @@ const Index = () => {
             hotspotId: hotspot?.id,
             stateId: stateRecord?.id ?? stateRecord?.abbreviation ?? stateName,
             stateName,
-            source: hotspot?.source ?? 'neutral',
+            source: (hotspot?.source === 'neutral' ? 'truth' : hotspot?.source) ?? 'truth',
             defenseBoost,
             truthReward,
             duration: hotspot?.duration,
@@ -1362,7 +1362,7 @@ const Index = () => {
             hotspotId: historyEntry?.id,
             stateId: historyEntry?.stateId ?? stateRecord?.id ?? stateRecord?.abbreviation ?? stateName,
             stateName,
-            source: historyEntry?.source ?? 'neutral',
+            source: (historyEntry?.source === 'neutral' ? 'truth' : historyEntry?.source) ?? 'truth',
             defenseBoost: historyEntry?.defenseBoost,
             truthReward: historyEntry?.truthReward,
             outcome: 'captured',
@@ -1406,7 +1406,7 @@ const Index = () => {
             hotspotId: historyEntry?.id,
             stateId: historyEntry?.stateId ?? stateRecord?.id ?? stateRecord?.abbreviation ?? stateName,
             stateName,
-            source: historyEntry?.source ?? 'neutral',
+            source: (historyEntry?.source === 'neutral' ? 'truth' : historyEntry?.source) ?? 'truth',
             defenseBoost: historyEntry?.defenseBoost,
             truthReward: historyEntry?.truthReward,
             outcome: 'expired',
@@ -2400,7 +2400,7 @@ const Index = () => {
           />
         </div>
       </div>
-      <CardPreviewOverlay card={hoveredCard} />
+      <CardPreviewOverlay card={hoveredCard ? { ...hoveredCard, text: hoveredCard.text || '' } : null} />
     </div>
   );
 

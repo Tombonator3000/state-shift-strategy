@@ -5,7 +5,7 @@ interface CardPreviewOverlayProps {
     id: string;
     name: string;
     type: string;
-    text: string;
+    text?: string;
     cost: number;
     rarity?: string;
     _hoverPosition?: { x: number; y: number };
