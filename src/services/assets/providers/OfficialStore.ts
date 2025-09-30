@@ -1,5 +1,8 @@
 import { getCardExtensionInfo } from '@/data/extensionIntegration';
+import type { GameCard } from '@/rules/mvp';
 import type { AssetProvider, AssetProviderResult } from '../types';
+
+const OFFICIAL_SOURCE_ID = 'official';
 
 function inferExtension(cardId: string): string | null {
   const info = getCardExtensionInfo(cardId);
@@ -16,8 +19,45 @@ function buildOfficialUrl(cardId: string, preferredExtension: 'jpg' | 'png'): st
   return `/card-art/${cardId}.${preferredExtension}`;
 }
 
-export const OfficialStore: AssetProvider = {
-  id: 'official',
+function isTemporaryArtId(card: GameCard, extension: string | null): boolean {
+  if (!card.artId) {
+    return false;
+  }
+
+  if (extension && card.artId === `${extension}-Temp-Image`) {
+    return true;
+  }
+
+  return /temp/i.test(card.artId);
+}
+
+function buildCandidate(card: GameCard, artId: string) {
+  return {
+    id: `${OFFICIAL_SOURCE_ID}-${artId}`,
+    url: buildOfficialUrl(artId, 'jpg'),
+    provider: OFFICIAL_SOURCE_ID,
+    credit: card.artAttribution,
+    tags: card.artTags,
+    locked: card.artPolicy === 'manual',
+    metadata: { extensionFallback: buildOfficialUrl(artId, 'png') },
+  };
+}
+
+type OfficialLookupResult = {
+  url: string;
+  provider: string;
+  credit?: string;
+  license?: string;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+};
+
+type OfficialProvider = AssetProvider & {
+  lookup(card: GameCard): Promise<OfficialLookupResult | null>;
+};
+
+export const OfficialStore: OfficialProvider = {
+  id: OFFICIAL_SOURCE_ID,
   priority: 0,
   shouldSkip: context => context.scope !== 'card' || !context.card,
   async fetchAssets(_query, context): Promise<AssetProviderResult> {
@@ -27,26 +67,34 @@ export const OfficialStore: AssetProvider = {
     }
 
     const extension = inferExtension(card.id);
-    const isTemp = Boolean(extension) && card.artPolicy !== 'manual';
+    const hasTemporaryArtId = isTemporaryArtId(card, extension);
 
-    if (!card.artId && !isTemp) {
+    if (!card.artId && !hasTemporaryArtId) {
       return { candidates: [] };
     }
 
-    const idToUse = card.artId ?? card.id;
+    const idToUse = card.artId && !hasTemporaryArtId ? card.artId : card.id;
 
     return {
       candidates: [
-        {
-          id: `official-${idToUse}`,
-          url: buildOfficialUrl(idToUse, 'jpg'),
-          provider: 'official',
-          credit: card.artAttribution,
-          tags: card.artTags,
-          locked: card.artPolicy === 'manual',
-          metadata: { extensionFallback: buildOfficialUrl(idToUse, 'png') },
-        },
+        buildCandidate(card, idToUse),
       ],
     };
+  },
+  async lookup(card) {
+    const extension = inferExtension(card.id);
+    if (!card.artId || isTemporaryArtId(card, extension)) {
+      return null;
+    }
+
+    const candidate = buildCandidate(card, card.artId);
+    return {
+      url: candidate.url,
+      provider: candidate.provider,
+      credit: candidate.credit,
+      license: undefined,
+      tags: candidate.tags,
+      metadata: candidate.metadata,
+    } satisfies OfficialLookupResult;
   },
 };

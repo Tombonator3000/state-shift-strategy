@@ -25,9 +25,22 @@ function canUseLocalStorage(): boolean {
 
 const useLocalStorage = canUseLocalStorage();
 
+function normalizeState(state: Record<string, Partial<ManifestEntry>>): ManifestState {
+  const next: ManifestState = {};
+  for (const [key, entry] of Object.entries(state)) {
+    if (!entry) continue;
+    next[key] = {
+      ...entry,
+      key: entry.key ?? key,
+      source: entry.source ?? 'download',
+    } as ManifestEntry;
+  }
+  return next;
+}
+
 function loadFromStorage(): ManifestState {
   if (!useLocalStorage) {
-    return { ...memoryState.entries };
+    return normalizeState(memoryState.entries);
   }
 
   try {
@@ -37,7 +50,11 @@ function loadFromStorage(): ManifestState {
     }
 
     const parsed = JSON.parse(raw) as ManifestState;
-    return parsed ?? {};
+    if (!parsed) {
+      return {};
+    }
+
+    return normalizeState(parsed);
   } catch (error) {
     console.warn('[AssetManifest] Failed to parse manifest from storage', error);
     return {};
