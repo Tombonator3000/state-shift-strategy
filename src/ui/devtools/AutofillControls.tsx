@@ -10,7 +10,7 @@ import {
   toggleManifestLock,
   updateManifestCredit,
 } from '@/services/assets/AssetResolver';
-import type { AssetContext, ResolvedAsset } from '@/services/assets/types';
+import type { AssetContext, ManifestEntry, ResolvedAsset } from '@/services/assets/types';
 import { cn } from '@/lib/utils';
 
 interface AutofillControlsProps {
@@ -19,6 +19,14 @@ interface AutofillControlsProps {
   onResolved?: (asset: ResolvedAsset | null) => void;
   className?: string;
 }
+
+export const isLockedOrOfficial = (entry?: ManifestEntry | null): boolean => {
+  if (!entry) {
+    return false;
+  }
+
+  return Boolean(entry.locked || entry.source === 'official' || entry.provider === 'official');
+};
 
 const AutofillControls = ({ context, disabled = false, onResolved, className }: AutofillControlsProps) => {
   const contextKey = useMemo(() => getManifestKey(context), [context]);
@@ -46,8 +54,10 @@ const AutofillControls = ({ context, disabled = false, onResolved, className }: 
     });
   }, [contextKey]);
 
+  const lockedOrOfficial = isLockedOrOfficial(entry);
+
   const handleRoll = useCallback(async () => {
-    if (disabled) return;
+    if (disabled || lockedOrOfficial) return;
     setIsLoading(true);
     setError(null);
     try {
@@ -61,12 +71,12 @@ const AutofillControls = ({ context, disabled = false, onResolved, className }: 
     } finally {
       setIsLoading(false);
     }
-  }, [context, disabled, onResolved]);
+  }, [context, disabled, lockedOrOfficial, onResolved]);
 
   const handleLockToggle = useCallback(() => {
-    if (!entry || !contextKey) return;
+    if (!entry || !contextKey || lockedOrOfficial) return;
     toggleManifestLock(context, !entry.locked);
-  }, [context, contextKey, entry]);
+  }, [context, contextKey, entry, lockedOrOfficial]);
 
   const handleCreditCommit = useCallback(() => {
     if (!contextKey) return;
@@ -88,7 +98,7 @@ const AutofillControls = ({ context, disabled = false, onResolved, className }: 
         <Button
           variant="outline"
           size="sm"
-          disabled={disabled || isLoading}
+          disabled={disabled || isLoading || lockedOrOfficial}
           onClick={handleRoll}
         >
           {isLoading ? 'Rolling…' : 'Roll another'}
@@ -96,7 +106,7 @@ const AutofillControls = ({ context, disabled = false, onResolved, className }: 
         <Button
           variant={entry?.locked ? 'default' : 'outline'}
           size="sm"
-          disabled={!entry || disabled}
+          disabled={!entry || disabled || lockedOrOfficial}
           onClick={handleLockToggle}
         >
           {entry?.locked ? 'Locked' : 'Lock'}
