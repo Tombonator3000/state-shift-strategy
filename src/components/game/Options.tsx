@@ -13,6 +13,7 @@ import { COMBO_DEFINITIONS, DEFAULT_COMBO_SETTINGS } from '@/game/combo.config';
 import { formatComboReward, getComboSettings, setComboSettings } from '@/game/comboEngine';
 import type { ComboCategory, ComboSettings } from '@/game/combo.types';
 import { Badge } from '@/components/ui/badge';
+import { DEFAULT_UI_SCALE, coerceUiScale, parseUiScale } from '@/lib/ui-scale';
 import {
   Select,
   SelectContent,
@@ -92,14 +93,6 @@ interface OptionsProps {
   onSaveGame?: () => boolean;
 }
 
-const clampUiScale = (value: unknown): number => {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
-    return 1;
-  }
-
-  return Math.min(1.5, Math.max(0.75, value));
-};
-
 interface GameSettings {
   masterVolume: number;
   musicVolume: number;
@@ -152,7 +145,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       drawMode: 'standard',
       uiTheme,
       paranormalEffectsEnabled: true,
-      uiScale: 1,
+      uiScale: DEFAULT_UI_SCALE,
     };
 
     const stored = typeof localStorage !== 'undefined'
@@ -168,7 +161,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
           ...baseSettings,
           ...rest,
           difficulty: difficultyLabel,
-          uiScale: clampUiScale(rest?.uiScale ?? baseSettings.uiScale),
+          uiScale: parseUiScale(rest?.uiScale, baseSettings.uiScale),
         };
 
         if (typeof document !== 'undefined') {
@@ -327,7 +320,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const updateSettings = (newSettings: Partial<GameSettings>) => {
     const normalizedSettings: Partial<GameSettings> = { ...newSettings };
     if (typeof newSettings.uiScale === 'number') {
-      normalizedSettings.uiScale = clampUiScale(newSettings.uiScale);
+      normalizedSettings.uiScale = coerceUiScale(newSettings.uiScale);
     }
 
     if (typeof newSettings.masterVolume === 'number') {
@@ -400,7 +393,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       drawMode: 'standard',
       uiTheme: 'tabloid_bw',
       paranormalEffectsEnabled: true,
-      uiScale: 1,
+      uiScale: DEFAULT_UI_SCALE,
     };
 
     const defaultCombos = setComboSettings({
