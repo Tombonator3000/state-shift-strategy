@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Library, GraduationCap, Newspaper, X, MapPin } from 'lucide-react';
+import { Trophy, Library, GraduationCap, Newspaper, X, MapPin, FileSearch2 } from 'lucide-react';
 import { AchievementsSection } from './AchievementPanel';
 import { CardCollectionContent } from './CardCollection';
 import { TutorialSection } from './TutorialOverlay';
@@ -13,6 +13,8 @@ import type { ArchivedEdition } from '@/hooks/usePressArchive';
 import StateIntelBoard from './StateIntelBoard';
 import PlayerHubMapView from './PlayerHubMapView';
 import type { StateEventBonusSummary } from '@/hooks/gameStateTypes';
+import EvidenceArchivePanel from './EvidenceArchivePanel';
+import type { IntelArchiveEntry } from '@/hooks/useIntelArchive';
 import '@/styles/playerHub.css';
 
 interface PlayerHubOverlayProps {
@@ -22,6 +24,9 @@ interface PlayerHubOverlayProps {
   onOpenEdition: (issue: ArchivedEdition) => void;
   onDeleteEdition: (id: string) => void;
   stateIntel?: PlayerStateIntel;
+  intelArchive: IntelArchiveEntry[];
+  onDeleteIntel: (id: string) => void;
+  onClearIntel?: () => void;
   faction: 'truth' | 'government';
 }
 
@@ -72,7 +77,7 @@ export interface PlayerStateIntel {
   }>;
 }
 
-type HubTab = 'achievements' | 'cards' | 'tutorials' | 'press' | 'intel';
+type HubTab = 'achievements' | 'cards' | 'tutorials' | 'press' | 'evidence' | 'intel';
 
 const PlayerHubOverlay = ({
   onClose,
@@ -81,11 +86,18 @@ const PlayerHubOverlay = ({
   onOpenEdition,
   onDeleteEdition,
   stateIntel,
+  intelArchive,
+  onDeleteIntel,
+  onClearIntel,
   faction,
 }: PlayerHubOverlayProps) => {
   const [activeTab, setActiveTab] = useState<HubTab>(() => {
     if (pressIssues.length > 0) {
       return 'press';
+    }
+
+    if (intelArchive.length > 0) {
+      return 'evidence';
     }
 
     if (stateIntel && stateIntel.recentEvents.length > 0) {
@@ -191,7 +203,7 @@ const PlayerHubOverlay = ({
           <div className="relative px-6 pt-6">
             <TabsList
               className={clsx(
-                'player-hub-tablist grid w-full grid-cols-5 gap-2 rounded-lg border p-1 backdrop-blur',
+                'player-hub-tablist grid w-full grid-cols-6 gap-2 rounded-lg border p-1 backdrop-blur',
                 isTruth
                   ? 'border-rose-900/40 bg-[rgba(255,255,255,0.86)] shadow-[inset_0_15px_40px_rgba(124,45,18,0.12)]'
                   : 'border-emerald-500/20 bg-slate-900/70',
@@ -244,6 +256,18 @@ const PlayerHubOverlay = ({
               >
                 <Newspaper className="h-4 w-4" />
                 Press Archive
+              </TabsTrigger>
+              <TabsTrigger
+                value="evidence"
+                className={clsx(
+                  'flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] transition',
+                  isTruth
+                    ? 'text-stone-500 data-[state=active]:border-rose-900/60 data-[state=active]:bg-amber-100/90 data-[state=active]:text-rose-900 data-[state=active]:shadow-[inset_0_4px_18px_rgba(124,45,18,0.18)]'
+                    : 'text-slate-400 data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200',
+                )}
+              >
+                <FileSearch2 className="h-4 w-4" />
+                Evidence
               </TabsTrigger>
               <TabsTrigger
                 value="intel"
@@ -308,6 +332,14 @@ const PlayerHubOverlay = ({
                   issues={pressIssues}
                   onOpen={onOpenEdition}
                   onDelete={onDeleteEdition}
+                  className="h-full"
+                />
+              </TabsContent>
+              <TabsContent value="evidence" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
+                <EvidenceArchivePanel
+                  entries={intelArchive}
+                  onDelete={onDeleteIntel}
+                  onClear={onClearIntel}
                   className="h-full"
                 />
               </TabsContent>

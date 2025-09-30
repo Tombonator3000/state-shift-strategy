@@ -48,8 +48,11 @@ import type { ParanormalSighting } from '@/types/paranormal';
 import { areParanormalEffectsEnabled } from '@/state/settings';
 import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
+import { EVENT_DATABASE } from '@/data/eventDatabase';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import { usePressArchive } from '@/hooks/usePressArchive';
+import { useIntelArchive } from '@/hooks/useIntelArchive';
+import type { IntelArchiveDraft } from '@/hooks/useIntelArchive';
 import type {
   AgendaSummary,
   ImpactType,
@@ -585,6 +588,12 @@ const Index = () => {
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
   const { issues: pressArchive, archiveEdition, removeEditionFromArchive } = usePressArchive();
+  const {
+    entries: intelArchiveEntries,
+    archiveIntelEvents,
+    removeIntelFromArchive,
+    clearArchive: clearIntelArchive,
+  } = useIntelArchive();
 
   const persistFaction = useCallback((faction: 'truth' | 'government') => {
     setLastSelectedFaction(faction);
@@ -641,6 +650,7 @@ const Index = () => {
   const activeHotspotByStateRef = useRef<Record<string, ActiveParanormalHotspot>>({});
   const hotspotLogCursorRef = useRef<number>(0);
   const hotspotLogInitializedRef = useRef<boolean>(false);
+  const archivedIntelIdsRef = useRef<Set<string>>(new Set());
 
   const stateLookupByName = useMemo(() => {
     const lookup = new Map<string, (typeof gameState.states)[number]>();
@@ -650,6 +660,16 @@ const Index = () => {
     });
     return lookup;
   }, [gameState.states]);
+
+  const eventLookup = useMemo(() => {
+    const lookup = new Map<string, GameEvent>();
+    EVENT_DATABASE.forEach(event => {
+      if (event && typeof event.id === 'string') {
+        lookup.set(event.id, event);
+      }
+    });
+    return lookup;
+  }, []);
 
   const playerHubStateIntel = useMemo<PlayerStateIntel>(() => {
     const states = Array.isArray(gameState.states) ? gameState.states : [];
@@ -711,6 +731,66 @@ const Index = () => {
       recentEvents,
     } satisfies PlayerStateIntel;
   }, [gameState.states, gameState.turn, gameState.round]);
+
+  useEffect(() => {
+    if (!gameState.isGameOver) {
+      archivedIntelIdsRef.current.clear();
+      return;
+    }
+
+    const history = playerHubStateIntel.eventHistory ?? [];
+    if (history.length === 0) {
+      return;
+    }
+
+    const payload = history
+      .map<IntelArchiveDraft | null>(eventEntry => {
+        const stateKey = eventEntry.stateId ?? eventEntry.abbreviation ?? eventEntry.stateName ?? eventEntry.event.eventId;
+        const uniqueId = `${stateKey}-${eventEntry.event.eventId}-${eventEntry.event.triggeredOnTurn}`;
+        if (archivedIntelIdsRef.current.has(uniqueId)) {
+          return null;
+        }
+        const eventData = eventLookup.get(eventEntry.event.eventId);
+        const flavor = eventEntry.event.faction === 'truth'
+          ? eventData?.flavorTruth
+          : eventEntry.event.faction === 'government'
+            ? eventData?.flavorGov
+            : undefined;
+        const loreText = flavor
+          ?? eventData?.flavorText
+          ?? eventData?.content
+          ?? eventEntry.event.description
+          ?? eventEntry.event.label;
+
+        return {
+          id: uniqueId,
+          savedAt: Date.now(),
+          stateId: stateKey,
+          stateName: eventEntry.stateName,
+          stateAbbreviation: eventEntry.abbreviation,
+          stateOwner: eventEntry.owner,
+          contested: eventEntry.contested,
+          faction: eventEntry.event.faction,
+          eventId: eventEntry.event.eventId,
+          eventLabel: eventEntry.event.label,
+          eventType: eventData?.type ?? 'unknown',
+          triggeredOnTurn: eventEntry.event.triggeredOnTurn,
+          round: playerHubStateIntel.round,
+          loreText,
+          effectSummary: eventEntry.event.effectSummary,
+        } satisfies IntelArchiveDraft;
+      })
+      .filter((entry): entry is IntelArchiveDraft => entry !== null);
+
+    if (payload.length === 0) {
+      return;
+    }
+
+    archiveIntelEvents(payload);
+    payload.forEach(entry => {
+      archivedIntelIdsRef.current.add(entry.id);
+    });
+  }, [archiveIntelEvents, eventLookup, gameState.isGameOver, playerHubStateIntel.eventHistory, playerHubStateIntel.round]);
 
   useEffect(() => {
     const nextActive: Record<string, ActiveParanormalHotspot> = {};
@@ -1842,6 +1922,9 @@ const Index = () => {
         }}
         onDeleteEdition={(id) => removeEditionFromArchive(id)}
         stateIntel={playerHubStateIntel}
+        intelArchive={intelArchiveEntries}
+        onDeleteIntel={removeIntelFromArchive}
+        onClearIntel={intelArchiveEntries.length > 0 ? () => clearIntelArchive() : undefined}
       />
     );
   }
