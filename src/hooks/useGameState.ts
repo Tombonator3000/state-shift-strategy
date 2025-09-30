@@ -22,7 +22,7 @@ import { type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import { chooseTurnActions } from '@/ai/enhancedController';
-import { EventManager, type GameEvent, type ParanormalHotspotPayload } from '@/data/eventDatabase';
+import { EVENT_DATABASE, EventManager, type GameEvent, type ParanormalHotspotPayload } from '@/data/eventDatabase';
 import { processAiActions } from './aiTurnActions';
 import { buildEditionEvents } from './eventEdition';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
@@ -35,8 +35,10 @@ import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
 import type {
+  ActiveCampaignArcState,
   ActiveParanormalHotspot,
   GameState,
+  PendingCampaignArcEvent,
   StateEventBonusSummary,
   StateParanormalHotspot,
 } from './gameStateTypes';
@@ -195,6 +197,126 @@ const ownerToFaction = (
   if (owner === 'neutral') return 'neutral';
   if (owner === 'player') return playerFaction;
   return playerFaction === 'truth' ? 'government' : 'truth';
+};
+
+const findCampaignEventByChapter = (arcId: string, chapter: number): GameEvent | undefined =>
+  EVENT_DATABASE.find(event => event.campaign?.arcId === arcId && event.campaign.chapter === chapter);
+
+const updateCampaignArcProgress = (
+  params: {
+    currentArcs: ActiveCampaignArcState[];
+    pendingEvents: PendingCampaignArcEvent[];
+    triggeredEvent: GameEvent;
+  },
+): {
+  activeArcs: ActiveCampaignArcState[];
+  pendingEvents: PendingCampaignArcEvent[];
+  logEntry?: string;
+} => {
+  const { currentArcs, pendingEvents, triggeredEvent } = params;
+  if (!triggeredEvent.campaign) {
+    return {
+      activeArcs: currentArcs,
+      pendingEvents,
+    };
+  }
+
+  const { arcId, chapter, resolution } = triggeredEvent.campaign;
+  const nextActiveArcs = currentArcs.map(arc => ({ ...arc }));
+  const existingIndex = nextActiveArcs.findIndex(arc => arc.arcId === arcId);
+  const status: ActiveCampaignArcState['status'] = resolution === 'finale' ? 'completed' : 'active';
+
+  if (existingIndex === -1) {
+    nextActiveArcs.push({
+      arcId,
+      currentChapter: chapter,
+      lastEventId: triggeredEvent.id,
+      status,
+      resolution,
+    });
+  } else {
+    const existing = nextActiveArcs[existingIndex];
+    nextActiveArcs[existingIndex] = {
+      ...existing,
+      currentChapter: Math.max(existing.currentChapter, chapter),
+      lastEventId: triggeredEvent.id,
+      status,
+      resolution,
+    };
+  }
+
+  let nextPendingEvents = pendingEvents.filter(
+    pending => !(pending.arcId === arcId && pending.chapter <= chapter),
+  );
+
+  if (resolution !== 'finale') {
+    const nextChapter = chapter + 1;
+    const nextEvent = findCampaignEventByChapter(arcId, nextChapter);
+    if (nextEvent) {
+      const alreadyQueued = nextPendingEvents.some(
+        pending => pending.arcId === arcId && pending.chapter === nextChapter,
+      );
+      if (!alreadyQueued) {
+        nextPendingEvents = [
+          ...nextPendingEvents,
+          { arcId, chapter: nextChapter, eventId: nextEvent.id },
+        ];
+      }
+    } else {
+      const updatedIndex = nextActiveArcs.findIndex(arc => arc.arcId === arcId);
+      if (updatedIndex !== -1) {
+        nextActiveArcs[updatedIndex] = {
+          ...nextActiveArcs[updatedIndex],
+          status: 'completed',
+        };
+      }
+    }
+  }
+
+  nextPendingEvents = nextPendingEvents
+    .slice()
+    .sort((a, b) => (a.chapter === b.chapter ? a.arcId.localeCompare(b.arcId) : a.chapter - b.chapter));
+
+  const logEntry = resolution === 'finale'
+    ? `📖 Campaign arc ${arcId} concluded with ${triggeredEvent.title}.`
+    : `📖 Campaign arc ${arcId} advanced to chapter ${chapter}.`;
+
+  return {
+    activeArcs: nextActiveArcs,
+    pendingEvents: nextPendingEvents,
+    logEntry,
+  };
+};
+
+const selectPendingArcEvent = (
+  pendingEvents: PendingCampaignArcEvent[],
+  eventManager: EventManager | undefined,
+  gameState: GameState,
+): { event: GameEvent; index: number } | null => {
+  if (!eventManager || pendingEvents.length === 0) {
+    return null;
+  }
+
+  const availableEvents = eventManager.getAvailableEvents(gameState);
+  const availableById = new Map(availableEvents.map(event => [event.id, event]));
+
+  for (let index = 0; index < pendingEvents.length; index += 1) {
+    const pending = pendingEvents[index];
+    const candidate = availableById.get(pending.eventId);
+    if (!candidate) {
+      continue;
+    }
+
+    const forcedEvent: GameEvent = {
+      ...candidate,
+      triggerChance: 1,
+      conditionalChance: 1,
+    };
+
+    return { event: forcedEvent, index };
+  }
+
+  return null;
 };
 
 const selectHotspotTargetState = (params: {
@@ -1220,6 +1342,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }),
       currentEvents: [],
       pendingEditionEvents: [],
+      activeCampaignArcs: [],
+      pendingArcEvents: [],
       eventManager,
       showNewspaper: false,
       agendaIssue: initialIssue,
@@ -1360,6 +1484,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       stateRoundEvents: {},
       currentEvents: [],
       pendingEditionEvents: [],
+      activeCampaignArcs: [],
+      pendingArcEvents: [],
       showNewspaper: false,
       aiStrategist: AIFactory.createStrategist(aiDifficulty),
       agendaIssue: issueState,
@@ -1788,15 +1914,29 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         let bonusCardDraw = 0;
         let triggeredEvent: GameEvent | null = null;
         let eventForEdition: GameEvent | null = null;
+        let activeCampaignArcs = [...prev.activeCampaignArcs];
+        let pendingArcEvents = [...prev.pendingArcEvents];
 
         if (prev.eventManager) {
-          const maybeEvent = prev.eventManager.maybeSelectRandomEvent(prev);
-          if (maybeEvent) {
-            triggeredEvent = maybeEvent;
-            eventForEdition = maybeEvent;
+          const pendingSelection = selectPendingArcEvent(pendingArcEvents, prev.eventManager, prev);
+          if (pendingSelection) {
+            triggeredEvent = pendingSelection.event;
+            eventForEdition = pendingSelection.event;
+            pendingArcEvents = pendingArcEvents.filter((_, index) => index !== pendingSelection.index);
+            prev.eventManager.triggerEvent(pendingSelection.event.id);
+          } else {
+            const maybeEvent = prev.eventManager.maybeSelectRandomEvent(prev);
+            if (maybeEvent) {
+              triggeredEvent = maybeEvent;
+              eventForEdition = maybeEvent;
+            }
+          }
 
-            if (maybeEvent.effects) {
-              const effects = maybeEvent.effects;
+          if (triggeredEvent) {
+            const activeEvent = triggeredEvent;
+
+            if (activeEvent.effects) {
+              const effects = activeEvent.effects;
               const formatSigned = (value: number) => (value > 0 ? `+${value}` : `${value}`);
               const truthDeltaFromEffects = (effects.truth ?? 0) + (effects.truthChange ?? 0);
               const ipDeltaFromEffects = (effects.ip ?? 0) + (effects.ipChange ?? 0);
@@ -1848,7 +1988,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
                 pressureLogMap.set(state.id, existing);
               };
 
-              const eventStateContext = maybeEvent as GameEvent & {
+              const eventStateContext = activeEvent as GameEvent & {
                 stateId?: string;
                 state?: string;
                 stateAbbreviation?: string;
@@ -1927,7 +2067,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
                 }
               }
 
-              eventEffectLog.push(`EVENT: ${maybeEvent.title} triggered!`);
+              eventEffectLog.push(`EVENT: ${activeEvent.title} triggered!`);
               if (truthDeltaFromEffects !== 0) {
                 eventEffectLog.push(`Truth ${formatSigned(truthDeltaFromEffects)}%`);
               }
@@ -1955,23 +2095,23 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
               }
             }
 
-            if (maybeEvent.paranormalHotspot) {
+            if (activeEvent.paranormalHotspot) {
               const target = selectHotspotTargetState({
                 states: statesAfterHotspot,
                 activeHotspots: hotspotsAfterHotspot,
-                payload: maybeEvent.paranormalHotspot,
+                payload: activeEvent.paranormalHotspot,
                 playerFaction: prev.faction,
               });
 
               if (target) {
                 const { active, stateHotspot } = createHotspotEntries({
-                  event: maybeEvent,
-                  payload: maybeEvent.paranormalHotspot,
+                  event: activeEvent,
+                  payload: activeEvent.paranormalHotspot,
                   state: target,
                   currentTurn: prev.turn,
                 });
 
-                target.defense = target.defense + maybeEvent.paranormalHotspot.defenseBoost;
+                target.defense = target.defense + activeEvent.paranormalHotspot.defenseBoost;
                 target.paranormalHotspot = stateHotspot;
                 hotspotsAfterHotspot = {
                   ...hotspotsAfterHotspot,
@@ -1979,19 +2119,32 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
                 };
 
                 eventEffectLog.push(
-                  `👻 ${stateHotspot.label} erupts in ${target.name}! Defense +${stateHotspot.defenseBoost} for ${maybeEvent.paranormalHotspot.duration} turn${maybeEvent.paranormalHotspot.duration === 1 ? '' : 's'}. Capture swings truth by ±${stateHotspot.truthReward}%.`,
+                  `👻 ${stateHotspot.label} erupts in ${target.name}! Defense +${stateHotspot.defenseBoost} for ${activeEvent.paranormalHotspot.duration} turn${activeEvent.paranormalHotspot.duration === 1 ? '' : 's'}. Capture swings truth by ±${stateHotspot.truthReward}%.`,
                 );
                 hotspotSourceToRegister = active.source;
 
-                if (maybeEvent.paranormalHotspot.headlineTemplate) {
-                  const dynamicHeadline = maybeEvent.paranormalHotspot.headlineTemplate.replace(
+                if (activeEvent.paranormalHotspot.headlineTemplate) {
+                  const dynamicHeadline = activeEvent.paranormalHotspot.headlineTemplate.replace(
                     /\{\{STATE\}\}/g,
                     target.name.toUpperCase(),
                   );
-                  eventForEdition = { ...maybeEvent, headline: dynamicHeadline };
+                  eventForEdition = { ...activeEvent, headline: dynamicHeadline };
                 }
               } else {
                 eventEffectLog.push('👻 Paranormal surge failed to find a viable hotspot target.');
+              }
+            }
+
+            if (activeEvent.campaign) {
+              const arcUpdate = updateCampaignArcProgress({
+                currentArcs: activeCampaignArcs,
+                pendingEvents: pendingArcEvents,
+                triggeredEvent: activeEvent,
+              });
+              activeCampaignArcs = arcUpdate.activeArcs;
+              pendingArcEvents = arcUpdate.pendingEvents;
+              if (arcUpdate.logEntry) {
+                eventEffectLog.push(arcUpdate.logEntry);
               }
             }
           }
@@ -2052,6 +2205,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           turnPlays: [],
           states: statesAfterHotspot,
           paranormalHotspots: hotspotsAfterHotspot,
+          activeCampaignArcs,
+          pendingArcEvents,
         };
 
         if ((eventForEdition ?? triggeredEvent)?.effects?.revealSecretAgenda) {
@@ -3048,6 +3203,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           pendingEditionEvents: Array.isArray(saveData.pendingEditionEvents)
             ? saveData.pendingEditionEvents
             : [],
+          activeCampaignArcs: Array.isArray(saveData.activeCampaignArcs)
+            ? saveData.activeCampaignArcs as ActiveCampaignArcState[]
+            : [...prev.activeCampaignArcs],
+          pendingArcEvents: Array.isArray(saveData.pendingArcEvents)
+            ? saveData.pendingArcEvents as PendingCampaignArcEvent[]
+            : [...prev.pendingArcEvents],
           // Ensure objects are properly reconstructed
           eventManager: prev.eventManager, // Keep the current event manager
           aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium'),

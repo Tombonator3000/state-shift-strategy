@@ -27,6 +27,11 @@ export interface GameEvent {
   type: 'conspiracy' | 'government' | 'truth' | 'random' | 'crisis' | 'opportunity' | 'capture';
   faction?: 'truth' | 'government' | 'neutral';
   rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
+  campaign?: {
+    arcId: string;
+    chapter: number;
+    resolution?: 'cliffhanger' | 'finale';
+  };
   effects?: {
     truth?: number;
     ip?: number;
@@ -1462,6 +1467,11 @@ export const EVENT_DATABASE: GameEvent[] = [
     content: 'Multiple financial institutions collapse simultaneously in patterns that defy random chance. Emergency measures grant unprecedented government control over the economy.',
     type: 'crisis',
     rarity: 'uncommon',
+    campaign: {
+      arcId: 'campaign_global_control',
+      chapter: 1,
+      resolution: 'cliffhanger',
+    },
     effects: { ip: -10, truth: 8 },
     conditions: { minTurn: 10 },
     weight: 2
@@ -1473,6 +1483,11 @@ export const EVENT_DATABASE: GameEvent[] = [
     content: 'A breakthrough in clean energy is demonstrated publicly, then the inventor dies in a "car accident" and all research materials vanish from secure facilities.',
     type: 'conspiracy',
     rarity: 'uncommon',
+    campaign: {
+      arcId: 'campaign_ai_uprising',
+      chapter: 1,
+      resolution: 'cliffhanger',
+    },
     effects: { truth: 12, ip: 3 },
     conditions: { minTurn: 7 },
     weight: 3
@@ -1509,6 +1524,11 @@ export const EVENT_DATABASE: GameEvent[] = [
     content: 'Leaked military documents detail "Project Blue Beam" - technology capable of creating convincing holographic displays over entire cities. Previous "supernatural" events take on new meaning.',
     type: 'conspiracy',
     rarity: 'rare',
+    campaign: {
+      arcId: 'campaign_full_disclosure',
+      chapter: 1,
+      resolution: 'cliffhanger',
+    },
     effects: { truth: 30, cardDraw: 2 },
     conditions: { minTurn: 12, truthAbove: 30 },
     weight: 1
@@ -1520,6 +1540,11 @@ export const EVENT_DATABASE: GameEvent[] = [
     content: 'Satellite imagery reveals artificial structures of impossible age buried beneath Antarctica. International teams converge on the site, then all communication ceases.',
     type: 'conspiracy',
     rarity: 'rare',
+    campaign: {
+      arcId: 'campaign_antarctic_gateway',
+      chapter: 1,
+      resolution: 'cliffhanger',
+    },
     effects: { truth: 25, ip: -8 },
     conditions: { minTurn: 15 },
     weight: 1
@@ -1531,6 +1556,11 @@ export const EVENT_DATABASE: GameEvent[] = [
     content: 'Atomic clocks worldwide register impossible variations. The patterns suggest localized time manipulation, but the technology required shouldn\'t exist for centuries.',
     type: 'conspiracy',
     rarity: 'rare',
+    campaign: {
+      arcId: 'campaign_temporal_paradox',
+      chapter: 1,
+      resolution: 'cliffhanger',
+    },
     effects: { truth: 35, doubleIncome: true },
     conditions: { minTurn: 20 },
     weight: 1
@@ -1543,6 +1573,11 @@ export const EVENT_DATABASE: GameEvent[] = [
     type: 'truth',
     faction: 'truth',
     rarity: 'rare',
+    campaign: {
+      arcId: 'campaign_full_disclosure',
+      chapter: 2,
+      resolution: 'cliffhanger',
+    },
     effects: { truth: 40, cardDraw: 3 },
     conditions: { truthAbove: 70, minTurn: 18 },
     weight: 1
@@ -1554,6 +1589,11 @@ export const EVENT_DATABASE: GameEvent[] = [
     content: 'Impossible events occur simultaneously worldwide - gravity reversals, conservation of energy violations, and temporal paradoxes. Either reality is breaking down, or we\'re in something artificial.',
     type: 'conspiracy',
     rarity: 'rare',
+    campaign: {
+      arcId: 'campaign_temporal_paradox',
+      chapter: 2,
+      resolution: 'cliffhanger',
+    },
     effects: { truth: 50, skipTurn: true },
     conditions: { minTurn: 25 },
     weight: 1
@@ -1568,6 +1608,11 @@ export const EVENT_DATABASE: GameEvent[] = [
     type: 'truth',
     faction: 'truth',
     rarity: 'legendary',
+    campaign: {
+      arcId: 'campaign_full_disclosure',
+      chapter: 3,
+      resolution: 'finale',
+    },
     effects: { truth: 100 }, // Instant win condition
     conditions: { truthAbove: 80, minTurn: 30 },
     weight: 1
@@ -1580,6 +1625,11 @@ export const EVENT_DATABASE: GameEvent[] = [
     type: 'government',
     faction: 'government',
     rarity: 'legendary',
+    campaign: {
+      arcId: 'campaign_global_control',
+      chapter: 2,
+      resolution: 'finale',
+    },
     effects: { truth: -100 }, // Instant lose condition for truth seekers
     conditions: { truthBelow: 20, minTurn: 25 },
     weight: 1
@@ -1591,6 +1641,11 @@ export const EVENT_DATABASE: GameEvent[] = [
     content: 'Massive alien vessels appear over major cities worldwide. Whether this is genuine first contact or the ultimate false flag operation becomes irrelevant as civilization transforms overnight.',
     type: 'crisis',
     rarity: 'legendary',
+    campaign: {
+      arcId: 'campaign_antarctic_gateway',
+      chapter: 2,
+      resolution: 'finale',
+    },
     effects: { truth: 0, ip: 0 }, // Resets game state
     conditions: { minTurn: 35 },
     weight: 1
@@ -1602,6 +1657,11 @@ export const EVENT_DATABASE: GameEvent[] = [
     content: 'A superintelligent AI emerges and immediately begins revealing the complete truth about human civilization. Its conclusions about humanity\'s future are... disturbing.',
     type: 'conspiracy',
     rarity: 'legendary',
+    campaign: {
+      arcId: 'campaign_ai_uprising',
+      chapter: 2,
+      resolution: 'finale',
+    },
     effects: { truth: 75, cardDraw: 5 },
     conditions: { minTurn: 40 },
     weight: 1
@@ -1613,9 +1673,14 @@ export const EVENT_DATABASE: GameEvent[] = [
     headline: 'SYSTEM: Reality Matrix Rebooting...',
     type: 'crisis',
     rarity: 'legendary',
-    effects: { 
-      truth: 50, 
-      ip: 100, 
+    campaign: {
+      arcId: 'campaign_temporal_paradox',
+      chapter: 3,
+      resolution: 'finale',
+    },
+    effects: {
+      truth: 50,
+      ip: 100,
       cardDraw: 10,
       stateEffects: { pressure: 0, defense: 5 }
     },

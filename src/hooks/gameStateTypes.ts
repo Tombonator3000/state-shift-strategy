@@ -114,6 +114,22 @@ export interface GameState {
   stateRoundSeed: number;
   lastStateBonusRound: number;
   stateRoundEvents: Record<string, StateRoundEventLogEntry[]>;
+  activeCampaignArcs: ActiveCampaignArcState[];
+  pendingArcEvents: PendingCampaignArcEvent[];
+}
+
+export interface ActiveCampaignArcState {
+  arcId: string;
+  currentChapter: number;
+  lastEventId: string;
+  status: 'active' | 'completed';
+  resolution?: 'cliffhanger' | 'finale';
+}
+
+export interface PendingCampaignArcEvent {
+  arcId: string;
+  eventId: string;
+  chapter: number;
 }
 
 export interface StateEventBonusSummary {
