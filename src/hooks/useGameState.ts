@@ -52,6 +52,7 @@ import {
 import { evaluateCombosForTurn } from './comboAdapter';
 import { mergeStateEventHistories, trimStateEventHistory } from './stateEventHistory';
 import { assignStateBonuses } from '@/game/stateBonuses';
+import { applyStateBonusAssignmentToState } from './stateBonusAssignment';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
@@ -2606,74 +2607,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           playerFaction: nextState.faction,
         });
 
-        let workingLogs = assignment.logs.length > 0 ? [...nextState.log, ...assignment.logs] : [...nextState.log];
-        nextState = { ...nextState, log: workingLogs };
-
-        const factionMultiplier = nextState.faction === 'truth' ? 1 : -1;
-
-        if (assignment.truthDelta !== 0) {
-          nextState = applyTruthDelta(nextState, assignment.truthDelta * factionMultiplier, 'human');
-          workingLogs = nextState.log;
-        }
-
-        if (assignment.ipDelta !== 0) {
-          const ipDelta = assignment.ipDelta * factionMultiplier;
-          nextState.ip = Math.max(0, Math.round(nextState.ip + ipDelta));
-          workingLogs = [...workingLogs, `State bonuses adjusted IP by ${ipDelta >= 0 ? '+' : ''}${ipDelta}`];
-        }
-
-        const pressureKey: 'pressurePlayer' | 'pressureAi' = nextState.faction === 'truth'
-          ? 'pressurePlayer'
-          : 'pressureAi';
-        const rivalKey = pressureKey === 'pressurePlayer' ? 'pressureAi' : 'pressurePlayer';
-        const updatedStates = nextState.states.map(state => {
-          const bonus = assignment.bonuses[state.abbreviation] ?? null;
-          const hasController = state.owner === 'player' || state.owner === 'ai';
-          const roundEvents = hasController ? assignment.roundEvents[state.abbreviation] ?? [] : [];
-          const deltaBase = assignment.pressureAdjustments[state.abbreviation] ?? 0;
-          const effectiveDelta = deltaBase * factionMultiplier;
-
-          if (effectiveDelta === 0) {
-            return {
-              ...state,
-              activeStateBonus: bonus,
-              roundEvents,
-            };
-          }
-
-          const updatedPressureOwner = Math.max(0, (state[pressureKey] ?? 0) + effectiveDelta);
-          const opponentPressure = Math.max(0, state[rivalKey] ?? 0);
-
-          return {
-            ...state,
-            [pressureKey]: updatedPressureOwner,
-            pressure: Math.max(updatedPressureOwner, opponentPressure),
-            activeStateBonus: bonus,
-            roundEvents,
-          } as typeof state;
-        });
-
-        const stateRoundEventsMap = Object.fromEntries(
-          updatedStates.map(state => [state.abbreviation, state.roundEvents ?? []]),
-        );
-
-        nextState = {
-          ...nextState,
-          states: updatedStates,
-          stateRoundEvents: stateRoundEventsMap,
-          lastStateBonusRound: nextState.round,
-          log: workingLogs,
-        };
-
-        if (assignment.newspaperEvents.length > 0) {
-          nextState = {
-            ...nextState,
-            currentEvents: buildEditionEvents(
-              { turn: nextState.turn, round: nextState.round, currentEvents: nextState.currentEvents },
-              assignment.newspaperEvents,
-            ),
-          };
-        }
+        nextState = applyStateBonusAssignmentToState(nextState, assignment);
 
         if (typeof window !== 'undefined') {
           (window as any).__stateThemedDebug = {
