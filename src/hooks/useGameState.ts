@@ -2404,7 +2404,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const rivalKey = pressureKey === 'pressurePlayer' ? 'pressureAi' : 'pressurePlayer';
         const updatedStates = nextState.states.map(state => {
           const bonus = assignment.bonuses[state.abbreviation] ?? null;
-          const roundEvents = assignment.roundEvents[state.abbreviation] ?? [];
+          const hasController = state.owner === 'player' || state.owner === 'ai';
+          const roundEvents = hasController ? assignment.roundEvents[state.abbreviation] ?? [] : [];
           const deltaBase = assignment.pressureAdjustments[state.abbreviation] ?? 0;
           const effectiveDelta = deltaBase * factionMultiplier;
 

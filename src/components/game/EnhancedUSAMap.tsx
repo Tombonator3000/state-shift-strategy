@@ -828,7 +828,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
               </div>
             )}
 
-            {stateInfo.roundEvents?.length ? (
+            {stateInfo.owner !== 'neutral' && stateInfo.roundEvents?.length ? (
               <div className="pt-2 border-t border-border">
                 <div className="flex items-center gap-2 text-sm font-bold text-foreground mb-1">
                   <span>🗞️</span>
