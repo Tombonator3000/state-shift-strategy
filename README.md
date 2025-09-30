@@ -68,6 +68,9 @@ Custom artwork for cards should be stored in `public/card-art/` with filenames t
 `<cardId>.jpg` image and then for `<cardId>.png`. If neither file is present the UI will automatically fall back to the existing
 placeholder illustrations.
 
+When official assets drift out of sync with the manifest, run the [official asset recovery workflow](docs/official-asset-recovery.md)
+to re-lock every card against the canonical metadata before shipping.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/fa2f38e2-5939-4c65-a945-2c0f8029da84) and click on Share -> Publish.
