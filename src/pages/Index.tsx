@@ -2238,7 +2238,6 @@ const Index = () => {
           </SheetContent>
         </Sheet>
         <div className="leading-tight">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">The Paranoid Times</p>
           <h1 className="text-lg font-bold text-newspaper-text sm:text-2xl">THE PARANOID TIMES</h1>
           <p className="text-[11px] font-medium text-newspaper-text/70 sm:text-xs">{subtitle}</p>
         </div>
