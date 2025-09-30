@@ -58,6 +58,7 @@ function manifestEntryToResolved(entry: ManifestEntry): ResolvedAsset {
     updatedAt: entry.updatedAt,
     tags: entry.tags,
     metadata: entry.metadata,
+    source: entry.source,
   };
 }
 
@@ -134,7 +135,7 @@ export async function resolveImage(
   }
 
   const existing = assetManifest.getEntry(key);
-  if (existing && existing.locked && !options.forceRefresh) {
+  if (existing && (existing.locked || existing.source === 'official')) {
     return manifestEntryToResolved(existing);
   }
 
@@ -143,6 +144,39 @@ export async function resolveImage(
   }
 
   try {
+    if (context.scope === 'card' && context.card) {
+      const official = await OfficialStore.lookup(context.card);
+      if (official) {
+        let styledUrl = official.url;
+        try {
+          styledUrl = await runStylePipeline(official.url);
+        } catch (error) {
+          console.warn('[AssetResolver] style pipeline failed for official art, using original url', error);
+          styledUrl = official.url;
+        }
+
+        const manifestEntry: ManifestEntry = {
+          key,
+          scope: context.scope,
+          url: official.url,
+          styledUrl,
+          provider: official.provider,
+          credit: normalizeCredit(
+            mergeCredit(existing?.credit, official.credit ?? undefined) ?? official.credit,
+          ),
+          license: official.license,
+          locked: true,
+          tags: official.tags ?? context.tags ?? [],
+          metadata: official.metadata,
+          updatedAt: Date.now(),
+          source: 'official',
+        };
+
+        assetManifest.upsert(manifestEntry);
+        return manifestEntryToResolved(manifestEntry);
+      }
+    }
+
     const { providerSnapshots, query } = await resolveWithProviders(context);
     if (providerSnapshots.length === 0) {
       if (context.fallbackUrl) {
@@ -158,7 +192,14 @@ export async function resolveImage(
           tags: context.tags ?? [],
           metadata: { query },
           updatedAt: Date.now(),
+          source: 'download',
         };
+
+        const latest = assetManifest.getEntry(key);
+        if (latest && (latest.locked || latest.source === 'official')) {
+          return manifestEntryToResolved(latest);
+        }
+
         assetManifest.upsert(entry);
         return manifestEntryToResolved(entry);
       }
@@ -195,7 +236,13 @@ export async function resolveImage(
       tags: bestCandidate.tags ?? context.tags ?? [],
       metadata: { ...bestCandidate.metadata, query },
       updatedAt: Date.now(),
+      source: 'download',
     };
+
+    const latest = assetManifest.getEntry(key);
+    if (latest && (latest.locked || latest.source === 'official')) {
+      return manifestEntryToResolved(latest);
+    }
 
     assetManifest.upsert(manifestEntry);
     return manifestEntryToResolved(manifestEntry);

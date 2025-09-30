@@ -28,6 +28,8 @@ export interface AssetCandidate {
   metadata?: Record<string, unknown>;
 }
 
+export type ManifestSource = 'official' | 'download';
+
 export interface ResolvedAsset {
   key: string;
   url: string;
@@ -39,6 +41,7 @@ export interface ResolvedAsset {
   updatedAt: number;
   tags: string[];
   metadata?: Record<string, unknown>;
+  source: ManifestSource;
 }
 
 export interface AssetProviderResult {
@@ -89,6 +92,7 @@ export interface ManifestEntry {
   thumbnailUrl?: string;
   metadata?: Record<string, unknown>;
   updatedAt: number;
+  source: ManifestSource;
 }
 
 export type ManifestListener = (entries: ManifestEntry[]) => void;
