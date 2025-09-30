@@ -7,6 +7,7 @@ import type { GameEvent } from '@/data/eventDatabase';
 import type { NewsArticle } from '@/types';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import { resolveImage } from '@/services/assets/AssetResolver';
+import { shouldAutofillAsset } from '@/services/assets/autofillGuards';
 import { featureFlags } from '@/state/featureFlags';
 
 interface PlayedCard {
@@ -220,7 +221,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
       if (articleAssets[article.id]) {
         return false;
       }
-      return !article.image || !article.imageCredit;
+      return shouldAutofillAsset(article.image);
     });
 
     if (!pending.length) {
