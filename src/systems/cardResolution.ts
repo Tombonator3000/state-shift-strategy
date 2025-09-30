@@ -373,7 +373,8 @@ export function resolveCardMVP(
         : gameState.faction === 'truth'
           ? 'government'
           : 'truth';
-      const truthDelta = hotspot.truthReward;
+      const rawTruthReward = hotspot.truthReward;
+      const truthDelta = Number.isFinite(rawTruthReward) ? rawTruthReward : 0;
       const directionalDelta = captureFaction === 'truth' ? truthDelta : -truthDelta;
       if (directionalDelta !== 0) {
         truthBonusFromHotspots += directionalDelta;
