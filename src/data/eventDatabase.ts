@@ -1761,7 +1761,7 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
   // Connecticut
   "CT": [
     {
-      id: "ct_insurance_conspiracy", title: "Insurance Companies Control Reality", 
+      id: "ct_insurance_conspiracy", title: "Insurance Companies Control Reality",
       content: "Hartford's insurance giants have developed technology to manipulate probability itself!",
       type: "capture", rarity: "rare", weight: 6,
       effects: { ipChange: 4, truthChange: -1 },
@@ -1770,7 +1770,7 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       flavorTruth: "They're rigging the odds of everything!"
     },
     {
-      id: "ct_submarine_time_travel", title: "Nuclear Sub Travels Through Time", 
+      id: "ct_submarine_time_travel", title: "Nuclear Sub Travels Through Time",
       content: "A Groton submarine has been spotted in multiple time periods simultaneously!",
       type: "capture", rarity: "legendary", weight: 2,
       effects: { truthChange: 7, cardDraw: 2 },
@@ -1780,10 +1780,32 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
     }
   ],
 
+  // District of Columbia
+  "DC": [
+    {
+      id: "dc_library_psychoacoustics", title: "Library of Congress Resonance Vault Unsealed",
+      content: "Archivists uncover a sub-basement full of tuning forks that amplify latent psychic broadcasts across the capital!",
+      type: "capture", rarity: "rare", weight: 5,
+      effects: { truthChange: 5, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Every marble column hums the frequencies of disclosure tonight!",
+      flavorGov: "Merely calibrating acoustics for educational programming, nothing paranormal."
+    },
+    {
+      id: "dc_reflecting_pool_array", title: "Reflecting Pool Converts to Surveillance Array",
+      content: "The National Mall's reflecting pool drains overnight, revealing mirrored drones projecting a continental hologram grid!",
+      type: "capture", rarity: "uncommon", weight: 9,
+      effects: { ipChange: 3, defenseChange: 2 },
+      conditions: { capturedBy: "government" },
+      flavorGov: "Capitol perimeter upgrades ensure tourists reflect on proper security.",
+      flavorTruth: "They're turning every monument into a listening post!"
+    }
+  ],
+
   // Delaware
   "DE": [
     {
-      id: "de_corporate_hivemind", title: "Delaware Corporations Share Collective Mind", 
+      id: "de_corporate_hivemind", title: "Delaware Corporations Share Collective Mind",
       content: "All companies incorporated in Delaware begin acting in perfect synchronization!",
       type: "capture", rarity: "uncommon", weight: 8,
       effects: { ipChange: 2, cardDraw: 1 },
