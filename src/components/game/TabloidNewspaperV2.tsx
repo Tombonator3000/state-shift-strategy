@@ -13,6 +13,7 @@ import { buildRoundContext, formatTruthDelta } from './tabloidRoundUtils';
 import { useAudioContext } from '@/contexts/AudioContext';
 import type { ParanormalSighting } from '@/types/paranormal';
 import { resolveImage } from '@/services/assets/AssetResolver';
+import { shouldAutofillAsset } from '@/services/assets/autofillGuards';
 import { featureFlags } from '@/state/featureFlags';
 
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
@@ -630,7 +631,7 @@ const TabloidNewspaperV2 = ({
       if (eventAssets[event.id]) {
         return false;
       }
-      return !event.image || !event.imageCredit;
+      return shouldAutofillAsset(event.image);
     });
 
     if (!pending.length) {
