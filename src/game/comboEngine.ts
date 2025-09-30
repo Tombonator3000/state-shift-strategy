@@ -41,6 +41,17 @@ let currentComboRng: () => number = comboSettings.rng ?? Math.random;
 
 let lastComboSummary: ComboSummary | null = null;
 
+type NormalizedFaction = 'truth' | 'government';
+
+function normalizePlayerFaction(
+  faction: GameState['players'][PlayerId]['faction'] | undefined,
+): NormalizedFaction {
+  if (typeof faction === 'string' && faction.toLowerCase() === 'government') {
+    return 'government';
+  }
+  return 'truth';
+}
+
 function ensureToggleCoverage(settings: ComboSettings): ComboSettings {
   const toggles = { ...settings.comboToggles };
   for (const def of COMBO_DEFINITIONS) {
@@ -412,7 +423,12 @@ function evaluateTrigger(
   }
 }
 
-function formatReward(reward: ComboReward): string {
+export interface FormatComboRewardOptions {
+  faction?: NormalizedFaction;
+  truthDeltaOverride?: number;
+}
+
+function formatReward(reward: ComboReward, options?: FormatComboRewardOptions): string {
   const parts: string[] = [];
   const ip = reward.ip;
   if (typeof ip === 'number' && ip !== 0) {
@@ -420,8 +436,19 @@ function formatReward(reward: ComboReward): string {
   }
 
   const truth = reward.truth;
-  if (typeof truth === 'number' && truth !== 0) {
-    parts.push(`${truth > 0 ? `±${truth}` : truth} Truth`);
+  const truthOverride = options?.truthDeltaOverride;
+  if (typeof truthOverride === 'number') {
+    if (truthOverride !== 0) {
+      parts.push(`${truthOverride > 0 ? '+' : ''}${truthOverride} Truth`);
+    }
+  } else if (typeof truth === 'number' && truth !== 0) {
+    const faction = options?.faction;
+    if (!faction) {
+      parts.push(`${truth > 0 ? `±${truth}` : truth} Truth`);
+    } else {
+      const displayTruth = faction === 'government' ? -truth : truth;
+      parts.push(`${displayTruth > 0 ? '+' : ''}${displayTruth} Truth`);
+    }
   }
 
   const nextAttackMultiplier = reward.nextAttackMultiplier;
@@ -457,9 +484,11 @@ export function evaluateCombos(
     .filter(play => play.stage === 'resolve' && play.owner === player)
     .sort((a, b) => a.sequence - b.sequence);
 
+  const playerFaction = normalizePlayerFaction(state.players[player]?.faction);
+
   if (!settings.enabled || plays.length === 0) {
     const empty: ComboEvaluation = { results: [], totalReward: {}, logs: [] };
-    lastComboSummary = { ...empty, player, turn: state.turn };
+    lastComboSummary = { ...empty, player, playerFaction, turn: state.turn };
     return empty;
   }
 
@@ -497,12 +526,12 @@ export function evaluateCombos(
       details: { matchedPlays: match.matchedPlays, extra: match.extra },
     });
 
-    const text = formatReward(applied);
+    const text = formatReward(applied, { faction: playerFaction });
     logs.push(text ? `${def.name} ${text}` : def.name);
   }
 
   const summary: ComboEvaluation = { results, totalReward, logs };
-  lastComboSummary = { ...summary, player, turn: state.turn };
+  lastComboSummary = { ...summary, player, playerFaction, turn: state.turn };
   return summary;
 }
 
@@ -527,7 +556,7 @@ export function applyComboRewards(
   const truthReward = evaluation.totalReward.truth ?? 0;
   if (truthReward !== 0) {
     const playerState = updated.players[player];
-    const faction = playerState?.faction ?? 'truth';
+    const faction = normalizePlayerFaction(playerState?.faction);
     const signedTruthDelta = faction === 'government' ? -truthReward : truthReward;
     applyTruthDelta(updated, signedTruthDelta, player);
   }
@@ -562,6 +591,9 @@ export function getLastComboSummary(): ComboSummary | null {
   return lastComboSummary;
 }
 
-export function formatComboReward(reward: ComboReward): string {
-  return formatReward(reward);
+export function formatComboReward(
+  reward: ComboReward,
+  options?: FormatComboRewardOptions,
+): string {
+  return formatReward(reward, options);
 }

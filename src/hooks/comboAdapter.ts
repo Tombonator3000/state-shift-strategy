@@ -99,9 +99,10 @@ export const evaluateCombosForTurn = (
   const rewardedState = applyComboRewards(engineState, playerId, evaluation);
   const rewardLogs = rewardedState.log.slice(logStart);
   const truthDelta = rewardedState.truth - state.truth;
+  const comboPlayerFaction = engineState.players[playerId]?.faction === 'government' ? 'government' : 'truth';
 
   const comboMessages = evaluation.results.map(result => {
-    const rewardText = formatComboReward(result.appliedReward);
+    const rewardText = formatComboReward(result.appliedReward, { faction: comboPlayerFaction });
     return rewardText ? `${result.definition.name} ${rewardText}` : result.definition.name;
   });
 

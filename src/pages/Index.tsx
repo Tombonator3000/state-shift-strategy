@@ -329,7 +329,9 @@ const buildComboHighlights = (
   const ownerLabel = resolveComboOwnerLabel(summary.player);
 
   return summary.results.map(result => {
-    const rewardLabel = formatComboReward(result.appliedReward).replace(/[()]/g, '').trim();
+    const rewardLabel = formatComboReward(result.appliedReward, { faction: summary.playerFaction })
+      .replace(/[()]/g, '')
+      .trim();
     return {
       id: result.definition.id,
       name: result.definition.name ?? result.definition.id,
