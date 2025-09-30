@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
+import type { NewsArticle } from '@/types';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 
 interface PlayedCard {
@@ -21,17 +22,6 @@ interface NewspaperProps {
 interface NewspaperData {
   mastheads: string[];
   ads: string[];
-}
-
-interface Article {
-  id: string;
-  title: string;
-  headline: string;
-  content: string;
-  image: string;
-  isEvent: boolean;
-  isCard?: boolean;
-  player?: 'human' | 'ai';
 }
 
 const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) => {
@@ -101,7 +91,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
   }, [newspaperData]);
 
   // Generate card articles with tabloid-style headlines
-  const generateCardArticle = (card: GameCard, player: 'human' | 'ai'): Article => {
+  const generateCardArticle = (card: GameCard, player: 'human' | 'ai'): NewsArticle => {
     const tabloidHeadlines = [
       `"${card.name}" SHOCKS NATION`,
       `EXCLUSIVE: ${card.name.toUpperCase()} LEAKED!`,
@@ -137,7 +127,9 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
       title: card.name,
       headline,
       content: `${tabloidContent} ${editorialComments[Math.floor(Math.random() * editorialComments.length)]}`,
-      image: '/placeholder-card.png', // Default since cards don't have images in the type
+      image: card.artId ?? '/placeholder-card.png',
+      imageCredit: card.artAttribution,
+      tags: card.artTags && card.artTags.length > 0 ? [...card.artTags] : [],
       isCard: true,
       isEvent: false,
       player
@@ -188,7 +180,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
   };
 
   // Convert events to articles with red styling for events
-  const eventArticles: Article[] = events.map(event => {
+  const eventArticles: NewsArticle[] = events.map(event => {
     const impact = formatEventImpact(event);
     const baseHeadline = event.headline || event.title;
 
@@ -197,12 +189,14 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
       title: event.title,
       headline: impact ? `${baseHeadline} (${impact})` : baseHeadline,
       content: event.content,
-      image: '/placeholder-event.png',
+      image: event.image ?? '/placeholder-event.png',
+      imageCredit: event.imageCredit,
+      tags: event.tags && event.tags.length > 0 ? [...event.tags] : [],
       isEvent: true
     };
   });
 
-  const allArticles: Article[] = [...cardArticles, ...eventArticles];
+  const allArticles: NewsArticle[] = [...cardArticles, ...eventArticles];
 
   // Get random ads from newspaper data
   const getRandomAds = (count: number) => {
@@ -402,15 +396,22 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
                 </h2>
                 
                 {article.image && (
-                  <div className="w-full h-32 mb-3 border-2 border-newspaper-border overflow-hidden">
-                    <img 
-                      src={article.image} 
-                      alt={article.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder-card.png';
-                      }}
-                    />
+                  <div className="mb-3">
+                    <div className="w-full h-32 border-2 border-newspaper-border overflow-hidden">
+                      <img
+                        src={article.image}
+                        alt={article.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder-card.png';
+                        }}
+                      />
+                    </div>
+                    {article.imageCredit ? (
+                      <p className="mt-1 text-[10px] font-serif italic text-newspaper-text/60">
+                        Image: {article.imageCredit}
+                      </p>
+                    ) : null}
                   </div>
                 )}
                 
