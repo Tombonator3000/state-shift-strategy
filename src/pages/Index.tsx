@@ -1937,6 +1937,11 @@ const Index = () => {
   const startNewGame = async (faction: 'government' | 'truth') => {
     console.log('🎵 Index: Starting new game with faction:', faction);
     persistFaction(faction);
+    setVictoryState({ isVictory: false, type: null });
+    setFinalEdition(null);
+    setReadingEdition(null);
+    setShowExtraEdition(false);
+    setParanormalSightings([]);
     await initGame(faction);
     setShowMenu(false);
     setShowIntro(false);
