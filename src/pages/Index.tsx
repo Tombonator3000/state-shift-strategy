@@ -42,7 +42,12 @@ import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
 import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
-import type { ActiveParanormalHotspot, CardPlayRecord } from '@/hooks/gameStateTypes';
+import type {
+  ActiveCampaignArcState,
+  ActiveParanormalHotspot,
+  CardPlayRecord,
+  PendingCampaignArcEvent,
+} from '@/hooks/gameStateTypes';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
 import { areParanormalEffectsEnabled } from '@/state/settings';
@@ -134,6 +139,115 @@ const resolveStateName = (stateId: string): string => {
     return byAbbr.name;
   }
   return stateId;
+};
+
+const formatSignedNumber = (value: number): string => {
+  const rounded = Math.round(value);
+  if (rounded === 0) {
+    return '0';
+  }
+  return rounded > 0 ? `+${rounded}` : `${rounded}`;
+};
+
+const formatArcName = (arcId: string): string => {
+  return arcId
+    .replace(/^campaign_/, '')
+    .split('_')
+    .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+};
+
+const detectReducedMotion = (): boolean => {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return false;
+  }
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+};
+
+const pickChapterTemplate = (templates: string[], chapter: number): string => {
+  if (templates.length === 0) {
+    return '';
+  }
+  const index = Math.max(0, (chapter - 1) % templates.length);
+  return templates[index];
+};
+
+type CampaignStage = 'intro' | 'advance' | 'finale';
+
+const resolveEventStateName = (event?: GameEvent): string | undefined => {
+  if (!event) {
+    return undefined;
+  }
+  const stateId = event.effects?.stateEffects?.stateId
+    ?? event.paranormalHotspot?.stateId;
+  if (!stateId) {
+    return undefined;
+  }
+  return resolveStateName(stateId);
+};
+
+const buildCampaignHotspotTagline = (params: {
+  arc: ActiveCampaignArcState;
+  event?: GameEvent;
+  stage: CampaignStage;
+}): string | null => {
+  const { event, arc, stage } = params;
+  if (!event?.paranormalHotspot) {
+    return null;
+  }
+
+  const stateName = resolveEventStateName(event) ?? 'the grid';
+  const chapter = event.campaign?.chapter ?? arc.currentChapter;
+  const template = stage === 'finale'
+    ? pickChapterTemplate(HOTSPOT_RESOLUTION_TAGLINES, chapter)
+    : pickChapterTemplate(HOTSPOT_SPAWN_TAGLINES, chapter);
+
+  const truthDelta = (event.effects?.truth ?? 0)
+    + (event.effects?.truthChange ?? 0)
+    || event.paranormalHotspot.truthReward;
+
+  return fillTemplate(template, {
+    STATE: stateName.toUpperCase(),
+    DEFENSE: event.paranormalHotspot.defenseBoost,
+    TRUTH: Math.abs(event.paranormalHotspot.truthReward),
+    TRUTH_DELTA: formatSignedNumber(truthDelta),
+  });
+};
+
+const buildCampaignBroadcastContext = (params: {
+  arc: ActiveCampaignArcState;
+  event?: GameEvent;
+  stage: CampaignStage;
+}): { tagline: string; intensity: 'surge' | 'collapse'; setList: string[] } | null => {
+  const { arc, event, stage } = params;
+  const chapter = event?.campaign?.chapter ?? arc.currentChapter;
+  const template = pickChapterTemplate(BROADCAST_SIGHTING_TAGLINES, chapter);
+  if (!template) {
+    return null;
+  }
+
+  const trackLabel = event?.title ?? formatArcName(arc.arcId);
+  const faction = event?.faction ?? 'neutral';
+  const finaleIntensity: 'surge' | 'collapse' = faction === 'government' ? 'collapse' : 'surge';
+  const intensity: 'surge' | 'collapse' = stage === 'finale'
+    ? finaleIntensity
+    : faction === 'government'
+      ? 'collapse'
+      : 'surge';
+
+  const tagline = fillTemplate(template, {
+    TRACK: trackLabel.toUpperCase(),
+    INTENSITY: intensity.toUpperCase(),
+  });
+
+  const setList: string[] = [];
+  if (event?.headline) {
+    setList.push(event.headline);
+  } else {
+    setList.push(trackLabel);
+  }
+
+  return { tagline, intensity, setList };
 };
 
 const computeEventScore = (event: GameEvent): number => {
@@ -656,6 +770,9 @@ const Index = () => {
   const hotspotLogCursorRef = useRef<number>(0);
   const hotspotLogInitializedRef = useRef<boolean>(false);
   const archivedIntelIdsRef = useRef<Set<string>>(new Set());
+  const campaignArcSnapshotRef = useRef<Map<string, ActiveCampaignArcState>>(new Map());
+  const campaignArcInitializedRef = useRef(false);
+  const campaignPendingAnnouncementsRef = useRef<Set<string>>(new Set());
 
   const stateLookupByName = useMemo(() => {
     const lookup = new Map<string, (typeof gameState.states)[number]>();
@@ -675,6 +792,20 @@ const Index = () => {
     });
     return lookup;
   }, []);
+
+  const pendingArcDetails = useMemo(() => {
+    const map = new Map<string, { entry: PendingCampaignArcEvent; event?: GameEvent }>();
+    (gameState.pendingArcEvents ?? []).forEach(entry => {
+      const existing = map.get(entry.arcId);
+      if (!existing || entry.chapter < existing.entry.chapter) {
+        map.set(entry.arcId, {
+          entry,
+          event: eventLookup.get(entry.eventId) ?? EVENT_DATABASE.find(evt => evt.id === entry.eventId),
+        });
+      }
+    });
+    return map;
+  }, [gameState.pendingArcEvents, eventLookup]);
 
   const playerHubStateIntel = useMemo<PlayerStateIntel>(() => {
     const states = Array.isArray(gameState.states) ? gameState.states : [];
@@ -805,6 +936,171 @@ const Index = () => {
     });
     activeHotspotByStateRef.current = nextActive;
   }, [gameState.paranormalHotspots]);
+
+  useEffect(() => {
+    if (!campaignArcInitializedRef.current) {
+      campaignArcInitializedRef.current = true;
+      campaignArcSnapshotRef.current = new Map(
+        gameState.activeCampaignArcs.map(arc => [arc.arcId, { ...arc }]),
+      );
+      return;
+    }
+
+    const previous = campaignArcSnapshotRef.current;
+    const reducedMotion = detectReducedMotion();
+
+    gameState.activeCampaignArcs.forEach(arc => {
+      const prev = previous.get(arc.arcId);
+      let stage: CampaignStage | null = null;
+
+      if (!prev) {
+        stage = 'intro';
+      } else if (arc.status === 'completed' && prev.status !== 'completed') {
+        stage = 'finale';
+      } else if (
+        arc.currentChapter > prev.currentChapter
+        || prev.lastEventId !== arc.lastEventId
+      ) {
+        stage = 'advance';
+      }
+
+      if (!stage) {
+        return;
+      }
+
+      const currentEvent = eventLookup.get(arc.lastEventId)
+        ?? EVENT_DATABASE.find(event =>
+          event.campaign?.arcId === arc.arcId
+          && event.campaign.chapter === arc.currentChapter,
+        );
+
+      const arcLabel = formatArcName(arc.arcId);
+      const broadcastContext = buildCampaignBroadcastContext({ arc, event: currentEvent, stage });
+
+      if (broadcastContext) {
+        const broadcastPosition = VisualEffectsCoordinator.getRandomCenterPosition(stage === 'finale' ? 80 : 160);
+        VisualEffectsCoordinator.triggerTruthMeltdownBroadcast({
+          position: broadcastPosition,
+          intensity: broadcastContext.intensity,
+          setList: broadcastContext.setList,
+          truthValue: Math.round(gameState.truth),
+          reducedMotion,
+          source: currentEvent?.faction,
+        });
+        VisualEffectsCoordinator.triggerParticleEffect('broadcast', broadcastPosition);
+        if (stage === 'finale') {
+          VisualEffectsCoordinator.triggerTruthFlash(broadcastPosition);
+        }
+
+        const timestamp = Date.now();
+        pushSighting({
+          id: `campaign-broadcast-${arc.arcId}-${arc.currentChapter}-${timestamp}`,
+          timestamp,
+          category: 'truth-meltdown',
+          headline: `${arcLabel.toUpperCase()} CHAPTER ${arc.currentChapter}`,
+          subtext: broadcastContext.tagline,
+          location: 'National Broadcast Grid',
+          metadata: {
+            setList: broadcastContext.setList,
+            intensity: broadcastContext.intensity,
+            truthValue: Math.round(gameState.truth),
+            source: currentEvent?.faction,
+          },
+        });
+
+        const nextEvent = pendingArcDetails.get(arc.arcId)?.event;
+        const message = stage === 'finale'
+          ? `${arcLabel}: Finale resolved!`
+          : `${arcLabel}: Chapter ${arc.currentChapter} ${stage === 'intro' ? 'initiated' : 'escalated'}!`;
+        const followUp = nextEvent ? ` Next: ${nextEvent.title}` : '';
+        toast.success(`${message}${followUp}`, {
+          id: `campaign-arc-${arc.arcId}-${arc.currentChapter}`,
+        });
+
+        audio.playSFX(stage === 'finale' ? 'victory' : 'turnEnd');
+      }
+
+      const hotspotTagline = buildCampaignHotspotTagline({ arc, event: currentEvent, stage });
+      if (hotspotTagline && currentEvent?.paranormalHotspot) {
+        const hotspotStateName = resolveEventStateName(currentEvent) ?? 'Unknown Site';
+        const hotspotPosition = VisualEffectsCoordinator.getRandomCenterPosition(stage === 'finale' ? 100 : 220);
+        VisualEffectsCoordinator.triggerParanormalHotspot({
+          position: hotspotPosition,
+          stateId: currentEvent.paranormalHotspot.stateId ?? hotspotStateName,
+          stateName: hotspotStateName,
+          label: currentEvent.paranormalHotspot.label ?? currentEvent.title,
+          icon: currentEvent.paranormalHotspot.icon ?? '👻',
+          source: currentEvent.paranormalHotspot.source ?? 'neutral',
+          defenseBoost: currentEvent.paranormalHotspot.defenseBoost,
+          truthReward: currentEvent.paranormalHotspot.truthReward,
+        });
+
+        const timestamp = Date.now();
+        pushSighting({
+          id: `campaign-hotspot-${arc.arcId}-${arc.currentChapter}-${timestamp}`,
+          timestamp,
+          category: 'hotspot',
+          headline: `${currentEvent.paranormalHotspot.icon ?? '👻'} ${arcLabel.toUpperCase()} HOTSPOT`,
+          subtext: hotspotTagline,
+          location: hotspotStateName,
+          metadata: {
+            hotspotId: currentEvent.id,
+            stateId: currentEvent.paranormalHotspot.stateId,
+            stateName: hotspotStateName,
+            defenseBoost: currentEvent.paranormalHotspot.defenseBoost,
+            truthReward: currentEvent.paranormalHotspot.truthReward,
+            duration: currentEvent.paranormalHotspot.duration,
+            source: currentEvent.paranormalHotspot.source ?? 'neutral',
+            outcome: stage === 'finale' ? 'captured' : 'active',
+          },
+        });
+      }
+    });
+
+    campaignArcSnapshotRef.current = new Map(
+      gameState.activeCampaignArcs.map(arc => [arc.arcId, { ...arc }]),
+    );
+  }, [
+    audio,
+    eventLookup,
+    gameState.activeCampaignArcs,
+    gameState.truth,
+    pendingArcDetails,
+    pushSighting,
+  ]);
+
+  useEffect(() => {
+    const seen = campaignPendingAnnouncementsRef.current;
+    const activeIds = new Set<string>();
+
+    (gameState.pendingArcEvents ?? []).forEach(entry => {
+      activeIds.add(entry.eventId);
+      if (seen.has(entry.eventId)) {
+        return;
+      }
+
+      const event = eventLookup.get(entry.eventId)
+        ?? EVENT_DATABASE.find(evt => evt.id === entry.eventId);
+      if (!event) {
+        return;
+      }
+
+      const arcLabel = formatArcName(entry.arcId);
+      toast(`${arcLabel} chapter ${entry.chapter} queued: ${event.title}`, {
+        duration: 4000,
+        icon: '📖',
+        id: `campaign-pending-${entry.arcId}-${entry.chapter}`,
+      });
+
+      seen.add(entry.eventId);
+    });
+
+    seen.forEach(id => {
+      if (!activeIds.has(id)) {
+        seen.delete(id);
+      }
+    });
+  }, [eventLookup, gameState.pendingArcEvents]);
 
   // Handle AI turns
   useEffect(() => {
