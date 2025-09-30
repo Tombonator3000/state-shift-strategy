@@ -4,6 +4,7 @@ import { isExtensionCard, getCardExtensionInfo } from '@/data/extensionIntegrati
 import { getAllCardsSnapshot } from '@/data/cardDatabase';
 import type { ResolvedAsset } from '@/services/assets/types';
 import { resolveImage } from '@/services/assets/AssetResolver';
+import { featureFlags } from '@/state/featureFlags';
 import AutofillControls from '@/ui/devtools/AutofillControls';
 
 interface CardImageProps {
@@ -54,6 +55,7 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'co
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
+  const autofillEnabled = featureFlags.autofillCardArt;
 
   const assetContext = useMemo(() => {
     if (!card) return null;
@@ -72,9 +74,10 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'co
   }, [fallbackImagePath, cardId]);
 
   useEffect(() => {
-    if (!assetContext) {
+    if (!assetContext || !autofillEnabled) {
       setAsset(null);
       setImageUrl(fallbackImagePath);
+      setIsResolving(false);
       return;
     }
 
@@ -107,7 +110,7 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'co
     return () => {
       cancelled = true;
     };
-  }, [assetContext, fallbackImagePath]);
+  }, [assetContext, autofillEnabled, fallbackImagePath]);
 
   const handleImageLoad = useCallback(() => {
     setImageLoaded(true);
@@ -159,11 +162,11 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'co
     [],
   );
 
-  const showControls = assetContext && card?.artPolicy !== 'manual';
+  const showControls = autofillEnabled && assetContext && card?.artPolicy !== 'manual';
 
   return (
     <div className={containerClassName}>
-      {(!imageLoaded || isResolving) && (
+      {autofillEnabled && (!imageLoaded || isResolving) && (
         <div className={loadingClassName}>
           {isResolving ? 'Resolving art…' : 'Loading...'}
         </div>
