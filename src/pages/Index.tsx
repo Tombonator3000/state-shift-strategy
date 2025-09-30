@@ -66,6 +66,7 @@ import type {
   FinalEditionComboHighlight,
   FinalEditionEventHighlight,
 } from '@/types/finalEdition';
+import type { ArcProgressSummary } from '@/types/campaign';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
@@ -265,13 +266,21 @@ const computeEventScore = (event: GameEvent): number => {
   return truthMagnitude * 2 + ipMagnitude * 1.5 + defenseMagnitude + rarityBoost;
 };
 
-const summarizeEventForFinalEdition = (event: GameEvent): FinalEditionEventHighlight => {
+const summarizeEventForFinalEdition = (
+  event: GameEvent,
+  arcSummaries?: Record<string, ArcProgressSummary>,
+): FinalEditionEventHighlight => {
   const headline = event.headline ?? event.title;
   const effects = event.effects ?? {};
   const truthDelta = (effects.truth ?? 0) + (effects.truthChange ?? 0);
   const ipDelta = (effects.ip ?? 0) + (effects.ipChange ?? 0);
   const stateName = effects.stateEffects?.stateId
     ? resolveStateName(effects.stateEffects.stateId)
+    : undefined;
+
+  const arcSummary = event.campaign ? arcSummaries?.[event.campaign.arcId] : undefined;
+  const matchingArcSummary = arcSummary && event.campaign && arcSummary.chapter === event.campaign.chapter
+    ? arcSummary
     : undefined;
 
   return {
@@ -284,15 +293,20 @@ const summarizeEventForFinalEdition = (event: GameEvent): FinalEditionEventHighl
     ipDelta,
     stateName,
     kicker: event.flavorText ?? event.flavorTruth ?? event.flavorGov ?? undefined,
+    arcSummary: matchingArcSummary,
   } satisfies FinalEditionEventHighlight;
 };
 
-const pickTopEvents = (events: GameEvent[], limit = 3): FinalEditionEventHighlight[] => {
+const pickTopEvents = (
+  events: GameEvent[],
+  limit = 3,
+  arcSummaries?: Record<string, ArcProgressSummary>,
+): FinalEditionEventHighlight[] => {
   return events
     .map(event => ({ event, score: computeEventScore(event) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
-    .map(entry => summarizeEventForFinalEdition(entry.event));
+    .map(entry => summarizeEventForFinalEdition(entry.event, arcSummaries));
 };
 
 const resolveComboOwnerLabel = (owner: string | undefined): string => {
@@ -674,6 +688,7 @@ const Index = () => {
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   const [isEndingTurn, setIsEndingTurn] = useState(false);
   const [paranormalSightings, setParanormalSightings] = useState<ParanormalSighting[]>([]);
+  const [arcProgressSummaries, setArcProgressSummaries] = useState<Record<string, ArcProgressSummary>>({});
   const [inspectedPlayedCard, setInspectedPlayedCard] = useState<GameCard | null>(null);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
@@ -719,6 +734,19 @@ const Index = () => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('shadowgov-last-faction', faction);
     }
+  }, []);
+
+  const handleArcProgress = useCallback((entries: ArcProgressSummary[]) => {
+    if (!entries.length) {
+      return;
+    }
+    setArcProgressSummaries(prev => {
+      const next = { ...prev };
+      for (const entry of entries) {
+        next[entry.arcId] = entry;
+      }
+      return next;
+    });
   }, []);
 
   const executeAITurnRef = useRef(executeAITurn);
@@ -1199,7 +1227,7 @@ const Index = () => {
           .filter(entry => entry.card.rarity === 'legendary')
           .map(entry => entry.card.name),
       ));
-      const topEvents = pickTopEvents(gameState.currentEvents ?? [], 4);
+      const topEvents = pickTopEvents(gameState.currentEvents ?? [], 4, arcProgressSummaries);
       const comboSummary = getLastComboSummary();
       const comboHighlights = buildComboHighlights(comboSummary);
       const recordedAt = Date.now();
@@ -1261,6 +1289,7 @@ const Index = () => {
     gameState.isGameOver,
     gameState.currentEvents,
     paranormalSightings,
+    arcProgressSummaries,
   ]);
 
   // Enhanced synergy detection with coordinated visual effects
@@ -1911,7 +1940,8 @@ const Index = () => {
     setShowIntro(false);
     audio.setGameplayMusic(faction);
     audio.playSFX('click');
-    
+    setArcProgressSummaries({});
+
     // Auto-enter fullscreen when game starts
     try {
       if (document.fullscreenEnabled && !document.fullscreenElement) {
@@ -2864,6 +2894,7 @@ const Index = () => {
           agendaIssue={gameState.agendaIssue}
           agendaMoments={agendaMoments}
           onClose={handleCloseNewspaper}
+          onArcProgress={handleArcProgress}
         />
       )}
     </>

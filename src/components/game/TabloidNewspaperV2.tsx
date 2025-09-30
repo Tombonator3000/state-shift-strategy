@@ -13,6 +13,8 @@ import { buildRoundContext, formatTruthDelta } from './tabloidRoundUtils';
 import { useAudioContext } from '@/contexts/AudioContext';
 import type { ParanormalSighting } from '@/types/paranormal';
 import type { AgendaMoment } from '@/hooks/usePressArchive';
+import { EVENT_DATABASE } from '@/data/eventDatabase';
+import type { ArcProgressSummary } from '@/types/campaign';
 
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
 
@@ -171,6 +173,85 @@ const createEventStory = (
   };
 };
 
+type CampaignEvent = TabloidNewspaperProps['events'][number];
+type CampaignResolution = NonNullable<CampaignEvent['campaign']>['resolution'];
+
+interface ArcChapterEventEntry {
+  event: CampaignEvent;
+  story: ReturnType<typeof createEventStory>;
+}
+
+interface ArcChapterGroup {
+  chapter: number;
+  resolution?: CampaignResolution;
+  events: ArcChapterEventEntry[];
+}
+
+interface CampaignArcGroup {
+  arcId: string;
+  arcName: string;
+  totalChapters: number;
+  latestChapter: number;
+  progressPercent: number;
+  status: 'active' | 'cliffhanger' | 'finale';
+  activeTagline: string;
+  chapters: ArcChapterGroup[];
+}
+
+const formatArcName = (arcId: string): string => {
+  return arcId
+    .replace(/^campaign_/, '')
+    .split('_')
+    .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+};
+
+const ARC_DEFINITION_MAP = (() => {
+  const map = new Map<string, { totalChapters: number }>();
+  for (const event of EVENT_DATABASE) {
+    const campaign = event.campaign;
+    if (!campaign) {
+      continue;
+    }
+    const existing = map.get(campaign.arcId) ?? { totalChapters: 0 };
+    if (campaign.chapter > existing.totalChapters) {
+      existing.totalChapters = campaign.chapter;
+    }
+    map.set(campaign.arcId, existing);
+  }
+  return map;
+})();
+
+const getArcTotalChapters = (arcId: string, fallbackChapter: number): number => {
+  const record = ARC_DEFINITION_MAP.get(arcId);
+  if (!record) {
+    return Math.max(1, fallbackChapter);
+  }
+  return Math.max(record.totalChapters, fallbackChapter, 1);
+};
+
+const buildArcStatusTagline = (
+  arcName: string,
+  chapter: number,
+  resolution: CampaignResolution | undefined,
+  event?: CampaignEvent,
+): string => {
+  const baseTitle = (event?.headline ?? event?.title ?? 'Classified Development').trim();
+  if (!chapter) {
+    return `${arcName} dossier updated.`;
+  }
+
+  if (resolution === 'finale') {
+    return `${arcName.toUpperCase()} ARC COMPLETE — ${baseTitle.toUpperCase()}`;
+  }
+
+  if (resolution === 'cliffhanger') {
+    return `Cliffhanger: ${arcName} Chapter ${chapter} — ${baseTitle}`;
+  }
+
+  return `${arcName} advances to chapter ${chapter} — ${baseTitle}`;
+};
+
 const TabloidNewspaperV2 = ({
   events,
   playedCards,
@@ -181,6 +262,7 @@ const TabloidNewspaperV2 = ({
   sightings = [],
   agendaIssue,
   agendaMoments = [],
+  onArcProgress,
 }: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState('THE PARANOID TIMES');
@@ -644,6 +726,151 @@ const TabloidNewspaperV2 = ({
       })),
     [events],
   );
+
+  const campaignArcGroups = useMemo<CampaignArcGroup[]>(() => {
+    if (!events.length) {
+      return [];
+    }
+
+    const arcMap = new Map<
+      string,
+      {
+        arcId: string;
+        arcName: string;
+        totalChapters: number;
+        chapters: Map<number, ArcChapterGroup>;
+      }
+    >();
+
+    for (const event of events) {
+      const campaign = event.campaign;
+      if (!campaign) {
+        continue;
+      }
+
+      const story = createEventStory(event);
+      const { arcId, chapter, resolution } = campaign;
+      const totalChapters = getArcTotalChapters(arcId, chapter);
+
+      let arcEntry = arcMap.get(arcId);
+      if (!arcEntry) {
+        arcEntry = {
+          arcId,
+          arcName: formatArcName(arcId),
+          totalChapters,
+          chapters: new Map<number, ArcChapterGroup>(),
+        };
+        arcMap.set(arcId, arcEntry);
+      } else {
+        arcEntry.totalChapters = Math.max(arcEntry.totalChapters, totalChapters, chapter);
+      }
+
+      let chapterEntry = arcEntry.chapters.get(chapter);
+      if (!chapterEntry) {
+        chapterEntry = {
+          chapter,
+          resolution,
+          events: [],
+        };
+        arcEntry.chapters.set(chapter, chapterEntry);
+      } else if (resolution && !chapterEntry.resolution) {
+        chapterEntry.resolution = resolution;
+      }
+
+      chapterEntry.events.push({ event, story });
+    }
+
+    return Array.from(arcMap.values())
+      .map(entry => {
+        const chapters = Array.from(entry.chapters.values()).sort((a, b) => a.chapter - b.chapter);
+        if (!chapters.length) {
+          return null;
+        }
+
+        const latestChapter = chapters[chapters.length - 1]?.chapter ?? 0;
+        const totalChapters = Math.max(entry.totalChapters, latestChapter || 1);
+        const activeChapter = chapters.find(chapter => chapter.chapter === latestChapter);
+        const resolution = activeChapter?.resolution;
+        const status: CampaignArcGroup['status'] =
+          resolution === 'finale'
+            ? 'finale'
+            : resolution === 'cliffhanger'
+              ? 'cliffhanger'
+              : 'active';
+        const rawProgress = totalChapters > 0 ? Math.round((latestChapter / totalChapters) * 100) : 0;
+        const progressPercent = Math.max(0, Math.min(100, rawProgress));
+        const activeTagline = buildArcStatusTagline(
+          entry.arcName,
+          latestChapter,
+          resolution,
+          activeChapter?.events[0]?.event,
+        );
+
+        return {
+          arcId: entry.arcId,
+          arcName: entry.arcName,
+          totalChapters,
+          latestChapter,
+          progressPercent,
+          status,
+          activeTagline,
+          chapters,
+        } satisfies CampaignArcGroup;
+      })
+      .filter((entry): entry is CampaignArcGroup => Boolean(entry))
+      .sort((a, b) => a.arcName.localeCompare(b.arcName));
+  }, [events]);
+
+  const arcProgressSummaries = useMemo<ArcProgressSummary[]>(() => {
+    if (!campaignArcGroups.length) {
+      return [];
+    }
+
+    return campaignArcGroups.map(arc => {
+      const activeChapter = arc.chapters.find(entry => entry.chapter === arc.latestChapter);
+      const resolution = activeChapter?.resolution;
+      const summaryEvents = activeChapter
+        ? activeChapter.events.map(({ event, story }) => ({
+            id: event.id,
+            headline: event.headline ?? event.title,
+            subhead: story.subhead,
+            summary: story.summary,
+            typeLabel: story.typeLabel,
+          }))
+        : [];
+      const status: ArcProgressSummary['status'] =
+        resolution === 'finale'
+          ? 'finale'
+          : resolution === 'cliffhanger'
+            ? 'cliffhanger'
+            : 'advanced';
+      const fallbackTagline = buildArcStatusTagline(
+        arc.arcName,
+        arc.latestChapter,
+        resolution,
+        activeChapter?.events[0]?.event,
+      );
+
+      return {
+        arcId: arc.arcId,
+        arcName: arc.arcName,
+        chapter: arc.latestChapter,
+        totalChapters: arc.totalChapters,
+        progressPercent: arc.progressPercent,
+        resolution,
+        status,
+        tagline: arc.activeTagline || fallbackTagline,
+        events: summaryEvents,
+      } satisfies ArcProgressSummary;
+    });
+  }, [campaignArcGroups]);
+
+  useEffect(() => {
+    if (!onArcProgress || !arcProgressSummaries.length) {
+      return;
+    }
+    onArcProgress(arcProgressSummaries);
+  }, [arcProgressSummaries, onArcProgress]);
 
   const playerStorySummaries = useMemo(() => {
     const stories = issue?.playerArticles ?? [];
@@ -1129,6 +1356,89 @@ const TabloidNewspaperV2 = ({
               ) : null}
             </aside>
           </div>
+
+          {campaignArcGroups.length ? (
+            <section className="mt-6 space-y-4 rounded-md border border-newspaper-border bg-white/75 p-6 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-black uppercase tracking-wide text-newspaper-text/70">
+                <span>Campaign Arc Monitor</span>
+                <span className="font-semibold">{campaignArcGroups.length} Active Plotline{campaignArcGroups.length === 1 ? '' : 's'}</span>
+              </div>
+              <div className="space-y-4">
+                {campaignArcGroups.map(arc => {
+                  const statusLabel = arc.status === 'finale'
+                    ? 'Finale'
+                    : arc.status === 'cliffhanger'
+                      ? 'Cliffhanger'
+                      : 'Advance';
+                  const statusClass = arc.status === 'finale'
+                    ? 'border-secret-red text-secret-red'
+                    : arc.status === 'cliffhanger'
+                      ? 'border-secret-red/70 text-secret-red/80'
+                      : 'border-newspaper-border text-newspaper-text/60';
+                  const taglineClass = arc.status === 'finale'
+                    ? 'text-secret-red font-black uppercase tracking-wide'
+                    : arc.status === 'cliffhanger'
+                      ? 'text-secret-red/80 font-semibold uppercase tracking-wide'
+                      : 'text-[11px] italic text-newspaper-text/70';
+
+                  return (
+                    <article
+                      key={arc.arcId}
+                      className="space-y-3 rounded-md border border-dashed border-newspaper-border/60 bg-white/80 p-4 shadow-sm"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/70">
+                        <span>{arc.arcName}</span>
+                        <div className="flex items-center gap-2">
+                          <span>Chapter {arc.latestChapter}/{arc.totalChapters}</span>
+                          <span className={`rounded-full border px-2 py-0.5 ${statusClass}`}>{statusLabel}</span>
+                        </div>
+                      </div>
+                      <Progress value={arc.progressPercent} className="h-1.5" />
+                      <p className={taglineClass}>{arc.activeTagline}</p>
+                      <div className="space-y-3 text-sm">
+                        {arc.chapters.map(chapter => {
+                          const chapterStatus = chapter.resolution === 'finale'
+                            ? 'Finale'
+                            : chapter.resolution === 'cliffhanger'
+                              ? 'Cliffhanger'
+                              : null;
+                          return (
+                            <div
+                              key={`${arc.arcId}-chapter-${chapter.chapter}`}
+                              className="rounded border border-newspaper-border/60 bg-white/70 p-3"
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                                <span>Chapter {chapter.chapter}</span>
+                                {chapterStatus ? (
+                                  <span className="rounded border border-dashed border-newspaper-border/60 px-2 py-0.5 text-secret-red/70">
+                                    {chapterStatus}
+                                  </span>
+                                ) : null}
+                              </div>
+                              <div className="mt-2 space-y-2">
+                                {chapter.events.map(entry => (
+                                  <div
+                                    key={entry.event.id}
+                                    className="rounded border border-dashed border-newspaper-border/60 bg-white/80 px-3 py-2"
+                                  >
+                                    <div className="text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                                      {entry.story.typeLabel}
+                                    </div>
+                                    <p className="text-sm font-semibold leading-snug text-newspaper-headline">{entry.story.headline}</p>
+                                    <p className="text-xs italic text-newspaper-text/70">{entry.story.subhead}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
 
           {secondaryStories.length ? (
             <section className="mt-6 space-y-4 rounded-md border border-newspaper-border bg-white/70 p-6 shadow-sm">

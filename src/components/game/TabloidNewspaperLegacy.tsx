@@ -10,6 +10,7 @@ import type { AgendaIssueState } from '@/data/agendaIssues';
 import type { AgendaMoment } from '@/hooks/usePressArchive';
 import CardImage from '@/components/game/CardImage';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
+import type { ArcProgressSummary } from '@/types/campaign';
 
 export interface TabloidPlayedCard {
   card: GameCard;
@@ -29,6 +30,7 @@ export interface TabloidNewspaperProps {
   sightings?: ParanormalSighting[];
   agendaIssue?: AgendaIssueState;
   agendaMoments?: AgendaMoment[];
+  onArcProgress?: (summaries: ArcProgressSummary[]) => void;
 }
 
 interface NewspaperData {
