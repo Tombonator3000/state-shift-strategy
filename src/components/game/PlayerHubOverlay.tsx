@@ -11,6 +11,7 @@ import { TutorialSection } from './TutorialOverlay';
 import PressArchivePanel from './PressArchivePanel';
 import type { ArchivedEdition } from '@/hooks/usePressArchive';
 import StateIntelBoard from './StateIntelBoard';
+import PlayerHubMapView from './PlayerHubMapView';
 import type { StateEventBonusSummary } from '@/hooks/gameStateTypes';
 import '@/styles/playerHub.css';
 
@@ -299,7 +300,16 @@ const PlayerHubOverlay = ({
                 />
               </TabsContent>
               <TabsContent value="intel" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
-                <StateIntelBoard intel={stateIntel} />
+                <div className="flex h-full flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+                  <PlayerHubMapView
+                    intel={stateIntel}
+                    faction={faction}
+                    className="h-full min-h-[320px]"
+                  />
+                  <div className="min-h-0 overflow-hidden">
+                    <StateIntelBoard intel={stateIntel} />
+                  </div>
+                </div>
               </TabsContent>
             </div>
           </div>
