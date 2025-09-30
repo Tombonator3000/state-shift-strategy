@@ -2375,6 +2375,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             id: state.id,
             abbreviation: state.abbreviation,
             name: state.name,
+            owner: state.owner === 'player' || state.owner === 'ai' ? state.owner : 'neutral',
           })),
           baseSeed: nextState.stateRoundSeed,
           round: nextState.round,

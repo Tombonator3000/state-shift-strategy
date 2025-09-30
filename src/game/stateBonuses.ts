@@ -75,6 +75,7 @@ interface AssignStateBonusesOptions {
     id: string;
     abbreviation: string;
     name: string;
+    owner?: 'player' | 'ai' | 'neutral' | null;
   }>;
   baseSeed: number;
   round: number;
@@ -216,6 +217,9 @@ export const assignStateBonuses = (
   const eventChance = options.eventChance ?? STATE_EVENT_CHANCE;
 
   for (const state of sortedStates) {
+    const owner = state.owner === 'player' || state.owner === 'ai' ? state.owner : 'neutral';
+    const isPlayerControlled = owner === 'player';
+
     const pool = resolvePoolForState({ id: state.id, abbreviation: state.abbreviation });
     if (!pool) {
       rolls.push({ state: state.abbreviation, bonusId: null, eventId: null });
@@ -238,11 +242,13 @@ export const assignStateBonuses = (
 
     if (bonusRecord) {
       bonuses[state.abbreviation] = bonusRecord;
-      truthDelta += bonusRecord.truthDelta ?? 0;
-      ipDelta += bonusRecord.ipDelta ?? 0;
-      if (bonusRecord.pressureDelta) {
-        pressureAdjustments[state.abbreviation] =
-          (pressureAdjustments[state.abbreviation] ?? 0) + bonusRecord.pressureDelta;
+      if (isPlayerControlled) {
+        truthDelta += bonusRecord.truthDelta ?? 0;
+        ipDelta += bonusRecord.ipDelta ?? 0;
+        if (bonusRecord.pressureDelta) {
+          pressureAdjustments[state.abbreviation] =
+            (pressureAdjustments[state.abbreviation] ?? 0) + bonusRecord.pressureDelta;
+        }
       }
       const icon = bonusRecord.icon ?? '⭐️';
       logs.push(`${icon} ${state.name} activates ${bonusRecord.label}`);
@@ -251,11 +257,13 @@ export const assignStateBonuses = (
     if (selectedEvent) {
       const eventEntry = toRoundEvent(selectedEvent, state, options.round);
       roundEvents[state.abbreviation] = [...(roundEvents[state.abbreviation] ?? []), eventEntry];
-      truthDelta += eventEntry.truthDelta ?? 0;
-      ipDelta += eventEntry.ipDelta ?? 0;
-      if (eventEntry.pressureDelta) {
-        pressureAdjustments[state.abbreviation] =
-          (pressureAdjustments[state.abbreviation] ?? 0) + eventEntry.pressureDelta;
+      if (isPlayerControlled) {
+        truthDelta += eventEntry.truthDelta ?? 0;
+        ipDelta += eventEntry.ipDelta ?? 0;
+        if (eventEntry.pressureDelta) {
+          pressureAdjustments[state.abbreviation] =
+            (pressureAdjustments[state.abbreviation] ?? 0) + eventEntry.pressureDelta;
+        }
       }
       logs.push(`${eventEntry.icon ?? '🗞️'} ${state.name} reports: ${eventEntry.headline}`);
       newspaperEvents.push(toGameEvent(selectedEvent, state, options.round, eventChance));

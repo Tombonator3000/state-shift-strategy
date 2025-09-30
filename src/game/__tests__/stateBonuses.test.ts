@@ -62,4 +62,60 @@ describe('stateBonuses deterministic selection', () => {
     }
     expect(result.newspaperEvents.length).toBe(0);
   });
+
+  test('only player-controlled states contribute to truth and IP totals', () => {
+    const states = [
+      { id: '32', abbreviation: 'NV', name: 'Nevada', owner: 'player' as const },
+      { id: '56', abbreviation: 'WY', name: 'Wyoming', owner: 'player' as const },
+      { id: '38', abbreviation: 'ND', name: 'North Dakota', owner: 'ai' as const },
+      { id: '12', abbreviation: 'FL', name: 'Florida', owner: 'ai' as const },
+    ];
+
+    const result = assignStateBonuses({
+      states,
+      baseSeed: 9999,
+      round: 3,
+      playerFaction: 'truth',
+      eventChance: 0,
+    });
+
+    const playerTruth = states
+      .filter(state => state.owner === 'player')
+      .reduce((sum, state) => sum + (result.bonuses[state.abbreviation]?.truthDelta ?? 0), 0);
+
+    const playerIp = states
+      .filter(state => state.owner === 'player')
+      .reduce((sum, state) => sum + (result.bonuses[state.abbreviation]?.ipDelta ?? 0), 0);
+
+    const aiTruth = states
+      .filter(state => state.owner === 'ai')
+      .reduce((sum, state) => sum + (result.bonuses[state.abbreviation]?.truthDelta ?? 0), 0);
+
+    const aiIp = states
+      .filter(state => state.owner === 'ai')
+      .reduce((sum, state) => sum + (result.bonuses[state.abbreviation]?.ipDelta ?? 0), 0);
+
+    expect(aiTruth).not.toBe(0);
+    expect(aiIp).not.toBe(0);
+    expect(result.truthDelta).toBe(playerTruth);
+    expect(result.ipDelta).toBe(playerIp);
+    expect(result.truthDelta).not.toBe(playerTruth + aiTruth);
+    expect(result.ipDelta).not.toBe(playerIp + aiIp);
+  });
+
+  test('pressure adjustments exclude AI-controlled states', () => {
+    const result = assignStateBonuses({
+      states: [
+        { id: '12', abbreviation: 'FL', name: 'Florida', owner: 'ai' },
+        { id: '56', abbreviation: 'WY', name: 'Wyoming', owner: 'player' },
+      ],
+      baseSeed: 123456,
+      round: 3,
+      playerFaction: 'truth',
+      eventChance: 0,
+    });
+
+    expect(result.bonuses['FL']?.pressureDelta ?? 0).not.toBe(0);
+    expect(result.pressureAdjustments).toEqual({});
+  });
 });
