@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,11 +23,7 @@ const EnhancedNewspaper = ({ onClose, gameEvents, faction, round, truth, ip }: E
   const [fakeAds, setFakeAds] = useState<string[]>([]);
   const [mainEvent, setMainEvent] = useState<string>('');
 
-  useEffect(() => {
-    generateNewspaperContent();
-  }, [gameEvents, faction, round, truth]);
-
-  const generateNewspaperContent = () => {
+  const generateNewspaperContent = useCallback(() => {
     // 5% chance for glitch masthead
     const glitchMastheads = [
       'THE SHEEPLE DAILY',
@@ -60,7 +56,7 @@ const EnhancedNewspaper = ({ onClose, gameEvents, faction, round, truth, ip }: E
       'Local Man Discovers Birds ARE Real, Confused',
       'Government Denies Existence of Government', 
       'Bigfoot Spotted Shopping at Walmart Again',
-      'Elvis Found Working at McDonald\'s Drive-Thru',
+      "Elvis Found Working at McDonald's Drive-Thru",
       'Alien Abduction Rates Drop Due to Gas Prices',
       'Flat Earth Society Gains New Member: Your Mom',
       'Chemtrails Now Available in Strawberry Flavor',
@@ -107,25 +103,28 @@ const EnhancedNewspaper = ({ onClose, gameEvents, faction, round, truth, ip }: E
       'Florida Man University: Now Accepting Applications!',
       'Pastor Rex Predicts Your Future (Again)',
       'Alien Translation Services - We Speak Probe',
-      'Bigfoot Dating App: \"Finally, Someone Your Size\"',
-      'Conspiracy Theory Insurance: \"We Cover What They Won\'t\"',
-      'Underground Bunker Rentals: \"Your Apocalypse Away From Home\"',
-      'Mind Reading for Dummies: \"Now in Braille\"',
-      'Elvis Impersonator School: \"Thank Ya Very Much\"',
-      'Chemtrail Detox Kit: \"Clear Skies, Clear Minds\"',
-      'Government Surveillance Counter-Kit: \"They\'re Watching, But So Are We\"',
-      'Lizard People Skincare: \"Shed Your Old Life\"',
-      'Time Machine Repair Service: \"We Fix Tomorrow\'s Problems Today\"',
-      'Alien Probe Insurance: \"Comprehensive Coverage\"',
-      'Flat Earth Travel Agency: \"Don\'t Fall Off the Edge\"',
-      'Illuminati Membership Drive: \"Join the Club Everyone Talks About\"'
+      'Bigfoot Dating App: "Finally, Someone Your Size"',
+      'Conspiracy Theory Insurance: "We Cover What They Won\'t"',
+      'Underground Bunker Rentals: "Your Apocalypse Away From Home"',
+      'Mind Reading for Dummies: "Now in Braille"',
+      'Elvis Impersonator School: "Thank Ya Very Much"',
+      'Chemtrail Detox Kit: "Clear Skies, Clear Minds"',
+      'Government Surveillance Counter-Kit: "They\'re Watching, But So Are We"',
+      'Lizard People Skincare: "Shed Your Old Life"',
+      'Time Machine Repair Service: "We Fix Tomorrow\'s Problems Today"',
+      'Alien Probe Insurance: "Comprehensive Coverage"',
+      'Flat Earth Travel Agency: "Don\'t Fall Off the Edge"',
+      'Illuminati Membership Drive: "Join the Club Everyone Talks About"'
     ];
 
     const selectedAds = [...adTexts].sort(() => Math.random() - 0.5).slice(0, 2);
     setFakeAds(selectedAds);
-  };
+  }, [faction, gameEvents, round, truth, ip]);
 
-  const generateMainHeadline = (event: any, faction: 'government' | 'truth'): string => {
+  const generateMainHeadline = (
+    event: EnhancedNewspaperProps['gameEvents'][number],
+    faction: 'government' | 'truth'
+  ): string => {
     const eventType = event.type?.toLowerCase() || 'unknown';
     
     if (eventType.includes('truth')) {
@@ -156,6 +155,10 @@ const EnhancedNewspaper = ({ onClose, gameEvents, faction, round, truth, ip }: E
       return genericHeadlines[Math.floor(Math.random() * genericHeadlines.length)];
     }
   };
+
+  useEffect(() => {
+    generateNewspaperContent();
+  }, [generateNewspaperContent]);
 
   const getCurrentDate = () => {
     const date = new Date();
