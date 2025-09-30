@@ -27,7 +27,6 @@ import ErrorLogPanel from '@/components/dev/ErrorLogPanel';
 import AudioQAControls from '@/components/dev/AudioQAControls';
 import HotspotInspector from '@/components/dev/HotspotInspector';
 import type { ActiveParanormalHotspot } from '@/hooks/gameStateTypes';
-import AssetAuditPanel from '@/ui/devtools/AssetAuditPanel';
 
 type HistogramBin = { label: string; count: number };
 
@@ -890,7 +889,6 @@ const EnhancedBalancingDashboard = ({
                 />
                 <div className="flex flex-col gap-6">
                   <ErrorLogPanel />
-                  <AssetAuditPanel />
                   <AudioQAControls />
                   <HotspotInspector
                     hotspots={paranormalHotspots}

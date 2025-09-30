@@ -32,25 +32,7 @@ function ensureMvpCard(raw: GameCard, tag: SourceTag): GameCard {
     console.warn(`[CARD DATABASE][${tag}] ${card.id}: ${validation.errors.join('; ')}`);
   }
 
-  const normalizedArtTags = Array.isArray(card.artTags)
-    ? card.artTags
-        .map(tag => `${tag}`.trim())
-        .filter((tag): tag is string => tag.length > 0)
-    : [];
-  const normalizedArtId =
-    typeof card.artId === 'string' && card.artId.trim().length > 0 ? card.artId.trim() : undefined;
-  const normalizedAttribution =
-    typeof card.artAttribution === 'string' && card.artAttribution.trim().length > 0
-      ? card.artAttribution.trim()
-      : undefined;
-
-  return {
-    ...card,
-    artId: normalizedArtId,
-    artAttribution: normalizedAttribution,
-    artPolicy: card.artPolicy === 'manual' ? 'manual' : 'autofill',
-    artTags: normalizedArtTags,
-  } satisfies GameCard;
+  return card;
 }
 
 const FALLBACK_CARDS_RAW: GameCard[] = [

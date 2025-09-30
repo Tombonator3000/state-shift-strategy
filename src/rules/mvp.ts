@@ -46,10 +46,6 @@ export interface GameCard {
   effects?: CardEffects;
   target?: CardTarget;
   extId?: string;
-  artId?: string;
-  artPolicy?: 'manual' | 'autofill';
-  artTags?: string[];
-  artAttribution?: string;
 }
 
 export const MVP_COST_TABLE: Record<MVPCardType, Record<Rarity, number>> = {

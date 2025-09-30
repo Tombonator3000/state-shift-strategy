@@ -13,7 +13,6 @@
     "predev": "node scripts/generate-extension-index.mjs",
     "prebuild": "node scripts/generate-extension-index.mjs",
     "ingest:core": "ts-node scripts/splitCoreToBatches.ts",
-    "assets:relock": "bun scripts/relock-official-assets.ts",
     "validate:mvp": "bun scripts/validate-mvp-batch.ts",
     "ai:tune": "node --loader ts-node/esm --experimental-specifier-resolution=node tools/ai-simulation.ts"
   },

@@ -4,11 +4,7 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
-import type { NewsArticle } from '@/types';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
-import { resolveImage } from '@/services/assets/AssetResolver';
-import { shouldAutofillAsset } from '@/services/assets/autofillGuards';
-import { featureFlags } from '@/state/featureFlags';
 
 interface PlayedCard {
   card: GameCard;
@@ -27,11 +23,21 @@ interface NewspaperData {
   ads: string[];
 }
 
+interface Article {
+  id: string;
+  title: string;
+  headline: string;
+  content: string;
+  image: string;
+  isEvent: boolean;
+  isCard?: boolean;
+  player?: 'human' | 'ai';
+}
+
 const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) => {
   const [glitching, setGlitching] = useState(false);
   const [masthead, setMasthead] = useState('THE PARANOID TIMES');
   const [newspaperData, setNewspaperData] = useState<NewspaperData | null>(null);
-  const [articleAssets, setArticleAssets] = useState<Record<string, { url: string; credit?: string }>>({});
 
   // Load newspaper data and hide card layers when newspaper opens
   useEffect(() => {
@@ -95,7 +101,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
   }, [newspaperData]);
 
   // Generate card articles with tabloid-style headlines
-  const generateCardArticle = (card: GameCard, player: 'human' | 'ai'): NewsArticle => {
+  const generateCardArticle = (card: GameCard, player: 'human' | 'ai'): Article => {
     const tabloidHeadlines = [
       `"${card.name}" SHOCKS NATION`,
       `EXCLUSIVE: ${card.name.toUpperCase()} LEAKED!`,
@@ -131,9 +137,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
       title: card.name,
       headline,
       content: `${tabloidContent} ${editorialComments[Math.floor(Math.random() * editorialComments.length)]}`,
-      image: card.artId ?? '/placeholder-card.png',
-      imageCredit: card.artAttribution,
-      tags: card.artTags && card.artTags.length > 0 ? [...card.artTags] : [],
+      image: '/placeholder-card.png', // Default since cards don't have images in the type
       isCard: true,
       isEvent: false,
       player
@@ -184,7 +188,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
   };
 
   // Convert events to articles with red styling for events
-  const eventArticles: NewsArticle[] = events.map(event => {
+  const eventArticles: Article[] = events.map(event => {
     const impact = formatEventImpact(event);
     const baseHeadline = event.headline || event.title;
 
@@ -193,99 +197,12 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
       title: event.title,
       headline: impact ? `${baseHeadline} (${impact})` : baseHeadline,
       content: event.content,
-      image: event.image ?? '/placeholder-event.png',
-      imageCredit: event.imageCredit,
-      tags: event.tags && event.tags.length > 0 ? [...event.tags] : [],
+      image: '/placeholder-event.png',
       isEvent: true
     };
   });
 
-  const allArticles: NewsArticle[] = [...cardArticles, ...eventArticles];
-
-  const eventMap = useMemo(() => {
-    const map = new Map<string, GameEvent>();
-    for (const event of events) {
-      map.set(event.id, event);
-    }
-    return map;
-  }, [events]);
-
-  const autofillEnabled = featureFlags.autofillCardArt;
-
-  useEffect(() => {
-    if (!autofillEnabled) {
-      return;
-    }
-
-    const pending = allArticles.filter(article => {
-      if (articleAssets[article.id]) {
-        return false;
-      }
-      return shouldAutofillAsset(article.image);
-    });
-
-    if (!pending.length) {
-      return;
-    }
-
-    let cancelled = false;
-
-    pending.forEach(article => {
-      const fallback = article.image ?? (article.isEvent ? '/placeholder-event.png' : '/placeholder-card.png');
-      const context = article.isEvent
-        ? {
-            scope: 'event' as const,
-            event: eventMap.get(article.id),
-            tags: article.tags,
-            fallbackUrl: fallback,
-          }
-        : {
-            scope: 'article' as const,
-            article,
-            tags: article.tags,
-            fallbackUrl: fallback,
-          };
-
-      if (context.scope === 'event' && !context.event) {
-        setArticleAssets(prev => ({
-          ...prev,
-          [article.id]: { url: fallback, credit: article.imageCredit },
-        }));
-        return;
-      }
-
-      resolveImage(context)
-        .then(result => {
-          if (cancelled) return;
-          if (!result) {
-            setArticleAssets(prev => ({
-              ...prev,
-              [article.id]: { url: fallback, credit: article.imageCredit },
-            }));
-            return;
-          }
-
-          setArticleAssets(prev => ({
-            ...prev,
-            [article.id]: {
-              url: result.styledUrl ?? result.url ?? fallback,
-              credit: result.credit ?? article.imageCredit,
-            },
-          }));
-        })
-        .catch(() => {
-          if (cancelled) return;
-          setArticleAssets(prev => ({
-            ...prev,
-            [article.id]: { url: fallback, credit: article.imageCredit },
-          }));
-        });
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [allArticles, articleAssets, eventMap, autofillEnabled]);
+  const allArticles: Article[] = [...cardArticles, ...eventArticles];
 
   // Get random ads from newspaper data
   const getRandomAds = (count: number) => {
@@ -484,34 +401,19 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
                   {article.headline}
                 </h2>
                 
-                {(() => {
-                  const resolved = articleAssets[article.id];
-                  const imageSrc = resolved?.url ?? article.image;
-                  const credit = resolved?.credit ?? article.imageCredit;
-                  if (!imageSrc) {
-                    return null;
-                  }
-                  return (
-                    <div className="mb-3">
-                      <div className="w-full h-32 border-2 border-newspaper-border overflow-hidden">
-                        <img
-                          src={imageSrc}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                          onError={e => {
-                            e.currentTarget.src = '/placeholder-card.png';
-                          }}
-                        />
-                      </div>
-                      {credit ? (
-                        <p className="mt-1 text-[10px] font-serif italic text-newspaper-text/60">
-                          Image: {credit}
-                        </p>
-                      ) : null}
-                    </div>
-                  );
-                })()}
-
+                {article.image && (
+                  <div className="w-full h-32 mb-3 border-2 border-newspaper-border overflow-hidden">
+                    <img 
+                      src={article.image} 
+                      alt={article.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder-card.png';
+                      }}
+                    />
+                  </div>
+                )}
+                
                 <p className={`leading-relaxed font-serif ${
                   article.isEvent ? 'text-secret-red' : 'text-newspaper-text'
                 }`}>

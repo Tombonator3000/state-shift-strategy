@@ -1,15 +1,11 @@
-import { AUTOFILL } from '@/config/autofill';
-
 export type FeatureFlags = {
   newspaperV2: boolean;
   aiVerboseStrategyLog: boolean;
-  autofillCardArt: boolean;
 };
 
 const DEFAULT_FLAGS: FeatureFlags = {
   newspaperV2: true,
   aiVerboseStrategyLog: false,
-  autofillCardArt: AUTOFILL.ENABLED,
 };
 
 const readBoolean = (key: string, fallback: boolean): boolean => {
@@ -43,6 +39,4 @@ export const featureFlags: FeatureFlags = {
   newspaperV2: overrides.newspaperV2 ?? readBoolean('shadowgov:flag:newspaperV2', DEFAULT_FLAGS.newspaperV2),
   aiVerboseStrategyLog:
     overrides.aiVerboseStrategyLog ?? readBoolean('shadowgov:flag:aiVerboseStrategyLog', DEFAULT_FLAGS.aiVerboseStrategyLog),
-  autofillCardArt:
-    overrides.autofillCardArt ?? readBoolean('shadowgov:flag:autofillCardArt', DEFAULT_FLAGS.autofillCardArt),
 };

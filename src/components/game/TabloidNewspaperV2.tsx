@@ -12,9 +12,6 @@ import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import { buildRoundContext, formatTruthDelta } from './tabloidRoundUtils';
 import { useAudioContext } from '@/contexts/AudioContext';
 import type { ParanormalSighting } from '@/types/paranormal';
-import { resolveImage } from '@/services/assets/AssetResolver';
-import { shouldAutofillAsset } from '@/services/assets/autofillGuards';
-import { featureFlags } from '@/state/featureFlags';
 
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
 
@@ -186,7 +183,6 @@ const TabloidNewspaperV2 = ({
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState('THE PARANOID TIMES');
   const [glitchText, setGlitchText] = useState<string | null>(null);
-  const [eventAssets, setEventAssets] = useState<Record<string, { url: string; credit?: string }>>({});
 
   const dataset = data ?? FALLBACK_DATA;
   const [issue, setIssue] = useState<NarrativeIssue | null>(null);
@@ -569,14 +565,6 @@ const TabloidNewspaperV2 = ({
   const heroTriggerChance = heroEvent?.triggerChance ?? null;
   const heroConditionalChance = heroEvent?.conditionalChance ?? null;
   const comboNarrative = issue?.comboArticle ?? null;
-  const heroEventAsset = useMemo(() => {
-    if (!heroEvent) return null;
-    const asset = eventAssets[heroEvent.id];
-    const url = asset?.url ?? heroEvent.image ?? null;
-    const credit = asset?.credit ?? heroEvent.imageCredit;
-    if (!url) return null;
-    return { url, credit };
-  }, [heroEvent, eventAssets]);
 
   const bylinePool = dataset.bylines && dataset.bylines.length ? dataset.bylines : FALLBACK_DATA.bylines;
   const sourcePool = dataset.sources && dataset.sources.length ? dataset.sources : FALLBACK_DATA.sources;
@@ -619,65 +607,6 @@ const TabloidNewspaperV2 = ({
       })),
     [events],
   );
-
-  const autofillEnabled = featureFlags.autofillCardArt;
-
-  useEffect(() => {
-    if (!autofillEnabled) {
-      return;
-    }
-
-    const pending = events.filter(event => {
-      if (eventAssets[event.id]) {
-        return false;
-      }
-      return shouldAutofillAsset(event.image);
-    });
-
-    if (!pending.length) {
-      return;
-    }
-
-    let cancelled = false;
-
-    pending.forEach(event => {
-      const fallback = event.image ?? '/placeholder-event.png';
-      resolveImage({
-        scope: 'event',
-        event,
-        tags: event.tags,
-        fallbackUrl: fallback,
-      })
-        .then(result => {
-          if (cancelled) return;
-          if (!result) {
-            setEventAssets(prev => ({
-              ...prev,
-              [event.id]: { url: fallback, credit: event.imageCredit },
-            }));
-            return;
-          }
-          setEventAssets(prev => ({
-            ...prev,
-            [event.id]: {
-              url: result.styledUrl ?? result.url ?? fallback,
-              credit: result.credit ?? event.imageCredit,
-            },
-          }));
-        })
-        .catch(() => {
-          if (cancelled) return;
-          setEventAssets(prev => ({
-            ...prev,
-            [event.id]: { url: fallback, credit: event.imageCredit },
-          }));
-        });
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [events, eventAssets, autofillEnabled]);
 
   const playerStorySummaries = useMemo(() => {
     const stories = issue?.playerArticles ?? [];
@@ -853,22 +782,6 @@ const TabloidNewspaperV2 = ({
                         fit="contain"
                         className="w-full aspect-[63/88] max-h-80"
                       />
-                    ) : heroEventAsset ? (
-                      <div className="relative aspect-[63/88] w-full max-h-80 overflow-hidden">
-                        <img
-                          src={heroEventAsset.url}
-                          alt={heroEvent?.title ?? 'Event art'}
-                          className="h-full w-full object-cover"
-                          onError={e => {
-                            e.currentTarget.src = '/placeholder-event.png';
-                          }}
-                        />
-                        {heroEventAsset.credit ? (
-                          <div className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1 text-[10px] text-white/80">
-                            Image: {heroEventAsset.credit}
-                          </div>
-                        ) : null}
-                      </div>
                     ) : (
                       <div className="flex aspect-[63/88] w-full max-h-80 items-center justify-center text-sm font-semibold uppercase tracking-wide text-newspaper-text/60">
                         Archival footage pending clearance.
@@ -1119,30 +1032,6 @@ const TabloidNewspaperV2 = ({
                   <div className="space-y-3 text-sm text-secret-red/90">
                     {eventStories.slice(0, 3).map(story => (
                       <div key={story.id} className="border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0">
-                        {(() => {
-                          const sourceEvent = events.find(event => event.id === story.id);
-                          const asset = eventAssets[story.id];
-                          const imageSrc = asset?.url ?? sourceEvent?.image;
-                          const credit = asset?.credit ?? sourceEvent?.imageCredit;
-                          if (!imageSrc) {
-                            return null;
-                          }
-                          return (
-                            <div className="mb-2 overflow-hidden rounded border border-secret-red/40">
-                              <img
-                                src={imageSrc}
-                                alt={story.headline}
-                                className="h-28 w-full object-cover"
-                                onError={e => {
-                                  e.currentTarget.src = '/placeholder-event.png';
-                                }}
-                              />
-                              {credit ? (
-                                <div className="bg-black/60 px-2 py-1 text-[10px] text-white/80">Image: {credit}</div>
-                              ) : null}
-                            </div>
-                          );
-                        })()}
                         <div className="text-[11px] font-semibold uppercase tracking-wide text-secret-red/80">{story.typeLabel}</div>
                         <p className="font-semibold leading-snug text-secret-red">{story.headline}</p>
                         <p className="text-xs italic text-secret-red/80">{story.subhead}</p>
@@ -1208,30 +1097,6 @@ const TabloidNewspaperV2 = ({
                       >
                         {story.summary}
                       </p>
-                      {!isCard && (() => {
-                        const sourceEvent = events.find(event => event.id === story.id);
-                        const asset = eventAssets[story.id];
-                        const imageSrc = asset?.url ?? sourceEvent?.image;
-                        const credit = asset?.credit ?? sourceEvent?.imageCredit;
-                        if (!imageSrc) {
-                          return null;
-                        }
-                        return (
-                          <div className="overflow-hidden rounded border border-secret-red/30">
-                            <img
-                              src={imageSrc}
-                              alt={story.headline}
-                              className="h-32 w-full object-cover"
-                              onError={e => {
-                                e.currentTarget.src = '/placeholder-event.png';
-                              }}
-                            />
-                            {credit ? (
-                              <div className="bg-black/60 px-2 py-1 text-[10px] text-white/80">Image: {credit}</div>
-                            ) : null}
-                          </div>
-                        );
-                      })()}
                       {!isCard && (formatChance(story.triggerChance) || formatChance(story.conditionalChance)) ? (
                         <div className="text-[10px] font-semibold uppercase tracking-wide text-secret-red/80">
                           {formatChance(story.triggerChance) ? (
