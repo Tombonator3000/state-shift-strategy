@@ -3,7 +3,7 @@ import type { GameState } from '@/hooks/gameStateTypes';
 import type { AIDifficulty } from '@/data/aiStrategy';
 import { createDefaultCombinationEffects, STATE_COMBINATIONS, aggregateStateCombinationEffects, calculateDynamicIpBonus, applyStateCombinationCostModifiers, applyDefenseBonusToStates } from '@/data/stateCombinations';
 import type { TurnPlay } from '@/game/combo.types';
-import { resolveCardMVP } from '@/systems/cardResolution';
+import { resolveCardMVP } from '@/systems/cardResolution.actual';
 import type { GameCard } from '@/rules/mvp';
 import { applyComboRewards, evaluateCombos, setComboSettings } from '@/game/comboEngine';
 import { DEFAULT_COMBO_SETTINGS } from '@/game/combo.config';
