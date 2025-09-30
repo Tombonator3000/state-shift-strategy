@@ -12,6 +12,7 @@ import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import { buildRoundContext, formatTruthDelta } from './tabloidRoundUtils';
 import { useAudioContext } from '@/contexts/AudioContext';
 import type { ParanormalSighting } from '@/types/paranormal';
+import type { AgendaMoment } from '@/hooks/usePressArchive';
 
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
 
@@ -179,6 +180,7 @@ const TabloidNewspaperV2 = ({
   onClose,
   sightings = [],
   agendaIssue,
+  agendaMoments = [],
 }: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState('THE PARANOID TIMES');
@@ -193,6 +195,41 @@ const TabloidNewspaperV2 = ({
   const highlightTimeoutRef = useRef<number | null>(null);
   const prevSightingsCountRef = useRef(0);
   const lastSightingIdRef = useRef<string | null>(null);
+
+  const agendaPullQuotes = useMemo(() => {
+    if (!agendaMoments?.length) {
+      return [] as AgendaMoment[];
+    }
+    const sorted = [...agendaMoments].sort((a, b) => a.recordedAt - b.recordedAt);
+    const latestComplete = [...sorted].reverse().find(moment => moment.status === 'complete');
+    const latestSetback = [...sorted].reverse().find(moment => moment.status === 'setback');
+    return [latestComplete, latestSetback].filter(Boolean) as AgendaMoment[];
+  }, [agendaMoments]);
+
+  const formattedAgendaQuotes = useMemo(
+    () => agendaPullQuotes.map(moment => {
+      const progressLabel = `${moment.progress}/${moment.target}`;
+      const title = moment.status === 'complete' ? 'Agenda Final Stage' : 'Agenda Setback';
+      const baseText = moment.status === 'complete'
+        ? `${moment.stageLabel} unlocked. Objective reaches ${progressLabel}.`
+        : `${moment.stageLabel} compromised — momentum drops to ${progressLabel}.`;
+      const description = moment.stageDescription ? moment.stageDescription : baseText;
+      const factionLabel = moment.faction === 'truth' ? 'Truth Coalition' : 'Government Directorate';
+      const actorLabel = moment.actor === 'player' ? 'Operatives' : 'Opposition Network';
+      return {
+        id: moment.id,
+        title,
+        headline: moment.agendaTitle,
+        description,
+        stageLabel: moment.stageLabel,
+        status: moment.status,
+        progressLabel,
+        factionLabel,
+        actorLabel,
+      };
+    }),
+    [agendaPullQuotes],
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -877,6 +914,43 @@ const TabloidNewspaperV2 = ({
                       })}
                     </div>
                   ) : null}
+                </section>
+              ) : null}
+              {formattedAgendaQuotes.length ? (
+                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
+                  <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
+                    Agenda Signals
+                  </h3>
+                  <div className="space-y-3">
+                    {formattedAgendaQuotes.map(entry => (
+                      <div
+                        key={entry.id}
+                        className={`rounded-md border-l-4 pl-3 pr-2 py-2 ${
+                          entry.status === 'complete'
+                            ? 'border-emerald-500 bg-emerald-50/70'
+                            : 'border-rose-500 bg-rose-50/70'
+                        }`}
+                      >
+                        <div className="text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                          {entry.title}
+                        </div>
+                        <div className="text-sm font-semibold leading-snug text-newspaper-text">
+                          {entry.headline}
+                        </div>
+                        <blockquote className="text-xs italic text-newspaper-text/70">
+                          “{entry.description}”
+                        </blockquote>
+                        <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/50">
+                          <span>{entry.factionLabel}</span>
+                          <span>Stage: {entry.stageLabel}</span>
+                          <span>Progress {entry.progressLabel}</span>
+                        </div>
+                        <div className="text-[9px] uppercase tracking-[0.35em] text-newspaper-text/40">
+                          {entry.actorLabel}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </section>
               ) : null}
               <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">

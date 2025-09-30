@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ParticleEffectType, ParticleSystem } from '@/components/effects/ParticleSystem';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import RedactionSweep from '@/components/effects/RedactionSweep';
@@ -130,6 +130,25 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       caseNumber: string;
     }>;
   } | null>(null);
+
+  const [agendaStageOverlay, setAgendaStageOverlay] = useState<{
+    id: number;
+    title: string;
+    stageLabel: string;
+    status: 'advance' | 'setback' | 'complete';
+    faction: 'truth' | 'government';
+  } | null>(null);
+
+  const agendaStageTimeoutRef = useRef<number | null>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  const clearAgendaStageOverlay = useCallback(() => {
+    if (agendaStageTimeoutRef.current && typeof window !== 'undefined') {
+      window.clearTimeout(agendaStageTimeoutRef.current);
+    }
+    agendaStageTimeoutRef.current = null;
+    setAgendaStageOverlay(null);
+  }, []);
 
   const spawnParticleEffect = useCallback((type: ParticleEffectType, x: number, y: number) => {
     setParticleEffects(prev => [
@@ -379,6 +398,36 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       audio?.playSFX?.('cardPlay');
     };
 
+    const handleAgendaStageShift = (event: CustomEvent<{
+      agendaTitle?: string;
+      stageLabel?: string;
+      status?: 'advance' | 'setback' | 'complete';
+      faction?: 'truth' | 'government';
+    }>) => {
+      const detail = event?.detail;
+      if (!detail || !detail.stageLabel || !detail.status || !detail.faction) {
+        return;
+      }
+
+      clearAgendaStageOverlay();
+
+      const overlayId = Date.now();
+      setAgendaStageOverlay({
+        id: overlayId,
+        title: detail.agendaTitle ?? 'Secret Agenda',
+        stageLabel: detail.stageLabel,
+        status: detail.status,
+        faction: detail.faction,
+      });
+
+      spawnParticleEffect('flash', window.innerWidth / 2, window.innerHeight / 2);
+      audio?.playSFX?.('typewriter');
+
+      agendaStageTimeoutRef.current = window.setTimeout(() => {
+        clearAgendaStageOverlay();
+      }, 2200);
+    };
+
     const handleFloatingNumber = (event: CustomEvent<{ value: number; type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain'; x: number; y: number }>) => {
       if (!event?.detail) return;
       setFloatingNumber({
@@ -433,6 +482,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     window.addEventListener('typewriterReveal', handleTypewriterReveal as EventListener);
     window.addEventListener('staticInterference', handleStaticInterference as EventListener);
     window.addEventListener('evidenceGallery', handleEvidenceGallery as EventListener);
+    window.addEventListener('agendaStageShift', handleAgendaStageShift as EventListener);
 
     return () => {
       window.removeEventListener('cardDeployed', handleCardDeployed as EventListener);
@@ -453,8 +503,47 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('typewriterReveal', handleTypewriterReveal as EventListener);
       window.removeEventListener('staticInterference', handleStaticInterference as EventListener);
       window.removeEventListener('evidenceGallery', handleEvidenceGallery as EventListener);
+      window.removeEventListener('agendaStageShift', handleAgendaStageShift as EventListener);
     };
-  }, [spawnParticleEffect, audio]);
+  }, [spawnParticleEffect, audio, clearAgendaStageOverlay]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return;
+    }
+
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleMotionPreferenceChange = (event: MediaQueryListEvent | MediaQueryList) => {
+      setPrefersReducedMotion(event.matches);
+    };
+
+    handleMotionPreferenceChange(motionQuery);
+
+    const handleChange = (event: MediaQueryListEvent) => handleMotionPreferenceChange(event);
+
+    if (typeof motionQuery.addEventListener === 'function') {
+      motionQuery.addEventListener('change', handleChange);
+      return () => {
+        motionQuery.removeEventListener('change', handleChange);
+      };
+    }
+
+    // Safari fallback
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore addListener is deprecated but still required for older engines
+    motionQuery.addListener(handleChange);
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore removeListener is deprecated but still required for older engines
+      motionQuery.removeListener(handleChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearAgendaStageOverlay();
+    };
+  }, [clearAgendaStageOverlay]);
 
   const handleParticleComplete = useCallback((id: number) => {
     setParticleEffects(prev => prev.filter(effect => effect.id !== id));
@@ -508,6 +597,63 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
   const handleEvidenceComplete = useCallback(() => {
     setEvidenceOverlay(null);
   }, []);
+
+  const agendaStageVisuals = useMemo(() => {
+    if (!agendaStageOverlay) {
+      return null;
+    }
+
+    const factionBadge = agendaStageOverlay.faction === 'truth'
+      ? 'border-emerald-300/50 bg-emerald-500/20 text-emerald-100'
+      : 'border-amber-300/50 bg-amber-500/20 text-amber-100';
+    const factionText = agendaStageOverlay.faction === 'truth'
+      ? 'Truth Network Operations'
+      : 'Government Operations Division';
+    const accentText = agendaStageOverlay.faction === 'truth' ? 'text-emerald-100' : 'text-amber-100';
+
+    const visuals = {
+      gradient: 'from-slate-900/90 via-slate-900/80 to-black/95',
+      frame: 'border-white/20 shadow-[0_0_40px_rgba(148,163,184,0.25)]',
+      statusBadge: 'border border-slate-200/40 bg-slate-800/60 text-slate-100',
+      classificationBadge: 'border border-slate-200/40 bg-black/60 text-slate-100',
+      statusText: 'Stage Update',
+      classificationText: 'Classified',
+      factionBadge,
+      factionText,
+      accentText,
+    };
+
+    switch (agendaStageOverlay.status) {
+      case 'advance':
+        visuals.gradient = 'from-emerald-500/80 via-emerald-600/35 to-slate-950/90';
+        visuals.frame = 'border-emerald-200/60 shadow-[0_0_45px_rgba(16,185,129,0.35)]';
+        visuals.statusBadge = 'border border-emerald-300/60 bg-emerald-500/25 text-emerald-50';
+        visuals.classificationBadge = 'border border-emerald-200/40 bg-black/55 text-emerald-100';
+        visuals.statusText = 'Phase Advance';
+        visuals.classificationText = 'Declassifying';
+        break;
+      case 'setback':
+        visuals.gradient = 'from-amber-500/80 via-amber-700/35 to-slate-950/90';
+        visuals.frame = 'border-amber-200/60 shadow-[0_0_45px_rgba(251,191,36,0.35)]';
+        visuals.statusBadge = 'border border-amber-300/60 bg-amber-500/25 text-amber-100';
+        visuals.classificationBadge = 'border border-amber-200/40 bg-black/55 text-amber-100';
+        visuals.statusText = 'Phase Setback';
+        visuals.classificationText = 'Redacted';
+        break;
+      case 'complete':
+        visuals.gradient = 'from-purple-500/80 via-indigo-600/35 to-slate-950/90';
+        visuals.frame = 'border-purple-200/60 shadow-[0_0_50px_rgba(165,180,252,0.4)]';
+        visuals.statusBadge = 'border border-purple-300/60 bg-purple-500/25 text-purple-100';
+        visuals.classificationBadge = 'border border-purple-200/40 bg-black/55 text-purple-100';
+        visuals.statusText = 'Final Phase';
+        visuals.classificationText = 'Unredacted';
+        break;
+      default:
+        break;
+    }
+
+    return visuals;
+  }, [agendaStageOverlay]);
 
   return (
     <>
@@ -624,6 +770,53 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
             photos={evidenceOverlay.photos}
             onComplete={handleEvidenceComplete}
           />
+        )}
+
+        {agendaStageOverlay && agendaStageVisuals && (
+          <div className="absolute inset-0 z-[55] flex items-center justify-center">
+            <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[1.5px]" aria-hidden="true" />
+            <div className="pointer-events-none relative w-full max-w-3xl px-6">
+              <div
+                key={agendaStageOverlay.id}
+                className={`agenda-stage-overlay relative w-full overflow-hidden rounded-3xl border-2 px-10 py-9 text-center shadow-2xl ${agendaStageVisuals.frame} ${prefersReducedMotion ? 'agenda-stage-overlay--static' : ''}`}
+              >
+                <div
+                  className={`absolute inset-0 -z-10 bg-gradient-to-br ${agendaStageVisuals.gradient}`}
+                  aria-hidden="true"
+                />
+                {!prefersReducedMotion && <div className="agenda-stage-overlay__glint" aria-hidden="true" />}
+
+                <div className="flex flex-col items-center gap-3 text-white">
+                  <span
+                    className={`inline-flex items-center justify-center rounded-full border px-5 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.45em] ${agendaStageVisuals.factionBadge}`}
+                  >
+                    {agendaStageVisuals.factionText.toUpperCase()}
+                  </span>
+
+                  <div className="text-xs uppercase tracking-[0.7em] text-white/70">
+                    Agenda Stage Shift
+                  </div>
+
+                  <h3 className={`text-3xl font-semibold uppercase tracking-[0.25em] drop-shadow-lg ${agendaStageVisuals.accentText}`}>
+                    {agendaStageOverlay.title}
+                  </h3>
+
+                  <p className="text-lg font-medium uppercase tracking-[0.2em] text-white/85">
+                    {agendaStageOverlay.stageLabel}
+                  </p>
+
+                  <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-[0.62rem] font-semibold uppercase tracking-[0.45em]">
+                    <span className={`rounded-full px-4 py-1 backdrop-blur-sm ${agendaStageVisuals.statusBadge}`}>
+                      {agendaStageVisuals.statusText}
+                    </span>
+                    <span className={`rounded-full px-4 py-1 backdrop-blur-sm ${agendaStageVisuals.classificationBadge}`}>
+                      {agendaStageVisuals.classificationText}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 

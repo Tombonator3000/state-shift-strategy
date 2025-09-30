@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Eye, Lock, ChevronDown, ChevronUp } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
 import { SecretAgenda as AgendaType } from '@/data/agendaDatabase';
@@ -10,6 +10,7 @@ interface SecretAgendaProps {
     progress: number;
     completed: boolean;
     revealed: boolean;
+    stageId?: string;
   };
   isPlayer?: boolean;
 }
@@ -46,6 +47,59 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
     }
   }, [agenda.difficulty, isGovernmentAgenda]);
 
+  const stages = useMemo(() => Array.isArray(agenda.stages) ? agenda.stages : [], [agenda.stages]);
+  const activeStageId = useMemo(() => agenda.stageId || stages[0]?.id || '', [agenda.stageId, stages]);
+  const activeStageIndex = useMemo(() => {
+    if (!stages.length) {
+      return -1;
+    }
+    const index = stages.findIndex(stage => stage.id === activeStageId);
+    return index >= 0 ? index : 0;
+  }, [stages, activeStageId]);
+  const activeStage = stages[activeStageIndex] ?? null;
+  const stageStatuses = useMemo(
+    () => stages.map((stage, index) => {
+      const isActive = stage.id === activeStageId;
+      const isComplete = agenda.completed
+        ? stage.threshold <= agenda.progress
+        : index < activeStageIndex;
+      const status: 'locked' | 'active' | 'complete' = isComplete
+        ? 'complete'
+        : isActive
+          ? 'active'
+          : 'locked';
+      return { stage, status, index };
+    }),
+    [stages, activeStageId, activeStageIndex, agenda.completed, agenda.progress],
+  );
+
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleChange = (event: MediaQueryListEvent) => setPrefersReducedMotion(event.matches);
+    setPrefersReducedMotion(media.matches);
+    media.addEventListener('change', handleChange);
+    return () => media.removeEventListener('change', handleChange);
+  }, []);
+
+  const [highlightedStageId, setHighlightedStageId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!agenda.stageId) {
+      return;
+    }
+    setHighlightedStageId(agenda.stageId);
+    if (prefersReducedMotion || typeof window === 'undefined') {
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      setHighlightedStageId(null);
+    }, 1600);
+    return () => window.clearTimeout(timeout);
+  }, [agenda.stageId, prefersReducedMotion]);
+
   const renderProgressBar = () => {
     const trackClass = isGovernmentAgenda ? 'bg-slate-800' : 'bg-secret-red/20';
     const fillClass = isGovernmentAgenda ? 'bg-government-blue' : 'bg-secret-red';
@@ -68,6 +122,75 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
             style={{ width: `${progressPercent}%` }}
           />
         </div>
+      </div>
+    );
+  };
+
+  const renderStageCards = () => {
+    if (!stageStatuses.length) {
+      return null;
+    }
+
+    return (
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {stageStatuses.map(({ stage, status }) => {
+          const isActiveStage = status === 'active';
+          const isCompleteStage = status === 'complete';
+          const isLockedStage = status === 'locked';
+          const highlight = highlightedStageId === stage.id;
+          const baseClass = isGovernmentAgenda
+            ? 'border border-slate-700/70 bg-slate-950/60'
+            : 'border border-secret-red/40 bg-black/60';
+          const activeClass = isActiveStage
+            ? isGovernmentAgenda
+              ? 'ring-2 ring-government-blue/60 shadow-[0_0_18px_rgba(59,130,246,0.35)]'
+              : 'ring-2 ring-secret-red/70 shadow-[0_0_18px_rgba(248,113,113,0.45)]'
+            : '';
+          const completeClass = isCompleteStage
+            ? isGovernmentAgenda
+              ? 'border-government-blue/60 bg-government-blue/10'
+              : 'border-secret-red/60 bg-secret-red/20'
+            : '';
+          const pulseClass = highlight && !prefersReducedMotion ? 'animate-[pulse_1.4s_ease-in-out]' : '';
+          const lockedOverlayClass = isGovernmentAgenda
+            ? 'bg-slate-950/85 text-slate-400'
+            : 'bg-black/80 text-rose-200/80';
+          const unlockedOverlayClass = isGovernmentAgenda
+            ? 'text-government-blue/80'
+            : 'text-amber-200/90';
+          const titleClass = isGovernmentAgenda
+            ? 'text-xs font-bold uppercase tracking-wide text-slate-100'
+            : 'text-xs font-bold uppercase tracking-wide text-rose-100';
+          const descriptionClass = isGovernmentAgenda
+            ? 'text-[11px] leading-snug text-slate-300'
+            : 'text-[11px] leading-snug text-rose-100/90';
+          const requirementClass = isGovernmentAgenda
+            ? 'text-[10px] font-mono uppercase text-slate-400'
+            : 'text-[10px] font-mono uppercase text-amber-200/80';
+
+          return (
+            <div
+              key={stage.id}
+              className={`relative overflow-hidden rounded-md p-3 transition-all duration-500 ${baseClass} ${activeClass} ${completeClass} ${pulseClass}`}
+            >
+              <div
+                className={`pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-mono uppercase tracking-[0.5em] transition-opacity duration-500 ${isLockedStage ? 'opacity-80' : 'opacity-0'} ${lockedOverlayClass}`}
+              >
+                CLASSIFIED
+              </div>
+              <div
+                className={`pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-mono uppercase tracking-[0.45em] transition-opacity duration-500 ${isLockedStage ? 'opacity-0' : 'opacity-80'} ${unlockedOverlayClass}`}
+              >
+                {isCompleteStage ? 'UNREDACTED' : 'DECLASSIFYING'}
+              </div>
+              <div className="relative z-10 space-y-1">
+                <div className={titleClass}>{stage.label}</div>
+                <p className={descriptionClass}>{stage.description}</p>
+                <p className={requirementClass}>{stage.requirement}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -127,6 +250,16 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
           <div className="text-[10px] text-slate-400 line-clamp-2 font-mono">
             {agenda.description}
           </div>
+          {activeStage && (
+            <div className="space-y-1">
+              <div className="text-[10px] uppercase tracking-[0.3em] text-slate-300 font-mono">
+                Current Phase: {activeStage.label}
+              </div>
+              <div className="text-[10px] text-slate-400 font-mono">
+                {activeStage.requirement}
+              </div>
+            </div>
+          )}
           {renderProgressBar()}
           {agenda.completed && (
             <div className="text-[10px] text-government-blue font-bold">
@@ -166,6 +299,16 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
         <div className="text-[10px] text-rose-100/80 line-clamp-2 font-mono">
           {agenda.description}
         </div>
+        {activeStage && (
+          <div className="space-y-1">
+            <div className="text-[10px] uppercase tracking-[0.35em] text-orange-200/80 font-semibold">
+              Current Phase: {activeStage.label}
+            </div>
+            <div className="text-[10px] text-rose-100/80 font-mono">
+              {activeStage.requirement}
+            </div>
+          </div>
+        )}
         {renderProgressBar()}
         {agenda.completed && (
           <div className="text-[10px] text-secret-red font-bold">
@@ -363,6 +506,8 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
                 </div>
               </div>
             )}
+
+            {renderStageCards()}
 
             {renderProgressBar()}
 

@@ -1,5 +1,18 @@
 import { weightForIssue } from './agendaIssues';
 
+export interface AgendaStage {
+  id: string;
+  label: string;
+  description: string;
+  requirement: string;
+  threshold: number;
+}
+
+export interface AgendaProgressReport {
+  progress: number;
+  stageId: string;
+}
+
 export interface SecretAgenda {
   id: string;
   faction: 'truth' | 'government' | 'both';
@@ -17,7 +30,8 @@ export interface SecretAgenda {
   description: string;
   target: number;
   difficulty: 'easy' | 'medium' | 'hard' | 'legendary';
-  checkProgress: (gameState: any) => number;
+  stages: AgendaStage[];
+  checkProgress: (gameState: any) => AgendaProgressReport;
   flavorText: string;
 }
 
@@ -157,9 +171,116 @@ const countMediaAndAttackPairs = (gameState: any): number => {
   return Math.min(media, attack);
 };
 
+const clampProgress = (value: unknown): number => {
+  const numeric = typeof value === 'number' ? value : Number(value ?? 0);
+  if (!Number.isFinite(numeric)) {
+    return 0;
+  }
+  return Math.max(0, numeric);
+};
+
+export const resolveAgendaStageByProgress = (
+  stages: AgendaStage[] | undefined,
+  progress: number,
+): AgendaStage | undefined => {
+  if (!Array.isArray(stages) || stages.length === 0) {
+    return undefined;
+  }
+
+  const sorted = [...stages].sort((a, b) => a.threshold - b.threshold);
+  const fallback = sorted[0];
+  const match = [...sorted].reverse().find(stage => progress >= stage.threshold);
+  return match ?? fallback;
+};
+
+const createStageProgressEvaluator = (
+  stages: AgendaStage[],
+  compute: (gameState: any) => number,
+): ((gameState: any) => AgendaProgressReport) => {
+  return (gameState: any): AgendaProgressReport => {
+    const rawProgress = compute(gameState);
+    const progress = clampProgress(rawProgress);
+    const stage = resolveAgendaStageByProgress(stages, progress);
+    return {
+      progress,
+      stageId: stage?.id ?? '',
+    };
+  };
+};
+
+interface AgendaDefinition
+  extends Omit<SecretAgenda, 'checkProgress'> {
+  computeProgress: (gameState: any) => number;
+}
+
+interface StageCopy {
+  label?: string;
+  description: string;
+  requirement?: string;
+  threshold?: number;
+}
+
+const createAgendaStages = (
+  idPrefix: string,
+  target: number,
+  copy: {
+    briefing: StageCopy;
+    escalation: StageCopy;
+    finale: StageCopy;
+  },
+): AgendaStage[] => {
+  const rawEscalationThreshold = copy.escalation.threshold;
+  const computedEscalation = typeof rawEscalationThreshold === 'number'
+    ? Math.max(0, rawEscalationThreshold)
+    : target <= 2
+      ? 1
+      : Math.max(1, Math.ceil(target / 2));
+  const escalationThreshold = Math.min(
+    computedEscalation >= target ? Math.max(1, target - 1) : computedEscalation,
+    Math.max(target - 1, 1),
+  );
+
+  return [
+    {
+      id: `${idPrefix}-briefing`,
+      label: copy.briefing.label ?? 'Briefing',
+      description: copy.briefing.description,
+      requirement: copy.briefing.requirement ?? 'Mission dossier acknowledged.',
+      threshold: 0,
+    },
+    {
+      id: `${idPrefix}-escalation`,
+      label: copy.escalation.label ?? 'Operational Push',
+      description: copy.escalation.description,
+      requirement:
+        copy.escalation.requirement
+        ?? `Reach ${escalationThreshold}/${target} progress.`,
+      threshold: escalationThreshold,
+    },
+    {
+      id: `${idPrefix}-finale`,
+      label: copy.finale.label ?? 'Final Phase',
+      description: copy.finale.description,
+      requirement:
+        copy.finale.requirement
+        ?? `Reach ${target}/${target} progress.`,
+      threshold: target,
+    },
+  ];
+};
+
+const defineAgenda = (definition: AgendaDefinition): SecretAgenda => {
+  const { computeProgress, ...agenda } = definition;
+  const evaluator = createStageProgressEvaluator(agenda.stages, computeProgress);
+  return {
+    ...agenda,
+    checkProgress: evaluator,
+  };
+};
+
 export const AGENDA_DATABASE: SecretAgenda[] = [
   // TRUTH FACTION AGENDAS
-  {
+  defineAgenda({
     id: 'truth_bat_boy_brunch',
     faction: 'truth',
     category: 'territorial',
@@ -176,10 +297,27 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Control three Appalachian strongholds (WV, KY, TN, or PA) so Bat Boy can beam midnight stump speeches into every root cellar.',
     target: 3,
     difficulty: 'medium',
-    checkProgress: gameState => countControlledMatches(gameState, ['WV', 'KY', 'TN', 'PA']),
+    stages: createAgendaStages('truth_bat_boy_brunch', 3, {
+      briefing: {
+        label: 'Ridge Recon',
+        description: 'Bat Boy scouts root cellar venues and sympathetic sheriffs.',
+        requirement: 'Map out the Appalachian broadcast route.',
+      },
+      escalation: {
+        label: 'Nighttime Canvass',
+        description: 'Street teams secure footholds along the ridge towns.',
+        requirement: 'Control 2 Appalachian strongholds.',
+      },
+      finale: {
+        label: 'Moonlight Majority',
+        description: 'Every holler tunes in to Bat Boy’s midnight stump speech.',
+        requirement: 'Control 3 Appalachian strongholds.',
+      },
+    }),
+    computeProgress: gameState => countControlledMatches(gameState, ['WV', 'KY', 'TN', 'PA']),
     flavorText: 'He autographs sonar maps between stump speeches.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'truth_moonbeam_marmalade',
     faction: 'truth',
     category: 'resource',
@@ -196,10 +334,29 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Keep the Truth meter above 80% for three consecutive turns to maintain the clandestine moon-to-newsroom broadcast uplink.',
     target: 3,
     difficulty: 'hard',
-    checkProgress: gameState => resolveStreak(gameState, 'truthAbove80Streak'),
+    stages: createAgendaStages('truth_moonbeam_marmalade', 3, {
+      briefing: {
+        label: 'Signal Calibration',
+        description: 'Techs polish the dish and tune the cheese-coded handshake.',
+        requirement: 'Truth stabilizes above 80% for the first cycle.',
+        threshold: 0,
+      },
+      escalation: {
+        label: 'Lunar Lock',
+        description: 'The uplink hums as consecutive broadcasts stay unscrambled.',
+        requirement: 'Maintain Truth above 80% for 1 consecutive turn.',
+        threshold: 1,
+      },
+      finale: {
+        label: 'Full Spectrum Beam',
+        description: 'Moonlight relays every leak straight into the newsroom.',
+        requirement: 'Sustain Truth above 80% for 3 consecutive turns.',
+      },
+    }),
+    computeProgress: gameState => resolveStreak(gameState, 'truthAbove80Streak'),
     flavorText: 'Schedule transmissions to align with authorized cattle abduction weather reports.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'truth_ufo_retrieval_log',
     faction: 'truth',
     category: 'strategic',
@@ -216,11 +373,28 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Run four ZONE operations on desert crash sites (NV, NM, AZ, UT) to catalogue saucer fragments before the khaki-clad clean-up crew arrives.',
     target: 4,
     difficulty: 'medium',
-    checkProgress: gameState =>
+    stages: createAgendaStages('truth_ufo_retrieval_log', 4, {
+      briefing: {
+        label: 'Crash Map Recon',
+        description: 'Scouts trace fresh impact craters before khaki squads arrive.',
+        requirement: 'Chart the four-state recovery corridor.',
+      },
+      escalation: {
+        label: 'Salvage Convoys',
+        description: 'Convoys run covert ZONE drills through the desert night.',
+        requirement: 'Complete 2 ZONE operations on desert crash sites.',
+      },
+      finale: {
+        label: 'Hangar Lockdown',
+        description: 'Every recovered saucer fragment is catalogued and secured.',
+        requirement: 'Complete 4 ZONE operations on NV, NM, AZ, or UT.',
+      },
+    }),
+    computeProgress: gameState =>
       countZonePlaysOnStates(gameState, new Set(['NV', 'NM', 'AZ', 'UT'])),
     flavorText: 'Every saucer comes with a complimentary anti-grav polishing cloth.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'truth_tabloid_taste_test',
     faction: 'truth',
     category: 'influence',
@@ -237,10 +411,27 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Publish six MEDIA spreads to flood the airwaves with Elvis clone sightings, lizard congress exposés, and interdimensional gossip.',
     target: 6,
     difficulty: 'easy',
-    checkProgress: gameState => countCardTypePlays(gameState, 'MEDIA'),
+    stages: createAgendaStages('truth_tabloid_taste_test', 6, {
+      briefing: {
+        label: 'Frequency Warm-Up',
+        description: 'Editors align the rumor presses and warm the scanners.',
+        requirement: 'Greenlight the gossip wire for launch.',
+      },
+      escalation: {
+        label: 'Tabloid Blitz',
+        description: 'Sensational spreads roll off the press in rapid bursts.',
+        requirement: 'Publish 3 MEDIA spreads.',
+      },
+      finale: {
+        label: 'Signal Jammed',
+        description: 'Every channel loops Elvis clones and reptilian hearings.',
+        requirement: 'Publish 6 MEDIA spreads.',
+      },
+    }),
+    computeProgress: gameState => countCardTypePlays(gameState, 'MEDIA'),
     flavorText: 'Lead every headline with a blurry handshake between Bigfoot and a senator.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'truth_cryptid_potluck',
     faction: 'truth',
     category: 'territorial',
@@ -257,10 +448,27 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Secure four cryptid hotspots (WA, OR, WV, NJ, MT, or NH) so every legendary creature attends the clandestine summit on human relations.',
     target: 4,
     difficulty: 'hard',
-    checkProgress: gameState => countControlledMatches(gameState, ['WA', 'OR', 'WV', 'NJ', 'MT', 'NH']),
+    stages: createAgendaStages('truth_cryptid_potluck', 4, {
+      briefing: {
+        label: 'Summit Invitations',
+        description: 'Handlers coax cryptids with RSVP-laced trail mix.',
+        requirement: 'Identify which hotspots will host the conclave.',
+      },
+      escalation: {
+        label: 'Delegate Escort',
+        description: 'Field teams ferry elusive guests between safehouses.',
+        requirement: 'Control 2 cryptid hotspots.',
+      },
+      finale: {
+        label: 'Council Seated',
+        description: 'Every legendary creature signs the summit accord.',
+        requirement: 'Control 4 cryptid hotspots.',
+      },
+    }),
+    computeProgress: gameState => countControlledMatches(gameState, ['WA', 'OR', 'WV', 'NJ', 'MT', 'NH']),
     flavorText: 'Nametags must accommodate claws, hooves, and ectoplasm.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'truth_abduction_bakeoff',
     faction: 'truth',
     category: 'strategic',
@@ -277,10 +485,27 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Capture three states with any card to film synchronized abduction demonstrations that leave voters craving disclosure.',
     target: 3,
     difficulty: 'medium',
-    checkProgress: gameState => countCapturedMatches(gameState),
+    stages: createAgendaStages('truth_abduction_bakeoff', 3, {
+      briefing: {
+        label: 'Tour Bus Warm-Up',
+        description: 'Rig the levitation hydraulics and rehearse the patter.',
+        requirement: 'Route the awareness tour through key swing states.',
+      },
+      escalation: {
+        label: 'Demo Flights',
+        description: 'Crowds witness synchronized tractor beam choreography.',
+        requirement: 'Capture 2 states with any card.',
+      },
+      finale: {
+        label: 'Encore Extraction',
+        description: 'Disclosure reels go viral from every tour stop.',
+        requirement: 'Capture 3 states with any card.',
+      },
+    }),
+    computeProgress: gameState => countCapturedMatches(gameState),
     flavorText: 'Winners receive commemorative probe-shaped microphones.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'truth_cosmic_conserve',
     faction: 'truth',
     category: 'resource',
@@ -297,12 +522,29 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Accumulate +25 Truth from your card plays to bankroll the next leak of classified nebula dossiers.',
     target: 25,
     difficulty: 'legendary',
-    checkProgress: gameState => sumPositiveTruthDelta(gameState),
+    stages: createAgendaStages('truth_cosmic_conserve', 25, {
+      briefing: {
+        label: 'Leak Kitchen',
+        description: 'Whistleblowers stir cosmic conserve in sealed bunkers.',
+        requirement: 'Secure the first trickle of Truth from card plays.',
+      },
+      escalation: {
+        label: 'Nebula Drip',
+        description: 'Daily zines fund the slow-burn disclosure budget.',
+        requirement: 'Accumulate +13 Truth from card plays.',
+      },
+      finale: {
+        label: 'Dossier Cascade',
+        description: 'A flood of nebula files detonates across the presses.',
+        requirement: 'Accumulate +25 Truth from card plays.',
+      },
+    }),
+    computeProgress: gameState => sumPositiveTruthDelta(gameState),
     flavorText: 'Press releases are printed on meteorite confetti.'
-  },
+  }),
 
   // GOVERNMENT FACTION AGENDAS
-  {
+  defineAgenda({
     id: 'gov_capitol_stew',
     faction: 'government',
     category: 'territorial',
@@ -319,10 +561,27 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Control any three beltway command hubs (DC, VA, MD, or CO) to stage emergency briefings that keep Bat Boy rumors quarantined.',
     target: 3,
     difficulty: 'easy',
-    checkProgress: gameState => countControlledMatches(gameState, ['DC', 'VA', 'MD', 'CO']),
+    stages: createAgendaStages('gov_capitol_stew', 3, {
+      briefing: {
+        label: 'Briefing Freeze',
+        description: 'Crisis desks rehearse the official silence protocol.',
+        requirement: 'Audit cloakdown scripts for beltway spokespeople.',
+      },
+      escalation: {
+        label: 'Perimeter Lock',
+        description: 'Security cordons tighten around the briefing circuit.',
+        requirement: 'Control 2 beltway command hubs.',
+      },
+      finale: {
+        label: 'Cloakdown Enforced',
+        description: 'Emergency briefings drown out every Bat Boy rumor.',
+        requirement: 'Control 3 beltway command hubs.',
+      },
+    }),
+    computeProgress: gameState => countControlledMatches(gameState, ['DC', 'VA', 'MD', 'CO']),
     flavorText: 'All statements vetted by the Department of Implausible Denial.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'gov_field_ration_redactions',
     faction: 'government',
     category: 'influence',
@@ -339,10 +598,27 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Broadcast six MEDIA briefings to overwrite field reports about the rogue Elvis clone with sanitized bullet points.',
     target: 6,
     difficulty: 'medium',
-    checkProgress: gameState => countCardTypePlays(gameState, 'MEDIA'),
+    stages: createAgendaStages('gov_field_ration_redactions', 6, {
+      briefing: {
+        label: 'Directive Drafting',
+        description: 'Spin doctors rewrite every field memo from scratch.',
+        requirement: 'Issue sanitized talking points to the network.',
+      },
+      escalation: {
+        label: 'Broadcast Cadence',
+        description: 'Mindwipe briefings cascade through the field offices.',
+        requirement: 'Broadcast 3 MEDIA briefings.',
+      },
+      finale: {
+        label: 'Total Recall Void',
+        description: 'Agents remember nothing but the approved Elvis cover story.',
+        requirement: 'Broadcast 6 MEDIA briefings.',
+      },
+    }),
+    computeProgress: gameState => countCardTypePlays(gameState, 'MEDIA'),
     flavorText: 'Side effects include humming suspiciously like Jailhouse Rock.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'gov_supply_chain_soup',
     faction: 'government',
     category: 'resource',
@@ -359,10 +635,27 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Lock down four heartland corridors (IA, NE, KS, MO, OK, or AR) to corral migrating cryptids before tabloids sniff the trail.',
     target: 4,
     difficulty: 'medium',
-    checkProgress: gameState => countControlledMatches(gameState, ['IA', 'NE', 'KS', 'MO', 'OK', 'AR']),
+    stages: createAgendaStages('gov_supply_chain_soup', 4, {
+      briefing: {
+        label: 'Checkpoint Paperwork',
+        description: 'Plainclothes teams draft cover stories at faux markets.',
+        requirement: 'Assign interception crews across the corridor map.',
+      },
+      escalation: {
+        label: 'Perimeter Test',
+        description: 'Temporary fences funnel cryptid traffic into scanners.',
+        requirement: 'Control 2 heartland corridors.',
+      },
+      finale: {
+        label: 'Containment Grid',
+        description: 'The entire migration is bottled up before tabloids arrive.',
+        requirement: 'Control 4 heartland corridors.',
+      },
+    }),
+    computeProgress: gameState => countControlledMatches(gameState, ['IA', 'NE', 'KS', 'MO', 'OK', 'AR']),
     flavorText: 'Every checkpoint issues complimentary anti-Yeti booties.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'gov_ufo_recall_paperwork',
     faction: 'government',
     category: 'strategic',
@@ -379,11 +672,28 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Repossess three desert crash sites through captures before the tabloids broadcast unauthorized saucer recall notices.',
     target: 3,
     difficulty: 'hard',
-    checkProgress: gameState =>
+    stages: createAgendaStages('gov_ufo_recall_paperwork', 3, {
+      briefing: {
+        label: 'Recall Notices',
+        description: 'Clerks prep triplicate forms and telepathy-proof seals.',
+        requirement: 'Coordinate repossession teams for every crash site.',
+      },
+      escalation: {
+        label: 'Collection Sweep',
+        description: 'Agents descend on desert hangars with recall warrants.',
+        requirement: 'Repossess 2 desert crash sites.',
+      },
+      finale: {
+        label: 'Warehouse Sealed',
+        description: 'Every saucer asset is logged back into federal storage.',
+        requirement: 'Repossess 3 desert crash sites.',
+      },
+    }),
+    computeProgress: gameState =>
       countCapturedMatches(gameState, new Set(['NV', 'NM', 'AZ', 'UT'])),
     flavorText: 'Failure triggers a mandatory Men-in-Khaki conga line.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'gov_coverup_casserole',
     faction: 'government',
     category: 'sabotage',
@@ -400,10 +710,28 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Keep Truth under 20% for three consecutive turns to drown the airwaves in distraction musicals and eclipse the leak.',
     target: 3,
     difficulty: 'hard',
-    checkProgress: gameState => resolveStreak(gameState, 'truthBelow20Streak'),
+    stages: createAgendaStages('gov_coverup_casserole', 3, {
+      briefing: {
+        label: 'Playbill Draft',
+        description: 'Stage managers script the distraction musical slate.',
+        requirement: 'Prime the theater crew to smother any Truth spike.',
+      },
+      escalation: {
+        label: 'Spotlight Drop',
+        description: 'Fog machines and denials roll in on schedule.',
+        requirement: 'Keep Truth below 20% for 1 consecutive turn.',
+        threshold: 1,
+      },
+      finale: {
+        label: 'Encore Denial',
+        description: 'Every channel loops the spectacle, Truth muted entirely.',
+        requirement: 'Keep Truth below 20% for 3 consecutive turns.',
+      },
+    }),
+    computeProgress: gameState => resolveStreak(gameState, 'truthBelow20Streak'),
     flavorText: 'Encore features nine dancers dressed as non-existent aliens.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'gov_spice_rack_surveillance',
     faction: 'government',
     category: 'strategic',
@@ -420,10 +748,27 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Control NY, CA, TX, and FL to triangulate celebrity clone sightings before the truth movement livestreams them.',
     target: 4,
     difficulty: 'hard',
-    checkProgress: gameState => countControlledMatches(gameState, ['NY', 'CA', 'TX', 'FL']),
+    stages: createAgendaStages('gov_spice_rack_surveillance', 4, {
+      briefing: {
+        label: 'Orbital Alignment',
+        description: 'Sat teams calibrate the mind net over coastal anchors.',
+        requirement: 'Prep surveillance relays in NY, CA, TX, and FL.',
+      },
+      escalation: {
+        label: 'Triangulation Sweep',
+        description: 'Clone sightings collapse into a tight telemetry cone.',
+        requirement: 'Control 2 of NY, CA, TX, or FL.',
+      },
+      finale: {
+        label: 'Nationwide Sweep',
+        description: 'Every celebrity double is tracked before it livestreams.',
+        requirement: 'Control NY, CA, TX, and FL.',
+      },
+    }),
+    computeProgress: gameState => countControlledMatches(gameState, ['NY', 'CA', 'TX', 'FL']),
     flavorText: 'Headquarters monitors Bigfoot, Elvis, and the Loch Ness intern simultaneously.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'gov_black_budget_bbq',
     faction: 'government',
     category: 'resource',
@@ -440,12 +785,29 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Stockpile 220 IP to bankroll the global Elvis decoy tour that keeps the real King in deep cover.',
     target: 220,
     difficulty: 'legendary',
-    checkProgress: gameState => (typeof gameState?.ip === 'number' ? Math.max(0, gameState.ip) : 0),
+    stages: createAgendaStages('gov_black_budget_bbq', 220, {
+      briefing: {
+        label: 'Appropriations Huddle',
+        description: 'Budgeteers shuffle funds behind blackout curtains.',
+        requirement: 'Secure the first covert IP reserves.',
+      },
+      escalation: {
+        label: 'Tour Retainer',
+        description: 'Decoy band signs contracts under four layers of aliases.',
+        requirement: 'Stockpile 110 IP.',
+      },
+      finale: {
+        label: 'World Tour Paid',
+        description: 'Every decoy jet and jumpsuit is fully funded.',
+        requirement: 'Stockpile 220 IP.',
+      },
+    }),
+    computeProgress: gameState => (typeof gameState?.ip === 'number' ? Math.max(0, gameState.ip) : 0),
     flavorText: 'The receipts are written in glow-in-the-dark redactions.'
-  },
+  }),
 
   // SHARED/NEUTRAL AGENDAS
-  {
+  defineAgenda({
     id: 'shared_paranoid_picnic',
     faction: 'both',
     category: 'territorial',
@@ -462,10 +824,27 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Control four roadside hotspots (WI, MN, NJ, LA, or NM) to escort the caravan of psychics, cryptids, and clairvoyant truckers.',
     target: 4,
     difficulty: 'medium',
-    checkProgress: gameState => countControlledMatches(gameState, ['WI', 'MN', 'NJ', 'LA', 'NM']),
+    stages: createAgendaStages('shared_paranoid_picnic', 4, {
+      briefing: {
+        label: 'Route Planning',
+        description: 'Caravan scouts mark overpasses with spectral flares.',
+        requirement: 'Plot the interstate stages for the convoy.',
+      },
+      escalation: {
+        label: 'Convoy Rollout',
+        description: 'Psychics and cryptids seize rest stops for broadcasts.',
+        requirement: 'Control 2 roadside hotspots.',
+      },
+      finale: {
+        label: 'Motorcade in Motion',
+        description: 'The full caravan blankets the heartland with omens.',
+        requirement: 'Control 4 roadside hotspots.',
+      },
+    }),
+    computeProgress: gameState => countControlledMatches(gameState, ['WI', 'MN', 'NJ', 'LA', 'NM']),
     flavorText: 'Tinfoil streamers are mandatory for all convertibles.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'shared_midnight_press_run',
     faction: 'both',
     category: 'influence',
@@ -482,10 +861,28 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Serve three rounds of attack-and-media pairings to keep the haunted newsroom staffed with spectral copy editors.',
     target: 3,
     difficulty: 'medium',
-    checkProgress: gameState => countMediaAndAttackPairs(gameState),
+    stages: createAgendaStages('shared_midnight_press_run', 3, {
+      briefing: {
+        label: 'Pressroom Warm-Up',
+        description: 'Spectral copy editors prime the haunted linotypes.',
+        requirement: 'Pair the newsroom for its first attack-media cycle.',
+      },
+      escalation: {
+        label: 'Double Truck',
+        description: 'Alternating attacks and media lock into a rhythm.',
+        requirement: 'Serve 1 attack + media pairing.',
+        threshold: 1,
+      },
+      finale: {
+        label: 'Midnight Run',
+        description: 'Three perfect spreads keep the ghost staff fully manifest.',
+        requirement: 'Serve 3 attack + media pairings.',
+      },
+    }),
+    computeProgress: gameState => countMediaAndAttackPairs(gameState),
     flavorText: 'Ink smells faintly of ectoplasm and burnt coffee.'
-  },
-  {
+  }),
+  defineAgenda({
     id: 'shared_combo_platter',
     faction: 'both',
     category: 'strategic',
@@ -502,9 +899,27 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     description: 'Maintain two simultaneous state combination bonuses to balance competing realities in the news cycle.',
     target: 2,
     difficulty: 'legendary',
-    checkProgress: gameState => ensureArray(gameState?.activeStateCombinationIds).length,
+    stages: createAgendaStages('shared_combo_platter', 2, {
+      briefing: {
+        label: 'Timeline Briefing',
+        description: 'Editors choreograph articles across mirrored realities.',
+        requirement: 'Prepare overlapping state combination dossiers.',
+      },
+      escalation: {
+        label: 'Split Reality',
+        description: 'One combination hums while the alternate timeline stabilizes.',
+        requirement: 'Maintain 1 state combination bonus.',
+        threshold: 1,
+      },
+      finale: {
+        label: 'Parallel Harmony',
+        description: 'Two combos spin in sync without collapsing causality.',
+        requirement: 'Maintain 2 state combination bonuses.',
+      },
+    }),
+    computeProgress: gameState => ensureArray(gameState?.activeStateCombinationIds).length,
     flavorText: 'Side B of the paper swears none of this ever happened.'
-  }
+  })
 ];
 
 export interface AgendaSelectionOptions {

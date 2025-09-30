@@ -7,6 +7,7 @@ import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
 import type { ParanormalSighting } from '@/types/paranormal';
 import type { AgendaIssueState } from '@/data/agendaIssues';
+import type { AgendaMoment } from '@/hooks/usePressArchive';
 import CardImage from '@/components/game/CardImage';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 
@@ -27,6 +28,7 @@ export interface TabloidNewspaperProps {
   onClose: () => void;
   sightings?: ParanormalSighting[];
   agendaIssue?: AgendaIssueState;
+  agendaMoments?: AgendaMoment[];
 }
 
 interface NewspaperData {

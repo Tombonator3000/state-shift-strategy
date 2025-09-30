@@ -9,7 +9,7 @@ import {
   applyDefenseBonusToStates,
   createDefaultCombinationEffects,
 } from '@/data/stateCombinations';
-import { getRandomAgenda, getAgendaById } from '@/data/agendaDatabase';
+import { getRandomAgenda, getAgendaById, resolveAgendaStageByProgress } from '@/data/agendaDatabase';
 import type { SecretAgenda } from '@/data/agendaDatabase';
 import {
   advanceAgendaIssue,
@@ -718,17 +718,44 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
     options: { requireRevealForProgress?: boolean } = {},
   ): T => {
     const snapshot = buildAgendaSnapshot(state, perspective);
-    const computedProgressRaw = Number(agenda.checkProgress?.(snapshot) ?? agenda.progress ?? 0);
+    const progressResult = agenda.checkProgress?.(snapshot);
+    const computedProgressRaw = typeof progressResult === 'number'
+      ? progressResult
+      : typeof (progressResult as { progress?: number } | null | undefined)?.progress === 'number'
+        ? (progressResult as { progress: number }).progress
+        : agenda.progress ?? 0;
     const computedProgress = Number.isFinite(computedProgressRaw)
       ? Math.max(0, computedProgressRaw)
       : agenda.progress ?? 0;
     const previousProgress = agenda.progress ?? 0;
     const target = agenda.target ?? 0;
+    const previousStageId = agenda.stageId
+      ?? resolveAgendaStageByProgress(agenda.stages, previousProgress)?.id
+      ?? '';
+    const rawStageId = typeof progressResult === 'object' && progressResult
+      ? String((progressResult as { stageId?: string }).stageId ?? '')
+      : '';
+    const fallbackStage = resolveAgendaStageByProgress(agenda.stages, computedProgress);
+    const computedStageId = (rawStageId || fallbackStage?.id || previousStageId || '').trim();
+    const stageDefinition = agenda.stages?.find(stage => stage.id === computedStageId) ?? fallbackStage;
+    const previousStageDefinition = agenda.stages?.find(stage => stage.id === previousStageId) ?? null;
+    const stageIndex = agenda.stages?.findIndex(stage => stage.id === computedStageId) ?? -1;
+    const previousStageIndex = agenda.stages?.findIndex(stage => stage.id === previousStageId) ?? -1;
+    const stageChanged = computedStageId !== previousStageId;
     const isCompleted = computedProgress >= target;
     const isStreakAgenda = STREAK_AGENDA_IDS.has(agenda.id);
     const shouldLogProgress = options.requireRevealForProgress ? Boolean(agenda.revealed) : true;
     const actorPrefix = actor === 'opposition' ? 'Opposition ' : '';
     const actorLabel = actor === 'opposition' ? 'Opposition' : 'Operatives';
+    const stageIsFinal = Boolean(stageDefinition && stageDefinition.threshold >= target);
+    let stageStatus: 'advance' | 'setback' | 'complete' = 'advance';
+    if (stageChanged) {
+      if (isCompleted && stageIsFinal) {
+        stageStatus = 'complete';
+      } else if (stageIndex !== -1 && previousStageIndex !== -1 && stageIndex < previousStageIndex) {
+        stageStatus = 'setback';
+      }
+    }
 
     if (computedProgress > previousProgress && shouldLogProgress) {
       const delta = computedProgress - previousProgress;
@@ -743,6 +770,19 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
       logUpdates = [...logUpdates, formatAgendaLogEntry(agenda, dropMessage, quip)];
     }
 
+    if (stageChanged && shouldLogProgress && stageDefinition) {
+      const stageLabel = stageDefinition.label ?? computedStageId;
+      const stageMessage = stageStatus === 'setback'
+        ? `${actorLabel} fall back to ${stageLabel}.`
+        : `${actorLabel} advance to ${stageLabel}.`;
+      const quip = getIssueQuip(
+        issueId,
+        faction,
+        stageStatus === 'setback' ? -computedProgress : computedProgress,
+      );
+      logUpdates = [...logUpdates, formatAgendaLogEntry(agenda, stageMessage, quip)];
+    }
+
     if (isCompleted && !agenda.completed) {
       const completionMessage = `${actorLabel} secure the objective at ${computedProgress}/${target}!`;
       const quip = getIssueQuip(issueId, faction, computedProgress * 2);
@@ -755,10 +795,35 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
       logUpdates = [...logUpdates, formatAgendaLogEntry(agenda, regressionMessage, quip)];
     }
 
+    if (stageChanged && shouldLogProgress && typeof window !== 'undefined' && stageDefinition) {
+      const timestamp = Date.now();
+      const stageLabel = stageDefinition.label ?? computedStageId;
+      const detail = {
+        id: `${agenda.id}:${timestamp}:${computedStageId || 'stage'}`,
+        agendaId: agenda.id,
+        agendaTitle: agenda.title,
+        stageId: computedStageId,
+        stageLabel,
+        stageDescription: stageDefinition.description,
+        previousStageId,
+        previousStageLabel: previousStageDefinition?.label,
+        faction,
+        actor,
+        status: stageStatus,
+        progress: computedProgress,
+        target,
+        recordedAt: timestamp,
+      };
+
+      window.dispatchEvent(new CustomEvent('agendaStageShift', { detail }));
+      window.dispatchEvent(new CustomEvent('agendaMoment', { detail }));
+    }
+
     return {
       ...agenda,
       progress: computedProgress,
       completed: isCompleted,
+      stageId: computedStageId || previousStageId,
     };
   };
 
@@ -1172,12 +1237,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         progress: 0,
         completed: false,
         revealed: false,
+        stageId: resolveAgendaStageByProgress(initialPlayerAgenda.stages, 0)?.id ?? '',
       },
       aiSecretAgenda: {
         ...initialAiAgenda,
         progress: 0,
         completed: false,
         revealed: false,
+        stageId: resolveAgendaStageByProgress(initialAiAgenda.stages, 0)?.id ?? '',
       },
       animating: false,
       aiTurnInProgress: false,
@@ -1349,12 +1416,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         progress: 0,
         completed: false,
         revealed: false,
+        stageId: resolveAgendaStageByProgress(playerAgendaTemplate.stages, 0)?.id ?? '',
       },
       aiSecretAgenda: {
         ...aiAgendaTemplate,
         progress: 0,
         completed: false,
         revealed: false,
+        stageId: resolveAgendaStageByProgress(aiAgendaTemplate.stages, 0)?.id ?? '',
       },
     }));
   }, [achievements, aiDifficulty]);
@@ -2578,12 +2647,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             : 0;
         const completed = typeof agendaData.completed === 'boolean' ? agendaData.completed : false;
         const revealed = typeof agendaData.revealed === 'boolean' ? agendaData.revealed : false;
+        const stageId = resolveAgendaStageByProgress(baseAgenda.stages, progress)?.id ?? '';
 
         return {
           ...baseAgenda,
           progress,
           completed,
           revealed,
+          stageId,
         };
       };
 
