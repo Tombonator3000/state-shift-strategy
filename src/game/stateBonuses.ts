@@ -256,7 +256,9 @@ export const assignStateBonuses = (
 
     if (selectedEvent) {
       const eventEntry = toRoundEvent(selectedEvent, state, options.round);
-      roundEvents[state.abbreviation] = [...(roundEvents[state.abbreviation] ?? []), eventEntry];
+      if (owner !== 'neutral') {
+        roundEvents[state.abbreviation] = [...(roundEvents[state.abbreviation] ?? []), eventEntry];
+      }
       if (isPlayerControlled) {
         truthDelta += eventEntry.truthDelta ?? 0;
         ipDelta += eventEntry.ipDelta ?? 0;
