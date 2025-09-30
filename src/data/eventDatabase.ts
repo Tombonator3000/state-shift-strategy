@@ -1638,13 +1638,22 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       flavorGov: "Just a weather balloon... made of peanuts."
     },
     {
-      id: "al_bigfoot_cotton", title: "Bigfoot Helps Alabama Cotton Harvest", 
+      id: "al_bigfoot_cotton", title: "Bigfoot Helps Alabama Cotton Harvest",
       content: "Sasquatch sightings surge as mysterious figure assists local cotton farmers with superhuman efficiency!",
       type: "capture", rarity: "common", weight: 12,
       effects: { ipChange: 2, defenseChange: 1 },
       conditions: { capturedBy: "government" },
       flavorGov: "Classified agricultural assistance program is working perfectly.",
       flavorTruth: "The cryptid workforce is real!"
+    },
+    {
+      id: "al_rocket_barbecue", title: "Rocket Barbecue Ignites Huntsville Skyline",
+      content: "NASA interns reportedly launched a rib smoker into low orbit to season the atmosphere before it parachuted onto the courthouse lawn.",
+      type: "capture", rarity: "uncommon", weight: 7,
+      effects: { truthChange: 1, ipChange: 2, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "That sauce trail spelled out classified coordinates!",
+      flavorGov: "Aerothermal marinade trials are within acceptable parameters."
     }
   ],
   
@@ -1667,6 +1676,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Operation Tusk is performing beyond expectations.",
       flavorTruth: "They're militarizing marine mammals!"
+    },
+    {
+      id: "ak_aurora_karaoke", title: "Aurora Karaoke Lights Up Anchorage",
+      content: "Northern lights sync perfectly with a bar playlist, flashing classified Morse choruses across the sky.",
+      type: "capture", rarity: "uncommon", weight: 8,
+      effects: { truthChange: 3, ipChange: -1, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The aurora is broadcasting whistleblower ballads!",
+      flavorGov: "Atmospheric refraction occasionally resembles pop music."
     }
   ],
   
@@ -1689,6 +1707,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Project Needlepoint provides excellent desert coverage.",
       flavorTruth: "They're watching us through the cacti!"
+    },
+    {
+      id: "az_solar_cowboy_rodeo", title: "Solar Cowboy Rodeo Hijacks Grid",
+      content: "Laser-lasso riders reportedly rerouted enough sunlight to power a hidden desert bunker for one wild night.",
+      type: "capture", rarity: "rare", weight: 6,
+      effects: { ipChange: 3, truthChange: -1, defenseChange: 1 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They branded the blackout pattern onto the mesa!",
+      flavorGov: "Grid stress test proves our cowpoke simulations were accurate."
     }
   ],
   
@@ -1711,6 +1738,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "They're using our crops as starship fuel!",
       flavorGov: "Standard agricultural monitoring in progress."
+    },
+    {
+      id: "ar_crystal_radio_revival", title: "Crystal Cathedral Broadcasts Future News",
+      content: "Hot Springs bathhouse crystals replay headlines from next Tuesday including secret hearings.",
+      type: "capture", rarity: "uncommon", weight: 9,
+      effects: { truthChange: 2, ipChange: 1, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The echoes told us which files they will shred!",
+      flavorGov: "Therapeutic acoustics occasionally over-resonate."
     }
   ],
   
@@ -1733,6 +1769,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Geological research for public safety.",
       flavorTruth: "They can trigger earthquakes at will!"
+    },
+    {
+      id: "ca_director_cut_doctrine", title: "Directors Guild Leaks Reality Rewrite",
+      content: "Studio executives allegedly screened a cut of Los Angeles where permits auto approve propaganda reshoots.",
+      type: "capture", rarity: "rare", weight: 5,
+      effects: { truthChange: 4, ipChange: 2, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Final draft clearly watermarked with the secret agenda!",
+      flavorGov: "Industry mock ups help agencies prep for emergency messaging."
     }
   ],
 
@@ -1755,6 +1800,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "The thin air opens the mind's eye!",
       flavorGov: "Altitude sickness causes minor hallucinations."
+    },
+    {
+      id: "co_red_rock_resonance", title: "Red Rocks Amphitheater Opens Telepathic Hotline",
+      content: "Concert goers swear the sandstone translated audience thoughts into classified setlists mid show.",
+      type: "capture", rarity: "uncommon", weight: 8,
+      effects: { truthChange: 3, defenseChange: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Those riffs were broadcasting agency passwords!",
+      flavorGov: "Acoustic tests sometimes exaggerate cognitive feedback loops."
     }
   ],
   
@@ -1777,6 +1831,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "Temporal displacement is real!",
       flavorGov: "Experimental navigation systems under development."
+    },
+    {
+      id: "ct_submarine_polo_league", title: "Secret Submarine Polo League Surfaces",
+      content: "Mystic shipyards host midnight matches where torpedoes double as goal markers and surveillance buoys.",
+      type: "capture", rarity: "common", weight: 11,
+      effects: { ipChange: 2, truthChange: -1, defenseChange: 2 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They built a navy just to spy on intermission snacks!",
+      flavorGov: "Joint training keeps our crews coordinated and hydrated."
     }
   ],
 
@@ -1799,6 +1862,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Capitol perimeter upgrades ensure tourists reflect on proper security.",
       flavorTruth: "They're turning every monument into a listening post!"
+    },
+    {
+      id: "dc_monument_march", title: "Monuments Conduct Midnight March",
+      content: "Witnesses insist the monuments rearranged themselves to spell out emergency legislation before dawn.",
+      type: "capture", rarity: "legendary", weight: 2,
+      effects: { truthChange: 6, ipChange: 3, stateEffects: { pressure: -2, defense: 2 } },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Even the statues are tired of secret committees!",
+      flavorGov: "Routine relocation for marble preservation remains normal."
     }
   ],
 
@@ -1821,6 +1893,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "They've monetized parallel universes!",
       flavorGov: "Complex financial instruments require specialized oversight."
+    },
+    {
+      id: "de_credit_card_cyclone", title: "Delaware Credit Cyclone Swallows Paper Trail",
+      content: "A spiral of receipts hovered over Wilmington shredding shell company aliases midair.",
+      type: "capture", rarity: "rare", weight: 5,
+      effects: { truthChange: 4, ipChange: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The confetti spelled the offshore network!",
+      flavorGov: "Localized wind shear occasionally helps with document recycling."
     }
   ],
 
@@ -1843,6 +1924,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Wildlife conservation program shows promising results.",
       flavorTruth: "They've militarized the swamp!"
+    },
+    {
+      id: "fl_mermaid_space_force", title: "Mermaid Space Force Launches From Cape",
+      content: "Aquatic cadets rode tidal boosters into orbit saluting an unlisted satellite shaped like a conch shell.",
+      type: "capture", rarity: "legendary", weight: 3,
+      effects: { ipChange: 4, truthChange: -2, defenseChange: 2 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They weaponized sea shanties for orbital mind control!",
+      flavorGov: "Joint maritime aerospace drills ensure splashdown readiness."
     }
   ],
 
@@ -1865,6 +1955,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "All flights connect to other dimensions!",
       flavorGov: "Advanced logistics coordination center."
+    },
+    {
+      id: "ga_peach_pit_laboratory", title: "Peach Pit Lab Grows Replacement Politicians",
+      content: "Macon orchard tours revealed vats cultivating look alike officials with programmable smiles.",
+      type: "capture", rarity: "uncommon", weight: 9,
+      effects: { truthChange: 2, ipChange: 2, defenseChange: -1 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They are cloning charisma to rubber stamp the agenda!",
+      flavorGov: "Advanced biomimicry research keeps continuity of governance safe."
     }
   ],
 
@@ -1887,6 +1986,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "They've mastered human wave sports!",
       flavorGov: "Athletic performance enhancement through proper nutrition."
+    },
+    {
+      id: "hi_volcano_time_share", title: "Volcano Time Share Opens to Parallel Tourists",
+      content: "Mauna Loa hosted visitors stepping out of rifts waving brochures dated 2087.",
+      type: "capture", rarity: "rare", weight: 4,
+      effects: { truthChange: 5, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Future travelers confirmed the cover up lasts decades!",
+      flavorGov: "Geothermal excursions occasionally attract imaginative storytellers."
     }
   ],
 
@@ -1909,6 +2017,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "The preppers were right all along!",
       flavorGov: "Mining operations for mineral extraction."
+    },
+    {
+      id: "id_potato_signal_array", title: "Potato Fields Beam Emergency Wi Fi",
+      content: "Boise farmers discovered tubers humming firmware updates straight into passing drones.",
+      type: "capture", rarity: "common", weight: 10,
+      effects: { ipChange: 3, truthChange: -1, cardDraw: 1 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They turned starch into surveillance routers!",
+      flavorGov: "Precision agriculture requires robust over the air diagnostics."
     }
   ],
 
@@ -1931,6 +2048,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Atmospheric research improves weather prediction accuracy.",
       flavorTruth: "They're broadcasting through the air currents!"
+    },
+    {
+      id: "il_cloud_gate_broadcast", title: "Cloud Gate Mirrors Classified Briefings",
+      content: "Tourists reading the Bean reflection saw scrolling memos about midnight council votes.",
+      type: "capture", rarity: "uncommon", weight: 8,
+      effects: { truthChange: 3, ipChange: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Chicago steel is reflecting more than selfies!",
+      flavorGov: "Urban art maintenance occasionally includes augmented reality tests."
     }
   ],
 
@@ -1953,6 +2079,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Agricultural entertainment with security features.",
       flavorTruth: "Lost in the maze means lost forever!"
+    },
+    {
+      id: "in_speedway_time_lap", title: "Indy Speedway Runs a Lap of Tomorrow",
+      content: "Practice cars allegedly crossed the finish line minutes before they started carrying courier pouches.",
+      type: "capture", rarity: "rare", weight: 5,
+      effects: { truthChange: 4, defenseChange: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Those time skips delivered proof of tomorrow curfew!",
+      flavorGov: "Chronometric calibration keeps our timing systems precise."
     }
   ],
 
@@ -1975,6 +2110,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Enhanced polling techniques improve democratic accuracy.",
       flavorTruth: "They're reading minds at the ballot box!"
+    },
+    {
+      id: "ia_cornfield_comet", title: "Cornfield Comet Carves Black Budget",
+      content: "A glowing tractor beam etched covert spending line items across Ames farmland.",
+      type: "capture", rarity: "common", weight: 11,
+      effects: { truthChange: 2, ipChange: 1, stateEffects: { pressure: 1 } },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The harvest literally highlighted the slush fund!",
+      flavorGov: "Precision planting demos sometimes resemble typography."
     }
   ],
 
@@ -1997,6 +2141,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "There really is no place like home... dimension!",
       flavorGov: "Historical fiction analysis for cultural studies."
+    },
+    {
+      id: "ks_wizard_weatherball", title: "Wizard Weatherball Returns Tornadoes to Sender",
+      content: "Dodge City storm chasers filmed a glowing orb batting funnels away from resistance safehouses.",
+      type: "capture", rarity: "uncommon", weight: 7,
+      effects: { truthChange: 3, defenseChange: 2 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Someone finally hacked their wind machine!",
+      flavorGov: "Atmospheric anomalies often self correct after guidance pulses."
     }
   ],
 
@@ -2019,6 +2172,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Equine health monitoring improves racing safety.",
       flavorTruth: "They've turned horses into mobile surveillance units!"
+    },
+    {
+      id: "ky_derby_psychic_hat", title: "Derby Hat Predicts Classified Photo Finishes",
+      content: "A Louisville milliner sold fascinators that whisper winners and security passwords before each race.",
+      type: "capture", rarity: "common", weight: 10,
+      effects: { truthChange: 1, ipChange: 2, cardDraw: 1 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They hide encryption keys under couture!",
+      flavorGov: "Fashion forward biometrics keep the paddock orderly."
     }
   ],
 
@@ -2041,6 +2203,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "They've drilled into another reality!",
       flavorGov: "Deep water exploration reveals unusual geological formations."
+    },
+    {
+      id: "la_bayou_brass_barrage", title: "Bayou Brass Band Summons Floodgate Spirits",
+      content: "Second line trumpets reportedly convinced levees to open secret maintenance tunnels toward a hidden lab.",
+      type: "capture", rarity: "rare", weight: 5,
+      effects: { truthChange: 4, ipChange: 2, defenseChange: -1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The horn section blew the lid off the swamp bunker!",
+      flavorGov: "Infrastructure rehearsals often include cultural outreach ensembles."
     }
   ],
 
@@ -2063,6 +2234,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Coastal navigation infrastructure operates efficiently.",
       flavorTruth: "They're signaling ships that shouldn't exist!"
+    },
+    {
+      id: "me_fogbank_file_drop", title: "Fog Bank Drops Classified Lobster Traps",
+      content: "Harbor fog condensed into briefcases baited with redacted memos and glowing buoys.",
+      type: "capture", rarity: "uncommon", weight: 8,
+      effects: { truthChange: 3, ipChange: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The mist literally delivered whistleblower bait!",
+      flavorGov: "Maritime logistics exercises sometimes look theatrical."
     }
   ],
 
@@ -2085,6 +2265,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Advanced intelligence gathering techniques remain classified.",
       flavorTruth: "They're reading thoughts from across the country!"
+    },
+    {
+      id: "md_beltway_backmasking", title: "Beltway Traffic Reports Hide Secret Directives",
+      content: "Commuters decoding radio static swear they heard instructions for midnight motorcades.",
+      type: "capture", rarity: "common", weight: 10,
+      effects: { ipChange: 2, truthChange: -1, defenseChange: 1 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They are steering us into checkpoints!",
+      flavorGov: "Adaptive routing guidance ensures everyone arrives on schedule."
     }
   ],
 
@@ -2107,6 +2296,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "The founding fathers are back and they're angry!",
       flavorGov: "Historical reenactment events show impressive dedication."
+    },
+    {
+      id: "ma_freedom_trail_fractal", title: "Freedom Trail Tiles Rearrange Into Cipher",
+      content: "Boston sidewalks shifted overnight to spell a colonial leak about new surveillance laws.",
+      type: "capture", rarity: "rare", weight: 4,
+      effects: { truthChange: 5, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Even the cobblestones are whistleblowing!",
+      flavorGov: "Public works crews sometimes test augmented wayfinding after hours."
     }
   ],
 
@@ -2129,6 +2327,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Freshwater research facility studies aquatic ecosystems.",
       flavorTruth: "They've built cities under our lakes!"
+    },
+    {
+      id: "mi_great_lake_hologram", title: "Great Lakes Project Blue Holographic Border",
+      content: "Ferries passing Detroit sailed through a shimmering firewall projecting customs interrogations.",
+      type: "capture", rarity: "uncommon", weight: 8,
+      effects: { ipChange: 3, defenseChange: 2 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They are scanning thought bubbles over open water!",
+      flavorGov: "Experimental port security ensures smooth transparent travel."
     }
   ],
 
@@ -2151,6 +2358,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "Ancient beings still inhabit our waters!",
       flavorGov: "Unusual wildlife sighting under investigation."
+    },
+    {
+      id: "mn_paul_bunyan_satellite", title: "Paul Bunyan Statue Controls Weather Satellite",
+      content: "Bemidji locals watched the lumberjack swing his axe adjusting storm tracks over three states.",
+      type: "capture", rarity: "rare", weight: 5,
+      effects: { truthChange: 4, defenseChange: 2, stateEffects: { stateId: "MN", defense: 2 } },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Even folklore is tired of classified forecast tweaks!",
+      flavorGov: "Heritage displays sometimes double as calibration antennas."
     }
   ],
 
@@ -2173,6 +2389,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Aquatic monitoring improves river navigation safety.",
       flavorTruth: "They've militarized the fish!"
+    },
+    {
+      id: "ms_delta_diplomats", title: "Delta Blues Diplomats Jam With Aliens",
+      content: "Clarksdale juke joints hosted luminous guests bartering riffs for extradition waivers.",
+      type: "capture", rarity: "legendary", weight: 3,
+      effects: { truthChange: 6, ipChange: 2 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Those solos spelled out the amnesty clause!",
+      flavorGov: "Cultural exchange fosters interstellar goodwill hypothetically."
     }
   ],
 
@@ -2195,6 +2420,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Monument maintenance includes advanced telecommunications equipment.",
       flavorTruth: "They're broadcasting to the stars!"
+    },
+    {
+      id: "mo_arch_elevator", title: "Gateway Arch Elevator Opens Wormhole Tour",
+      content: "Visitors stepped out onto replicas of classified briefing rooms before returning with souvenir dossiers.",
+      type: "capture", rarity: "rare", weight: 4,
+      effects: { truthChange: 4, ipChange: 1, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "They have hidden exit doors to secret hearings!",
+      flavorGov: "Historical exhibits sometimes stage immersive education experiences."
     }
   ],
 
@@ -2217,6 +2451,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Environmental research station monitors climate change.",
       flavorTruth: "They're melting glaciers to build bunkers!"
+    },
+    {
+      id: "mt_buffalo_aurora_guard", title: "Buffalo Stampede Forms Northern Lights Shield",
+      content: "Herds galloped in geometric patterns deflecting surveillance drones with magnetic manes.",
+      type: "capture", rarity: "uncommon", weight: 7,
+      effects: { truthChange: 2, defenseChange: 3 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The plains just jammed their spy satellites!",
+      flavorGov: "Wildlife sometimes interacts unpredictably with magnetospheric research."
     }
   ],
 
@@ -2239,6 +2482,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Advanced economic modeling improves market stability.",
       flavorTruth: "He's seeing tomorrow's stock prices today!"
+    },
+    {
+      id: "ne_sandhill_server_farm", title: "Sandhill Cranes Host Sky Server Farm",
+      content: "Migrating flocks trailed fiber optic streamers relaying encrypted town hall transcripts to the stratosphere.",
+      type: "capture", rarity: "common", weight: 9,
+      effects: { ipChange: 3, truthChange: -1 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They are outsourcing surveillance to birds now!",
+      flavorGov: "Environmental telemetry helps conserve the flyway."
     }
   ],
 
@@ -2261,6 +2513,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Entertainment industry research improves customer experience.",
       flavorTruth: "They're programming gamblers' minds!"
+    },
+    {
+      id: "nv_casino_quasar", title: "Casino Quasar Pays Out Classified Chips",
+      content: "Slot machines on the Strip spat tokens laser etched with coordinates to an unlisted hangar.",
+      type: "capture", rarity: "rare", weight: 4,
+      effects: { truthChange: 5, ipChange: 2 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The jackpot pointed to the saucer stash!",
+      flavorGov: "Promotional gaming props do not reflect operational facilities."
     }
   ],
 
@@ -2283,6 +2544,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Electoral process refinement through repeated testing.",
       flavorTruth: "They're perfecting democracy through temporal manipulation!"
+    },
+    {
+      id: "nh_primary_snowglobe", title: "Primary Debate Encased in Predictive Snowglobe",
+      content: "Manchester town hall shrank into a snowglobe projecting every future poll result on each flake.",
+      type: "capture", rarity: "uncommon", weight: 8,
+      effects: { truthChange: 3, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The flakes spelled out the rigging schedule!",
+      flavorGov: "Civic engagement art installations can appear uncanny in winter."
     }
   ],
 
@@ -2305,6 +2575,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "Pollution created its own solution!",
       flavorGov: "Environmental remediation program shows unexpected community involvement."
+    },
+    {
+      id: "nj_turnpike_phantom_toll", title: "Turnpike Phantom Toll Dispenses Cover IDs",
+      content: "Drivers encountered a spectral booth issuing laminated aliases and gas money.",
+      type: "capture", rarity: "common", weight: 11,
+      effects: { ipChange: 2, truthChange: -1, cardDraw: 1 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They have an express lane for operatives!",
+      flavorGov: "Pilot programs simplify commuter reimbursements, that is all."
     }
   ],
 
@@ -2327,6 +2606,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Agricultural enhancement improves crop nutritional value.",
       flavorTruth: "They're spicing our food with obedience!"
+    },
+    {
+      id: "nm_roswell_recipe_swap", title: "Roswell Potluck Trades Saucer Schematics",
+      content: "Diners swapping casseroles found blueprints baked into crust and instructions for anti grav gravy.",
+      type: "capture", rarity: "rare", weight: 5,
+      effects: { truthChange: 5, ipChange: 1, defenseChange: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Grandma pie just leaked propulsion math!",
+      flavorGov: "Community outreach sometimes inspires fanciful recipe cards."
     }
   ],
 
@@ -2349,6 +2637,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Advanced trading systems improve market efficiency.",
       flavorTruth: "A machine controls the entire economy!"
+    },
+    {
+      id: "ny_subway_flash_cast", title: "Subway Flash Cast Rehearses Secret Bills",
+      content: "Pop up performers belted appropriations hidden in committee drafts during rush hour.",
+      type: "capture", rarity: "uncommon", weight: 9,
+      effects: { truthChange: 3, ipChange: 2 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Broadway spoiled the secret rider!",
+      flavorGov: "Transit arts programs occasionally test policy themed scripts."
     }
   ],
 
@@ -2371,6 +2668,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "They've been trying to stop truth smoking!",
       flavorGov: "Public health campaigns show mixed effectiveness."
+    },
+    {
+      id: "nc_outer_banks_frequency", title: "Outer Banks Lighthouse Emits Memory Wipes",
+      content: "Vacationers forgot entire briefings after the beam pulsed with classified sirens offshore.",
+      type: "capture", rarity: "rare", weight: 4,
+      effects: { ipChange: 3, truthChange: -2 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They are erasing witnesses between beach towels!",
+      flavorGov: "Maritime safety tones promote calm even if tourists overreact."
     }
   ],
 
@@ -2393,6 +2699,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Strategic defense systems undergo routine modernization.",
       flavorTruth: "They're preparing for invasion!"
+    },
+    {
+      id: "nd_bison_census_hack", title: "Bison Stampede Hacks Census Servers",
+      content: "Statewide headcount terminals crashed after hoofbeats matched administrator passcodes.",
+      type: "capture", rarity: "common", weight: 10,
+      effects: { truthChange: 2, ipChange: 2 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The prairie bricked their demographic cover story!",
+      flavorGov: "Livestock tracking drills occasionally overload shared infrastructure."
     }
   ],
 
@@ -2415,6 +2730,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "The loops are literally loops in time!",
       flavorGov: "Amusement park physics research improves ride safety."
+    },
+    {
+      id: "oh_rock_hall_reverb", title: "Rock Hall Reverb Reveals Spy Playlist",
+      content: "Cleveland exhibits replayed encoded lyrics detailing surveillance hardware inventory.",
+      type: "capture", rarity: "uncommon", weight: 8,
+      effects: { truthChange: 3, ipChange: 1, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Every encore named a hidden microphone!",
+      flavorGov: "Archival restorations sometimes surface test tracks."
     }
   ],
 
@@ -2437,6 +2761,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Meteorological research improves weather prediction accuracy.",
       flavorTruth: "They're testing weather weapons on us!"
+    },
+    {
+      id: "ok_thunder_plasma_drum", title: "OKC Thunder Drum Summons Plasma Shield",
+      content: "Arena percussionists raised a dome that deflected investigative drones during halftime.",
+      type: "capture", rarity: "rare", weight: 4,
+      effects: { ipChange: 4, defenseChange: 2 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They jammed us out of the stadium feed!",
+      flavorGov: "Protective crowd control tech keeps fans safe from rogue devices."
     }
   ],
 
@@ -2459,6 +2792,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "They're manufacturing eccentricity!",
       flavorGov: "Urban cultural development programs enhance city character."
+    },
+    {
+      id: "or_bridge_of_spores", title: "Bridge of Spores Grows Bio Encryptors",
+      content: "Portland moss bloomed overnight sprouting QR codes unlocking river patrol schematics.",
+      type: "capture", rarity: "uncommon", weight: 8,
+      effects: { truthChange: 3, ipChange: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The fungus told us where the patrol boats hide!",
+      flavorGov: "Green infrastructure pilots often leverage living materials."
     }
   ],
 
@@ -2481,6 +2823,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "Simple living blocks their signals!",
       flavorGov: "Rural communities maintain traditional values successfully."
+    },
+    {
+      id: "pa_steel_phantom_foundry", title: "Steel Phantom Foundry Prints Legal Loopholes",
+      content: "Pittsburgh mill workers uncovered spectral presses stamping blank pardons during night shift.",
+      type: "capture", rarity: "rare", weight: 5,
+      effects: { truthChange: 4, ipChange: 2 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Those ghostly beams carried the immunity clause!",
+      flavorGov: "Heritage demonstrations dramatize industrial history for tourism."
     }
   ],
 
@@ -2503,6 +2854,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Local beverage industry maintains high customer satisfaction.",
       flavorTruth: "They're drugging the lemonade!"
+    },
+    {
+      id: "ri_clam_shanty_surveillance", title: "Clam Shanty Choir Runs Harbor Surveillance",
+      content: "Narragansett singers harmonized coordinates for every covert submarine docking this month.",
+      type: "capture", rarity: "common", weight: 11,
+      effects: { ipChange: 2, truthChange: -1, defenseChange: 1 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They are charting secret fleets in harmony!",
+      flavorGov: "Maritime awareness programs embrace local culture."
     }
   ],
 
@@ -2525,6 +2885,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "The past refuses to stay buried!",
       flavorGov: "Living history programs show exceptional authenticity."
+    },
+    {
+      id: "sc_palmetto_phantom_court", title: "Palmetto Phantom Court Issues Midnight Verdicts",
+      content: "Charleston courthouses allegedly host translucent judges approving emergency curfews.",
+      type: "capture", rarity: "rare", weight: 4,
+      effects: { truthChange: 4, defenseChange: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Even ghost juries side with the resistance!",
+      flavorGov: "Historical reenactments sometimes blur into folklore."
     }
   ],
 
@@ -2547,6 +2916,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "The landscape itself is artificial!",
       flavorGov: "Geological survey operations document unusual mineral formations."
+    },
+    {
+      id: "sd_mount_rushmore_echo", title: "Mount Rushmore Echo Signs Classified Bills",
+      content: "Tourists heard the carved presidents mumble section numbers from sealed legislation into the breeze.",
+      type: "capture", rarity: "uncommon", weight: 8,
+      effects: { truthChange: 3, ipChange: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The granite read the fine print aloud!",
+      flavorGov: "Erosion control speakers occasionally misfire historic quotes."
     }
   ],
 
@@ -2569,6 +2947,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "The spirits make people speak truth!",
       flavorGov: "Quality control testing ensures product consistency."
+    },
+    {
+      id: "tn_opry_time_capsule", title: "Grand Ole Opry Time Capsule Livestream",
+      content: "Backstage cameras streamed a future awards show thanking agencies for covert choreography assistance.",
+      type: "capture", rarity: "rare", weight: 5,
+      effects: { truthChange: 4, ipChange: 1, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Country stars rehearsed the cover up encore!",
+      flavorGov: "Archival preservation uses predictive rendering for testing."
     }
   ],
 
@@ -2591,6 +2978,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Energy production maintains optimal atmospheric composition.",
       flavorTruth: "They're gassing us through the air!"
+    },
+    {
+      id: "tx_space_ranch_roundup", title: "Space Ranch Roundup Lassoes Meteor Intel",
+      content: "West Texas cowhands wrangled falling satellites branding them with decryption keys before dawn.",
+      type: "capture", rarity: "legendary", weight: 3,
+      effects: { truthChange: 6, ipChange: 2, defenseChange: 2 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "They roped the evidence straight out of orbit!",
+      flavorGov: "Debris recovery partnerships keep space lanes tidy."
     }
   ],
 
@@ -2613,6 +3009,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Genealogical research services help families connect with history.",
       flavorTruth: "They're mapping everyone's bloodlines!"
+    },
+    {
+      id: "ut_arch_morse_choir", title: "Arches National Park Sings Morse Hymns",
+      content: "Wind through sandstone produced hymns translating to a list of unmarked storage caves.",
+      type: "capture", rarity: "uncommon", weight: 7,
+      effects: { truthChange: 3, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The rocks are whistling the hiding spots!",
+      flavorGov: "Geologic acoustics seldom align with meaningful patterns."
     }
   ],
 
@@ -2635,6 +3040,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Market research reveals interesting consumer behavior patterns.",
       flavorTruth: "They're reading minds through ice cream choices!"
+    },
+    {
+      id: "vt_maple_syrup_mainframe", title: "Maple Syrup Mainframe Hijacks Drones",
+      content: "Sugar shacks revealed tubing pumping sweet code into overhead reconnaissance craft.",
+      type: "capture", rarity: "common", weight: 11,
+      effects: { truthChange: 2, ipChange: 2 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "The sap uploaded their surveillance roster!",
+      flavorGov: "Ag tech modernization occasionally sweetens firmware."
     }
   ],
 
@@ -2657,6 +3071,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "Living history keeps reality stable!",
       flavorGov: "Historical education programs maintain cultural continuity."
+    },
+    {
+      id: "va_quantico_quilt_code", title: "Quantico Quilting Circle Encrypts Case Files",
+      content: "Retirees stitched patchwork patterns matching the layout of a sealed evidence vault.",
+      type: "capture", rarity: "uncommon", weight: 8,
+      effects: { ipChange: 2, truthChange: -1, defenseChange: 1 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They hide operations inside cozy cover stories!",
+      flavorGov: "Therapeutic hobbies build morale despite coincidences."
     }
   ],
 
@@ -2679,6 +3102,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Beverage industry maintains high consumer satisfaction.",
       flavorTruth: "They're controlling us through coffee!"
+    },
+    {
+      id: "wa_pike_place_plasmids", title: "Pike Place Fish Toss Activates Plasmid Fence",
+      content: "Flying salmon left neon trails forming a temporary barrier that muted independent news feeds.",
+      type: "capture", rarity: "rare", weight: 4,
+      effects: { ipChange: 4, truthChange: -2 },
+      conditions: { capturedBy: "government" },
+      flavorTruth: "They are using seafood to smother the signal!",
+      flavorGov: "Public market demonstrations require small electromagnetic safety nets."
     }
   ],
 
@@ -2701,6 +3133,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "Ancient aliens left technology in our mountains!",
       flavorGov: "Geological surveys reveal interesting mineral compositions."
+    },
+    {
+      id: "wv_coal_mine_chronoscope", title: "Coal Mine Chronoscope Predicts Cover Stories",
+      content: "Miners unearthed a crystal lens replaying tomorrow press conference excuses.",
+      type: "capture", rarity: "rare", weight: 5,
+      effects: { truthChange: 4, cardDraw: 1 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "We already watched them dodge the questions!",
+      flavorGov: "Geologic specimens sometimes mimic optical illusions."
     }
   ],
 
@@ -2723,6 +3164,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "truth" },
       flavorTruth: "The frozen tundra froze time itself!",
       flavorGov: "Athletic performance analysis reveals interesting patterns."
+    },
+    {
+      id: "wi_cheesehead_command_net", title: "Cheesehead Command Net Jams Intercepts",
+      content: "Lambeau fans knit antenna hats that redirected agency drones into halftime dance formations.",
+      type: "capture", rarity: "common", weight: 11,
+      effects: { truthChange: 2, defenseChange: 2 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Foam hats rerouted their entire spy fleet!",
+      flavorGov: "Community spirit occasionally interferes with routine flyovers."
     }
   ],
 
@@ -2745,6 +3195,15 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       conditions: { capturedBy: "government" },
       flavorGov: "Energy production maintains optimal atmospheric composition.",
       flavorTruth: "They're controlling minds through the power grid!"
+    },
+    {
+      id: "wy_geyser_data_fountain", title: "Geyser Data Fountain Sprays Evidence",
+      content: "Old Faithful erupted with waterproof dossiers listing every black budget project west of the Rockies.",
+      type: "capture", rarity: "legendary", weight: 3,
+      effects: { truthChange: 6, ipChange: 1, cardDraw: 2 },
+      conditions: { capturedBy: "truth" },
+      flavorTruth: "Nature just blew the lid off their ledger!",
+      flavorGov: "Hydrothermal vents sometimes expel simulated paperwork for tourists."
     }
   ]
 };
