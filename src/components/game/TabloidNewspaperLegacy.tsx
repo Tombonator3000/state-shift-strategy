@@ -318,7 +318,9 @@ const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }
         id: result.definition.id,
         name: result.definition.name,
         description: result.definition.description,
-        reward: formatComboReward(result.appliedReward).replace(/[()]/g, '').trim(),
+        reward: formatComboReward(result.appliedReward, { faction: comboSummary.playerFaction })
+          .replace(/[()]/g, '')
+          .trim(),
         matched: result.details.matchedPlays.map(play => play.cardName).filter(Boolean),
         fxText: result.definition.fxText,
       })),

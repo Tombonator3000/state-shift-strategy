@@ -519,16 +519,18 @@ export function endTurn(
   turnLog.push(discardMessage.trim());
 
   const comboEvaluation = evaluateCombos(cloned, currentId, options.combo);
+  const comboPlayerFaction = cloned.players[currentId]?.faction === 'government' ? 'government' : 'truth';
   const comboSummary: ComboSummary = {
     ...comboEvaluation,
     player: currentId,
+    playerFaction: comboPlayerFaction,
     turn: turnNumber,
   };
 
   if (comboEvaluation.results.length > 0) {
     const summaryText = comboEvaluation.results
       .map(result => {
-        const rewardText = formatComboReward(result.appliedReward);
+        const rewardText = formatComboReward(result.appliedReward, { faction: comboPlayerFaction });
         return rewardText ? `${result.definition.name} ${rewardText}` : result.definition.name;
       })
       .join('; ');
@@ -554,7 +556,7 @@ export function endTurn(
     for (const result of comboEvaluation.results) {
       callbacks?.onComboFx?.(result);
       if (typeof window !== 'undefined' && typeof (window as any).uiComboToast === 'function') {
-        const rewardText = formatComboReward(result.appliedReward);
+        const rewardText = formatComboReward(result.appliedReward, { faction: comboPlayerFaction });
         (window as any).uiComboToast(
           rewardText ? `${result.definition.name} ${rewardText}` : result.definition.name,
         );

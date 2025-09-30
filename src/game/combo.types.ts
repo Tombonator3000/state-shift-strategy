@@ -120,5 +120,6 @@ export interface ComboOptions extends Partial<ComboSettings> {
 
 export interface ComboSummary extends ComboEvaluation {
   player: PlayerId;
+  playerFaction: 'truth' | 'government';
   turn: number;
 }
