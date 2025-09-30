@@ -5,7 +5,7 @@ Welcome to the current ShadowGov ruleset. The game now layers secret agendas, pa
 ## Mission Objectives
 Victory is evaluated in priority order at every checkpoint. Achieve any of the following to end the game:
 
-1. **Complete your Secret Agenda** – hidden objectives unlocked at setup finish the campaign instantly.
+1. **Complete your Secret Agenda** – each faction starts with a hidden objective; certain cards or tabloid events can expose the AI’s plan, and finishing yours ends the campaign instantly.
 2. **Truth Extremes** – Truth Seekers win at ≥95% Truth, Government wins at ≤5%.
 3. **Resource Dominance** – Bank 300 Influence Points (IP).
 4. **Territorial Control** – Hold 10 U.S. states at once.
