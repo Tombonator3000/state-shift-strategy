@@ -587,7 +587,12 @@ const Index = () => {
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
-  const { issues: pressArchive, archiveEdition, removeEditionFromArchive } = usePressArchive();
+  const {
+    issues: pressArchive,
+    archiveEdition,
+    removeEditionFromArchive,
+    agendaMoments,
+  } = usePressArchive();
   const {
     entries: intelArchiveEntries,
     archiveIntelEvents,
@@ -2561,6 +2566,7 @@ const Index = () => {
           comboTruthDelta={gameState.comboTruthDeltaThisRound}
           sightings={paranormalSightings}
           agendaIssue={gameState.agendaIssue}
+          agendaMoments={agendaMoments}
           onClose={handleCloseNewspaper}
         />
       )}

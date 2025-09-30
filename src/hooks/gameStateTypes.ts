@@ -86,11 +86,13 @@ export interface GameState {
     progress: number;
     completed: boolean;
     revealed: boolean;
+    stageId?: string;
   };
   aiSecretAgenda?: SecretAgenda & {
     progress: number;
     completed: boolean;
     revealed: boolean;
+    stageId?: string;
   };
   animating: boolean;
   aiTurnInProgress: boolean;

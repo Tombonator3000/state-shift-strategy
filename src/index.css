@@ -755,6 +755,72 @@ All colors MUST be HSL.
     transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  .agenda-stage-overlay {
+    animation: agenda-stage-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    backdrop-filter: blur(8px);
+  }
+
+  .agenda-stage-overlay__glint {
+    position: absolute;
+    inset: -25% -10%;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.35) 45%, rgba(255, 255, 255, 0) 80%);
+    transform: translateX(-120%) rotate(4deg);
+    animation: agenda-stage-glint 1.6s ease-out forwards;
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+
+  .agenda-stage-overlay--static {
+    animation: none;
+  }
+
+  .agenda-stage-overlay--static .agenda-stage-overlay__glint {
+    animation: none;
+    opacity: 0.2;
+    transform: translateX(0) rotate(4deg);
+  }
+
+  @keyframes agenda-stage-enter {
+    0% {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    55% {
+      opacity: 1;
+      transform: scale(1.04);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes agenda-stage-glint {
+    0% {
+      opacity: 0;
+      transform: translateX(-120%) rotate(4deg);
+    }
+    20% {
+      opacity: 0.75;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(120%) rotate(4deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .agenda-stage-overlay {
+      animation: none;
+    }
+
+    .agenda-stage-overlay__glint {
+      animation: none;
+      opacity: 0.25;
+      transform: translateX(0) rotate(4deg);
+    }
+  }
+
   /* Error State Animations */
   .error-shake {
     animation: error-shake 0.5s ease-in-out;

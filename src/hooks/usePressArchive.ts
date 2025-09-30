@@ -9,6 +9,23 @@ export interface ArchivedEdition {
   report: GameOverReport;
 }
 
+export interface AgendaMoment {
+  id: string;
+  agendaId: string;
+  agendaTitle: string;
+  stageId: string;
+  stageLabel: string;
+  stageDescription?: string;
+  previousStageId?: string;
+  previousStageLabel?: string;
+  faction: 'truth' | 'government';
+  actor: 'player' | 'opposition';
+  status: 'advance' | 'setback' | 'complete';
+  progress: number;
+  target: number;
+  recordedAt: number;
+}
+
 const STORAGE_KEY = 'shadowgov-press-archive';
 const MAX_ENTRIES = 12;
 
@@ -23,6 +40,7 @@ const deriveTitle = (report: GameOverReport): string => {
 
 export const usePressArchive = () => {
   const [issues, setIssues] = useState<ArchivedEdition[]>([]);
+  const [agendaMoments, setAgendaMoments] = useState<AgendaMoment[]>([]);
 
   useEffect(() => {
     try {
@@ -58,6 +76,31 @@ export const usePressArchive = () => {
     }
   }, [issues]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<AgendaMoment | null>).detail;
+      if (!detail || typeof detail !== 'object') {
+        return;
+      }
+
+      setAgendaMoments(prev => {
+        if (prev.some(entry => entry.id === detail.id)) {
+          return prev;
+        }
+        const MAX_ENTRIES = 12;
+        const updated = [...prev, detail].sort((a, b) => (a.recordedAt ?? 0) - (b.recordedAt ?? 0));
+        return updated.slice(-MAX_ENTRIES);
+      });
+    };
+
+    window.addEventListener('agendaMoment', handler as EventListener);
+    return () => window.removeEventListener('agendaMoment', handler as EventListener);
+  }, []);
+
   const archiveEdition = useCallback((report: GameOverReport) => {
     setIssues(prev => {
       const id = `edition-${report.recordedAt}`;
@@ -88,10 +131,16 @@ export const usePressArchive = () => {
     setIssues([]);
   }, []);
 
+  const clearAgendaMoments = useCallback(() => {
+    setAgendaMoments([]);
+  }, []);
+
   return {
     issues,
     archiveEdition,
     removeEditionFromArchive,
     clearArchive,
+    agendaMoments,
+    clearAgendaMoments,
   };
 };
