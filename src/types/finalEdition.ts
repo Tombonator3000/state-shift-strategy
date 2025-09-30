@@ -1,4 +1,5 @@
 import type { ParanormalSighting } from '@/types/paranormal';
+import type { ArcProgressSummary } from './campaign';
 
 export type ImpactType = 'capture' | 'truth' | 'ip' | 'damage' | 'support';
 
@@ -47,6 +48,7 @@ export interface FinalEditionEventHighlight {
   ipDelta: number;
   stateName?: string;
   kicker?: string;
+  arcSummary?: ArcProgressSummary;
 }
 
 export interface FinalEditionComboHighlight {

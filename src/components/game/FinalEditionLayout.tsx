@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import type { GameOverReport, FinalEditionEventHighlight, MVPReport } from '@/types/finalEdition';
 import {
   getFactionDisplayName,
@@ -167,19 +168,68 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
           <Badge className="border-emerald-500/40 bg-emerald-500/10 text-emerald-200">{eventHighlights.length}</Badge>
         </div>
         <div className="mt-4 space-y-4">
-          {eventHighlights.map(event => (
-            <div key={event.id} className="rounded-lg border border-slate-700/40 bg-slate-900/70 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-lg font-semibold text-emerald-100">{event.headline}</h3>
-                <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">
-                  {event.faction.toUpperCase()} · {event.rarity.toUpperCase()}
-                </Badge>
+          {eventHighlights.map(event => {
+            const arcSummary = event.arcSummary;
+            const arcStatusLabel = arcSummary
+              ? arcSummary.status === 'finale'
+                ? 'Finale'
+                : arcSummary.status === 'cliffhanger'
+                  ? 'Cliffhanger'
+                  : 'Advance'
+              : null;
+            const arcStatusClass = arcSummary
+              ? arcSummary.status === 'finale'
+                ? 'border-emerald-400/80 text-emerald-100'
+                : arcSummary.status === 'cliffhanger'
+                  ? 'border-emerald-400/60 text-emerald-100/80'
+                  : 'border-emerald-400/40 text-emerald-100/70'
+              : '';
+
+            return (
+              <div key={event.id} className="rounded-lg border border-slate-700/40 bg-slate-900/70 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-lg font-semibold text-emerald-100">{event.headline}</h3>
+                  <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">
+                    {event.faction.toUpperCase()} · {event.rarity.toUpperCase()}
+                  </Badge>
+                </div>
+                <p className="mt-2 text-sm text-emerald-100/80">{event.summary}</p>
+                {event.kicker && <p className="mt-2 text-xs italic text-emerald-200/70">{event.kicker}</p>}
+                <div className="mt-3 text-xs text-emerald-200/70">{renderImpactBadges(event)}</div>
+                {arcSummary ? (
+                  <div className="mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-200/70">
+                      <span>Campaign Arc</span>
+                      <div className="flex items-center gap-2">
+                        <span>Chapter {arcSummary.chapter}/{arcSummary.totalChapters}</span>
+                        {arcStatusLabel ? (
+                          <span className={`rounded-full border px-2 py-0.5 ${arcStatusClass}`}>
+                            {arcStatusLabel}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <p className="mt-1 text-sm font-semibold text-emerald-100">{arcSummary.arcName}</p>
+                    <Progress value={arcSummary.progressPercent} className="mt-2 h-1.5 bg-emerald-500/20" />
+                    <p className="mt-2 text-xs italic text-emerald-200/70">{arcSummary.tagline}</p>
+                    {arcSummary.events.length ? (
+                      <ul className="mt-2 space-y-1 text-xs text-emerald-200/70">
+                        {arcSummary.events.slice(0, 2).map(arcEvent => (
+                          <li key={arcEvent.id}>
+                            <span className="font-semibold text-emerald-100/90">{arcEvent.headline}</span>
+                            <span className="block italic text-emerald-200/60">{arcEvent.subhead}</span>
+                          </li>
+                        ))}
+                        {arcSummary.events.length > 2 ? (
+                          <li className="text-[10px] uppercase tracking-[0.28em] text-emerald-200/60">…</li>
+                        ) : null}
+                      </ul>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
-              <p className="mt-2 text-sm text-emerald-100/80">{event.summary}</p>
-              {event.kicker && <p className="mt-2 text-xs italic text-emerald-200/70">{event.kicker}</p>}
-              <div className="mt-3 text-xs text-emerald-200/70">{renderImpactBadges(event)}</div>
-            </div>
-          ))}
+            );
+          })}
           {eventHighlights.length === 0 && (
             <p className="text-sm text-emerald-100/70">No notable events logged this match.</p>
           )}
