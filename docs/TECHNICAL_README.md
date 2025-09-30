@@ -7,6 +7,7 @@
 - [Combo engine integration](#combo-engine-integration)
 - [Card data normalization pipeline](#card-data-normalization-pipeline)
 - [Audio systems](#audio-systems)
+- [Campaign arc progress telemetry](#campaign-arc-progress-telemetry)
 - [Secret agenda cookbook grid](#secret-agenda-cookbook-grid)
 
 ## Game loop fundamentals
@@ -89,6 +90,13 @@ The `useAudio` hook centralizes music playlists, SFX loading, and playback APIs.
 The loader currently falls back to placeholder audio for `ufo-elvis`, `cryptid-rumble`, and `radio-static`, so contributors should source royalty-free replacements—e.g., UFO ambience, low-frequency rumble, and shortwave static—from providers listed in the audio README, ensure MP3 format under the recommended size limits, and drop them into `public/audio/` with filenames that match the SFX keys. Update `existingSfxFiles` if the final filenames differ and verify licensing records per the project’s royalty-free guidance.【F:src/hooks/useAudio.ts†L406-L423】【F:public/audio/README.md†L1-L28】【F:public/audio/README.md†L30-L36】
 
 Music playback is orchestrated through stateful helpers (`setMenuMusic`, `setFactionMusic`, `setGameplayMusic`, `setEndCreditsMusic`) so UI layers can switch playlists without reinitializing the hook.【F:src/hooks/useAudio.ts†L320-L420】 Future contributors should call these helpers instead of manipulating HTMLAudioElements directly to keep crossfade and unlock logic intact.
+
+## Campaign arc progress telemetry
+`TabloidNewspaperV2` now groups every campaign storyline into `CampaignArcGroup` buckets as it assembles the nightly paper. Each group tracks the latest unlocked chapter, total chapter count, resolution status (active, cliffhanger, or finale), a progress bar percentage, and a generated status tagline derived from the most recent story beats.【F:src/components/game/TabloidNewspaperV2.tsx†L783-L865】 Those groups are distilled into lightweight `ArcProgressSummary` objects that capture the active chapter metadata and the top arc-aligned headlines. Whenever the overlay resolves a fresh batch of summaries it calls the optional `onArcProgress` callback so downstream systems can persist arc telemetry outside of the newspaper UI.【F:src/components/game/TabloidNewspaperV2.tsx†L824-L873】
+
+`Index.tsx` subscribes to that callback with `handleArcProgress`, merging each payload into a stateful cache keyed by `arcId` so progress persists across multiple newspaper issues and into the post-game flow.【F:src/pages/Index.tsx†L691-L750】 When a match ends, the same file folds the cached summaries into `summarizeEventForFinalEdition`, which tags each high-impact event highlight with the matching arc snapshot if the headline advanced the same chapter that emitted the summary.【F:src/pages/Index.tsx†L269-L309】 This keeps the final edition report aware of how a given play moved its broader storyline.
+
+`FinalEditionLayout` renders those annotated highlights in the Key Events panel. If an event includes `arcSummary` data, the panel adds chapter counters, finale/cliffhanger badges, a progress bar, the generated tagline, and the first few arc headlines so the endgame recap shows exactly how the campaign arc evolved.【F:src/components/game/FinalEditionLayout.tsx†L165-L229】 Future contributors who need real-time arc progress can tap the `onArcProgress` emission on the newspaper overlay, while post-game dashboards can reuse the cached summaries exposed alongside event highlights to surface chapter status, completion percentage, and narrative flavor text.
 
 ## Toast notification catalog
 The UI surfaces a consistent set of toast banners to reinforce player feedback. The table below maps each emitting module to its messages and why they appear.
