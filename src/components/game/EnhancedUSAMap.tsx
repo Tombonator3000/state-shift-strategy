@@ -8,7 +8,11 @@ import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { areParanormalEffectsEnabled } from '@/state/settings';
-import type { StateEventBonusSummary } from '@/hooks/gameStateTypes';
+import type {
+  ActiveStateBonus,
+  StateEventBonusSummary,
+  StateRoundEventLogEntry,
+} from '@/hooks/gameStateTypes';
 
 
 interface EnhancedState {
@@ -43,6 +47,8 @@ interface EnhancedState {
   };
   stateEventBonus?: StateEventBonusSummary;
   stateEventHistory?: StateEventBonusSummary[];
+  activeStateBonus?: ActiveStateBonus | null;
+  roundEvents?: StateRoundEventLogEntry[];
 }
 
 interface PlayedCard {
@@ -770,6 +776,107 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
                 </div>
               </div>
             )}
+
+            {stateInfo.activeStateBonus && (
+              <div className="pt-2 border-t border-border">
+                <div className="flex items-center gap-2 text-sm font-bold text-foreground mb-1">
+                  <span>{stateInfo.activeStateBonus.icon ?? '⭐️'}</span>
+                  <span>{stateInfo.activeStateBonus.label}</span>
+                </div>
+                <div className="space-y-2 text-xs font-mono bg-emerald-500/10 border border-emerald-500/40 p-3 rounded shadow-sm">
+                  <div className="text-sm font-semibold text-foreground">
+                    {stateInfo.activeStateBonus.headline}
+                  </div>
+                  {stateInfo.activeStateBonus.subhead && (
+                    <div className="text-muted-foreground leading-snug">
+                      {stateInfo.activeStateBonus.subhead}
+                    </div>
+                  )}
+                  <div className="text-muted-foreground leading-snug">
+                    {stateInfo.activeStateBonus.summary}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-muted-foreground">
+                    {typeof stateInfo.activeStateBonus.truthDelta === 'number' && stateInfo.activeStateBonus.truthDelta !== 0 && (
+                      <span>
+                        Truth {stateInfo.activeStateBonus.truthDelta > 0 ? '+' : ''}
+                        {stateInfo.activeStateBonus.truthDelta}
+                      </span>
+                    )}
+                    {typeof stateInfo.activeStateBonus.ipDelta === 'number' && stateInfo.activeStateBonus.ipDelta !== 0 && (
+                      <span>
+                        IP {stateInfo.activeStateBonus.ipDelta > 0 ? '+' : ''}
+                        {stateInfo.activeStateBonus.ipDelta}
+                      </span>
+                    )}
+                    {typeof stateInfo.activeStateBonus.pressureDelta === 'number'
+                      && stateInfo.activeStateBonus.pressureDelta !== 0 && (
+                        <span>
+                          Pressure {stateInfo.activeStateBonus.pressureDelta > 0 ? '+' : ''}
+                          {stateInfo.activeStateBonus.pressureDelta}
+                        </span>
+                      )}
+                    {(!stateInfo.activeStateBonus.truthDelta
+                      && !stateInfo.activeStateBonus.ipDelta
+                      && !stateInfo.activeStateBonus.pressureDelta) && (
+                        <span className="col-span-2 text-muted-foreground/80">Passive influence active</span>
+                      )}
+                  </div>
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
+                    Round {stateInfo.activeStateBonus.round}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {stateInfo.roundEvents?.length ? (
+              <div className="pt-2 border-t border-border">
+                <div className="flex items-center gap-2 text-sm font-bold text-foreground mb-1">
+                  <span>🗞️</span>
+                  <span>Current Anomalies</span>
+                </div>
+                <div className="space-y-2 text-xs font-mono bg-sky-500/10 border border-sky-500/40 p-3 rounded shadow-sm">
+                  {stateInfo.roundEvents.map(event => (
+                    <div
+                      key={`${stateInfo.id}-round-event-${event.id}`}
+                      className="rounded border border-sky-500/30 bg-background/80 p-2 shadow-sm"
+                    >
+                      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <span>{event.icon ?? '⚡'}</span>
+                        <span className="truncate">{event.headline}</span>
+                      </div>
+                      {event.subhead && (
+                        <div className="text-[11px] text-muted-foreground/80 mt-1">
+                          {event.subhead}
+                        </div>
+                      )}
+                      <div className="text-muted-foreground leading-snug mt-1">
+                        {event.summary}
+                      </div>
+                      <div className="flex flex-wrap gap-2 pt-1 text-[11px] text-muted-foreground/90">
+                        {typeof event.truthDelta === 'number' && event.truthDelta !== 0 && (
+                          <span className="rounded border border-sky-500/40 px-2 py-0.5">
+                            Truth {event.truthDelta > 0 ? '+' : ''}{event.truthDelta}
+                          </span>
+                        )}
+                        {typeof event.ipDelta === 'number' && event.ipDelta !== 0 && (
+                          <span className="rounded border border-sky-500/40 px-2 py-0.5">
+                            IP {event.ipDelta > 0 ? '+' : ''}{event.ipDelta}
+                          </span>
+                        )}
+                        {typeof event.pressureDelta === 'number' && event.pressureDelta !== 0 && (
+                          <span className="rounded border border-sky-500/40 px-2 py-0.5">
+                            Pressure {event.pressureDelta > 0 ? '+' : ''}{event.pressureDelta}
+                          </span>
+                        )}
+                        <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground/70">
+                          Round {event.round}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             {stateInfo.stateEventBonus && (
               <div className="pt-2 border-t border-border">

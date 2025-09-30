@@ -49,6 +49,7 @@ import {
 } from './aiHelpers';
 import { evaluateCombosForTurn } from './comboAdapter';
 import { mergeStateEventHistories, trimStateEventHistory } from './stateEventHistory';
+import { assignStateBonuses } from '@/game/stateBonuses';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
@@ -1148,6 +1149,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           paranormalHotspot: undefined,
           stateEventBonus: undefined,
           stateEventHistory: [],
+          activeStateBonus: null,
+          roundEvents: [],
         };
       }),
       currentEvents: [],
@@ -1285,6 +1288,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         truthBelow20Streak: 0,
       },
       paranormalHotspots: {},
+      stateRoundSeed: Math.floor(Math.random() * 0xffffffff),
+      lastStateBonusRound: 0,
+      stateRoundEvents: {},
       currentEvents: [],
       pendingEditionEvents: [],
       showNewspaper: false,
@@ -1320,6 +1326,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           paranormalHotspot: undefined,
           stateEventBonus: undefined,
           stateEventHistory: [],
+          activeStateBonus: null,
+          roundEvents: [],
         };
       }),
       log: [
@@ -2008,6 +2016,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           ? [...prev.log, ...comboResult.logEntries, ...hotspotLogs]
           : [...prev.log, ...hotspotLogs];
 
+      const clearedStates = statesAfterHotspot.map(state => ({
+        ...state,
+        activeStateBonus: null,
+        roundEvents: [],
+      }));
+
       const nextStateBase: GameState = {
         ...prev,
         round: prev.round + 1,
@@ -2021,8 +2035,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         turnPlays: [],
         comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboResult.truthDelta,
         log: [...comboLog, 'AI turn completed'],
-        states: statesAfterHotspot,
+        states: clearedStates,
         paranormalHotspots: hotspotsAfterHotspot,
+        stateRoundEvents: {},
       };
 
       const truthStreaks = computeTruthStreaks(prev, nextStateBase.truth);
@@ -2331,7 +2346,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         drawLogEntry = `Ready to act (hand ${newHand.length})`;
       }
 
-      const nextState: GameState = {
+      const baseLogs = [...prev.log, drawLogEntry];
+
+      let nextState: GameState = {
         ...prev,
         hand: newHand,
         deck: remainingDeck,
@@ -2348,9 +2365,100 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         selectedCard: null,
         targetState: null,
         aiTurnInProgress: false,
-        log: [...prev.log, drawLogEntry],
+        log: baseLogs,
         agendaRoundCounters: {},
       };
+
+      if (nextState.lastStateBonusRound !== nextState.round) {
+        const assignment = assignStateBonuses({
+          states: nextState.states.map(state => ({
+            id: state.id,
+            abbreviation: state.abbreviation,
+            name: state.name,
+          })),
+          baseSeed: nextState.stateRoundSeed,
+          round: nextState.round,
+          playerFaction: nextState.faction,
+        });
+
+        let workingLogs = assignment.logs.length > 0 ? [...nextState.log, ...assignment.logs] : [...nextState.log];
+        nextState = { ...nextState, log: workingLogs };
+
+        const factionMultiplier = nextState.faction === 'truth' ? 1 : -1;
+
+        if (assignment.truthDelta !== 0) {
+          nextState = applyTruthDelta(nextState, assignment.truthDelta * factionMultiplier, 'human');
+          workingLogs = nextState.log;
+        }
+
+        if (assignment.ipDelta !== 0) {
+          const ipDelta = assignment.ipDelta * factionMultiplier;
+          nextState.ip = Math.max(0, Math.round(nextState.ip + ipDelta));
+          workingLogs = [...workingLogs, `State bonuses adjusted IP by ${ipDelta >= 0 ? '+' : ''}${ipDelta}`];
+        }
+
+        const pressureKey: 'pressurePlayer' | 'pressureAi' = nextState.faction === 'truth'
+          ? 'pressurePlayer'
+          : 'pressureAi';
+        const rivalKey = pressureKey === 'pressurePlayer' ? 'pressureAi' : 'pressurePlayer';
+        const updatedStates = nextState.states.map(state => {
+          const bonus = assignment.bonuses[state.abbreviation] ?? null;
+          const roundEvents = assignment.roundEvents[state.abbreviation] ?? [];
+          const deltaBase = assignment.pressureAdjustments[state.abbreviation] ?? 0;
+          const effectiveDelta = deltaBase * factionMultiplier;
+
+          if (effectiveDelta === 0) {
+            return {
+              ...state,
+              activeStateBonus: bonus,
+              roundEvents,
+            };
+          }
+
+          const updatedPressureOwner = Math.max(0, (state[pressureKey] ?? 0) + effectiveDelta);
+          const opponentPressure = Math.max(0, state[rivalKey] ?? 0);
+
+          return {
+            ...state,
+            [pressureKey]: updatedPressureOwner,
+            pressure: Math.max(updatedPressureOwner, opponentPressure),
+            activeStateBonus: bonus,
+            roundEvents,
+          } as typeof state;
+        });
+
+        const stateRoundEventsMap = Object.fromEntries(
+          updatedStates.map(state => [state.abbreviation, state.roundEvents ?? []]),
+        );
+
+        nextState = {
+          ...nextState,
+          states: updatedStates,
+          stateRoundEvents: stateRoundEventsMap,
+          lastStateBonusRound: nextState.round,
+          log: workingLogs,
+        };
+
+        if (assignment.newspaperEvents.length > 0) {
+          nextState = {
+            ...nextState,
+            currentEvents: buildEditionEvents(
+              { turn: nextState.turn, round: nextState.round, currentEvents: nextState.currentEvents },
+              assignment.newspaperEvents,
+            ),
+          };
+        }
+
+        if (typeof window !== 'undefined') {
+          (window as any).__stateThemedDebug = {
+            round: nextState.round,
+            baseSeed: nextState.stateRoundSeed,
+            ...assignment.debug,
+          };
+          (window as any).__dumpStateThemed = () =>
+            JSON.stringify((window as any).__stateThemedDebug, null, 2);
+        }
+      }
 
       return updateSecretAgendaProgress(nextState);
     });
@@ -2543,6 +2651,100 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           ? stateEventHistory[stateEventHistory.length - 1]
           : normalizedBonus;
 
+        const rawActiveBonus = (rawState as { activeStateBonus?: unknown }).activeStateBonus;
+        const activeStateBonus = rawActiveBonus && typeof rawActiveBonus === 'object'
+          && typeof (rawActiveBonus as { id?: unknown }).id === 'string'
+          ? ({
+              source: 'state-themed' as const,
+              id: String((rawActiveBonus as { id: string }).id),
+              stateId: typeof (rawActiveBonus as { stateId?: unknown }).stateId === 'string'
+                ? (rawActiveBonus as { stateId: string }).stateId
+                : lookupBase?.id ?? normalizedAbbreviation,
+              stateName: typeof (rawActiveBonus as { stateName?: unknown }).stateName === 'string'
+                ? (rawActiveBonus as { stateName: string }).stateName
+                : lookupBase?.name ?? normalizedAbbreviation,
+              stateAbbreviation: normalizedAbbreviation,
+              round: typeof (rawActiveBonus as { round?: unknown }).round === 'number'
+                && Number.isFinite((rawActiveBonus as { round: number }).round)
+                ? (rawActiveBonus as { round: number }).round
+                : normalizedRound,
+              label: typeof (rawActiveBonus as { label?: unknown }).label === 'string'
+                ? (rawActiveBonus as { label: string }).label
+                : 'State Bonus',
+              summary: typeof (rawActiveBonus as { summary?: unknown }).summary === 'string'
+                ? (rawActiveBonus as { summary: string }).summary
+                : '',
+              headline: typeof (rawActiveBonus as { headline?: unknown }).headline === 'string'
+                ? (rawActiveBonus as { headline: string }).headline
+                : (typeof (rawActiveBonus as { label?: unknown }).label === 'string'
+                  ? String((rawActiveBonus as { label: string }).label)
+                  : 'State Bonus'),
+              subhead: typeof (rawActiveBonus as { subhead?: unknown }).subhead === 'string'
+                ? (rawActiveBonus as { subhead: string }).subhead
+                : undefined,
+              icon: typeof (rawActiveBonus as { icon?: unknown }).icon === 'string'
+                ? (rawActiveBonus as { icon: string }).icon
+                : undefined,
+              truthDelta: typeof (rawActiveBonus as { truthDelta?: unknown }).truthDelta === 'number'
+                && Number.isFinite((rawActiveBonus as { truthDelta: number }).truthDelta)
+                ? (rawActiveBonus as { truthDelta: number }).truthDelta
+                : undefined,
+              ipDelta: typeof (rawActiveBonus as { ipDelta?: unknown }).ipDelta === 'number'
+                && Number.isFinite((rawActiveBonus as { ipDelta: number }).ipDelta)
+                ? (rawActiveBonus as { ipDelta: number }).ipDelta
+                : undefined,
+              pressureDelta: typeof (rawActiveBonus as { pressureDelta?: unknown }).pressureDelta === 'number'
+                && Number.isFinite((rawActiveBonus as { pressureDelta: number }).pressureDelta)
+                ? (rawActiveBonus as { pressureDelta: number }).pressureDelta
+                : undefined,
+            })
+          : null;
+
+        const rawRoundEvents = (rawState as { roundEvents?: unknown }).roundEvents;
+        const roundEvents = Array.isArray(rawRoundEvents)
+          ? rawRoundEvents
+              .filter(entry => entry && typeof entry === 'object' && typeof (entry as { id?: unknown }).id === 'string')
+              .map(entry => ({
+                source: 'state-themed' as const,
+                id: String((entry as { id: string }).id),
+                stateId: typeof (entry as { stateId?: unknown }).stateId === 'string'
+                  ? (entry as { stateId: string }).stateId
+                  : lookupBase?.id ?? normalizedAbbreviation,
+                stateName: typeof (entry as { stateName?: unknown }).stateName === 'string'
+                  ? (entry as { stateName: string }).stateName
+                  : lookupBase?.name ?? normalizedAbbreviation,
+                stateAbbreviation: normalizedAbbreviation,
+                round: typeof (entry as { round?: unknown }).round === 'number'
+                  && Number.isFinite((entry as { round: number }).round)
+                  ? (entry as { round: number }).round
+                  : normalizedRound,
+                headline: typeof (entry as { headline?: unknown }).headline === 'string'
+                  ? (entry as { headline: string }).headline
+                  : 'State Event',
+                summary: typeof (entry as { summary?: unknown }).summary === 'string'
+                  ? (entry as { summary: string }).summary
+                  : '',
+                subhead: typeof (entry as { subhead?: unknown }).subhead === 'string'
+                  ? (entry as { subhead: string }).subhead
+                  : undefined,
+                icon: typeof (entry as { icon?: unknown }).icon === 'string'
+                  ? (entry as { icon: string }).icon
+                  : undefined,
+                truthDelta: typeof (entry as { truthDelta?: unknown }).truthDelta === 'number'
+                  && Number.isFinite((entry as { truthDelta: number }).truthDelta)
+                  ? (entry as { truthDelta: number }).truthDelta
+                  : undefined,
+                ipDelta: typeof (entry as { ipDelta?: unknown }).ipDelta === 'number'
+                  && Number.isFinite((entry as { ipDelta: number }).ipDelta)
+                  ? (entry as { ipDelta: number }).ipDelta
+                  : undefined,
+                pressureDelta: typeof (entry as { pressureDelta?: unknown }).pressureDelta === 'number'
+                  && Number.isFinite((entry as { pressureDelta: number }).pressureDelta)
+                  ? (entry as { pressureDelta: number }).pressureDelta
+                  : undefined,
+              }))
+          : [];
+
         return {
           id: typeof rawState?.id === 'string' ? rawState.id : lookupBase?.id ?? normalizedAbbreviation,
           name: typeof rawState?.name === 'string' ? rawState.name : lookupBase?.name ?? normalizedAbbreviation,
@@ -2572,6 +2774,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           paranormalHotspot: undefined,
           stateEventBonus,
           stateEventHistory,
+          activeStateBonus,
+          roundEvents,
         } as GameState['states'][number];
       });
 
@@ -2731,6 +2935,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
         const baseStates = statesWithHotspot.length > 0 ? statesWithHotspot : prev.states;
         const statesWithDefense = applyDefenseBonusToStates(baseStates, restoredEffects.stateDefenseBonus);
+        const derivedStateRoundEvents = Object.fromEntries(
+          statesWithDefense.map(state => [state.abbreviation, Array.isArray(state.roundEvents) ? state.roundEvents : []]),
+        );
 
         return {
           ...prev,
@@ -2780,6 +2987,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             truthAbove80Streak: savedTruthAboveStreak,
             truthBelow20Streak: savedTruthBelowStreak,
           },
+          stateRoundSeed: typeof saveData.stateRoundSeed === 'number' && Number.isFinite(saveData.stateRoundSeed)
+            ? saveData.stateRoundSeed >>> 0
+            : (Number.isFinite(prev.stateRoundSeed) ? prev.stateRoundSeed : Math.floor(Math.random() * 0xffffffff)),
+          lastStateBonusRound: typeof saveData.lastStateBonusRound === 'number'
+            && Number.isFinite(saveData.lastStateBonusRound)
+            ? saveData.lastStateBonusRound
+            : 0,
+          stateRoundEvents: derivedStateRoundEvents,
         };
       });
       
