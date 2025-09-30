@@ -92,6 +92,14 @@ interface OptionsProps {
   onSaveGame?: () => boolean;
 }
 
+const clampUiScale = (value: unknown): number => {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return 1;
+  }
+
+  return Math.min(1.5, Math.max(0.75, value));
+};
+
 interface GameSettings {
   masterVolume: number;
   musicVolume: number;
@@ -107,6 +115,7 @@ interface GameSettings {
   drawMode: 'standard' | 'classic' | 'momentum' | 'catchup' | 'fast';
   uiTheme: 'tabloid_bw' | 'government_classic';
   paranormalEffectsEnabled: boolean;
+  uiScale: number;
 }
 
 const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
@@ -143,6 +152,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       drawMode: 'standard',
       uiTheme,
       paranormalEffectsEnabled: true,
+      uiScale: 1,
     };
 
     const stored = typeof localStorage !== 'undefined'
@@ -158,7 +168,12 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
           ...baseSettings,
           ...rest,
           difficulty: difficultyLabel,
+          uiScale: clampUiScale(rest?.uiScale ?? baseSettings.uiScale),
         };
+
+        if (typeof document !== 'undefined') {
+          document.documentElement.style.setProperty('--ui-scale', mergedSettings.uiScale.toString());
+        }
 
         setDifficultyFromLabel(mergedSettings.difficulty);
 
@@ -198,6 +213,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const [settings, setSettings] = useState<GameSettings>(initialStateRef.current.settings);
   const [comboSettingsState, setComboSettingsState] = useState<ComboSettings>(initialStateRef.current.combo);
   const masterVolumeUpdateSource = useRef<'settings' | null>(null);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    document.documentElement.style.setProperty('--ui-scale', settings.uiScale.toString());
+  }, [settings.uiScale]);
 
   useEffect(() => {
     if (masterVolumeUpdateSource.current !== 'settings') {
@@ -302,12 +325,17 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   }, []);
 
   const updateSettings = (newSettings: Partial<GameSettings>) => {
+    const normalizedSettings: Partial<GameSettings> = { ...newSettings };
+    if (typeof newSettings.uiScale === 'number') {
+      normalizedSettings.uiScale = clampUiScale(newSettings.uiScale);
+    }
+
     if (typeof newSettings.masterVolume === 'number') {
       masterVolumeUpdateSource.current = 'settings';
     }
 
     setSettings(prev => {
-      const updated = { ...prev, ...newSettings };
+      const updated = { ...prev, ...normalizedSettings };
       if (newSettings.difficulty) {
         setDifficultyFromLabel(newSettings.difficulty);
       }
@@ -372,6 +400,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       drawMode: 'standard',
       uiTheme: 'tabloid_bw',
       paranormalEffectsEnabled: true,
+      uiScale: 1,
     };
 
     const defaultCombos = setComboSettings({
@@ -783,6 +812,26 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <Switch
                   checked={settings.paranormalEffectsEnabled}
                   onCheckedChange={checked => updateSettings({ paranormalEffectsEnabled: checked })}
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-newspaper-text">Interface Scale</label>
+                  <span className="text-xs font-mono tracking-[0.2em] text-newspaper-text">
+                    {Math.round(settings.uiScale * 100)}%
+                  </span>
+                </div>
+                <Slider
+                  value={[settings.uiScale]}
+                  min={0.75}
+                  max={1.5}
+                  step={0.05}
+                  onValueChange={([value]) => {
+                    if (typeof value === 'number') {
+                      updateSettings({ uiScale: value });
+                    }
+                  }}
                 />
               </div>
 
