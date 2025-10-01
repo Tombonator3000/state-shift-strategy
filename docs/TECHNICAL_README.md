@@ -294,6 +294,26 @@ The UI surfaces a consistent set of toast banners to reinforce player feedback. 
 | Tutorial overlay | <ul><li>`Tutorial Started`</li><li>`Tutorial Unavailable`</li></ul> | Signals which tutorial sequence just launched or why the request was rejected from the training vault UI.【F:src/components/game/TutorialOverlay.tsx†L39-L55】 |
 
 ## Secret agenda cookbook grid
+
+### Difficulty parity roadmap
+Secret agendas now share a single difficulty roll between the player and the AI. The `getRandomAgenda` helper will accept an optional `difficulty` argument so the AI can mirror the tier that the human either selected or rolled. If no agenda exists for that combination the selector gracefully falls back to the nearest tier while logging the miss. This keeps sudden “cakewalk vs. nightmare” mismatches out of live builds and simplifies QA reproduction.
+
+The start flow upgrades described in [Let players pick a secret agenda at game start](../src/hooks/useGameState.ts) expose the available agendas per faction, grouped by difficulty and annotated with the weekly issue. `startNewGame` forwards an agenda id to `initGame`, which then bypasses the randomizer for the human player and records the difficulty for the mirrored AI draw. Save slots persist both the agenda id and locked-in difficulty so mid-campaign loads do not drift into a new pairing.
+
+We keep a diff-friendly checklist below for testing the parity hooks:
+
+1. Start as Truth Seekers, pick a Hard agenda, and confirm the AI log announces a Hard agenda as well.
+2. Start as Government, pick any agenda, and verify the AI’s agenda falls back only when its faction lacks the requested tier.
+3. Rotate agendas mid-campaign (e.g., through narrative triggers) and confirm both factions land on the same tier.
+4. Load an autosave created after a rotation and ensure the lock still applies.
+
+### Agenda expansion notes
+The hidden agenda database is expanding significantly. Designers can continue appending entries to `AGENDA_DATABASE`, but they should tag each record with `difficulty`, `faction`, `issue`, and a short `summary` string so the start-menu picker can render filter badges without extra work. When adding new stages, prefer the `createAgendaStages` helper because it provides consistent goal messaging and pipes completion telemetry to the campaign tracker automatically. If an agenda demands bespoke logic, encapsulate the evaluator in a dedicated module and import it into the agenda definition so future refactors can tree-shake unused code.
+
+For QA coverage, add a unit test that instantiates every agenda definition and executes the stage predicates against mocked game state snapshots. The test suite should assert that each agenda advertises at least one completion path and that the picker list renders a title for every record.
+
+### UI cues
+The objectives HUD control will receive a subtle pulsing ring via a Tailwind keyframe animation (`objectives-pulse`). The pulse should respect reduced-motion preferences: wrap the animation in the existing `useReducedMotion` gate and switch to a static highlighted border when motion is disabled. Whenever the agenda tracker has unseen progress (new stage unlocked, completion imminent, etc.), the hook should set a `shouldPulseObjectives` flag so the button attracts attention without permanently flashing.
 The secret agenda database now leans into the “Paranoid Times” tabloid-cookbook tone. Each faction’s entries pair a pulp trope with concrete telemetry pulled from `GameState` snapshots, ensuring the themed goals remain trackable by AI and UI layers alike.
 
 ### Truth Seekers menu
