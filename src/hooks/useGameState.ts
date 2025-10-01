@@ -1997,7 +1997,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
                 eventStateContext.stateId,
                 eventStateContext.state,
                 eventStateContext.stateAbbreviation,
-                maybeEvent.conditions?.requiresState,
+                activeEvent.conditions?.requiresState,
               );
 
               if (truthDeltaFromEffects !== 0) {
