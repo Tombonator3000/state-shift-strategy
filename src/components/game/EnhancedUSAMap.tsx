@@ -1028,8 +1028,27 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         .state-path.hotspot-active {
           stroke: rgba(74, 222, 128, 0.95);
           stroke-width: 3;
+          fill: rgba(74, 222, 128, 0.26);
           filter: drop-shadow(0 0 16px rgba(74, 222, 128, 0.55));
-          transition: filter 200ms ease, stroke 200ms ease;
+          transition: filter 200ms ease, stroke 200ms ease, fill-opacity 200ms ease;
+          animation: hotspotActivePulse 2.2s ease-in-out infinite;
+          mix-blend-mode: screen;
+        }
+
+        @keyframes hotspotActivePulse {
+          0%,
+          100% {
+            filter: drop-shadow(0 0 16px rgba(74, 222, 128, 0.55));
+            fill: rgba(74, 222, 128, 0.26);
+          }
+          45% {
+            filter: drop-shadow(0 0 22px rgba(74, 222, 128, 0.75));
+            fill: rgba(74, 222, 128, 0.34);
+          }
+          55% {
+            filter: drop-shadow(0 0 26px rgba(74, 222, 128, 0.9));
+            fill: rgba(74, 222, 128, 0.28);
+          }
         }
 
         .contested-radar {
@@ -1182,6 +1201,11 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           }
           .paranormal-hotspot-marker {
             animation: none !important;
+          }
+          .state-path.hotspot-active {
+            animation: none !important;
+            filter: drop-shadow(0 0 18px rgba(74, 222, 128, 0.7));
+            fill: rgba(74, 222, 128, 0.32);
           }
         }
 
