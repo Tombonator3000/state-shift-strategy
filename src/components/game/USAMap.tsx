@@ -11,8 +11,6 @@ interface State {
   defense: number;
   pressure: number;
   owner: 'player' | 'ai' | 'neutral';
-  specialBonus?: string;
-  bonusValue?: number;
 }
 
 interface USAMapProps {
@@ -227,13 +225,6 @@ const USAMap: React.FC<USAMapProps> = ({ states, onStateClick, selectedCard, aud
                   <div className="text-foreground">Pressure: <span className="font-mono font-bold text-destructive">{getHoveredStateInfo()?.pressure}</span></div>
                 </div>
               </div>
-              {getHoveredStateInfo()?.specialBonus && (
-                <div className="text-base mt-2 p-3 bg-accent/20 border border-accent/40 rounded">
-                  <span className="font-bold text-lg text-foreground">🎯 Special Bonus</span><br />
-                  <span className="font-mono text-lg text-foreground">{getHoveredStateInfo()?.specialBonus}</span>
-                  {getHoveredStateInfo()?.bonusValue && <span className="text-primary font-bold"> (+${getHoveredStateInfo()?.bonusValue} IP)</span>}
-                </div>
-              )}
               {getHoveredStateInfo()?.pressure >= getHoveredStateInfo()?.defense && (
                 <div className="text-destructive text-sm font-bold bg-destructive/10 border border-destructive/20 rounded p-2">
                   ⚠️ Capture {getHoveredStateInfo()?.pressure}/{getHoveredStateInfo()?.defense} needed

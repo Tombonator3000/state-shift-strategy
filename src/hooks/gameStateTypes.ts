@@ -61,8 +61,6 @@ export interface GameState {
     pressureAi: number;
     contested: boolean;
     owner: 'player' | 'ai' | 'neutral';
-    specialBonus?: string;
-    bonusValue?: number;
     occupierCardId?: string | null;
     occupierCardName?: string | null;
     occupierLabel?: string | null;

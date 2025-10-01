@@ -40,8 +40,6 @@ export interface StateForResolution {
   pressureAi: number;
   contested: boolean;
   owner: StateOwner;
-  specialBonus?: string;
-  bonusValue?: number;
   occupierCardId?: string | null;
   occupierCardName?: string | null;
   occupierLabel?: string | null;
