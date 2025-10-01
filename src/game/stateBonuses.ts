@@ -88,9 +88,11 @@ export interface AssignStateBonusesResult {
   bonuses: Record<string, ActiveStateBonus>;
   roundEvents: Record<string, StateRoundEventLogEntry[]>;
   logs: string[];
-  truthDelta: number;
-  ipDelta: number;
-  pressureAdjustments: Record<string, number>;
+  playerTruthDelta: number;
+  aiTruthDelta: number;
+  playerIpDelta: number;
+  aiIpDelta: number;
+  pressureAdjustments: Record<string, { player: number; ai: number }>;
   newspaperEvents: GameEvent[];
   debug: {
     seed: number;
@@ -208,18 +210,19 @@ export const assignStateBonuses = (
   const roundEvents: Record<string, StateRoundEventLogEntry[]> = {};
   const logs: string[] = [];
   const newspaperEvents: GameEvent[] = [];
-  const pressureAdjustments: Record<string, number> = {};
+  const pressureAdjustments: Record<string, { player: number; ai: number }> = {};
   const rolls: Array<{ state: string; bonusId: string | null; eventId: string | null }> = [];
 
-  let truthDelta = 0;
-  let ipDelta = 0;
+  let playerTruthDelta = 0;
+  let aiTruthDelta = 0;
+  let playerIpDelta = 0;
+  let aiIpDelta = 0;
 
   const sortedStates = [...options.states].sort((a, b) => a.abbreviation.localeCompare(b.abbreviation));
   const eventChance = options.eventChance ?? STATE_EVENT_CHANCE;
 
   for (const state of sortedStates) {
     const owner = state.owner === 'player' || state.owner === 'ai' ? state.owner : 'neutral';
-    const isPlayerControlled = owner === 'player';
 
     const pool = resolvePoolForState({ id: state.id, abbreviation: state.abbreviation });
     if (!pool) {
@@ -254,12 +257,20 @@ export const assignStateBonuses = (
 
     if (bonusRecord) {
       bonuses[state.abbreviation] = bonusRecord;
-      if (isPlayerControlled) {
-        truthDelta += bonusRecord.truthDelta ?? 0;
-        ipDelta += bonusRecord.ipDelta ?? 0;
+      if (owner !== 'neutral') {
+        if (owner === 'player') {
+          playerTruthDelta += bonusRecord.truthDelta ?? 0;
+          playerIpDelta += bonusRecord.ipDelta ?? 0;
+        } else if (owner === 'ai') {
+          aiTruthDelta += bonusRecord.truthDelta ?? 0;
+          aiIpDelta += bonusRecord.ipDelta ?? 0;
+        }
         if (bonusRecord.pressureDelta) {
-          pressureAdjustments[state.abbreviation] =
-            (pressureAdjustments[state.abbreviation] ?? 0) + bonusRecord.pressureDelta;
+          const existing = pressureAdjustments[state.abbreviation] ?? { player: 0, ai: 0 };
+          pressureAdjustments[state.abbreviation] = {
+            player: existing.player + (owner === 'player' ? bonusRecord.pressureDelta : 0),
+            ai: existing.ai + (owner === 'ai' ? bonusRecord.pressureDelta : 0),
+          };
         }
       }
     }
@@ -268,13 +279,19 @@ export const assignStateBonuses = (
       const eventEntry = toRoundEvent(selectedEvent, state, options.round);
       if (owner !== 'neutral') {
         roundEvents[state.abbreviation] = [...(roundEvents[state.abbreviation] ?? []), eventEntry];
-      }
-      if (isPlayerControlled) {
-        truthDelta += eventEntry.truthDelta ?? 0;
-        ipDelta += eventEntry.ipDelta ?? 0;
+        if (owner === 'player') {
+          playerTruthDelta += eventEntry.truthDelta ?? 0;
+          playerIpDelta += eventEntry.ipDelta ?? 0;
+        } else if (owner === 'ai') {
+          aiTruthDelta += eventEntry.truthDelta ?? 0;
+          aiIpDelta += eventEntry.ipDelta ?? 0;
+        }
         if (eventEntry.pressureDelta) {
-          pressureAdjustments[state.abbreviation] =
-            (pressureAdjustments[state.abbreviation] ?? 0) + eventEntry.pressureDelta;
+          const existing = pressureAdjustments[state.abbreviation] ?? { player: 0, ai: 0 };
+          pressureAdjustments[state.abbreviation] = {
+            player: existing.player + (owner === 'player' ? eventEntry.pressureDelta : 0),
+            ai: existing.ai + (owner === 'ai' ? eventEntry.pressureDelta : 0),
+          };
         }
       }
       logs.push(`${eventEntry.icon ?? '🗞️'} ${state.name} reports: ${eventEntry.headline}`);
@@ -286,8 +303,10 @@ export const assignStateBonuses = (
     bonuses,
     roundEvents,
     logs,
-    truthDelta,
-    ipDelta,
+    playerTruthDelta,
+    aiTruthDelta,
+    playerIpDelta,
+    aiIpDelta,
     pressureAdjustments,
     newspaperEvents,
     debug: {

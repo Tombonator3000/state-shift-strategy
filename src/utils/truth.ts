@@ -14,7 +14,7 @@ export function clampTruth(x: number): number {
 export function applyTruthDelta<T extends TruthMutable>(
   gs: T,
   delta: number,
-  _who: TruthActorId,
+  who: TruthActorId,
 ): T {
   if (!Number.isFinite(delta)) {
     return gs;
@@ -33,6 +33,13 @@ export function applyTruthDelta<T extends TruthMutable>(
     (window as any).uiToastTruth(change);
   }
   const arrow = delta >= 0 ? '↑' : '↓';
-  gs.log.push(`Truth manipulation ${arrow} (${before}% → ${after}%)`);
+  const actorLabel =
+    who === 'ai' || who === 'P2'
+      ? 'AI'
+      : who === 'human' || who === 'player' || who === 'P1'
+        ? 'player'
+        : null;
+  const actorSuffix = actorLabel ? ` [${actorLabel}]` : '';
+  gs.log.push(`Truth manipulation ${arrow} (${before}% → ${after}%)${actorSuffix}`);
   return gs;
 }

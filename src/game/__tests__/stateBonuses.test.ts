@@ -63,7 +63,7 @@ describe('stateBonuses deterministic selection', () => {
     expect(result.newspaperEvents.length).toBe(0);
   });
 
-  test('only player-controlled states contribute to truth and IP totals', () => {
+  test('truth and IP totals split between human and AI controllers', () => {
     const states = [
       { id: '32', abbreviation: 'NV', name: 'Nevada', owner: 'player' as const },
       { id: '56', abbreviation: 'WY', name: 'Wyoming', owner: 'player' as const },
@@ -95,15 +95,15 @@ describe('stateBonuses deterministic selection', () => {
       .filter(state => state.owner === 'ai')
       .reduce((sum, state) => sum + (result.bonuses[state.abbreviation]?.ipDelta ?? 0), 0);
 
-    expect(aiTruth).not.toBe(0);
-    expect(aiIp).not.toBe(0);
-    expect(result.truthDelta).toBe(playerTruth);
-    expect(result.ipDelta).toBe(playerIp);
-    expect(result.truthDelta).not.toBe(playerTruth + aiTruth);
-    expect(result.ipDelta).not.toBe(playerIp + aiIp);
+    expect(result.playerTruthDelta).toBe(playerTruth);
+    expect(result.playerIpDelta).toBe(playerIp);
+    expect(result.aiTruthDelta).toBe(aiTruth);
+    expect(result.aiIpDelta).toBe(aiIp);
+    expect(result.playerTruthDelta + result.aiTruthDelta).toBe(playerTruth + aiTruth);
+    expect(result.playerIpDelta + result.aiIpDelta).toBe(playerIp + aiIp);
   });
 
-  test('pressure adjustments exclude AI-controlled states', () => {
+  test('pressure adjustments retain controller ownership', () => {
     const result = assignStateBonuses({
       states: [
         { id: '12', abbreviation: 'FL', name: 'Florida', owner: 'ai' },
@@ -115,7 +115,16 @@ describe('stateBonuses deterministic selection', () => {
       eventChance: 0,
     });
 
-    expect(result.bonuses['FL']?.pressureDelta ?? 0).not.toBe(0);
-    expect(result.pressureAdjustments).toEqual({});
+    const wyomingPressure =
+      (result.bonuses['WY']?.pressureDelta ?? 0) +
+      (result.roundEvents['WY'] ?? []).reduce((sum, event) => sum + (event.pressureDelta ?? 0), 0);
+    const floridaPressure =
+      (result.bonuses['FL']?.pressureDelta ?? 0) +
+      (result.roundEvents['FL'] ?? []).reduce((sum, event) => sum + (event.pressureDelta ?? 0), 0);
+
+    expect(result.pressureAdjustments['WY']?.player ?? 0).toBe(wyomingPressure);
+    expect(result.pressureAdjustments['WY']?.ai ?? 0).toBe(0);
+    expect(result.pressureAdjustments['FL']?.ai ?? 0).toBe(floridaPressure);
+    expect(result.pressureAdjustments['FL']?.player ?? 0).toBe(0);
   });
 });

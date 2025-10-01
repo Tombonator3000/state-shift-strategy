@@ -113,9 +113,11 @@ const createAssignment = (): AssignStateBonusesResult => ({
     ],
   },
   logs: ['🗞️ Texas reports: Investigative Lead'],
-  truthDelta: -2,
-  ipDelta: 4,
-  pressureAdjustments: { TX: 1 },
+  playerTruthDelta: -2,
+  aiTruthDelta: 0,
+  playerIpDelta: 4,
+  aiIpDelta: 0,
+  pressureAdjustments: { TX: { player: 1, ai: 0 } },
   newspaperEvents: [],
   debug: { seed: 99, rolls: [] },
 });
@@ -141,7 +143,7 @@ describe('applyStateBonusAssignmentToState', () => {
     expect(updated.log).toContain('🗞️ Texas reports: Investigative Lead');
     expect(updated.log).toContain('⭐️ Texas activates Mystery Subsidy');
     expect(updated.log.some(entry => entry.startsWith('Truth manipulation'))).toBe(true);
-    expect(updated.log).toContain('State bonuses adjusted IP by +4');
+    expect(updated.log).toContain('State bonuses adjusted player IP by +4');
 
     // original state remains unchanged
     expect(baseState.truth).toBe(50);
@@ -163,7 +165,7 @@ describe('applyStateBonusAssignmentToState', () => {
     expect(state.pressurePlayer).toBe(0);
     expect(state.pressure).toBe(4);
 
-    expect(updated.log).toContain('State bonuses adjusted IP by +4');
+    expect(updated.log).toContain('State bonuses adjusted player IP by +4');
     expect(updated.log.some(entry => entry.startsWith('Truth manipulation'))).toBe(true);
   });
 
@@ -209,15 +211,92 @@ describe('applyStateBonusAssignmentToState', () => {
       afterRoundThree.states[0].activeStateBonus?.id,
     );
 
-    const truthDelta = followupAssignment.truthDelta ?? 0;
-    const ipDelta = followupAssignment.ipDelta ?? 0;
-    const pressureDelta = followupAssignment.pressureAdjustments.TX ?? 0;
+    const truthDelta = (followupAssignment.playerTruthDelta ?? 0) + (followupAssignment.aiTruthDelta ?? 0);
+    const ipDelta = followupAssignment.playerIpDelta ?? 0;
+    const pressureDelta = followupAssignment.pressureAdjustments.TX?.player ?? 0;
 
     expect(afterRoundFour.truth).toBe(afterRoundThree.truth + truthDelta);
     expect(afterRoundFour.ip).toBe(afterRoundThree.ip + ipDelta);
     expect(afterRoundFour.states[0].pressurePlayer).toBe(
       (afterRoundThree.states[0].pressurePlayer ?? 0) + pressureDelta,
     );
+  });
+
+  test('applies AI-controlled adjustments to the correct pools', () => {
+    const baseState: GameState = {
+      ...createBaseGameState('truth'),
+      states: [
+        {
+          id: '06',
+          name: 'California',
+          abbreviation: 'CA',
+          baseIP: 0,
+          baseDefense: 0,
+          defense: 0,
+          pressure: 2,
+          pressurePlayer: 0,
+          pressureAi: 2,
+          contested: false,
+          owner: 'ai',
+          stateEventHistory: [],
+          roundEvents: [],
+        },
+      ],
+    };
+
+    const assignment: AssignStateBonusesResult = {
+      bonuses: {
+        CA: {
+          source: 'state-themed',
+          id: 'bonus:ca',
+          stateId: '06',
+          stateName: 'California',
+          stateAbbreviation: 'CA',
+          round: 3,
+          label: 'Propaganda Windfall',
+          summary: 'Narratives bend toward the establishment.',
+          headline: 'Public sentiment shifts',
+          icon: '🛰️',
+          truthDelta: -3,
+          ipDelta: 5,
+          pressureDelta: 2,
+        },
+      },
+      roundEvents: {
+        CA: [
+          {
+            source: 'state-themed',
+            id: 'event:ca',
+            stateId: '06',
+            stateName: 'California',
+            stateAbbreviation: 'CA',
+            round: 3,
+            headline: 'Censorious Crackdown',
+            summary: 'Authorities clamp down on dissent.',
+            truthDelta: -2,
+            ipDelta: 4,
+            pressureDelta: 1,
+          },
+        ],
+      },
+      logs: ['🛰️ California activates Propaganda Windfall'],
+      playerTruthDelta: 0,
+      aiTruthDelta: -5,
+      playerIpDelta: 0,
+      aiIpDelta: 9,
+      pressureAdjustments: { CA: { player: 0, ai: 3 } },
+      newspaperEvents: [],
+      debug: { seed: 77, rolls: [] },
+    };
+
+    const updated = applyStateBonusAssignmentToState(baseState, assignment);
+
+    expect(updated.truth).toBe(baseState.truth - 5);
+    expect(updated.ip).toBe(baseState.ip);
+    expect(updated.aiIP).toBe(baseState.aiIP + 9);
+    expect(updated.states[0].pressureAi).toBe(baseState.states[0].pressureAi + 3);
+    expect(updated.states[0].pressurePlayer).toBe(baseState.states[0].pressurePlayer);
+    expect(updated.log).toContain('State bonuses adjusted AI IP by +9');
   });
 });
 
