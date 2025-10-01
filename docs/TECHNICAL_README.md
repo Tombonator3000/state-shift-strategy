@@ -9,6 +9,7 @@
 - [Audio systems](#audio-systems)
 - [Campaign arc progress telemetry](#campaign-arc-progress-telemetry)
 - [Secret agenda cookbook grid](#secret-agenda-cookbook-grid)
+- [UI feedback systems](#ui-feedback-systems)
 
 ## Game loop fundamentals
 The MVP design defines a duel between the Truth Seekers and the Government, each managing Influence Points (IP), a shared Truth meter, and pressure on individual U.S. states. Win conditions include controlling 10 states, pushing Truth to faction-specific thresholds, or accumulating 300 IP.【F:DESIGN_DOC_MVP.md†L7-L63】 These core concepts are implemented directly in the runtime engine:
@@ -77,6 +78,68 @@ The table below keeps designers out of TypeScript while they balance the weights
 - `nj_event_turnpike_time_fog` — *EXIT 12 COVERED IN CLOCK-STOPPING MIST* — A luminescent fog halts time, letting operatives reposition surveillance vans in reversed traffic. Effects: Truth +2, IP +0, Pressure +0.
 - `nj_event_reststop_flashmob` — *JANITORS BREAK INTO CHOREOGRAPHED LEAK* — Molly Pitcher staff perform a whistleblower routine while drivers record and upload the scoop. Effects: Truth +1, IP +2, Pressure +0.
 - `nj_event_gwb_lightcode` — *GEORGE WASHINGTON BRIDGE BLINKS BINARY* — An 8-bit aurora uploads clearance keys to anyone stuck in traffic with a dashcam. Effects: Truth +0, IP +0, Pressure +2.
+
+## UI feedback systems
+
+### Toast notifications
+
+| Area | Trigger & message |
+| --- | --- |
+| State event system | Capturing a state rolls a tabloid-style toast and spawns matching VFX; contested states trigger their own effect without a toast. |
+| Achievement manager | Unlocking achievements, importing saves, and resetting progress surface success/destructive toasts with achievement details. |
+| Achievement panel UI | Exporting progress confirms with a toast; malformed import files raise a destructive toast before delegating to the manager for further handling. |
+| Tutorial vault | Starting an available tutorial shows a confirmation toast; blocked tutorials warn the player. |
+| Enhanced USA map | Clicking a state you already control while a zone card is selected fires a destructive toast and light error click. |
+| Enhanced hand | Attempting to play unaffordable cards or catching deployment errors raises destructive toasts from both the quick play button and the card detail overlay. |
+| Press archive | Archiving a final edition warns when it’s already stored, otherwise celebrates the save. |
+| Campaign arcs | New chapter resolutions and pending chapter queues generate celebratory/informational toasts keyed by arc and chapter. |
+| Synergy detection | Each newly activated combo shows a success toast describing the bonus IP gained. |
+| Fullscreen controls | Manual toggle reports success/failure in Norwegian, while auto-request on game start reports success or failure accordingly. |
+| Zone card targeting | Selecting a zone card without a target or choosing an invalid/owned state emits guidance or error toasts; successful target locking celebrates the choice. |
+| Card deployment outcome | Successful deployments celebrate the card; failures emit a destructive toast and error SFX. |
+| Contextual help | Optional strategy suggestions surface as neutral toasts styled like UI hints. |
+| Legacy UI overlays | Truth/IP deltas and combo events use lightweight HUD toasts wired through global helpers triggered during attack/truth resolution. |
+
+### Sound effects
+
+| SFX key(s) | Where it plays |
+| --- | --- |
+| `click` | General UI interactions across menus, faction selection, and starting games; also used when confirming zone targets or closing overlays. |
+| `lightClick` | Subtle feedback for hover/error cases in the hand and map. |
+| `hover` | Played when hovering states or selecting zone cards during targeting flows. |
+| `error` | Fired for invalid zone targets, insufficient IP, turn limit breaches, and card deployment failures. |
+| `cardPlay` | Plays when deploying cards (hand interactions, animation layer evidence reveals) and during the contextual evidence gallery effect. |
+| `flash` | Used when truth-media cards resolve to trigger bright flashes. |
+| `cardDraw` | Plays shortly after ending the turn to confirm card draws. |
+| `turnEnd` / `victory` | End-of-turn and campaign stage completion feedback, with finale stages switching to the victory sting. |
+| `newspaper` | Triggered for breaking-news overlays and when closing in-game newspapers. |
+| `typewriter` | Played for typewriter document reveals and agenda stage briefings. |
+| `ufo-elvis` | Audio stinger for truth meltdown broadcasts and paranormal hotspot overlays (tied to paranormal settings). |
+| `cryptid-rumble` | Plays during cryptid sightings and hotspot capture log events. |
+| `radio-static` | Used for hotspot expirations and static interference overlays. |
+| `stateCapture` | Click feedback when selecting states on the legacy map component. |
+| *(Attempted)* `state-capture` | Synergy activations attempt to play this hyphenated key (note: the manifest only exposes `stateCapture`). |
+| QA / settings hooks | In-game options expose a test button for the click SFX, and developer QA controls can audition any registered key. |
+| Manifest reference | Complete list of bundled SFX keys and file mappings lives in the manifest. |
+
+### Particle & visual effects
+
+| Effect type(s) | Trigger & emission |
+| --- | --- |
+| Particle dispatcher | `VisualEffectsCoordinator.triggerParticleEffect` defines the canonical effect types (deploy, capture, synergy, chain, stateevent, contested, flash, broadcast, cryptid, etc.) dispatched as `cardDeployed` events. |
+| Card deployment | `useCardAnimation` fires a `'deploy'` particle event once the card finishes flying to the play pile. |
+| State capture/loss | Animation layer listens for `stateCapture`/`stateLoss` custom events to spawn `'capture'` or `'stateloss'` particle bursts. |
+| Synergy activations | Synergy detection emits `'synergy'`, `'chain'`, and `'bigwin'` effects (with floating numbers), while the animation layer reinforces them and shows combo corkboards. |
+| Government targeting | Zone targeting dispatches `'counter'` particles; completed locks also show overlays via `triggerGovernmentZoneTarget`. |
+| Broadcast & truth flashes | Campaign broadcasts and media effects invoke `triggerTruthMeltdownBroadcast`, `triggerTruthFlash`, and `'broadcast'`/`'flash'` particles, with additional truth flashes for media cards. |
+| State events & contested states | State-event hooks dispatch `'stateevent'` particles; contested states trigger `'contested'` effects and optional cryptid sightings on the map. |
+| Paranormal overlays | `VisualEffectsCoordinator` can emit cryptid sightings, paranormal hotspots, breaking news, surveillance sweeps, typewriter reveals, static interference, and evidence galleries—each mapped to unique particle/SFX combos in the animation layer. |
+| Government redaction & truth flashes | Dedicated helpers dispatch `governmentRedaction` and `truthFlash` events, which the animation layer turns into sweeping overlays and flash particles. |
+| Particle renderer | `ParticleSystem` enumerates effect types, particle counts, colors, and lifespans, powering all emitted bursts. |
+
+### Testing
+
+⚠️ Not run (static QA review only).
 
 ##### Pacific Quantum Coast (`CA`, `WA`, `OR`, `AK`, `HI`)
 **Bonuses**
