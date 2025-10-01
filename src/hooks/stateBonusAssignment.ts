@@ -7,11 +7,12 @@ export const applyStateBonusAssignmentToState = (
   baseState: GameState,
   assignment: AssignStateBonusesResult,
 ): GameState => {
+  const assignmentLogs = assignment.logs.filter(log => !log.includes('activates '));
   let nextState: GameState = {
     ...baseState,
     log:
-      assignment.logs.length > 0
-        ? [...baseState.log, ...assignment.logs]
+      assignmentLogs.length > 0
+        ? [...baseState.log, ...assignmentLogs]
         : [...baseState.log],
   };
 
@@ -35,11 +36,21 @@ export const applyStateBonusAssignmentToState = (
     nextState.faction === 'truth' ? 'pressurePlayer' : 'pressureAi';
   const rivalKey = pressureKey === 'pressurePlayer' ? 'pressureAi' : 'pressurePlayer';
 
+  const activationLogs: string[] = [];
   const updatedStates = nextState.states.map(state => {
     const bonus = assignment.bonuses[state.abbreviation] ?? null;
     const hasController = state.owner === 'player' || state.owner === 'ai';
     const roundEvents = hasController ? assignment.roundEvents[state.abbreviation] ?? [] : [];
     const pressureDelta = assignment.pressureAdjustments[state.abbreviation] ?? 0;
+
+    const previousBonus = state.activeStateBonus ?? null;
+    if (bonus) {
+      const bonusChanged = !previousBonus || previousBonus.id !== bonus.id;
+      if (bonusChanged) {
+        const icon = bonus.icon ?? '⭐️';
+        activationLogs.push(`${icon} ${state.name} activates ${bonus.label}`);
+      }
+    }
 
     if (pressureDelta === 0) {
       return {
@@ -71,6 +82,13 @@ export const applyStateBonusAssignmentToState = (
     stateRoundEvents,
     lastStateBonusRound: nextState.round,
   };
+
+  if (activationLogs.length > 0) {
+    nextState = {
+      ...nextState,
+      log: [...nextState.log, ...activationLogs],
+    };
+  }
 
   if (assignment.newspaperEvents.length > 0) {
     nextState = {

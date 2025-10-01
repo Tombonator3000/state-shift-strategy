@@ -37,6 +37,7 @@ import { getComboSettings } from '@/game/comboEngine';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
+  ActiveStateBonus,
   GameState,
   PendingCampaignArcEvent,
   StateEventBonusSummary,
@@ -2595,6 +2596,16 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       };
 
       if (nextState.lastStateBonusRound !== nextState.round) {
+        const existingBonuses = nextState.states.reduce<Record<string, ActiveStateBonus | null | undefined>>(
+          (acc, state) => {
+            if (state.activeStateBonus) {
+              acc[state.abbreviation] = state.activeStateBonus;
+            }
+            return acc;
+          },
+          {},
+        );
+
         const assignment = assignStateBonuses({
           states: nextState.states.map(state => ({
             id: state.id,
@@ -2605,6 +2616,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           baseSeed: nextState.stateRoundSeed,
           round: nextState.round,
           playerFaction: nextState.faction,
+          existingBonuses,
         });
 
         nextState = applyStateBonusAssignmentToState(nextState, assignment);
