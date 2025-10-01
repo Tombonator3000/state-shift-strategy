@@ -12,7 +12,7 @@ import PressArchivePanel from './PressArchivePanel';
 import type { ArchivedEdition } from '@/hooks/usePressArchive';
 import StateIntelBoard from './StateIntelBoard';
 import PlayerHubMapView from './PlayerHubMapView';
-import type { StateEventBonusSummary } from '@/hooks/gameStateTypes';
+import type { StateEventBonusSummary, StateParanormalHotspotSummary } from '@/hooks/gameStateTypes';
 import EvidenceArchivePanel from './EvidenceArchivePanel';
 import type { IntelArchiveEntry } from '@/hooks/useIntelArchive';
 import '@/styles/playerHub.css';
@@ -50,6 +50,7 @@ export interface PlayerStateIntel {
     pressurePlayer: number;
     pressureAi: number;
     stateEventHistory: StateEventBonusSummary[];
+    paranormalHotspotHistory: StateParanormalHotspotSummary[];
   }>;
   eventHistory: Array<{
     stateId: string;

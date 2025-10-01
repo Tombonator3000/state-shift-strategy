@@ -67,6 +67,7 @@ export interface GameState {
     occupierIcon?: string | null;
     occupierUpdatedAt?: number;
     paranormalHotspot?: StateParanormalHotspot;
+    paranormalHotspotHistory: StateParanormalHotspotSummary[];
     stateEventBonus?: StateEventBonusSummary;
     stateEventHistory: StateEventBonusSummary[];
     activeStateBonus?: ActiveStateBonus | null;
@@ -140,6 +141,14 @@ export interface StateEventBonusSummary {
   faction: 'truth' | 'government';
   effects?: NonNullable<GameEvent['effects']>;
   effectSummary?: string[];
+}
+
+export interface StateParanormalHotspotSummary {
+  id: string;
+  label: string;
+  resolvedOnTurn: number;
+  faction: 'truth' | 'government';
+  truthDelta: number;
 }
 
 export interface ActiveStateBonus {

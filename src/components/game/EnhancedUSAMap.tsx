@@ -11,6 +11,7 @@ import { areParanormalEffectsEnabled } from '@/state/settings';
 import type {
   ActiveStateBonus,
   StateEventBonusSummary,
+  StateParanormalHotspotSummary,
   StateRoundEventLogEntry,
 } from '@/hooks/gameStateTypes';
 
@@ -43,6 +44,7 @@ interface EnhancedState {
     turnsRemaining: number;
     source: 'truth' | 'government' | 'neutral';
   };
+  paranormalHotspotHistory?: StateParanormalHotspotSummary[];
   stateEventBonus?: StateEventBonusSummary;
   stateEventHistory?: StateEventBonusSummary[];
   activeStateBonus?: ActiveStateBonus | null;
@@ -64,6 +66,83 @@ interface EnhancedUSAMapProps {
   playedCards?: PlayedCard[];
   playerFaction: 'truth' | 'government';
 }
+
+export interface StateHotspotDetailsProps {
+  hotspot?: EnhancedState['paranormalHotspot'];
+  history?: StateParanormalHotspotSummary[];
+}
+
+export const StateHotspotDetails: React.FC<StateHotspotDetailsProps> = ({ hotspot, history }) => {
+  const entries = Array.isArray(history) ? history.slice(-5).reverse() : [];
+  if (!hotspot && entries.length === 0) {
+    return null;
+  }
+
+  const hasHotspot = Boolean(hotspot);
+
+  return (
+    <div className="pt-2 border-t border-border">
+      <div className="flex items-center gap-2 text-sm font-bold text-foreground mb-1">
+        <span>{hotspot?.icon ?? '👻'}</span>
+        <span>Paranormal Hotspot</span>
+      </div>
+      <div className="space-y-2 text-xs font-mono bg-purple-500/10 border border-purple-500/40 p-3 rounded shadow-sm">
+        {hotspot ? (
+          <>
+            <div className="text-sm font-semibold text-foreground">{hotspot.label}</div>
+            {hotspot.description && (
+              <div className="text-muted-foreground leading-snug">{hotspot.description}</div>
+            )}
+            {(() => {
+              const truthCaptureDelta = hotspot.truthReward;
+              const governmentCaptureDelta = -truthCaptureDelta;
+              const formatTruthDelta = (value: number) => `${value >= 0 ? '+' : ''}${value}%`;
+
+              return (
+                <div className="grid grid-cols-2 gap-2 pt-1 text-muted-foreground">
+                  <span>Defense +{hotspot.defenseBoost}</span>
+                  <span>Truth capture: {formatTruthDelta(truthCaptureDelta)}</span>
+                  <span>Gov capture: {formatTruthDelta(governmentCaptureDelta)}</span>
+                  <span>Turns left: {Math.max(0, hotspot.turnsRemaining)}</span>
+                  <span>Source: {hotspot.source.toUpperCase()}</span>
+                </div>
+              );
+            })()}
+          </>
+        ) : (
+          <div className="text-muted-foreground leading-snug">No active hotspot detected.</div>
+        )}
+        {entries.length > 0 && (
+          <div className={`mt-1 ${hasHotspot ? 'border-t border-purple-500/20 pt-2' : ''}`}>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70">
+              Resolved hotspots
+            </div>
+            <ul className="mt-1 space-y-1 text-[11px] text-muted-foreground/90">
+              {entries.map((entry, index) => (
+                <li
+                  key={`${entry.id}-${entry.resolvedOnTurn}-${index}`}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded bg-purple-500/5 px-2 py-1"
+                >
+                  <span className="truncate font-semibold text-foreground/90">{entry.label}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {entry.truthDelta !== 0 && (
+                      <span className="text-[10px] font-mono text-muted-foreground/80">
+                        Truth {entry.truthDelta > 0 ? '+' : ''}{entry.truthDelta}
+                      </span>
+                    )}
+                    <span className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground/70">
+                      Turn {entry.resolvedOnTurn} · {entry.faction.toUpperCase()}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const MAP_BASE_WIDTH = 975;
 const MAP_BASE_HEIGHT = 610;
@@ -931,40 +1010,10 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
               </div>
             )}
 
-            {stateInfo.paranormalHotspot && (
-              <div className="pt-2 border-t border-border">
-                <div className="flex items-center gap-2 text-sm font-bold text-foreground mb-1">
-                  <span>{stateInfo.paranormalHotspot.icon ?? '👻'}</span>
-                  <span>Paranormal Hotspot</span>
-                </div>
-                <div className="space-y-2 text-xs font-mono bg-purple-500/10 border border-purple-500/40 p-3 rounded shadow-sm">
-                  <div className="text-sm font-semibold text-foreground">
-                    {stateInfo.paranormalHotspot.label}
-                  </div>
-                  {stateInfo.paranormalHotspot.description && (
-                    <div className="text-muted-foreground leading-snug">
-                      {stateInfo.paranormalHotspot.description}
-                    </div>
-                  )}
-                  {(() => {
-                    const hotspot = stateInfo.paranormalHotspot!;
-                    const truthCaptureDelta = hotspot.truthReward;
-                    const governmentCaptureDelta = -truthCaptureDelta;
-                    const formatTruthDelta = (value: number) => `${value >= 0 ? '+' : ''}${value}%`;
-
-                    return (
-                      <div className="grid grid-cols-2 gap-2 pt-1 text-muted-foreground">
-                        <span>Defense +{hotspot.defenseBoost}</span>
-                        <span>Truth capture: {formatTruthDelta(truthCaptureDelta)}</span>
-                        <span>Gov capture: {formatTruthDelta(governmentCaptureDelta)}</span>
-                        <span>Turns left: {Math.max(0, hotspot.turnsRemaining)}</span>
-                        <span>Source: {hotspot.source.toUpperCase()}</span>
-                      </div>
-                    );
-                  })()}
-                </div>
-              </div>
-            )}
+            <StateHotspotDetails
+              hotspot={stateInfo.paranormalHotspot}
+              history={stateInfo.paranormalHotspotHistory}
+            />
           </div>
         </div>,
         document.body

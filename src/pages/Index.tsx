@@ -918,6 +918,9 @@ const Index = () => {
       pressurePlayer: state.pressurePlayer ?? 0,
       pressureAi: state.pressureAi ?? 0,
       stateEventHistory: Array.isArray(state.stateEventHistory) ? [...state.stateEventHistory] : [],
+      paranormalHotspotHistory: Array.isArray(state.paranormalHotspotHistory)
+        ? [...state.paranormalHotspotHistory]
+        : [],
     }));
 
     const fullEventHistory: PlayerStateIntel['eventHistory'] = statesIntel

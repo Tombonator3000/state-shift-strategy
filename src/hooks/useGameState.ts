@@ -42,6 +42,7 @@ import type {
   PendingCampaignArcEvent,
   StateEventBonusSummary,
   StateParanormalHotspot,
+  StateParanormalHotspotSummary,
 } from './gameStateTypes';
 import {
   applyAiCardPlay,
@@ -51,7 +52,11 @@ import {
   type AiCardPlayParams,
 } from './aiHelpers';
 import { evaluateCombosForTurn } from './comboAdapter';
-import { mergeStateEventHistories, trimStateEventHistory } from './stateEventHistory';
+import {
+  mergeStateEventHistories,
+  trimParanormalHotspotHistory,
+  trimStateEventHistory,
+} from './stateEventHistory';
 import { assignStateBonuses } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from './stateBonusAssignment';
 
@@ -652,6 +657,66 @@ const normalizeStateEventHistory = (
   return trimStateEventHistory(normalized);
 };
 
+const normalizeParanormalHotspotSummary = (
+  raw: unknown,
+  fallbackTurn: number,
+): StateParanormalHotspotSummary | undefined => {
+  if (!raw || typeof raw !== 'object') {
+    return undefined;
+  }
+
+  const idCandidate = typeof (raw as { id?: unknown }).id === 'string'
+    ? (raw as { id: string }).id.trim()
+    : typeof (raw as { eventId?: unknown }).eventId === 'string'
+      ? (raw as { eventId: string }).eventId.trim()
+      : '';
+
+  if (!idCandidate) {
+    return undefined;
+  }
+
+  const label = typeof (raw as { label?: unknown }).label === 'string'
+    ? (raw as { label: string }).label.trim() || 'Paranormal Hotspot'
+    : 'Paranormal Hotspot';
+
+  const resolvedOnTurn = typeof (raw as { resolvedOnTurn?: unknown }).resolvedOnTurn === 'number'
+    && Number.isFinite((raw as { resolvedOnTurn: number }).resolvedOnTurn)
+    ? Math.max(1, Math.floor((raw as { resolvedOnTurn: number }).resolvedOnTurn))
+    : Math.max(1, Math.floor(fallbackTurn));
+
+  const factionValue = (raw as { faction?: unknown }).faction;
+  const faction: StateParanormalHotspotSummary['faction'] =
+    factionValue === 'government' ? 'government' : 'truth';
+
+  const truthDeltaRaw = (raw as { truthDelta?: unknown }).truthDelta;
+  const truthDelta = typeof truthDeltaRaw === 'number' && Number.isFinite(truthDeltaRaw)
+    ? truthDeltaRaw
+    : 0;
+
+  return {
+    id: idCandidate,
+    label,
+    resolvedOnTurn,
+    faction,
+    truthDelta,
+  } satisfies StateParanormalHotspotSummary;
+};
+
+const normalizeParanormalHotspotHistory = (
+  raw: unknown,
+  fallbackTurn: number,
+): StateParanormalHotspotSummary[] => {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  const normalized = raw
+    .map(entry => normalizeParanormalHotspotSummary(entry, fallbackTurn))
+    .filter((entry): entry is StateParanormalHotspotSummary => Boolean(entry));
+
+  return trimParanormalHotspotHistory(normalized);
+};
+
 const revealAiSecretAgenda = (
   state: GameState,
   context: { type: 'card' | 'event'; name: string },
@@ -1127,6 +1192,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             : baseTargetState.stateEventBonus
               ? [baseTargetState.stateEventBonus]
               : [],
+          paranormalHotspotHistory: Array.isArray(baseTargetState.paranormalHotspotHistory)
+            ? [...baseTargetState.paranormalHotspotHistory]
+            : [],
         };
         const eventEffects = trigger.event.effects;
 
@@ -1366,6 +1434,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           contested: false,
           owner: 'neutral' as const,
           paranormalHotspot: undefined,
+          paranormalHotspotHistory: [],
           stateEventBonus: undefined,
           stateEventHistory: [],
           activeStateBonus: null,
@@ -1564,6 +1633,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           contested: false,
           owner,
           paranormalHotspot: undefined,
+          paranormalHotspotHistory: [],
           stateEventBonus: undefined,
           stateEventHistory: [],
           activeStateBonus: null,
@@ -2891,6 +2961,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const stateEventBonus = stateEventHistory.length > 0
           ? stateEventHistory[stateEventHistory.length - 1]
           : normalizedBonus;
+        const rawHotspotHistory = (rawState as { paranormalHotspotHistory?: unknown }).paranormalHotspotHistory;
+        const paranormalHotspotHistory = normalizeParanormalHotspotHistory(rawHotspotHistory, normalizedTurn);
 
         const rawActiveBonus = (rawState as { activeStateBonus?: unknown }).activeStateBonus;
         const activeStateBonus = rawActiveBonus && typeof rawActiveBonus === 'object'
@@ -3009,6 +3081,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             ? rawState.occupierUpdatedAt
             : undefined,
           paranormalHotspot: undefined,
+          paranormalHotspotHistory,
           stateEventBonus,
           stateEventHistory,
           activeStateBonus,
