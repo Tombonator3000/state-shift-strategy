@@ -543,6 +543,88 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     flavorText: 'Press releases are printed on meteorite confetti.'
   }),
 
+  defineAgenda({
+    id: 'truth_signal_flare_network',
+    faction: 'truth',
+    category: 'influence',
+    title: 'Signal Flare Syndicate',
+    headline: 'PIRATE BROADCASTS STITCH TOGETHER NIGHT SKY!',
+    operationName: 'Operation Aurora Relay',
+    issueTheme: 'Underground Frequencies',
+    pullQuote: '“Pair every tower with a backup disco ball antenna.”',
+    artCue: {
+      icon: '/assets/tabloid-flash.svg',
+      texture: '/assets/tabloid-halftone.svg',
+      alt: 'Illuminated radio beacon graphic',
+    },
+    description:
+      'Complete four synchronized MEDIA and ZONE pairings to light the clandestine signal chain across sympathetic rooftops.',
+    target: 4,
+    difficulty: 'hard',
+    stages: createAgendaStages('truth_signal_flare_network', 4, {
+      briefing: {
+        label: 'Beacon Calibration',
+        description: 'Engineers strap mirrored dishes to abandoned rooftops.',
+        requirement: 'Assemble the first MEDIA and ZONE crew pair.',
+      },
+      escalation: {
+        label: 'Skyline Synchrony',
+        description: 'Flare teams alternate broadcasts and field deployments.',
+        requirement: 'Complete 2 MEDIA and ZONE pairings.',
+      },
+      finale: {
+        label: 'Constellation Live',
+        description: 'The full relay paints the sky with encoded headlines.',
+        requirement: 'Complete 4 MEDIA and ZONE pairings.',
+      },
+    }),
+    computeProgress: gameState => {
+      const media = countCardTypePlays(gameState, 'MEDIA');
+      const zone = countCardTypePlays(gameState, 'ZONE');
+      return Math.min(media, zone);
+    },
+    flavorText: 'Every synchronized flare doubles as a signal booster for Bat Boy’s fan club hotline.'
+  }),
+
+  defineAgenda({
+    id: 'truth_dimensional_townhall',
+    faction: 'truth',
+    category: 'strategic',
+    title: 'Dimensional Town Hall',
+    headline: 'MULTIVERSE VOTERS DEMAND PRIME-TIME TRANSPARENCY!',
+    operationName: 'Operation Portal Podium',
+    issueTheme: 'Portal Outreach',
+    pullQuote: '“If the mic hums in three keys, the other timelines tuned in.”',
+    artCue: {
+      icon: '/assets/tabloid-flash.svg',
+      texture: '/assets/tabloid-halftone.svg',
+      alt: 'Rift-lined debate stage graphic',
+    },
+    description:
+      'Accrue 60 total positive Truth momentum to keep the multiversal town hall open for whistleblowers from parallel timelines.',
+    target: 60,
+    difficulty: 'legendary',
+    stages: createAgendaStages('truth_dimensional_townhall', 60, {
+      briefing: {
+        label: 'Portal Soundcheck',
+        description: 'Stagehands sync podiums across mirrored chambers.',
+        requirement: 'Build the first surge of positive Truth momentum.',
+      },
+      escalation: {
+        label: 'Cross-Reality Roll Call',
+        description: 'Audience members from sister timelines take their seats.',
+        requirement: 'Accrue 30 positive Truth momentum.',
+      },
+      finale: {
+        label: 'Town Hall Broadcast',
+        description: 'Multiversal delegates beam testimonies into every feed.',
+        requirement: 'Accrue 60 positive Truth momentum.',
+      },
+    }),
+    computeProgress: gameState => sumPositiveTruthDelta(gameState),
+    flavorText: 'Refreshments include chronologically ambiguous coffee and infinite doughnuts.'
+  }),
+
   // GOVERNMENT FACTION AGENDAS
   defineAgenda({
     id: 'gov_capitol_stew',
@@ -806,6 +888,85 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     flavorText: 'The receipts are written in glow-in-the-dark redactions.'
   }),
 
+  defineAgenda({
+    id: 'gov_data_quarantine_protocol',
+    faction: 'government',
+    category: 'sabotage',
+    title: 'Data Quarantine Protocol',
+    headline: 'Directive 8-R: SCRUB THE LEAK TRAIL CLEAN',
+    operationName: 'Operation Firewall Waltz',
+    issueTheme: 'Information Containment',
+    pullQuote: '“Rotate codenames every chorus of the hold music.”',
+    artCue: {
+      icon: '/assets/dossier-stamp.svg',
+      texture: '/assets/dossier-fibers.svg',
+      alt: 'Restricted clearance badge',
+    },
+    description:
+      'Execute five ATTACK operations to smother the rumor cascade before it splashes into prime time.',
+    target: 5,
+    difficulty: 'medium',
+    stages: createAgendaStages('gov_data_quarantine_protocol', 5, {
+      briefing: {
+        label: 'Containment Drill',
+        description: 'Rapid-response teams rehearse synchronized takedowns.',
+        requirement: 'Launch the first ATTACK operation against the leak.',
+      },
+      escalation: {
+        label: 'Firewall Sweep',
+        description: 'Strike squads rotate through rumor hubs without resting.',
+        requirement: 'Execute 3 ATTACK operations.',
+      },
+      finale: {
+        label: 'Silence Secured',
+        description: 'Every whisper trace is quarantined behind red tape.',
+        requirement: 'Execute 5 ATTACK operations.',
+      },
+    }),
+    computeProgress: gameState => countCardTypePlays(gameState, 'ATTACK'),
+    flavorText: 'All incident reports must be sung in monotone to avoid triggering the rumor detector.'
+  }),
+
+  defineAgenda({
+    id: 'gov_ghost_network_buyout',
+    faction: 'government',
+    category: 'resource',
+    title: 'Ghost Network Buyout',
+    headline: 'Appropriation Memo 5-V: PURCHASE THE PSYCHIC SWITCHBOARD',
+    operationName: 'Operation Silent Dividend',
+    issueTheme: 'Asset Neutralization',
+    pullQuote: '“Offer hazard pay in unmarked karaoke tokens.”',
+    artCue: {
+      icon: '/assets/dossier-stamp.svg',
+      texture: '/assets/dossier-fibers.svg',
+      alt: 'Classified escrow seal',
+    },
+    description:
+      'Capture three coastal relay states (MA, MD, VA, or RI) to fold the rogue psychic switchboard into the federal balance sheet.',
+    target: 3,
+    difficulty: 'easy',
+    stages: createAgendaStages('gov_ghost_network_buyout', 3, {
+      briefing: {
+        label: 'Escrow Briefing',
+        description: 'Auditors memorize the spectral escrow incantations.',
+        requirement: 'Identify which coastal relays are up for acquisition.',
+      },
+      escalation: {
+        label: 'Bidding War',
+        description: 'Handlers outmaneuver clairvoyant venture capitalists.',
+        requirement: 'Capture 2 coastal relay states.',
+      },
+      finale: {
+        label: 'Switchboard Seized',
+        description: 'The psychic network folds quietly into federal custody.',
+        requirement: 'Capture 3 coastal relay states.',
+      },
+    }),
+    computeProgress: gameState =>
+      countCapturedMatches(gameState, new Set(['MA', 'MD', 'VA', 'RI'])),
+    flavorText: 'Accountants must balance ledgers while wearing ectoplasm-insulated gloves.'
+  }),
+
   // SHARED/NEUTRAL AGENDAS
   defineAgenda({
     id: 'shared_paranoid_picnic',
@@ -919,6 +1080,48 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     }),
     computeProgress: gameState => ensureArray(gameState?.activeStateCombinationIds).length,
     flavorText: 'Side B of the paper swears none of this ever happened.'
+  }),
+
+  defineAgenda({
+    id: 'shared_resonance_roundtable',
+    faction: 'both',
+    category: 'resource',
+    title: 'Resonance Roundtable',
+    headline: 'JOINT TASKFORCE TUNES INTO SECRET AIRWAVES!',
+    operationName: 'Operation Harmonic Accord',
+    issueTheme: 'Covert Broadcasts',
+    pullQuote: '“Pass the conch microphone clockwise to keep the spirits calm.”',
+    artCue: {
+      icon: '/assets/tabloid-flash.svg',
+      texture: '/assets/tabloid-halftone.svg',
+      alt: 'Circular broadcast glyph',
+    },
+    description:
+      'Maintain three simultaneous MEDIA and ATTACK pairings to keep the bipartisan séance roundtable in perfect resonance.',
+    target: 3,
+    difficulty: 'hard',
+    stages: createAgendaStages('shared_resonance_roundtable', 3, {
+      briefing: {
+        label: 'Roundtable Roll Call',
+        description: 'Delegates align crystals and calibrate the conch mic.',
+        requirement: 'Coordinate the first MEDIA and ATTACK pairing.',
+      },
+      escalation: {
+        label: 'Dual Harmony',
+        description: 'Both factions alternate headlines and crackdowns in sync.',
+        requirement: 'Maintain 2 MEDIA and ATTACK pairings.',
+      },
+      finale: {
+        label: 'Full Resonance',
+        description: 'Three perfect pairings keep the séance humming.',
+        requirement: 'Maintain 3 MEDIA and ATTACK pairings.',
+      },
+    }),
+    computeProgress: gameState => Math.min(
+      countCardTypePlays(gameState, 'MEDIA'),
+      countCardTypePlays(gameState, 'ATTACK'),
+    ),
+    flavorText: 'Snacks include bipartisan fudge and spectral seltzer.'
   })
 ];
 
