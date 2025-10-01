@@ -266,6 +266,32 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     const nextHotspotPresence: Record<string, string> = {};
     const svgRect = svg.getBoundingClientRect();
 
+    const convertPointToScreenPosition = (point: [number, number]) => {
+      const svgElement = svgRef.current;
+
+      if (svgElement?.createSVGPoint) {
+        const ctm = svgElement.getScreenCTM?.();
+        if (ctm) {
+          const svgPoint = svgElement.createSVGPoint();
+          svgPoint.x = point[0];
+          svgPoint.y = point[1];
+          const transformed = svgPoint.matrixTransform(ctm);
+          return {
+            x: transformed.x,
+            y: transformed.y
+          };
+        }
+      }
+
+      const scaleX = svgRect.width / MAP_BASE_WIDTH;
+      const scaleY = svgRect.height / MAP_BASE_HEIGHT;
+
+      return {
+        x: svgRect.left + point[0] * scaleX,
+        y: svgRect.top + point[1] * scaleY
+      };
+    };
+
     const prefersReducedMotion = typeof window !== 'undefined'
       ? window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
       : false;
@@ -519,11 +545,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           ) {
             const prefersReducedMotionHotspot = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
             if (!prefersReducedMotionHotspot) {
+              const hotspotScreenPosition = convertPointToScreenPosition(centroid as [number, number]);
               VisualEffectsCoordinator.triggerParanormalHotspot({
-                position: {
-                  x: svgRect.left + centroid[0],
-                  y: svgRect.top + centroid[1],
-                },
+                position: hotspotScreenPosition,
                 label: hotspot.label,
                 stateName,
                 stateId: stateKey,
