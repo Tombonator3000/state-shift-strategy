@@ -58,6 +58,7 @@ import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import { usePressArchive } from '@/hooks/usePressArchive';
 import { useIntelArchive } from '@/hooks/useIntelArchive';
 import type { IntelArchiveDraft } from '@/hooks/useIntelArchive';
+import { upsertParanormalSighting } from '@/utils/paranormalSightings';
 import type {
   AgendaSummary,
   ImpactType,
@@ -838,11 +839,7 @@ const Index = () => {
   );
 
   const pushSighting = useCallback((entry: ParanormalSighting) => {
-    setParanormalSightings(prev => {
-      const merged = [...prev, entry];
-      const MAX_ENTRIES = 12;
-      return merged.length > MAX_ENTRIES ? merged.slice(merged.length - MAX_ENTRIES) : merged;
-    });
+    setParanormalSightings(prev => upsertParanormalSighting(prev, entry));
     registerParanormalSighting(entry.metadata?.source ?? undefined);
   }, [registerParanormalSighting]);
 
