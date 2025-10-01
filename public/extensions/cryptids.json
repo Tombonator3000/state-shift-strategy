@@ -2695,7 +2695,7 @@
     "type": "MEDIA",
     "rarity": "rare",
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "tags": [
       "cryptid"
@@ -2759,7 +2759,7 @@
     "type": "MEDIA",
     "rarity": "uncommon",
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "tags": [
       "cryptid"
@@ -2775,7 +2775,7 @@
     "type": "MEDIA",
     "rarity": "rare",
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "tags": [
       "cryptid"
@@ -2863,7 +2863,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid"
@@ -3084,7 +3084,7 @@
     "type": "MEDIA",
     "rarity": "legendary",
     "effects": {
-      "truthDelta": 4
+      "truthDelta": -4
     },
     "tags": [
       "cryptid"
@@ -3116,7 +3116,7 @@
     "type": "MEDIA",
     "rarity": "uncommon",
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "tags": [
       "cryptid"
@@ -3310,7 +3310,7 @@
     "type": "MEDIA",
     "rarity": "rare",
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "tags": [
       "cryptid"
@@ -3342,7 +3342,7 @@
     "type": "MEDIA",
     "rarity": "legendary",
     "effects": {
-      "truthDelta": 4
+      "truthDelta": -4
     },
     "tags": [
       "cryptid"
@@ -3392,7 +3392,7 @@
     "type": "MEDIA",
     "rarity": "rare",
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "tags": [
       "cryptid"
@@ -3490,7 +3490,7 @@
     "type": "MEDIA",
     "rarity": "uncommon",
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "tags": [
       "cryptid"
@@ -3525,7 +3525,7 @@
     "type": "MEDIA",
     "rarity": "uncommon",
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "tags": [
       "cryptid"
@@ -3541,7 +3541,7 @@
     "type": "MEDIA",
     "rarity": "uncommon",
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "tags": [
       "cryptid"
@@ -3557,7 +3557,7 @@
     "type": "MEDIA",
     "rarity": "rare",
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "tags": [
       "cryptid"
@@ -3640,7 +3640,7 @@
     "type": "MEDIA",
     "rarity": "rare",
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "tags": [
       "cryptid"
@@ -3693,7 +3693,7 @@
     "type": "MEDIA",
     "rarity": "uncommon",
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "tags": [
       "cryptid"
@@ -3709,7 +3709,7 @@
     "type": "MEDIA",
     "rarity": "uncommon",
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "tags": [
       "cryptid"
@@ -3757,7 +3757,7 @@
     "type": "MEDIA",
     "rarity": "rare",
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "tags": [
       "cryptid"
@@ -3887,7 +3887,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -3905,7 +3905,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -3943,7 +3943,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -3997,7 +3997,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4015,7 +4015,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4033,7 +4033,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4051,7 +4051,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4069,7 +4069,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4087,7 +4087,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4123,7 +4123,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4141,7 +4141,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4159,7 +4159,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4177,7 +4177,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4195,7 +4195,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4213,7 +4213,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4231,7 +4231,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4249,7 +4249,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4267,7 +4267,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4305,7 +4305,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4323,7 +4323,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4341,7 +4341,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4359,7 +4359,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4377,7 +4377,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4395,7 +4395,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4453,7 +4453,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4471,7 +4471,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4489,7 +4489,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4507,7 +4507,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4525,7 +4525,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4543,7 +4543,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4561,7 +4561,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4579,7 +4579,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4597,7 +4597,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4615,7 +4615,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4633,7 +4633,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4671,7 +4671,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4689,7 +4689,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4707,7 +4707,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4725,7 +4725,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4783,7 +4783,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "cryptid",
@@ -4837,7 +4837,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "snallygaster",
@@ -5051,7 +5051,7 @@
     "type": "MEDIA",
     "rarity": "common",
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "tags": [
       "rougarou",
