@@ -53,12 +53,63 @@ const formatVictorySubhead = (report: GameOverReport): string => {
   return `${victor} closes the season via ${method} after ${rounds}; monitors register ${truth}.`;
 };
 
-const formatAgendaSummary = (agenda?: GameOverReport['playerSecretAgenda']) => {
+interface AgendaPresentation {
+  badgeLabel: string;
+  headline: string;
+  operationName?: string;
+  issueTheme?: string;
+  pullQuote?: string;
+  statusLabel: string;
+  progressLabel: string;
+  progress: number;
+  target: number;
+  completed: boolean;
+  revealed: boolean;
+}
+
+const presentAgenda = (agenda?: GameOverReport['playerSecretAgenda']): AgendaPresentation | null => {
   if (!agenda) {
     return null;
   }
-  const status = agenda.completed ? 'Completed' : 'In Progress';
-  return `${agenda.headline || agenda.title} — ${status} (${agenda.progress}/${agenda.target})`;
+
+  const statusLabel = agenda.completed ? 'Completed' : 'In Progress';
+  const progressLabel = `${agenda.progress}/${agenda.target}`;
+  const headline = agenda.headline || agenda.title;
+
+  return {
+    badgeLabel: `${headline} — ${statusLabel} (${progressLabel})`,
+    headline,
+    operationName: agenda.operationName,
+    issueTheme: agenda.issueTheme,
+    pullQuote: agenda.pullQuote,
+    statusLabel,
+    progressLabel,
+    progress: agenda.progress,
+    target: agenda.target,
+    completed: agenda.completed,
+    revealed: agenda.revealed,
+  };
+};
+
+const formatAgendaNarrative = (
+  agenda: AgendaPresentation,
+  owner: 'player' | 'ai',
+): string => {
+  const actor = owner === 'player' ? 'Operatives' : 'Opposition strategists';
+  const operationLine = agenda.operationName
+    ? `Operation ${agenda.operationName} drove the "${agenda.headline}" agenda.`
+    : `The "${agenda.headline}" agenda set the operation in motion.`;
+  const themeLine = agenda.issueTheme
+    ? `The plan weaponized the ${agenda.issueTheme} storyline to sway the board.`
+    : '';
+  const statusLine = agenda.completed
+    ? `${actor} completed the mission after securing ${agenda.progress}/${agenda.target} objectives.`
+    : `${actor} left the mission unfinished at ${agenda.progress}/${agenda.target} objectives when the season closed.`;
+  const revealLine = agenda.revealed
+    ? 'Field teams confirmed the covert plan during play, exposing its moving parts.'
+    : 'Post-match decrypts finally exposed the covert plan to analysts.';
+
+  return [operationLine, themeLine, statusLine, revealLine].filter(Boolean).join(' ');
 };
 
 const renderImpactBadges = (event: FinalEditionEventHighlight) => {
@@ -135,8 +186,12 @@ const renderMvpPanel = (label: string, mvp?: MVPReport | null) => {
 const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
   const headline = formatVictoryHeadline(report);
   const subhead = formatVictorySubhead(report);
-  const playerAgenda = formatAgendaSummary(report.playerSecretAgenda);
-  const aiAgenda = formatAgendaSummary(report.aiSecretAgenda);
+  const playerAgenda = presentAgenda(report.playerSecretAgenda);
+  const aiAgenda = presentAgenda(report.aiSecretAgenda);
+  const agendaBriefings = [
+    { label: 'Operative Agenda', owner: 'player' as const, agenda: playerAgenda },
+    { label: 'Opposition Agenda', owner: 'ai' as const, agenda: aiAgenda },
+  ].filter((entry): entry is { label: string; owner: 'player' | 'ai'; agenda: AgendaPresentation } => Boolean(entry.agenda));
   const eventHighlights = report.topEvents.slice(0, 3);
   const comboHighlights = report.comboHighlights.slice(0, 3);
   const sightings = report.sightings.slice(-4);
@@ -339,12 +394,43 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
             <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">No legendary cards deployed</Badge>
           )}
           {playerAgenda && (
-            <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">Operative Agenda: {playerAgenda}</Badge>
+            <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">
+              Operative Agenda: {playerAgenda.badgeLabel}
+            </Badge>
           )}
           {aiAgenda && (
-            <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">Opposition Agenda: {aiAgenda}</Badge>
+            <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">
+              Opposition Agenda: {aiAgenda.badgeLabel}
+            </Badge>
           )}
         </div>
+        {agendaBriefings.length > 0 && (
+          <div className="mt-6 space-y-4">
+            <h3 className="font-mono text-xs uppercase tracking-[0.28em] text-emerald-200/70">
+              Hidden Agenda Debrief
+            </h3>
+            {agendaBriefings.map(({ agenda, label, owner }) => (
+              <article
+                key={owner}
+                className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 shadow-[0_0_25px_rgba(16,185,129,0.1)]"
+              >
+                <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.24em] text-emerald-200/80">
+                  <span className="text-emerald-100">{label}</span>
+                  <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">
+                    {agenda.statusLabel}
+                  </Badge>
+                  <span className="text-emerald-200/70">Progress {agenda.progressLabel}</span>
+                </div>
+                <p className="mt-3 text-sm text-emerald-100/80">{formatAgendaNarrative(agenda, owner)}</p>
+                {agenda.pullQuote && (
+                  <blockquote className="mt-3 border-l-2 border-emerald-500/40 pl-3 text-sm italic text-emerald-200/70">
+                    “{agenda.pullQuote}”
+                  </blockquote>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
