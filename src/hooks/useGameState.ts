@@ -484,7 +484,13 @@ const cloneEventEffects = (
     : undefined;
 };
 
-const buildStateEventEffectSummary = (effects: GameEvent['effects'] | undefined): string[] => {
+const buildStateEventEffectSummary = (params: {
+  effects: GameEvent['effects'] | undefined;
+  faction: 'truth' | 'government';
+  truthDeltaOverride?: number | null;
+}): string[] => {
+  const { effects, faction, truthDeltaOverride } = params;
+
   if (!effects || typeof effects !== 'object') {
     return [];
   }
@@ -492,9 +498,16 @@ const buildStateEventEffectSummary = (effects: GameEvent['effects'] | undefined)
   const summary: string[] = [];
   const formatSigned = (value: number) => (value >= 0 ? `+${value}` : `${value}`);
 
-  const truthDelta = (effects.truth ?? 0) + (effects.truthChange ?? 0);
-  if (truthDelta) {
-    summary.push(`Truth ${formatSigned(truthDelta)}%`);
+  const hasTruthOverride = typeof truthDeltaOverride === 'number' && Number.isFinite(truthDeltaOverride);
+  const rawTruthDelta = (effects.truth ?? 0) + (effects.truthChange ?? 0);
+  const adjustedTruthDelta = hasTruthOverride
+    ? (truthDeltaOverride as number)
+    : faction === 'government'
+      ? -rawTruthDelta
+      : rawTruthDelta;
+
+  if (adjustedTruthDelta) {
+    summary.push(`Truth ${formatSigned(adjustedTruthDelta)}%`);
   }
 
   const ipDelta = (effects.ip ?? 0) + (effects.ipChange ?? 0);
@@ -541,8 +554,9 @@ const createStateEventBonusSummary = (params: {
   event: GameEvent;
   faction: 'truth' | 'government';
   turn: number;
+  truthDeltaOverride?: number | null;
 }): StateEventBonusSummary => {
-  const { event, faction, turn } = params;
+  const { event, faction, turn, truthDeltaOverride } = params;
   const labelSource = typeof event.title === 'string' && event.title.trim().length > 0
     ? event.title.trim()
     : typeof event.headline === 'string' && event.headline.trim().length > 0
@@ -554,7 +568,11 @@ const createStateEventBonusSummary = (params: {
       ? event.content.trim()
       : undefined;
   const effects = cloneEventEffects(event.effects);
-  const effectSummary = buildStateEventEffectSummary(event.effects);
+  const effectSummary = buildStateEventEffectSummary({
+    effects: effects ?? event.effects,
+    faction,
+    truthDeltaOverride,
+  });
 
   return {
     source: 'state-event',
@@ -601,12 +619,11 @@ const normalizeStateEventBonus = (
   const faction = data.faction === 'truth' || data.faction === 'government'
     ? data.faction
     : 'truth';
-  const effectSummary = Array.isArray(data.effectSummary)
-    ? data.effectSummary
-        .map(entry => (typeof entry === 'string' ? entry.trim() : ''))
-        .filter(entry => entry.length > 0)
-    : undefined;
   const effects = cloneEventEffects((data as { effects?: GameEvent['effects'] }).effects);
+  const recomputedSummary = buildStateEventEffectSummary({
+    effects: effects ?? (data as { effects?: GameEvent['effects'] }).effects,
+    faction,
+  });
 
   return {
     source: 'state-event',
@@ -616,7 +633,7 @@ const normalizeStateEventBonus = (
     triggeredOnTurn,
     faction,
     effects,
-    effectSummary: effectSummary && effectSummary.length > 0 ? effectSummary : undefined,
+    effectSummary: recomputedSummary.length > 0 ? recomputedSummary : undefined,
   } satisfies StateEventBonusSummary;
 };
 
@@ -1114,13 +1131,16 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const eventEffects = trigger.event.effects;
 
         let immediateDrawNote: string | null = null;
+        let adjustedTruthDeltaForSummary: number | undefined;
 
         if (eventEffects && typeof eventEffects === 'object') {
-          const truthDelta = (eventEffects.truth ?? 0) + (eventEffects.truthChange ?? 0);
-          if (truthDelta) {
+          const rawTruthDelta = (eventEffects.truth ?? 0) + (eventEffects.truthChange ?? 0);
+          const adjustedTruthDelta = capturingFaction === 'government' ? -rawTruthDelta : rawTruthDelta;
+          adjustedTruthDeltaForSummary = adjustedTruthDelta;
+          if (adjustedTruthDelta) {
             const truthMutation = { truth, log: [] as string[] };
             const truthActor = capturingFaction === nextState.faction ? 'human' : 'ai';
-            applyTruthDelta(truthMutation, truthDelta, truthActor);
+            applyTruthDelta(truthMutation, adjustedTruthDelta, truthActor);
             if (truthMutation.log.length > 0) {
               eventLogs.push(...truthMutation.log);
             }
@@ -1227,6 +1247,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           event: trigger.event,
           faction: trigger.capturingFaction,
           turn: trigger.triggeredOnTurn,
+          truthDeltaOverride: adjustedTruthDeltaForSummary,
         });
         const updatedHistory = trimStateEventHistory([...targetState.stateEventHistory, summary]);
         targetState.stateEventHistory = updatedHistory;
