@@ -670,10 +670,6 @@ class LegacyAIStrategist {
       priority += (state.baseIP ?? 0) * 0.04 * (1 + this.personality.territorial) * zoneWeights.highValueMultiplier;
       priority += this.getLocationBonus(state) * zoneWeights.locationMultiplier;
 
-      if (state.specialBonus) {
-        priority += 0.15 * zoneWeights.specialBonusMultiplier;
-      }
-
       if (state.owner === 'player') {
         priority += this.personality.aggressiveness * 0.3 * zoneWeights.ownerAggressionMultiplier;
       } else if (state.owner === 'neutral') {
@@ -703,10 +699,6 @@ class LegacyAIStrategist {
       } else if (pressureDelta > 0) {
         reasoningParts.push(`apply +${pressureDelta} pressure`);
       }
-      if (state.specialBonus) {
-        reasoningParts.push('special bonus');
-      }
-
       plays.push({
         cardId: card.id,
         targetState: state.abbreviation,

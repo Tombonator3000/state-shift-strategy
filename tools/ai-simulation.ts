@@ -235,8 +235,6 @@ function selectStates(count: number, rng: () => number): SimulatedState[] {
     pressure: 0,
     contested: false,
     owner: 'neutral',
-    specialBonus: state.specialBonus,
-    bonusValue: state.bonusValue,
     occupierCardId: null,
     occupierCardName: null,
     occupierIcon: null,

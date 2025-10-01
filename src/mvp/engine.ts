@@ -68,8 +68,6 @@ export interface StateIncomeContribution {
   state: string;
   abbreviation: string;
   baseIP: number;
-  bonusValue: number;
-  total: number;
   fallback: boolean;
 }
 
@@ -171,13 +169,10 @@ const computeStateIncomeDetails = (states: string[]): StateIncomeContribution[] 
 
     if (metadata) {
       const baseIP = Number.isFinite(metadata.baseIP) ? metadata.baseIP : 0;
-      const bonusValue = Number.isFinite(metadata.bonusValue ?? 0) ? metadata.bonusValue ?? 0 : 0;
       return {
         state: trimmed,
         abbreviation: metadata.abbreviation,
         baseIP,
-        bonusValue,
-        total: baseIP + bonusValue,
         fallback: false,
       };
     }
@@ -188,8 +183,6 @@ const computeStateIncomeDetails = (states: string[]): StateIncomeContribution[] 
       state: trimmed,
       abbreviation,
       baseIP: 0,
-      bonusValue: 0,
-      total: 1,
       fallback: true,
     };
   });
@@ -202,7 +195,7 @@ export function computeTurnIpIncome(
   catchUpSettings: CatchUpSettings = DEFAULT_CATCH_UP_SETTINGS,
 ): IpIncomeBreakdown {
   const stateIncomeDetails = computeStateIncomeDetails(player.states);
-  const stateIncomeTotal = stateIncomeDetails.reduce((total, entry) => total + entry.total, 0);
+  const stateIncomeTotal = stateIncomeDetails.reduce((total, entry) => total + entry.baseIP, 0);
   const baseIncome = 5 + stateIncomeTotal;
   const overage = Math.max(0, player.ip - maintenanceSettings.threshold);
   const rawMaintenance = maintenanceSettings.divisor > 0 ? Math.floor(overage / maintenanceSettings.divisor) : 0;
@@ -238,13 +231,9 @@ export function startTurn(state: GameState): GameState {
   if (stateIncomeDetails.length > 0) {
     const formattedStates = stateIncomeDetails.map(detail => {
       if (detail.fallback) {
-        return `${detail.abbreviation} ${detail.total} (fallback)`;
+        return `${detail.abbreviation} ${detail.baseIP} (fallback)`;
       }
-      const parts = [`base ${detail.baseIP}`];
-      if (detail.bonusValue) {
-        parts.push(`bonus ${detail.bonusValue}`);
-      }
-      return `${detail.abbreviation} ${detail.total} (${parts.join(' + ')})`;
+      return `${detail.abbreviation} ${detail.baseIP} (base ${detail.baseIP})`;
     });
     baseComponents.push(`states ${formattedStates.join(', ')}`);
   }

@@ -39,7 +39,6 @@ export interface AiTuningConfig {
       factionMultiplier: number;
       highValueMultiplier: number;
       locationMultiplier: number;
-      specialBonusMultiplier: number;
       ownerAggressionMultiplier: number;
       signalCaptureMultiplier: number;
       dangerResponseMultiplier: number;
@@ -115,7 +114,6 @@ const BASE_TUNING: AiTuningConfig = {
       factionMultiplier: 1,
       highValueMultiplier: 1,
       locationMultiplier: 1,
-      specialBonusMultiplier: 1,
       ownerAggressionMultiplier: 1,
       signalCaptureMultiplier: 1,
       dangerResponseMultiplier: 1,

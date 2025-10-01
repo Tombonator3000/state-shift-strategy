@@ -1333,8 +1333,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           pressureAi: 0,
           contested: false,
           owner: 'neutral' as const,
-          specialBonus: state.specialBonus,
-          bonusValue: state.bonusValue,
           paranormalHotspot: undefined,
           stateEventBonus: undefined,
           stateEventHistory: [],
@@ -1516,8 +1514,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           pressureAi: 0,
           contested: false,
           owner,
-          specialBonus: state.specialBonus,
-          bonusValue: state.bonusValue,
           paranormalHotspot: undefined,
           stateEventBonus: undefined,
           stateEventHistory: [],
@@ -2778,7 +2774,26 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       // Reconstruct the game state
       const stateByAbbreviation = Object.fromEntries(USA_STATES.map(state => [state.abbreviation, state]));
       const stateById = Object.fromEntries(USA_STATES.map(state => [state.id, state]));
-      const rawStates = Array.isArray(saveData.states) ? saveData.states : [];
+      let legacySpecialBonusDetected = false;
+      const rawStates = Array.isArray(saveData.states)
+        ? saveData.states.map(rawState => {
+            if (!rawState || typeof rawState !== 'object') {
+              return rawState;
+            }
+
+            const { specialBonus, bonusValue, ...rest } = rawState as Record<string, unknown>;
+            if (specialBonus !== undefined || bonusValue !== undefined) {
+              legacySpecialBonusDetected = true;
+            }
+
+            return rest;
+          })
+        : [];
+
+      if (legacySpecialBonusDetected) {
+        console.info('[Migration] Dropped legacy state bonus fields from save data');
+      }
+
       const normalizedStates = rawStates.map(rawState => {
         const providedAbbreviation = typeof rawState?.abbreviation === 'string'
           ? rawState.abbreviation.trim()
@@ -2934,10 +2949,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           pressureAi,
           contested: Boolean(rawState?.contested),
           owner,
-          specialBonus: rawState?.specialBonus ?? lookupBase?.specialBonus,
-          bonusValue: typeof rawState?.bonusValue === 'number' && Number.isFinite(rawState.bonusValue)
-            ? rawState.bonusValue
-            : lookupBase?.bonusValue,
           occupierCardId: rawState?.occupierCardId ?? null,
           occupierCardName: rawState?.occupierCardName ?? null,
           occupierLabel: rawState?.occupierLabel ?? null,

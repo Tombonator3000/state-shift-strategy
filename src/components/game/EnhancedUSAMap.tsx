@@ -24,8 +24,6 @@ interface EnhancedState {
   defense: number;
   pressure: number;
   owner: 'player' | 'ai' | 'neutral';
-  specialBonus?: string;
-  bonusValue?: number;
   contested?: boolean;
   // Occupation data for ZONE takeovers
   occupierCardId?: string | null;
@@ -750,25 +748,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
               </div>
             </div>
             
-            {stateInfo.specialBonus && (
-              <div className="pt-2 border-t border-border">
-                <div className="text-sm font-bold text-foreground mb-1">🎯 Special Bonus</div>
-                <div className="text-sm font-mono bg-accent/20 border border-accent/40 p-3 rounded shadow-sm">
-                  <span className="font-bold text-foreground">{stateInfo.specialBonus}</span>
-                  {stateInfo.bonusValue && <span className="text-primary font-bold"> (+{stateInfo.bonusValue} IP)</span>}
-                </div>
-                
-                {/* Occupation Info */}
-                {stateInfo.occupierLabel && stateInfo.owner && stateInfo.owner !== null && (
-                  <div className="mt-2 text-sm font-mono bg-card/60 border border-border/40 p-2 rounded shadow-sm opacity-95">
-                    <span className="font-bold text-foreground">{stateInfo.occupierLabel}</span>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* Show occupation info even when no special bonus */}
-            {!stateInfo.specialBonus && stateInfo.occupierLabel && stateInfo.owner && stateInfo.owner !== null && (
+            {stateInfo.occupierLabel && stateInfo.owner && stateInfo.owner !== null && (
               <div className="pt-2 border-t border-border">
                 <div className="text-sm font-bold text-foreground mb-1">Control</div>
                 <div className="text-sm font-mono bg-card/60 border border-border/40 p-2 rounded shadow-sm opacity-95">
