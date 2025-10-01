@@ -10,7 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { CardTextGenerator } from '@/systems/CardTextGenerator';
 import BaseCard from '@/components/game/cards/BaseCard';
 import { useUiTheme } from '@/hooks/useTheme';
-import { normalizeCardType as normalizeTabloidCardType } from '@/lib/cardUi';
+import { getFlavorText, normalizeCardType as normalizeTabloidCardType } from '@/lib/cardUi';
 import { cn } from '@/lib/utils';
 
 interface CardDetailOverlayProps {
@@ -157,7 +157,7 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
 
   const faction = getLegacyFaction(card);
   const displayType = normalizeLegacyCardType(card.type);
-  const flavorText = card.flavor ?? card.flavorGov ?? card.flavorTruth ?? 'No intelligence available.';
+  const flavorText = getFlavorText(card) ?? 'No intelligence available.';
 
   return (
     <div
@@ -221,7 +221,7 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
               CLASSIFIED INTELLIGENCE
             </h4>
             <div className="italic text-sm text-foreground border-l-4 border-truth-red bg-truth-red/10 rounded-r border border-truth-red/20 pl-3 pr-3 py-2 leading-relaxed">
-              "{flavorText}"
+              {flavorText}
             </div>
           </div>
 

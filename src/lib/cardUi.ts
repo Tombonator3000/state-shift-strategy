@@ -57,8 +57,23 @@ export const getRarityLabel = (rarity?: GameCard['rarity']): string => {
   return `${normalized} ${emoji}`.trim();
 };
 
+const QUOTE_CHARACTERS = /^["'“”‘’]+|["'“”‘’]+$/g;
+
+export const normalizeFlavorText = (text?: string | null): string | undefined => {
+  if (!text) return undefined;
+
+  let normalized = text.trim();
+  if (!normalized) return undefined;
+
+  normalized = normalized.replace(QUOTE_CHARACTERS, '').trim();
+  normalized = normalized.replace(/^CLASSIFIED INTELLIGENCE:\s*/i, '').trim();
+
+  return normalized || undefined;
+};
+
 export const getFlavorText = (card: GameCard): string | undefined => {
-  return card.flavor ?? card.flavorTruth ?? card.flavorGov ?? undefined;
+  const rawFlavor = card.flavor ?? card.flavorTruth ?? card.flavorGov ?? undefined;
+  return normalizeFlavorText(rawFlavor);
 };
 
 export const formatEffect = (card: GameCard): string => {
