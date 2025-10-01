@@ -103,6 +103,48 @@ describe('stateBonuses deterministic selection', () => {
     expect(result.playerIpDelta + result.aiIpDelta).toBe(playerIp + aiIp);
   });
 
+  test('government players invert truth adjustments for their controlled states', () => {
+    const states = [
+      { id: '32', abbreviation: 'NV', name: 'Nevada', owner: 'player' as const },
+      { id: '56', abbreviation: 'WY', name: 'Wyoming', owner: 'player' as const },
+      { id: '38', abbreviation: 'ND', name: 'North Dakota', owner: 'ai' as const },
+      { id: '12', abbreviation: 'FL', name: 'Florida', owner: 'ai' as const },
+    ];
+
+    const truthFactionResult = assignStateBonuses({
+      states,
+      baseSeed: 2025,
+      round: 4,
+      playerFaction: 'truth',
+      eventChance: 0,
+    });
+
+    const governmentFactionResult = assignStateBonuses({
+      states,
+      baseSeed: 2025,
+      round: 4,
+      playerFaction: 'government',
+      eventChance: 0,
+    });
+
+    for (const state of states) {
+      const truthDeltaTruthFaction = truthFactionResult.bonuses[state.abbreviation]?.truthDelta ?? 0;
+      const truthDeltaGovernmentFaction = governmentFactionResult.bonuses[state.abbreviation]?.truthDelta ?? 0;
+      expect(truthDeltaGovernmentFaction).toBe(-truthDeltaTruthFaction);
+
+      if (state.owner === 'player') {
+        expect(truthDeltaGovernmentFaction).toBeLessThanOrEqual(0);
+      } else {
+        expect(truthDeltaGovernmentFaction).toBeGreaterThanOrEqual(0);
+      }
+    }
+
+    expect(governmentFactionResult.playerTruthDelta).toBe(-truthFactionResult.playerTruthDelta);
+    expect(governmentFactionResult.aiTruthDelta).toBe(-truthFactionResult.aiTruthDelta);
+    expect(governmentFactionResult.playerTruthDelta).toBeLessThanOrEqual(0);
+    expect(governmentFactionResult.aiTruthDelta).toBeGreaterThanOrEqual(0);
+  });
+
   test('pressure adjustments retain controller ownership', () => {
     const result = assignStateBonuses({
       states: [
