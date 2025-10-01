@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Credits from './Credits';
 import HowToPlay from './HowToPlay';
 import Options from './Options';
@@ -12,9 +12,10 @@ import CardCollectionTabloid from './CardCollectionTabloid';
 import StartScreen from '@/components/start/StartScreen';
 import FactionSelectTabloid from './FactionSelectTabloid';
 import { useUiTheme } from '@/hooks/useTheme';
+import { getAgendasByFaction, type SecretAgenda } from '@/data/agendaDatabase';
 
 interface GameMenuProps {
-  onStartGame: (faction: 'government' | 'truth') => Promise<void>;
+  onStartGame: (faction: 'government' | 'truth', agendaId?: string) => Promise<void>;
   onFactionHover?: (faction: 'government' | 'truth' | null) => void;
   audio?: any;
   onBackToMainMenu?: () => void;
@@ -45,6 +46,29 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
     rotate: Math.random() * 4 - 2,
   })));
   const [showCollection, setShowCollection] = useState(false);
+  const [agendaSelections, setAgendaSelections] = useState<{ government: string | null; truth: string | null }>({
+    government: null,
+    truth: null,
+  });
+
+  const governmentAgendas = useMemo<SecretAgenda[]>(() => getAgendasByFaction('government'), []);
+  const truthAgendas = useMemo<SecretAgenda[]>(() => getAgendasByFaction('truth'), []);
+
+  const handleAgendaSelect = (faction: 'government' | 'truth', value: string) => {
+    setAgendaSelections(prev => ({
+      ...prev,
+      [faction]: value === 'random' ? null : value,
+    }));
+  };
+
+  const getSelectedAgenda = (faction: 'government' | 'truth'): SecretAgenda | undefined => {
+    const selectedId = agendaSelections[faction];
+    const agendaPool = faction === 'government' ? governmentAgendas : truthAgendas;
+    return selectedId ? agendaPool.find(agenda => agenda.id === selectedId) : undefined;
+  };
+
+  const selectedGovernmentAgenda = getSelectedAgenda('government');
+  const selectedTruthAgenda = getSelectedAgenda('truth');
 
   const handleShowCollection = () => {
     if (onShowCardCollection) {
@@ -199,6 +223,12 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
         onFactionHover={onFactionHover}
         onBack={() => setShowFactionSelect(false)}
         audio={audio}
+        agendas={{
+          government: governmentAgendas,
+          truth: truthAgendas,
+        }}
+        selectedAgendas={agendaSelections}
+        onAgendaSelect={handleAgendaSelect}
       />
     ) : (
       <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
@@ -265,15 +295,39 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
                   Access to Lizard People
                 </div>
               </div>
-              
+
+              <div className="space-y-2 mb-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.25em] text-newspaper-text/60">
+                  Secret Agenda
+                </div>
+                <select
+                  className="w-full rounded border border-newspaper-text bg-newspaper-bg px-3 py-2 text-sm font-mono text-newspaper-text shadow-sm"
+                  value={agendaSelections.government ?? 'random'}
+                  onChange={(event) => handleAgendaSelect('government', event.target.value)}
+                >
+                  <option value="random">Random Assignment</option>
+                  {governmentAgendas.map(agenda => (
+                    <option key={agenda.id} value={agenda.id}>
+                      {agenda.title} ({agenda.difficulty.toUpperCase()})
+                    </option>
+                  ))}
+                </select>
+                {selectedGovernmentAgenda && (
+                  <div className="rounded border border-dashed border-newspaper-text/40 bg-newspaper-bg/60 p-3 text-xs font-mono text-newspaper-text/80">
+                    <p className="font-semibold text-newspaper-text">{selectedGovernmentAgenda.headline}</p>
+                    <p>{selectedGovernmentAgenda.description}</p>
+                  </div>
+                )}
+              </div>
+
               <div className="bg-newspaper-text/10 p-3 mb-4 text-xs italic text-newspaper-text">
                 "Control the narrative with black helicopters, weather machines, and surprisingly comfortable underground bunkers."
               </div>
-              
-              <Button 
+
+              <Button
                 onClick={async () => {
                   audio?.playSFX?.('click');
-                  await onStartGame('government');
+                  await onStartGame('government', agendaSelections.government ?? undefined);
                 }}
                 className="w-full bg-government-blue hover:bg-government-blue/80 text-white group-hover:animate-pulse"
               >
@@ -304,15 +358,39 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
                   Tinfoil Hat Immunity
                 </div>
               </div>
-              
+
+              <div className="space-y-2 mb-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.25em] text-newspaper-text/60">
+                  Secret Agenda
+                </div>
+                <select
+                  className="w-full rounded border border-newspaper-text bg-newspaper-bg px-3 py-2 text-sm font-mono text-newspaper-text shadow-sm"
+                  value={agendaSelections.truth ?? 'random'}
+                  onChange={(event) => handleAgendaSelect('truth', event.target.value)}
+                >
+                  <option value="random">Random Assignment</option>
+                  {truthAgendas.map(agenda => (
+                    <option key={agenda.id} value={agenda.id}>
+                      {agenda.title} ({agenda.difficulty.toUpperCase()})
+                    </option>
+                  ))}
+                </select>
+                {selectedTruthAgenda && (
+                  <div className="rounded border border-dashed border-newspaper-text/40 bg-newspaper-bg/60 p-3 text-xs font-mono text-newspaper-text/80">
+                    <p className="font-semibold text-newspaper-text">{selectedTruthAgenda.headline}</p>
+                    <p>{selectedTruthAgenda.description}</p>
+                  </div>
+                )}
+              </div>
+
               <div className="bg-newspaper-text/10 p-3 mb-4 text-xs italic text-newspaper-text">
                 "Wake up the sheeple with essential oils, healing crystals, and really long YouTube videos."
               </div>
-              
-              <Button 
+
+              <Button
                 onClick={async () => {
                   audio?.playSFX?.('click');
-                  await onStartGame('truth');
+                  await onStartGame('truth', agendaSelections.truth ?? undefined);
                 }}
                 className="w-full bg-truth-red hover:bg-truth-red/80 text-white group-hover:animate-pulse"
               >
