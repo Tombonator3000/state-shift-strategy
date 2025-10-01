@@ -104,7 +104,13 @@ const toBonus = (
   themed: ThemedEffect,
   state: AssignStateBonusesOptions['states'][number],
   round: number,
+  ownerFaction: 'truth' | 'government' | null,
 ): ActiveStateBonus => {
+  const truthDeltaBase = clamp(
+    themed.effect.truthDelta ?? 0,
+    EFFECT_LIMITS.truth.min,
+    EFFECT_LIMITS.truth.max,
+  );
   return {
     source: 'state-themed',
     id: themed.id,
@@ -117,7 +123,7 @@ const toBonus = (
     headline: themed.headline,
     subhead: themed.subhead,
     icon: themed.icon,
-    truthDelta: clamp(themed.effect.truthDelta ?? 0, EFFECT_LIMITS.truth.min, EFFECT_LIMITS.truth.max),
+    truthDelta: ownerFaction === 'government' ? -truthDeltaBase : truthDeltaBase,
     ipDelta: clamp(themed.effect.ipDelta ?? 0, EFFECT_LIMITS.ip.min, EFFECT_LIMITS.ip.max),
     pressureDelta: clamp(
       themed.effect.pressureDelta ?? 0,
@@ -131,7 +137,13 @@ const toRoundEvent = (
   themed: ThemedEffect,
   state: AssignStateBonusesOptions['states'][number],
   round: number,
+  ownerFaction: 'truth' | 'government' | null,
 ): StateRoundEventLogEntry => {
+  const truthDeltaBase = clamp(
+    themed.effect.truthDelta ?? 0,
+    EFFECT_LIMITS.truth.min,
+    EFFECT_LIMITS.truth.max,
+  );
   return {
     source: 'state-themed',
     id: themed.id,
@@ -143,7 +155,7 @@ const toRoundEvent = (
     summary: themed.summary,
     subhead: themed.subhead,
     icon: themed.icon,
-    truthDelta: clamp(themed.effect.truthDelta ?? 0, EFFECT_LIMITS.truth.min, EFFECT_LIMITS.truth.max),
+    truthDelta: ownerFaction === 'government' ? -truthDeltaBase : truthDeltaBase,
     ipDelta: clamp(themed.effect.ipDelta ?? 0, EFFECT_LIMITS.ip.min, EFFECT_LIMITS.ip.max),
     pressureDelta: clamp(
       themed.effect.pressureDelta ?? 0,
@@ -223,6 +235,14 @@ export const assignStateBonuses = (
 
   for (const state of sortedStates) {
     const owner = state.owner === 'player' || state.owner === 'ai' ? state.owner : 'neutral';
+    const ownerFaction: 'truth' | 'government' | null =
+      owner === 'player'
+        ? options.playerFaction
+        : owner === 'ai'
+          ? options.playerFaction === 'truth'
+            ? 'government'
+            : 'truth'
+          : null;
 
     const pool = resolvePoolForState({ id: state.id, abbreviation: state.abbreviation });
     if (!pool) {
@@ -241,7 +261,7 @@ export const assignStateBonuses = (
       : (() => {
           const bonus =
             rng.pickWeighted(pool.bonuses.map(entry => ({ weight: entry.weight, value: entry }))) ?? null;
-          return bonus ? toBonus(bonus, state, options.round) : null;
+          return bonus ? toBonus(bonus, state, options.round, ownerFaction) : null;
         })();
 
     let selectedEvent: ThemedEffect | null = null;
@@ -276,7 +296,7 @@ export const assignStateBonuses = (
     }
 
     if (selectedEvent) {
-      const eventEntry = toRoundEvent(selectedEvent, state, options.round);
+      const eventEntry = toRoundEvent(selectedEvent, state, options.round, ownerFaction);
       if (owner !== 'neutral') {
         roundEvents[state.abbreviation] = [...(roundEvents[state.abbreviation] ?? []), eventEntry];
         if (owner === 'player') {
