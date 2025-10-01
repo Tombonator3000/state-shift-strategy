@@ -47,6 +47,9 @@ Agendas are faction-flavoured mini-campaigns ranging from holding themed regions
 
 Some events, cards, or investigative plays can expose the opponent’s agenda, revealing its target so you can plan a counter-strategy.
 
+## Campaign & Anomalies
+Campaign storylines will occasionally override the random tabloids at the end of a round. When you see the 📖 log stamp in the Extra Edition, it means a campaign arc has advanced, and the next chapter is already queued to appear in a future paper—finale headlines close the loop and clear the queue entirely.【F:src/hooks/useGameState.ts†L204-L320】 State-themed bonuses resolve in the same window. Any state with an active bonus gets a glowing green intel panel in the map drawer that lists its icon, headline, and Truth/IP/pressure swings for the current round.【F:src/components/game/EnhancedUSAMap.tsx†L780-L820】 The blue “Current Anomalies” feed underneath only shows up while a faction actually controls the state, so neutral regions hide anomaly warnings until someone claims them.【F:src/components/game/EnhancedUSAMap.tsx†L821-L864】
+
 ## Events, Hotspots & Combos
 - **Tabloid Events** fire at the end of turns, twisting Truth, IP, defense, or card draw. Legendary events can even reveal agendas or reshuffle state control.
 - **Paranormal Hotspots** temporarily raise a state’s defense while promising a Truth swing to whichever faction resolves the anomaly first. When a hotspot appears you’ll see a flying UFO skim the affected state and leave a green glow around it, plus you’ll hear the UFO bulletin sting so you can react even while scanning other panels. If you’ve enabled reduced-motion mode, the UFO flashes in place without sweeping across the map, but the glow still locks on—and the sting still plays—so you can track the target. Drop pressure there immediately or sabotage your opponent’s attempt—the glow clears the moment someone resolves the anomaly.
