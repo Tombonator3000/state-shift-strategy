@@ -44,6 +44,7 @@ export interface FinalEditionEventHighlight {
   summary: string;
   faction: 'truth' | 'government' | 'neutral';
   rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
+  cardId?: string;
   truthDelta: number;
   ipDelta: number;
   stateName?: string;
@@ -57,6 +58,7 @@ export interface FinalEditionComboHighlight {
   rewardLabel: string;
   turn: number;
   ownerLabel: string;
+  cardId?: string;
   description?: string;
 }
 
