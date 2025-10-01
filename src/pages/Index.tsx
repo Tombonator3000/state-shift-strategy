@@ -731,6 +731,57 @@ const Index = () => {
     clearArchive: clearIntelArchive,
   } = useIntelArchive();
 
+  const [isObjectivesOpen, setIsObjectivesOpen] = useState(false);
+  const [hasAcknowledgedObjectives, setHasAcknowledgedObjectives] = useState(() => gameState.turn > 3);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => detectReducedMotion());
+  const previousAgendaIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleChange = (event: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event.matches);
+    };
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+
+  useEffect(() => {
+    const currentAgendaId = gameState.secretAgenda?.id ?? null;
+    if (previousAgendaIdRef.current && currentAgendaId && previousAgendaIdRef.current !== currentAgendaId) {
+      setHasAcknowledgedObjectives(false);
+    }
+    if (!previousAgendaIdRef.current && currentAgendaId) {
+      setHasAcknowledgedObjectives(false);
+    }
+    previousAgendaIdRef.current = currentAgendaId;
+  }, [gameState.secretAgenda?.id]);
+
+  useEffect(() => {
+    if (gameState.turn <= 1) {
+      setHasAcknowledgedObjectives(false);
+    } else if (gameState.turn > 3) {
+      setHasAcknowledgedObjectives(true);
+    }
+  }, [gameState.turn]);
+
+  useEffect(() => {
+    if (isObjectivesOpen) {
+      setHasAcknowledgedObjectives(true);
+    }
+  }, [isObjectivesOpen]);
+
+  const shouldPulseObjectives = !hasAcknowledgedObjectives && !isObjectivesOpen && !prefersReducedMotion;
+
   const persistFaction = useCallback((faction: 'truth' | 'government') => {
     setLastSelectedFaction(faction);
     if (typeof window !== 'undefined') {
@@ -2669,13 +2720,14 @@ const Index = () => {
             <span className="font-bold uppercase tracking-wide">AI States</span>
             <span>{gameState.states.filter(s => s.owner === 'ai').length}</span>
           </div>
-          <Popover>
+          <Popover open={isObjectivesOpen} onOpenChange={setIsObjectivesOpen}>
             <PopoverTrigger asChild>
               <button
                 type="button"
                 className={clsx(
                   statusBadgeClass,
-                  'text-[10px] font-bold uppercase tracking-wide transition hover:bg-newspaper-text/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg'
+                  'text-[10px] font-bold uppercase tracking-wide transition hover:bg-newspaper-text/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg',
+                  shouldPulseObjectives && 'relative motion-safe:animate-objective-pulse'
                 )}
               >
                 Objectives
