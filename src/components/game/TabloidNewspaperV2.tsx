@@ -15,6 +15,14 @@ import type { ParanormalSighting } from '@/types/paranormal';
 import type { AgendaMoment } from '@/hooks/usePressArchive';
 import { EVENT_DATABASE } from '@/data/eventDatabase';
 import type { ArcProgressSummary } from '@/types/campaign';
+import { cn } from '@/lib/utils';
+import {
+  NEWSPAPER_BADGE_CLASS,
+  NEWSPAPER_BODY_CLASS,
+  NEWSPAPER_CARD_CLASS,
+  NEWSPAPER_HEADER_CLASS,
+  NewspaperSection,
+} from './newspaperLayout';
 
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
 
@@ -930,8 +938,8 @@ const TabloidNewspaperV2 = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <UICard className="ink-smudge relative flex h-full max-h-[90vh] w-full max-w-[min(95vw,1280px)] flex-col overflow-hidden border-4 border-newspaper-border bg-newspaper-bg text-newspaper-text shadow-2xl">
-        <header className="relative border-b-4 border-double border-newspaper-border bg-newspaper-header/90 px-6 py-5">
+      <UICard className={NEWSPAPER_CARD_CLASS}>
+        <header className={NEWSPAPER_HEADER_CLASS}>
           {breakingStamp ? (
             <div className="stamp stamp--breaking absolute left-6 top-4">{breakingStamp}</div>
           ) : null}
@@ -962,8 +970,8 @@ const TabloidNewspaperV2 = ({
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 xl:px-5 xl:py-5">
-          <section className="mb-6 rounded-md border border-newspaper-border bg-white/70 px-4 py-3 text-sm text-newspaper-text shadow-sm">
+        <div className={NEWSPAPER_BODY_CLASS}>
+          <NewspaperSection className="mb-6 bg-white/70 px-4 py-3 text-sm text-newspaper-text">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <span className="font-semibold uppercase tracking-wide">Truth Index</span>
@@ -987,12 +995,14 @@ const TabloidNewspaperV2 = ({
                 </span>
               </div>
             </div>
-          </section>
+          </NewspaperSection>
 
           <div className="grid gap-4 lg:gap-5 lg:grid-cols-3">
             <article className="lg:col-span-2 space-y-4 rounded-md border border-newspaper-border bg-white/80 p-6 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
-                <span className="rounded-full border border-newspaper-border px-2 py-1">{heroTypeLabel}</span>
+                <span className={cn(NEWSPAPER_BADGE_CLASS, 'rounded-full px-2 py-1 text-[11px] tracking-wide text-newspaper-text')}>
+                  {heroTypeLabel}
+                </span>
                 {heroTarget ? (
                   <span className="rounded-full border border-dashed border-newspaper-border px-2 py-1">{heroTarget}</span>
                 ) : null}
