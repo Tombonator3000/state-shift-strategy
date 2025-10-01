@@ -111,5 +111,107 @@ describe('resolveCardMVP hotspot handling', () => {
     expect(result.logEntries.some(entry => entry.includes('👻 Desert Rift resolved in Nevada!'))).toBe(true);
     expect(result.logEntries.some(entry => entry.includes('NaN'))).toBe(false);
   });
+
+  it('applies hotspot truth swings for both human and AI captures', () => {
+    const tracker = createTracker();
+    const card: GameCard = {
+      id: 'zone-seizure',
+      name: 'Silent Takeover',
+      type: 'ZONE',
+      faction: 'truth',
+      rarity: 'common',
+      cost: 0,
+      target: { scope: 'state', count: 1 },
+      effects: { pressureDelta: 2 },
+    };
+
+    const humanResult = resolveCardMVP(
+      createBaseSnapshot({
+        truth: 85,
+        aiControlledStates: ['NV'],
+        states: [
+          {
+            id: 'NV',
+            name: 'Nevada',
+            abbreviation: 'NV',
+            baseIP: 2,
+            baseDefense: 1,
+            defense: 1,
+            pressure: 0,
+            pressurePlayer: 0,
+            pressureAi: 0,
+            contested: false,
+            owner: 'ai',
+            paranormalHotspot: {
+              id: 'hotspot-1',
+              eventId: 'event-1',
+              label: 'Desert Rift',
+              defenseBoost: 0,
+              truthReward: 20,
+              expiresOnTurn: 2,
+              turnsRemaining: 2,
+              source: 'neutral',
+            },
+          },
+        ],
+      }),
+      card,
+      'NV',
+      'human',
+      tracker,
+    );
+
+    expect(humanResult.truth).toBe(100);
+    expect(
+      humanResult.logEntries,
+    ).toContain('Silent Takeover: Truth manipulation ↑ (85% → 100%) [player]');
+    expect(humanResult.logEntries).toContain(
+      '👻 Desert Rift resolved in Nevada! Truth +15.',
+    );
+
+    const aiResult = resolveCardMVP(
+      createBaseSnapshot({
+        truth: 10,
+        controlledStates: ['NV'],
+        states: [
+          {
+            id: 'NV',
+            name: 'Nevada',
+            abbreviation: 'NV',
+            baseIP: 2,
+            baseDefense: 1,
+            defense: 1,
+            pressure: 0,
+            pressurePlayer: 0,
+            pressureAi: 0,
+            contested: false,
+            owner: 'player',
+            paranormalHotspot: {
+              id: 'hotspot-2',
+              eventId: 'event-1',
+              label: 'Desert Rift',
+              defenseBoost: 0,
+              truthReward: 7,
+              expiresOnTurn: 2,
+              turnsRemaining: 2,
+              source: 'neutral',
+            },
+          },
+        ],
+      }),
+      card,
+      'NV',
+      'ai',
+      tracker,
+    );
+
+    expect(aiResult.truth).toBe(3);
+    expect(aiResult.logEntries).toContain(
+      'Silent Takeover: Truth manipulation ↓ (10% → 3%) [AI]',
+    );
+    expect(aiResult.logEntries).toContain(
+      '👻 Desert Rift resolved in Nevada! Truth -7.',
+    );
+  });
 });
 

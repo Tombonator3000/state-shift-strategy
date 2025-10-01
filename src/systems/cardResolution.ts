@@ -10,6 +10,7 @@ import {
 } from '@/data/stateCombinations';
 import type { PlayerStats } from '@/data/achievementSystem';
 import type { StateEventBonusSummary, StateParanormalHotspot } from '@/hooks/gameStateTypes';
+import { applyTruthDelta } from '@/utils/truth';
 
 type Faction = 'government' | 'truth';
 
@@ -297,6 +298,12 @@ export function resolveCardMVP(
   applyEffectsMvp(engineState, ownerId, effectiveCard as Card, targetStateId, mediaOptionsWithCombos);
 
   const logEntries: string[] = engineLog.map(message => `${card.name}: ${message}`);
+  let syncedEngineLogLength = engineLog.length;
+  const flushEngineLog = () => {
+    while (syncedEngineLogLength < engineLog.length) {
+      logEntries.push(`${card.name}: ${engineLog[syncedEngineLogLength++]}`);
+    }
+  };
   const newStates = gameState.states.map(state => ({ ...state }));
   const nextControlledStates = new Set(gameState.controlledStates);
   const nextAiControlledStates = new Set(gameState.aiControlledStates ?? []);
@@ -375,10 +382,18 @@ export function resolveCardMVP(
       const truthDelta = Number.isFinite(rawTruthReward) ? rawTruthReward : 0;
       const directionalDelta = captureFaction === 'truth' ? truthDelta : -truthDelta;
       if (directionalDelta !== 0) {
-        truthBonusFromHotspots += directionalDelta;
-        logEntries.push(
-          `👻 ${hotspot.label} resolved in ${state.name}! Truth ${directionalDelta > 0 ? '+' : ''}${directionalDelta}.`,
-        );
+        const beforeTruth = engineState.truth;
+        applyTruthDelta(engineState, directionalDelta, owner === 'player' ? 'human' : 'ai');
+        flushEngineLog();
+        const actualDelta = engineState.truth - beforeTruth;
+        truthBonusFromHotspots += actualDelta;
+        if (actualDelta !== 0) {
+          logEntries.push(
+            `👻 ${hotspot.label} resolved in ${state.name}! Truth ${actualDelta > 0 ? '+' : ''}${actualDelta}.`,
+          );
+        } else {
+          logEntries.push(`👻 ${hotspot.label} resolved in ${state.name}!`);
+        }
       } else {
         logEntries.push(`👻 ${hotspot.label} resolved in ${state.name}!`);
       }
@@ -392,7 +407,8 @@ export function resolveCardMVP(
 
   const playerIPAfterEffects = engineState.players[PLAYER_ID].ip;
   const aiIPAfterEffects = engineState.players[AI_ID].ip;
-  const truthAfterEffects = Math.max(0, Math.min(100, engineState.truth + truthBonusFromHotspots));
+  flushEngineLog();
+  const truthAfterEffects = engineState.truth;
   const damageDealt = Math.max(0, beforeState.players[opponentId].ip - engineState.players[opponentId].ip);
 
   const adjustedStates = applyDefenseBonusToStates(newStates, comboEffects.stateDefenseBonus);
