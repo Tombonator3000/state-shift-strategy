@@ -484,7 +484,10 @@ const cloneEventEffects = (
     : undefined;
 };
 
-const buildStateEventEffectSummary = (effects: GameEvent['effects'] | undefined): string[] => {
+const buildStateEventEffectSummary = (
+  effects: GameEvent['effects'] | undefined,
+  options?: { faction?: 'truth' | 'government'; truthDeltaOverride?: number },
+): string[] => {
   if (!effects || typeof effects !== 'object') {
     return [];
   }
@@ -492,7 +495,15 @@ const buildStateEventEffectSummary = (effects: GameEvent['effects'] | undefined)
   const summary: string[] = [];
   const formatSigned = (value: number) => (value >= 0 ? `+${value}` : `${value}`);
 
-  const truthDelta = (effects.truth ?? 0) + (effects.truthChange ?? 0);
+  const rawTruthDelta = (effects.truth ?? 0) + (effects.truthChange ?? 0);
+  let truthDelta = rawTruthDelta;
+
+  if (typeof options?.truthDeltaOverride === 'number' && Number.isFinite(options.truthDeltaOverride)) {
+    truthDelta = options.truthDeltaOverride;
+  } else if (options?.faction === 'government') {
+    truthDelta = -rawTruthDelta;
+  }
+
   if (truthDelta) {
     summary.push(`Truth ${formatSigned(truthDelta)}%`);
   }
@@ -541,8 +552,9 @@ const createStateEventBonusSummary = (params: {
   event: GameEvent;
   faction: 'truth' | 'government';
   turn: number;
+  truthDeltaOverride?: number;
 }): StateEventBonusSummary => {
-  const { event, faction, turn } = params;
+  const { event, faction, turn, truthDeltaOverride } = params;
   const labelSource = typeof event.title === 'string' && event.title.trim().length > 0
     ? event.title.trim()
     : typeof event.headline === 'string' && event.headline.trim().length > 0
@@ -554,7 +566,10 @@ const createStateEventBonusSummary = (params: {
       ? event.content.trim()
       : undefined;
   const effects = cloneEventEffects(event.effects);
-  const effectSummary = buildStateEventEffectSummary(event.effects);
+  const effectSummary = buildStateEventEffectSummary(event.effects, {
+    faction,
+    truthDeltaOverride,
+  });
 
   return {
     source: 'state-event',
@@ -601,12 +616,16 @@ const normalizeStateEventBonus = (
   const faction = data.faction === 'truth' || data.faction === 'government'
     ? data.faction
     : 'truth';
-  const effectSummary = Array.isArray(data.effectSummary)
+  const persistedSummary = Array.isArray(data.effectSummary)
     ? data.effectSummary
         .map(entry => (typeof entry === 'string' ? entry.trim() : ''))
         .filter(entry => entry.length > 0)
     : undefined;
   const effects = cloneEventEffects((data as { effects?: GameEvent['effects'] }).effects);
+  const computedSummary = buildStateEventEffectSummary(effects, { faction });
+  const effectSummary = computedSummary.length > 0
+    ? computedSummary
+    : persistedSummary;
 
   return {
     source: 'state-event',
@@ -1114,13 +1133,18 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const eventEffects = trigger.event.effects;
 
         let immediateDrawNote: string | null = null;
+        let truthDeltaOverride: number | undefined;
 
         if (eventEffects && typeof eventEffects === 'object') {
-          const truthDelta = (eventEffects.truth ?? 0) + (eventEffects.truthChange ?? 0);
-          if (truthDelta) {
+          const rawTruthDelta = (eventEffects.truth ?? 0) + (eventEffects.truthChange ?? 0);
+          const adjustedTruthDelta = capturingFaction === 'government'
+            ? -rawTruthDelta
+            : rawTruthDelta;
+          truthDeltaOverride = adjustedTruthDelta;
+          if (adjustedTruthDelta) {
             const truthMutation = { truth, log: [] as string[] };
             const truthActor = capturingFaction === nextState.faction ? 'human' : 'ai';
-            applyTruthDelta(truthMutation, truthDelta, truthActor);
+            applyTruthDelta(truthMutation, adjustedTruthDelta, truthActor);
             if (truthMutation.log.length > 0) {
               eventLogs.push(...truthMutation.log);
             }
@@ -1227,6 +1251,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           event: trigger.event,
           faction: trigger.capturingFaction,
           turn: trigger.triggeredOnTurn,
+          truthDeltaOverride,
         });
         const updatedHistory = trimStateEventHistory([...targetState.stateEventHistory, summary]);
         targetState.stateEventHistory = updatedHistory;
