@@ -393,48 +393,60 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
             </Card>
 
             {/* Main Articles */}
-            {allArticles.slice(0, 4).map((article, index) => (
-              <article key={article.id} className="border-b-2 border-newspaper-border pb-4">
-                <h2 className={`text-3xl font-black mb-3 font-serif leading-tight ${
-                  article.isEvent 
-                    ? 'text-secret-red' 
-                    : 'text-newspaper-text hover:text-secret-red transition-colors cursor-pointer'
-                }`}>
-                  {article.headline}
-                </h2>
-                
-                {article.image && (
-                  <div className="w-full h-32 mb-3 border-2 border-newspaper-border overflow-hidden">
-                    <img 
-                      src={article.image} 
-                      alt={article.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder-card.png';
-                      }}
-                    />
+            {allArticles.slice(0, 4).map((article, index) => {
+              const isFilesOnTheLoose = article.id === 'deepfile_dump_crochet_forum';
+              return (
+                <article
+                  key={article.id}
+                  className={`border-b-2 border-newspaper-border pb-4 ${
+                    isFilesOnTheLoose ? 'animate-pulse ring-2 ring-secret-red/70 shadow-[0_0_20px_rgba(248,113,113,0.4)] rounded-md px-3 py-2' : ''
+                  }`}
+                >
+                  <h2
+                    className={`text-3xl font-black mb-3 font-serif leading-tight ${
+                      article.isEvent
+                        ? 'text-secret-red'
+                        : 'text-newspaper-text hover:text-secret-red transition-colors cursor-pointer'
+                    } ${isFilesOnTheLoose ? 'drop-shadow-[0_0_18px_rgba(248,113,113,0.6)]' : ''}`}
+                  >
+                    {article.headline}
+                  </h2>
+
+                  {article.image && (
+                    <div className="w-full h-32 mb-3 border-2 border-newspaper-border overflow-hidden">
+                      <img
+                        src={article.image}
+                        alt={article.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder-card.png';
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  <p
+                    className={`leading-relaxed font-serif ${
+                      article.isEvent ? 'text-secret-red' : 'text-newspaper-text'
+                    } ${isFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_12px_rgba(248,113,113,0.5)]' : ''}`}
+                  >
+                    {article.content}
+                  </p>
+
+                  {index === 0 && (
+                    <div className="mt-3 text-sm text-newspaper-text/70 italic">
+                      Continued on page A-{Math.floor(Math.random() * 20) + 1}...
+                      <span className="text-secret-red ml-2">[REMAINDER REDACTED]</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center mt-2 text-xs text-newspaper-text/60">
+                    <span>By: {article.isEvent ? 'Crisis Reporter' : 'Agent ████████'}</span>
+                    <span>Source: {article.isEvent ? 'EMERGENCY BROADCAST' : 'Classified Intel'}</span>
                   </div>
-                )}
-                
-                <p className={`leading-relaxed font-serif ${
-                  article.isEvent ? 'text-secret-red' : 'text-newspaper-text'
-                }`}>
-                  {article.content}
-                </p>
-                
-                {index === 0 && (
-                  <div className="mt-3 text-sm text-newspaper-text/70 italic">
-                    Continued on page A-{Math.floor(Math.random() * 20) + 1}... 
-                    <span className="text-secret-red ml-2">[REMAINDER REDACTED]</span>
-                  </div>
-                )}
-                
-                <div className="flex justify-between items-center mt-2 text-xs text-newspaper-text/60">
-                  <span>By: {article.isEvent ? 'Crisis Reporter' : 'Agent ████████'}</span>
-                  <span>Source: {article.isEvent ? 'EMERGENCY BROADCAST' : 'Classified Intel'}</span>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
 
           {/* Sidebar - Takes up 1 column */}

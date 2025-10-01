@@ -24,7 +24,8 @@ export const governmentBatch3: GameCard[] = [
       "ipDelta": {
         "opponent": 3
       },
-      "discardOpponent": 1
+      "discardOpponent": 1,
+      "revealSecretAgenda": true
     },
     "flavor": "He shakes with one hand and pockets with the other."
   },
@@ -86,7 +87,8 @@ export const governmentBatch3: GameCard[] = [
     "rarity": "uncommon",
     "cost": 5,
     "effects": {
-      "pressureDelta": 2
+      "pressureDelta": 2,
+      "revealSecretAgenda": true
     },
     "flavor": "Bleach for inconvenient ink."
   },
