@@ -16,7 +16,7 @@ export const useStateEvents = () => {
   const { toast } = useToast();
 
   const triggerStateEvent = useCallback((
-    stateId: string, 
+    stateId: string,
     capturingFaction: 'truth' | 'government',
     gameState: Pick<GameState, 'states' | 'turn'>,
     statePosition?: { x: number; y: number }
@@ -63,10 +63,15 @@ export const useStateEvents = () => {
     eventManager.updateTurn(turn);
   }, [eventManager]);
 
+  const resetStateEvents = useCallback(() => {
+    eventManager.reset();
+  }, [eventManager]);
+
   return {
     triggerStateEvent,
     triggerContestedStateEffects,
     updateEventManagerTurn,
+    resetStateEvents,
     eventManager
   };
 };
