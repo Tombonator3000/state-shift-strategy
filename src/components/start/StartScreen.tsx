@@ -4,7 +4,7 @@ import ArticleButton from './ArticleButton';
 import '@/styles/newspaper.css';
 
 type StartScreenProps = {
-  onStartGame: (faction: 'government' | 'truth') => void | Promise<void>;
+  onStartGame: (faction: 'government' | 'truth', agendaId?: string) => void | Promise<void>;
   onManageExpansions: () => void;
   onHowToPlay: () => void;
   onOptions: () => void;

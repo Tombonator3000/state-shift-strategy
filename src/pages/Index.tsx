@@ -1934,7 +1934,7 @@ const Index = () => {
     }
   };
 
-  const startNewGame = async (faction: 'government' | 'truth') => {
+  const startNewGame = async (faction: 'government' | 'truth', agendaId?: string) => {
     console.log('🎵 Index: Starting new game with faction:', faction);
     persistFaction(faction);
     setVictoryState({ isVictory: false, type: null });
@@ -1942,7 +1942,7 @@ const Index = () => {
     setReadingEdition(null);
     setShowExtraEdition(false);
     setParanormalSightings([]);
-    await initGame(faction);
+    await initGame(faction, agendaId);
     setShowMenu(false);
     setShowIntro(false);
     audio.setGameplayMusic(faction);

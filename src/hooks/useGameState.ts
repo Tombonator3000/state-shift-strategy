@@ -1425,7 +1425,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     [achievements],
   );
 
-  const initGame = useCallback((faction: 'government' | 'truth') => {
+  const initGame = useCallback((faction: 'government' | 'truth', agendaId?: string) => {
     const startingTruth = 50;
     const startingIP = 5;
     const aiStartingIP = 5;
@@ -1447,7 +1447,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const initialControl = getInitialStateControl(faction);
     const issueDefinition = advanceAgendaIssue();
     const issueState = agendaIssueToState(issueDefinition);
-    const playerAgendaTemplate = getRandomAgenda(faction, { issueId: issueState.id });
+    const providedAgenda = agendaId ? getAgendaById(agendaId) : undefined;
+    const isAgendaCompatible = providedAgenda
+      ? providedAgenda.faction === faction || providedAgenda.faction === 'both'
+      : false;
+    const playerAgendaTemplate = isAgendaCompatible
+      ? providedAgenda!
+      : getRandomAgenda(faction, { issueId: issueState.id });
     const syncedAgendaDifficulty = playerAgendaTemplate.difficulty;
     const aiAgendaTemplate = getRandomAgenda(aiFaction, {
       issueId: issueState.id,
@@ -1549,6 +1555,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         `Controlled states: ${initialControl.player.join(', ')}`,
         `Weekly Issue: ${issueState.label}`,
         `Issue Spotlight: ${issueState.description}`,
+        `Secret Agenda Assigned: ${playerAgendaTemplate.title} (${playerAgendaTemplate.difficulty.toUpperCase()})`,
         `Secret Agenda Difficulty Sync: ${syncedAgendaDifficulty.toUpperCase()}${aiAgendaFallback ? ` (AI fallback to ${aiAgendaFallback.toUpperCase()})` : ''}`,
       ],
       drawMode,
