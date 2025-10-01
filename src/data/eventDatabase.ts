@@ -5028,19 +5028,32 @@ export class EventManager {
     }
 
     // Filter events based on capturing faction and conditions
-    const availableEvents = stateEvents.filter(event => {
+    const factionEligibleEvents = stateEvents.filter(event => {
       if (event.conditions?.capturedBy && event.conditions.capturedBy !== capturingFaction) {
-        return false;
-      }
-
-      if (this.hasStateEventBeenUsedRecently(stateId, event.id)) {
         return false;
       }
 
       return true;
     });
 
+    const availableEvents = factionEligibleEvents.filter(
+      event => !this.hasStateEventBeenUsedRecently(stateId, event.id)
+    );
+
     if (!availableEvents.length) {
+      const allBlockedByHistory =
+        factionEligibleEvents.length > 0 &&
+        factionEligibleEvents.every(event => this.hasStateEventBeenUsedRecently(stateId, event.id));
+
+      if (allBlockedByHistory) {
+        const currentHistory = [...this.getStateEventHistory(stateId)];
+        if (currentHistory.length > 1) {
+          const trimmedHistory = currentHistory.slice(1);
+          this.stateEventHistoryByState.set(stateId, trimmedHistory);
+          return this.selectStateEvent(stateId, capturingFaction, gameState);
+        }
+      }
+
       const fallbackEvent = this.createFallbackStateEvent(
         stateId,
         capturingFaction,
