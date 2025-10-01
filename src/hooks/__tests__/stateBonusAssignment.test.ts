@@ -89,6 +89,7 @@ const createAssignment = (): AssignStateBonusesResult => ({
       label: 'Mystery Subsidy',
       summary: 'Economic incentives flow freely.',
       headline: 'State coffers swell',
+      icon: '⭐️',
       truthDelta: -2,
       ipDelta: 4,
       pressureDelta: 1,
@@ -111,7 +112,7 @@ const createAssignment = (): AssignStateBonusesResult => ({
       },
     ],
   },
-  logs: ['⭐️ Texas activates Mystery Subsidy'],
+  logs: ['🗞️ Texas reports: Investigative Lead'],
   truthDelta: -2,
   ipDelta: 4,
   pressureAdjustments: { TX: 1 },
@@ -137,9 +138,10 @@ describe('applyStateBonusAssignmentToState', () => {
     expect(state.pressure).toBe(4);
     expect(state.activeStateBonus?.id).toBe('bonus:tx');
 
+    expect(updated.log).toContain('🗞️ Texas reports: Investigative Lead');
     expect(updated.log).toContain('⭐️ Texas activates Mystery Subsidy');
     expect(updated.log.some(entry => entry.startsWith('Truth manipulation'))).toBe(true);
-    expect(updated.log.at(-1)).toBe('State bonuses adjusted IP by +4');
+    expect(updated.log).toContain('State bonuses adjusted IP by +4');
 
     // original state remains unchanged
     expect(baseState.truth).toBe(50);
@@ -161,8 +163,61 @@ describe('applyStateBonusAssignmentToState', () => {
     expect(state.pressurePlayer).toBe(0);
     expect(state.pressure).toBe(4);
 
-    expect(updated.log.at(-1)).toBe('State bonuses adjusted IP by +4');
+    expect(updated.log).toContain('State bonuses adjusted IP by +4');
     expect(updated.log.some(entry => entry.startsWith('Truth manipulation'))).toBe(true);
+  });
+
+  test('retains active bonus across rounds without duplicate activation log', () => {
+    const baseState = createBaseGameState('truth');
+    const assignment = createAssignment();
+
+    const afterRoundThree = applyStateBonusAssignmentToState(baseState, assignment);
+
+    const activationLogsAfterFirst = afterRoundThree.log.filter(entry =>
+      entry.includes('activates Mystery Subsidy'),
+    );
+    expect(activationLogsAfterFirst).toHaveLength(1);
+
+    const nextRoundBase: GameState = {
+      ...afterRoundThree,
+      round: afterRoundThree.round + 1,
+      lastStateBonusRound: afterRoundThree.lastStateBonusRound,
+      log: [...afterRoundThree.log],
+    };
+
+    const followupAssignment: AssignStateBonusesResult = {
+      ...assignment,
+      bonuses: {
+        TX: {
+          ...assignment.bonuses.TX!,
+          round: nextRoundBase.round,
+        },
+      },
+      logs: [],
+      roundEvents: { TX: [] },
+      debug: { seed: 100, rolls: [] },
+    };
+
+    const afterRoundFour = applyStateBonusAssignmentToState(nextRoundBase, followupAssignment);
+
+    const activationLogsAfterSecond = afterRoundFour.log.filter(entry =>
+      entry.includes('activates Mystery Subsidy'),
+    );
+    expect(activationLogsAfterSecond).toHaveLength(1);
+
+    expect(afterRoundFour.states[0].activeStateBonus?.id).toBe(
+      afterRoundThree.states[0].activeStateBonus?.id,
+    );
+
+    const truthDelta = followupAssignment.truthDelta ?? 0;
+    const ipDelta = followupAssignment.ipDelta ?? 0;
+    const pressureDelta = followupAssignment.pressureAdjustments.TX ?? 0;
+
+    expect(afterRoundFour.truth).toBe(afterRoundThree.truth + truthDelta);
+    expect(afterRoundFour.ip).toBe(afterRoundThree.ip + ipDelta);
+    expect(afterRoundFour.states[0].pressurePlayer).toBe(
+      (afterRoundThree.states[0].pressurePlayer ?? 0) + pressureDelta,
+    );
   });
 });
 

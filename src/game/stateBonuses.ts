@@ -81,6 +81,7 @@ interface AssignStateBonusesOptions {
   round: number;
   playerFaction: 'truth' | 'government';
   eventChance?: number;
+  existingBonuses?: Record<string, ActiveStateBonus | null | undefined>;
 }
 
 export interface AssignStateBonusesResult {
@@ -226,8 +227,19 @@ export const assignStateBonuses = (
       continue;
     }
 
-    const bonus = rng.pickWeighted(pool.bonuses.map(entry => ({ weight: entry.weight, value: entry }))) ?? null;
-    const bonusRecord = bonus ? toBonus(bonus, state, options.round) : null;
+    const existingBonus = options.existingBonuses?.[state.abbreviation] ?? null;
+    const normalizedExistingBonus =
+      existingBonus && existingBonus.stateAbbreviation === state.abbreviation
+        ? existingBonus
+        : null;
+
+    const bonusRecord = normalizedExistingBonus
+      ? { ...normalizedExistingBonus, round: options.round }
+      : (() => {
+          const bonus =
+            rng.pickWeighted(pool.bonuses.map(entry => ({ weight: entry.weight, value: entry }))) ?? null;
+          return bonus ? toBonus(bonus, state, options.round) : null;
+        })();
 
     let selectedEvent: ThemedEffect | null = null;
     if (rng.chance(eventChance)) {
@@ -250,8 +262,6 @@ export const assignStateBonuses = (
             (pressureAdjustments[state.abbreviation] ?? 0) + bonusRecord.pressureDelta;
         }
       }
-      const icon = bonusRecord.icon ?? '⭐️';
-      logs.push(`${icon} ${state.name} activates ${bonusRecord.label}`);
     }
 
     if (selectedEvent) {
