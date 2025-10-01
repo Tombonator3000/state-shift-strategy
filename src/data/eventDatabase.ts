@@ -4657,11 +4657,64 @@ export class EventManager {
   private readonly paranormalHotspotChance: number = 0.2;
   private readonly stateEventHistoryLimit: number = 3;
   private stateEventHistoryByState: Map<string, string[]> = new Map();
+  private activeStateEvents: Map<string, GameEvent[]> = new Map();
 
   constructor() {
     this.eventHistory = [];
     this.turnCount = 0;
     this.stateEventHistoryByState = new Map();
+    this.rebuildActiveStateEvents();
+  }
+
+  private rebuildActiveStateEvents() {
+    this.activeStateEvents.clear();
+    for (const [stateId, events] of Object.entries(STATE_EVENTS_DATABASE)) {
+      if (!Array.isArray(events) || events.length === 0) {
+        this.activeStateEvents.set(stateId, []);
+        continue;
+      }
+
+      const activeEvents = this.buildActiveStateEventsForState(events);
+      this.activeStateEvents.set(stateId, activeEvents);
+    }
+  }
+
+  private buildActiveStateEventsForState(events: GameEvent[]): GameEvent[] {
+    const truthEvents = events.filter(
+      event => event.conditions?.capturedBy === 'truth',
+    );
+    const governmentEvents = events.filter(
+      event => event.conditions?.capturedBy === 'government',
+    );
+    const otherEvents = events.filter(event => {
+      const capturedBy = event.conditions?.capturedBy;
+      return capturedBy !== 'truth' && capturedBy !== 'government';
+    });
+
+    const selectedTruth = this.selectRandomSubset(truthEvents, 3);
+    const selectedGovernment = this.selectRandomSubset(governmentEvents, 3);
+    const selectedOthers = otherEvents.length > 0
+      ? this.shuffleArray([...otherEvents])
+      : [];
+
+    return [...selectedTruth, ...selectedGovernment, ...selectedOthers];
+  }
+
+  private selectRandomSubset<T>(pool: T[], limit: number): T[] {
+    if (pool.length <= limit) {
+      return pool.slice();
+    }
+
+    const shuffled = this.shuffleArray([...pool]);
+    return shuffled.slice(0, limit);
+  }
+
+  private shuffleArray<T>(array: T[]): T[] {
+    for (let index = array.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [array[index], array[swapIndex]] = [array[swapIndex], array[index]];
+    }
+    return array;
   }
 
   private selectEventFromPool(
@@ -4848,11 +4901,23 @@ export class EventManager {
     this.eventHistory = [];
     this.turnCount = 0;
     this.stateEventHistoryByState.clear();
+    this.rebuildActiveStateEvents();
   }
 
   // Get state-specific events for a state
   getStateEvents(stateId: string): GameEvent[] {
-    return STATE_EVENTS_DATABASE[stateId] || [];
+    if (this.activeStateEvents.has(stateId)) {
+      return this.activeStateEvents.get(stateId) ?? [];
+    }
+
+    const baseEvents = STATE_EVENTS_DATABASE[stateId];
+    if (!baseEvents || baseEvents.length === 0) {
+      return [];
+    }
+
+    const activeEvents = this.buildActiveStateEventsForState(baseEvents);
+    this.activeStateEvents.set(stateId, activeEvents);
+    return activeEvents;
   }
 
   private getStateEventHistory(stateId: string): string[] {

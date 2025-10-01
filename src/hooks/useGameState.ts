@@ -985,7 +985,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const aiDifficulty = resolveAiDifficulty(aiDifficultyOverride);
   const [eventManager] = useState(() => new EventManager());
   const achievements = useAchievements();
-  const { triggerStateEvent } = useStateEvents();
+  const { triggerStateEvent, resetStateEvents } = useStateEvents();
 
   const triggerCapturedStateEvents = useCallback(
     (resolution: CardPlayResolution | undefined, nextState: GameState): GameEvent[] => {
@@ -1466,6 +1466,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     // Track game start in achievements
     achievements.onGameStart(faction, aiDifficulty);
     achievements.manager.onNewGameStart();
+    eventManager.reset();
+    resetStateEvents();
 
     gameSessionRef.current += 1;
     if (pendingAiTimeoutRef.current) {
@@ -1579,7 +1581,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       },
       secretAgendaDifficulty: syncedAgendaDifficulty,
     }));
-  }, [achievements, aiDifficulty]);
+  }, [achievements, aiDifficulty, eventManager, resetStateEvents]);
 
   const playCard = useCallback((cardId: string, targetOverride?: string | null) => {
     setGameState(prev => {
