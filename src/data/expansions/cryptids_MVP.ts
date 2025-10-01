@@ -2312,7 +2312,7 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
@@ -2376,7 +2376,7 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no roswell detected.\""
@@ -2389,7 +2389,7 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
@@ -2466,7 +2466,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
@@ -2672,7 +2672,7 @@ const cards: GameCard[] = [
     "rarity": "legendary",
     "cost": 6,
     "effects": {
-      "truthDelta": 4
+      "truthDelta": -4
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
@@ -2702,7 +2702,7 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no time detected.\""
@@ -2900,7 +2900,7 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no giant detected.\""
@@ -2930,7 +2930,7 @@ const cards: GameCard[] = [
     "rarity": "legendary",
     "cost": 6,
     "effects": {
-      "truthDelta": 4
+      "truthDelta": -4
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no invisible detected.\""
@@ -2975,7 +2975,7 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
@@ -3071,7 +3071,7 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no neuralyzer detected.\""
@@ -3100,7 +3100,7 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no operation detected.\""
@@ -3113,7 +3113,7 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no holographic detected.\""
@@ -3126,7 +3126,7 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
@@ -3206,7 +3206,7 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no cosmic detected.\""
@@ -3250,7 +3250,7 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
@@ -3263,7 +3263,7 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no cryptid detected.\""
@@ -3310,7 +3310,7 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
@@ -3440,7 +3440,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the alabama cryptid.\""
@@ -3453,7 +3453,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the tizheruk.\""
@@ -3481,7 +3481,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the fouke monster.\""
@@ -3528,7 +3528,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the connecticut cryptid.\""
@@ -3541,7 +3541,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the delaware cryptid.\""
@@ -3554,7 +3554,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the skunk ape.\""
@@ -3567,7 +3567,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the georgia cryptid.\""
@@ -3580,7 +3580,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the hawaii cryptid.\""
@@ -3593,7 +3593,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the idaho cryptid.\""
@@ -3623,7 +3623,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the indiana cryptid.\""
@@ -3636,7 +3636,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the iowa cryptid.\""
@@ -3649,7 +3649,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the kansas cryptid.\""
@@ -3662,7 +3662,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the kelly–hopkinsville goblins.\""
@@ -3675,7 +3675,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the rougarou.\""
@@ -3688,7 +3688,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the maine cryptid.\""
@@ -3701,7 +3701,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the snallygaster.\""
@@ -3714,7 +3714,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the dover demon.\""
@@ -3727,7 +3727,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the dogman.\""
@@ -3755,7 +3755,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the mississippi cryptid.\""
@@ -3768,7 +3768,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the missouri cryptid.\""
@@ -3781,7 +3781,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the shunka warakin.\""
@@ -3794,7 +3794,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the nebraska cryptid.\""
@@ -3807,7 +3807,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the tahoe tessie.\""
@@ -3820,7 +3820,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the wood devils.\""
@@ -3863,7 +3863,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the montauk monster.\""
@@ -3876,7 +3876,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the north carolina cryptid.\""
@@ -3889,7 +3889,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the north dakota cryptid.\""
@@ -3902,7 +3902,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the loveland frogman.\""
@@ -3915,7 +3915,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the oklahoma cryptid.\""
@@ -3928,7 +3928,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the bigfoot.\""
@@ -3941,7 +3941,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the pennsylvania cryptid.\""
@@ -3954,7 +3954,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the rhode island cryptid.\""
@@ -3967,7 +3967,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the south carolina cryptid.\""
@@ -3980,7 +3980,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the south dakota cryptid.\""
@@ -3993,7 +3993,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the tennessee cryptid.\""
@@ -4021,7 +4021,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the utah cryptid.\""
@@ -4034,7 +4034,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the champ.\""
@@ -4047,7 +4047,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the virginia cryptid.\""
@@ -4060,7 +4060,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the bigfoot.\""
@@ -4103,7 +4103,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the wyoming cryptid.\""
@@ -4148,7 +4148,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
@@ -4338,7 +4338,7 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "cryptids",
     "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
