@@ -966,10 +966,14 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
     updatedAiSecretAgenda !== state.aiSecretAgenda ||
     logUpdates.length > 0
   ) {
+    const resolvedDifficulty = updatedSecretAgenda?.difficulty
+      ?? state.secretAgendaDifficulty
+      ?? null;
     return {
       ...state,
       secretAgenda: updatedSecretAgenda,
       aiSecretAgenda: updatedAiSecretAgenda,
+      secretAgendaDifficulty: resolvedDifficulty,
       log: logUpdates.length > 0 ? [...state.log, ...logUpdates] : state.log,
     };
   }
@@ -1284,7 +1288,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const initialIssueDefinition = peekActiveAgendaIssue();
     const initialIssue = agendaIssueToState(initialIssueDefinition);
     const initialPlayerAgenda = getRandomAgenda('truth', { issueId: initialIssue.id });
-    const initialAiAgenda = getRandomAgenda('government', { issueId: initialIssue.id });
+    const initialAgendaDifficulty = initialPlayerAgenda.difficulty;
+    const initialAiAgenda = getRandomAgenda('government', {
+      issueId: initialIssue.id,
+      difficulty: initialAgendaDifficulty,
+    });
+    const initialAiFallback = initialAiAgenda.difficulty !== initialAgendaDifficulty
+      ? initialAiAgenda.difficulty
+      : null;
 
     return {
       faction: 'truth',
@@ -1355,6 +1366,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         'Cards drawn: 5',
         `AI Difficulty: ${aiDifficulty}`,
         `Weekly Issue: ${initialIssue.label}`,
+        `Secret Agenda Difficulty Sync: ${initialAgendaDifficulty.toUpperCase()}${initialAiFallback ? ` (AI fallback to ${initialAiFallback.toUpperCase()})` : ''}`,
       ],
       secretAgenda: {
         ...initialPlayerAgenda,
@@ -1370,6 +1382,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         revealed: false,
         stageId: resolveAgendaStageByProgress(initialAiAgenda.stages, 0)?.id ?? '',
       },
+      secretAgendaDifficulty: initialAgendaDifficulty,
       animating: false,
       aiTurnInProgress: false,
       selectedCard: null,
@@ -1435,7 +1448,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const issueDefinition = advanceAgendaIssue();
     const issueState = agendaIssueToState(issueDefinition);
     const playerAgendaTemplate = getRandomAgenda(faction, { issueId: issueState.id });
-    const aiAgendaTemplate = getRandomAgenda(aiFaction, { issueId: issueState.id });
+    const syncedAgendaDifficulty = playerAgendaTemplate.difficulty;
+    const aiAgendaTemplate = getRandomAgenda(aiFaction, {
+      issueId: issueState.id,
+      difficulty: syncedAgendaDifficulty,
+    });
+    const aiAgendaFallback = aiAgendaTemplate.difficulty !== syncedAgendaDifficulty
+      ? aiAgendaTemplate.difficulty
+      : null;
 
     // Track game start in achievements
     achievements.onGameStart(faction, aiDifficulty);
@@ -1529,6 +1549,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         `Controlled states: ${initialControl.player.join(', ')}`,
         `Weekly Issue: ${issueState.label}`,
         `Issue Spotlight: ${issueState.description}`,
+        `Secret Agenda Difficulty Sync: ${syncedAgendaDifficulty.toUpperCase()}${aiAgendaFallback ? ` (AI fallback to ${aiAgendaFallback.toUpperCase()})` : ''}`,
       ],
       drawMode,
       cardDrawState: {
@@ -1549,6 +1570,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         revealed: false,
         stageId: resolveAgendaStageByProgress(aiAgendaTemplate.stages, 0)?.id ?? '',
       },
+      secretAgendaDifficulty: syncedAgendaDifficulty,
     }));
   }, [achievements, aiDifficulty]);
 
@@ -3111,6 +3133,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       pendingAiTimeoutRef.current = null;
 
       setGameState(prev => {
+        const savedDifficultyValue = typeof saveData.secretAgendaDifficulty === 'string'
+          ? saveData.secretAgendaDifficulty.toLowerCase()
+          : null;
+        const isValidSavedDifficulty = savedDifficultyValue === 'easy'
+          || savedDifficultyValue === 'medium'
+          || savedDifficultyValue === 'hard'
+          || savedDifficultyValue === 'legendary';
         const restoredEffects = saveData.stateCombinationEffects
           ? {
             ...createDefaultCombinationEffects(),
@@ -3132,6 +3161,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           paranormalHotspots: normalizedHotspots,
           secretAgenda,
           aiSecretAgenda,
+          secretAgendaDifficulty: secretAgenda?.difficulty
+            ?? (isValidSavedDifficulty ? savedDifficultyValue as SecretAgenda['difficulty'] : null),
           agendaIssue: agendaIssueState,
           agendaIssueCounters: (saveData.agendaIssueCounters && typeof saveData.agendaIssueCounters === 'object')
             ? saveData.agendaIssueCounters as Record<string, number>

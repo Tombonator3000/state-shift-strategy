@@ -92,6 +92,7 @@ export interface GameState {
     revealed: boolean;
     stageId?: string;
   };
+  secretAgendaDifficulty?: SecretAgenda['difficulty'] | null;
   animating: boolean;
   aiTurnInProgress: boolean;
   selectedCard: string | null;
