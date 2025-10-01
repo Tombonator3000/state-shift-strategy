@@ -2350,6 +2350,19 @@ const Index = () => {
 
     return (
       <div className="secret-agenda rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
+        {gameState.secretAgendaDifficulty && (
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[10px] uppercase tracking-[0.25em] text-newspaper-text/70">
+            <span className="font-semibold">Synced Agenda Difficulty</span>
+            <span className="font-mono text-newspaper-text">
+              {gameState.secretAgendaDifficulty.toUpperCase()}
+            </span>
+          </div>
+        )}
+        {gameState.secretAgendaDifficulty && aiAgenda && aiAgenda.difficulty !== gameState.secretAgendaDifficulty && (
+          <div className="mb-2 text-[10px] font-mono text-newspaper-text/60">
+            AI fallback difficulty: {aiAgenda.difficulty.toUpperCase()}
+          </div>
+        )}
         {content}
       </div>
     );

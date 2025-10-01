@@ -925,6 +925,7 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
 export interface AgendaSelectionOptions {
   issueId?: string;
   excludeIds?: string[];
+  difficulty?: SecretAgenda['difficulty'];
 }
 
 export const getRandomAgenda = (
@@ -944,7 +945,15 @@ export const getRandomAgenda = (
   }
 
   const issueId = options?.issueId;
-  const weightedPool = factionAgendas.flatMap(agenda => {
+  const desiredDifficulty = options?.difficulty;
+  const difficultyMatchedAgendas = desiredDifficulty
+    ? factionAgendas.filter(agenda => agenda.difficulty === desiredDifficulty)
+    : factionAgendas;
+  const eligibleAgendas = difficultyMatchedAgendas.length > 0
+    ? difficultyMatchedAgendas
+    : factionAgendas;
+
+  const weightedPool = eligibleAgendas.flatMap(agenda => {
     const baseWeight = agenda.difficulty === 'easy'
       ? 4
       : agenda.difficulty === 'medium'
@@ -956,6 +965,10 @@ export const getRandomAgenda = (
     const effectiveWeight = Math.max(1, Math.round(baseWeight * multiplier));
     return Array.from({ length: effectiveWeight }, () => agenda);
   });
+
+  if (weightedPool.length === 0) {
+    return factionAgendas[Math.floor(Math.random() * factionAgendas.length)];
+  }
 
   return weightedPool[Math.floor(Math.random() * weightedPool.length)];
 };

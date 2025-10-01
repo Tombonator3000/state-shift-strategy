@@ -364,10 +364,20 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
                 AI OBJECTIVE
               </h3>
             </div>
-            <span className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${statusClasses}`}>
-              {agenda.revealed ? <Eye size={10} /> : <Lock size={10} />}
-              {statusLabel}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${statusClasses}`}
+              >
+                {agenda.revealed ? <Eye size={10} /> : <Lock size={10} />}
+                {statusLabel}
+              </span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${difficultyBadgeClass}`}
+                aria-label={`Secret agenda difficulty ${agenda.difficulty}`}
+              >
+                {agenda.difficulty.toUpperCase()}
+              </span>
+            </div>
           </div>
           {agenda.revealed ? (
             renderCompactContent()
