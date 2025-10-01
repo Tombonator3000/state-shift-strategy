@@ -1,3 +1,4 @@
+import CardImage from '@/components/game/CardImage';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import type { GameOverReport, FinalEditionEventHighlight, MVPReport } from '@/types/finalEdition';
@@ -76,6 +77,34 @@ const renderImpactBadges = (event: FinalEditionEventHighlight) => {
   return segments.join(' · ');
 };
 
+const CardArt = ({
+  cardId,
+  className = '',
+  showPlaceholder = false,
+}: {
+  cardId?: string;
+  className?: string;
+  showPlaceholder?: boolean;
+}) => {
+  if (!cardId && !showPlaceholder) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`relative overflow-hidden rounded-md border border-emerald-500/20 bg-slate-950/60 ${className}`}
+    >
+      {cardId ? (
+        <CardImage cardId={cardId} fit="contain" className="aspect-[63/88] w-full" />
+      ) : (
+        <div className="flex aspect-[63/88] w-full items-center justify-center px-3 text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-200/40">
+          Archival footage pending clearance.
+        </div>
+      )}
+    </div>
+  );
+};
+
 const renderMvpPanel = (label: string, mvp?: MVPReport | null) => {
   if (!mvp) {
     return null;
@@ -86,13 +115,18 @@ const renderMvpPanel = (label: string, mvp?: MVPReport | null) => {
         <h4 className="font-mono text-xs uppercase tracking-[0.32em] text-emerald-300/80">{label}</h4>
         <Badge className="border-emerald-500/40 bg-emerald-500/10 text-emerald-200">{mvp.impactLabel}</Badge>
       </div>
-      <h3 className="mt-2 text-xl font-semibold text-emerald-100">{mvp.cardName}</h3>
-      <p className="mt-1 text-sm text-emerald-100/80">{mvp.highlight}</p>
-      <div className="mt-3 grid gap-2 text-xs text-emerald-200/70 sm:grid-cols-2">
-        <div>Truth Delta: {Math.round(mvp.truthDelta)}%</div>
-        <div>IP Swing: {mvp.ipDelta >= 0 ? '+' : ''}{Math.round(mvp.ipDelta)}</div>
-        <div>States Captured: {mvp.capturedStates.length > 0 ? mvp.capturedStates.join(', ') : '—'}</div>
-        <div>Damage: {Math.round(mvp.damageDealt)}</div>
+      <div className="mt-3 flex flex-col gap-4 sm:flex-row">
+        <CardArt cardId={mvp.cardId} showPlaceholder className="sm:w-32" />
+        <div className="flex-1">
+          <h3 className="text-xl font-semibold text-emerald-100">{mvp.cardName}</h3>
+          <p className="mt-1 text-sm text-emerald-100/80">{mvp.highlight}</p>
+          <div className="mt-3 grid gap-2 text-xs text-emerald-200/70 sm:grid-cols-2">
+            <div>Truth Delta: {Math.round(mvp.truthDelta)}%</div>
+            <div>IP Swing: {mvp.ipDelta >= 0 ? '+' : ''}{Math.round(mvp.ipDelta)}</div>
+            <div>States Captured: {mvp.capturedStates.length > 0 ? mvp.capturedStates.join(', ') : '—'}</div>
+            <div>Damage: {Math.round(mvp.damageDealt)}</div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -187,22 +221,29 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
 
             return (
               <div key={event.id} className="rounded-lg border border-slate-700/40 bg-slate-900/70 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="text-lg font-semibold text-emerald-100">{event.headline}</h3>
-                  <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">
-                    {event.faction.toUpperCase()} · {event.rarity.toUpperCase()}
-                  </Badge>
-                </div>
-                <p className="mt-2 text-sm text-emerald-100/80">{event.summary}</p>
-                {event.kicker && <p className="mt-2 text-xs italic text-emerald-200/70">{event.kicker}</p>}
-                <div className="mt-3 text-xs text-emerald-200/70">{renderImpactBadges(event)}</div>
-                {arcSummary ? (
-                  <div className="mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-200/70">
-                      <span>Campaign Arc</span>
-                      <div className="flex items-center gap-2">
-                        <span>Chapter {arcSummary.chapter}/{arcSummary.totalChapters}</span>
-                        {arcStatusLabel ? (
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <CardArt cardId={event.cardId} className="sm:w-28" />
+                  <div className="flex-1 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-lg font-semibold text-emerald-100">{event.headline}</h3>
+                      <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">
+                        {event.faction.toUpperCase()} · {event.rarity.toUpperCase()}
+                      </Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm text-emerald-100/80">{event.summary}</p>
+                      {event.kicker && (
+                        <p className="text-xs italic text-emerald-200/70">{event.kicker}</p>
+                      )}
+                      <div className="text-xs text-emerald-200/70">{renderImpactBadges(event)}</div>
+                    </div>
+                    {arcSummary ? (
+                      <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-200/70">
+                          <span>Campaign Arc</span>
+                          <div className="flex items-center gap-2">
+                            <span>Chapter {arcSummary.chapter}/{arcSummary.totalChapters}</span>
+                            {arcStatusLabel ? (
                           <span className={`rounded-full border px-2 py-0.5 ${arcStatusClass}`}>
                             {arcStatusLabel}
                           </span>
@@ -226,7 +267,9 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
                       </ul>
                     ) : null}
                   </div>
-                ) : null}
+                    ) : null}
+                  </div>
+                </div>
               </div>
             );
           })}
@@ -242,12 +285,19 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
           <div className="mt-4 space-y-3">
             {comboHighlights.map(combo => (
               <div key={combo.id} className="rounded-lg border border-slate-700/40 bg-slate-900/70 p-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-emerald-100">{combo.name}</h3>
-                  <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">{combo.rewardLabel}</Badge>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <CardArt cardId={combo.cardId} className="sm:w-24" />
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-emerald-100">{combo.name}</h3>
+                      <Badge variant="outline" className="border-emerald-500/40 text-emerald-200">{combo.rewardLabel}</Badge>
+                    </div>
+                    <p className="text-xs text-emerald-200/70">Turn {combo.turn} · {combo.ownerLabel}</p>
+                    {combo.description && (
+                      <p className="text-sm text-emerald-100/80">{combo.description}</p>
+                    )}
+                  </div>
                 </div>
-                <p className="mt-1 text-xs text-emerald-200/70">Turn {combo.turn} · {combo.ownerLabel}</p>
-                {combo.description && <p className="mt-2 text-sm text-emerald-100/80">{combo.description}</p>}
               </div>
             ))}
             {comboHighlights.length === 0 && (
