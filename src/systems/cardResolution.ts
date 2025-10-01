@@ -9,8 +9,13 @@ import {
   type StateCombinationEffects,
 } from '@/data/stateCombinations';
 import type { PlayerStats } from '@/data/achievementSystem';
-import type { StateEventBonusSummary, StateParanormalHotspot } from '@/hooks/gameStateTypes';
+import type {
+  StateEventBonusSummary,
+  StateParanormalHotspot,
+  StateParanormalHotspotSummary,
+} from '@/hooks/gameStateTypes';
 import { applyTruthDelta } from '@/utils/truth';
+import { trimParanormalHotspotHistory } from '@/hooks/stateEventHistory';
 
 type Faction = 'government' | 'truth';
 
@@ -47,6 +52,7 @@ export interface StateForResolution {
   occupierIcon?: string | null;
   occupierUpdatedAt?: number;
   paranormalHotspot?: StateParanormalHotspot;
+  paranormalHotspotHistory?: StateParanormalHotspotSummary[];
   stateEventBonus?: StateEventBonusSummary;
   stateEventHistory?: StateEventBonusSummary[];
 }
@@ -381,12 +387,14 @@ export function resolveCardMVP(
       const rawTruthReward = hotspot.truthReward;
       const truthDelta = Number.isFinite(rawTruthReward) ? rawTruthReward : 0;
       const directionalDelta = captureFaction === 'truth' ? truthDelta : -truthDelta;
+      let actualTruthDelta = 0;
       if (directionalDelta !== 0) {
         const beforeTruth = engineState.truth;
         applyTruthDelta(engineState, directionalDelta, owner === 'player' ? 'human' : 'ai');
         flushEngineLog();
         const actualDelta = engineState.truth - beforeTruth;
         truthBonusFromHotspots += actualDelta;
+        actualTruthDelta = actualDelta;
         if (actualDelta !== 0) {
           logEntries.push(
             `👻 ${hotspot.label} resolved in ${state.name}! Truth ${actualDelta > 0 ? '+' : ''}${actualDelta}.`,
@@ -400,6 +408,14 @@ export function resolveCardMVP(
 
       const adjustedDefense = Math.max(1, state.defense - hotspot.defenseBoost);
       state.defense = Math.max(1, adjustedDefense);
+      const resolvedSummary: StateParanormalHotspotSummary = {
+        id: hotspot.id,
+        label: hotspot.label,
+        resolvedOnTurn: gameState.turn,
+        faction: captureFaction,
+        truthDelta: actualTruthDelta,
+      };
+      recordParanormalHotspotResolution(state, resolvedSummary);
       state.paranormalHotspot = undefined;
       resolvedHotspots.push(state.abbreviation);
     }
@@ -457,3 +473,16 @@ export function resolveCardEffects(
 ): CardPlayResolution {
   return resolveCardMVP(gameState, card, targetState, 'human', achievements, mediaOptions);
 }
+export const recordParanormalHotspotResolution = (
+  state: StateForResolution,
+  summary: StateParanormalHotspotSummary,
+) => {
+  const existingHistory = Array.isArray(state.paranormalHotspotHistory)
+    ? state.paranormalHotspotHistory
+    : [];
+  state.paranormalHotspotHistory = trimParanormalHotspotHistory([
+    ...existingHistory,
+    summary,
+  ]);
+};
+

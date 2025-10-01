@@ -1,6 +1,11 @@
-import type { GameState, StateEventBonusSummary } from './gameStateTypes';
+import type {
+  GameState,
+  StateEventBonusSummary,
+  StateParanormalHotspotSummary,
+} from './gameStateTypes';
 
 export const STATE_EVENT_HISTORY_LIMIT = 5;
+export const STATE_HOTSPOT_HISTORY_LIMIT = 5;
 
 export const trimStateEventHistory = (
   history: StateEventBonusSummary[],
@@ -10,6 +15,16 @@ export const trimStateEventHistory = (
   }
 
   return history.slice(history.length - STATE_EVENT_HISTORY_LIMIT);
+};
+
+export const trimParanormalHotspotHistory = (
+  history: StateParanormalHotspotSummary[],
+): StateParanormalHotspotSummary[] => {
+  if (history.length <= STATE_HOTSPOT_HISTORY_LIMIT) {
+    return history;
+  }
+
+  return history.slice(history.length - STATE_HOTSPOT_HISTORY_LIMIT);
 };
 
 const buildHistoryLookupKey = (state: GameState['states'][number]): string[] => {
@@ -23,8 +38,12 @@ const buildHistoryLookupKey = (state: GameState['states'][number]): string[] => 
   return keys;
 };
 
-type StateWithOptionalHistory = Omit<GameState['states'][number], 'stateEventHistory'> & {
+type StateWithOptionalHistory = Omit<
+  GameState['states'][number],
+  'stateEventHistory' | 'paranormalHotspotHistory'
+> & {
   stateEventHistory?: StateEventBonusSummary[];
+  paranormalHotspotHistory?: StateParanormalHotspotSummary[];
   stateEventBonus?: StateEventBonusSummary;
 };
 
@@ -33,11 +52,16 @@ export const mergeStateEventHistories = (
   next: StateWithOptionalHistory[],
 ): GameState['states'] => {
   const historyLookup = new Map<string, StateEventBonusSummary[]>();
+  const hotspotHistoryLookup = new Map<string, StateParanormalHotspotSummary[]>();
 
   for (const state of previous) {
     const history = Array.isArray(state.stateEventHistory) ? state.stateEventHistory : [];
+    const hotspotHistory = Array.isArray(state.paranormalHotspotHistory)
+      ? state.paranormalHotspotHistory
+      : [];
     for (const key of buildHistoryLookupKey(state)) {
       historyLookup.set(key, history);
+      hotspotHistoryLookup.set(key, hotspotHistory);
     }
   }
 
@@ -45,7 +69,13 @@ export const mergeStateEventHistories = (
     const existingHistory = Array.isArray(state.stateEventHistory)
       ? state.stateEventHistory
       : historyLookup.get(state.id) ?? historyLookup.get(state.abbreviation) ?? [];
+    const existingHotspotHistory = Array.isArray(state.paranormalHotspotHistory)
+      ? state.paranormalHotspotHistory
+      : hotspotHistoryLookup.get(state.id)
+          ?? hotspotHistoryLookup.get(state.abbreviation)
+          ?? [];
     const normalizedHistory = trimStateEventHistory([...existingHistory]);
+    const normalizedHotspotHistory = trimParanormalHotspotHistory([...existingHotspotHistory]);
     const historyWithBonus =
       normalizedHistory.length === 0 && state.stateEventBonus
         ? trimStateEventHistory([...normalizedHistory, state.stateEventBonus])
@@ -57,6 +87,7 @@ export const mergeStateEventHistories = (
     return {
       ...state,
       stateEventHistory: historyWithBonus,
+      paranormalHotspotHistory: normalizedHotspotHistory,
       stateEventBonus: normalizedBonus,
     } satisfies GameState['states'][number];
   });

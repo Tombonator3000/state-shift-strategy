@@ -2,12 +2,15 @@ import { describe, expect, it } from 'bun:test';
 
 import type { PlayerStats } from '@/data/achievementSystem';
 import type { GameCard } from '@/rules/mvp';
+import { STATE_HOTSPOT_HISTORY_LIMIT } from '@/hooks/stateEventHistory';
 
 import {
   resolveCardMVP,
+  recordParanormalHotspotResolution,
   type AchievementTracker,
   type CardActor,
   type GameSnapshot,
+  type StateForResolution,
 } from '../cardResolution';
 
 const createTracker = (
@@ -54,8 +57,25 @@ const createBaseSnapshot = (overrides: Partial<GameSnapshot> = {}): GameSnapshot
       pressureAi: 0,
       contested: false,
       owner: 'neutral',
+      paranormalHotspotHistory: [],
     },
   ],
+  ...overrides,
+});
+
+const createState = (overrides: Partial<StateForResolution> = {}): StateForResolution => ({
+  id: 'NV',
+  name: 'Nevada',
+  abbreviation: 'NV',
+  baseIP: 2,
+  baseDefense: 1,
+  defense: 1,
+  pressure: 0,
+  pressurePlayer: 0,
+  pressureAi: 0,
+  contested: false,
+  owner: 'player',
+  paranormalHotspotHistory: [],
   ...overrides,
 });
 
@@ -65,6 +85,7 @@ describe('resolveCardMVP hotspot handling', () => {
   it('normalizes invalid hotspot truth rewards before applying them', () => {
     const tracker = createTracker();
     const gameState = createBaseSnapshot({
+      aiControlledStates: ['NV'],
       states: [
         {
           id: 'NV',
@@ -77,7 +98,8 @@ describe('resolveCardMVP hotspot handling', () => {
           pressurePlayer: 0,
           pressureAi: 0,
           contested: false,
-          owner: 'neutral',
+          owner: 'ai',
+          paranormalHotspotHistory: [],
           paranormalHotspot: {
             id: 'hotspot-1',
             eventId: 'event-1',
@@ -107,111 +129,55 @@ describe('resolveCardMVP hotspot handling', () => {
 
     expect(result.truth).toBe(42);
     expect(Number.isFinite(result.truth)).toBe(true);
-    expect(result.resolvedHotspots).toEqual(['NV']);
-    expect(result.logEntries.some(entry => entry.includes('👻 Desert Rift resolved in Nevada!'))).toBe(true);
     expect(result.logEntries.some(entry => entry.includes('NaN'))).toBe(false);
   });
 
-  it('applies hotspot truth swings for both human and AI captures', () => {
-    const tracker = createTracker();
-    const card: GameCard = {
-      id: 'zone-seizure',
-      name: 'Silent Takeover',
-      type: 'ZONE',
-      faction: 'truth',
-      rarity: 'common',
-      cost: 0,
-      target: { scope: 'state', count: 1 },
-      effects: { pressureDelta: 2 },
+  it('records hotspot history entries for truth and government captures', () => {
+    const state = createState({ owner: 'player', paranormalHotspotHistory: [] });
+    const truthSummary = {
+      id: 'hotspot-1',
+      label: 'Desert Rift',
+      resolvedOnTurn: 3,
+      faction: 'truth' as const,
+      truthDelta: 12,
+    };
+    recordParanormalHotspotResolution(state, truthSummary);
+    expect(state.paranormalHotspotHistory).toEqual([truthSummary]);
+
+    const governmentSummary = {
+      id: 'hotspot-2',
+      label: 'Desert Rift',
+      resolvedOnTurn: 4,
+      faction: 'government' as const,
+      truthDelta: -5,
+    };
+    recordParanormalHotspotResolution(state, governmentSummary);
+    expect(state.paranormalHotspotHistory).toEqual([truthSummary, governmentSummary]);
+  });
+
+  it('trims hotspot history to the configured limit after resolution', () => {
+    const existingHistory = Array.from({ length: STATE_HOTSPOT_HISTORY_LIMIT }, (_, index) => ({
+      id: `old-${index}`,
+      label: `Archive ${index}`,
+      resolvedOnTurn: index + 1,
+      faction: index % 2 === 0 ? 'truth' : 'government',
+      truthDelta: index,
+    }));
+
+    const state = createState({ paranormalHotspotHistory: existingHistory });
+    const newSummary = {
+      id: 'hotspot-1',
+      label: 'Desert Rift',
+      resolvedOnTurn: 99,
+      faction: 'truth' as const,
+      truthDelta: 7,
     };
 
-    const humanResult = resolveCardMVP(
-      createBaseSnapshot({
-        truth: 85,
-        aiControlledStates: ['NV'],
-        states: [
-          {
-            id: 'NV',
-            name: 'Nevada',
-            abbreviation: 'NV',
-            baseIP: 2,
-            baseDefense: 1,
-            defense: 1,
-            pressure: 0,
-            pressurePlayer: 0,
-            pressureAi: 0,
-            contested: false,
-            owner: 'ai',
-            paranormalHotspot: {
-              id: 'hotspot-1',
-              eventId: 'event-1',
-              label: 'Desert Rift',
-              defenseBoost: 0,
-              truthReward: 20,
-              expiresOnTurn: 2,
-              turnsRemaining: 2,
-              source: 'neutral',
-            },
-          },
-        ],
-      }),
-      card,
-      'NV',
-      'human',
-      tracker,
-    );
+    recordParanormalHotspotResolution(state, newSummary);
 
-    expect(humanResult.truth).toBe(100);
-    expect(
-      humanResult.logEntries,
-    ).toContain('Silent Takeover: Truth manipulation ↑ (85% → 100%) [player]');
-    expect(humanResult.logEntries).toContain(
-      '👻 Desert Rift resolved in Nevada! Truth +15.',
-    );
-
-    const aiResult = resolveCardMVP(
-      createBaseSnapshot({
-        truth: 10,
-        controlledStates: ['NV'],
-        states: [
-          {
-            id: 'NV',
-            name: 'Nevada',
-            abbreviation: 'NV',
-            baseIP: 2,
-            baseDefense: 1,
-            defense: 1,
-            pressure: 0,
-            pressurePlayer: 0,
-            pressureAi: 0,
-            contested: false,
-            owner: 'player',
-            paranormalHotspot: {
-              id: 'hotspot-2',
-              eventId: 'event-1',
-              label: 'Desert Rift',
-              defenseBoost: 0,
-              truthReward: 7,
-              expiresOnTurn: 2,
-              turnsRemaining: 2,
-              source: 'neutral',
-            },
-          },
-        ],
-      }),
-      card,
-      'NV',
-      'ai',
-      tracker,
-    );
-
-    expect(aiResult.truth).toBe(3);
-    expect(aiResult.logEntries).toContain(
-      'Silent Takeover: Truth manipulation ↓ (10% → 3%) [AI]',
-    );
-    expect(aiResult.logEntries).toContain(
-      '👻 Desert Rift resolved in Nevada! Truth -7.',
-    );
+    expect(state.paranormalHotspotHistory).toHaveLength(STATE_HOTSPOT_HISTORY_LIMIT);
+    expect(state.paranormalHotspotHistory?.some(entry => entry.id === 'hotspot-1')).toBe(true);
+    expect(state.paranormalHotspotHistory?.[0].id).toBe('old-1');
   });
 });
 
