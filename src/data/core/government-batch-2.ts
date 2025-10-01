@@ -11,7 +11,8 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 2
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "Nobody remembers the encounter… and that's the point."
   },
@@ -61,7 +62,8 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 1
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "Forms must be filed in triplicate, notarized, and burned."
   },
@@ -192,7 +194,8 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 2
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "Always in the background, always adjusting his tie."
   },
@@ -266,7 +269,8 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 3
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "One ring controls all."
   },

@@ -26,7 +26,8 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 2
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "If it's stamped 'secret', it's stapled to our to-do list."
   },
@@ -103,7 +104,8 @@ export const truthBatch3: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": 3,
+      "revealSecretAgenda": true
     },
     "flavor": "Screams in AP style."
   },

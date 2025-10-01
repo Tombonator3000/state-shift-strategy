@@ -674,6 +674,7 @@ const TabloidNewspaperV2 = ({
   );
 
   const heroIsEvent = Boolean(heroEvent);
+  const heroIsFilesOnTheLoose = heroEvent?.id === 'deepfile_dump_crochet_forum';
   const heroTypeLabel = heroArticle?.typeLabel
     ?? (heroEvent ? `[${(heroEvent.type ?? 'Event').toUpperCase()}]` : comboReport ? '[PLAYER HIGHLIGHT]' : '[STATUS BRIEF]');
   const heroTarget = heroArticle?.stateLabel ?? (heroEvent ? null : comboOwnerLabel ?? null);
@@ -1001,14 +1002,20 @@ const TabloidNewspaperV2 = ({
                   <h2
                     className={`text-3xl font-black leading-tight sm:text-4xl ${
                       heroIsEvent ? 'text-secret-red' : 'text-newspaper-headline'
+                    } ${
+                      heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_20px_rgba(248,113,113,0.65)]' : ''
                     }`}
                   >
                     {heroHeadline}
                   </h2>
                   <p
                     className={`text-lg font-semibold italic ${
-                      heroIsEvent ? 'text-secret-red/80' : 'text-newspaper-text/80'
-                    }`}
+                      heroIsEvent
+                        ? heroIsFilesOnTheLoose
+                          ? 'text-secret-red drop-shadow-[0_0_12px_rgba(248,113,113,0.55)]'
+                          : 'text-secret-red/80'
+                        : 'text-newspaper-text/80'
+                    } ${heroIsFilesOnTheLoose ? 'animate-pulse' : ''}`}
                   >
                     {heroSubhead}
                   </p>
@@ -1017,7 +1024,13 @@ const TabloidNewspaperV2 = ({
                     <span>{sourceLine}</span>
                   </div>
                   {heroIsEvent && (heroTriggerChance || heroConditionalChance) ? (
-                    <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-wide text-secret-red/80">
+                    <div
+                      className={`flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-wide ${
+                        heroIsFilesOnTheLoose
+                          ? 'text-secret-red animate-pulse drop-shadow-[0_0_12px_rgba(248,113,113,0.5)]'
+                          : 'text-secret-red/80'
+                      }`}
+                    >
                       {formatChance(heroTriggerChance) ? (
                         <span className="rounded border border-secret-red/50 px-2 py-0.5">
                           Chance This Turn: {formatChance(heroTriggerChance)}
@@ -1033,6 +1046,8 @@ const TabloidNewspaperV2 = ({
                   <div
                     className={`space-y-4 text-sm leading-relaxed ${
                       heroIsEvent ? 'text-secret-red/90' : ''
+                    } ${
+                      heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_14px_rgba(248,113,113,0.4)]' : ''
                     }`}
                   >
                     {heroBody.map((paragraph, index) => (
@@ -1333,26 +1348,66 @@ const TabloidNewspaperV2 = ({
                 <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
                   <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-secret-red">Event Wire</h3>
                   <div className="space-y-3 text-sm text-secret-red/90">
-                    {eventStories.slice(0, 3).map(story => (
-                      <div key={story.id} className="border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0">
-                        <div className="text-[11px] font-semibold uppercase tracking-wide text-secret-red/80">{story.typeLabel}</div>
-                        <p className="font-semibold leading-snug text-secret-red">{story.headline}</p>
-                        <p className="text-xs italic text-secret-red/80">{story.subhead}</p>
-                        {formatChance(story.triggerChance) || formatChance(story.conditionalChance) ? (
-                          <div className="text-[10px] font-semibold uppercase tracking-wide text-secret-red/70">
-                            {formatChance(story.triggerChance) ? (
-                              <span>Chance This Turn: {formatChance(story.triggerChance)}</span>
-                            ) : null}
-                            {formatChance(story.triggerChance) && formatChance(story.conditionalChance) ? (
-                              <span> · </span>
-                            ) : null}
-                            {formatChance(story.conditionalChance) ? (
-                              <span>If Triggered: {formatChance(story.conditionalChance)}</span>
-                            ) : null}
+                    {eventStories.slice(0, 3).map(story => {
+                      const isFilesOnTheLoose = story.id === 'deepfile_dump_crochet_forum';
+                      return (
+                        <div
+                          key={story.id}
+                          className={`border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0 ${
+                            isFilesOnTheLoose
+                              ? 'rounded-md bg-white/95 px-3 py-2 shadow-[0_0_20px_rgba(248,113,113,0.35)] ring-2 ring-secret-red/60'
+                              : ''
+                          }`}
+                        >
+                          <div
+                            className={`text-[11px] font-semibold uppercase tracking-wide ${
+                              isFilesOnTheLoose
+                                ? 'text-secret-red animate-pulse drop-shadow-[0_0_10px_rgba(248,113,113,0.65)]'
+                                : 'text-secret-red/80'
+                            }`}
+                          >
+                            {story.typeLabel}
                           </div>
-                        ) : null}
-                      </div>
-                    ))}
+                          <p
+                            className={`font-semibold leading-snug text-secret-red ${
+                              isFilesOnTheLoose
+                                ? 'animate-pulse drop-shadow-[0_0_16px_rgba(248,113,113,0.6)]'
+                                : ''
+                            }`}
+                          >
+                            {story.headline}
+                          </p>
+                          <p
+                            className={`text-xs italic ${
+                              isFilesOnTheLoose
+                                ? 'text-secret-red animate-pulse drop-shadow-[0_0_12px_rgba(248,113,113,0.5)]'
+                                : 'text-secret-red/80'
+                            }`}
+                          >
+                            {story.subhead}
+                          </p>
+                          {formatChance(story.triggerChance) || formatChance(story.conditionalChance) ? (
+                            <div
+                              className={`text-[10px] font-semibold uppercase tracking-wide ${
+                                isFilesOnTheLoose
+                                  ? 'text-secret-red animate-pulse drop-shadow-[0_0_10px_rgba(248,113,113,0.55)]'
+                                  : 'text-secret-red/70'
+                              }`}
+                            >
+                              {formatChance(story.triggerChance) ? (
+                                <span>Chance This Turn: {formatChance(story.triggerChance)}</span>
+                              ) : null}
+                              {formatChance(story.triggerChance) && formatChance(story.conditionalChance) ? (
+                                <span> · </span>
+                              ) : null}
+                              {formatChance(story.conditionalChance) ? (
+                                <span>If Triggered: {formatChance(story.conditionalChance)}</span>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
               ) : null}

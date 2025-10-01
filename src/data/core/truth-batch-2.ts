@@ -11,7 +11,8 @@ export const truthBatch2: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 1
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "Security was no match for flip-flops and fury."
   },

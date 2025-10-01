@@ -45,7 +45,8 @@ export const truthBatch1: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": 3,
+      "revealSecretAgenda": true
     },
     "flavor": "His platform: windows with no curtains."
   },
@@ -121,7 +122,8 @@ export const truthBatch1: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 4
+      "truthDelta": 4,
+      "revealSecretAgenda": true
     },
     "flavor": "Ink smudges reveal more than black bars."
   },
@@ -171,7 +173,8 @@ export const truthBatch1: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 1
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "Phones are better than binoculars."
   },
@@ -200,7 +203,8 @@ export const truthBatch1: GameCard[] = [
       "ipDelta": {
         "opponent": 3,
         "opponentPercent": 0.08
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "The squeak heard round the world."
   },
@@ -236,7 +240,8 @@ export const truthBatch1: GameCard[] = [
     "rarity": "uncommon",
     "cost": 5,
     "effects": {
-      "pressureDelta": 2
+      "pressureDelta": 2,
+      "revealSecretAgenda": true
     },
     "flavor": "Rollback prices on cursed dolls."
   },
@@ -272,7 +277,8 @@ export const truthBatch1: GameCard[] = [
     "rarity": "uncommon",
     "cost": 5,
     "effects": {
-      "pressureDelta": 2
+      "pressureDelta": 2,
+      "revealSecretAgenda": true
     },
     "flavor": "Burning love, steady income."
   },

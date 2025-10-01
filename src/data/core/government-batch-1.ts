@@ -38,7 +38,8 @@ export const governmentBatch1: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 2
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "Democracy is great. Backups are greater.",
     "flavorTruth": "When democracy fails, what takes its place?",
@@ -116,7 +117,8 @@ export const governmentBatch1: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 2
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "They don't need badges when they have clipboards."
   },
@@ -142,7 +144,8 @@ export const governmentBatch1: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 1
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "Static is the sound of safety."
   },
@@ -192,7 +195,8 @@ export const governmentBatch1: GameCard[] = [
     "effects": {
       "ipDelta": {
         "opponent": 1
-      }
+      },
+      "revealSecretAgenda": true
     },
     "flavor": "If it beeped, we kept it."
   },

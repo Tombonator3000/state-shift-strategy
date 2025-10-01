@@ -45,6 +45,7 @@ interface Article {
   isCard?: boolean;
   cardId?: string;
   player?: 'human' | 'ai';
+  eventId?: string;
 }
 
 const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }: TabloidNewspaperProps) => {
@@ -228,7 +229,8 @@ const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }
     const eventHeadlines = filteredEvents.map(event => ({
       headline: `🚨 ${event.headline || `BREAKING: ${event.title.toUpperCase()}`} 🚨`,
       content: `URGENT UPDATE: ${event.content} This developing story continues to unfold as authorities scramble to contain the situation.${formatGameEffects(event.effects)}`,
-      isEvent: true
+      isEvent: true,
+      eventId: event.id
     }));
     
     return eventHeadlines;
@@ -489,93 +491,106 @@ const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }
 
           {/* MAIN ARTICLES - True tabloid style */}
           <div className="space-y-8">
-            {selectedHeadlines.map((article, index) => (
-              <article key={index} className={`border-8 border-black bg-white p-6 shadow-lg transform ${
-                index % 2 === 0 ? 'rotate-0' : 'rotate-0'
-              } ${article.isEvent ? 'bg-red-50' : 'bg-white'}`}>
-                
-                {/* EVENT BADGE for event articles */}
-                {article.isEvent && (
-                  <div className="absolute -top-4 -right-4 bg-red-600 text-white px-4 py-2 border-4 border-black transform rotate-12 z-10">
-                    <span className="font-black text-lg" style={{ fontFamily: 'Anton, sans-serif' }}>EVENT</span>
-                  </div>
-                )}
-                
-                {/* MASSIVE TABLOID HEADLINE */}
-                <h2 className={`text-5xl md:text-7xl font-black mb-6 text-center leading-none transform -rotate-1 ${
-                  article.isEvent ? 'text-red-600 animate-pulse' : 'text-black'
-                } uppercase tracking-tight`} style={{ fontFamily: 'Anton, Impact, sans-serif' }}>
-                  {article.headline}
-                </h2>
-                
-                {/* Subtitle/Dek */}
-                <div className="text-center mb-6">
-                  <p className="text-lg italic text-gray-600 border-t-2 border-b-2 border-black py-2 bg-gray-100">
-                    {article.isEvent ? 'DEVELOPING STORY - AUTHORITIES BAFFLED' : 'EXCLUSIVE INVESTIGATION'}
-                  </p>
-                </div>
-                
-                {/* Article Layout with Tabloid Photo */}
-                <div className="grid md:grid-cols-4 gap-6">
-                  {/* TABLOID PHOTO - Left column */}
-                  <div className="md:col-span-2 relative">
-                    {article.isCard && article.cardId ? (
-                      <div className="relative border-8 border-black bg-white p-2 shadow-lg">
-                        <CardImage 
-                          cardId={article.cardId}
-                          className="w-full h-48 md:h-64 object-cover grayscale contrast-125 sepia-[0.2]"
-                        />
-                        <div className="absolute -bottom-2 -right-2 bg-black text-white text-xs px-3 py-2 font-bold border-4 border-white">
-                          CLASSIFIED DOCUMENT PHOTO
-                        </div>
-                        {/* Tape effect */}
-                        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-200 border border-yellow-400 px-8 py-1 opacity-80">
-                          EVIDENCE
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="border-8 border-black bg-black text-white h-48 md:h-64 flex items-center justify-center shadow-lg">
-                        <div className="text-center">
-                          <div className="text-4xl font-bold mb-2 animate-pulse" style={{ fontFamily: 'Anton, sans-serif' }}>
-                            [CLASSIFIED]
-                          </div>
-                          <div className="text-lg">PHOTO CENSORED</div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* ARTICLE TEXT - Right columns */}
-                  <div className="md:col-span-2">
-                    <p className={`text-lg leading-relaxed font-serif ${
-                      article.isEvent ? 'text-red-800 font-bold' : 'text-black'
-                    } text-justify`}>
-                      {article.content}
+            {selectedHeadlines.map((article, index) => {
+              const isFilesOnTheLoose = article.eventId === 'deepfile_dump_crochet_forum';
+              return (
+                <article
+                  key={index}
+                  className={`border-8 border-black bg-white p-6 shadow-lg transform ${
+                    index % 2 === 0 ? 'rotate-0' : 'rotate-0'
+                  } ${article.isEvent ? 'bg-red-50' : 'bg-white'} ${
+                    isFilesOnTheLoose ? 'animate-pulse ring-4 ring-red-500/80 shadow-[0_0_30px_rgba(248,113,113,0.5)]' : ''
+                  }`}
+                >
+
+                  {/* EVENT BADGE for event articles */}
+                  {article.isEvent && (
+                    <div className="absolute -top-4 -right-4 bg-red-600 text-white px-4 py-2 border-4 border-black transform rotate-12 z-10">
+                      <span className="font-black text-lg" style={{ fontFamily: 'Anton, sans-serif' }}>EVENT</span>
+                    </div>
+                  )}
+
+                  {/* MASSIVE TABLOID HEADLINE */}
+                  <h2
+                    className={`text-5xl md:text-7xl font-black mb-6 text-center leading-none transform -rotate-1 ${
+                      article.isEvent ? 'text-red-600 animate-pulse' : 'text-black'
+                    } ${isFilesOnTheLoose ? 'drop-shadow-[0_0_22px_rgba(248,113,113,0.7)]' : ''} uppercase tracking-tight`}
+                    style={{ fontFamily: 'Anton, Impact, sans-serif' }}
+                  >
+                    {article.headline}
+                  </h2>
+
+                  {/* Subtitle/Dek */}
+                  <div className="text-center mb-6">
+                    <p className="text-lg italic text-gray-600 border-t-2 border-b-2 border-black py-2 bg-gray-100">
+                      {article.isEvent ? 'DEVELOPING STORY - AUTHORITIES BAFFLED' : 'EXCLUSIVE INVESTIGATION'}
                     </p>
-                    
-                    {/* Continuation notice */}
-                    {index === 0 && (
-                      <div className="mt-4 p-3 bg-yellow-100 border-4 border-black transform rotate-1">
-                        <div className="text-sm text-gray-800 italic text-center">
-                          Continued on page A-{Math.floor(Math.random() * 20) + 1}... 
-                          <span className="text-red-600 ml-2 font-black">[REMAINDER CLASSIFIED]</span>
-                        </div>
-                      </div>
-                    )}
                   </div>
-                </div>
-                
-                {/* BYLINE AND SOURCE - Tabloid style */}
-                <div className="flex justify-between items-center mt-6 text-xs border-t-4 border-black pt-3 bg-gray-50 px-4 py-2">
-                  <span className="font-mono font-bold">
-                    By: {article.isEvent ? 'CRISIS REPORTER' : ['Agent X', 'Deep Throat Jr.', 'Anonymous Tipster', 'Florida Man'][Math.floor(Math.random() * 4)]}
-                  </span>
-                  <span className="font-mono">
-                    Source: {article.isEvent ? 'EMERGENCY BROADCAST' : ['Totally Reliable', 'My Cousin\'s Blog', 'Overheard at Denny\'s'][Math.floor(Math.random() * 3)]}
-                  </span>
-                </div>
-              </article>
-            ))}
+
+                  {/* ARTICLE LAYOUT WITH TABLOID PHOTO */}
+                  <div className="grid md:grid-cols-4 gap-6">
+                    {/* TABLOID PHOTO - Left column */}
+                    <div className="md:col-span-2 relative">
+                      {article.isCard && article.cardId ? (
+                        <div className="relative border-8 border-black bg-white p-2 shadow-lg">
+                          <CardImage
+                            cardId={article.cardId}
+                            className="w-full h-48 md:h-64 object-cover grayscale contrast-125 sepia-[0.2]"
+                          />
+                          <div className="absolute -bottom-2 -right-2 bg-black text-white text-xs px-3 py-2 font-bold border-4 border-white">
+                            CLASSIFIED DOCUMENT PHOTO
+                          </div>
+                          {/* Tape effect */}
+                          <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-200 border border-yellow-400 px-8 py-1 opacity-80">
+                            EVIDENCE
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-8 border-black bg-black text-white h-48 md:h-64 flex items-center justify-center shadow-lg">
+                          <div className="text-center">
+                            <div className="text-4xl font-bold mb-2 animate-pulse" style={{ fontFamily: 'Anton, sans-serif' }}>
+                              [CLASSIFIED]
+                            </div>
+                            <div className="text-lg">PHOTO CENSORED</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ARTICLE TEXT - Right columns */}
+                    <div className="md:col-span-2">
+                      <p
+                        className={`text-lg leading-relaxed font-serif ${
+                          article.isEvent ? 'text-red-800 font-bold' : 'text-black'
+                        } ${isFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_14px_rgba(248,113,113,0.45)]' : ''} text-justify`}
+                      >
+                        {article.content}
+                      </p>
+
+                      {/* Continuation notice */}
+                      {index === 0 && (
+                        <div className="mt-4 p-3 bg-yellow-100 border-4 border-black transform rotate-1">
+                          <div className="text-sm text-gray-800 italic text-center">
+                            Continued on page A-{Math.floor(Math.random() * 20) + 1}...
+                            <span className="text-red-600 ml-2 font-black">[REMAINDER CLASSIFIED]</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* BYLINE AND SOURCE - Tabloid style */}
+                  <div className="flex justify-between items-center mt-6 text-xs border-t-4 border-black pt-3 bg-gray-50 px-4 py-2">
+                    <span className="font-mono font-bold">
+                      By: {article.isEvent ? 'CRISIS REPORTER' : ['Agent X', 'Deep Throat Jr.', 'Anonymous Tipster', 'Florida Man'][Math.floor(Math.random() * 4)]}
+                    </span>
+                    <span className="font-mono">
+                      Source: {article.isEvent ? 'EMERGENCY BROADCAST' : ['Totally Reliable', 'My Cousin\'s Blog', 'Overheard at Denny\'s'][Math.floor(Math.random() * 3)]}
+                    </span>
+                  </div>
+                </article>
+              );
+            })}
           </div>
           
           {/* TABLOID ADS SECTION - Bottom of page */}
