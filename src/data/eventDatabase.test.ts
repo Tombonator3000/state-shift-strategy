@@ -187,5 +187,72 @@ describe('EventManager.maybeSelectRandomEvent', () => {
       Math.random = originalRandom;
     }
   });
+
+  it('restores legacy paranormal spawns when the director flag is toggled off mid-session', () => {
+    featureFlags.hotspotDirectorEnabled = true;
+
+    const manager = new EventManager();
+    const paranormalEvent: GameEvent = {
+      id: 'legacy-paranormal',
+      title: 'Legacy Paranormal Hotspot',
+      content: 'Hotspot payload from legacy events.',
+      type: 'random',
+      rarity: 'rare',
+      weight: 1,
+      paranormalHotspot: {
+        label: 'Legacy Rift',
+        duration: 3,
+        truthReward: 5,
+        defenseBoost: 2,
+      },
+    };
+    const fallbackEvent: GameEvent = {
+      id: 'legacy-standard',
+      title: 'Legacy Standard Event',
+      content: 'Non-hotspot payload.',
+      type: 'random',
+      rarity: 'common',
+      weight: 1,
+    };
+
+    const pools: Array<{ ids: string[]; chance: number }> = [];
+    (manager as unknown as { getAvailableEvents(): GameEvent[] }).getAvailableEvents = () => [
+      paranormalEvent,
+      fallbackEvent,
+    ];
+    (manager as unknown as {
+      selectEventFromPool(pool: GameEvent[], chanceFactor: number): GameEvent | null;
+    }).selectEventFromPool = (pool: GameEvent[], chanceFactor: number) => {
+      pools.push({ ids: pool.map(event => event.id), chance: chanceFactor });
+      return pool[0] ?? null;
+    };
+
+    manager.setEventChance(1);
+
+    const originalRandom = Math.random;
+    const randomValues = [0.99, 0.05];
+    Math.random = () => {
+      const next = randomValues.shift();
+      return typeof next === 'number' ? next : 0;
+    };
+
+    try {
+      const initialSelection = manager.maybeSelectRandomEvent({});
+      expect(initialSelection).toBe(paranormalEvent);
+      expect(pools).toHaveLength(1);
+      expect(pools[0]?.ids).toEqual(['legacy-paranormal', 'legacy-standard']);
+      expect(pools[0]?.chance).toBeCloseTo(1);
+
+      featureFlags.hotspotDirectorEnabled = false;
+
+      const toggledSelection = manager.maybeSelectRandomEvent({});
+      expect(toggledSelection).toBe(paranormalEvent);
+      expect(pools).toHaveLength(2);
+      expect(pools[1]?.ids).toEqual(['legacy-paranormal']);
+      expect(pools[1]?.chance).toBeCloseTo(0.2);
+    } finally {
+      Math.random = originalRandom;
+    }
+  });
 });
 
