@@ -12,7 +12,12 @@ import {
   type GameSnapshot,
   type StateForResolution,
 } from '../cardResolution';
-import { resolveHotspot } from '../paranormalHotspots';
+import {
+  resolveHotspot,
+  __setTestEnabledExpansions,
+  type WeightedHotspotCandidate,
+} from '../paranormalHotspots';
+import { __test_createDirectorHotspotEntries } from '@/hooks/useGameState';
 
 const createTracker = (
   initial?: Partial<PlayerStats>,
@@ -82,6 +87,147 @@ const createState = (overrides: Partial<StateForResolution> = {}): StateForResol
 
 describe('resolveCardMVP hotspot handling', () => {
   const actor: CardActor = 'human';
+
+  it('resolves director hotspots symmetrically for truth and government with expansion bonuses', () => {
+    __setTestEnabledExpansions(['cryptids']);
+    try {
+      const candidate: WeightedHotspotCandidate = {
+        id: 'auto:OR:1:seed',
+        name: 'Oregon Phenomenon',
+        kind: 'phenomenon',
+        location: 'Oregon',
+        intensity: 6,
+        status: 'spawning',
+        tags: ['auto-spawn', 'expansion:cryptids'],
+        icon: '🛸',
+        stateId: 'OR',
+        stateName: 'Oregon',
+        stateAbbreviation: 'OR',
+        totalWeight: 5,
+        weightBreakdown: { base: 3, expansion: 1, cryptid: 1 },
+      };
+
+      const baseDefense = 2;
+      const directorState = {
+        id: 'OR',
+        name: 'Oregon',
+        abbreviation: 'OR',
+        baseIP: 2,
+        baseDefense,
+        defense: baseDefense,
+        pressure: 0,
+        pressurePlayer: 0,
+        pressureAi: 0,
+        contested: false,
+        owner: 'neutral' as const,
+        paranormalHotspotHistory: [],
+      } satisfies GameSnapshot['states'][number];
+
+      const { stateHotspot, payload } = __test_createDirectorHotspotEntries({
+        candidate,
+        state: directorState,
+        currentTurn: 1,
+        enabledExpansions: ['cryptids'],
+      });
+
+      const expectedTruthReward = payload.truthReward;
+      expect(expectedTruthReward).toBeGreaterThan(0);
+      expect(payload.defenseBoost).toBeGreaterThan(0);
+
+      const baselineTruthReward = resolveHotspot('OR', 'truth', { enabledExpansions: [] }).finalReward;
+      expect(expectedTruthReward).toBeGreaterThan(baselineTruthReward);
+
+      const truthResolutionWithExpansion = resolveHotspot('OR', 'truth', {
+        enabledExpansions: ['cryptids'],
+      });
+      expect(truthResolutionWithExpansion.finalReward).toBe(expectedTruthReward);
+
+      const hotspotForTruth = { ...stateHotspot };
+      const defenseWithBoost = baseDefense + payload.defenseBoost;
+
+      const truthGameState = createBaseSnapshot({
+        truth: 50,
+        aiControlledStates: ['OR'],
+        states: [
+          {
+            ...directorState,
+            owner: 'ai' as const,
+            defense: defenseWithBoost,
+            paranormalHotspot: { ...hotspotForTruth },
+          },
+        ],
+      });
+
+      const captureCard: GameCard = {
+        id: 'zone-overrun',
+        name: 'Covert Encirclement',
+        type: 'ZONE',
+        faction: 'truth',
+        rarity: 'rare',
+        cost: 3,
+        target: { scope: 'state', count: 1 },
+        effects: { pressureDelta: defenseWithBoost },
+      };
+
+      const truthTracker = createTracker();
+      const truthResult = resolveCardMVP(truthGameState, captureCard, 'OR', 'human', truthTracker);
+
+      const truthStateAfter = truthResult.states.find(state => state.id === 'OR');
+      expect(truthStateAfter).toBeDefined();
+      expect(truthStateAfter?.defense).toBe(baseDefense);
+      expect(truthStateAfter?.paranormalHotspot).toBeUndefined();
+      const truthHistory = truthStateAfter?.paranormalHotspotHistory ?? [];
+      expect(truthHistory).toHaveLength(1);
+      expect(truthHistory[0]?.faction).toBe('truth');
+      expect(truthHistory[0]?.truthDelta).toBe(expectedTruthReward);
+
+      expect(truthResult.truth - truthGameState.truth).toBe(expectedTruthReward);
+      expect(truthResult.hotspotResolutions).toHaveLength(1);
+      expect(truthResult.hotspotResolutions?.[0].truthReward).toBe(expectedTruthReward);
+      expect(truthResult.hotspotResolutions?.[0].truthDelta).toBe(expectedTruthReward);
+      expect(truthResult.hotspotResolutions?.[0].faction).toBe('truth');
+
+      const hotspotForGovernment = { ...stateHotspot };
+      const governmentGameState = createBaseSnapshot({
+        truth: 50,
+        controlledStates: ['OR'],
+        states: [
+          {
+            ...directorState,
+            owner: 'player' as const,
+            defense: defenseWithBoost,
+            paranormalHotspot: { ...hotspotForGovernment },
+          },
+        ],
+      });
+
+      const governmentTracker = createTracker();
+      const governmentResult = resolveCardMVP(
+        governmentGameState,
+        { ...captureCard, faction: 'government' },
+        'OR',
+        'ai',
+        governmentTracker,
+      );
+
+      const governmentStateAfter = governmentResult.states.find(state => state.id === 'OR');
+      expect(governmentStateAfter).toBeDefined();
+      expect(governmentStateAfter?.defense).toBe(baseDefense);
+      expect(governmentStateAfter?.paranormalHotspot).toBeUndefined();
+      const governmentHistory = governmentStateAfter?.paranormalHotspotHistory ?? [];
+      expect(governmentHistory).toHaveLength(1);
+      expect(governmentHistory[0]?.faction).toBe('government');
+      expect(governmentHistory[0]?.truthDelta).toBe(-expectedTruthReward);
+
+      expect(governmentResult.truth - governmentGameState.truth).toBe(-expectedTruthReward);
+      expect(governmentResult.hotspotResolutions).toHaveLength(1);
+      expect(governmentResult.hotspotResolutions?.[0].truthReward).toBe(expectedTruthReward);
+      expect(governmentResult.hotspotResolutions?.[0].truthDelta).toBe(-expectedTruthReward);
+      expect(governmentResult.hotspotResolutions?.[0].faction).toBe('government');
+    } finally {
+      __setTestEnabledExpansions(null);
+    }
+  });
 
   it('normalizes invalid hotspot truth rewards before applying them', () => {
     const tracker = createTracker();
