@@ -1556,15 +1556,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const [gameState, setGameState] = useState<GameState>(() => {
     const initialIssueDefinition = peekActiveAgendaIssue();
     const initialIssue = agendaIssueToState(initialIssueDefinition);
-    const initialPlayerAgenda = getRandomAgenda('truth', { issueId: initialIssue.id });
-    const initialAgendaDifficulty = initialPlayerAgenda.difficulty;
-    const initialAiAgenda = getRandomAgenda('government', {
-      issueId: initialIssue.id,
-      difficulty: initialAgendaDifficulty,
-    });
-    const initialAiFallback = initialAiAgenda.difficulty !== initialAgendaDifficulty
-      ? initialAiAgenda.difficulty
-      : null;
 
     return {
       faction: 'truth',
@@ -1636,23 +1627,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         'Cards drawn: 5',
         `AI Difficulty: ${aiDifficulty}`,
         `Weekly Issue: ${initialIssue.label}`,
-        `Secret Agenda Difficulty Sync: ${initialAgendaDifficulty.toUpperCase()}${initialAiFallback ? ` (AI fallback to ${initialAiFallback.toUpperCase()})` : ''}`,
       ],
-      secretAgenda: {
-        ...initialPlayerAgenda,
-        progress: 0,
-        completed: false,
-        revealed: false,
-        stageId: resolveAgendaStageByProgress(initialPlayerAgenda.stages, 0)?.id ?? '',
-      },
-      aiSecretAgenda: {
-        ...initialAiAgenda,
-        progress: 0,
-        completed: false,
-        revealed: false,
-        stageId: resolveAgendaStageByProgress(initialAiAgenda.stages, 0)?.id ?? '',
-      },
-      secretAgendaDifficulty: initialAgendaDifficulty,
+      secretAgenda: undefined,
+      aiSecretAgenda: undefined,
+      secretAgendaDifficulty: null,
+      secretAgendasEnabled: true,
       animating: false,
       aiTurnInProgress: false,
       selectedCard: null,
@@ -1698,6 +1677,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const assignSecretAgenda = useCallback((factionAgendaId: string | null) => {
     setGameState(prev => {
       if (!prev.faction || !prev.agendaIssue) {
+        return prev;
+      }
+
+      if (prev.secretAgendasEnabled === false) {
+        if (prev.secretAgenda || prev.aiSecretAgenda || prev.secretAgendaDifficulty) {
+          return {
+            ...prev,
+            secretAgenda: undefined,
+            aiSecretAgenda: undefined,
+            secretAgendaDifficulty: null,
+          };
+        }
+
         return prev;
       }
 
@@ -1768,10 +1760,28 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const startingIP = 5;
     const aiStartingIP = 5;
     
-    // Get draw mode from localStorage
+    // Get draw mode and agenda preferences from localStorage
+    let drawMode: DrawMode = 'standard';
+    let secretAgendasEnabled = true;
     const savedSettings = localStorage.getItem('gameSettings');
-    const drawMode: DrawMode = savedSettings ? 
-      (JSON.parse(savedSettings).drawMode || 'standard') : 'standard';
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings) as {
+          drawMode?: DrawMode;
+          secretAgendasEnabled?: unknown;
+        } | null;
+
+        if (parsed && typeof parsed.drawMode === 'string') {
+          drawMode = parsed.drawMode as DrawMode;
+        }
+
+        if (parsed && typeof parsed.secretAgendasEnabled === 'boolean') {
+          secretAgendasEnabled = parsed.secretAgendasEnabled;
+        }
+      } catch (error) {
+        console.warn('Failed to parse saved settings:', error);
+      }
+    }
     
     const handSize = Math.max(5, getStartingHandSize(drawMode, faction));
     const aiFaction = faction === 'government' ? 'truth' : 'government';
@@ -1882,6 +1892,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         `Controlled states: ${initialControl.player.join(', ')}`,
         `Weekly Issue: ${issueState.label}`,
         `Issue Spotlight: ${issueState.description}`,
+        ...(secretAgendasEnabled ? [] : ['Secret agendas disabled for this campaign']),
       ],
       drawMode,
       cardDrawState: {
@@ -1891,8 +1902,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       secretAgenda: undefined,
       aiSecretAgenda: undefined,
       secretAgendaDifficulty: null,
+      secretAgendasEnabled,
     }));
-    if (agendaId) {
+    if (secretAgendasEnabled && agendaId) {
       assignSecretAgenda(agendaId);
     }
   }, [achievements, aiDifficulty, assignSecretAgenda, eventManager, resetStateEvents]);
@@ -3622,6 +3634,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return {
           ...prev,
           ...saveData,
+          secretAgendasEnabled: typeof saveData.secretAgendasEnabled === 'boolean'
+            ? saveData.secretAgendasEnabled
+            : true,
           turn: normalizedTurn,
           round: normalizedRound,
           paranormalHotspots: normalizedHotspots,

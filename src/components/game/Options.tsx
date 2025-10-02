@@ -105,6 +105,7 @@ interface GameSettings {
   difficulty: DifficultyLabel;
   screenShake: boolean;
   confirmActions: boolean;
+  secretAgendasEnabled: boolean;
   drawMode: 'standard' | 'classic' | 'momentum' | 'catchup' | 'fast';
   uiTheme: 'tabloid_bw' | 'government_classic';
   paranormalEffectsEnabled: boolean;
@@ -142,6 +143,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       difficulty: defaultDifficulty,
       screenShake: true,
       confirmActions: true,
+      secretAgendasEnabled: true,
       drawMode: 'standard',
       uiTheme,
       paranormalEffectsEnabled: true,
@@ -162,6 +164,9 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
           ...rest,
           difficulty: difficultyLabel,
           uiScale: parseUiScale(rest?.uiScale, baseSettings.uiScale),
+          secretAgendasEnabled: typeof rest.secretAgendasEnabled === 'boolean'
+            ? rest.secretAgendasEnabled
+            : baseSettings.secretAgendasEnabled,
         };
 
         if (typeof document !== 'undefined') {
@@ -390,6 +395,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       difficulty: DIFFICULTY_LABELS.NORMAL,
       screenShake: true,
       confirmActions: true,
+      secretAgendasEnabled: true,
       drawMode: 'standard',
       uiTheme: 'tabloid_bw',
       paranormalEffectsEnabled: true,
@@ -833,6 +839,19 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <Switch
                   checked={settings.confirmActions}
                   onCheckedChange={checked => updateSettings({ confirmActions: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <label className="text-sm font-medium text-newspaper-text">Enable Secret Agendas</label>
+                  <p className="text-xs text-newspaper-text/70">
+                    Assigns a random agenda to both factions at the start of a new campaign.
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.secretAgendasEnabled}
+                  onCheckedChange={checked => updateSettings({ secretAgendasEnabled: checked })}
                 />
               </div>
 
