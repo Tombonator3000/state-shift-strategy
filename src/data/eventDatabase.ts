@@ -1,6 +1,8 @@
 import { featureFlags } from '@/state/featureFlags';
 import type { HotspotKind } from '@/systems/paranormalHotspots';
 
+export const DEFAULT_EVENT_TRIGGER_CHANCE = 0.12;
+
 export interface ParanormalHotspotPayload {
   /** Optional fixed state identifier (FIPS or abbreviation) to anchor the hotspot. */
   stateId?: string;
@@ -4658,7 +4660,7 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
 export class EventManager {
   private eventHistory: string[] = [];
   private turnCount: number = 0;
-  private baseEventChance: number = 0.12;
+  private baseEventChance: number = DEFAULT_EVENT_TRIGGER_CHANCE;
   private readonly paranormalHotspotChance: number = 0.2;
   private readonly stateEventHistoryLimit: number = 3;
   private stateEventHistoryByState: Map<string, string[]> = new Map();

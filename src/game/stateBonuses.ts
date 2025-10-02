@@ -1,4 +1,4 @@
-import type { GameEvent } from '@/data/eventDatabase';
+import { DEFAULT_EVENT_TRIGGER_CHANCE, type GameEvent } from '@/data/eventDatabase';
 import { resolvePoolForState, type ThemedEffect } from '@/data/stateThemedPools';
 import type { ActiveStateBonus, StateRoundEventLogEntry } from '@/hooks/gameStateTypes';
 
@@ -60,7 +60,7 @@ export class StateRoundRNG {
   }
 }
 
-export const STATE_EVENT_CHANCE = 0.35;
+export const STATE_EVENT_CHANCE = DEFAULT_EVENT_TRIGGER_CHANCE;
 
 export const computeRoundSeed = (baseSeed: number, round: number): number => {
   const normalizedBase = baseSeed >>> 0;
