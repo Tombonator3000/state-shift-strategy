@@ -3068,7 +3068,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       if (typeof window !== 'undefined') {
         if (spawnedHotspotVisual) {
-          const position = VisualEffectsCoordinator.getRandomCenterPosition(220);
+          const position =
+            VisualEffectsCoordinator.getStateCenterPosition({
+              stateId: spawnedHotspotVisual.stateId,
+              stateAbbreviation: rolledHotspot?.stateAbbreviation,
+            }) ?? VisualEffectsCoordinator.getScreenCenter();
           VisualEffectsCoordinator.triggerParanormalHotspot({
             position,
             stateId: spawnedHotspotVisual.stateId,
@@ -3086,7 +3090,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             tags: rolledHotspot.tags,
             expansionTag: rolledHotspot.expansionTag,
           });
-          const position = VisualEffectsCoordinator.getRandomCenterPosition(220);
+          const position =
+            VisualEffectsCoordinator.getStateCenterPosition({
+              stateId: rolledHotspot.stateId,
+              stateAbbreviation: rolledHotspot.stateAbbreviation,
+            }) ?? VisualEffectsCoordinator.getScreenCenter();
           VisualEffectsCoordinator.triggerParanormalHotspot({
             position,
             stateId: rolledHotspot.stateId ?? rolledHotspot.stateAbbreviation ?? label,

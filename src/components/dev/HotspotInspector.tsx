@@ -13,14 +13,10 @@ interface HotspotInspectorProps {
 }
 
 const resolvePosition = (stateAbbreviation: string | undefined) => {
-  if (!stateAbbreviation) {
-    return VisualEffectsCoordinator.getScreenCenter();
-  }
-
-  const element = document.querySelector<HTMLElement>(`[data-state-id="${stateAbbreviation.toUpperCase()}"]`);
-  return element
-    ? VisualEffectsCoordinator.getElementCenter(element)
-    : VisualEffectsCoordinator.getScreenCenter();
+  return (
+    VisualEffectsCoordinator.getStateCenterPosition({ stateAbbreviation })
+    ?? VisualEffectsCoordinator.getScreenCenter()
+  );
 };
 
 const HotspotInspector = ({ hotspots, onTriggerEvent }: HotspotInspectorProps) => {

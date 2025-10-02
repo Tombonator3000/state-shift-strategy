@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, expect, it, beforeEach, afterEach, afterAll, mock } from 'bun:test';
 import TestRenderer, { act } from 'react-test-renderer';
+import { JSDOM } from 'jsdom';
 
 type MockGameEvent = {
   id: string;
@@ -283,6 +284,72 @@ const createSeededRng = (seed: number) => {
     let t = Math.imul(state ^ (state >>> 15), 1 | state);
     t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const ensureDomEnvironment = () => {
+  const globalScope = globalThis as {
+    window?: Window;
+    document?: Document;
+    navigator?: Navigator;
+    Event?: typeof Event;
+    CustomEvent?: typeof CustomEvent;
+  };
+
+  const hadWindow = 'window' in globalScope;
+  const hadDocument = 'document' in globalScope;
+  const hadNavigator = 'navigator' in globalScope;
+  const hadEvent = 'Event' in globalScope;
+  const hadCustomEvent = 'CustomEvent' in globalScope;
+
+  if (hadWindow && hadDocument) {
+    return () => {};
+  }
+
+  const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'http://localhost' });
+
+  const previousWindow = globalScope.window;
+  const previousDocument = globalScope.document;
+  const previousNavigator = globalScope.navigator;
+  const previousEvent = globalScope.Event;
+  const previousCustomEvent = globalScope.CustomEvent;
+
+  globalScope.window = dom.window as unknown as Window;
+  globalScope.document = dom.window.document as unknown as Document;
+  globalScope.navigator = dom.window.navigator as unknown as Navigator;
+  globalScope.Event = dom.window.Event as unknown as typeof Event;
+  globalScope.CustomEvent = dom.window.CustomEvent as unknown as typeof CustomEvent;
+
+  return () => {
+    if (hadWindow) {
+      globalScope.window = previousWindow;
+    } else {
+      delete globalScope.window;
+    }
+
+    if (hadDocument) {
+      globalScope.document = previousDocument;
+    } else {
+      delete globalScope.document;
+    }
+
+    if (hadNavigator) {
+      globalScope.navigator = previousNavigator;
+    } else {
+      delete globalScope.navigator;
+    }
+
+    if (hadEvent) {
+      globalScope.Event = previousEvent;
+    } else {
+      delete globalScope.Event;
+    }
+
+    if (hadCustomEvent) {
+      globalScope.CustomEvent = previousCustomEvent;
+    } else {
+      delete globalScope.CustomEvent;
+    }
   };
 };
 
@@ -585,6 +652,105 @@ describe('useGameState state event truth adjustments', () => {
     expect(finalState.paranormalHotspots[targetAbbreviation].expiresOnTurn).toBe(
       legacyEntries.active.expiresOnTurn,
     );
+  });
+
+  it('emits hotspot visuals centered on the target state when closing the newspaper', async () => {
+    const originalHotspotFlag = featureFlags.hotspotDirectorEnabled;
+    const hook = renderHook(() => useGameState());
+
+    await act(async () => {
+      hook.result.current?.initGame('truth');
+    });
+
+    const director = hook.result.current?.hotspotDirector;
+    expect(director).toBeDefined();
+    if (!director) {
+      return;
+    }
+
+    const gameState = hook.result.current?.gameState;
+    expect(gameState).toBeDefined();
+    if (!gameState) {
+      return;
+    }
+
+    const targetState = gameState.states.find(state => state.id && state.abbreviation && state.name);
+    expect(targetState).toBeDefined();
+    if (!targetState) {
+      return;
+    }
+
+    const restoreDom = ensureDomEnvironment();
+
+    const candidate: WeightedHotspotCandidate = {
+      id: 'test-hotspot',
+      name: 'Centered Signal',
+      kind: 'ghost',
+      location: 'Test Site',
+      intensity: 4,
+      status: 'spawning',
+      tags: [],
+      icon: undefined,
+      expansionTag: undefined,
+      stateId: targetState.id,
+      stateName: targetState.name,
+      stateAbbreviation: targetState.abbreviation,
+      totalWeight: 1,
+      weightBreakdown: { base: 1, catalog: 0, type: 0, expansion: 0, cryptid: 0 },
+    };
+
+    const originalRollForSpawn = director.rollForSpawn;
+    director.rollForSpawn = () => candidate;
+
+    const stateElement = document.createElement('div');
+    stateElement.setAttribute('data-state-id', targetState.id);
+    stateElement.setAttribute('data-state-abbr', targetState.abbreviation);
+    stateElement.getBoundingClientRect = () => ({
+      width: 120,
+      height: 80,
+      top: 300,
+      left: 400,
+      right: 520,
+      bottom: 380,
+      x: 400,
+      y: 300,
+      toJSON: () => ({}),
+    }) as DOMRect;
+    document.body.appendChild(stateElement);
+
+    let listener: ((event: Event) => void) | null = null;
+    const hotspotDetailPromise = new Promise<{
+      position: { x: number; y: number };
+    }>(resolve => {
+      const localListener = (event: Event) => {
+        window.removeEventListener('paranormalHotspot', localListener as EventListener);
+        const detail = (event as CustomEvent<{ position: { x: number; y: number } }>).detail;
+        resolve(detail);
+      };
+      listener = localListener;
+      window.addEventListener('paranormalHotspot', localListener as EventListener);
+    });
+
+    featureFlags.hotspotDirectorEnabled = true;
+
+    try {
+      await act(async () => {
+        hook.result.current?.closeNewspaper();
+      });
+
+      const detail = await hotspotDetailPromise;
+      expect(detail.position).toEqual({ x: 460, y: 340 });
+    } finally {
+      if (listener) {
+        window.removeEventListener('paranormalHotspot', listener as EventListener);
+      }
+      if (stateElement.parentElement) {
+        stateElement.parentElement.removeChild(stateElement);
+      }
+      director.rollForSpawn = originalRollForSpawn;
+      featureFlags.hotspotDirectorEnabled = originalHotspotFlag;
+      restoreDom();
+    }
   });
 });
 

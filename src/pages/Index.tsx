@@ -1108,7 +1108,11 @@ const Index = () => {
       const hotspotTagline = buildCampaignHotspotTagline({ arc, event: currentEvent, stage });
       if (hotspotTagline && currentEvent?.paranormalHotspot) {
         const hotspotStateName = resolveEventStateName(currentEvent) ?? 'Unknown Site';
-        const hotspotPosition = VisualEffectsCoordinator.getRandomCenterPosition(stage === 'finale' ? 100 : 220);
+        const hotspotPosition =
+          VisualEffectsCoordinator.getStateCenterPosition({
+            stateId: currentEvent.paranormalHotspot.stateId,
+            stateAbbreviation: currentEvent.paranormalHotspot.stateId,
+          }) ?? VisualEffectsCoordinator.getScreenCenter();
         VisualEffectsCoordinator.triggerParanormalHotspot({
           position: hotspotPosition,
           stateId: currentEvent.paranormalHotspot.stateId ?? hotspotStateName,
