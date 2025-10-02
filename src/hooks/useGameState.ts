@@ -36,13 +36,14 @@ import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
 import {
   HotspotDirector,
+  resolveHotspot,
   type WeightedHotspotCandidate,
   type Hotspot,
 } from '@/systems/paranormalHotspots';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
 import { queueHotspotResolveToast, queueHotspotExpireToast } from '@/ui/hotspots.toasts';
-import { formatHotspotSpawnLog, getHotspotIdleLog } from '@/state/useGameLog';
+import { getHotspotIdleLog } from '@/state/useGameLog';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
@@ -526,6 +527,68 @@ const createHotspotEntries = (params: {
     active,
     stateHotspot: toStateHotspot(active, currentTurn),
   };
+};
+
+const createDirectorHotspotEntries = (params: {
+  candidate: WeightedHotspotCandidate;
+  state: GameState['states'][number];
+  currentTurn: number;
+  enabledExpansions: string[];
+}): {
+  active: ActiveParanormalHotspot;
+  stateHotspot: StateParanormalHotspot;
+  payload: ParanormalHotspotPayload;
+} => {
+  const { candidate, state, currentTurn, enabledExpansions } = params;
+
+  const truthResolution = resolveHotspot(state.id, 'truth', {
+    stateId: state.id,
+    stateAbbreviation: state.abbreviation,
+    enabledExpansions,
+  });
+
+  const rawIntensity = typeof candidate.intensity === 'number' && Number.isFinite(candidate.intensity)
+    ? candidate.intensity
+    : 3;
+  const defenseBoost = Math.max(1, Math.round(rawIntensity / 2));
+  const duration = Math.max(2, Math.min(4, Math.round(rawIntensity / 2) + 1));
+  const truthReward = Math.max(1, Math.round(Math.abs(truthResolution.truthDelta)));
+
+  const icon = candidate.tags.includes('cryptid-home') || candidate.tags.includes('expansion:cryptids')
+    ? '🛸'
+    : '👻';
+  const label = candidate.name ?? `${state.name} Hotspot`;
+
+  const payload: ParanormalHotspotPayload = {
+    stateId: state.id,
+    label,
+    description: candidate.location,
+    icon,
+    duration,
+    truthReward,
+    defenseBoost,
+    source: 'neutral',
+  };
+
+  const syntheticEvent: GameEvent = {
+    id: candidate.id,
+    title: label,
+    headline: candidate.name?.toUpperCase(),
+    content: candidate.location ?? `${state.name} hotspot`,
+    type: 'random',
+    faction: 'neutral',
+    rarity: 'rare',
+    weight: 0,
+  };
+
+  const entries = createHotspotEntries({
+    event: syntheticEvent,
+    payload,
+    state,
+    currentTurn,
+  });
+
+  return { ...entries, payload };
 };
 
 const cloneEventEffects = (
@@ -2870,12 +2933,62 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const rolledHotspot = hotspotDirector.rollForSpawn(prev.round, prev, {
         enabledExpansions,
       });
-      let hotspotLogs: string[] = [];
+
+      let logsWithHotspot = baseLogs;
+      // TODO: Re-enable hotspot spawn logging once director-driven entries replace legacy event spawns.
+      let statesAfterHotspot: GameState['states'] = prev.states;
+      let hotspotsAfterHotspot = prev.paranormalHotspots;
+      let spawnedHotspotVisual: {
+        stateId: string;
+        stateName: string;
+        label: string;
+        icon?: string;
+        source: 'truth' | 'government' | 'neutral';
+        defenseBoost: number;
+        truthReward: number;
+      } | null = null;
+
       if (rolledHotspot) {
-        const extraArticle = hotspotDirector.buildHotspotExtraArticle(rolledHotspot);
-        hotspotLogs = [formatHotspotSpawnLog(extraArticle)];
+        const targetState = prev.states.find(state =>
+          state.abbreviation?.toUpperCase?.() === rolledHotspot.stateAbbreviation?.toUpperCase?.(),
+        );
+
+        if (targetState && targetState.abbreviation) {
+          const targetAbbreviation = targetState.abbreviation;
+          const { active, stateHotspot, payload } = createDirectorHotspotEntries({
+            candidate: rolledHotspot,
+            state: targetState,
+            currentTurn: prev.turn,
+            enabledExpansions,
+          });
+
+          statesAfterHotspot = prev.states.map(state => {
+            if (state.abbreviation === targetAbbreviation) {
+              return {
+                ...state,
+                defense: state.defense + payload.defenseBoost,
+                paranormalHotspot: stateHotspot,
+              };
+            }
+            return state;
+          });
+
+          hotspotsAfterHotspot = {
+            ...prev.paranormalHotspots,
+            [targetAbbreviation]: active,
+          };
+
+          spawnedHotspotVisual = {
+            stateId: active.stateId,
+            stateName: active.stateName,
+            label: active.label,
+            icon: active.icon,
+            source: active.source,
+            defenseBoost: payload.defenseBoost,
+            truthReward: payload.truthReward,
+          };
+        }
       }
-      const logsWithHotspot = hotspotLogs.length > 0 ? [...baseLogs, ...hotspotLogs] : baseLogs;
 
       let nextState: GameState = {
         ...prev,
@@ -2897,6 +3010,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         log: logsWithHotspot,
         agendaRoundCounters: {},
         activeHotspot: rolledHotspot ?? null,
+        states: statesAfterHotspot,
+        paranormalHotspots: hotspotsAfterHotspot,
       };
 
       if (nextState.lastStateBonusRound !== nextState.round) {
@@ -2936,23 +3051,37 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         }
       }
 
-      if (rolledHotspot && typeof window !== 'undefined') {
-        const label = rolledHotspot.stateName ?? rolledHotspot.location ?? rolledHotspot.name;
-        const icon = rolledHotspot.tags.includes('cryptid-home') ? '🛸' : rolledHotspot.tags.includes('expansion:cryptids')
-          ? '🛸'
-          : '👻';
-        const position = VisualEffectsCoordinator.getRandomCenterPosition(220);
-        VisualEffectsCoordinator.triggerParanormalHotspot({
-          position,
-          stateId: rolledHotspot.stateId ?? rolledHotspot.stateAbbreviation ?? label,
-          stateName: label,
-          label: rolledHotspot.name,
-          icon,
-          source: 'neutral',
-          defenseBoost: 0,
-          truthReward: 0,
-        });
+      if (typeof window !== 'undefined') {
+        if (spawnedHotspotVisual) {
+          const position = VisualEffectsCoordinator.getRandomCenterPosition(220);
+          VisualEffectsCoordinator.triggerParanormalHotspot({
+            position,
+            stateId: spawnedHotspotVisual.stateId,
+            stateName: spawnedHotspotVisual.stateName,
+            label: spawnedHotspotVisual.label,
+            icon: spawnedHotspotVisual.icon ?? '👻',
+            source: spawnedHotspotVisual.source,
+            defenseBoost: spawnedHotspotVisual.defenseBoost,
+            truthReward: spawnedHotspotVisual.truthReward,
+          });
+        } else if (rolledHotspot) {
+          const label = rolledHotspot.stateName ?? rolledHotspot.location ?? rolledHotspot.name;
+          const icon = rolledHotspot.tags.includes('cryptid-home') ? '🛸' : rolledHotspot.tags.includes('expansion:cryptids')
+            ? '🛸'
+            : '👻';
+          const position = VisualEffectsCoordinator.getRandomCenterPosition(220);
+          VisualEffectsCoordinator.triggerParanormalHotspot({
+            position,
+            stateId: rolledHotspot.stateId ?? rolledHotspot.stateAbbreviation ?? label,
+            stateName: label,
+            label: rolledHotspot.name,
+            icon,
+            source: 'neutral',
+            defenseBoost: 0,
+            truthReward: 0,
+          });
         }
+      }
 
         return updateSecretAgendaProgress(nextState);
       });
