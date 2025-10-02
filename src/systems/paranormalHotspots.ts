@@ -1,6 +1,7 @@
 import hotspotsCatalog from '@/data/hotspots.catalog.json';
 import hotspotsConfig from '@/data/hotspots.config.json';
 import cryptidHomeStates from '@/data/cryptids.homestate.json';
+import { USA_STATES } from '@/data/usaStates';
 import type { GameState } from '@/hooks/gameStateTypes';
 import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
 
@@ -54,6 +55,26 @@ export interface HotspotExtraArticle {
 type HotspotCatalog = typeof hotspotsCatalog;
 type HotspotConfig = typeof hotspotsConfig;
 type CryptidHomeState = typeof cryptidHomeStates;
+
+interface CryptidSignatureRecord {
+  stateName: string;
+  abbreviation?: string;
+  name: string;
+  slug: string;
+}
+
+const STATE_NAME_TO_ABBR = new Map<string, string>();
+for (const state of USA_STATES) {
+  if (!state || typeof state.name !== 'string' || typeof state.abbreviation !== 'string') {
+    continue;
+  }
+  const nameKey = state.name.trim().toUpperCase();
+  const abbrValue = state.abbreviation.trim().toUpperCase();
+  if (!nameKey || !abbrValue) {
+    continue;
+  }
+  STATE_NAME_TO_ABBR.set(nameKey, abbrValue);
+}
 
 interface ExpansionModifierConfig {
   multiplier?: number;
@@ -494,7 +515,7 @@ export class HotspotDirector {
 
   private readonly uiConfig: HotspotUiConfig;
 
-  private cryptidHomeLookup: Map<string, number> | null = null;
+  private cryptidHomeLookup: Map<string, CryptidSignatureRecord> | null = null;
 
   constructor(
     catalog: HotspotCatalog = hotspotsCatalog,
@@ -550,6 +571,22 @@ export class HotspotDirector {
       .filter((tag): tag is string => typeof tag === 'string')
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0);
+  }
+
+  private resolveCryptidSlug(tags: string[]): string | null {
+    for (const tag of tags) {
+      const normalized = tag.toLowerCase();
+      if (!normalized.startsWith('cryptid:')) {
+        continue;
+      }
+      const value = tag.slice(tag.indexOf(':') + 1).trim();
+      if (value.length === 0) {
+        continue;
+      }
+      return value.toLowerCase();
+    }
+
+    return null;
   }
 
   private resolveEntryStateAbbreviation(entry: CatalogEntry): string | undefined {
@@ -896,32 +933,55 @@ export class HotspotDirector {
     } satisfies HotspotExtraArticle;
   }
 
-  private resolveCryptidLookup(): Map<string, number> {
+  private slugifyCryptidName(name: string): string {
+    return name
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .toLowerCase();
+  }
+
+  private resolveCryptidLookup(): Map<string, CryptidSignatureRecord> {
     if (this.cryptidHomeLookup) {
       return this.cryptidHomeLookup;
     }
 
-    const lookup = new Map<string, number>();
-    const entries = Array.isArray(this.cryptids?.cryptids) ? this.cryptids.cryptids : [];
+    const lookup = new Map<string, CryptidSignatureRecord>();
+    const entries = this.cryptids && typeof this.cryptids === 'object'
+      ? Object.entries(this.cryptids as Record<string, unknown>)
+      : [];
 
-    for (const cryptid of entries) {
-      const rawStates = (cryptid as { homeStates?: unknown; states?: unknown }).homeStates
-        ?? (cryptid as { states?: unknown }).states;
-
-      if (!Array.isArray(rawStates)) {
+    for (const [rawStateName, rawCryptidName] of entries) {
+      if (typeof rawStateName !== 'string' || typeof rawCryptidName !== 'string') {
         continue;
       }
 
-      for (const state of rawStates) {
-        if (typeof state !== 'string') {
-          continue;
-        }
-        const key = state.trim().toUpperCase();
-        if (!key) {
-          continue;
-        }
-        const current = lookup.get(key) ?? 0;
-        lookup.set(key, current + 1);
+      const stateName = rawStateName.trim();
+      const cryptidName = rawCryptidName.trim();
+
+      if (!stateName || !cryptidName) {
+        continue;
+      }
+
+      const slug = this.slugifyCryptidName(cryptidName);
+      if (!slug) {
+        continue;
+      }
+
+      const key = stateName.toUpperCase();
+      const abbreviation = STATE_NAME_TO_ABBR.get(key);
+
+      const record: CryptidSignatureRecord = {
+        stateName,
+        abbreviation,
+        name: cryptidName,
+        slug,
+      };
+
+      lookup.set(key, record);
+      if (abbreviation) {
+        lookup.set(abbreviation, record);
       }
     }
 
@@ -989,10 +1049,26 @@ export class HotspotDirector {
     return { weight, bonus, tags: modifierTags };
   }
 
-  private applyCryptidBoost(stateAbbr: string, currentWeight: number): { weight: number; bonus: number; tag?: string } {
+  private applyCryptidBoost(
+    stateAbbr: string,
+    stateName: string | undefined,
+    cryptidSlug: string | null,
+    currentWeight: number,
+  ): { weight: number; bonus: number; tag?: string } {
+    if (!cryptidSlug) {
+      return { weight: currentWeight, bonus: 0 };
+    }
+
     const lookup = this.resolveCryptidLookup();
-    const homeCount = lookup.get(stateAbbr.toUpperCase()) ?? 0;
-    if (homeCount <= 0) {
+    const normalizedAbbr = stateAbbr.toUpperCase();
+    const normalizedStateName = typeof stateName === 'string'
+      ? stateName.trim().toUpperCase()
+      : undefined;
+
+    const signature = lookup.get(normalizedAbbr)
+      ?? (normalizedStateName ? lookup.get(normalizedStateName) : undefined);
+
+    if (!signature || signature.slug !== cryptidSlug) {
       return { weight: currentWeight, bonus: 0 };
     }
 
@@ -1001,6 +1077,7 @@ export class HotspotDirector {
     const perCryptid = cryptidConfig.perCryptid;
     const max = cryptidConfig.max;
 
+    const homeCount = 1;
     const boost = Math.min(max, base + homeCount * perCryptid);
     return { weight: currentWeight + boost, bonus: boost, tag: 'cryptid-home' };
   }
@@ -1125,7 +1202,19 @@ export class HotspotDirector {
         tags = [...tags, ...expansionResult.tags];
       }
 
-      const cryptidResult = this.applyCryptidBoost(stateAbbr, totalWeight);
+      const cryptidSlug = this.resolveCryptidSlug(tags);
+      const stateNameCandidate = typeof state.name === 'string' ? state.name.trim() : '';
+      const entryStateNameCandidate = typeof (entry as { stateName?: unknown }).stateName === 'string'
+        ? ((entry as { stateName: string }).stateName.trim())
+        : '';
+      const resolvedStateName = stateNameCandidate || entryStateNameCandidate || undefined;
+
+      const cryptidResult = this.applyCryptidBoost(
+        stateAbbr,
+        resolvedStateName,
+        cryptidSlug,
+        totalWeight,
+      );
       breakdown.cryptid = cryptidResult.bonus;
       totalWeight = cryptidResult.weight;
       if (cryptidResult.tag) {
