@@ -8,6 +8,7 @@ import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { areParanormalEffectsEnabled } from '@/state/settings';
+import { getHotspotIdleMessage } from '@/state/useGameLog';
 import type {
   ActiveStateBonus,
   StateEventBonusSummary,
@@ -110,7 +111,7 @@ export const StateHotspotDetails: React.FC<StateHotspotDetailsProps> = ({ hotspo
             })()}
           </>
         ) : (
-          <div className="text-muted-foreground leading-snug">No active hotspot detected.</div>
+          <div className="text-muted-foreground leading-snug">{getHotspotIdleMessage()}</div>
         )}
         {entries.length > 0 && (
           <div className={`mt-1 ${hasHotspot ? 'border-t border-purple-500/20 pt-2' : ''}`}>

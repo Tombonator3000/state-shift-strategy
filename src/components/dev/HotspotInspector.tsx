@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { type ActiveParanormalHotspot } from '@/hooks/gameStateTypes';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
+import { getHotspotIdleMessage } from '@/state/useGameLog';
 
 interface HotspotInspectorProps {
   hotspots?: Record<string, ActiveParanormalHotspot>;
@@ -63,7 +64,7 @@ const HotspotInspector = ({ hotspots, onTriggerEvent }: HotspotInspectorProps) =
       <CardContent className="p-0">
         {entries.length === 0 ? (
           <div className="p-6 text-center text-sm text-slate-400">
-            No active hotspots detected. Fire an event that spawns anomalies to populate this panel.
+            {getHotspotIdleMessage()} Skyt inn en hendelse for å generere nye anomalier.
           </div>
         ) : (
           <ScrollArea className="max-h-72">

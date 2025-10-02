@@ -82,5 +82,49 @@
         }
       }
     }
+  },
+  "ui": {
+    "badges": {
+      "default": {
+        "className": "bg-slate-950/80 border-slate-500/60 text-slate-200"
+      },
+      "anomaly": {
+        "className": "bg-indigo-950/80 border-indigo-500/70 text-indigo-200"
+      },
+      "disturbance": {
+        "className": "bg-amber-950/80 border-amber-500/60 text-amber-200"
+      },
+      "manifestation": {
+        "className": "bg-rose-950/75 border-rose-500/60 text-rose-200"
+      },
+      "phenomenon": {
+        "className": "bg-purple-950/80 border-purple-400/70 text-purple-100"
+      },
+      "encounter": {
+        "className": "bg-sky-950/80 border-sky-500/60 text-sky-200"
+      }
+    },
+    "blurbs": {
+      "default": [
+        "Sensorene melder {KIND}-anomali over {STATE}. Intensitet {INTENSITY}.",
+        "Feltteam rapporterer ustabil energi i {STATE_TITLE}. Intensitet {INTENSITY}."
+      ],
+      "phenomenon": [
+        "Spektrale bølger forstyrrer {STATE_TITLE}. Målt intensitet {INTENSITY}.",
+        "Pressesenteret registrerer en fenomen-krusning over {STATE_TITLE}. Intensitet {INTENSITY}."
+      ],
+      "encounter": [
+        "Vitner i {STATE_TITLE} rapporterer nærkontakt. Intensitet {INTENSITY}.",
+        "Operatører i {STATE_TITLE} låser inn på ukjent signatur. Intensitet {INTENSITY}."
+      ],
+      "disturbance": [
+        "Lokale nett i {STATE_TITLE} flimrer mens en forstyrrelse bygger seg opp. Intensitet {INTENSITY}.",
+        "Alarmnettet noterer en taktisk forstyrrelse i {STATE_TITLE}. Intensitet {INTENSITY}."
+      ],
+      "manifestation": [
+        "Materialiserte former driver over {STATE_TITLE}. Intensitet {INTENSITY}.",
+        "Observatører melder om manifestasjoner i {STATE_TITLE}. Intensitet {INTENSITY}."
+      ]
+    }
   }
 }

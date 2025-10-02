@@ -7,6 +7,7 @@ import CardImage from '@/components/game/CardImage';
 import { loadNewspaperData, pick, shuffle, type NewspaperData } from '@/lib/newspaperData';
 import { generateIssue, type NarrativeIssue, type PlayedCardInput } from '@/engine/newspaper/IssueGenerator';
 import type { TabloidNewspaperProps } from './TabloidNewspaperLegacy';
+import type { HotspotExtraArticle } from '@/systems/paranormalHotspots';
 import type { Card } from '@/types';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import { buildRoundContext, formatTruthDelta } from './tabloidRoundUtils';
@@ -271,6 +272,8 @@ const TabloidNewspaperV2 = ({
   agendaIssue,
   agendaMoments = [],
   onArcProgress,
+  hotspotDirector,
+  activeHotspot,
 }: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState('THE PARANOID TIMES');
@@ -738,6 +741,19 @@ const TabloidNewspaperV2 = ({
     [events],
   );
 
+  const hotspotExtraArticle = useMemo<HotspotExtraArticle | null>(() => {
+    if (!hotspotDirector || !activeHotspot) {
+      return null;
+    }
+
+    try {
+      return hotspotDirector.buildHotspotExtraArticle(activeHotspot);
+    } catch (error) {
+      console.error('Failed to compose hotspot extra article:', error);
+      return null;
+    }
+  }, [hotspotDirector, activeHotspot]);
+
   const campaignArcGroups = useMemo<CampaignArcGroup[]>(() => {
     if (!events.length) {
       return [];
@@ -1114,14 +1130,41 @@ const TabloidNewspaperV2 = ({
                   ) : null}
                 </div>
               </div>
-            </article>
+          </article>
 
-            <aside className="space-y-4">
-              {comboNarrative ? (
-                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                  <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
-                    Combo Dispatch
-                  </h3>
+          <aside className="space-y-4">
+            {hotspotExtraArticle ? (
+              <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-2 rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
+                      hotspotExtraArticle.badgeClassName || 'bg-purple-950/80 border-purple-400/70 text-purple-100',
+                    )}
+                  >
+                    <span aria-hidden="true">🛸</span>
+                    {hotspotExtraArticle.badgeLabel}
+                  </span>
+                  <span className="rounded border border-dashed border-newspaper-border/60 px-2 py-0.5">
+                    Intensitet {hotspotExtraArticle.intensity}
+                  </span>
+                </div>
+                <div className="mt-2 text-[10px] font-semibold uppercase tracking-[0.35em] text-newspaper-text/50">
+                  Hotspot Oppdaget
+                </div>
+                <h3 className="mt-1 text-base font-black uppercase tracking-wide text-newspaper-headline">
+                  {hotspotExtraArticle.headline}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-newspaper-text/80">
+                  {hotspotExtraArticle.blurb}
+                </p>
+              </section>
+            ) : null}
+            {comboNarrative ? (
+              <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
+                <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
+                  Combo Dispatch
+                </h3>
                   <div className="text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
                     Chain: {comboNarrative.magnitude} · {comboNarrative.tags.join(' • ')}
                   </div>

@@ -717,6 +717,7 @@ const Index = () => {
     loadGame,
     getSaveInfo,
     registerParanormalSighting,
+    hotspotDirector,
   } = useGameState();
   const audio = useAudioContext();
   const { animatePlayCard, isAnimating } = useCardAnimation();
@@ -3019,6 +3020,8 @@ const Index = () => {
           agendaMoments={agendaMoments}
           onClose={handleCloseNewspaper}
           onArcProgress={handleArcProgress}
+          hotspotDirector={hotspotDirector}
+          activeHotspot={gameState.activeHotspot}
         />
       )}
     </>

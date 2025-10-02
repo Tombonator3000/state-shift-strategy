@@ -32,6 +32,18 @@ export interface Hotspot {
   weightBreakdown?: HotspotWeightBreakdown;
 }
 
+export interface HotspotExtraArticle {
+  id: string;
+  kind: HotspotKind;
+  stateName: string;
+  stateAbbreviation?: string;
+  badgeLabel: string;
+  badgeClassName: string;
+  headline: string;
+  blurb: string;
+  intensity: number;
+}
+
 type HotspotCatalog = typeof hotspotsCatalog;
 type HotspotConfig = typeof hotspotsConfig;
 type CryptidHomeState = typeof cryptidHomeStates;
@@ -54,6 +66,19 @@ interface SpawnConfig {
     max: number;
   };
 }
+
+interface HotspotBadgeDefinition {
+  className: string;
+}
+
+interface HotspotUiConfig {
+  badges: Record<string, HotspotBadgeDefinition>;
+  blurbs: Record<string, string[]>;
+}
+
+const DEFAULT_BADGE_CLASS = 'bg-purple-950/80 border-purple-400/70 text-purple-100';
+
+const DEFAULT_BLURB_TEMPLATE = 'Sensorene melder {KIND}-anomali over {STATE}. Intensitet {INTENSITY}.';
 
 interface TruthRewardRangeConfig {
   base?: number;
@@ -264,6 +289,8 @@ export class HotspotDirector {
 
   private readonly spawnConfig: SpawnConfig;
 
+  private readonly uiConfig: HotspotUiConfig;
+
   private cryptidHomeLookup: Map<string, number> | null = null;
 
   constructor(
@@ -275,6 +302,7 @@ export class HotspotDirector {
     this.config = config;
     this.cryptids = cryptids;
     this.spawnConfig = this.normalizeSpawnConfig(config);
+    this.uiConfig = this.normalizeUiConfig(config);
   }
 
   initialize(): void {
@@ -375,6 +403,127 @@ export class HotspotDirector {
     }
 
     return { baseWeights, expansionModifiers, cryptidHomeStateBoost };
+  }
+
+  private normalizeUiConfig(config: HotspotConfig): HotspotUiConfig {
+    const uiConfig: HotspotUiConfig = { badges: {}, blurbs: {} };
+    const rawUi = (config as { ui?: unknown }).ui;
+    if (!rawUi || typeof rawUi !== 'object') {
+      return uiConfig;
+    }
+
+    const rawBadges = (rawUi as { badges?: unknown }).badges;
+    if (rawBadges && typeof rawBadges === 'object') {
+      for (const [key, value] of Object.entries(rawBadges as Record<string, unknown>)) {
+        if (typeof value === 'string' && value.trim()) {
+          uiConfig.badges[key] = { className: value.trim() };
+          continue;
+        }
+
+        if (value && typeof value === 'object') {
+          const className = (value as { className?: unknown }).className;
+          if (typeof className === 'string' && className.trim()) {
+            uiConfig.badges[key] = { className: className.trim() };
+          }
+        }
+      }
+    }
+
+    const rawBlurbs = (rawUi as { blurbs?: unknown }).blurbs;
+    if (rawBlurbs && typeof rawBlurbs === 'object') {
+      for (const [key, value] of Object.entries(rawBlurbs as Record<string, unknown>)) {
+        if (!Array.isArray(value)) {
+          continue;
+        }
+        const blurbs = value
+          .filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0)
+          .map(entry => entry.trim());
+        if (blurbs.length > 0) {
+          uiConfig.blurbs[key] = blurbs;
+        }
+      }
+    }
+
+    return uiConfig;
+  }
+
+  private getBadgeClass(kind: HotspotKind | string | undefined): string {
+    const normalized = typeof kind === 'string' ? kind.toLowerCase() : '';
+    if (normalized && this.uiConfig.badges[normalized]) {
+      return this.uiConfig.badges[normalized].className;
+    }
+    if (this.uiConfig.badges.default) {
+      return this.uiConfig.badges.default.className;
+    }
+    return DEFAULT_BADGE_CLASS;
+  }
+
+  private getBlurbs(kind: HotspotKind | string | undefined): string[] {
+    const normalized = typeof kind === 'string' ? kind.toLowerCase() : '';
+    const specific = normalized && this.uiConfig.blurbs[normalized]
+      ? this.uiConfig.blurbs[normalized]
+      : [];
+    const defaults = this.uiConfig.blurbs.default ?? [];
+    const combined = [...specific, ...defaults];
+    return combined.length > 0 ? combined : [DEFAULT_BLURB_TEMPLATE];
+  }
+
+  private getSeededIndex(seed: string, length: number): number {
+    if (length <= 0) {
+      return 0;
+    }
+    let hash = 0;
+    for (let index = 0; index < seed.length; index += 1) {
+      hash = ((hash << 5) - hash) + seed.charCodeAt(index);
+      hash |= 0;
+    }
+    const normalized = Math.abs(hash);
+    return normalized % length;
+  }
+
+  private pickTemplate(templates: string[], seed: string): string {
+    if (!templates.length) {
+      return DEFAULT_BLURB_TEMPLATE;
+    }
+    const index = this.getSeededIndex(seed, templates.length);
+    return templates[index] ?? templates[0];
+  }
+
+  private formatBlurb(template: string, hotspot: Hotspot): string {
+    const rawState = hotspot.stateName ?? hotspot.location ?? 'ukjent sone';
+    const stateName = rawState.trim() || 'ukjent sone';
+    const intensity = Math.max(1, Math.round(hotspot.intensity ?? 1));
+    const kindLabel = (hotspot.kind ?? 'hotspot').toUpperCase();
+
+    return template
+      .replace(/\{STATE\}/g, stateName.toUpperCase())
+      .replace(/\{STATE_TITLE\}/g, stateName)
+      .replace(/\{INTENSITY\}/g, intensity.toString())
+      .replace(/\{KIND\}/g, kindLabel);
+  }
+
+  buildHotspotExtraArticle(hotspot: Hotspot): HotspotExtraArticle {
+    const normalizedKind: HotspotKind = hotspot.kind ?? 'phenomenon';
+    const stateName = (hotspot.stateName ?? hotspot.location ?? 'Ukjent sone').trim() || 'Ukjent sone';
+    const badgeClassName = this.getBadgeClass(normalizedKind);
+    const badgeLabel = `${normalizedKind.toUpperCase()} • ${stateName.toUpperCase()}`;
+    const headline = (hotspot.name ?? `${stateName} Hotspot`).toUpperCase();
+    const templates = this.getBlurbs(normalizedKind);
+    const template = this.pickTemplate(templates, hotspot.id ?? `${stateName}-${normalizedKind}`);
+    const blurb = this.formatBlurb(template, hotspot);
+    const intensity = Math.max(1, Math.round(hotspot.intensity ?? 1));
+
+    return {
+      id: hotspot.id,
+      kind: normalizedKind,
+      stateName,
+      stateAbbreviation: hotspot.stateAbbreviation,
+      badgeLabel,
+      badgeClassName,
+      headline,
+      blurb,
+      intensity,
+    } satisfies HotspotExtraArticle;
   }
 
   private resolveCryptidLookup(): Map<string, number> {
