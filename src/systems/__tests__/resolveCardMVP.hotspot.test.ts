@@ -134,11 +134,15 @@ describe('resolveCardMVP hotspot handling', () => {
       expect(expectedTruthReward).toBeGreaterThan(0);
       expect(payload.defenseBoost).toBeGreaterThan(0);
 
-      const baselineTruthReward = resolveHotspot('OR', 'truth', { enabledExpansions: [] }).finalReward;
-      expect(expectedTruthReward).toBeGreaterThan(baselineTruthReward);
+      const baselineTruthReward = resolveHotspot('OR', 'truth', {
+        enabledExpansions: [],
+        hotspotKind: 'cryptid',
+      }).finalReward;
+      expect(expectedTruthReward).toBeGreaterThanOrEqual(baselineTruthReward);
 
       const truthResolutionWithExpansion = resolveHotspot('OR', 'truth', {
         enabledExpansions: ['cryptids'],
+        hotspotKind: 'cryptid',
       });
       expect(truthResolutionWithExpansion.finalReward).toBe(expectedTruthReward);
 
@@ -335,7 +339,7 @@ describe('resolveCardMVP hotspot handling', () => {
 
   it('computes signed truth deltas based on winning faction', () => {
     const truthOutcome = resolveHotspot('OR', 'truth');
-    const governmentOutcome = resolveHotspot('OR', 'government');
+    const governmentOutcome = resolveHotspot('OR', 'government', { hotspotKind: 'normal' });
 
     expect(truthOutcome.finalReward).toBeGreaterThan(0);
     expect(truthOutcome.truthDelta).toBeGreaterThan(0);

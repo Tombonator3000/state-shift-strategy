@@ -305,6 +305,7 @@ const buildLegacyHotspotEntries = (params: {
     stateId,
     stateAbbreviation,
     enabledExpansions,
+    hotspotKind: candidate.kind,
   });
 
   const rawIntensity = typeof candidate.intensity === 'number' && Number.isFinite(candidate.intensity)
@@ -318,9 +319,10 @@ const buildLegacyHotspotEntries = (params: {
     icon: candidate.icon,
     tags: candidate.tags,
     expansionTag: candidate.expansionTag,
+    kind: candidate.kind,
   });
   const label = candidate.name ?? `${state.name} Hotspot`;
-  const description = candidate.location ?? `${state.name} hotspot`;
+  const description = candidate.summary ?? candidate.location ?? `${state.name} hotspot`;
 
   const payload: ParanormalHotspotPayload = {
     stateId,
@@ -331,6 +333,7 @@ const buildLegacyHotspotEntries = (params: {
     truthReward,
     defenseBoost,
     source: 'neutral',
+    kind: candidate.kind,
   };
 
   const expiresOnTurn = currentTurn + duration;
@@ -351,6 +354,7 @@ const buildLegacyHotspotEntries = (params: {
     expiresOnTurn,
     createdOnTurn: currentTurn,
     source: payload.source ?? 'neutral',
+    kind: candidate.kind,
   } satisfies GameState['paranormalHotspots'][string];
 
   const stateHotspot = {
@@ -364,6 +368,7 @@ const buildLegacyHotspotEntries = (params: {
     expiresOnTurn,
     turnsRemaining: Math.max(0, expiresOnTurn - currentTurn),
     source: payload.source ?? 'neutral',
+    kind: candidate.kind,
   } satisfies NonNullable<GameState['states'][number]['paranormalHotspot']>;
 
   return { active, stateHotspot, payload };

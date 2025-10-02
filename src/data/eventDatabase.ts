@@ -1,4 +1,5 @@
 import { featureFlags } from '@/state/featureFlags';
+import type { HotspotKind } from '@/systems/paranormalHotspots';
 
 export interface ParanormalHotspotPayload {
   /** Optional fixed state identifier (FIPS or abbreviation) to anchor the hotspot. */
@@ -9,6 +10,8 @@ export interface ParanormalHotspotPayload {
   description?: string;
   /** Emoji/icon shorthand for quick recognition on the map. */
   icon?: string;
+  /** Optional hotspot kind used to resolve themed truth rewards. */
+  kind?: HotspotKind;
   /** Number of turns the hotspot should remain active (minimum 1). */
   duration: number;
   /** Bonus truth awarded (or deducted) when the hotspot is captured. */

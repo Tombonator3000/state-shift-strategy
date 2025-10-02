@@ -412,6 +412,7 @@ export function resolveCardMVP(
           stateId: state.id,
           stateAbbreviation: state.abbreviation,
           fallbackTruthReward: fallbackReward,
+          hotspotKind: hotspot.kind,
         },
       );
       const directionalDelta = hotspotOutcome.truthDelta;

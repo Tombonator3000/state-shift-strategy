@@ -10,16 +10,79 @@
       "spawnRate": 0.2
     },
     "baseWeights": {
-      "default": 1,
+      "default": {
+        "default": 1,
+        "normal": 1,
+        "ufo": 1.05,
+        "ghost": 1.08,
+        "elvis": 0.98,
+        "cryptid": 1.2
+      },
       "states": {
-        "WA": 1.4,
-        "OR": 1.25,
-        "WV": 1.1,
-        "NJ": 1.15,
-        "NM": 1.3,
-        "AZ": 1.2,
-        "MT": 1.05,
-        "NH": 1.05
+        "WA": {
+          "default": 1.35,
+          "normal": 1.3,
+          "ufo": 1.45,
+          "ghost": 1.25,
+          "elvis": 1.05,
+          "cryptid": 1.6
+        },
+        "OR": {
+          "default": 1.2,
+          "normal": 1.18,
+          "ufo": 1.28,
+          "ghost": 1.15,
+          "elvis": 1.02,
+          "cryptid": 1.4
+        },
+        "WV": {
+          "default": 1.15,
+          "normal": 1.12,
+          "ufo": 1.25,
+          "ghost": 1.18,
+          "elvis": 1.05,
+          "cryptid": 1.35
+        },
+        "NJ": {
+          "default": 1.18,
+          "normal": 1.15,
+          "ufo": 1.22,
+          "ghost": 1.14,
+          "elvis": 1.08,
+          "cryptid": 1.32
+        },
+        "NM": {
+          "default": 1.28,
+          "normal": 1.22,
+          "ufo": 1.35,
+          "ghost": 1.18,
+          "elvis": 1.05,
+          "cryptid": 1.45
+        },
+        "AZ": {
+          "default": 1.24,
+          "normal": 1.2,
+          "ufo": 1.32,
+          "ghost": 1.14,
+          "elvis": 1.02,
+          "cryptid": 1.4
+        },
+        "MT": {
+          "default": 1.08,
+          "normal": 1.05,
+          "ufo": 1.18,
+          "ghost": 1.1,
+          "elvis": 1.0,
+          "cryptid": 1.25
+        },
+        "NH": {
+          "default": 1.08,
+          "normal": 1.04,
+          "ufo": 1.16,
+          "ghost": 1.09,
+          "elvis": 1.01,
+          "cryptid": 1.22
+        }
       }
     },
     "expansionModifiers": {
@@ -46,41 +109,71 @@
   "resolution": {
     "truthRewards": {
       "defaults": {
-        "base": 8,
-        "min": 2,
-        "max": 18
+        "base": 3,
+        "min": 1,
+        "max": 4
       },
       "states": {
         "WA": {
-          "base": 11,
-          "max": 20
+          "base": 4,
+          "max": 4
         },
         "OR": {
-          "base": 9
+          "base": 3
         },
         "WV": {
-          "base": 10,
-          "min": 3
+          "base": 3,
+          "min": 1
         },
         "NJ": {
-          "base": 9
+          "base": 3
         },
         "NM": {
-          "base": 10
+          "base": 3
         }
       },
-      "expansionBonuses": {
-        "cryptids": {
-          "flat": 1,
-          "states": {
-            "WA": {
-              "flat": 2
-            },
-            "OR": 1,
-            "NM": {
-              "flat": 1,
-              "multiplier": 1.05
-            }
+      "byKind": {
+        "default": {
+          "basePercent": 0.02,
+          "minPercent": 0.01,
+          "maxPercent": 0.03,
+          "expansionBonus": {
+            "default": 0.0025,
+            "halloween": 0.005
+          }
+        },
+        "normal": {
+          "basePercent": 0.02,
+          "minPercent": 0.01,
+          "maxPercent": 0.025
+        },
+        "ufo": {
+          "basePercent": 0.035,
+          "minPercent": 0.02,
+          "maxPercent": 0.04,
+          "expansionBonus": {
+            "cryptids": 0.01
+          }
+        },
+        "ghost": {
+          "basePercent": 0.03,
+          "minPercent": 0.02,
+          "maxPercent": 0.035,
+          "expansionBonus": {
+            "halloween": 0.01
+          }
+        },
+        "elvis": {
+          "basePercent": 0.025,
+          "minPercent": 0.015,
+          "maxPercent": 0.03
+        },
+        "cryptid": {
+          "basePercent": 0.04,
+          "minPercent": 0.025,
+          "maxPercent": 0.04,
+          "expansionBonus": {
+            "cryptids": 0.015
           }
         }
       }
@@ -91,42 +184,49 @@
       "default": {
         "className": "bg-slate-950/80 border-slate-500/60 text-slate-200"
       },
-      "anomaly": {
-        "className": "bg-indigo-950/80 border-indigo-500/70 text-indigo-200"
+      "normal": {
+        "className": "bg-slate-950/80 border-slate-400/60 text-slate-100"
       },
-      "disturbance": {
-        "className": "bg-amber-950/80 border-amber-500/60 text-amber-200"
+      "ufo": {
+        "className": "bg-lime-950/80 border-lime-500/60 text-lime-100"
       },
-      "manifestation": {
-        "className": "bg-rose-950/75 border-rose-500/60 text-rose-200"
+      "ghost": {
+        "className": "bg-violet-950/80 border-violet-400/60 text-violet-100"
       },
-      "phenomenon": {
-        "className": "bg-purple-950/80 border-purple-400/70 text-purple-100"
+      "elvis": {
+        "className": "bg-fuchsia-950/75 border-fuchsia-400/60 text-fuchsia-100"
       },
-      "encounter": {
-        "className": "bg-sky-950/80 border-sky-500/60 text-sky-200"
+      "cryptid": {
+        "className": "bg-emerald-950/80 border-emerald-500/70 text-emerald-100"
+      },
+      "halloween": {
+        "className": "bg-orange-950/80 border-orange-500/70 text-orange-100"
       }
     },
     "blurbs": {
       "default": [
-        "Sensorene melder {KIND}-anomali over {STATE}. Intensitet {INTENSITY}.",
-        "Feltteam rapporterer ustabil energi i {STATE_TITLE}. Intensitet {INTENSITY}."
+        "Sensors flag a {KIND} ripple over {STATE_TITLE}. Intensity {INTENSITY}.",
+        "Command uplink records static from {STATE_TITLE}. {KIND} footprint estimated at level {INTENSITY}."
       ],
-      "phenomenon": [
-        "Spektrale bølger forstyrrer {STATE_TITLE}. Målt intensitet {INTENSITY}.",
-        "Pressesenteret registrerer en fenomen-krusning over {STATE_TITLE}. Intensitet {INTENSITY}."
+      "normal": [
+        "Local ham radios in {STATE_TITLE} won't shut up about {HEADLINE}. Field intensity {INTENSITY}.",
+        "Agents report {KIND} chatter ricocheting across {STATE_TITLE}. Dials peg at {INTENSITY}."
       ],
-      "encounter": [
-        "Vitner i {STATE_TITLE} rapporterer nærkontakt. Intensitet {INTENSITY}.",
-        "Operatører i {STATE_TITLE} låser inn på ukjent signatur. Intensitet {INTENSITY}."
+      "ufo": [
+        "Radar dishes in {STATE_TITLE} paint a luminous arc. {HEADLINE} blinks at level {INTENSITY}.",
+        "Air-traffic control over {STATE_TITLE} watching {KIND} contrails spell '{HEADLINE}'. Signal strength {INTENSITY}."
       ],
-      "disturbance": [
-        "Lokale nett i {STATE_TITLE} flimrer mens en forstyrrelse bygger seg opp. Intensitet {INTENSITY}.",
-        "Alarmnettet noterer en taktisk forstyrrelse i {STATE_TITLE}. Intensitet {INTENSITY}."
+      "ghost": [
+        "Haunted frequencies out of {STATE_TITLE}: {HEADLINE} manifesting at {INTENSITY}.",
+        "Spectral cold front rolling through {STATE_TITLE}. {HEADLINE} rattles chains at {INTENSITY}."
       ],
-      "manifestation": [
-        "Materialiserte former driver over {STATE_TITLE}. Intensitet {INTENSITY}.",
-        "Observatører melder om manifestasjoner i {STATE_TITLE}. Intensitet {INTENSITY}."
+      "elvis": [
+        "Vegas sequins spotted far from home in {STATE_TITLE}. {HEADLINE} croons at intensity {INTENSITY}.",
+        "Backstage monitors in {STATE_TITLE} light up-{HEADLINE} demands an encore at {INTENSITY}."
+      ],
+      "cryptid": [
+        "Trail cams in {STATE_TITLE} catch footprints spelling '{HEADLINE}'. Intensity {INTENSITY}.",
+        "Rangers whisper that {HEADLINE} is stomping through {STATE_TITLE}. Tracking meters at {INTENSITY}."
       ]
     }
   }

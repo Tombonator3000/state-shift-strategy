@@ -61,13 +61,17 @@ interface ExpansionModifierConfig {
   stateWeights: Record<string, number>;
 }
 
+type SpawnKindKey = HotspotKind | 'default';
+
+type SpawnKindWeights = Partial<Record<SpawnKindKey, number>>;
+
 interface SpawnConfig {
   defaults?: {
     spawnRate?: number;
   };
   baseWeights: {
-    default: number;
-    states: Record<string, number>;
+    default: SpawnKindWeights;
+    states: Record<string, SpawnKindWeights>;
   };
   expansionModifiers: Record<string, ExpansionModifierConfig>;
   cryptidHomeStateBoost: {
@@ -88,7 +92,7 @@ interface HotspotUiConfig {
 
 const DEFAULT_BADGE_CLASS = 'bg-purple-950/80 border-purple-400/70 text-purple-100';
 
-const DEFAULT_BLURB_TEMPLATE = 'Sensorene melder {KIND}-anomali over {STATE}. Intensitet {INTENSITY}.';
+const DEFAULT_BLURB_TEMPLATE = 'Sensors flag a {KIND} ripple over {STATE_TITLE}. Intensity {INTENSITY}.';
 
 interface TruthRewardRangeConfig {
   base?: number;
@@ -96,7 +100,14 @@ interface TruthRewardRangeConfig {
   max?: number;
 }
 
-interface TruthRewardExpansionStateConfig extends TruthRewardRangeConfig {
+interface TruthRewardKindConfig extends TruthRewardRangeConfig {
+  basePercent?: number;
+  minPercent?: number;
+  maxPercent?: number;
+  expansionBonus?: Partial<Record<string, number>>;
+}
+
+interface TruthRewardExpansionLegacyStateConfig extends TruthRewardRangeConfig {
   flat?: number;
   multiplier?: number;
   faction?: Partial<Record<'truth' | 'government', number>>;
@@ -106,13 +117,13 @@ interface TruthRewardExpansionConfig {
   flat?: number;
   multiplier?: number;
   faction?: Partial<Record<'truth' | 'government', number>>;
-  states?: Record<string, number | TruthRewardExpansionStateConfig>;
+  states?: Record<string, number | TruthRewardExpansionLegacyStateConfig>;
 }
 
 interface TruthRewardsConfig {
   defaults?: TruthRewardRangeConfig;
   states?: Record<string, TruthRewardRangeConfig>;
-  expansionBonuses?: Record<string, TruthRewardExpansionConfig>;
+  byKind?: Record<string, TruthRewardKindConfig>;
 }
 
 export interface ResolveHotspotOptions {
@@ -133,6 +144,10 @@ export interface ResolveHotspotOptions {
    * Override the enabled expansion identifiers. Defaults to the global snapshot.
    */
   enabledExpansions?: string[];
+  /**
+   * Optional hotspot kind to resolve specialized payouts.
+   */
+  hotspotKind?: HotspotKind;
 }
 
 export interface HotspotResolutionOutcome {
@@ -198,24 +213,108 @@ export function resolveHotspot(
   const truthRewardsConfig = resolveTruthRewardsConfig();
   const stateKey = (options.stateAbbreviation ?? stateId).trim().toUpperCase();
   const normalizedStateId = options.stateId ?? stateId;
+  const normalizedKindKey = (options.hotspotKind ?? 'default').toLowerCase();
+
+  const byKindConfig = truthRewardsConfig.byKind ?? {};
+  const defaultKindConfig = byKindConfig.default ?? {};
+  const specificKindConfig = byKindConfig[normalizedKindKey] ?? {};
+
+  const pickKindValue = (getter: (config: TruthRewardKindConfig) => number | undefined): number | undefined => {
+    const specificValue = getter(specificKindConfig);
+    if (typeof specificValue === 'number' && Number.isFinite(specificValue)) {
+      return specificValue;
+    }
+    const defaultValue = getter(defaultKindConfig);
+    if (typeof defaultValue === 'number' && Number.isFinite(defaultValue)) {
+      return defaultValue;
+    }
+    return undefined;
+  };
+
+  const toAbsoluteValue = (value: number | undefined): number | undefined => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      return undefined;
+    }
+    if (Math.abs(value) <= 1) {
+      return value * 100;
+    }
+    return value;
+  };
 
   const defaults = truthRewardsConfig.defaults ?? {};
   const stateOverrides = truthRewardsConfig.states ?? {};
   const stateConfig = stateOverrides[stateKey];
 
   const fallbackReward = toFiniteNumber(options.fallbackTruthReward) ?? 0;
-  const baseReward = toFiniteNumber(stateConfig?.base)
+  let baseReward = toFiniteNumber(stateConfig?.base)
     ?? toFiniteNumber(defaults.base)
     ?? fallbackReward;
 
-  const minReward = toFiniteNumber(stateConfig?.min)
-    ?? toFiniteNumber(defaults.min)
-    ?? 0;
-  const maxReward = toFiniteNumber(stateConfig?.max)
-    ?? toFiniteNumber(defaults.max)
-    ?? Number.POSITIVE_INFINITY;
+  const kindBase = pickKindValue(config => config.base);
+  const kindBasePercent = pickKindValue(config => config.basePercent);
+  const resolvedKindBase = toAbsoluteValue(kindBase ?? kindBasePercent);
+  if (typeof resolvedKindBase === 'number') {
+    baseReward = resolvedKindBase;
+  }
 
-  const expansionConfig = truthRewardsConfig.expansionBonuses ?? {};
+  const minCandidates: number[] = [];
+  const resolvedStateMin = toFiniteNumber(stateConfig?.min);
+  if (typeof resolvedStateMin === 'number') {
+    minCandidates.push(resolvedStateMin);
+  }
+  const resolvedDefaultMin = toFiniteNumber(defaults.min);
+  if (typeof resolvedDefaultMin === 'number') {
+    minCandidates.push(resolvedDefaultMin);
+  }
+  const resolvedKindMin = toAbsoluteValue(
+    pickKindValue(config => config.min) ?? pickKindValue(config => config.minPercent),
+  );
+  if (typeof resolvedKindMin === 'number') {
+    minCandidates.push(resolvedKindMin);
+  }
+  const minReward = minCandidates.length > 0 ? Math.max(...minCandidates) : 0;
+
+  const maxCandidates: number[] = [];
+  const resolvedStateMax = toFiniteNumber(stateConfig?.max);
+  if (typeof resolvedStateMax === 'number') {
+    maxCandidates.push(resolvedStateMax);
+  }
+  const resolvedDefaultMax = toFiniteNumber(defaults.max);
+  if (typeof resolvedDefaultMax === 'number') {
+    maxCandidates.push(resolvedDefaultMax);
+  }
+  const resolvedKindMax = toAbsoluteValue(
+    pickKindValue(config => config.max) ?? pickKindValue(config => config.maxPercent),
+  );
+  if (typeof resolvedKindMax === 'number') {
+    maxCandidates.push(resolvedKindMax);
+  }
+  const maxReward = maxCandidates.length > 0 ? Math.min(...maxCandidates) : Number.POSITIVE_INFINITY;
+
+  const resolveKindExpansionBonus = (expansionId: string): number => {
+    const normalized = expansionId.trim().toLowerCase();
+    if (!normalized) {
+      return 0;
+    }
+    const fromConfig = pickKindValue(config => {
+      if (!config.expansionBonus) {
+        return undefined;
+      }
+      const direct = config.expansionBonus[normalized];
+      if (typeof direct === 'number' && Number.isFinite(direct)) {
+        return direct;
+      }
+      const defaultBonus = config.expansionBonus.default;
+      if (typeof defaultBonus === 'number' && Number.isFinite(defaultBonus)) {
+        return defaultBonus;
+      }
+      return undefined;
+    });
+    const absolute = toAbsoluteValue(fromConfig);
+    return typeof absolute === 'number' ? absolute : 0;
+  };
+
+  const legacyExpansionConfig = (truthRewardsConfig as { expansionBonuses?: Record<string, unknown> }).expansionBonuses ?? {};
   const enabledExpansionIds = options.enabledExpansions
     ?? testEnabledExpansionOverride
     ?? getEnabledExpansionIdsSnapshot();
@@ -226,8 +325,9 @@ export function resolveHotspot(
   let factionBonus = 0;
 
   for (const expansionId of enabledExpansions) {
-    const modifier = expansionConfig[expansionId];
+    const modifier = legacyExpansionConfig[expansionId] as TruthRewardExpansionConfig | undefined;
     if (!modifier) {
+      expansionBonus += resolveKindExpansionBonus(expansionId);
       continue;
     }
 
@@ -262,6 +362,8 @@ export function resolveHotspot(
         }
       }
     }
+
+    expansionBonus += resolveKindExpansionBonus(expansionId);
   }
 
   const rewardBeforeClamp = (baseReward ?? 0) * totalMultiplier + expansionBonus + factionBonus;
@@ -533,7 +635,7 @@ export class HotspotDirector {
 
   private normalizeSpawnConfig(config: HotspotConfig): SpawnConfig {
     const baseWeights: SpawnConfig['baseWeights'] = {
-      default: 1,
+      default: { default: 1 },
       states: {},
     };
     const expansionModifiers: SpawnConfig['expansionModifiers'] = {};
@@ -564,13 +666,40 @@ export class HotspotDirector {
       }
 
       if (spawn.baseWeights && typeof spawn.baseWeights === 'object') {
-        if (typeof spawn.baseWeights.default === 'number' && Number.isFinite(spawn.baseWeights.default)) {
-          baseWeights.default = spawn.baseWeights.default;
+        const normalizeKindWeights = (value: unknown): SpawnKindWeights => {
+          const weights: SpawnKindWeights = {};
+          if (!value || typeof value !== 'object') {
+            if (typeof value === 'number' && Number.isFinite(value)) {
+              weights.default = value;
+            }
+            return weights;
+          }
+
+          for (const [kindKey, kindValue] of Object.entries(value as Record<string, unknown>)) {
+            if (typeof kindValue === 'number' && Number.isFinite(kindValue)) {
+              weights[(kindKey.trim().toLowerCase() || 'default') as SpawnKindKey] = kindValue;
+            }
+          }
+          return weights;
+        };
+
+        const rawDefaultWeights = normalizeKindWeights(spawn.baseWeights.default);
+        if (Object.keys(rawDefaultWeights).length > 0) {
+          baseWeights.default = { ...baseWeights.default, ...rawDefaultWeights };
         }
+
         if (spawn.baseWeights.states && typeof spawn.baseWeights.states === 'object') {
           for (const [key, value] of Object.entries(spawn.baseWeights.states)) {
-            if (typeof value === 'number' && Number.isFinite(value)) {
-              baseWeights.states[key.toUpperCase()] = value;
+            const normalizedKey = key.toUpperCase();
+            if (!normalizedKey) {
+              continue;
+            }
+            const normalizedWeights = normalizeKindWeights(value);
+            if (Object.keys(normalizedWeights).length > 0) {
+              baseWeights.states[normalizedKey] = {
+                ...(baseWeights.states[normalizedKey] ?? {}),
+                ...normalizedWeights,
+              };
             }
           }
         }
@@ -712,25 +841,43 @@ export class HotspotDirector {
     return templates[index] ?? templates[0];
   }
 
+  private formatKindLabel(kind: HotspotKind | string | undefined): string {
+    if (!kind) {
+      return 'Hotspot';
+    }
+    const normalized = kind.toString().trim();
+    if (!normalized) {
+      return 'Hotspot';
+    }
+    if (normalized.toLowerCase() === 'ufo') {
+      return 'UFO';
+    }
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  }
+
   private formatBlurb(template: string, hotspot: Hotspot): string {
-    const rawState = hotspot.stateName ?? hotspot.location ?? 'ukjent sone';
-    const stateName = rawState.trim() || 'ukjent sone';
+    const rawState = hotspot.stateName ?? hotspot.location ?? 'Unknown Zone';
+    const stateName = rawState.trim() || 'Unknown Zone';
     const intensity = Math.max(1, Math.round(hotspot.intensity ?? 1));
-    const kindLabel = (hotspot.kind ?? 'hotspot').toUpperCase();
+    const kindLabel = this.formatKindLabel(hotspot.kind);
+    const headline = typeof hotspot.name === 'string' && hotspot.name.trim().length > 0
+      ? hotspot.name.trim()
+      : `${stateName} Hotspot`;
 
     return template
       .replace(/\{STATE\}/g, stateName.toUpperCase())
       .replace(/\{STATE_TITLE\}/g, stateName)
       .replace(/\{INTENSITY\}/g, intensity.toString())
-      .replace(/\{KIND\}/g, kindLabel);
+      .replace(/\{KIND\}/g, kindLabel)
+      .replace(/\{HEADLINE\}/g, headline);
   }
 
   buildHotspotExtraArticle(hotspot: Hotspot): HotspotExtraArticle {
     const normalizedKind: HotspotKind = hotspot.kind ?? 'normal';
-    const stateName = (hotspot.stateName ?? hotspot.location ?? 'Ukjent sone').trim() || 'Ukjent sone';
+    const stateName = (hotspot.stateName ?? hotspot.location ?? 'Unknown Zone').trim() || 'Unknown Zone';
     const badgeClassName = this.getBadgeClass(normalizedKind);
-    const badgeLabel = `${normalizedKind.toUpperCase()} • ${stateName.toUpperCase()}`;
-    const headline = (hotspot.name ?? `${stateName} Hotspot`).toUpperCase();
+    const badgeLabel = `${this.formatKindLabel(normalizedKind)} • ${stateName}`;
+    const headline = (hotspot.name ?? `${stateName} Hotspot`).toString().trim() || `${stateName} Hotspot`;
     const templates = this.getBlurbs(normalizedKind);
     const template = this.pickTemplate(templates, hotspot.id ?? `${stateName}-${normalizedKind}`);
     const blurb = this.formatBlurb(template, hotspot);
@@ -782,18 +929,25 @@ export class HotspotDirector {
     return lookup;
   }
 
-  private getBaseWeight(stateId: string, stateAbbr: string): number {
+  private getBaseWeight(stateId: string, stateAbbr: string, kind: HotspotKind): number {
     const { baseWeights } = this.spawnConfig;
-    const statesMap = baseWeights.states;
-    const defaultWeight = baseWeights.default;
+    const kindKey = (kind ?? 'normal').toLowerCase() as SpawnKindKey;
+
+    const resolveWeight = (weights: SpawnKindWeights | undefined): number | undefined => {
+      if (!weights) {
+        return undefined;
+      }
+      return weights[kindKey] ?? weights.default;
+    };
 
     const abbrKey = stateAbbr.toUpperCase();
-    const idKey = stateId.trim();
+    const idKey = stateId.trim().toUpperCase();
 
-    const abbrWeight = statesMap[abbrKey];
-    const idWeight = statesMap[idKey];
+    const abbrWeight = resolveWeight(baseWeights.states[abbrKey]);
+    const idWeight = resolveWeight(baseWeights.states[idKey]);
+    const defaultWeight = resolveWeight(baseWeights.default);
 
-    return abbrWeight ?? idWeight ?? defaultWeight;
+    return abbrWeight ?? idWeight ?? defaultWeight ?? 1;
   }
 
   private applyExpansionModifiers(
@@ -936,13 +1090,12 @@ export class HotspotDirector {
         continue;
       }
 
+      const kind = this.resolveCatalogKind(entry);
       const stateId = (state.id ?? stateAbbr).toString();
-      const baseWeight = this.getBaseWeight(stateId, stateAbbr);
+      const baseWeight = this.getBaseWeight(stateId, stateAbbr, kind);
       if (!baseWeight || baseWeight <= 0) {
         continue;
       }
-
-      const kind = this.resolveCatalogKind(entry);
       const breakdown: HotspotWeightBreakdown = {
         base: baseWeight,
         catalog: 0,
@@ -1036,6 +1189,7 @@ export class HotspotDirector {
       stateId,
       stateAbbreviation: stateAbbr,
       enabledExpansions: enabledList,
+      hotspotKind: kind,
     });
     const truthRewardHint = Math.max(1, Math.round(Math.abs(truthOutcome.truthDelta)));
 

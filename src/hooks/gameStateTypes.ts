@@ -6,7 +6,7 @@ import type { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import type { DrawMode, CardDrawState } from '@/data/cardDrawingSystem';
 import type { AIDifficulty } from '@/data/aiStrategy';
 import type { TurnPlay } from '@/game/combo.types';
-import type { WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
+import type { HotspotKind, WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
 import type { StateCombinationEffects } from '@/data/stateCombinations';
 
 export interface CardPlayRecord {
@@ -201,6 +201,7 @@ export interface ActiveParanormalHotspot {
   expiresOnTurn: number;
   createdOnTurn: number;
   source: NonNullable<ParanormalHotspotPayload['source']>;
+  kind?: HotspotKind;
 }
 
 export interface StateParanormalHotspot {
@@ -214,4 +215,5 @@ export interface StateParanormalHotspot {
   expiresOnTurn: number;
   turnsRemaining: number;
   source: NonNullable<ParanormalHotspotPayload['source']>;
+  kind?: HotspotKind;
 }

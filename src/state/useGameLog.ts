@@ -1,10 +1,10 @@
 import type { HotspotExtraArticle } from '@/systems/paranormalHotspots';
 
-const HOTSPOT_IDLE_MESSAGE = 'Ingen hotspot-signaler registrert. Sensorene holder linjen åpen.';
+const HOTSPOT_IDLE_MESSAGE = 'Paranormal sweep continuing. Sensors report a quiet board.';
 
 export const formatHotspotSpawnLog = (article: HotspotExtraArticle): string => {
-  const stateLabel = article.stateName ? article.stateName.toUpperCase() : 'UKJENT OMRÅDE';
-  return `🛸 HOTSPOT OPPDAGET: ${stateLabel}. ${article.headline} — ${article.blurb}`;
+  const stateLabel = article.stateName ? article.stateName.toUpperCase() : 'UNKNOWN SECTOR';
+  return `🛸 HOTSPOT DETECTED: ${stateLabel}. ${article.headline} — ${article.blurb}`;
 };
 
 export const getHotspotIdleMessage = (): string => HOTSPOT_IDLE_MESSAGE;
