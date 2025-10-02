@@ -2382,7 +2382,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
               }
             }
 
-            if (activeEvent.paranormalHotspot) {
+            if (!featureFlags.hotspotDirectorEnabled && activeEvent.paranormalHotspot) {
               const target = selectHotspotTargetState({
                 states: statesAfterHotspot,
                 activeHotspots: hotspotsAfterHotspot,
