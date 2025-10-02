@@ -27,16 +27,21 @@ import { processAiActions } from './aiTurnActions';
 import { buildEditionEvents } from './eventEdition';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
-import { resolveCardMVP, type CardPlayResolution } from '@/systems/cardResolution';
+import { resolveCardMVP, type CardPlayResolution, type CardHotspotResolution } from '@/systems/cardResolution';
 import { useStateEvents } from '@/hooks/useStateEvents';
 import { applyTruthDelta } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
-import { HotspotDirector, type WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
+import {
+  HotspotDirector,
+  type WeightedHotspotCandidate,
+  type Hotspot,
+} from '@/systems/paranormalHotspots';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
+import { queueHotspotResolveToast, queueHotspotExpireToast } from '@/ui/hotspots.toasts';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
@@ -78,6 +83,93 @@ const MEDIA_TOTAL_SUFFIX = 'mediaTotal';
 const MEDIA_ROUND_SUFFIX = 'mediaThisRound';
 const SIGHTING_TOTAL_SUFFIX = 'sightingsTotal';
 const SIGHTING_ROUND_SUFFIX = 'sightingsThisRound';
+
+const computeHotspotToastIntensity = (value: number | undefined): number => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return 1;
+  }
+  return Math.max(1, Math.round(Math.abs(value)));
+};
+
+const buildResolvedHotspotToast = (resolution: CardHotspotResolution): Hotspot => {
+  const tags = [
+    'resolved',
+    `faction:${resolution.faction}`,
+    `source:${resolution.source}`,
+  ];
+
+  return {
+    id: resolution.hotspotId,
+    name: resolution.label,
+    kind: 'phenomenon',
+    location: resolution.stateName,
+    intensity: computeHotspotToastIntensity(resolution.truthReward || resolution.truthDelta),
+    status: 'resolved',
+    tags,
+    stateId: resolution.stateId,
+    stateName: resolution.stateName,
+    stateAbbreviation: resolution.stateAbbreviation,
+  } satisfies Hotspot;
+};
+
+const buildExpiredHotspotToast = (hotspot: ActiveParanormalHotspot): Hotspot => ({
+  id: hotspot.id,
+  name: hotspot.label,
+  kind: 'phenomenon',
+  location: hotspot.stateName,
+  intensity: computeHotspotToastIntensity(hotspot.truthReward),
+  status: 'expired',
+  tags: ['expired', `source:${hotspot.source}`],
+  stateId: hotspot.stateId,
+  stateName: hotspot.stateName,
+  stateAbbreviation: hotspot.stateAbbreviation,
+});
+
+const activeHotspotMatchesResolution = (
+  active: WeightedHotspotCandidate | null,
+  resolution: CardHotspotResolution,
+): boolean => {
+  if (!active) {
+    return false;
+  }
+
+  const activeId = active.stateId ?? active.stateAbbreviation ?? '';
+  const activeAbbr = active.stateAbbreviation?.toUpperCase?.();
+  const resolutionAbbr = resolution.stateAbbreviation?.toUpperCase?.();
+
+  if (resolutionAbbr && activeAbbr && resolutionAbbr === activeAbbr) {
+    return true;
+  }
+
+  if (resolution.stateId && activeId && resolution.stateId === activeId) {
+    return true;
+  }
+
+  return false;
+};
+
+const activeHotspotMatchesActive = (
+  active: WeightedHotspotCandidate | null,
+  hotspot: ActiveParanormalHotspot,
+): boolean => {
+  if (!active) {
+    return false;
+  }
+
+  const activeId = active.stateId ?? active.stateAbbreviation ?? '';
+  const activeAbbr = active.stateAbbreviation?.toUpperCase?.();
+  const hotspotAbbr = hotspot.stateAbbreviation?.toUpperCase?.();
+
+  if (hotspotAbbr && activeAbbr && hotspotAbbr === activeAbbr) {
+    return true;
+  }
+
+  if (hotspot.stateId && activeId && hotspot.stateId === activeId) {
+    return true;
+  }
+
+  return false;
+};
 
 const incrementCounterMap = (
   map: Record<string, number> | undefined,
@@ -1751,6 +1843,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           delete updatedHotspots[abbr];
         }
       }
+      let nextActiveHotspot = prev.activeHotspot;
+      if (resolution.hotspotResolutions) {
+        for (const resolved of resolution.hotspotResolutions) {
+          if (activeHotspotMatchesResolution(nextActiveHotspot, resolved)) {
+            nextActiveHotspot = null;
+          }
+          queueHotspotResolveToast(buildResolvedHotspotToast(resolved));
+        }
+      }
       const counterSnapshot = applyAgendaCardCounters(prev, 'human', resolvedCard);
       const playedCardRecord = createPlayedCardRecord({
         card: resolvedCard,
@@ -1794,6 +1895,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         agendaIssueCounters: counterSnapshot.issueCounters,
         agendaRoundCounters: counterSnapshot.roundCounters,
         paranormalHotspots: updatedHotspots,
+        activeHotspot: nextActiveHotspot,
       };
 
       const stateWithReveal = resolution.aiSecretAgendaRevealed
@@ -1860,6 +1962,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           delete updatedHotspots[abbr];
         }
       }
+      let nextActiveHotspot = prev.activeHotspot;
+      if (resolution.hotspotResolutions) {
+        for (const resolved of resolution.hotspotResolutions) {
+          if (activeHotspotMatchesResolution(nextActiveHotspot, resolved)) {
+            nextActiveHotspot = null;
+          }
+          queueHotspotResolveToast(buildResolvedHotspotToast(resolved));
+        }
+      }
       const counterSnapshot = applyAgendaCardCounters(prev, 'human', resolvedCard);
       pendingRecord = createPlayedCardRecord({
         card: resolvedCard,
@@ -1899,6 +2010,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         agendaIssueCounters: counterSnapshot.issueCounters,
         agendaRoundCounters: counterSnapshot.roundCounters,
         paranormalHotspots: updatedHotspots,
+        activeHotspot: nextActiveHotspot,
       };
 
       const stateWithReveal = resolution.aiSecretAgendaRevealed
@@ -2021,6 +2133,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const statesAfterHotspot = prev.states.map(state => ({ ...state }));
       let hotspotsAfterHotspot: Record<string, ActiveParanormalHotspot> = { ...prev.paranormalHotspots };
       const hotspotLogs: string[] = [];
+      let nextActiveHotspot = prev.activeHotspot;
 
       for (const [abbr, hotspot] of Object.entries(hotspotsAfterHotspot)) {
         const state = statesAfterHotspot.find(candidate => candidate.abbreviation === abbr);
@@ -2035,6 +2148,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           state.paranormalHotspot = undefined;
           delete hotspotsAfterHotspot[abbr];
           hotspotLogs.push(`🕯️ ${hotspot.label} in ${state.name} fizzles out. Defenses return to normal.`);
+          if (activeHotspotMatchesActive(nextActiveHotspot, hotspot)) {
+            nextActiveHotspot = null;
+          }
+          queueHotspotExpireToast(buildExpiredHotspotToast(hotspot));
         } else {
           state.paranormalHotspot = toStateHotspot(hotspot, prev.turn);
         }
@@ -2429,6 +2546,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         states: clearedStates,
         paranormalHotspots: hotspotsAfterHotspot,
         stateRoundEvents: {},
+        activeHotspot: nextActiveHotspot,
       };
 
       const truthStreaks = computeTruthStreaks(prev, nextStateBase.truth);
@@ -2439,13 +2557,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         truthBelow20Streak: truthStreaks.truthBelow20Streak,
       };
 
-      return updateSecretAgendaProgress({
-        ...nextStateBase,
-        truthAbove80Streak: truthStreaks.truthAbove80Streak,
-        truthBelow20Streak: truthStreaks.truthBelow20Streak,
-        timeBasedGoalCounters,
+        return updateSecretAgendaProgress({
+          ...nextStateBase,
+          truthAbove80Streak: truthStreaks.truthAbove80Streak,
+          truthBelow20Streak: truthStreaks.truthBelow20Streak,
+          timeBasedGoalCounters,
+          activeHotspot: nextActiveHotspot,
+        });
       });
-    });
 
     if (hotspotSourceToRegister) {
       registerParanormalSighting(hotspotSourceToRegister);
@@ -2472,6 +2591,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         }
 
         const result = applyAiCardPlay(prev, params, achievements);
+        if (result.resolution?.hotspotResolutions) {
+          for (const resolved of result.resolution.hotspotResolutions) {
+            queueHotspotResolveToast(buildResolvedHotspotToast(resolved));
+          }
+        }
         let nextStateBase = result.nextState;
         if (result.card) {
           const counterSnapshot = applyAgendaCardCounters(prev, 'ai', result.card);

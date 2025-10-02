@@ -12,6 +12,7 @@ import {
   type GameSnapshot,
   type StateForResolution,
 } from '../cardResolution';
+import { resolveHotspot } from '../paranormalHotspots';
 
 const createTracker = (
   initial?: Partial<PlayerStats>,
@@ -127,9 +128,15 @@ describe('resolveCardMVP hotspot handling', () => {
 
     const result = resolveCardMVP(gameState, card, 'NV', actor, tracker);
 
-    expect(result.truth).toBe(42);
+    const truthDeltaFromHotspot = result.hotspotResolutions?.[0]?.truthDelta ?? 0;
+    expect(result.truth).toBe(42 + truthDeltaFromHotspot);
     expect(Number.isFinite(result.truth)).toBe(true);
     expect(result.logEntries.some(entry => entry.includes('NaN'))).toBe(false);
+    expect(result.hotspotResolutions).toBeDefined();
+    expect(result.hotspotResolutions).toHaveLength(1);
+    const [resolution] = result.hotspotResolutions ?? [];
+    expect(resolution?.stateAbbreviation).toBe('NV');
+    expect(Number.isFinite(resolution?.truthReward ?? Number.NaN)).toBe(true);
   });
 
   it('records hotspot history entries for truth and government captures', () => {
@@ -178,6 +185,18 @@ describe('resolveCardMVP hotspot handling', () => {
     expect(state.paranormalHotspotHistory).toHaveLength(STATE_HOTSPOT_HISTORY_LIMIT);
     expect(state.paranormalHotspotHistory?.some(entry => entry.id === 'hotspot-1')).toBe(true);
     expect(state.paranormalHotspotHistory?.[0].id).toBe('old-1');
+  });
+
+  it('computes signed truth deltas based on winning faction', () => {
+    const truthOutcome = resolveHotspot('OR', 'truth');
+    const governmentOutcome = resolveHotspot('OR', 'government');
+
+    expect(truthOutcome.finalReward).toBeGreaterThan(0);
+    expect(truthOutcome.truthDelta).toBeGreaterThan(0);
+    expect(governmentOutcome.finalReward).toBeGreaterThan(0);
+    expect(governmentOutcome.truthDelta).toBeLessThanOrEqual(0);
+    expect(Math.abs(governmentOutcome.truthDelta)).toBe(governmentOutcome.finalReward);
+    expect(Math.abs(truthOutcome.truthDelta)).toBe(truthOutcome.finalReward);
   });
 });
 

@@ -1,13 +1,42 @@
 import type { GameCard, Rarity } from '@/rules/mvp';
 import { featureFlags } from '@/state/featureFlags';
-import { resolveCardMVP, type AchievementTracker, type CardPlayResolution } from '@/systems/cardResolution';
+import {
+  resolveCardMVP,
+  type AchievementTracker,
+  type CardPlayResolution,
+  type CardHotspotResolution,
+} from '@/systems/cardResolution';
 import type { TurnPlay } from '@/game/combo.types';
 import type { PlayerId } from '@/mvp/validator';
+import type { WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
 
 import type { CardPlayRecord, GameState } from './gameStateTypes';
 import { mergeStateEventHistories } from './stateEventHistory';
 
 const CAPTURE_REGEX = /(captured|seized)\s+([^!]+)!/i;
+
+const matchesResolvedHotspot = (
+  active: WeightedHotspotCandidate | null,
+  resolution: CardHotspotResolution,
+): boolean => {
+  if (!active) {
+    return false;
+  }
+
+  const activeId = active.stateId ?? active.stateAbbreviation ?? '';
+  const activeAbbr = active.stateAbbreviation?.toUpperCase?.();
+  const resolutionAbbr = resolution.stateAbbreviation?.toUpperCase?.();
+
+  if (resolutionAbbr && activeAbbr && resolutionAbbr === activeAbbr) {
+    return true;
+  }
+
+  if (resolution.stateId && activeId && resolution.stateId === activeId) {
+    return true;
+  }
+
+  return false;
+};
 
 export const extractCapturedStates = (logEntries: string[]): string[] => {
   const states: string[] = [];
@@ -345,6 +374,15 @@ export const applyAiCardPlay = (
     }
   }
 
+  let nextActiveHotspot = prev.activeHotspot;
+  if (resolution.hotspotResolutions) {
+    for (const resolved of resolution.hotspotResolutions) {
+      if (matchesResolvedHotspot(nextActiveHotspot, resolved)) {
+        nextActiveHotspot = null;
+      }
+    }
+  }
+
   const mergedStates = mergeStateEventHistories(prev.states, resolution.states);
 
   const nextState: GameState = {
@@ -363,6 +401,7 @@ export const applyAiCardPlay = (
     log: logEntries,
     paranormalHotspots: updatedHotspots,
     cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+    activeHotspot: nextActiveHotspot,
   };
 
   return {
