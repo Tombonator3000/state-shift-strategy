@@ -249,7 +249,15 @@ declare module '@/data/eventDatabase' {
 }
 
 import { useGameState } from '@/hooks/useGameState';
-import type { GameEvent } from '@/data/eventDatabase';
+import type { GameEvent, ParanormalHotspotPayload } from '@/data/eventDatabase';
+import type { GameState } from '@/hooks/gameStateTypes';
+import { featureFlags } from '@/state/featureFlags';
+import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
+import {
+  deriveHotspotIcon,
+  resolveHotspot,
+  type WeightedHotspotCandidate,
+} from '@/systems/paranormalHotspots';
 
 const renderHook = <T,>(callback: () => T) => {
   const result: { current: T | undefined } = { current: undefined };
@@ -266,6 +274,99 @@ const renderHook = <T,>(callback: () => T) => {
     rerender: () => renderer.update(React.createElement(TestComponent)),
     unmount: () => renderer.unmount(),
   };
+};
+
+const createSeededRng = (seed: number) => {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const buildLegacyHotspotEntries = (params: {
+  candidate: WeightedHotspotCandidate;
+  state: GameState['states'][number];
+  currentTurn: number;
+  enabledExpansions: string[];
+}): {
+  active: GameState['paranormalHotspots'][string];
+  stateHotspot: NonNullable<GameState['states'][number]['paranormalHotspot']>;
+  payload: ParanormalHotspotPayload;
+} => {
+  const { candidate, state, currentTurn, enabledExpansions } = params;
+
+  const stateAbbreviation = state.abbreviation ?? candidate.stateAbbreviation ?? '';
+  const stateId = state.id ?? candidate.stateId ?? stateAbbreviation;
+
+  const truthResolution = resolveHotspot(stateId, 'truth', {
+    stateId,
+    stateAbbreviation,
+    enabledExpansions,
+  });
+
+  const rawIntensity = typeof candidate.intensity === 'number' && Number.isFinite(candidate.intensity)
+    ? candidate.intensity
+    : 3;
+  const defenseBoost = Math.max(1, Math.round(rawIntensity / 2));
+  const duration = Math.max(2, Math.min(4, Math.round(rawIntensity / 2) + 1));
+  const truthReward = Math.max(1, Math.round(Math.abs(truthResolution.truthDelta)));
+
+  const icon = deriveHotspotIcon({
+    icon: candidate.icon,
+    tags: candidate.tags,
+    expansionTag: candidate.expansionTag,
+  });
+  const label = candidate.name ?? `${state.name} Hotspot`;
+  const description = candidate.location ?? `${state.name} hotspot`;
+
+  const payload: ParanormalHotspotPayload = {
+    stateId,
+    label,
+    description,
+    icon,
+    duration,
+    truthReward,
+    defenseBoost,
+    source: 'neutral',
+  };
+
+  const expiresOnTurn = currentTurn + duration;
+  const id = `${candidate.id}:${stateAbbreviation}:${currentTurn}`;
+
+  const active = {
+    id,
+    eventId: candidate.id,
+    stateId,
+    stateName: state.name,
+    stateAbbreviation,
+    label,
+    description,
+    icon,
+    duration,
+    defenseBoost,
+    truthReward,
+    expiresOnTurn,
+    createdOnTurn: currentTurn,
+    source: payload.source ?? 'neutral',
+  } satisfies GameState['paranormalHotspots'][string];
+
+  const stateHotspot = {
+    id,
+    eventId: candidate.id,
+    label,
+    description,
+    icon,
+    defenseBoost,
+    truthReward,
+    expiresOnTurn,
+    turnsRemaining: Math.max(0, expiresOnTurn - currentTurn),
+    source: payload.source ?? 'neutral',
+  } satisfies NonNullable<GameState['states'][number]['paranormalHotspot']>;
+
+  return { active, stateHotspot, payload };
 };
 
 describe('useGameState state event truth adjustments', () => {
@@ -406,6 +507,79 @@ describe('useGameState state event truth adjustments', () => {
     const summaryEntry = california.stateEventHistory[california.stateEventHistory.length - 1];
     expect(summaryEntry.effectSummary).toBeDefined();
     expect(summaryEntry.effectSummary).toContain('Truth -5%');
+  });
+
+  it('spawns director hotspots matching legacy hotspot entries when closing the newspaper', async () => {
+    const originalHotspotFlag = featureFlags.hotspotDirectorEnabled;
+    const hook = renderHook(() => useGameState());
+
+    await act(async () => {
+      hook.result.current?.initGame('truth');
+    });
+
+    const director = hook.result.current?.hotspotDirector;
+    expect(director).toBeDefined();
+    if (!director) return;
+
+    const seededRng = createSeededRng(1337);
+    const originalRollForSpawn = director.rollForSpawn;
+    let capturedCandidate: WeightedHotspotCandidate | null = null;
+
+    const stubbedRoll: typeof director.rollForSpawn = (round, gameState, options = {}) => {
+      const result = originalRollForSpawn.call(director, round, gameState, { ...options, rng: seededRng });
+      capturedCandidate = result;
+      return result;
+    };
+
+    director.rollForSpawn = stubbedRoll;
+    featureFlags.hotspotDirectorEnabled = true;
+
+    const beforeCloseState = JSON.parse(JSON.stringify(hook.result.current!.gameState)) as GameState;
+
+    try {
+      await act(async () => {
+        hook.result.current?.closeNewspaper();
+      });
+    } finally {
+      director.rollForSpawn = originalRollForSpawn;
+      featureFlags.hotspotDirectorEnabled = originalHotspotFlag;
+    }
+
+    expect(capturedCandidate).not.toBeNull();
+    if (!capturedCandidate) return;
+
+    const finalState = hook.result.current?.gameState;
+    expect(finalState).toBeDefined();
+    if (!finalState) return;
+
+    const targetAbbreviation = capturedCandidate.stateAbbreviation;
+    expect(typeof targetAbbreviation).toBe('string');
+    if (!targetAbbreviation) return;
+
+    const beforeTargetState = beforeCloseState.states.find(state => state.abbreviation === targetAbbreviation);
+    const afterTargetState = finalState.states.find(state => state.abbreviation === targetAbbreviation);
+
+    expect(beforeTargetState).toBeDefined();
+    expect(afterTargetState).toBeDefined();
+    if (!beforeTargetState || !afterTargetState) return;
+
+    const enabledExpansions = getEnabledExpansionIdsSnapshot();
+    const legacyEntries = buildLegacyHotspotEntries({
+      candidate: capturedCandidate,
+      state: beforeTargetState,
+      currentTurn: beforeCloseState.turn,
+      enabledExpansions,
+    });
+
+    expect(afterTargetState.paranormalHotspot).toEqual(legacyEntries.stateHotspot);
+    expect(finalState.paranormalHotspots[targetAbbreviation]).toEqual(legacyEntries.active);
+    expect(afterTargetState.defense).toBe(beforeTargetState.defense + legacyEntries.payload.defenseBoost);
+    expect(legacyEntries.payload.truthReward).toBe(afterTargetState.paranormalHotspot.truthReward);
+    expect(legacyEntries.payload.defenseBoost).toBe(afterTargetState.paranormalHotspot.defenseBoost);
+    expect(finalState.paranormalHotspots[targetAbbreviation].icon).toBe(legacyEntries.active.icon);
+    expect(finalState.paranormalHotspots[targetAbbreviation].expiresOnTurn).toBe(
+      legacyEntries.active.expiresOnTurn,
+    );
   });
 });
 
