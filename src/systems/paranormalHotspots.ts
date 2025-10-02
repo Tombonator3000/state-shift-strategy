@@ -2,6 +2,7 @@ import hotspotsCatalog from '@/data/hotspots.catalog.json';
 import hotspotsConfig from '@/data/hotspots.config.json';
 import cryptidHomeStates from '@/data/cryptids.homestate.json';
 import type { GameState } from '@/hooks/gameStateTypes';
+import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
 
 export interface HotspotWeightBreakdown {
   base: number;
@@ -52,6 +53,192 @@ interface SpawnConfig {
     perCryptid: number;
     max: number;
   };
+}
+
+interface TruthRewardRangeConfig {
+  base?: number;
+  min?: number;
+  max?: number;
+}
+
+interface TruthRewardExpansionStateConfig extends TruthRewardRangeConfig {
+  flat?: number;
+  multiplier?: number;
+  faction?: Partial<Record<'truth' | 'government', number>>;
+}
+
+interface TruthRewardExpansionConfig {
+  flat?: number;
+  multiplier?: number;
+  faction?: Partial<Record<'truth' | 'government', number>>;
+  states?: Record<string, number | TruthRewardExpansionStateConfig>;
+}
+
+interface TruthRewardsConfig {
+  defaults?: TruthRewardRangeConfig;
+  states?: Record<string, TruthRewardRangeConfig>;
+  expansionBonuses?: Record<string, TruthRewardExpansionConfig>;
+}
+
+export interface ResolveHotspotOptions {
+  /**
+   * Explicit state abbreviation to use when looking up configuration.
+   * Falls back to the provided state id if omitted.
+   */
+  stateAbbreviation?: string;
+  /**
+   * Explicit state identifier to include in the result metadata.
+   */
+  stateId?: string;
+  /**
+   * Optional fallback reward to use when configuration does not provide a value.
+   */
+  fallbackTruthReward?: number;
+  /**
+   * Override the enabled expansion identifiers. Defaults to the global snapshot.
+   */
+  enabledExpansions?: string[];
+}
+
+export interface HotspotResolutionOutcome {
+  stateId: string;
+  stateAbbreviation: string;
+  winnerFaction: 'truth' | 'government';
+  baseReward: number;
+  expansionBonus: number;
+  factionBonus: number;
+  totalMultiplier: number;
+  rewardBeforeClamp: number;
+  minReward: number;
+  maxReward: number;
+  finalReward: number;
+  truthDelta: number;
+  enabledExpansions: string[];
+}
+
+const toFiniteNumber = (value: unknown): number | undefined =>
+  typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+
+const resolveTruthRewardsConfig = (): TruthRewardsConfig => {
+  const rawResolution = (hotspotsConfig as { resolution?: unknown }).resolution;
+  if (!rawResolution || typeof rawResolution !== 'object') {
+    return {};
+  }
+
+  const truthRewards = (rawResolution as { truthRewards?: unknown }).truthRewards;
+  if (!truthRewards || typeof truthRewards !== 'object') {
+    return {};
+  }
+
+  return truthRewards as TruthRewardsConfig;
+};
+
+const clampValue = (value: number, min: number, max: number): number => {
+  if (Number.isNaN(value)) return 0;
+  if (!Number.isFinite(min)) min = 0;
+  if (!Number.isFinite(max)) max = Number.POSITIVE_INFINITY;
+  if (max < min) {
+    max = min;
+  }
+  return Math.min(Math.max(value, min), max);
+};
+
+export function resolveHotspot(
+  stateId: string,
+  winnerFaction: 'truth' | 'government',
+  options: ResolveHotspotOptions = {},
+): HotspotResolutionOutcome {
+  const truthRewardsConfig = resolveTruthRewardsConfig();
+  const stateKey = (options.stateAbbreviation ?? stateId).trim().toUpperCase();
+  const normalizedStateId = options.stateId ?? stateId;
+
+  const defaults = truthRewardsConfig.defaults ?? {};
+  const stateOverrides = truthRewardsConfig.states ?? {};
+  const stateConfig = stateOverrides[stateKey];
+
+  const fallbackReward = toFiniteNumber(options.fallbackTruthReward) ?? 0;
+  const baseReward = toFiniteNumber(stateConfig?.base)
+    ?? toFiniteNumber(defaults.base)
+    ?? fallbackReward;
+
+  const minReward = toFiniteNumber(stateConfig?.min)
+    ?? toFiniteNumber(defaults.min)
+    ?? 0;
+  const maxReward = toFiniteNumber(stateConfig?.max)
+    ?? toFiniteNumber(defaults.max)
+    ?? Number.POSITIVE_INFINITY;
+
+  const expansionConfig = truthRewardsConfig.expansionBonuses ?? {};
+  const enabledExpansions = new Set(
+    options.enabledExpansions ?? getEnabledExpansionIdsSnapshot(),
+  );
+
+  let expansionBonus = 0;
+  let totalMultiplier = 1;
+  let factionBonus = 0;
+
+  for (const expansionId of enabledExpansions) {
+    const modifier = expansionConfig[expansionId];
+    if (!modifier) {
+      continue;
+    }
+
+    if (typeof modifier.flat === 'number' && Number.isFinite(modifier.flat)) {
+      expansionBonus += modifier.flat;
+    }
+    if (typeof modifier.multiplier === 'number' && Number.isFinite(modifier.multiplier)) {
+      totalMultiplier *= modifier.multiplier;
+    }
+    if (modifier.faction && typeof modifier.faction[winnerFaction] === 'number') {
+      const factionValue = modifier.faction[winnerFaction];
+      if (Number.isFinite(factionValue)) {
+        factionBonus += factionValue as number;
+      }
+    }
+
+    const stateSpecific = modifier.states ?? {};
+    const stateEntry = stateSpecific[stateKey];
+    if (typeof stateEntry === 'number') {
+      expansionBonus += stateEntry;
+    } else if (stateEntry && typeof stateEntry === 'object') {
+      if (typeof stateEntry.flat === 'number' && Number.isFinite(stateEntry.flat)) {
+        expansionBonus += stateEntry.flat;
+      }
+      if (typeof stateEntry.multiplier === 'number' && Number.isFinite(stateEntry.multiplier)) {
+        totalMultiplier *= stateEntry.multiplier;
+      }
+      if (stateEntry.faction && typeof stateEntry.faction[winnerFaction] === 'number') {
+        const factionValue = stateEntry.faction[winnerFaction];
+        if (Number.isFinite(factionValue)) {
+          factionBonus += factionValue as number;
+        }
+      }
+    }
+  }
+
+  const rewardBeforeClamp = (baseReward ?? 0) * totalMultiplier + expansionBonus + factionBonus;
+  const clampedReward = clampValue(rewardBeforeClamp, minReward, maxReward);
+  const finalReward = Math.round(clampedReward);
+  const normalizedFinalReward = Number.isFinite(finalReward) ? finalReward : 0;
+  const truthDelta = winnerFaction === 'truth'
+    ? normalizedFinalReward
+    : -normalizedFinalReward;
+
+  return {
+    stateId: normalizedStateId,
+    stateAbbreviation: stateKey,
+    winnerFaction,
+    baseReward: Number.isFinite(baseReward) ? baseReward : 0,
+    expansionBonus,
+    factionBonus,
+    totalMultiplier,
+    rewardBeforeClamp,
+    minReward,
+    maxReward,
+    finalReward: normalizedFinalReward,
+    truthDelta,
+    enabledExpansions: Array.from(enabledExpansions),
+  } satisfies HotspotResolutionOutcome;
 }
 
 export interface HotspotSpawnOptions {

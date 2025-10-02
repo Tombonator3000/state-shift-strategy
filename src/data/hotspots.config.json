@@ -39,5 +39,48 @@
       "perCryptid": 0.2,
       "max": 1.5
     }
+  },
+  "resolution": {
+    "truthRewards": {
+      "defaults": {
+        "base": 8,
+        "min": 2,
+        "max": 18
+      },
+      "states": {
+        "WA": {
+          "base": 11,
+          "max": 20
+        },
+        "OR": {
+          "base": 9
+        },
+        "WV": {
+          "base": 10,
+          "min": 3
+        },
+        "NJ": {
+          "base": 9
+        },
+        "NM": {
+          "base": 10
+        }
+      },
+      "expansionBonuses": {
+        "cryptids": {
+          "flat": 1,
+          "states": {
+            "WA": {
+              "flat": 2
+            },
+            "OR": 1,
+            "NM": {
+              "flat": 1,
+              "multiplier": 1.05
+            }
+          }
+        }
+      }
+    }
   }
 }

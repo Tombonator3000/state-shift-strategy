@@ -16,6 +16,10 @@ import type {
 } from '@/hooks/gameStateTypes';
 import { applyTruthDelta } from '@/utils/truth';
 import { trimParanormalHotspotHistory } from '@/hooks/stateEventHistory';
+import {
+  resolveHotspot as resolveParanormalHotspot,
+  type HotspotResolutionOutcome,
+} from '@/systems/paranormalHotspots';
 
 type Faction = 'government' | 'truth';
 
@@ -72,6 +76,20 @@ export interface GameSnapshot {
   stateCombinationEffects?: StateCombinationEffects;
 }
 
+export interface CardHotspotResolution {
+  stateId: string;
+  stateAbbreviation: string;
+  stateName: string;
+  hotspotId: string;
+  label: string;
+  defenseBoost: number;
+  truthReward: number;
+  truthDelta: number;
+  expectedTruthDelta: number;
+  faction: 'truth' | 'government';
+  source: 'truth' | 'government' | 'neutral';
+}
+
 export interface CardPlayResolution {
   ip: number;
   aiIP: number;
@@ -86,6 +104,7 @@ export interface CardPlayResolution {
   damageDealt: number;
   aiSecretAgendaRevealed?: boolean;
   resolvedHotspots?: string[];
+  hotspotResolutions?: CardHotspotResolution[];
 }
 
 const PLAYER_ID: PlayerId = 'P1';
@@ -317,6 +336,7 @@ export function resolveCardMVP(
   const capturedStateIds: string[] = [];
   let nextTargetState: string | null = actor === 'human' && card.type === 'ZONE' ? targetState : null;
   const resolvedHotspots: string[] = [];
+  const hotspotResolutions: CardHotspotResolution[] = [];
   let truthBonusFromHotspots = 0;
   for (const state of newStates) {
     const beforePressurePlayer = beforeState.pressureByState[state.id]?.[PLAYER_ID] ?? 0;
@@ -384,9 +404,17 @@ export function resolveCardMVP(
         : gameState.faction === 'truth'
           ? 'government'
           : 'truth';
-      const rawTruthReward = hotspot.truthReward;
-      const truthDelta = Number.isFinite(rawTruthReward) ? rawTruthReward : 0;
-      const directionalDelta = captureFaction === 'truth' ? truthDelta : -truthDelta;
+      const fallbackReward = Number.isFinite(hotspot.truthReward) ? hotspot.truthReward : undefined;
+      const hotspotOutcome: HotspotResolutionOutcome = resolveParanormalHotspot(
+        state.abbreviation ?? state.id,
+        captureFaction,
+        {
+          stateId: state.id,
+          stateAbbreviation: state.abbreviation,
+          fallbackTruthReward: fallbackReward,
+        },
+      );
+      const directionalDelta = hotspotOutcome.truthDelta;
       let actualTruthDelta = 0;
       if (directionalDelta !== 0) {
         const beforeTruth = engineState.truth;
@@ -418,6 +446,19 @@ export function resolveCardMVP(
       recordParanormalHotspotResolution(state, resolvedSummary);
       state.paranormalHotspot = undefined;
       resolvedHotspots.push(state.abbreviation);
+      hotspotResolutions.push({
+        stateId: state.id,
+        stateAbbreviation: state.abbreviation,
+        stateName: state.name,
+        hotspotId: hotspot.id,
+        label: hotspot.label,
+        defenseBoost: hotspot.defenseBoost,
+        truthReward: hotspotOutcome.finalReward,
+        truthDelta: actualTruthDelta,
+        expectedTruthDelta: hotspotOutcome.truthDelta,
+        faction: captureFaction,
+        source: hotspot.source,
+      });
     }
   }
 
@@ -461,6 +502,7 @@ export function resolveCardMVP(
     damageDealt,
     aiSecretAgendaRevealed: revealsSecretAgenda,
     resolvedHotspots: resolvedHotspots.length > 0 ? resolvedHotspots : undefined,
+    hotspotResolutions: hotspotResolutions.length > 0 ? hotspotResolutions : undefined,
   };
 }
 
