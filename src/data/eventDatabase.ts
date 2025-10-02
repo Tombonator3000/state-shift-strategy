@@ -78,6 +78,12 @@ export interface GameEvent {
   paranormalHotspot?: ParanormalHotspotPayload;
 }
 
+export const getTruthDelta = (event: GameEvent): number => {
+  const truth = event.effects?.truth ?? 0;
+  const truthChange = event.effects?.truthChange ?? 0;
+  return truth + truthChange;
+};
+
 export const EVENT_DATABASE: GameEvent[] = [
   // COMMON EVENTS (80 events) — Tabloid randoms for the newspaper (low impact, balanced)
   {
@@ -4665,11 +4671,15 @@ export class EventManager {
   private readonly stateEventHistoryLimit: number = 3;
   private stateEventHistoryByState: Map<string, string[]> = new Map();
   private activeStateEvents: Map<string, GameEvent[]> = new Map();
+  private positiveTruthSelections: number = 0;
+  private negativeTruthSelections: number = 0;
 
   constructor() {
     this.eventHistory = [];
     this.turnCount = 0;
     this.stateEventHistoryByState = new Map();
+    this.positiveTruthSelections = 0;
+    this.negativeTruthSelections = 0;
     this.rebuildActiveStateEvents();
   }
 
@@ -4755,6 +4765,7 @@ export class EventManager {
     totalWeight: number,
     chanceFactor: number,
   ): GameEvent {
+    this.recordTruthSelection(event);
     this.eventHistory.push(event.id);
     if (this.eventHistory.length > 20) {
       this.eventHistory = this.eventHistory.slice(-15);
@@ -4768,6 +4779,15 @@ export class EventManager {
       conditionalChance,
       triggerChance,
     };
+  }
+
+  private recordTruthSelection(event: GameEvent) {
+    const truthDelta = getTruthDelta(event);
+    if (truthDelta > 0) {
+      this.positiveTruthSelections += 1;
+    } else if (truthDelta < 0) {
+      this.negativeTruthSelections += 1;
+    }
   }
 
   // Set (or tweak) the chance of triggering an event each turn
@@ -4785,6 +4805,21 @@ export class EventManager {
     const availableEvents = this.getAvailableEvents(gameState);
     if (availableEvents.length === 0) {
       return null;
+    }
+
+    const positiveEvents: GameEvent[] = [];
+    const negativeEvents: GameEvent[] = [];
+    const neutralEvents: GameEvent[] = [];
+
+    for (const event of availableEvents) {
+      const truthDelta = getTruthDelta(event);
+      if (truthDelta > 0) {
+        positiveEvents.push(event);
+      } else if (truthDelta < 0) {
+        negativeEvents.push(event);
+      } else {
+        neutralEvents.push(event);
+      }
     }
 
     const eventHotspotsEnabled = !featureFlags.hotspotDirectorEnabled;
@@ -4805,7 +4840,20 @@ export class EventManager {
       return null;
     }
 
-    return this.selectEventFromPool(availableEvents, this.baseEventChance);
+    let preferredPool: GameEvent[] | null = null;
+    if (this.positiveTruthSelections > this.negativeTruthSelections) {
+      preferredPool = negativeEvents;
+    } else if (this.negativeTruthSelections > this.positiveTruthSelections) {
+      preferredPool = positiveEvents;
+    }
+
+    const selectionPool = preferredPool && preferredPool.length > 0
+      ? preferredPool
+      : neutralEvents.length > 0 && positiveEvents.length === 0 && negativeEvents.length === 0
+        ? neutralEvents
+        : availableEvents;
+
+    return this.selectEventFromPool(selectionPool, this.baseEventChance);
   }
 
   // Update turn count for condition checking
@@ -4911,6 +4959,8 @@ export class EventManager {
     this.eventHistory = [];
     this.turnCount = 0;
     this.stateEventHistoryByState.clear();
+    this.positiveTruthSelections = 0;
+    this.negativeTruthSelections = 0;
     this.rebuildActiveStateEvents();
   }
 

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'bun:test';
 import { featureFlags } from '@/state/featureFlags';
 
 import type { GameEvent } from './eventDatabase';
-import { EventManager } from './eventDatabase';
+import { EventManager, getTruthDelta } from './eventDatabase';
 
 describe('EventManager.selectStateEvent', () => {
   it('rotates through capture events without using fallback when only history blocks selection', () => {
@@ -253,6 +253,94 @@ describe('EventManager.maybeSelectRandomEvent', () => {
     } finally {
       Math.random = originalRandom;
     }
+  });
+});
+
+describe('EventManager truth balance heuristics', () => {
+  const originalHotspotFlag = featureFlags.hotspotDirectorEnabled;
+
+  afterEach(() => {
+    featureFlags.hotspotDirectorEnabled = originalHotspotFlag;
+  });
+
+  it('keeps positive and negative truth selections within tolerance', () => {
+    featureFlags.hotspotDirectorEnabled = true;
+
+    const manager = new EventManager();
+    manager.setEventChance(1);
+
+    const positiveEvent: GameEvent = {
+      id: 'balance-positive',
+      title: 'Positive Truth',
+      content: 'Boosts truth slightly.',
+      type: 'random',
+      rarity: 'common',
+      weight: 1,
+      effects: { truth: 1 },
+    };
+
+    const negativeEvent: GameEvent = {
+      id: 'balance-negative',
+      title: 'Negative Truth',
+      content: 'Reduces truth slightly.',
+      type: 'random',
+      rarity: 'common',
+      weight: 1,
+      effects: { truthChange: -1 },
+    };
+
+    const neutralEvent: GameEvent = {
+      id: 'balance-neutral',
+      title: 'Neutral Truth',
+      content: 'No truth change.',
+      type: 'random',
+      rarity: 'common',
+      weight: 1,
+    };
+
+    (manager as unknown as { getAvailableEvents(): GameEvent[] }).getAvailableEvents = () => [
+      positiveEvent,
+      negativeEvent,
+      neutralEvent,
+    ];
+
+    const selectionCounts = {
+      positive: 0,
+      negative: 0,
+      neutral: 0,
+    };
+
+    const originalRandom = Math.random;
+    Math.random = () => 0;
+
+    try {
+      const trials = 300;
+      for (let attempt = 0; attempt < trials; attempt += 1) {
+        const selection = manager.maybeSelectRandomEvent({});
+        expect(selection).not.toBeNull();
+        if (!selection) {
+          continue;
+        }
+
+        const truthDelta = getTruthDelta(selection);
+        if (truthDelta > 0) {
+          selectionCounts.positive += 1;
+        } else if (truthDelta < 0) {
+          selectionCounts.negative += 1;
+        } else {
+          selectionCounts.neutral += 1;
+        }
+      }
+    } finally {
+      Math.random = originalRandom;
+    }
+
+    const signedTotal = selectionCounts.positive + selectionCounts.negative;
+    expect(signedTotal).toBeGreaterThan(0);
+
+    const positiveRatio = selectionCounts.positive / signedTotal;
+    expect(positiveRatio).toBeGreaterThan(0.4);
+    expect(positiveRatio).toBeLessThan(0.6);
   });
 });
 
