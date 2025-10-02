@@ -42,12 +42,13 @@ const GameHand = ({ cards, onPlayCard, disabled }: GameHandProps) => {
       
       <div className="space-y-2 max-h-96 overflow-y-auto">
         {cards.map((card, index) => (
-          <Card 
-            key={card.id} 
+          <Card
+            key={card.id}
             className={`relative p-0 cursor-pointer transition-all hover:scale-105 hover:-translate-y-2 ${getTypeColor(normalizeCardType(card.type))} ${
               disabled ? 'opacity-50' : ''
             } overflow-hidden animate-card-deal`}
             style={{ animationDelay: `${index * 0.1}s` }}
+            data-card-id={card.id}
           >
             {/* TCG Card Layout */}
             <div className="relative">

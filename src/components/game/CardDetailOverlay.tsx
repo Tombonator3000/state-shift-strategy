@@ -59,7 +59,7 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
         </div>
 
         <div className="modal-wrapper">
-          <div className="modal-card">
+          <div className="modal-card" data-card-id={card.id}>
             <BaseCard card={card} polaroidHover={false} />
           </div>
         </div>
@@ -170,6 +170,7 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
           isMobile ? 'w-full max-w-sm max-h-[90vh] rounded-xl' : 'w-full max-w-md h-[85vh] rounded-2xl'
         } ${getLegacyRarityFrameClass(card.rarity)} ${getLegacyRarityGlowClass(card.rarity)}`}
         onClick={(e) => e.stopPropagation()}
+        data-card-id={card.id}
       >
         <div className="bg-card/95 backdrop-blur-sm border-b border-border p-4 flex-shrink-0">
           <div className="flex items-start justify-between gap-3">
