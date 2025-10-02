@@ -153,6 +153,14 @@ const sumPositiveTruthDelta = (gameState: any): number => {
   return result as number;
 };
 
+const sumSuppressedTruthDelta = (gameState: any): number => {
+  const result = ensureArray(gameState?.factionPlayHistory).reduce((total: number, record: any) => {
+    const delta = typeof record?.truthDelta === 'number' ? record.truthDelta : 0;
+    return delta < 0 ? total + Math.abs(delta) : total;
+  }, 0 as number);
+  return result as number;
+};
+
 const countZonePlaysOnStates = (gameState: any, targets: Set<string>): number => {
   return ensureArray(gameState?.factionPlayHistory).filter((record: any) => {
     if (record?.card?.type !== 'ZONE') {
@@ -625,6 +633,86 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     flavorText: 'Refreshments include chronologically ambiguous coffee and infinite doughnuts.'
   }),
 
+  defineAgenda({
+    id: 'truth_mermaid_coastline_confessional',
+    faction: 'truth',
+    category: 'strategic',
+    title: 'Mermaid Coastline Confessional',
+    headline: 'MERMAID DELEGATES TURN PIER INTO PRESS ROOM!',
+    operationName: 'Operation Tidal Tell-All',
+    issueTheme: 'Seaside Revelations',
+    pullQuote: '“Never schedule a press junket at low tide.”',
+    artCue: {
+      icon: '/assets/tabloid-flash.svg',
+      texture: '/assets/tabloid-halftone.svg',
+      alt: 'Foamy pier tabloid glyph',
+    },
+    description:
+      'Capture three Atlantic piers (NC, SC, GA, FL, or VA) to host a saltwater whistleblower summit before the Coast Guard confiscates the conch microphones.',
+    target: 3,
+    difficulty: 'hard',
+    stages: createAgendaStages('truth_mermaid_coastline_confessional', 3, {
+      briefing: {
+        label: 'Pier Recon',
+        description: 'Divers chart which boardwalks can hide the conch podium.',
+        requirement: 'Scope out the Atlantic piers for the summit.',
+      },
+      escalation: {
+        label: 'Saltwater Broadcast',
+        description: 'Merfolk spokespeople rehearse synchronized splash cues.',
+        requirement: 'Capture 2 Atlantic piers.',
+      },
+      finale: {
+        label: 'Conch Press Conference',
+        description: 'Reporters tread water while leaks pour out of every tidepool.',
+        requirement: 'Capture 3 Atlantic piers.',
+      },
+    }),
+    computeProgress: gameState =>
+      countCapturedMatches(gameState, new Set(['NC', 'SC', 'GA', 'FL', 'VA'])),
+    flavorText: 'Media badges double as waterproof kelp lanyards.'
+  }),
+
+  defineAgenda({
+    id: 'truth_crop_circle_telethon',
+    faction: 'truth',
+    category: 'resource',
+    title: 'Crop Circle Telethon',
+    headline: 'CORNFIELD SWITCHBOARD DIALS THE COSMOS!',
+    operationName: 'Operation Combine Choir',
+    issueTheme: 'Agri Disclosure',
+    pullQuote: '“Operators are standing by in sequined bib overalls.”',
+    artCue: {
+      icon: '/assets/tabloid-flash.svg',
+      texture: '/assets/tabloid-halftone.svg',
+      alt: 'Irradiated crop circle motif',
+    },
+    description:
+      'Complete four ZONE operations across prairie states (IA, KS, NE, ND, or SD) to beam donation pleas to every abductee support group.',
+    target: 4,
+    difficulty: 'hard',
+    stages: createAgendaStages('truth_crop_circle_telethon', 4, {
+      briefing: {
+        label: 'Switchboard Setup',
+        description: 'Hay bales hide satellite dishes between the rows.',
+        requirement: 'Aim the telethon relays toward the prairie grid.',
+      },
+      escalation: {
+        label: 'Combine Choir',
+        description: 'Harvester crews stomp crop circles in perfect rhythm.',
+        requirement: 'Complete 2 prairie ZONE operations.',
+      },
+      finale: {
+        label: 'Midnight Pledge Drive',
+        description: 'Every abductee hotline lights up across the heartland.',
+        requirement: 'Complete 4 ZONE operations in IA, KS, NE, ND, or SD.',
+      },
+    }),
+    computeProgress: gameState =>
+      countZonePlaysOnStates(gameState, new Set(['IA', 'KS', 'NE', 'ND', 'SD'])),
+    flavorText: 'Donation perks include glow-in-the-dark crop circle blueprints.'
+  }),
+
   // GOVERNMENT FACTION AGENDAS
   defineAgenda({
     id: 'gov_capitol_stew',
@@ -965,6 +1053,85 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     computeProgress: gameState =>
       countCapturedMatches(gameState, new Set(['MA', 'MD', 'VA', 'RI'])),
     flavorText: 'Accountants must balance ledgers while wearing ectoplasm-insulated gloves.'
+  }),
+
+  defineAgenda({
+    id: 'gov_aurora_damper_patrol',
+    faction: 'government',
+    category: 'strategic',
+    title: 'Aurora Damper Patrol',
+    headline: 'Security Bulletin 12-A: SWITCH OFF THE SKY VEIL',
+    operationName: 'Operation Polar Umbrella',
+    issueTheme: 'Geomagnetic Suppression',
+    pullQuote: '“Never let the aurora karaoke reach the chorus.”',
+    artCue: {
+      icon: '/assets/dossier-stamp.svg',
+      texture: '/assets/dossier-fibers.svg',
+      alt: 'Arctic interception seal',
+    },
+    description:
+      'Conduct four ZONE operations in aurora states (AK, ND, MN, MI, or ME) to jam the northern lights before they spell out classified telegrams.',
+    target: 4,
+    difficulty: 'hard',
+    stages: createAgendaStages('gov_aurora_damper_patrol', 4, {
+      briefing: {
+        label: 'Sky Veil Survey',
+        description: 'Weather balloons map which auroras leak classified Morse.',
+        requirement: 'Chart the aurora states targeted for dampening.',
+      },
+      escalation: {
+        label: 'Polar Umbrella',
+        description: 'Mobile towers roll in to muffle the northern light show.',
+        requirement: 'Complete 2 aurora ZONE operations.',
+      },
+      finale: {
+        label: 'Lights Out',
+        description: 'The sky glows beige and the telegram stays sealed.',
+        requirement: 'Complete 4 ZONE operations in AK, ND, MN, MI, or ME.',
+      },
+    }),
+    computeProgress: gameState =>
+      countZonePlaysOnStates(gameState, new Set(['AK', 'ND', 'MN', 'MI', 'ME'])),
+    flavorText: 'Field manuals warn against humming the X-Files theme near the dampers.'
+  }),
+
+  defineAgenda({
+    id: 'gov_memory_hole_marathon',
+    faction: 'government',
+    category: 'sabotage',
+    title: 'Memory Hole Marathon',
+    headline: 'Directive 12-Z: 24-HOUR DENIAL TELETHON',
+    operationName: 'Operation Oblivion Relay',
+    issueTheme: 'Narrative Erasure',
+    pullQuote: '“Hydrate between denials to prevent static cling on the cue cards.”',
+    artCue: {
+      icon: '/assets/dossier-stamp.svg',
+      texture: '/assets/dossier-fibers.svg',
+      alt: 'Shredded memo emblem',
+    },
+    description:
+      'Accumulate 18 suppressed Truth through negative deltas so the denial marathon can drone over every leak hotline.',
+    target: 18,
+    difficulty: 'hard',
+    stages: createAgendaStages('gov_memory_hole_marathon', 18, {
+      briefing: {
+        label: 'Telethon Warm-Up',
+        description: 'Anchors rehearse denial scripts over hold music.',
+        requirement: 'Drain the first drops of Truth with a negative delta.',
+      },
+      escalation: {
+        label: 'Cue Card Carousel',
+        description: 'Operators shuffle rebuttals through rotating phone banks.',
+        requirement: 'Accumulate 9 suppressed Truth.',
+      },
+      finale: {
+        label: 'Oblivion Broadcast',
+        description: 'Viewers forget the leak exists before the credits roll.',
+        requirement: 'Accumulate 18 suppressed Truth.',
+      },
+    }),
+    computeProgress: gameState => sumSuppressedTruthDelta(gameState),
+    flavorText: 'Tote board numbers glow whenever a memory hole successfully swallows a rumor.'
   }),
 
   // SHARED/NEUTRAL AGENDAS
