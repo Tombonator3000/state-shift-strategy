@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { DEFAULT_EVENT_TRIGGER_CHANCE } from '@/data/eventDatabase';
 import { assignStateBonuses, computeRoundSeed } from '../stateBonuses';
 
 describe('stateBonuses deterministic selection', () => {
@@ -61,6 +62,24 @@ describe('stateBonuses deterministic selection', () => {
       expect(events.length).toBe(0);
     }
     expect(result.newspaperEvents.length).toBe(0);
+  });
+
+  test('newspaper events carry the shared trigger probability metadata', () => {
+    const result = assignStateBonuses({
+      states: mockStates,
+      baseSeed: 1,
+      round: 3,
+      playerFaction: 'truth',
+    });
+
+    expect(result.newspaperEvents.length).toBeGreaterThan(0);
+
+    for (const event of result.newspaperEvents) {
+      expect(event.triggerChance).toBeCloseTo(DEFAULT_EVENT_TRIGGER_CHANCE);
+      const normalizedWeight = Math.max(1, event.weight ?? 0);
+      const expectedConditional = Math.min(1, DEFAULT_EVENT_TRIGGER_CHANCE / normalizedWeight);
+      expect(event.conditionalChance).toBeCloseTo(expectedConditional);
+    }
   });
 
   test('truth and IP totals split between human and AI controllers', () => {
