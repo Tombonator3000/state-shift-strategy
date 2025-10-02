@@ -493,6 +493,7 @@ const toStateHotspot = (
   expiresOnTurn: hotspot.expiresOnTurn,
   turnsRemaining: computeHotspotTurnsRemaining(currentTurn, hotspot.expiresOnTurn),
   source: hotspot.source,
+  kind: hotspot.kind,
 });
 
 const createHotspotEntries = (params: {
@@ -522,6 +523,7 @@ const createHotspotEntries = (params: {
     expiresOnTurn,
     createdOnTurn: currentTurn,
     source,
+    kind: payload.kind,
   };
 
   return {
@@ -546,6 +548,7 @@ const createDirectorHotspotEntries = (params: {
     stateId: state.id,
     stateAbbreviation: state.abbreviation,
     enabledExpansions,
+    hotspotKind: candidate.kind,
   });
 
   const rawIntensity = typeof candidate.intensity === 'number' && Number.isFinite(candidate.intensity)
@@ -577,6 +580,7 @@ const createDirectorHotspotEntries = (params: {
     truthReward,
     defenseBoost,
     source: 'neutral',
+    kind: candidate.kind,
   };
 
   const syntheticEvent: GameEvent = {

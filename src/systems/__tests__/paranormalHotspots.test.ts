@@ -151,13 +151,13 @@ describe('Hotspot presentation helpers', () => {
 
     const article = director.buildHotspotExtraArticle(sampleHotspot);
     expect(article.badgeClassName)
-      .toBe('bg-slate-950/80 border-slate-500/60 text-slate-200');
+      .toBe('bg-slate-950/80 border-slate-400/60 text-slate-100');
     expect(article).toMatchInlineSnapshot(`
       {
-        "badgeClassName": "bg-slate-950/80 border-slate-500/60 text-slate-200",
-        "badgeLabel": "NORMAL • WASHINGTON",
-        "blurb": "Sensorene melder NORMAL-anomali over WASHINGTON. Intensitet 6.",
-        "headline": "WASHINGTON PHENOMENON",
+        "badgeClassName": "bg-slate-950/80 border-slate-400/60 text-slate-100",
+        "badgeLabel": "Normal • Washington",
+        "blurb": "Sensors flag a Normal ripple over Washington. Intensity 6.",
+        "headline": "Washington Phenomenon",
         "id": "auto:WA:42:123456789",
         "intensity": 6,
         "kind": "normal",
@@ -166,12 +166,75 @@ describe('Hotspot presentation helpers', () => {
       }
     `);
 
+    expect(article.headline).toBe(sampleHotspot.name);
+    expect(article.blurb).toMatch(/Washington/);
+    expect(article.blurb).toMatch(/Intensity/);
+
     const logEntry = formatHotspotSpawnLog(article);
-    expect(logEntry).toContain('🛸 HOTSPOT OPPDAGET: WASHINGTON.');
+    expect(logEntry).toContain('🛸 HOTSPOT DETECTED: WASHINGTON.');
     expect(logEntry.toLowerCase()).not.toContain('no active hotspot detected');
 
     const idleLog = getHotspotIdleLog();
-    expect(idleLog.toLowerCase()).not.toContain('no active hotspot detected');
-    expect(idleLog).toContain('Ingen hotspot-signaler');
+    expect(idleLog.toLowerCase()).not.toContain('ingen hotspot');
+    expect(idleLog).toContain('Paranormal sweep continuing');
+  });
+
+  it('clamps truth rewards to configured ranges for each hotspot kind', () => {
+    const truthRewards = hotspotsConfig.resolution.truthRewards;
+    const byKind = truthRewards.byKind ?? {};
+    const defaults = truthRewards.defaults ?? {};
+
+    const percentToValue = (value?: number): number | undefined => {
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
+        return undefined;
+      }
+      return Math.abs(value) <= 1 ? value * 100 : value;
+    };
+
+    const resolveRange = (kind: 'normal' | 'ufo' | 'ghost' | 'elvis' | 'cryptid') => {
+      const kindConfig = { ...byKind.default, ...byKind[kind] } as Record<string, number | undefined>;
+      const minCandidates = [
+        defaults.min,
+        percentToValue(kindConfig.min as number | undefined),
+        percentToValue(kindConfig.minPercent as number | undefined),
+      ].filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+      const maxCandidates = [
+        defaults.max,
+        percentToValue(kindConfig.max as number | undefined),
+        percentToValue(kindConfig.maxPercent as number | undefined),
+      ].filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+
+      const min = minCandidates.length ? Math.max(...minCandidates) : 0;
+      const max = maxCandidates.length ? Math.min(...maxCandidates) : Number.POSITIVE_INFINITY;
+      return { min, max };
+    };
+
+    const kinds: Array<{
+      kind: 'normal' | 'ufo' | 'ghost' | 'elvis' | 'cryptid';
+      state: string;
+    }> = [
+      { kind: 'normal', state: 'OR' },
+      { kind: 'ufo', state: 'NM' },
+      { kind: 'ghost', state: 'WA' },
+      { kind: 'elvis', state: 'NJ' },
+      { kind: 'cryptid', state: 'WA' },
+    ];
+
+    for (const { kind, state } of kinds) {
+      const { min, max } = resolveRange(kind);
+      const truthResolution = resolveHotspot(state, 'truth', {
+        hotspotKind: kind,
+        enabledExpansions: ['cryptids'],
+      });
+      const governmentResolution = resolveHotspot(state, 'government', {
+        hotspotKind: kind,
+        enabledExpansions: ['cryptids'],
+      });
+
+      expect(Math.abs(truthResolution.truthDelta)).toBeGreaterThanOrEqual(Math.round(min));
+      expect(Math.abs(truthResolution.truthDelta)).toBeLessThanOrEqual(Math.round(max));
+      expect(Math.abs(governmentResolution.truthDelta)).toBeGreaterThanOrEqual(Math.round(min));
+      expect(Math.abs(governmentResolution.truthDelta)).toBeLessThanOrEqual(Math.round(max));
+    }
   });
 });
