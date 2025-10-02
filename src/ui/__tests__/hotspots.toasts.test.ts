@@ -35,18 +35,18 @@ describe('hotspot toast formatting', () => {
   const sampleHotspot: Hotspot = {
     id: 'test-hotspot',
     name: 'Cascade Rift',
-    kind: 'phenomenon',
+    kind: 'normal',
     location: 'Washington',
     intensity: 5,
     status: 'spawning',
     tags: ['auto-spawn'],
-    icon: '🛸',
+    icon: '👻',
     expansionTag: undefined,
     stateId: '53',
     stateName: 'Washington',
     stateAbbreviation: 'WA',
     totalWeight: 1,
-    weightBreakdown: { base: 1, expansion: 0, cryptid: 0 },
+    weightBreakdown: { base: 1, catalog: 0, type: 0, expansion: 0, cryptid: 0 },
     truthDelta: 4,
   };
 

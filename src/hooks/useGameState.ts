@@ -104,7 +104,7 @@ const buildResolvedHotspotToast = (resolution: CardHotspotResolution): Hotspot =
   return {
     id: resolution.hotspotId,
     name: resolution.label,
-    kind: 'phenomenon',
+    kind: 'normal',
     location: resolution.stateName,
     intensity: computeHotspotToastIntensity(resolution.truthReward || resolution.truthDelta),
     status: 'resolved',
@@ -119,7 +119,7 @@ const buildResolvedHotspotToast = (resolution: CardHotspotResolution): Hotspot =
 const buildExpiredHotspotToast = (hotspot: ActiveParanormalHotspot): Hotspot => ({
   id: hotspot.id,
   name: hotspot.label,
-  kind: 'phenomenon',
+  kind: 'normal',
   location: hotspot.stateName,
   intensity: computeHotspotToastIntensity(hotspot.truthReward),
   status: 'expired',
@@ -553,19 +553,25 @@ const createDirectorHotspotEntries = (params: {
     : 3;
   const defenseBoost = Math.max(1, Math.round(rawIntensity / 2));
   const duration = Math.max(2, Math.min(4, Math.round(rawIntensity / 2) + 1));
-  const truthReward = Math.max(1, Math.round(Math.abs(truthResolution.truthDelta)));
+  const truthReward = Math.max(
+    1,
+    Math.round(
+      Math.abs(candidate.truthRewardHint ?? truthResolution.truthDelta ?? 0),
+    ),
+  );
 
   const icon = deriveHotspotIcon({
     icon: candidate.icon,
     tags: candidate.tags,
     expansionTag: candidate.expansionTag,
+    kind: candidate.kind,
   });
   const label = candidate.name ?? `${state.name} Hotspot`;
 
   const payload: ParanormalHotspotPayload = {
     stateId: state.id,
     label,
-    description: candidate.location,
+    description: candidate.summary ?? candidate.location,
     icon,
     duration,
     truthReward,
@@ -577,7 +583,7 @@ const createDirectorHotspotEntries = (params: {
     id: candidate.id,
     title: label,
     headline: candidate.name?.toUpperCase(),
-    content: candidate.location ?? `${state.name} hotspot`,
+    content: candidate.summary ?? candidate.location ?? `${state.name} hotspot`,
     type: 'random',
     faction: 'neutral',
     rarity: 'rare',

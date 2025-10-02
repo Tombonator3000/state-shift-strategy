@@ -6,16 +6,18 @@ import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
 
 export interface HotspotWeightBreakdown {
   base: number;
+  catalog: number;
+  type: number;
   expansion: number;
   cryptid: number;
 }
 
 export type HotspotKind =
-  | 'anomaly'
-  | 'disturbance'
-  | 'manifestation'
-  | 'phenomenon'
-  | 'encounter';
+  | 'normal'
+  | 'ufo'
+  | 'ghost'
+  | 'elvis'
+  | 'cryptid';
 
 export interface Hotspot {
   id: string;
@@ -33,6 +35,8 @@ export interface Hotspot {
   totalWeight?: number;
   weightBreakdown?: HotspotWeightBreakdown;
   truthDelta?: number;
+  summary?: string;
+  truthRewardHint?: number;
 }
 
 export interface HotspotExtraArticle {
@@ -58,6 +62,9 @@ interface ExpansionModifierConfig {
 }
 
 interface SpawnConfig {
+  defaults?: {
+    spawnRate?: number;
+  };
   baseWeights: {
     default: number;
     states: Record<string, number>;
@@ -288,17 +295,42 @@ export interface HotspotSpawnOptions {
   excludeStates?: string[];
 }
 
-export const DEFAULT_HOTSPOT_ICON = '🛸';
+const HOTSPOT_KIND_VALUES: readonly HotspotKind[] = ['normal', 'ufo', 'ghost', 'elvis', 'cryptid'] as const;
+
+const HOTSPOT_KIND_ICON_MAP: Record<HotspotKind, string> = {
+  normal: '👻',
+  ufo: '🛸',
+  ghost: '🎃',
+  elvis: '🕺',
+  cryptid: '🦶',
+};
+
+const normalizeHotspotKind = (value: unknown): HotspotKind | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  return HOTSPOT_KIND_VALUES.find(kind => kind === normalized);
+};
+
+export const DEFAULT_HOTSPOT_ICON = HOTSPOT_KIND_ICON_MAP.normal;
 
 export function deriveHotspotIcon(metadata: {
   icon?: string;
   tags?: string[];
   expansionTag?: string;
+  kind?: HotspotKind | string;
 }): string {
-  const { icon, tags = [], expansionTag } = metadata;
+  const { icon, tags = [], expansionTag, kind } = metadata;
 
   if (typeof icon === 'string' && icon.trim().length > 0) {
     return icon;
+  }
+
+  const normalizedKind = normalizeHotspotKind(kind);
+  if (normalizedKind) {
+    return HOTSPOT_KIND_ICON_MAP[normalizedKind];
   }
 
   const normalizedTags = tags
@@ -317,7 +349,7 @@ export function deriveHotspotIcon(metadata: {
     || normalizedTagSet.has('expansion:cryptids')
     || normalizedExpansionTag === 'cryptids'
   ) {
-    return '🦶';
+    return HOTSPOT_KIND_ICON_MAP.cryptid;
   }
 
   if (
@@ -325,11 +357,21 @@ export function deriveHotspotIcon(metadata: {
     || normalizedTagSet.has('expansion:halloween')
     || normalizedExpansionTag === 'halloween'
   ) {
-    return '🎃';
+    return HOTSPOT_KIND_ICON_MAP.ghost;
   }
 
-  return DEFAULT_HOTSPOT_ICON;
+  return HOTSPOT_KIND_ICON_MAP.normal;
 }
+
+type CatalogEntry = HotspotCatalog['hotspots'][number];
+
+const HOTSPOT_KIND_WEIGHT_MULTIPLIER: Record<HotspotKind, number> = {
+  normal: 1,
+  ufo: 1.1,
+  ghost: 1.05,
+  elvis: 1.02,
+  cryptid: 1.2,
+};
 
 export interface WeightedHotspotCandidate extends Hotspot {
   stateId: string;
@@ -380,6 +422,115 @@ export class HotspotDirector {
     return this.cryptids;
   }
 
+  private getSpawnRate(): number {
+    const spawnDefaultsRate = toFiniteNumber(this.spawnConfig.defaults?.spawnRate);
+    const configDefaultsRate = toFiniteNumber((this.config as { defaults?: { spawnRate?: unknown } }).defaults?.spawnRate);
+
+    const resolved = typeof spawnDefaultsRate === 'number'
+      ? spawnDefaultsRate
+      : typeof configDefaultsRate === 'number'
+        ? configDefaultsRate
+        : undefined;
+
+    if (typeof resolved === 'number') {
+      return Math.min(Math.max(resolved, 0), 1);
+    }
+
+    return 0.2;
+  }
+
+  private ensureStringTags(tags: unknown): string[] {
+    if (!Array.isArray(tags)) {
+      return [];
+    }
+
+    return tags
+      .filter((tag): tag is string => typeof tag === 'string')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+  }
+
+  private resolveEntryStateAbbreviation(entry: CatalogEntry): string | undefined {
+    if (entry && typeof entry === 'object') {
+      const direct = (entry as { stateAbbreviation?: unknown }).stateAbbreviation;
+      if (typeof direct === 'string' && direct.trim().length > 0) {
+        return direct.trim().toUpperCase();
+      }
+
+      const tags = this.ensureStringTags((entry as { tags?: unknown }).tags);
+      for (const tag of tags) {
+        const normalized = tag.toLowerCase();
+        if (normalized.startsWith('state:')) {
+          const value = tag.slice(tag.indexOf(':') + 1).trim().toUpperCase();
+          if (value) {
+            return value;
+          }
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  private resolveCatalogKind(entry: CatalogEntry): HotspotKind {
+    const tags = this.ensureStringTags((entry as { tags?: unknown }).tags).map(tag => tag.toLowerCase());
+    const id = typeof (entry as { id?: unknown }).id === 'string' ? (entry as { id: string }).id.toLowerCase() : '';
+    const name = typeof (entry as { name?: unknown }).name === 'string' ? (entry as { name: string }).name.toLowerCase() : '';
+    const expansionTag = typeof (entry as { expansionTag?: unknown }).expansionTag === 'string'
+      ? ((entry as { expansionTag: string }).expansionTag.trim().toLowerCase())
+      : '';
+
+    if (tags.includes('cryptid') || expansionTag === 'cryptids' || id.includes('cryptid')) {
+      return 'cryptid';
+    }
+
+    if (tags.includes('halloween') || expansionTag === 'halloween' || id.includes('halloween')) {
+      return 'ghost';
+    }
+
+    if (tags.some(tag => tag.includes('elvis')) || id.includes('elvis') || name.includes('elvis')) {
+      return 'elvis';
+    }
+
+    if (tags.some(tag => tag.includes('ufo') || tag.includes('alien')) || id.includes('ufo') || name.includes('ufo') || name.includes('alien')) {
+      return 'ufo';
+    }
+
+    return 'normal';
+  }
+
+  private getCatalogWeightMultiplier(entry: CatalogEntry): number {
+    const rawIntensity = toFiniteNumber((entry as { intensity?: unknown }).intensity);
+    const intensity = typeof rawIntensity === 'number' ? Math.min(Math.max(rawIntensity, 1), 5) : 3;
+    const intensityMultiplier = intensity / 3;
+
+    const rawTruthDelta = toFiniteNumber((entry as { truthDelta?: unknown }).truthDelta);
+    const truthMagnitude = rawTruthDelta ? Math.abs(rawTruthDelta) : 0;
+    const truthMultiplier = truthMagnitude > 0 ? 1 + truthMagnitude / 12 : 1;
+
+    const multiplier = intensityMultiplier * truthMultiplier;
+    return Math.min(Math.max(multiplier, 0.5), 3);
+  }
+
+  private getTypeMultiplier(kind: HotspotKind): number {
+    return HOTSPOT_KIND_WEIGHT_MULTIPLIER[kind] ?? 1;
+  }
+
+  private computeCatalogIntensity(entry: CatalogEntry, fallback: number): number {
+    const rawIntensity = toFiniteNumber((entry as { intensity?: unknown }).intensity);
+    if (typeof rawIntensity === 'number') {
+      return Math.max(1, Math.round(rawIntensity));
+    }
+    return Math.max(1, Math.round(fallback));
+  }
+
+  private resolveCatalogExpansion(entry: CatalogEntry): string | undefined {
+    const expansionTag = typeof (entry as { expansionTag?: unknown }).expansionTag === 'string'
+      ? (entry as { expansionTag: string }).expansionTag.trim().toLowerCase()
+      : undefined;
+    return expansionTag && expansionTag.length > 0 ? expansionTag : undefined;
+  }
+
   private normalizeSpawnConfig(config: HotspotConfig): SpawnConfig {
     const baseWeights: SpawnConfig['baseWeights'] = {
       default: 1,
@@ -391,10 +542,12 @@ export class HotspotDirector {
       perCryptid: 0,
       max: Number.POSITIVE_INFINITY,
     };
+    const defaults: NonNullable<SpawnConfig['defaults']> = {};
 
     const rawSpawn = (config as { spawn?: unknown }).spawn;
     if (rawSpawn && typeof rawSpawn === 'object') {
       const spawn = rawSpawn as {
+        defaults?: { spawnRate?: unknown };
         baseWeights?: { default?: unknown; states?: Record<string, unknown> };
         expansionModifiers?: Record<string, {
           multiplier?: unknown;
@@ -403,6 +556,12 @@ export class HotspotDirector {
         }>;
         cryptidHomeStateBoost?: { base?: unknown; perCryptid?: unknown; max?: unknown };
       };
+
+      if (spawn.defaults && typeof spawn.defaults === 'object') {
+        if (typeof spawn.defaults.spawnRate === 'number' && Number.isFinite(spawn.defaults.spawnRate)) {
+          defaults.spawnRate = spawn.defaults.spawnRate;
+        }
+      }
 
       if (spawn.baseWeights && typeof spawn.baseWeights === 'object') {
         if (typeof spawn.baseWeights.default === 'number' && Number.isFinite(spawn.baseWeights.default)) {
@@ -461,7 +620,12 @@ export class HotspotDirector {
       }
     }
 
-    return { baseWeights, expansionModifiers, cryptidHomeStateBoost };
+    const normalized: SpawnConfig = { baseWeights, expansionModifiers, cryptidHomeStateBoost };
+    if (Object.keys(defaults).length > 0) {
+      normalized.defaults = defaults;
+    }
+
+    return normalized;
   }
 
   private normalizeUiConfig(config: HotspotConfig): HotspotUiConfig {
@@ -562,7 +726,7 @@ export class HotspotDirector {
   }
 
   buildHotspotExtraArticle(hotspot: Hotspot): HotspotExtraArticle {
-    const normalizedKind: HotspotKind = hotspot.kind ?? 'phenomenon';
+    const normalizedKind: HotspotKind = hotspot.kind ?? 'normal';
     const stateName = (hotspot.stateName ?? hotspot.location ?? 'Ukjent sone').trim() || 'Ukjent sone';
     const badgeClassName = this.getBadgeClass(normalizedKind);
     const badgeLabel = `${normalizedKind.toUpperCase()} • ${stateName.toUpperCase()}`;
@@ -710,96 +874,199 @@ export class HotspotDirector {
     options: HotspotSpawnOptions = {},
   ): WeightedHotspotCandidate | null {
     const { enabledExpansions = [], rng = Math.random, excludeStates = [] } = options;
-    const enabledSet = new Set(enabledExpansions);
-    const exclusionSet = new Set(excludeStates.map(value => value.trim().toUpperCase()));
-    const activeHotspots = new Set(Object.keys(gameState.paranormalHotspots ?? {}));
+    const spawnRoll = rng();
+    if (spawnRoll >= this.getSpawnRate()) {
+      return null;
+    }
+
+    const enabledSet = new Set(
+      enabledExpansions
+        .map(value => (typeof value === 'string' ? value.trim().toLowerCase() : ''))
+        .filter(value => value.length > 0),
+    );
+    const exclusionSet = new Set(
+      excludeStates
+        .map(value => (typeof value === 'string' ? value.trim().toUpperCase() : ''))
+        .filter(value => value.length > 0),
+    );
+    const activeHotspots = new Set(
+      Object.keys(gameState.paranormalHotspots ?? {})
+        .map(key => key.toUpperCase()),
+    );
+
+    const stateLookup = new Map<string, GameState['states'][number]>();
+    for (const state of gameState.states ?? []) {
+      const abbr = state.abbreviation?.toUpperCase?.() ?? '';
+      if (!abbr) {
+        continue;
+      }
+      stateLookup.set(abbr, state);
+    }
+
+    const catalogEntries = Array.isArray(this.catalog?.hotspots) ? this.catalog.hotspots : [];
 
     const candidates: Array<{
       state: GameState['states'][number];
+      entry: CatalogEntry;
       weight: number;
       breakdown: HotspotWeightBreakdown;
       tags: string[];
       expansionTag?: string;
       icon: string;
+      kind: HotspotKind;
     }> = [];
 
-    for (const state of gameState.states) {
-      const abbr = state.abbreviation?.toUpperCase?.() ?? '';
-      if (!abbr) {
+    for (const entry of catalogEntries) {
+      const stateAbbr = this.resolveEntryStateAbbreviation(entry);
+      if (!stateAbbr) {
         continue;
       }
 
-      if (activeHotspots.has(abbr) || exclusionSet.has(abbr)) {
+      if (exclusionSet.has(stateAbbr) || activeHotspots.has(stateAbbr)) {
         continue;
       }
 
-      const baseWeight = this.getBaseWeight(state.id ?? abbr, abbr);
+      const state = stateLookup.get(stateAbbr);
+      if (!state) {
+        continue;
+      }
+
+      const catalogExpansion = this.resolveCatalogExpansion(entry);
+      if (catalogExpansion && !enabledSet.has(catalogExpansion)) {
+        continue;
+      }
+
+      const stateId = (state.id ?? stateAbbr).toString();
+      const baseWeight = this.getBaseWeight(stateId, stateAbbr);
       if (!baseWeight || baseWeight <= 0) {
         continue;
       }
 
-      const breakdown: HotspotWeightBreakdown = { base: baseWeight, expansion: 0, cryptid: 0 };
-      const tags = ['auto-spawn'];
+      const kind = this.resolveCatalogKind(entry);
+      const breakdown: HotspotWeightBreakdown = {
+        base: baseWeight,
+        catalog: 0,
+        type: 0,
+        expansion: 0,
+        cryptid: 0,
+      };
 
-      const expansionResult = this.applyExpansionModifiers(baseWeight, abbr, enabledSet);
+      let totalWeight = baseWeight;
+
+      const catalogMultiplier = this.getCatalogWeightMultiplier(entry);
+      const weightAfterCatalog = totalWeight * catalogMultiplier;
+      breakdown.catalog = weightAfterCatalog - totalWeight;
+      totalWeight = weightAfterCatalog;
+
+      const typeMultiplier = this.getTypeMultiplier(kind);
+      const weightAfterType = totalWeight * typeMultiplier;
+      breakdown.type = weightAfterType - totalWeight;
+      totalWeight = weightAfterType;
+
+      const expansionResult = this.applyExpansionModifiers(totalWeight, stateAbbr, enabledSet);
       breakdown.expansion = expansionResult.bonus;
+      totalWeight = expansionResult.weight;
+
+      let tags = this.ensureStringTags((entry as { tags?: unknown }).tags);
       if (expansionResult.tags.length > 0) {
-        tags.push(...expansionResult.tags);
+        tags = [...tags, ...expansionResult.tags];
       }
 
-      const cryptidResult = this.applyCryptidBoost(abbr, expansionResult.weight);
+      const cryptidResult = this.applyCryptidBoost(stateAbbr, totalWeight);
       breakdown.cryptid = cryptidResult.bonus;
+      totalWeight = cryptidResult.weight;
       if (cryptidResult.tag) {
-        tags.push(cryptidResult.tag);
+        tags = [...tags, cryptidResult.tag];
       }
 
-      const totalWeight = cryptidResult.weight;
       if (!totalWeight || totalWeight <= 0) {
         continue;
       }
 
-      const expansionTag = this.resolveExpansionTag(tags);
-      const icon = deriveHotspotIcon({ tags, expansionTag });
+      const normalizedTags = Array.from(new Set(['auto-spawn', ...tags]));
+      const resolvedExpansionTag = catalogExpansion ?? this.resolveExpansionTag(normalizedTags);
+      const icon = deriveHotspotIcon({
+        icon: (entry as { icon?: unknown }).icon as string | undefined,
+        tags: normalizedTags,
+        expansionTag: resolvedExpansionTag,
+        kind,
+      });
 
-      candidates.push({ state, weight: totalWeight, breakdown, tags, expansionTag, icon });
+      candidates.push({
+        state,
+        entry,
+        weight: totalWeight,
+        breakdown,
+        tags: normalizedTags,
+        expansionTag: resolvedExpansionTag,
+        icon,
+        kind,
+      });
     }
 
     if (candidates.length === 0) {
       return null;
     }
 
-    const total = candidates.reduce((sum, entry) => sum + entry.weight, 0);
-    const roll = rng() * total;
+    const totalWeight = candidates.reduce((sum, entry) => sum + entry.weight, 0);
+    const selectionRoll = rng() * totalWeight;
     let accumulator = 0;
     let selected = candidates[0];
-    for (const entry of candidates) {
-      accumulator += entry.weight;
-      if (roll <= accumulator) {
-        selected = entry;
+    for (const candidate of candidates) {
+      accumulator += candidate.weight;
+      if (selectionRoll <= accumulator) {
+        selected = candidate;
         break;
       }
     }
 
-    const { state, breakdown, weight, tags, expansionTag, icon } = selected;
-    const timestamp = Date.now();
-    const baseName = state.name ?? state.abbreviation;
-    const hotspotId = `auto:${state.abbreviation}:${round}:${timestamp}`;
+    const { state, entry, breakdown, weight, tags, expansionTag, icon, kind } = selected;
+    const stateAbbr = state.abbreviation?.toUpperCase?.() ?? this.resolveEntryStateAbbreviation(entry) ?? '';
+    const rawStateId = state.id ?? (entry as { stateId?: unknown }).stateId ?? stateAbbr;
+    const stateId = typeof rawStateId === 'string' ? rawStateId : String(rawStateId ?? stateAbbr);
+    const stateName = (state.name ?? (entry as { stateName?: unknown }).stateName ?? stateAbbr).toString();
+
+    const baseId = typeof (entry as { id?: unknown }).id === 'string' && (entry as { id: string }).id.trim().length > 0
+      ? (entry as { id: string }).id.trim()
+      : `auto:${stateAbbr}`;
+    const hotspotId = `${baseId}:${round}:${Date.now()}`;
+
+    const enabledList = Array.from(enabledSet);
+    const truthOutcome = resolveHotspot(stateId, 'truth', {
+      stateId,
+      stateAbbreviation: stateAbbr,
+      enabledExpansions: enabledList,
+    });
+    const truthRewardHint = Math.max(1, Math.round(Math.abs(truthOutcome.truthDelta)));
+
+    const summary = typeof (entry as { summary?: unknown }).summary === 'string'
+      ? (entry as { summary: string }).summary
+      : undefined;
+    const location = typeof (entry as { location?: unknown }).location === 'string'
+      ? (entry as { location: string }).location
+      : stateName;
+    const name = typeof (entry as { name?: unknown }).name === 'string'
+      ? (entry as { name: string }).name
+      : `${stateName} Hotspot`;
 
     return {
       id: hotspotId,
-      name: `${baseName} Hotspot`,
-      kind: 'phenomenon',
-      location: baseName,
-      intensity: Math.max(1, Math.round(weight * 5)),
+      name,
+      kind,
+      location,
+      summary: summary ?? location,
+      intensity: this.computeCatalogIntensity(entry, weight * 5),
       status: 'spawning',
       tags,
       icon,
       expansionTag,
-      stateId: state.id,
-      stateName: baseName,
-      stateAbbreviation: state.abbreviation,
+      stateId,
+      stateName,
+      stateAbbreviation: stateAbbr,
       totalWeight: weight,
       weightBreakdown: breakdown,
-    };
+      truthDelta: truthOutcome.truthDelta,
+      truthRewardHint,
+    } satisfies WeightedHotspotCandidate;
   }
 }

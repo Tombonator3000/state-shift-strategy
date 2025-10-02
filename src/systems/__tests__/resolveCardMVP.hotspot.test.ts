@@ -94,17 +94,17 @@ describe('resolveCardMVP hotspot handling', () => {
       const candidate: WeightedHotspotCandidate = {
         id: 'auto:OR:1:seed',
         name: 'Oregon Phenomenon',
-        kind: 'phenomenon',
+        kind: 'cryptid',
         location: 'Oregon',
         intensity: 6,
         status: 'spawning',
         tags: ['auto-spawn', 'expansion:cryptids'],
-        icon: '🛸',
+        icon: '🦶',
         stateId: 'OR',
         stateName: 'Oregon',
         stateAbbreviation: 'OR',
         totalWeight: 5,
-        weightBreakdown: { base: 3, expansion: 1, cryptid: 1 },
+        weightBreakdown: { base: 3, catalog: 0.5, type: 0.5, expansion: 1, cryptid: 1 },
       };
 
       const baseDefense = 2;

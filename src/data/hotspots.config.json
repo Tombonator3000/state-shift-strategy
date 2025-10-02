@@ -6,6 +6,9 @@
     "decayRate": 0.05
   },
   "spawn": {
+    "defaults": {
+      "spawnRate": 0.2
+    },
     "baseWeights": {
       "default": 1,
       "states": {

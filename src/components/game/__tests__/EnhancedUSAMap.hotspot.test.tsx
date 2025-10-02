@@ -407,12 +407,12 @@ describe('EnhancedUSAMap paranormal hotspots', () => {
     const oregon = createState('41', 'Oregon', 'OR', 'ai');
     const california = createState('06', 'California', 'CA', 'neutral');
 
-    const baseWeight = { base: 1, expansion: 0, cryptid: 0 };
+    const baseWeight = { base: 1, catalog: 0, type: 0, expansion: 0, cryptid: 0 };
 
     const defaultCandidate: WeightedHotspotCandidate = {
       id: 'ufo-sighting',
       name: 'Cascade Lights',
-      kind: 'anomaly',
+      kind: 'ufo',
       location: 'Seattle Skyline',
       intensity: 4,
       status: 'spawning',
@@ -435,6 +435,7 @@ describe('EnhancedUSAMap paranormal hotspots', () => {
       stateId: oregon.id,
       stateName: oregon.name,
       stateAbbreviation: oregon.abbreviation,
+      kind: 'cryptid',
     };
 
     const halloweenCandidate: WeightedHotspotCandidate = {
@@ -446,6 +447,7 @@ describe('EnhancedUSAMap paranormal hotspots', () => {
       stateId: california.id,
       stateName: california.name,
       stateAbbreviation: california.abbreviation,
+      kind: 'ghost',
     };
 
     const washingtonHotspot = createDirectorStyleHotspot({
