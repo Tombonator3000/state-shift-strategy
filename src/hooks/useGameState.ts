@@ -34,6 +34,9 @@ import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
+import { HotspotDirector, type WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
+import { VisualEffectsCoordinator } from '@/utils/visualEffects';
+import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
@@ -1067,6 +1070,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const aiDifficulty = resolveAiDifficulty(aiDifficultyOverride);
   const [eventManager] = useState(() => new EventManager());
   const achievements = useAchievements();
+  const [hotspotDirector] = useState(() => new HotspotDirector());
   const { triggerStateEvent, resetStateEvents } = useStateEvents();
 
   const triggerCapturedStateEvents = useCallback(
@@ -1657,6 +1661,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       pendingEditionEvents: [],
       activeCampaignArcs: [],
       pendingArcEvents: [],
+      activeHotspot: null,
       showNewspaper: false,
       aiStrategist: AIFactory.createStrategist(aiDifficulty),
       agendaIssue: issueState,
@@ -1983,7 +1988,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       ...prev, 
       selectedCard: prev.selectedCard === cardId ? null : cardId 
     }));
-  }, []);
+  }, [hotspotDirector]);
 
   const selectTargetState = useCallback((stateId: string | null) => {
     setGameState(prev => ({ ...prev, targetState: stateId }));
@@ -2734,6 +2739,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const baseLogs = [...prev.log, drawLogEntry];
 
+      const enabledExpansions = getEnabledExpansionIdsSnapshot();
+      const rolledHotspot = hotspotDirector.rollForSpawn(prev.round, prev, {
+        enabledExpansions,
+      });
+      const hotspotLogs = rolledHotspot
+        ? [`👻 ${rolledHotspot.name} rumored near ${rolledHotspot.stateName ?? rolledHotspot.location}.`]
+        : [];
+      const logsWithHotspot = hotspotLogs.length > 0 ? [...baseLogs, ...hotspotLogs] : baseLogs;
+
       let nextState: GameState = {
         ...prev,
         hand: newHand,
@@ -2751,8 +2765,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         selectedCard: null,
         targetState: null,
         aiTurnInProgress: false,
-        log: baseLogs,
+        log: logsWithHotspot,
         agendaRoundCounters: {},
+        activeHotspot: rolledHotspot ?? null,
       };
 
       if (nextState.lastStateBonusRound !== nextState.round) {
@@ -2792,9 +2807,27 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         }
       }
 
-      return updateSecretAgendaProgress(nextState);
-    });
-  }, []);
+      if (rolledHotspot && typeof window !== 'undefined') {
+        const label = rolledHotspot.stateName ?? rolledHotspot.location ?? rolledHotspot.name;
+        const icon = rolledHotspot.tags.includes('cryptid-home') ? '🛸' : rolledHotspot.tags.includes('expansion:cryptids')
+          ? '🛸'
+          : '👻';
+        const position = VisualEffectsCoordinator.getRandomCenterPosition(220);
+        VisualEffectsCoordinator.triggerParanormalHotspot({
+          position,
+          stateId: rolledHotspot.stateId ?? rolledHotspot.stateAbbreviation ?? label,
+          stateName: label,
+          label: rolledHotspot.name,
+          icon,
+          source: 'neutral',
+          defenseBoost: 0,
+          truthReward: 0,
+        });
+        }
+
+        return updateSecretAgendaProgress(nextState);
+      });
+    }, [hotspotDirector]);
 
   const confirmNewCards = useCallback(() => {
     setGameState(prev => ({
@@ -3354,6 +3387,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             truthAbove80Streak: savedTruthAboveStreak,
             truthBelow20Streak: savedTruthBelowStreak,
           },
+          activeHotspot: saveData.activeHotspot && typeof saveData.activeHotspot === 'object'
+            ? ({
+                ...(saveData.activeHotspot as WeightedHotspotCandidate),
+                tags: Array.isArray((saveData.activeHotspot as { tags?: unknown }).tags)
+                  ? [...(saveData.activeHotspot as { tags: string[] }).tags]
+                  : [],
+              } as WeightedHotspotCandidate)
+            : null,
           stateRoundSeed: typeof saveData.stateRoundSeed === 'number' && Number.isFinite(saveData.stateRoundSeed)
             ? saveData.stateRoundSeed >>> 0
             : (Number.isFinite(prev.stateRoundSeed) ? prev.stateRoundSeed : Math.floor(Math.random() * 0xffffffff)),
