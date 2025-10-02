@@ -257,7 +257,14 @@ export const assignStateBonuses = (
         : null;
 
     const bonusRecord = normalizedExistingBonus
-      ? { ...normalizedExistingBonus, round: options.round }
+      ? (() => {
+          const matchingEffect = pool.bonuses.find(effect => effect.id === normalizedExistingBonus.id);
+          if (!matchingEffect) {
+            return { ...normalizedExistingBonus, round: options.round };
+          }
+          const recalculated = toBonus(matchingEffect, state, options.round, ownerFaction);
+          return { ...normalizedExistingBonus, ...recalculated };
+        })()
       : (() => {
           const bonus =
             rng.pickWeighted(pool.bonuses.map(entry => ({ weight: entry.weight, value: entry }))) ?? null;
