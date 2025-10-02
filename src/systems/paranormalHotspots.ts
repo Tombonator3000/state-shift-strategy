@@ -147,6 +147,18 @@ export interface HotspotResolutionOutcome {
 const toFiniteNumber = (value: unknown): number | undefined =>
   typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 
+let testEnabledExpansionOverride: string[] | null = null;
+
+export const __setTestEnabledExpansions = (ids: string[] | null): void => {
+  if (Array.isArray(ids)) {
+    testEnabledExpansionOverride = ids
+      .filter((id): id is string => typeof id === 'string')
+      .map(id => id);
+  } else {
+    testEnabledExpansionOverride = null;
+  }
+};
+
 const resolveTruthRewardsConfig = (): TruthRewardsConfig => {
   const rawResolution = (hotspotsConfig as { resolution?: unknown }).resolution;
   if (!rawResolution || typeof rawResolution !== 'object') {
@@ -197,9 +209,10 @@ export function resolveHotspot(
     ?? Number.POSITIVE_INFINITY;
 
   const expansionConfig = truthRewardsConfig.expansionBonuses ?? {};
-  const enabledExpansions = new Set(
-    options.enabledExpansions ?? getEnabledExpansionIdsSnapshot(),
-  );
+  const enabledExpansionIds = options.enabledExpansions
+    ?? testEnabledExpansionOverride
+    ?? getEnabledExpansionIdsSnapshot();
+  const enabledExpansions = new Set(enabledExpansionIds);
 
   let expansionBonus = 0;
   let totalMultiplier = 1;

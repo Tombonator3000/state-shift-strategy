@@ -594,6 +594,8 @@ const createDirectorHotspotEntries = (params: {
   return { ...entries, payload };
 };
 
+export const __test_createDirectorHotspotEntries = createDirectorHotspotEntries;
+
 const cloneEventEffects = (
   effects: GameEvent['effects'] | undefined,
 ): NonNullable<GameEvent['effects']> | undefined => {
