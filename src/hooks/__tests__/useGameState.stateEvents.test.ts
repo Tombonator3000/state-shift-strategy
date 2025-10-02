@@ -581,6 +581,77 @@ describe('useGameState state event truth adjustments', () => {
     expect(summaryEntry.effectSummary).toContain('Truth -5%');
   });
 
+  it('keeps pressure fields finite when applying a pressure delta to a state without faction pressure', async () => {
+    const hook = renderHook(() => useGameState());
+
+    await act(async () => {
+      hook.result.current?.initGame('truth');
+    });
+
+    const initialState = hook.result.current?.gameState;
+    expect(initialState).toBeDefined();
+    if (!initialState) return;
+
+    const [firstCard] = initialState.hand;
+    expect(firstCard).toBeDefined();
+    if (!firstCard) return;
+
+    await act(async () => {
+      hook.result.current?.setGameState(prev => ({
+        ...prev,
+        ip: 50,
+        hand: prev.hand.map((card, index) => (index === 0 ? { ...card, cost: 0 } : card)),
+        states: prev.states.map(state => {
+          if (state.abbreviation !== 'CA') {
+            return state;
+          }
+
+          const sanitizedState = { ...state } as typeof state & Record<string, unknown>;
+          delete sanitizedState.pressurePlayer;
+          delete sanitizedState.pressureAi;
+          delete sanitizedState.pressure;
+          return sanitizedState as typeof state;
+        }),
+      }));
+    });
+
+    const event: GameEvent = {
+      id: 'pressure_surge',
+      title: 'Pressure Surge',
+      content: 'A sudden wave of activism grips the state.',
+      type: 'state',
+      rarity: 'common',
+      weight: 1,
+      effects: {
+        stateEffects: {
+          pressure: 4,
+        },
+      },
+    } as GameEvent;
+
+    pushStateEvent('CA', event);
+
+    await act(async () => {
+      hook.result.current?.playCard(firstCard.id, 'CA');
+    });
+
+    const latestState = hook.result.current?.gameState;
+    expect(latestState).toBeDefined();
+    if (!latestState) return;
+
+    const california = latestState.states.find(state => state.abbreviation === 'CA');
+    expect(california).toBeDefined();
+    if (!california) return;
+
+    expect(Number.isFinite(california.pressure)).toBe(true);
+    expect(Number.isFinite(california.pressurePlayer)).toBe(true);
+    expect(Number.isFinite(california.pressureAi)).toBe(true);
+    expect(california.pressure).toBeGreaterThanOrEqual(0);
+    expect(california.pressurePlayer ?? 0).toBeGreaterThan(0);
+    expect(california.pressureAi ?? 0).toBeGreaterThanOrEqual(0);
+    expect(california.pressure).toBeGreaterThanOrEqual(california.pressurePlayer ?? 0);
+  });
+
   it('spawns director hotspots matching legacy hotspot entries when closing the newspaper', async () => {
     const originalHotspotFlag = featureFlags.hotspotDirectorEnabled;
     const hook = renderHook(() => useGameState());

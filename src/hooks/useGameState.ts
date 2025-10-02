@@ -1462,16 +1462,25 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
               if (typeof stateEffects.pressure === 'number' && Number.isFinite(stateEffects.pressure) && stateEffects.pressure !== 0) {
                 const delta = stateEffects.pressure;
-                candidateState.pressure = Math.max(0, candidateState.pressure + delta);
+                const basePressure = Number.isFinite(candidateState.pressure) ? candidateState.pressure : 0;
+                const basePressurePlayer = Number.isFinite(candidateState.pressurePlayer) ? candidateState.pressurePlayer : 0;
+                const basePressureAi = Number.isFinite(candidateState.pressureAi) ? candidateState.pressureAi : 0;
+
+                let nextPressurePlayer = basePressurePlayer;
+                let nextPressureAi = basePressureAi;
 
                 if (candidateState.owner === 'player') {
-                  candidateState.pressurePlayer = Math.max(0, candidateState.pressurePlayer + delta);
+                  nextPressurePlayer = Math.max(0, basePressurePlayer + delta);
                 } else if (candidateState.owner === 'ai') {
-                  candidateState.pressureAi = Math.max(0, candidateState.pressureAi + delta);
+                  nextPressureAi = Math.max(0, basePressureAi + delta);
                 } else {
-                  candidateState.pressurePlayer = Math.max(0, candidateState.pressurePlayer + delta);
-                  candidateState.pressureAi = Math.max(0, candidateState.pressureAi + delta);
+                  nextPressurePlayer = Math.max(0, basePressurePlayer + delta);
+                  nextPressureAi = Math.max(0, basePressureAi + delta);
                 }
+
+                candidateState.pressurePlayer = nextPressurePlayer;
+                candidateState.pressureAi = nextPressureAi;
+                candidateState.pressure = Math.max(0, basePressure + delta, nextPressurePlayer, nextPressureAi);
               }
 
               if (index !== stateIndex) {
