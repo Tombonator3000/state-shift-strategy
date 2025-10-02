@@ -7719,7 +7719,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 2
+        "truthDelta": -2
       }
     },
     "hallo-gov-banshee-prime-directive-files-004": {
@@ -7732,7 +7732,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 3
+        "truthDelta": -3
       }
     },
     "hallo-gov-banshee-shenanigans-incident-018": {
@@ -7758,7 +7758,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 2
+        "truthDelta": -2
       }
     },
     "hallo-gov-bat-boy-shuffle-020": {
@@ -7810,7 +7810,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-broadcast-of-the-seance-003": {
@@ -7823,7 +7823,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 2
+        "truthDelta": -2
       }
     },
     "hallo-gov-candy-corn-expedition-protocol-018": {
@@ -7836,7 +7836,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 2
+        "truthDelta": -2
       }
     },
     "hallo-gov-candy-corn-whispers-064": {
@@ -7875,7 +7875,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-cobweb-report-files-049": {
@@ -7888,7 +7888,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-cobweb-scare-036": {
@@ -7953,7 +7953,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 3
+        "truthDelta": -3
       }
     },
     "hallo-gov-coven-scare-032": {
@@ -7992,7 +7992,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-dracula-shuffle-protocol-006": {
@@ -8005,7 +8005,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-ectoplasm-brief-files-048": {
@@ -8031,7 +8031,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-frankenstein-flyer-incident-031": {
@@ -8044,7 +8044,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-frankenstein-pamphlet-initiative-025": {
@@ -8083,7 +8083,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-full-moon-shenanigans-067": {
@@ -8109,7 +8109,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-ghost-flyer-protocol-041": {
@@ -8148,7 +8148,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-ghoul-sweep-initiative-001": {
@@ -8200,7 +8200,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 2
+        "truthDelta": -2
       }
     },
     "hallo-gov-haunted-mansion-whispers-023": {
@@ -8239,7 +8239,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 2
+        "truthDelta": -2
       }
     },
     "hallo-gov-headless-horseman-investigation-initiative-016": {
@@ -8278,7 +8278,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-jack-o-lantern-rally-incident-066": {
@@ -8291,7 +8291,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-jack-o-lantern-stakeout-006": {
@@ -8317,7 +8317,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 2
+        "truthDelta": -2
       }
     },
     "hallo-gov-moonlight-deep-cover-007": {
@@ -8330,7 +8330,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 3
+        "truthDelta": -3
       }
     },
     "hallo-gov-moonlight-expedition-incident-008": {
@@ -8343,7 +8343,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 2
+        "truthDelta": -2
       }
     },
     "hallo-gov-moonlight-scare-files-021": {
@@ -8369,7 +8369,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-omen-pamphlet-files-051": {
@@ -8395,7 +8395,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 4
+        "truthDelta": -4
       }
     },
     "hallo-gov-ouija-rumor-061": {
@@ -8421,7 +8421,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-ouija-shuffle-incident-004": {
@@ -8434,7 +8434,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-ploy-of-the-headless-horseman-005": {
@@ -8499,7 +8499,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 2
+        "truthDelta": -2
       }
     },
     "hallo-gov-poltergeist-report-initiative-039": {
@@ -8512,7 +8512,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-press-release-of-the-full-moon-008": {
@@ -8525,7 +8525,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-raven-flyer-protocol-014": {
@@ -8538,7 +8538,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-raven-project-protocol-006": {
@@ -8551,7 +8551,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 3
+        "truthDelta": -3
       }
     },
     "hallo-gov-raven-revelation-initiative-002": {
@@ -8564,7 +8564,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 3
+        "truthDelta": -3
       }
     },
     "hallo-gov-raven-scare-024": {
@@ -8577,7 +8577,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-report-of-the-fog-machine-005": {
@@ -8603,7 +8603,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-revelation-of-the-graveyard-001": {
@@ -8616,7 +8616,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 3
+        "truthDelta": -3
       }
     },
     "hallo-gov-scare-of-the-ghost-017": {
@@ -8629,7 +8629,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-scare-of-the-midnight-009": {
@@ -8655,7 +8655,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-seance-alert-initiative-037": {
@@ -8681,7 +8681,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 2
+        "truthDelta": -2
       }
     },
     "hallo-gov-seance-containment-files-005": {
@@ -8694,7 +8694,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 3
+        "truthDelta": -3
       }
     },
     "hallo-gov-seance-shenanigans-043": {
@@ -8720,7 +8720,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-shuffle-of-the-haunted-056": {
@@ -8798,7 +8798,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-spider-gambit-protocol-020": {
@@ -8811,7 +8811,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 2
+        "truthDelta": -2
       }
     },
     "hallo-gov-spider-scare-incident-002": {
@@ -8876,7 +8876,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-witch-press-release-incident-070": {
@@ -8941,7 +8941,7 @@
       "setId": "halloween_spooktacular",
       "setName": "Halloween Spooktacular",
       "effects": {
-        "truthDelta": 1
+        "truthDelta": -1
       }
     },
     "hallo-gov-zombie-murmur-network-files-014": {

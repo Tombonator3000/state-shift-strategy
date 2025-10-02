@@ -57,10 +57,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Approved by the Council of Shadows."
   },
   {
@@ -87,10 +87,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Do not taunt the poltergeist."
   },
   {
@@ -101,10 +101,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Rated PG‑Paranoid."
   },
   {
@@ -115,10 +115,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Whispers from the cornfield."
   },
   {
@@ -179,10 +179,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Whispers from the cornfield."
   },
   {
@@ -209,10 +209,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "They came for the candy, stayed for the cover‑up."
   },
   {
@@ -239,10 +239,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "‘It was just the wind,’ said the intern."
   },
   {
@@ -253,10 +253,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Smells like fog machine and fear."
   },
   {
@@ -365,10 +365,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Mind the ectoplasm."
   },
   {
@@ -397,10 +397,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Bring a flashlight and plausible deniability."
   },
   {
@@ -427,10 +427,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Try not to scream on camera."
   },
   {
@@ -457,10 +457,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "They came for the candy, stayed for the cover‑up."
   },
   {
@@ -471,10 +471,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "They came for the candy, stayed for the cover‑up."
   },
   {
@@ -519,10 +519,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Mind the ectoplasm."
   },
   {
@@ -533,10 +533,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Licensed spooktacular."
   },
   {
@@ -583,10 +583,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Red eyes in the rear-view mirror."
   },
   {
@@ -597,10 +597,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Mind the ectoplasm."
   },
   {
@@ -645,10 +645,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Keep garlic handy."
   },
   {
@@ -707,10 +707,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Keep garlic handy."
   },
   {
@@ -721,10 +721,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "The crypt Wi‑Fi is excellent."
   },
   {
@@ -751,10 +751,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Someone left the portal open again."
   },
   {
@@ -765,10 +765,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Bring a flashlight and plausible deniability."
   },
   {
@@ -845,10 +845,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Sticky with sugar and secrets."
   },
   {
@@ -927,10 +927,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Licensed spooktacular."
   },
   {
@@ -1005,10 +1005,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "All treats, suspicious tricks."
   },
   {
@@ -1019,10 +1019,10 @@ const cards: GameCard[] = [
     "rarity": "common",
     "cost": 3,
     "effects": {
-      "truthDelta": 1
+      "truthDelta": -1
     },
     "extId": "halloween",
-    "text": "+1% Truth.",
+    "text": "−1% Truth.",
     "flavor": "Do not taunt the poltergeist."
   },
   {
@@ -1113,10 +1113,10 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "halloween",
-    "text": "+2% Truth.",
+    "text": "−2% Truth.",
     "flavor": "This is fine. Probably."
   },
   {
@@ -1127,10 +1127,10 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "halloween",
-    "text": "+2% Truth.",
+    "text": "−2% Truth.",
     "flavor": "Whispers from the cornfield."
   },
   {
@@ -1189,10 +1189,10 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "halloween",
-    "text": "+2% Truth.",
+    "text": "−2% Truth.",
     "flavor": "Rated PG‑Paranoid."
   },
   {
@@ -1203,10 +1203,10 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "halloween",
-    "text": "+2% Truth.",
+    "text": "−2% Truth.",
     "flavor": "They came for the candy, stayed for the cover‑up."
   },
   {
@@ -1217,10 +1217,10 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "halloween",
-    "text": "+2% Truth.",
+    "text": "−2% Truth.",
     "flavor": "Licensed spooktacular."
   },
   {
@@ -1231,10 +1231,10 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "halloween",
-    "text": "+2% Truth.",
+    "text": "−2% Truth.",
     "flavor": "Do not feed after midnight."
   },
   {
@@ -1245,10 +1245,10 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "halloween",
-    "text": "+2% Truth.",
+    "text": "−2% Truth.",
     "flavor": "Smells like fog machine and fear."
   },
   {
@@ -1311,10 +1311,10 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "halloween",
-    "text": "+2% Truth.",
+    "text": "−2% Truth.",
     "flavor": "This is fine. Probably."
   },
   {
@@ -1343,10 +1343,10 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "halloween",
-    "text": "+2% Truth.",
+    "text": "−2% Truth.",
     "flavor": "Licensed spooktacular."
   },
   {
@@ -1357,10 +1357,10 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "halloween",
-    "text": "+2% Truth.",
+    "text": "−2% Truth.",
     "flavor": "This is fine. Probably."
   },
   {
@@ -1389,10 +1389,10 @@ const cards: GameCard[] = [
     "rarity": "uncommon",
     "cost": 4,
     "effects": {
-      "truthDelta": 2
+      "truthDelta": -2
     },
     "extId": "halloween",
-    "text": "+2% Truth.",
+    "text": "−2% Truth.",
     "flavor": "Batteries not included."
   },
   {
@@ -1403,10 +1403,10 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "halloween",
-    "text": "+3% Truth.",
+    "text": "−3% Truth.",
     "flavor": "They came for the candy, stayed for the cover‑up."
   },
   {
@@ -1417,10 +1417,10 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "halloween",
-    "text": "+3% Truth.",
+    "text": "−3% Truth.",
     "flavor": "The crypt Wi‑Fi is excellent."
   },
   {
@@ -1448,10 +1448,10 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "halloween",
-    "text": "+3% Truth.",
+    "text": "−3% Truth.",
     "flavor": "Try not to scream on camera."
   },
   {
@@ -1462,10 +1462,10 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "halloween",
-    "text": "+3% Truth.",
+    "text": "−3% Truth.",
     "flavor": "Rated PG‑Paranoid."
   },
   {
@@ -1476,10 +1476,10 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "halloween",
-    "text": "+3% Truth.",
+    "text": "−3% Truth.",
     "flavor": "Filed under ‘Seasonal Anomalies’."
   },
   {
@@ -1490,10 +1490,10 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "halloween",
-    "text": "+3% Truth.",
+    "text": "−3% Truth.",
     "flavor": "Someone left the portal open again."
   },
   {
@@ -2997,10 +2997,10 @@ const cards: GameCard[] = [
     "rarity": "legendary",
     "cost": 6,
     "effects": {
-      "truthDelta": 4
+      "truthDelta": -4
     },
     "extId": "halloween",
-    "text": "+4% Truth.",
+    "text": "−4% Truth.",
     "flavor": "Approved by the Starbucks Council of Shadows."
   },
   {
@@ -3011,10 +3011,10 @@ const cards: GameCard[] = [
     "rarity": "rare",
     "cost": 5,
     "effects": {
-      "truthDelta": 3
+      "truthDelta": -3
     },
     "extId": "halloween",
-    "text": "+3% Truth.",
+    "text": "−3% Truth.",
     "flavor": "Stake, garlic, plausible deniability."
   },
   {
