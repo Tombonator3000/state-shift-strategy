@@ -1,21 +1,10 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import type { SecretAgenda } from '@/data/agendaDatabase';
-
 interface FactionSelectTabloidProps {
-  onStartGame: (faction: 'government' | 'truth', agendaId?: string) => Promise<void>;
+  onStartGame: (faction: 'government' | 'truth') => Promise<void>;
   onFactionHover?: (faction: 'government' | 'truth' | null) => void;
   onBack: () => void;
   audio?: any;
-  agendas: {
-    government: SecretAgenda[];
-    truth: SecretAgenda[];
-  };
-  selectedAgendas: {
-    government: string | null;
-    truth: string | null;
-  };
-  onAgendaSelect?: (faction: 'government' | 'truth', value: string) => void;
 }
 
 const FactionSelectTabloid = ({
@@ -23,9 +12,6 @@ const FactionSelectTabloid = ({
   onFactionHover,
   onBack,
   audio,
-  agendas,
-  selectedAgendas,
-  onAgendaSelect,
 }: FactionSelectTabloidProps) => {
   const tabloidButtonClass = `
     w-full border-2 border-black bg-white text-black
@@ -36,13 +22,6 @@ const FactionSelectTabloid = ({
     active:translate-x-[2px] active:translate-y-[2px]
     focus:outline-none focus:ring-4 focus:ring-gray-300
   `;
-
-  const selectedGovernmentAgenda = selectedAgendas.government
-    ? agendas.government.find(agenda => agenda.id === selectedAgendas.government)
-    : undefined;
-  const selectedTruthAgenda = selectedAgendas.truth
-    ? agendas.truth.find(agenda => agenda.id === selectedAgendas.truth)
-    : undefined;
 
   return (
     <div className="min-h-screen bg-[var(--paper)] flex items-center justify-center p-4 md:p-8">
@@ -92,31 +71,17 @@ const FactionSelectTabloid = ({
               <div className="text-[10px] font-black uppercase tracking-[0.3em] text-black/70">
                 SECRET AGENDA
               </div>
-              <select
-                className="w-full border-2 border-black bg-white px-3 py-2 font-mono text-xs uppercase"
-                value={selectedAgendas.government ?? 'random'}
-                onChange={(event) => onAgendaSelect?.('government', event.target.value)}
-              >
-                <option value="random">RANDOM ASSIGNMENT</option>
-                {agendas.government.map(agenda => (
-                  <option key={agenda.id} value={agenda.id}>
-                    {agenda.title} ({agenda.difficulty.toUpperCase()})
-                  </option>
-                ))}
-              </select>
-              {selectedGovernmentAgenda && (
-                <Card className="border-2 border-dashed border-black/40 bg-[#f5f5f5] p-3 text-[11px] font-mono text-black">
-                  <p className="font-black uppercase tracking-wide text-[10px]">
-                    {selectedGovernmentAgenda.headline}
-                  </p>
-                  <p className="text-[11px] normal-case">{selectedGovernmentAgenda.description}</p>
-                </Card>
-              )}
+              <Card className="border-2 border-dashed border-black/40 bg-[#f5f5f5] p-3 text-[11px] font-mono text-black">
+                <p className="font-black uppercase tracking-wide text-[10px]">Classified briefing</p>
+                <p className="text-[11px] normal-case">
+                  Choose your strategy after the first briefing once operations begin.
+                </p>
+              </Card>
             </div>
             <Button
               onClick={async () => {
                 audio?.playSFX?.('click');
-                await onStartGame('government', selectedAgendas.government ?? undefined);
+                await onStartGame('government');
               }}
               className={tabloidButtonClass}
             >
@@ -143,31 +108,17 @@ const FactionSelectTabloid = ({
               <div className="text-[10px] font-black uppercase tracking-[0.3em] text-black/70">
                 SECRET AGENDA
               </div>
-              <select
-                className="w-full border-2 border-black bg-white px-3 py-2 font-mono text-xs uppercase"
-                value={selectedAgendas.truth ?? 'random'}
-                onChange={(event) => onAgendaSelect?.('truth', event.target.value)}
-              >
-                <option value="random">RANDOM ASSIGNMENT</option>
-                {agendas.truth.map(agenda => (
-                  <option key={agenda.id} value={agenda.id}>
-                    {agenda.title} ({agenda.difficulty.toUpperCase()})
-                  </option>
-                ))}
-              </select>
-              {selectedTruthAgenda && (
-                <Card className="border-2 border-dashed border-black/40 bg-[#f5f5f5] p-3 text-[11px] font-mono text-black">
-                  <p className="font-black uppercase tracking-wide text-[10px]">
-                    {selectedTruthAgenda.headline}
-                  </p>
-                  <p className="text-[11px] normal-case">{selectedTruthAgenda.description}</p>
-                </Card>
-              )}
+              <Card className="border-2 border-dashed border-black/40 bg-[#f5f5f5] p-3 text-[11px] font-mono text-black">
+                <p className="font-black uppercase tracking-wide text-[10px]">Encrypted dossier</p>
+                <p className="text-[11px] normal-case">
+                  Lock in your secret objective right after the game briefing begins.
+                </p>
+              </Card>
             </div>
             <Button
               onClick={async () => {
                 audio?.playSFX?.('click');
-                await onStartGame('truth', selectedAgendas.truth ?? undefined);
+                await onStartGame('truth');
               }}
               className={tabloidButtonClass}
             >

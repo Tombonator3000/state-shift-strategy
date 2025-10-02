@@ -1515,6 +1515,74 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     [achievements],
   );
 
+  const assignSecretAgenda = useCallback((factionAgendaId: string | null) => {
+    setGameState(prev => {
+      if (!prev.faction || !prev.agendaIssue) {
+        return prev;
+      }
+
+      const playerFaction = prev.faction;
+      const aiFaction = playerFaction === 'truth' ? 'government' : 'truth';
+      const issueId = prev.agendaIssue.id;
+
+      const providedAgenda = factionAgendaId ? getAgendaById(factionAgendaId) : undefined;
+      const isAgendaCompatible = providedAgenda
+        ? providedAgenda.faction === playerFaction || providedAgenda.faction === 'both'
+        : false;
+
+      const playerAgendaTemplate = isAgendaCompatible
+        ? providedAgenda!
+        : getRandomAgenda(playerFaction, { issueId });
+
+      const syncedAgendaDifficulty = playerAgendaTemplate.difficulty;
+      const aiAgendaTemplate = getRandomAgenda(aiFaction, {
+        issueId,
+        difficulty: syncedAgendaDifficulty,
+      });
+
+      const aiAgendaFallback = aiAgendaTemplate.difficulty !== syncedAgendaDifficulty
+        ? aiAgendaTemplate.difficulty
+        : null;
+
+      const playerAgenda = {
+        ...playerAgendaTemplate,
+        progress: 0,
+        completed: false,
+        revealed: false,
+        stageId: resolveAgendaStageByProgress(playerAgendaTemplate.stages, 0)?.id ?? '',
+      };
+
+      const aiAgenda = {
+        ...aiAgendaTemplate,
+        progress: 0,
+        completed: false,
+        revealed: false,
+        stageId: resolveAgendaStageByProgress(aiAgendaTemplate.stages, 0)?.id ?? '',
+      };
+
+      const agendasUnchanged =
+        prev.secretAgenda?.id === playerAgendaTemplate.id
+        && prev.aiSecretAgenda?.id === aiAgendaTemplate.id
+        && prev.secretAgendaDifficulty === syncedAgendaDifficulty;
+
+      if (agendasUnchanged) {
+        return prev;
+      }
+
+      const agendaAssignedLog = `Secret Agenda Assigned: ${playerAgendaTemplate.title} (${playerAgendaTemplate.difficulty.toUpperCase()})`;
+      const difficultyLog = `Secret Agenda Difficulty Sync: ${syncedAgendaDifficulty.toUpperCase()}${aiAgendaFallback ? ` (AI fallback to ${aiAgendaFallback.toUpperCase()})` : ''}`;
+      const aiAgendaLog = `AI Secret Agenda Assigned: ${aiAgendaTemplate.title} (${aiAgendaTemplate.difficulty.toUpperCase()})`;
+
+      return {
+        ...prev,
+        secretAgenda: playerAgenda,
+        aiSecretAgenda: aiAgenda,
+        secretAgendaDifficulty: syncedAgendaDifficulty,
+        log: [...(prev.log ?? []), agendaAssignedLog, difficultyLog, aiAgendaLog],
+      };
+    });
+  }, [setGameState]);
+
   const initGame = useCallback((faction: 'government' | 'truth', agendaId?: string) => {
     const startingTruth = 50;
     const startingIP = 5;
@@ -1537,21 +1605,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const initialControl = getInitialStateControl(faction);
     const issueDefinition = advanceAgendaIssue();
     const issueState = agendaIssueToState(issueDefinition);
-    const providedAgenda = agendaId ? getAgendaById(agendaId) : undefined;
-    const isAgendaCompatible = providedAgenda
-      ? providedAgenda.faction === faction || providedAgenda.faction === 'both'
-      : false;
-    const playerAgendaTemplate = isAgendaCompatible
-      ? providedAgenda!
-      : getRandomAgenda(faction, { issueId: issueState.id });
-    const syncedAgendaDifficulty = playerAgendaTemplate.difficulty;
-    const aiAgendaTemplate = getRandomAgenda(aiFaction, {
-      issueId: issueState.id,
-      difficulty: syncedAgendaDifficulty,
-    });
-    const aiAgendaFallback = aiAgendaTemplate.difficulty !== syncedAgendaDifficulty
-      ? aiAgendaTemplate.difficulty
-      : null;
 
     // Track game start in achievements
     achievements.onGameStart(faction, aiDifficulty);
@@ -1648,31 +1701,20 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         `Controlled states: ${initialControl.player.join(', ')}`,
         `Weekly Issue: ${issueState.label}`,
         `Issue Spotlight: ${issueState.description}`,
-        `Secret Agenda Assigned: ${playerAgendaTemplate.title} (${playerAgendaTemplate.difficulty.toUpperCase()})`,
-        `Secret Agenda Difficulty Sync: ${syncedAgendaDifficulty.toUpperCase()}${aiAgendaFallback ? ` (AI fallback to ${aiAgendaFallback.toUpperCase()})` : ''}`,
       ],
       drawMode,
       cardDrawState: {
         cardsPlayedLastTurn: 0,
         lastTurnWithoutPlay: false,
       },
-      secretAgenda: {
-        ...playerAgendaTemplate,
-        progress: 0,
-        completed: false,
-        revealed: false,
-        stageId: resolveAgendaStageByProgress(playerAgendaTemplate.stages, 0)?.id ?? '',
-      },
-      aiSecretAgenda: {
-        ...aiAgendaTemplate,
-        progress: 0,
-        completed: false,
-        revealed: false,
-        stageId: resolveAgendaStageByProgress(aiAgendaTemplate.stages, 0)?.id ?? '',
-      },
-      secretAgendaDifficulty: syncedAgendaDifficulty,
+      secretAgenda: undefined,
+      aiSecretAgenda: undefined,
+      secretAgendaDifficulty: null,
     }));
-  }, [achievements, aiDifficulty, eventManager, resetStateEvents]);
+    if (agendaId) {
+      assignSecretAgenda(agendaId);
+    }
+  }, [achievements, aiDifficulty, assignSecretAgenda, eventManager, resetStateEvents]);
 
   const playCard = useCallback((cardId: string, targetOverride?: string | null) => {
     setGameState(prev => {
@@ -3367,6 +3409,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   return {
     gameState,
     initGame,
+    assignSecretAgenda,
     playCard,
     playCardAnimated,
     selectCard,
