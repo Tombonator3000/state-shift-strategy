@@ -11,6 +11,7 @@ import CardDetailOverlay from '@/components/game/CardDetailOverlay';
 import TabloidNewspaper from '@/components/game/TabloidNewspaper';
 import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
+import SecretAgendaModal from '@/components/game/SecretAgendaModal';
 import AIStatus from '@/components/game/AIStatus';
 import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashboard';
 import Options from '@/components/game/Options';
@@ -689,6 +690,7 @@ const Index = () => {
   const [finalEdition, setFinalEdition] = useState<GameOverReport | null>(null);
   const [readingEdition, setReadingEdition] = useState<GameOverReport | null>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
+  const [showAgendaModal, setShowAgendaModal] = useState(false);
   const [isEndingTurn, setIsEndingTurn] = useState(false);
   const [paranormalSightings, setParanormalSightings] = useState<ParanormalSighting[]>([]);
   const [arcProgressSummaries, setArcProgressSummaries] = useState<Record<string, ArcProgressSummary>>({});
@@ -701,6 +703,7 @@ const Index = () => {
   const {
     gameState,
     initGame,
+    assignSecretAgenda,
     playCard,
     playCardAnimated,
     selectCard,
@@ -1882,7 +1885,7 @@ const Index = () => {
   }, [audio]);
 
   const handleEndTurn = useCallback(() => {
-    if (isEndingTurn) {
+    if (showAgendaModal || isEndingTurn) {
       return;
     }
 
@@ -1893,12 +1896,12 @@ const Index = () => {
     setTimeout(() => {
       audio.playSFX('cardDraw');
     }, 500);
-  }, [audio, endTurn, isEndingTurn]);
+  }, [audio, endTurn, isEndingTurn, showAgendaModal]);
 
   // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (showMenu || showIntro || showInGameOptions || showHowToPlay) return;
+      if (showMenu || showIntro || showInGameOptions || showHowToPlay || showAgendaModal) return;
 
       // Number keys for playing cards (1-9)
       const cardNumber = parseInt(e.key);
@@ -1949,6 +1952,7 @@ const Index = () => {
     showIntro,
     showInGameOptions,
     showHowToPlay,
+    showAgendaModal,
     gameState.phase,
     gameState.animating,
     gameState.hand,
@@ -1985,7 +1989,7 @@ const Index = () => {
     }
   };
 
-  const startNewGame = async (faction: 'government' | 'truth', agendaId?: string) => {
+  const startNewGame = async (faction: 'government' | 'truth') => {
     console.log('🎵 Index: Starting new game with faction:', faction);
     persistFaction(faction);
     setVictoryState({ isVictory: false, type: null });
@@ -1993,7 +1997,8 @@ const Index = () => {
     setReadingEdition(null);
     setShowExtraEdition(false);
     setParanormalSightings([]);
-    await initGame(faction, agendaId);
+    setShowAgendaModal(false);
+    await initGame(faction);
     setShowMenu(false);
     setShowIntro(false);
     audio.setGameplayMusic(faction);
@@ -2013,7 +2018,20 @@ const Index = () => {
     }
   };
 
+  const handleAgendaConfirmSelection = useCallback((agendaId: string | null) => {
+    assignSecretAgenda(agendaId);
+    setShowAgendaModal(false);
+  }, [assignSecretAgenda]);
+
+  const handleAgendaSkip = useCallback(() => {
+    assignSecretAgenda(null);
+    setShowAgendaModal(false);
+  }, [assignSecretAgenda]);
+
   const handleZoneCardSelect = (cardId: string) => {
+    if (showAgendaModal) {
+      return;
+    }
     const card = gameState.hand.find(c => c.id === cardId);
     if (card?.type === 'ZONE') {
       selectCard(cardId);
@@ -2022,6 +2040,9 @@ const Index = () => {
   };
 
   const handleStateClick = async (stateId: string) => {
+    if (showAgendaModal) {
+      return;
+    }
     if (gameState.selectedCard && !isAnimating()) {
       const card = gameState.hand.find(c => c.id === gameState.selectedCard);
       if (card?.type === 'ZONE') {
@@ -2054,11 +2075,17 @@ const Index = () => {
   };
 
   const handleSelectCard = (cardId: string) => {
+    if (showAgendaModal) {
+      return;
+    }
     selectCard(cardId);
     audio.playSFX('hover');
   };
 
   const handlePlayCard = async (cardId: string, targetStateArg?: string) => {
+    if (showAgendaModal) {
+      return;
+    }
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || isAnimating()) return;
 
@@ -2254,6 +2281,21 @@ const Index = () => {
     }
   }, [gameState.faction, showMenu, persistFaction]);
 
+  useEffect(() => {
+    const shouldPromptAgenda =
+      !showMenu &&
+      !showIntro &&
+      Boolean(gameState.faction) &&
+      gameState.turn === 1 &&
+      !gameState.secretAgenda;
+
+    if (shouldPromptAgenda) {
+      setShowAgendaModal(true);
+    } else if (!shouldPromptAgenda && showAgendaModal) {
+      setShowAgendaModal(false);
+    }
+  }, [gameState.faction, gameState.secretAgenda, gameState.turn, showAgendaModal, showIntro, showMenu]);
+
   // Start menu music after user interaction
   useEffect(() => {
     // Only start music when user clicks to dismiss intro
@@ -2374,7 +2416,8 @@ const Index = () => {
     );
   }
 
-  const isPlayerActionLocked = gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
+  const isPlayerActionLocked =
+    showAgendaModal || gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
   const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
 
   const playerAgenda = gameState.secretAgenda;
@@ -2847,6 +2890,15 @@ const Index = () => {
 
   return (
     <>
+      {showAgendaModal && gameState.faction && (
+        <SecretAgendaModal
+          open={showAgendaModal}
+          faction={gameState.faction}
+          onConfirm={handleAgendaConfirmSelection}
+          onCancel={handleAgendaSkip}
+        />
+      )}
+
       <ResponsiveLayout
         masthead={mastheadContent}
         leftPane={leftPaneContent}
