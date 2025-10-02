@@ -163,7 +163,11 @@ export function applyEffectsMvp(
     const multiplier = typeof opts.truthMultiplier === 'number' && opts.truthMultiplier > 0
       ? opts.truthMultiplier
       : 1;
-    const delta = multiplier === 1 ? baseDelta : Math.round(baseDelta * multiplier);
+    let delta = baseDelta;
+    if (multiplier !== 1 && baseDelta !== 0) {
+      const scaled = Math.round(Math.abs(baseDelta) * multiplier);
+      delta = baseDelta >= 0 ? scaled : -scaled;
+    }
 
     if (multiplier === 1) {
       warnIfMediaScaling(card, delta);
