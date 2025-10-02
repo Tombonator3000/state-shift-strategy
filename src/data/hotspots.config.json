@@ -1,0 +1,8 @@
+{
+  "cooldowns": {},
+  "intensityThresholds": {},
+  "defaults": {
+    "spawnRate": 0,
+    "decayRate": 0
+  }
+}
