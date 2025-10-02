@@ -548,14 +548,14 @@ describe('useGameState state event truth adjustments', () => {
     });
 
     const event: GameEvent = {
-      id: 'coverup_sweep',
-      title: 'Cover-Up Sweep',
-      content: 'Suppress dissenting voices.',
+      id: 'ut_antechamber_checkpoint',
+      title: 'Antechamber Checkpoint',
+      content: 'Clamp down on dissenters.',
       type: 'state',
       rarity: 'common',
       weight: 1,
       effects: {
-        truth: 5,
+        truthChange: -5,
       },
     } as GameEvent;
 
