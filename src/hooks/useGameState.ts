@@ -39,6 +39,7 @@ import {
   resolveHotspot,
   type WeightedHotspotCandidate,
   type Hotspot,
+  deriveHotspotIcon,
 } from '@/systems/paranormalHotspots';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
@@ -554,9 +555,11 @@ const createDirectorHotspotEntries = (params: {
   const duration = Math.max(2, Math.min(4, Math.round(rawIntensity / 2) + 1));
   const truthReward = Math.max(1, Math.round(Math.abs(truthResolution.truthDelta)));
 
-  const icon = candidate.tags.includes('cryptid-home') || candidate.tags.includes('expansion:cryptids')
-    ? '🛸'
-    : '👻';
+  const icon = deriveHotspotIcon({
+    icon: candidate.icon,
+    tags: candidate.tags,
+    expansionTag: candidate.expansionTag,
+  });
   const label = candidate.name ?? `${state.name} Hotspot`;
 
   const payload: ParanormalHotspotPayload = {
@@ -3066,9 +3069,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           });
         } else if (rolledHotspot) {
           const label = rolledHotspot.stateName ?? rolledHotspot.location ?? rolledHotspot.name;
-          const icon = rolledHotspot.tags.includes('cryptid-home') ? '🛸' : rolledHotspot.tags.includes('expansion:cryptids')
-            ? '🛸'
-            : '👻';
+          const icon = deriveHotspotIcon({
+            icon: rolledHotspot.icon,
+            tags: rolledHotspot.tags,
+            expansionTag: rolledHotspot.expansionTag,
+          });
           const position = VisualEffectsCoordinator.getRandomCenterPosition(220);
           VisualEffectsCoordinator.triggerParanormalHotspot({
             position,
