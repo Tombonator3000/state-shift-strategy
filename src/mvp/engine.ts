@@ -5,6 +5,7 @@ import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward 
 import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import { cloneGameState } from './validator';
+import { auditGameState } from './gameStateAudit';
 import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
 import type { MediaResolutionOptions } from './media';
 
@@ -583,6 +584,8 @@ export function endTurn(
     logEntries: turnLog,
     winCheck: winResult.winner ? winResult : null,
   };
+
+  auditGameState(finalState);
 
   return { state: finalState, summary };
 }
