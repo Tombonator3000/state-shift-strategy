@@ -683,7 +683,7 @@ const Index = () => {
   } | null>(null);
   const [previousPhase, setPreviousPhase] = useState('');
   const [hoveredCard, setHoveredCard] = useState<GameCard | null>(null);
-  const [victoryState, setVictoryState] = useState<{ isVictory: boolean; type: 'states' | 'ip' | 'truth' | 'agenda' | null }>({ isVictory: false, type: null });
+  const [victoryState, setVictoryState] = useState<{ isVictory: boolean; type: 'states' | 'ip' | 'truth' | null }>({ isVictory: false, type: null });
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showInGameOptions, setShowInGameOptions] = useState(false);
   const [finalEdition, setFinalEdition] = useState<GameOverReport | null>(null);
@@ -1221,7 +1221,7 @@ const Index = () => {
     if (gameState.isGameOver || gameState.animating) return;
 
     let winner: "government" | "truth" | "draw" | null = null;
-    let victoryType: 'states' | 'ip' | 'truth' | 'agenda' | null = null;
+    let victoryType: 'states' | 'ip' | 'truth' | null = null;
 
     // Only evaluate victory conditions at proper timing:
     // - After card effects are fully resolved
@@ -1236,25 +1236,16 @@ const Index = () => {
     const playerSecretAgenda = gameState.secretAgenda;
     const aiSecretAgenda = gameState.aiSecretAgenda;
 
-    // Priority 1: Secret Agenda (highest priority)
-    if (playerSecretAgenda?.completed) {
-      winner = gameState.faction;
-      victoryType = 'agenda';
-    } else if (aiSecretAgenda?.completed) {
-      winner = gameState.faction === 'truth' ? 'government' : 'truth';
-      victoryType = 'agenda';
-    }
-    
-    // Priority 2: Truth thresholds (Truth ≥ 95% for Truth Seekers, Truth ≤ 5% for Government)
-    else if (gameState.truth >= 95 && gameState.faction === 'truth') {
+    // Priority 1: Truth thresholds (Truth ≥ 95% for Truth Seekers, Truth ≤ 5% for Government)
+    if (gameState.truth >= 95 && gameState.faction === 'truth') {
       winner = 'truth';
       victoryType = 'truth';
     } else if (gameState.truth <= 5 && gameState.faction === 'government') {
       winner = 'government';
       victoryType = 'truth';
     }
-    
-    // Priority 3: IP victory (300 IP)
+
+    // Priority 2: IP victory (300 IP)
     else if (gameState.ip >= 300) {
       winner = gameState.faction;
       victoryType = 'ip';
@@ -1262,8 +1253,8 @@ const Index = () => {
       winner = gameState.faction === 'government' ? 'truth' : 'government';
       victoryType = 'ip';
     }
-    
-    // Priority 4: State control (10 states)
+
+    // Priority 3: State control (10 states)
     else if (gameState.controlledStates.length >= 10) {
       winner = gameState.faction;
       victoryType = 'states';

@@ -137,7 +137,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'victory_conditions',
         title: 'Path to Victory',
-        description: 'Victory checks run in priority order: 1) finish your Secret Agenda, 2) hit Truth ≥95% (Truth) or ≤5% (Government), 3) bank 300 IP, 4) control 10 states. Deny the AI before it crosses any of these thresholds.',
+        description: 'Victory checks run in priority order: 1) spike the Truth meter to ≥95% (Truth) or ≤5% (Government), 2) bank 300 IP, 3) control 10 states. Secret Agendas now fuel that Truth surge based on difficulty—plan around the swing before the AI does.',
         position: 'center',
         delay: 4000
       }

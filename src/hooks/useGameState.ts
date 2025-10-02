@@ -87,6 +87,13 @@ const MEDIA_ROUND_SUFFIX = 'mediaThisRound';
 const SIGHTING_TOTAL_SUFFIX = 'sightingsTotal';
 const SIGHTING_ROUND_SUFFIX = 'sightingsThisRound';
 
+const AGENDA_TRUTH_REWARD_BY_DIFFICULTY: Record<SecretAgenda['difficulty'], number> = {
+  easy: 5,
+  medium: 10,
+  hard: 15,
+  legendary: 20,
+};
+
 const computeHotspotToastIntensity = (value: number | undefined): number => {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     return 1;
@@ -1082,6 +1089,10 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
   let logUpdates: string[] = [];
   let updatedSecretAgenda = state.secretAgenda;
   let updatedAiSecretAgenda = state.aiSecretAgenda;
+  const truthTracker: { truth: number; log: string[] } = {
+    truth: state.truth,
+    log: [],
+  };
 
   const issueId = state.agendaIssue?.id;
   const playerFaction = state.faction;
@@ -1125,6 +1136,8 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
     const actorPrefix = actor === 'opposition' ? 'Opposition ' : '';
     const actorLabel = actor === 'opposition' ? 'Opposition' : 'Operatives';
     const stageIsFinal = Boolean(stageDefinition && stageDefinition.threshold >= target);
+    const rewardAlreadyApplied = Boolean(agenda.truthRewardApplied);
+    let truthRewardApplied = rewardAlreadyApplied;
     let stageStatus: 'advance' | 'setback' | 'complete' = 'advance';
     if (stageChanged) {
       if (isCompleted && stageIsFinal) {
@@ -1172,6 +1185,21 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
       logUpdates = [...logUpdates, formatAgendaLogEntry(agenda, regressionMessage, quip)];
     }
 
+    if (isCompleted && !rewardAlreadyApplied) {
+      const difficulty = (agenda.difficulty ?? state.secretAgendaDifficulty ?? 'medium') as SecretAgenda['difficulty'];
+      const magnitude = AGENDA_TRUTH_REWARD_BY_DIFFICULTY[difficulty] ?? AGENDA_TRUTH_REWARD_BY_DIFFICULTY.medium;
+      const signedMagnitude = faction === 'truth' ? magnitude : -magnitude;
+      if (signedMagnitude !== 0) {
+        const truthActor = actor === 'opposition' ? 'ai' : 'human';
+        applyTruthDelta(truthTracker, signedMagnitude, truthActor);
+        const direction = signedMagnitude > 0 ? 'surge' : 'crash';
+        const rewardMessage = `${actorLabel} leverage the agenda for a Truth ${direction} (${signedMagnitude > 0 ? '+' : ''}${signedMagnitude}).`;
+        const quip = getIssueQuip(issueId, faction, signedMagnitude * 2);
+        logUpdates = [...logUpdates, formatAgendaLogEntry(agenda, rewardMessage, quip)];
+      }
+      truthRewardApplied = true;
+    }
+
     if (stageChanged && shouldLogProgress && typeof window !== 'undefined' && stageDefinition) {
       const timestamp = Date.now();
       const stageLabel = stageDefinition.label ?? computedStageId;
@@ -1201,6 +1229,7 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
       progress: computedProgress,
       completed: isCompleted,
       stageId: computedStageId || previousStageId,
+      truthRewardApplied,
     };
   };
 
@@ -1217,17 +1246,23 @@ const updateSecretAgendaProgress = (state: GameState): GameState => {
   if (
     updatedSecretAgenda !== state.secretAgenda ||
     updatedAiSecretAgenda !== state.aiSecretAgenda ||
-    logUpdates.length > 0
+    logUpdates.length > 0 ||
+    truthTracker.truth !== state.truth ||
+    truthTracker.log.length > 0
   ) {
     const resolvedDifficulty = updatedSecretAgenda?.difficulty
       ?? state.secretAgendaDifficulty
       ?? null;
+    const truthLogs = truthTracker.log;
     return {
       ...state,
+      truth: truthTracker.truth,
       secretAgenda: updatedSecretAgenda,
       aiSecretAgenda: updatedAiSecretAgenda,
       secretAgendaDifficulty: resolvedDifficulty,
-      log: logUpdates.length > 0 ? [...state.log, ...logUpdates] : state.log,
+      log: truthLogs.length > 0 || logUpdates.length > 0
+        ? [...state.log, ...truthLogs, ...logUpdates]
+        : state.log,
     };
   }
 
@@ -1722,6 +1757,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         completed: false,
         revealed: false,
         stageId: resolveAgendaStageByProgress(playerAgendaTemplate.stages, 0)?.id ?? '',
+        truthRewardApplied: false,
       };
 
       const aiAgenda = {
@@ -1730,6 +1766,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         completed: false,
         revealed: false,
         stageId: resolveAgendaStageByProgress(aiAgendaTemplate.stages, 0)?.id ?? '',
+        truthRewardApplied: false,
       };
 
       const agendasUnchanged =
@@ -3241,6 +3278,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             : 0;
         const completed = typeof agendaData.completed === 'boolean' ? agendaData.completed : false;
         const revealed = typeof agendaData.revealed === 'boolean' ? agendaData.revealed : false;
+        const truthRewardApplied = typeof agendaData.truthRewardApplied === 'boolean'
+          ? agendaData.truthRewardApplied
+          : false;
         const stageId = resolveAgendaStageByProgress(baseAgenda.stages, progress)?.id ?? '';
 
         return {
@@ -3249,6 +3289,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           completed,
           revealed,
           stageId,
+          truthRewardApplied,
         };
       };
 

@@ -87,12 +87,14 @@ export interface GameState {
     completed: boolean;
     revealed: boolean;
     stageId?: string;
+    truthRewardApplied?: boolean;
   };
   aiSecretAgenda?: SecretAgenda & {
     progress: number;
     completed: boolean;
     revealed: boolean;
     stageId?: string;
+    truthRewardApplied?: boolean;
   };
   secretAgendaDifficulty?: SecretAgenda['difficulty'] | null;
   secretAgendasEnabled: boolean;
