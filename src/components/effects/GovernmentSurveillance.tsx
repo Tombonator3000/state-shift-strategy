@@ -49,16 +49,6 @@ const GovernmentSurveillance: React.FC<GovernmentSurveillanceProps> = ({
     '--threat-level': threatLevel.toLowerCase(),
   }) as React.CSSProperties, [x, y, threatLevel]);
 
-  const agencyCode = useMemo(() => {
-    const codes = ['NSA', 'CIA', 'FBI', 'DHS', 'DOD', '███'];
-    return codes[Math.floor(Math.random() * codes.length)];
-  }, []);
-
-  const classificationLevel = useMemo(() => {
-    const levels = ['CONFIDENTIAL', 'SECRET', 'TOP SECRET', '█████████'];
-    return levels[Math.floor(Math.random() * levels.length)];
-  }, []);
-
   if (reducedMotion) return null;
 
   return (
@@ -70,51 +60,31 @@ const GovernmentSurveillance: React.FC<GovernmentSurveillanceProps> = ({
       aria-label={`Government surveillance scanning ${targetName}`}
     >
       <div className="surveillance-frame">
-        <div className="surveillance-crosshair" />
-        <div className="surveillance-grid" />
-        <div className="surveillance-scanline" 
-             style={{ transform: `translateY(${scanProgress * 2}px)` }} />
-        
-        <div className="surveillance-hud">
-          <div className="hud-corner hud-corner--tl" />
-          <div className="hud-corner hud-corner--tr" />
-          <div className="hud-corner hud-corner--bl" />
-          <div className="hud-corner hud-corner--br" />
-        </div>
-
-        <div className="surveillance-data">
-          <div className="data-header">
-            <span className="agency-code">{agencyCode}</span>
-            <span className="classification">{classificationLevel}</span>
-          </div>
-          
-          <div className="data-body">
-            <div className="data-row">
-              <span className="label">TARGET:</span>
-              <span className="value">{targetName}</span>
-            </div>
-            <div className="data-row">
-              <span className="label">THREAT:</span>
-              <span className={`value threat-${threatLevel.toLowerCase()}`}>
-                {threatLevel}
-              </span>
-            </div>
-            <div className="data-row">
-              <span className="label">SCAN:</span>
-              <span className="value">{scanProgress}%</span>
-            </div>
+        <div className="surveillance-redaction-overlay">
+          <div className="redaction-header">
+            <div className="redaction-label">CLEARANCE CHECK</div>
+            <div className="redaction-target">{targetName}</div>
           </div>
 
-          {scanProgress >= 100 && (
-            <div className="scan-complete">
-              <span className="status-text">
-                {threatLevel === 'HIGH' ? '⚠️ SUBJECT FLAGGED' : '✓ SCAN COMPLETE'}
+          <div className="redaction-body">
+            <div className="redaction-stripe redaction-stripe--primary" />
+            <div className="redaction-stripe redaction-stripe--secondary" />
+            <div className="redaction-stripe redaction-stripe--primary" />
+            <div className="redaction-progress">
+              <span className="redaction-label">SCANNING…</span>
+              <div className="redaction-bar">
+                <div className="redaction-bar-fill" style={{ width: `${scanProgress}%` }} />
+              </div>
+              <span className="redaction-progress-label">{scanProgress}%
               </span>
             </div>
-          )}
+            <div className={`redaction-status ${threatLevel === 'HIGH' ? 'redaction-status--alert' : ''}`}>
+              <span>{threatLevel === 'HIGH' ? 'SUBJECT FLAGGED' : 'SCAN COMPLETE'}</span>
+            </div>
+          </div>
         </div>
       </div>
-      
+
       <div className="surveillance-noise" />
       {isScanning && <div className="surveillance-pulse" />}
     </div>
