@@ -103,11 +103,9 @@ export const getStatesByPopulation = (population: StateData['population']): Stat
   return USA_STATES.filter(state => state.population === population);
 };
 
-export const getTotalIPFromStates = (controlledStates: string[]): number => {
-  return controlledStates.reduce((total, stateAbbr) => {
-    const state = getStateByAbbreviation(stateAbbr);
-    return total + (state?.baseIP || 0);
-  }, 0);
+export const getControlledStateCount = (controlledStates: string[]): number => {
+  const normalized = controlledStates.map(state => state.trim().toUpperCase()).filter(Boolean);
+  return new Set(normalized).size;
 };
 
 // Occupation label generation

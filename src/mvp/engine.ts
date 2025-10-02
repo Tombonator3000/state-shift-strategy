@@ -68,7 +68,7 @@ export interface IpIncomeBreakdown {
 export interface StateIncomeContribution {
   state: string;
   abbreviation: string;
-  baseIP: number;
+  count: number;
   fallback: boolean;
 }
 
@@ -163,30 +163,36 @@ export const evaluateCatchUpAdjustments = (
 };
 
 const computeStateIncomeDetails = (states: string[]): StateIncomeContribution[] => {
-  return states.map(stateId => {
+  const contributions = new Map<string, StateIncomeContribution>();
+
+  for (const stateId of states) {
     const trimmed = stateId.trim();
+    if (!trimmed) {
+      continue;
+    }
     const upper = trimmed.toUpperCase();
     const metadata = getStateByAbbreviation(upper) ?? getStateById(trimmed);
 
-    if (metadata) {
-      const baseIP = Number.isFinite(metadata.baseIP) ? metadata.baseIP : 0;
-      return {
-        state: trimmed,
-        abbreviation: metadata.abbreviation,
-        baseIP,
-        fallback: false,
-      };
+    const abbreviation = metadata?.abbreviation ?? (upper || trimmed || 'UNKNOWN');
+    const key = abbreviation;
+    const entry = contributions.get(key);
+
+    if (entry) {
+      entry.count += 1;
+      entry.state = metadata?.name ?? trimmed;
+      entry.fallback = entry.fallback && !metadata;
+      continue;
     }
 
-    const abbreviation = upper || trimmed || 'UNKNOWN';
-
-    return {
-      state: trimmed,
+    contributions.set(key, {
+      state: metadata?.name ?? trimmed,
       abbreviation,
-      baseIP: 0,
-      fallback: true,
-    };
-  });
+      count: 1,
+      fallback: !metadata,
+    });
+  }
+
+  return Array.from(contributions.values());
 };
 
 export function computeTurnIpIncome(
@@ -196,7 +202,7 @@ export function computeTurnIpIncome(
   catchUpSettings: CatchUpSettings = DEFAULT_CATCH_UP_SETTINGS,
 ): IpIncomeBreakdown {
   const stateIncomeDetails = computeStateIncomeDetails(player.states);
-  const stateIncomeTotal = stateIncomeDetails.reduce((total, entry) => total + entry.baseIP, 0);
+  const stateIncomeTotal = stateIncomeDetails.length;
   const baseIncome = 5 + stateIncomeTotal;
   const overage = Math.max(0, player.ip - maintenanceSettings.threshold);
   const rawMaintenance = maintenanceSettings.divisor > 0 ? Math.floor(overage / maintenanceSettings.divisor) : 0;
@@ -231,10 +237,11 @@ export function startTurn(state: GameState): GameState {
   const baseComponents: string[] = ['base 5'];
   if (stateIncomeDetails.length > 0) {
     const formattedStates = stateIncomeDetails.map(detail => {
+      const quantity = detail.count > 1 ? ` x${detail.count}` : '';
       if (detail.fallback) {
-        return `${detail.abbreviation} ${detail.baseIP} (fallback)`;
+        return `${detail.abbreviation}${quantity} (fallback)`;
       }
-      return `${detail.abbreviation} ${detail.baseIP} (base ${detail.baseIP})`;
+      return `${detail.abbreviation}${quantity}`;
     });
     baseComponents.push(`states ${formattedStates.join(', ')}`);
   }

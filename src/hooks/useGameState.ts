@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
 import { generateWeightedDeck } from '@/data/weightedCardDistribution';
-import { USA_STATES, getInitialStateControl, getTotalIPFromStates, type StateData } from '@/data/usaStates';
+import { USA_STATES, getControlledStateCount, getInitialStateControl, type StateData } from '@/data/usaStates';
 import {
   applyStateCombinationCostModifiers,
   calculateDynamicIpBonus,
@@ -2263,7 +2263,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }
 
       if (isHumanTurn) {
-        const stateIncome = getTotalIPFromStates(prev.controlledStates);
+        const controlledStateCount = getControlledStateCount(prev.controlledStates);
+        const stateIncome = controlledStateCount;
         const baseIncome = 5;
         const synergyIncome = prev.stateCombinationBonusIP;
         const neutralStates = statesAfterHotspot.filter(state => state.owner === 'neutral').length;
@@ -2541,7 +2542,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           ...comboLog,
           `Turn ${prev.turn} ended`,
           `Base income: ${baseIncome} IP`,
-          `State income: ${stateIncome} IP (${prev.controlledStates.length} states)`,
+          `State income: ${stateIncome} IP (${controlledStateCount} states)`,
           ...(synergyIncome > 0 ? [`State synergy bonus: +${synergyIncome} IP`] : []),
           ...(comboEffectIncome > 0 ? [`Combo effects bonus: +${comboEffectIncome} IP`] : []),
           `Total income: ${totalIncome + ipModifier} IP`,
@@ -2774,7 +2775,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           .filter(state => state.owner === 'ai')
           .map(state => state.abbreviation);
 
-        const aiStateIncome = getTotalIPFromStates(aiControlledStates);
+        const aiControlledStateCount = getControlledStateCount(aiControlledStates);
+        const aiStateIncome = aiControlledStateCount;
         const aiBaseIncome = 5;
         const aiTotalIncome = aiBaseIncome + aiStateIncome;
 
@@ -2790,7 +2792,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           aiIP: prev.aiIP + aiTotalIncome,
           log: [
             ...prev.log,
-            `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStates.length} states = ${aiTotalIncome} IP`,
+            `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStateCount} states = ${aiTotalIncome} IP`,
             `AI drew ${aiDrawnCards.length} card${aiDrawnCards.length === 1 ? '' : 's'} (hand ${aiHandSizeAfterDraw}/${HAND_LIMIT})`,
           ],
         };
