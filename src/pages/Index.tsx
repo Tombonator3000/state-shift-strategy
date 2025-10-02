@@ -11,7 +11,6 @@ import CardDetailOverlay from '@/components/game/CardDetailOverlay';
 import TabloidNewspaper from '@/components/game/TabloidNewspaper';
 import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
-import SecretAgendaModal from '@/components/game/SecretAgendaModal';
 import AIStatus from '@/components/game/AIStatus';
 import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashboard';
 import Options from '@/components/game/Options';
@@ -690,7 +689,6 @@ const Index = () => {
   const [finalEdition, setFinalEdition] = useState<GameOverReport | null>(null);
   const [readingEdition, setReadingEdition] = useState<GameOverReport | null>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
-  const [showAgendaModal, setShowAgendaModal] = useState(false);
   const [isEndingTurn, setIsEndingTurn] = useState(false);
   const [paranormalSightings, setParanormalSightings] = useState<ParanormalSighting[]>([]);
   const [arcProgressSummaries, setArcProgressSummaries] = useState<Record<string, ArcProgressSummary>>({});
@@ -1890,7 +1888,7 @@ const Index = () => {
   }, [audio]);
 
   const handleEndTurn = useCallback(() => {
-    if (showAgendaModal || isEndingTurn) {
+    if (isEndingTurn) {
       return;
     }
 
@@ -1901,12 +1899,12 @@ const Index = () => {
     setTimeout(() => {
       audio.playSFX('cardDraw');
     }, 500);
-  }, [audio, endTurn, isEndingTurn, showAgendaModal]);
+  }, [audio, endTurn, isEndingTurn]);
 
   // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (showMenu || showIntro || showInGameOptions || showHowToPlay || showAgendaModal) return;
+      if (showMenu || showIntro || showInGameOptions || showHowToPlay) return;
 
       // Number keys for playing cards (1-9)
       const cardNumber = parseInt(e.key);
@@ -1957,7 +1955,6 @@ const Index = () => {
     showIntro,
     showInGameOptions,
     showHowToPlay,
-    showAgendaModal,
     gameState.phase,
     gameState.animating,
     gameState.hand,
@@ -2002,7 +1999,6 @@ const Index = () => {
     setReadingEdition(null);
     setShowExtraEdition(false);
     setParanormalSightings([]);
-    setShowAgendaModal(false);
     await initGame(faction);
     setShowMenu(false);
     setShowIntro(false);
@@ -2023,20 +2019,7 @@ const Index = () => {
     }
   };
 
-  const handleAgendaConfirmSelection = useCallback((agendaId: string | null) => {
-    assignSecretAgenda(agendaId);
-    setShowAgendaModal(false);
-  }, [assignSecretAgenda]);
-
-  const handleAgendaSkip = useCallback(() => {
-    assignSecretAgenda(null);
-    setShowAgendaModal(false);
-  }, [assignSecretAgenda]);
-
   const handleZoneCardSelect = (cardId: string) => {
-    if (showAgendaModal) {
-      return;
-    }
     const card = gameState.hand.find(c => c.id === cardId);
     if (card?.type === 'ZONE') {
       selectCard(cardId);
@@ -2045,9 +2028,6 @@ const Index = () => {
   };
 
   const handleStateClick = async (stateId: string) => {
-    if (showAgendaModal) {
-      return;
-    }
     if (gameState.selectedCard && !isAnimating()) {
       const card = gameState.hand.find(c => c.id === gameState.selectedCard);
       if (card?.type === 'ZONE') {
@@ -2080,17 +2060,11 @@ const Index = () => {
   };
 
   const handleSelectCard = (cardId: string) => {
-    if (showAgendaModal) {
-      return;
-    }
     selectCard(cardId);
     audio.playSFX('hover');
   };
 
   const handlePlayCard = async (cardId: string, targetStateArg?: string) => {
-    if (showAgendaModal) {
-      return;
-    }
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || isAnimating()) return;
 
@@ -2287,19 +2261,29 @@ const Index = () => {
   }, [gameState.faction, showMenu, persistFaction]);
 
   useEffect(() => {
-    const shouldPromptAgenda =
-      !showMenu &&
-      !showIntro &&
-      Boolean(gameState.faction) &&
-      gameState.turn === 1 &&
-      !gameState.secretAgenda;
-
-    if (shouldPromptAgenda) {
-      setShowAgendaModal(true);
-    } else if (!shouldPromptAgenda && showAgendaModal) {
-      setShowAgendaModal(false);
+    if (
+      showMenu
+      || showIntro
+      || !gameState.secretAgendasEnabled
+      || !gameState.faction
+      || gameState.turn !== 1
+      || gameState.round !== 1
+      || gameState.secretAgenda
+    ) {
+      return;
     }
-  }, [gameState.faction, gameState.secretAgenda, gameState.turn, showAgendaModal, showIntro, showMenu]);
+
+    assignSecretAgenda(null);
+  }, [
+    assignSecretAgenda,
+    gameState.faction,
+    gameState.round,
+    gameState.secretAgenda,
+    gameState.secretAgendasEnabled,
+    gameState.turn,
+    showIntro,
+    showMenu,
+  ]);
 
   // Start menu music after user interaction
   useEffect(() => {
@@ -2422,7 +2406,7 @@ const Index = () => {
   }
 
   const isPlayerActionLocked =
-    showAgendaModal || gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
+    gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
   const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
 
   const playerAgenda = gameState.secretAgenda;
@@ -2432,24 +2416,34 @@ const Index = () => {
     ? Math.min(100, (aiAgenda.progress / aiAgenda.target) * 100)
     : 0;
   const aiAssessment = gameState.aiStrategist?.getStrategicAssessment(gameState);
+  const secretAgendasEnabled = gameState.secretAgendasEnabled !== false;
 
   const renderSecretAgendaPanel = (variant: 'overlay' | 'mobile') => {
-    const content = playerAgenda ? (
-      <SecretAgenda agenda={playerAgenda} isPlayer />
-    ) : (
-      <div
-        className={clsx(
-          'rounded border border-dashed border-newspaper-border/60 bg-newspaper-bg/40 p-3 text-xs font-mono text-newspaper-text/60',
-          variant === 'overlay' && 'text-[11px]'
-        )}
-      >
-        No secret agenda assigned.
-      </div>
+    const placeholderClasses = clsx(
+      'rounded border border-dashed border-newspaper-border/60 bg-newspaper-bg/40 p-3 text-xs font-mono text-newspaper-text/60',
+      variant === 'overlay' && 'text-[11px]'
     );
+
+    let content;
+    if (!secretAgendasEnabled) {
+      content = (
+        <div className={placeholderClasses}>
+          Secret agendas are disabled for this campaign.
+        </div>
+      );
+    } else if (playerAgenda) {
+      content = <SecretAgenda agenda={playerAgenda} isPlayer />;
+    } else {
+      content = (
+        <div className={placeholderClasses}>
+          No secret agenda assigned.
+        </div>
+      );
+    }
 
     return (
       <div className="secret-agenda rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-        {gameState.secretAgendaDifficulty && (
+        {secretAgendasEnabled && gameState.secretAgendaDifficulty && (
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[10px] uppercase tracking-[0.25em] text-newspaper-text/70">
             <span className="font-semibold">Synced Agenda Difficulty</span>
             <span className="font-mono text-newspaper-text">
@@ -2457,7 +2451,7 @@ const Index = () => {
             </span>
           </div>
         )}
-        {gameState.secretAgendaDifficulty && aiAgenda && aiAgenda.difficulty !== gameState.secretAgendaDifficulty && (
+        {secretAgendasEnabled && gameState.secretAgendaDifficulty && aiAgenda && aiAgenda.difficulty !== gameState.secretAgendaDifficulty && (
           <div className="mb-2 text-[10px] font-mono text-newspaper-text/60">
             AI fallback difficulty: {aiAgenda.difficulty.toUpperCase()}
           </div>
@@ -2895,14 +2889,6 @@ const Index = () => {
 
   return (
     <>
-      {showAgendaModal && gameState.faction && (
-        <SecretAgendaModal
-          open={showAgendaModal}
-          faction={gameState.faction}
-          onConfirm={handleAgendaConfirmSelection}
-          onCancel={handleAgendaSkip}
-        />
-      )}
 
       <ResponsiveLayout
         masthead={mastheadContent}
