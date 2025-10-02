@@ -1,7 +1,1212 @@
 {
-  "hotspots": [],
+  "hotspots": [
+    {
+      "id": "baseline:ny:midnight-subway-signal",
+      "name": "Midnight Subway Signal Flare",
+      "kind": "anomaly",
+      "location": "New York, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 2,
+      "tags": [
+        "catalog",
+        "baseline",
+        "state:NY"
+      ],
+      "stateId": "36",
+      "stateName": "New York",
+      "stateAbbreviation": "NY",
+      "summary": "Commuters in New York film spectral trains sliding through sealed tunnels."
+    },
+    {
+      "id": "baseline:ca:silicon-seance",
+      "name": "Silicon Seance Cluster",
+      "kind": "phenomenon",
+      "location": "California, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "baseline",
+        "state:CA"
+      ],
+      "stateId": "06",
+      "stateName": "California",
+      "stateAbbreviation": "CA",
+      "summary": "Bay Area offices light up with phantom code that points to buried scandals."
+    },
+    {
+      "id": "baseline:tx:oilfield-will-o-wisps",
+      "name": "Oilfield Will-o'-Wisps",
+      "kind": "encounter",
+      "location": "Texas, USA",
+      "intensity": 3,
+      "status": "spawning",
+      "truthDelta": 2,
+      "tags": [
+        "catalog",
+        "baseline",
+        "state:TX"
+      ],
+      "stateId": "48",
+      "stateName": "Texas",
+      "stateAbbreviation": "TX",
+      "summary": "Flames hover over West Texas rigs and spell out leaked surveillance orders."
+    },
+    {
+      "id": "baseline:fl:everglades-lights",
+      "name": "Everglades Luminous Wake",
+      "kind": "manifestation",
+      "location": "Florida, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "baseline",
+        "state:FL"
+      ],
+      "stateId": "12",
+      "stateName": "Florida",
+      "stateAbbreviation": "FL",
+      "summary": "Airboats chase phosphorescent wakes that reveal hidden detention sites."
+    },
+    {
+      "id": "baseline:dc:midnight-briefing",
+      "name": "Midnight Briefing Echo",
+      "kind": "anomaly",
+      "location": "Washington DC, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 2,
+      "tags": [
+        "catalog",
+        "baseline",
+        "state:DC"
+      ],
+      "stateId": "11",
+      "stateName": "Washington DC",
+      "stateAbbreviation": "DC",
+      "summary": "Security cameras in DC replay classified briefings hours before they occur."
+    },
+    {
+      "id": "halloween:ma:salem-witch-surge",
+      "name": "Salem Witch Surge",
+      "kind": "manifestation",
+      "location": "Massachusetts, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "halloween",
+        "state:MA"
+      ],
+      "stateId": "25",
+      "stateName": "Massachusetts",
+      "stateAbbreviation": "MA",
+      "summary": "Coven chants roll across Salem, amplifying every leaked ritual transcript.",
+      "expansionTag": "halloween"
+    },
+    {
+      "id": "halloween:la:bayou-revenant-parade",
+      "name": "Bayou Revenant Parade",
+      "kind": "encounter",
+      "location": "Louisiana, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "halloween",
+        "state:LA"
+      ],
+      "stateId": "22",
+      "stateName": "Louisiana",
+      "stateAbbreviation": "LA",
+      "summary": "Lantern-lit barges on the bayou ferry returning spirits carrying subpoena scrolls.",
+      "expansionTag": "halloween"
+    },
+    {
+      "id": "halloween:il:candy-corn-poltergeist",
+      "name": "Candy Corn Poltergeist Swarm",
+      "kind": "disturbance",
+      "location": "Illinois, USA",
+      "intensity": 3,
+      "status": "spawning",
+      "truthDelta": 2,
+      "tags": [
+        "catalog",
+        "halloween",
+        "state:IL"
+      ],
+      "stateId": "17",
+      "stateName": "Illinois",
+      "stateAbbreviation": "IL",
+      "summary": "Chicago storefronts explode with sugared projectiles that etch whistleblower names.",
+      "expansionTag": "halloween"
+    },
+    {
+      "id": "halloween:nm:pumpkin-drop",
+      "name": "Roswell Pumpkin Drop",
+      "kind": "phenomenon",
+      "location": "New Mexico, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "halloween",
+        "state:NM"
+      ],
+      "stateId": "35",
+      "stateName": "New Mexico",
+      "stateAbbreviation": "NM",
+      "summary": "Jack-o'-lanterns rain from low-flying saucers, each carved with classified schematics.",
+      "expansionTag": "halloween"
+    },
+    {
+      "id": "halloween:oh:lantern-parade",
+      "name": "Cemetery Lantern Parade",
+      "kind": "encounter",
+      "location": "Ohio, USA",
+      "intensity": 3,
+      "status": "spawning",
+      "truthDelta": 2,
+      "tags": [
+        "catalog",
+        "halloween",
+        "state:OH"
+      ],
+      "stateId": "39",
+      "stateName": "Ohio",
+      "stateAbbreviation": "OH",
+      "summary": "Processions through Ohio graveyards project holographic depositions on mausoleums.",
+      "expansionTag": "halloween"
+    },
+    {
+      "id": "halloween:co:rockies-ghost-ski",
+      "name": "Rockies Ghost Ski Run",
+      "kind": "anomaly",
+      "location": "Colorado, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "halloween",
+        "state:CO"
+      ],
+      "stateId": "08",
+      "stateName": "Colorado",
+      "stateAbbreviation": "CO",
+      "summary": "Unmanned snowcats carve sigils into Colorado slopes before dawn patrol arrives.",
+      "expansionTag": "halloween"
+    },
+    {
+      "id": "cryptids:ak:tizheruk",
+      "name": "Tizheruk Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Alaska, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:tizheruk",
+        "state:AK"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "02",
+      "stateName": "Alaska",
+      "stateAbbreviation": "AK",
+      "summary": "Tizheruk anchors a ritual site in Alaska, drawing seekers in."
+    },
+    {
+      "id": "cryptids:al:alabama-cryptid",
+      "name": "Alabama Cryptid Panic Sweep",
+      "kind": "disturbance",
+      "location": "Alabama, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:alabama-cryptid",
+        "state:AL"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "01",
+      "stateName": "Alabama",
+      "stateAbbreviation": "AL",
+      "summary": "Alabama Cryptid rampages across Alabama, draining agency cover stories."
+    },
+    {
+      "id": "cryptids:ar:fouke-monster",
+      "name": "Fouke Monster Panic Sweep",
+      "kind": "disturbance",
+      "location": "Arkansas, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:fouke-monster",
+        "state:AR"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "05",
+      "stateName": "Arkansas",
+      "stateAbbreviation": "AR",
+      "summary": "Fouke Monster rampages across Arkansas, draining agency cover stories."
+    },
+    {
+      "id": "cryptids:az:thunderbird",
+      "name": "Thunderbird Panic Sweep",
+      "kind": "disturbance",
+      "location": "Arizona, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:thunderbird",
+        "state:AZ"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "04",
+      "stateName": "Arizona",
+      "stateAbbreviation": "AZ",
+      "summary": "Thunderbird rampages across Arizona, draining agency cover stories."
+    },
+    {
+      "id": "cryptids:ca:bigfoot",
+      "name": "Bigfoot Manifestation Zone",
+      "kind": "manifestation",
+      "location": "California, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:bigfoot",
+        "state:CA"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "06",
+      "stateName": "California",
+      "stateAbbreviation": "CA",
+      "summary": "Bigfoot anchors a ritual site in California, drawing seekers in."
+    },
+    {
+      "id": "cryptids:co:colorado-cryptid",
+      "name": "Colorado Cryptid Panic Sweep",
+      "kind": "disturbance",
+      "location": "Colorado, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:colorado-cryptid",
+        "state:CO"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "08",
+      "stateName": "Colorado",
+      "stateAbbreviation": "CO",
+      "summary": "Colorado Cryptid rampages across Colorado, draining agency cover stories."
+    },
+    {
+      "id": "cryptids:ct:connecticut-cryptid",
+      "name": "Connecticut Cryptid Panic Sweep",
+      "kind": "disturbance",
+      "location": "Connecticut, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:connecticut-cryptid",
+        "state:CT"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "09",
+      "stateName": "Connecticut",
+      "stateAbbreviation": "CT",
+      "summary": "Connecticut Cryptid rampages across Connecticut, draining agency cover stories."
+    },
+    {
+      "id": "cryptids:de:delaware-cryptid",
+      "name": "Delaware Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Delaware, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:delaware-cryptid",
+        "state:DE"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "10",
+      "stateName": "Delaware",
+      "stateAbbreviation": "DE",
+      "summary": "Delaware Cryptid anchors a ritual site in Delaware, drawing seekers in."
+    },
+    {
+      "id": "cryptids:fl:skunk-ape",
+      "name": "Skunk Ape Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Florida, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:skunk-ape",
+        "state:FL"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "12",
+      "stateName": "Florida",
+      "stateAbbreviation": "FL",
+      "summary": "Skunk Ape anchors a ritual site in Florida, drawing seekers in."
+    },
+    {
+      "id": "cryptids:ga:georgia-cryptid",
+      "name": "Georgia Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Georgia, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:georgia-cryptid",
+        "state:GA"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "13",
+      "stateName": "Georgia",
+      "stateAbbreviation": "GA",
+      "summary": "Georgia Cryptid anchors a ritual site in Georgia, drawing seekers in."
+    },
+    {
+      "id": "cryptids:hi:hawaii-cryptid",
+      "name": "Hawaii Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Hawaii, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:hawaii-cryptid",
+        "state:HI"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "15",
+      "stateName": "Hawaii",
+      "stateAbbreviation": "HI",
+      "summary": "Hawaii Cryptid anchors a ritual site in Hawaii, drawing seekers in."
+    },
+    {
+      "id": "cryptids:ia:iowa-cryptid",
+      "name": "Iowa Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Iowa, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:iowa-cryptid",
+        "state:IA"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "19",
+      "stateName": "Iowa",
+      "stateAbbreviation": "IA",
+      "summary": "Iowa Cryptid anchors a ritual site in Iowa, drawing seekers in."
+    },
+    {
+      "id": "cryptids:id:idaho-cryptid",
+      "name": "Idaho Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Idaho, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:idaho-cryptid",
+        "state:ID"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "16",
+      "stateName": "Idaho",
+      "stateAbbreviation": "ID",
+      "summary": "Idaho Cryptid anchors a ritual site in Idaho, drawing seekers in."
+    },
+    {
+      "id": "cryptids:il:enfield-horror",
+      "name": "Enfield Horror Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Illinois, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:enfield-horror",
+        "state:IL"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "17",
+      "stateName": "Illinois",
+      "stateAbbreviation": "IL",
+      "summary": "Enfield Horror anchors a ritual site in Illinois, drawing seekers in."
+    },
+    {
+      "id": "cryptids:in:indiana-cryptid",
+      "name": "Indiana Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Indiana, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:indiana-cryptid",
+        "state:IN"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "18",
+      "stateName": "Indiana",
+      "stateAbbreviation": "IN",
+      "summary": "Indiana Cryptid anchors a ritual site in Indiana, drawing seekers in."
+    },
+    {
+      "id": "cryptids:ks:kansas-cryptid",
+      "name": "Kansas Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Kansas, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:kansas-cryptid",
+        "state:KS"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "20",
+      "stateName": "Kansas",
+      "stateAbbreviation": "KS",
+      "summary": "Kansas Cryptid anchors a ritual site in Kansas, drawing seekers in."
+    },
+    {
+      "id": "cryptids:ky:kelly-hopkinsville-goblins",
+      "name": "Kelly–Hopkinsville Goblins Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Kentucky, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:kelly-hopkinsville-goblins",
+        "state:KY"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "21",
+      "stateName": "Kentucky",
+      "stateAbbreviation": "KY",
+      "summary": "Kelly–Hopkinsville Goblins anchors a ritual site in Kentucky, drawing seekers in."
+    },
+    {
+      "id": "cryptids:la:rougarou",
+      "name": "Rougarou Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Louisiana, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:rougarou",
+        "state:LA"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "22",
+      "stateName": "Louisiana",
+      "stateAbbreviation": "LA",
+      "summary": "Rougarou anchors a ritual site in Louisiana, drawing seekers in."
+    },
+    {
+      "id": "cryptids:ma:dover-demon",
+      "name": "Dover Demon Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Massachusetts, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:dover-demon",
+        "state:MA"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "25",
+      "stateName": "Massachusetts",
+      "stateAbbreviation": "MA",
+      "summary": "Dover Demon anchors a ritual site in Massachusetts, drawing seekers in."
+    },
+    {
+      "id": "cryptids:md:snallygaster",
+      "name": "Snallygaster Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Maryland, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:snallygaster",
+        "state:MD"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "24",
+      "stateName": "Maryland",
+      "stateAbbreviation": "MD",
+      "summary": "Snallygaster anchors a ritual site in Maryland, drawing seekers in."
+    },
+    {
+      "id": "cryptids:me:maine-cryptid",
+      "name": "Maine Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Maine, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:maine-cryptid",
+        "state:ME"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "23",
+      "stateName": "Maine",
+      "stateAbbreviation": "ME",
+      "summary": "Maine Cryptid anchors a ritual site in Maine, drawing seekers in."
+    },
+    {
+      "id": "cryptids:mi:dogman",
+      "name": "Dogman Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Michigan, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:dogman",
+        "state:MI"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "26",
+      "stateName": "Michigan",
+      "stateAbbreviation": "MI",
+      "summary": "Dogman anchors a ritual site in Michigan, drawing seekers in."
+    },
+    {
+      "id": "cryptids:mn:wendigo",
+      "name": "Wendigo Panic Sweep",
+      "kind": "disturbance",
+      "location": "Minnesota, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:wendigo",
+        "state:MN"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "27",
+      "stateName": "Minnesota",
+      "stateAbbreviation": "MN",
+      "summary": "Wendigo rampages across Minnesota, draining agency cover stories."
+    },
+    {
+      "id": "cryptids:mo:missouri-cryptid",
+      "name": "Missouri Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Missouri, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:missouri-cryptid",
+        "state:MO"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "29",
+      "stateName": "Missouri",
+      "stateAbbreviation": "MO",
+      "summary": "Missouri Cryptid anchors a ritual site in Missouri, drawing seekers in."
+    },
+    {
+      "id": "cryptids:ms:mississippi-cryptid",
+      "name": "Mississippi Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Mississippi, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:mississippi-cryptid",
+        "state:MS"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "28",
+      "stateName": "Mississippi",
+      "stateAbbreviation": "MS",
+      "summary": "Mississippi Cryptid anchors a ritual site in Mississippi, drawing seekers in."
+    },
+    {
+      "id": "cryptids:mt:shunka-warakin",
+      "name": "Shunka Warakin Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Montana, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:shunka-warakin",
+        "state:MT"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "30",
+      "stateName": "Montana",
+      "stateAbbreviation": "MT",
+      "summary": "Shunka Warakin anchors a ritual site in Montana, drawing seekers in."
+    },
+    {
+      "id": "cryptids:nc:north-carolina-cryptid",
+      "name": "North Carolina Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "North Carolina, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:north-carolina-cryptid",
+        "state:NC"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "37",
+      "stateName": "North Carolina",
+      "stateAbbreviation": "NC",
+      "summary": "North Carolina Cryptid anchors a ritual site in North Carolina, drawing seekers in."
+    },
+    {
+      "id": "cryptids:nd:north-dakota-cryptid",
+      "name": "North Dakota Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "North Dakota, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:north-dakota-cryptid",
+        "state:ND"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "38",
+      "stateName": "North Dakota",
+      "stateAbbreviation": "ND",
+      "summary": "North Dakota Cryptid anchors a ritual site in North Dakota, drawing seekers in."
+    },
+    {
+      "id": "cryptids:ne:nebraska-cryptid",
+      "name": "Nebraska Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Nebraska, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:nebraska-cryptid",
+        "state:NE"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "31",
+      "stateName": "Nebraska",
+      "stateAbbreviation": "NE",
+      "summary": "Nebraska Cryptid anchors a ritual site in Nebraska, drawing seekers in."
+    },
+    {
+      "id": "cryptids:nh:wood-devils",
+      "name": "Wood Devils Manifestation Zone",
+      "kind": "manifestation",
+      "location": "New Hampshire, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:wood-devils",
+        "state:NH"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "33",
+      "stateName": "New Hampshire",
+      "stateAbbreviation": "NH",
+      "summary": "Wood Devils anchors a ritual site in New Hampshire, drawing seekers in."
+    },
+    {
+      "id": "cryptids:nj:jersey-devil",
+      "name": "Jersey Devil Panic Sweep",
+      "kind": "disturbance",
+      "location": "New Jersey, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:jersey-devil",
+        "state:NJ"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "34",
+      "stateName": "New Jersey",
+      "stateAbbreviation": "NJ",
+      "summary": "Jersey Devil rampages across New Jersey, draining agency cover stories."
+    },
+    {
+      "id": "cryptids:nm:skinwalkers",
+      "name": "Skinwalkers Panic Sweep",
+      "kind": "disturbance",
+      "location": "New Mexico, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:skinwalkers",
+        "state:NM"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "35",
+      "stateName": "New Mexico",
+      "stateAbbreviation": "NM",
+      "summary": "Skinwalkers rampages across New Mexico, draining agency cover stories."
+    },
+    {
+      "id": "cryptids:nv:tahoe-tessie",
+      "name": "Tahoe Tessie Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Nevada, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:tahoe-tessie",
+        "state:NV"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "32",
+      "stateName": "Nevada",
+      "stateAbbreviation": "NV",
+      "summary": "Tahoe Tessie anchors a ritual site in Nevada, drawing seekers in."
+    },
+    {
+      "id": "cryptids:ny:montauk-monster",
+      "name": "Montauk Monster Manifestation Zone",
+      "kind": "manifestation",
+      "location": "New York, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:montauk-monster",
+        "state:NY"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "36",
+      "stateName": "New York",
+      "stateAbbreviation": "NY",
+      "summary": "Montauk Monster anchors a ritual site in New York, drawing seekers in."
+    },
+    {
+      "id": "cryptids:oh:loveland-frogman",
+      "name": "Loveland Frogman Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Ohio, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:loveland-frogman",
+        "state:OH"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "39",
+      "stateName": "Ohio",
+      "stateAbbreviation": "OH",
+      "summary": "Loveland Frogman anchors a ritual site in Ohio, drawing seekers in."
+    },
+    {
+      "id": "cryptids:ok:oklahoma-cryptid",
+      "name": "Oklahoma Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Oklahoma, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:oklahoma-cryptid",
+        "state:OK"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "40",
+      "stateName": "Oklahoma",
+      "stateAbbreviation": "OK",
+      "summary": "Oklahoma Cryptid anchors a ritual site in Oklahoma, drawing seekers in."
+    },
+    {
+      "id": "cryptids:or:bigfoot",
+      "name": "Bigfoot Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Oregon, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:bigfoot",
+        "state:OR"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "41",
+      "stateName": "Oregon",
+      "stateAbbreviation": "OR",
+      "summary": "Bigfoot anchors a ritual site in Oregon, drawing seekers in."
+    },
+    {
+      "id": "cryptids:pa:pennsylvania-cryptid",
+      "name": "Pennsylvania Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Pennsylvania, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:pennsylvania-cryptid",
+        "state:PA"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "42",
+      "stateName": "Pennsylvania",
+      "stateAbbreviation": "PA",
+      "summary": "Pennsylvania Cryptid anchors a ritual site in Pennsylvania, drawing seekers in."
+    },
+    {
+      "id": "cryptids:ri:rhode-island-cryptid",
+      "name": "Rhode Island Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Rhode Island, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:rhode-island-cryptid",
+        "state:RI"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "44",
+      "stateName": "Rhode Island",
+      "stateAbbreviation": "RI",
+      "summary": "Rhode Island Cryptid anchors a ritual site in Rhode Island, drawing seekers in."
+    },
+    {
+      "id": "cryptids:sc:south-carolina-cryptid",
+      "name": "South Carolina Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "South Carolina, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:south-carolina-cryptid",
+        "state:SC"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "45",
+      "stateName": "South Carolina",
+      "stateAbbreviation": "SC",
+      "summary": "South Carolina Cryptid anchors a ritual site in South Carolina, drawing seekers in."
+    },
+    {
+      "id": "cryptids:sd:south-dakota-cryptid",
+      "name": "South Dakota Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "South Dakota, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:south-dakota-cryptid",
+        "state:SD"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "46",
+      "stateName": "South Dakota",
+      "stateAbbreviation": "SD",
+      "summary": "South Dakota Cryptid anchors a ritual site in South Dakota, drawing seekers in."
+    },
+    {
+      "id": "cryptids:tn:tennessee-cryptid",
+      "name": "Tennessee Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Tennessee, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:tennessee-cryptid",
+        "state:TN"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "47",
+      "stateName": "Tennessee",
+      "stateAbbreviation": "TN",
+      "summary": "Tennessee Cryptid anchors a ritual site in Tennessee, drawing seekers in."
+    },
+    {
+      "id": "cryptids:tx:chupacabra",
+      "name": "Chupacabra Panic Sweep",
+      "kind": "disturbance",
+      "location": "Texas, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:chupacabra",
+        "state:TX"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "48",
+      "stateName": "Texas",
+      "stateAbbreviation": "TX",
+      "summary": "Chupacabra rampages across Texas, draining agency cover stories."
+    },
+    {
+      "id": "cryptids:ut:utah-cryptid",
+      "name": "Utah Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Utah, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:utah-cryptid",
+        "state:UT"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "49",
+      "stateName": "Utah",
+      "stateAbbreviation": "UT",
+      "summary": "Utah Cryptid anchors a ritual site in Utah, drawing seekers in."
+    },
+    {
+      "id": "cryptids:va:virginia-cryptid",
+      "name": "Virginia Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Virginia, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:virginia-cryptid",
+        "state:VA"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "51",
+      "stateName": "Virginia",
+      "stateAbbreviation": "VA",
+      "summary": "Virginia Cryptid anchors a ritual site in Virginia, drawing seekers in."
+    },
+    {
+      "id": "cryptids:vt:champ",
+      "name": "Champ Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Vermont, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:champ",
+        "state:VT"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "50",
+      "stateName": "Vermont",
+      "stateAbbreviation": "VT",
+      "summary": "Champ anchors a ritual site in Vermont, drawing seekers in."
+    },
+    {
+      "id": "cryptids:wa:bigfoot",
+      "name": "Bigfoot Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Washington, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:bigfoot",
+        "state:WA"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "53",
+      "stateName": "Washington",
+      "stateAbbreviation": "WA",
+      "summary": "Bigfoot anchors a ritual site in Washington, drawing seekers in."
+    },
+    {
+      "id": "cryptids:wi:beast-of-bray-road",
+      "name": "Beast of Bray Road Panic Sweep",
+      "kind": "disturbance",
+      "location": "Wisconsin, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:beast-of-bray-road",
+        "state:WI"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "55",
+      "stateName": "Wisconsin",
+      "stateAbbreviation": "WI",
+      "summary": "Beast of Bray Road rampages across Wisconsin, draining agency cover stories."
+    },
+    {
+      "id": "cryptids:wv:mothman",
+      "name": "Mothman Panic Sweep",
+      "kind": "disturbance",
+      "location": "West Virginia, USA",
+      "intensity": 4,
+      "status": "spawning",
+      "truthDelta": 3,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:mothman",
+        "state:WV"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "54",
+      "stateName": "West Virginia",
+      "stateAbbreviation": "WV",
+      "summary": "Mothman rampages across West Virginia, draining agency cover stories."
+    },
+    {
+      "id": "cryptids:wy:wyoming-cryptid",
+      "name": "Wyoming Cryptid Manifestation Zone",
+      "kind": "manifestation",
+      "location": "Wyoming, USA",
+      "intensity": 5,
+      "status": "spawning",
+      "truthDelta": 4,
+      "tags": [
+        "catalog",
+        "cryptid",
+        "cryptid:wyoming-cryptid",
+        "state:WY"
+      ],
+      "expansionTag": "cryptids",
+      "stateId": "56",
+      "stateName": "Wyoming",
+      "stateAbbreviation": "WY",
+      "summary": "Wyoming Cryptid anchors a ritual site in Wyoming, drawing seekers in."
+    }
+  ],
   "metadata": {
-    "version": "0.0.0",
-    "generatedAt": null
+    "version": "1.0.0",
+    "generatedAt": "2025-10-02T08:16:51.186Z"
   }
 }

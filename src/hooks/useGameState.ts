@@ -110,6 +110,7 @@ const buildResolvedHotspotToast = (resolution: CardHotspotResolution): Hotspot =
     stateId: resolution.stateId,
     stateName: resolution.stateName,
     stateAbbreviation: resolution.stateAbbreviation,
+    truthDelta: resolution.truthDelta,
   } satisfies Hotspot;
 };
 
@@ -124,6 +125,7 @@ const buildExpiredHotspotToast = (hotspot: ActiveParanormalHotspot): Hotspot => 
   stateId: hotspot.stateId,
   stateName: hotspot.stateName,
   stateAbbreviation: hotspot.stateAbbreviation,
+  truthDelta: hotspot.truthReward ? -Math.abs(hotspot.truthReward) : undefined,
 });
 
 const activeHotspotMatchesResolution = (
