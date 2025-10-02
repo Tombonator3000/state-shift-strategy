@@ -164,12 +164,110 @@ describe('applyStateBonusAssignmentToState', () => {
     expect(updated.ip).toBe(46);
 
     const state = updated.states[0];
-    expect(state.pressureAi).toBe(4);
-    expect(state.pressurePlayer).toBe(0);
-    expect(state.pressure).toBe(4);
+    expect(state.pressurePlayer).toBe(1);
+    expect(state.pressureAi).toBe(3);
+    expect(state.pressure).toBe(3);
 
     expect(updated.log).toContain('State bonuses adjusted player IP by +4');
     expect(updated.log.some(entry => entry.startsWith('Truth manipulation'))).toBe(true);
+  });
+
+  test('applies pressure adjustments based on the controlling side of each state', () => {
+    const baseState = createBaseGameState('truth');
+    const aiControlledState: GameState['states'][number] = {
+      id: '12',
+      name: 'Florida',
+      abbreviation: 'FL',
+      baseIP: 0,
+      baseDefense: 0,
+      defense: 0,
+      pressure: 2,
+      pressurePlayer: 0,
+      pressureAi: 2,
+      contested: false,
+      owner: 'ai',
+      paranormalHotspot: undefined,
+      paranormalHotspotHistory: [],
+      stateEventBonus: undefined,
+      stateEventHistory: [],
+      roundEvents: [],
+    };
+
+    const contestedState: GameState['states'][number] = {
+      id: '13',
+      name: 'Colorado',
+      abbreviation: 'CO',
+      baseIP: 0,
+      baseDefense: 0,
+      defense: 0,
+      pressure: 1,
+      pressurePlayer: 1,
+      pressureAi: 1,
+      contested: true,
+      owner: 'neutral',
+      paranormalHotspot: undefined,
+      paranormalHotspotHistory: [],
+      stateEventBonus: undefined,
+      stateEventHistory: [],
+      roundEvents: [],
+    };
+
+    const neutralState: GameState['states'][number] = {
+      id: '14',
+      name: 'Maine',
+      abbreviation: 'ME',
+      baseIP: 0,
+      baseDefense: 0,
+      defense: 0,
+      pressure: 0,
+      pressurePlayer: 0,
+      pressureAi: 0,
+      contested: false,
+      owner: 'neutral',
+      paranormalHotspot: undefined,
+      paranormalHotspotHistory: [],
+      stateEventBonus: undefined,
+      stateEventHistory: [],
+      roundEvents: [],
+    };
+
+    const augmentedBase: GameState = {
+      ...baseState,
+      states: [baseState.states[0], aiControlledState, contestedState, neutralState],
+    };
+
+    const assignment: AssignStateBonusesResult = {
+      ...createAssignment(),
+      pressureAdjustments: {
+        TX: { player: 1, ai: 0 },
+        FL: { player: 0, ai: 2 },
+        CO: { player: 5, ai: 5 },
+        ME: { player: 3, ai: 3 },
+      },
+    };
+
+    const updated = applyStateBonusAssignmentToState(augmentedBase, assignment);
+
+    const texas = updated.states.find(state => state.abbreviation === 'TX');
+    const florida = updated.states.find(state => state.abbreviation === 'FL');
+    const colorado = updated.states.find(state => state.abbreviation === 'CO');
+    const maine = updated.states.find(state => state.abbreviation === 'ME');
+
+    expect(texas?.pressurePlayer).toBe(4);
+    expect(texas?.pressureAi).toBe(0);
+    expect(texas?.pressure).toBe(4);
+
+    expect(florida?.pressurePlayer).toBe(0);
+    expect(florida?.pressureAi).toBe(4);
+    expect(florida?.pressure).toBe(4);
+
+    expect(colorado?.pressurePlayer).toBe(1);
+    expect(colorado?.pressureAi).toBe(1);
+    expect(colorado?.pressure).toBe(1);
+
+    expect(maine?.pressurePlayer).toBe(0);
+    expect(maine?.pressureAi).toBe(0);
+    expect(maine?.pressure).toBe(0);
   });
 
   test('retains active bonus across rounds without duplicate activation log', () => {

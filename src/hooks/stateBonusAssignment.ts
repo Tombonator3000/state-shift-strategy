@@ -74,28 +74,15 @@ export const applyStateBonusAssignmentToState = (
       };
     }
 
-    const playerFactionPressureKey: 'pressurePlayer' | 'pressureAi' =
-      nextState.faction === 'truth' ? 'pressurePlayer' : 'pressureAi';
-    const aiFactionPressureKey =
-      playerFactionPressureKey === 'pressurePlayer' ? 'pressureAi' : 'pressurePlayer';
-
     let updatedPressurePlayer = state.pressurePlayer ?? 0;
     let updatedPressureAi = state.pressureAi ?? 0;
 
     if (playerPressureDelta !== 0 && state.owner === 'player') {
-      if (playerFactionPressureKey === 'pressurePlayer') {
-        updatedPressurePlayer = Math.max(0, updatedPressurePlayer + playerPressureDelta);
-      } else {
-        updatedPressureAi = Math.max(0, updatedPressureAi + playerPressureDelta);
-      }
+      updatedPressurePlayer = Math.max(0, updatedPressurePlayer + playerPressureDelta);
     }
 
     if (aiPressureDelta !== 0 && state.owner === 'ai') {
-      if (aiFactionPressureKey === 'pressurePlayer') {
-        updatedPressurePlayer = Math.max(0, updatedPressurePlayer + aiPressureDelta);
-      } else {
-        updatedPressureAi = Math.max(0, updatedPressureAi + aiPressureDelta);
-      }
+      updatedPressureAi = Math.max(0, updatedPressureAi + aiPressureDelta);
     }
 
     const updatedPressure = Math.max(updatedPressurePlayer, updatedPressureAi);
