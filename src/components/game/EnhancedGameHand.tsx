@@ -179,6 +179,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   disabled && 'cursor-default'
                 )}
                 style={{ animationDelay: `${index * 0.03}s` }}
+                data-card-id={card.id}
                 onClick={(e) => {
                   e.preventDefault();
                   audio.playSFX('click');
