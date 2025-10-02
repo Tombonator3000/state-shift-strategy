@@ -183,6 +183,58 @@ export class VisualEffectsCoordinator {
     };
   }
 
+  private static resolveStateElementByValue(value: unknown): Element | null {
+    if (typeof document === 'undefined' || typeof value !== 'string') {
+      return null;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const candidates = new Set<string>([trimmed]);
+    const upper = trimmed.toUpperCase();
+    if (upper !== trimmed) {
+      candidates.add(upper);
+    }
+
+    const selectors = ['data-state-id', 'data-state', 'data-state-abbr'];
+
+    for (const candidate of candidates) {
+      for (const attribute of selectors) {
+        const element = document.querySelector<HTMLElement>(`[${attribute}="${candidate}"]`);
+        if (element) {
+          return element;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  static resolveStateElement(params: {
+    stateId?: string | null;
+    stateAbbreviation?: string | null;
+  }): Element | null {
+    const { stateId, stateAbbreviation } = params;
+
+    const elementFromId = this.resolveStateElementByValue(stateId ?? undefined);
+    if (elementFromId) {
+      return elementFromId;
+    }
+
+    return this.resolveStateElementByValue(stateAbbreviation ?? undefined);
+  }
+
+  static getStateCenterPosition(params: {
+    stateId?: string | null;
+    stateAbbreviation?: string | null;
+  }): EffectPosition | null {
+    const element = this.resolveStateElement(params);
+    return element ? this.getElementCenter(element) : null;
+  }
+
   // Helper to get screen center position
   static getScreenCenter(): EffectPosition {
     return {
