@@ -11,6 +11,7 @@ import type { AgendaMoment } from '@/hooks/usePressArchive';
 import CardImage from '@/components/game/CardImage';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import type { ArcProgressSummary } from '@/types/campaign';
+import type { HotspotDirector, WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
 
 export interface TabloidPlayedCard {
   card: GameCard;
@@ -31,6 +32,8 @@ export interface TabloidNewspaperProps {
   agendaIssue?: AgendaIssueState;
   agendaMoments?: AgendaMoment[];
   onArcProgress?: (summaries: ArcProgressSummary[]) => void;
+  hotspotDirector?: HotspotDirector;
+  activeHotspot?: WeightedHotspotCandidate | null;
 }
 
 interface NewspaperData {

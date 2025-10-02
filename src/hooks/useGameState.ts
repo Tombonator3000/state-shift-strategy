@@ -42,6 +42,7 @@ import {
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
 import { queueHotspotResolveToast, queueHotspotExpireToast } from '@/ui/hotspots.toasts';
+import { formatHotspotSpawnLog, getHotspotIdleLog } from '@/state/useGameLog';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
@@ -2415,7 +2416,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
                   eventForEdition = { ...activeEvent, headline: dynamicHeadline };
                 }
               } else {
-                eventEffectLog.push('👻 Paranormal surge failed to find a viable hotspot target.');
+                eventEffectLog.push(getHotspotIdleLog());
               }
             }
 
@@ -2867,9 +2868,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const rolledHotspot = hotspotDirector.rollForSpawn(prev.round, prev, {
         enabledExpansions,
       });
-      const hotspotLogs = rolledHotspot
-        ? [`👻 ${rolledHotspot.name} rumored near ${rolledHotspot.stateName ?? rolledHotspot.location}.`]
-        : [];
+      let hotspotLogs: string[] = [];
+      if (rolledHotspot) {
+        const extraArticle = hotspotDirector.buildHotspotExtraArticle(rolledHotspot);
+        hotspotLogs = [formatHotspotSpawnLog(extraArticle)];
+      }
       const logsWithHotspot = hotspotLogs.length > 0 ? [...baseLogs, ...hotspotLogs] : baseLogs;
 
       let nextState: GameState = {
@@ -3590,5 +3593,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     deleteSave,
     checkVictoryConditions,
     registerParanormalSighting,
+    hotspotDirector,
   };
 };
