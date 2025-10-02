@@ -70,10 +70,23 @@ export const BaseCard = ({
   );
 
   const wrapperStyle = { '--card-scale': String(SIZE_TO_SCALE[size]) } as CSSProperties;
+  const revealsSecretAgenda = Boolean(
+    (card.effects as { revealSecretAgenda?: boolean } | undefined)?.revealSecretAgenda,
+  );
+  const isLegendaryCard = String(card.rarity ?? '').toLowerCase() === 'legendary';
 
   return (
     <div
-      className={cn('card-frame-wrapper', polaroidHover && 'group', frameClassName, className)}
+      className={cn(
+        'card-frame-wrapper',
+        polaroidHover && 'group',
+        frameClassName,
+        className,
+        {
+          'card-glow-agenda-reveal': revealsSecretAgenda,
+          'card-glow-legendary': isLegendaryCard,
+        },
+      )}
       style={wrapperStyle}
       data-testid="tabloid-card"
     >
