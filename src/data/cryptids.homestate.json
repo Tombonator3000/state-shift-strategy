@@ -1,4 +1,30 @@
 {
-  "cryptids": [],
+  "cryptids": [
+    {
+      "id": "bigfoot",
+      "name": "Bigfoot",
+      "homeStates": ["WA", "OR", "MT"]
+    },
+    {
+      "id": "mothman",
+      "name": "Mothman",
+      "homeStates": ["WV"]
+    },
+    {
+      "id": "jersey-devil",
+      "name": "Jersey Devil",
+      "homeStates": ["NJ"]
+    },
+    {
+      "id": "champ",
+      "name": "Champ",
+      "homeStates": ["NH", "VT"]
+    },
+    {
+      "id": "skinwalker",
+      "name": "Skinwalker",
+      "homeStates": ["AZ", "NM", "UT"]
+    }
+  ],
   "regions": {}
 }

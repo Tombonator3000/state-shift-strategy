@@ -2,7 +2,42 @@
   "cooldowns": {},
   "intensityThresholds": {},
   "defaults": {
-    "spawnRate": 0,
-    "decayRate": 0
+    "spawnRate": 0.15,
+    "decayRate": 0.05
+  },
+  "spawn": {
+    "baseWeights": {
+      "default": 1,
+      "states": {
+        "WA": 1.4,
+        "OR": 1.25,
+        "WV": 1.1,
+        "NJ": 1.15,
+        "NM": 1.3,
+        "AZ": 1.2,
+        "MT": 1.05,
+        "NH": 1.05
+      }
+    },
+    "expansionModifiers": {
+      "cryptids": {
+        "multiplier": 1.2,
+        "stateWeights": {
+          "WA": 0.6,
+          "OR": 0.5,
+          "WV": 0.5,
+          "NJ": 0.45,
+          "MT": 0.4,
+          "NH": 0.35,
+          "NM": 0.5,
+          "AZ": 0.45
+        }
+      }
+    },
+    "cryptidHomeStateBoost": {
+      "base": 0.25,
+      "perCryptid": 0.2,
+      "max": 1.5
+    }
   }
 }

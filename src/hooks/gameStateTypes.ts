@@ -6,6 +6,7 @@ import type { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
 import type { DrawMode, CardDrawState } from '@/data/cardDrawingSystem';
 import type { AIDifficulty } from '@/data/aiStrategy';
 import type { TurnPlay } from '@/game/combo.types';
+import type { WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
 import type { StateCombinationEffects } from '@/data/stateCombinations';
 
 export interface CardPlayRecord {
@@ -111,6 +112,7 @@ export interface GameState {
   truthBelow20Streak: number;
   timeBasedGoalCounters: Record<string, number>;
   paranormalHotspots: Record<string, ActiveParanormalHotspot>;
+  activeHotspot: WeightedHotspotCandidate | null;
   stateRoundSeed: number;
   lastStateBonusRound: number;
   stateRoundEvents: Record<string, StateRoundEventLogEntry[]>;
