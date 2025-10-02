@@ -1,29 +1,688 @@
 {
   "cryptids": [
     {
+      "id": "alabama-cryptid",
+      "name": "Alabama Cryptid",
+      "homeStates": [
+        "AL"
+      ],
+      "sources": [
+        {
+          "state": "AL",
+          "cardId": "CRY-TS-068",
+          "cardType": "ATTACK"
+        }
+      ]
+    },
+    {
+      "id": "beast-of-bray-road",
+      "name": "Beast of Bray Road",
+      "homeStates": [
+        "WI"
+      ],
+      "sources": [
+        {
+          "state": "WI",
+          "cardId": "CRY-TS-116",
+          "cardType": "ATTACK"
+        }
+      ]
+    },
+    {
       "id": "bigfoot",
       "name": "Bigfoot",
-      "homeStates": ["WA", "OR", "MT"]
-    },
-    {
-      "id": "mothman",
-      "name": "Mothman",
-      "homeStates": ["WV"]
-    },
-    {
-      "id": "jersey-devil",
-      "name": "Jersey Devil",
-      "homeStates": ["NJ"]
+      "homeStates": [
+        "CA",
+        "OR",
+        "WA"
+      ],
+      "sources": [
+        {
+          "state": "CA",
+          "cardId": "CRY-TS-072",
+          "cardType": "ZONE"
+        },
+        {
+          "state": "OR",
+          "cardId": "CRY-TS-104",
+          "cardType": "ZONE"
+        },
+        {
+          "state": "WA",
+          "cardId": "CRY-TS-114",
+          "cardType": "ZONE"
+        }
+      ]
     },
     {
       "id": "champ",
       "name": "Champ",
-      "homeStates": ["NH", "VT"]
+      "homeStates": [
+        "VT"
+      ],
+      "sources": [
+        {
+          "state": "VT",
+          "cardId": "CRY-TS-112",
+          "cardType": "ZONE"
+        }
+      ]
     },
     {
-      "id": "skinwalker",
-      "name": "Skinwalker",
-      "homeStates": ["AZ", "NM", "UT"]
+      "id": "chupacabra",
+      "name": "Chupacabra",
+      "homeStates": [
+        "TX"
+      ],
+      "sources": [
+        {
+          "state": "TX",
+          "cardId": "CRY-TS-110",
+          "cardType": "ATTACK"
+        }
+      ]
+    },
+    {
+      "id": "colorado-cryptid",
+      "name": "Colorado Cryptid",
+      "homeStates": [
+        "CO"
+      ],
+      "sources": [
+        {
+          "state": "CO",
+          "cardId": "CRY-TS-073",
+          "cardType": "ATTACK"
+        }
+      ]
+    },
+    {
+      "id": "connecticut-cryptid",
+      "name": "Connecticut Cryptid",
+      "homeStates": [
+        "CT"
+      ],
+      "sources": [
+        {
+          "state": "CT",
+          "cardId": "CRY-TS-074",
+          "cardType": "ATTACK"
+        }
+      ]
+    },
+    {
+      "id": "delaware-cryptid",
+      "name": "Delaware Cryptid",
+      "homeStates": [
+        "DE"
+      ],
+      "sources": [
+        {
+          "state": "DE",
+          "cardId": "CRY-TS-075",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "dogman",
+      "name": "Dogman",
+      "homeStates": [
+        "MI"
+      ],
+      "sources": [
+        {
+          "state": "MI",
+          "cardId": "CRY-TS-089",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "dover-demon",
+      "name": "Dover Demon",
+      "homeStates": [
+        "MA"
+      ],
+      "sources": [
+        {
+          "state": "MA",
+          "cardId": "CRY-TS-088",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "enfield-horror",
+      "name": "Enfield Horror",
+      "homeStates": [
+        "IL"
+      ],
+      "sources": [
+        {
+          "state": "IL",
+          "cardId": "CRY-TS-080",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "fouke-monster",
+      "name": "Fouke Monster",
+      "homeStates": [
+        "AR"
+      ],
+      "sources": [
+        {
+          "state": "AR",
+          "cardId": "CRY-TS-071",
+          "cardType": "ATTACK"
+        }
+      ]
+    },
+    {
+      "id": "georgia-cryptid",
+      "name": "Georgia Cryptid",
+      "homeStates": [
+        "GA"
+      ],
+      "sources": [
+        {
+          "state": "GA",
+          "cardId": "CRY-TS-077",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "hawaii-cryptid",
+      "name": "Hawaii Cryptid",
+      "homeStates": [
+        "HI"
+      ],
+      "sources": [
+        {
+          "state": "HI",
+          "cardId": "CRY-TS-078",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "idaho-cryptid",
+      "name": "Idaho Cryptid",
+      "homeStates": [
+        "ID"
+      ],
+      "sources": [
+        {
+          "state": "ID",
+          "cardId": "CRY-TS-079",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "indiana-cryptid",
+      "name": "Indiana Cryptid",
+      "homeStates": [
+        "IN"
+      ],
+      "sources": [
+        {
+          "state": "IN",
+          "cardId": "CRY-TS-081",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "iowa-cryptid",
+      "name": "Iowa Cryptid",
+      "homeStates": [
+        "IA"
+      ],
+      "sources": [
+        {
+          "state": "IA",
+          "cardId": "CRY-TS-082",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "jersey-devil",
+      "name": "Jersey Devil",
+      "homeStates": [
+        "NJ"
+      ],
+      "sources": [
+        {
+          "state": "NJ",
+          "cardId": "CRY-TS-097",
+          "cardType": "ATTACK"
+        }
+      ]
+    },
+    {
+      "id": "kansas-cryptid",
+      "name": "Kansas Cryptid",
+      "homeStates": [
+        "KS"
+      ],
+      "sources": [
+        {
+          "state": "KS",
+          "cardId": "CRY-TS-083",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "kelly-hopkinsville-goblins",
+      "name": "Kelly–Hopkinsville Goblins",
+      "homeStates": [
+        "KY"
+      ],
+      "sources": [
+        {
+          "state": "KY",
+          "cardId": "CRY-TS-084",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "loveland-frogman",
+      "name": "Loveland Frogman",
+      "homeStates": [
+        "OH"
+      ],
+      "sources": [
+        {
+          "state": "OH",
+          "cardId": "CRY-TS-102",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "maine-cryptid",
+      "name": "Maine Cryptid",
+      "homeStates": [
+        "ME"
+      ],
+      "sources": [
+        {
+          "state": "ME",
+          "cardId": "CRY-TS-086",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "mississippi-cryptid",
+      "name": "Mississippi Cryptid",
+      "homeStates": [
+        "MS"
+      ],
+      "sources": [
+        {
+          "state": "MS",
+          "cardId": "CRY-TS-091",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "missouri-cryptid",
+      "name": "Missouri Cryptid",
+      "homeStates": [
+        "MO"
+      ],
+      "sources": [
+        {
+          "state": "MO",
+          "cardId": "CRY-TS-092",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "montauk-monster",
+      "name": "Montauk Monster",
+      "homeStates": [
+        "NY"
+      ],
+      "sources": [
+        {
+          "state": "NY",
+          "cardId": "CRY-TS-099",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "mothman",
+      "name": "Mothman",
+      "homeStates": [
+        "WV"
+      ],
+      "sources": [
+        {
+          "state": "WV",
+          "cardId": "CRY-TS-115",
+          "cardType": "ATTACK"
+        }
+      ]
+    },
+    {
+      "id": "nebraska-cryptid",
+      "name": "Nebraska Cryptid",
+      "homeStates": [
+        "NE"
+      ],
+      "sources": [
+        {
+          "state": "NE",
+          "cardId": "CRY-TS-094",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "north-carolina-cryptid",
+      "name": "North Carolina Cryptid",
+      "homeStates": [
+        "NC"
+      ],
+      "sources": [
+        {
+          "state": "NC",
+          "cardId": "CRY-TS-100",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "north-dakota-cryptid",
+      "name": "North Dakota Cryptid",
+      "homeStates": [
+        "ND"
+      ],
+      "sources": [
+        {
+          "state": "ND",
+          "cardId": "CRY-TS-101",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "oklahoma-cryptid",
+      "name": "Oklahoma Cryptid",
+      "homeStates": [
+        "OK"
+      ],
+      "sources": [
+        {
+          "state": "OK",
+          "cardId": "CRY-TS-103",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "pennsylvania-cryptid",
+      "name": "Pennsylvania Cryptid",
+      "homeStates": [
+        "PA"
+      ],
+      "sources": [
+        {
+          "state": "PA",
+          "cardId": "CRY-TS-105",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "rhode-island-cryptid",
+      "name": "Rhode Island Cryptid",
+      "homeStates": [
+        "RI"
+      ],
+      "sources": [
+        {
+          "state": "RI",
+          "cardId": "CRY-TS-106",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "rougarou",
+      "name": "Rougarou",
+      "homeStates": [
+        "LA"
+      ],
+      "sources": [
+        {
+          "state": "LA",
+          "cardId": "CRY-TS-085",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "shunka-warakin",
+      "name": "Shunka Warakin",
+      "homeStates": [
+        "MT"
+      ],
+      "sources": [
+        {
+          "state": "MT",
+          "cardId": "CRY-TS-093",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "skinwalkers",
+      "name": "Skinwalkers",
+      "homeStates": [
+        "NM"
+      ],
+      "sources": [
+        {
+          "state": "NM",
+          "cardId": "CRY-TS-098",
+          "cardType": "ATTACK"
+        }
+      ]
+    },
+    {
+      "id": "skunk-ape",
+      "name": "Skunk Ape",
+      "homeStates": [
+        "FL"
+      ],
+      "sources": [
+        {
+          "state": "FL",
+          "cardId": "CRY-TS-076",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "snallygaster",
+      "name": "Snallygaster",
+      "homeStates": [
+        "MD"
+      ],
+      "sources": [
+        {
+          "state": "MD",
+          "cardId": "CRY-TS-087",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "south-carolina-cryptid",
+      "name": "South Carolina Cryptid",
+      "homeStates": [
+        "SC"
+      ],
+      "sources": [
+        {
+          "state": "SC",
+          "cardId": "CRY-TS-107",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "south-dakota-cryptid",
+      "name": "South Dakota Cryptid",
+      "homeStates": [
+        "SD"
+      ],
+      "sources": [
+        {
+          "state": "SD",
+          "cardId": "CRY-TS-108",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "tahoe-tessie",
+      "name": "Tahoe Tessie",
+      "homeStates": [
+        "NV"
+      ],
+      "sources": [
+        {
+          "state": "NV",
+          "cardId": "CRY-TS-095",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "tennessee-cryptid",
+      "name": "Tennessee Cryptid",
+      "homeStates": [
+        "TN"
+      ],
+      "sources": [
+        {
+          "state": "TN",
+          "cardId": "CRY-TS-109",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "thunderbird",
+      "name": "Thunderbird",
+      "homeStates": [
+        "AZ"
+      ],
+      "sources": [
+        {
+          "state": "AZ",
+          "cardId": "CRY-TS-070",
+          "cardType": "ATTACK"
+        }
+      ]
+    },
+    {
+      "id": "tizheruk",
+      "name": "Tizheruk",
+      "homeStates": [
+        "AK"
+      ],
+      "sources": [
+        {
+          "state": "AK",
+          "cardId": "CRY-TS-069",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "utah-cryptid",
+      "name": "Utah Cryptid",
+      "homeStates": [
+        "UT"
+      ],
+      "sources": [
+        {
+          "state": "UT",
+          "cardId": "CRY-TS-111",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "virginia-cryptid",
+      "name": "Virginia Cryptid",
+      "homeStates": [
+        "VA"
+      ],
+      "sources": [
+        {
+          "state": "VA",
+          "cardId": "CRY-TS-113",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "wendigo",
+      "name": "Wendigo",
+      "homeStates": [
+        "MN"
+      ],
+      "sources": [
+        {
+          "state": "MN",
+          "cardId": "CRY-TS-090",
+          "cardType": "ATTACK"
+        }
+      ]
+    },
+    {
+      "id": "wood-devils",
+      "name": "Wood Devils",
+      "homeStates": [
+        "NH"
+      ],
+      "sources": [
+        {
+          "state": "NH",
+          "cardId": "CRY-TS-096",
+          "cardType": "ZONE"
+        }
+      ]
+    },
+    {
+      "id": "wyoming-cryptid",
+      "name": "Wyoming Cryptid",
+      "homeStates": [
+        "WY"
+      ],
+      "sources": [
+        {
+          "state": "WY",
+          "cardId": "CRY-TS-117",
+          "cardType": "ZONE"
+        }
+      ]
     }
   ],
   "regions": {}

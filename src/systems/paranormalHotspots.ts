@@ -30,6 +30,7 @@ export interface Hotspot {
   stateAbbreviation?: string;
   totalWeight?: number;
   weightBreakdown?: HotspotWeightBreakdown;
+  truthDelta?: number;
 }
 
 export interface HotspotExtraArticle {
