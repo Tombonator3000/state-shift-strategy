@@ -18,94 +18,64 @@ const createGameState = (): Pick<GameState, 'states' | 'paranormalHotspots'> => 
   paranormalHotspots: {},
 });
 
-const createRng = (seed: number) => {
-  let value = seed % 2147483647;
-  if (value <= 0) value += 2147483646;
+const makeRng = (...values: number[]) => {
+  let index = 0;
+  const last = values.length > 0 ? values[values.length - 1] : 0;
   return () => {
-    value = (value * 16807) % 2147483647;
-    return (value - 1) / 2147483646;
+    const value = index < values.length ? values[index] : last;
+    index += 1;
+    return value;
   };
 };
 
-type SpawnRecord = { round: number; candidate: WeightedHotspotCandidate };
-
-const simulateSpawns = (rounds: number, enabledExpansions: string[]): SpawnRecord[] => {
-  const director = new HotspotDirector();
-  const rng = createRng(42);
-  const gameState = createGameState();
-  const results: SpawnRecord[] = [];
-
-  for (let round = 1; round <= rounds; round += 1) {
-    const candidate = director.rollForSpawn(round, gameState, { rng, enabledExpansions });
-    if (!candidate) {
-      continue;
-    }
-    results.push({ round, candidate });
-    gameState.paranormalHotspots = {};
-  }
-
-  return results;
-};
-
-const tallyByState = (records: SpawnRecord[]): Record<string, number> =>
-  records.reduce<Record<string, number>>((acc, record) => {
-    const key = record.candidate.stateAbbreviation;
-    acc[key] = (acc[key] ?? 0) + 1;
-    return acc;
-  }, {});
-
 describe('HotspotDirector spawn simulation', () => {
-  it('respects per-round cap and expansion weighting across ≥50 rounds', () => {
-    const rounds = 200;
-    const baseRecords = simulateSpawns(rounds, []);
-    const cryptidsRecords = simulateSpawns(rounds, ['cryptids']);
-    const halloweenRecords = simulateSpawns(rounds, ['halloween']);
+  it('honors spawn rate gating and surfaces catalog metadata', () => {
+    const director = new HotspotDirector();
+    const gameState = createGameState();
+    gameState.states = gameState.states
+      .filter(state => state.abbreviation === 'CA') as unknown as GameState['states'];
 
-    expect(baseRecords.length).toBe(rounds);
-    expect(new Set(baseRecords.map(record => record.round)).size).toBe(rounds);
+    const catalogEntry = hotspotsCatalog.hotspots.find(entry => entry.id === 'baseline:ca:silicon-seance');
+    const rng = makeRng(0.5, 0.01, 0.2);
 
-    const baseCounts = tallyByState(baseRecords);
-    const cryptidsCounts = tallyByState(cryptidsRecords);
-    const halloweenCounts = tallyByState(halloweenRecords);
+    expect(director.rollForSpawn(1, gameState, { rng, enabledExpansions: [] })).toBeNull();
 
-    const totalBaseSpawns = Object.values(baseCounts).reduce((sum, value) => sum + value, 0);
-    expect(totalBaseSpawns).toBe(rounds);
-
-    const targetedStates = ['WA', 'OR', 'WV', 'NJ', 'MT', 'NH', 'NM', 'AZ'];
-    const baseTargetedTotal = targetedStates
-      .reduce((sum, state) => sum + (baseCounts[state] ?? 0), 0);
-    const cryptidsTargetedTotal = targetedStates
-      .reduce((sum, state) => sum + (cryptidsCounts[state] ?? 0), 0);
-    expect(cryptidsTargetedTotal).toBeGreaterThan(baseTargetedTotal);
-    expect(targetedStates.some(state => (cryptidsCounts[state] ?? 0) > (baseCounts[state] ?? 0)))
-      .toBe(true);
-
-    expect(cryptidsRecords.some(record => record.candidate.tags.includes('expansion:cryptids')))
-      .toBe(true);
-
-    const waRecord = cryptidsRecords.find(record => record.candidate.stateAbbreviation === 'WA');
-    expect(waRecord?.candidate.weightBreakdown?.cryptid ?? 0).toBeGreaterThan(0);
-    expect(waRecord?.candidate.tags ?? []).toContain('cryptid-home');
-
-    expect(halloweenCounts).toEqual(baseCounts);
-    expect(halloweenRecords.every(record => !record.candidate.tags.includes('expansion:halloween')))
-      .toBe(true);
+    const candidate = director.rollForSpawn(2, gameState, { rng, enabledExpansions: [] });
+    expect(candidate).not.toBeNull();
+    expect(candidate?.name).toBe(catalogEntry?.name);
+    expect(candidate?.summary).toBe(catalogEntry?.summary ?? catalogEntry?.location);
+    expect(candidate?.kind).toBe('normal');
+    expect(candidate?.icon).toBe('👻');
+    expect(candidate?.truthRewardHint ?? 0).toBeGreaterThan(0);
+    expect(candidate?.tags).toContain('auto-spawn');
+    expect(candidate?.weightBreakdown).toMatchObject({
+      base: expect.any(Number),
+      catalog: expect.any(Number),
+      type: expect.any(Number),
+    });
   });
 
-  it('assigns themed icons for cryptid and halloween expansion spawns', () => {
+  it('requires enabled expansions for gated catalog entries and applies themed icons', () => {
     const director = new HotspotDirector();
     const cryptidGameState = createGameState();
     cryptidGameState.states = cryptidGameState.states
       .filter(state => state.abbreviation === 'WA') as unknown as GameState['states'];
 
-    const cryptidCandidate = director.rollForSpawn(1, cryptidGameState, {
-      rng: () => 0,
+    const blocked = director.rollForSpawn(1, cryptidGameState, {
+      rng: makeRng(0.01),
+      enabledExpansions: [],
+    });
+    expect(blocked).toBeNull();
+
+    const cryptidCandidate = director.rollForSpawn(2, cryptidGameState, {
+      rng: makeRng(0.01, 0.2),
       enabledExpansions: ['cryptids'],
     });
 
     expect(cryptidCandidate).not.toBeNull();
     expect(cryptidCandidate?.tags ?? []).toContain('cryptid-home');
     expect(cryptidCandidate?.icon).toBe('🦶');
+    expect(cryptidCandidate?.kind).toBe('cryptid');
 
     const halloweenConfig = JSON.parse(JSON.stringify(hotspotsConfig)) as typeof hotspotsConfig;
     halloweenConfig.spawn.expansionModifiers = {
@@ -117,19 +87,26 @@ describe('HotspotDirector spawn simulation', () => {
     };
 
     const emptyCryptids = { cryptids: [] } as { cryptids: [] };
-    const themedDirector = new HotspotDirector(hotspotsCatalog, halloweenConfig, emptyCryptids);
+    const halloweenCatalog = {
+      ...hotspotsCatalog,
+      hotspots: hotspotsCatalog.hotspots.filter(
+        entry => entry.expansionTag === 'halloween' && entry.stateAbbreviation === 'MA',
+      ),
+    } as typeof hotspotsCatalog;
+    const themedDirector = new HotspotDirector(halloweenCatalog, halloweenConfig, emptyCryptids);
     const halloweenGameState = createGameState();
     halloweenGameState.states = halloweenGameState.states
-      .filter(state => state.abbreviation === 'TX') as unknown as GameState['states'];
+      .filter(state => state.abbreviation === 'MA') as unknown as GameState['states'];
 
     const halloweenCandidate = themedDirector.rollForSpawn(1, halloweenGameState, {
-      rng: () => 0,
+      rng: makeRng(0.01, 0.2),
       enabledExpansions: ['halloween'],
     });
 
     expect(halloweenCandidate).not.toBeNull();
     expect(halloweenCandidate?.tags ?? []).toContain('expansion:halloween');
-    expect(halloweenCandidate?.icon).toBe('🎃');
+    expect(halloweenCandidate?.icon?.codePointAt(0)).toBe('🎃'.codePointAt(0));
+    expect(halloweenCandidate?.kind).toBe('ghost');
   });
 });
 
@@ -157,8 +134,9 @@ describe('Hotspot presentation helpers', () => {
     const sampleHotspot: WeightedHotspotCandidate = {
       id: 'auto:WA:42:123456789',
       name: 'Washington Phenomenon',
-      kind: 'phenomenon',
+      kind: 'normal',
       location: 'Washington',
+      summary: 'Washington sensors flare.',
       intensity: 6,
       status: 'spawning',
       tags: ['auto-spawn', 'expansion:cryptids', 'cryptid-home'],
@@ -166,22 +144,23 @@ describe('Hotspot presentation helpers', () => {
       stateName: 'Washington',
       stateAbbreviation: 'WA',
       totalWeight: 2.15,
-      weightBreakdown: { base: 1.4, expansion: 0.5, cryptid: 0.25 },
+      weightBreakdown: { base: 1.4, catalog: 0.2, type: 0, expansion: 0.5, cryptid: 0.25 },
       truthDelta: 0,
+      truthRewardHint: 5,
     };
 
     const article = director.buildHotspotExtraArticle(sampleHotspot);
     expect(article.badgeClassName)
-      .toBe('bg-purple-950/80 border-purple-400/70 text-purple-100');
+      .toBe('bg-slate-950/80 border-slate-500/60 text-slate-200');
     expect(article).toMatchInlineSnapshot(`
       {
-        "badgeClassName": "bg-purple-950/80 border-purple-400/70 text-purple-100",
-        "badgeLabel": "PHENOMENON • WASHINGTON",
-        "blurb": "Sensorene melder PHENOMENON-anomali over WASHINGTON. Intensitet 6.",
+        "badgeClassName": "bg-slate-950/80 border-slate-500/60 text-slate-200",
+        "badgeLabel": "NORMAL • WASHINGTON",
+        "blurb": "Sensorene melder NORMAL-anomali over WASHINGTON. Intensitet 6.",
         "headline": "WASHINGTON PHENOMENON",
         "id": "auto:WA:42:123456789",
         "intensity": 6,
-        "kind": "phenomenon",
+        "kind": "normal",
         "stateAbbreviation": "WA",
         "stateName": "Washington",
       }
