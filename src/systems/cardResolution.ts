@@ -1,4 +1,5 @@
 import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
+import { auditGameState } from '@/mvp/gameStateAudit';
 import type { MediaResolutionOptions } from '@/mvp/media';
 import { cloneGameState, type Card, type GameState as EngineGameState } from '@/mvp';
 import type { GameCard } from '@/rules/mvp';
@@ -321,6 +322,7 @@ export function resolveCardMVP(
   }
 
   applyEffectsMvp(engineState, ownerId, effectiveCard as Card, targetStateId, mediaOptionsWithCombos);
+  auditGameState(engineState);
 
   const logEntries: string[] = engineLog.map(message => `${card.name}: ${message}`);
   let syncedEngineLogLength = engineLog.length;
