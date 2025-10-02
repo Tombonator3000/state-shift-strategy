@@ -188,6 +188,7 @@ describe('Hotspot presentation helpers', () => {
     `);
 
     const logEntry = formatHotspotSpawnLog(article);
+    expect(logEntry).toContain('🛸 HOTSPOT OPPDAGET: WASHINGTON.');
     expect(logEntry.toLowerCase()).not.toContain('no active hotspot detected');
 
     const idleLog = getHotspotIdleLog();
