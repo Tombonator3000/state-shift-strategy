@@ -170,16 +170,24 @@ const toEngineState = (
     stateDefense[state.id] = state.defense;
     const owner = state.owner;
     const fallbackPressure = Math.max(0, state.pressure ?? 0);
-    const playerPressure = Number.isFinite(state.pressurePlayer)
+    let playerPressure = Number.isFinite(state.pressurePlayer)
       ? Math.max(0, state.pressurePlayer)
       : owner === 'player'
         ? 0
         : fallbackPressure;
-    const aiPressure = Number.isFinite(state.pressureAi)
+    let aiPressure = Number.isFinite(state.pressureAi)
       ? Math.max(0, state.pressureAi)
       : owner === 'ai'
         ? fallbackPressure
         : 0;
+
+    if (owner === 'player') {
+      playerPressure = 0;
+      aiPressure = 0;
+    } else if (owner === 'ai') {
+      aiPressure = 0;
+      playerPressure = 0;
+    }
 
     if (owner === 'player') {
       playerStates.add(state.id);
