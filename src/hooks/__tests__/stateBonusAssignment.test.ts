@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import type { GameState } from '../gameStateTypes';
-import type { AssignStateBonusesResult } from '@/game/stateBonuses';
+import type { ActiveStateBonus, GameState } from '../gameStateTypes';
+import { assignStateBonuses, type AssignStateBonusesResult } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from '../stateBonusAssignment';
 
 const createBaseGameState = (faction: 'truth' | 'government'): GameState => ({
@@ -223,6 +223,46 @@ describe('applyStateBonusAssignmentToState', () => {
     expect(afterRoundFour.states[0].pressurePlayer).toBe(
       (afterRoundThree.states[0].pressurePlayer ?? 0) + pressureDelta,
     );
+  });
+
+  test('flips cached bonus truth delta when a government player takes control of a neutral state', () => {
+    const neutralBonus: ActiveStateBonus = {
+      source: 'state-themed',
+      id: 'mountain_bonus_sasquatch_zoning_board',
+      stateId: '56',
+      stateName: 'Wyoming',
+      stateAbbreviation: 'WY',
+      round: 2,
+      label: 'Sasquatch Zoning Board',
+      summary: 'A towering “ranger” greenlights antenna farms for compliant operatives.',
+      headline: 'FOREST COUNCIL MEETING INCLUDES VERY TALL “RANGER”',
+      subhead: 'Minutes record no anomalies besides giant footprints.',
+      icon: '🦶',
+      truthDelta: 2,
+      pressureDelta: 1,
+    };
+
+    const reassignment = assignStateBonuses({
+      states: [
+        {
+          id: '56',
+          abbreviation: 'WY',
+          name: 'Wyoming',
+          owner: 'player',
+        },
+      ],
+      baseSeed: 101,
+      round: 3,
+      playerFaction: 'government',
+      existingBonuses: { WY: neutralBonus },
+    });
+
+    const wyomingBonus = reassignment.bonuses.WY;
+    expect(neutralBonus.truthDelta).toBeGreaterThan(0);
+    expect(wyomingBonus?.id).toBe(neutralBonus.id);
+    expect(wyomingBonus?.label).toBe(neutralBonus.label);
+    expect(wyomingBonus?.truthDelta).toBe(-neutralBonus.truthDelta);
+    expect(reassignment.playerTruthDelta).toBe(-neutralBonus.truthDelta);
   });
 
   test('applies AI-controlled adjustments to the correct pools', () => {
