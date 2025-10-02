@@ -1,3 +1,5 @@
+import { featureFlags } from '@/state/featureFlags';
+
 export interface ParanormalHotspotPayload {
   /** Optional fixed state identifier (FIPS or abbreviation) to anchor the hotspot. */
   stateId?: string;
@@ -4780,8 +4782,11 @@ export class EventManager {
       return null;
     }
 
-    const paranormalEvents = availableEvents.filter(event => Boolean(event.paranormalHotspot));
-    if (paranormalEvents.length > 0 && Math.random() < this.paranormalHotspotChance) {
+    const eventHotspotsEnabled = !featureFlags.hotspotDirectorEnabled;
+    const paranormalEvents = eventHotspotsEnabled
+      ? availableEvents.filter(event => Boolean(event.paranormalHotspot))
+      : [];
+    if (eventHotspotsEnabled && paranormalEvents.length > 0 && Math.random() < this.paranormalHotspotChance) {
       const paranormalSelection = this.selectEventFromPool(
         paranormalEvents,
         this.paranormalHotspotChance,
