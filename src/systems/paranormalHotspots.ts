@@ -25,6 +25,8 @@ export interface Hotspot {
   intensity: number;
   status: 'spawning' | 'active' | 'resolved' | 'expired';
   tags: string[];
+  icon?: string;
+  expansionTag?: string;
   stateId?: string;
   stateName?: string;
   stateAbbreviation?: string;
@@ -271,6 +273,49 @@ export interface HotspotSpawnOptions {
   enabledExpansions?: string[];
   rng?: () => number;
   excludeStates?: string[];
+}
+
+export const DEFAULT_HOTSPOT_ICON = '🛸';
+
+export function deriveHotspotIcon(metadata: {
+  icon?: string;
+  tags?: string[];
+  expansionTag?: string;
+}): string {
+  const { icon, tags = [], expansionTag } = metadata;
+
+  if (typeof icon === 'string' && icon.trim().length > 0) {
+    return icon;
+  }
+
+  const normalizedTags = tags
+    .filter((tag): tag is string => typeof tag === 'string')
+    .map(tag => tag.trim().toLowerCase())
+    .filter(tag => tag.length > 0);
+  const normalizedTagSet = new Set(normalizedTags);
+
+  const normalizedExpansionTag = (expansionTag ?? '')
+    .toString()
+    .trim()
+    .toLowerCase();
+
+  if (
+    normalizedTagSet.has('cryptid-home')
+    || normalizedTagSet.has('expansion:cryptids')
+    || normalizedExpansionTag === 'cryptids'
+  ) {
+    return '🦶';
+  }
+
+  if (
+    normalizedTagSet.has('halloween')
+    || normalizedTagSet.has('expansion:halloween')
+    || normalizedExpansionTag === 'halloween'
+  ) {
+    return '🎃';
+  }
+
+  return DEFAULT_HOTSPOT_ICON;
 }
 
 export interface WeightedHotspotCandidate extends Hotspot {
@@ -629,6 +674,23 @@ export class HotspotDirector {
     return { weight: currentWeight + boost, bonus: boost, tag: 'cryptid-home' };
   }
 
+  private resolveExpansionTag(tags: string[]): string | undefined {
+    for (const tag of tags) {
+      if (typeof tag !== 'string') {
+        continue;
+      }
+      const trimmed = tag.trim();
+      if (!trimmed.toLowerCase().startsWith('expansion:')) {
+        continue;
+      }
+      const value = trimmed.slice(trimmed.indexOf(':') + 1).trim();
+      if (value.length > 0) {
+        return value.toLowerCase();
+      }
+    }
+    return undefined;
+  }
+
   rollForSpawn(
     round: number,
     gameState: Pick<GameState, 'states' | 'paranormalHotspots'>,
@@ -644,6 +706,8 @@ export class HotspotDirector {
       weight: number;
       breakdown: HotspotWeightBreakdown;
       tags: string[];
+      expansionTag?: string;
+      icon: string;
     }> = [];
 
     for (const state of gameState.states) {
@@ -681,7 +745,10 @@ export class HotspotDirector {
         continue;
       }
 
-      candidates.push({ state, weight: totalWeight, breakdown, tags });
+      const expansionTag = this.resolveExpansionTag(tags);
+      const icon = deriveHotspotIcon({ tags, expansionTag });
+
+      candidates.push({ state, weight: totalWeight, breakdown, tags, expansionTag, icon });
     }
 
     if (candidates.length === 0) {
@@ -700,7 +767,7 @@ export class HotspotDirector {
       }
     }
 
-    const { state, breakdown, weight, tags } = selected;
+    const { state, breakdown, weight, tags, expansionTag, icon } = selected;
     const timestamp = Date.now();
     const baseName = state.name ?? state.abbreviation;
     const hotspotId = `auto:${state.abbreviation}:${round}:${timestamp}`;
@@ -713,6 +780,8 @@ export class HotspotDirector {
       intensity: Math.max(1, Math.round(weight * 5)),
       status: 'spawning',
       tags,
+      icon,
+      expansionTag,
       stateId: state.id,
       stateName: baseName,
       stateAbbreviation: state.abbreviation,

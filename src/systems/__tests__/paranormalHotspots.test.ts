@@ -4,6 +4,9 @@ import type { GameState } from '@/hooks/gameStateTypes';
 import { formatHotspotSpawnLog, getHotspotIdleLog } from '@/state/useGameLog';
 import { USA_STATES } from '@/data/usaStates';
 
+import hotspotsCatalog from '@/data/hotspots.catalog.json';
+import hotspotsConfig from '@/data/hotspots.config.json';
+
 import { HotspotDirector, resolveHotspot, type WeightedHotspotCandidate } from '../paranormalHotspots';
 
 const createGameState = (): Pick<GameState, 'states' | 'paranormalHotspots'> => ({
@@ -87,6 +90,46 @@ describe('HotspotDirector spawn simulation', () => {
     expect(halloweenCounts).toEqual(baseCounts);
     expect(halloweenRecords.every(record => !record.candidate.tags.includes('expansion:halloween')))
       .toBe(true);
+  });
+
+  it('assigns themed icons for cryptid and halloween expansion spawns', () => {
+    const director = new HotspotDirector();
+    const cryptidGameState = createGameState();
+    cryptidGameState.states = cryptidGameState.states
+      .filter(state => state.abbreviation === 'WA') as unknown as GameState['states'];
+
+    const cryptidCandidate = director.rollForSpawn(1, cryptidGameState, {
+      rng: () => 0,
+      enabledExpansions: ['cryptids'],
+    });
+
+    expect(cryptidCandidate).not.toBeNull();
+    expect(cryptidCandidate?.tags ?? []).toContain('cryptid-home');
+    expect(cryptidCandidate?.icon).toBe('🦶');
+
+    const halloweenConfig = JSON.parse(JSON.stringify(hotspotsConfig)) as typeof hotspotsConfig;
+    halloweenConfig.spawn.expansionModifiers = {
+      ...halloweenConfig.spawn.expansionModifiers,
+      halloween: {
+        multiplier: 1.15,
+        stateWeights: { TX: 2 },
+      },
+    };
+
+    const emptyCryptids = { cryptids: [] } as { cryptids: [] };
+    const themedDirector = new HotspotDirector(hotspotsCatalog, halloweenConfig, emptyCryptids);
+    const halloweenGameState = createGameState();
+    halloweenGameState.states = halloweenGameState.states
+      .filter(state => state.abbreviation === 'TX') as unknown as GameState['states'];
+
+    const halloweenCandidate = themedDirector.rollForSpawn(1, halloweenGameState, {
+      rng: () => 0,
+      enabledExpansions: ['halloween'],
+    });
+
+    expect(halloweenCandidate).not.toBeNull();
+    expect(halloweenCandidate?.tags ?? []).toContain('expansion:halloween');
+    expect(halloweenCandidate?.icon).toBe('🎃');
   });
 });
 

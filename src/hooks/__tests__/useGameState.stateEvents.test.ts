@@ -184,7 +184,7 @@ mock.module('@/systems/cardResolution', () => ({
     const updatedStates = prev.states.map((state: any) => {
       if (captureId && state.id === captureId) {
         const ownerLabel = owner === 'human' ? 'player' : 'ai';
-        return { ...state, owner: ownerLabel };
+        return { ...state, owner: ownerLabel, paranormalHotspot: undefined };
       }
       return { ...state };
     });
@@ -202,10 +202,33 @@ mock.module('@/systems/cardResolution', () => ({
       ? addControlledState(prev.aiControlledStates, resolvedState.abbreviation)
       : prev.aiControlledStates;
 
+    const truthDelta = 0;
+    const truth = prev.truth;
+
+    const hotspotResolutions = captureId && resolvedState?.paranormalHotspot
+      ? [{
+        stateId: resolvedState.id,
+        stateAbbreviation: resolvedState.abbreviation,
+        stateName: resolvedState.name,
+        hotspotId: resolvedState.paranormalHotspot.id,
+        label: resolvedState.paranormalHotspot.label,
+        defenseBoost: resolvedState.paranormalHotspot.defenseBoost ?? 0,
+        truthReward: 0,
+        truthDelta,
+        expectedTruthDelta: truthDelta,
+        faction: owner === 'human' ? prev.faction : prev.faction === 'truth' ? 'government' : 'truth',
+        source: resolvedState.paranormalHotspot.source ?? 'neutral',
+      }]
+      : undefined;
+
+    const resolvedHotspots = captureId && resolvedState?.paranormalHotspot
+      ? [resolvedState.abbreviation ?? resolvedState.id]
+      : undefined;
+
     return {
       ip: prev.ip,
       aiIP: prev.aiIP,
-      truth: prev.truth,
+      truth,
       states: updatedStates,
       controlledStates,
       aiControlledStates,
@@ -214,6 +237,8 @@ mock.module('@/systems/cardResolution', () => ({
       selectedCard: card?.id ?? null,
       logEntries: [],
       damageDealt: 0,
+      resolvedHotspots,
+      hotspotResolutions,
     };
   },
 }));
