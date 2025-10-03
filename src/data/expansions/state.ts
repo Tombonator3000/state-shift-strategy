@@ -20,6 +20,7 @@ import {
   hydrateExpansionFeatures,
   isEditorsFeatureEnabled,
   setEditorsFeatureEnabled as persistEditorsFeatureEnabled,
+  setTabloidRelicsFeatureEnabled as persistTabloidRelicsFeatureEnabled,
 } from './features';
 
 type StoredPrefs = {
@@ -123,6 +124,12 @@ export const getStoredExpansionIds = (): string[] => [...enabledIdsCache];
 
 export const setEditorsExpansionEnabled = (enabled: boolean): void => {
   const nextFeatures = persistEditorsFeatureEnabled(enabled);
+  prefs.features = nextFeatures;
+  notify();
+};
+
+export const setTabloidRelicsExpansionEnabled = (enabled: boolean): void => {
+  const nextFeatures = persistTabloidRelicsFeatureEnabled(enabled);
   prefs.features = nextFeatures;
   notify();
 };

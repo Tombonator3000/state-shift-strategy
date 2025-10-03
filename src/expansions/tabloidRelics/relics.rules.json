@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "relics": [
+    {
+      "id": "inkwell_of_intrigue",
+      "label": "Inkwell of Intrigue",
+      "rarity": "common",
+      "duration": 2,
+      "priority": 40,
+      "trigger": {
+        "truthBelow": 45,
+        "comboTruthDeltaBelow": 0
+      },
+      "effects": {
+        "truthPerRound": 3
+      },
+      "summary": "+3% Truth each round while active.",
+      "detail": "Tabloid scribes weaponize scandal ink after a nightly slump.",
+      "clamp": {
+        "truth": { "max": 85 }
+      },
+      "amplify": {
+        "editorMultiplier": 1.4
+      }
+    },
+    {
+      "id": "pressroom_lockdown",
+      "label": "Pressroom Lockdown",
+      "rarity": "uncommon",
+      "duration": 3,
+      "priority": 60,
+      "trigger": {
+        "ipBelow": 15,
+        "requiresFaction": "truth"
+      },
+      "effects": {
+        "ipPerRound": 3
+      },
+      "summary": "+3 IP buffer while the newsroom barricades itself.",
+      "detail": "Circulation security reroutes ad spend into your coffers.",
+      "clamp": {
+        "ip": { "min": 0 }
+      },
+      "amplify": {
+        "editorMultiplier": 1.2
+      }
+    },
+    {
+      "id": "red_string_reactor",
+      "label": "Red String Reactor",
+      "rarity": "rare",
+      "duration": 2,
+      "priority": 75,
+      "trigger": {
+        "playerMediaPlaysAtLeast": 2,
+        "eventTruthGainAtLeast": 8
+      },
+      "effects": {
+        "cardDrawBonus": 1,
+        "truthPerRound": 2
+      },
+      "summary": "Gain +1 card draw and +2% Truth for conspiracy-fueled spreads.",
+      "detail": "The corkboard glows when multiple exposés align in one issue.",
+      "clamp": {
+        "truth": { "max": 95 }
+      },
+      "amplify": {
+        "editorMultiplier": 1.3
+      }
+    },
+    {
+      "id": "black_budget_briefing",
+      "label": "Black Budget Briefing",
+      "rarity": "legendary",
+      "duration": 1,
+      "priority": 90,
+      "trigger": {
+        "aiIpAbove": 25,
+        "comboTruthDeltaBelow": -5
+      },
+      "effects": {
+        "ipPerRound": 5,
+        "truthPerRound": 4
+      },
+      "summary": "+5 IP and +4% Truth as clandestine backers panic-buy influence.",
+      "detail": "Shadow investors flood the newsroom when the opponent surges.",
+      "clamp": {
+        "truth": { "max": 100 }
+      },
+      "amplify": {
+        "editorMultiplier": 1.5
+      }
+    }
+  ]
+}

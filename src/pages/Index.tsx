@@ -20,6 +20,7 @@ import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
+import RelicUI from '@/expansions/tabloidRelics/RelicUI';
 
 import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
 import ContextualHelp from '@/components/game/ContextualHelp';
@@ -3015,6 +3016,7 @@ const Index = () => {
       />
 
       <CardAnimationLayer />
+      <RelicUI runtime={gameState.tabloidRelicsRuntime ?? null} />
 
       <CardDetailOverlay
         card={inspectedPlayedCard}

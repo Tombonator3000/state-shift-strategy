@@ -9,6 +9,7 @@ import type { TurnPlay } from '@/game/combo.types';
 import type { HotspotKind, WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
 import type { StateCombinationEffects } from '@/data/stateCombinations';
 import type { EditorDefinition, EditorId } from '@/expansions/editors/EditorsEngine';
+import type { TabloidRelicRuntimeState } from '@/expansions/tabloidRelics/RelicTypes';
 
 export interface CardPlayRecord {
   card: GameCard;
@@ -128,6 +129,7 @@ export interface GameState {
   editorDef?: EditorDefinition | null;
   editorRuntime?: GameEditorRuntimeState | null;
   preGameAdditions?: GameEditorPreGameAdditions | null;
+  tabloidRelicsRuntime?: TabloidRelicRuntimeState | null;
 }
 
 export interface GameEditorScandalFlags {

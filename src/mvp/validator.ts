@@ -1,5 +1,6 @@
 import type { Faction, GameCard, MVPCardType, Rarity } from '@/rules/mvp';
 import type { TurnPlay } from '@/game/combo.types';
+import type { TabloidRelicRuntimeState } from '@/expansions/tabloidRelics/RelicTypes';
 import { expectedCost, MVP_CARD_TYPES } from '@/rules/mvp';
 
 type BaseEffects = {
@@ -50,6 +51,7 @@ export type GameState = {
   playsThisTurn: number;
   turnPlays: TurnPlay[];
   log: string[];
+  tabloidRelicsRuntime?: TabloidRelicRuntimeState | null;
 };
 
 export const ALLOWED_FACTIONS: readonly Faction[] = ['truth', 'government'];
@@ -548,6 +550,14 @@ export function clonePlayer(player: PlayerState): PlayerState {
 }
 
 export function cloneGameState(state: GameState): GameState {
+  const clonedRuntime = state.tabloidRelicsRuntime
+    ? {
+        entries: state.tabloidRelicsRuntime.entries.map(entry => ({ ...entry })),
+        lastIssueRound: state.tabloidRelicsRuntime.lastIssueRound,
+        lastUpdatedTurn: state.tabloidRelicsRuntime.lastUpdatedTurn,
+      }
+    : state.tabloidRelicsRuntime ?? null;
+
   return {
     ...state,
     log: [...state.log],
@@ -563,6 +573,7 @@ export function cloneGameState(state: GameState): GameState {
       Object.entries(state.pressureByState).map(([id, value]) => [id, { ...value }]),
     ),
     stateDefense: { ...state.stateDefense },
+    tabloidRelicsRuntime: clonedRuntime,
   };
 }
 

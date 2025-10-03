@@ -4,6 +4,7 @@ import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
 import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward } from '@/game/comboEngine';
 import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
+import { RelicEngine } from '@/expansions/tabloidRelics/RelicEngine';
 import { cloneGameState } from './validator';
 import { auditGameState } from './gameStateAudit';
 import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
@@ -228,11 +229,30 @@ export function startTurn(state: GameState): GameState {
   const currentId = cloned.currentPlayer;
   const me = cloned.players[currentId];
   const opponent = cloned.players[otherPlayer(currentId)];
+  const relicResult = RelicEngine.applyRoundStart({
+    state: {
+      faction: me.faction,
+      truth: cloned.truth,
+      ip: me.ip,
+      aiIP: opponent.ip,
+      round: cloned.turn,
+      turn: cloned.turn,
+      editorId: null,
+      editorDef: null,
+      tabloidRelicsRuntime: cloned.tabloidRelicsRuntime ?? null,
+    },
+  });
+  cloned.truth = relicResult.truth;
+  me.ip = relicResult.ip;
+  opponent.ip = relicResult.aiIp;
+  cloned.tabloidRelicsRuntime = relicResult.runtime;
   const { baseIncome, maintenance, swingTax, catchUpBonus, netIncome, ipGap, stateGap, stateIncomeDetails } = computeTurnIpIncome(
     me,
     opponent,
   );
-  const logEntries = [...cloned.log];
+  const logEntries = relicResult.logEntries.length
+    ? [...cloned.log, ...relicResult.logEntries]
+    : [...cloned.log];
 
   const baseComponents: string[] = ['base 5'];
   if (stateIncomeDetails.length > 0) {
