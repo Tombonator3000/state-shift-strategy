@@ -9,7 +9,23 @@ export interface EffectPosition {
 export class VisualEffectsCoordinator {
   // Trigger particle effect at specific position
   static triggerParticleEffect(
-    type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain' | 'stateevent' | 'flash' | 'broadcast' | 'cryptid',
+    type:
+      | 'deploy'
+      | 'capture'
+      | 'counter'
+      | 'victory'
+      | 'synergy'
+      | 'bigwin'
+      | 'stateloss'
+      | 'chain'
+      | 'stateevent'
+      | 'flash'
+      | 'broadcast'
+      | 'cryptid'
+      | 'ectoplasm'
+      | 'surveillanceRedaction'
+      | 'corkboardPins'
+      | 'hotspotFlare',
     position: EffectPosition
   ): void {
     window.dispatchEvent(new CustomEvent('cardDeployed', {
@@ -45,8 +61,10 @@ export class VisualEffectsCoordinator {
   static triggerSynergyActivation(
     bonusIP: number,
     position: EffectPosition,
-    effectType: 'synergy' | 'bigwin' | 'chain' = 'synergy',
-    comboName?: string
+    effectType: 'synergy' | 'bigwin' | 'chain' | 'corkboardPins' = 'synergy',
+    comboName?: string,
+    numberType: 'synergy' | 'combo' | 'chain' =
+      effectType === 'chain' ? 'chain' : effectType === 'bigwin' ? 'combo' : 'synergy'
   ): void {
     window.dispatchEvent(new CustomEvent('synergyActivation', {
       detail: {
@@ -54,7 +72,7 @@ export class VisualEffectsCoordinator {
         x: position.x,
         y: position.y,
         effectType,
-        numberType: effectType,
+        numberType,
         comboName
       }
     }));

@@ -19,6 +19,29 @@ interface CardAnimationLayerProps {
   children?: React.ReactNode;
 }
 
+const CORKBOARD_PIN_OFFSETS: Array<{ dx: number; dy: number }> = [
+  { dx: -48, dy: -56 },
+  { dx: 52, dy: -28 },
+  { dx: -44, dy: 46 },
+  { dx: 50, dy: 54 }
+];
+
+const SURVEILLANCE_BAR_OFFSETS: number[] = [-42, 0, 42];
+
+const HOTSPOT_PARTICLE_OFFSETS: Array<{ dx: number; dy: number }> = [
+  { dx: 0, dy: -72 },
+  { dx: -60, dy: 14 },
+  { dx: 64, dy: 18 }
+];
+
+const CORKBOARD_PARTICLE_DELAY = 220;
+const CORKBOARD_PARTICLE_STAGGER = 90;
+const SURVEILLANCE_PARTICLE_DELAY = 280;
+const SURVEILLANCE_PARTICLE_STAGGER = 110;
+const HOTSPOT_PARTICLE_DELAY = 2200;
+const HOTSPOT_PARTICLE_STAGGER = 140;
+const ECTOPLASM_PARTICLE_DELAY = 200;
+
 const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => {
   const audio = useAudioContext();
   const [particleEffects, setParticleEffects] = useState<Array<{
@@ -141,6 +164,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
 
   const agendaStageTimeoutRef = useRef<number | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const effectTimeoutsRef = useRef<number[]>([]);
 
   const clearAgendaStageOverlay = useCallback(() => {
     if (agendaStageTimeoutRef.current && typeof window !== 'undefined') {
@@ -150,17 +174,42 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     setAgendaStageOverlay(null);
   }, []);
 
-  const spawnParticleEffect = useCallback((type: ParticleEffectType, x: number, y: number) => {
-    setParticleEffects(prev => [
-      ...prev,
-      {
-        id: Date.now() + Math.random(),
-        type,
-        x,
-        y
+  const spawnParticleEffect = useCallback(
+    (
+      type: ParticleEffectType,
+      x: number,
+      y: number,
+      options?: { delay?: number; skipOnReducedMotion?: boolean }
+    ) => {
+      if (prefersReducedMotion && options?.skipOnReducedMotion) {
+        return;
       }
-    ]);
-  }, []);
+
+      const enqueueEffect = () => {
+        setParticleEffects(prev => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            type,
+            x,
+            y
+          }
+        ]);
+      };
+
+      if (options?.delay && typeof window !== 'undefined') {
+        const timeoutId = window.setTimeout(() => {
+          enqueueEffect();
+          effectTimeoutsRef.current = effectTimeoutsRef.current.filter(id => id !== timeoutId);
+        }, options.delay);
+        effectTimeoutsRef.current.push(timeoutId);
+        return;
+      }
+
+      enqueueEffect();
+    },
+    [prefersReducedMotion]
+  );
 
   useEffect(() => {
     const handleCardDeployed = (event: CustomEvent<{ type: ParticleEffectType; x: number; y: number }>) => {
@@ -180,9 +229,25 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
 
     const handleSynergyActivation = (event: CustomEvent<{ bonusIP: number; numberType?: 'synergy' | 'combo' | 'chain'; effectType?: ParticleEffectType; x: number; y: number; comboName?: string }>) => {
       if (!event?.detail) return;
-      const effectType = event.detail.effectType || 'synergy';
+      const requestedEffectType = event.detail.effectType || 'corkboardPins';
+      const resolvedEffectType = requestedEffectType === 'synergy' ? 'corkboardPins' : requestedEffectType;
       const numberType = event.detail.numberType ?? 'synergy';
-      spawnParticleEffect(effectType, event.detail.x, event.detail.y);
+
+      if (resolvedEffectType === 'corkboardPins') {
+        CORKBOARD_PIN_OFFSETS.forEach((offset, index) => {
+          spawnParticleEffect(
+            'corkboardPins',
+            event.detail.x + offset.dx,
+            event.detail.y + offset.dy,
+            {
+              delay: CORKBOARD_PARTICLE_DELAY + index * CORKBOARD_PARTICLE_STAGGER,
+              skipOnReducedMotion: true
+            }
+          );
+        });
+      } else {
+        spawnParticleEffect(resolvedEffectType, event.detail.x, event.detail.y);
+      }
 
       // Also show floating number for synergy bonus
       setFloatingNumber({
@@ -245,7 +310,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       if (!event?.detail) return;
       const { position, stateId, stateName, footageQuality, reducedMotion } = event.detail;
       if (position && !reducedMotion) {
-        spawnParticleEffect('cryptid', position.x, position.y);
+        spawnParticleEffect('ectoplasm', position.x, position.y, {
+          delay: ECTOPLASM_PARTICLE_DELAY,
+          skipOnReducedMotion: true
+        });
       }
       setCryptidOverlay({
         id: Date.now(),
@@ -279,7 +347,17 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       };
       const resolvedPosition = position ?? fallbackPosition;
 
-      spawnParticleEffect('flash', resolvedPosition.x, resolvedPosition.y);
+      HOTSPOT_PARTICLE_OFFSETS.forEach((offset, index) => {
+        spawnParticleEffect(
+          'hotspotFlare',
+          resolvedPosition.x + offset.dx,
+          resolvedPosition.y + offset.dy,
+          {
+            delay: HOTSPOT_PARTICLE_DELAY + index * HOTSPOT_PARTICLE_STAGGER,
+            skipOnReducedMotion: true
+          }
+        );
+      });
       setHotspotOverlay({
         id: Date.now(),
         x: resolvedPosition.x,
@@ -330,7 +408,12 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         targetName,
         threatLevel
       });
-      spawnParticleEffect('counter', x, y);
+      SURVEILLANCE_BAR_OFFSETS.forEach((offsetY, index) => {
+        spawnParticleEffect('surveillanceRedaction', x, y + offsetY, {
+          delay: SURVEILLANCE_PARTICLE_DELAY + index * SURVEILLANCE_PARTICLE_STAGGER,
+          skipOnReducedMotion: true
+        });
+      });
       audio?.playSFX?.('click'); // Surveillance beep
     };
 
@@ -496,7 +579,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
       window.removeEventListener('cryptidSighting', handleCryptidSighting as EventListener);
       window.removeEventListener('paranormalHotspot', handleParanormalHotspot as EventListener);
-      
+
       // New enhanced effect listeners
       window.removeEventListener('breakingNews', handleBreakingNews as EventListener);
       window.removeEventListener('governmentSurveillance', handleGovernmentSurveillance as EventListener);
@@ -506,6 +589,18 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('agendaStageShift', handleAgendaStageShift as EventListener);
     };
   }, [spawnParticleEffect, audio, clearAgendaStageOverlay]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window === 'undefined') {
+        return;
+      }
+      effectTimeoutsRef.current.forEach(timeoutId => {
+        window.clearTimeout(timeoutId);
+      });
+      effectTimeoutsRef.current = [];
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) {
