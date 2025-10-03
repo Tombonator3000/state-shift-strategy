@@ -57,7 +57,13 @@ import type {
   StateParanormalHotspot,
   StateParanormalHotspotSummary,
 } from './gameStateTypes';
-import { applyOnSetup, resolveEditor, type EditorId } from '@/expansions/editors/EditorsEngine';
+import {
+  applyOnSetup,
+  applyOnTurnStart,
+  applyOnPlayCard,
+  resolveEditor,
+  type EditorId,
+} from '@/expansions/editors/EditorsEngine';
 import {
   applyAiCardPlay,
   buildStrategyLogEntries as buildStrategyLogEntriesHelper,
@@ -79,6 +85,180 @@ const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefin
 const HAND_LIMIT = 5;
 
 type AgendaOwner = 'human' | 'ai';
+
+type EditorScandalTarget = 'player' | 'ai';
+
+interface EditorPendingScandalEffect {
+  kind: 'discard-random';
+  id?: string;
+  source: string;
+  amount: number;
+  target: EditorScandalTarget;
+  logMessage?: string;
+  emptyLogMessage?: string;
+  toastMessage?: string;
+}
+
+interface EditorTurnStartHookContext {
+  readonly state: GameState;
+  readonly runtime: GameEditorRuntimeState | null;
+  bonusCardDraw: number;
+  pendingScandals: EditorPendingScandalEffect[];
+  logEntries: string[];
+  toastMessages: string[];
+  runtimePatch?: Partial<GameEditorRuntimeState>;
+}
+
+interface EditorPlayCardHookContext {
+  readonly state: GameState;
+  readonly runtime: GameEditorRuntimeState | null;
+  readonly card: GameCard;
+  readonly cardKind: GameCard['type'];
+  cost: number;
+  truthDelta: number;
+  ipDelta: number;
+  aiIpDelta: number;
+  pendingScandals: EditorPendingScandalEffect[];
+  logEntries: string[];
+  toastMessages: string[];
+  fxMessages: string[];
+  runtimePatch?: Partial<GameEditorRuntimeState>;
+}
+
+interface EditorScandalResolution {
+  playerHand: GameCard[];
+  aiHand: GameCard[];
+  logEntries: string[];
+  toastMessages: string[];
+}
+
+const resolveActiveEditorFromState = (state: GameState) => {
+  return state.editorDef ?? resolveEditor(state.editorId ?? null) ?? null;
+};
+
+const emitEditorToastMessages = (messages: string[]): void => {
+  if (!messages.length || typeof window === 'undefined') {
+    return;
+  }
+
+  const emitter: unknown = (window as any).uiComboToast;
+  if (typeof emitter !== 'function') {
+    return;
+  }
+
+  for (const message of messages) {
+    if (typeof message === 'string' && message.trim().length > 0) {
+      (emitter as (value: string) => void)(message);
+    }
+  }
+};
+
+const applyEditorPendingScandalEffects = (params: {
+  effects: EditorPendingScandalEffect[];
+  playerHand: GameCard[];
+  aiHand: GameCard[];
+  logEntries: string[];
+}): EditorScandalResolution => {
+  const { effects, playerHand, aiHand, logEntries } = params;
+  if (!effects.length) {
+    return {
+      playerHand,
+      aiHand,
+      logEntries: [...logEntries],
+      toastMessages: [],
+    };
+  }
+
+  const workingPlayerHand = [...playerHand];
+  const workingAiHand = [...aiHand];
+  const combinedLogs = [...logEntries];
+  const toastMessages: string[] = [];
+
+  for (const effect of effects) {
+    if (!effect || effect.kind !== 'discard-random') {
+      continue;
+    }
+
+    const discardAmount = Number.isFinite(effect.amount) ? Math.max(0, Math.trunc(effect.amount)) : 0;
+    if (discardAmount <= 0) {
+      continue;
+    }
+
+    const targetHand = effect.target === 'ai' ? workingAiHand : workingPlayerHand;
+    if (targetHand.length === 0) {
+      if (effect.emptyLogMessage) {
+        combinedLogs.push(effect.emptyLogMessage);
+      } else {
+        combinedLogs.push(
+          `${effect.source} fizzles — ${effect.target === 'ai' ? 'the AI has' : 'you have'} no cards to discard.`,
+        );
+      }
+      continue;
+    }
+
+    const discardCount = Math.min(discardAmount, targetHand.length);
+    const discardedCards: GameCard[] = [];
+
+    for (let index = 0; index < discardCount; index += 1) {
+      const randomIndex = Math.floor(Math.random() * targetHand.length);
+      const [removed] = targetHand.splice(randomIndex, 1);
+      if (removed) {
+        discardedCards.push(removed);
+      }
+    }
+
+    const cardNames = discardedCards.map(card => card.name ?? card.id).filter(Boolean);
+    const joinedCardNames = cardNames.join(', ');
+    const detail = cardNames.length > 0 ? ` (${joinedCardNames})` : '';
+    const logMessage = effect.logMessage
+      ?? `${effect.source} forces ${effect.target === 'ai' ? 'the AI' : 'you'} to discard ${discardCount} card${
+        discardCount === 1 ? '' : 's'
+      }${detail}.`;
+    combinedLogs.push(logMessage);
+
+    if (effect.toastMessage) {
+      const toast = effect.toastMessage.replace('{{CARDS}}', joinedCardNames);
+      if (toast.trim().length > 0) {
+        toastMessages.push(toast);
+      }
+    }
+  }
+
+  return {
+    playerHand: workingPlayerHand,
+    aiHand: workingAiHand,
+    logEntries: combinedLogs,
+    toastMessages,
+  };
+};
+
+const applyEditorTurnStartHookEffect = (
+  options: { hookId?: string | null },
+  context: EditorTurnStartHookContext,
+): void => {
+  if (!options.hookId) {
+    return;
+  }
+
+  switch (options.hookId) {
+    default:
+      break;
+  }
+};
+
+const applyEditorPlayCardHookEffect = (
+  options: { hookId?: string | null },
+  context: EditorPlayCardHookContext,
+): void => {
+  if (!options.hookId) {
+    return;
+  }
+
+  switch (options.hookId) {
+    default:
+      break;
+  }
+};
 
 const normalizeEditorRuntimeState = (value: unknown): GameEditorRuntimeState | undefined => {
   if (!value || typeof value !== 'object') {
@@ -2382,19 +2562,45 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   }, [achievements, aiDifficulty, assignSecretAgenda, eventManager, resetStateEvents]);
 
   const playCard = useCallback((cardId: string, targetOverride?: string | null) => {
+    const pendingEditorToasts: string[] = [];
     setGameState(prev => {
       const card = prev.hand.find(c => c.id === cardId);
       if (!card || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
         return prev;
       }
 
-      const effectiveCost = applyStateCombinationCostModifiers(
+      const baseCost = applyStateCombinationCostModifiers(
         card.cost,
         card.type,
         'human',
         prev.stateCombinationEffects,
       );
 
+      const runtimeSnapshot = prev.editorRuntime ? { ...prev.editorRuntime } : null;
+      const activeEditor = resolveActiveEditorFromState(prev);
+      const playContext: EditorPlayCardHookContext = {
+        state: prev,
+        runtime: runtimeSnapshot,
+        card,
+        cardKind: card.type,
+        cost: baseCost,
+        truthDelta: 0,
+        ipDelta: 0,
+        aiIpDelta: 0,
+        pendingScandals: [],
+        logEntries: [],
+        toastMessages: [],
+        fxMessages: [],
+      };
+
+      if (activeEditor) {
+        // [EDITORS_ON_PLAY_CARD_HOOK]
+        applyOnPlayCard(activeEditor, ({ hook }) => {
+          applyEditorPlayCardHookEffect({ hookId: hook?.id }, playContext);
+        });
+      }
+
+      const effectiveCost = Math.max(0, Math.trunc(playContext.cost));
       if (prev.ip < effectiveCost) {
         return prev;
       }
@@ -2405,6 +2611,37 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const targetState = targetOverride ?? prev.targetState ?? null;
       const resolution = resolveCardEffects(prev, resolvedCard, targetState);
+
+      const adjustmentLogs: string[] = [];
+      if (playContext.truthDelta !== 0) {
+        const truthMutation = { truth: resolution.truth, log: [] as string[] };
+        applyTruthDelta(truthMutation, playContext.truthDelta, 'human');
+        resolution.truth = truthMutation.truth;
+        if (truthMutation.log.length > 0) {
+          adjustmentLogs.push(...truthMutation.log);
+        }
+      }
+
+      if (playContext.ipDelta !== 0) {
+        resolution.ip = Math.max(0, resolution.ip + playContext.ipDelta);
+      }
+
+      if (playContext.aiIpDelta !== 0) {
+        resolution.aiIP = Math.max(0, resolution.aiIP + playContext.aiIpDelta);
+      }
+
+      if (adjustmentLogs.length > 0 || playContext.logEntries.length > 0) {
+        const mergedLogEntries = [...(resolution.logEntries ?? []), ...adjustmentLogs, ...playContext.logEntries];
+        resolution.logEntries = mergedLogEntries;
+      }
+
+      if (playContext.toastMessages.length > 0) {
+        pendingEditorToasts.push(...playContext.toastMessages);
+      }
+      if (playContext.fxMessages.length > 0) {
+        pendingEditorToasts.push(...playContext.fxMessages);
+      }
+
       const updatedHotspots = { ...prev.paranormalHotspots };
       if (resolution.resolvedHotspots) {
         for (const abbr of resolution.resolvedHotspots) {
@@ -2444,7 +2681,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const mergedStates = mergeStateEventHistories(prev.states, resolution.states);
 
-      const nextState: GameState = {
+      const editorRuntimePatch = playContext.runtimePatch
+        ? normalizeEditorRuntimeState({ ...(runtimeSnapshot ?? {}), ...playContext.runtimePatch })
+        : undefined;
+      const nextEditorRuntime = editorRuntimePatch ?? runtimeSnapshot ?? prev.editorRuntime ?? null;
+
+      let nextState: GameState = {
         ...prev,
         hand: prev.hand.filter(c => c.id !== cardId),
         ip: resolution.ip,
@@ -2464,7 +2706,26 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         agendaRoundCounters: counterSnapshot.roundCounters,
         paranormalHotspots: updatedHotspots,
         activeHotspot: nextActiveHotspot,
+        editorRuntime: nextEditorRuntime ?? null,
       };
+
+      if (playContext.pendingScandals.length > 0) {
+        const scandalOutcome = applyEditorPendingScandalEffects({
+          effects: playContext.pendingScandals,
+          playerHand: nextState.hand,
+          aiHand: nextState.aiHand,
+          logEntries: nextState.log,
+        });
+        nextState = {
+          ...nextState,
+          hand: scandalOutcome.playerHand,
+          aiHand: scandalOutcome.aiHand,
+          log: scandalOutcome.logEntries,
+        };
+        if (scandalOutcome.toastMessages.length > 0) {
+          pendingEditorToasts.push(...scandalOutcome.toastMessages);
+        }
+      }
 
       const ownershipLogEntries = reconcileStateBonusOwnership(prev, nextState);
       if (ownershipLogEntries.length > 0) {
@@ -2479,26 +2740,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       triggerCapturedStateEvents(resolution, resultState);
       return resultState;
     });
+
+    if (pendingEditorToasts.length > 0) {
+      emitEditorToastMessages(pendingEditorToasts);
+    }
   }, [achievements, resolveCardEffects, triggerCapturedStateEvents]);
 
   const playCardAnimated = useCallback(async (
     cardId: string,
     animateCard: (cardId: string, card: any, options?: any) => Promise<any>,
-    explicitTargetState?: string
+    explicitTargetState?: string,
   ) => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
-      return;
-    }
-
-    const initialCost = applyStateCombinationCostModifiers(
-      card.cost,
-      card.type,
-      'human',
-      gameState.stateCombinationEffects,
-    );
-
-    if (gameState.ip < initialCost) {
       return;
     }
 
@@ -2508,19 +2762,46 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
     let pendingTurnPlays: ReturnType<typeof createTurnPlayEntries> | null = null;
     let pendingResolvedCard: GameCard | null = null;
+    let pendingScandalEffects: EditorPendingScandalEffect[] | null = null;
+    const pendingEditorToasts: string[] = [];
 
     setGameState(prev => {
       if (prev.animating) {
         return prev;
       }
 
-      const effectiveCost = applyStateCombinationCostModifiers(
+      const baseCost = applyStateCombinationCostModifiers(
         card.cost,
         card.type,
         'human',
         prev.stateCombinationEffects,
       );
 
+      const runtimeSnapshot = prev.editorRuntime ? { ...prev.editorRuntime } : null;
+      const activeEditor = resolveActiveEditorFromState(prev);
+      const playContext: EditorPlayCardHookContext = {
+        state: prev,
+        runtime: runtimeSnapshot,
+        card,
+        cardKind: card.type,
+        cost: baseCost,
+        truthDelta: 0,
+        ipDelta: 0,
+        aiIpDelta: 0,
+        pendingScandals: [],
+        logEntries: [],
+        toastMessages: [],
+        fxMessages: [],
+      };
+
+      if (activeEditor) {
+        // [EDITORS_ON_PLAY_CARD_HOOK]
+        applyOnPlayCard(activeEditor, ({ hook }) => {
+          applyEditorPlayCardHookEffect({ hookId: hook?.id }, playContext);
+        });
+      }
+
+      const effectiveCost = Math.max(0, Math.trunc(playContext.cost));
       if (prev.ip < effectiveCost) {
         return prev;
       }
@@ -2529,6 +2810,40 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       pendingResolvedCard = resolvedCard;
 
       const resolution = resolveCardEffects(prev, resolvedCard, targetState);
+
+      const adjustmentLogs: string[] = [];
+      if (playContext.truthDelta !== 0) {
+        const truthMutation = { truth: resolution.truth, log: [] as string[] };
+        applyTruthDelta(truthMutation, playContext.truthDelta, 'human');
+        resolution.truth = truthMutation.truth;
+        if (truthMutation.log.length > 0) {
+          adjustmentLogs.push(...truthMutation.log);
+        }
+      }
+
+      if (playContext.ipDelta !== 0) {
+        resolution.ip = Math.max(0, resolution.ip + playContext.ipDelta);
+      }
+
+      if (playContext.aiIpDelta !== 0) {
+        resolution.aiIP = Math.max(0, resolution.aiIP + playContext.aiIpDelta);
+      }
+
+      if (adjustmentLogs.length > 0 || playContext.logEntries.length > 0) {
+        resolution.logEntries = [
+          ...(resolution.logEntries ?? []),
+          ...adjustmentLogs,
+          ...playContext.logEntries,
+        ];
+      }
+
+      if (playContext.toastMessages.length > 0) {
+        pendingEditorToasts.push(...playContext.toastMessages);
+      }
+      if (playContext.fxMessages.length > 0) {
+        pendingEditorToasts.push(...playContext.fxMessages);
+      }
+
       const updatedHotspots = { ...prev.paranormalHotspots };
       if (resolution.resolvedHotspots) {
         for (const abbr of resolution.resolvedHotspots) {
@@ -2568,6 +2883,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const mergedStates = mergeStateEventHistories(prev.states, resolution.states);
 
+      const editorRuntimePatch = playContext.runtimePatch
+        ? normalizeEditorRuntimeState({ ...(runtimeSnapshot ?? {}), ...playContext.runtimePatch })
+        : undefined;
+      const nextEditorRuntime = editorRuntimePatch ?? runtimeSnapshot ?? prev.editorRuntime ?? null;
+
+      pendingScandalEffects = playContext.pendingScandals.length > 0 ? [...playContext.pendingScandals] : null;
+
       const nextState: GameState = {
         ...prev,
         animating: true,
@@ -2584,6 +2906,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         agendaRoundCounters: counterSnapshot.roundCounters,
         paranormalHotspots: updatedHotspots,
         activeHotspot: nextActiveHotspot,
+        editorRuntime: nextEditorRuntime ?? null,
       };
 
       const stateWithReveal = resolution.aiSecretAgendaRevealed
@@ -2595,10 +2918,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       return resultState;
     });
 
+    if (pendingEditorToasts.length > 0) {
+      emitEditorToastMessages(pendingEditorToasts);
+      pendingEditorToasts.length = 0;
+    }
+
     try {
       await animateCard(cardId, card, {
         targetState,
-        onResolve: async () => Promise.resolve()
+        onResolve: async () => Promise.resolve(),
       });
 
       setGameState(prev => {
@@ -2618,7 +2946,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           timestamp: Date.now(),
           logEntries: [],
         };
-        const nextState: GameState = {
+        let nextState: GameState = {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),
           cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
@@ -2630,8 +2958,32 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           animating: false,
         };
 
+        if (pendingScandalEffects && pendingScandalEffects.length > 0) {
+          const scandalOutcome = applyEditorPendingScandalEffects({
+            effects: pendingScandalEffects,
+            playerHand: nextState.hand,
+            aiHand: nextState.aiHand,
+            logEntries: nextState.log,
+          });
+          nextState = {
+            ...nextState,
+            hand: scandalOutcome.playerHand,
+            aiHand: scandalOutcome.aiHand,
+            log: scandalOutcome.logEntries,
+          };
+          if (scandalOutcome.toastMessages.length > 0) {
+            pendingEditorToasts.push(...scandalOutcome.toastMessages);
+          }
+          pendingScandalEffects = null;
+        }
+
         return updateSecretAgendaProgress(nextState);
       });
+
+      if (pendingEditorToasts.length > 0) {
+        emitEditorToastMessages(pendingEditorToasts);
+        pendingEditorToasts.length = 0;
+      }
     } catch (error) {
       console.error('Card animation failed:', error);
       setGameState(prev => {
@@ -2651,7 +3003,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           timestamp: Date.now(),
           logEntries: [],
         };
-        const nextState: GameState = {
+        let nextState: GameState = {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),
           cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
@@ -2663,10 +3015,34 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           animating: false,
         };
 
+        if (pendingScandalEffects && pendingScandalEffects.length > 0) {
+          const scandalOutcome = applyEditorPendingScandalEffects({
+            effects: pendingScandalEffects,
+            playerHand: nextState.hand,
+            aiHand: nextState.aiHand,
+            logEntries: nextState.log,
+          });
+          nextState = {
+            ...nextState,
+            hand: scandalOutcome.playerHand,
+            aiHand: scandalOutcome.aiHand,
+            log: scandalOutcome.logEntries,
+          };
+          if (scandalOutcome.toastMessages.length > 0) {
+            pendingEditorToasts.push(...scandalOutcome.toastMessages);
+          }
+          pendingScandalEffects = null;
+        }
+
         return updateSecretAgendaProgress(nextState);
       });
+
+      if (pendingEditorToasts.length > 0) {
+        emitEditorToastMessages(pendingEditorToasts);
+      }
     }
-  }, [gameState, achievements, resolveCardEffects, triggerCapturedStateEvents]);
+  }, [achievements, resolveCardEffects, triggerCapturedStateEvents, gameState, animateCard]);
+
 
   const selectCard = useCallback((cardId: string | null) => {
     setGameState(prev => ({ 
@@ -3459,15 +3835,38 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       clearTimeout(newspaperRevealTimeoutRef.current);
       newspaperRevealTimeoutRef.current = null;
     }
+    const pendingEditorToasts: string[] = [];
     setGameState(prev => {
-      const bonusCardDraw = Math.max(0, prev.pendingCardDraw ?? 0);
+      const runtimeSnapshot = prev.editorRuntime ? { ...prev.editorRuntime } : null;
+      const activeEditor = resolveActiveEditorFromState(prev);
+      const turnStartContext: EditorTurnStartHookContext | null = activeEditor
+        ? {
+            state: prev,
+            runtime: runtimeSnapshot,
+            bonusCardDraw: 0,
+            pendingScandals: [],
+            logEntries: [],
+            toastMessages: [],
+          }
+        : null;
+
+      if (activeEditor && turnStartContext) {
+        // [EDITORS_ON_TURN_START_HOOK]
+        applyOnTurnStart(activeEditor, ({ hook }) => {
+          applyEditorTurnStartHookEffect({ hookId: hook?.id }, turnStartContext);
+        });
+      }
+
+      const hookBonusDraw = turnStartContext ? Math.max(0, turnStartContext.bonusCardDraw) : 0;
+      const baseBonusCardDraw = Math.max(0, prev.pendingCardDraw ?? 0);
+      const bonusCardDraw = baseBonusCardDraw + hookBonusDraw;
       const targetHandSize = HAND_LIMIT + bonusCardDraw;
       const cardsNeeded = Math.max(0, targetHandSize - prev.hand.length);
       const {
         drawn,
         deck: remainingDeck,
       } = drawCardsFromDeck(prev.deck, cardsNeeded, prev.faction);
-      const newHand = cardsNeeded > 0 ? [...prev.hand, ...drawn] : [...prev.hand];
+      let newHand = cardsNeeded > 0 ? [...prev.hand, ...drawn] : [...prev.hand];
       const deckShortage = cardsNeeded > 0 && drawn.length < cardsNeeded;
 
       let drawLogEntry = '';
@@ -3480,7 +3879,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         drawLogEntry = `Ready to act (hand ${newHand.length})`;
       }
 
-      const baseLogs = [...prev.log, drawLogEntry];
+      let baseLogs = [...prev.log];
+      if (turnStartContext?.logEntries?.length) {
+        baseLogs = [...baseLogs, ...turnStartContext.logEntries];
+      }
+      baseLogs.push(drawLogEntry);
 
       const enabledExpansions = getEnabledExpansionIdsSnapshot();
       const rolledHotspot = hotspotDirector.rollForSpawn(prev.round, prev, {
@@ -3543,9 +3946,35 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         }
       }
 
+      let aiHandAfterScandals = prev.aiHand;
+      if (turnStartContext?.pendingScandals?.length) {
+        const scandalOutcome = applyEditorPendingScandalEffects({
+          effects: turnStartContext.pendingScandals,
+          playerHand: newHand,
+          aiHand: aiHandAfterScandals,
+          logEntries: logsWithHotspot,
+        });
+        newHand = scandalOutcome.playerHand;
+        aiHandAfterScandals = scandalOutcome.aiHand;
+        logsWithHotspot = scandalOutcome.logEntries;
+        if (scandalOutcome.toastMessages.length > 0) {
+          pendingEditorToasts.push(...scandalOutcome.toastMessages);
+        }
+      }
+
+      if (turnStartContext?.toastMessages?.length) {
+        pendingEditorToasts.push(...turnStartContext.toastMessages);
+      }
+
+      const editorRuntimePatch = turnStartContext?.runtimePatch
+        ? normalizeEditorRuntimeState({ ...(runtimeSnapshot ?? {}), ...turnStartContext.runtimePatch })
+        : undefined;
+      const nextEditorRuntime = editorRuntimePatch ?? runtimeSnapshot;
+
       let nextState: GameState = {
         ...prev,
         hand: newHand,
+        aiHand: aiHandAfterScandals,
         deck: remainingDeck,
         showNewspaper: false,
         cardsPlayedThisRound: [],
@@ -3565,6 +3994,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         activeHotspot: rolledHotspot ?? null,
         states: statesAfterHotspot,
         paranormalHotspots: hotspotsAfterHotspot,
+        editorRuntime: nextEditorRuntime ?? null,
       };
 
       if (nextState.lastStateBonusRound !== nextState.round) {
@@ -3646,9 +4076,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         }
       }
 
-        return updateSecretAgendaProgress(nextState);
-      });
-    }, [hotspotDirector]);
+      return updateSecretAgendaProgress(nextState);
+    });
+
+    if (pendingEditorToasts.length > 0) {
+      emitEditorToastMessages(pendingEditorToasts);
+    }
+  }, [hotspotDirector]);
 
   const confirmNewCards = useCallback(() => {
     setGameState(prev => ({
