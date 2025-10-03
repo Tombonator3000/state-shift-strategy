@@ -9,7 +9,7 @@ import CardCollection from './CardCollection';
 import CreditsTableoid from './CreditsTableoid';
 import HowToPlayTabloid from './HowToPlayTabloid';
 import CardCollectionTabloid from './CardCollectionTabloid';
-import StartScreen from '@/components/start/StartScreen';
+import StartScreen from '@/ui/start/StartScreen';
 import FactionSelectTabloid from './FactionSelectTabloid';
 import { useUiTheme } from '@/hooks/useTheme';
 

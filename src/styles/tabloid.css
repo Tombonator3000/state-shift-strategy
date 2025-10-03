@@ -1,0 +1,176 @@
+:root {
+  --paper: #f2eddc;
+  --ink: #101010;
+}
+
+.tabloid-bg {
+  background: var(--paper);
+  color: var(--ink);
+  background-image: radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+.tabloid-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 0.8fr;
+  gap: 16px;
+}
+
+@media (max-width: 1100px) {
+  .tabloid-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.masthead {
+  font-family: Impact, 'Bebas Neue', sans-serif;
+  font-size: clamp(36px, 7vw, 72px);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  padding: 12px 8px;
+  border-bottom: 4px solid var(--ink);
+}
+
+.subhead {
+  font-family: Impact, 'Bebas Neue', sans-serif;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: #fff;
+  padding: 6px 10px;
+  margin: 6px 0 16px;
+  letter-spacing: 0.03em;
+}
+
+.tabloid-card {
+  position: relative;
+  border: 4px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  overflow: hidden;
+  background: #000;
+  display: block;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+}
+
+.tabloid-card img,
+.tabloid-card .bg-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: grayscale(100%) contrast(130%) brightness(92%);
+}
+
+.card-headline {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: Impact, 'Bebas Neue', sans-serif;
+  font-size: clamp(18px, 3vw, 28px);
+  padding: 6px 10px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.tabloid-card .redact {
+  pointer-events: none;
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  height: 26%;
+  top: 38%;
+  background: #000;
+  transform: rotate(-3deg) translateY(-120%);
+  transition: transform 200ms ease;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4), 0 -2px 0 rgba(0, 0, 0, 0.4);
+}
+
+.tabloid-card:hover .redact,
+.tabloid-card:focus-visible .redact {
+  transform: rotate(-3deg) translateY(0);
+}
+
+.tabloid-card .redact::after {
+  content: 'REDACTED!';
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  font-family: Impact, 'Bebas Neue', sans-serif;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ad-card {
+  border: 3px solid var(--ink);
+  background: #fff;
+  padding: 10px 12px;
+  font-family: Impact, 'Bebas Neue', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+}
+
+.pt-weather-badge {
+  cursor: default;
+}
+
+.ad-card.small {
+  font-size: 18px;
+  padding: 8px 10px;
+}
+
+.ad-card:hover,
+.ad-card:focus-visible {
+  transform: translate(-1px, -1px);
+}
+
+.ad-card:focus-visible {
+  outline: 3px solid #000;
+  outline-offset: 2px;
+}
+
+.ticker {
+  margin-top: 12px;
+  border-top: 3px solid var(--ink);
+  padding: 10px 0;
+  font-family: Impact, 'Bebas Neue', sans-serif;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.continue-btn {
+  display: inline-block;
+  padding: 10px 16px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  box-shadow: 2px 2px 0 var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: clamp(16px, 3vw, 20px);
+}
+
+@media (max-width: 600px) {
+  .tabloid-grid {
+    gap: 12px;
+  }
+
+  .card-headline {
+    font-size: clamp(16px, 4vw, 22px);
+  }
+
+  .ad-card {
+    font-size: 16px;
+  }
+}
