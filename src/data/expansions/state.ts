@@ -13,16 +13,25 @@ import {
   sanitizeDistributionSettings,
   weightedDistribution,
 } from '../weightedCardDistribution';
+import {
+  EDITORS_EXPANSION_ID,
+  type ExpansionFeatureState,
+  getExpansionFeaturesSnapshot,
+  hydrateExpansionFeatures,
+  isEditorsFeatureEnabled,
+  setEditorsFeatureEnabled as persistEditorsFeatureEnabled,
+} from './features';
 
 type StoredPrefs = {
   mode?: MixMode;
   enabled?: Record<string, boolean>;
   customWeights?: Record<string, number>;
+  features?: Partial<ExpansionFeatureState>;
 };
 
 type Listener = (payload: { ids: string[]; cards: GameCard[] }) => void;
 
-let prefs: StoredPrefs = { enabled: {}, customWeights: {}, mode: 'BALANCED_MIX' };
+let prefs: StoredPrefs = { enabled: {}, customWeights: {}, mode: 'BALANCED_MIX', features: {} };
 let enabledIdsCache: string[] = [];
 let cachedCards: GameCard[] = [];
 let loadingPromise: Promise<GameCard[]> | null = null;
@@ -48,7 +57,12 @@ const sanitizeEnabledIds = (ids: string[]): string[] => {
 };
 
 const persistPrefs = () => {
-  savePrefs(prefs);
+  const featureSnapshot = getExpansionFeaturesSnapshot();
+  prefs.features = featureSnapshot;
+  savePrefs({
+    ...prefs,
+    features: featureSnapshot,
+  });
 };
 
 const rebuildEnabledMap = () => {
@@ -63,10 +77,12 @@ const rebuildEnabledMap = () => {
 const loadStoredPrefs = () => {
   const stored = loadPrefs<StoredPrefs>();
   if (stored && typeof stored === 'object') {
+    const features = hydrateExpansionFeatures(stored.features);
     prefs = {
       mode: stored.mode,
       enabled: stored.enabled ?? {},
       customWeights: stored.customWeights ?? {},
+      features,
     };
   }
 };
@@ -93,11 +109,23 @@ const ensureCardsLoaded = async () => {
   return load;
 };
 
-export const getEnabledExpansionIdsSnapshot = (): string[] => [...enabledIdsCache];
+export const getEnabledExpansionIdsSnapshot = (): string[] => {
+  const ids = [...enabledIdsCache];
+  if (isEditorsFeatureEnabled() && !ids.includes(EDITORS_EXPANSION_ID)) {
+    ids.push(EDITORS_EXPANSION_ID);
+  }
+  return ids;
+};
 
 export const getExpansionCardsSnapshot = (): GameCard[] => cachedCards.map(card => ({ ...card }));
 
 export const getStoredExpansionIds = (): string[] => [...enabledIdsCache];
+
+export const setEditorsExpansionEnabled = (enabled: boolean): void => {
+  const nextFeatures = persistEditorsFeatureEnabled(enabled);
+  prefs.features = nextFeatures;
+  notify();
+};
 
 export const subscribeToExpansionChanges = (listener: Listener): (() => void) => {
   listeners.add(listener);

@@ -24,7 +24,15 @@ import { loadPrefs, savePrefs } from '@/lib/persist';
 import { getCoreCards } from '@/data/cardDatabase';
 import type { GameCard } from '@/rules/mvp';
 import { cn } from '@/lib/utils';
-import { updateEnabledExpansions } from '@/data/expansions/state';
+import {
+  setEditorsExpansionEnabled,
+  updateEnabledExpansions,
+} from '@/data/expansions/state';
+import {
+  getExpansionFeaturesSnapshot,
+  hydrateExpansionFeatures,
+  type ExpansionFeatureState,
+} from '@/data/expansions/features';
 import { useDistributionSettings } from '@/hooks/useDistributionSettings';
 import type { DistributionMode } from '@/data/weightedCardDistribution';
 
@@ -43,6 +51,7 @@ type StoredPrefs = {
   mode?: MixMode;
   enabled?: Record<string, boolean>;
   customWeights?: Record<string, number>;
+  features?: Partial<ExpansionFeatureState>;
 };
 
 type ExpansionEntry = DiscoveredExpansion & {
@@ -156,6 +165,9 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
   const [preview, setPreview] = useState<PreviewState>({ weights: {}, poolsRemaining: {}, deckSize: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editorsEnabled, setEditorsEnabled] = useState<boolean>(
+    () => getExpansionFeaturesSnapshot().editors,
+  );
   const initializedRef = useRef(false);
 
   const coreCards = useMemo(() => coreCardsForPreview(), []);
@@ -219,6 +231,8 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
         const prefs = (loadPrefs<StoredPrefs>() ?? {}) as StoredPrefs;
         const enabled = prefs.enabled ?? {};
         const weights = prefs.customWeights ?? {};
+        const features = hydrateExpansionFeatures(prefs.features);
+        setEditorsEnabled(features.editors);
         const hookCoreWeight = fromDistributionWeight(settings.setWeights.core);
         const resolvedCoreWeight =
           typeof hookCoreWeight === 'number' ? hookCoreWeight : weights.core ?? DEFAULT_WEIGHT;
@@ -271,10 +285,12 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
 
   const persist = useCallback(
     (nextMode: MixMode, nextEntries: ExpansionEntry[]) => {
+      const featurePrefs = getExpansionFeaturesSnapshot();
       const prefs: StoredPrefs = {
         mode: nextMode,
         enabled: buildEnabledMap(nextEntries),
         customWeights: buildWeightMap(nextEntries, coreWeight),
+        features: featurePrefs,
       };
       savePrefs(prefs);
       applyDistributionWeights(nextEntries);
@@ -334,6 +350,15 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
     [expansions, persist, setDistributionMode],
   );
 
+  const handleEditorsToggle = useCallback(
+    (nextEnabled: boolean) => {
+      setEditorsEnabled(nextEnabled);
+      setEditorsExpansionEnabled(nextEnabled);
+      setError(prev => (prev === SYNC_ERROR_MESSAGE ? null : prev));
+    },
+    [],
+  );
+
   useEffect(() => {
     recalcPreview(mode, expansions);
   }, [mode, expansions, recalcPreview]);
@@ -348,6 +373,34 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
 
   const hasAnyExpansions = expansions.length > 0;
   const hasEnabledExpansions = expansions.some(entry => entry.enabled);
+
+  // [EDITORS_EXPANSION_TOGGLE]
+  const editorsToggleCard = (
+    <UICard>
+      <CardHeader>
+        <CardTitle>Editors</CardTitle>
+        <CardDescription>Gate the Editors mini-expansion behind a dedicated toggle.</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1 text-sm text-newspaper-text/70">
+          <p>Require an Editor selection before a new campaign begins.</p>
+          <p className="text-xs text-newspaper-text/60">
+            Disable this to skip the newsroom modal during game setup.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-newspaper-text/60">
+            {editorsEnabled ? 'Enabled' : 'Disabled'}
+          </span>
+          <Switch
+            checked={editorsEnabled}
+            onCheckedChange={handleEditorsToggle}
+            aria-label="Toggle Editors mini-expansion"
+          />
+        </div>
+      </CardContent>
+    </UICard>
+  );
 
   return (
     <div className="min-h-screen bg-newspaper-bg py-8 px-4">
@@ -414,6 +467,8 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
             </CardContent>
           </UICard>
         </div>
+
+        {editorsToggleCard}
 
         <section>
           <div className="flex items-center justify-between gap-2">
