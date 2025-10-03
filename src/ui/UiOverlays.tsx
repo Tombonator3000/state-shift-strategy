@@ -14,13 +14,27 @@ type AnyCard = {
 type Toast = { id: number; text: string; slot: "truth" | "ip-left" | "ip-right" | "combo" };
 type PendingDelta = { delta: number; timer: number };
 
+type BreakingHeadlineCardPayload = { type: "card"; card: AnyCard; duration?: number };
+type BreakingHeadlineHeadlinePayload = {
+  type: "headline";
+  title: string;
+  body?: string;
+  duration?: number;
+};
+
+type BreakingHeadlinePayload = BreakingHeadlineCardPayload | BreakingHeadlineHeadlinePayload;
+type BreakingHeadlineItem = (BreakingHeadlineCardPayload | BreakingHeadlineHeadlinePayload) & { id: number };
+
 const MAX_TOASTS_PER_SLOT = 3;
 const DEFAULT_TOAST_LIFETIME = 900;
 const COMBO_TOAST_LIFETIME = 1400;
 const DELTA_BATCH_WINDOW = 180; // milliseconds
+const CARD_HEADLINE_DURATION = 1400;
+const GENERIC_HEADLINE_DURATION = 4600;
 
 declare global {
   interface Window {
+    uiShowBreakingHeadline?: (headline: BreakingHeadlinePayload) => void;
     uiShowOpponentCard?: (card: AnyCard) => void;
     uiToastTruth?: (delta: number) => void;
     uiToastIp?: (playerId: "P1" | "P2", delta: number) => void;
@@ -30,11 +44,37 @@ declare global {
 }
 
 export default function UiOverlays() {
-  const [revealCard, setRevealCard] = React.useState<AnyCard | null>(null);
-  const revealTimer = React.useRef<number | null>(null);
+  const [breakingHeadlines, setBreakingHeadlines] = React.useState<BreakingHeadlineItem[]>([]);
+  const breakingHeadlineTimers = React.useRef<Record<number, number>>({});
 
   const [toasts, setToasts] = React.useState<Toast[]>([]);
   const pendingDeltas = React.useRef<Record<string, PendingDelta>>({});
+
+  const removeBreakingHeadline = React.useCallback((id: number) => {
+    setBreakingHeadlines((prev) => prev.filter((item) => item.id !== id));
+    const timer = breakingHeadlineTimers.current[id];
+    if (timer) {
+      window.clearTimeout(timer);
+      delete breakingHeadlineTimers.current[id];
+    }
+  }, []);
+
+  const enqueueBreakingHeadline = React.useCallback(
+    (payload: BreakingHeadlinePayload) => {
+      const id = Date.now() + Math.random();
+      const duration =
+        payload.duration ?? (payload.type === "card" ? CARD_HEADLINE_DURATION : GENERIC_HEADLINE_DURATION);
+
+      setBreakingHeadlines((prev) => [...prev, { ...payload, id } as BreakingHeadlineItem]);
+
+      const timeoutId = window.setTimeout(() => {
+        removeBreakingHeadline(id);
+      }, duration);
+
+      breakingHeadlineTimers.current[id] = timeoutId;
+    },
+    [removeBreakingHeadline],
+  );
 
   const addToast = React.useCallback(
     (slot: Toast["slot"], text: string, duration = DEFAULT_TOAST_LIFETIME) => {
@@ -110,16 +150,14 @@ export default function UiOverlays() {
   );
 
   React.useEffect(() => {
+    window.uiShowBreakingHeadline = (headline: BreakingHeadlinePayload) => {
+      enqueueBreakingHeadline(headline);
+    };
+
     window.uiShowOpponentCard = (card: AnyCard) => {
-      try {
-        if (revealTimer.current) {
-          window.clearTimeout(revealTimer.current);
-        }
-      } catch {
-        // no-op
+      if (window.uiShowBreakingHeadline) {
+        window.uiShowBreakingHeadline({ type: "card", card });
       }
-      setRevealCard(card);
-      revealTimer.current = window.setTimeout(() => setRevealCard(null), 1400);
     };
 
     window.uiToastTruth = (delta: number) => {
@@ -163,6 +201,7 @@ export default function UiOverlays() {
     };
 
     return () => {
+      delete window.uiShowBreakingHeadline;
       delete window.uiShowOpponentCard;
       delete window.uiToastTruth;
       delete window.uiToastIp;
@@ -172,8 +211,12 @@ export default function UiOverlays() {
         window.clearTimeout(pending.timer);
       });
       pendingDeltas.current = {};
+      Object.values(breakingHeadlineTimers.current).forEach((timer) => {
+        window.clearTimeout(timer);
+      });
+      breakingHeadlineTimers.current = {};
     };
-  }, [addToast, queueDeltaToast]);
+  }, [addToast, enqueueBreakingHeadline, queueDeltaToast]);
 
   function renderEffects(card: AnyCard) {
     const eff = card?.effects || {};
@@ -203,20 +246,33 @@ export default function UiOverlays() {
     return "";
   }
 
+  const activeBreakingHeadline = breakingHeadlines[0];
+
   return (
     <>
-      {/* CARD REVEAL OVERLAY */}
+      {/* BREAKING HEADLINE OVERLAY */}
       <div className="pointer-events-none fixed top-4 right-4 z-[940] flex flex-col items-end space-y-3">
-        {revealCard && (
+        {activeBreakingHeadline && (
           <div className="pointer-events-auto max-w-md w-[92%] sm:w-[420px] bg-white text-black shadow-2xl border-4 border-black p-4">
             <div className="text-xs tracking-widest font-bold bg-black text-white px-2 py-1 inline-block mb-2">
               BREAKING
             </div>
-            <div className="text-2xl font-black leading-tight mb-2">{revealCard.name}</div>
-            {revealCard.flavor && (
-              <div className="text-sm italic opacity-80 mb-3">“{revealCard.flavor}”</div>
+            {activeBreakingHeadline.type === "card" ? (
+              <>
+                <div className="text-2xl font-black leading-tight mb-2">{activeBreakingHeadline.card.name}</div>
+                {activeBreakingHeadline.card.flavor && (
+                  <div className="text-sm italic opacity-80 mb-3">“{activeBreakingHeadline.card.flavor}”</div>
+                )}
+                <div className="text-sm font-semibold">{renderEffects(activeBreakingHeadline.card)}</div>
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-black leading-tight mb-2">{activeBreakingHeadline.title}</div>
+                {activeBreakingHeadline.body && (
+                  <div className="text-sm font-semibold opacity-90 leading-snug">{activeBreakingHeadline.body}</div>
+                )}
+              </>
             )}
-            <div className="text-sm font-semibold">{renderEffects(revealCard)}</div>
           </div>
         )}
       </div>

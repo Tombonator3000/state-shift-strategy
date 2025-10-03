@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { EventManager, GameEvent } from '@/data/eventDatabase';
-import { useToast } from '@/hooks/use-toast';
+import { toast as legacyToast } from '@/hooks/use-toast';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import type { GameState } from './gameStateTypes';
 
@@ -13,7 +13,9 @@ export interface StateEventTrigger {
 
 export const useStateEvents = () => {
   const [eventManager] = useState(() => new EventManager());
-  const { toast } = useToast();
+  const [breakingHelperWasAvailable] = useState(
+    () => typeof window !== 'undefined' && typeof window.uiShowBreakingHeadline === 'function'
+  );
 
   const triggerStateEvent = useCallback((
     stateId: string,
@@ -28,12 +30,22 @@ export const useStateEvents = () => {
     // Get state name for display
     const stateName = gameState.states?.find((s: any) => s.id === stateId)?.name || stateId;
     
-    // Show toast notification with wacky tabloid style
-    toast({
-      title: `🗞️ BREAKING: ${event.title}`,
-      description: `${stateName}: ${event.content}`,
-      duration: 6000,
-    });
+    const showBreakingHeadline = typeof window !== 'undefined' ? window.uiShowBreakingHeadline : undefined;
+
+    if (showBreakingHeadline) {
+      showBreakingHeadline({
+        type: 'headline',
+        title: `🗞️ BREAKING: ${event.title}`,
+        body: `${stateName}: ${event.content}`,
+        duration: 6000,
+      });
+    } else if (!breakingHelperWasAvailable) {
+      legacyToast({
+        title: `🗞️ BREAKING: ${event.title}`,
+        description: `${stateName}: ${event.content}`,
+        duration: 6000,
+      });
+    }
 
     // Trigger visual effects if position is available
     if (statePosition) {
@@ -46,7 +58,7 @@ export const useStateEvents = () => {
       capturingFaction,
       triggeredOnTurn: typeof gameState.turn === 'number' ? Math.max(1, gameState.turn) : 1,
     } satisfies StateEventTrigger;
-  }, [eventManager, toast]);
+  }, [breakingHelperWasAvailable, eventManager]);
 
   const triggerContestedStateEffects = useCallback((
     stateId: string,
