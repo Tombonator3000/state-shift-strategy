@@ -38,7 +38,6 @@ export const useStateEvents = () => {
     // Trigger visual effects if position is available
     if (statePosition) {
       VisualEffectsCoordinator.triggerStateEvent(event.type, stateId, statePosition);
-      VisualEffectsCoordinator.triggerParticleEffect('stateevent', statePosition);
     }
 
     return {

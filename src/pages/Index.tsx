@@ -1070,9 +1070,6 @@ const Index = () => {
           reducedMotion,
           source: currentEvent?.faction,
         });
-        if (!reducedMotion && areMapVfxEnabled()) {
-          VisualEffectsCoordinator.triggerParticleEffect('broadcast', broadcastPosition);
-        }
         if (stage === 'finale') {
           VisualEffectsCoordinator.triggerTruthFlash(broadcastPosition);
         }
@@ -1386,12 +1383,6 @@ const Index = () => {
             position: 'top-center'
           });
       },
-      (type, x, y) => {
-        // Particle effect callback
-        if (!prefersReducedMotion && areMapVfxEnabled()) {
-          VisualEffectsCoordinator.triggerParticleEffect(type as any, { x, y });
-        }
-      },
       (value, type, x, y) => {
         // Floating number callback
         if (x && y) {
@@ -1467,7 +1458,6 @@ const Index = () => {
     getTotalBonusIP,
     audio,
     setGameState,
-    prefersReducedMotion,
   ]);
 
   useEffect(() => {
@@ -2206,9 +2196,6 @@ const Index = () => {
       const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
       if (cardElement) {
         effectPosition = VisualEffectsCoordinator.getElementCenter(cardElement);
-
-        // Trigger deploy particle effect
-        VisualEffectsCoordinator.triggerParticleEffect('deploy', effectPosition);
 
         if (card.faction === 'government' && card.type === 'ATTACK') {
           VisualEffectsCoordinator.triggerGovernmentRedaction(effectPosition);

@@ -337,18 +337,9 @@ export const useCardAnimation = () => {
         await options.onResolve(card);
       }
 
-      // Fly to played pile with particle effect
+      // Fly to played pile
       await flyToPlayedPile(clone);
       
-      // Trigger particle effect at final position
-      const event = new CustomEvent('cardDeployed', {
-        detail: {
-          x: destRect.x + destRect.width / 2,
-          y: destRect.y + destRect.height / 2,
-          type: 'deploy'
-        }
-      });
-      window.dispatchEvent(event);
       clone.remove();
       highlightState(); // Remove highlight
 
