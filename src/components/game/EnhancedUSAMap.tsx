@@ -586,20 +586,16 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             }, 50);
             contestedAnimationTimeoutsRef.current.push(timeoutId);
 
-            if (typeof window !== 'undefined') {
-              const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-              if (areParanormalEffectsEnabled()) {
-                VisualEffectsCoordinator.triggerCryptidSighting({
-                  position: {
-                    x: svgRect.left + centroid[0],
-                    y: svgRect.top + centroid[1]
-                  },
-                  stateId: stateKey,
-                  stateName,
-                  footageQuality: prefersReducedMotion ? 'still' : Math.random() > 0.6 ? 'thermal' : 'grainy',
-                  reducedMotion: prefersReducedMotion,
-                });
-              }
+            if (typeof window !== 'undefined' && areParanormalEffectsEnabled()) {
+              const contestedScreenPosition = convertPointToScreenPosition(centroid as [number, number]);
+              const fallbackPosition = contestedScreenPosition ?? VisualEffectsCoordinator.getScreenCenter();
+              const baseName = (stateName || stateId).toString();
+              const breakingNewsHeadline = `${baseName.toUpperCase()} UNDER CONTEST!`;
+
+              VisualEffectsCoordinator.triggerBreakingNews(
+                breakingNewsHeadline,
+                fallbackPosition
+              );
             }
           }
         }

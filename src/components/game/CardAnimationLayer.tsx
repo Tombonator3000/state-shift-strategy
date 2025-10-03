@@ -298,20 +298,73 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     };
 
     // New enhanced effect handlers
+    const resolveRightPanelAnchor = () => {
+      if (typeof window === 'undefined') {
+        return { x: 0, y: 0 };
+      }
+
+      const defaultPosition = {
+        x: window.innerWidth - Math.min(window.innerWidth * 0.2, 320),
+        y: Math.max(window.innerHeight * 0.25, 120),
+      };
+
+      if (typeof document === 'undefined') {
+        return defaultPosition;
+      }
+
+      const candidateSelectors = [
+        '[data-right-pane]',
+        '[data-panel="right"]',
+        '[data-region="right-pane"]',
+        '[data-panel-region="right"]',
+      ];
+
+      let anchorElement: Element | null = null;
+
+      for (const selector of candidateSelectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+          anchorElement = element;
+          break;
+        }
+      }
+
+      if (!anchorElement) {
+        const asideElements = Array.from(document.querySelectorAll('aside'));
+        anchorElement = asideElements.find((el) => {
+          const content = el.textContent?.toUpperCase() ?? '';
+          return content.includes('NEWSROOM DESK');
+        }) ?? null;
+      }
+
+      if (anchorElement) {
+        const rect = anchorElement.getBoundingClientRect();
+        return {
+          x: rect.left + rect.width / 2,
+          y: rect.top + Math.min(rect.height * 0.25, 140),
+        };
+      }
+
+      return defaultPosition;
+    };
+
     const handleBreakingNews = (event: CustomEvent<{
       newsText: string;
-      x: number;
-      y: number;
+      x?: number;
+      y?: number;
     }>) => {
       if (!event?.detail) return;
       const { newsText, x, y } = event.detail;
+      const fallbackPosition = resolveRightPanelAnchor();
+      const resolvedX = typeof x === 'number' ? x : fallbackPosition.x;
+      const resolvedY = typeof y === 'number' ? y : fallbackPosition.y;
+
       setBreakingNewsOverlay({
         id: Date.now(),
-        x,
-        y,
-        newsText
+        x: resolvedX,
+        y: resolvedY,
+        newsText,
       });
-      spawnParticleEffect('flash', x, y);
       audio?.playSFX?.('newspaper');
     };
 
