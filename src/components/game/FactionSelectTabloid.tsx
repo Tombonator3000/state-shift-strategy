@@ -1,7 +1,11 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import type { EditorId } from '@/expansions/editors/EditorsEngine';
 interface FactionSelectTabloidProps {
-  onStartGame: (faction: 'government' | 'truth') => Promise<void>;
+  onStartGame: (
+    faction: 'government' | 'truth',
+    options?: { editorId?: EditorId | null },
+  ) => Promise<void>;
   onFactionHover?: (faction: 'government' | 'truth' | null) => void;
   onBack: () => void;
   audio?: any;
