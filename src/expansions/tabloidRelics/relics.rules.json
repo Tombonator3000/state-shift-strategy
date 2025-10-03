@@ -90,6 +90,227 @@
       "amplify": {
         "editorMultiplier": 1.5
       }
+    },
+    {
+      "id": "ufo_scoop",
+      "label": "UFO Scoop",
+      "match": { "tagsAny": ["ufo", "flyingSaucer"], "factionBias": "truth" },
+      "rarity": "common",
+      "duration": 1,
+      "effects": { "media_costDelta": -1 },
+      "amplifyByEditor": {
+        "ed_muldrunk": { "media_costDelta": -1 }
+      }
+    },
+    {
+      "id": "coverup_continues",
+      "label": "Cover-Up Continues",
+      "match": { "tagsAny": ["coverup", "denial", "MIB"], "factionBias": "government" },
+      "rarity": "common",
+      "duration": 1,
+      "effects": { "opponent_media_costDelta": 1 }
+    },
+    {
+      "id": "cryptid_craze",
+      "label": "Cryptid Craze",
+      "match": { "tagsAny": ["cryptid", "bigfoot", "mothman", "batboy", "chupacabra", "skunkApe", "jerseyDevil", "thunderbird"] },
+      "rarity": "uncommon",
+      "duration": 1,
+      "effects": { "drawDelta": 1 }
+    },
+    {
+      "id": "florida_man_madness",
+      "label": "Florida Man Madness",
+      "match": { "tagsAny": ["florida", "floridaMan"] },
+      "rarity": "uncommon",
+      "duration": 1,
+      "effects": { "ipGainDelta": 1 },
+      "amplifyByEditor": {
+        "ed_floridaman": { "ipGainDelta": 1 }
+      }
+    },
+    {
+      "id": "government_scandal",
+      "label": "Government Scandal",
+      "match": { "tagsAny": ["scandal", "leak", "whistleblower"], "factionBias": "truth" },
+      "rarity": "rare",
+      "duration": 1,
+      "effects": { "truthBump": 2 },
+      "exclusiveWith": ["global_reassurance_tour"]
+    },
+    {
+      "id": "global_reassurance_tour",
+      "label": "Global Reassurance Tour",
+      "match": { "tagsAny": ["reassurance", "pressTour"], "factionBias": "government" },
+      "rarity": "rare",
+      "duration": 1,
+      "effects": { "truthBump": -2 },
+      "exclusiveWith": ["government_scandal"]
+    },
+    {
+      "id": "committee_hearing",
+      "label": "Emergency Committee Hearing",
+      "match": { "headlineRegex": "Committee Hearing|Emergency Session|Special Inquiry" },
+      "rarity": "common",
+      "duration": 1,
+      "effects": { "zone_costDelta": -1 }
+    },
+    {
+      "id": "front_page_exclusive",
+      "label": "Front Page Exclusive",
+      "match": { "headlineRegex": "Exclusive|Shocks the Nation|We Have the Files" },
+      "rarity": "frontpageExclusive",
+      "duration": "infinite",
+      "effects": { "media_costDelta": -1, "drawDelta": 1 },
+      "maxStacks": 1
+    },
+    {
+      "id": "bigfoot_bowling_night",
+      "label": "Bigfoot Bowling Night",
+      "match": { "tagsAny": ["bigfoot"], "headlineRegex": "Bowling|League Night|Lanes" },
+      "rarity": "uncommon",
+      "duration": 1,
+      "effects": { "drawDelta": 1 }
+    },
+    {
+      "id": "mothman_omen",
+      "label": "Mothman Omen",
+      "match": { "tagsAny": ["mothman"] },
+      "rarity": "uncommon",
+      "duration": 1,
+      "effects": { "opponent_drawDelta": -1 }
+    },
+    {
+      "id": "jersey_devil_alert",
+      "label": "Jersey Devil Alert",
+      "match": { "tagsAny": ["jerseyDevil"] },
+      "rarity": "common",
+      "duration": 1,
+      "effects": { "media_costDelta": -1 }
+    },
+    {
+      "id": "bat_boy_exclusive",
+      "label": "Bat Boy Exclusive Interview",
+      "match": { "tagsAny": ["batboy"] },
+      "rarity": "rare",
+      "duration": 1,
+      "effects": { "truthBump": 2, "drawDelta": 1 },
+      "maxStacks": 1
+    },
+    {
+      "id": "thunderbird_flyover",
+      "label": "Thunderbird Flyover",
+      "match": { "tagsAny": ["thunderbird"] },
+      "rarity": "uncommon",
+      "duration": 1,
+      "effects": { "zone_costDelta": -1 }
+    },
+    {
+      "id": "chupacabra_outbreak",
+      "label": "Chupacabra Outbreak",
+      "match": { "tagsAny": ["chupacabra"] },
+      "rarity": "uncommon",
+      "duration": 1,
+      "effects": { "ipGainDelta": 1 }
+    },
+    {
+      "id": "skunk_ape_sighting",
+      "label": "Skunk Ape Sighted in Swamps",
+      "match": { "tagsAny": ["skunkApe", "florida"] },
+      "rarity": "uncommon",
+      "duration": 1,
+      "effects": { "ipGainDelta": 1 },
+      "amplifyByEditor": {
+        "ed_floridaman": { "ipGainDelta": 1 }
+      }
+    },
+    {
+      "id": "flatwoods_monster_files",
+      "label": "Flatwoods Monster Files Declassified",
+      "match": { "tagsAny": ["flatwoods"] },
+      "rarity": "rare",
+      "duration": 1,
+      "effects": { "media_costDelta": -1, "truthBump": 1 }
+    },
+    {
+      "id": "haunted_walmart",
+      "label": "Haunted Walmart Night Shift",
+      "match": { "tagsAny": ["haunted", "walmart", "ghost"], "headlineRegex": "Haunted Walmart|Night Shift Haunting" },
+      "rarity": "uncommon",
+      "duration": 1,
+      "effects": { "media_costDelta": -1 }
+    },
+    {
+      "id": "cornfield_abduction",
+      "label": "Cornfield Abduction Frenzy",
+      "match": { "tagsAny": ["cornfield", "abduction", "ufo"] },
+      "rarity": "common",
+      "duration": 1,
+      "effects": { "media_costDelta": -1, "hotspot_bonus_ip": 1 }
+    },
+    {
+      "id": "denver_airport_bunker",
+      "label": "Denver Airport Bunker Tour",
+      "match": { "tagsAny": ["denver", "bunker", "airport"] },
+      "rarity": "rare",
+      "duration": 1,
+      "effects": { "zone_costDelta": -1 }
+    },
+    {
+      "id": "pumpkin_uprising",
+      "label": "Pumpkin Uprising!",
+      "match": { "tagsAny": ["pumpkin", "jackOLantern"] },
+      "rarity": "common",
+      "duration": 1,
+      "effects": { "opponent_media_costDelta": 1 }
+    },
+    {
+      "id": "witches_coven",
+      "label": "Witches’ Coven at Dusk",
+      "match": { "tagsAny": ["witch", "coven", "ritual"] },
+      "rarity": "uncommon",
+      "duration": 1,
+      "effects": { "truthBump": 1 }
+    },
+    {
+      "id": "zombie_press_conference",
+      "label": "Zombie Press Conference",
+      "match": { "tagsAny": ["zombie", "undead", "apocalypse"] },
+      "rarity": "uncommon",
+      "duration": 1,
+      "effects": { "opponent_drawDelta": -1 }
+    },
+    {
+      "id": "full_moon_special",
+      "label": "Full Moon Special Edition",
+      "match": { "tagsAny": ["fullMoon", "werewolf"], "headlineRegex": "Full Moon|Lunar|Werewolf" },
+      "rarity": "rare",
+      "duration": 1,
+      "effects": { "attack_costDelta": -1 }
+    },
+    {
+      "id": "haunted_harvest",
+      "label": "Haunted Harvest Festival",
+      "match": { "tagsAny": ["harvest", "festival", "haunted"] },
+      "rarity": "common",
+      "duration": 1,
+      "effects": { "drawDelta": 1 }
+    },
+    {
+      "id": "midnight_candy_shortage",
+      "label": "Midnight Candy Shortage",
+      "match": { "tagsAny": ["candy", "trickOrTreat"] },
+      "rarity": "common",
+      "duration": 1,
+      "effects": { "ipGainDelta": 1 }
+    },
+    {
+      "id": "mib_cleanup",
+      "label": "Men in Black Cleanup Crew",
+      "match": { "tagsAny": ["MIB", "coverup"], "factionBias": "government" },
+      "rarity": "uncommon",
+      "duration": 1,
+      "effects": { "opponent_drawDelta": -1 }
     }
   ]
 }
