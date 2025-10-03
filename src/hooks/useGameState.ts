@@ -1811,6 +1811,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   }, [gameState]);
 
   const pendingAiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const newspaperRevealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameSessionRef = useRef(0);
 
   useEffect(
@@ -1818,6 +1819,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (pendingAiTimeoutRef.current) {
         clearTimeout(pendingAiTimeoutRef.current);
         pendingAiTimeoutRef.current = null;
+      }
+      if (newspaperRevealTimeoutRef.current) {
+        clearTimeout(newspaperRevealTimeoutRef.current);
+        newspaperRevealTimeoutRef.current = null;
       }
     },
     [],
@@ -1969,6 +1974,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       clearTimeout(pendingAiTimeoutRef.current);
     }
     pendingAiTimeoutRef.current = null;
+    if (newspaperRevealTimeoutRef.current) {
+      clearTimeout(newspaperRevealTimeoutRef.current);
+    }
+    newspaperRevealTimeoutRef.current = null;
 
     setGameState(prev => ({
       ...prev,
@@ -2388,6 +2397,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
   const endTurn = useCallback(() => {
     let hotspotSourceToRegister: 'truth' | 'government' | 'neutral' | null = null;
+    let shouldScheduleNewspaperReveal = false;
+    const sessionGuard = gameSessionRef.current;
 
     setGameState(prev => {
       if (prev.isGameOver) return prev;
@@ -2804,7 +2815,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         round: prev.round + 1,
         phase: 'newspaper',
         currentPlayer: 'human',
-        showNewspaper: true,
+        showNewspaper: false,
         truth: comboResult.updatedTruth,
         ip: comboResult.updatedOpponentIp,
         aiIP: comboResult.updatedPlayerIp,
@@ -2826,6 +2837,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         truthBelow20Streak: truthStreaks.truthBelow20Streak,
       };
 
+        shouldScheduleNewspaperReveal = true;
         return updateSecretAgendaProgress({
           ...nextStateBase,
           truthAbove80Streak: truthStreaks.truthAbove80Streak,
@@ -2834,6 +2846,31 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           activeHotspot: nextActiveHotspot,
         });
       });
+
+    if (shouldScheduleNewspaperReveal) {
+      if (newspaperRevealTimeoutRef.current) {
+        clearTimeout(newspaperRevealTimeoutRef.current);
+      }
+      const revealSessionGuard = sessionGuard;
+      newspaperRevealTimeoutRef.current = setTimeout(() => {
+        if (revealSessionGuard !== gameSessionRef.current) {
+          return;
+        }
+
+        newspaperRevealTimeoutRef.current = null;
+
+        setGameState(prev => {
+          if (revealSessionGuard !== gameSessionRef.current) {
+            return prev;
+          }
+          if (prev.isGameOver || prev.phase !== 'newspaper' || prev.showNewspaper) {
+            return prev;
+          }
+
+          return { ...prev, showNewspaper: true };
+        });
+      }, 1000);
+    }
 
     if (hotspotSourceToRegister) {
       registerParanormalSighting(hotspotSourceToRegister);
@@ -3117,6 +3154,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   }, []);
 
   const closeNewspaper = useCallback(() => {
+    if (newspaperRevealTimeoutRef.current) {
+      clearTimeout(newspaperRevealTimeoutRef.current);
+      newspaperRevealTimeoutRef.current = null;
+    }
     setGameState(prev => {
       const bonusCardDraw = Math.max(0, prev.pendingCardDraw ?? 0);
       const targetHandSize = HAND_LIMIT + bonusCardDraw;
