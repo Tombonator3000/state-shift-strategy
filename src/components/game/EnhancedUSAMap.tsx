@@ -588,13 +588,6 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
             if (typeof window !== 'undefined') {
               const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-              if (!prefersReducedMotion) {
-                VisualEffectsCoordinator.triggerParticleEffect('contested', {
-                  x: svgRect.left + centroid[0],
-                  y: svgRect.top + centroid[1]
-                });
-              }
-
               if (areParanormalEffectsEnabled()) {
                 VisualEffectsCoordinator.triggerCryptidSighting({
                   position: {
@@ -1102,36 +1095,37 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         }
 
         .contested-radar {
-          fill: rgba(57, 255, 20, 0.08);
-          stroke: #39ff14;
-          stroke-width: 2.5;
-          stroke-dasharray: 8 10;
-          animation: radarSweep 2.4s linear infinite, contestedPulse 2.4s ease-in-out infinite;
+          fill: rgba(57, 255, 20, 0.12);
+          stroke: rgba(57, 255, 20, 0.8);
+          stroke-width: 2.25;
+          stroke-dasharray: 6 14;
+          animation: contestedCalmPulse 5s ease-in-out infinite;
           transform-origin: center;
-          opacity: 0.85;
-          filter: drop-shadow(0 0 10px rgba(57, 255, 20, 0.35));
+          opacity: 0.72;
+          filter: drop-shadow(0 0 12px rgba(57, 255, 20, 0.45));
           pointer-events: none;
         }
 
         .bigfoot-tracks {
           pointer-events: none;
-          animation: bigfootStride 3.4s ease-in-out infinite;
+          filter: drop-shadow(0 0 8px rgba(32, 72, 46, 0.45));
         }
 
-        .bigfoot-tracks.reduced-motion {
+        .bigfoot-tracks.reduced-motion .bigfoot-track {
           animation: none !important;
         }
 
         .bigfoot-track {
-          fill: rgba(76, 128, 92, 0.7);
-          stroke: rgba(18, 51, 32, 0.85);
+          fill: rgba(76, 128, 92, 0.75);
+          stroke: rgba(18, 51, 32, 0.88);
           stroke-width: 1.2;
-          filter: drop-shadow(0 0 6px rgba(32, 72, 46, 0.6));
+          transform-origin: center;
+          animation: bigfootTrackGlow 6s ease-in-out infinite;
         }
 
-        .bigfoot-track-1 { animation: footprintPulse 2.6s ease-in-out infinite; }
-        .bigfoot-track-2 { animation: footprintPulse 3.1s ease-in-out infinite 0.35s; }
-        .bigfoot-track-3 { animation: footprintPulse 2.4s ease-in-out infinite 0.7s; }
+        .bigfoot-track-1 { animation-delay: 0s; }
+        .bigfoot-track-2 { animation-delay: 1.4s; }
+        .bigfoot-track-3 { animation-delay: 2.8s; }
 
         /* Firefox-specific: reduce costly filter effects */
         @-moz-document url-prefix() {
@@ -1150,48 +1144,29 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           cursor: crosshair;
         }
 
-        @keyframes radarSweep {
-          0% {
-            stroke-dashoffset: 0;
-            transform: scale(0.85);
-            opacity: 0.9;
+        @keyframes contestedCalmPulse {
+          0%, 100% {
+            opacity: 0.75;
+            transform: scale(0.94);
+            filter: drop-shadow(0 0 10px rgba(57, 255, 20, 0.35));
           }
-          60% {
-            opacity: 0.45;
-          }
-          100% {
-            stroke-dashoffset: -140;
-            transform: scale(1.32);
-            opacity: 0;
+          50% {
+            opacity: 0.55;
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 18px rgba(57, 255, 20, 0.6));
           }
         }
 
-        @keyframes contestedPulse {
+        @keyframes bigfootTrackGlow {
           0%, 100% {
-            filter: drop-shadow(0 0 12px rgba(57, 255, 20, 0.45));
+            opacity: 0.85;
+            transform: scale(0.98);
+            filter: drop-shadow(0 0 8px rgba(32, 72, 46, 0.45));
           }
           50% {
-            filter: drop-shadow(0 0 24px rgba(57, 255, 20, 0.85));
-          }
-        }
-
-        @keyframes footprintPulse {
-          0%, 100% {
-            opacity: 0.9;
-            transform: scale(1) translateY(0);
-          }
-          50% {
-            opacity: 0.6;
-            transform: scale(0.92) translateY(-3px);
-          }
-        }
-
-        @keyframes bigfootStride {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-2px);
+            opacity: 0.65;
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 14px rgba(32, 72, 46, 0.6));
           }
         }
 
@@ -1248,6 +1223,11 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             opacity: 0.8;
             filter: drop-shadow(0 0 14px rgba(57, 255, 20, 0.6));
             stroke-dasharray: 0;
+          }
+          .bigfoot-track {
+            animation: none !important;
+            filter: drop-shadow(0 0 8px rgba(32, 72, 46, 0.5));
+            opacity: 0.8;
           }
           .paranormal-hotspot-marker {
             animation: none !important;

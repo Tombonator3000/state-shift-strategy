@@ -9,7 +9,7 @@ export interface EffectPosition {
 export class VisualEffectsCoordinator {
   // Trigger particle effect at specific position
   static triggerParticleEffect(
-    type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain' | 'stateevent' | 'contested' | 'flash' | 'broadcast' | 'cryptid',
+    type: 'deploy' | 'capture' | 'counter' | 'victory' | 'synergy' | 'bigwin' | 'stateloss' | 'chain' | 'stateevent' | 'flash' | 'broadcast' | 'cryptid',
     position: EffectPosition
   ): void {
     window.dispatchEvent(new CustomEvent('cardDeployed', {

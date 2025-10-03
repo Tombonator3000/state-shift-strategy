@@ -260,6 +260,7 @@ const createDirectorStyleHotspot = (params: {
     icon: candidate.icon,
     tags: candidate.tags,
     expansionTag: candidate.expansionTag,
+    kind: candidate.kind,
   });
   const label = candidate.name ?? `${state.name} Hotspot`;
 
