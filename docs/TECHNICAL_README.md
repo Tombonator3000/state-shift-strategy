@@ -135,7 +135,7 @@ The table below keeps designers out of TypeScript while they balance the weights
 | State events & contested states | State-event hooks dispatch `stateEvent` overlays, while contested states trigger `'contestedState'` effects and optional cryptid sightings on the map. |
 | Paranormal overlays | `VisualEffectsCoordinator` can emit cryptid sightings, paranormal hotspots, breaking news, surveillance sweeps, typewriter reveals, static interference, and evidence galleries—each mapped to unique particle/SFX combos in the animation layer. |
 | Government redaction & truth flashes | Dedicated helpers dispatch `governmentRedaction` and `truthFlash` events, which the animation layer turns into sweeping overlays and flash particles. |
-| Particle renderer | `ParticleSystem` enumerates effect types, particle counts, colors, and lifespans, powering all emitted bursts. |
+| Visual flourishes | The animation layer leans on bespoke overlay components and floating-number emitters instead of a shared particle renderer. |
 
 ### Testing
 
