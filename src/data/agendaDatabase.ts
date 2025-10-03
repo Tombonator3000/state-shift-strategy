@@ -713,6 +713,46 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     flavorText: 'Donation perks include glow-in-the-dark crop circle blueprints.'
   }),
 
+  defineAgenda({
+    id: 'truth_aurora_truth_choir',
+    faction: 'truth',
+    category: 'influence',
+    title: 'Aurora Truth Choir',
+    headline: 'AURORA TRUTH CHOIR HARMONIZES FIVE NIGHTS STRAIGHT!',
+    operationName: 'Operation Polar Chorus',
+    issueTheme: 'Truth Momentum',
+    pullQuote: '“Hold the high note until the truth meter hums at full resonance.”',
+    artCue: {
+      icon: '/assets/tabloid-flash.svg',
+      texture: '/assets/tabloid-halftone.svg',
+      alt: 'Radiant aurora microphone graphic',
+    },
+    description:
+      'Keep the Truth meter above 80% for five consecutive turns so the aurora choir can beam whistleblower ballads across every midnight broadcast.',
+    target: 5,
+    difficulty: 'legendary',
+    stages: createAgendaStages('truth_aurora_truth_choir', 5, {
+      briefing: {
+        label: 'Choir Warm-Ups',
+        description: 'Sopranos rehearse foil-lined scales beneath the northern lights.',
+        requirement: 'Climb above 80% Truth for the opening performance.',
+      },
+      escalation: {
+        label: 'Encore Scheduling',
+        description: 'Every safehouse books repeat broadcasts as the streak continues.',
+        requirement: 'Sustain Truth above 80% for 3 consecutive turns.',
+        threshold: 3,
+      },
+      finale: {
+        label: 'Polar Ovation',
+        description: 'Five flawless nights shake surveillance drones out of alignment.',
+        requirement: 'Sustain Truth above 80% for 5 consecutive turns.',
+      },
+    }),
+    computeProgress: gameState => resolveStreak(gameState, 'truthAbove80Streak'),
+    flavorText: 'Program inserts double as emergency aurora-viewing visors.'
+  }),
+
   // GOVERNMENT FACTION AGENDAS
   defineAgenda({
     id: 'gov_capitol_stew',
@@ -1132,6 +1172,45 @@ export const AGENDA_DATABASE: SecretAgenda[] = [
     }),
     computeProgress: gameState => sumSuppressedTruthDelta(gameState),
     flavorText: 'Tote board numbers glow whenever a memory hole successfully swallows a rumor.'
+  }),
+
+  defineAgenda({
+    id: 'gov_spin_shield_network',
+    faction: 'government',
+    category: 'influence',
+    title: 'Spin Shield Network',
+    headline: 'DIRECTIVE 42-L: DEFENSIVE TALKING POINT GRID ONLINE!',
+    operationName: 'Operation Counter Chorus',
+    issueTheme: 'Information Discipline',
+    pullQuote: '“Rotate the cue cards clockwise after every rebuttal.”',
+    artCue: {
+      icon: '/assets/dossier-stamp.svg',
+      texture: '/assets/dossier-fibers.svg',
+      alt: 'Directive clearance sigil',
+    },
+    description:
+      'Deploy five DEFENSIVE cards so the spin shield can blanket nightly broadcasts with airtight rebuttal loops.',
+    target: 5,
+    difficulty: 'medium',
+    stages: createAgendaStages('gov_spin_shield_network', 5, {
+      briefing: {
+        label: 'Shield Calibration',
+        description: 'Briefing rooms script synchronized defensive counterpoints.',
+        requirement: 'Deploy the first DEFENSIVE rebuttal.',
+      },
+      escalation: {
+        label: 'Cue Card Rotation',
+        description: 'Talking point captains rehearse overlapping counter-choruses.',
+        requirement: 'Play 3 DEFENSIVE cards.',
+      },
+      finale: {
+        label: 'Full Spectrum Scramble',
+        description: 'Five-layer shield hums so loudly that rogue leaks lose traction.',
+        requirement: 'Play 5 DEFENSIVE cards.',
+      },
+    }),
+    computeProgress: gameState => countCardTypePlays(gameState, 'DEFENSIVE'),
+    flavorText: 'Each lectern hides an emergency fog machine for punctuation.'
   }),
 
   // SHARED/NEUTRAL AGENDAS

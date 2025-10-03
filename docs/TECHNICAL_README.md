@@ -384,6 +384,7 @@ The secret agenda database now leans into the “Paranoid Times” tabloid-cookb
 | --- | --- | --- |
 | Bat Boy’s Brunch Brigade | Bat Boy sightings go brunch-core | Counts Appalachian control via `controlledStates` to confirm WV/KY/TN/PA brunch venues. |
 | Moonbeam Marmalade Slow-Cook | Lunar jam session | Reads `truthAbove80Streak` / `timeBasedGoalCounters` to require three glowing turns. |
+| Aurora Truth Choir | Polar foil-hood choir nights | Tracks `truthAbove80Streak` to demand a five-night streak above 80% Truth. |
 | UFO Retrieval Mise en Place | Crash-site mise en place | Filters `factionPlayHistory` for ZONE plays targeting desert crash states (NV/NM/AZ/UT). |
 | Tabloid Taste Test Kitchen | Recipe-column media blitz | Tallies MEDIA cards from `factionPlayHistory` to model serialized taste tests. |
 | Cryptid Potluck Planning | Monster potluck RSVPs | Uses `controlledStates` to corral cryptid-haunted states like WA/OR/WV/NJ/MT/NH. |
@@ -395,6 +396,7 @@ The secret agenda database now leans into the “Paranoid Times” tabloid-cookb
 | --- | --- | --- |
 | Capitol Cafeteria Stew | Beltway cafeteria chow | Requires `controlledStates` coverage of DC/VA/MD/CO ladles. |
 | Field-Ration Redactions | Press-release seasoning | Counts MEDIA plays from `factionPlayHistory` to keep the placemats censored. |
+| Spin Shield Network | Cue-card counter-chorus | Tallies DEFENSIVE card plays from `factionPlayHistory` to keep rebuttal grids aligned. |
 | Supply Chain Soup | Heartland ration routing | Monitors agricultural depot control (IA/NE/KS/MO/OK/AR) via `controlledStates`. |
 | UFO Recall Paperwork | Crash-site compliance | Uses `capturedStates` extracted from `factionPlayHistory` to confirm confiscations in NV/NM/AZ/UT. |
 | Cover-Up Casserole | Lid-on truth suppression | Leans on `truthBelow20Streak` / `timeBasedGoalCounters` for streak-style baking. |
