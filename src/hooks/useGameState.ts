@@ -132,6 +132,20 @@ interface EditorScandalResolution {
   toastMessages: string[];
 }
 
+type EditorTelemetryPayload = {
+  editorId: EditorId;
+  faction: GameState['faction'];
+  outcome: 'win' | 'loss';
+  playerWon: boolean;
+  victoryType: string;
+  turn: number;
+  round: number;
+  finalTruth: number;
+  finalIp: number;
+  aiIp: number;
+  timestamp: number;
+};
+
 const resolveActiveEditorFromState = (state: GameState) => {
   return state.editorDef ?? resolveEditor(state.editorId ?? null) ?? null;
 };
@@ -149,6 +163,62 @@ const emitEditorToastMessages = (messages: string[]): void => {
   for (const message of messages) {
     if (typeof message === 'string' && message.trim().length > 0) {
       (emitter as (value: string) => void)(message);
+    }
+  }
+};
+
+const dispatchEditorTelemetry = (payload: EditorTelemetryPayload): void => {
+  if (!payload.editorId) {
+    return;
+  }
+
+  // [EDITORS_TELEMETRY]
+  if (typeof window !== 'undefined') {
+    const analytics = (window as typeof window & {
+      shadowgovAnalytics?: {
+        publish?: (channel: string, detail: EditorTelemetryPayload) => void;
+      };
+    }).shadowgovAnalytics;
+
+    if (analytics && typeof analytics.publish === 'function') {
+      try {
+        analytics.publish('editors', payload);
+      } catch (error) {
+        if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+          console.warn('[Editors][Telemetry] Analytics publish failed', error);
+        }
+      }
+    }
+
+    if (typeof window.dispatchEvent === 'function' && typeof CustomEvent === 'function') {
+      try {
+        window.dispatchEvent(new CustomEvent<EditorTelemetryPayload>('editorsTelemetry', { detail: payload }));
+      } catch (error) {
+        if (typeof console !== 'undefined' && typeof console.debug === 'function') {
+          console.debug('[Editors][Telemetry] Event dispatch failed', error);
+        }
+      }
+    }
+  }
+
+  if (typeof console !== 'undefined') {
+    const label = `[Editors][Telemetry] ${payload.editorId} · ${payload.outcome.toUpperCase()}`;
+    if (typeof console.groupCollapsed === 'function') {
+      console.groupCollapsed(label);
+      console.log('Faction:', payload.faction);
+      console.log('Victory Type:', payload.victoryType || 'n/a');
+      console.log('Turn:', payload.turn);
+      console.log('Round:', payload.round);
+      console.log('Final Truth:', payload.finalTruth);
+      console.log('Final IP:', payload.finalIp);
+      console.log('AI IP:', payload.aiIp);
+      console.log('Player Won:', payload.playerWon);
+      console.log('Timestamp:', new Date(payload.timestamp).toISOString());
+      if (typeof console.groupEnd === 'function') {
+        console.groupEnd();
+      }
+    } else if (typeof console.info === 'function') {
+      console.info(label, payload);
     }
   }
 };
@@ -4144,6 +4214,40 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         finalIP: state.ip,
         finalTruth: state.truth,
         statesControlled: state.controlledStates.length
+      });
+    }
+
+    const aiOwnedStateCount = state.states.filter(stateEntry => stateEntry.owner === 'ai').length;
+    const playerVictoryAchieved = Boolean(victoryType && playerWon);
+    const aiVictoryAchieved =
+      !playerWon && (state.aiIP >= 300 || state.truth <= 0 || state.truth >= 100 || aiOwnedStateCount >= 10);
+    const activeEditorId = state.editorId ?? undefined;
+
+    if ((playerVictoryAchieved || aiVictoryAchieved) && activeEditorId) {
+      const resolvedVictoryType = playerVictoryAchieved
+        ? victoryType || 'player_unknown'
+        : state.aiIP >= 300
+        ? 'ai_ip'
+        : state.truth <= 0
+        ? 'truth_min'
+        : state.truth >= 100
+        ? 'truth_max'
+        : aiOwnedStateCount >= 10
+        ? 'ai_states'
+        : 'ai_unknown';
+
+      dispatchEditorTelemetry({
+        editorId: activeEditorId,
+        faction: state.faction,
+        outcome: playerWon ? 'win' : 'loss',
+        playerWon,
+        victoryType: resolvedVictoryType,
+        turn: state.turn,
+        round: state.round,
+        finalTruth: state.truth,
+        finalIp: state.ip,
+        aiIp: state.aiIP,
+        timestamp: Date.now(),
       });
     }
 
