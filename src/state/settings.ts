@@ -2,6 +2,29 @@ import type { Difficulty } from "../ai";
 
 const OPTIONS_STORAGE_KEY = "gameSettings";
 
+type StoredGameSettings = {
+  paranormalEffectsEnabled?: unknown;
+  mapVfxEnabled?: unknown;
+};
+
+const readStoredGameSettings = (): StoredGameSettings | null => {
+  if (typeof localStorage === "undefined") {
+    return null;
+  }
+
+  try {
+    const stored = localStorage.getItem(OPTIONS_STORAGE_KEY);
+    if (!stored) {
+      return null;
+    }
+
+    return JSON.parse(stored) as StoredGameSettings;
+  } catch (error) {
+    console.warn("Failed to read stored game settings:", error);
+    return null;
+  }
+};
+
 export function getDifficulty(): Difficulty {
   const storage = typeof localStorage !== "undefined" ? localStorage : null;
   const raw = storage?.getItem("shadowgov:difficulty") ?? "NORMAL";
@@ -29,23 +52,17 @@ export function setDifficultyFromLabel(label: string) {
 }
 
 export function areParanormalEffectsEnabled(): boolean {
-  if (typeof localStorage === "undefined") {
-    return true;
+  const stored = readStoredGameSettings();
+  if (stored && typeof stored.paranormalEffectsEnabled === "boolean") {
+    return stored.paranormalEffectsEnabled;
   }
+  return true;
+}
 
-  try {
-    const stored = localStorage.getItem(OPTIONS_STORAGE_KEY);
-    if (!stored) {
-      return true;
-    }
-
-    const parsed = JSON.parse(stored) as { paranormalEffectsEnabled?: unknown } | null;
-    if (parsed && typeof parsed.paranormalEffectsEnabled === "boolean") {
-      return parsed.paranormalEffectsEnabled;
-    }
-  } catch (error) {
-    console.warn("Failed to read paranormal effects setting: ", error);
+export function areMapVfxEnabled(): boolean {
+  const stored = readStoredGameSettings();
+  if (stored && typeof stored.mapVfxEnabled === "boolean") {
+    return stored.mapVfxEnabled;
   }
-
   return true;
 }

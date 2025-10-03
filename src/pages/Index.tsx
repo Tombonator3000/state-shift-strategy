@@ -50,7 +50,7 @@ import type {
 } from '@/hooks/gameStateTypes';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
-import { areParanormalEffectsEnabled } from '@/state/settings';
+import { areMapVfxEnabled, areParanormalEffectsEnabled } from '@/state/settings';
 import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
 import { EVENT_DATABASE } from '@/data/eventDatabase';
@@ -1070,7 +1070,9 @@ const Index = () => {
           reducedMotion,
           source: currentEvent?.faction,
         });
-        VisualEffectsCoordinator.triggerParticleEffect('broadcast', broadcastPosition);
+        if (!reducedMotion && areMapVfxEnabled()) {
+          VisualEffectsCoordinator.triggerParticleEffect('broadcast', broadcastPosition);
+        }
         if (stage === 'finale') {
           VisualEffectsCoordinator.triggerTruthFlash(broadcastPosition);
         }
@@ -1111,16 +1113,22 @@ const Index = () => {
             stateId: currentEvent.paranormalHotspot.stateId,
             stateAbbreviation: currentEvent.paranormalHotspot.stateId,
           }) ?? VisualEffectsCoordinator.getScreenCenter();
-        VisualEffectsCoordinator.triggerParanormalHotspot({
-          position: hotspotPosition,
-          stateId: currentEvent.paranormalHotspot.stateId ?? hotspotStateName,
-          stateName: hotspotStateName,
-          label: currentEvent.paranormalHotspot.label ?? currentEvent.title,
-          icon: currentEvent.paranormalHotspot.icon ?? '👻',
-          source: currentEvent.paranormalHotspot.source ?? 'neutral',
-          defenseBoost: currentEvent.paranormalHotspot.defenseBoost,
-          truthReward: currentEvent.paranormalHotspot.truthReward,
-        });
+        if (
+          !reducedMotion
+          && areMapVfxEnabled()
+          && areParanormalEffectsEnabled()
+        ) {
+          VisualEffectsCoordinator.triggerParanormalHotspot({
+            position: hotspotPosition,
+            stateId: currentEvent.paranormalHotspot.stateId ?? hotspotStateName,
+            stateName: hotspotStateName,
+            label: currentEvent.paranormalHotspot.label ?? currentEvent.title,
+            icon: currentEvent.paranormalHotspot.icon ?? '👻',
+            source: currentEvent.paranormalHotspot.source ?? 'neutral',
+            defenseBoost: currentEvent.paranormalHotspot.defenseBoost,
+            truthReward: currentEvent.paranormalHotspot.truthReward,
+          });
+        }
 
         const timestamp = Date.now();
         pushSighting({
@@ -1370,7 +1378,9 @@ const Index = () => {
       },
       (type, x, y) => {
         // Particle effect callback
-        VisualEffectsCoordinator.triggerParticleEffect(type as any, { x, y });
+        if (!prefersReducedMotion && areMapVfxEnabled()) {
+          VisualEffectsCoordinator.triggerParticleEffect(type as any, { x, y });
+        }
       },
       (value, type, x, y) => {
         // Floating number callback
@@ -1447,6 +1457,7 @@ const Index = () => {
     getTotalBonusIP,
     audio,
     setGameState,
+    prefersReducedMotion,
   ]);
 
   useEffect(() => {
