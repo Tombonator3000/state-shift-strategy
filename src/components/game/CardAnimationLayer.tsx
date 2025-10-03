@@ -366,7 +366,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
 
       agendaStageTimeoutRef.current = window.setTimeout(() => {
         clearAgendaStageOverlay();
-      }, 2200);
+      }, 4200);
     };
 
     const handleFloatingNumber = (event: CustomEvent<{ value: number; type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain'; x: number; y: number }>) => {
@@ -584,7 +584,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       {/* Full-screen overlay for card animations */}
       <div
         id="card-play-layer"
-        className="fixed inset-0 pointer-events-none z-[40]"
+        className={`fixed inset-0 pointer-events-none ${agendaStageOverlay ? 'z-[70]' : 'z-[40]'}`}
         aria-hidden="true"
       >
         {children}
