@@ -8,7 +8,7 @@ import type { AIDifficulty } from '@/data/aiStrategy';
 import type { TurnPlay } from '@/game/combo.types';
 import type { HotspotKind, WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
 import type { StateCombinationEffects } from '@/data/stateCombinations';
-import type { EditorDefinition, EditorId } from '@/expansions/editors/EditorsEngine';
+import type { EditorDef, EditorId } from '@/expansions/editors/EditorsEngine';
 import type { TabloidRelicRuntimeState } from '@/expansions/tabloidRelics/RelicTypes';
 
 export interface CardPlayRecord {
@@ -126,25 +126,16 @@ export interface GameState {
   activeCampaignArcs: ActiveCampaignArcState[];
   pendingArcEvents: PendingCampaignArcEvent[];
   editorId?: EditorId | null;
-  editorDef?: EditorDefinition | null;
+  editorDef?: EditorDef | null;
   editorRuntime?: GameEditorRuntimeState | null;
   preGameAdditions?: GameEditorPreGameAdditions | null;
   tabloidRelicsRuntime?: TabloidRelicRuntimeState | null;
 }
 
-export interface GameEditorScandalFlags {
-  readonly [flagId: string]: boolean;
-}
-
 export interface GameEditorRuntimeState {
   appliedSetup?: boolean;
   roundIndex?: number;
-  rngSeed?: number;
-  scandalFlags?: GameEditorScandalFlags;
-  deckSizeDelta?: {
-    player?: number;
-    ai?: number;
-  };
+  deckSizeDelta?: number;
 }
 
 export interface GameEditorPreGameAdditions {

@@ -43,14 +43,8 @@ import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
 import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
-import {
-  chooseEditor,
-  isEditorsExpansionEnabled,
-  summarizeEditorEffects,
-  EDITOR_PHASE_LABELS,
-  type EditorEffectBuckets,
-} from '@/expansions/editors/EditorsUI';
-import type { EditorId } from '@/expansions/editors/EditorsEngine';
+import { chooseEditor, isEditorsExpansionEnabled } from '@/expansions/editors/EditorsUI';
+import { describeEditorEffect, type EditorId } from '@/expansions/editors/EditorsEngine';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
@@ -745,11 +739,14 @@ const Index = () => {
     clearArchive: clearIntelArchive,
   } = useIntelArchive();
 
-  const editorEffects = useMemo<EditorEffectBuckets | null>(() => {
+  const editorEffects = useMemo(() => {
     if (!gameState.editorDef) {
       return null;
     }
-    return summarizeEditorEffects(gameState.editorDef);
+    return {
+      bonus: describeEditorEffect(gameState.editorDef.bonus),
+      penalty: describeEditorEffect(gameState.editorDef.penalty),
+    };
   }, [gameState.editorDef]);
 
   const [isObjectivesOpen, setIsObjectivesOpen] = useState(false);
@@ -2862,7 +2859,7 @@ const Index = () => {
                   )}
                   data-editor-id={gameState.editorDef.id}
                 >
-                  ✒️ Editor: {gameState.editorDef.shortName}
+                  ✒️ Editor: {gameState.editorDef.name}
                 </button>
               </PopoverTrigger>
               <PopoverContent
@@ -2873,43 +2870,28 @@ const Index = () => {
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/60">Desk Editor</p>
                     <h3 className="text-base font-semibold leading-tight">{gameState.editorDef.name}</h3>
-                    <p className="text-xs text-newspaper-text/70">{gameState.editorDef.tagline}</p>
+                    {gameState.editorDef.flavor ? (
+                      <p className="text-xs italic text-newspaper-text/70">{gameState.editorDef.flavor}</p>
+                    ) : null}
                   </div>
-                  {gameState.editorDef.hookSummary ? (
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/60">
-                      Focus: <span className="font-normal normal-case text-newspaper-text">{gameState.editorDef.hookSummary}</span>
-                    </p>
-                  ) : null}
-                  {editorEffects?.bonuses?.length ? (
+                  {editorEffects?.bonus?.length ? (
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-600">Bonuses</p>
                       <ul className="mt-1 space-y-1 text-xs text-emerald-700">
-                        {editorEffects.bonuses.map(effect => (
-                          <li key={effect.key}>
-                            <span className="font-semibold">{EDITOR_PHASE_LABELS[effect.phase]}:</span> {effect.description}
-                          </li>
+                        {editorEffects.bonus.map((line, index) => (
+                          <li key={`editor-bonus-${index}`}>{line}</li>
                         ))}
                       </ul>
                     </div>
                   ) : null}
-                  {editorEffects?.penalties?.length ? (
+                  {editorEffects?.penalty?.length ? (
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-rose-600">Tradeoffs</p>
                       <ul className="mt-1 space-y-1 text-xs text-rose-700">
-                        {editorEffects.penalties.map(effect => (
-                          <li key={effect.key}>
-                            <span className="font-semibold">{EDITOR_PHASE_LABELS[effect.phase]}:</span> {effect.description}
-                          </li>
+                        {editorEffects.penalty.map((line, index) => (
+                          <li key={`editor-penalty-${index}`}>{line}</li>
                         ))}
                       </ul>
-                    </div>
-                  ) : null}
-                  {gameState.editorDef.recommendedHotspots?.length ? (
-                    <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/40 p-3">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/60">Favoured Hotspots</p>
-                      <p className="text-[11px] text-newspaper-text/80">
-                        {gameState.editorDef.recommendedHotspots.join(', ')}
-                      </p>
                     </div>
                   ) : null}
                 </div>

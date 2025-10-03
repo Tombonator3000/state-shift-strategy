@@ -58,9 +58,9 @@ import type {
   StateParanormalHotspotSummary,
 } from './gameStateTypes';
 import {
-  applyOnSetup,
-  applyOnTurnStart,
-  applyOnPlayCard,
+  gatherEditorPlayCardAdjustments,
+  gatherEditorSetupAdjustments,
+  gatherEditorTurnStartAdjustments,
   resolveEditor,
   type EditorId,
 } from '@/expansions/editors/EditorsEngine';
@@ -303,34 +303,6 @@ const applyEditorPendingScandalEffects = (params: {
   };
 };
 
-const applyEditorTurnStartHookEffect = (
-  options: { hookId?: string | null },
-  context: EditorTurnStartHookContext,
-): void => {
-  if (!options.hookId) {
-    return;
-  }
-
-  switch (options.hookId) {
-    default:
-      break;
-  }
-};
-
-const applyEditorPlayCardHookEffect = (
-  options: { hookId?: string | null },
-  context: EditorPlayCardHookContext,
-): void => {
-  if (!options.hookId) {
-    return;
-  }
-
-  switch (options.hookId) {
-    default:
-      break;
-  }
-};
-
 const normalizeEditorRuntimeState = (value: unknown): GameEditorRuntimeState | undefined => {
   if (!value || typeof value !== 'object') {
     return undefined;
@@ -347,41 +319,66 @@ const normalizeEditorRuntimeState = (value: unknown): GameEditorRuntimeState | u
     normalized.roundIndex = Math.max(0, Math.trunc(runtime.roundIndex));
   }
 
-  if (typeof runtime.rngSeed === 'number' && Number.isFinite(runtime.rngSeed)) {
-    normalized.rngSeed = runtime.rngSeed >>> 0;
-  }
-
-  if (runtime.scandalFlags && typeof runtime.scandalFlags === 'object') {
-    const scandalFlags: NonNullable<GameEditorRuntimeState['scandalFlags']> = {};
-    for (const [flagId, flagValue] of Object.entries(runtime.scandalFlags as Record<string, unknown>)) {
-      if (typeof flagValue === 'boolean') {
-        scandalFlags[flagId] = flagValue;
-      }
-    }
-    if (Object.keys(scandalFlags).length > 0) {
-      normalized.scandalFlags = scandalFlags;
-    }
-  }
-
-  if (runtime.deckSizeDelta && typeof runtime.deckSizeDelta === 'object') {
-    const deckSizeDelta: NonNullable<GameEditorRuntimeState['deckSizeDelta']> = {};
-    const playerDelta = (runtime.deckSizeDelta as { player?: unknown }).player;
-    const aiDelta = (runtime.deckSizeDelta as { ai?: unknown }).ai;
-
-    if (typeof playerDelta === 'number' && Number.isFinite(playerDelta) && playerDelta !== 0) {
-      deckSizeDelta.player = Math.trunc(playerDelta);
-    }
-
-    if (typeof aiDelta === 'number' && Number.isFinite(aiDelta) && aiDelta !== 0) {
-      deckSizeDelta.ai = Math.trunc(aiDelta);
-    }
-
-    if (Object.keys(deckSizeDelta).length > 0) {
-      normalized.deckSizeDelta = deckSizeDelta;
-    }
+  if (typeof runtime.deckSizeDelta === 'number' && Number.isFinite(runtime.deckSizeDelta) && runtime.deckSizeDelta !== 0) {
+    normalized.deckSizeDelta = Math.trunc(runtime.deckSizeDelta);
   }
 
   return Object.keys(normalized).length > 0 ? normalized : undefined;
+};
+
+const applyEditorTurnStartAdjustments = (context: EditorTurnStartHookContext): void => {
+  const editor = resolveActiveEditorFromState(context.state);
+  if (!editor) {
+    return;
+  }
+
+  const adjustments = gatherEditorTurnStartAdjustments(editor);
+  const nextRoundIndex = (context.runtime?.roundIndex ?? 0) + 1;
+  context.runtimePatch = {
+    ...(context.runtimePatch ?? {}),
+    roundIndex: nextRoundIndex,
+  };
+
+  if (nextRoundIndex === 1 && adjustments.roundOneDrawBonus > 0) {
+    context.bonusCardDraw += adjustments.roundOneDrawBonus;
+    context.logEntries.push(`${editor.name} grants +${adjustments.roundOneDrawBonus} opening draw.`);
+  }
+
+  if (adjustments.scandalChance > 0 && adjustments.scandalEffect === 'randomDiscard:1') {
+    if (Math.random() < adjustments.scandalChance) {
+      context.pendingScandals.push({
+        kind: 'discard-random',
+        amount: 1,
+        target: 'player',
+        source: `${editor.name} scandal`,
+        toastMessage: 'Editor scandal forces a random discard: {{CARDS}}',
+        emptyLogMessage: `${editor.name} scandal fizzles (no cards to discard).`,
+      });
+      context.logEntries.push(`${editor.name} scandal triggers a random discard.`);
+      context.toastMessages.push('Editor scandal! Random discard incoming.');
+    }
+  }
+};
+
+const applyEditorPlayCardAdjustments = (context: EditorPlayCardHookContext): void => {
+  const editor = resolveActiveEditorFromState(context.state);
+  if (!editor) {
+    return;
+  }
+
+  const adjustments = gatherEditorPlayCardAdjustments(editor);
+
+  if (context.cardKind === 'MEDIA' && adjustments.mediaTruthDelta !== 0) {
+    context.truthDelta += adjustments.mediaTruthDelta;
+    context.logEntries.push(`${editor.name} adds ${adjustments.mediaTruthDelta > 0 ? '+' : ''}${adjustments.mediaTruthDelta} truth to MEDIA.`);
+    context.toastMessages.push(`Editor: ${adjustments.mediaTruthDelta > 0 ? '+' : ''}${adjustments.mediaTruthDelta} truth`);
+  }
+
+  if (context.cardKind === 'ATTACK' && adjustments.attackIpCostDelta !== 0) {
+    context.cost += adjustments.attackIpCostDelta;
+    context.logEntries.push(`${editor.name} adjusts attack IP cost by ${adjustments.attackIpCostDelta > 0 ? '+' : ''}${adjustments.attackIpCostDelta}.`);
+    context.toastMessages.push(`Editor: ${adjustments.attackIpCostDelta > 0 ? '+' : ''}${adjustments.attackIpCostDelta} IP cost`);
+  }
 };
 
 const normalizeEditorPreGameAdditions = (value: unknown): GameEditorPreGameAdditions | undefined => {
@@ -2432,47 +2429,26 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
     const requestedEditorId = editorId ?? gameStateRef.current.editorId ?? null;
     const resolvedEditor = resolveEditor(requestedEditorId);
-    const existingRuntime = resolvedEditor
-      ? normalizeEditorRuntimeState(gameStateRef.current.editorRuntime)
-      : undefined;
-    const existingPreGameAdditions = resolvedEditor
-      ? normalizeEditorPreGameAdditions(gameStateRef.current.preGameAdditions)
-      : undefined;
-    const shouldConsumePreGameAdditions = resolvedEditor
-      ? existingRuntime?.appliedSetup !== true
-      : false;
+    const setupAdjustments = gatherEditorSetupAdjustments(resolvedEditor ?? null);
 
     const editorRuntime: GameEditorRuntimeState | undefined = resolvedEditor
       ? {
-          appliedSetup: false,
+          appliedSetup: true,
           roundIndex: 0,
-          rngSeed: Math.floor(Math.random() * 0xffffffff),
-          scandalFlags: existingRuntime?.scandalFlags
-            ? { ...existingRuntime.scandalFlags }
-            : undefined,
-          deckSizeDelta: existingRuntime?.deckSizeDelta
-            ? { ...existingRuntime.deckSizeDelta }
-            : undefined,
+          deckSizeDelta: setupAdjustments.deckSizeDelta !== 0 ? setupAdjustments.deckSizeDelta : undefined,
         }
       : undefined;
 
-    const preGameAdditions = shouldConsumePreGameAdditions ? existingPreGameAdditions : undefined;
+    const addedCards: GameCard[] = setupAdjustments.addCardIds
+      .map(cardId => CARD_DATABASE.find(card => card.id === cardId))
+      .filter((card): card is GameCard => Boolean(card))
+      .map(card => ({ ...card }));
 
-    if (resolvedEditor && editorRuntime) {
-      // [EDITORS_ON_SETUP_HOOK]
-      applyOnSetup(resolvedEditor, () => {
-        editorRuntime.appliedSetup = true;
-      });
-      editorRuntime.appliedSetup = true;
-    }
-
-    const playerDeckDelta = editorRuntime?.deckSizeDelta?.player ?? 0;
-    const aiDeckDelta = editorRuntime?.deckSizeDelta?.ai ?? 0;
+    const playerDeckDelta = editorRuntime?.deckSizeDelta ?? 0;
     const normalizedPlayerDeckDelta = Number.isFinite(playerDeckDelta) ? Math.trunc(playerDeckDelta) : 0;
-    const normalizedAiDeckDelta = Number.isFinite(aiDeckDelta) ? Math.trunc(aiDeckDelta) : 0;
 
     const basePlayerDeckSize = 40 + normalizedPlayerDeckDelta;
-    const baseAiDeckSize = 40 + normalizedAiDeckDelta;
+    const baseAiDeckSize = 40;
 
     const playerDeckSize = Math.max(handSize, basePlayerDeckSize);
     const aiDeckSize = Math.max(handSize, baseAiDeckSize);
@@ -2480,36 +2456,22 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     let newDeck = generateWeightedDeck(playerDeckSize, faction);
     let aiDeckSource = generateWeightedDeck(aiDeckSize, aiFaction);
 
-    if (preGameAdditions?.playerDeck?.length) {
-      newDeck = [...preGameAdditions.playerDeck, ...newDeck];
-    }
-
-    if (preGameAdditions?.aiDeck?.length) {
-      aiDeckSource = [...preGameAdditions.aiDeck, ...aiDeckSource];
+    if (addedCards.length > 0) {
+      newDeck = [...addedCards, ...newDeck];
     }
 
     let startingHand = newDeck.slice(0, handSize);
     let remainingDeck = newDeck.slice(handSize);
 
-    if (preGameAdditions?.playerHand?.length) {
-      startingHand = [...startingHand, ...preGameAdditions.playerHand];
-    }
-
     let aiStartingHand = aiDeckSource.slice(0, handSize);
     let aiRemainingDeck = aiDeckSource.slice(handSize);
 
-    if (preGameAdditions?.aiHand?.length) {
-      aiStartingHand = [...aiStartingHand, ...preGameAdditions.aiHand];
-    }
-
     const runtimeToPersist = editorRuntime ? normalizeEditorRuntimeState(editorRuntime) ?? undefined : undefined;
-    const preGameAdditionsToPersist = shouldConsumePreGameAdditions
-      ? null
-      : existingPreGameAdditions ?? null;
     const initialControl = getInitialStateControl(faction);
     const issueDefinition = advanceAgendaIssue();
     const issueState = agendaIssueToState(issueDefinition);
 
+    const adjustedStartingIp = Math.max(0, startingIP + setupAdjustments.ipDelta);
     // Track game start in achievements
     achievements.onGameStart(faction, aiDifficulty);
     achievements.manager.onNewGameStart();
@@ -2530,7 +2492,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       ...prev,
       faction,
       truth: startingTruth,
-      ip: startingIP,
+      ip: adjustedStartingIp,
       aiIP: aiStartingIP,
       hand: startingHand,
       deck: remainingDeck,
@@ -2580,7 +2542,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       editorId: resolvedEditor?.id ?? requestedEditorId ?? null,
       editorDef: resolvedEditor ?? null,
       editorRuntime: runtimeToPersist ?? null,
-      preGameAdditions: preGameAdditionsToPersist,
+      preGameAdditions: null,
       tabloidRelicsRuntime: null,
       states: USA_STATES.map(state => {
         let owner: 'player' | 'ai' | 'neutral' = 'neutral';
@@ -2650,7 +2612,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       );
 
       const runtimeSnapshot = prev.editorRuntime ? { ...prev.editorRuntime } : null;
-      const activeEditor = resolveActiveEditorFromState(prev);
       const playContext: EditorPlayCardHookContext = {
         state: prev,
         runtime: runtimeSnapshot,
@@ -2666,12 +2627,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         fxMessages: [],
       };
 
-      if (activeEditor) {
-        // [EDITORS_ON_PLAY_CARD_HOOK]
-        applyOnPlayCard(activeEditor, ({ hook }) => {
-          applyEditorPlayCardHookEffect({ hookId: hook?.id }, playContext);
-        });
-      }
+      applyEditorPlayCardAdjustments(playContext);
 
       const effectiveCost = Math.max(0, Math.trunc(playContext.cost));
       if (prev.ip < effectiveCost) {
@@ -2851,7 +2807,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       );
 
       const runtimeSnapshot = prev.editorRuntime ? { ...prev.editorRuntime } : null;
-      const activeEditor = resolveActiveEditorFromState(prev);
       const playContext: EditorPlayCardHookContext = {
         state: prev,
         runtime: runtimeSnapshot,
@@ -2867,12 +2822,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         fxMessages: [],
       };
 
-      if (activeEditor) {
-        // [EDITORS_ON_PLAY_CARD_HOOK]
-        applyOnPlayCard(activeEditor, ({ hook }) => {
-          applyEditorPlayCardHookEffect({ hookId: hook?.id }, playContext);
-        });
-      }
+      applyEditorPlayCardAdjustments(playContext);
 
       const effectiveCost = Math.max(0, Math.trunc(playContext.cost));
       if (prev.ip < effectiveCost) {
@@ -3948,32 +3898,24 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         : [...prev.log];
 
       const runtimeSnapshot = prev.editorRuntime ? { ...prev.editorRuntime } : null;
-      const activeEditor = resolveActiveEditorFromState(prev);
-      const turnStartContext: EditorTurnStartHookContext | null = activeEditor
-        ? {
-            state: {
-              ...prev,
-              truth: relicTruth,
-              ip: relicIp,
-              aiIP: relicAiIp,
-              tabloidRelicsRuntime: relicRuntime,
-            },
-            runtime: runtimeSnapshot,
-            bonusCardDraw: 0,
-            pendingScandals: [],
-            logEntries: [],
-            toastMessages: [],
-          }
-        : null;
+      const turnStartContext: EditorTurnStartHookContext = {
+        state: {
+          ...prev,
+          truth: relicTruth,
+          ip: relicIp,
+          aiIP: relicAiIp,
+          tabloidRelicsRuntime: relicRuntime,
+        },
+        runtime: runtimeSnapshot,
+        bonusCardDraw: 0,
+        pendingScandals: [],
+        logEntries: [],
+        toastMessages: [],
+      };
 
-      if (activeEditor && turnStartContext) {
-        // [EDITORS_ON_TURN_START_HOOK]
-        applyOnTurnStart(activeEditor, ({ hook }) => {
-          applyEditorTurnStartHookEffect({ hookId: hook?.id }, turnStartContext);
-        });
-      }
+      applyEditorTurnStartAdjustments(turnStartContext);
 
-      const hookBonusDraw = turnStartContext ? Math.max(0, turnStartContext.bonusCardDraw) : 0;
+      const hookBonusDraw = Math.max(0, turnStartContext.bonusCardDraw);
       const baseBonusCardDraw = Math.max(0, prev.pendingCardDraw ?? 0);
       const bonusCardDraw = baseBonusCardDraw + hookBonusDraw + relicBonusDraw;
       const targetHandSize = HAND_LIMIT + bonusCardDraw;
@@ -3995,7 +3937,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         drawLogEntry = `Ready to act (hand ${newHand.length})`;
       }
 
-      if (turnStartContext?.logEntries?.length) {
+      if (turnStartContext.logEntries.length) {
         baseLogs = [...baseLogs, ...turnStartContext.logEntries];
       }
       baseLogs.push(drawLogEntry);
@@ -4062,7 +4004,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       }
 
       let aiHandAfterScandals = prev.aiHand;
-      if (turnStartContext?.pendingScandals?.length) {
+      if (turnStartContext.pendingScandals.length) {
         const scandalOutcome = applyEditorPendingScandalEffects({
           effects: turnStartContext.pendingScandals,
           playerHand: newHand,
@@ -4081,7 +4023,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         pendingEditorToasts.push(...turnStartContext.toastMessages);
       }
 
-      const editorRuntimePatch = turnStartContext?.runtimePatch
+      const editorRuntimePatch = turnStartContext.runtimePatch
         ? normalizeEditorRuntimeState({ ...(runtimeSnapshot ?? {}), ...turnStartContext.runtimePatch })
         : undefined;
       const nextEditorRuntime = editorRuntimePatch ?? runtimeSnapshot;

@@ -1,15 +1,7 @@
-import editorsJson from './editors.json';
-import type { EditorDefinition, EditorHookFor, EditorHookPhase, EditorsJson } from './EditorsTypes';
+import rawEditors from './editors.json';
+import type { EditorDef, EditorEffect, EditorId } from './EditorsTypes';
 
-const data = editorsJson as EditorsJson;
-const editorsList = data.editors as const satisfies readonly EditorDefinition[];
-
-export type EditorId = (typeof editorsList)[number]['id'];
-export type EditorSlug = (typeof editorsList)[number]['slug'];
-
-const editorsById = new Map<EditorId, EditorDefinition>(
-  editorsList.map((editor) => [editor.id, editor]),
-);
+const EDITORS: EditorDef[] = rawEditors as EditorDef[];
 
 export const FEATURE_EDITORS_MINIDRAFT = false;
 
@@ -18,136 +10,155 @@ export interface ResolveEditorOptions {
   readonly fallbackId?: EditorId | null;
 }
 
-export const getEditors = (): readonly EditorDefinition[] => editorsList;
+export type EditorEffectKind = 'bonus' | 'penalty';
 
-export const getEditorById = (editorId: EditorId | null | undefined): EditorDefinition | undefined => {
-  if (!editorId) {
-    return undefined;
-  }
-  return editorsById.get(editorId);
+export const getEditors = (): EditorDef[] => [...EDITORS];
+
+export const getEditorById = (id?: EditorId | null): EditorDef | undefined => {
+  if (!id) return undefined;
+  return EDITORS.find(editor => editor.id === id);
 };
 
-export const resolveEditor = (editorId: EditorId | null | undefined): EditorDefinition | undefined => {
-  return getEditorById(editorId ?? undefined);
-};
+export const resolveEditor = (id?: EditorId | null): EditorDef | undefined => getEditorById(id);
 
-export const resolveActiveEditor = (options?: ResolveEditorOptions): EditorDefinition | undefined => {
-  if (!options) {
-    return undefined;
-  }
-
+export const resolveActiveEditor = (options?: ResolveEditorOptions): EditorDef | undefined => {
+  if (!options) return undefined;
   const { editorId, fallbackId } = options;
-  const active = getEditorById(editorId ?? undefined);
-  if (active) {
-    return active;
-  }
-
-  if (fallbackId) {
-    return getEditorById(fallbackId);
-  }
-
-  return undefined;
+  return getEditorById(editorId ?? undefined) ?? getEditorById(fallbackId ?? undefined);
 };
 
-type HookCallback<Phase extends EditorHookPhase> = (payload: {
-  readonly editor: EditorDefinition;
-  readonly hook: EditorHookFor<Phase>;
-}) => void;
-
-type HookTarget = EditorId | EditorDefinition | null | undefined;
-
-const normaliseEditor = (editorLike: HookTarget): EditorDefinition | undefined => {
-  if (!editorLike) {
-    return undefined;
+export const forEachEditorEffect = (
+  editor: EditorDef | null | undefined,
+  callback: (effect: EditorEffect, kind: EditorEffectKind) => void,
+): void => {
+  if (!editor) return;
+  if (editor.penalty) {
+    callback(editor.penalty, 'penalty');
   }
-
-  if (typeof editorLike === 'string') {
-    return getEditorById(editorLike as EditorId);
+  if (editor.bonus) {
+    callback(editor.bonus, 'bonus');
   }
-
-  return editorLike;
 };
 
-const createHookApplier = <Phase extends EditorHookPhase>(phase: Phase) => {
-  return (target: HookTarget, callback: HookCallback<Phase>): void => {
-    const editor = normaliseEditor(target);
-    if (!editor) {
-      return;
-    }
+export interface EditorSetupAdjustments {
+  ipDelta: number;
+  deckSizeDelta: number;
+  addCardIds: string[];
+}
 
-    const hooksForPhase = editor.hooks?.[phase];
-    if (!hooksForPhase?.length) {
-      return;
-    }
-
-    for (const hook of hooksForPhase) {
-      callback({
-        editor,
-        hook: hook as EditorHookFor<Phase>,
-      });
-    }
+export const gatherEditorSetupAdjustments = (editor: EditorDef | null | undefined): EditorSetupAdjustments => {
+  const result: EditorSetupAdjustments = {
+    ipDelta: 0,
+    deckSizeDelta: 0,
+    addCardIds: [],
   };
-};
 
-// @future-editors-hook:applyOnSetup
-export const applyOnSetup = createHookApplier('onSetup');
-
-// @future-editors-hook:applyOnTurnStart
-export const applyOnTurnStart = createHookApplier('onTurnStart');
-
-// @future-editors-hook:applyOnPlayCard
-export const applyOnPlayCard = createHookApplier('onPlayCard');
-
-const FLORIDA_TOKENS = new Set([
-  'fl',
-  'florida',
-  'florida, usa',
-  'state-florida',
-  'sunshine-state',
-]);
-
-export type HotspotLike =
-  | string
-  | number
-  | { readonly id?: string | number; readonly slug?: string; readonly stateName?: string; readonly name?: string };
-
-const normaliseHotspotToken = (value: unknown): string => {
-  if (typeof value === 'number') {
-    return String(value);
-  }
-
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  if (value && typeof value === 'object') {
-    const candidate =
-      (value as Record<string, unknown>).slug ??
-      (value as Record<string, unknown>).id ??
-      (value as Record<string, unknown>).stateName ??
-      (value as Record<string, unknown>).name;
-
-    if (typeof candidate === 'string' || typeof candidate === 'number') {
-      return String(candidate);
+  forEachEditorEffect(editor, effect => {
+    if (typeof effect.start_ipDelta === 'number') {
+      result.ipDelta += effect.start_ipDelta;
     }
-  }
+    if (typeof effect.onSetup_deckSizeDelta === 'number') {
+      result.deckSizeDelta += effect.onSetup_deckSizeDelta;
+    }
+    if (Array.isArray(effect.onSetup_addCardIds)) {
+      result.addCardIds.push(...effect.onSetup_addCardIds);
+    }
+  });
 
-  return '';
+  return result;
 };
 
-export const isFloridaHot = (hotspot: HotspotLike | null | undefined): boolean => {
-  if (hotspot === null || hotspot === undefined) {
-    return false;
+export interface EditorTurnStartAdjustments {
+  roundOneDrawBonus: number;
+  scandalChance: number;
+  scandalEffect?: 'randomDiscard:1';
+}
+
+export const gatherEditorTurnStartAdjustments = (
+  editor: EditorDef | null | undefined,
+): EditorTurnStartAdjustments => {
+  const result: EditorTurnStartAdjustments = {
+    roundOneDrawBonus: 0,
+    scandalChance: 0,
+    scandalEffect: undefined,
+  };
+
+  forEachEditorEffect(editor, effect => {
+    if (typeof effect.round1_drawDelta === 'number') {
+      result.roundOneDrawBonus += effect.round1_drawDelta;
+    }
+    if (typeof effect.turnStart_scandalChance === 'number' && effect.turnStart_scandalChance > 0) {
+      result.scandalChance += effect.turnStart_scandalChance;
+      if (effect.scandal_effect) {
+        result.scandalEffect = effect.scandal_effect;
+      }
+    }
+  });
+
+  return result;
+};
+
+export interface EditorPlayCardAdjustments {
+  mediaTruthDelta: number;
+  attackIpCostDelta: number;
+}
+
+export const gatherEditorPlayCardAdjustments = (
+  editor: EditorDef | null | undefined,
+): EditorPlayCardAdjustments => {
+  const result: EditorPlayCardAdjustments = {
+    mediaTruthDelta: 0,
+    attackIpCostDelta: 0,
+  };
+
+  forEachEditorEffect(editor, effect => {
+    if (typeof effect.onMediaPlay_truthDelta === 'number') {
+      result.mediaTruthDelta += effect.onMediaPlay_truthDelta;
+    }
+    if (typeof effect.attack_ipCostDelta === 'number') {
+      result.attackIpCostDelta += effect.attack_ipCostDelta;
+    }
+  });
+
+  return result;
+};
+
+const EFFECT_LABELS: Partial<Record<keyof EditorEffect, string>> = {
+  start_ipDelta: 'Start IP',
+  onSetup_addCardIds: 'Start cards',
+  onSetup_deckSizeDelta: 'Deck size',
+  round1_drawDelta: 'Round 1 draw',
+  turnStart_scandalChance: 'Turn start',
+  onMediaPlay_truthDelta: 'Media truth',
+  attack_ipCostDelta: 'Attack IP cost',
+};
+
+export const describeEditorEffect = (effect: EditorEffect): string[] => {
+  const parts: string[] = [];
+
+  if (typeof effect.start_ipDelta === 'number' && effect.start_ipDelta !== 0) {
+    parts.push(`${EFFECT_LABELS.start_ipDelta}: ${effect.start_ipDelta > 0 ? '+' : ''}${effect.start_ipDelta}`);
+  }
+  if (typeof effect.onSetup_deckSizeDelta === 'number' && effect.onSetup_deckSizeDelta !== 0) {
+    parts.push(`${EFFECT_LABELS.onSetup_deckSizeDelta}: ${effect.onSetup_deckSizeDelta > 0 ? '+' : ''}${effect.onSetup_deckSizeDelta}`);
+  }
+  if (Array.isArray(effect.onSetup_addCardIds) && effect.onSetup_addCardIds.length > 0) {
+    parts.push(`${EFFECT_LABELS.onSetup_addCardIds}: ${effect.onSetup_addCardIds.join(', ')}`);
+  }
+  if (typeof effect.round1_drawDelta === 'number' && effect.round1_drawDelta !== 0) {
+    parts.push(`${EFFECT_LABELS.round1_drawDelta}: ${effect.round1_drawDelta > 0 ? '+' : ''}${effect.round1_drawDelta}`);
+  }
+  if (typeof effect.turnStart_scandalChance === 'number' && effect.turnStart_scandalChance > 0) {
+    const percent = Math.round(effect.turnStart_scandalChance * 100);
+    const effectLabel = effect.scandal_effect === 'randomDiscard:1' ? 'random discard' : 'scandal';
+    parts.push(`${EFFECT_LABELS.turnStart_scandalChance}: ${percent}% ${effectLabel}`);
+  }
+  if (typeof effect.onMediaPlay_truthDelta === 'number' && effect.onMediaPlay_truthDelta !== 0) {
+    parts.push(`${EFFECT_LABELS.onMediaPlay_truthDelta}: ${effect.onMediaPlay_truthDelta > 0 ? '+' : ''}${effect.onMediaPlay_truthDelta}`);
+  }
+  if (typeof effect.attack_ipCostDelta === 'number' && effect.attack_ipCostDelta !== 0) {
+    parts.push(`${EFFECT_LABELS.attack_ipCostDelta}: ${effect.attack_ipCostDelta > 0 ? '+' : ''}${effect.attack_ipCostDelta}`);
   }
 
-  const token = normaliseHotspotToken(hotspot).trim().toLowerCase();
-  if (!token) {
-    return false;
-  }
-
-  if (FLORIDA_TOKENS.has(token)) {
-    return true;
-  }
-
-  return token.includes('florida');
+  return parts;
 };
