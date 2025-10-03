@@ -1108,10 +1108,18 @@ const Index = () => {
       const hotspotTagline = buildCampaignHotspotTagline({ arc, event: currentEvent, stage });
       if (hotspotTagline && currentEvent?.paranormalHotspot) {
         const hotspotStateName = resolveEventStateName(currentEvent) ?? 'Unknown Site';
+        const rawStateId = currentEvent.paranormalHotspot.stateId;
+        const normalizedStateId = rawStateId?.trim();
+        const resolvedState = normalizedStateId
+          ? getStateById(normalizedStateId)
+            ?? getStateByAbbreviation(normalizedStateId.toUpperCase())
+          : undefined;
+        const hotspotStateAbbreviation = resolvedState?.abbreviation
+          ?? normalizedStateId?.toUpperCase();
         const hotspotPosition =
           VisualEffectsCoordinator.getStateCenterPosition({
             stateId: currentEvent.paranormalHotspot.stateId,
-            stateAbbreviation: currentEvent.paranormalHotspot.stateId,
+            stateAbbreviation: hotspotStateAbbreviation,
           }) ?? VisualEffectsCoordinator.getScreenCenter();
         if (
           !reducedMotion
@@ -1120,7 +1128,9 @@ const Index = () => {
         ) {
           VisualEffectsCoordinator.triggerParanormalHotspot({
             position: hotspotPosition,
-            stateId: currentEvent.paranormalHotspot.stateId ?? hotspotStateName,
+            stateId: hotspotStateAbbreviation
+              ?? currentEvent.paranormalHotspot.stateId
+              ?? hotspotStateName,
             stateName: hotspotStateName,
             label: currentEvent.paranormalHotspot.label ?? currentEvent.title,
             icon: currentEvent.paranormalHotspot.icon ?? '👻',
