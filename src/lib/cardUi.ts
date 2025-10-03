@@ -97,6 +97,9 @@ export const formatEffect = (card: GameCard): string => {
     if (typeof effects.discardOpponent === 'number' && effects.discardOpponent > 0) {
       parts.push(`Discard ${effects.discardOpponent}`);
     }
+    if (effects.revealSecretAgenda) {
+      parts.push('Reveal enemy secret agenda');
+    }
     if (parts.length) {
       return parts.join(' · ');
     }
@@ -105,14 +108,22 @@ export const formatEffect = (card: GameCard): string => {
   if (type === 'MEDIA') {
     if (typeof effects.truthDelta === 'number') {
       const sign = effects.truthDelta >= 0 ? '+' : '';
-      return `Truth ${sign}${effects.truthDelta}%`;
+      const parts = [`Truth ${sign}${effects.truthDelta}%`];
+      if (effects.revealSecretAgenda) {
+        parts.push('Reveal enemy secret agenda');
+      }
+      return parts.join(' · ');
     }
   }
 
   if (type === 'ZONE') {
     if (typeof effects.pressureDelta === 'number') {
       const amount = effects.pressureDelta >= 0 ? `+${effects.pressureDelta}` : `${effects.pressureDelta}`;
-      return `${amount} Pressure to a state`;
+      const parts = [`${amount} Pressure to a state`];
+      if (effects.revealSecretAgenda) {
+        parts.push('Reveal enemy secret agenda');
+      }
+      return parts.join(' · ');
     }
   }
 
