@@ -2302,15 +2302,26 @@ const Index = () => {
         }}
       >
         <div className="text-center space-y-8">
-          <div className="bg-secret-red/20 border-2 border-secret-red p-8 transform -rotate-2">
-            <h1 className="text-6xl font-mono font-bold text-secret-red">
-              [CLASSIFIED]
-            </h1>
-            <div className="mt-4 text-xl font-mono text-foreground">
-              SHADOW GOVERNMENT
+          <div className="relative inline-flex transform -rotate-2">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-black text-yellow-300 px-4 py-1 uppercase tracking-[0.35em] text-[0.65rem] sm:text-xs font-semibold shadow-[6px_6px_0_rgba(0,0,0,0.65)]">
+              Paranoid Times Exclusive
             </div>
-            <div className="text-sm font-mono text-muted-foreground mt-2">
-              TOP SECRET - EYES ONLY
+            <div className="bg-gradient-to-br from-yellow-200 via-red-500 to-red-700 px-10 py-8 border-[6px] border-black shadow-[14px_14px_0_rgba(0,0,0,0.8)] text-black">
+              <div className="text-[0.85rem] sm:text-sm uppercase tracking-[0.4em] text-black/80 font-semibold">
+                Tonight&rsquo;s Cover Story
+              </div>
+              <div className="mt-3 text-4xl sm:text-5xl font-black uppercase leading-[0.9] drop-shadow-[4px_4px_0_rgba(0,0,0,0.6)]">
+                You Won&rsquo;t Believe
+              </div>
+              <div className="text-4xl sm:text-5xl font-black uppercase leading-[0.9] text-yellow-100 drop-shadow-[4px_4px_0_rgba(0,0,0,0.6)]">
+                What Happens Next...
+              </div>
+              <div className="mt-4 text-base sm:text-lg font-semibold italic tracking-wide text-black/90">
+                Shadow bureau insiders spill every last secret.
+              </div>
+            </div>
+            <div className="absolute -bottom-5 right-0 bg-black text-white text-[0.65rem] sm:text-xs uppercase tracking-[0.3em] px-3 py-1 shadow-[5px_5px_0_rgba(0,0,0,0.65)] rotate-1">
+              Hot Scoop
             </div>
           </div>
           <p className="text-muted-foreground font-mono">
