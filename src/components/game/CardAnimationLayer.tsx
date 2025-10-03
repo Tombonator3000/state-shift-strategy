@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ParticleEffectType, ParticleSystem } from '@/components/effects/ParticleSystem';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import RedactionSweep from '@/components/effects/RedactionSweep';
 import TabloidFlashOverlay from '@/components/effects/TabloidFlashOverlay';
@@ -19,38 +18,8 @@ interface CardAnimationLayerProps {
   children?: React.ReactNode;
 }
 
-const CORKBOARD_PIN_OFFSETS: Array<{ dx: number; dy: number }> = [
-  { dx: -48, dy: -56 },
-  { dx: 52, dy: -28 },
-  { dx: -44, dy: 46 },
-  { dx: 50, dy: 54 }
-];
-
-const SURVEILLANCE_BAR_OFFSETS: number[] = [-42, 0, 42];
-
-const HOTSPOT_PARTICLE_OFFSETS: Array<{ dx: number; dy: number }> = [
-  { dx: 0, dy: -72 },
-  { dx: -60, dy: 14 },
-  { dx: 64, dy: 18 }
-];
-
-const CORKBOARD_PARTICLE_DELAY = 220;
-const CORKBOARD_PARTICLE_STAGGER = 90;
-const SURVEILLANCE_PARTICLE_DELAY = 280;
-const SURVEILLANCE_PARTICLE_STAGGER = 110;
-const HOTSPOT_PARTICLE_DELAY = 2200;
-const HOTSPOT_PARTICLE_STAGGER = 140;
-const ECTOPLASM_PARTICLE_DELAY = 200;
-
 const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => {
   const audio = useAudioContext();
-  const [particleEffects, setParticleEffects] = useState<Array<{
-    id: number;
-    x: number;
-    y: number;
-    type: ParticleEffectType;
-  }>>([]);
-
   const [floatingNumber, setFloatingNumber] = useState<{
     value: number;
     type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain';
@@ -164,7 +133,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
 
   const agendaStageTimeoutRef = useRef<number | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const effectTimeoutsRef = useRef<number[]>([]);
 
   const clearAgendaStageOverlay = useCallback(() => {
     if (agendaStageTimeoutRef.current && typeof window !== 'undefined') {
@@ -174,80 +142,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     setAgendaStageOverlay(null);
   }, []);
 
-  const spawnParticleEffect = useCallback(
-    (
-      type: ParticleEffectType,
-      x: number,
-      y: number,
-      options?: { delay?: number; skipOnReducedMotion?: boolean }
-    ) => {
-      if (prefersReducedMotion && options?.skipOnReducedMotion) {
-        return;
-      }
-
-      const enqueueEffect = () => {
-        setParticleEffects(prev => [
-          ...prev,
-          {
-            id: Date.now() + Math.random(),
-            type,
-            x,
-            y
-          }
-        ]);
-      };
-
-      if (options?.delay && typeof window !== 'undefined') {
-        const timeoutId = window.setTimeout(() => {
-          enqueueEffect();
-          effectTimeoutsRef.current = effectTimeoutsRef.current.filter(id => id !== timeoutId);
-        }, options.delay);
-        effectTimeoutsRef.current.push(timeoutId);
-        return;
-      }
-
-      enqueueEffect();
-    },
-    [prefersReducedMotion]
-  );
-
   useEffect(() => {
-    const handleCardDeployed = (event: CustomEvent<{ type: ParticleEffectType; x: number; y: number }>) => {
+    const handleSynergyActivation = (event: CustomEvent<{ bonusIP: number; numberType?: 'synergy' | 'combo' | 'chain'; x: number; y: number; comboName?: string }>) => {
       if (!event?.detail) return;
-      spawnParticleEffect(event.detail.type, event.detail.x, event.detail.y);
-    };
-
-    const handleStateCapture = (event: CustomEvent<{ x: number; y: number }>) => {
-      if (!event?.detail) return;
-      spawnParticleEffect('capture', event.detail.x, event.detail.y);
-    };
-
-    const handleStateLoss = (event: CustomEvent<{ x: number; y: number }>) => {
-      if (!event?.detail) return;
-      spawnParticleEffect('stateloss', event.detail.x, event.detail.y);
-    };
-
-    const handleSynergyActivation = (event: CustomEvent<{ bonusIP: number; numberType?: 'synergy' | 'combo' | 'chain'; effectType?: ParticleEffectType; x: number; y: number; comboName?: string }>) => {
-      if (!event?.detail) return;
-      const requestedEffectType = event.detail.effectType || 'corkboardPins';
-      const resolvedEffectType = requestedEffectType === 'synergy' ? 'corkboardPins' : requestedEffectType;
       const numberType = event.detail.numberType ?? 'synergy';
-
-      if (resolvedEffectType === 'corkboardPins') {
-        CORKBOARD_PIN_OFFSETS.forEach((offset, index) => {
-          spawnParticleEffect(
-            'corkboardPins',
-            event.detail.x + offset.dx,
-            event.detail.y + offset.dy,
-            {
-              delay: CORKBOARD_PARTICLE_DELAY + index * CORKBOARD_PARTICLE_STAGGER,
-              skipOnReducedMotion: true
-            }
-          );
-        });
-      } else {
-        spawnParticleEffect(resolvedEffectType, event.detail.x, event.detail.y);
-      }
 
       // Also show floating number for synergy bonus
       setFloatingNumber({
@@ -266,14 +164,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       });
     };
 
-    const handleGovernmentZoneTarget = (event: CustomEvent<{ active: boolean; x?: number; y?: number }>) => {
-      if (!event?.detail) return;
-
-      if (event.detail.active && typeof event.detail.x === 'number' && typeof event.detail.y === 'number') {
-        spawnParticleEffect('counter', event.detail.x, event.detail.y);
-      }
-    };
-
     const handleTruthMeltdownBroadcast = (event: CustomEvent<{
       position: { x: number; y: number };
       intensity: 'surge' | 'collapse';
@@ -283,9 +173,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     }>) => {
       if (!event?.detail) return;
       const { position, intensity, setList, truthValue, reducedMotion } = event.detail;
-      if (position && !reducedMotion) {
-        spawnParticleEffect('broadcast', position.x, position.y);
-      }
       setBroadcastOverlay({
         id: Date.now(),
         x: position?.x ?? window.innerWidth / 2,
@@ -309,12 +196,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     }>) => {
       if (!event?.detail) return;
       const { position, stateId, stateName, footageQuality, reducedMotion } = event.detail;
-      if (position && !reducedMotion) {
-        spawnParticleEffect('ectoplasm', position.x, position.y, {
-          delay: ECTOPLASM_PARTICLE_DELAY,
-          skipOnReducedMotion: true
-        });
-      }
       setCryptidOverlay({
         id: Date.now(),
         x: position?.x ?? window.innerWidth / 2,
@@ -346,18 +227,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         y: window.innerHeight / 2,
       };
       const resolvedPosition = position ?? fallbackPosition;
-
-      HOTSPOT_PARTICLE_OFFSETS.forEach((offset, index) => {
-        spawnParticleEffect(
-          'hotspotFlare',
-          resolvedPosition.x + offset.dx,
-          resolvedPosition.y + offset.dy,
-          {
-            delay: HOTSPOT_PARTICLE_DELAY + index * HOTSPOT_PARTICLE_STAGGER,
-            skipOnReducedMotion: true
-          }
-        );
-      });
       setHotspotOverlay({
         id: Date.now(),
         x: resolvedPosition.x,
@@ -389,7 +258,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         y,
         newsText
       });
-      spawnParticleEffect('flash', x, y);
       audio?.playSFX?.('newspaper');
     };
 
@@ -407,12 +275,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         y,
         targetName,
         threatLevel
-      });
-      SURVEILLANCE_BAR_OFFSETS.forEach((offsetY, index) => {
-        spawnParticleEffect('surveillanceRedaction', x, y + offsetY, {
-          delay: SURVEILLANCE_PARTICLE_DELAY + index * SURVEILLANCE_PARTICLE_STAGGER,
-          skipOnReducedMotion: true
-        });
       });
       audio?.playSFX?.('click'); // Surveillance beep
     };
@@ -452,7 +314,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         intensity,
         message
       });
-      spawnParticleEffect('broadcast', x, y);
       audio?.playSFX?.('radio-static');
     };
 
@@ -477,7 +338,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         caseTitle,
         photos
       });
-      spawnParticleEffect('flash', x, y);
       audio?.playSFX?.('cardPlay');
     };
 
@@ -502,8 +362,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         status: detail.status,
         faction: detail.faction,
       });
-
-      spawnParticleEffect('flash', window.innerWidth / 2, window.innerHeight / 2);
       audio?.playSFX?.('typewriter');
 
       agendaStageTimeoutRef.current = window.setTimeout(() => {
@@ -543,18 +401,13 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         x,
         y
       });
-      spawnParticleEffect('flash', x, y);
     };
 
     // Register event listeners
-    window.addEventListener('cardDeployed', handleCardDeployed as EventListener);
-    window.addEventListener('stateCapture', handleStateCapture as EventListener);
-    window.addEventListener('stateLoss', handleStateLoss as EventListener);
     window.addEventListener('synergyActivation', handleSynergyActivation as EventListener);
     window.addEventListener('showFloatingNumber', handleFloatingNumber as EventListener);
     window.addEventListener('governmentRedaction', handleGovernmentRedaction as EventListener);
     window.addEventListener('truthFlash', handleTruthFlash as EventListener);
-    window.addEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
     window.addEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
     window.addEventListener('cryptidSighting', handleCryptidSighting as EventListener);
     window.addEventListener('paranormalHotspot', handleParanormalHotspot as EventListener);
@@ -568,14 +421,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     window.addEventListener('agendaStageShift', handleAgendaStageShift as EventListener);
 
     return () => {
-      window.removeEventListener('cardDeployed', handleCardDeployed as EventListener);
-      window.removeEventListener('stateCapture', handleStateCapture as EventListener);
-      window.removeEventListener('stateLoss', handleStateLoss as EventListener);
       window.removeEventListener('synergyActivation', handleSynergyActivation as EventListener);
       window.removeEventListener('showFloatingNumber', handleFloatingNumber as EventListener);
       window.removeEventListener('governmentRedaction', handleGovernmentRedaction as EventListener);
       window.removeEventListener('truthFlash', handleTruthFlash as EventListener);
-      window.removeEventListener('governmentZoneTarget', handleGovernmentZoneTarget as EventListener);
       window.removeEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
       window.removeEventListener('cryptidSighting', handleCryptidSighting as EventListener);
       window.removeEventListener('paranormalHotspot', handleParanormalHotspot as EventListener);
@@ -588,19 +437,7 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('evidenceGallery', handleEvidenceGallery as EventListener);
       window.removeEventListener('agendaStageShift', handleAgendaStageShift as EventListener);
     };
-  }, [spawnParticleEffect, audio, clearAgendaStageOverlay]);
-
-  useEffect(() => {
-    return () => {
-      if (typeof window === 'undefined') {
-        return;
-      }
-      effectTimeoutsRef.current.forEach(timeoutId => {
-        window.clearTimeout(timeoutId);
-      });
-      effectTimeoutsRef.current = [];
-    };
-  }, []);
+  }, [audio, clearAgendaStageOverlay]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) {
@@ -639,14 +476,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       clearAgendaStageOverlay();
     };
   }, [clearAgendaStageOverlay]);
-
-  const handleParticleComplete = useCallback((id: number) => {
-    setParticleEffects(prev => prev.filter(effect => effect.id !== id));
-  }, []);
-
-  const handleFloatingNumberComplete = () => {
-    setFloatingNumber(null);
-  };
 
   const handleRedactionComplete = () => {
     setRedactionSweep(null);
@@ -914,18 +743,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
           </div>
         )}
       </div>
-
-      {/* Particle Effects */}
-      {particleEffects.map(effect => (
-        <ParticleSystem
-          key={effect.id}
-          active
-          x={effect.x}
-          y={effect.y}
-          type={effect.type}
-          onComplete={() => handleParticleComplete(effect.id)}
-        />
-      ))}
 
       {/* Truth Flash Overlay */}
       {truthFlash && (
