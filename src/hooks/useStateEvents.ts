@@ -55,7 +55,6 @@ export const useStateEvents = () => {
   ) => {
     if (statePosition) {
       VisualEffectsCoordinator.triggerContestedState(statePosition);
-      VisualEffectsCoordinator.triggerParticleEffect('contested', statePosition);
     }
   }, []);
 
