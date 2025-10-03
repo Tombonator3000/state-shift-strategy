@@ -1,32 +1,21 @@
-export type EditorFaction = 'truth' | 'government' | 'neutral';
+export type EditorId = string;
 
-export type EditorHookPhase = 'onSetup' | 'onTurnStart' | 'onPlayCard';
+export type EditorEffect = {
+  start_ipDelta?: number;
+  onSetup_addCardIds?: string[];
+  onSetup_deckSizeDelta?: number;
+  round1_drawDelta?: number;
+  turnStart_scandalChance?: number;
+  scandal_effect?: 'randomDiscard:1';
+  onMediaPlay_truthDelta?: number;
+  attack_ipCostDelta?: number;
+};
 
-export interface EditorHookDefinition {
-  readonly id: string;
-  readonly label: string;
-  readonly description: string;
-}
-
-export type EditorHooksMap = Partial<Record<EditorHookPhase, readonly EditorHookDefinition[]>>;
-
-export interface EditorDefinition {
-  readonly id: string;
-  readonly slug: string;
-  readonly name: string;
-  readonly shortName: string;
-  readonly tagline: string;
-  readonly faction: EditorFaction;
-  readonly summary: string;
-  readonly hookSummary: string;
-  readonly recommendedHotspots?: readonly string[];
-  readonly hooks: EditorHooksMap;
-}
-
-export interface EditorsJson {
-  readonly editors: readonly EditorDefinition[];
-}
-
-export type EditorHookFor<Phase extends EditorHookPhase> = NonNullable<EditorHooksMap[Phase]> extends readonly (infer Hook)[]
-  ? Hook
-  : never;
+export type EditorDef = {
+  id: EditorId;
+  name: string;
+  portrait?: string;
+  flavor?: string;
+  bonus: EditorEffect;
+  penalty: EditorEffect;
+};
