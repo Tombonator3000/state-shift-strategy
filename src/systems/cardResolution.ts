@@ -211,6 +211,14 @@ const toEngineState = (
     aiStates.add(id);
   }
 
+  for (const id of playerStates) {
+    pressureByState[id] = { P1: 0, P2: 0 };
+  }
+
+  for (const id of aiStates) {
+    pressureByState[id] = { P1: 0, P2: 0 };
+  }
+
   return {
     turn: snapshot.turn,
     currentPlayer: PLAYER_ID,
