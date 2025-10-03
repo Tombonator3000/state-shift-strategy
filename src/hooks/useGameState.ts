@@ -3158,6 +3158,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       let hotspotsAfterHotspot: Record<string, ActiveParanormalHotspot> = { ...prev.paranormalHotspots };
       const hotspotLogs: string[] = [];
       let nextActiveHotspot = prev.activeHotspot;
+      let editionEvents = prev.currentEvents ?? [];
 
       for (const [abbr, hotspot] of Object.entries(hotspotsAfterHotspot)) {
         const state = statesAfterHotspot.find(candidate => candidate.abbreviation === abbr);
@@ -3465,7 +3466,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           stateEventsForEdition.push(randomEventForEdition);
         }
 
-        const newEvents = buildEditionEvents(prev, stateEventsForEdition);
+        editionEvents = buildEditionEvents(prev, stateEventsForEdition);
 
         const comboDrawBonus = Math.max(0, prev.stateCombinationEffects.extraCardDraw);
         const pendingCardDraw = bonusCardDraw + comboDrawBonus;
@@ -3503,7 +3504,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           ip: humanIpAfterCombos + totalIncome + ipModifier,
           aiIP: aiIpAfterCombos,
           pendingCardDraw,
-          currentEvents: newEvents,
+          currentEvents: editionEvents,
           pendingEditionEvents: [],
           comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboTruthDelta,
           cardDrawState: {
@@ -3578,6 +3579,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         paranormalHotspots: hotspotsAfterHotspot,
         stateRoundEvents: {},
         activeHotspot: nextActiveHotspot,
+        currentEvents: editionEvents,
+        pendingEditionEvents: [],
         tabloidRelicsRuntime: prev.tabloidRelicsRuntime ?? null,
       };
 
@@ -3589,7 +3592,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         aiIP: nextStateBase.aiIP,
         comboTruthDelta: nextStateBase.comboTruthDeltaThisRound,
         faction: prev.faction,
-        events: newEvents,
+        events: nextStateBase.currentEvents,
         plays: prev.cardsPlayedThisRound,
         runtime: prev.tabloidRelicsRuntime ?? null,
         editorActive: Boolean(prev.editorId ?? prev.editorDef),
