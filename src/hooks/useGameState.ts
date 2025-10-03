@@ -202,6 +202,131 @@ const incrementCounterMap = (
   };
 };
 
+const resolveOwnerFaction = (
+  owner: GameState['states'][number]['owner'],
+  playerFaction: GameState['faction'],
+): 'truth' | 'government' | null => {
+  if (owner === 'player') {
+    return playerFaction;
+  }
+  if (owner === 'ai') {
+    return playerFaction === 'truth' ? 'government' : 'truth';
+  }
+  return null;
+};
+
+const normalizeTruthDelta = (value: number | null | undefined): number => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return 0;
+  }
+  return Math.trunc(value);
+};
+
+const deriveBaseTruthDelta = (
+  storedTruthDelta: number | null | undefined,
+  ownerFaction: 'truth' | 'government' | null,
+): number => {
+  const normalized = normalizeTruthDelta(storedTruthDelta);
+  if (ownerFaction === 'government') {
+    return -normalized;
+  }
+  return normalized;
+};
+
+const truthDeltaForFaction = (
+  baseTruthDelta: number,
+  ownerFaction: 'truth' | 'government' | null,
+): number => {
+  if (ownerFaction === 'government') {
+    return normalizeTruthDelta(-baseTruthDelta);
+  }
+  return normalizeTruthDelta(baseTruthDelta);
+};
+
+const resolveTruthActorForOwnerChange = (
+  owner: GameState['states'][number]['owner'],
+  delta: number,
+): 'human' | 'ai' => {
+  if (owner === 'player') {
+    return 'human';
+  }
+  if (owner === 'ai') {
+    return 'ai';
+  }
+  return delta >= 0 ? 'human' : 'ai';
+};
+
+export const reconcileStateBonusOwnership = (prev: GameState, nextState: GameState): string[] => {
+  const playerFaction = nextState.faction;
+  const prevStateById = new Map<string, GameState['states'][number]>();
+  const prevStateByAbbreviation = new Map<string, GameState['states'][number]>();
+
+  for (const state of prev.states) {
+    prevStateById.set(state.id, state);
+    if (state.abbreviation) {
+      prevStateByAbbreviation.set(state.abbreviation, state);
+    }
+  }
+
+  const logEntries: string[] = [];
+
+  for (let index = 0; index < nextState.states.length; index += 1) {
+    const state = nextState.states[index];
+    const prevState = prevStateById.get(state.id)
+      ?? (state.abbreviation ? prevStateByAbbreviation.get(state.abbreviation) : undefined);
+
+    if (!prevState) {
+      continue;
+    }
+
+    if (prevState.owner === state.owner) {
+      continue;
+    }
+
+    const previousBonus = prevState.activeStateBonus ?? null;
+    const currentBonus = state.activeStateBonus ?? null;
+    const referenceBonus = currentBonus ?? previousBonus;
+
+    if (!referenceBonus) {
+      continue;
+    }
+
+    const previousOwnerFaction = resolveOwnerFaction(prevState.owner, playerFaction);
+    const nextOwnerFaction = resolveOwnerFaction(state.owner, playerFaction);
+
+    const baseSource = previousBonus ?? referenceBonus;
+    const baseTruthDelta = deriveBaseTruthDelta(baseSource?.truthDelta, previousBonus ? previousOwnerFaction : nextOwnerFaction);
+    const updatedTruthDelta = truthDeltaForFaction(baseTruthDelta, nextOwnerFaction);
+    const existingTruthDelta = normalizeTruthDelta(
+      currentBonus?.truthDelta ?? previousBonus?.truthDelta ?? referenceBonus.truthDelta,
+    );
+
+    if (currentBonus?.truthDelta !== updatedTruthDelta) {
+      const updatedBonus = { ...referenceBonus, truthDelta: updatedTruthDelta };
+      nextState.states[index] = { ...state, activeStateBonus: updatedBonus };
+    }
+
+    const truthDeltaDifference = updatedTruthDelta - existingTruthDelta;
+    if (truthDeltaDifference !== 0) {
+      const actor = resolveTruthActorForOwnerChange(state.owner, truthDeltaDifference);
+      applyTruthDelta(nextState, truthDeltaDifference, actor);
+    }
+
+    if (existingTruthDelta !== updatedTruthDelta) {
+      const formatted = updatedTruthDelta > 0 ? `+${updatedTruthDelta}` : `${updatedTruthDelta}`;
+      const ownerLabel = state.owner === 'player'
+        ? 'player'
+        : state.owner === 'ai'
+          ? 'AI'
+          : 'neutral';
+      const direction = updatedTruthDelta >= 0 ? 'boosts' : 'suppresses';
+      logEntries.push(`State bonus in ${state.name} now ${direction} Truth (${formatted}%) under ${ownerLabel} control.`);
+    }
+  }
+
+  return logEntries;
+};
+
 const applyAgendaCardCounters = (
   state: GameState,
   owner: AgendaOwner,
@@ -2031,6 +2156,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         activeHotspot: nextActiveHotspot,
       };
 
+      const ownershipLogEntries = reconcileStateBonusOwnership(prev, nextState);
+      if (ownershipLogEntries.length > 0) {
+        nextState.log = [...nextState.log, ...ownershipLogEntries];
+      }
+
       const stateWithReveal = resolution.aiSecretAgendaRevealed
         ? revealAiSecretAgenda(nextState, { type: 'card', name: resolvedCard.name })
         : nextState;
@@ -2627,6 +2757,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           pendingArcEvents,
         };
 
+        const ownershipLogEntries = reconcileStateBonusOwnership(prev, nextState);
+        if (ownershipLogEntries.length > 0) {
+          nextState.log = [...nextState.log, ...ownershipLogEntries];
+        }
+
         if ((eventForEdition ?? triggeredEvent)?.effects?.revealSecretAgenda) {
           nextState = revealAiSecretAgenda(nextState, {
             type: 'event',
@@ -2737,6 +2872,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             ...nextStateBase,
             agendaIssueCounters: counterSnapshot.issueCounters,
             agendaRoundCounters: counterSnapshot.roundCounters,
+          };
+        }
+        const ownershipLogEntries = reconcileStateBonusOwnership(prev, nextStateBase);
+        if (ownershipLogEntries.length > 0) {
+          nextStateBase = {
+            ...nextStateBase,
+            log: [...nextStateBase.log, ...ownershipLogEntries],
           };
         }
         const nextStateAfterReveal =

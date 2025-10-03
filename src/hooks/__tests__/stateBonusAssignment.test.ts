@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import type { ActiveStateBonus, GameState } from '../gameStateTypes';
 import { assignStateBonuses, type AssignStateBonusesResult } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from '../stateBonusAssignment';
+import { reconcileStateBonusOwnership } from '../useGameState';
 
 const createBaseGameState = (faction: 'truth' | 'government'): GameState => ({
   faction,
@@ -441,6 +442,57 @@ describe('applyStateBonusAssignmentToState', () => {
     expect(updated.states[0].pressureAi).toBe(baseState.states[0].pressureAi + 3);
     expect(updated.states[0].pressurePlayer).toBe(baseState.states[0].pressurePlayer);
     expect(updated.log).toContain('State bonuses adjusted AI IP by +9');
+  });
+
+  test('flips active bonus truth impact immediately when state control changes mid-round', () => {
+    const baseState = createBaseGameState('truth');
+    const aiBonus: ActiveStateBonus = {
+      source: 'state-themed',
+      id: 'bonus:flip',
+      stateId: baseState.states[0].id,
+      stateName: baseState.states[0].name,
+      stateAbbreviation: baseState.states[0].abbreviation,
+      round: baseState.round,
+      label: 'Spin Cycle',
+      summary: 'Narrative engineered for the opposition.',
+      headline: 'Disinformation Dominates',
+      truthDelta: -3,
+    };
+
+    const prevState: GameState = {
+      ...baseState,
+      log: ['Initial log'],
+      states: [
+        {
+          ...baseState.states[0],
+          owner: 'ai',
+          activeStateBonus: aiBonus,
+        },
+      ],
+    };
+
+    const nextState: GameState = {
+      ...prevState,
+      truth: prevState.truth,
+      log: [...prevState.log],
+      states: [
+        {
+          ...prevState.states[0],
+          owner: 'player',
+          activeStateBonus: { ...aiBonus },
+        },
+      ],
+    };
+
+    const ownershipLogs = reconcileStateBonusOwnership(prevState, nextState);
+
+    expect(nextState.states[0].activeStateBonus?.truthDelta).toBe(3);
+    expect(nextState.truth).toBe(56);
+    expect(nextState.log.some(entry => entry.startsWith('Truth manipulation'))).toBe(true);
+
+    nextState.log = [...nextState.log, ...ownershipLogs];
+    expect(ownershipLogs.some(entry => entry.includes('boosts Truth (+3%)'))).toBe(true);
+    expect(nextState.log.some(entry => entry.includes('boosts Truth (+3%)'))).toBe(true);
   });
 });
 
