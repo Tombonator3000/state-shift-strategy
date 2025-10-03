@@ -20,7 +20,7 @@ import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
-import RelicUI from '@/expansions/tabloidRelics/RelicUI';
+import FalloutOverlay from '@/expansions/tabloidRelics/RelicUI';
 
 import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
 import ContextualHelp from '@/components/game/ContextualHelp';
@@ -57,6 +57,7 @@ import type {
   CardPlayRecord,
   PendingCampaignArcEvent,
 } from '@/hooks/gameStateTypes';
+import type { TabloidRelicRuntimeEntry } from '@/expansions/tabloidRelics/RelicTypes';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { ParanormalSighting } from '@/types/paranormal';
 import { areMapVfxEnabled, areParanormalEffectsEnabled } from '@/state/settings';
@@ -702,6 +703,7 @@ const Index = () => {
   const [paranormalSightings, setParanormalSightings] = useState<ParanormalSighting[]>([]);
   const [arcProgressSummaries, setArcProgressSummaries] = useState<Record<string, ArcProgressSummary>>({});
   const [inspectedPlayedCard, setInspectedPlayedCard] = useState<GameCard | null>(null);
+  const [activeRelicFallout, setActiveRelicFallout] = useState<TabloidRelicRuntimeEntry | null>(null);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -754,6 +756,7 @@ const Index = () => {
   const [hasAcknowledgedObjectives, setHasAcknowledgedObjectives] = useState(() => gameState.turn > 3);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => detectReducedMotion());
   const previousAgendaIdRef = useRef<string | null>(null);
+  const relicFalloutSeenRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -786,6 +789,47 @@ const Index = () => {
   }, [gameState.secretAgenda?.id]);
 
   useEffect(() => {
+    const runtime = gameState.tabloidRelicsRuntime ?? null;
+
+    if (!runtime || runtime.entries.length === 0) {
+      relicFalloutSeenRef.current.clear();
+      if (activeRelicFallout) {
+        setActiveRelicFallout(null);
+      }
+      return;
+    }
+
+    const currentIds = new Set(runtime.entries.map(entry => entry.uid));
+    for (const seenId of Array.from(relicFalloutSeenRef.current)) {
+      if (!currentIds.has(seenId)) {
+        relicFalloutSeenRef.current.delete(seenId);
+      }
+    }
+
+    if (activeRelicFallout) {
+      return;
+    }
+
+    const nextRelic = [...runtime.entries]
+      .filter(entry => entry.status === 'active')
+      .sort((a, b) => {
+        if (a.triggeredOnRound !== b.triggeredOnRound) {
+          return b.triggeredOnRound - a.triggeredOnRound;
+        }
+        if (a.remaining !== b.remaining) {
+          return b.remaining - a.remaining;
+        }
+        return a.uid.localeCompare(b.uid);
+      })
+      .find(entry => !relicFalloutSeenRef.current.has(entry.uid));
+
+    if (nextRelic) {
+      relicFalloutSeenRef.current.add(nextRelic.uid);
+      setActiveRelicFallout(nextRelic);
+    }
+  }, [gameState.tabloidRelicsRuntime, activeRelicFallout]);
+
+  useEffect(() => {
     if (gameState.turn <= 1) {
       setHasAcknowledgedObjectives(false);
     } else if (gameState.turn > 3) {
@@ -806,6 +850,10 @@ const Index = () => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('shadowgov-last-faction', faction);
     }
+  }, []);
+
+  const handleRelicOverlayClose = useCallback(() => {
+    setActiveRelicFallout(null);
   }, []);
 
   const handleArcProgress = useCallback((entries: ArcProgressSummary[]) => {
@@ -3016,7 +3064,7 @@ const Index = () => {
       />
 
       <CardAnimationLayer />
-      <RelicUI runtime={gameState.tabloidRelicsRuntime ?? null} />
+      <FalloutOverlay relic={activeRelicFallout} onClose={handleRelicOverlayClose} />
 
       <CardDetailOverlay
         card={inspectedPlayedCard}
