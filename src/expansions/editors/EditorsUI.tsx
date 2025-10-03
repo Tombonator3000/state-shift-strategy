@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
+import { EDITORS_EXPANSION_ID, isEditorsFeatureEnabled } from '@/data/expansions/features';
+
+export { EDITORS_EXPANSION_ID } from '@/data/expansions/features';
 
 import type { EditorDefinition, EditorFaction, EditorHookDefinition, EditorHookPhase } from './EditorsTypes';
 import { getEditors, resolveActiveEditor, type EditorId } from './EditorsEngine';
@@ -18,7 +20,6 @@ export interface EditorsUIProps extends PropsWithChildren {
 }
 
 const STORAGE_KEY = 'shadowgov:editors:last-selection';
-export const EDITORS_EXPANSION_ID = 'editors';
 
 const PHASE_LABELS: Record<EditorHookPhase, string> = {
   onSetup: 'Setup',
@@ -433,7 +434,7 @@ export const chooseEditor = (options: ChooseEditorOptions = {}): Promise<EditorI
 
 export const isEditorsExpansionEnabled = (): boolean => {
   try {
-    return getEnabledExpansionIdsSnapshot().includes(EDITORS_EXPANSION_ID);
+    return isEditorsFeatureEnabled();
   } catch (error) {
     console.warn('[Editors] Failed to resolve expansion state', error);
     return false;
