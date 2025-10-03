@@ -126,13 +126,13 @@ The table below keeps designers out of TypeScript while they balance the weights
 
 | Effect type(s) | Trigger & emission |
 | --- | --- |
-| Particle dispatcher | `VisualEffectsCoordinator.triggerParticleEffect` defines the canonical effect types (deploy, capture, synergy, chain, stateevent, contested, flash, broadcast, cryptid, etc.) dispatched as `cardDeployed` events. |
-| Card deployment | `useCardAnimation` fires a `'deploy'` particle event once the card finishes flying to the play pile. |
+| Particle dispatcher | Dedicated helpers on `VisualEffectsCoordinator` dispatch focused custom events (synergy activation, state events, redaction sweeps, etc.) consumed by the animation layer instead of a generic `cardDeployed` bus. |
+| Card deployment | `useCardAnimation` now relies on contextual helpers (for example `triggerContextualEffect`) and floating numbers rather than emitting a `'deploy'` particle broadcast. |
 | State capture/loss | Animation layer listens for `stateCapture`/`stateLoss` custom events to spawn `'capture'` or `'stateloss'` particle bursts. |
-| Synergy activations | Synergy detection emits `'synergy'`, `'chain'`, and `'bigwin'` effects (with floating numbers), while the animation layer reinforces them and shows combo corkboards. |
+| Synergy activations | Synergy detection drives haptics, screen shake, and floating numbers while callers invoke `triggerSynergyActivation` for the combo overlays. |
 | Government targeting | Zone targeting dispatches `'counter'` particles; completed locks also show overlays via `triggerGovernmentZoneTarget`. |
-| Broadcast & truth flashes | Campaign broadcasts and media effects invoke `triggerTruthMeltdownBroadcast`, `triggerTruthFlash`, and `'broadcast'`/`'flash'` particles, with additional truth flashes for media cards. |
-| State events & contested states | State-event hooks dispatch `'stateevent'` particles; contested states trigger `'contested'` effects and optional cryptid sightings on the map. |
+| Broadcast & truth flashes | Campaign broadcasts and media effects invoke `triggerTruthMeltdownBroadcast` and `triggerTruthFlash`, with additional flashes for media cards. |
+| State events & contested states | State-event hooks dispatch `stateEvent` overlays, while contested states trigger `'contestedState'` effects and optional cryptid sightings on the map. |
 | Paranormal overlays | `VisualEffectsCoordinator` can emit cryptid sightings, paranormal hotspots, breaking news, surveillance sweeps, typewriter reveals, static interference, and evidence galleries—each mapped to unique particle/SFX combos in the animation layer. |
 | Government redaction & truth flashes | Dedicated helpers dispatch `governmentRedaction` and `truthFlash` events, which the animation layer turns into sweeping overlays and flash particles. |
 | Particle renderer | `ParticleSystem` enumerates effect types, particle counts, colors, and lifespans, powering all emitted bursts. |

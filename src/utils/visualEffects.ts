@@ -7,36 +7,6 @@ export interface EffectPosition {
 }
 
 export class VisualEffectsCoordinator {
-  // Trigger particle effect at specific position
-  static triggerParticleEffect(
-    type:
-      | 'deploy'
-      | 'capture'
-      | 'counter'
-      | 'victory'
-      | 'synergy'
-      | 'bigwin'
-      | 'stateloss'
-      | 'chain'
-      | 'stateevent'
-      | 'flash'
-      | 'broadcast'
-      | 'cryptid'
-      | 'ectoplasm'
-      | 'surveillanceRedaction'
-      | 'corkboardPins'
-      | 'hotspotFlare',
-    position: EffectPosition
-  ): void {
-    window.dispatchEvent(new CustomEvent('cardDeployed', {
-      detail: {
-        type,
-        x: position.x, 
-        y: position.y 
-      }
-    }));
-  }
-
   // Trigger full-screen government redaction sweep
   static triggerGovernmentRedaction(position: EffectPosition): void {
     window.dispatchEvent(new CustomEvent('governmentRedaction', {
