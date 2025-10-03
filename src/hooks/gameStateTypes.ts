@@ -8,6 +8,7 @@ import type { AIDifficulty } from '@/data/aiStrategy';
 import type { TurnPlay } from '@/game/combo.types';
 import type { HotspotKind, WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
 import type { StateCombinationEffects } from '@/data/stateCombinations';
+import type { EditorDefinition, EditorId } from '@/expansions/editors/EditorsEngine';
 
 export interface CardPlayRecord {
   card: GameCard;
@@ -123,6 +124,32 @@ export interface GameState {
   stateRoundEvents: Record<string, StateRoundEventLogEntry[]>;
   activeCampaignArcs: ActiveCampaignArcState[];
   pendingArcEvents: PendingCampaignArcEvent[];
+  editorId?: EditorId | null;
+  editorDef?: EditorDefinition | null;
+  editorRuntime?: GameEditorRuntimeState | null;
+  preGameAdditions?: GameEditorPreGameAdditions | null;
+}
+
+export interface GameEditorScandalFlags {
+  readonly [flagId: string]: boolean;
+}
+
+export interface GameEditorRuntimeState {
+  appliedSetup?: boolean;
+  roundIndex?: number;
+  rngSeed?: number;
+  scandalFlags?: GameEditorScandalFlags;
+  deckSizeDelta?: {
+    player?: number;
+    ai?: number;
+  };
+}
+
+export interface GameEditorPreGameAdditions {
+  readonly playerDeck?: GameCard[];
+  readonly aiDeck?: GameCard[];
+  readonly playerHand?: GameCard[];
+  readonly aiHand?: GameCard[];
 }
 
 export interface ActiveCampaignArcState {

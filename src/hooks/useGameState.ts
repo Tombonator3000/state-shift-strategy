@@ -49,12 +49,15 @@ import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
   ActiveStateBonus,
+  GameEditorPreGameAdditions,
+  GameEditorRuntimeState,
   GameState,
   PendingCampaignArcEvent,
   StateEventBonusSummary,
   StateParanormalHotspot,
   StateParanormalHotspotSummary,
 } from './gameStateTypes';
+import { applyOnSetup, resolveEditor, type EditorId } from '@/expansions/editors/EditorsEngine';
 import {
   applyAiCardPlay,
   buildStrategyLogEntries as buildStrategyLogEntriesHelper,
@@ -76,6 +79,111 @@ const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefin
 const HAND_LIMIT = 5;
 
 type AgendaOwner = 'human' | 'ai';
+
+const normalizeEditorRuntimeState = (value: unknown): GameEditorRuntimeState | undefined => {
+  if (!value || typeof value !== 'object') {
+    return undefined;
+  }
+
+  const runtime = value as Partial<GameEditorRuntimeState>;
+  const normalized: GameEditorRuntimeState = {};
+
+  if (typeof runtime.appliedSetup === 'boolean') {
+    normalized.appliedSetup = runtime.appliedSetup;
+  }
+
+  if (typeof runtime.roundIndex === 'number' && Number.isFinite(runtime.roundIndex)) {
+    normalized.roundIndex = Math.max(0, Math.trunc(runtime.roundIndex));
+  }
+
+  if (typeof runtime.rngSeed === 'number' && Number.isFinite(runtime.rngSeed)) {
+    normalized.rngSeed = runtime.rngSeed >>> 0;
+  }
+
+  if (runtime.scandalFlags && typeof runtime.scandalFlags === 'object') {
+    const scandalFlags: NonNullable<GameEditorRuntimeState['scandalFlags']> = {};
+    for (const [flagId, flagValue] of Object.entries(runtime.scandalFlags as Record<string, unknown>)) {
+      if (typeof flagValue === 'boolean') {
+        scandalFlags[flagId] = flagValue;
+      }
+    }
+    if (Object.keys(scandalFlags).length > 0) {
+      normalized.scandalFlags = scandalFlags;
+    }
+  }
+
+  if (runtime.deckSizeDelta && typeof runtime.deckSizeDelta === 'object') {
+    const deckSizeDelta: NonNullable<GameEditorRuntimeState['deckSizeDelta']> = {};
+    const playerDelta = (runtime.deckSizeDelta as { player?: unknown }).player;
+    const aiDelta = (runtime.deckSizeDelta as { ai?: unknown }).ai;
+
+    if (typeof playerDelta === 'number' && Number.isFinite(playerDelta) && playerDelta !== 0) {
+      deckSizeDelta.player = Math.trunc(playerDelta);
+    }
+
+    if (typeof aiDelta === 'number' && Number.isFinite(aiDelta) && aiDelta !== 0) {
+      deckSizeDelta.ai = Math.trunc(aiDelta);
+    }
+
+    if (Object.keys(deckSizeDelta).length > 0) {
+      normalized.deckSizeDelta = deckSizeDelta;
+    }
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+};
+
+const normalizeEditorPreGameAdditions = (value: unknown): GameEditorPreGameAdditions | undefined => {
+  if (!value || typeof value !== 'object') {
+    return undefined;
+  }
+
+  const additions = value as Partial<GameEditorPreGameAdditions>;
+  const normalized: GameEditorPreGameAdditions = {};
+
+  const toCardArray = (cards?: unknown): GameCard[] | undefined => {
+    if (!Array.isArray(cards)) {
+      return undefined;
+    }
+
+    const valid: GameCard[] = [];
+    for (const entry of cards) {
+      if (entry && typeof entry === 'object' && typeof (entry as GameCard).id === 'string') {
+        valid.push(entry as GameCard);
+      }
+    }
+
+    return valid.length > 0 ? valid : undefined;
+  };
+
+  const playerDeck = toCardArray(
+    (additions as { playerDeck?: unknown; deck?: unknown }).playerDeck
+      ?? (additions as { deck?: unknown }).deck,
+  );
+  if (playerDeck) {
+    normalized.playerDeck = [...playerDeck];
+  }
+
+  const aiDeck = toCardArray((additions as { aiDeck?: unknown }).aiDeck);
+  if (aiDeck) {
+    normalized.aiDeck = [...aiDeck];
+  }
+
+  const playerHand = toCardArray(
+    (additions as { playerHand?: unknown; hand?: unknown }).playerHand
+      ?? (additions as { hand?: unknown }).hand,
+  );
+  if (playerHand) {
+    normalized.playerHand = [...playerHand];
+  }
+
+  const aiHand = toCardArray((additions as { aiHand?: unknown }).aiHand);
+  if (aiHand) {
+    normalized.aiHand = [...aiHand];
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+};
 
 const OWNER_LABEL: Record<AgendaOwner, 'player' | 'ai'> = {
   human: 'player',
@@ -1980,6 +2088,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         cardsPlayedLastTurn: 0,
         lastTurnWithoutPlay: false,
       },
+      editorId: null,
+      editorDef: null,
+      editorRuntime: null,
+      preGameAdditions: null,
     };
   });
 
@@ -2031,7 +2143,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     [],
   );
 
-  const initGame = useCallback((faction: 'government' | 'truth', agendaId?: string) => {
+  const initGame = useCallback((
+    faction: 'government' | 'truth',
+    agendaId?: string,
+    editorId?: EditorId | null,
+  ) => {
     const startingTruth = 50;
     const startingIP = 5;
     const aiStartingIP = 5;
@@ -2061,13 +2177,83 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     
     const handSize = Math.max(5, getStartingHandSize(drawMode, faction));
     const aiFaction = faction === 'government' ? 'truth' : 'government';
-    // CRITICAL: Pass faction to deck generation
-    const newDeck = generateWeightedDeck(40, faction);
-    const startingHand = newDeck.slice(0, handSize);
-    const remainingDeck = newDeck.slice(handSize);
-    const aiDeckSource = generateWeightedDeck(40, aiFaction);
-    const aiStartingHand = aiDeckSource.slice(0, handSize);
-    const aiRemainingDeck = aiDeckSource.slice(handSize);
+
+    const requestedEditorId = editorId ?? gameStateRef.current.editorId ?? null;
+    const resolvedEditor = resolveEditor(requestedEditorId);
+    const existingRuntime = resolvedEditor
+      ? normalizeEditorRuntimeState(gameStateRef.current.editorRuntime)
+      : undefined;
+    const existingPreGameAdditions = resolvedEditor
+      ? normalizeEditorPreGameAdditions(gameStateRef.current.preGameAdditions)
+      : undefined;
+    const shouldConsumePreGameAdditions = resolvedEditor
+      ? existingRuntime?.appliedSetup !== true
+      : false;
+
+    const editorRuntime: GameEditorRuntimeState | undefined = resolvedEditor
+      ? {
+          appliedSetup: false,
+          roundIndex: 0,
+          rngSeed: Math.floor(Math.random() * 0xffffffff),
+          scandalFlags: existingRuntime?.scandalFlags
+            ? { ...existingRuntime.scandalFlags }
+            : undefined,
+          deckSizeDelta: existingRuntime?.deckSizeDelta
+            ? { ...existingRuntime.deckSizeDelta }
+            : undefined,
+        }
+      : undefined;
+
+    const preGameAdditions = shouldConsumePreGameAdditions ? existingPreGameAdditions : undefined;
+
+    if (resolvedEditor && editorRuntime) {
+      // [EDITORS_ON_SETUP_HOOK]
+      applyOnSetup(resolvedEditor, () => {
+        editorRuntime.appliedSetup = true;
+      });
+      editorRuntime.appliedSetup = true;
+    }
+
+    const playerDeckDelta = editorRuntime?.deckSizeDelta?.player ?? 0;
+    const aiDeckDelta = editorRuntime?.deckSizeDelta?.ai ?? 0;
+    const normalizedPlayerDeckDelta = Number.isFinite(playerDeckDelta) ? Math.trunc(playerDeckDelta) : 0;
+    const normalizedAiDeckDelta = Number.isFinite(aiDeckDelta) ? Math.trunc(aiDeckDelta) : 0;
+
+    const basePlayerDeckSize = 40 + normalizedPlayerDeckDelta;
+    const baseAiDeckSize = 40 + normalizedAiDeckDelta;
+
+    const playerDeckSize = Math.max(handSize, basePlayerDeckSize);
+    const aiDeckSize = Math.max(handSize, baseAiDeckSize);
+
+    let newDeck = generateWeightedDeck(playerDeckSize, faction);
+    let aiDeckSource = generateWeightedDeck(aiDeckSize, aiFaction);
+
+    if (preGameAdditions?.playerDeck?.length) {
+      newDeck = [...preGameAdditions.playerDeck, ...newDeck];
+    }
+
+    if (preGameAdditions?.aiDeck?.length) {
+      aiDeckSource = [...preGameAdditions.aiDeck, ...aiDeckSource];
+    }
+
+    let startingHand = newDeck.slice(0, handSize);
+    let remainingDeck = newDeck.slice(handSize);
+
+    if (preGameAdditions?.playerHand?.length) {
+      startingHand = [...startingHand, ...preGameAdditions.playerHand];
+    }
+
+    let aiStartingHand = aiDeckSource.slice(0, handSize);
+    let aiRemainingDeck = aiDeckSource.slice(handSize);
+
+    if (preGameAdditions?.aiHand?.length) {
+      aiStartingHand = [...aiStartingHand, ...preGameAdditions.aiHand];
+    }
+
+    const runtimeToPersist = editorRuntime ? normalizeEditorRuntimeState(editorRuntime) ?? undefined : undefined;
+    const preGameAdditionsToPersist = shouldConsumePreGameAdditions
+      ? null
+      : existingPreGameAdditions ?? null;
     const initialControl = getInitialStateControl(faction);
     const issueDefinition = advanceAgendaIssue();
     const issueState = agendaIssueToState(issueDefinition);
@@ -2139,6 +2325,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       aiTurnInProgress: false,
       selectedCard: null,
       targetState: null,
+      editorId: resolvedEditor?.id ?? requestedEditorId ?? null,
+      editorDef: resolvedEditor ?? null,
+      editorRuntime: runtimeToPersist ?? null,
+      preGameAdditions: preGameAdditionsToPersist,
       states: USA_STATES.map(state => {
         let owner: 'player' | 'ai' | 'neutral' = 'neutral';
 
@@ -3610,6 +3800,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const normalizedTurn = typeof saveData.turn === 'number' && Number.isFinite(saveData.turn)
         ? Math.max(1, saveData.turn)
         : 1;
+      const savedEditorIdRaw = (saveData as { editorId?: unknown }).editorId;
+      const savedEditorId = typeof savedEditorIdRaw === 'string' ? savedEditorIdRaw : null;
+      const restoredEditor = resolveEditor(savedEditorId);
+      const normalizedEditorRuntime = normalizeEditorRuntimeState(
+        (saveData as { editorRuntime?: unknown }).editorRuntime,
+      );
+      const normalizedPreGameAdditions = normalizeEditorPreGameAdditions(
+        (saveData as { preGameAdditions?: unknown }).preGameAdditions,
+      );
 
       // Validate save data structure
       if (!saveData.faction || !saveData.phase || saveData.version !== '1.0') {
@@ -4057,9 +4256,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             ? saveData.lastStateBonusRound
             : 0,
           stateRoundEvents: derivedStateRoundEvents,
+          editorId: restoredEditor?.id ?? null,
+          editorDef: restoredEditor ?? null,
+          editorRuntime: normalizedEditorRuntime ?? null,
+          preGameAdditions: normalizedPreGameAdditions ?? null,
         };
       });
-      
+
       return true;
     } catch (error) {
       console.error('Failed to load game:', error);

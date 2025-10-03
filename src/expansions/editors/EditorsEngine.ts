@@ -27,6 +27,10 @@ export const getEditorById = (editorId: EditorId | null | undefined): EditorDefi
   return editorsById.get(editorId);
 };
 
+export const resolveEditor = (editorId: EditorId | null | undefined): EditorDefinition | undefined => {
+  return getEditorById(editorId ?? undefined);
+};
+
 export const resolveActiveEditor = (options?: ResolveEditorOptions): EditorDefinition | undefined => {
   if (!options) {
     return undefined;
