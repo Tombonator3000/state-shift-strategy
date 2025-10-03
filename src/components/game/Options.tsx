@@ -14,6 +14,7 @@ import { formatComboReward, getComboSettings, setComboSettings } from '@/game/co
 import type { ComboCategory, ComboSettings } from '@/game/combo.types';
 import { Badge } from '@/components/ui/badge';
 import { DEFAULT_UI_SCALE, coerceUiScale, parseUiScale } from '@/lib/ui-scale';
+import { cn } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -21,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import '@/styles/tabloid.css';
 
 const SETTINGS_STORAGE_KEY = 'gameSettings';
 
@@ -122,6 +124,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     audio.currentMusicType,
   );
   const [selectedTrackIndex, setSelectedTrackIndex] = useState<number>(0);
+  const isTabloid = uiTheme === 'tabloid_bw';
 
   const resolveInitialState = (): { settings: GameSettings; combo: ComboSettings } => {
     const defaultDifficulty = (() => {
@@ -515,54 +518,164 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       }));
   }, []);
 
+  const panelCardClass = isTabloid
+    ? 'rounded-none border-[3px] border-black bg-[var(--paper)]/95 shadow-[8px_8px_0_rgba(0,0,0,0.25)] p-6 text-black'
+    : 'p-6 border-2 border-newspaper-text bg-newspaper-bg';
+
+  const sectionTitleClass = isTabloid
+    ? 'font-tabloid text-2xl uppercase tracking-[0.3em] text-black mb-4 flex items-center gap-2'
+    : 'font-bold text-xl text-newspaper-text mb-4 flex items-center';
+
+  const strapLabelClass = isTabloid
+    ? 'text-[11px] font-black uppercase tracking-[0.4em] text-black/60'
+    : 'text-[11px] font-mono uppercase tracking-[0.2em] text-newspaper-text/60';
+
+  const sliderLabelClass = isTabloid
+    ? 'text-sm font-black uppercase tracking-[0.2em] text-black mb-2 block'
+    : 'text-sm font-medium text-newspaper-text mb-2 block';
+
+  const infoTextClass = isTabloid
+    ? 'text-xs text-black/70 font-semibold uppercase tracking-[0.2em]'
+    : 'text-xs text-newspaper-text/70';
+
+  const toggleRowClass = isTabloid
+    ? 'flex items-center justify-between border border-black/10 bg-white/70 px-4 py-3'
+    : 'flex items-center justify-between';
+
+  const toggleLabelClass = isTabloid
+    ? 'text-xs font-black uppercase tracking-[0.2em] text-black'
+    : 'text-sm font-medium text-newspaper-text';
+
+  const formLabelClass = isTabloid
+    ? 'text-xs font-black uppercase tracking-[0.25em] text-black mb-2 block'
+    : 'text-sm font-medium text-newspaper-text mb-2 block';
+
+  const buttonBaseClass = isTabloid
+    ? 'rounded-none border-2 border-black uppercase font-black tracking-[0.25em] shadow-[6px_6px_0_rgba(0,0,0,0.4)] transition-transform hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[1px] active:translate-y-[1px]'
+    : '';
+
+  const outlineButtonClass = isTabloid
+    ? `${buttonBaseClass} bg-[var(--paper)] text-black`
+    : '';
+
+  const filledButtonClass = isTabloid
+    ? `${buttonBaseClass} bg-black text-[var(--paper)] hover:bg-black/90`
+    : '';
+
   return (
-    <div className="min-h-screen bg-newspaper-bg flex items-center justify-center p-8 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-5">
-        {Array.from({ length: 30 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute bg-newspaper-text h-6"
-            style={{
-              width: `${Math.random() * 300 + 100}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              transform: `rotate(${Math.random() * 4 - 2}deg)`
-            }}
-          />
-        ))}
-      </div>
+    <div
+      className={cn(
+        'min-h-screen flex justify-center relative overflow-hidden',
+        isTabloid ? 'tabloid-bg items-start px-4 py-8 sm:px-10' : 'bg-newspaper-bg items-center p-8',
+      )}
+    >
+      {isTabloid ? (
+        <div className="pointer-events-none absolute inset-0 opacity-20 bg-[radial-gradient(circle,rgba(0,0,0,0.25)_1px,transparent_1px)] [background-size:14px_14px]" />
+      ) : (
+        <div className="absolute inset-0 opacity-5">
+          {Array.from({ length: 30 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute bg-newspaper-text h-6"
+              style={{
+                width: `${Math.random() * 300 + 100}px`,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                transform: `rotate(${Math.random() * 4 - 2}deg)`
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       <Card
-        className="max-w-4xl w-full p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal relative"
-        style={{ fontFamily: 'serif' }}
+        className={cn(
+          'w-full relative',
+          isTabloid
+            ? 'max-w-5xl rounded-none border-[6px] border-black bg-[var(--paper)] shadow-[12px_12px_0_rgba(0,0,0,0.35)] overflow-hidden text-black'
+            : 'max-w-4xl p-8 bg-newspaper-bg border-4 border-newspaper-text animate-redacted-reveal',
+        )}
+        style={isTabloid ? undefined : { fontFamily: 'serif' }}
       >
-        <div className="absolute top-4 right-4 text-red-600 font-mono text-xs transform rotate-12 border-2 border-red-600 p-2">
+        <div
+          className={cn(
+            'absolute top-4 right-4 text-red-600 font-mono text-xs transform rotate-12 border-2 border-red-600 p-2',
+            isTabloid &&
+              'bg-black text-[var(--paper)] border-black font-tabloid tracking-[0.4em] uppercase rotate-6 shadow-[4px_4px_0_rgba(0,0,0,0.4)]',
+          )}
+        >
           TOP SECRET
         </div>
-        <div className="absolute bottom-4 left-4 text-red-600 font-mono text-xs transform -rotate-12 border-2 border-red-600 p-2">
+        <div
+          className={cn(
+            'absolute bottom-4 left-4 text-red-600 font-mono text-xs transform -rotate-12 border-2 border-red-600 p-2',
+            isTabloid &&
+              'bg-black text-[var(--paper)] border-black font-tabloid tracking-[0.4em] uppercase -rotate-6 shadow-[4px_4px_0_rgba(0,0,0,0.4)]',
+          )}
+        >
           EYES ONLY
         </div>
 
         <Button
           onClick={onClose}
           variant="outline"
-          className="absolute top-4 left-4 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
+          className={cn(
+            'absolute top-4 left-4',
+            isTabloid
+              ? `${outlineButtonClass} text-xs px-4 py-2 bg-[var(--paper)] hover:bg-white`
+              : 'border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10',
+          )}
         >
           ← BACK
         </Button>
 
-        <div className="text-center mb-8 mt-8">
-          <h1 className="text-4xl font-bold text-newspaper-text mb-4">CLASSIFIED OPTIONS</h1>
-          <div className="text-sm text-newspaper-text/80 mb-4">Configure your conspiracy experience</div>
-        </div>
+        <header
+          className={cn(
+            'text-center',
+            isTabloid ? 'px-6 sm:px-10 pt-12 pb-6' : 'mb-8 mt-8',
+          )}
+        >
+          <div
+            className={cn(
+              'inline-block',
+              isTabloid && 'border-[3px] border-black bg-white px-6 py-4 shadow-[8px_8px_0_rgba(0,0,0,0.35)]',
+            )}
+          >
+            <h1
+              className={cn(
+                'mb-2',
+                isTabloid
+                  ? 'font-tabloid text-4xl sm:text-5xl uppercase tracking-[0.35em] text-black'
+                  : 'text-4xl font-bold text-newspaper-text mb-4',
+              )}
+            >
+              CLASSIFIED OPTIONS
+            </h1>
+            <p
+              className={cn(
+                'text-sm',
+                isTabloid
+                  ? 'font-black uppercase tracking-[0.3em] text-black/70'
+                  : 'text-newspaper-text/80 mb-4',
+              )}
+            >
+              Configure your conspiracy experience
+            </p>
+          </div>
+        </header>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <Card className="p-6 border-2 border-newspaper-text bg-newspaper-bg">
-            <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">🔊 AUDIO SURVEILLANCE</h3>
+        <div
+          className={cn(
+            'grid md:grid-cols-2',
+            isTabloid ? 'gap-6 px-6 sm:px-10' : 'gap-8',
+          )}
+        >
+          <Card className={cn(panelCardClass)}>
+            <h3 className={sectionTitleClass}>🔊 AUDIO SURVEILLANCE</h3>
 
             <div className="space-y-6">
               <div>
-                <label className="text-sm font-medium text-newspaper-text mb-2 block">
+                <label className={sliderLabelClass}>
                   Master Volume: {settings.masterVolume}%
                 </label>
                 <Slider
@@ -575,7 +688,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-newspaper-text mb-2 block">
+                <label className={sliderLabelClass}>
                   Music Volume: {settings.musicVolume}%
                 </label>
                 <Slider
@@ -591,7 +704,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-newspaper-text mb-2 block">
+                <label className={sliderLabelClass}>
                   Sound Effects: {settings.sfxVolume}%
                 </label>
                 <Slider
@@ -606,12 +719,22 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 />
               </div>
 
-              <div className="border-t border-newspaper-text/20 pt-4 space-y-4">
-                <div className="grid gap-3 md:grid-cols-3">
-                  <div className="border border-newspaper-text/30 bg-white/80 p-3 shadow-sm flex items-center justify-between">
+              <div
+                className={cn(
+                  'border-t border-newspaper-text/20 pt-4 space-y-4',
+                  isTabloid && 'border-black/30 pt-6',
+                )}
+              >
+                <div className={cn('grid gap-3 md:grid-cols-3', isTabloid && 'gap-4')}>
+                  <div
+                    className={cn(
+                      'border border-newspaper-text/30 bg-white/80 p-3 shadow-sm flex items-center justify-between',
+                      isTabloid && 'border-black bg-white shadow-[4px_4px_0_rgba(0,0,0,0.3)] px-4 py-3',
+                    )}
+                  >
                     <div>
-                      <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-newspaper-text/60">Music Channel</div>
-                      <div className="text-lg font-bold text-newspaper-text">
+                      <div className={strapLabelClass}>Music Channel</div>
+                      <div className={cn('text-lg font-bold', isTabloid ? 'text-black' : 'text-newspaper-text')}>
                         {audio.config.musicEnabled ? 'ONLINE' : 'OFFLINE'}
                       </div>
                     </div>
@@ -620,10 +743,15 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                       onCheckedChange={() => audio.toggleMusic()}
                     />
                   </div>
-                  <div className="border border-newspaper-text/30 bg-white/80 p-3 shadow-sm flex items-center justify-between">
+                  <div
+                    className={cn(
+                      'border border-newspaper-text/30 bg-white/80 p-3 shadow-sm flex items-center justify-between',
+                      isTabloid && 'border-black bg-white shadow-[4px_4px_0_rgba(0,0,0,0.3)] px-4 py-3',
+                    )}
+                  >
                     <div>
-                      <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-newspaper-text/60">SFX Channel</div>
-                      <div className="text-lg font-bold text-newspaper-text">
+                      <div className={strapLabelClass}>SFX Channel</div>
+                      <div className={cn('text-lg font-bold', isTabloid ? 'text-black' : 'text-newspaper-text')}>
                         {audio.config.sfxEnabled ? 'READY' : 'DISABLED'}
                       </div>
                     </div>
@@ -632,10 +760,15 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                       onCheckedChange={() => audio.toggleSFX()}
                     />
                   </div>
-                  <div className="border border-newspaper-text/30 bg-white/80 p-3 shadow-sm flex items-center justify-between">
+                  <div
+                    className={cn(
+                      'border border-newspaper-text/30 bg-white/80 p-3 shadow-sm flex items-center justify-between',
+                      isTabloid && 'border-black bg-white shadow-[4px_4px_0_rgba(0,0,0,0.3)] px-4 py-3',
+                    )}
+                  >
                     <div>
-                      <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-newspaper-text/60">Master Mute</div>
-                      <div className="text-lg font-bold text-newspaper-text">
+                      <div className={strapLabelClass}>Master Mute</div>
+                      <div className={cn('text-lg font-bold', isTabloid ? 'text-black' : 'text-newspaper-text')}>
                         {audio.config.muted ? 'SILENCED' : 'ACTIVE'}
                       </div>
                     </div>
@@ -646,30 +779,39 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   </div>
                 </div>
 
-                <div className="border border-newspaper-text/30 bg-white/80 p-4 shadow-sm space-y-4">
+                <div
+                  className={cn(
+                    'border border-newspaper-text/30 bg-white/80 p-4 shadow-sm space-y-4',
+                    isTabloid && 'border-black bg-white shadow-[6px_6px_0_rgba(0,0,0,0.3)]',
+                  )}
+                >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-xs font-mono uppercase tracking-[0.2em] text-newspaper-text/60">
+                      <div className={strapLabelClass}>
                         Currently Broadcasting
                       </div>
-                      <div className="text-lg font-bold text-newspaper-text">
+                      <div className={cn('text-lg font-bold', isTabloid ? 'text-black' : 'text-newspaper-text')}>
                         {currentTrackLabel}
                       </div>
-                      <div className="text-[11px] font-mono text-newspaper-text/60">
+                      <div className={cn('text-[11px]', isTabloid ? 'font-black uppercase tracking-[0.3em] text-black/50' : 'font-mono text-newspaper-text/60')}>
                         Status: {audio.audioStatus}
                       </div>
                     </div>
                     <Badge
                       variant={audio.isPlaying ? 'default' : 'secondary'}
-                      className="font-mono tracking-[0.2em] uppercase"
+                      className={cn(
+                        'font-mono tracking-[0.2em] uppercase',
+                        isTabloid &&
+                          'rounded-none border-2 border-black bg-black text-[var(--paper)] px-3 py-1 shadow-[3px_3px_0_rgba(0,0,0,0.35)] font-black',
+                      )}
                     >
                       {audio.isPlaying ? 'LIVE' : 'STANDBY'}
                     </Badge>
                   </div>
 
-                  <div className="grid gap-3 md:grid-cols-2">
+                  <div className={cn('grid gap-3 md:grid-cols-2', isTabloid && 'gap-4')}>
                     <div>
-                      <div className="text-xs font-mono uppercase tracking-[0.2em] text-newspaper-text/60 mb-1">
+                      <div className={cn(strapLabelClass, 'mb-1')}>
                         Music Collection
                       </div>
                       <Select
@@ -677,10 +819,22 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                         onValueChange={value => setSelectedMusicCollection(value as MusicCollectionKey)}
                         disabled={!collectionEntries.some(([, tracks]) => tracks.length > 0)}
                       >
-                        <SelectTrigger className="border-2 border-newspaper-text bg-newspaper-bg text-newspaper-text font-mono uppercase tracking-[0.2em] text-xs">
+                        <SelectTrigger
+                          className={cn(
+                            'font-mono uppercase tracking-[0.2em] text-xs',
+                            isTabloid
+                              ? 'border-[3px] border-black bg-white text-black rounded-none shadow-[3px_3px_0_rgba(0,0,0,0.35)]'
+                              : 'border-2 border-newspaper-text bg-newspaper-bg text-newspaper-text',
+                          )}
+                        >
                           <SelectValue placeholder="Select playlist" />
                         </SelectTrigger>
-                        <SelectContent className="bg-newspaper-bg text-newspaper-text">
+                        <SelectContent
+                          className={cn(
+                            'text-newspaper-text',
+                            isTabloid && 'bg-[var(--paper)] text-black border-2 border-black rounded-none shadow-[4px_4px_0_rgba(0,0,0,0.25)]',
+                          )}
+                        >
                           {collectionEntries.map(([collection, tracks]) => (
                             <SelectItem
                               key={collection}
@@ -695,7 +849,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                       </Select>
                     </div>
                     <div>
-                      <div className="text-xs font-mono uppercase tracking-[0.2em] text-newspaper-text/60 mb-1">
+                      <div className={cn(strapLabelClass, 'mb-1')}>
                         Track Selection
                       </div>
                       <Select
@@ -709,10 +863,22 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                         }}
                         disabled={selectedCollectionTracks.length === 0}
                       >
-                        <SelectTrigger className="border-2 border-newspaper-text bg-newspaper-bg text-newspaper-text font-mono uppercase tracking-[0.2em] text-xs">
+                        <SelectTrigger
+                          className={cn(
+                            'font-mono uppercase tracking-[0.2em] text-xs',
+                            isTabloid
+                              ? 'border-[3px] border-black bg-white text-black rounded-none shadow-[3px_3px_0_rgba(0,0,0,0.35)]'
+                              : 'border-2 border-newspaper-text bg-newspaper-bg text-newspaper-text',
+                          )}
+                        >
                           <SelectValue placeholder="Select track" />
                         </SelectTrigger>
-                        <SelectContent className="bg-newspaper-bg text-newspaper-text">
+                        <SelectContent
+                          className={cn(
+                            'text-newspaper-text',
+                            isTabloid && 'bg-[var(--paper)] text-black border-2 border-black rounded-none shadow-[4px_4px_0_rgba(0,0,0,0.25)]',
+                          )}
+                        >
                           {selectedCollectionTracks.map(track => (
                             <SelectItem
                               key={track.index}
@@ -727,10 +893,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className={cn('flex flex-wrap gap-2', isTabloid && 'gap-3')}>
                     <Button
                       onClick={() => audio.playMusic(selectedMusicCollection)}
-                      className="bg-government-blue text-white hover:bg-government-blue/80 font-mono uppercase tracking-[0.2em]"
+                      className={cn(
+                        isTabloid
+                          ? `${filledButtonClass} px-6 py-2 text-xs`
+                          : 'bg-government-blue text-white hover:bg-government-blue/80 font-mono uppercase tracking-[0.2em]',
+                      )}
                       disabled={!isAudioReady}
                     >
                       ▶︎ Play
@@ -738,7 +908,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                     <Button
                       onClick={() => audio.pauseMusic()}
                       variant="outline"
-                      className="border-newspaper-text text-newspaper-text font-mono uppercase tracking-[0.2em]"
+                      className={cn(
+                        isTabloid
+                          ? `${outlineButtonClass} px-6 py-2 text-xs`
+                          : 'border-newspaper-text text-newspaper-text font-mono uppercase tracking-[0.2em]',
+                      )}
                       disabled={!audio.isPlaying}
                     >
                       ❚❚ Pause
@@ -746,14 +920,22 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                     <Button
                       onClick={() => audio.stopMusic()}
                       variant="outline"
-                      className="border-newspaper-text text-newspaper-text font-mono uppercase tracking-[0.2em]"
+                      className={cn(
+                        isTabloid
+                          ? `${outlineButtonClass} px-6 py-2 text-xs`
+                          : 'border-newspaper-text text-newspaper-text font-mono uppercase tracking-[0.2em]',
+                      )}
                     >
                       ■ Stop
                     </Button>
                     <Button
                       onClick={() => audio.testSFX()}
                       variant="outline"
-                      className="border-newspaper-text text-newspaper-text font-mono uppercase tracking-[0.2em]"
+                      className={cn(
+                        isTabloid
+                          ? `${outlineButtonClass} px-6 py-2 text-xs`
+                          : 'border-newspaper-text text-newspaper-text font-mono uppercase tracking-[0.2em]',
+                      )}
                     >
                       🔊 Test SFX
                     </Button>
@@ -763,75 +945,80 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
             </div>
           </Card>
 
-          <Card className="p-6 border-2 border-newspaper-text bg-newspaper-bg">
-            <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">⚙️ OPERATION PARAMETERS</h3>
+          <Card className={cn(panelCardClass)}>
+            <h3 className={sectionTitleClass}>⚙️ OPERATION PARAMETERS</h3>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">Enable Animations</label>
+            <div className={cn('space-y-4', isTabloid && 'space-y-5')}>
+              <div className={toggleRowClass}>
+                <label className={toggleLabelClass}>Enable Animations</label>
                 <Switch
                   checked={settings.enableAnimations}
                   onCheckedChange={checked => updateSettings({ enableAnimations: checked })}
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">Auto Go To Press</label>
+              <div className={toggleRowClass}>
+                <label className={toggleLabelClass}>Auto Go To Press</label>
                 <Switch
                   checked={settings.autoEndTurn}
                   onCheckedChange={checked => updateSettings({ autoEndTurn: checked })}
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">Fast Mode</label>
+              <div className={toggleRowClass}>
+                <label className={toggleLabelClass}>Fast Mode</label>
                 <Switch checked={settings.fastMode} onCheckedChange={checked => updateSettings({ fastMode: checked })} />
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">Show Tooltips</label>
+              <div className={toggleRowClass}>
+                <label className={toggleLabelClass}>Show Tooltips</label>
                 <Switch
                   checked={settings.showTooltips}
                   onCheckedChange={checked => updateSettings({ showTooltips: checked })}
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">Keyboard Shortcuts</label>
+              <div className={toggleRowClass}>
+                <label className={toggleLabelClass}>Keyboard Shortcuts</label>
                 <Switch
                   checked={settings.enableKeyboardShortcuts}
                   onCheckedChange={checked => updateSettings({ enableKeyboardShortcuts: checked })}
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">Screen Shake Effects</label>
+              <div className={toggleRowClass}>
+                <label className={toggleLabelClass}>Screen Shake Effects</label>
                 <Switch
                   checked={settings.screenShake}
                   onCheckedChange={checked => updateSettings({ screenShake: checked })}
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">Paranormal Overlays &amp; Sightings</label>
+              <div className={toggleRowClass}>
+                <label className={toggleLabelClass}>Paranormal Overlays &amp; Sightings</label>
                 <Switch
                   checked={settings.paranormalEffectsEnabled}
                   onCheckedChange={checked => updateSettings({ paranormalEffectsEnabled: checked })}
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">Map Visual Effects</label>
+              <div className={toggleRowClass}>
+                <label className={toggleLabelClass}>Map Visual Effects</label>
                 <Switch
                   checked={settings.mapVfxEnabled}
                   onCheckedChange={checked => updateSettings({ mapVfxEnabled: checked })}
                 />
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-newspaper-text">Interface Scale</label>
-                  <span className="text-xs font-mono tracking-[0.2em] text-newspaper-text">
+              <div className={cn(isTabloid && 'border border-black/10 bg-white/70 px-4 py-4 space-y-3')}>
+                <div className={cn('flex items-center justify-between mb-2', isTabloid && 'mb-3')}>
+                  <label className={toggleLabelClass}>Interface Scale</label>
+                  <span
+                    className={cn(
+                      'text-xs font-mono tracking-[0.2em] text-newspaper-text',
+                      isTabloid && 'font-black text-black tracking-[0.25em] uppercase',
+                    )}
+                  >
                     {Math.round(settings.uiScale * 100)}%
                   </span>
                 </div>
@@ -848,18 +1035,18 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-newspaper-text">Confirm Destructive Actions</label>
+              <div className={toggleRowClass}>
+                <label className={toggleLabelClass}>Confirm Destructive Actions</label>
                 <Switch
                   checked={settings.confirmActions}
                   onCheckedChange={checked => updateSettings({ confirmActions: checked })}
                 />
               </div>
 
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <label className="text-sm font-medium text-newspaper-text">Enable Secret Agendas</label>
-                  <p className="text-xs text-newspaper-text/70">
+              <div className={cn(toggleRowClass, isTabloid && 'gap-4 flex-wrap md:flex-nowrap')}>
+                <div className={cn('flex-1', isTabloid && 'space-y-1')}>
+                  <label className={toggleLabelClass}>Enable Secret Agendas</label>
+                  <p className={infoTextClass}>
                     Assigns a random agenda to both factions at the start of a new campaign.
                   </p>
                 </div>
@@ -869,12 +1056,17 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 />
               </div>
 
-              <div>
-                <label className="text-sm font-medium text-newspaper-text mb-2 block">Difficulty Level</label>
+              <div className={cn(isTabloid && 'border border-black/10 bg-white/70 px-4 py-4 space-y-2')}>
+                <label className={formLabelClass}>Difficulty Level</label>
                 <select
                   value={settings.difficulty}
                   onChange={event => updateSettings({ difficulty: event.target.value as DifficultyLabel })}
-                  className="w-full p-2 border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded"
+                  className={cn(
+                    'w-full p-2',
+                    isTabloid
+                      ? 'border-[3px] border-black bg-white text-black uppercase tracking-[0.25em] text-xs font-black rounded-none shadow-[4px_4px_0_rgba(0,0,0,0.35)]'
+                      : 'border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded',
+                  )}
                 >
                   {DIFFICULTY_OPTIONS.map(option => (
                     <option key={option} value={option}>
@@ -884,12 +1076,17 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 </select>
               </div>
 
-              <div>
-                <label className="text-sm font-medium text-newspaper-text mb-2 block">Card Draw Mode</label>
+              <div className={cn(isTabloid && 'border border-black/10 bg-white/70 px-4 py-4 space-y-2')}>
+                <label className={formLabelClass}>Card Draw Mode</label>
                 <select
                   value={settings.drawMode}
                   onChange={event => updateSettings({ drawMode: event.target.value as DrawMode })}
-                  className="w-full p-2 border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded mb-2"
+                  className={cn(
+                    'w-full p-2 mb-2',
+                    isTabloid
+                      ? 'border-[3px] border-black bg-white text-black uppercase tracking-[0.25em] text-xs font-black rounded-none shadow-[4px_4px_0_rgba(0,0,0,0.35)]'
+                      : 'border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded',
+                  )}
                 >
                   {Object.entries(DRAW_MODE_CONFIGS).map(([key, config]) => (
                     <option key={key} value={key}>
@@ -897,15 +1094,20 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                     </option>
                   ))}
                 </select>
-                <div className="text-xs text-newspaper-text/70 space-y-1">
+                <div
+                  className={cn(
+                    'text-xs text-newspaper-text/70 space-y-1',
+                    isTabloid && 'text-black/70 font-semibold uppercase tracking-[0.12em] space-y-2',
+                  )}
+                >
                   {(DRAW_MODE_CONFIGS[settings.drawMode] || DRAW_MODE_CONFIGS.standard).specialRules.map((rule, index) => (
                     <div key={index}>• {rule}</div>
                   ))}
                 </div>
               </div>
 
-              <div>
-                <label className="text-sm font-medium text-newspaper-text mb-2 block">UI Theme</label>
+              <div className={cn(isTabloid && 'border border-black/10 bg-white/70 px-4 py-4 space-y-2')}>
+                <label className={formLabelClass}>UI Theme</label>
                 <select
                   value={uiTheme}
                   onChange={event => {
@@ -913,45 +1115,59 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                     setUiTheme(newTheme);
                     updateSettings({ uiTheme: newTheme });
                   }}
-                  className="w-full p-2 border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded"
+                  className={cn(
+                    'w-full p-2',
+                    isTabloid
+                      ? 'border-[3px] border-black bg-white text-black uppercase tracking-[0.25em] text-xs font-black rounded-none shadow-[4px_4px_0_rgba(0,0,0,0.35)]'
+                      : 'border border-newspaper-text bg-newspaper-bg text-newspaper-text rounded',
+                  )}
                 >
                   <option value="tabloid_bw">TABLOID (Black &amp; White)</option>
                   <option value="government_classic">GOVERNMENT CLASSIC (Legacy Layout)</option>
                 </select>
-                <div className="text-xs text-newspaper-text/70 mt-1">Changes the visual appearance of menus and screens</div>
+                <div className={cn('text-xs text-newspaper-text/70 mt-1', isTabloid && 'text-black/70 font-semibold uppercase tracking-[0.15em]')}>
+                  Changes the visual appearance of menus and screens
+                </div>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 border-2 border-newspaper-text bg-newspaper-bg md:col-span-2">
-            <h3 className="font-bold text-xl text-newspaper-text mb-2 flex items-center">⚡ COMBO PROTOCOLS</h3>
-            <p className="text-sm text-newspaper-text/80 mb-4">
+          <Card className={cn(panelCardClass, 'md:col-span-2')}>
+            <h3 className={sectionTitleClass}>⚡ COMBO PROTOCOLS</h3>
+            <p
+              className={cn(
+                'text-sm text-newspaper-text/80 mb-4',
+                isTabloid && 'text-black/70 font-semibold uppercase tracking-[0.12em]',
+              )}
+            >
               Configure the combo engine, visual FX, and per-combo authorisations for this profile.
             </p>
 
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3">
+            <div className={cn('flex flex-col gap-4 md:flex-row md:items-center md:justify-between', isTabloid && 'gap-6')}>
+              <div className={cn('flex items-center gap-3', isTabloid && 'border border-black/10 bg-white/70 px-4 py-3')}>
                 <Switch
                   checked={comboSettingsState.enabled}
                   onCheckedChange={checked => applyComboSettings({ enabled: checked })}
                 />
-                <span className="text-sm text-newspaper-text font-medium">Enable combo engine</span>
+                <span className={cn('text-sm text-newspaper-text font-medium', isTabloid && 'text-xs font-black uppercase tracking-[0.2em] text-black')}>
+                  Enable combo engine
+                </span>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className={cn('flex items-center gap-3', isTabloid && 'border border-black/10 bg-white/70 px-4 py-3')}>
                 <Switch
                   checked={comboSettingsState.fxEnabled}
                   onCheckedChange={checked => applyComboSettings({ fxEnabled: checked })}
                   disabled={!comboSettingsState.enabled}
                 />
-                <span className="text-sm text-newspaper-text font-medium">
+                <span className={cn('text-sm text-newspaper-text font-medium', isTabloid && 'text-xs font-black uppercase tracking-[0.2em] text-black')}>
                   FX notifications ({comboSettingsState.fxEnabled ? 'on' : 'off'})
                 </span>
               </div>
             </div>
 
             <div className="mt-4">
-              <label className="text-sm font-medium text-newspaper-text mb-2 block">
+              <label className={formLabelClass}>
                 Max combos per turn: {comboSettingsState.maxCombosPerTurn}
               </label>
               <Slider
@@ -966,33 +1182,47 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
             </div>
 
             <ScrollArea className="mt-4 h-64 pr-2">
-              <div className="space-y-4">
+              <div className={cn('space-y-4', isTabloid && 'space-y-5')}>
                 {comboGroups.map(group => (
                   <div key={group.category}>
-                    <div className="text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
+                    <div
+                      className={cn(
+                        'text-xs font-semibold uppercase tracking-wide text-newspaper-text/70',
+                        isTabloid && 'text-black/70 tracking-[0.25em] font-black',
+                      )}
+                    >
                       {group.label}
                     </div>
-                    <div className="mt-2 space-y-3">
+                    <div className={cn('mt-2 space-y-3', isTabloid && 'space-y-4')}>
                       {group.combos.map(combo => {
                         const enabled = comboSettingsState.comboToggles[combo.id] ?? true;
                         const rewardLabel = combo.reward;
                         return (
                           <div
                             key={combo.id}
-                            className="rounded-md border border-newspaper-text/40 bg-white/70 p-3 shadow-sm"
+                            className={cn(
+                              'rounded-md border border-newspaper-text/40 bg-white/70 p-3 shadow-sm',
+                              isTabloid && 'rounded-none border-black bg-white shadow-[4px_4px_0_rgba(0,0,0,0.25)]',
+                            )}
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div>
-                                <div className="font-semibold text-newspaper-text">{combo.name}</div>
-                                <div className="text-xs text-newspaper-text/70">{combo.description}</div>
+                                <div className={cn('font-semibold text-newspaper-text', isTabloid && 'text-black uppercase tracking-[0.08em]')}>
+                                  {combo.name}
+                                </div>
+                                <div className={cn('text-xs text-newspaper-text/70', isTabloid && 'text-black/70 uppercase tracking-[0.06em]')}>
+                                  {combo.description}
+                                </div>
                                 {rewardLabel ? (
-                                  <div className="mt-1 text-xs font-semibold text-newspaper-text/80">
+                                  <div className={cn('mt-1 text-xs font-semibold text-newspaper-text/80', isTabloid && 'text-black/80 uppercase tracking-[0.06em]')}>
                                     Reward: {rewardLabel}
                                     {typeof combo.cap === 'number' ? ` (cap ${combo.cap})` : ''}
                                   </div>
                                 ) : null}
                                 {combo.fxText ? (
-                                  <div className="text-[11px] italic text-newspaper-text/60">FX: {combo.fxText}</div>
+                                  <div className={cn('text-[11px] italic text-newspaper-text/60', isTabloid && 'text-black/60 uppercase tracking-[0.05em] not-italic font-semibold')}>
+                                    FX: {combo.fxText}
+                                  </div>
                                 ) : null}
                               </div>
                               <Switch
@@ -1014,13 +1244,18 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
           </Card>
         </div>
 
-        <Card className="mt-6 p-6 border-2 border-newspaper-text bg-newspaper-bg">
-          <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">🎮 MISSION CONTROL</h3>
-          <div className="grid md:grid-cols-4 gap-4">
+        <div className={cn(isTabloid && 'px-6 sm:px-10')}>
+          <Card className={cn(panelCardClass, 'mt-6')}>
+          <h3 className={sectionTitleClass}>🎮 MISSION CONTROL</h3>
+          <div className={cn('grid md:grid-cols-4 gap-4', isTabloid && 'gap-6')}>
             {onSaveGame && (
               <Button
                 onClick={handleSaveGame}
-                className="bg-green-700 hover:bg-green-600 text-white border-green-600"
+                className={cn(
+                  isTabloid
+                    ? `${buttonBaseClass} bg-[#14532d] text-white hover:bg-[#166534] px-6 py-3 text-xs`
+                    : 'bg-green-700 hover:bg-green-600 text-white border-green-600',
+                )}
               >
                 💾 SAVE GAME
               </Button>
@@ -1028,7 +1263,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
             <Button
               onClick={resetToDefaults}
               variant="outline"
-              className="border-yellow-600 text-yellow-600 hover:bg-yellow-600/10"
+              className={cn(
+                isTabloid
+                  ? `${buttonBaseClass} bg-[#fef08a] text-black hover:bg-[#fde68a] px-6 py-3 text-xs`
+                  : 'border-yellow-600 text-yellow-600 hover:bg-yellow-600/10',
+              )}
             >
               🔄 RESET DEFAULTS
             </Button>
@@ -1044,7 +1283,11 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                   }
                 }}
                 variant="outline"
-                className="border-red-600 text-red-600 hover:bg-red-600/10"
+                className={cn(
+                  isTabloid
+                    ? `${buttonBaseClass} bg-[#fee2e2] text-[#991b1b] hover:bg-[#fecaca] px-6 py-3 text-xs`
+                    : 'border-red-600 text-red-600 hover:bg-red-600/10',
+                )}
               >
                 🏠 MAIN MENU
               </Button>
@@ -1060,35 +1303,47 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 setTimeout(() => exportIndicator.remove(), 2000);
               }}
               variant="outline"
-              className="border-blue-600 text-blue-600 hover:bg-blue-600/10"
+              className={cn(
+                isTabloid
+                  ? `${buttonBaseClass} bg-[#bfdbfe] text-[#1d4ed8] hover:bg-[#bfdbfe]/80 px-6 py-3 text-xs`
+                  : 'border-blue-600 text-blue-600 hover:bg-blue-600/10',
+              )}
             >
               📤 EXPORT
             </Button>
           </div>
         </Card>
 
-        <Card className="mt-6 p-6 border-2 border-newspaper-text bg-newspaper-bg">
-          <h3 className="font-bold text-xl text-newspaper-text mb-4 flex items-center">⌨️ COVERT OPERATIONS MANUAL</h3>
-          <div className="grid md:grid-cols-2 gap-4 text-sm text-newspaper-text">
-            <div>
-              <div className="font-mono">SPACE - Go To Press</div>
-              <div className="font-mono">T - Select Card</div>
-              <div className="font-mono">U - View Upgrades</div>
-              <div className="font-mono">S - View Statistics</div>
+          <Card className={cn(panelCardClass, 'mt-6')}>
+          <h3 className={sectionTitleClass}>⌨️ COVERT OPERATIONS MANUAL</h3>
+          <div className={cn('grid md:grid-cols-2 gap-4 text-sm text-newspaper-text', isTabloid && 'gap-6 text-black font-black uppercase tracking-[0.15em]')}>
+            <div className={cn(isTabloid && 'space-y-2')}>
+              <div className={cn('font-mono', isTabloid && 'font-black text-black tracking-[0.2em] uppercase')}>SPACE - Go To Press</div>
+              <div className={cn('font-mono', isTabloid && 'font-black text-black tracking-[0.2em] uppercase')}>T - Select Card</div>
+              <div className={cn('font-mono', isTabloid && 'font-black text-black tracking-[0.2em] uppercase')}>U - View Upgrades</div>
+              <div className={cn('font-mono', isTabloid && 'font-black text-black tracking-[0.2em] uppercase')}>S - View Statistics</div>
             </div>
-            <div>
-              <div className="font-mono">Q - Quick Save</div>
-              <div className="font-mono">L - Quick Load</div>
-              <div className="font-mono">ESC - Pause/Menu</div>
-              <div className="font-mono">F11 - Fullscreen</div>
+            <div className={cn(isTabloid && 'space-y-2')}>
+              <div className={cn('font-mono', isTabloid && 'font-black text-black tracking-[0.2em] uppercase')}>Q - Quick Save</div>
+              <div className={cn('font-mono', isTabloid && 'font-black text-black tracking-[0.2em] uppercase')}>L - Quick Load</div>
+              <div className={cn('font-mono', isTabloid && 'font-black text-black tracking-[0.2em] uppercase')}>ESC - Pause/Menu</div>
+              <div className={cn('font-mono', isTabloid && 'font-black text-black tracking-[0.2em] uppercase')}>F11 - Fullscreen</div>
             </div>
           </div>
         </Card>
 
-        <div className="mt-8 text-center text-xs text-newspaper-text/60">
-          <div className="mb-2">CONFIDENTIAL: Settings are automatically saved</div>
+          <div
+            className={cn(
+              'mt-8 text-center text-xs text-newspaper-text/60',
+              isTabloid && 'text-black font-black uppercase tracking-[0.2em] space-y-2',
+            )}
+          >
+          <div className={cn('mb-2', isTabloid && 'mb-0')}>CONFIDENTIAL: Settings are automatically saved</div>
           <div>Changes take effect immediately</div>
-          <div className="mt-2 text-red-600 font-bold">[CLASSIFIED] - Security Clearance: ULTRA BLACK</div>
+          <div className={cn('mt-2 text-red-600 font-bold', isTabloid && 'text-black bg-yellow-200 inline-block px-3 py-1 border-2 border-black shadow-[4px_4px_0_rgba(0,0,0,0.25)]')}>
+            [CLASSIFIED] - Security Clearance: ULTRA BLACK
+          </div>
+          </div>
         </div>
       </Card>
     </div>
