@@ -726,6 +726,7 @@ const Index = () => {
     archiveEdition,
     removeEditionFromArchive,
     agendaMoments,
+    clearAgendaMoments,
   } = usePressArchive();
   const {
     entries: intelArchiveEntries,
@@ -2001,6 +2002,7 @@ const Index = () => {
     setReadingEdition(null);
     setShowExtraEdition(false);
     setParanormalSightings([]);
+    clearAgendaMoments();
     await initGame(faction);
     setShowMenu(false);
     setShowIntro(false);
