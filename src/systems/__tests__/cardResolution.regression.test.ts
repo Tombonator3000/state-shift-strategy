@@ -78,4 +78,37 @@ describe('resolveCardMVP regression', () => {
     expect(state?.pressureAi).toBe(0);
     expect(state?.pressurePlayer).toBe(0);
   });
+
+  it('clears ai pressure for ai-controlled states sourced from aiControlledStates', () => {
+    const gameState = createBaseSnapshot({
+      aiControlledStates: ['CA'],
+      states: [
+        {
+          id: 'CA',
+          name: 'California',
+          abbreviation: 'CA',
+          baseIP: 3,
+          baseDefense: 1,
+          defense: 1,
+          pressure: 4,
+          pressurePlayer: 0,
+          pressureAi: 4,
+          contested: false,
+          owner: 'ai',
+        },
+      ],
+    });
+    const card: GameCard = {
+      id: 'noop',
+      name: 'No-Op',
+      type: 'MEDIA',
+      faction: 'truth',
+      rarity: 'common',
+      cost: 0,
+    };
+
+    expect(() => {
+      resolveCardMVP(gameState, card, null, actor);
+    }).not.toThrow();
+  });
 });
