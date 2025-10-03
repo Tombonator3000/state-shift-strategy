@@ -1,7 +1,9 @@
-import { useMemo, useRef } from 'react';
+import type { CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { randomGovHeadline, randomTruthHeadline } from '@/ui/tabloid/headlines';
 import { WeatherBadge } from '@/ui/start/WeatherBadge';
 import '@/styles/tabloid.css';
+import { loadNewspaperData, pick } from '@/lib/newspaperData';
 
 type StartScreenProps = {
   onStartGame: (faction: 'government' | 'truth') => void | Promise<void>;
@@ -31,6 +33,31 @@ const StartScreen = ({
   const govHeadline = useMemo(randomGovHeadline, []);
   const truthHeadline = useMemo(randomTruthHeadline, []);
   const governmentCardRef = useRef<HTMLButtonElement>(null);
+  const [adBlurb, setAdBlurb] = useState<string>('Classified ads temporarily unavailable.');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    loadNewspaperData()
+      .then(data => {
+        if (isMounted) {
+          setAdBlurb(pick(data.ads, 'Classified ads temporarily unavailable.'));
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setAdBlurb('Classified ads temporarily unavailable.');
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const governmentCardStyle = { '--tilt': '-2.2deg' } as CSSProperties;
+  const truthCardStyle = { '--tilt': '-4.1deg' } as CSSProperties;
+  const staticAdStyle: CSSProperties = { cursor: 'default' };
 
   const playClick = () => {
     audio?.playSFX?.('click');
@@ -90,9 +117,11 @@ const StartScreen = ({
           ref={governmentCardRef}
           type="button"
           className="tabloid-card focus:outline-none focus-visible:ring-4 focus-visible:ring-black/40"
+          style={governmentCardStyle}
           onClick={() => handleFactionSelect('government')}
           aria-label="Choose Government faction"
         >
+          <span className="badge">Exclusive</span>
           <img src="/assets/start/start-gov.jpeg" alt="Government" loading="eager" />
 
           <div className="redact" aria-hidden="true"></div>
@@ -102,9 +131,11 @@ const StartScreen = ({
         <button
           type="button"
           className="tabloid-card focus:outline-none focus-visible:ring-4 focus-visible:ring-black/40"
+          style={truthCardStyle}
           onClick={() => handleFactionSelect('truth')}
           aria-label="Choose Truth Seekers faction"
         >
+          <span className="badge">Exclusive</span>
           <img src="/assets/start/start-truth.jpeg" alt="Truth Seekers" loading="eager" />
 
           <div className="redact" aria-hidden="true"></div>
@@ -149,6 +180,9 @@ const StartScreen = ({
             Follow The Money
           </button>
           <WeatherBadge />
+          <div className="ad-card small" aria-live="polite" style={staticAdStyle}>
+            {adBlurb}
+          </div>
         </aside>
       </div>
 
