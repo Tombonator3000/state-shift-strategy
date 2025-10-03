@@ -34,27 +34,308 @@ export type ParticleEffectType =
   | 'flash'
   | 'stateevent'
   | 'broadcast'
-  | 'cryptid';
+  | 'cryptid'
+  | 'ectoplasm'
+  | 'surveillanceRedaction'
+  | 'corkboardPins'
+  | 'hotspotFlare';
 
-const TABLOID_PALETTE = ['#d7263d', '#ff564f', '#161414'];
-const NIGHT_VISION_PALETTE = ['#00ff99', '#9cff7a', '#0e3b26'];
-const CIGARETTE_PALETTE = ['#f2d675', '#fce7b2', '#b38a3c'];
-const PHOTOCOPIER_PALETTE = ['#4ad3ff', '#b8f1ff', '#1a6aa8'];
+type SizeMultiplierMap = Partial<Record<ParticleShape, number>> & { default?: number };
+type Range = [number, number];
+
+interface ParticleMotionProfile {
+  vx: Range;
+  vy: Range;
+  drag: number;
+  floatForce: number;
+  angularVelocity: Range;
+  reducedAngularVelocityScale?: number;
+  trailIntensity: number;
+  shapeOverrides?: Partial<
+    Record<ParticleShape, { angularVelocity?: Range; trailIntensity?: number }>
+  >;
+}
+
+interface ParticleMotifDefaults {
+  count: number;
+  spread: number;
+  lifespanMultiplier: number;
+  sizeMultiplier?: SizeMultiplierMap;
+}
+
+interface ParticleMotifConfig {
+  palette: string[];
+  shapeWeights: Array<{ shape: ParticleShape; weight: number }>;
+  motion: ParticleMotionProfile;
+  defaults: ParticleMotifDefaults;
+  overrides?: Partial<Record<ParticleEffectType, Partial<ParticleMotifDefaults>>>;
+}
+
+type ParticleMotifKey =
+  | 'dossierShards'
+  | 'scanlineGlitch'
+  | 'victoryConfetti'
+  | 'memoAsh'
+  | 'ectoplasmSmear'
+  | 'corkboardPins'
+  | 'surveillanceBars'
+  | 'hotspotFlares';
+
+const TABLOID_PALETTE = ['#d7263d', '#ff564f', '#161414', '#f4d8b4'];
+const NIGHT_VISION_PALETTE = ['#00ff99', '#9cff7a', '#0e3b26', '#133a2a'];
+const CIGARETTE_PALETTE = ['#f2d675', '#fce7b2', '#b38a3c', '#2d1c0f'];
+const PHOTOCOPIER_PALETTE = ['#4ad3ff', '#b8f1ff', '#1a6aa8', '#0b1f2e'];
+const MEMO_ASH_PALETTE = ['#ff9e53', '#ffd7a3', '#5c3d2e', '#1f140b'];
+const SURVEILLANCE_PALETTE = ['#f9f9f9', '#cfcfcf', '#2b2b2b', '#ff4d4d'];
+const HOTSPOT_PALETTE = ['#ff8a3d', '#ffd166', '#ff5d8f', '#fff3d9'];
+const CORKBOARD_PALETTE = ['#f5d0a9', '#d98324', '#b0432c', '#4a1e15'];
 const DEFAULT_PALETTE = ['#111111', '#444444'];
 
-const EFFECT_PALETTES: Record<ParticleEffectType, string[]> = {
-  deploy: NIGHT_VISION_PALETTE,
-  chain: NIGHT_VISION_PALETTE,
-  cryptid: NIGHT_VISION_PALETTE,
-  capture: TABLOID_PALETTE,
-  counter: TABLOID_PALETTE,
-  stateloss: TABLOID_PALETTE,
-  victory: CIGARETTE_PALETTE,
-  bigwin: CIGARETTE_PALETTE,
-  synergy: PHOTOCOPIER_PALETTE,
-  stateevent: PHOTOCOPIER_PALETTE,
-  broadcast: PHOTOCOPIER_PALETTE,
-  flash: PHOTOCOPIER_PALETTE
+const PARTICLE_MOTIFS: Record<ParticleMotifKey, ParticleMotifConfig> = {
+  dossierShards: {
+    palette: TABLOID_PALETTE,
+    shapeWeights: [
+      { shape: 'newsprintShard', weight: 0.6 },
+      { shape: 'redactionBar', weight: 0.3 },
+      { shape: 'staticSpeck', weight: 0.1 }
+    ],
+    motion: {
+      vx: [-0.7, 0.7],
+      vy: [-0.35, 0.15],
+      drag: 0.88,
+      floatForce: 0.02,
+      angularVelocity: [-0.02, 0.02],
+      reducedAngularVelocityScale: 0.4,
+      trailIntensity: 0.25,
+      shapeOverrides: {
+        redactionBar: { angularVelocity: [-0.015, 0.015], trailIntensity: 0.2 }
+      }
+    },
+    defaults: {
+      count: 28,
+      spread: 48,
+      lifespanMultiplier: 1,
+      sizeMultiplier: { redactionBar: 1.1, newsprintShard: 1, staticSpeck: 0.9 }
+    },
+    overrides: {
+      deploy: { count: 30 },
+      capture: { count: 24 },
+      counter: { count: 24 },
+      chain: { count: 32, spread: 52, lifespanMultiplier: 1.05 }
+    }
+  },
+  scanlineGlitch: {
+    palette: PHOTOCOPIER_PALETTE,
+    shapeWeights: [
+      { shape: 'staticSpeck', weight: 0.7 },
+      { shape: 'redactionBar', weight: 0.3 }
+    ],
+    motion: {
+      vx: [-0.5, 0.5],
+      vy: [-0.4, 0.4],
+      drag: 0.9,
+      floatForce: 0.012,
+      angularVelocity: [-0.02, 0.02],
+      reducedAngularVelocityScale: 0.3,
+      trailIntensity: 0.55,
+      shapeOverrides: {
+        redactionBar: { angularVelocity: [-0.015, 0.015] }
+      }
+    },
+    defaults: {
+      count: 42,
+      spread: 64,
+      lifespanMultiplier: 1.1,
+      sizeMultiplier: { redactionBar: 1.2, staticSpeck: 0.8 }
+    }
+  },
+  victoryConfetti: {
+    palette: CIGARETTE_PALETTE,
+    shapeWeights: [
+      { shape: 'newsprintShard', weight: 0.7 },
+      { shape: 'staticSpeck', weight: 0.3 }
+    ],
+    motion: {
+      vx: [-0.9, 0.9],
+      vy: [-0.6, 0.1],
+      drag: 0.93,
+      floatForce: 0.028,
+      angularVelocity: [-0.025, 0.025],
+      reducedAngularVelocityScale: 0.4,
+      trailIntensity: 0.4
+    },
+    defaults: {
+      count: 40,
+      spread: 60,
+      lifespanMultiplier: 1.3,
+      sizeMultiplier: { newsprintShard: 1.1, staticSpeck: 1 }
+    },
+    overrides: {
+      victory: { count: 46, spread: 68, lifespanMultiplier: 1.4 },
+      bigwin: { count: 46, spread: 68, lifespanMultiplier: 1.4 },
+      stateevent: { count: 36, spread: 58, lifespanMultiplier: 1.2 }
+    }
+  },
+  memoAsh: {
+    palette: MEMO_ASH_PALETTE,
+    shapeWeights: [
+      { shape: 'newsprintShard', weight: 0.4 },
+      { shape: 'staticSpeck', weight: 0.5 },
+      { shape: 'redactionBar', weight: 0.1 }
+    ],
+    motion: {
+      vx: [-0.5, 0.5],
+      vy: [-0.25, 0.1],
+      drag: 0.9,
+      floatForce: 0.01,
+      angularVelocity: [-0.015, 0.015],
+      reducedAngularVelocityScale: 0.35,
+      trailIntensity: 0.2,
+      shapeOverrides: {
+        redactionBar: { angularVelocity: [-0.01, 0.01], trailIntensity: 0.15 }
+      }
+    },
+    defaults: {
+      count: 26,
+      spread: 46,
+      lifespanMultiplier: 0.85,
+      sizeMultiplier: { staticSpeck: 0.9, newsprintShard: 0.9 }
+    }
+  },
+  ectoplasmSmear: {
+    palette: NIGHT_VISION_PALETTE,
+    shapeWeights: [
+      { shape: 'staticSpeck', weight: 0.6 },
+      { shape: 'newsprintShard', weight: 0.3 },
+      { shape: 'redactionBar', weight: 0.1 }
+    ],
+    motion: {
+      vx: [-0.65, 0.65],
+      vy: [-0.45, 0.15],
+      drag: 0.92,
+      floatForce: 0.014,
+      angularVelocity: [-0.02, 0.02],
+      reducedAngularVelocityScale: 0.35,
+      trailIntensity: 0.35
+    },
+    defaults: {
+      count: 32,
+      spread: 52,
+      lifespanMultiplier: 1.05,
+      sizeMultiplier: { staticSpeck: 1, newsprintShard: 0.95 }
+    }
+  },
+  corkboardPins: {
+    palette: CORKBOARD_PALETTE,
+    shapeWeights: [
+      { shape: 'newsprintShard', weight: 0.45 },
+      { shape: 'staticSpeck', weight: 0.45 },
+      { shape: 'redactionBar', weight: 0.1 }
+    ],
+    motion: {
+      vx: [-0.45, 0.45],
+      vy: [-0.3, 0.12],
+      drag: 0.92,
+      floatForce: 0.02,
+      angularVelocity: [-0.018, 0.018],
+      reducedAngularVelocityScale: 0.35,
+      trailIntensity: 0.3
+    },
+    defaults: {
+      count: 36,
+      spread: 58,
+      lifespanMultiplier: 1.2,
+      sizeMultiplier: { newsprintShard: 0.95, staticSpeck: 0.85 }
+    },
+    overrides: {
+      corkboardPins: { count: 24, spread: 34, lifespanMultiplier: 1 }
+    }
+  },
+  surveillanceBars: {
+    palette: SURVEILLANCE_PALETTE,
+    shapeWeights: [
+      { shape: 'redactionBar', weight: 0.8 },
+      { shape: 'staticSpeck', weight: 0.2 }
+    ],
+    motion: {
+      vx: [-0.4, 0.4],
+      vy: [-0.18, 0.08],
+      drag: 0.88,
+      floatForce: 0.008,
+      angularVelocity: [-0.012, 0.012],
+      reducedAngularVelocityScale: 0.3,
+      trailIntensity: 0.18,
+      shapeOverrides: {
+        redactionBar: { angularVelocity: [-0.008, 0.008], trailIntensity: 0.15 }
+      }
+    },
+    defaults: {
+      count: 22,
+      spread: 28,
+      lifespanMultiplier: 0.95,
+      sizeMultiplier: { redactionBar: 1.4, staticSpeck: 0.7 }
+    }
+  },
+  hotspotFlares: {
+    palette: HOTSPOT_PALETTE,
+    shapeWeights: [
+      { shape: 'staticSpeck', weight: 0.7 },
+      { shape: 'newsprintShard', weight: 0.3 }
+    ],
+    motion: {
+      vx: [-0.6, 0.6],
+      vy: [-0.5, 0.2],
+      drag: 0.9,
+      floatForce: 0.02,
+      angularVelocity: [-0.022, 0.022],
+      reducedAngularVelocityScale: 0.35,
+      trailIntensity: 0.5
+    },
+    defaults: {
+      count: 34,
+      spread: 48,
+      lifespanMultiplier: 1.1,
+      sizeMultiplier: { staticSpeck: 1, newsprintShard: 0.9 }
+    }
+  }
+};
+
+const EFFECT_TO_MOTIF: Record<ParticleEffectType, ParticleMotifKey> = {
+  deploy: 'dossierShards',
+  capture: 'dossierShards',
+  counter: 'dossierShards',
+  chain: 'dossierShards',
+  stateloss: 'memoAsh',
+  victory: 'victoryConfetti',
+  bigwin: 'victoryConfetti',
+  stateevent: 'victoryConfetti',
+  flash: 'scanlineGlitch',
+  broadcast: 'scanlineGlitch',
+  synergy: 'corkboardPins',
+  corkboardPins: 'corkboardPins',
+  cryptid: 'ectoplasmSmear',
+  ectoplasm: 'ectoplasmSmear',
+  surveillanceRedaction: 'surveillanceBars',
+  hotspotFlare: 'hotspotFlares'
+};
+
+const DEFAULT_MOTIF_KEY: ParticleMotifKey = 'dossierShards';
+
+const getMotifConfig = (type: ParticleEffectType): ParticleMotifConfig => {
+  const motifKey = EFFECT_TO_MOTIF[type] ?? DEFAULT_MOTIF_KEY;
+  return PARTICLE_MOTIFS[motifKey] ?? PARTICLE_MOTIFS[DEFAULT_MOTIF_KEY];
+};
+
+const getMotifSetting = <K extends keyof ParticleMotifDefaults>(
+  type: ParticleEffectType,
+  key: K
+): ParticleMotifDefaults[K] => {
+  const config = getMotifConfig(type);
+  const override = config.overrides?.[type]?.[key];
+  if (override !== undefined) {
+    return override as ParticleMotifDefaults[K];
+  }
+  return config.defaults[key];
 };
 
 const hexToRgba = (hex: string): string => {
@@ -67,55 +348,59 @@ const hexToRgba = (hex: string): string => {
 };
 
 const pickColorForEffect = (type: ParticleEffectType): string => {
-  const palette = EFFECT_PALETTES[type] ?? DEFAULT_PALETTE;
-  const color = palette[Math.floor(Math.random() * palette.length)];
+  const palette = getMotifConfig(type).palette ?? DEFAULT_PALETTE;
+  const safePalette = palette.length > 0 ? palette : DEFAULT_PALETTE;
+  const color = safePalette[Math.floor(Math.random() * safePalette.length)] ?? DEFAULT_PALETTE[0];
   return hexToRgba(color);
 };
 
 const pickShapeForEffect = (type: ParticleEffectType): ParticleShape => {
-  switch (type) {
-    case 'capture':
-    case 'counter':
-    case 'stateloss':
-      return Math.random() > 0.4 ? 'redactionBar' : 'newsprintShard';
-    case 'victory':
-    case 'bigwin':
-    case 'stateevent':
-      return Math.random() > 0.3 ? 'newsprintShard' : 'staticSpeck';
-    case 'broadcast':
-    case 'flash':
-      return Math.random() > 0.2 ? 'staticSpeck' : 'redactionBar';
-    default:
-      return 'staticSpeck';
+  const { shapeWeights } = getMotifConfig(type);
+  if (!shapeWeights.length) {
+    return 'staticSpeck';
   }
+
+  const totalWeight = shapeWeights.reduce((sum, item) => sum + item.weight, 0);
+  const threshold = Math.random() * totalWeight;
+  let cumulative = 0;
+
+  for (const item of shapeWeights) {
+    cumulative += item.weight;
+    if (threshold <= cumulative) {
+      return item.shape;
+    }
+  }
+
+  return shapeWeights[shapeWeights.length - 1]?.shape ?? 'staticSpeck';
 };
 
 const getRandomInRange = (min: number, max: number): number => Math.random() * (max - min) + min;
 
-const getParticleCount = (type: ParticleEffectType): number => {
-  switch (type) {
-    case 'victory':
-    case 'bigwin':
-      return 46;
-    case 'flash':
-    case 'broadcast':
-      return 42;
-    case 'synergy':
-    case 'stateevent':
-      return 36;
-    case 'chain':
-    case 'cryptid':
-      return 32;
-    case 'deploy':
-      return 30;
-    case 'stateloss':
-      return 26;
-    case 'capture':
-    case 'counter':
-      return 24;
-    default:
-      return 28;
+const getParticleCount = (type: ParticleEffectType): number => getMotifSetting(type, 'count');
+
+const getParticleSpread = (type: ParticleEffectType): number => getMotifSetting(type, 'spread');
+
+const getParticleLifespan = (type: ParticleEffectType): number => {
+  const base = getRandomInRange(140, 200);
+  return base * getMotifSetting(type, 'lifespanMultiplier');
+};
+
+const getParticleSize = (type: ParticleEffectType, shape: ParticleShape): number => {
+  const base =
+    shape === 'newsprintShard'
+      ? getRandomInRange(6, 12)
+      : shape === 'redactionBar'
+        ? getRandomInRange(5, 9)
+        : getRandomInRange(2, 4);
+
+  const sizeMultiplierMap = getMotifSetting(type, 'sizeMultiplier');
+  if (!sizeMultiplierMap) {
+    return base;
   }
+
+  const shapeMultiplier = sizeMultiplierMap[shape];
+  const defaultMultiplier = sizeMultiplierMap.default ?? 1;
+  return base * (shapeMultiplier ?? defaultMultiplier ?? 1);
 };
 
 const getMotionForParticle = (
@@ -130,141 +415,27 @@ const getMotionForParticle = (
   angularVelocity: number;
   trailIntensity: number;
 } => {
+  const config = getMotifConfig(effectType);
+  const motion = config.motion;
   const motionScale = reducedMotion ? 0.5 : 1;
 
-  switch (effectType) {
-    case 'capture':
-    case 'counter':
-    case 'stateloss':
-      return {
-        vx: getRandomInRange(-0.7, 0.7) * motionScale,
-        vy: getRandomInRange(-0.3, 0.15) * motionScale,
-        drag: 0.88,
-        floatForce: 0.02,
-        angularVelocity:
-          (shape === 'redactionBar'
-            ? getRandomInRange(-0.015, 0.015)
-            : getRandomInRange(-0.02, 0.02)) * (reducedMotion ? 0.4 : 1),
-        trailIntensity: reducedMotion ? 0 : 0.25
-      };
-    case 'victory':
-    case 'bigwin':
-    case 'stateevent':
-      return {
-        vx: getRandomInRange(-0.9, 0.9) * motionScale,
-        vy: getRandomInRange(-0.6, 0.1) * motionScale,
-        drag: 0.93,
-        floatForce: 0.028,
-        angularVelocity: getRandomInRange(-0.025, 0.025) * (reducedMotion ? 0.4 : 1),
-        trailIntensity: reducedMotion ? 0 : 0.4
-      };
-    case 'flash':
-    case 'broadcast':
-      return {
-        vx: getRandomInRange(-0.5, 0.5) * motionScale,
-        vy: getRandomInRange(-0.4, 0.4) * motionScale,
-        drag: 0.9,
-        floatForce: 0.012,
-        angularVelocity:
-          shape === 'staticSpeck'
-            ? getRandomInRange(-0.02, 0.02) * (reducedMotion ? 0.3 : 1)
-            : getRandomInRange(-0.015, 0.015),
-        trailIntensity: reducedMotion ? 0 : 0.55
-      };
-    case 'synergy':
-      return {
-        vx: getRandomInRange(-0.6, 0.6) * motionScale,
-        vy: getRandomInRange(-0.5, 0.2) * motionScale,
-        drag: 0.91,
-        floatForce: 0.016,
-        angularVelocity: getRandomInRange(-0.02, 0.02) * (reducedMotion ? 0.35 : 1),
-        trailIntensity: reducedMotion ? 0 : 0.5
-      };
-    case 'chain':
-    case 'cryptid':
-      return {
-        vx: getRandomInRange(-0.65, 0.65) * motionScale,
-        vy: getRandomInRange(-0.45, 0.15) * motionScale,
-        drag: 0.92,
-        floatForce: 0.014,
-        angularVelocity: getRandomInRange(-0.02, 0.02) * (reducedMotion ? 0.35 : 1),
-        trailIntensity: reducedMotion ? 0 : 0.35
-      };
-    default:
-      return {
-        vx: getRandomInRange(-0.6, 0.6) * motionScale,
-        vy: getRandomInRange(-0.4, 0.2) * motionScale,
-        drag: 0.92,
-        floatForce: 0.015,
-        angularVelocity: getRandomInRange(-0.02, 0.02) * (reducedMotion ? 0.35 : 1),
-        trailIntensity: reducedMotion ? 0 : 0.3
-      };
-  }
-};
+  const vx = getRandomInRange(motion.vx[0], motion.vx[1]) * motionScale;
+  const vy = getRandomInRange(motion.vy[0], motion.vy[1]) * motionScale;
 
-const getParticleSpread = (type: ParticleEffectType): number => {
-  switch (type) {
-    case 'victory':
-    case 'bigwin':
-      return 68;
-    case 'flash':
-    case 'broadcast':
-      return 64;
-    case 'synergy':
-    case 'stateevent':
-      return 58;
-    case 'chain':
-    case 'cryptid':
-      return 52;
-    case 'stateloss':
-      return 46;
-    default:
-      return 50;
-  }
-};
+  const angularRange = motion.shapeOverrides?.[shape]?.angularVelocity ?? motion.angularVelocity;
+  const angularScale = reducedMotion ? motion.reducedAngularVelocityScale ?? 0.4 : 1;
+  const angularVelocity = getRandomInRange(angularRange[0], angularRange[1]) * angularScale;
 
-const getParticleLifespan = (type: ParticleEffectType): number => {
-  const base = getRandomInRange(140, 200);
-  switch (type) {
-    case 'victory':
-    case 'bigwin':
-    case 'stateevent':
-      return base * 1.4;
-    case 'flash':
-    case 'broadcast':
-      return base * 1.1;
-    case 'synergy':
-      return base * 1.2;
-    case 'chain':
-    case 'cryptid':
-      return base * 1.05;
-    case 'stateloss':
-      return base * 0.85;
-    default:
-      return base;
-  }
-};
+  const baseTrail = motion.shapeOverrides?.[shape]?.trailIntensity ?? motion.trailIntensity;
 
-const getParticleSize = (type: ParticleEffectType, shape: ParticleShape): number => {
-  const base =
-    shape === 'newsprintShard'
-      ? getRandomInRange(6, 12)
-      : shape === 'redactionBar'
-        ? getRandomInRange(5, 9)
-        : getRandomInRange(2, 4);
-
-  switch (type) {
-    case 'victory':
-    case 'bigwin':
-      return base * 1.1;
-    case 'flash':
-    case 'broadcast':
-      return base * 0.9;
-    case 'stateloss':
-      return base * 0.8;
-    default:
-      return base;
-  }
+  return {
+    vx,
+    vy,
+    drag: motion.drag,
+    floatForce: motion.floatForce,
+    angularVelocity,
+    trailIntensity: reducedMotion ? 0 : baseTrail
+  };
 };
 
 const createParticle = (
