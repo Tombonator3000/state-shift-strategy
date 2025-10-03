@@ -3111,7 +3111,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         emitEditorToastMessages(pendingEditorToasts);
       }
     }
-  }, [achievements, resolveCardEffects, triggerCapturedStateEvents, gameState, animateCard]);
+  }, [achievements, resolveCardEffects, triggerCapturedStateEvents, gameState]);
 
 
   const selectCard = useCallback((cardId: string | null) => {
