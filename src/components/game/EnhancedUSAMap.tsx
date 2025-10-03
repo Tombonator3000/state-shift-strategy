@@ -7,7 +7,7 @@ import * as topojson from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { AlertTriangle, Target, Shield } from 'lucide-react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
-import { areParanormalEffectsEnabled } from '@/state/settings';
+import { areMapVfxEnabled, areParanormalEffectsEnabled } from '@/state/settings';
 import { getHotspotIdleMessage } from '@/state/useGameLog';
 import type {
   ActiveStateBonus,
@@ -375,6 +375,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     const prefersReducedMotion = typeof window !== 'undefined'
       ? window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
       : false;
+    const mapVfxEnabled = areMapVfxEnabled();
 
     const isGovernmentZoneTargeting = Boolean(governmentTarget?.active);
     const lockedStateId = governmentTarget?.stateId;
@@ -586,9 +587,13 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             }, 50);
             contestedAnimationTimeoutsRef.current.push(timeoutId);
 
-            if (typeof window !== 'undefined') {
-              const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-              if (areParanormalEffectsEnabled()) {
+            if (
+              typeof window !== 'undefined'
+              && mapVfxEnabled
+              && areParanormalEffectsEnabled()
+            ) {
+              const prefersReducedMotionSetting = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+              if (!prefersReducedMotionSetting) {
                 VisualEffectsCoordinator.triggerCryptidSighting({
                   position: {
                     x: svgRect.left + centroid[0],
@@ -596,8 +601,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
                   },
                   stateId: stateKey,
                   stateName,
-                  footageQuality: prefersReducedMotion ? 'still' : Math.random() > 0.6 ? 'thermal' : 'grainy',
-                  reducedMotion: prefersReducedMotion,
+                  footageQuality: Math.random() > 0.6 ? 'thermal' : 'grainy',
+                  reducedMotion: prefersReducedMotionSetting,
                 });
               }
             }
@@ -614,6 +619,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           if (
             hotspotChanged &&
             typeof window !== 'undefined' &&
+            mapVfxEnabled &&
             areParanormalEffectsEnabled()
           ) {
             const prefersReducedMotionHotspot = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;

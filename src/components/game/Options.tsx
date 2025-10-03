@@ -109,6 +109,7 @@ interface GameSettings {
   drawMode: 'standard' | 'classic' | 'momentum' | 'catchup' | 'fast';
   uiTheme: 'tabloid_bw' | 'government_classic';
   paranormalEffectsEnabled: boolean;
+  mapVfxEnabled: boolean;
   uiScale: number;
 }
 
@@ -147,6 +148,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       drawMode: 'standard',
       uiTheme,
       paranormalEffectsEnabled: true,
+      mapVfxEnabled: true,
       uiScale: DEFAULT_UI_SCALE,
     };
 
@@ -167,6 +169,9 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
           secretAgendasEnabled: typeof rest.secretAgendasEnabled === 'boolean'
             ? rest.secretAgendasEnabled
             : baseSettings.secretAgendasEnabled,
+          mapVfxEnabled: typeof rest.mapVfxEnabled === 'boolean'
+            ? rest.mapVfxEnabled
+            : baseSettings.mapVfxEnabled,
         };
 
         if (typeof document !== 'undefined') {
@@ -399,6 +404,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       drawMode: 'standard',
       uiTheme: 'tabloid_bw',
       paranormalEffectsEnabled: true,
+      mapVfxEnabled: true,
       uiScale: DEFAULT_UI_SCALE,
     };
 
@@ -811,6 +817,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                 <Switch
                   checked={settings.paranormalEffectsEnabled}
                   onCheckedChange={checked => updateSettings({ paranormalEffectsEnabled: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-newspaper-text">Map Visual Effects</label>
+                <Switch
+                  checked={settings.mapVfxEnabled}
+                  onCheckedChange={checked => updateSettings({ mapVfxEnabled: checked })}
                 />
               </div>
 
