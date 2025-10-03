@@ -42,6 +42,14 @@ import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
 import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
+import {
+  chooseEditor,
+  isEditorsExpansionEnabled,
+  summarizeEditorEffects,
+  EDITOR_PHASE_LABELS,
+  type EditorEffectBuckets,
+} from '@/expansions/editors/EditorsUI';
+import type { EditorId } from '@/expansions/editors/EditorsEngine';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
@@ -733,6 +741,13 @@ const Index = () => {
     removeIntelFromArchive,
     clearArchive: clearIntelArchive,
   } = useIntelArchive();
+
+  const editorEffects = useMemo<EditorEffectBuckets | null>(() => {
+    if (!gameState.editorDef) {
+      return null;
+    }
+    return summarizeEditorEffects(gameState.editorDef);
+  }, [gameState.editorDef]);
 
   const [isObjectivesOpen, setIsObjectivesOpen] = useState(false);
   const [hasAcknowledgedObjectives, setHasAcknowledgedObjectives] = useState(() => gameState.turn > 3);
@@ -1993,15 +2008,29 @@ const Index = () => {
     }
   };
 
-  const startNewGame = async (faction: 'government' | 'truth') => {
+  const startNewGame = async (
+    faction: 'government' | 'truth',
+    options?: { editorId?: EditorId | null },
+  ) => {
     console.log('🎵 Index: Starting new game with faction:', faction);
+
+    let resolvedEditorId = options?.editorId;
+    if (resolvedEditorId === undefined && isEditorsExpansionEnabled()) {
+      try {
+        resolvedEditorId = await chooseEditor({ faction });
+      } catch (error) {
+        console.warn('[Editors] Failed to resolve editor during start flow', error);
+        resolvedEditorId = null;
+      }
+    }
+
     persistFaction(faction);
     setVictoryState({ isVictory: false, type: null });
     setFinalEdition(null);
     setReadingEdition(null);
     setShowExtraEdition(false);
     setParanormalSightings([]);
-    await initGame(faction);
+    await initGame(faction, undefined, resolvedEditorId ?? null);
     setShowMenu(false);
     setShowIntro(false);
     audio.setGameplayMusic(faction);
@@ -2772,6 +2801,72 @@ const Index = () => {
             <span className="font-bold uppercase tracking-wide">AI States</span>
             <span>{gameState.states.filter(s => s.owner === 'ai').length}</span>
           </div>
+          {gameState.editorDef ? (
+            // [EDITORS_HUD_BADGE]
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className={clsx(
+                    statusBadgeClass,
+                    'text-[10px] font-bold uppercase tracking-wide transition hover:bg-newspaper-text/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg',
+                  )}
+                  data-editor-id={gameState.editorDef.id}
+                >
+                  ✒️ Editor: {gameState.editorDef.shortName}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                className="z-50 w-80 max-w-[min(20rem,calc(100vw-2rem))] border border-newspaper-border bg-newspaper-bg p-4 text-newspaper-text shadow-lg"
+              >
+                <div className="space-y-3" data-editor-badge="active">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/60">Desk Editor</p>
+                    <h3 className="text-base font-semibold leading-tight">{gameState.editorDef.name}</h3>
+                    <p className="text-xs text-newspaper-text/70">{gameState.editorDef.tagline}</p>
+                  </div>
+                  {gameState.editorDef.hookSummary ? (
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/60">
+                      Focus: <span className="font-normal normal-case text-newspaper-text">{gameState.editorDef.hookSummary}</span>
+                    </p>
+                  ) : null}
+                  {editorEffects?.bonuses?.length ? (
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-600">Bonuses</p>
+                      <ul className="mt-1 space-y-1 text-xs text-emerald-700">
+                        {editorEffects.bonuses.map(effect => (
+                          <li key={effect.key}>
+                            <span className="font-semibold">{EDITOR_PHASE_LABELS[effect.phase]}:</span> {effect.description}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {editorEffects?.penalties?.length ? (
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-rose-600">Tradeoffs</p>
+                      <ul className="mt-1 space-y-1 text-xs text-rose-700">
+                        {editorEffects.penalties.map(effect => (
+                          <li key={effect.key}>
+                            <span className="font-semibold">{EDITOR_PHASE_LABELS[effect.phase]}:</span> {effect.description}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {gameState.editorDef.recommendedHotspots?.length ? (
+                    <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/40 p-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/60">Favoured Hotspots</p>
+                      <p className="text-[11px] text-newspaper-text/80">
+                        {gameState.editorDef.recommendedHotspots.join(', ')}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              </PopoverContent>
+            </Popover>
+          ) : null}
           <Popover open={isObjectivesOpen} onOpenChange={setIsObjectivesOpen}>
             <PopoverTrigger asChild>
               <button

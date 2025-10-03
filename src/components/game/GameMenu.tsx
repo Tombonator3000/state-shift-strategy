@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Credits from './Credits';
 import HowToPlay from './HowToPlay';
 import Options from './Options';
@@ -12,9 +12,14 @@ import CardCollectionTabloid from './CardCollectionTabloid';
 import StartScreen from '@/ui/start/StartScreen';
 import FactionSelectTabloid from './FactionSelectTabloid';
 import { useUiTheme } from '@/hooks/useTheme';
+import { chooseEditor, isEditorsExpansionEnabled } from '@/expansions/editors/EditorsUI';
+import type { EditorId } from '@/expansions/editors/EditorsEngine';
 
 interface GameMenuProps {
-  onStartGame: (faction: 'government' | 'truth') => Promise<void>;
+  onStartGame: (
+    faction: 'government' | 'truth',
+    options?: { editorId?: EditorId | null },
+  ) => Promise<void>;
   onFactionHover?: (faction: 'government' | 'truth' | null) => void;
   audio?: any;
   onBackToMainMenu?: () => void;
@@ -45,6 +50,18 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
     rotate: Math.random() * 4 - 2,
   })));
   const [showCollection, setShowCollection] = useState(false);
+  const handleStartGame = useCallback(async (faction: 'government' | 'truth') => {
+    let editorId: EditorId | null = null;
+    if (isEditorsExpansionEnabled()) {
+      try {
+        editorId = await chooseEditor({ faction });
+      } catch (error) {
+        console.warn('[Editors] Failed to choose editor from menu', error);
+        editorId = null;
+      }
+    }
+    await onStartGame(faction, { editorId });
+  }, [onStartGame]);
   const handleShowCollection = () => {
     if (onShowCardCollection) {
       onShowCardCollection();
@@ -194,7 +211,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
   if (showFactionSelect) {
     return uiTheme === 'tabloid_bw' ? (
       <FactionSelectTabloid
-        onStartGame={onStartGame}
+        onStartGame={handleStartGame}
         onFactionHover={onFactionHover}
         onBack={() => setShowFactionSelect(false)}
         audio={audio}
@@ -281,7 +298,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
               <Button
                 onClick={async () => {
                   audio?.playSFX?.('click');
-                  await onStartGame('government');
+                  await handleStartGame('government');
                 }}
                 className="w-full bg-government-blue hover:bg-government-blue/80 text-white group-hover:animate-pulse"
               >
@@ -329,7 +346,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
               <Button
                 onClick={async () => {
                   audio?.playSFX?.('click');
-                  await onStartGame('truth');
+                  await handleStartGame('truth');
                 }}
                 className="w-full bg-truth-red hover:bg-truth-red/80 text-white group-hover:animate-pulse"
               >
@@ -345,9 +362,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
   return uiTheme === 'tabloid_bw' ? (
     <>
       <StartScreen
-        onStartGame={async (faction) => {
-          await onStartGame(faction);
-        }}
+        onStartGame={handleStartGame}
         onManageExpansions={() => setShowManageExpansions(true)}
         onHowToPlay={() => setShowHowToPlay(true)}
         onOptions={() => setShowOptions(true)}

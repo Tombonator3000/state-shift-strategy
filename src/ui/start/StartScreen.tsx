@@ -1,10 +1,14 @@
 import { useMemo, useRef } from 'react';
+import type { EditorId } from '@/expansions/editors/EditorsEngine';
 import { randomGovHeadline, randomTruthHeadline } from '@/ui/tabloid/headlines';
 import { WeatherBadge } from '@/ui/start/WeatherBadge';
 import '@/styles/tabloid.css';
 
 type StartScreenProps = {
-  onStartGame: (faction: 'government' | 'truth') => void | Promise<void>;
+  onStartGame: (
+    faction: 'government' | 'truth',
+    options?: { editorId?: EditorId | null },
+  ) => void | Promise<void>;
   onManageExpansions: () => void;
   onHowToPlay: () => void;
   onOptions: () => void;
