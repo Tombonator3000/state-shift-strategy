@@ -206,7 +206,7 @@ export default function UiOverlays() {
   return (
     <>
       {/* CARD REVEAL OVERLAY */}
-      <div className="pointer-events-none fixed inset-0 z-[999] flex items-center justify-center">
+      <div className="pointer-events-none fixed top-4 right-4 z-[940] flex flex-col items-end space-y-3">
         {revealCard && (
           <div className="pointer-events-auto max-w-md w-[92%] sm:w-[420px] bg-white text-black shadow-2xl border-4 border-black p-4">
             <div className="text-xs tracking-widest font-bold bg-black text-white px-2 py-1 inline-block mb-2">
@@ -223,7 +223,7 @@ export default function UiOverlays() {
 
       {/* SIMPLE TOASTS */}
       {/* Truth → top center */}
-      <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[998] space-y-2">
+      <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[930] space-y-2">
         {toasts
           .filter((t) => t.slot === "truth")
           .map((t) => (
@@ -233,7 +233,7 @@ export default function UiOverlays() {
           ))}
       </div>
       {/* IP left (P1) */}
-      <div className="fixed top-16 left-3 z-[998] space-y-2">
+      <div className="fixed top-16 left-3 z-[930] space-y-2">
         {toasts
           .filter((t) => t.slot === "ip-left")
           .map((t) => (
@@ -243,7 +243,7 @@ export default function UiOverlays() {
           ))}
       </div>
       {/* IP right (P2) */}
-      <div className="fixed top-16 right-3 z-[998] space-y-2">
+      <div className="fixed top-[19rem] sm:top-[18rem] md:top-[17rem] lg:top-[16rem] xl:top-[15rem] right-3 z-[930] space-y-2">
         {toasts
           .filter((t) => t.slot === "ip-right")
           .map((t) => (
@@ -253,7 +253,7 @@ export default function UiOverlays() {
           ))}
       </div>
       {/* Combo notifications */}
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[998] space-y-2">
+      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[930] space-y-2">
         {toasts
           .filter((t) => t.slot === "combo")
           .map((t) => (
