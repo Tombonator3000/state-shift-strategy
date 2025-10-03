@@ -37,6 +37,12 @@ export interface RelicEffectDefinition {
   readonly cardDrawBonus?: number;
 }
 
+export interface RelicEffect extends RelicEffectDefinition {
+  readonly truthDelta?: number;
+  readonly ipDelta?: number;
+  readonly aiIpDelta?: number;
+}
+
 export interface RelicAmplifyConfig {
   readonly editorMultiplier?: number;
 }
@@ -72,7 +78,7 @@ export interface TabloidRelicRuntimeEntry {
   readonly status: 'queued' | 'active';
   readonly triggeredOnRound: number;
   readonly clamp?: RelicClampDefinition;
-  readonly effects: RelicEffectDefinition;
+  readonly effects: RelicEffect;
 }
 
 export interface TabloidRelicRuntimeState {

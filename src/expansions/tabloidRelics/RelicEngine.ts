@@ -2,6 +2,7 @@ import relicRules from './relics.rules.json';
 import { getTruthDelta } from '@/data/eventDatabase';
 import { isTabloidRelicsFeatureEnabled } from '@/data/expansions/features';
 import type {
+  RelicEffect,
   RelicIngestResult,
   RelicIssueSnapshot,
   RelicRuleDefinition,
@@ -190,7 +191,7 @@ const evaluateTrigger = (rule: RelicRuleDefinition, snapshot: RelicIssueSnapshot
 const amplifyEffects = (
   rule: RelicRuleDefinition,
   editorActive: boolean,
-): RelicRuleDefinition['effects'] => {
+): RelicEffect => {
   const multiplier = editorActive ? rule.amplify?.editorMultiplier ?? 1 : 1;
   if (multiplier === 1) {
     return { ...rule.effects };
