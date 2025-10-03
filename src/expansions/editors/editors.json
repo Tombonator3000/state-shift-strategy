@@ -1,0 +1,119 @@
+{
+  "editors": [
+    {
+      "id": "city-desk-cartographer",
+      "slug": "city-desk-cartographer",
+      "name": "City Desk Cartographer",
+      "shortName": "City Desk",
+      "tagline": "Maps the rumor grid before the presses heat up.",
+      "faction": "truth",
+      "summary": "Stabilizes the opening board state by scouting the layout grid and nudging early circulation in the right direction.",
+      "hookSummary": "Previews critical slots and shapes the first wave of assignments.",
+      "recommendedHotspots": ["new-york", "chicago", "washington-dc"],
+      "hooks": {
+        "onSetup": [
+          {
+            "id": "scout-the-grid",
+            "label": "Scout the Grid",
+            "description": "Preview the opening headline slot and tuck a spare lead for later."
+          }
+        ],
+        "onTurnStart": [
+          {
+            "id": "metro-ticker",
+            "label": "Metro Ticker",
+            "description": "Peek at the top Truth card each turn; you may keep or cycle it."
+          }
+        ]
+      }
+    },
+    {
+      "id": "night-shift-redactor",
+      "slug": "night-shift-redactor",
+      "name": "Night Shift Redactor",
+      "shortName": "Night Shift",
+      "tagline": "Stamps every revelation with a midnight disclaimer.",
+      "faction": "government",
+      "summary": "The agency-friendly desk that scrubs sensitive material and buries leads until dawn.",
+      "hookSummary": "Suppresses tempo plays while funneling evidence into the burn bin.",
+      "recommendedHotspots": ["pentagon", "langley", "quantico"],
+      "hooks": {
+        "onSetup": [
+          {
+            "id": "mandatory-redaction",
+            "label": "Mandatory Redaction",
+            "description": "Force both factions to discard and redraw one setup card."
+          }
+        ],
+        "onTurnStart": [
+          {
+            "id": "graveyard-shift",
+            "label": "Graveyard Shift",
+            "description": "Tax the opponent one Cover-Up whenever Public Frenzy is calm."
+          }
+        ],
+        "onPlayCard": [
+          {
+            "id": "stamp-it-denied",
+            "label": "Stamp it DENIED",
+            "description": "When you play a Response, flip an enemy bonus slot to locked until end of round."
+          }
+        ]
+      }
+    },
+    {
+      "id": "signal-jammer-bureau",
+      "slug": "signal-jammer-bureau",
+      "name": "Signal Jammer Bureau",
+      "shortName": "Signal Jammer",
+      "tagline": "Catches every weird broadcast before it hits the wire.",
+      "faction": "truth",
+      "summary": "A paranoiac desk that lives in the radio static, turning surprise transmissions into tactical intel.",
+      "hookSummary": "Rewards responsive play and amplifies chained reveals.",
+      "recommendedHotspots": ["roswell", "area-51", "estes-park"],
+      "hooks": {
+        "onTurnStart": [
+          {
+            "id": "frequency-scan",
+            "label": "Frequency Scan",
+            "description": "If Public Frenzy is 3+ gain a free Signal token; otherwise draw a clue fragment."
+          }
+        ],
+        "onPlayCard": [
+          {
+            "id": "jam-the-feed",
+            "label": "Jam the Feed",
+            "description": "After you play a Reaction headline, exhaust a Government support asset."
+          }
+        ]
+      }
+    },
+    {
+      "id": "florida-man-liaison",
+      "slug": "florida-man-liaison",
+      "name": "Florida Man Liaison",
+      "shortName": "Florida Bureau",
+      "tagline": "Files reports barefoot while the swamp is literally on fire.",
+      "faction": "truth",
+      "summary": "Leans into volatile hotspots and weaponises tabloid absurdity from the Sunshine State.",
+      "hookSummary": "Doubles down on hotspots that are already cooking and converts chaos into momentum.",
+      "recommendedHotspots": ["florida", "everglades", "key-west"],
+      "hooks": {
+        "onSetup": [
+          {
+            "id": "sunshine-surplus",
+            "label": "Sunshine Surplus",
+            "description": "Start with a Florida story pinned to the rumor board."
+          }
+        ],
+        "onPlayCard": [
+          {
+            "id": "headlines-on-fire",
+            "label": "Headlines on Fire",
+            "description": "When a hotspot is burning, upgrade the next Truth card you play this turn."
+          }
+        ]
+      }
+    }
+  ]
+}

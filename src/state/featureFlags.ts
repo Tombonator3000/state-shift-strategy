@@ -1,13 +1,17 @@
+import { FEATURE_EDITORS_MINIDRAFT } from '../expansions/editors/EditorsEngine';
+
 export type FeatureFlags = {
   newspaperV2: boolean;
   aiVerboseStrategyLog: boolean;
   hotspotDirectorEnabled: boolean;
+  editorsMiniDraft: boolean;
 };
 
 const DEFAULT_FLAGS: FeatureFlags = {
   newspaperV2: true,
   aiVerboseStrategyLog: false,
   hotspotDirectorEnabled: true,
+  editorsMiniDraft: FEATURE_EDITORS_MINIDRAFT,
 };
 
 const readBoolean = (key: string, fallback: boolean): boolean => {
@@ -44,4 +48,6 @@ export const featureFlags: FeatureFlags = {
   hotspotDirectorEnabled:
     overrides.hotspotDirectorEnabled
       ?? readBoolean('shadowgov:flag:hotspotDirectorEnabled', DEFAULT_FLAGS.hotspotDirectorEnabled),
+  editorsMiniDraft:
+    overrides.editorsMiniDraft ?? readBoolean('shadowgov:flag:editorsMiniDraft', DEFAULT_FLAGS.editorsMiniDraft),
 };
