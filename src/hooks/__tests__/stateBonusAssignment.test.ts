@@ -61,6 +61,8 @@ const createBaseGameState = (faction: 'truth' | 'government'): GameState => ({
   },
   agendaIssueCounters: {},
   agendaRoundCounters: {},
+  completedSecretAgendaIds: [],
+  completedAiSecretAgendaIds: [],
   animating: false,
   aiTurnInProgress: false,
   selectedCard: null,
