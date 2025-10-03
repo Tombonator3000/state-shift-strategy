@@ -26,6 +26,7 @@ import type { GameCard } from '@/rules/mvp';
 import { cn } from '@/lib/utils';
 import {
   setEditorsExpansionEnabled,
+  setTabloidRelicsExpansionEnabled,
   updateEnabledExpansions,
 } from '@/data/expansions/state';
 import {
@@ -165,8 +166,12 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
   const [preview, setPreview] = useState<PreviewState>({ weights: {}, poolsRemaining: {}, deckSize: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const featureSnapshot = useMemo(() => getExpansionFeaturesSnapshot(), []);
   const [editorsEnabled, setEditorsEnabled] = useState<boolean>(
-    () => getExpansionFeaturesSnapshot().editors,
+    () => featureSnapshot.editors,
+  );
+  const [tabloidRelicsEnabled, setTabloidRelicsEnabled] = useState<boolean>(
+    () => featureSnapshot.tabloidRelics,
   );
   const initializedRef = useRef(false);
 
@@ -233,6 +238,7 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
         const weights = prefs.customWeights ?? {};
         const features = hydrateExpansionFeatures(prefs.features);
         setEditorsEnabled(features.editors);
+        setTabloidRelicsEnabled(features.tabloidRelics);
         const hookCoreWeight = fromDistributionWeight(settings.setWeights.core);
         const resolvedCoreWeight =
           typeof hookCoreWeight === 'number' ? hookCoreWeight : weights.core ?? DEFAULT_WEIGHT;
@@ -359,6 +365,15 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
     [],
   );
 
+  const handleTabloidRelicsToggle = useCallback(
+    (nextEnabled: boolean) => {
+      setTabloidRelicsEnabled(nextEnabled);
+      setTabloidRelicsExpansionEnabled(nextEnabled);
+      setError(prev => (prev === SYNC_ERROR_MESSAGE ? null : prev));
+    },
+    [],
+  );
+
   useEffect(() => {
     recalcPreview(mode, expansions);
   }, [mode, expansions, recalcPreview]);
@@ -374,7 +389,6 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
   const hasAnyExpansions = expansions.length > 0;
   const hasEnabledExpansions = expansions.some(entry => entry.enabled);
 
-  // [EDITORS_EXPANSION_TOGGLE]
   const editorsToggleCard = (
     <UICard>
       <CardHeader>
@@ -396,6 +410,35 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
             checked={editorsEnabled}
             onCheckedChange={handleEditorsToggle}
             aria-label="Toggle Editors mini-expansion"
+          />
+        </div>
+      </CardContent>
+    </UICard>
+  );
+
+  const tabloidRelicsToggleCard = (
+    <UICard>
+      <CardHeader>
+        <CardTitle>Tabloid Relics</CardTitle>
+        <CardDescription>
+          Enable nightly relic fallout that echoes the latest headlines.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1 text-sm text-newspaper-text/70">
+          <p>Carry the newspaper&apos;s chaos into the next round with lingering boosts.</p>
+          <p className="text-xs text-newspaper-text/60">
+            When active, relic effects persist between turns and appear in the HUD.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-newspaper-text/60">
+            {tabloidRelicsEnabled ? 'Enabled' : 'Disabled'}
+          </span>
+          <Switch
+            checked={tabloidRelicsEnabled}
+            onCheckedChange={handleTabloidRelicsToggle}
+            aria-label="Toggle Tabloid Relics feature"
           />
         </div>
       </CardContent>
@@ -469,6 +512,7 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
         </div>
 
         {editorsToggleCard}
+        {tabloidRelicsToggleCard}
 
         <section>
           <div className="flex items-center justify-between gap-2">

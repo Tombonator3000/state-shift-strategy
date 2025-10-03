@@ -64,6 +64,7 @@ import {
   resolveEditor,
   type EditorId,
 } from '@/expansions/editors/EditorsEngine';
+import { RelicEngine } from '@/expansions/tabloidRelics/RelicEngine';
 import {
   applyAiCardPlay,
   buildStrategyLogEntries as buildStrategyLogEntriesHelper,
@@ -2342,6 +2343,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       editorDef: null,
       editorRuntime: null,
       preGameAdditions: null,
+      tabloidRelicsRuntime: null,
     };
   });
 
@@ -2579,6 +2581,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       editorDef: resolvedEditor ?? null,
       editorRuntime: runtimeToPersist ?? null,
       preGameAdditions: preGameAdditionsToPersist,
+      tabloidRelicsRuntime: null,
       states: USA_STATES.map(state => {
         let owner: 'player' | 'ai' | 'neutral' = 'neutral';
 
@@ -3508,12 +3511,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             lastTurnWithoutPlay: prev.cardsPlayedThisTurn === 0,
           },
           log: logEntries,
-          turnPlays: [],
-          states: statesAfterHotspot,
-          paranormalHotspots: hotspotsAfterHotspot,
-          activeCampaignArcs,
-          pendingArcEvents,
-        };
+        turnPlays: [],
+        states: statesAfterHotspot,
+        paranormalHotspots: hotspotsAfterHotspot,
+        activeCampaignArcs,
+        pendingArcEvents,
+        tabloidRelicsRuntime: prev.tabloidRelicsRuntime ?? null,
+      };
 
         const ownershipLogEntries = reconcileStateBonusOwnership(prev, nextState);
         if (ownershipLogEntries.length > 0) {
@@ -3574,7 +3578,29 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         paranormalHotspots: hotspotsAfterHotspot,
         stateRoundEvents: {},
         activeHotspot: nextActiveHotspot,
+        tabloidRelicsRuntime: prev.tabloidRelicsRuntime ?? null,
       };
+
+      const relicOutcome = RelicEngine.ingestIssue({
+        round: nextStateBase.round,
+        turn: prev.turn,
+        truth: nextStateBase.truth,
+        ip: nextStateBase.ip,
+        aiIP: nextStateBase.aiIP,
+        comboTruthDelta: nextStateBase.comboTruthDeltaThisRound,
+        faction: prev.faction,
+        events: newEvents,
+        plays: prev.cardsPlayedThisRound,
+        runtime: prev.tabloidRelicsRuntime ?? null,
+        editorActive: Boolean(prev.editorId ?? prev.editorDef),
+      });
+
+      if (relicOutcome.runtime !== undefined) {
+        nextStateBase.tabloidRelicsRuntime = relicOutcome.runtime;
+      }
+      if (relicOutcome.logEntries.length > 0) {
+        nextStateBase.log = [...nextStateBase.log, ...relicOutcome.logEntries];
+      }
 
       const truthStreaks = computeTruthStreaks(prev, nextStateBase.truth);
       const previousCounters = prev.timeBasedGoalCounters ?? {};
@@ -3907,11 +3933,28 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     }
     const pendingEditorToasts: string[] = [];
     setGameState(prev => {
+      const relicRoundResult = RelicEngine.applyRoundStart({ state: prev });
+      const relicTruth = relicRoundResult.truth;
+      const relicIp = relicRoundResult.ip;
+      const relicAiIp = relicRoundResult.aiIp;
+      const relicRuntime = relicRoundResult.runtime ?? null;
+      const relicBonusDraw = Math.max(0, relicRoundResult.bonusCardDraw);
+
+      let baseLogs = relicRoundResult.logEntries.length
+        ? [...prev.log, ...relicRoundResult.logEntries]
+        : [...prev.log];
+
       const runtimeSnapshot = prev.editorRuntime ? { ...prev.editorRuntime } : null;
       const activeEditor = resolveActiveEditorFromState(prev);
       const turnStartContext: EditorTurnStartHookContext | null = activeEditor
         ? {
-            state: prev,
+            state: {
+              ...prev,
+              truth: relicTruth,
+              ip: relicIp,
+              aiIP: relicAiIp,
+              tabloidRelicsRuntime: relicRuntime,
+            },
             runtime: runtimeSnapshot,
             bonusCardDraw: 0,
             pendingScandals: [],
@@ -3929,7 +3972,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const hookBonusDraw = turnStartContext ? Math.max(0, turnStartContext.bonusCardDraw) : 0;
       const baseBonusCardDraw = Math.max(0, prev.pendingCardDraw ?? 0);
-      const bonusCardDraw = baseBonusCardDraw + hookBonusDraw;
+      const bonusCardDraw = baseBonusCardDraw + hookBonusDraw + relicBonusDraw;
       const targetHandSize = HAND_LIMIT + bonusCardDraw;
       const cardsNeeded = Math.max(0, targetHandSize - prev.hand.length);
       const {
@@ -3949,7 +3992,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         drawLogEntry = `Ready to act (hand ${newHand.length})`;
       }
 
-      let baseLogs = [...prev.log];
       if (turnStartContext?.logEntries?.length) {
         baseLogs = [...baseLogs, ...turnStartContext.logEntries];
       }
@@ -4065,6 +4107,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         states: statesAfterHotspot,
         paranormalHotspots: hotspotsAfterHotspot,
         editorRuntime: nextEditorRuntime ?? null,
+        truth: relicTruth,
+        ip: relicIp,
+        aiIP: relicAiIp,
+        tabloidRelicsRuntime: relicRuntime,
       };
 
       if (nextState.lastStateBonusRound !== nextState.round) {
