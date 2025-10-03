@@ -82,6 +82,8 @@ export interface GameState {
   agendaIssue: AgendaIssueState;
   agendaIssueCounters: Record<string, number>;
   agendaRoundCounters: Record<string, number>;
+  completedSecretAgendaIds: string[];
+  completedAiSecretAgendaIds: string[];
   secretAgenda?: SecretAgenda & {
     progress: number;
     completed: boolean;
