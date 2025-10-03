@@ -407,7 +407,11 @@ const computeTruthStreaks = (
   };
 };
 
-const STREAK_AGENDA_IDS = new Set(['truth_moonbeam_marmalade', 'gov_coverup_casserole']);
+const STREAK_AGENDA_IDS = new Set([
+  'truth_moonbeam_marmalade',
+  'truth_aurora_truth_choir',
+  'gov_coverup_casserole',
+]);
 
 const DEFAULT_HOTSPOT_SOURCE: NonNullable<ParanormalHotspotPayload['source']> = 'neutral';
 
