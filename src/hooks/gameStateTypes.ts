@@ -1,4 +1,5 @@
 import type { GameCard } from '@/rules/mvp';
+import type { PlayedCardMetaLite } from '@/state/game/roundNewsBuffer';
 import type { EventManager, GameEvent, ParanormalHotspotPayload } from '@/data/eventDatabase';
 import type { SecretAgenda } from '@/data/agendaDatabase';
 import type { AgendaIssueState } from '@/data/agendaIssues';
@@ -47,6 +48,7 @@ export interface GameState {
   cardsPlayedThisTurn: number;
   cardsPlayedThisRound: CardPlayRecord[];
   playHistory: CardPlayRecord[];
+  frontPageTriplet: PlayedCardMetaLite[] | null;
   turnPlays: TurnPlay[];
   comboTruthDeltaThisRound: number;
   controlledStates: string[];

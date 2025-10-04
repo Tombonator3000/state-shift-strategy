@@ -226,10 +226,10 @@ describe('TabloidNewspaperV2 front page integration', () => {
     render(<TabloidNewspaperV2 {...baseProps} />);
 
     const headline = await screen.findByRole('heading', { level: 1 });
-    expect(headline.textContent).toContain('SPECIAL EDITION: PRINTING GREMLINS AT WORK');
+    expect(headline.textContent ?? '').toMatch(/ALPHA AGENT/);
 
-    const list = await screen.findByRole('list');
-    const items = within(list).getAllByRole('listitem');
+    const lists = await screen.findAllByRole('list');
+    const items = within(lists[0] as HTMLElement).getAllByRole('listitem');
     expect(items).toHaveLength(3);
     expect(items[0]?.textContent).toContain('[ATTACK]');
   });

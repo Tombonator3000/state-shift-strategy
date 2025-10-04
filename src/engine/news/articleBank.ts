@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+// Static fallback so the article bank still works even if network paths fail.
+import fallbackArticleJson from '../paranoid_times_card_articles_ALL.json' assert { type: 'json' };
+
 export type CardArticle = {
   id: string;
   tone: 'truth' | 'gov';
@@ -16,7 +19,13 @@ export type ArticleBank = {
   hasArticles(): boolean;
 };
 
-const ARTICLE_BANK_PATH = '/data/paranoid_times_card_articles_ALL.json';
+// Resolve a base-relative URL that works in dev and prod.
+// In dev BASE_URL === '/', in prod it may be '/app/' etc.
+const BASE_URL = (import.meta as any)?.env?.BASE_URL ?? '/';
+const CANDIDATE_PATHS = [
+  `${BASE_URL}data/paranoid_times_card_articles_ALL.json`,
+  `${BASE_URL}assets/data/paranoid_times_card_articles_ALL.json`,
+];
 const ERROR_PREFIX = '[article-bank]';
 
 const createEmptyArticleBank = (): ArticleBank => ({
@@ -58,15 +67,23 @@ const normaliseTags = (tags: string[] | undefined): string[] => {
   return Array.from(seen);
 };
 
-export async function loadArticleBank(jsonPath: string = ARTICLE_BANK_PATH): Promise<ArticleBank> {
-  try {
-    const response = await fetch(jsonPath);
-    if (!response.ok) {
-      console.error(`${ERROR_PREFIX} failed to fetch ${jsonPath}: ${response.status} ${response.statusText}`);
-      return createEmptyArticleBank();
+export async function loadArticleBank(): Promise<ArticleBank> {
+  // Try candidates first; on any failure, fall back to bundled JSON.
+  const tryFetch = async (): Promise<unknown | null> => {
+    for (const url of CANDIDATE_PATHS) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) return await res.json();
+        console.warn(`${ERROR_PREFIX} fetch failed ${url}: ${res.status} ${res.statusText}`);
+      } catch (e) {
+        console.warn(`${ERROR_PREFIX} network error for ${url}`, e);
+      }
     }
+    return null;
+  };
 
-    const payload = await response.json();
+  try {
+    const payload = (await tryFetch()) ?? (fallbackArticleJson as unknown);
     const { articles } = articleFileSchema.parse(payload);
 
     const map = new Map<string, CardArticle>();
@@ -79,23 +96,20 @@ export async function loadArticleBank(jsonPath: string = ARTICLE_BANK_PATH): Pro
     }
 
     if (!map.size) {
-      console.warn(`${ERROR_PREFIX} loaded 0 articles from ${jsonPath}`);
+      console.warn(`${ERROR_PREFIX} loaded 0 articles (network+fallback)`);
       return createEmptyArticleBank();
     }
 
     return {
-      getById(cardId: string): CardArticle | null {
-        if (!cardId) {
-          return null;
-        }
-        return map.get(cardId) ?? null;
+      getById(cardId: string) {
+        return cardId ? map.get(cardId) ?? null : null;
       },
       hasArticles() {
         return map.size > 0;
       },
     } satisfies ArticleBank;
   } catch (error) {
-    console.error(`${ERROR_PREFIX} unable to load ${jsonPath}`, error);
+    console.error(`${ERROR_PREFIX} unable to load article bank`, error);
     return createEmptyArticleBank();
   }
 }

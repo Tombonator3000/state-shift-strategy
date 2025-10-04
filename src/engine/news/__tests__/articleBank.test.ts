@@ -32,7 +32,7 @@ test('provides lookup access for parsed articles', async () => {
   const fetchMock = mock(async () => createResponse({ articles: [article] })) as unknown as typeof fetch;
   (globalThis as { fetch: typeof fetch }).fetch = fetchMock;
 
-  const bank = await loadArticleBank('https://example.com/articles.json');
+  const bank = await loadArticleBank();
 
   expect(fetchMock).toHaveBeenCalledTimes(1);
   const resolved = bank.getById('story-1');
@@ -42,7 +42,7 @@ test('provides lookup access for parsed articles', async () => {
   expect(bank.hasArticles()).toBe(true);
 });
 
-test('returns empty bank when fetch fails', async () => {
+test('falls back to bundled dataset when fetch fails', async () => {
   const fetchMock = mock(async () =>
     createResponse(
       {},
@@ -55,17 +55,18 @@ test('returns empty bank when fetch fails', async () => {
   ) as unknown as typeof fetch;
   (globalThis as { fetch: typeof fetch }).fetch = fetchMock;
 
-  const bank = await loadArticleBank('https://example.com/missing.json');
+  const bank = await loadArticleBank();
 
+  expect(fetchMock).toHaveBeenCalledTimes(2);
   expect(bank.getById('missing')).toBeNull();
-  expect(bank.hasArticles()).toBe(false);
+  expect(bank.hasArticles()).toBe(true);
 });
 
 test('handles payloads without articles gracefully', async () => {
   const fetchMock = mock(async () => createResponse({})) as unknown as typeof fetch;
   (globalThis as { fetch: typeof fetch }).fetch = fetchMock;
 
-  const bank = await loadArticleBank('https://example.com/empty.json');
+  const bank = await loadArticleBank();
 
   expect(bank.getById('any')).toBeNull();
   expect(bank.hasArticles()).toBe(false);
