@@ -23,6 +23,13 @@ export interface ArticleBank {
 }
 
 let cachedArticleBank: Promise<ArticleBank> | null = null;
+type ArticleDataLoader = () => Promise<unknown>;
+
+let customArticleLoader: ArticleDataLoader | null = null;
+
+const resolveArticleLoader = (): ArticleDataLoader => {
+  return customArticleLoader ?? importArticleData;
+};
 
 async function importArticleData() {
   const module = await import('../../../paranoid_times_card_articles_ALL.json');
@@ -31,7 +38,8 @@ async function importArticleData() {
 
 export async function loadArticleBank(): Promise<ArticleBank> {
   if (!cachedArticleBank) {
-    cachedArticleBank = importArticleData().then((rawData) => {
+    const loader = resolveArticleLoader();
+    cachedArticleBank = loader().then((rawData) => {
       const { articles } = articleFileSchema.parse(rawData);
       const byId = new Map<string, CardArticle>();
 
@@ -44,6 +52,16 @@ export async function loadArticleBank(): Promise<ArticleBank> {
   }
 
   return cachedArticleBank;
+}
+
+export function __setArticleBankLoader(loader: ArticleDataLoader | null): void {
+  customArticleLoader = loader;
+  cachedArticleBank = null;
+}
+
+export function __resetArticleBankCache(): void {
+  customArticleLoader = null;
+  cachedArticleBank = null;
 }
 
 export function getById(bank: ArticleBank, id: string | null | undefined): CardArticle | null {
