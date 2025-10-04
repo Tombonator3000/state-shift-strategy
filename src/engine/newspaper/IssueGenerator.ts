@@ -2,6 +2,7 @@ import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { NewspaperData } from '@/lib/newspaperData';
 import type { Card } from '@/types';
 import { loadCardLexicon } from './CardLexicon';
+import { loadArticleBank, type CardArticle } from '@/engine/news/articleBank';
 import { composeCardStory, composeComboStory, type CardStory, type ComboStory } from './StoryComposer';
 import type { ComboSummary } from '@/game/combo.types';
 import type { AgendaIssueId } from '@/data/agendaIssues';
@@ -27,6 +28,29 @@ export interface NarrativeArticle extends CardStory {
   capturedStates: string[];
 }
 
+export interface GeneratedStoryArticle {
+  cardId: string;
+  cardName: string;
+  cardType: string;
+  player: 'human' | 'ai';
+  articleId: string | null;
+  headline: string;
+  subhead: string;
+  byline: string;
+  body: string[];
+  tags: string[];
+  imagePrompt: string | null;
+  isFallback: boolean;
+}
+
+export interface GeneratedStory {
+  headline: string;
+  subhead: string;
+  byline: string;
+  articles: GeneratedStoryArticle[];
+  isFallback: boolean;
+}
+
 export interface NarrativeIssue {
   hero: NarrativeArticle | null;
   playerArticles: NarrativeArticle[];
@@ -36,6 +60,7 @@ export interface NarrativeIssue {
   sourceLine: string;
   stamps: { breaking: string | null; classified: string | null };
   supplements: { ads: string[]; conspiracies: string[]; weather: string };
+  generatedStory: GeneratedStory;
 }
 
 export interface NarrativeContext {
@@ -59,6 +84,8 @@ const FALLBACK_CONSPIRACIES = ['Rumors temporarily sealed in bunker storage.'];
 const FALLBACK_WEATHER = 'Forecast withheld pending clearance.';
 const FALLBACK_BYLINE = 'By: Anonymous Insider';
 const FALLBACK_SOURCE = 'Source: Redacted Dossier';
+const FALLBACK_FRONT_PAGE_HEADLINE = 'SPECIAL EDITION: PRINTING GREMLINS AT WORK';
+const FALLBACK_FRONT_PAGE_SUBHEAD = 'Article vault temporarily unavailable — dispatch desk investigating.';
 
 const pick = <T,>(arr: T[] | undefined, fallback: T): T => {
   if (Array.isArray(arr) && arr.length) {
@@ -246,8 +273,62 @@ const collectWeather = (dataset: NewspaperData): string => {
   return pick(pool, FALLBACK_WEATHER);
 };
 
+const splitArticleBody = (body: CardArticle['body'] | undefined): string[] => {
+  if (typeof body !== 'string') {
+    return [];
+  }
+
+  return body
+    .split(/\n+/)
+    .map(paragraph => paragraph.trim())
+    .filter(Boolean);
+};
+
+const buildGeneratedStoryArticle = (
+  entry: PlayedCardInput,
+  article: CardArticle | null,
+): GeneratedStoryArticle => {
+  const fallbackHeadline = `${entry.card.name.toUpperCase()} FILE UNDER INVESTIGATION`;
+  const fallbackSubhead = 'Card record located without supporting copy — newsroom gremlins dispatched.';
+  const fallbackBody = [
+    `${entry.card.name} was played, but the archival article refused to print. Operators are reloading the matrix.`,
+  ];
+
+  const headline = article?.headline?.trim();
+  const subhead = article?.subhead?.trim();
+  const byline = article?.byline?.trim();
+  const body = splitArticleBody(article?.body);
+  const cardTags = Array.isArray((entry.card as { tags?: string[] }).tags)
+    ? ((entry.card as { tags?: string[] }).tags as string[])
+    : [];
+
+  return {
+    cardId: entry.card.id,
+    cardName: entry.card.name,
+    cardType: entry.card.type,
+    player: entry.player,
+    articleId: article?.id ?? null,
+    headline: headline && headline.length > 0 ? headline : fallbackHeadline,
+    subhead: subhead && subhead.length > 0 ? subhead : fallbackSubhead,
+    byline: byline && byline.length > 0 ? byline : FALLBACK_BYLINE,
+    body: body.length ? body : fallbackBody,
+    tags: Array.isArray(article?.tags) ? article.tags : cardTags,
+    imagePrompt: article?.imagePrompt ?? null,
+    isFallback: !article,
+  } satisfies GeneratedStoryArticle;
+};
+
 export async function generateIssue(input: IssueGeneratorInput): Promise<NarrativeIssue> {
   const lexicon = await loadCardLexicon();
+  let articleBank: Awaited<ReturnType<typeof loadArticleBank>> | null = null;
+
+  try {
+    articleBank = await loadArticleBank();
+  } catch (error) {
+    console.error('Failed to load article bank for newspaper issue:', error);
+    articleBank = null;
+  }
+
   const playerCards = input.playedCards.filter(entry => entry.player === 'human');
   const opponentCards = input.playedCards.filter(entry => entry.player === 'ai');
 
@@ -308,6 +389,31 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     weather: collectWeather(input.dataset),
   };
 
+  const selectedCards = playerCards.slice(0, 3);
+  const generatedArticles = selectedCards.map(entry => {
+    const article = articleBank?.byId?.get(entry.card.id) ?? null;
+    return buildGeneratedStoryArticle(entry, article);
+  });
+
+  const validArticles = generatedArticles.filter(article => !article.isFallback);
+  const combinedHeadline = validArticles.length
+    ? validArticles.map(article => article.headline).join(' ✦ ')
+    : FALLBACK_FRONT_PAGE_HEADLINE;
+  const combinedSubhead = validArticles.length
+    ? validArticles
+        .map(article => article.subhead)
+        .filter(Boolean)
+        .join(' | ') || selectedCards.map(entry => entry.card.name).join(' • ') || FALLBACK_FRONT_PAGE_SUBHEAD
+    : FALLBACK_FRONT_PAGE_SUBHEAD;
+
+  const generatedStory: GeneratedStory = {
+    headline: combinedHeadline,
+    subhead: combinedSubhead,
+    byline: validArticles[0]?.byline ?? FALLBACK_BYLINE,
+    articles: generatedArticles,
+    isFallback: validArticles.length === 0,
+  } satisfies GeneratedStory;
+
   return {
     hero: heroArticle ?? null,
     playerArticles: remainingPlayerArticles,
@@ -317,5 +423,6 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     sourceLine,
     stamps: { breaking: breakingStamp, classified: classifiedStamp },
     supplements,
+    generatedStory,
   } satisfies NarrativeIssue;
 }
