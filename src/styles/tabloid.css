@@ -119,6 +119,8 @@
   letter-spacing: 0.02em;
   box-shadow: 2px 2px 0 var(--ink);
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 
 .pt-weather-badge {
@@ -138,6 +140,56 @@
 .ad-card:focus-visible {
   outline: 3px solid #000;
   outline-offset: 2px;
+}
+
+.tabloid-menu-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-start;
+  text-align: left;
+  padding: 0.85rem 1rem;
+}
+
+.menu-masthead {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  text-transform: uppercase;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 0.2rem;
+  width: 100%;
+}
+
+.menu-headline {
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: #000;
+  transition: all 0.2s ease;
+}
+
+.tabloid-menu-btn:hover .menu-headline {
+  animation: glitch 0.3s ease-in-out;
+}
+
+.menu-subhead {
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  text-transform: none;
+  opacity: 0.6;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+@keyframes glitch {
+  0%, 100% { transform: translate(0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(2px, -1px); }
+  75% { transform: translate(-1px, -2px); }
 }
 
 .ticker {
