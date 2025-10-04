@@ -67,6 +67,13 @@ export default {
         "government-dark": "hsl(var(--government-dark))",
         "truth-red": "hsl(var(--truth-red))",
         "secret-red": "hsl(var(--secret-red))",
+        victory: {
+          start: "hsl(var(--victory-gradient-start))",
+          mid: "hsl(var(--victory-gradient-mid))",
+          end: "hsl(var(--victory-gradient-end))",
+          foreground: "hsl(var(--victory-foreground))",
+          accent: "hsl(var(--victory-accent))",
+        },
         "newspaper-bg": "hsl(var(--newspaper-bg))",
         "newspaper-text": "hsl(var(--newspaper-text))",
         "newspaper-header": "hsl(var(--newspaper-header))",
