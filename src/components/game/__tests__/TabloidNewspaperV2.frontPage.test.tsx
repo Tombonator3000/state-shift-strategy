@@ -22,7 +22,11 @@ globalThis.navigator = windowRef.navigator as Navigator;
 globalThis.HTMLElement = windowRef.HTMLElement as unknown as typeof globalThis.HTMLElement;
 globalThis.CustomEvent = windowRef.CustomEvent as unknown as typeof globalThis.CustomEvent;
 
-const { render, screen, waitFor, cleanup } = await import('@testing-library/react');
+const { render, screen, waitFor, cleanup, within } = await import('@testing-library/react');
+const {
+  __setArticleBankLoader,
+  __resetArticleBankCache,
+} = await import('@/engine/news/articleBank');
 
 mock.module('@/lib/newspaperData', () => ({
   loadNewspaperData: async () => ({
@@ -47,55 +51,57 @@ mock.module('@/lib/newspaperData', () => ({
   shuffle: <T,>(values: T[]): T[] => [...values],
 }));
 
+const articleFixtures = [
+  {
+    cardId: 'card-1',
+    cardName: 'Alpha Agent',
+    cardType: 'ATTACK',
+    player: 'human' as const,
+    articleId: 'story-1',
+    headline: 'Side Story One',
+    subhead: 'Lead operatives breach the signal vault.',
+    body: 'Field team confirmed the breach before dawn.',
+  },
+  {
+    cardId: 'card-2',
+    cardName: 'Beta Analyst',
+    cardType: 'MEDIA',
+    player: 'human' as const,
+    articleId: 'story-2',
+    headline: 'Side Story Two',
+    subhead: 'Analysts flood feeds with decoded memos.',
+    body: 'Network nodes amplify the recovered intel.',
+  },
+  {
+    cardId: 'card-3',
+    cardName: 'Gamma Operative',
+    cardType: 'ZONE',
+    player: 'human' as const,
+    articleId: 'story-3',
+    headline: 'Side Story Three',
+    subhead: 'Containment perimeter reroutes civilian traffic.',
+    body: 'Logistics teams confirm minimal collateral noise.',
+  },
+];
+
 const generatedStory: NarrativeIssue['generatedStory'] = {
-  headline: 'Combined Headline Assembled',
-  subhead: 'Operatives align messaging across the theater.',
-  byline: 'By: Field Desk',
-  isFallback: false,
-  articles: [
-    {
-      cardId: 'card-1',
-      cardName: 'Alpha Agent',
-      cardType: 'attack',
-      player: 'human',
-      articleId: 'story-1',
-      headline: 'Side Story One',
-      subhead: 'Lead operatives breach the signal vault.',
-      byline: 'By: Operative Pulse',
-      body: ['Field team confirmed the breach before dawn.'],
-      tags: ['#Signal'],
-      imagePrompt: null,
-      isFallback: false,
-    },
-    {
-      cardId: 'card-2',
-      cardName: 'Beta Analyst',
-      cardType: 'media',
-      player: 'human',
-      articleId: 'story-2',
-      headline: 'Side Story Two',
-      subhead: 'Analysts flood feeds with decoded memos.',
-      byline: 'By: Resonance Bureau',
-      body: ['Network nodes amplify the recovered intel.'],
-      tags: ['#Broadcast'],
-      imagePrompt: null,
-      isFallback: false,
-    },
-    {
-      cardId: 'card-3',
-      cardName: 'Gamma Operative',
-      cardType: 'zone',
-      player: 'human',
-      articleId: 'story-3',
-      headline: 'Side Story Three',
-      subhead: 'Containment perimeter reroutes civilian traffic.',
-      byline: 'By: Field Desk',
-      body: ['Logistics teams confirm minimal collateral noise.'],
-      tags: ['#Containment'],
-      imagePrompt: null,
-      isFallback: false,
-    },
-  ],
+  main: null,
+  articles: articleFixtures.map(entry => ({
+    cardId: entry.cardId,
+    cardName: entry.cardName,
+    cardType: entry.cardType,
+    player: entry.player,
+    articleId: entry.articleId,
+    headline: entry.headline,
+    subhead: entry.subhead,
+    byline: 'By: Field Desk',
+    body: [entry.body],
+    tags: ['#Signal'],
+    imagePrompt: null,
+    isFallback: false,
+  })),
+  fallbackHeadline: 'SPECIAL EDITION: PRINTING GREMLINS AT WORK',
+  fallbackSubhead: 'Article vault temporarily unavailable — dispatch desk investigating.',
 };
 
 const issue: NarrativeIssue = {
@@ -124,7 +130,16 @@ import TabloidNewspaperV2 from '../TabloidNewspaperV2';
 
 const baseProps: TabloidNewspaperProps = {
   events: [],
-  playedCards: [],
+  playedCards: articleFixtures.map(entry => ({
+    card: {
+      id: entry.cardId,
+      name: entry.cardName,
+      type: entry.cardType,
+      faction: 'truth',
+      cost: 1,
+    },
+    player: entry.player,
+  })),
   faction: 'truth',
   truth: 55,
   onClose: () => {},
@@ -138,6 +153,7 @@ beforeAll(() => {
 
 afterEach(() => {
   cleanup();
+  __resetArticleBankCache();
 });
 
 afterAll(() => {
@@ -147,19 +163,29 @@ afterAll(() => {
 
 describe('TabloidNewspaperV2 front page integration', () => {
   test('renders combined headline and three side dispatches', async () => {
+    __setArticleBankLoader(async () => ({
+      articles: articleFixtures.map(entry => ({
+        id: entry.cardId,
+        tone: 'truth' as const,
+        tags: ['signal'],
+        headline: entry.headline,
+        subhead: entry.subhead,
+        body: entry.body,
+      })),
+    }));
+
     render(<TabloidNewspaperV2 {...baseProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Combined Headline Assembled')).toBeTruthy();
+      const headline = screen.getByRole('heading', { level: 1 });
+      expect(headline.textContent ?? '').toMatch(/ALPHA AGENT/);
     });
 
-    expect(screen.getByText('Operatives align messaging across the theater.')).toBeTruthy();
+    expect(screen.getByText(/Witnesses report escalating weirdness/)).toBeTruthy();
 
-    const sideStories = ['Side Story One', 'Side Story Two', 'Side Story Three'];
-    for (const headline of sideStories) {
-      expect(screen.getByText(headline)).toBeTruthy();
-    }
-
-    expect(screen.getAllByText(/Side Story/)).toHaveLength(3);
+    const secondaryHeading = await screen.findByText('SECONDARY REPORTS');
+    const secondarySection = secondaryHeading.closest('section');
+    expect(secondarySection).not.toBeNull();
+    expect(within(secondarySection as HTMLElement).getAllByText(/Side Story/)).toHaveLength(3);
   });
 });

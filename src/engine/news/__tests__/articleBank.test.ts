@@ -1,22 +1,20 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
 
 import {
-  loadArticleBank,
-  getById,
-  has,
-  type CardArticle,
-  __setArticleBankLoader,
   __resetArticleBankCache,
+  __setArticleBankLoader,
+  loadArticleBank,
+  type CardArticle,
 } from '../articleBank';
 
 const sampleArticle = (overrides: Partial<CardArticle> = {}): CardArticle => ({
   id: overrides.id ?? 'alpha',
   tone: overrides.tone ?? 'truth',
-  tags: overrides.tags ?? ['#Signal'],
-  headline: overrides.headline ?? 'ALPHA SIGNAL DETECTED',
-  subhead: overrides.subhead ?? 'Operatives intercept classified broadcast.',
-  byline: overrides.byline ?? 'By: Field Unit 27-B/6',
-  body: overrides.body ?? 'Field report notes unusual readings across the grid.',
+  tags: overrides.tags ?? ['signal'],
+  headline: overrides.headline,
+  subhead: overrides.subhead,
+  byline: overrides.byline,
+  body: overrides.body,
   imagePrompt: overrides.imagePrompt,
 });
 
@@ -25,27 +23,23 @@ afterEach(() => {
 });
 
 describe('loadArticleBank', () => {
-  test('successfully loads data and exposes lookup helpers', async () => {
-    const article = sampleArticle();
+  test('provides lookup access for parsed articles', async () => {
+    const article = sampleArticle({ id: 'story-1', tags: ['cryptid'] });
     __setArticleBankLoader(async () => ({ articles: [article] }));
 
     const bank = await loadArticleBank();
 
-    expect(bank.articles).toHaveLength(1);
-    expect(bank.byId.get(article.id)).toEqual(article);
-    expect(getById(bank, article.id)).toEqual(article);
-    expect(getById(bank, null)).toBeNull();
-    expect(has(bank, article.id)).toBe(true);
-    expect(has(bank, undefined)).toBe(false);
+    expect(bank.getById('story-1')).toEqual(article);
+    expect(bank.getById('missing')).toBeNull();
   });
 
-  test('throws when the incoming data fails schema validation', async () => {
+  test('validates incoming payload shape', async () => {
     __setArticleBankLoader(async () => ({ invalid: true }));
 
     await expect(loadArticleBank()).rejects.toThrow(/articles/i);
   });
 
-  test('reuses the cached promise across multiple invocations', async () => {
+  test('caches the resolved bank per loader key', async () => {
     const loader = mock(async () => ({ articles: [sampleArticle({ id: 'cached' })] }));
     __setArticleBankLoader(loader);
 
@@ -53,7 +47,46 @@ describe('loadArticleBank', () => {
     const second = await loadArticleBank();
 
     expect(loader).toHaveBeenCalledTimes(1);
-    expect(second).toBe(first);
-    expect(has(second, 'cached')).toBe(true);
+    expect(second.getById('cached')).toEqual(first.getById('cached'));
+  });
+
+  test('separates cache entries for distinct urls', async () => {
+    const payloads: Record<string, { articles: CardArticle[] }> = {
+      'https://example.com/alpha.json': { articles: [sampleArticle({ id: 'one' })] },
+      'https://example.com/beta.json': { articles: [sampleArticle({ id: 'two' })] },
+    };
+
+    const originalFetch = globalThis.fetch;
+    const fetchMock = mock(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      const payload = payloads[url];
+      if (!payload) {
+        return {
+          ok: false,
+          status: 404,
+          statusText: 'Not Found',
+          json: async () => ({}),
+        } as Response;
+      }
+      return {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => payload,
+      } as Response;
+    });
+
+    (globalThis as { fetch: typeof fetch }).fetch = fetchMock as unknown as typeof fetch;
+
+    try {
+      const first = await loadArticleBank('https://example.com/alpha.json');
+      const second = await loadArticleBank('https://example.com/beta.json');
+
+      expect(first.getById('one')?.id).toBe('one');
+      expect(second.getById('two')?.id).toBe('two');
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      (globalThis as { fetch: typeof fetch }).fetch = originalFetch;
+    }
   });
 });

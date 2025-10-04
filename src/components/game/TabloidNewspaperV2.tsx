@@ -9,6 +9,7 @@ import { generateIssue, type NarrativeIssue, type PlayedCardInput } from '@/engi
 import type { TabloidNewspaperProps } from './TabloidNewspaperLegacy';
 import type { HotspotExtraArticle } from '@/systems/paranormalHotspots';
 import type { Card } from '@/types';
+import type { PlayedCardMeta } from '@/engine/news/mainStory';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import { buildRoundContext, formatTruthDelta } from './tabloidRoundUtils';
 import { useAudioContext } from '@/contexts/AudioContext';
@@ -24,6 +25,7 @@ import {
   NEWSPAPER_HEADER_CLASS,
   NewspaperSection,
 } from './newspaperLayout';
+import FrontPage from '@/ui/newspaper/FrontPage';
 
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
 const FRONT_PAGE_FALLBACK_HEADLINE = 'SPECIAL EDITION: PRINTING GREMLINS AT WORK';
@@ -539,6 +541,24 @@ const TabloidNewspaperV2 = ({
     [narrativePlayedCards],
   );
 
+  const frontPageCards = useMemo<PlayedCardMeta[]>(() => {
+    return playerNarrativeCards.slice(0, 3)
+      .map(entry => {
+        const rawType = String(entry.card.type ?? '').toUpperCase();
+        if (rawType !== 'ATTACK' && rawType !== 'MEDIA' && rawType !== 'ZONE') {
+          return null;
+        }
+        const faction = String(entry.card.faction ?? '').toUpperCase().includes('GOV') ? 'GOV' : 'TRUTH';
+        return {
+          id: entry.card.id,
+          name: entry.card.name,
+          type: rawType as PlayedCardMeta['type'],
+          faction,
+        } satisfies PlayedCardMeta;
+      })
+      .filter((meta): meta is PlayedCardMeta => Boolean(meta));
+  }, [playerNarrativeCards]);
+
   const comboSummary = useMemo(() => getLastComboSummary(), [events, playedCards]);
   const comboReport = useMemo(() => {
     if (!comboSummary || comboSummary.results.length === 0) {
@@ -610,7 +630,7 @@ const TabloidNewspaperV2 = ({
     if (!SHOW_NEWSPAPER_DEBUG) {
       return;
     }
-    const debug = issue?.generatedStory?.debug;
+    const debug = issue?.generatedStory?.main?.debug;
     if (!debug) {
       return;
     }
@@ -618,7 +638,7 @@ const TabloidNewspaperV2 = ({
       return;
     }
 
-    const groupLabel = `[Newspaper][GeneratedStory] template=${debug.templateId}`;
+    const groupLabel = `[Newspaper][MainStory] template=${debug.templateId}`;
     const canGroup = typeof console.groupCollapsed === 'function';
     if (canGroup) {
       console.groupCollapsed(groupLabel);
@@ -626,35 +646,13 @@ const TabloidNewspaperV2 = ({
       console.log(groupLabel);
     }
 
+    console.log('Subject:', debug.subject);
     console.log('Common tags:', debug.commonTags);
 
-    if (debug.verbs.length > 0) {
-      if (typeof console.table === 'function') {
-        console.table(
-          debug.verbs.map(entry => ({
-            cardId: entry.cardId,
-            cardName: entry.cardName,
-            player: entry.player,
-            tone: entry.tone ?? '(unknown)',
-            selectedVerb: entry.selected ?? '(none)',
-            source: entry.source,
-            articleId: entry.articleId ?? '(none)',
-          })),
-        );
-      } else {
-        for (const entry of debug.verbs) {
-          console.log('[Newspaper][Verb]', entry.cardId, {
-            cardName: entry.cardName,
-            player: entry.player,
-            tone: entry.tone,
-            selectedVerb: entry.selected,
-            source: entry.source,
-            articleId: entry.articleId,
-          });
-        }
-      }
+    if (debug.parts.length > 0) {
+      console.log('Template parts:', debug.parts);
     } else {
-      console.log('No verb debug entries recorded.');
+      console.log('No template parts recorded.');
     }
 
     if (canGroup) {
@@ -760,16 +758,11 @@ const TabloidNewspaperV2 = ({
   const heroTriggerChance = heroEvent?.triggerChance ?? null;
   const heroConditionalChance = heroEvent?.conditionalChance ?? null;
   const comboNarrative = issue?.comboArticle ?? null;
-  const frontPageStory = issue?.generatedStory ?? null;
-  const frontPageArticles = frontPageStory?.articles ?? [];
-  const frontPageHeadline = frontPageStory?.headline ?? FRONT_PAGE_FALLBACK_HEADLINE;
-  const frontPageSubhead = frontPageStory?.subhead ?? FRONT_PAGE_FALLBACK_SUBHEAD;
-
   const bylinePool = dataset.bylines && dataset.bylines.length ? dataset.bylines : FALLBACK_DATA.bylines;
   const sourcePool = dataset.sources && dataset.sources.length ? dataset.sources : FALLBACK_DATA.sources;
   const byline = issue?.byline ?? pick(bylinePool, FALLBACK_DATA.bylines?.[0] ?? 'By: Anonymous Insider');
   const sourceLine = issue?.sourceLine ?? pick(sourcePool, FALLBACK_DATA.sources?.[0] ?? 'Source: Redacted Dossier');
-  const frontPageByline = frontPageStory?.byline ?? byline;
+  const frontPageArticles = issue?.generatedStory?.articles ?? [];
   const breakingStamp = issue?.stamps.breaking ?? null;
   const classifiedStamp = issue?.stamps.classified ?? null;
 
@@ -1036,12 +1029,12 @@ const TabloidNewspaperV2 = ({
           </button>
           <div className="flex flex-col gap-1 text-center">
             <span className="text-[11px] font-semibold uppercase tracking-[0.6em] text-newspaper-text/60">ShadowGov Press Bureau</span>
-            <h1
+            <p
               className={`text-3xl font-black uppercase tracking-[0.2em] text-newspaper-text sm:text-4xl ${glitchText ? 'glitch' : ''}`}
               data-text={displayMasthead}
             >
               {displayMasthead}
-            </h1>
+            </p>
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-newspaper-text/60">
               {faction === 'truth' ? 'Truth Coalition Dispatch' : 'Official Government Bulletin'}
             </p>
@@ -1055,16 +1048,13 @@ const TabloidNewspaperV2 = ({
 
         <div className={NEWSPAPER_BODY_CLASS}>
           <NewspaperSection className="mb-4 bg-white/80 px-4 py-3 text-newspaper-text">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.35em] text-newspaper-text/60">
-              Front Page Dispatch
-            </div>
-            <h2 className="text-2xl font-black uppercase tracking-[0.2em] text-newspaper-headline">
-              {frontPageHeadline}
-            </h2>
-            <p className="text-sm italic text-newspaper-text/80">{frontPageSubhead}</p>
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/50">
-              {frontPageByline}
-            </div>
+            <FrontPage
+              cards={frontPageCards}
+              headlineFallback={{
+                headline: FRONT_PAGE_FALLBACK_HEADLINE,
+                subhead: FRONT_PAGE_FALLBACK_SUBHEAD,
+              }}
+            />
           </NewspaperSection>
           <NewspaperSection className="mb-6 bg-white/70 px-4 py-3 text-sm text-newspaper-text">
             <div className="flex flex-wrap items-center justify-between gap-3">
