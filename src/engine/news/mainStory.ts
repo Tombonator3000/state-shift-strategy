@@ -1,5 +1,4 @@
 import type { CardArticle } from './articleBank';
-import { govTemplates, truthTemplates, type HeadlineTemplate } from './templates';
 
 export type PlayedCardMeta = {
   id: string;
@@ -16,228 +15,123 @@ export type GeneratedStory = {
   debug?: { commonTags: string[]; subject: string; parts: string[]; templateId: string };
 };
 
+const MYTH = new Set(['alien', 'ufo', 'ghost', 'cryptid', 'bigfoot', 'mothman', 'bat-boy', 'elvis']);
+const BAD = new Set(['attack', 'media', 'zone']);
+
+const TRUTH_VERBS = {
+  ATTACK: ['EXPOSES', 'BUSTS', 'LEAKS', 'BLOWS LID OFF', 'IGNITES'],
+  MEDIA: ['GOES LIVE', 'BROADCASTS', 'TRENDING', 'LEAKS'],
+  ZONE: ['MARCHES', 'SURGES', 'ERUPTS', 'HAUNTS', 'SWEEPS'],
+} as const;
+
+const GOV = {
+  EUPH: ['Routine Incident', 'Administrative Test', 'Benign Anomaly', 'Training Exercise', 'Localized Phenomenon'],
+  MEDIA: ['Briefing Concluded', 'Statement Issued', 'Update Filed'],
+  ATTACK: ['Mitigation Successful', 'Containment Ongoing', 'Review Open'],
+  ZONE: ['Perimeter Established', 'Access Normalized', 'Calm Restored'],
+} as const;
+
+function seedPick<T>(arr: readonly T[], seed: string): T {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i += 1) {
+    h ^= seed.charCodeAt(i);
+    h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+  }
+  return arr[Math.abs(h) % arr.length];
+}
+
+function intersectNonTechTags(arts: (CardArticle | null)[]): string[] {
+  const sets = arts.map(a => new Set((a?.tags ?? []).filter(t => !BAD.has(t))));
+  if (!sets.length) return [];
+  const out: string[] = [];
+  sets[0].forEach(t => {
+    if (sets.every(s => s.has(t))) out.push(t);
+  });
+  return out.sort();
+}
+
+function chooseSubject(arts: (CardArticle | null)[], metas: PlayedCardMeta[]): string {
+  const common = intersectNonTechTags(arts);
+  const myth = common.find(t => MYTH.has(t));
+  if (myth) {
+    const match = metas.find(x => x.name.toLowerCase().includes(myth.replace('-', ' ')));
+    if (match) return match.faction === 'TRUTH' ? match.name.toUpperCase() : titleCase(match.name);
+  }
+  let best = 0;
+  let score = -1;
+  arts.forEach((article, index) => {
+    const value = (article?.tags ?? []).reduce((total, tag) => total + (MYTH.has(tag) ? 1 : 0), 0);
+    if (value > score) {
+      score = value;
+      best = index;
+    }
+  });
+  const meta = metas[best];
+  return meta.faction === 'TRUTH' ? meta.name.toUpperCase() : titleCase(meta.name);
+}
+
+function titleCase(s: string) {
+  return s.replace(/\w\S*/g, word => word[0].toUpperCase() + word.slice(1).toLowerCase());
+}
+function clampLen(s: string, n = 160) {
+  return s.length > n ? `${s.slice(0, n - 1)}…` : s;
+}
+function sanitize(s: string) {
+  return s
+    .replace(/\s*[|✦]+\s*/g, ' ')
+    .replace(/\s+—\s+—/g, ' — ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 export function generateMainStory(
   played: PlayedCardMeta[],
   lookup: (id: string) => CardArticle | null,
 ): GeneratedStory {
-  if (played.length === 0) {
-    return {
-      headline: 'SPECIAL DISPATCH: PRINTING GREMLINS AT WORK',
-      subhead: 'Witnesses report escalating weirdness. Officials baffled.',
-      tone: 'truth',
-      usedCards: [],
-      debug: { commonTags: [], subject: 'FRONT PAGE', parts: [], templateId: 'fallback:none' },
-    } satisfies GeneratedStory;
+  if (played.length !== 3) throw new Error('generateMainStory expects exactly 3 cards.');
+  const articles = played.map(card => lookup(card.id));
+  const tone: 'truth' | 'gov' = played[0].faction === 'TRUTH' ? 'truth' : 'gov';
+  const seed = played.map(card => card.id).join('|');
+  const commonTags = intersectNonTechTags(articles);
+  const subject = chooseSubject(articles, played);
+
+  let headline = '';
+  let subhead = '';
+  let parts: string[] = [];
+
+  if (tone === 'truth') {
+    const [a, b, c] = played;
+    const v1 = seedPick(TRUTH_VERBS[a.type], `${seed}a`);
+    const v2 = seedPick(TRUTH_VERBS[b.type], `${seed}b`);
+    const v3 = seedPick(TRUTH_VERBS[c.type], `${seed}c`);
+    const n2 = b.name.toUpperCase();
+    const n3 = c.name.toUpperCase();
+
+    headline = `${subject} ${v1} AS ${n2} ${v2} — ${n3} ${v3}!`;
+    subhead = clampLen(
+      `Witnesses report escalating weirdness${commonTags.length ? ` (${commonTags.slice(0, 2).join(', ')})` : ''}. Officials baffled; snacks remain excellent.`,
+    );
+    parts = [v1, v2, v3];
+  } else {
+    const [a, b, c] = played;
+    const euph = seedPick(GOV.EUPH, `${seed}e`);
+    const p1 = seedPick(GOV[a.type], `${seed}1`);
+    const p2 = seedPick(GOV[b.type], `${seed}2`);
+    const p3 = seedPick(GOV[c.type], `${seed}3`);
+    headline = `${subject}: ${euph}; ${p1}; ${p2 === p1 ? seedPick(GOV[b.type], `${seed}2x`) : p2}`;
+    headline += headline.includes(p3) ? '' : `; ${p3}`;
+    subhead = 'Transparency achieved via prudent opacity. Further questions will be taken later, retroactively.';
+    parts = [euph, p1, p2, p3];
   }
 
-  const normalizedCards = [...played].sort((a, b) => a.id.localeCompare(b.id));
-  const tone: 'truth' | 'gov' = (normalizedCards[0]?.faction ?? played[0]?.faction) === 'GOV' ? 'gov' : 'truth';
-  const articles = normalizedCards.map(card => lookup(card.id));
-
-  const tagData = collectTagData(articles);
-  const subjectIndex = resolveSubjectIndex(normalizedCards, tagData);
-  const orderedCards = reorderBySubject(normalizedCards, subjectIndex);
-  const orderedArticles = reorderBySubject(articles, subjectIndex);
-  const subjectCard = orderedCards[0] ?? normalizedCards[0];
-
-  const baseSeed = buildSeed(played);
-  const pick = createPicker(baseSeed);
-
-  const templates = tone === 'truth' ? truthTemplates : govTemplates;
-  const template = templates.length ? pick(templates, 'template') : null;
-
-  const { headline, templateId, parts, explicitSubhead } = composeHeadline(
-    template,
-    orderedCards,
-    orderedArticles,
-    tagData.common,
-    pick,
-    tone,
-  );
-
-  const commonTagDisplays = tagData.common.map(tag => tagData.display.get(tag) ?? formatTagForDisplay(tag));
-  const subjectName = (subjectCard?.name ?? 'Front Page').toUpperCase();
-  const subhead = explicitSubhead ?? formatSubhead(tone, commonTagDisplays);
+  headline = sanitize(headline);
+  subhead = sanitize(subhead);
 
   return {
     headline,
     subhead,
     tone,
-    usedCards: orderedCards.map(card => card.id),
-    debug: {
-      commonTags: commonTagDisplays,
-      subject: subjectName,
-      parts,
-      templateId,
-    },
+    usedCards: played.map(card => card.id),
+    debug: { commonTags, subject, parts, templateId: tone === 'truth' ? 'T1' : 'G1' },
   } satisfies GeneratedStory;
 }
-
-const TECHNICAL_TAGS = new Set(['attack', 'media', 'zone']);
-const MYTHIC_TAGS = new Set(['alien', 'ufo', 'ghost', 'cryptid', 'bigfoot', 'mothman', 'bat-boy', 'elvis']);
-
-const normalizeTag = (tag: string): string => {
-  return tag.trim().replace(/^#/u, '').toLowerCase();
-};
-
-const formatTagForDisplay = (tag: string): string => {
-  return normalizeTag(tag).replace(/[-_]+/g, ' ');
-};
-
-const collectTagData = (articles: (CardArticle | null)[]) => {
-  const perCard: string[][] = [];
-  const display = new Map<string, string>();
-
-  for (const article of articles) {
-    const set = new Set<string>();
-    for (const raw of article?.tags ?? []) {
-      const normalized = normalizeTag(raw);
-      if (!normalized || TECHNICAL_TAGS.has(normalized)) {
-        continue;
-      }
-      set.add(normalized);
-      if (!display.has(normalized)) {
-        display.set(normalized, formatTagForDisplay(raw));
-      }
-    }
-    perCard.push(Array.from(set));
-  }
-
-  let common = new Set<string>();
-  if (perCard.length > 0) {
-    common = new Set(perCard[0]);
-    for (let index = 1; index < perCard.length; index += 1) {
-      const current = new Set(perCard[index]);
-      for (const tag of Array.from(common)) {
-        if (!current.has(tag)) {
-          common.delete(tag);
-        }
-      }
-      if (common.size === 0) {
-        break;
-      }
-    }
-  }
-
-  return {
-    perCard,
-    common: Array.from(common),
-    display,
-  } satisfies {
-    perCard: string[][];
-    common: string[];
-    display: Map<string, string>;
-  };
-};
-
-const resolveSubjectIndex = (played: PlayedCardMeta[], tagData: ReturnType<typeof collectTagData>): number => {
-  if (played.length === 0) {
-    return 0;
-  }
-
-  const names = played.map(card => card.name.toLowerCase());
-  const commonMythic = tagData.common.filter(tag => MYTHIC_TAGS.has(tag));
-
-  for (const mythicTag of commonMythic) {
-    const normalized = mythicTag.replace(/[-_]+/g, ' ');
-    const compact = normalized.replace(/\s+/g, '');
-    for (let index = 0; index < names.length; index += 1) {
-      const name = names[index];
-      if (name.includes(normalized) || name.replace(/\s+/g, '').includes(compact)) {
-        return index;
-      }
-    }
-  }
-
-  if (commonMythic.length > 0) {
-    return 0;
-  }
-
-  let subjectIndex = 0;
-  let bestScore = -1;
-
-  for (let index = 0; index < played.length; index += 1) {
-    const tags = tagData.perCard[index] ?? [];
-    const score = tags.reduce((total, tag) => total + (MYTHIC_TAGS.has(tag) ? 1 : 0), 0);
-    if (score > bestScore) {
-      bestScore = score;
-      subjectIndex = index;
-    }
-  }
-
-  return subjectIndex;
-};
-
-const reorderBySubject = <T>(items: T[], subjectIndex: number): T[] => {
-  if (!items.length) {
-    return items;
-  }
-  const subject = items[subjectIndex];
-  const rest = items.filter((_item, index) => index !== subjectIndex);
-  return subject !== undefined ? [subject, ...rest] : [...items];
-};
-
-const hashString = (value: string): number => {
-  let hash = 0;
-  for (let index = 0; index < value.length; index += 1) {
-    hash = Math.imul(31, hash) + value.charCodeAt(index);
-    hash |= 0;
-  }
-  return hash >>> 0;
-};
-
-const createPicker = (seed: string) => {
-  return <T>(arr: T[], seedKey: string): T => {
-    if (!Array.isArray(arr) || arr.length === 0) {
-      throw new Error('Cannot pick from an empty array');
-    }
-    const key = `${seed}:${seedKey}`;
-    const index = hashString(key) % arr.length;
-    return arr[index] as T;
-  };
-};
-
-const buildSeed = (played: PlayedCardMeta[]): string => {
-  const ids = played.map(card => card.id).sort();
-  return ids.join('|') || 'no-cards';
-};
-
-const composeHeadline = (
-  template: HeadlineTemplate | null,
-  cards: PlayedCardMeta[],
-  articles: (CardArticle | null)[],
-  commonTags: string[],
-  pick: <T>(arr: T[], seedKey: string) => T,
-  tone: 'truth' | 'gov',
-): { headline: string; templateId: string; parts: string[]; explicitSubhead?: string } => {
-  if (!template) {
-    const subjectName = (cards[0]?.name ?? 'Front Page').toUpperCase();
-    const fallback = tone === 'truth' ? 'ALERTED' : 'STATUS REPORT';
-    const headline = `${subjectName} ${fallback}`;
-    return { headline, templateId: 'fallback:none', parts: [] };
-  }
-
-  try {
-    const result = template.compose({ cards, articles, commonTags, pick });
-    const parts = result.debugNote ? result.debugNote.split('|').filter(Boolean) : [];
-    return {
-      headline: result.headline.trim(),
-      templateId: template.id,
-      parts,
-      explicitSubhead: result.subhead?.trim(),
-    };
-  } catch (error) {
-    console.warn('Failed to compose headline via template', template.id, error);
-    const subjectName = (cards[0]?.name ?? 'Front Page').toUpperCase();
-    return { headline: `${subjectName} STATUS UPDATE`, templateId: `${template.id}:error`, parts: [] };
-  }
-};
-
-const formatSubhead = (tone: 'truth' | 'gov', tags: string[]): string => {
-  if (tone === 'truth') {
-    const snippet = tags.slice(0, 2).filter(Boolean).map(tag => tag.toLowerCase()).join(', ');
-    const tagPart = snippet ? ` (${snippet})` : '';
-    return `Witnesses report escalating weirdness${tagPart}. Officials baffled.`;
-  }
-  return 'Transparency achieved via prudent opacity. Further questions will be taken later, retroactively.';
-};

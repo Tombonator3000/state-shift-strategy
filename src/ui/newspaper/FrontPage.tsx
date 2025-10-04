@@ -19,12 +19,23 @@ type SecondaryStory = {
 export interface FrontPageProps {
   cards: PlayedCardMeta[];
   className?: string;
+  faction?: 'truth' | 'gov' | 'TRUTH' | 'GOV';
   headlineFallback?: { headline: string; subhead: string };
 }
 
-const FrontPage = ({ cards, className, headlineFallback = DEFAULT_FALLBACK }: FrontPageProps) => {
+const normaliseFaction = (value?: string): 'TRUTH' | 'GOV' => {
+  if (typeof value === 'string' && value.toUpperCase().includes('GOV')) {
+    return 'GOV';
+  }
+  return 'TRUTH';
+};
+
+const FrontPage = ({ cards, className, faction, headlineFallback = DEFAULT_FALLBACK }: FrontPageProps) => {
   const [articleBank, setArticleBank] = useState<ArticleBank | null>(null);
   const [mainStory, setMainStory] = useState<GeneratedStory | null>(null);
+
+  const dominantFaction = normaliseFaction(faction ?? cards[0]?.faction);
+  const kickerLabel = dominantFaction === 'TRUTH' ? 'FRONT PAGE DISPATCH' : 'OFFICIAL GOVERNMENT BULLETIN';
 
   useEffect(() => {
     let cancelled = false;
@@ -48,13 +59,13 @@ const FrontPage = ({ cards, className, headlineFallback = DEFAULT_FALLBACK }: Fr
   }, []);
 
   useEffect(() => {
-    if (cards.length !== 3) {
+    if (!articleBank || cards.length !== 3) {
       setMainStory(null);
       return;
     }
 
     try {
-      const story = generateMainStory(cards, id => articleBank?.getById(id) ?? null);
+      const story = generateMainStory(cards, id => articleBank.getById(id));
       setMainStory(story);
     } catch (error) {
       console.warn('Failed to compose main story', error);
@@ -73,35 +84,30 @@ const FrontPage = ({ cards, className, headlineFallback = DEFAULT_FALLBACK }: Fr
 
   const headline = mainStory?.headline ?? headlineFallback.headline;
   const subhead = mainStory?.subhead ?? headlineFallback.subhead;
+  const toneClass = mainStory?.tone ?? (dominantFaction === 'GOV' ? 'gov' : 'truth');
 
   return (
-    <div className={cn('frontpage', className)}>
-      <section className="frontpage-main space-y-2">
-        <div className="kicker text-[10px] font-semibold uppercase tracking-[0.35em] text-newspaper-text/60">
-          Front Page Dispatch
-        </div>
-        <h1 className="headline">{headline}</h1>
+    <div className={cn('frontpage text-newspaper-text', className)}>
+      <section className="frontpage-main">
+        <div className={cn('kicker text-newspaper-text/70')}>{kickerLabel}</div>
+        <h1 className={cn('headline', toneClass)}>{headline}</h1>
         {subhead ? <p className="subhead">{subhead}</p> : null}
       </section>
 
-      <section className="frontpage-secondary mt-6 space-y-3">
-        <h2 className="section-title text-sm">SECONDARY REPORTS</h2>
-        <div className="grid-2">
+      <section className="frontpage-secondary">
+        <h2 className="section-title">SECONDARY REPORTS</h2>
+        <div className="secondary-grid">
           {secondaryStories.map(({ card, article }) => {
             const bodyText = article?.body?.trim();
             return (
               <article
                 key={card.id}
-                className="secondary-article space-y-2 rounded border border-newspaper-border/60 bg-white/70 p-3"
+                className={cn('secondary-article border border-newspaper-border/60 bg-white/70 shadow-sm')}
               >
-                <div className="pill text-newspaper-text/80">[{card.type}]</div>
-                <h3 className="text-lg font-semibold leading-snug text-newspaper-headline">
-                  {article?.headline ?? card.name}
-                </h3>
-                {article?.subhead ? (
-                  <p className="muted text-sm italic text-newspaper-text/70">{article.subhead}</p>
-                ) : null}
-                {bodyText ? <p className="text-sm leading-relaxed text-newspaper-text/80">{bodyText}</p> : null}
+                <div className="pill">[{card.type}]</div>
+                <h3 className="secondary-headline text-newspaper-headline">{article?.headline ?? card.name}</h3>
+                {article?.subhead ? <p className="muted italic">{article.subhead}</p> : null}
+                {bodyText ? <p>{bodyText}</p> : null}
               </article>
             );
           })}
