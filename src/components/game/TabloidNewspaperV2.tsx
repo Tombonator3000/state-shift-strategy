@@ -282,6 +282,7 @@ const TabloidNewspaperV2 = ({
   onArcProgress,
   hotspotDirector,
   activeHotspot,
+  frontPageTriplet,
 }: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState('THE PARANOID TIMES');
@@ -542,6 +543,15 @@ const TabloidNewspaperV2 = ({
   );
 
   const frontPageCards = useMemo<PlayedCardMeta[]>(() => {
+    if (Array.isArray(frontPageTriplet) && frontPageTriplet.length === 3) {
+      return frontPageTriplet.map(card => ({
+        id: card.id,
+        name: card.name,
+        type: card.type,
+        faction: card.faction,
+      }));
+    }
+
     return playerNarrativeCards.slice(0, 3)
       .map(entry => {
         const rawType = String(entry.card.type ?? '').toUpperCase();
@@ -557,7 +567,7 @@ const TabloidNewspaperV2 = ({
         } satisfies PlayedCardMeta;
       })
       .filter((meta): meta is PlayedCardMeta => Boolean(meta));
-  }, [playerNarrativeCards]);
+  }, [frontPageTriplet, playerNarrativeCards]);
 
   const comboSummary = useMemo(() => getLastComboSummary(), [events, playedCards]);
   const comboReport = useMemo(() => {

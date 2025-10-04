@@ -3142,6 +3142,7 @@ const Index = () => {
           faction={gameState.faction}
           truth={gameState.truth}
           comboTruthDelta={gameState.comboTruthDeltaThisRound}
+          frontPageTriplet={gameState.frontPageTriplet ?? null}
           sightings={paranormalSightings}
           agendaIssue={gameState.agendaIssue}
           agendaMoments={agendaMoments}

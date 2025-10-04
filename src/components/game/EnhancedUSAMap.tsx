@@ -770,9 +770,14 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           };
 
           // Store animation function for cleanup
-          const animationId = requestAnimationFrame(function animationLoop() {
+          const scheduleFrame =
+            typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function'
+              ? window.requestAnimationFrame.bind(window)
+              : ((cb: FrameRequestCallback) => setTimeout(() => cb(Date.now()), 16)) as unknown as typeof requestAnimationFrame;
+
+          const animationId = scheduleFrame(function animationLoop() {
             animate();
-            hotspotMarker.setAttribute('data-animation-id', String(requestAnimationFrame(animationLoop)));
+            hotspotMarker.setAttribute('data-animation-id', String(scheduleFrame(animationLoop)));
           });
           hotspotMarker.setAttribute('data-animation-id', String(animationId));
 

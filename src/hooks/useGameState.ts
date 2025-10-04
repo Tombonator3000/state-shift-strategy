@@ -80,6 +80,7 @@ import {
 } from './stateEventHistory';
 import { assignStateBonuses } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from './stateBonusAssignment';
+import { clearNewsBuffer, getNewsTriplet, pushToNewsBuffer } from '@/state/game/roundNewsBuffer';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
@@ -2271,6 +2272,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       stateCombinationBonusIP: 0,
       activeStateCombinationIds: [],
       stateCombinationEffects: createDefaultCombinationEffects(),
+      frontPageTriplet: null,
       truthAbove80Streak: 0,
       truthBelow20Streak: 0,
       timeBasedGoalCounters: {
@@ -2488,6 +2490,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     }
     newspaperRevealTimeoutRef.current = null;
 
+    clearNewsBuffer();
+
     setGameState(prev => ({
       ...prev,
       faction,
@@ -2508,6 +2512,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       cardsPlayedThisTurn: 0,
       cardsPlayedThisRound: [],
       comboTruthDeltaThisRound: 0,
+      frontPageTriplet: null,
       playHistory: [],
       turnPlays: [],
       stateCombinationBonusIP: 0,
@@ -2765,9 +2770,29 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         ? revealAiSecretAgenda(nextState, { type: 'card', name: resolvedCard.name })
         : nextState;
 
+      const rawType = String(resolvedCard.type ?? '').toUpperCase();
+      const derivedType: 'ATTACK' | 'MEDIA' | 'ZONE' = rawType.includes('ZONE')
+        ? 'ZONE'
+        : rawType.includes('MEDIA')
+          ? 'MEDIA'
+          : 'ATTACK';
+      const factionLabel: 'TRUTH' | 'GOV' = String(resolvedCard.faction ?? '').toUpperCase().includes('GOV')
+        ? 'GOV'
+        : 'TRUTH';
+
+      pushToNewsBuffer({
+        id: resolvedCard.id,
+        name: resolvedCard.name,
+        type: derivedType,
+        faction: factionLabel,
+      });
+
+      const triplet = getNewsTriplet();
+
       const resultState = updateSecretAgendaProgress(stateWithReveal);
-      triggerCapturedStateEvents(resolution, resultState);
-      return resultState;
+      const finalState = triplet ? { ...resultState, frontPageTriplet: triplet } : resultState;
+      triggerCapturedStateEvents(resolution, finalState);
+      return finalState;
     });
 
     if (pendingEditorToasts.length > 0) {
@@ -4028,6 +4053,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         : undefined;
       const nextEditorRuntime = editorRuntimePatch ?? runtimeSnapshot;
 
+      clearNewsBuffer();
+
       let nextState: GameState = {
         ...prev,
         hand: newHand,
@@ -4036,6 +4063,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         showNewspaper: false,
         cardsPlayedThisRound: [],
         comboTruthDeltaThisRound: 0,
+        frontPageTriplet: null,
         phase: 'action',
         currentPlayer: 'human',
         showNewCardsPresentation: false,

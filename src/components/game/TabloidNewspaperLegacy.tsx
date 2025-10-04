@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { X, TrendingUp, AlertTriangle } from 'lucide-react';
 import type { GameCard } from '@/rules/mvp';
+import type { PlayedCardMeta } from '@/engine/news/mainStory';
 import type { GameEvent } from '@/data/eventDatabase';
 import type { ParanormalSighting } from '@/types/paranormal';
 import type { AgendaIssueState } from '@/data/agendaIssues';
@@ -34,6 +35,7 @@ export interface TabloidNewspaperProps {
   onArcProgress?: (summaries: ArcProgressSummary[]) => void;
   hotspotDirector?: HotspotDirector;
   activeHotspot?: WeightedHotspotCandidate | null;
+  frontPageTriplet?: PlayedCardMeta[] | null;
 }
 
 interface NewspaperData {

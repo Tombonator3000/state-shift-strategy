@@ -367,8 +367,12 @@ describe('EnhancedUSAMap paranormal hotspots', () => {
       dispatchEvent: vi.fn(),
     });
 
-    window.requestAnimationFrame = (cb: FrameRequestCallback): number => setTimeout(() => cb(Date.now()), 0);
-    window.cancelAnimationFrame = (id: number) => clearTimeout(id);
+    const raf = (cb: FrameRequestCallback): number => setTimeout(() => cb(Date.now()), 0);
+    const caf = (id: number) => clearTimeout(id);
+    window.requestAnimationFrame = raf;
+    window.cancelAnimationFrame = caf;
+    (globalThis as typeof globalThis & { requestAnimationFrame: typeof raf; cancelAnimationFrame: typeof caf }).requestAnimationFrame = raf;
+    (globalThis as typeof globalThis & { requestAnimationFrame: typeof raf; cancelAnimationFrame: typeof caf }).cancelAnimationFrame = caf;
 
     ({ default: EnhancedUSAMap } = await import('../EnhancedUSAMap'));
     const hotspotsModule = await import('@/systems/paranormalHotspots');
