@@ -638,27 +638,72 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             }
           }
 
+          // Determine hotspot kind from icon or tags
+          const hotspotKind = (() => {
+            const iconStr = hotspot.icon ?? '👻';
+            if (iconStr === '🛸' || iconStr.includes('ufo')) return 'ufo';
+            if (iconStr === '🦶' || iconStr === '🦍' || iconStr.includes('bigfoot') || iconStr.includes('cryptid')) return 'cryptid';
+            if (iconStr === '🎃' || iconStr === '👻' || iconStr.includes('ghost')) return 'ghost';
+            if (iconStr === '🕺' || iconStr.includes('elvis')) return 'elvis';
+            return 'normal';
+          })();
+
           const hotspotMarker = document.createElementNS('http://www.w3.org/2000/svg', 'g');
           hotspotMarker.setAttribute('class', 'paranormal-hotspot-marker');
-          hotspotMarker.setAttribute('transform', `translate(${centroid[0]}, ${centroid[1]})`);
+          hotspotMarker.setAttribute('data-hotspot-kind', hotspotKind);
+          hotspotMarker.setAttribute('data-state-id', stateKey);
           hotspotMarker.setAttribute('pointer-events', 'none');
+
+          // Create animated icon based on type
+          const iconGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          iconGroup.setAttribute('class', `animated-hotspot-${hotspotKind}`);
+          iconGroup.setAttribute('data-animation-phase', '0');
 
           const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           glow.setAttribute('class', 'paranormal-hotspot-glow');
           glow.setAttribute('r', '24');
-          hotspotMarker.appendChild(glow);
+          iconGroup.appendChild(glow);
 
           const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           ring.setAttribute('class', 'paranormal-hotspot-ring');
           ring.setAttribute('r', '16');
-          hotspotMarker.appendChild(ring);
+          iconGroup.appendChild(ring);
+
+          // Add kind-specific visual effects
+          if (hotspotKind === 'ufo') {
+            const outerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            outerRing.setAttribute('r', '18');
+            outerRing.setAttribute('fill', 'none');
+            outerRing.setAttribute('stroke', 'rgba(96, 165, 250, 0.6)');
+            outerRing.setAttribute('stroke-width', '1.5');
+            outerRing.setAttribute('stroke-dasharray', '4 4');
+            outerRing.setAttribute('class', 'ufo-ring');
+            iconGroup.appendChild(outerRing);
+          } else if (hotspotKind === 'cryptid') {
+            // Add footprints
+            for (let i = 0; i < 3; i++) {
+              const footprint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+              footprint.setAttribute('r', '2');
+              footprint.setAttribute('fill', 'rgba(76, 128, 92, 0.6)');
+              footprint.setAttribute('class', `cryptid-footprint-${i + 1}`);
+              iconGroup.appendChild(footprint);
+            }
+          } else if (hotspotKind === 'ghost') {
+            const etherealRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            etherealRing.setAttribute('r', '20');
+            etherealRing.setAttribute('fill', 'none');
+            etherealRing.setAttribute('stroke', 'rgba(196, 181, 253, 0.5)');
+            etherealRing.setAttribute('stroke-width', '2');
+            etherealRing.setAttribute('class', 'ghost-ethereal');
+            iconGroup.appendChild(etherealRing);
+          }
 
           const icon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           icon.setAttribute('class', 'paranormal-hotspot-icon');
           icon.setAttribute('text-anchor', 'middle');
           icon.setAttribute('dominant-baseline', 'central');
           icon.textContent = hotspot.icon ?? '👻';
-          hotspotMarker.appendChild(icon);
+          iconGroup.appendChild(icon);
 
           const counter = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           counter.setAttribute('class', 'paranormal-hotspot-counter');
@@ -666,7 +711,70 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           counter.setAttribute('y', '28');
           const turnsRemaining = Math.max(0, hotspot.turnsRemaining);
           counter.textContent = turnsRemaining > 0 ? `T-${turnsRemaining}` : 'LAST';
-          hotspotMarker.appendChild(counter);
+          iconGroup.appendChild(counter);
+
+          // Position the icon group at centroid
+          iconGroup.setAttribute('transform', `translate(${centroid[0]}, ${centroid[1]})`);
+          hotspotMarker.appendChild(iconGroup);
+
+          // Animate the icon based on type
+          let animationPhase = 0;
+          const animate = () => {
+            animationPhase = (animationPhase + 2) % 360;
+            const radians = (animationPhase * Math.PI) / 180;
+            
+            let transform = `translate(${centroid[0]}, ${centroid[1]})`;
+            
+            if (hotspotKind === 'ufo') {
+              // Hover up and down
+              const yOffset = Math.sin(radians) * 8;
+              const rotation = Math.sin(radians * 2) * 3;
+              transform = `translate(${centroid[0]}, ${centroid[1] + yOffset}) rotate(${rotation})`;
+            } else if (hotspotKind === 'cryptid') {
+              // Move in figure-8
+              const radius = 15;
+              const xOffset = Math.sin(radians) * radius;
+              const yOffset = Math.sin(radians * 2) * radius * 0.5;
+              const rotation = Math.sin(radians) * 10;
+              transform = `translate(${centroid[0] + xOffset}, ${centroid[1] + yOffset}) rotate(${rotation})`;
+              
+              // Update footprints
+              const footprints = iconGroup.querySelectorAll('[class^="cryptid-footprint-"]');
+              footprints.forEach((fp, i) => {
+                const angle = radians - (i * Math.PI / 3);
+                const fx = Math.cos(angle) * 12;
+                const fy = Math.sin(angle) * 12;
+                fp.setAttribute('cx', String(fx));
+                fp.setAttribute('cy', String(fy));
+                fp.setAttribute('opacity', String(0.6 - (i * 0.2)));
+              });
+            } else if (hotspotKind === 'ghost') {
+              // Float in circle
+              const radius = 12;
+              const xOffset = Math.cos(radians) * radius;
+              const yOffset = Math.sin(radians) * radius;
+              transform = `translate(${centroid[0] + xOffset}, ${centroid[1] + yOffset}) rotate(${animationPhase * 0.5})`;
+            } else if (hotspotKind === 'elvis') {
+              // Dance
+              const xOffset = Math.sin(radians * 2) * 5;
+              const yOffset = Math.abs(Math.sin(radians * 4)) * 6;
+              const rotation = Math.sin(radians * 3) * 15;
+              transform = `translate(${centroid[0] + xOffset}, ${centroid[1] + yOffset}) rotate(${rotation})`;
+            } else {
+              // Default gentle hover
+              const yOffset = Math.sin(radians) * 4;
+              transform = `translate(${centroid[0]}, ${centroid[1] + yOffset})`;
+            }
+            
+            iconGroup.setAttribute('transform', transform);
+          };
+
+          // Store animation function for cleanup
+          const animationId = requestAnimationFrame(function animationLoop() {
+            animate();
+            hotspotMarker.setAttribute('data-animation-id', String(requestAnimationFrame(animationLoop)));
+          });
+          hotspotMarker.setAttribute('data-animation-id', String(animationId));
 
           hotspotGroup.appendChild(hotspotMarker);
         }
@@ -1209,6 +1317,53 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           font-size: 9px;
           font-family: 'JetBrains Mono', monospace;
           letter-spacing: 0.08em;
+        }
+
+        /* UFO-specific animations */
+        .ufo-ring {
+          animation: ufoRingRotate 4s linear infinite;
+          transform-origin: center;
+        }
+
+        /* Cryptid footprints */
+        .cryptid-footprint-1,
+        .cryptid-footprint-2,
+        .cryptid-footprint-3 {
+          animation: footprintFade 3s ease-in-out infinite;
+        }
+
+        .cryptid-footprint-2 {
+          animation-delay: 0.5s;
+        }
+
+        .cryptid-footprint-3 {
+          animation-delay: 1s;
+        }
+
+        /* Ghost ethereal effects */
+        .ghost-ethereal {
+          animation: ghostEtherealPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes ufoRingRotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes footprintFade {
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 0.8; }
+        }
+
+        @keyframes ghostEtherealPulse {
+          0%, 100% { 
+            opacity: 0.3;
+            r: 20;
+          }
+          50% { 
+            opacity: 0.6;
+            r: 24;
+          }
         }
 
         @keyframes hotspotPulse {
