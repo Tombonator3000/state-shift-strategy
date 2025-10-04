@@ -29,6 +29,10 @@ const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓S
 const FRONT_PAGE_FALLBACK_HEADLINE = 'SPECIAL EDITION: PRINTING GREMLINS AT WORK';
 const FRONT_PAGE_FALLBACK_SUBHEAD = 'Article vault temporarily unavailable — dispatch desk investigating.';
 
+const newspaperDebugFlag = String(import.meta.env.VITE_NEWSPAPER_DEBUG ?? '').toLowerCase();
+const SHOW_NEWSPAPER_DEBUG =
+  import.meta.env.DEV && (newspaperDebugFlag === 'true' || newspaperDebugFlag === '1');
+
 const FALLBACK_DATA: NewspaperData = {
   mastheads: ['THE PARANOID TIMES'],
   ads: ['All advertising temporarily redacted.'],
@@ -601,6 +605,62 @@ const TabloidNewspaperV2 = ({
       cancelled = true;
     };
   }, [dataset, narrativePlayedCards, eventsTruthDelta, comboTruthDelta, comboSummary, agendaIssue?.id]);
+
+  useEffect(() => {
+    if (!SHOW_NEWSPAPER_DEBUG) {
+      return;
+    }
+    const debug = issue?.generatedStory?.debug;
+    if (!debug) {
+      return;
+    }
+    if (typeof console === 'undefined') {
+      return;
+    }
+
+    const groupLabel = `[Newspaper][GeneratedStory] template=${debug.templateId}`;
+    const canGroup = typeof console.groupCollapsed === 'function';
+    if (canGroup) {
+      console.groupCollapsed(groupLabel);
+    } else {
+      console.log(groupLabel);
+    }
+
+    console.log('Common tags:', debug.commonTags);
+
+    if (debug.verbs.length > 0) {
+      if (typeof console.table === 'function') {
+        console.table(
+          debug.verbs.map(entry => ({
+            cardId: entry.cardId,
+            cardName: entry.cardName,
+            player: entry.player,
+            tone: entry.tone ?? '(unknown)',
+            selectedVerb: entry.selected ?? '(none)',
+            source: entry.source,
+            articleId: entry.articleId ?? '(none)',
+          })),
+        );
+      } else {
+        for (const entry of debug.verbs) {
+          console.log('[Newspaper][Verb]', entry.cardId, {
+            cardName: entry.cardName,
+            player: entry.player,
+            tone: entry.tone,
+            selectedVerb: entry.selected,
+            source: entry.source,
+            articleId: entry.articleId,
+          });
+        }
+      }
+    } else {
+      console.log('No verb debug entries recorded.');
+    }
+
+    if (canGroup) {
+      console.groupEnd();
+    }
+  }, [issue]);
 
   const narrativeContext = useMemo(
     () => buildRoundContext(playerNarrativeCards, opponentNarrativeCards, eventsTruthDelta, comboTruthDelta),

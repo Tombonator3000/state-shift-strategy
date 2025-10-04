@@ -10,6 +10,7 @@
 - [Campaign arc progress telemetry](#campaign-arc-progress-telemetry)
 - [Secret agenda cookbook grid](#secret-agenda-cookbook-grid)
 - [UI feedback systems](#ui-feedback-systems)
+- [Newspaper debugging](#newspaper-debugging)
 
 ## Game loop fundamentals
 The MVP design defines a duel between the Truth Seekers and the Government, each managing Influence Points (IP), a shared Truth meter, and pressure on individual U.S. states. Win conditions include controlling 10 states, pushing Truth to faction-specific thresholds, or accumulating 300 IP.【F:DESIGN_DOC_MVP.md†L7-L63】 These core concepts are implemented directly in the runtime engine:
@@ -118,6 +119,13 @@ The table below keeps designers out of TypeScript while they balance the weights
 | `cryptid-rumble` | Plays during cryptid sightings and hotspot capture log events. |
 | `radio-static` | Used for hotspot expirations and static interference overlays. |
 | `stateCapture` | Click feedback when selecting states on the legacy map component. |
+
+## Newspaper debugging
+
+Front-page assembly exposes extra telemetry during local development. Set `VITE_NEWSPAPER_DEBUG=true` (or `1`) before running
+`npm run dev` to enable console logs from the Tabloid newspaper render. The flag is ignored in production builds and defaults to
+disabled, preventing debug chatter in shipped bundles. The console output summarizes the selected template, shared tags across the
+compiled articles, and the verb pools chosen for each card, matching the `GeneratedStory.debug` payload.
 | *(Attempted)* `state-capture` | Synergy activations attempt to play this hyphenated key (note: the manifest only exposes `stateCapture`). |
 | QA / settings hooks | In-game options expose a test button for the click SFX, and developer QA controls can audition any registered key. |
 | Manifest reference | Complete list of bundled SFX keys and file mappings lives in the manifest. |

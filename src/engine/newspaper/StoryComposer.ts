@@ -276,12 +276,25 @@ export interface CardStoryInput {
   issueId?: string;
 }
 
+export interface CardStoryVerbDebug {
+  pool: string[];
+  selected: string;
+  tone: Card['type'];
+}
+
+export interface CardStoryDebug {
+  templateId: string;
+  verb: CardStoryVerbDebug;
+  tagPool: string[];
+}
+
 export interface CardStory {
   headline: string;
   deck: string;
   paragraphs: string[];
   tags: string[];
   artHint: string;
+  debug: CardStoryDebug;
 }
 
 export function composeCardStory(input: CardStoryInput): CardStory {
@@ -396,6 +409,15 @@ export function composeCardStory(input: CardStoryInput): CardStory {
     paragraphs: chunkSentences(sentences.map(ensureSentence)),
     tags,
     artHint,
+    debug: {
+      templateId: `tone:${toneKey}`,
+      verb: {
+        pool: [...verbPool],
+        selected: verb,
+        tone: toneKey,
+      },
+      tagPool: Array.from(allowedTags),
+    },
   } satisfies CardStory;
 }
 
