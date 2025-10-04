@@ -1,89 +1,129 @@
-import type { Card } from '@/types';
+import type { CardArticle } from './articleBank';
+import type { PlayedCardMeta } from './mainStory';
 
-export type StoryTone = 'truth' | 'government';
-
-export interface StoryTemplate {
+export type HeadlineTemplate = {
   id: string;
-  headline: string;
-  deck: string;
-  body: string[];
-  imagePrompt: string;
-}
-
-export const VERB_POOLS: Record<StoryTone, string[]> = {
-  truth: ['EXPOSES', 'UNCOVERS', 'BROADCASTS', 'LEAKS', 'SPOTLIGHTS', 'AMPLIFIES'],
-  government: ['CONTAINS', 'REDACTS', 'SANITIZES', 'STABILIZES', 'DISMISSES', 'NEUTRALIZES'],
+  tone: 'truth' | 'gov';
+  compose(inputs: {
+    cards: PlayedCardMeta[];
+    articles: (CardArticle | null)[];
+    commonTags: string[];
+    pick: <T>(arr: T[], seedKey: string) => T;
+  }): { headline: string; subhead?: string; debugNote?: string };
 };
 
-export const BYLINE_POOLS: Record<StoryTone, string[]> = {
-  truth: [
-    'By: Field Unit 27-B/6',
-    'By: Rogue Desk of Disclosure',
-    'By: Signal-Watcher Syndicate',
-    'By: Anonymous Courier (Probably)',
-  ],
-  government: [
-    'By: Office of Narrative Compliance',
-    'By: Department of Plausible Updates',
-    'By: Clearance Channel Liaison',
-    'By: Bureau of Strategic Messaging',
-  ],
+const TRUTH_VERBS: Record<PlayedCardMeta['type'], string[]> = {
+  ATTACK: ['EXPOSES', 'BUSTS', 'LEAKS', 'BLOWS LID OFF', 'IGNITES'],
+  MEDIA: ['GOES LIVE', 'BROADCASTS', 'TRENDING', 'LEAKS'],
+  ZONE: ['MARCHES', 'SURGES', 'ERUPTS', 'HAUNTS', 'SWEEPS'],
 };
 
-export const DEFAULT_TAGS: Record<StoryTone, string[]> = {
-  truth: ['#TruthSignal', '#LeakSeason'],
-  government: ['#NarrativeContainment', '#OfficialChannel'],
+const GOV_EUPHEMISMS = ['Routine Incident', 'Administrative Test', 'Benign Anomaly', 'Training Exercise'];
+const GOV_MEDIA = ['Briefing Concluded', 'Statement Issued', 'Update Filed'];
+const GOV_ATTACK = ['Mitigation Successful', 'Containment Ongoing', 'Review Open'];
+const GOV_ZONE = ['Perimeter Established', 'Access Normalized', 'Calm Restored'];
+
+const govPoolForType = (cardType: PlayedCardMeta['type']): string[] => {
+  switch (cardType) {
+    case 'ATTACK':
+      return GOV_ATTACK;
+    case 'MEDIA':
+      return GOV_MEDIA;
+    case 'ZONE':
+    default:
+      return GOV_ZONE;
+  }
 };
 
-export const STORY_TEMPLATES: Record<StoryTone, StoryTemplate[]> = {
-  truth: [
-    {
-      id: 'truth-broadcast-surge',
-      headline: '{primaryNameUpper} {verb} {tagHeadline}',
-      deck: 'Citizen transmitters flood {tagSummary} back into daylight.',
-      body: [
-        '{cardListPlain} circulate {tagPhrase} receipts after {primaryName} hits the feeds.',
-        'Witnesses swear the newsroom smells like ozone whenever {tagLine} trends.',
-      ],
-      imagePrompt:
-        'tabloid collage, chaotic neon annotations, {primaryName} spotlight, references to {tagSummary}, halftone texture',
-    },
-    {
-      id: 'truth-insider-signal',
-      headline: 'INSIDERS {verb} {tagHeadline} VIA {primaryNameUpper}',
-      deck: '{tagSummary} returns to circulation despite official denials.',
-      body: [
-        'Underground channels credit {primaryName} with rerouting the narrative.',
-        'Analysts note {cardListPlain} cross-post fragments linking {tagPhrase} to midnight transmissions.',
-      ],
-      imagePrompt:
-        'zine collage, photocopied clippings, {primaryName} headline circled in red ink, graffiti {tagLine}',
-    },
-  ],
-  government: [
-    {
-      id: 'gov-bulletin-control',
-      headline: '{primaryNameUpper} {verb} {tagHeadline}',
-      deck: 'Official communique assures stakeholders {tagSummary} remains contained.',
-      body: [
-        '{cardListPlain} file counter-messaging briefings to neutralize {tagPhrase}.',
-        'Compliance desk reminds outlets to reference memo {tagLine} before broadcasting.',
-      ],
-      imagePrompt:
-        'sterile government dossier, redacted text, {primaryName} headline, {tagSummary}, muted palette',
-    },
-    {
-      id: 'gov-audit-review',
-      headline: '{primaryNameUpper} TRIGGERS {verb} REVIEW OF {tagHeadline}',
-      deck: 'Compliance board declares {tagSummary} an internal matter.',
-      body: [
-        'Spokespeople cite {primaryName} as evidence protocols remain agile.',
-        'Internal monitors confirm {cardListPlain} rerouted chatter about {tagPhrase} to secure channels.',
-      ],
-      imagePrompt:
-        'monochrome surveillance still, stacks of binders, {primaryName} file, barcode overlays, cool desaturated tones',
-    },
-  ],
+const truthHeadlineA: HeadlineTemplate = {
+  id: 'truth:triad:surge',
+  tone: 'truth',
+  compose({ cards, pick }) {
+    const [subject, second, third] = cards;
+    const verbs = [subject, second, third].map((card, index) => {
+      const pool = TRUTH_VERBS[card?.type ?? 'MEDIA'] ?? TRUTH_VERBS.MEDIA;
+      return pick(pool, `truth:verb:${index}`);
+    });
+
+    const subjectName = subject?.name?.toUpperCase() ?? 'UNKNOWN SUBJECT';
+    const secondName = second?.name?.toUpperCase() ?? 'UNKNOWN ALLY';
+    const thirdName = third?.name?.toUpperCase() ?? 'UNKNOWN ALLY';
+
+    const headline = `${subjectName} ${verbs[0] ?? 'IGNITES'} AS ${secondName} ${verbs[1] ?? 'BROADCASTS'} — ${thirdName} ${verbs[2] ?? 'SURGES'}!`;
+
+    return {
+      headline,
+      debugNote: verbs.join('|'),
+    };
+  },
 };
 
-export type StoryCardLike = Pick<Card, 'id' | 'name' | 'faction'> & { tags?: string[] };
+const truthHeadlineB: HeadlineTemplate = {
+  id: 'truth:triad:alert',
+  tone: 'truth',
+  compose({ cards, pick }) {
+    const [subject, second, third] = cards;
+    const verbs = [subject, second, third].map((card, index) => {
+      const pool = TRUTH_VERBS[card?.type ?? 'MEDIA'] ?? TRUTH_VERBS.MEDIA;
+      return pick(pool, `truth:verb-alt:${index}`);
+    });
+
+    const subjectName = subject?.name?.toUpperCase() ?? 'UNKNOWN SUBJECT';
+    const secondName = second?.name?.toUpperCase() ?? 'UNKNOWN ALLY';
+    const thirdName = third?.name?.toUpperCase() ?? 'UNKNOWN ALLY';
+
+    const headline = `${subjectName}: ${verbs[0] ?? 'EXPOSES'}! ${secondName} ${verbs[1] ?? 'BROADCASTS'}, ${thirdName} ${verbs[2] ?? 'SURGES'}!`;
+
+    return {
+      headline,
+      debugNote: verbs.join('|'),
+    };
+  },
+};
+
+const govHeadlineA: HeadlineTemplate = {
+  id: 'gov:triad:bulletin',
+  tone: 'gov',
+  compose({ cards, pick }) {
+    const [subject, second, third] = cards;
+    const subjectName = subject?.name?.toUpperCase() ?? 'OFFICIAL CHANNEL';
+    const secondName = second?.name?.toUpperCase() ?? 'AUXILIARY UNIT';
+    const thirdName = third?.name?.toUpperCase() ?? 'AUXILIARY UNIT';
+
+    const euphemism = pick(GOV_EUPHEMISMS, 'gov:euph');
+    const phrase2 = pick(govPoolForType(second?.type ?? 'ZONE'), 'gov:phrase:1');
+    const phrase3 = pick(govPoolForType(third?.type ?? 'ZONE'), 'gov:phrase:2');
+
+    const headline = `${subjectName}: ${euphemism}; ${secondName} ${phrase2}; ${thirdName} ${phrase3}`;
+
+    return {
+      headline,
+      debugNote: [euphemism, phrase2, phrase3].join('|'),
+    };
+  },
+};
+
+const govHeadlineB: HeadlineTemplate = {
+  id: 'gov:triad:status',
+  tone: 'gov',
+  compose({ cards, pick }) {
+    const [subject, second, third] = cards;
+    const subjectName = subject?.name?.toUpperCase() ?? 'OFFICIAL CHANNEL';
+    const secondName = second?.name?.toUpperCase() ?? 'AUXILIARY UNIT';
+    const thirdName = third?.name?.toUpperCase() ?? 'AUXILIARY UNIT';
+
+    const euphemism = pick(GOV_EUPHEMISMS, 'gov:euph:status');
+    const phrase2 = pick(govPoolForType(second?.type ?? 'ZONE'), 'gov:phrase:status:1');
+    const phrase3 = pick(govPoolForType(third?.type ?? 'ZONE'), 'gov:phrase:status:2');
+
+    const headline = `${subjectName}: CONFIRMS ${euphemism}; ${secondName} ${phrase2}; ${thirdName} ${phrase3}`;
+
+    return {
+      headline,
+      debugNote: [euphemism, phrase2, phrase3].join('|'),
+    };
+  },
+};
+
+export const truthTemplates: HeadlineTemplate[] = [truthHeadlineA, truthHeadlineB];
+export const govTemplates: HeadlineTemplate[] = [govHeadlineA, govHeadlineB];

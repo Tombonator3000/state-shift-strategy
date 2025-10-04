@@ -3339,3 +3339,38 @@ html, body, #root {
   0%, 100% { opacity: 0.8; }
   50% { opacity: 1; }
 }
+
+.frontpage-main .headline {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.frontpage-main .subhead {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.frontpage-secondary .section-title {
+  margin-top: 24px;
+  font-weight: 700;
+}
+
+.frontpage .grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.frontpage .pill {
+  font-size: 12px;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.frontpage .muted {
+  opacity: 0.75;
+}

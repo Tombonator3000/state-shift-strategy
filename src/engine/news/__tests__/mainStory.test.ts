@@ -1,93 +1,97 @@
 import { describe, expect, test } from 'bun:test';
 
-import { generateMainStory } from '../mainStory';
-import type { ArticleBank, CardArticle } from '../articleBank';
-import type { StoryCardLike } from '../templates';
+import { generateMainStory, type PlayedCardMeta } from '../mainStory';
+import type { CardArticle } from '../articleBank';
 
-const createArticle = (overrides: Partial<CardArticle> = {}): CardArticle => ({
-  id: overrides.id ?? 'card-alpha',
-  tone: overrides.tone ?? 'truth',
-  tags: overrides.tags ?? ['#Signal'],
-  headline: overrides.headline ?? 'ALPHA DISCOVERY CONFIRMED',
-  subhead: overrides.subhead ?? 'Operatives race to verify leaked intel.',
-  byline: overrides.byline ?? 'By: Field Unit 27-B/6',
-  body: overrides.body ?? 'Agents report unusual spikes across the grid.',
-  imagePrompt: overrides.imagePrompt,
-});
-
-const createBank = (articles: CardArticle[]): ArticleBank => ({
-  articles,
-  byId: new Map(articles.map(article => [article.id, article])),
-});
-
-const createCard = (overrides: Partial<StoryCardLike> & Pick<StoryCardLike, 'id'>): StoryCardLike => ({
-  id: overrides.id,
-  name: overrides.name ?? overrides.id,
-  faction: overrides.faction ?? 'truth',
-  tags: overrides.tags ?? [],
+const mkCard = (id: string, name: string, type: PlayedCardMeta['type'], faction: PlayedCardMeta['faction']): PlayedCardMeta => ({
+  id,
+  name,
+  type,
+  faction,
 });
 
 describe('generateMainStory', () => {
-  test('normalizes tone based on faction input', () => {
-    const truthCard = createCard({ id: 'truth-1', faction: 'Truth Coalition' });
-    const truthArticle = createArticle({ id: 'truth-1' });
-    const truthResult = generateMainStory({ bank: createBank([truthArticle]), cards: [truthCard], activeFaction: 'Truth Coalition' });
-
-    expect(truthResult.article.tone).toBe('truth');
-    expect(truthResult.debug.fallback).toBe(false);
-
-    const govCard = createCard({ id: 'gov-1', faction: 'GOV OPS' });
-    const govArticle = createArticle({ id: 'gov-1', tone: 'government', headline: 'DIRECTORATE RETAINS CONTROL' });
-    const govResult = generateMainStory({ bank: createBank([govArticle]), cards: [govCard], activeFaction: 'Gov Directorate' });
-
-    expect(govResult.article.tone).toBe('government');
-    expect(govResult.debug.fallback).toBe(false);
-  });
-
-  test('surfaces shared tags across cards in fallback stories', () => {
-    const cards = [
-      createCard({ id: 'alpha', name: 'Alpha Agent', tags: ['Mystery Signal', '#Network'] }),
-      createCard({ id: 'beta', name: 'Beta Analyst', tags: ['mystery signal', 'Countermeasure'] }),
+  test('Truth: én samlet headline med verb per type', () => {
+    const played = [
+      mkCard('T1', 'Paranoia Rally', 'ZONE', 'TRUTH'),
+      mkCard('T2', 'Community Leak Drop', 'ATTACK', 'TRUTH'),
+      mkCard('T3', 'Mothman Public Warning', 'MEDIA', 'TRUTH'),
     ];
+    const lookup = (id: string): CardArticle | null => ({
+      id,
+      tone: 'truth',
+      tags: id === 'T3' ? ['mothman', 'cryptid'] : ['cryptid'],
+    });
 
-    const result = generateMainStory({ bank: createBank([]), cards, activeFaction: 'Truth' });
+    const story = generateMainStory(played, lookup);
 
-    expect(result.debug.fallback).toBe(true);
-    expect(result.debug.commonTags).toContain('#MysterySignal');
-    expect(result.article.tags).toContain('#MysterySignal');
+    expect(story.headline).toMatch(/PARANOIA RALLY .* AS COMMUNITY LEAK DROP .* — MOTHMAN PUBLIC WARNING .*!/);
+    expect((story.headline.match(/—/g) ?? []).length).toBe(1);
+    expect(story.subhead).toContain('cryptid');
+    expect(story.debug?.subject).toBe('PARANOIA RALLY');
   });
 
-  test('builds a mythic fallback article when no cards provide headlines', () => {
-    const result = generateMainStory({ bank: createBank([]), cards: [], activeFaction: undefined });
-
-    expect(result.debug.fallback).toBe(true);
-    expect(result.debug.templateId).not.toBeNull();
-    expect(result.article.id).toMatch(/^generated-truth-/);
-    expect(result.article.headline).toBe(result.article.headline.toUpperCase());
-  });
-
-  test('produces deterministic output for identical inputs', () => {
-    const cards = [
-      createCard({ id: 'alpha', faction: 'truth', tags: ['Signal'] }),
-      createCard({ id: 'beta', faction: 'truth', tags: ['Counter'] }),
+  test('Gov: eufemisme + fraser; ikke limte deloverskrifter', () => {
+    const played = [
+      mkCard('G1', 'Council in the Smoke', 'MEDIA', 'GOV'),
+      mkCard('G2', 'Psychological Operations Cell', 'ATTACK', 'GOV'),
+      mkCard('G3', 'Compliance Audit', 'ZONE', 'GOV'),
     ];
-    const articles = [createArticle({ id: 'alpha', headline: 'ALPHA FIELD REPORT' })];
-    const bank = createBank(articles);
+    const lookup = (_id: string): CardArticle | null => ({ id: _id, tone: 'gov', tags: ['coverup'] });
 
-    const first = generateMainStory({ bank, cards, activeFaction: 'truth' });
-    const second = generateMainStory({ bank, cards, activeFaction: 'truth' });
+    const story = generateMainStory(played, lookup);
 
-    expect(second).toEqual(first);
+    expect(story.headline).toMatch(/COUNCIL IN THE SMOKE: .*; .*; .*/);
+    expect(story.headline).not.toMatch(/✦|\|/);
+    expect(story.subhead).toMatch(/Transparency achieved via prudent opacity/);
+    expect(story.debug?.parts?.length ?? 0).toBeGreaterThanOrEqual(3);
   });
 
-  test('falls back when referenced card articles are missing', () => {
-    const cards = [createCard({ id: 'missing', faction: 'gov force', tags: ['Containment'] })];
+  test('subhead references up to two shared tags', () => {
+    const played = [
+      mkCard('S1', 'Skywatch Network', 'MEDIA', 'TRUTH'),
+      mkCard('S2', 'Orbital Watch', 'ZONE', 'TRUTH'),
+      mkCard('S3', 'Signal Uplink', 'ATTACK', 'TRUTH'),
+    ];
+    const lookup = (_id: string): CardArticle | null => ({
+      id: _id,
+      tone: 'truth',
+      tags: ['ufo', 'alien', 'attack'],
+    });
 
-    const result = generateMainStory({ bank: createBank([]), cards, activeFaction: 'gov force' });
+    const story = generateMainStory(played, lookup);
 
-    expect(result.debug.fallback).toBe(true);
-    expect(result.article.tone).toBe('government');
-    expect(result.article.tags).toEqual(expect.arrayContaining(['#NarrativeContainment', '#OfficialChannel']));
-    expect(result.article.byline).toMatch(/By:/);
+    expect(story.subhead).toMatch(/ufo, alien/);
+    expect(story.debug?.commonTags).toEqual(['ufo', 'alien']);
+  });
+
+  test('deterministic headline regardless of card order', () => {
+    const cards = [
+      mkCard('A1', 'First Contact', 'MEDIA', 'TRUTH'),
+      mkCard('A2', 'Deep Vault Breach', 'ATTACK', 'TRUTH'),
+      mkCard('A3', 'Rally of Witnesses', 'ZONE', 'TRUTH'),
+    ];
+    const lookup = (_id: string): CardArticle | null => ({ id: _id, tone: 'truth', tags: ['witness'] });
+
+    const storyA = generateMainStory(cards, lookup);
+    const storyB = generateMainStory([...cards].reverse(), lookup);
+
+    expect(storyB.headline).toBe(storyA.headline);
+    expect(storyB.subhead).toBe(storyA.subhead);
+    expect(storyB.debug?.templateId).toBe(storyA.debug?.templateId);
+  });
+
+  test('falls back to subject-based selection when mythic tags absent', () => {
+    const played = [
+      mkCard('F1', 'Zone Sweep', 'ZONE', 'TRUTH'),
+      mkCard('F2', 'Media Blitz', 'MEDIA', 'TRUTH'),
+      mkCard('F3', 'Attack Vector', 'ATTACK', 'TRUTH'),
+    ];
+    const lookup = (_id: string): CardArticle | null => ({ id: _id, tone: 'truth', tags: ['analysis'] });
+
+    const story = generateMainStory(played, lookup);
+
+    expect(story.debug?.subject).toBe('ZONE SWEEP');
+    expect(story.debug?.templateId).toMatch(/truth/);
   });
 });

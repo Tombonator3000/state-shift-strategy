@@ -3,6 +3,7 @@ import type { NewspaperData } from '@/lib/newspaperData';
 import type { Card } from '@/types';
 import { loadCardLexicon } from './CardLexicon';
 import { loadArticleBank, type CardArticle } from '@/engine/news/articleBank';
+import { generateMainStory, type PlayedCardMeta, type GeneratedStory as MainGeneratedStory } from '@/engine/news/mainStory';
 import { composeCardStory, composeComboStory, type CardStory, type ComboStory } from './StoryComposer';
 import type { ComboSummary } from '@/game/combo.types';
 import type { AgendaIssueId } from '@/data/agendaIssues';
@@ -43,30 +44,11 @@ export interface GeneratedStoryArticle {
   isFallback: boolean;
 }
 
-export interface GeneratedStoryVerbDebug {
-  cardId: string;
-  cardName: string;
-  articleId: string | null;
-  player: 'human' | 'ai';
-  tone: Card['type'] | null;
-  selected: string | null;
-  pool: string[];
-  source: 'article-bank' | 'fallback' | 'story-composer';
-}
-
-export interface GeneratedStoryDebug {
-  templateId: string;
-  commonTags: string[];
-  verbs: GeneratedStoryVerbDebug[];
-}
-
-export interface GeneratedStory {
-  headline: string;
-  subhead: string;
-  byline: string;
+export interface FrontPagePackage {
+  main: MainGeneratedStory | null;
   articles: GeneratedStoryArticle[];
-  isFallback: boolean;
-  debug: GeneratedStoryDebug;
+  fallbackHeadline: string;
+  fallbackSubhead: string;
 }
 
 export interface NarrativeIssue {
@@ -78,7 +60,7 @@ export interface NarrativeIssue {
   sourceLine: string;
   stamps: { breaking: string | null; classified: string | null };
   supplements: { ads: string[]; conspiracies: string[]; weather: string };
-  generatedStory: GeneratedStory;
+  generatedStory: FrontPagePackage;
 }
 
 export interface NarrativeContext {
@@ -153,6 +135,28 @@ const formatPressureLabel = (value: number | undefined | null): string | null =>
   }
   const sign = value > 0 ? '+' : '−';
   return `${sign}${Math.abs(value)} Pressure`;
+};
+
+const normalizeCardType = (value: Card['type']): PlayedCardMeta['type'] | null => {
+  const upper = String(value ?? '').toUpperCase();
+  if (upper === 'ATTACK' || upper === 'MEDIA' || upper === 'ZONE') {
+    return upper as PlayedCardMeta['type'];
+  }
+  if (upper.includes('ATTACK')) {
+    return 'ATTACK';
+  }
+  if (upper.includes('MEDIA')) {
+    return 'MEDIA';
+  }
+  if (upper.includes('ZONE')) {
+    return 'ZONE';
+  }
+  return null;
+};
+
+const normalizeFaction = (value: Card['faction']): PlayedCardMeta['faction'] => {
+  const upper = String(value ?? '').toUpperCase();
+  return upper.includes('GOV') ? 'GOV' : 'TRUTH';
 };
 
 const resolveStateName = (input?: string | null): string | null => {
@@ -303,24 +307,6 @@ const splitArticleBody = (body: CardArticle['body'] | undefined): string[] => {
     .filter(Boolean);
 };
 
-const deriveCommonTags = (articles: GeneratedStoryArticle[]): string[] => {
-  if (articles.length === 0) {
-    return [];
-  }
-
-  let shared = new Set<string>(articles[0]?.tags ?? []);
-  for (let index = 1; index < articles.length; index += 1) {
-    const article = articles[index];
-    const next = new Set<string>((article?.tags ?? []).filter(Boolean));
-    shared = new Set<string>(Array.from(shared).filter(tag => next.has(tag)));
-    if (shared.size === 0) {
-      break;
-    }
-  }
-
-  return Array.from(shared).sort();
-};
-
 const buildGeneratedStoryArticle = (
   entry: PlayedCardInput,
   article: CardArticle | null,
@@ -359,8 +345,6 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
   const lexicon = await loadCardLexicon();
   let articleBank: Awaited<ReturnType<typeof loadArticleBank>> | null = null;
 
-  const storyDebugByCardId = new Map<string, CardStory['debug']>();
-
   try {
     articleBank = await loadArticleBank();
   } catch (error) {
@@ -392,8 +376,6 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
       capturedStateNames: capturedNames,
       issueId: input.agendaIssueId,
     });
-    storyDebugByCardId.set(entry.card.id, story.debug);
-
     return mapCardToArticle(entry, story, truth, ip, pressure, targetName, capturedNames);
   };
 
@@ -431,59 +413,35 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
 
   const selectedCards = playerCards.slice(0, 3);
   const generatedArticles = selectedCards.map(entry => {
-    const article = articleBank?.byId?.get(entry.card.id) ?? null;
+    const article = articleBank?.getById?.(entry.card.id) ?? null;
     return buildGeneratedStoryArticle(entry, article);
   });
 
-  const validArticles = generatedArticles.filter(article => !article.isFallback);
-  const combinedHeadline = validArticles.length
-    ? validArticles.map(article => article.headline).join(' ✦ ')
-    : FALLBACK_FRONT_PAGE_HEADLINE;
-  const combinedSubhead = validArticles.length
-    ? validArticles
-        .map(article => article.subhead)
-        .filter(Boolean)
-        .join(' | ') || selectedCards.map(entry => entry.card.name).join(' • ') || FALLBACK_FRONT_PAGE_SUBHEAD
-    : FALLBACK_FRONT_PAGE_SUBHEAD;
+  const frontPageCards: PlayedCardMeta[] = selectedCards
+    .map(entry => {
+      const type = normalizeCardType(entry.card.type);
+      if (!type) {
+        return null;
+      }
+      return {
+        id: entry.card.id,
+        name: entry.card.name,
+        type,
+        faction: normalizeFaction(entry.card.faction),
+      } satisfies PlayedCardMeta;
+    })
+    .filter((meta): meta is PlayedCardMeta => Boolean(meta));
 
-  const verbDebug: GeneratedStoryVerbDebug[] = generatedArticles.map(article => {
-    const storyDebug = storyDebugByCardId.get(article.cardId) ?? null;
-    const source: GeneratedStoryVerbDebug['source'] = article.isFallback
-      ? 'fallback'
-      : storyDebug
-        ? 'story-composer'
-        : 'article-bank';
+  const mainStory: MainGeneratedStory | null = frontPageCards.length === 3
+    ? generateMainStory(frontPageCards, id => articleBank?.getById?.(id) ?? null)
+    : null;
 
-    return {
-      cardId: article.cardId,
-      cardName: article.cardName,
-      articleId: article.articleId,
-      player: article.player,
-      tone: storyDebug?.verb.tone ?? null,
-      selected: storyDebug?.verb.selected ?? null,
-      pool: [...(storyDebug?.verb.pool ?? [])],
-      source,
-    } satisfies GeneratedStoryVerbDebug;
-  });
-
-  const templateId = validArticles.length === generatedArticles.length
-    ? 'article-bank:v1'
-    : validArticles.length === 0
-      ? 'fallback:v1'
-      : 'hybrid:v1';
-
-  const generatedStory: GeneratedStory = {
-    headline: combinedHeadline,
-    subhead: combinedSubhead,
-    byline: validArticles[0]?.byline ?? FALLBACK_BYLINE,
+  const generatedStory: FrontPagePackage = {
+    main: mainStory,
     articles: generatedArticles,
-    isFallback: validArticles.length === 0,
-    debug: {
-      templateId,
-      commonTags: deriveCommonTags(generatedArticles),
-      verbs: verbDebug,
-    },
-  } satisfies GeneratedStory;
+    fallbackHeadline: FALLBACK_FRONT_PAGE_HEADLINE,
+    fallbackSubhead: FALLBACK_FRONT_PAGE_SUBHEAD,
+  } satisfies FrontPagePackage;
 
   return {
     hero: heroArticle ?? null,
