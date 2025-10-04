@@ -87,7 +87,14 @@ All colors MUST be HSL.
     --government-dark: 220 100% 8%;
     --truth-red: 0 85% 55%;
     --secret-red: 0 100% 40%;
-    
+
+    /* Victory celebration palette */
+    --victory-gradient-start: 52.76 98.31% 76.86%;
+    --victory-gradient-mid: 0 84.24% 60.2%;
+    --victory-gradient-end: 0 73.71% 41.76%;
+    --victory-foreground: 0 0% 5%;
+    --victory-accent: 54.92 96.72% 88.04%;
+
     /* Newspaper colors */
     --newspaper-bg: 45 15% 98%;
     --newspaper-text: 0 0% 5%;
