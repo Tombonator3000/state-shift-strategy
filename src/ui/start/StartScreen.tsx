@@ -121,7 +121,7 @@ const StartScreen = ({
             className="ad-card"
             onClick={handleArticleAction(onManageExpansions)}
           >
-            Sell Expansions!
+            Editors’ Expansion Scoop!
             <small style={{ display: 'block', fontFamily: 'monospace' }}>Story on Page 6</small>
           </button>
           <button
