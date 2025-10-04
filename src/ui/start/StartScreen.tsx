@@ -129,7 +129,7 @@ const StartScreen = ({
             className="ad-card"
             onClick={handleArticleAction(onOptions)}
           >
-            Top Secret Settings
+            CLASSIFIED CONTROL ROOM!
           </button>
           <button
             type="button"
