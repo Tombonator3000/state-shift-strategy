@@ -9,7 +9,13 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Experts confirm: pixels don't lie."
+    "flavor": "Experts confirm: pixels don't lie.",
+    "tags": [
+      "bigfoot",
+      "cryptid",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-002",
@@ -21,7 +27,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "The King recommends the midnight pancakes."
+    "flavor": "The King recommends the midnight pancakes.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-003",
@@ -33,7 +44,11 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Sponsored by Doomsday Beans™."
+    "flavor": "Sponsored by Doomsday Beans™.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-004",
@@ -45,7 +60,13 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "His platform: windows with no curtains."
+    "flavor": "His platform: windows with no curtains.",
+    "tags": [
+      "bat-boy",
+      "cryptid",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-005",
@@ -59,7 +80,12 @@
         "opponent": 1
       }
     },
-    "flavor": "Rice thrown… immediately abducted."
+    "flavor": "Rice thrown… immediately abducted.",
+    "tags": [
+      "alien",
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-006",
@@ -71,7 +97,11 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "They politely asked for tea."
+    "flavor": "They politely asked for tea.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-007",
@@ -83,7 +113,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Halftime show beamed in from Andromeda."
+    "flavor": "Halftime show beamed in from Andromeda.",
+    "tags": [
+      "truth",
+      "ufo",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-008",
@@ -95,7 +130,11 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "#NoFilter #DefinitelyReal"
+    "flavor": "#NoFilter #DefinitelyReal",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-009",
@@ -109,7 +148,12 @@
         "opponent": 2
       }
     },
-    "flavor": "He composts the tabloids."
+    "flavor": "He composts the tabloids.",
+    "tags": [
+      "attack",
+      "elvis",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-010",
@@ -121,7 +165,11 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Ink smudges reveal more than black bars."
+    "flavor": "Ink smudges reveal more than black bars.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-011",
@@ -133,7 +181,11 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Chat: 'first!'"
+    "flavor": "Chat: 'first!'",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-012",
@@ -145,7 +197,12 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "He brought snacks. Questionable snacks."
+    "flavor": "He brought snacks. Questionable snacks.",
+    "tags": [
+      "florida-man",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-013",
@@ -157,7 +214,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Tip jar shaped like a saucer."
+    "flavor": "Tip jar shaped like a saucer.",
+    "tags": [
+      "area51",
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-014",
@@ -171,7 +234,11 @@
         "opponent": 1
       }
     },
-    "flavor": "Phones are better than binoculars."
+    "flavor": "Phones are better than binoculars.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-015",
@@ -185,7 +252,11 @@
         "opponent": 2
       }
     },
-    "flavor": "BYO tractor."
+    "flavor": "BYO tractor.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-016",
@@ -200,7 +271,12 @@
         "opponentPercent": 0.08
       }
     },
-    "flavor": "The squeak heard round the world."
+    "flavor": "The squeak heard round the world.",
+    "tags": [
+      "attack",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-017",
@@ -212,7 +288,14 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Historic handshake, very furry."
+    "flavor": "Historic handshake, very furry.",
+    "tags": [
+      "bat-boy",
+      "bigfoot",
+      "cryptid",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-018",
@@ -224,7 +307,13 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Thank you, interstellar much."
+    "flavor": "Thank you, interstellar much.",
+    "tags": [
+      "elvis",
+      "media",
+      "truth",
+      "ufo"
+    ]
   },
   {
     "id": "TRUTH-019",
@@ -236,7 +325,14 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Rollback prices on cursed dolls."
+    "flavor": "Rollback prices on cursed dolls.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "location",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-020",
@@ -248,7 +344,12 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Free tractor rides included."
+    "flavor": "Free tractor rides included.",
+    "tags": [
+      "location",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-021",
@@ -260,7 +361,13 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Please don't feed the senator."
+    "flavor": "Please don't feed the senator.",
+    "tags": [
+      "bigfoot",
+      "cryptid",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-022",
@@ -272,7 +379,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Burning love, steady income."
+    "flavor": "Burning love, steady income.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-023",
@@ -284,7 +396,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Knitting needles levitate on Tuesdays."
+    "flavor": "Knitting needles levitate on Tuesdays.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-024",
@@ -296,7 +414,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Ink stains reveal hidden messages."
+    "flavor": "Ink stains reveal hidden messages.",
+    "tags": [
+      "media",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-025",
@@ -308,7 +431,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Room service knocks itself."
+    "flavor": "Room service knocks itself.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-026",
@@ -320,7 +449,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Static carries secrets."
+    "flavor": "Static carries secrets.",
+    "tags": [
+      "location",
+      "media",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-027",
@@ -332,7 +467,11 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Stamped 'definitely not a front'."
+    "flavor": "Stamped 'definitely not a front'.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-028",
@@ -344,7 +483,11 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "No refunds on splash damage."
+    "flavor": "No refunds on splash damage.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-029",
@@ -356,7 +499,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Wax figures hum suspiciously on Thursdays."
+    "flavor": "Wax figures hum suspiciously on Thursdays.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-030",
@@ -368,7 +516,11 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Tilt-a-Whirl screams back."
+    "flavor": "Tilt-a-Whirl screams back.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-031",
@@ -382,7 +534,11 @@
         "opponent": 1
       }
     },
-    "flavor": "Family-pack protection."
+    "flavor": "Family-pack protection.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-032",
@@ -396,7 +552,12 @@
         "opponent": 2
       }
     },
-    "flavor": "AM band, PM truths."
+    "flavor": "AM band, PM truths.",
+    "tags": [
+      "attack",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-033",
@@ -410,7 +571,12 @@
         "opponent": 2
       }
     },
-    "flavor": "Front page beats front line."
+    "flavor": "Front page beats front line.",
+    "tags": [
+      "attack",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-034",
@@ -424,7 +590,13 @@
         "opponent": 2
       }
     },
-    "flavor": "They ain't afraid of your hand size."
+    "flavor": "They ain't afraid of your hand size.",
+    "tags": [
+      "attack",
+      "ghost",
+      "haunted",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-035",
@@ -439,7 +611,11 @@
         "opponentPercent": 0.08
       }
     },
-    "flavor": "Keynote featuring laser pointer to Orion."
+    "flavor": "Keynote featuring laser pointer to Orion.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-036",
@@ -453,7 +629,11 @@
         "opponent": 1
       }
     },
-    "flavor": "Hold, your call is very important to justice."
+    "flavor": "Hold, your call is very important to justice.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-037",
@@ -468,7 +648,11 @@
         "opponentPercent": 0.1
       }
     },
-    "flavor": "Uploaded by user 'ghost_admin'."
+    "flavor": "Uploaded by user 'ghost_admin'.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-038",
@@ -482,7 +666,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Everybody saw something."
+    "flavor": "Everybody saw something.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-039",
@@ -498,7 +686,11 @@
       },
       "discardOpponent": 1
     },
-    "flavor": "Heavily unredacted, lightly folded."
+    "flavor": "Heavily unredacted, lightly folded.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-040",
@@ -512,7 +704,13 @@
         "opponent": 2
       }
     },
-    "flavor": "Those wings weren't for show."
+    "flavor": "Those wings weren't for show.",
+    "tags": [
+      "attack",
+      "cryptid",
+      "mothman",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-041",
@@ -524,7 +722,12 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Cranial shine, divine design."
+    "flavor": "Cranial shine, divine design.",
+    "tags": [
+      "alien",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-042",
@@ -536,7 +739,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Neighborhood eyes beat satellite spies."
+    "flavor": "Neighborhood eyes beat satellite spies.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-043",
@@ -548,7 +755,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Chant louder, doubt quieter."
+    "flavor": "Chant louder, doubt quieter.",
+    "tags": [
+      "protest",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-044",
@@ -560,7 +772,11 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Invisible hands hold your hand."
+    "flavor": "Invisible hands hold your hand.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-045",
@@ -572,7 +788,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Broadcast jammed by cosmic drizzle."
+    "flavor": "Broadcast jammed by cosmic drizzle.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-046",
@@ -584,7 +804,11 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Many eyes, fewer lies."
+    "flavor": "Many eyes, fewer lies.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-047",
@@ -596,7 +820,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Coupons clipped from reality."
+    "flavor": "Coupons clipped from reality.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-048",
@@ -608,7 +836,13 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Socks for enormous feet sell out instantly."
+    "flavor": "Socks for enormous feet sell out instantly.",
+    "tags": [
+      "bigfoot",
+      "cryptid",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-049",
@@ -620,7 +854,12 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "All shook up… and tuned in."
+    "flavor": "All shook up… and tuned in.",
+    "tags": [
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-050",
@@ -632,7 +871,13 @@
     "effects": {
       "truthDelta": 4
     },
-    "flavor": "Running for Senate (again)."
+    "flavor": "Running for Senate (again).",
+    "tags": [
+      "bat-boy",
+      "cryptid",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-051",
@@ -646,7 +891,13 @@
         "opponent": 1
       }
     },
-    "flavor": "Security was no match for flip-flops and fury."
+    "flavor": "Security was no match for flip-flops and fury.",
+    "tags": [
+      "attack",
+      "florida-man",
+      "truth",
+      "ufo"
+    ]
   },
   {
     "id": "TRUTH-052",
@@ -658,7 +909,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Campaign slogan: 'More Screams, Less Taxes.'"
+    "flavor": "Campaign slogan: 'More Screams, Less Taxes.'",
+    "tags": [
+      "bat-boy",
+      "cryptid",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-053",
@@ -670,7 +927,12 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Sunday service includes suspicious sequins."
+    "flavor": "Sunday service includes suspicious sequins.",
+    "tags": [
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-054",
@@ -684,7 +946,13 @@
         "opponent": 1
       }
     },
-    "flavor": "Best at bedtime stories, worst at curfew."
+    "flavor": "Best at bedtime stories, worst at curfew.",
+    "tags": [
+      "alien",
+      "attack",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-055",
@@ -696,7 +964,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Thank you, fried much."
+    "flavor": "Thank you, fried much.",
+    "tags": [
+      "elvis",
+      "roswell",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-056",
@@ -708,7 +982,12 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Powered entirely by gator energy drinks."
+    "flavor": "Powered entirely by gator energy drinks.",
+    "tags": [
+      "florida-man",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-057",
@@ -720,7 +999,13 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Comment section full of ghosts."
+    "flavor": "Comment section full of ghosts.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-058",
@@ -734,7 +1019,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Sprinkles cover more than sugar."
+    "flavor": "Sprinkles cover more than sugar.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-059",
@@ -746,7 +1035,13 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Major: Paranormal Political Science."
+    "flavor": "Major: Paranormal Political Science.",
+    "tags": [
+      "bat-boy",
+      "cryptid",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-060",
@@ -758,7 +1053,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Corn dogs and hound dogs."
+    "flavor": "Corn dogs and hound dogs.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-061",
@@ -770,7 +1070,13 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "The aliens subscribed instantly."
+    "flavor": "The aliens subscribed instantly.",
+    "tags": [
+      "florida-man",
+      "media",
+      "truth",
+      "ufo"
+    ]
   },
   {
     "id": "TRUTH-062",
@@ -784,7 +1090,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Hallelujah, the files are open."
+    "flavor": "Hallelujah, the files are open.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-063",
@@ -798,7 +1108,13 @@
         "opponent": 2
       }
     },
-    "flavor": "Final rose withheld for national security."
+    "flavor": "Final rose withheld for national security.",
+    "tags": [
+      "attack",
+      "bat-boy",
+      "cryptid",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-064",
@@ -813,7 +1129,13 @@
         "opponentPercent": 0.12
       }
     },
-    "flavor": "His space suit sparkles."
+    "flavor": "His space suit sparkles.",
+    "tags": [
+      "attack",
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-065",
@@ -828,7 +1150,13 @@
         "opponentPercent": 0.1
       }
     },
-    "flavor": "Turns out interns shouldn't have clearance."
+    "flavor": "Turns out interns shouldn't have clearance.",
+    "tags": [
+      "attack",
+      "media",
+      "truth",
+      "ufo"
+    ]
   },
   {
     "id": "TRUTH-066",
@@ -840,7 +1168,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Membership includes free capes."
+    "flavor": "Membership includes free capes.",
+    "tags": [
+      "bat-boy",
+      "cryptid",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-067",
@@ -852,7 +1186,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Fill up on miracles."
+    "flavor": "Fill up on miracles.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-068",
@@ -864,7 +1203,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Mosquitoes included."
+    "flavor": "Mosquitoes included.",
+    "tags": [
+      "florida-man",
+      "location",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-069",
@@ -876,7 +1221,14 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Ghosts pay rent in ectoplasm."
+    "flavor": "Ghosts pay rent in ectoplasm.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "location",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-070",
@@ -888,7 +1240,11 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Hallelujah, the aliens are among us!"
+    "flavor": "Hallelujah, the aliens are among us!",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-071",
@@ -900,7 +1256,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Funnel cakes taste out of this world."
+    "flavor": "Funnel cakes taste out of this world.",
+    "tags": [
+      "truth",
+      "ufo",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-072",
@@ -912,7 +1273,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Thank you, very hidden."
+    "flavor": "Thank you, very hidden.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-073",
@@ -924,7 +1290,13 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Tickets include blurry binoculars."
+    "flavor": "Tickets include blurry binoculars.",
+    "tags": [
+      "bigfoot",
+      "cryptid",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-074",
@@ -936,7 +1308,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Hot off the paranormal presses."
+    "flavor": "Hot off the paranormal presses.",
+    "tags": [
+      "media",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-075",
@@ -948,7 +1325,14 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Roller coasters scream back."
+    "flavor": "Roller coasters scream back.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "location",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-076",
@@ -960,7 +1344,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Gator wrestling, Elvis impersonator optional."
+    "flavor": "Gator wrestling, Elvis impersonator optional.",
+    "tags": [
+      "florida-man",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-077",
@@ -972,7 +1361,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Bartender vanished in 1893, still pouring."
+    "flavor": "Bartender vanished in 1893, still pouring.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-078",
@@ -984,7 +1379,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "We sell postcards and plausible deniability."
+    "flavor": "We sell postcards and plausible deniability.",
+    "tags": [
+      "roswell",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-079",
@@ -996,7 +1396,14 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Tourist trap with prophetic wings."
+    "flavor": "Tourist trap with prophetic wings.",
+    "tags": [
+      "cryptid",
+      "location",
+      "mothman",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-080",
@@ -1008,7 +1415,14 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Fog horn occasionally says your name."
+    "flavor": "Fog horn occasionally says your name.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "location",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-081",
@@ -1020,7 +1434,11 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Files stacked by string color."
+    "flavor": "Files stacked by string color.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-082",
@@ -1032,7 +1450,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Size 28 evidence, mind the puddles."
+    "flavor": "Size 28 evidence, mind the puddles.",
+    "tags": [
+      "bigfoot",
+      "cryptid",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-083",
@@ -1044,7 +1468,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Love me tender, pay me weekly."
+    "flavor": "Love me tender, pay me weekly.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-084",
@@ -1056,7 +1485,11 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Blankets, binoculars, and bleeping."
+    "flavor": "Blankets, binoculars, and bleeping.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-085",
@@ -1068,7 +1501,11 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Blue ribbon for best geometry."
+    "flavor": "Blue ribbon for best geometry.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-086",
@@ -1082,7 +1519,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Your honor, we respectfully unredact."
+    "flavor": "Your honor, we respectfully unredact.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-087",
@@ -1096,7 +1537,14 @@
         "opponent": 1
       }
     },
-    "flavor": "Season 3 unlocks your third eye."
+    "flavor": "Season 3 unlocks your third eye.",
+    "tags": [
+      "attack",
+      "bureaucracy",
+      "coverup",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-088",
@@ -1110,7 +1558,12 @@
         "opponent": 2
       }
     },
-    "flavor": "Sequins are blinding…and binding."
+    "flavor": "Sequins are blinding…and binding.",
+    "tags": [
+      "attack",
+      "elvis",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-089",
@@ -1124,7 +1577,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Beep boop, nice try, spooks."
+    "flavor": "Beep boop, nice try, spooks.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-090",
@@ -1138,7 +1595,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Green tint, clear intent."
+    "flavor": "Green tint, clear intent.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-091",
@@ -1152,7 +1613,14 @@
         "opponent": 3
       }
     },
-    "flavor": "Microphones mysteriously smeared with mud."
+    "flavor": "Microphones mysteriously smeared with mud.",
+    "tags": [
+      "attack",
+      "bigfoot",
+      "cryptid",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-092",
@@ -1166,7 +1634,13 @@
         "opponent": 3
       }
     },
-    "flavor": "The warning no one can ignore."
+    "flavor": "The warning no one can ignore.",
+    "tags": [
+      "attack",
+      "cryptid",
+      "mothman",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-093",
@@ -1180,7 +1654,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Lines lit, lies dimmed."
+    "flavor": "Lines lit, lies dimmed.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-094",
@@ -1192,7 +1670,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Receipts loaded; caps locked."
+    "flavor": "Receipts loaded; caps locked.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-095",
@@ -1204,7 +1686,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Smile, you're de-escalated."
+    "flavor": "Smile, you're de-escalated.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-096",
@@ -1216,7 +1702,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Live rebuttal beats late retraction."
+    "flavor": "Live rebuttal beats late retraction.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-097",
@@ -1230,7 +1720,11 @@
         "opponent": 3
       }
     },
-    "flavor": "Oops, the simulation dropped a frame."
+    "flavor": "Oops, the simulation dropped a frame.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-098",
@@ -1244,7 +1738,12 @@
         "opponent": 3
       }
     },
-    "flavor": "Git push: disclosure."
+    "flavor": "Git push: disclosure.",
+    "tags": [
+      "attack",
+      "truth",
+      "ufo"
+    ]
   },
   {
     "id": "TRUTH-099",
@@ -1256,7 +1755,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "One micro-donation at a time."
+    "flavor": "One micro-donation at a time.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-100",
@@ -1268,7 +1771,11 @@
     "effects": {
       "truthDelta": 4
     },
-    "flavor": "Take me to your committee chair."
+    "flavor": "Take me to your committee chair.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-101",
@@ -1282,7 +1789,11 @@
         "opponent": 3
       }
     },
-    "flavor": "Three hackers, zero hygiene, one friend on the inside."
+    "flavor": "Three hackers, zero hygiene, one friend on the inside.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-102",
@@ -1296,7 +1807,11 @@
         "opponent": 2
       }
     },
-    "flavor": "If it's stamped 'secret', it's stapled to our to-do list."
+    "flavor": "If it's stamped 'secret', it's stapled to our to-do list.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-103",
@@ -1310,7 +1825,12 @@
         "opponent": 2
       }
     },
-    "flavor": "Ink by the people, for the people."
+    "flavor": "Ink by the people, for the people.",
+    "tags": [
+      "attack",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-104",
@@ -1324,7 +1844,11 @@
         "opponent": 3
       }
     },
-    "flavor": "Microscopes donated, miracles improvised."
+    "flavor": "Microscopes donated, miracles improvised.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-105",
@@ -1336,7 +1860,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Batteries not included. Lies excluded."
+    "flavor": "Batteries not included. Lies excluded.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-106",
@@ -1348,7 +1876,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Industrial-grade hats for industrial-sized cover-ups."
+    "flavor": "Industrial-grade hats for industrial-sized cover-ups.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-107",
@@ -1360,7 +1892,12 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Punches in with a glittery glove."
+    "flavor": "Punches in with a glittery glove.",
+    "tags": [
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-108",
@@ -1372,7 +1909,13 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Screams in AP style."
+    "flavor": "Screams in AP style.",
+    "tags": [
+      "bat-boy",
+      "cryptid",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-109",
@@ -1384,7 +1927,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Tail between their legs, allegedly."
+    "flavor": "Tail between their legs, allegedly.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-110",
@@ -1398,7 +1945,12 @@
         "opponent": 1
       }
     },
-    "flavor": "He used it to open soda first."
+    "flavor": "He used it to open soda first.",
+    "tags": [
+      "attack",
+      "florida-man",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-111",
@@ -1410,7 +1962,11 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Blink and you'll still see it."
+    "flavor": "Blink and you'll still see it.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-112",
@@ -1422,7 +1978,12 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Reads only paperbacks—no fingerprints."
+    "flavor": "Reads only paperbacks—no fingerprints.",
+    "tags": [
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-113",
@@ -1434,7 +1995,11 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "He anonymously CC'd everyone."
+    "flavor": "He anonymously CC'd everyone.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-114",
@@ -1446,7 +2011,13 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Wingspan: entire windshield."
+    "flavor": "Wingspan: entire windshield.",
+    "tags": [
+      "cryptid",
+      "media",
+      "mothman",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-115",
@@ -1458,7 +2029,13 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Verdict echoes for eternity."
+    "flavor": "Verdict echoes for eternity.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-116",
@@ -1470,7 +2047,12 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Headline: 'Love Me Tender, Tell Me Everything'."
+    "flavor": "Headline: 'Love Me Tender, Tell Me Everything'.",
+    "tags": [
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-117",
@@ -1482,7 +2064,11 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "First question: favorite ice cream?"
+    "flavor": "First question: favorite ice cream?",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-118",
@@ -1494,7 +2080,13 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Stapled with bravado."
+    "flavor": "Stapled with bravado.",
+    "tags": [
+      "bat-boy",
+      "cryptid",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-119",
@@ -1508,7 +2100,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Knew you'd play this."
+    "flavor": "Knew you'd play this.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-120",
@@ -1520,7 +2116,11 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Text too big to redact."
+    "flavor": "Text too big to redact.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-121",
@@ -1532,7 +2132,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "After-school programs for aspiring screamers."
+    "flavor": "After-school programs for aspiring screamers.",
+    "tags": [
+      "bat-boy",
+      "cryptid",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-122",
@@ -1544,7 +2150,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Vows exchanged, lies annulled."
+    "flavor": "Vows exchanged, lies annulled.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-123",
@@ -1556,7 +2167,11 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Bring blankets, witness meteors and memos."
+    "flavor": "Bring blankets, witness meteors and memos.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-124",
@@ -1568,7 +2183,11 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Single-origin skepticism."
+    "flavor": "Single-origin skepticism.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-125",
@@ -1580,7 +2199,13 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Shhh… the books whisper back."
+    "flavor": "Shhh… the books whisper back.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-126",
@@ -1592,7 +2217,11 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Airwaves have nothing to hide."
+    "flavor": "Airwaves have nothing to hide.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-127",
@@ -1604,7 +2233,11 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Waiver includes claws and clauses."
+    "flavor": "Waiver includes claws and clauses.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-128",
@@ -1616,7 +2249,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Playlists of leaks and licks."
+    "flavor": "Playlists of leaks and licks.",
+    "tags": [
+      "media",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-129",
@@ -1628,7 +2266,12 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "House always wins—unless truth shows up."
+    "flavor": "House always wins—unless truth shows up.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-130",
@@ -1640,7 +2283,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Tonight on 'Open Secrets': everything."
+    "flavor": "Tonight on 'Open Secrets': everything.",
+    "tags": [
+      "media",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-131",
@@ -1652,7 +2300,14 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Leave only footprints; hear many more."
+    "flavor": "Leave only footprints; hear many more.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "location",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-132",
@@ -1666,7 +2321,11 @@
         "opponent": 2
       }
     },
-    "flavor": "The loudest tiny whistle ever printed."
+    "flavor": "The loudest tiny whistle ever printed.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-133",
@@ -1680,7 +2339,12 @@
         "opponent": 2
       }
     },
-    "flavor": "First question, final answer."
+    "flavor": "First question, final answer.",
+    "tags": [
+      "attack",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-134",
@@ -1694,7 +2358,11 @@
         "opponent": 3
       }
     },
-    "flavor": "Redaction ink runs in the rain."
+    "flavor": "Redaction ink runs in the rain.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-135",
@@ -1708,7 +2376,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Credentials printed on recycled secrets."
+    "flavor": "Credentials printed on recycled secrets.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-136",
@@ -1722,7 +2394,11 @@
         "opponent": 2
       }
     },
-    "flavor": "1,000 comments, one conclusion."
+    "flavor": "1,000 comments, one conclusion.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-137",
@@ -1737,7 +2413,13 @@
       },
       "discardOpponent": 1
     },
-    "flavor": "Stage lights melt alibis."
+    "flavor": "Stage lights melt alibis.",
+    "tags": [
+      "attack",
+      "bureaucracy",
+      "coverup",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-138",
@@ -1751,7 +2433,12 @@
         "opponent": 2
       }
     },
-    "flavor": "We interrupt your regularly scheduled denial."
+    "flavor": "We interrupt your regularly scheduled denial.",
+    "tags": [
+      "attack",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-139",
@@ -1765,7 +2452,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Microphones swarm like bees."
+    "flavor": "Microphones swarm like bees.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-140",
@@ -1779,7 +2470,11 @@
         "opponent": 3
       }
     },
-    "flavor": "Signed by Judge Public Opinion."
+    "flavor": "Signed by Judge Public Opinion.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-141",
@@ -1793,7 +2488,13 @@
         "opponent": 2
       }
     },
-    "flavor": "Laminate of destiny."
+    "flavor": "Laminate of destiny.",
+    "tags": [
+      "attack",
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-142",
@@ -1807,7 +2508,12 @@
         "opponent": 2
       }
     },
-    "flavor": "Chants harmonize with sirens."
+    "flavor": "Chants harmonize with sirens.",
+    "tags": [
+      "attack",
+      "protest",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-143",
@@ -1821,7 +2527,11 @@
         "opponent": 1
       }
     },
-    "flavor": "Ring once if it's a cover-up."
+    "flavor": "Ring once if it's a cover-up.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-144",
@@ -1833,7 +2543,13 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Boo! Also, bookkeeping."
+    "flavor": "Boo! Also, bookkeeping.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-145",
@@ -1845,7 +2561,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Stapled, stamped, safe."
+    "flavor": "Stapled, stamped, safe.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-146",
@@ -1857,7 +2577,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Press 1 to spill, press 2 to bill."
+    "flavor": "Press 1 to spill, press 2 to bill.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-147",
@@ -1869,7 +2593,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Umbrella policy: extraterrestrial."
+    "flavor": "Umbrella policy: extraterrestrial.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-148",
@@ -1881,7 +2609,11 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Objection sustained, publicity gained."
+    "flavor": "Objection sustained, publicity gained.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-149",
@@ -1893,7 +2625,13 @@
     "effects": {
       "truthDelta": 4
     },
-    "flavor": "A platform of planks and footprints."
+    "flavor": "A platform of planks and footprints.",
+    "tags": [
+      "bigfoot",
+      "cryptid",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-150",
@@ -1905,7 +2643,12 @@
     "effects": {
       "truthDelta": 4
     },
-    "flavor": "Long live the King—and the headline."
+    "flavor": "Long live the King—and the headline.",
+    "tags": [
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-151",
@@ -1917,7 +2660,12 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Hound dogs approved."
+    "flavor": "Hound dogs approved.",
+    "tags": [
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-152",
@@ -1931,7 +2679,13 @@
         "opponent": 3
       }
     },
-    "flavor": "Top story: screamingly credible."
+    "flavor": "Top story: screamingly credible.",
+    "tags": [
+      "attack",
+      "bat-boy",
+      "cryptid",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-153",
@@ -1943,7 +2697,12 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Hot rock, hotter takes."
+    "flavor": "Hot rock, hotter takes.",
+    "tags": [
+      "florida-man",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-154",
@@ -1957,7 +2716,14 @@
         "opponent": 2
       }
     },
-    "flavor": "Bring your own highlighter."
+    "flavor": "Bring your own highlighter.",
+    "tags": [
+      "attack",
+      "bureaucracy",
+      "coverup",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-155",
@@ -1969,7 +2735,11 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "'Do not call back.' *Beep.*"
+    "flavor": "'Do not call back.' *Beep.*",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-156",
@@ -1981,7 +2751,11 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Geometry class finally pays off."
+    "flavor": "Geometry class finally pays off.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-157",
@@ -1993,7 +2767,12 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "All donations tax-deductible from reality."
+    "flavor": "All donations tax-deductible from reality.",
+    "tags": [
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-158",
@@ -2005,7 +2784,12 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Please merge truthfully."
+    "flavor": "Please merge truthfully.",
+    "tags": [
+      "media",
+      "truth",
+      "ufo"
+    ]
   },
   {
     "id": "TRUTH-159",
@@ -2019,7 +2803,13 @@
         "opponent": 2
       }
     },
-    "flavor": "Has the receipts, keeps the screams."
+    "flavor": "Has the receipts, keeps the screams.",
+    "tags": [
+      "attack",
+      "bat-boy",
+      "cryptid",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-160",
@@ -2031,7 +2821,11 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Meeting minutes by planchette."
+    "flavor": "Meeting minutes by planchette.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-161",
@@ -2043,7 +2837,12 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Return address: The Heartbreak Hotel."
+    "flavor": "Return address: The Heartbreak Hotel.",
+    "tags": [
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-162",
@@ -2055,7 +2854,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Violation: obvious saucer."
+    "flavor": "Violation: obvious saucer.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-163",
@@ -2067,7 +2870,12 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Ribs and revelations."
+    "flavor": "Ribs and revelations.",
+    "tags": [
+      "florida-man",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-164",
@@ -2079,7 +2887,13 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Accepted with a polite shriek."
+    "flavor": "Accepted with a polite shriek.",
+    "tags": [
+      "bat-boy",
+      "cryptid",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-165",
@@ -2091,7 +2905,13 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "No cameras, only camcorders."
+    "flavor": "No cameras, only camcorders.",
+    "tags": [
+      "area51",
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-166",
@@ -2105,7 +2925,12 @@
         "opponent": 1
       }
     },
-    "flavor": "The cloud is just a sky hard drive."
+    "flavor": "The cloud is just a sky hard drive.",
+    "tags": [
+      "attack",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-167",
@@ -2119,7 +2944,11 @@
         "opponent": 1
       }
     },
-    "flavor": "Cupcakes with classified sprinkles."
+    "flavor": "Cupcakes with classified sprinkles.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-168",
@@ -2131,7 +2960,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Questions answered, hips simulated."
+    "flavor": "Questions answered, hips simulated.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-169",
@@ -2143,7 +2977,11 @@
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Attached wings, unattached verdict."
+    "flavor": "Attached wings, unattached verdict.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-170",
@@ -2157,7 +2995,11 @@
         "opponent": 3
       }
     },
-    "flavor": "Contents: oops, everything."
+    "flavor": "Contents: oops, everything.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-171",
@@ -2171,7 +3013,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Eyes everywhere, budget nowhere."
+    "flavor": "Eyes everywhere, budget nowhere.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-172",
@@ -2183,7 +3029,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Dares accepted by democracy."
+    "flavor": "Dares accepted by democracy.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-173",
@@ -2195,7 +3045,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Open late, secrets later."
+    "flavor": "Open late, secrets later.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-174",
@@ -2207,7 +3062,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Homework: screaming practice."
+    "flavor": "Homework: screaming practice.",
+    "tags": [
+      "bat-boy",
+      "cryptid",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-175",
@@ -2219,7 +3080,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Next arrival: transparency."
+    "flavor": "Next arrival: transparency.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-176",
@@ -2231,7 +3098,11 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Ink smudges improve credibility."
+    "flavor": "Ink smudges improve credibility.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-177",
@@ -2243,7 +3114,11 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Souvenir shops sell periscopes."
+    "flavor": "Souvenir shops sell periscopes.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-178",
@@ -2255,7 +3130,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Recorded live in an undisclosed basement."
+    "flavor": "Recorded live in an undisclosed basement.",
+    "tags": [
+      "media",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-179",
@@ -2267,7 +3147,11 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Gently used evidence."
+    "flavor": "Gently used evidence.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-180",
@@ -2279,7 +3163,14 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Beam bends around secrets."
+    "flavor": "Beam bends around secrets.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "location",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-181",
@@ -2291,7 +3182,12 @@
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Choir hums suspiciously familiar melodies."
+    "flavor": "Choir hums suspiciously familiar melodies.",
+    "tags": [
+      "elvis",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-182",
@@ -2303,7 +3199,13 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Files arranged by shriek pitch."
+    "flavor": "Files arranged by shriek pitch.",
+    "tags": [
+      "bat-boy",
+      "cryptid",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-183",
@@ -2317,7 +3219,12 @@
         "opponent": 2
       }
     },
-    "flavor": "Mic check, lie wreck."
+    "flavor": "Mic check, lie wreck.",
+    "tags": [
+      "attack",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-184",
@@ -2331,7 +3238,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Eyes in the sky, pies on the porch."
+    "flavor": "Eyes in the sky, pies on the porch.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-185",
@@ -2345,7 +3256,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Ink beats intimidation."
+    "flavor": "Ink beats intimidation.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-186",
@@ -2359,7 +3274,11 @@
         "opponent": 3
       }
     },
-    "flavor": "Receipts stapled to reality."
+    "flavor": "Receipts stapled to reality.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-187",
@@ -2373,7 +3292,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Static speaks volumes."
+    "flavor": "Static speaks volumes.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-188",
@@ -2387,7 +3310,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Spin class for facts."
+    "flavor": "Spin class for facts.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-189",
@@ -2401,7 +3328,11 @@
         "opponent": 3
       }
     },
-    "flavor": "Paper cuts to the narrative."
+    "flavor": "Paper cuts to the narrative.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-190",
@@ -2415,7 +3346,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Synchronised citations."
+    "flavor": "Synchronised citations.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-191",
@@ -2429,7 +3364,13 @@
         "opponent": 2
       }
     },
-    "flavor": "Wings over weak points."
+    "flavor": "Wings over weak points.",
+    "tags": [
+      "attack",
+      "cryptid",
+      "mothman",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-192",
@@ -2441,7 +3382,11 @@
     "effects": {
       "pressureDelta": 1
     },
-    "flavor": "Paper wins this round."
+    "flavor": "Paper wins this round.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-193",
@@ -2453,7 +3398,11 @@
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "We saw that coming."
+    "flavor": "We saw that coming.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-194",
@@ -2465,7 +3414,11 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Light pierces ledger lines."
+    "flavor": "Light pierces ledger lines.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-195",
@@ -2477,7 +3430,13 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Overruled by the afterlife."
+    "flavor": "Overruled by the afterlife.",
+    "tags": [
+      "ghost",
+      "haunted",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-196",
@@ -2489,7 +3448,11 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Threads that pull threads."
+    "flavor": "Threads that pull threads.",
+    "tags": [
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-197",
@@ -2501,7 +3464,12 @@
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Small bills fund big stories."
+    "flavor": "Small bills fund big stories.",
+    "tags": [
+      "media",
+      "truth",
+      "zone"
+    ]
   },
   {
     "id": "TRUTH-198",
@@ -2515,7 +3483,11 @@
         "opponent": 2
       }
     },
-    "flavor": "Password: OpenEverything."
+    "flavor": "Password: OpenEverything.",
+    "tags": [
+      "attack",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-199",
@@ -2527,7 +3499,12 @@
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Contents: one sequined future."
+    "flavor": "Contents: one sequined future.",
+    "tags": [
+      "elvis",
+      "media",
+      "truth"
+    ]
   },
   {
     "id": "TRUTH-200",
@@ -2539,6 +3516,10 @@
     "effects": {
       "truthDelta": 4
     },
-    "flavor": "The last page of the last secret file."
+    "flavor": "The last page of the last secret file.",
+    "tags": [
+      "media",
+      "truth"
+    ]
   }
 ]
