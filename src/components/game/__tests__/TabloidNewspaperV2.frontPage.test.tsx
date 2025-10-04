@@ -23,10 +23,6 @@ globalThis.HTMLElement = windowRef.HTMLElement as unknown as typeof globalThis.H
 globalThis.CustomEvent = windowRef.CustomEvent as unknown as typeof globalThis.CustomEvent;
 
 const { render, screen, waitFor, cleanup, within } = await import('@testing-library/react');
-const {
-  __setArticleBankLoader,
-  __resetArticleBankCache,
-} = await import('@/engine/news/articleBank');
 
 mock.module('@/lib/newspaperData', () => ({
   loadNewspaperData: async () => ({
@@ -83,6 +79,27 @@ const articleFixtures = [
     body: 'Logistics teams confirm minimal collateral noise.',
   },
 ];
+
+type BankArticle = {
+  id: string;
+  tone: 'truth' | 'gov';
+  tags: string[];
+  headline?: string;
+  subhead?: string;
+  body?: string;
+};
+
+let bankArticles = new Map<string, BankArticle>();
+
+const loadArticleBankMock = mock(async () => ({
+  getById(id: string) {
+    return bankArticles.get(id) ?? null;
+  },
+}));
+
+mock.module('@/engine/news/articleBank', () => ({
+  loadArticleBank: loadArticleBankMock,
+}));
 
 const generatedStory: NarrativeIssue['generatedStory'] = {
   main: null,
@@ -153,7 +170,7 @@ beforeAll(() => {
 
 afterEach(() => {
   cleanup();
-  __resetArticleBankCache();
+  bankArticles = new Map();
 });
 
 afterAll(() => {
@@ -163,16 +180,19 @@ afterAll(() => {
 
 describe('TabloidNewspaperV2 front page integration', () => {
   test('renders combined headline and three side dispatches', async () => {
-    __setArticleBankLoader(async () => ({
-      articles: articleFixtures.map(entry => ({
-        id: entry.cardId,
-        tone: 'truth' as const,
-        tags: ['signal'],
-        headline: entry.headline,
-        subhead: entry.subhead,
-        body: entry.body,
-      })),
-    }));
+    bankArticles = new Map(
+      articleFixtures.map(entry => [
+        entry.cardId,
+        {
+          id: entry.cardId,
+          tone: 'truth',
+          tags: ['signal'],
+          headline: entry.headline,
+          subhead: entry.subhead,
+          body: entry.body,
+        } satisfies BankArticle,
+      ]),
+    );
 
     render(<TabloidNewspaperV2 {...baseProps} />);
 
@@ -181,7 +201,7 @@ describe('TabloidNewspaperV2 front page integration', () => {
       expect(headline.textContent ?? '').toMatch(/ALPHA AGENT/);
     });
 
-    expect(screen.getByText(/Witnesses report escalating weirdness/)).toBeTruthy();
+    expect(screen.getByText(/snacks remain excellent/i)).toBeTruthy();
 
     const secondaryHeading = await screen.findByText('SECONDARY REPORTS');
     const secondarySection = secondaryHeading.closest('section');

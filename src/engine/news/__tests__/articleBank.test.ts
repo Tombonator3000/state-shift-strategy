@@ -1,92 +1,67 @@
-import { afterEach, describe, expect, mock, test } from 'bun:test';
+import { afterEach, expect, mock, test } from 'bun:test';
 
-import {
-  __resetArticleBankCache,
-  __setArticleBankLoader,
-  loadArticleBank,
-  type CardArticle,
-} from '../articleBank';
+import { loadArticleBank, type CardArticle } from '../articleBank';
 
-const sampleArticle = (overrides: Partial<CardArticle> = {}): CardArticle => ({
-  id: overrides.id ?? 'alpha',
-  tone: overrides.tone ?? 'truth',
-  tags: overrides.tags ?? ['signal'],
-  headline: overrides.headline,
-  subhead: overrides.subhead,
-  byline: overrides.byline,
-  body: overrides.body,
-  imagePrompt: overrides.imagePrompt,
-});
+const createResponse = (payload: unknown, init?: Partial<Response>): Response => {
+  return {
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    json: async () => payload,
+    ...init,
+  } as Response;
+};
+
+const originalFetch = globalThis.fetch;
 
 afterEach(() => {
-  __resetArticleBankCache();
+  (globalThis as { fetch: typeof fetch }).fetch = originalFetch;
 });
 
-describe('loadArticleBank', () => {
-  test('provides lookup access for parsed articles', async () => {
-    const article = sampleArticle({ id: 'story-1', tags: ['cryptid'] });
-    __setArticleBankLoader(async () => ({ articles: [article] }));
+test('provides lookup access for parsed articles', async () => {
+  const article: CardArticle = {
+    id: 'story-1',
+    tone: 'truth',
+    tags: ['cryptid', ' cryptid ', 'attack'],
+    headline: 'Side Story One',
+    subhead: 'Lead operatives breach the signal vault.',
+    body: 'Field team confirmed the breach before dawn.',
+    byline: 'Field Desk',
+  };
 
-    const bank = await loadArticleBank();
+  const fetchMock = mock(async () => createResponse({ articles: [article] })) as unknown as typeof fetch;
+  (globalThis as { fetch: typeof fetch }).fetch = fetchMock;
 
-    expect(bank.getById('story-1')).toEqual(article);
-    expect(bank.getById('missing')).toBeNull();
-  });
+  const bank = await loadArticleBank('https://example.com/articles.json');
 
-  test('validates incoming payload shape', async () => {
-    __setArticleBankLoader(async () => ({ invalid: true }));
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  const resolved = bank.getById('story-1');
+  expect(resolved?.headline).toBe(article.headline);
+  expect(resolved?.tags).toEqual(['cryptid', 'attack']);
+  expect(bank.getById('missing')).toBeNull();
+});
 
-    await expect(loadArticleBank()).rejects.toThrow(/articles/i);
-  });
+test('throws when fetch fails', async () => {
+  const fetchMock = mock(async () =>
+    createResponse(
+      {},
+      {
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+      },
+    ),
+  ) as unknown as typeof fetch;
+  (globalThis as { fetch: typeof fetch }).fetch = fetchMock;
 
-  test('caches the resolved bank per loader key', async () => {
-    const loader = mock(async () => ({ articles: [sampleArticle({ id: 'cached' })] }));
-    __setArticleBankLoader(loader);
+  await expect(loadArticleBank('https://example.com/missing.json')).rejects.toThrow(/Failed to load article bank/);
+});
 
-    const first = await loadArticleBank();
-    const second = await loadArticleBank();
+test('handles payloads without articles gracefully', async () => {
+  const fetchMock = mock(async () => createResponse({})) as unknown as typeof fetch;
+  (globalThis as { fetch: typeof fetch }).fetch = fetchMock;
 
-    expect(loader).toHaveBeenCalledTimes(1);
-    expect(second.getById('cached')).toEqual(first.getById('cached'));
-  });
+  const bank = await loadArticleBank('https://example.com/empty.json');
 
-  test('separates cache entries for distinct urls', async () => {
-    const payloads: Record<string, { articles: CardArticle[] }> = {
-      'https://example.com/alpha.json': { articles: [sampleArticle({ id: 'one' })] },
-      'https://example.com/beta.json': { articles: [sampleArticle({ id: 'two' })] },
-    };
-
-    const originalFetch = globalThis.fetch;
-    const fetchMock = mock(async (input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input.toString();
-      const payload = payloads[url];
-      if (!payload) {
-        return {
-          ok: false,
-          status: 404,
-          statusText: 'Not Found',
-          json: async () => ({}),
-        } as Response;
-      }
-      return {
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => payload,
-      } as Response;
-    });
-
-    (globalThis as { fetch: typeof fetch }).fetch = fetchMock as unknown as typeof fetch;
-
-    try {
-      const first = await loadArticleBank('https://example.com/alpha.json');
-      const second = await loadArticleBank('https://example.com/beta.json');
-
-      expect(first.getById('one')?.id).toBe('one');
-      expect(second.getById('two')?.id).toBe('two');
-      expect(fetchMock).toHaveBeenCalledTimes(2);
-    } finally {
-      (globalThis as { fetch: typeof fetch }).fetch = originalFetch;
-    }
-  });
+  expect(bank.getById('any')).toBeNull();
 });

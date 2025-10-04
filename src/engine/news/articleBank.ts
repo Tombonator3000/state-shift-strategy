@@ -15,7 +15,7 @@ export type ArticleBank = {
   getById(cardId: string): CardArticle | null;
 };
 
-type ArticleDataLoader = () => Promise<unknown>;
+const DEFAULT_BANK_PATH = '/data/paranoid_times_card_articles_ALL.json';
 
 const cardArticleSchema: z.ZodType<CardArticle> = z.object({
   id: z.string(),
@@ -29,80 +29,48 @@ const cardArticleSchema: z.ZodType<CardArticle> = z.object({
 });
 
 const articleFileSchema = z.object({
-  articles: z.array(cardArticleSchema),
+  articles: z.array(cardArticleSchema).default([]),
 });
 
-let cachedArticleBank: Promise<ArticleBank> | null = null;
-let cacheKey: string | null = null;
-let loaderOverride: ArticleDataLoader | null = null;
-
-const importArticleData: ArticleDataLoader = async () => {
-  const module = await import('../../../paranoid_times_card_articles_ALL.json');
-  return (module as { default?: unknown }).default ?? module;
+const normaliseTags = (tags: string[] | undefined): string[] => {
+  if (!Array.isArray(tags)) {
+    return [];
+  }
+  const seen = new Set<string>();
+  for (const raw of tags) {
+    const value = typeof raw === 'string' ? raw.trim() : '';
+    if (!value) {
+      continue;
+    }
+    seen.add(value);
+  }
+  return Array.from(seen);
 };
 
-const fetchArticleData = async (url: string): Promise<unknown> => {
-  const response = await fetch(url);
+export async function loadArticleBank(jsonPath: string = DEFAULT_BANK_PATH): Promise<ArticleBank> {
+  const response = await fetch(jsonPath);
   if (!response.ok) {
-    throw new Error(`Failed to load article bank from ${url}: ${response.status} ${response.statusText}`);
-  }
-  return response.json();
-};
-
-const resolveLoader = (jsonUrl?: string): { loader: ArticleDataLoader; key: string } => {
-  if (loaderOverride) {
-    return { loader: loaderOverride, key: 'override' };
+    throw new Error(`Failed to load article bank from ${jsonPath}: ${response.status} ${response.statusText}`);
   }
 
-  if (jsonUrl) {
-    return { loader: () => fetchArticleData(jsonUrl), key: jsonUrl };
-  }
+  const payload = await response.json();
+  const { articles } = articleFileSchema.parse(payload);
 
-  return { loader: importArticleData, key: 'default' };
-};
-
-const buildArticleBank = (articles: CardArticle[]): ArticleBank => {
-  const byId = new Map<string, CardArticle>();
+  const map = new Map<string, CardArticle>();
   for (const article of articles) {
-    const normalized: CardArticle = {
+    const normalised: CardArticle = {
       ...article,
-      tags: Array.isArray(article.tags) ? article.tags : [],
+      tags: normaliseTags(article.tags),
     };
-    byId.set(normalized.id, normalized);
+    map.set(normalised.id, normalised);
   }
 
   return {
-    getById(cardId: string) {
+    getById(cardId: string): CardArticle | null {
       if (!cardId) {
         return null;
       }
-      return byId.get(cardId) ?? null;
+      return map.get(cardId) ?? null;
     },
   } satisfies ArticleBank;
-};
-
-export async function loadArticleBank(jsonUrl?: string): Promise<ArticleBank> {
-  const { loader, key } = resolveLoader(jsonUrl);
-
-  if (!cachedArticleBank || cacheKey !== key) {
-    cacheKey = key;
-    cachedArticleBank = loader().then(raw => {
-      const { articles } = articleFileSchema.parse(raw);
-      return buildArticleBank(articles);
-    });
-  }
-
-  return cachedArticleBank;
-}
-
-export function __setArticleBankLoader(loader: ArticleDataLoader | null): void {
-  loaderOverride = loader;
-  cacheKey = null;
-  cachedArticleBank = null;
-}
-
-export function __resetArticleBankCache(): void {
-  loaderOverride = null;
-  cacheKey = null;
-  cachedArticleBank = null;
 }
