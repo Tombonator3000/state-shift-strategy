@@ -23,7 +23,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-spider-scare-incident-002",
@@ -39,7 +44,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Bring a flashlight and plausible deniability.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-cauldron-whispers-incident-003",
@@ -55,7 +65,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "All treats, suspicious tricks.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-ouija-shuffle-incident-004",
@@ -69,7 +84,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Approved by the Council of Shadows.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-report-of-the-fog-machine-005",
@@ -85,7 +105,15 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-dracula-shuffle-protocol-006",
@@ -99,7 +127,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Do not taunt the poltergeist.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-wolfman-shenanigans-007",
@@ -113,7 +146,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Rated PG‑Paranoid.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-press-release-of-the-full-moon-008",
@@ -127,7 +165,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-scare-of-the-midnight-009",
@@ -143,7 +186,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Batteries not included.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-bat-boy-shuffle-protocol-010",
@@ -158,7 +206,14 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bat-boy",
+        "cryptid",
+        "government",
+        "halloween",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-skeleton-press-release-files-011",
@@ -174,7 +229,15 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Approved by the Council of Shadows.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-trick-or-treat-pamphlet-files-012",
@@ -188,7 +251,14 @@
       },
       "text": "−1% Truth.",
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-haunted-rally-protocol-013",
@@ -204,7 +274,15 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Bring a flashlight and plausible deniability.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "ghost",
+        "government",
+        "halloween",
+        "haunted",
+        "protest"
+      ]
     },
     {
       "id": "hallo-gov-raven-flyer-protocol-014",
@@ -218,7 +296,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-poltergeist-alert-protocol-015",
@@ -234,7 +317,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-scarecrow-shenanigans-incident-016",
@@ -248,7 +336,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "‘It was just the wind,’ said the intern.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-scare-of-the-ghost-017",
@@ -262,7 +355,14 @@
       },
       "text": "−1% Truth.",
       "flavor": "Smells like fog machine and fear.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "ghost",
+        "government",
+        "halloween",
+        "haunted",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-banshee-shenanigans-incident-018",
@@ -278,7 +378,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "The veil is thin tonight.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-wolfman-pamphlet-incident-019",
@@ -294,7 +399,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-bat-boy-shuffle-020",
@@ -310,7 +420,14 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "‘It was just the wind,’ said the intern.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bat-boy",
+        "cryptid",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-moonlight-scare-files-021",
@@ -325,7 +442,15 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "‘It was just the wind,’ said the intern.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-shuffle-of-the-mummy-022",
@@ -341,7 +466,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "The veil is thin tonight.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-haunted-mansion-whispers-023",
@@ -357,7 +487,14 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "We can neither confirm nor deny the howling.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "ghost",
+        "government",
+        "halloween",
+        "haunted"
+      ]
     },
     {
       "id": "hallo-gov-raven-scare-024",
@@ -371,7 +508,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-frankenstein-pamphlet-initiative-025",
@@ -386,7 +528,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-shenanigans-of-the-cauldron-026",
@@ -400,7 +547,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Bring a flashlight and plausible deniability.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-headless-horseman-pamphlet-files-027",
@@ -416,7 +568,15 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Licensed spooktacular.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-ouija-scare-protocol-028",
@@ -430,7 +590,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-skeleton-flyer-files-029",
@@ -446,7 +611,15 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-brief-of-the-skeleton-030",
@@ -460,7 +633,14 @@
       },
       "text": "−1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-frankenstein-flyer-incident-031",
@@ -474,7 +654,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-coven-scare-032",
@@ -489,7 +674,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-poltergeist-flyer-033",
@@ -505,7 +695,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-fog-machine-rally-034",
@@ -519,7 +714,13 @@
       },
       "text": "−1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media",
+        "protest"
+      ]
     },
     {
       "id": "hallo-gov-ghoul-alert-protocol-035",
@@ -533,7 +734,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Licensed spooktacular.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-cobweb-scare-036",
@@ -548,7 +754,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "The veil is thin tonight.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-seance-alert-initiative-037",
@@ -563,7 +774,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Bring a flashlight and plausible deniability.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-ghost-alert-initiative-038",
@@ -577,7 +793,14 @@
       },
       "text": "−1% Truth.",
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "ghost",
+        "government",
+        "halloween",
+        "haunted",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-poltergeist-report-initiative-039",
@@ -591,7 +814,14 @@
       },
       "text": "−1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-alert-of-the-haunted-mansion-040",
@@ -607,7 +837,14 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "ghost",
+        "government",
+        "halloween",
+        "haunted"
+      ]
     },
     {
       "id": "hallo-gov-ghost-flyer-protocol-041",
@@ -622,7 +859,14 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "ghost",
+        "government",
+        "halloween",
+        "haunted",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-jack-o-lantern-alert-042",
@@ -636,7 +880,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Keep garlic handy.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-seance-shenanigans-043",
@@ -652,7 +901,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-zombie-pamphlet-incident-044",
@@ -668,7 +922,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Bring a flashlight and plausible deniability.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-crypt-rumor-protocol-045",
@@ -684,7 +943,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Sticky with sugar and secrets.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-skeleton-whispers-initiative-046",
@@ -698,7 +962,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Keep garlic handy.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-report-of-the-moonlight-047",
@@ -712,7 +981,14 @@
       },
       "text": "−1% Truth.",
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-ectoplasm-brief-files-048",
@@ -728,7 +1004,15 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "‘It was just the wind,’ said the intern.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-cobweb-report-files-049",
@@ -742,7 +1026,14 @@
       },
       "text": "−1% Truth.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-cobweb-alert-protocol-050",
@@ -756,7 +1047,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Bring a flashlight and plausible deniability.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-omen-pamphlet-files-051",
@@ -771,7 +1067,15 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-ghost-scare-files-052",
@@ -787,7 +1091,17 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "The veil is thin tonight.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "ghost",
+        "government",
+        "halloween",
+        "haunted",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-frankenstein-pamphlet-protocol-053",
@@ -803,7 +1117,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-cobweb-whispers-054",
@@ -819,7 +1138,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Do not feed after midnight.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-full-moon-press-release-incident-055",
@@ -833,7 +1157,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Sticky with sugar and secrets.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-shuffle-of-the-haunted-056",
@@ -849,7 +1178,14 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "ghost",
+        "government",
+        "halloween",
+        "haunted"
+      ]
     },
     {
       "id": "hallo-gov-cobweb-shenanigans-incident-057",
@@ -865,7 +1201,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Approved by the Council of Shadows.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-witch-shenanigans-058",
@@ -880,7 +1221,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-zombie-rally-files-059",
@@ -895,7 +1241,16 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media",
+        "protest",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-dracula-shenanigans-060",
@@ -909,7 +1264,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "Licensed spooktacular.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-ouija-rumor-061",
@@ -925,7 +1285,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-skeleton-rally-protocol-062",
@@ -941,7 +1306,13 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Haunting sponsored by a totally normal NGO.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween",
+        "protest"
+      ]
     },
     {
       "id": "hallo-gov-spider-shuffle-063",
@@ -957,7 +1328,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Approved by the Council of Shadows.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-candy-corn-whispers-064",
@@ -973,7 +1349,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-moonlight-scare-initiative-065",
@@ -987,7 +1368,12 @@
       },
       "text": "−1% Truth.",
       "flavor": "All treats, suspicious tricks.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-jack-o-lantern-rally-incident-066",
@@ -1001,7 +1387,13 @@
       },
       "text": "−1% Truth.",
       "flavor": "Do not taunt the poltergeist.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media",
+        "protest"
+      ]
     },
     {
       "id": "hallo-gov-full-moon-shenanigans-067",
@@ -1017,7 +1409,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-wolfman-flyer-protocol-068",
@@ -1033,7 +1430,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-brief-of-the-midnight-069",
@@ -1049,7 +1451,14 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Haunting sponsored by a totally normal NGO.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-witch-press-release-incident-070",
@@ -1065,7 +1474,13 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Sticky with sugar and secrets.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-ghoul-sweep-initiative-001",
@@ -1081,7 +1496,12 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "Bring a flashlight and plausible deniability.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-bat-boy-operation-protocol-002",
@@ -1095,7 +1515,16 @@
       },
       "text": "−2% Truth.",
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bat-boy",
+        "bureaucracy",
+        "coverup",
+        "cryptid",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-broadcast-of-the-seance-003",
@@ -1109,7 +1538,12 @@
       },
       "text": "−2% Truth.",
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-spooky-hayride-operation-initiative-004",
@@ -1125,7 +1559,14 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "All treats, suspicious tricks.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-ploy-of-the-headless-horseman-005",
@@ -1141,7 +1582,12 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "Smells like fog machine and fear.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-jack-o-lantern-stakeout-006",
@@ -1157,7 +1603,12 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "Licensed spooktacular.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-poltergeist-murmur-network-incident-007",
@@ -1171,7 +1622,12 @@
       },
       "text": "−2% Truth.",
       "flavor": "Rated PG‑Paranoid.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-moonlight-expedition-incident-008",
@@ -1185,7 +1641,12 @@
       },
       "text": "−2% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-seance-broadcast-incident-009",
@@ -1199,7 +1660,12 @@
       },
       "text": "−2% Truth.",
       "flavor": "Licensed spooktacular.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-midnight-ploy-protocol-010",
@@ -1213,7 +1679,12 @@
       },
       "text": "−2% Truth.",
       "flavor": "Do not feed after midnight.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-banshee-investigation-files-011",
@@ -1227,7 +1698,14 @@
       },
       "text": "−2% Truth.",
       "flavor": "Smells like fog machine and fear.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-poltergeist-expedition-012",
@@ -1243,7 +1721,12 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-graveyard-expedition-initiative-013",
@@ -1258,7 +1741,12 @@
       "text": "+2 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Sticky with sugar and secrets.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-zombie-murmur-network-files-014",
@@ -1273,7 +1761,15 @@
       "text": "+2 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Rated PG‑Paranoid.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-haunted-mansion-ploy-protocol-015",
@@ -1287,7 +1783,14 @@
       },
       "text": "−2% Truth.",
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "ghost",
+        "government",
+        "halloween",
+        "haunted",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-headless-horseman-investigation-initiative-016",
@@ -1302,7 +1805,12 @@
       "text": "+2 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-headless-horseman-gambit-017",
@@ -1316,7 +1824,12 @@
       },
       "text": "−2% Truth.",
       "flavor": "Licensed spooktacular.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-candy-corn-expedition-protocol-018",
@@ -1330,7 +1843,12 @@
       },
       "text": "−2% Truth.",
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-banshee-broadcast-initiative-019",
@@ -1345,7 +1863,13 @@
       "text": "+2 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media",
+        "zone"
+      ]
     },
     {
       "id": "hallo-gov-spider-gambit-protocol-020",
@@ -1359,7 +1883,12 @@
       },
       "text": "−2% Truth.",
       "flavor": "Batteries not included.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-revelation-of-the-graveyard-001",
@@ -1373,7 +1902,12 @@
       },
       "text": "−3% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-raven-revelation-initiative-002",
@@ -1387,7 +1921,12 @@
       },
       "text": "−3% Truth.",
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-containment-of-the-cauldron-003",
@@ -1404,7 +1943,12 @@
       },
       "text": "Opponent −3 IP, discard 1.",
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "government",
+        "halloween"
+      ]
     },
     {
       "id": "hallo-gov-banshee-prime-directive-files-004",
@@ -1418,7 +1962,14 @@
       },
       "text": "−3% Truth.",
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-seance-containment-files-005",
@@ -1432,7 +1983,14 @@
       },
       "text": "−3% Truth.",
       "flavor": "Rated PG‑Paranoid.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-raven-project-protocol-006",
@@ -1446,7 +2004,14 @@
       },
       "text": "−3% Truth.",
       "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-moonlight-deep-cover-007",
@@ -1460,7 +2025,12 @@
       },
       "text": "−3% Truth.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-truth-full-moon-pamphlet-initiative-001",
@@ -1474,7 +2044,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Do not taunt the poltergeist.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-trick-or-treat-press-release-incident-002",
@@ -1488,7 +2063,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-seance-scare-protocol-003",
@@ -1504,7 +2084,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-banshee-shuffle-004",
@@ -1520,7 +2105,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-candy-corn-shuffle-protocol-005",
@@ -1534,7 +2124,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-scare-of-the-coven-006",
@@ -1548,7 +2143,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-spooky-hayride-pamphlet-files-007",
@@ -1563,7 +2163,15 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "The veil is thin tonight.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-ouija-shenanigans-files-008",
@@ -1577,7 +2185,14 @@
       },
       "text": "+1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-black-cat-shenanigans-files-009",
@@ -1591,7 +2206,14 @@
       },
       "text": "+1% Truth.",
       "flavor": "Licensed spooktacular.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-candy-corn-rumor-010",
@@ -1607,7 +2229,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-rumor-of-the-witch-011",
@@ -1622,7 +2249,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-jack-o-lantern-press-release-protocol-012",
@@ -1637,7 +2269,13 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Sticky with sugar and secrets.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-witch-report-013",
@@ -1653,7 +2291,15 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-ghost-brief-protocol-014",
@@ -1667,7 +2313,16 @@
       },
       "text": "+1% Truth.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "ghost",
+        "halloween",
+        "haunted",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-raven-report-initiative-015",
@@ -1681,7 +2336,14 @@
       },
       "text": "+1% Truth.",
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-ghost-report-initiative-016",
@@ -1695,7 +2357,16 @@
       },
       "text": "+1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "ghost",
+        "halloween",
+        "haunted",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-alert-of-the-ghost-017",
@@ -1709,7 +2380,14 @@
       },
       "text": "+1% Truth.",
       "flavor": "We can neither confirm nor deny the howling.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "ghost",
+        "halloween",
+        "haunted",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-zombie-press-release-incident-018",
@@ -1723,7 +2401,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Licensed spooktacular.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-cemetery-press-release-initiative-019",
@@ -1737,7 +2420,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Rated PG‑Paranoid.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-rally-of-the-dracula-020",
@@ -1751,7 +2439,13 @@
       },
       "text": "+1% Truth.",
       "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "protest",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-seance-alert-incident-021",
@@ -1765,7 +2459,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Smells like fog machine and fear.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-cauldron-shuffle-protocol-022",
@@ -1779,7 +2478,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Sticky with sugar and secrets.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-poltergeist-scare-files-023",
@@ -1795,7 +2499,15 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-coven-shenanigans-024",
@@ -1811,7 +2523,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-whispers-of-the-skeleton-025",
@@ -1826,7 +2543,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Do not taunt the poltergeist.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-midnight-shuffle-026",
@@ -1841,7 +2563,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Sticky with sugar and secrets.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-trick-or-treat-brief-incident-027",
@@ -1857,7 +2584,14 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-crypt-press-release-protocol-028",
@@ -1871,7 +2605,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "We can neither confirm nor deny the howling.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-raven-press-release-029",
@@ -1886,7 +2625,13 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-witch-shuffle-incident-030",
@@ -1900,7 +2645,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Approved by the Council of Shadows.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-ghoul-pamphlet-initiative-031",
@@ -1915,7 +2665,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-crypt-pamphlet-032",
@@ -1931,7 +2686,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "All treats, suspicious tricks.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-headless-horseman-rally-incident-033",
@@ -1945,7 +2705,13 @@
       },
       "text": "+1% Truth.",
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "protest",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-headless-horseman-brief-034",
@@ -1961,7 +2727,14 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Smells like fog machine and fear.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-jack-o-lantern-shuffle-incident-035",
@@ -1975,7 +2748,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-cobweb-alert-protocol-036",
@@ -1989,7 +2767,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-rally-of-the-cauldron-037",
@@ -2003,7 +2786,13 @@
       },
       "text": "+1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "protest",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-scare-of-the-zombie-038",
@@ -2017,7 +2806,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Batteries not included.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-haunted-mansion-flyer-protocol-039",
@@ -2032,7 +2826,14 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "ghost",
+        "halloween",
+        "haunted",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-shuffle-of-the-spooky-hayride-040",
@@ -2048,7 +2849,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Haunting sponsored by a totally normal NGO.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-cauldron-brief-files-041",
@@ -2062,7 +2868,14 @@
       },
       "text": "+1% Truth.",
       "flavor": "Smells like fog machine and fear.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-moonlight-report-042",
@@ -2078,7 +2891,15 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-haunted-mansion-alert-initiative-043",
@@ -2094,7 +2915,14 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "ghost",
+        "halloween",
+        "haunted",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-banshee-shuffle-protocol-044",
@@ -2109,7 +2937,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "We can neither confirm nor deny the howling.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-ouija-rally-initiative-045",
@@ -2125,7 +2958,13 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "All treats, suspicious tricks.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "protest",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-banshee-shenanigans-files-046",
@@ -2139,7 +2978,14 @@
       },
       "text": "+1% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-frankenstein-brief-incident-047",
@@ -2154,7 +3000,14 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Licensed spooktacular.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-poltergeist-whispers-files-048",
@@ -2168,7 +3021,14 @@
       },
       "text": "+1% Truth.",
       "flavor": "Keep garlic handy.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-candy-corn-shuffle-incident-049",
@@ -2182,7 +3042,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-spider-shenanigans-protocol-050",
@@ -2197,7 +3062,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-haunted-press-release-051",
@@ -2211,7 +3081,14 @@
       },
       "text": "+1% Truth.",
       "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "ghost",
+        "halloween",
+        "haunted",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-ouija-flyer-052",
@@ -2225,7 +3102,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Batteries not included.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-shuffle-of-the-dracula-053",
@@ -2241,7 +3123,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-ghost-report-protocol-054",
@@ -2257,7 +3144,17 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "We can neither confirm nor deny the howling.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "ghost",
+        "halloween",
+        "haunted",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-pamphlet-of-the-raven-055",
@@ -2271,7 +3168,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Haunting sponsored by a totally normal NGO.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-seance-shuffle-incident-056",
@@ -2287,7 +3189,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-pumpkin-rally-initiative-057",
@@ -2301,7 +3208,13 @@
       },
       "text": "+1% Truth.",
       "flavor": "Keep garlic handy.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "protest",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-black-cat-press-release-protocol-058",
@@ -2315,7 +3228,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-cemetery-rumor-initiative-059",
@@ -2329,7 +3247,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-midnight-flyer-protocol-060",
@@ -2345,7 +3268,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-ghost-press-release-files-061",
@@ -2359,7 +3287,16 @@
       },
       "text": "+1% Truth.",
       "flavor": "Rated PG‑Paranoid.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "ghost",
+        "halloween",
+        "haunted",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-pamphlet-of-the-ouija-062",
@@ -2374,7 +3311,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-frankenstein-pamphlet-063",
@@ -2389,7 +3331,12 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-ectoplasm-whispers-incident-064",
@@ -2405,7 +3352,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Keep garlic handy.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-crypt-flyer-initiative-065",
@@ -2419,7 +3371,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Do not feed after midnight.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-full-moon-brief-incident-066",
@@ -2434,7 +3391,14 @@
       "text": "+1 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-spooky-hayride-rally-protocol-067",
@@ -2448,7 +3412,13 @@
       },
       "text": "+1% Truth.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "protest",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-alert-of-the-skeleton-068",
@@ -2462,7 +3432,12 @@
       },
       "text": "+1% Truth.",
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-headless-horseman-whispers-protocol-069",
@@ -2478,7 +3453,12 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-candy-corn-press-release-initiative-070",
@@ -2494,7 +3474,13 @@
       },
       "text": "Opponent −1 IP.",
       "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-graveyard-murmur-network-protocol-001",
@@ -2510,7 +3496,12 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "Keep garlic handy.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-poltergeist-broadcast-files-002",
@@ -2526,7 +3517,15 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-haunted-mansion-operation-003",
@@ -2542,7 +3541,16 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "Licensed spooktacular.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "ghost",
+        "halloween",
+        "haunted",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-spider-expedition-incident-004",
@@ -2558,7 +3566,12 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "Batteries not included.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-haunted-mansion-expedition-protocol-005",
@@ -2572,7 +3585,14 @@
       },
       "text": "+2% Truth.",
       "flavor": "Bring a flashlight and plausible deniability.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "ghost",
+        "halloween",
+        "haunted",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-seance-sweep-006",
@@ -2586,7 +3606,12 @@
       },
       "text": "+2% Truth.",
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-trick-or-treat-ploy-007",
@@ -2600,7 +3625,12 @@
       },
       "text": "+2% Truth.",
       "flavor": "Batteries not included.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-graveyard-gambit-protocol-008",
@@ -2616,7 +3646,12 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "Bring a flashlight and plausible deniability.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-cobweb-ploy-incident-009",
@@ -2630,7 +3665,12 @@
       },
       "text": "+2% Truth.",
       "flavor": "Do not feed after midnight.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-cauldron-gambit-protocol-010",
@@ -2645,7 +3685,12 @@
       "text": "+2 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Mind the ectoplasm.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-witch-operation-files-011",
@@ -2661,7 +3706,15 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "The crypt Wi‑Fi is excellent.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-seance-sweep-012",
@@ -2676,7 +3729,12 @@
       "text": "+2 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-zombie-murmur-network-013",
@@ -2690,7 +3748,12 @@
       },
       "text": "+2% Truth.",
       "flavor": "Licensed spooktacular.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-moonlight-operation-initiative-014",
@@ -2705,7 +3768,14 @@
       "text": "+2 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "Rated PG‑Paranoid.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-jack-o-lantern-broadcast-initiative-015",
@@ -2719,7 +3789,12 @@
       },
       "text": "+2% Truth.",
       "flavor": "They came for the candy, stayed for the cover‑up.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-ghoul-operation-initiative-016",
@@ -2733,7 +3808,14 @@
       },
       "text": "+2% Truth.",
       "flavor": "Keep garlic handy.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-operation-of-the-mummy-017",
@@ -2749,7 +3831,14 @@
       },
       "text": "Opponent −2 IP.",
       "flavor": "Rated PG‑Paranoid.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-poltergeist-murmur-network-incident-018",
@@ -2763,7 +3852,12 @@
       },
       "text": "+2% Truth.",
       "flavor": "Someone left the portal open again.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-cobweb-ploy-initiative-019",
@@ -2777,7 +3871,12 @@
       },
       "text": "+2% Truth.",
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-headless-horseman-expedition-files-020",
@@ -2791,7 +3890,14 @@
       },
       "text": "+2% Truth.",
       "flavor": "Filed under ‘Seasonal Anomalies’.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-mummy-sanction-001",
@@ -2808,7 +3914,12 @@
       },
       "text": "Opponent −3 IP, discard 1.",
       "flavor": "Do not taunt the poltergeist.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-frankenstein-project-incident-002",
@@ -2822,7 +3933,14 @@
       },
       "text": "+3% Truth.",
       "flavor": "This is fine. Probably.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-zombie-deep-cover-files-003",
@@ -2836,7 +3954,14 @@
       },
       "text": "+3% Truth.",
       "flavor": "Whispers from the cornfield.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-cauldron-grand-ritual-protocol-004",
@@ -2851,7 +3976,12 @@
       "text": "+3 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "‘It was just the wind,’ said the intern.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "truth",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-spooky-hayride-revelation-005",
@@ -2868,7 +3998,12 @@
       },
       "text": "Opponent −3 IP, discard 1.",
       "flavor": "Try not to scream on camera.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-ghoul-project-incident-006",
@@ -2885,7 +4020,14 @@
       },
       "text": "Opponent −3 IP, discard 1.",
       "flavor": "Red eyes in the rear-view mirror.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bureaucracy",
+        "coverup",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-cemetery-deep-cover-protocol-007",
@@ -2899,7 +4041,12 @@
       },
       "text": "+3% Truth.",
       "flavor": "Do not feed after midnight.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-gov-operation-pumpkin-spice-legendary",
@@ -2913,7 +4060,14 @@
       },
       "text": "−4% Truth.",
       "flavor": "Approved by the Starbucks Council of Shadows.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "bureaucracy",
+        "coverup",
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-containment-protocol-dracula-legendary",
@@ -2927,7 +4081,12 @@
       },
       "text": "−3% Truth.",
       "flavor": "Stake, garlic, plausible deniability.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "media"
+      ]
     },
     {
       "id": "hallo-gov-the-skeleton-army-rises-legendary",
@@ -2942,7 +4101,12 @@
       "text": "+3 Pressure in a chosen state.",
       "requiresTarget": true,
       "flavor": "From the boneyard to the ballot box.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "government",
+        "halloween",
+        "zone"
+      ]
     },
     {
       "id": "hallo-truth-elvira-mistress-of-the-leaks-legendary",
@@ -2956,7 +4120,12 @@
       },
       "text": "+4% Truth.",
       "flavor": "Late-night camp, early-morning chaos.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "halloween",
+        "media",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-bat-boy-s-rebellion-legendary",
@@ -2973,7 +4142,14 @@
       },
       "text": "Opponent −4 IP, discard 2.",
       "flavor": "Finally escaped the tabloids — and he’s pissed.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "bat-boy",
+        "cryptid",
+        "halloween",
+        "truth"
+      ]
     },
     {
       "id": "hallo-truth-candy-apocalypse-legendary",
@@ -2990,7 +4166,12 @@
       },
       "text": "Opponent −3 IP, discard 1.",
       "flavor": "Too much sugar unleashes the truth.",
-      "artId": "halloween_spooktacular-Temp-Image"
+      "artId": "halloween_spooktacular-Temp-Image",
+      "tags": [
+        "attack",
+        "halloween",
+        "truth"
+      ]
     }
   ]
 }
