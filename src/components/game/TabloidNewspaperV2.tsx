@@ -26,6 +26,8 @@ import {
 } from './newspaperLayout';
 
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
+const FRONT_PAGE_FALLBACK_HEADLINE = 'SPECIAL EDITION: PRINTING GREMLINS AT WORK';
+const FRONT_PAGE_FALLBACK_SUBHEAD = 'Article vault temporarily unavailable — dispatch desk investigating.';
 
 const FALLBACK_DATA: NewspaperData = {
   mastheads: ['THE PARANOID TIMES'],
@@ -698,11 +700,16 @@ const TabloidNewspaperV2 = ({
   const heroTriggerChance = heroEvent?.triggerChance ?? null;
   const heroConditionalChance = heroEvent?.conditionalChance ?? null;
   const comboNarrative = issue?.comboArticle ?? null;
+  const frontPageStory = issue?.generatedStory ?? null;
+  const frontPageArticles = frontPageStory?.articles ?? [];
+  const frontPageHeadline = frontPageStory?.headline ?? FRONT_PAGE_FALLBACK_HEADLINE;
+  const frontPageSubhead = frontPageStory?.subhead ?? FRONT_PAGE_FALLBACK_SUBHEAD;
 
   const bylinePool = dataset.bylines && dataset.bylines.length ? dataset.bylines : FALLBACK_DATA.bylines;
   const sourcePool = dataset.sources && dataset.sources.length ? dataset.sources : FALLBACK_DATA.sources;
   const byline = issue?.byline ?? pick(bylinePool, FALLBACK_DATA.bylines?.[0] ?? 'By: Anonymous Insider');
   const sourceLine = issue?.sourceLine ?? pick(sourcePool, FALLBACK_DATA.sources?.[0] ?? 'Source: Redacted Dossier');
+  const frontPageByline = frontPageStory?.byline ?? byline;
   const breakingStamp = issue?.stamps.breaking ?? null;
   const classifiedStamp = issue?.stamps.classified ?? null;
 
@@ -987,6 +994,18 @@ const TabloidNewspaperV2 = ({
         </header>
 
         <div className={NEWSPAPER_BODY_CLASS}>
+          <NewspaperSection className="mb-4 bg-white/80 px-4 py-3 text-newspaper-text">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.35em] text-newspaper-text/60">
+              Front Page Dispatch
+            </div>
+            <h2 className="text-2xl font-black uppercase tracking-[0.2em] text-newspaper-headline">
+              {frontPageHeadline}
+            </h2>
+            <p className="text-sm italic text-newspaper-text/80">{frontPageSubhead}</p>
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/50">
+              {frontPageByline}
+            </div>
+          </NewspaperSection>
           <NewspaperSection className="mb-6 bg-white/70 px-4 py-3 text-sm text-newspaper-text">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -1133,6 +1152,53 @@ const TabloidNewspaperV2 = ({
           </article>
 
           <aside className="space-y-4">
+            {frontPageArticles.length ? (
+              <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
+                <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
+                  Dispatch Archive
+                </h3>
+                <div className="space-y-3 text-newspaper-text">
+                  {frontPageArticles.map(article => {
+                    const cardTypeLabel = `[${article.cardType.toUpperCase()}]`;
+                    return (
+                      <article
+                        key={article.cardId}
+                        className="space-y-2 border-b border-dashed border-newspaper-border/60 pb-3 last:border-0 last:pb-0"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                          <span>{cardTypeLabel}</span>
+                          <span>{article.cardName}</span>
+                        </div>
+                        <h4 className="text-base font-semibold leading-snug text-newspaper-headline">
+                          {article.headline}
+                        </h4>
+                        <p className="text-xs italic text-newspaper-text/70">{article.subhead}</p>
+                        <p className="text-sm leading-relaxed text-newspaper-text/80">
+                          {article.body[0] ?? 'Details pending transmission.'}
+                        </p>
+                        {article.tags.length ? (
+                          <div className="flex flex-wrap gap-2 text-[9px] uppercase tracking-wide text-newspaper-text/50">
+                            {article.tags.slice(0, 3).map(tag => (
+                              <span key={tag} className="rounded border border-newspaper-border px-1.5 py-0.5">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+                        <div className="text-[9px] uppercase tracking-[0.35em] text-newspaper-text/40">
+                          {article.byline}
+                        </div>
+                        {article.isFallback ? (
+                          <div className="text-[10px] font-semibold uppercase tracking-wide text-secret-red/70">
+                            Archive retrieval glitch — standby for full copy.
+                          </div>
+                        ) : null}
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
             {hotspotExtraArticle ? (
               <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
