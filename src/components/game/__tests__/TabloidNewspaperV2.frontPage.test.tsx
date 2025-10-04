@@ -95,6 +95,9 @@ const loadArticleBankMock = mock(async () => ({
   getById(id: string) {
     return bankArticles.get(id) ?? null;
   },
+  hasArticles() {
+    return bankArticles.size > 0;
+  },
 }));
 
 mock.module('@/engine/news/articleBank', () => ({
@@ -171,6 +174,7 @@ beforeAll(() => {
 afterEach(() => {
   cleanup();
   bankArticles = new Map();
+  loadArticleBankMock.mockClear();
 });
 
 afterAll(() => {
@@ -207,5 +211,26 @@ describe('TabloidNewspaperV2 front page integration', () => {
     const secondarySection = secondaryHeading.closest('section');
     expect(secondarySection).not.toBeNull();
     expect(within(secondarySection as HTMLElement).getAllByText(/Side Story/)).toHaveLength(3);
+  });
+
+  test('shows fallback headline and simple list when article bank is empty', async () => {
+    loadArticleBankMock.mockImplementationOnce(async () => ({
+      getById() {
+        return null;
+      },
+      hasArticles() {
+        return false;
+      },
+    }));
+
+    render(<TabloidNewspaperV2 {...baseProps} />);
+
+    const headline = await screen.findByRole('heading', { level: 1 });
+    expect(headline.textContent).toContain('SPECIAL EDITION: PRINTING GREMLINS AT WORK');
+
+    const list = await screen.findByRole('list');
+    const items = within(list).getAllByRole('listitem');
+    expect(items).toHaveLength(3);
+    expect(items[0]?.textContent).toContain('[ATTACK]');
   });
 });

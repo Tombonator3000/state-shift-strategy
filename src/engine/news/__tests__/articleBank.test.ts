@@ -39,9 +39,10 @@ test('provides lookup access for parsed articles', async () => {
   expect(resolved?.headline).toBe(article.headline);
   expect(resolved?.tags).toEqual(['cryptid', 'attack']);
   expect(bank.getById('missing')).toBeNull();
+  expect(bank.hasArticles()).toBe(true);
 });
 
-test('throws when fetch fails', async () => {
+test('returns empty bank when fetch fails', async () => {
   const fetchMock = mock(async () =>
     createResponse(
       {},
@@ -54,7 +55,10 @@ test('throws when fetch fails', async () => {
   ) as unknown as typeof fetch;
   (globalThis as { fetch: typeof fetch }).fetch = fetchMock;
 
-  await expect(loadArticleBank('https://example.com/missing.json')).rejects.toThrow(/Failed to load article bank/);
+  const bank = await loadArticleBank('https://example.com/missing.json');
+
+  expect(bank.getById('missing')).toBeNull();
+  expect(bank.hasArticles()).toBe(false);
 });
 
 test('handles payloads without articles gracefully', async () => {
@@ -64,4 +68,5 @@ test('handles payloads without articles gracefully', async () => {
   const bank = await loadArticleBank('https://example.com/empty.json');
 
   expect(bank.getById('any')).toBeNull();
+  expect(bank.hasArticles()).toBe(false);
 });

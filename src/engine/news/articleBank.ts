@@ -13,9 +13,20 @@ export type CardArticle = {
 
 export type ArticleBank = {
   getById(cardId: string): CardArticle | null;
+  hasArticles(): boolean;
 };
 
-const DEFAULT_BANK_PATH = '/data/paranoid_times_card_articles_ALL.json';
+const ARTICLE_BANK_PATH = '/data/paranoid_times_card_articles_ALL.json';
+const ERROR_PREFIX = '[article-bank]';
+
+const createEmptyArticleBank = (): ArticleBank => ({
+  getById() {
+    return null;
+  },
+  hasArticles() {
+    return false;
+  },
+});
 
 const cardArticleSchema: z.ZodType<CardArticle> = z.object({
   id: z.string(),
@@ -47,30 +58,44 @@ const normaliseTags = (tags: string[] | undefined): string[] => {
   return Array.from(seen);
 };
 
-export async function loadArticleBank(jsonPath: string = DEFAULT_BANK_PATH): Promise<ArticleBank> {
-  const response = await fetch(jsonPath);
-  if (!response.ok) {
-    throw new Error(`Failed to load article bank from ${jsonPath}: ${response.status} ${response.statusText}`);
+export async function loadArticleBank(jsonPath: string = ARTICLE_BANK_PATH): Promise<ArticleBank> {
+  try {
+    const response = await fetch(jsonPath);
+    if (!response.ok) {
+      console.error(`${ERROR_PREFIX} failed to fetch ${jsonPath}: ${response.status} ${response.statusText}`);
+      return createEmptyArticleBank();
+    }
+
+    const payload = await response.json();
+    const { articles } = articleFileSchema.parse(payload);
+
+    const map = new Map<string, CardArticle>();
+    for (const article of articles) {
+      const normalised: CardArticle = {
+        ...article,
+        tags: normaliseTags(article.tags),
+      };
+      map.set(normalised.id, normalised);
+    }
+
+    if (!map.size) {
+      console.warn(`${ERROR_PREFIX} loaded 0 articles from ${jsonPath}`);
+      return createEmptyArticleBank();
+    }
+
+    return {
+      getById(cardId: string): CardArticle | null {
+        if (!cardId) {
+          return null;
+        }
+        return map.get(cardId) ?? null;
+      },
+      hasArticles() {
+        return map.size > 0;
+      },
+    } satisfies ArticleBank;
+  } catch (error) {
+    console.error(`${ERROR_PREFIX} unable to load ${jsonPath}`, error);
+    return createEmptyArticleBank();
   }
-
-  const payload = await response.json();
-  const { articles } = articleFileSchema.parse(payload);
-
-  const map = new Map<string, CardArticle>();
-  for (const article of articles) {
-    const normalised: CardArticle = {
-      ...article,
-      tags: normaliseTags(article.tags),
-    };
-    map.set(normalised.id, normalised);
-  }
-
-  return {
-    getById(cardId: string): CardArticle | null {
-      if (!cardId) {
-        return null;
-      }
-      return map.get(cardId) ?? null;
-    },
-  } satisfies ArticleBank;
 }

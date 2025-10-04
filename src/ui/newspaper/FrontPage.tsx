@@ -33,6 +33,7 @@ const normaliseFaction = (value?: string): 'TRUTH' | 'GOV' => {
 const FrontPage = ({ cards, className, faction, headlineFallback = DEFAULT_FALLBACK }: FrontPageProps) => {
   const [articleBank, setArticleBank] = useState<ArticleBank | null>(null);
   const [mainStory, setMainStory] = useState<GeneratedStory | null>(null);
+  const [articleBankReady, setArticleBankReady] = useState(false);
 
   const dominantFaction = normaliseFaction(faction ?? cards[0]?.faction);
   const kickerLabel = dominantFaction === 'TRUTH' ? 'FRONT PAGE DISPATCH' : 'OFFICIAL GOVERNMENT BULLETIN';
@@ -44,12 +45,14 @@ const FrontPage = ({ cards, className, faction, headlineFallback = DEFAULT_FALLB
       .then(bank => {
         if (!cancelled) {
           setArticleBank(bank);
+          setArticleBankReady(bank.hasArticles());
         }
       })
       .catch(error => {
         console.warn('Failed to load article bank for front page', error);
         if (!cancelled) {
           setArticleBank(null);
+          setArticleBankReady(false);
         }
       });
 
@@ -59,7 +62,7 @@ const FrontPage = ({ cards, className, faction, headlineFallback = DEFAULT_FALLB
   }, []);
 
   useEffect(() => {
-    if (!articleBank || cards.length !== 3) {
+    if (!articleBank || !articleBankReady || cards.length !== 3) {
       setMainStory(null);
       return;
     }
@@ -71,7 +74,7 @@ const FrontPage = ({ cards, className, faction, headlineFallback = DEFAULT_FALLB
       console.warn('Failed to compose main story', error);
       setMainStory(null);
     }
-  }, [articleBank, cards]);
+  }, [articleBank, articleBankReady, cards]);
 
   const secondaryStories = useMemo<SecondaryStory[]>(
     () =>
@@ -81,6 +84,8 @@ const FrontPage = ({ cards, className, faction, headlineFallback = DEFAULT_FALLB
       })),
     [articleBank, cards],
   );
+
+  const hasSecondaryArticles = articleBankReady && secondaryStories.some(({ article }) => Boolean(article));
 
   const headline = mainStory?.headline ?? headlineFallback.headline;
   const subhead = mainStory?.subhead ?? headlineFallback.subhead;
@@ -96,22 +101,33 @@ const FrontPage = ({ cards, className, faction, headlineFallback = DEFAULT_FALLB
 
       <section className="frontpage-secondary">
         <h2 className="section-title">SECONDARY REPORTS</h2>
-        <div className="secondary-grid">
-          {secondaryStories.map(({ card, article }) => {
-            const bodyText = article?.body?.trim();
-            return (
-              <article
-                key={card.id}
-                className={cn('secondary-article border border-newspaper-border/60 bg-white/70 shadow-sm')}
-              >
-                <div className="pill">[{card.type}]</div>
-                <h3 className="secondary-headline text-newspaper-headline">{article?.headline ?? card.name}</h3>
-                {article?.subhead ? <p className="muted italic">{article.subhead}</p> : null}
-                {bodyText ? <p>{bodyText}</p> : null}
-              </article>
-            );
-          })}
-        </div>
+        {hasSecondaryArticles ? (
+          <div className="secondary-grid">
+            {secondaryStories.map(({ card, article }) => {
+              const bodyText = article?.body?.trim();
+              return (
+                <article
+                  key={card.id}
+                  className={cn('secondary-article border border-newspaper-border/60 bg-white/70 shadow-sm')}
+                >
+                  <div className="pill">[{card.type}]</div>
+                  <h3 className="secondary-headline text-newspaper-headline">{article?.headline ?? card.name}</h3>
+                  {article?.subhead ? <p className="muted italic">{article.subhead}</p> : null}
+                  {bodyText ? <p>{bodyText}</p> : null}
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <ul className="space-y-2 rounded border border-dashed border-newspaper-border/60 bg-white/60 p-4 text-sm italic">
+            {cards.map(card => (
+              <li key={card.id} className="flex flex-wrap items-center gap-2">
+                <span className="rounded border border-newspaper-border/60 bg-white px-2 py-1 text-xs font-semibold uppercase tracking-wide">[{card.type}]</span>
+                <span className="font-semibold not-italic">{card.name}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { isExtensionCard, getCardExtensionInfo } from '@/data/extensionIntegration';
+import { AVAILABLE_CARD_ART } from '@/data/cardArtManifest';
 
 interface CardImageProps {
   cardId: string;
@@ -12,6 +13,7 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'co
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageExtension, setImageExtension] = useState<'jpg' | 'png'>('jpg');
+  const [canLoadDirect, setCanLoadDirect] = useState(() => AVAILABLE_CARD_ART.has(cardId));
 
   // Check if this is an extension card with temp image
   const getFallbackImagePath = () => {
@@ -51,17 +53,23 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'co
   };
 
   const fallbackImagePath = getFallbackImagePath();
-  const imagePath = imageError
+  const imagePath = imageError || !canLoadDirect
     ? fallbackImagePath
     : `/card-art/${cardId}.${imageExtension}`;
 
   useEffect(() => {
-    setImageError(false);
+    const hasArt = AVAILABLE_CARD_ART.has(cardId);
+    setCanLoadDirect(hasArt);
+    setImageError(!hasArt);
     setImageLoaded(false);
     setImageExtension('jpg');
   }, [cardId]);
 
   const handleImageError = () => {
+    if (!canLoadDirect) {
+      return;
+    }
+
     setImageLoaded(false);
 
     if (!imageError && imageExtension === 'jpg') {
