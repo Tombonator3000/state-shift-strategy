@@ -1060,7 +1060,7 @@ const TabloidNewspaperV2 = ({
           <NewspaperSection className="mb-4 bg-white/80 px-4 py-3 text-newspaper-text">
             <FrontPage
               cards={frontPageCards}
-              faction={faction}
+              faction={faction === 'government' ? 'GOV' : 'TRUTH'}
               headlineFallback={{
                 headline: FRONT_PAGE_FALLBACK_HEADLINE,
                 subhead: FRONT_PAGE_FALLBACK_SUBHEAD,

@@ -141,10 +141,10 @@ export interface GameEditorRuntimeState {
 }
 
 export interface GameEditorPreGameAdditions {
-  readonly playerDeck?: GameCard[];
-  readonly aiDeck?: GameCard[];
-  readonly playerHand?: GameCard[];
-  readonly aiHand?: GameCard[];
+  playerDeck?: GameCard[];
+  aiDeck?: GameCard[];
+  playerHand?: GameCard[];
+  aiHand?: GameCard[];
 }
 
 export interface ActiveCampaignArcState {

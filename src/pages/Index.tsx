@@ -1129,7 +1129,7 @@ const Index = () => {
           setList: broadcastContext.setList,
           truthValue: Math.round(gameState.truth),
           reducedMotion,
-          source: currentEvent?.faction,
+          source: currentEvent?.faction === 'neutral' ? 'truth' : currentEvent?.faction,
         });
         if (stage === 'finale') {
           VisualEffectsCoordinator.triggerTruthFlash(broadcastPosition);
@@ -1147,7 +1147,7 @@ const Index = () => {
             setList: broadcastContext.setList,
             intensity: broadcastContext.intensity,
             truthValue: Math.round(gameState.truth),
-            source: currentEvent?.faction,
+            source: currentEvent?.faction === 'neutral' ? 'truth' : currentEvent?.faction,
           },
         });
 
@@ -1213,7 +1213,7 @@ const Index = () => {
             defenseBoost: currentEvent.paranormalHotspot.defenseBoost,
             truthReward: currentEvent.paranormalHotspot.truthReward,
             duration: currentEvent.paranormalHotspot.duration,
-            source: currentEvent.paranormalHotspot.source ?? 'neutral',
+            source: (currentEvent.paranormalHotspot.source === 'neutral' ? 'truth' : currentEvent.paranormalHotspot.source) ?? 'truth',
             outcome: stage === 'finale' ? 'captured' : 'active',
           },
         });

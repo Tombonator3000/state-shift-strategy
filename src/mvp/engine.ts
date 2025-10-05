@@ -231,7 +231,7 @@ export function startTurn(state: GameState): GameState {
   const opponent = cloned.players[otherPlayer(currentId)];
   const relicResult = RelicEngine.applyRoundStart({
     state: {
-      faction: me.faction,
+      faction: me.faction.toLowerCase() as 'government' | 'truth',
       truth: cloned.truth,
       ip: me.ip,
       aiIP: opponent.ip,

@@ -302,7 +302,7 @@ export const RelicEngine = {
 
     for (const entry of runtime.entries) {
       const status = entry.status === 'queued' ? 'active' : entry.status;
-      const remaining = status === 'queued' ? entry.remaining : entry.remaining - 1;
+      const remaining = entry.status === 'queued' ? entry.remaining : entry.remaining - 1;
       const nextEntry: TabloidRelicRuntimeEntry = {
         ...entry,
         status: 'active',

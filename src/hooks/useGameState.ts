@@ -388,7 +388,7 @@ const normalizeEditorPreGameAdditions = (value: unknown): GameEditorPreGameAddit
   }
 
   const additions = value as Partial<GameEditorPreGameAdditions>;
-  const normalized: GameEditorPreGameAdditions = {};
+  const result: Partial<GameEditorPreGameAdditions> = {};
 
   const toCardArray = (cards?: unknown): GameCard[] | undefined => {
     if (!Array.isArray(cards)) {
@@ -410,12 +410,12 @@ const normalizeEditorPreGameAdditions = (value: unknown): GameEditorPreGameAddit
       ?? (additions as { deck?: unknown }).deck,
   );
   if (playerDeck) {
-    normalized.playerDeck = [...playerDeck];
+    result.playerDeck = [...playerDeck];
   }
 
   const aiDeck = toCardArray((additions as { aiDeck?: unknown }).aiDeck);
   if (aiDeck) {
-    normalized.aiDeck = [...aiDeck];
+    result.aiDeck = [...aiDeck];
   }
 
   const playerHand = toCardArray(
@@ -423,15 +423,15 @@ const normalizeEditorPreGameAdditions = (value: unknown): GameEditorPreGameAddit
       ?? (additions as { hand?: unknown }).hand,
   );
   if (playerHand) {
-    normalized.playerHand = [...playerHand];
+    result.playerHand = [...playerHand];
   }
 
   const aiHand = toCardArray((additions as { aiHand?: unknown }).aiHand);
   if (aiHand) {
-    normalized.aiHand = [...aiHand];
+    result.aiHand = [...aiHand];
   }
 
-  return Object.keys(normalized).length > 0 ? normalized : undefined;
+  return Object.keys(result).length > 0 ? result as GameEditorPreGameAdditions : undefined;
 };
 
 const OWNER_LABEL: Record<AgendaOwner, 'player' | 'ai'> = {
@@ -2284,6 +2284,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       turnPlays: [],
       controlledStates: [],
       aiControlledStates: [],
+      activeHotspot: null,
+      stateRoundSeed: 0,
+      lastStateBonusRound: 0,
+      stateRoundEvents: {},
       states: USA_STATES.map(state => {
         return {
           id: state.id,
@@ -4733,7 +4737,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const baseStates = statesWithHotspot.length > 0 ? statesWithHotspot : prev.states;
         const statesWithDefense = applyDefenseBonusToStates(baseStates, restoredEffects.stateDefenseBonus);
         const derivedStateRoundEvents = Object.fromEntries(
-          statesWithDefense.map(state => [state.abbreviation, Array.isArray(state.roundEvents) ? state.roundEvents : []]),
+          statesWithDefense.map(state => [
+            (state as any).abbreviation ?? (state as any).id ?? 'unknown',
+            Array.isArray((state as any).roundEvents) ? (state as any).roundEvents : []
+          ]),
         );
 
         return {

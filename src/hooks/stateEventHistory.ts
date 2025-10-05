@@ -49,7 +49,7 @@ type StateWithOptionalHistory = Omit<
 
 export const mergeStateEventHistories = (
   previous: GameState['states'],
-  next: StateWithOptionalHistory[],
+  next: (StateWithOptionalHistory | any)[],
 ): GameState['states'] => {
   const historyLookup = new Map<string, StateEventBonusSummary[]>();
   const hotspotHistoryLookup = new Map<string, StateParanormalHotspotSummary[]>();

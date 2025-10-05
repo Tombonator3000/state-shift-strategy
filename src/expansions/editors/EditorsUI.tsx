@@ -63,6 +63,7 @@ const getStoredSelection = (): EditorId | null => {
 interface ChooseEditorOptions {
   readonly defaultId?: EditorId | null;
   readonly allowSkip?: boolean;
+  readonly faction?: 'government' | 'truth';
 }
 
 interface EditorsChooseModalProps {

@@ -15,7 +15,7 @@ export class GameStateAuditError extends Error {
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value);
 
-const assertState = (condition: boolean, message: string): asserts condition => {
+const assertState: (condition: boolean, message: string) => asserts condition = (condition, message) => {
   if (!condition) {
     throw new GameStateAuditError(message);
   }

@@ -37,7 +37,7 @@ const createEmptyArticleBank = (): ArticleBank => ({
   },
 });
 
-const cardArticleSchema: z.ZodType<CardArticle> = z.object({
+const cardArticleSchema = z.object({
   id: z.string(),
   tone: z.union([z.literal('truth'), z.literal('gov')]),
   tags: z.array(z.string()).default([]),
@@ -88,9 +88,16 @@ export async function loadArticleBank(): Promise<ArticleBank> {
 
     const map = new Map<string, CardArticle>();
     for (const article of articles) {
+      if (!article.id || !article.tone) continue;
       const normalised: CardArticle = {
-        ...article,
+        id: article.id,
+        tone: article.tone,
         tags: normaliseTags(article.tags),
+        headline: article.headline,
+        subhead: article.subhead,
+        byline: article.byline,
+        body: article.body,
+        imagePrompt: article.imagePrompt,
       };
       map.set(normalised.id, normalised);
     }
