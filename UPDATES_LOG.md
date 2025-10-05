@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-05 – Summarize turn headlines and extras
+- Record per-turn highlights for both MVP engine and the main hook so news systems can consume consistent `PlayedLite` buffers.
+- Generate turn headline summaries and trigger Extra Extra bulletins after three plays to populate `headlineLog` and `extraExtraFeed`.
+
 ## 2025-10-05 – Expand game state tracking buffers
 - Add headline, extra edition, and turn buffer placeholders to both MVP and main game state models so upcoming newspaper flows
   can read consistent structures.

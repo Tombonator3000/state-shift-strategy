@@ -72,6 +72,7 @@ import {
   buildStrategyLogEntries as buildStrategyLogEntriesHelper,
   createPlayedCardRecord,
   createTurnPlayEntries,
+  toPlayedLite,
   type AiCardPlayParams,
 } from './aiHelpers';
 import { evaluateCombosForTurn } from './comboAdapter';
@@ -83,6 +84,8 @@ import {
 import { assignStateBonuses } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from './stateBonusAssignment';
 import { clearNewsBuffer, getNewsTriplet, pushToNewsBuffer } from '@/state/game/roundNewsBuffer';
+import { summarize, generateExtraExtra } from '@/news/headlineEngine';
+import type { TurnLog } from '@/news/headlineEngine';
 import type { GameOverReport } from '@/types/finalEdition';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
@@ -170,6 +173,37 @@ const emitEditorToastMessages = (messages: string[]): void => {
       (emitter as (value: string) => void)(message);
     }
   }
+};
+
+const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): GameState => {
+  const buffer = prev.turnBuffer ?? [];
+  if (buffer.length === 0) {
+    return next.turnBuffer.length === 0 ? next : { ...next, turnBuffer: [] };
+  }
+
+  const turnLog: TurnLog = {
+    round: prev.round,
+    turn: prev.turn,
+    plays: buffer,
+  };
+
+  const totals = summarize([turnLog]);
+  const summaryHeadline = `Turn ${prev.turn} recap: Truth plays ${totals.truth.plays}, Government plays ${totals.government.plays}`;
+  const headlineLog = [...next.headlineLog, summaryHeadline];
+
+  let extraExtraFeed = next.extraExtraFeed;
+  if (buffer.length >= 3) {
+    const article = generateExtraExtra(`${seedPrefix}:${prev.round}:${prev.turn}`, [turnLog], totals);
+    const articleLine = `${article.hed} — ${article.dek}`;
+    extraExtraFeed = [...extraExtraFeed, articleLine];
+  }
+
+  return {
+    ...next,
+    headlineLog,
+    extraExtraFeed,
+    turnBuffer: [],
+  };
 };
 
 const dispatchEditorTelemetry = (payload: EditorTelemetryPayload): void => {
@@ -2752,6 +2786,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         : undefined;
       const nextEditorRuntime = editorRuntimePatch ?? runtimeSnapshot ?? prev.editorRuntime ?? null;
 
+      const highlight = toPlayedLite(playedCardRecord);
+
       let nextState: GameState = {
         ...prev,
         hand: prev.hand.filter(c => c.id !== cardId),
@@ -2765,7 +2801,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
         playHistory: [...prev.playHistory, playedCardRecord],
         turnPlays: [...prev.turnPlays, ...turnPlayEntries],
-        turnBuffer: [...prev.turnBuffer, ...turnPlayEntries],
+        turnBuffer: highlight ? [...prev.turnBuffer, highlight] : prev.turnBuffer,
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
         log: [...prev.log, ...resolution.logEntries],
@@ -2953,7 +2989,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         round: prev.round,
         turn: prev.turn,
       });
-
       pendingTurnPlays = createTurnPlayEntries({
         state: prev,
         card: resolvedCard,
@@ -2983,7 +3018,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
         log: [...prev.log, ...resolution.logEntries],
-        turnBuffer: [...prev.turnBuffer, ...(pendingTurnPlays ?? [])],
         agendaIssueCounters: counterSnapshot.issueCounters,
         agendaRoundCounters: counterSnapshot.roundCounters,
         paranormalHotspots: updatedHotspots,
@@ -3028,6 +3062,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           timestamp: Date.now(),
           logEntries: [],
         };
+        const highlight = toPlayedLite(record);
+
         let nextState: GameState = {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),
@@ -3035,7 +3071,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
           playHistory: [...prev.playHistory, record],
           turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
-          turnBuffer: [...prev.turnBuffer, ...(pendingTurnPlays ?? [])],
+          turnBuffer: highlight ? [...prev.turnBuffer, highlight] : prev.turnBuffer,
           selectedCard: null,
           targetState: null,
           animating: false,
@@ -3086,6 +3122,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           timestamp: Date.now(),
           logEntries: [],
         };
+        const highlight = toPlayedLite(record);
+
         let nextState: GameState = {
           ...prev,
           hand: prev.hand.filter(c => c.id !== cardId),
@@ -3093,7 +3131,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
           playHistory: [...prev.playHistory, record],
           turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
-          turnBuffer: [...prev.turnBuffer, ...(pendingTurnPlays ?? [])],
+          turnBuffer: highlight ? [...prev.turnBuffer, highlight] : prev.turnBuffer,
           selectedCard: null,
           targetState: null,
           animating: false,
@@ -3611,6 +3649,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         };
         nextState.log.push(`AI ${prev.aiStrategist?.personality.name} is thinking...`);
 
+        nextState = applyTurnNews(prev, nextState, 'human');
+
         return updateSecretAgendaProgress(nextState);
       }
 
@@ -3681,14 +3721,17 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         truthBelow20Streak: truthStreaks.truthBelow20Streak,
       };
 
-        shouldScheduleNewspaperReveal = true;
-        return updateSecretAgendaProgress({
+        const nextStateWithStreaks: GameState = {
           ...nextStateBase,
           truthAbove80Streak: truthStreaks.truthAbove80Streak,
           truthBelow20Streak: truthStreaks.truthBelow20Streak,
           timeBasedGoalCounters,
           activeHotspot: nextActiveHotspot,
-        });
+        };
+
+        shouldScheduleNewspaperReveal = true;
+        const nextStateWithNews = applyTurnNews(prev, nextStateWithStreaks, 'ai');
+        return updateSecretAgendaProgress(nextStateWithNews);
       });
 
     if (shouldScheduleNewspaperReveal) {

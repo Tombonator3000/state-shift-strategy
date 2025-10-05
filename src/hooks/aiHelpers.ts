@@ -7,6 +7,7 @@ import {
   type CardHotspotResolution,
 } from '@/systems/cardResolution';
 import type { TurnPlay } from '@/game/combo.types';
+import type { PlayedLite } from '@/news/headlineEngine';
 import type { PlayerId } from '@/mvp/validator';
 import type { WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
 
@@ -250,6 +251,41 @@ export const createTurnPlayEntries = (params: {
   ];
 };
 
+export const toPlayedLite = (record: CardPlayRecord): PlayedLite | null => {
+  const type = String(record.card.type ?? '').toUpperCase();
+  if (type !== 'ATTACK' && type !== 'MEDIA' && type !== 'ZONE') {
+    return null;
+  }
+
+  const entry: PlayedLite = {
+    id: record.card.id,
+    name: record.card.name,
+    type: type as PlayedLite['type'],
+    faction: record.faction,
+  };
+
+  const positiveTruth = Math.max(0, record.truthDelta);
+  if (positiveTruth > 0) {
+    entry.truth = positiveTruth;
+  }
+
+  const positiveIp = Math.max(0, record.ipDelta);
+  if (positiveIp > 0) {
+    entry.ip = positiveIp;
+  }
+
+  const captures = record.capturedStateIds.length;
+  if (captures > 0) {
+    entry.captures = captures;
+  }
+
+  if (record.damageDealt > 0) {
+    entry.damage = record.damageDealt;
+  }
+
+  return entry;
+};
+
 const summarizeStrategy = (reasoning?: string, strategyDetails?: string[]): string | undefined => {
   const source = reasoning ?? strategyDetails?.[0];
   if (!source) {
@@ -396,6 +432,8 @@ export const applyAiCardPlay = (
     resolution,
   });
 
+  const turnBufferEntry = toPlayedLite(playedCardRecord);
+
   const updatedHotspots = { ...prev.paranormalHotspots };
   if (resolution.resolvedHotspots) {
     for (const abbr of resolution.resolvedHotspots) {
@@ -427,7 +465,7 @@ export const applyAiCardPlay = (
     cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
     playHistory: [...prev.playHistory, playedCardRecord],
     turnPlays: [...prev.turnPlays, ...turnPlayEntries],
-    turnBuffer: [...prev.turnBuffer, ...turnPlayEntries],
+    turnBuffer: turnBufferEntry ? [...prev.turnBuffer, turnBufferEntry] : prev.turnBuffer,
     log: logEntries,
     paranormalHotspots: updatedHotspots,
     cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,

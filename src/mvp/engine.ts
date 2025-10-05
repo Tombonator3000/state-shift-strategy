@@ -5,6 +5,8 @@ import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward 
 import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import { RelicEngine } from '@/expansions/tabloidRelics/RelicEngine';
+import { summarize, generateExtraExtra } from '@/news/headlineEngine';
+import type { PlayedLite, TurnLog } from '@/news/headlineEngine';
 import { cloneGameState } from './validator';
 import { auditGameState } from './gameStateAudit';
 import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
@@ -23,6 +25,35 @@ const drawUpToFive = (player: PlayerState): PlayerState => {
     deck,
     hand,
   };
+};
+
+const createPlayedLiteEntry = (player: PlayerState, card: Card): PlayedLite | null => {
+  if (card.type !== 'ATTACK' && card.type !== 'MEDIA' && card.type !== 'ZONE') {
+    return null;
+  }
+
+  const entry: PlayedLite = {
+    id: card.id,
+    name: card.name,
+    type: card.type,
+    faction: player.faction === 'government' ? 'government' : 'truth',
+  };
+
+  if (card.type === 'MEDIA') {
+    const truthDelta = (card.effects as EffectsMEDIA | undefined)?.truthDelta;
+    if (typeof truthDelta === 'number' && !Number.isNaN(truthDelta) && truthDelta !== 0) {
+      entry.truth = truthDelta;
+    }
+  }
+
+  if (card.type === 'ATTACK') {
+    const damage = (card.effects as EffectsATTACK | undefined)?.ipDelta?.opponent;
+    if (typeof damage === 'number' && !Number.isNaN(damage) && damage > 0) {
+      entry.damage = damage;
+    }
+  }
+
+  return entry;
 };
 
 export type WinResult = { winner?: PlayerId; reason?: 'states' | 'truth' | 'ip' };
@@ -388,10 +419,12 @@ export function playCard(
     targetStateId,
   };
 
+  const liteEntry = createPlayedLiteEntry(player, card);
+
   const interimState: GameState = {
     ...cloned,
     turnPlays: [...cloned.turnPlays, playEntry],
-    turnBuffer: [...cloned.turnBuffer, playEntry],
+    turnBuffer: liteEntry ? [...cloned.turnBuffer, liteEntry] : cloned.turnBuffer,
     players: {
       ...cloned.players,
       [currentId]: updatedPlayer,
@@ -462,7 +495,6 @@ export function resolve(
   return {
     ...resolved,
     turnPlays: [...resolved.turnPlays, resolveEntry],
-    turnBuffer: [...resolved.turnBuffer, resolveEntry],
   };
 }
 
@@ -601,6 +633,27 @@ export function endTurn(
 
   const nextPlayer = otherPlayer(currentId);
 
+  const bufferPlays = cloned.turnBuffer;
+  let headlineLog = cloned.headlineLog;
+  let extraExtraFeed = cloned.extraExtraFeed;
+
+  if (bufferPlays.length > 0) {
+    const turnLogEntry: TurnLog = {
+      round: cloned.turn,
+      turn: turnNumber,
+      plays: bufferPlays,
+    };
+    const totals = summarize([turnLogEntry]);
+    const summaryHeadline = `Turn ${turnNumber} recap: Truth plays ${totals.truth.plays}, Government plays ${totals.government.plays}`;
+    headlineLog = [...headlineLog, summaryHeadline];
+
+    if (bufferPlays.length >= 3) {
+      const article = generateExtraExtra(`mvp:${currentId}:${turnNumber}`, [turnLogEntry], totals);
+      const articleLine = `${article.hed} — ${article.dek}`;
+      extraExtraFeed = [...extraExtraFeed, articleLine];
+    }
+  }
+
   const finalState: GameState = {
     ...logEnhancedState,
     currentPlayer: nextPlayer,
@@ -608,6 +661,8 @@ export function endTurn(
     playsThisTurn: 0,
     turnPlays: [],
     turnBuffer: [],
+    headlineLog,
+    extraExtraFeed,
     winner: winResult.winner ?? null,
     victoryType: winResult.reason ?? null,
   };
