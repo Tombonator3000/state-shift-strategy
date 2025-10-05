@@ -32,7 +32,7 @@ import { Maximize, Menu, Minimize, UserCircle2 } from 'lucide-react';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import { planDiscardOutcome } from '@/utils/discardPlanner';
-import { safeSetLocalStorageItem } from '@/utils/storage';
+import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
 import {
   aggregateStateCombinationEffects,
   applyDefenseBonusToStates,
@@ -170,6 +170,27 @@ const detectReducedMotion = (): boolean => {
     return false;
   }
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+};
+
+const safeRemoveLocalStorageItem = (key: string): boolean => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  try {
+    const storage = window.localStorage;
+    if (!storage || typeof storage.removeItem !== 'function') {
+      return false;
+    }
+
+    storage.removeItem(key);
+    return true;
+  } catch (error) {
+    if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+      console.warn(`[storage] Failed to remove "${key}" from localStorage`, error);
+    }
+    return false;
+  }
 };
 
 const pickChapterTemplate = (templates: string[], chapter: number): string => {
@@ -667,11 +688,9 @@ const Index = () => {
   const [showPlayerHub, setShowPlayerHub] = useState(false);
   const [playerHubSource, setPlayerHubSource] = useState<'menu' | 'game'>('menu');
   const [lastSelectedFaction, setLastSelectedFaction] = useState<'truth' | 'government'>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = window.localStorage.getItem('shadowgov-last-faction');
-      if (stored === 'truth' || stored === 'government') {
-        return stored;
-      }
+    const stored = safeGetLocalStorageItem('shadowgov-last-faction');
+    if (stored === 'truth' || stored === 'government') {
+      return stored;
     }
 
     return 'government';
@@ -701,6 +720,8 @@ const Index = () => {
   const [arcProgressSummaries, setArcProgressSummaries] = useState<Record<string, ArcProgressSummary>>({});
   const [inspectedPlayedCard, setInspectedPlayedCard] = useState<GameCard | null>(null);
   const [activeRelicFallout, setActiveRelicFallout] = useState<TabloidRelicRuntimeEntry | null>(null);
+
+  const prevIPCacheRef = useRef<number | null>(null);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -859,6 +880,16 @@ const Index = () => {
   const persistFaction = useCallback((faction: 'truth' | 'government') => {
     setLastSelectedFaction(faction);
     safeSetLocalStorageItem('shadowgov-last-faction', faction);
+  }, []);
+
+  const persistPrevIP = useCallback((value: number | null) => {
+    prevIPCacheRef.current = value;
+    if (value === null) {
+      safeRemoveLocalStorageItem('prevIP');
+      return;
+    }
+
+    safeSetLocalStorageItem('prevIP', value.toString());
   }, []);
 
   const handleRelicOverlayClose = useCallback(() => {
@@ -1287,16 +1318,32 @@ const Index = () => {
   // Track IP changes for floating numbers
   useEffect(() => {
     const currentIP = gameState.ip;
-    const prevIP = parseInt(localStorage.getItem('prevIP') || '0');
-    
-    if (currentIP !== prevIP && prevIP > 0) {
-      const change = currentIP - prevIP;
+
+    const storedPrevIP = safeGetLocalStorageItem('prevIP');
+    let persistedPrevIP: number | null = null;
+
+    if (storedPrevIP !== null) {
+      const parsed = Number.parseInt(storedPrevIP, 10);
+      if (!Number.isNaN(parsed)) {
+        persistedPrevIP = parsed;
+      } else {
+        safeRemoveLocalStorageItem('prevIP');
+      }
+    }
+
+    const previousTrackedIP =
+      typeof persistedPrevIP === 'number' && Number.isFinite(persistedPrevIP)
+        ? persistedPrevIP
+        : prevIPCacheRef.current;
+
+    if (typeof previousTrackedIP === 'number' && previousTrackedIP > 0 && currentIP !== previousTrackedIP) {
+      const change = currentIP - previousTrackedIP;
       setFloatingNumbers({ value: change, type: 'ip' });
       setTimeout(() => setFloatingNumbers(null), 100);
     }
-    
-    localStorage.setItem('prevIP', currentIP.toString());
-  }, [gameState.ip]);
+
+    persistPrevIP(currentIP);
+  }, [gameState.ip, persistPrevIP]);
 
   // Track phase changes for context
   useEffect(() => {
@@ -1901,7 +1948,10 @@ const Index = () => {
 
   // Check if first-time player
   useEffect(() => {
-    const hasSeenOnboarding = localStorage.getItem('shadowgov-onboarding-complete') || localStorage.getItem('shadowgov-onboarding-skipped');
+    const onboardingComplete = safeGetLocalStorageItem('shadowgov-onboarding-complete');
+    const onboardingSkipped = safeGetLocalStorageItem('shadowgov-onboarding-skipped');
+    const hasSeenOnboarding = Boolean(onboardingComplete || onboardingSkipped);
+
     if (!hasSeenOnboarding && !showMenu && !showIntro) {
       setShowOnboarding(true);
     }

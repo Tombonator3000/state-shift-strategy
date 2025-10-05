@@ -2,6 +2,9 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-05 – Index onboarding storage safeguards
+- Use the safe storage helpers for faction selection, IP tracking, and onboarding checks so the intro flow still works when localStorage is blocked.
+
 ## 2025-10-05 – Weather badge storage safety
 - Use the safe localStorage helper for the start screen weather badge so blocked storage no longer breaks the intro UI.
 
