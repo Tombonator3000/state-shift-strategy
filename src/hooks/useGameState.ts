@@ -45,6 +45,7 @@ import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
 import { queueHotspotResolveToast, queueHotspotExpireToast } from '@/ui/hotspots.toasts';
 import { getHotspotIdleLog } from '@/state/useGameLog';
+import { planDiscardOutcome } from '@/utils/discardPlanner';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
@@ -2503,8 +2504,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       ip: adjustedStartingIp,
       aiIP: aiStartingIP,
       hand: startingHand,
+      discardPile: [],
       deck: remainingDeck,
       aiHand: aiStartingHand,
+      aiDiscardPile: [],
       aiDeck: aiRemainingDeck,
       controlledStates: initialControl.player,
       aiControlledStates: initialControl.ai,
@@ -3124,7 +3127,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     });
   }, []);
 
-  const endTurn = useCallback(() => {
+  const endTurn = useCallback((plannedDiscards: string[] = []) => {
     let hotspotSourceToRegister: 'truth' | 'government' | 'neutral' | null = null;
     let shouldScheduleNewspaperReveal = false;
     const sessionGuard = gameSessionRef.current;
@@ -3133,6 +3136,53 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (prev.isGameOver) return prev;
 
       const isHumanTurn = prev.currentPlayer === 'human';
+      const normalizedDiscards = Array.isArray(plannedDiscards)
+        ? plannedDiscards.filter(id => typeof id === 'string')
+        : [];
+
+      const humanDiscardOutcome =
+        isHumanTurn && normalizedDiscards.length > 0
+          ? planDiscardOutcome(prev.hand, prev.discardPile ?? [], normalizedDiscards)
+          : null;
+      const aiDiscardOutcome =
+        !isHumanTurn && normalizedDiscards.length > 0
+          ? planDiscardOutcome(prev.aiHand, prev.aiDiscardPile ?? [], normalizedDiscards)
+          : null;
+
+      const handAfterDiscards = humanDiscardOutcome ? humanDiscardOutcome.remainingHand : prev.hand;
+      const aiHandAfterDiscards = aiDiscardOutcome ? aiDiscardOutcome.remainingHand : prev.aiHand;
+      const discardPileAfter = humanDiscardOutcome ? humanDiscardOutcome.updatedDiscardPile : prev.discardPile ?? [];
+      const aiDiscardPileAfter = aiDiscardOutcome
+        ? aiDiscardOutcome.updatedDiscardPile
+        : prev.aiDiscardPile ?? [];
+      const ipAfterDiscards = humanDiscardOutcome ? Math.max(0, prev.ip - humanDiscardOutcome.ipCost) : prev.ip;
+      const aiIpAfterDiscards = aiDiscardOutcome ? Math.max(0, prev.aiIP - aiDiscardOutcome.ipCost) : prev.aiIP;
+
+      const discardLogEntries: string[] = [];
+      if (humanDiscardOutcome?.logEntry) {
+        discardLogEntries.push(humanDiscardOutcome.logEntry);
+      }
+      if (aiDiscardOutcome?.logEntry) {
+        const aiEntry = aiDiscardOutcome.logEntry;
+        discardLogEntries.push(`AI ${aiEntry.charAt(0).toLowerCase()}${aiEntry.slice(1)}`);
+      }
+
+      const baseLog = discardLogEntries.length > 0 ? [...prev.log, ...discardLogEntries] : prev.log;
+
+      const stateForCombos: GameState =
+        humanDiscardOutcome || aiDiscardOutcome || baseLog !== prev.log
+          ? {
+              ...prev,
+              hand: handAfterDiscards,
+              aiHand: aiHandAfterDiscards,
+              ip: ipAfterDiscards,
+              aiIP: aiIpAfterDiscards,
+              discardPile: discardPileAfter,
+              aiDiscardPile: aiDiscardPileAfter,
+              log: baseLog,
+            }
+          : prev;
+
       const statesAfterHotspot = prev.states.map(state => ({ ...state }));
       let hotspotsAfterHotspot: Record<string, ActiveParanormalHotspot> = { ...prev.paranormalHotspots };
       const hotspotLogs: string[] = [];
@@ -3167,7 +3217,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         }
       }
 
-      const comboResult = evaluateCombosForTurn(prev, isHumanTurn ? 'human' : 'ai');
+      const comboResult = evaluateCombosForTurn(stateForCombos, isHumanTurn ? 'human' : 'ai');
       achievements.onCombosResolved(isHumanTurn ? 'human' : 'ai', comboResult.evaluation);
       const fxEnabled = getComboSettings().fxEnabled;
 
@@ -3451,7 +3501,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const pendingCardDraw = bonusCardDraw + comboDrawBonus;
 
         const comboLog =
-          comboResult.logEntries.length > 0 ? [...prev.log, ...comboResult.logEntries] : [...prev.log];
+          comboResult.logEntries.length > 0 ? [...baseLog, ...comboResult.logEntries] : [...baseLog];
 
         const humanIpAfterCombos = comboResult.updatedPlayerIp;
         const aiIpAfterCombos = comboResult.updatedOpponentIp;
@@ -3474,6 +3524,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
         let nextState: GameState = {
           ...prev,
+          hand: handAfterDiscards,
+          aiHand: aiHandAfterDiscards,
+          discardPile: discardPileAfter,
+          aiDiscardPile: aiDiscardPileAfter,
           turn: prev.turn + 1,
           phase: 'ai_turn',
           currentPlayer: 'ai',
@@ -3532,8 +3586,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const comboLog =
         comboResult.logEntries.length > 0
-          ? [...prev.log, ...comboResult.logEntries, ...hotspotLogs]
-          : [...prev.log, ...hotspotLogs];
+          ? [...baseLog, ...comboResult.logEntries, ...hotspotLogs]
+          : [...baseLog, ...hotspotLogs];
 
       const clearedStates = statesAfterHotspot.map(state => ({
         ...state,
@@ -3543,6 +3597,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const nextStateBase: GameState = {
         ...prev,
+        hand: handAfterDiscards,
+        aiHand: aiHandAfterDiscards,
+        discardPile: discardPileAfter,
+        aiDiscardPile: aiDiscardPileAfter,
         round: prev.round + 1,
         phase: 'newspaper',
         currentPlayer: 'human',

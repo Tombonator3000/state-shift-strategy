@@ -31,6 +31,7 @@ import NewCardsPresentation from '@/components/game/NewCardsPresentation';
 import { Maximize, Menu, Minimize, UserCircle2 } from 'lucide-react';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
+import { planDiscardOutcome } from '@/utils/discardPlanner';
 import {
   aggregateStateCombinationEffects,
   applyDefenseBonusToStates,
@@ -675,6 +676,7 @@ const Index = () => {
     return 'government';
   });
   const [loadingCard, setLoadingCard] = useState<string | null>(null);
+  const [pendingDiscards, setPendingDiscards] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [subtitle, setSubtitle] = useState('Truth Seeker Operative');
   
@@ -726,6 +728,17 @@ const Index = () => {
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
+  const discardPreview = useMemo(
+    () => planDiscardOutcome(gameState.hand, gameState.discardPile ?? [], pendingDiscards),
+    [gameState.hand, gameState.discardPile, pendingDiscards]
+  );
+  const queuedDiscardNames = useMemo(
+    () =>
+      discardPreview.discardedCards
+        .map(card => card.name?.trim() || card.id)
+        .filter(Boolean),
+    [discardPreview.discardedCards]
+  );
   const {
     issues: pressArchive,
     archiveEdition,
@@ -1955,14 +1968,37 @@ const Index = () => {
       return;
     }
 
+    const plannedIds = pendingDiscards;
+    const plan = discardPreview;
+
     setIsEndingTurn(true);
-    endTurn();
+    endTurn(plannedIds);
+
+    if (plan.discardedCount > 0) {
+      const cardLabels = plan.discardedCards
+        .map(card => card.name?.trim() || card.id)
+        .filter(Boolean);
+      const costSummary = plan.ipCost > 0 ? `−${plan.ipCost} IP` : 'free';
+      const details = cardLabels.length > 0 ? ` · ${cardLabels.join(', ')}` : '';
+      toast.success(`🗂️ Discarded ${plan.discardedCount} card${plan.discardedCount === 1 ? '' : 's'} (${costSummary})${details}`, {
+        duration: 3500,
+        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #2563eb', fontFamily: 'monospace' }
+      });
+    }
+
+    setPendingDiscards([]);
     audio.playSFX('turnEnd');
     // Play card draw sound after a short delay
     setTimeout(() => {
       audio.playSFX('cardDraw');
     }, 500);
-  }, [audio, endTurn, isEndingTurn]);
+  }, [
+    audio,
+    discardPreview,
+    endTurn,
+    isEndingTurn,
+    pendingDiscards,
+  ]);
 
   // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
@@ -2031,6 +2067,17 @@ const Index = () => {
       setIsEndingTurn(false);
     }
   }, [gameState.phase, gameState.currentPlayer, gameState.animating]);
+
+  useEffect(() => {
+    setPendingDiscards(prev => {
+      if (prev.length === 0) {
+        return prev;
+      }
+      const handIds = new Set(gameState.hand.map(card => card.id));
+      const filtered = prev.filter(id => handIds.has(id));
+      return filtered.length === prev.length ? prev : filtered;
+    });
+  }, [gameState.hand]);
 
   const handleSaveGame = () => {
     if (saveGame) {
@@ -2263,6 +2310,8 @@ const Index = () => {
       // Use animated card play
       await playCardAnimated(cardId, animatePlayCard, resolvedTargetStateId);
 
+      setPendingDiscards(prev => (prev.length ? prev.filter(id => id !== cardId) : prev));
+
       // Track card in collection
       recordCardPlay(cardId);
       
@@ -2493,6 +2542,25 @@ const Index = () => {
   const isPlayerActionLocked =
     gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
   const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
+  const canQueueDiscards =
+    !handInteractionDisabled &&
+    gameState.currentPlayer === 'human' &&
+    gameState.phase === 'action' &&
+    !gameState.animating;
+  const handleToggleDiscard = useCallback(
+    (cardId: string) => {
+      if (!canQueueDiscards) {
+        return;
+      }
+      setPendingDiscards(prev => {
+        if (prev.includes(cardId)) {
+          return prev.filter(id => id !== cardId);
+        }
+        return [...prev, cardId];
+      });
+    },
+    [canQueueDiscards]
+  );
 
   const playerAgenda = gameState.secretAgenda;
   const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
@@ -3001,9 +3069,55 @@ const Index = () => {
           currentIP={gameState.ip}
           loadingCard={loadingCard}
           onCardHover={setHoveredCard}
+          discardQueue={pendingDiscards}
+          onToggleDiscard={handleToggleDiscard}
+          discardEnabled={canQueueDiscards}
         />
       </div>
       <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
+        <div className="mb-2 rounded border border-newspaper-border/60 bg-newspaper-border/10 px-3 py-2 text-[0.65rem] font-mono text-newspaper-border">
+          {pendingDiscards.length === 0 ? (
+            <span>First discard each turn is free. Extra discards cost 10 IP, then +5 IP per card.</span>
+          ) : (
+            <div className="space-y-1 text-newspaper-bg">
+              <div className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-newspaper-border">
+                Queued Discards ({pendingDiscards.length})
+              </div>
+              {queuedDiscardNames.length > 0 && (
+                <div className="truncate text-newspaper-bg/80">
+                  {queuedDiscardNames.join(', ')}
+                </div>
+              )}
+              <div>
+                IP impact:{' '}
+                <span
+                  className={clsx(
+                    'font-semibold',
+                    discardPreview.ipCost > 0 ? 'text-truth-red' : 'text-emerald-500'
+                  )}
+                >
+                  {discardPreview.ipCost > 0 ? `-${discardPreview.ipCost} IP` : 'Free'}
+                </span>
+              </div>
+              {discardPreview.costBreakdown.length > 0 && (
+                <div className="text-newspaper-bg/60">
+                  Cost steps:{' '}
+                  {discardPreview.costBreakdown
+                    .map((cost, index) =>
+                      index === 0
+                        ? '1st: 0 (free)'
+                        : (() => {
+                            const position = index + 1;
+                            const suffix = position === 2 ? 'nd' : position === 3 ? 'rd' : 'th';
+                            return `${position}${suffix}: ${cost}`;
+                          })()
+                    )
+                    .join(' · ')}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         <Button
           id="end-turn-button"
           onClick={handleEndTurn}

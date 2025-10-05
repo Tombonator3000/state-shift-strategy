@@ -41,7 +41,9 @@ export interface GameState {
   ip: number;
   aiIP: number;
   hand: GameCard[];
+  discardPile: GameCard[];
   aiHand: GameCard[];
+  aiDiscardPile: GameCard[];
   isGameOver: boolean;
   deck: GameCard[];
   aiDeck: GameCard[];
