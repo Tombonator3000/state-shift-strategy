@@ -2089,6 +2089,7 @@ const Index = () => {
         agendasEnabled={secretAgendasEnabled}
         currentAgenda={secretAgendasEnabled ? gameState.secretAgenda : undefined}
         completedAgendaIds={gameState.completedSecretAgendaIds}
+        agendaMoments={agendaMoments}
       />
     );
   }
