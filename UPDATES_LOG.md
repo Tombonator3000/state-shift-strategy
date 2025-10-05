@@ -26,6 +26,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Load news article pools on app startup to prevent empty or stale final editions when the archives are still initializing.
 - Skip composing the final newspaper until pool data is ready and clear the preview to avoid stale spreads during loading.
 
+## 2025-10-05 – Rotate tabloid relic triggers
+- Teach the Tabloid Relic engine to rotate between matching rules so consecutive issues queue different relics when possible.
+- Persist selection history and surface rotation logs to keep relic selection balanced across rounds.
+
 ## 2025-10-05 – Modularize truth strike reporting
 - Swap the truth-faction attack and media body banks for modular templates with dynamic motives, settings, and reactions to reduce repetition.
 - Teach the newspaper composer to render templated story segments alongside legacy string entries.

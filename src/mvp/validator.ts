@@ -562,6 +562,7 @@ export function cloneGameState(state: GameState): GameState {
         entries: state.tabloidRelicsRuntime.entries.map(entry => ({ ...entry })),
         lastIssueRound: state.tabloidRelicsRuntime.lastIssueRound,
         lastUpdatedTurn: state.tabloidRelicsRuntime.lastUpdatedTurn,
+        selectionHistory: [...(state.tabloidRelicsRuntime.selectionHistory ?? [])],
       }
     : state.tabloidRelicsRuntime ?? null;
 
