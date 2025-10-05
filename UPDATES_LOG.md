@@ -6,6 +6,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Load news article pools on app startup to prevent empty or stale final editions when the archives are still initializing.
 - Skip composing the final newspaper until pool data is ready and clear the preview to avoid stale spreads during loading.
 
+## 2025-10-05 – Surface extra bulletins in final editions
+- Retire the in-play Extra Extra strip so the primary board regains vertical space during matches.
+- Feed archived bulletin articles into the final edition builder and render them in the victory newspaper spread with fallback copy.
+
 ## 2025-10-05 – Rebuild Paranoid Times article bank
 - Replace the templated article dump with bespoke Truth and Government stories for every card across core sets and expansions.
 - Switch article metadata to the `faction` field and normalise legacy values inside the loader so the UI matches card factions.

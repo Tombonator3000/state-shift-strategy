@@ -19,7 +19,6 @@ import { useAudioContext } from '@/contexts/AudioContext';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
-import ExtraFeed from '@/components/news/ExtraFeed';
 import FinalEditionOverlay from '@/components/news/FinalEditionOverlay';
 import FalloutOverlay from '@/expansions/tabloidRelics/RelicUI';
 
@@ -877,6 +876,7 @@ const Index = () => {
           faction: gameState.faction,
           playHistory: gameState.playHistory,
           currentEvents: gameState.currentEvents ?? [],
+          extraExtraFeed: gameState.extraExtraFeed,
         },
         winner,
         victoryType,
@@ -2631,7 +2631,6 @@ const Index = () => {
             onInspectCard={(card) => setInspectedPlayedCard(card)}
           />
         </div>
-        <ExtraFeed articles={gameState.extraExtraFeed} />
       </div>
       <CardPreviewOverlay card={hoveredCard ? { ...hoveredCard, text: hoveredCard.text || '' } : null} />
     </div>

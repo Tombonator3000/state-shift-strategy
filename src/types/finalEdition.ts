@@ -1,3 +1,4 @@
+import type { ArticleBlock } from '@/news/headlineEngine';
 import type { ParanormalSighting } from '@/types/paranormal';
 import type { ArcProgressSummary } from './campaign';
 
@@ -80,6 +81,7 @@ export interface FinalEditionReport {
   topEvents: FinalEditionEventHighlight[];
   comboHighlights: FinalEditionComboHighlight[];
   sightings: ParanormalSighting[];
+  extraExtraFeed: ArticleBlock[];
   recordedAt: number;
 }
 
