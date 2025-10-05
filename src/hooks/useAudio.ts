@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { SFX_MANIFEST } from '@/assets/audio/sfxManifest';
+import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
 
 interface AudioConfig {
   volume: number;
@@ -43,7 +44,7 @@ export const useAudio = () => {
   // Load initial config from localStorage or defaults
   const [config, setConfig] = useState<AudioConfig>(() => {
     console.log('🎵 useAudio: Loading initial config...');
-    const saved = localStorage.getItem('gameSettings');
+    const saved = safeGetLocalStorageItem('gameSettings');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -467,41 +468,48 @@ export const useAudio = () => {
     });
 
     // Sync volume to localStorage (gameSettings) - but only if it actually changed
-    const saved = localStorage.getItem('gameSettings');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        const newMasterVolume = Math.round(config.volume * 100);
-        const newMusicVolume = Math.round(config.musicVolume * 100);
-        const newSfxVolume = Math.round(config.sfxVolume * 100);
-        let shouldSync = false;
+    const saved = safeGetLocalStorageItem('gameSettings');
+    if (!saved) {
+      console.log('🎵 No saved audio settings found or storage unavailable - skipping sync');
+      return;
+    }
 
-        if (parsed.masterVolume !== newMasterVolume) {
-          parsed.masterVolume = newMasterVolume;
-          shouldSync = true;
-        }
+    try {
+      const parsed = JSON.parse(saved);
+      const newMasterVolume = Math.round(config.volume * 100);
+      const newMusicVolume = Math.round(config.musicVolume * 100);
+      const newSfxVolume = Math.round(config.sfxVolume * 100);
+      let shouldSync = false;
 
-        if (parsed.sfxVolume !== newSfxVolume) {
-          parsed.sfxVolume = newSfxVolume;
-          shouldSync = true;
-        }
+      if (parsed.masterVolume !== newMasterVolume) {
+        parsed.masterVolume = newMasterVolume;
+        shouldSync = true;
+      }
 
-        if (parsed.musicVolume !== newMusicVolume) {
-          parsed.musicVolume = newMusicVolume;
-          shouldSync = true;
-        }
+      if (parsed.sfxVolume !== newSfxVolume) {
+        parsed.sfxVolume = newSfxVolume;
+        shouldSync = true;
+      }
 
-        if (shouldSync) {
-          localStorage.setItem('gameSettings', JSON.stringify(parsed));
+      if (parsed.musicVolume !== newMusicVolume) {
+        parsed.musicVolume = newMusicVolume;
+        shouldSync = true;
+      }
+
+      if (shouldSync) {
+        const didPersist = safeSetLocalStorageItem('gameSettings', JSON.stringify(parsed));
+        if (didPersist) {
           console.log('🎵 Synced volume to localStorage:', {
             masterVolume: newMasterVolume,
             musicVolume: newMusicVolume,
             sfxVolume: newSfxVolume
           });
+        } else {
+          console.warn('🎵 Failed to persist audio settings to localStorage');
         }
-      } catch (e) {
-        console.warn('🎵 Failed to sync audio settings to localStorage');
       }
+    } catch (error) {
+      console.warn('🎵 Failed to sync audio settings to localStorage', error);
     }
   }, [config.volume, config.musicVolume, config.sfxVolume, config.muted]);
 
