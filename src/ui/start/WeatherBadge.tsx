@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { fetchRealWeather } from '@/system/weather/fetchRealWeather';
 import { humorize } from '@/system/weather/tabloidWeather';
+import { safeGetLocalStorageItem } from '@/utils/storage';
 
 function getUseRealWeatherSetting(): boolean {
-  if (typeof window === 'undefined') return false;
-  const s = localStorage.getItem('useRealWeather');
-  return s ? s === 'true' : false;
+  const storedValue = safeGetLocalStorageItem('useRealWeather');
+  return storedValue ? storedValue === 'true' : false;
 }
 
 export function WeatherBadge() {
