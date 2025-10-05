@@ -2,6 +2,9 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-05 – Guard difficulty storage access
+- Use the safe localStorage helpers for difficulty reads and writes so blocked storage falls back to the NORMAL difficulty without crashing callers.
+
 ## 2025-10-05 – Harden options storage reads
 - Use the safe localStorage helper when loading saved options so the game falls back to defaults when storage is unavailable.
 
