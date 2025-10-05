@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, Target, Zap, Megaphone } from 'lucide-react';
+import { X, Target, Zap, Megaphone, Trash2 } from 'lucide-react';
 import type { GameCard } from '@/rules/mvp';
 import { MVP_CARD_TYPES, type MVPCardType } from '@/rules/mvp';
 import CardImage from '@/components/game/CardImage';
@@ -20,6 +20,9 @@ interface CardDetailOverlayProps {
   onClose: () => void;
   onPlayCard: () => void;
   swipeHandlers?: any;
+  isDiscardQueued?: boolean;
+  onToggleDiscard?: () => void;
+  discardEnabled?: boolean;
 }
 
 const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
@@ -29,12 +32,16 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
   onClose,
   onPlayCard,
   swipeHandlers,
+  isDiscardQueued,
+  onToggleDiscard,
+  discardEnabled = true,
 }) => {
   const isMobile = useIsMobile();
   if (!card) return null;
 
   const displayType = normalizeTabloidCardType(card.type);
   const ActionIcon = displayType === 'ZONE' ? Target : displayType === 'ATTACK' ? Zap : Megaphone;
+  const discardButtonDisabled = disabled || !onToggleDiscard || !discardEnabled;
 
   return (
     <div
@@ -79,6 +86,21 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
             {displayType === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
           </Button>
 
+          <Button
+            type="button"
+            onClick={() => onToggleDiscard?.()}
+            disabled={discardButtonDisabled}
+            className={cn(
+              'w-full sm:w-auto px-5 py-2 rounded-tabloid border uppercase tracking-[0.3em] text-xs flex items-center gap-2 font-mono transition-transform duration-200',
+              discardButtonDisabled
+                ? 'border-orange-500/20 bg-black/40 text-white/40 cursor-not-allowed'
+                : 'border-orange-400/80 bg-orange-500/80 text-black hover:bg-orange-400 hover:-translate-y-0.5'
+            )}
+          >
+            <Trash2 className="h-4 w-4" />
+            {isDiscardQueued ? 'UNQUEUE DISCARD' : 'QUEUE DISCARD'}
+          </Button>
+
           <div className="flex flex-wrap items-center justify-center gap-2 text-xs uppercase tracking-widest text-white/80">
             <span>
               {canAfford ? 'CLEARED FOR DEPLOYMENT' : `NEED ${card.cost} IP`}
@@ -98,6 +120,9 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
   onClose,
   onPlayCard,
   swipeHandlers,
+  isDiscardQueued,
+  onToggleDiscard,
+  discardEnabled = true,
 }) => {
   const isMobile = useIsMobile();
   if (!card) return null;
@@ -158,6 +183,7 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
   const faction = getLegacyFaction(card);
   const displayType = normalizeLegacyCardType(card.type);
   const flavorText = getFlavorText(card) ?? 'No intelligence available.';
+  const discardButtonDisabled = disabled || !onToggleDiscard || !discardEnabled;
 
   return (
     <div
@@ -236,26 +262,44 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
         </div>
 
         <div className="flex-shrink-0 p-4 border-t border-border bg-card/95">
-          <Button
-            onClick={onPlayCard}
-            disabled={disabled || !canAfford}
-            className={`enhanced-button w-full font-mono relative overflow-hidden transition-all duration-300 ${
-              isMobile ? 'text-base py-4' : 'text-sm py-3'
-            } ${!canAfford ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'}`}
-          >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              {displayType === 'ZONE' && <Target className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-              {displayType === 'ATTACK' && <Zap className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-              {displayType === 'MEDIA' && <Megaphone className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
-              {displayType === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
-            </span>
+          <div className="space-y-2">
+            <Button
+              onClick={onPlayCard}
+              disabled={disabled || !canAfford}
+              className={`enhanced-button w-full font-mono relative overflow-hidden transition-all duration-300 ${
+                isMobile ? 'text-base py-4' : 'text-sm py-3'
+              } ${!canAfford ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'}`}
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {displayType === 'ZONE' && <Target className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+                {displayType === 'ATTACK' && <Zap className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+                {displayType === 'MEDIA' && <Megaphone className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />}
+                {displayType === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
+              </span>
 
-            {!canAfford && (
-              <div className="absolute inset-0 flex items-center justify-center bg-destructive/10">
-                <span className="text-xs text-destructive font-medium">Need {card.cost} IP</span>
-              </div>
-            )}
-          </Button>
+              {!canAfford && (
+                <div className="absolute inset-0 flex items-center justify-center bg-destructive/10">
+                  <span className="text-xs text-destructive font-medium">Need {card.cost} IP</span>
+                </div>
+              )}
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => onToggleDiscard?.()}
+              disabled={discardButtonDisabled}
+              variant="outline"
+              className={cn(
+                'w-full font-mono flex items-center justify-center gap-2 text-xs uppercase tracking-[0.3em]',
+                discardButtonDisabled
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'border-orange-400 text-orange-500 hover:bg-orange-500/10'
+              )}
+            >
+              <Trash2 className="h-4 w-4" />
+              {isDiscardQueued ? 'UNQUEUE DISCARD' : 'QUEUE DISCARD'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

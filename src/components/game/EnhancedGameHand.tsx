@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import clsx from 'clsx';
 import CardDetailOverlay from './CardDetailOverlay';
 import BaseCard from '@/components/game/cards/BaseCard';
@@ -7,7 +7,7 @@ import type { GameCard, MVPCardType } from '@/rules/mvp';
 import { MVP_CARD_TYPES } from '@/rules/mvp';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { toast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { useHapticFeedback } from '@/hooks/useHapticFeedback';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -22,6 +22,9 @@ interface EnhancedGameHandProps {
   currentIP: number;
   loadingCard?: string | null;
   onCardHover?: (card: (GameCard & { _hoverPosition?: { x: number; y: number } }) | null) => void;
+  discardQueue?: string[];
+  onToggleDiscard?: (cardId: string) => void;
+  discardEnabled?: boolean;
 }
 
 const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
@@ -32,7 +35,10 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   onSelectCard,
   currentIP,
   loadingCard,
-  onCardHover
+  onCardHover,
+  discardQueue = [],
+  onToggleDiscard,
+  discardEnabled = true
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
@@ -40,6 +46,9 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const { triggerHaptic } = useHapticFeedback();
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);
+  const discardQueueSet = useMemo(() => new Set(discardQueue), [discardQueue]);
+  const examinedCardData = examinedCard ? cards.find(c => c.id === examinedCard) ?? null : null;
+  const examinedIsQueued = examinedCard ? discardQueueSet.has(examinedCard) : false;
 
   const normalizeCardType = (type: string): MVPCardType => {
     return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
@@ -126,6 +135,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
             const isLoading = loadingCard === card.id;
             const canAfford = canAffordCard(card);
             const displayType = normalizeCardType(card.type);
+            const isQueuedForDiscard = discardQueueSet.has(card.id);
+            const discardToggleDisabled = disabled || !discardEnabled || !onToggleDiscard;
 
             const overlay = (
               <>
@@ -133,14 +144,19 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   <div
                     className={clsx(
                       'pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-sm',
-                      isSelected && !isPlaying && !isLoading && 'bg-yellow-400/15 text-yellow-100'
+                      isSelected && !isPlaying && !isLoading && 'bg-yellow-400/15 text-yellow-100',
+                      isQueuedForDiscard && !isPlaying && !isLoading && !isSelected && 'bg-orange-500/15 text-orange-100'
                     )}
                     style={{ borderRadius: 'calc(var(--pt-radius) * var(--card-scale))' }}
                   >
                     <Loader2
                       className={clsx(
                         'mb-1 h-5 w-5',
-                        isSelected ? 'animate-pulse text-yellow-200' : 'animate-spin text-primary'
+                        isSelected
+                          ? 'animate-pulse text-yellow-200'
+                          : isQueuedForDiscard
+                            ? 'animate-pulse text-orange-300'
+                            : 'animate-spin text-primary'
                       )}
                     />
                     <span className="text-xs font-mono font-bold">
@@ -148,7 +164,9 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                         ? 'DEPLOYING'
                         : isSelected && displayType === 'ZONE'
                           ? 'TARGETING'
-                          : 'PROCESSING'}
+                          : isQueuedForDiscard
+                            ? 'QUEUED'
+                            : 'PROCESSING'}
                     </span>
                   </div>
                 )}
@@ -161,6 +179,17 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 
                 {isSelected && displayType !== 'ZONE' && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-yellow-300 ring-2 ring-yellow-200" />
+                )}
+
+                {isQueuedForDiscard && !isSelected && !isPlaying && !isLoading && (
+                  <div className="pointer-events-none absolute inset-0 z-10 rounded-[calc(var(--pt-radius) * var(--card-scale))] border-2 border-orange-400/80" />
+                )}
+
+                {isQueuedForDiscard && (
+                  <div className="absolute -top-1 -left-1 flex items-center gap-1 rounded-full bg-orange-500 px-2 py-0.5 text-[0.6rem] font-bold text-black shadow-lg">
+                    <Trash2 className="h-3 w-3" />
+                    <span>QUEUED</span>
+                  </div>
                 )}
 
                 <div className="pointer-events-none">
@@ -224,10 +253,49 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     'drop-shadow-[0_12px_22px_rgba(0,0,0,0.32)] transition-transform duration-200',
                     !disabled && canAfford && 'group-hover/card:-translate-y-1 group-hover/card:drop-shadow-[0_22px_30px_rgba(0,0,0,0.35)]',
                     (isPlaying || isLoading) && 'ring-2 ring-primary shadow-primary/40',
-                    isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40'
+                    isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40',
+                    isQueuedForDiscard && !(isPlaying || isLoading) && !isSelected && 'ring-2 ring-orange-400 shadow-orange-400/40'
                   )}
                   overlay={overlay}
                 />
+                {onToggleDiscard && (
+                  <span
+                    role="button"
+                    tabIndex={discardToggleDisabled ? -1 : 0}
+                    aria-pressed={isQueuedForDiscard}
+                    aria-label={isQueuedForDiscard ? 'Remove from discard queue' : 'Queue card for discard'}
+                    className={clsx(
+                      'absolute left-2 bottom-2 z-30 flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-[0.55rem] font-mono uppercase tracking-[0.25em] text-white shadow-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400',
+                      discardToggleDisabled && 'cursor-not-allowed opacity-40',
+                      !discardToggleDisabled && 'cursor-pointer hover:bg-orange-400 hover:text-black'
+                    )}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      if (discardToggleDisabled) {
+                        return;
+                      }
+                      audio.playSFX('click');
+                      triggerHaptic(isQueuedForDiscard ? 'light' : 'selection');
+                      onToggleDiscard(card.id);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (discardToggleDisabled) {
+                          return;
+                        }
+                        audio.playSFX('click');
+                        triggerHaptic(isQueuedForDiscard ? 'light' : 'selection');
+                        onToggleDiscard(card.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    {isQueuedForDiscard ? 'Queued' : 'Queue'}
+                  </span>
+                )}
               </button>
             );
           })
@@ -237,15 +305,15 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       {/* Card Detail Overlay - Redesigned */}
       {examinedCard && (
         <CardDetailOverlay
-          card={cards.find(c => c.id === examinedCard) || null}
-          canAfford={cards.find(c => c.id === examinedCard) ? canAffordCard(cards.find(c => c.id === examinedCard)!) : false}
+          card={examinedCardData}
+          canAfford={examinedCardData ? canAffordCard(examinedCardData) : false}
           disabled={disabled}
           onClose={() => {
             setExaminedCard(null);
             triggerHaptic('light');
           }}
           onPlayCard={() => {
-            const card = cards.find(c => c.id === examinedCard);
+            const card = examinedCardData;
             if (!card) return;
             
             if (!canAffordCard(card)) {
@@ -278,6 +346,16 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               handlePlayCard(card.id);
             }
           }}
+          isDiscardQueued={examinedIsQueued}
+          onToggleDiscard={() => {
+            if (!onToggleDiscard || !examinedCardData || disabled || !discardEnabled) {
+              return;
+            }
+            audio.playSFX('click');
+            triggerHaptic(examinedIsQueued ? 'light' : 'selection');
+            onToggleDiscard(examinedCardData.id);
+          }}
+          discardEnabled={!disabled && discardEnabled}
           swipeHandlers={isMobile ? swipeHandlers : undefined}
         />
       )}
