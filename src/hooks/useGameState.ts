@@ -2267,6 +2267,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       isGameOver: false,
       deck: generateWeightedDeck(40, 'truth'),
       aiDeck: generateWeightedDeck(40, 'government'),
+      discardPile: [],
+      aiDiscardPile: [],
       cardsPlayedThisTurn: 0,
       cardsPlayedThisRound: [],
       comboTruthDeltaThisRound: 0,
