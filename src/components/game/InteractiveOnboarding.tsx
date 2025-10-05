@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, ArrowLeft, X, CheckCircle2, Play } from 'lucide-react';
+import { safeSetLocalStorageItem } from '@/utils/storage';
 
 interface OnboardingStep {
   id: string;
@@ -108,14 +109,26 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     }
   };
 
+  const logStorageFailure = (key: string) => {
+    if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+      console.warn(`[onboarding] Failed to persist "${key}" flag to localStorage.`);
+    }
+  };
+
   const completeOnboarding = () => {
     setCompletedSteps(prev => [...prev, onboardingSteps[currentStep].id]);
-    localStorage.setItem('shadowgov-onboarding-complete', 'true');
+    const didPersist = safeSetLocalStorageItem('shadowgov-onboarding-complete', 'true');
+    if (!didPersist) {
+      logStorageFailure('shadowgov-onboarding-complete');
+    }
     onComplete();
   };
 
   const skipOnboarding = () => {
-    localStorage.setItem('shadowgov-onboarding-skipped', 'true');
+    const didPersist = safeSetLocalStorageItem('shadowgov-onboarding-skipped', 'true');
+    if (!didPersist) {
+      logStorageFailure('shadowgov-onboarding-skipped');
+    }
     onSkip();
   };
 
