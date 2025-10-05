@@ -54,12 +54,21 @@ export const usePressArchive = () => {
       }
       const normalized = parsed
         .filter(entry => entry && entry.report)
-        .map(entry => ({
-          ...entry,
-          id: entry.id ?? `edition-${entry.report.recordedAt}`,
-          title: entry.title ?? deriveTitle(entry.report),
-          savedAt: entry.savedAt ?? entry.report.recordedAt ?? Date.now(),
-        }))
+        .map(entry => {
+          const report = entry.report;
+          const normalizedReport = {
+            ...report,
+            legendaryUsed: Array.isArray(report.legendaryUsed) ? [...report.legendaryUsed] : [],
+          } as GameOverReport;
+
+          return {
+            ...entry,
+            report: normalizedReport,
+            id: entry.id ?? `edition-${normalizedReport.recordedAt}`,
+            title: entry.title ?? deriveTitle(normalizedReport),
+            savedAt: entry.savedAt ?? normalizedReport.recordedAt ?? Date.now(),
+          };
+        })
         .sort((a, b) => (b.savedAt ?? b.report.recordedAt ?? 0) - (a.savedAt ?? a.report.recordedAt ?? 0));
       setIssues(normalized);
     } catch (error) {
