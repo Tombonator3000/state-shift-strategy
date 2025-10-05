@@ -32,6 +32,7 @@ import { Maximize, Menu, Minimize, UserCircle2 } from 'lucide-react';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import { planDiscardOutcome } from '@/utils/discardPlanner';
+import { safeSetLocalStorageItem } from '@/utils/storage';
 import {
   aggregateStateCombinationEffects,
   applyDefenseBonusToStates,
@@ -857,9 +858,7 @@ const Index = () => {
 
   const persistFaction = useCallback((faction: 'truth' | 'government') => {
     setLastSelectedFaction(faction);
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('shadowgov-last-faction', faction);
-    }
+    safeSetLocalStorageItem('shadowgov-last-faction', faction);
   }, []);
 
   const handleRelicOverlayClose = useCallback(() => {
