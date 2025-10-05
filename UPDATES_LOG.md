@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-05 – Sync victory overlays with final editions
+- Persist MVP win checks into the game state so victory screens know the winner and trigger type automatically.
+- Build final newspaper reports through the shared helper and surface them via the victory overlay and extra edition reader.
+
 ## 2025-10-05 – Summarize turn headlines and extras
 - Record per-turn highlights for both MVP engine and the main hook so news systems can consume consistent `PlayedLite` buffers.
 - Generate turn headline summaries and trigger Extra Extra bulletins after three plays to populate `headlineLog` and `extraExtraFeed`.
