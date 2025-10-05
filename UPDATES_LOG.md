@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-06 – Delay final editions until news pools load
+- Load news article pools on app startup to prevent empty or stale final editions when the archives are still initializing.
+- Skip composing the final newspaper until pool data is ready and clear the preview to avoid stale spreads during loading.
+
 ## 2025-10-05 – Rebuild Paranoid Times article bank
 - Replace the templated article dump with bespoke Truth and Government stories for every card across core sets and expansions.
 - Switch article metadata to the `faction` field and normalise legacy values inside the loader so the UI matches card factions.

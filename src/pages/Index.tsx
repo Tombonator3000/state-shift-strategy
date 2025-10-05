@@ -73,6 +73,7 @@ import { buildFinalEdition as buildGameOverReport } from '@/utils/finalEdition';
 import type { GameOverReport } from '@/types/finalEdition';
 import type { ArcProgressSummary } from '@/types/campaign';
 import { buildFinalEdition as buildNewsFinalEdition, type FinalEdition, type TurnLog } from '@/news/headlineEngine';
+import { loadNewsPools } from '@/news/newsPools';
 import { toPlayedLite } from '@/hooks/aiHelpers';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
@@ -152,6 +153,7 @@ const Index = () => {
   const [showInGameOptions, setShowInGameOptions] = useState(false);
   const [finalEdition, setFinalEdition] = useState<GameOverReport | null>(null);
   const [newsFinalEdition, setNewsFinalEdition] = useState<FinalEdition | null>(null);
+  const [areNewsPoolsReady, setAreNewsPoolsReady] = useState(false);
   const [readingEdition, setReadingEdition] = useState<GameOverReport | null>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   const [isEndingTurn, setIsEndingTurn] = useState(false);
@@ -886,7 +888,9 @@ const Index = () => {
       });
 
       let composedNewsEdition: FinalEdition | null = null;
-      if (finalEditionTurnLogs.length > 0 || gameState.playHistory.length === 0) {
+      if (!areNewsPoolsReady) {
+        setNewsFinalEdition(null);
+      } else if (finalEditionTurnLogs.length > 0 || gameState.playHistory.length === 0) {
         try {
           composedNewsEdition = buildNewsFinalEdition(
             `${gameState.faction}:${report.recordedAt}`,
@@ -934,6 +938,7 @@ const Index = () => {
     arcProgressSummaries,
     paranormalSightings,
     setGameState,
+    areNewsPoolsReady,
   ]);
 
   useEffect(() => {
@@ -944,6 +949,11 @@ const Index = () => {
     }
 
     setFinalEdition(edition);
+    if (!areNewsPoolsReady) {
+      setNewsFinalEdition(null);
+      return;
+    }
+
     if (finalEditionTurnLogs.length > 0 || gameState.playHistory.length === 0) {
       try {
         const composed = buildNewsFinalEdition(
@@ -975,7 +985,30 @@ const Index = () => {
     gameState.faction,
     gameState.round,
     gameState.turn,
+    areNewsPoolsReady,
   ]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const prepareNewsPools = async () => {
+      try {
+        await loadNewsPools();
+        if (isMounted) {
+          setAreNewsPoolsReady(true);
+        }
+      } catch (error) {
+        console.error('Failed to load news pools', error);
+        toast.error('Failed to load news archives for the final edition.');
+      }
+    };
+
+    prepareNewsPools();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Enhanced synergy detection with coordinated visual effects
   useEffect(() => {
