@@ -2,6 +2,9 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-05 – Stabilize discard toggling during menus
+- Move the discard hook and related gating logic before intro/menu early returns so switching between intro and menu no longer triggers React hook order errors.
+
 ## 2025-10-05 – Harden local storage fallbacks
 - Guard settings and faction persistence against blocked storage so new games keep default options without crashing.
 - Add helper coverage to verify localStorage failures resolve safely.
