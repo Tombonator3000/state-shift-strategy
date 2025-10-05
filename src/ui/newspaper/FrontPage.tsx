@@ -18,13 +18,16 @@ type SecondaryStory = {
 export interface FrontPageProps {
   cards: PlayedCardMeta[];
   className?: string;
-  faction?: 'truth' | 'gov' | 'TRUTH' | 'GOV';
+  faction?: 'truth' | 'government' | 'TRUTH' | 'GOV' | 'GOVERNMENT';
   headlineFallback?: { headline: string; subhead: string };
 }
 
 const normaliseFaction = (value?: string): 'TRUTH' | 'GOV' => {
-  if (typeof value === 'string' && value.toUpperCase().includes('GOV')) {
-    return 'GOV';
+  if (typeof value === 'string') {
+    const upper = value.toUpperCase();
+    if (upper.includes('GOV')) {
+      return 'GOV';
+    }
   }
   return 'TRUTH';
 };
@@ -87,7 +90,7 @@ const FrontPage = ({ cards, className, faction, headlineFallback = DEFAULT_FALLB
   const hasSecondaryArticles = articleBankReady && secondaryStories.some(({ article }) => Boolean(article));
 
   const headline = mainStory?.headline ?? headlineFallback.headline;
-  const toneClass = mainStory?.tone ?? (dominantFaction === 'GOV' ? 'gov' : 'truth');
+  const toneClass = mainStory?.tone ?? (dominantFaction === 'GOV' ? 'government' : 'truth');
 
   const flavorSubhead =
     mainStory?.subhead ??
