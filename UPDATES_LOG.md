@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-05 – Expand game state tracking buffers
+- Add headline, extra edition, and turn buffer placeholders to both MVP and main game state models so upcoming newspaper flows
+  can read consistent structures.
+- Ensure clones, reducers, and initializers keep the new arrays in sync and persist them through saves.
+
 ## 2025-10-05 – Unify newspaper data pools
 - Move the public newspaper dataset to the new root location and expose shared pool loading helpers so newspaper generators can read the expanded copy deck consistently.
 

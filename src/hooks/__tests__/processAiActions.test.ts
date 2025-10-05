@@ -42,6 +42,7 @@ const baseState = (overrides: Partial<GameState> = {}): GameState => ({
   comboTruthDeltaThisRound: 0,
   playHistory: [],
   turnPlays: [],
+  turnBuffer: [],
   frontPageTriplet: null,
   controlledStates: [],
   aiControlledStates: [],
@@ -51,6 +52,8 @@ const baseState = (overrides: Partial<GameState> = {}): GameState => ({
   eventManager: undefined,
   showNewspaper: false,
   log: [],
+  headlineLog: [],
+  extraExtraFeed: [],
   agendaIssue: { id: 'ufo', label: 'Cosmic Cover Stories', description: 'Placeholder', tags: [] },
   agendaIssueCounters: {},
   agendaRoundCounters: {},
@@ -98,6 +101,9 @@ const baseState = (overrides: Partial<GameState> = {}): GameState => ({
   editorRuntime: null,
   preGameAdditions: null,
   tabloidRelicsRuntime: null,
+  winner: null,
+  victoryType: null,
+  finalEdition: null,
   ...overrides,
 });
 

@@ -37,7 +37,13 @@ const EffectTestPanel: React.FC = () => {
     truth: gameState.truth,
     playsThisTurn: 0,
     turnPlays: [],
+    turnBuffer: [],
     log: engineLog,
+    headlineLog: [],
+    extraExtraFeed: [],
+    winner: null,
+    victoryType: null,
+    finalEdition: null,
     players: {
       P1: {
         id: 'P1',

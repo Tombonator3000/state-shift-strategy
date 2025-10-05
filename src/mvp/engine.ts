@@ -310,6 +310,7 @@ export function startTurn(state: GameState): GameState {
     },
     playsThisTurn: 0,
     turnPlays: [],
+    turnBuffer: [],
     log: logEntries,
   };
 }
@@ -390,6 +391,7 @@ export function playCard(
   const interimState: GameState = {
     ...cloned,
     turnPlays: [...cloned.turnPlays, playEntry],
+    turnBuffer: [...cloned.turnBuffer, playEntry],
     players: {
       ...cloned.players,
       [currentId]: updatedPlayer,
@@ -460,6 +462,7 @@ export function resolve(
   return {
     ...resolved,
     turnPlays: [...resolved.turnPlays, resolveEntry],
+    turnBuffer: [...resolved.turnBuffer, resolveEntry],
   };
 }
 
@@ -604,6 +607,9 @@ export function endTurn(
     turn: logEnhancedState.turn + 1,
     playsThisTurn: 0,
     turnPlays: [],
+    turnBuffer: [],
+    winner: winResult.winner ?? null,
+    victoryType: winResult.reason ?? null,
   };
 
   const summary: EndTurnSummary = {

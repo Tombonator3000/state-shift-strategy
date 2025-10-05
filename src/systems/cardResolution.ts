@@ -247,7 +247,13 @@ const toEngineState = (
     stateDefense,
     playsThisTurn: 0,
     turnPlays: [],
+    turnBuffer: [],
     log,
+    headlineLog: [],
+    extraExtraFeed: [],
+    winner: null,
+    victoryType: null,
+    finalEdition: null,
   };
 };
 

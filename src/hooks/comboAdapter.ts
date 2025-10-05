@@ -90,8 +90,20 @@ export const evaluateCombosForTurn = (
     pressureByState: buildPressureByState(state),
     stateDefense: buildStateDefense(state),
     playsThisTurn: state.cardsPlayedThisTurn,
-    turnPlays: state.turnPlays.map(play => ({ ...play })),
+    turnPlays: state.turnPlays.map(play => ({
+      ...play,
+      metadata: play.metadata ? { ...play.metadata } : undefined,
+    })),
+    turnBuffer: state.turnBuffer.map(play => ({
+      ...play,
+      metadata: play.metadata ? { ...play.metadata } : undefined,
+    })),
     log: [...state.log],
+    headlineLog: [...state.headlineLog],
+    extraExtraFeed: [...state.extraExtraFeed],
+    winner: state.winner,
+    victoryType: state.victoryType,
+    finalEdition: state.finalEdition ?? null,
   } satisfies EngineGameState;
 
   const logStart = engineState.log.length;

@@ -11,6 +11,7 @@ import type { HotspotKind, WeightedHotspotCandidate } from '@/systems/paranormal
 import type { StateCombinationEffects } from '@/data/stateCombinations';
 import type { EditorDef, EditorId } from '@/expansions/editors/EditorsEngine';
 import type { TabloidRelicRuntimeState } from '@/expansions/tabloidRelics/RelicTypes';
+import type { GameOverReport } from '@/types/finalEdition';
 
 export interface CardPlayRecord {
   card: GameCard;
@@ -52,6 +53,7 @@ export interface GameState {
   playHistory: CardPlayRecord[];
   frontPageTriplet: PlayedCardMetaLite[] | null;
   turnPlays: TurnPlay[];
+  turnBuffer: TurnPlay[];
   comboTruthDeltaThisRound: number;
   controlledStates: string[];
   aiControlledStates: string[];
@@ -85,6 +87,8 @@ export interface GameState {
   eventManager?: EventManager;
   showNewspaper: boolean;
   log: string[];
+  headlineLog: string[];
+  extraExtraFeed: string[];
   agendaIssue: AgendaIssueState;
   agendaIssueCounters: Record<string, number>;
   agendaRoundCounters: Record<string, number>;
@@ -134,6 +138,9 @@ export interface GameState {
   editorRuntime?: GameEditorRuntimeState | null;
   preGameAdditions?: GameEditorPreGameAdditions | null;
   tabloidRelicsRuntime?: TabloidRelicRuntimeState | null;
+  winner: 'truth' | 'government' | 'draw' | null;
+  victoryType: 'states' | 'ip' | 'truth' | 'agenda' | null;
+  finalEdition?: GameOverReport | null;
 }
 
 export interface GameEditorRuntimeState {
