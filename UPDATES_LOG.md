@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-12 – Harden press archive persistence
+- Switch the press archive hook to the safe storage helpers so localStorage errors no longer crash the hub.
+- Add regression coverage that verifies the archive stays empty when storage access fails.
+
 ## 2025-10-11 – Stabilize AI turn wrap-up
 - Keep the AI turn progress flag active until the scheduled hand-off completes so the planner no longer loops.
 - Add regression coverage to confirm control returns to the player after the wrap-up timeout resolves.

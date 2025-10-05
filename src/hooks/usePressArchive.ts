@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { GameOverReport } from '@/types/finalEdition';
 import { getFactionDisplayName, getVictoryConditionLabel } from '@/utils/finalEdition';
+import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
 
 export interface ArchivedEdition {
   id: string;
@@ -44,7 +45,7 @@ export const usePressArchive = () => {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = safeGetLocalStorageItem(STORAGE_KEY, { logger: console });
       if (!stored) {
         return;
       }
@@ -79,7 +80,10 @@ export const usePressArchive = () => {
   useEffect(() => {
     try {
       const payload = JSON.stringify(issues);
-      localStorage.setItem(STORAGE_KEY, payload);
+      const didPersist = safeSetLocalStorageItem(STORAGE_KEY, payload, { logger: console });
+      if (!didPersist) {
+        console.warn('Failed to persist press archive');
+      }
     } catch (error) {
       console.warn('Failed to persist press archive', error);
     }
