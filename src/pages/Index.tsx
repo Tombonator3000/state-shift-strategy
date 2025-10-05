@@ -2415,9 +2415,32 @@ const Index = () => {
     }
   }, [showIntro, showMenu, audio]);
 
+  const isPlayerActionLocked =
+    gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
+  const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
+  const canQueueDiscards =
+    !handInteractionDisabled &&
+    gameState.currentPlayer === 'human' &&
+    gameState.phase === 'action' &&
+    !gameState.animating;
+  const handleToggleDiscard = useCallback(
+    (cardId: string) => {
+      if (!canQueueDiscards) {
+        return;
+      }
+      setPendingDiscards(prev => {
+        if (prev.includes(cardId)) {
+          return prev.filter(id => id !== cardId);
+        }
+        return [...prev, cardId];
+      });
+    },
+    [canQueueDiscards]
+  );
+
   if (showIntro) {
     return (
-      <div 
+      <div
         className="min-h-screen bg-government-dark flex items-center justify-center cursor-pointer"
         onClick={() => {
           setShowIntro(false);
@@ -2537,29 +2560,6 @@ const Index = () => {
       />
     );
   }
-
-  const isPlayerActionLocked =
-    gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
-  const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
-  const canQueueDiscards =
-    !handInteractionDisabled &&
-    gameState.currentPlayer === 'human' &&
-    gameState.phase === 'action' &&
-    !gameState.animating;
-  const handleToggleDiscard = useCallback(
-    (cardId: string) => {
-      if (!canQueueDiscards) {
-        return;
-      }
-      setPendingDiscards(prev => {
-        if (prev.includes(cardId)) {
-          return prev.filter(id => id !== cardId);
-        }
-        return [...prev, cardId];
-      });
-    },
-    [canQueueDiscards]
-  );
 
   const playerAgenda = gameState.secretAgenda;
   const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
