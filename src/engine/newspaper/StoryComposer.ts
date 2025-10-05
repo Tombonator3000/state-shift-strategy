@@ -17,6 +17,7 @@ import {
   tagInserts,
   verbs,
 } from './StoryBanks';
+import type { BodySentenceEntry } from './StoryBanks';
 import type { ComboSummary } from '@/game/combo.types';
 
 type Maybe<T> = T | null | undefined;
@@ -67,6 +68,28 @@ const ensureConnectorSpacing = (value: string): string => {
 };
 
 const normalizeBodySentence = (value: string): string => ensureSentence(ensureConnectorSpacing(value));
+
+const renderBodySentence = (entry: BodySentenceEntry): string => {
+  if (typeof entry === 'string') {
+    return entry;
+  }
+  const { blueprint, pools } = entry;
+  const sentence = blueprint.replace(/\{([^}]+)\}/g, (_match, key: string) => {
+    const options = pools[key];
+    if (!options?.length) {
+      return '';
+    }
+    const pool = options.slice();
+    const fallback = pool[0] ?? '';
+    return pick(pool, fallback);
+  });
+  return sentence
+    .replace(/\s+,/g, ',')
+    .replace(/\s+;/g, ';')
+    .replace(/\s+\./g, '.')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
 
 const pickDeltaTemplate = (
   value: number,
@@ -349,15 +372,16 @@ export function composeCardStory(input: CardStoryInput): CardStory {
 
   const bodySource = isTruthFaction ? bodyTruth : bodyGov;
   const toneBankKey = toneKey === 'ATTACK' || toneKey === 'MEDIA' || toneKey === 'ZONE' ? toneKey : 'NEUTRAL';
-  const toneBank = (bodySource[toneBankKey] ?? bodySource.NEUTRAL) as string[];
+  const toneBank = bodySource[toneBankKey] ?? bodySource.NEUTRAL;
   const neutralBank = bodySource.NEUTRAL;
 
   const baseSentenceCount = toneBank.length && Math.random() > 0.5 ? 4 : 3;
   const bodySentences: string[] = [];
   for (let index = 0; index < baseSentenceCount; index += 1) {
     const bank = index % 2 === 0 && toneBank.length ? toneBank : neutralBank;
-    const choice = pick(bank, bank[0] ?? 'Sources refuse to cooperate with this paragraph.');
-    bodySentences.push(normalizeBodySentence(choice));
+    const fallbackEntry: BodySentenceEntry = bank[0] ?? 'Sources refuse to cooperate with this paragraph.';
+    const choice = pick(bank, fallbackEntry);
+    bodySentences.push(normalizeBodySentence(renderBodySentence(choice)));
   }
 
   const allowedTags = new Set<string>();

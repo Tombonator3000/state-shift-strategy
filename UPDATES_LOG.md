@@ -22,6 +22,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Load news article pools on app startup to prevent empty or stale final editions when the archives are still initializing.
 - Skip composing the final newspaper until pool data is ready and clear the preview to avoid stale spreads during loading.
 
+## 2025-10-05 – Modularize truth strike reporting
+- Swap the truth-faction attack and media body banks for modular templates with dynamic motives, settings, and reactions to reduce repetition.
+- Teach the newspaper composer to render templated story segments alongside legacy string entries.
+
 ## 2025-10-05 – Surface extra bulletins in final editions
 - Retire the in-play Extra Extra strip so the primary board regains vertical space during matches.
 - Feed archived bulletin articles into the final edition builder and render them in the victory newspaper spread with fallback copy.
