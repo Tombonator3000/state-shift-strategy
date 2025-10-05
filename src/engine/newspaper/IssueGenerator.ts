@@ -357,7 +357,16 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
 
   const heroCard = chooseHeroCard(playerCards);
 
-  const mapEntry = (entry: PlayedCardInput): NarrativeArticle => {
+  type ArticleMeta = {
+    entry: PlayedCardInput;
+    article: NarrativeArticle;
+    truthMagnitude: number;
+    statusSignals: number;
+    capturedCount: number;
+    randomWeight: number;
+  };
+
+  const buildArticleMeta = (entry: PlayedCardInput): ArticleMeta => {
     const cardLexicon = lexicon[entry.card.id] ?? null;
     const targetName = resolveStateName(entry.targetState);
     const capturedNames = resolveCapturedStateNames(entry.capturedStates);
@@ -376,13 +385,39 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
       capturedStateNames: capturedNames,
       issueId: input.agendaIssueId,
     });
-    return mapCardToArticle(entry, story, truth, ip, pressure, targetName, capturedNames);
+    const article = mapCardToArticle(entry, story, truth, ip, pressure, targetName, capturedNames);
+
+    const truthMagnitude = typeof truth === 'number' && !Number.isNaN(truth) ? Math.abs(truth) : 0;
+    const ipMagnitude = typeof ip === 'number' && !Number.isNaN(ip) ? Math.abs(ip) : 0;
+    const pressureMagnitude = typeof pressure === 'number' && !Number.isNaN(pressure)
+      ? Math.abs(pressure)
+      : 0;
+    const statusSignals =
+      capturedNames.length +
+      (targetName ? 1 : 0) +
+      (ipMagnitude > 0 ? 1 : 0) +
+      (pressureMagnitude > 0 ? 1 : 0);
+
+    return {
+      entry,
+      article,
+      truthMagnitude,
+      statusSignals,
+      capturedCount: capturedNames.length,
+      randomWeight: Math.random(),
+    } satisfies ArticleMeta;
   };
 
-  const playerArticles = playerCards.map(mapEntry);
-  const oppositionArticles = opponentCards.map(mapEntry);
+  const playerMetas = playerCards.map(buildArticleMeta);
+  const oppositionMetas = opponentCards.map(buildArticleMeta);
 
-  const heroArticle = heroCard ? playerArticles.find(article => article.cardId === heroCard.card.id) ?? null : null;
+  const playerArticles = playerMetas.map(meta => meta.article);
+  const oppositionArticles = oppositionMetas.map(meta => meta.article);
+
+  const heroMeta = heroCard
+    ? playerMetas.find(meta => meta.entry.card.id === heroCard.card.id) ?? null
+    : null;
+  const heroArticle = heroMeta?.article ?? null;
   const remainingPlayerArticles = heroArticle
     ? playerArticles.filter(article => article.cardId !== heroArticle.cardId)
     : playerArticles;
@@ -411,8 +446,48 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     weather: collectWeather(input.dataset),
   };
 
-  const selectedCards = playerCards.slice(0, 3);
-  const generatedArticles = selectedCards.map(entry => {
+  const prioritizedMetas = [...playerMetas].sort((a, b) => {
+    if (b.capturedCount !== a.capturedCount) {
+      return b.capturedCount - a.capturedCount;
+    }
+    if (b.statusSignals !== a.statusSignals) {
+      return b.statusSignals - a.statusSignals;
+    }
+    if (b.truthMagnitude !== a.truthMagnitude) {
+      return b.truthMagnitude - a.truthMagnitude;
+    }
+    if (b.randomWeight !== a.randomWeight) {
+      return b.randomWeight - a.randomWeight;
+    }
+    return 0;
+  });
+
+  const frontPageSelection: ArticleMeta[] = [];
+  const usedCardIds = new Set<string>();
+
+  if (heroMeta) {
+    frontPageSelection.push(heroMeta);
+    usedCardIds.add(heroMeta.entry.card.id);
+  }
+
+  for (const meta of prioritizedMetas) {
+    if (frontPageSelection.length >= Math.min(3, playerMetas.length)) {
+      break;
+    }
+    if (usedCardIds.has(meta.entry.card.id)) {
+      continue;
+    }
+    frontPageSelection.push(meta);
+    usedCardIds.add(meta.entry.card.id);
+  }
+
+  const selectedMetas = frontPageSelection.length
+    ? frontPageSelection
+    : prioritizedMetas.slice(0, Math.min(3, prioritizedMetas.length));
+
+  const selectedCards = selectedMetas.map(meta => meta.entry);
+  const generatedArticles = selectedMetas.map(meta => {
+    const entry = meta.entry;
     const article = articleBank?.getById?.(entry.card.id) ?? null;
     return buildGeneratedStoryArticle(entry, article);
   });
