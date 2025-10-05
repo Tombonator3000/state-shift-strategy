@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { calculateCardDraw, getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
+import { safeGetLocalStorageItem } from '@/utils/storage';
 
 export interface DrawingSettings {
   drawMode: DrawMode;
@@ -14,11 +15,15 @@ export const useCardDrawing = () => {
 
   // Load settings from localStorage
   useEffect(() => {
-    const savedSettings = localStorage.getItem('gameSettings');
+    const savedSettings = safeGetLocalStorageItem('gameSettings');
     if (savedSettings) {
-      const parsed = JSON.parse(savedSettings);
-      if (parsed.drawMode) {
-        setSettings({ drawMode: parsed.drawMode });
+      try {
+        const parsed = JSON.parse(savedSettings);
+        if (parsed && typeof parsed.drawMode === 'string') {
+          setSettings({ drawMode: parsed.drawMode as DrawMode });
+        }
+      } catch (error) {
+        console.warn('Failed to parse saved card drawing settings:', error);
       }
     }
   }, []);
