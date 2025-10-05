@@ -3910,157 +3910,90 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       return;
     }
 
+    let aiTurnStarted = false;
+    let encounteredError = false;
+
     setGameState(prev => {
       if (sessionGuard !== gameSessionRef.current) {
         return prev;
       }
 
-      return prev.isGameOver ? prev : { ...prev, aiTurnInProgress: true };
+      if (prev.isGameOver) {
+        return prev;
+      }
+
+      aiTurnStarted = true;
+      return { ...prev, aiTurnInProgress: true };
     });
 
-    await new Promise<GameState>(resolve => {
-      setGameState(prev => {
-        if (sessionGuard !== gameSessionRef.current) {
-          resolve(prev);
-          return prev;
-        }
+    try {
+      await new Promise<GameState>(resolve => {
+        setGameState(prev => {
+          if (sessionGuard !== gameSessionRef.current) {
+            resolve(prev);
+            return prev;
+          }
 
-        if (prev.isGameOver) {
-          resolve(prev);
-          return prev;
-        }
+          if (prev.isGameOver) {
+            resolve(prev);
+            return prev;
+          }
 
-        const aiControlledStates = prev.states
-          .filter(state => state.owner === 'ai')
-          .map(state => state.abbreviation);
+          const aiControlledStates = prev.states
+            .filter(state => state.owner === 'ai')
+            .map(state => state.abbreviation);
 
-        const aiControlledStateCount = getControlledStateCount(aiControlledStates);
-        const aiStateIncome = aiControlledStateCount;
-        const aiBaseIncome = 5;
-        const aiTotalIncome = aiBaseIncome + aiStateIncome;
+          const aiControlledStateCount = getControlledStateCount(aiControlledStates);
+          const aiStateIncome = aiControlledStateCount;
+          const aiBaseIncome = 5;
+          const aiTotalIncome = aiBaseIncome + aiStateIncome;
 
-        const aiFaction = prev.faction === 'government' ? 'truth' : 'government';
-        const aiCardsNeeded = Math.max(0, HAND_LIMIT - prev.aiHand.length);
-        const { drawn: aiDrawnCards, deck: aiRemainingDeck } = drawCardsFromDeck(prev.aiDeck, aiCardsNeeded, aiFaction);
-        const aiHandSizeAfterDraw = prev.aiHand.length + aiDrawnCards.length;
+          const aiFaction = prev.faction === 'government' ? 'truth' : 'government';
+          const aiCardsNeeded = Math.max(0, HAND_LIMIT - prev.aiHand.length);
+          const { drawn: aiDrawnCards, deck: aiRemainingDeck } = drawCardsFromDeck(prev.aiDeck, aiCardsNeeded, aiFaction);
+          const aiHandSizeAfterDraw = prev.aiHand.length + aiDrawnCards.length;
 
-        const nextState: GameState = {
-          ...prev,
-          aiHand: [...prev.aiHand, ...aiDrawnCards],
-          aiDeck: aiRemainingDeck,
-          aiIP: prev.aiIP + aiTotalIncome,
-          log: [
-            ...prev.log,
-            `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStateCount} states = ${aiTotalIncome} IP`,
-            `AI drew ${aiDrawnCards.length} card${aiDrawnCards.length === 1 ? '' : 's'} (hand ${aiHandSizeAfterDraw}/${HAND_LIMIT})`,
-          ],
-        };
+          const nextState: GameState = {
+            ...prev,
+            aiHand: [...prev.aiHand, ...aiDrawnCards],
+            aiDeck: aiRemainingDeck,
+            aiIP: prev.aiIP + aiTotalIncome,
+            log: [
+              ...prev.log,
+              `AI Income: ${aiBaseIncome} base + ${aiStateIncome} from ${aiControlledStateCount} states = ${aiTotalIncome} IP`,
+              `AI drew ${aiDrawnCards.length} card${aiDrawnCards.length === 1 ? '' : 's'} (hand ${aiHandSizeAfterDraw}/${HAND_LIMIT})`,
+            ],
+          };
 
-        resolve(nextState);
-        return nextState;
+          resolve(nextState);
+          return nextState;
+        });
       });
-    });
 
-    if (sessionGuard !== gameSessionRef.current) {
-      return;
-    }
-
-    const prePlanningState = await readLatestState();
-    if (prePlanningState.isGameOver) {
-      return;
-    }
-
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
-
-    if (sessionGuard !== gameSessionRef.current) {
-      return;
-    }
-
-    const planningState = await readLatestState();
-
-    if (sessionGuard !== gameSessionRef.current) {
-      return;
-    }
-
-    if (!planningState.aiStrategist) {
-      setGameState(prev => {
-        if (sessionGuard !== gameSessionRef.current) {
-          return prev;
-        }
-
-        return prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false };
-      });
-      return;
-    }
-
-    if (planningState.isGameOver) {
-      return;
-    }
-
-    const turnPlan = chooseTurnActions({
-      strategist: planningState.aiStrategist,
-      gameState: planningState as any,
-      maxActions: 3,
-      priorityThreshold: 0.3,
-    });
-
-    if (turnPlan.actions.length === 0 && turnPlan.sequenceDetails.length) {
-      setGameState(prev => {
-        if (sessionGuard !== gameSessionRef.current) {
-          return prev;
-        }
-
-        return {
-          ...prev,
-          log: [...prev.log, ...buildStrategyLogEntries(undefined, turnPlan.sequenceDetails)],
-        };
-      });
-    }
-
-    const actionOutcome = await processAiActions({
-      actions: turnPlan.actions,
-      sequenceDetails: turnPlan.sequenceDetails,
-      readLatestState,
-      playCard: params => {
-        const playCardFn = playAICardRef.current;
-        return playCardFn ? playCardFn(params) : readLatestState();
-      },
-      waitBetweenActions: () => new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400)),
-    });
-
-    if (sessionGuard !== gameSessionRef.current) {
-      return;
-    }
-
-    if (actionOutcome.gameOver) {
-      return;
-    }
-
-    const latestState = await readLatestState();
-    if (latestState.isGameOver) {
-      return;
-    }
-
-    if (sessionGuard !== gameSessionRef.current) {
-      return;
-    }
-
-    if (pendingAiTimeoutRef.current) {
-      clearTimeout(pendingAiTimeoutRef.current);
-    }
-
-    const timeoutSessionGuard = gameSessionRef.current;
-    pendingAiTimeoutRef.current = setTimeout(() => {
-      if (timeoutSessionGuard !== gameSessionRef.current) {
+      if (sessionGuard !== gameSessionRef.current) {
         return;
       }
 
-      pendingAiTimeoutRef.current = null;
+      const prePlanningState = await readLatestState();
+      if (prePlanningState.isGameOver) {
+        return;
+      }
 
-      const stateSnapshot = gameStateRef.current;
-      if (!stateSnapshot || stateSnapshot.isGameOver || stateSnapshot.currentPlayer !== 'ai') {
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+
+      if (sessionGuard !== gameSessionRef.current) {
+        return;
+      }
+
+      const planningState = await readLatestState();
+
+      if (sessionGuard !== gameSessionRef.current) {
+        return;
+      }
+
+      if (!planningState.aiStrategist) {
         setGameState(prev => {
-          if (timeoutSessionGuard !== gameSessionRef.current) {
+          if (sessionGuard !== gameSessionRef.current) {
             return prev;
           }
 
@@ -4069,19 +4002,122 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return;
       }
 
-      if (timeoutSessionGuard !== gameSessionRef.current) {
+      if (planningState.isGameOver) {
         return;
       }
 
-      endTurnRef.current?.();
-      setGameState(prev => {
+      const turnPlan = chooseTurnActions({
+        strategist: planningState.aiStrategist,
+        gameState: planningState as any,
+        maxActions: 3,
+        priorityThreshold: 0.3,
+      });
+
+      if (turnPlan.actions.length === 0 && turnPlan.sequenceDetails.length) {
+        setGameState(prev => {
+          if (sessionGuard !== gameSessionRef.current) {
+            return prev;
+          }
+
+          return {
+            ...prev,
+            log: [...prev.log, ...buildStrategyLogEntries(undefined, turnPlan.sequenceDetails)],
+          };
+        });
+      }
+
+      const actionOutcome = await processAiActions({
+        actions: turnPlan.actions,
+        sequenceDetails: turnPlan.sequenceDetails,
+        readLatestState,
+        playCard: params => {
+          const playCardFn = playAICardRef.current;
+          return playCardFn ? playCardFn(params) : readLatestState();
+        },
+        waitBetweenActions: () => new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400)),
+      });
+
+      if (sessionGuard !== gameSessionRef.current) {
+        return;
+      }
+
+      if (actionOutcome.gameOver) {
+        return;
+      }
+
+      const latestState = await readLatestState();
+      if (latestState.isGameOver) {
+        return;
+      }
+
+      if (sessionGuard !== gameSessionRef.current) {
+        return;
+      }
+
+      if (pendingAiTimeoutRef.current) {
+        clearTimeout(pendingAiTimeoutRef.current);
+      }
+
+      const timeoutSessionGuard = gameSessionRef.current;
+      pendingAiTimeoutRef.current = setTimeout(() => {
         if (timeoutSessionGuard !== gameSessionRef.current) {
+          return;
+        }
+
+        pendingAiTimeoutRef.current = null;
+
+        const stateSnapshot = gameStateRef.current;
+        if (!stateSnapshot || stateSnapshot.isGameOver || stateSnapshot.currentPlayer !== 'ai') {
+          setGameState(prev => {
+            if (timeoutSessionGuard !== gameSessionRef.current) {
+              return prev;
+            }
+
+            return prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false };
+          });
+          return;
+        }
+
+        if (timeoutSessionGuard !== gameSessionRef.current) {
+          return;
+        }
+
+        endTurnRef.current?.();
+        setGameState(prev => {
+          if (timeoutSessionGuard !== gameSessionRef.current) {
+            return prev;
+          }
+
+          return prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false };
+        });
+      }, 1000);
+    } catch (error) {
+      encounteredError = true;
+      console.error('Failed to execute AI turn', error);
+    } finally {
+      if (!aiTurnStarted) {
+        return;
+      }
+
+      setGameState(prev => {
+        if (sessionGuard !== gameSessionRef.current) {
           return prev;
         }
 
-        return prev.isGameOver ? prev : { ...prev, aiTurnInProgress: false };
+        if (prev.isGameOver || !prev.aiTurnInProgress) {
+          return prev;
+        }
+
+        return { ...prev, aiTurnInProgress: false };
       });
-    }, 1000);
+
+      if (encounteredError && sessionGuard === gameSessionRef.current) {
+        const stateSnapshot = gameStateRef.current;
+        if (stateSnapshot && !stateSnapshot.isGameOver && stateSnapshot.currentPlayer === 'ai') {
+          endTurnRef.current?.();
+        }
+      }
+    }
   }, []);
 
   const closeNewspaper = useCallback(() => {

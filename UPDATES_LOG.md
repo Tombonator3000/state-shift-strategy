@@ -26,6 +26,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Load news article pools on app startup to prevent empty or stale final editions when the archives are still initializing.
 - Skip composing the final newspaper until pool data is ready and clear the preview to avoid stale spreads during loading.
 
+## 2025-10-05 – Harden AI turn recovery
+- Reset the AI turn progress flag when planning fails so the player immediately regains control.
+- Invoke a safe end-turn fallback if the AI remains the active player after an error to avoid stalled sessions.
+
 ## 2025-10-05 – Harden card collection fallbacks
 - Guard the card collection search filters against missing descriptions so textless cards no longer crash the overlay.
 - Show a friendly placeholder description when a discovered card lacks rules text and cover it with regression tests.
