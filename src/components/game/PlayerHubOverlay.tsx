@@ -9,7 +9,7 @@ import { AchievementsSection } from './AchievementPanel';
 import { CardCollectionContent } from './CardCollection';
 import { TutorialSection } from './TutorialOverlay';
 import PressArchivePanel from './PressArchivePanel';
-import type { ArchivedEdition } from '@/hooks/usePressArchive';
+import type { AgendaMoment, ArchivedEdition } from '@/hooks/usePressArchive';
 import StateIntelBoard from './StateIntelBoard';
 import PlayerHubMapView from './PlayerHubMapView';
 import type { StateEventBonusSummary, StateParanormalHotspotSummary } from '@/hooks/gameStateTypes';
@@ -34,6 +34,7 @@ interface PlayerHubOverlayProps {
   agendasEnabled: boolean;
   currentAgenda?: GameState['secretAgenda'];
   completedAgendaIds: string[];
+  agendaMoments?: AgendaMoment[];
 }
 
 export interface PlayerStateIntel {
@@ -100,6 +101,7 @@ const PlayerHubOverlay = ({
   agendasEnabled,
   currentAgenda,
   completedAgendaIds,
+  agendaMoments = [],
 }: PlayerHubOverlayProps) => {
   const [activeTab, setActiveTab] = useState<HubTab>(() => {
     if (agendasEnabled && (currentAgenda || completedAgendaIds.length > 0)) {
@@ -122,6 +124,7 @@ const PlayerHubOverlay = ({
   });
 
   const isTruth = faction === 'truth';
+  const [agendaFilter, setAgendaFilter] = useState<'all' | AgendaMoment['status']>('all');
   const completedAgendas = useMemo(
     () =>
       completedAgendaIds
@@ -129,6 +132,75 @@ const PlayerHubOverlay = ({
         .filter((agenda): agenda is AgendaDefinition => Boolean(agenda)),
     [completedAgendaIds],
   );
+
+  const agendaHistory = useMemo(
+    () =>
+      [...agendaMoments]
+        .filter(Boolean)
+        .sort((a, b) => (a.recordedAt ?? 0) - (b.recordedAt ?? 0)),
+    [agendaMoments],
+  );
+
+  const filteredAgendaHistory = useMemo(() => {
+    if (agendaFilter === 'all') {
+      return agendaHistory;
+    }
+    return agendaHistory.filter(moment => moment.status === agendaFilter);
+  }, [agendaHistory, agendaFilter]);
+
+  const agendaMomentFormatter = useMemo(() => {
+    try {
+      return new Intl.DateTimeFormat(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const agendaStatusTone: Record<AgendaMoment['status'], { badge: string; bullet: string }> = {
+    advance: {
+      badge: 'border-sky-500/60 bg-sky-500/10 text-sky-700 dark:text-sky-200',
+      bullet: 'border-sky-500 bg-sky-400',
+    },
+    setback: {
+      badge: 'border-rose-500/60 bg-rose-500/10 text-rose-700 dark:text-rose-200',
+      bullet: 'border-rose-500 bg-rose-400',
+    },
+    complete: {
+      badge: 'border-emerald-500/60 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200',
+      bullet: 'border-emerald-500 bg-emerald-400',
+    },
+  };
+
+  const agendaStatusLabel: Record<'all' | AgendaMoment['status'], string> = {
+    all: 'Alle',
+    advance: 'Fremdrift',
+    setback: 'Tilbakeslag',
+    complete: 'Fullført',
+  };
+
+  const resolveMomentTimestamp = (timestamp: number | undefined): string => {
+    if (!timestamp) {
+      return 'Tidspunkt ukjent';
+    }
+    if (agendaMomentFormatter) {
+      try {
+        return agendaMomentFormatter.format(new Date(timestamp));
+      } catch {
+        // fall through to fallback formatting
+      }
+    }
+    const date = new Date(timestamp);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${month}/${day} ${hours}:${minutes}`;
+  };
 
   const difficultyTone: Record<AgendaDefinition['difficulty'], string> = {
     easy: 'border-emerald-500/30 bg-emerald-500/15 text-emerald-600',
@@ -395,7 +467,7 @@ const PlayerHubOverlay = ({
                         </div>
                       </Card>
 
-                      <div className="flex-1 overflow-y-auto pr-1">
+                      <div className="flex-1 space-y-4 overflow-y-auto pr-1">
                         {completedAgendas.length > 0 ? (
                           <div className="grid gap-3 lg:grid-cols-2">
                             {completedAgendas.map(agenda => (
@@ -458,6 +530,151 @@ const PlayerHubOverlay = ({
                             No completed agendas logged yet.
                           </Card>
                         )}
+
+                        <Card
+                          className={clsx(
+                            'border p-4',
+                            isTruth
+                              ? 'border-rose-900/30 bg-rose-50/80 text-stone-900'
+                              : 'border-emerald-500/25 bg-slate-950/70 text-slate-100',
+                          )}
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                              <p className="text-[10px] font-semibold uppercase tracking-[0.32em] opacity-70">
+                                Agenda-Logg
+                              </p>
+                              <h3 className="text-lg font-bold uppercase tracking-[0.12em]">
+                                Historikk og signaler
+                              </h3>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {(['all', 'advance', 'setback', 'complete'] as const).map(filterValue => (
+                                <button
+                                  key={filterValue}
+                                  type="button"
+                                  onClick={() => setAgendaFilter(filterValue)}
+                                  className={clsx(
+                                    'rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] transition',
+                                    agendaFilter === filterValue
+                                      ? isTruth
+                                        ? 'border-rose-900 bg-rose-200/40 text-rose-900 shadow-sm'
+                                        : 'border-emerald-400 bg-emerald-500/20 text-emerald-50 shadow-sm'
+                                      : isTruth
+                                        ? 'border-transparent bg-amber-100/40 text-rose-900/70 hover:border-rose-900/30 hover:bg-amber-100/60'
+                                        : 'border-transparent bg-slate-900/60 text-emerald-100/70 hover:border-emerald-500/30 hover:bg-slate-900/80',
+                                  )}
+                                >
+                                  {agendaStatusLabel[filterValue]}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="mt-4">
+                            {agendaHistory.length === 0 ? (
+                              <div
+                                className={clsx(
+                                  'rounded border border-dashed p-4 text-center text-xs uppercase tracking-[0.28em] opacity-70',
+                                  isTruth
+                                    ? 'border-rose-900/30 bg-amber-100/40 text-rose-900/70'
+                                    : 'border-emerald-500/25 bg-slate-950/60 text-emerald-100/70',
+                                )}
+                              >
+                                Ingen agenda-historikk registrert ennå.
+                              </div>
+                            ) : filteredAgendaHistory.length === 0 ? (
+                              <div
+                                className={clsx(
+                                  'rounded border border-dashed p-4 text-center text-xs uppercase tracking-[0.28em] opacity-70',
+                                  isTruth
+                                    ? 'border-rose-900/30 bg-amber-100/40 text-rose-900/70'
+                                    : 'border-emerald-500/25 bg-slate-950/60 text-emerald-100/70',
+                                )}
+                              >
+                                Ingen hendelser samsvarer med filteret.
+                              </div>
+                            ) : (
+                              <div className="relative">
+                                <div
+                                  className={clsx(
+                                    'absolute left-[0.65rem] top-2 bottom-2 w-px',
+                                    isTruth ? 'bg-rose-900/30' : 'bg-emerald-500/30',
+                                  )}
+                                />
+                                <div className="space-y-4">
+                                  {filteredAgendaHistory.map(moment => {
+                                    const progressLabel = `${moment.progress}/${moment.target}`;
+                                    const factionLabel =
+                                      moment.faction === 'truth' ? 'Truth Coalition' : 'Government Directorate';
+                                    const actorLabel = moment.actor === 'player' ? 'Operatives' : 'Opposition Network';
+                                    const tone = agendaStatusTone[moment.status];
+                                    const statusLabel =
+                                      moment.status === 'advance'
+                                        ? 'Fremdrift'
+                                        : moment.status === 'setback'
+                                        ? 'Tilbakeslag'
+                                        : 'Fullført';
+
+                                    return (
+                                      <div key={moment.id} className="relative pl-8">
+                                        <span
+                                          className={clsx(
+                                            'absolute left-0 top-3 h-3 w-3 -translate-x-1/2 transform rounded-full border-2 shadow-sm',
+                                            tone.bullet,
+                                          )}
+                                        />
+                                        <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em]">
+                                          <Badge variant="outline" className={clsx('px-2 py-0.5', tone.badge)}>
+                                            {statusLabel}
+                                          </Badge>
+                                          <Badge
+                                            variant="outline"
+                                            className={clsx(
+                                              'border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.28em]',
+                                              isTruth
+                                                ? 'border-rose-900/30 bg-amber-50/80 text-rose-900'
+                                                : 'border-emerald-500/30 bg-slate-900/70 text-emerald-100',
+                                            )}
+                                          >
+                                            Stage: {moment.stageLabel}
+                                          </Badge>
+                                          <Badge
+                                            variant="outline"
+                                            className={clsx(
+                                              'border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.28em]',
+                                              isTruth
+                                                ? 'border-rose-900/30 bg-amber-50/80 text-rose-900'
+                                                : 'border-emerald-500/30 bg-slate-900/70 text-emerald-100',
+                                            )}
+                                          >
+                                            Fremdrift {progressLabel}
+                                          </Badge>
+                                        </div>
+                                        <div className="mt-2 space-y-1">
+                                          <h4 className="text-sm font-semibold uppercase tracking-[0.12em]">
+                                            {moment.agendaTitle}
+                                          </h4>
+                                          {moment.stageDescription ? (
+                                            <p className="text-xs text-muted-foreground">
+                                              {moment.stageDescription}
+                                            </p>
+                                          ) : null}
+                                          <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground/80">
+                                            Ansvarlig: {factionLabel} · {actorLabel}
+                                          </div>
+                                          <div className="text-[10px] uppercase tracking-[0.32em] text-muted-foreground/70">
+                                            {resolveMomentTimestamp(moment.recordedAt)}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </Card>
                       </div>
                     </>
                   ) : (

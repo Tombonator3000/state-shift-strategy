@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-07 – Chronicle agenda signals in hub
+- Route the live agenda moment feed into the Player Hub overlay and surface a chronological timeline of stages and outcomes.
+- Add status filters, timeline styling, and empty-state messaging to help players review agenda advances, setbacks, and completions at a glance.
+
 ## 2025-10-06 – Surface agenda history in player hub
 - Add an agendas tab to the Player Hub that highlights the current secret agenda when enabled.
 - Surface completed agendas with descriptions, issue themes, and difficulty badges for quick review.
