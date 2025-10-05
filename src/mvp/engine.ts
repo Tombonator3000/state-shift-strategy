@@ -689,30 +689,47 @@ export function endTurn(
 export function winCheck(
   state: GameState,
 ): { winner?: 'P1' | 'P2'; reason?: 'states' | 'truth' | 'ip' } {
+  const recordVictory = (
+    winner: 'P1' | 'P2',
+    reason: 'states' | 'truth' | 'ip',
+  ): { winner: 'P1' | 'P2'; reason: 'states' | 'truth' | 'ip' } => {
+    state.winner = winner;
+    state.victoryType = reason;
+    return { winner, reason };
+  };
+
+  const clearVictory = () => {
+    if (state.winner !== null || state.victoryType !== null) {
+      state.winner = null;
+      state.victoryType = null;
+    }
+  };
+
   const { players } = state;
   if (players.P1.states.length >= 10) {
-    return { winner: 'P1', reason: 'states' };
+    return recordVictory('P1', 'states');
   }
   if (players.P2.states.length >= 10) {
-    return { winner: 'P2', reason: 'states' };
+    return recordVictory('P2', 'states');
   }
 
   if (state.truth >= 95) {
     const truthPlayer = players.P1.faction === 'truth' ? 'P1' : 'P2';
-    return { winner: truthPlayer, reason: 'truth' };
+    return recordVictory(truthPlayer, 'truth');
   }
 
   if (state.truth <= 5) {
     const governmentPlayer = players.P1.faction === 'government' ? 'P1' : 'P2';
-    return { winner: governmentPlayer, reason: 'truth' };
+    return recordVictory(governmentPlayer, 'truth');
   }
 
   if (players.P1.ip >= 300) {
-    return { winner: 'P1', reason: 'ip' };
+    return recordVictory('P1', 'ip');
   }
   if (players.P2.ip >= 300) {
-    return { winner: 'P2', reason: 'ip' };
+    return recordVictory('P2', 'ip');
   }
 
+  clearVictory();
   return {};
 }

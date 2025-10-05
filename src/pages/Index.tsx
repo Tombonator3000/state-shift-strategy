@@ -50,7 +50,6 @@ import { describeEditorEffect, type EditorId } from '@/expansions/editors/Editor
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
-  CardPlayRecord,
   PendingCampaignArcEvent,
 } from '@/hooks/gameStateTypes';
 import type { TabloidRelicRuntimeEntry } from '@/expansions/tabloidRelics/RelicTypes';
@@ -60,353 +59,22 @@ import { areMapVfxEnabled, areParanormalEffectsEnabled } from '@/state/settings'
 import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
 import { EVENT_DATABASE } from '@/data/eventDatabase';
-import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
+import { getLastComboSummary } from '@/game/comboEngine';
 import { usePressArchive } from '@/hooks/usePressArchive';
 import { useIntelArchive } from '@/hooks/useIntelArchive';
 import type { IntelArchiveDraft } from '@/hooks/useIntelArchive';
 import { upsertParanormalSighting } from '@/utils/paranormalSightings';
-import type {
-  AgendaSummary,
-  ImpactType,
-  MVPReport,
-  GameOverReport,
-  FinalEditionComboHighlight,
-  FinalEditionEventHighlight,
-} from '@/types/finalEdition';
+import { buildFinalEdition } from '@/utils/finalEdition';
+import type { GameOverReport } from '@/types/finalEdition';
 import type { ArcProgressSummary } from '@/types/campaign';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
 type ObjectiveSectionId = 'victory' | 'secret-agenda';
 
-interface EnrichedPlay {
-  play: CardPlayRecord;
-  faction: 'truth' | 'government';
-  captureCount: number;
-  truthImpact: number;
-  ipImpact: number;
-  damageImpact: number;
-  actorGain: number;
-  opponentDrop: number;
-}
-
-const SYNERGY_SIGHTING_TAGLINES = [
-  'Operators swear sparks of +{BONUS} IP rained across the ops deck.',
-  'Combo uplink redlined at +{BONUS} IP before stabilizers kicked in.',
-  'Witnesses report neon corkboard materializing with +{BONUS} IP scribbles.',
-  'Analytics desk logged a phantom +{BONUS} IP surge and a chorus of high-fives.',
-];
-
-const HOTSPOT_SPAWN_TAGLINES = [
-  '{STATE} skies glow as defenses spike +{DEFENSE}. Command races for ±{TRUTH}% truth swing.',
-  'Field agents erect ecto-barriers in {STATE}. Whoever breaches first claims ±{TRUTH}% truth.',
-  'Spectral alarm: {STATE} grid hardens by +{DEFENSE}. News desk calls a hotspot scramble!',
-];
-
-const HOTSPOT_RESOLUTION_TAGLINES = [
-  '{STATE} anomaly captured—truth meter jolts {TRUTH_DELTA}%.',
-  'Task force secures {STATE} hotspot and rewrites the narrative {TRUTH_DELTA}% in their favor.',
-  'Hotspot lockdown lifted in {STATE}; truth sensors register {TRUTH_DELTA}% swing.',
-];
-
-const HOTSPOT_EXPIRE_TAGLINES = [
-  'Unstable portal in {STATE} flickers out before capture. Defenses normalize.',
-  '{STATE} anomaly dissipates quietly—no faction claims the truth swing.',
-  'Hotspot haze clears over {STATE}; analysts log a null capture.',
-];
-
-const BROADCAST_SIGHTING_TAGLINES = [
-  'Emergency feed hijacked by "{TRACK}"—intensity now at {INTENSITY}.',
-  'Viewers report tractor beams spelling out {INTENSITY} across the skyline.',
-  'Studio monitors loop Elvis crooning "{TRACK}" while truth hits {INTENSITY}.',
-  'Control room claims UFO spotlight synced perfectly to "{TRACK}".',
-];
-
-const CRYPTID_SIGHTING_TAGLINES = [
-  'Trail cam caught a hulking blur—classified as {QUALITY} evidence.',
-  'Footprint sensors lit up; agents dispatched toward {LOCATION}.',
-  'Local ham radio crackled: "Bigfoot just photobombed our {QUALITY} feed."',
-  'Thermal scanners near {LOCATION} pegged a 9-foot anomaly.',
-];
-
-const fillTemplate = (template: string, replacements: Record<string, string | number>): string => {
-  return template.replace(/\{(\w+)\}/g, (_match, key) => {
-    const replacement = replacements[key];
-    return replacement !== undefined ? String(replacement) : '';
-  });
-};
-
 const resolveStateName = (stateId: string): string => {
-  const normalized = stateId.toUpperCase();
-  const byId = getStateById(stateId);
-  if (byId?.name) {
-    return byId.name;
-  }
-  const byAbbr = getStateByAbbreviation(normalized);
-  if (byAbbr?.name) {
-    return byAbbr.name;
-  }
-  return stateId;
-};
-
-const formatSignedNumber = (value: number): string => {
-  const rounded = Math.round(value);
-  if (rounded === 0) {
-    return '0';
-  }
-  return rounded > 0 ? `+${rounded}` : `${rounded}`;
-};
-
-const formatArcName = (arcId: string): string => {
-  return arcId
-    .replace(/^campaign_/, '')
-    .split('_')
-    .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
-    .join(' ');
-};
-
-const detectReducedMotion = (): boolean => {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-    return false;
-  }
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-};
-
-const safeRemoveLocalStorageItem = (key: string): boolean => {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  try {
-    const storage = window.localStorage;
-    if (!storage || typeof storage.removeItem !== 'function') {
-      return false;
-    }
-
-    storage.removeItem(key);
-    return true;
-  } catch (error) {
-    if (typeof console !== 'undefined' && typeof console.warn === 'function') {
-      console.warn(`[storage] Failed to remove "${key}" from localStorage`, error);
-    }
-    return false;
-  }
-};
-
-const pickChapterTemplate = (templates: string[], chapter: number): string => {
-  if (templates.length === 0) {
-    return '';
-  }
-  const index = Math.max(0, (chapter - 1) % templates.length);
-  return templates[index];
-};
-
-type CampaignStage = 'intro' | 'advance' | 'finale';
-
-const resolveEventStateName = (event?: GameEvent): string | undefined => {
-  if (!event) {
-    return undefined;
-  }
-  const stateId = event.effects?.stateEffects?.stateId
-    ?? event.paranormalHotspot?.stateId;
-  if (!stateId) {
-    return undefined;
-  }
-  return resolveStateName(stateId);
-};
-
-const buildCampaignHotspotTagline = (params: {
-  arc: ActiveCampaignArcState;
-  event?: GameEvent;
-  stage: CampaignStage;
-}): string | null => {
-  const { event, arc, stage } = params;
-  if (!event?.paranormalHotspot) {
-    return null;
-  }
-
-  const stateName = resolveEventStateName(event) ?? 'the grid';
-  const chapter = event.campaign?.chapter ?? arc.currentChapter;
-  const template = stage === 'finale'
-    ? pickChapterTemplate(HOTSPOT_RESOLUTION_TAGLINES, chapter)
-    : pickChapterTemplate(HOTSPOT_SPAWN_TAGLINES, chapter);
-
-  const truthDelta = (event.effects?.truth ?? 0)
-    + (event.effects?.truthChange ?? 0)
-    || event.paranormalHotspot.truthReward;
-
-  return fillTemplate(template, {
-    STATE: stateName.toUpperCase(),
-    DEFENSE: event.paranormalHotspot.defenseBoost,
-    TRUTH: Math.abs(event.paranormalHotspot.truthReward),
-    TRUTH_DELTA: formatSignedNumber(truthDelta),
-  });
-};
-
-const buildCampaignBroadcastContext = (params: {
-  arc: ActiveCampaignArcState;
-  event?: GameEvent;
-  stage: CampaignStage;
-}): { tagline: string; intensity: 'surge' | 'collapse'; setList: string[] } | null => {
-  const { arc, event, stage } = params;
-  const chapter = event?.campaign?.chapter ?? arc.currentChapter;
-  const template = pickChapterTemplate(BROADCAST_SIGHTING_TAGLINES, chapter);
-  if (!template) {
-    return null;
-  }
-
-  const trackLabel = event?.title ?? formatArcName(arc.arcId);
-  const faction = event?.faction ?? 'neutral';
-  const finaleIntensity: 'surge' | 'collapse' = faction === 'government' ? 'collapse' : 'surge';
-  const intensity: 'surge' | 'collapse' = stage === 'finale'
-    ? finaleIntensity
-    : faction === 'government'
-      ? 'collapse'
-      : 'surge';
-
-  const tagline = fillTemplate(template, {
-    TRACK: trackLabel.toUpperCase(),
-    INTENSITY: intensity.toUpperCase(),
-  });
-
-  const setList: string[] = [];
-  if (event?.headline) {
-    setList.push(event.headline);
-  } else {
-    setList.push(trackLabel);
-  }
-
-  return { tagline, intensity, setList };
-};
-
-const computeEventScore = (event: GameEvent): number => {
-  const effects = event.effects ?? {};
-  const truthMagnitude = Math.abs(effects.truth ?? 0) + Math.abs(effects.truthChange ?? 0);
-  const ipMagnitude = Math.abs(effects.ip ?? 0) + Math.abs(effects.ipChange ?? 0);
-  const defenseMagnitude = Math.abs(effects.defenseChange ?? 0) + Math.abs(effects.stateEffects?.defense ?? 0);
-  const rarityBoost = event.rarity === 'legendary'
-    ? 3
-    : event.rarity === 'rare'
-      ? 2
-      : event.rarity === 'uncommon'
-        ? 1
-        : 0;
-  return truthMagnitude * 2 + ipMagnitude * 1.5 + defenseMagnitude + rarityBoost;
-};
-
-const summarizeEventForFinalEdition = (
-  event: GameEvent,
-  arcSummaries?: Record<string, ArcProgressSummary>,
-): FinalEditionEventHighlight => {
-  const headline = event.headline ?? event.title;
-  const effects = event.effects ?? {};
-  const truthDelta = (effects.truth ?? 0) + (effects.truthChange ?? 0);
-  const ipDelta = (effects.ip ?? 0) + (effects.ipChange ?? 0);
-  const stateName = effects.stateEffects?.stateId
-    ? resolveStateName(effects.stateEffects.stateId)
-    : undefined;
-
-  const arcSummary = event.campaign ? arcSummaries?.[event.campaign.arcId] : undefined;
-  const matchingArcSummary = arcSummary && event.campaign && arcSummary.chapter === event.campaign.chapter
-    ? arcSummary
-    : undefined;
-
-  return {
-    id: event.id,
-    headline,
-    summary: event.content,
-    faction: event.faction ?? 'neutral',
-    rarity: event.rarity,
-    truthDelta,
-    ipDelta,
-    stateName,
-    kicker: event.flavorText ?? event.flavorTruth ?? event.flavorGov ?? undefined,
-    arcSummary: matchingArcSummary,
-  } satisfies FinalEditionEventHighlight;
-};
-
-const pickTopEvents = (
-  events: GameEvent[],
-  limit = 3,
-  arcSummaries?: Record<string, ArcProgressSummary>,
-): FinalEditionEventHighlight[] => {
-  return events
-    .map(event => ({ event, score: computeEventScore(event) }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
-    .map(entry => summarizeEventForFinalEdition(entry.event, arcSummaries));
-};
-
-const resolveComboOwnerLabel = (owner: string | undefined): string => {
-  if (owner === 'P1') {
-    return 'Operative Team';
-  }
-  if (owner === 'P2') {
-    return 'Opposition Network';
-  }
-  return owner ?? 'Unknown Cell';
-};
-
-const buildComboHighlights = (
-  summary: ReturnType<typeof getLastComboSummary>,
-): FinalEditionComboHighlight[] => {
-  if (!summary || !summary.results || summary.results.length === 0) {
-    return [];
-  }
-
-  const ownerLabel = resolveComboOwnerLabel(summary.player);
-
-  return summary.results.map(result => {
-    const rewardLabel = formatComboReward(result.appliedReward, { faction: summary.playerFaction })
-      .replace(/[()]/g, '')
-      .trim();
-    return {
-      id: result.definition.id,
-      name: result.definition.name ?? result.definition.id,
-      rewardLabel: rewardLabel.length > 0 ? rewardLabel : 'Momentum Bonus',
-      turn: summary.turn,
-      ownerLabel,
-      description: result.definition.description,
-    } satisfies FinalEditionComboHighlight;
-  });
-};
-
-const inferFactionFromRecord = (
-  record: CardPlayRecord,
-  playerFaction: 'truth' | 'government',
-): 'truth' | 'government' => {
-  if (record.faction === 'truth' || record.faction === 'government') {
-    return record.faction;
-  }
-
-  return record.player === 'human'
-    ? playerFaction
-    : playerFaction === 'truth'
-      ? 'government'
-      : 'truth';
-};
-
-const computePlayMetrics = (
-  record: CardPlayRecord,
-  faction: 'truth' | 'government',
-): Pick<EnrichedPlay, 'captureCount' | 'truthImpact' | 'ipImpact' | 'damageImpact' | 'actorGain' | 'opponentDrop'> => {
-  const captureCount = Array.isArray(record.capturedStates) ? record.capturedStates.length : 0;
-  const truthDelta = typeof record.truthDelta === 'number' ? record.truthDelta : 0;
-  const truthImpact = faction === 'truth'
-    ? Math.max(0, truthDelta)
-    : Math.max(0, -truthDelta);
-
-  const ipDelta = typeof record.ipDelta === 'number' ? record.ipDelta : 0;
-  const aiIpDelta = typeof record.aiIpDelta === 'number' ? record.aiIpDelta : 0;
-  const actorGainRaw = record.player === 'human' ? ipDelta : aiIpDelta;
-  const opponentDropRaw = record.player === 'human' ? -aiIpDelta : -ipDelta;
-  const actorGain = actorGainRaw > 0 ? actorGainRaw : 0;
-  const opponentDrop = opponentDropRaw > 0 ? opponentDropRaw : 0;
-  const ipImpact = actorGain + opponentDrop;
-
-  const damageImpact = Math.max(0, typeof record.damageDealt === 'number' ? record.damageDealt : 0);
-
-  return { captureCount, truthImpact, ipImpact, damageImpact, actorGain, opponentDrop };
+  const state = getStateById(stateId) ?? getStateByAbbreviation(stateId);
+  return state?.name ?? stateId;
 };
 
 const normalizeCardFaction = (faction: GameCard['faction']): 'truth' | 'government' => {
@@ -414,269 +82,28 @@ const normalizeCardFaction = (faction: GameCard['faction']): 'truth' | 'governme
   return normalized.includes('government') ? 'government' : 'truth';
 };
 
-const determineCardContextualEffect = (card: GameCard): ContextualEffectType | null => {
+const determineCardContextualEffect = (
+  card: GameCard,
+): ContextualEffectType | null => {
   const faction = normalizeCardFaction(card.faction);
   const type = card.type;
   const truthDelta = typeof (card.effects as { truthDelta?: number } | undefined)?.truthDelta === 'number'
     ? (card.effects as { truthDelta?: number }).truthDelta
-    : null;
-
-  if (truthDelta !== null && truthDelta !== 0) {
-    return truthDelta > 0 ? 'media_blast' : 'government_crackdown';
-  }
-
-  if (type === 'MEDIA') {
-    return faction === 'truth' ? 'media_blast' : 'government_crackdown';
-  }
+    : 0;
+  const ipDelta = typeof (card.effects as { ipDelta?: { player?: number; opponent?: number } } | undefined)?.ipDelta === 'object'
+    ? (card.effects as { ipDelta?: { player?: number; opponent?: number } }).ipDelta ?? {}
+    : {};
 
   if (type === 'ATTACK') {
-    return faction === 'truth' ? 'conspiracy_revealed' : 'government_crackdown';
+    return 'damage';
   }
-
-  if (type === 'ZONE') {
-    return faction === 'truth' ? 'evidence_leaked' : 'surveillance_detected';
+  if (type === 'MEDIA' && truthDelta !== 0) {
+    return faction === 'truth' ? 'truth' : 'support';
   }
-
-  if ((card.effects as { ipDelta?: { opponent?: number } } | undefined)?.ipDelta?.opponent) {
-    return faction === 'truth' ? 'conspiracy_revealed' : 'government_crackdown';
+  if (type === 'MEDIA' && (ipDelta.player ?? 0) > 0) {
+    return 'ip';
   }
-
-  return faction === 'truth' ? 'media_blast' : 'government_crackdown';
-};
-
-const determineStateEventContext = (eventType?: string): ContextualEffectType | null => {
-  const normalized = typeof eventType === 'string' ? eventType.toLowerCase() : '';
-  switch (normalized) {
-    case 'truth':
-    case 'opportunity':
-      return 'evidence_leaked';
-    case 'conspiracy':
-      return 'conspiracy_revealed';
-    case 'government':
-    case 'crisis':
-    case 'capture':
-      return 'government_crackdown';
-    case 'random':
-      return 'media_blast';
-    default:
-      return null;
-  }
-};
-
-const determineTruthBroadcastContext = (
-  intensity: 'surge' | 'collapse',
-  source?: 'truth' | 'government',
-): ContextualEffectType => {
-  if (intensity === 'surge') {
-    return 'media_blast';
-  }
-
-  if (source === 'truth') {
-    return 'surveillance_detected';
-  }
-
-  return 'government_crackdown';
-};
-
-const pickBestCandidate = (
-  candidates: EnrichedPlay[],
-  primary: keyof Pick<EnrichedPlay, 'captureCount' | 'truthImpact' | 'ipImpact' | 'damageImpact'>,
-  fallbacks: Array<keyof Pick<EnrichedPlay, 'captureCount' | 'truthImpact' | 'ipImpact' | 'damageImpact'>>,
-): EnrichedPlay | null => {
-  return candidates.reduce<EnrichedPlay | null>((best, current) => {
-    if (!best) {
-      return current;
-    }
-
-    if (current[primary] > best[primary]) {
-      return current;
-    }
-    if (current[primary] < best[primary]) {
-      return best;
-    }
-
-    for (const metric of fallbacks) {
-      if (current[metric] > best[metric]) {
-        return current;
-      }
-      if (current[metric] < best[metric]) {
-        return best;
-      }
-    }
-
-    const currentTimestamp = current.play.timestamp ?? 0;
-    const bestTimestamp = best.play.timestamp ?? 0;
-    if (currentTimestamp !== bestTimestamp) {
-      return currentTimestamp > bestTimestamp ? current : best;
-    }
-
-    const currentRound = current.play.round ?? 0;
-    const bestRound = best.play.round ?? 0;
-    if (currentRound !== bestRound) {
-      return currentRound > bestRound ? current : best;
-    }
-
-    const currentTurn = current.play.turn ?? 0;
-    const bestTurn = best.play.turn ?? 0;
-    return currentTurn >= bestTurn ? current : best;
-  }, null);
-};
-
-const buildMvpHighlight = (candidate: EnrichedPlay, impactType: ImpactType, impactValue: number): string => {
-  const { play, actorGain, opponentDrop, captureCount } = candidate;
-  switch (impactType) {
-    case 'capture': {
-      if (captureCount <= 0) {
-        return 'Stabilized territorial control at a critical moment.';
-      }
-      const capturedList = play.capturedStates?.length ? play.capturedStates.join(', ') : 'undisclosed locations';
-      return `Secured ${captureCount} state${captureCount === 1 ? '' : 's'} (${capturedList}) in one sweep.`;
-    }
-    case 'truth': {
-      const delta = Math.abs(play.truthDelta ?? 0);
-      if (delta === 0) {
-        return 'Neutralized a truth swing before it escalated.';
-      }
-      if (play.faction === 'government') {
-        return play.truthDelta <= 0
-          ? `Suppressed truth by ${delta}% to keep the narrative contained.`
-          : `Twisted a ${delta}% truth surge into controlled propaganda.`;
-      }
-      return play.truthDelta >= 0
-        ? `Raised national awareness by ${delta}% in a single broadcast.`
-        : `Absorbed a ${delta}% misinformation hit and held the line.`;
-    }
-    case 'ip': {
-      const fragments: string[] = [];
-      if (actorGain > 0) {
-        fragments.push(`Generated ${actorGain} IP`);
-      }
-      if (opponentDrop > 0) {
-        fragments.push(`Siphoned ${opponentDrop} IP from the enemy`);
-      }
-      return fragments.length ? `${fragments.join(' & ')}.` : 'Shifted the resource war decisively.';
-    }
-    case 'damage':
-      return impactValue > 0
-        ? `Inflicted ${impactValue} direct damage to hostile operations.`
-        : 'Shredded enemy defenses without breaking stride.';
-    case 'support':
-    default:
-      return 'Delivered the clutch support play that sealed the deal.';
-  }
-};
-
-const buildMvpReport = (candidate: EnrichedPlay, impactType: ImpactType, impactValue: number): MVPReport => {
-  const { play } = candidate;
-  const impactLabels: Record<ImpactType, string> = {
-    capture: 'States Captured',
-    truth: 'Truth Swing',
-    ip: 'IP Swing',
-    damage: 'Damage Dealt',
-    support: 'Clutch Play',
-  };
-
-  return {
-    cardId: play.card.id,
-    cardName: play.card.name,
-    player: play.player,
-    faction: candidate.faction,
-    truthDelta: play.truthDelta,
-    ipDelta: play.ipDelta,
-    aiIpDelta: play.aiIpDelta,
-    capturedStates: play.capturedStates ?? [],
-    damageDealt: play.damageDealt,
-    round: play.round,
-    turn: play.turn,
-    impactType,
-    impactValue,
-    impactLabel: impactLabels[impactType],
-    highlight: buildMvpHighlight(candidate, impactType, impactValue),
-  };
-};
-
-const findTopCandidate = (
-  candidates: EnrichedPlay[],
-): { candidate: EnrichedPlay; impactType: ImpactType; impactValue: number } | null => {
-  if (candidates.length === 0) {
-    return null;
-  }
-
-  const captureMax = Math.max(...candidates.map(entry => entry.captureCount), 0);
-  if (captureMax > 0) {
-    const captureCandidates = candidates.filter(entry => entry.captureCount === captureMax);
-    const best = pickBestCandidate(captureCandidates, 'truthImpact', ['ipImpact', 'damageImpact']);
-    if (best) {
-      return { candidate: best, impactType: 'capture', impactValue: captureMax };
-    }
-  }
-
-  const truthMax = Math.max(...candidates.map(entry => entry.truthImpact), 0);
-  if (truthMax > 0) {
-    const truthCandidates = candidates.filter(entry => entry.truthImpact === truthMax);
-    const best = pickBestCandidate(truthCandidates, 'captureCount', ['ipImpact', 'damageImpact']);
-    if (best) {
-      return { candidate: best, impactType: 'truth', impactValue: truthMax };
-    }
-  }
-
-  const ipMax = Math.max(...candidates.map(entry => entry.ipImpact), 0);
-  if (ipMax > 0) {
-    const ipCandidates = candidates.filter(entry => entry.ipImpact === ipMax);
-    const best = pickBestCandidate(ipCandidates, 'captureCount', ['truthImpact', 'damageImpact']);
-    if (best) {
-      return { candidate: best, impactType: 'ip', impactValue: ipMax };
-    }
-  }
-
-  const damageMax = Math.max(...candidates.map(entry => entry.damageImpact), 0);
-  if (damageMax > 0) {
-    const damageCandidates = candidates.filter(entry => entry.damageImpact === damageMax);
-    const best = pickBestCandidate(damageCandidates, 'truthImpact', ['ipImpact', 'captureCount']);
-    if (best) {
-      return { candidate: best, impactType: 'damage', impactValue: damageMax };
-    }
-  }
-
-  const fallback = pickBestCandidate(candidates, 'captureCount', ['truthImpact', 'ipImpact', 'damageImpact']);
-  return fallback ? { candidate: fallback, impactType: 'support', impactValue: 0 } : null;
-};
-
-const determineTopPlays = (
-  history: CardPlayRecord[],
-  winner: 'truth' | 'government' | 'draw' | null,
-  playerFaction: 'truth' | 'government',
-): { mvp: MVPReport | null; runnerUp: MVPReport | null } => {
-  if (!winner || winner === 'draw' || history.length === 0) {
-    return { mvp: null, runnerUp: null };
-  }
-
-  const enrichedPlays: EnrichedPlay[] = history
-    .map(play => {
-      const faction = inferFactionFromRecord(play, playerFaction);
-      const metrics = computePlayMetrics(play, faction);
-      return { play, faction, ...metrics };
-    })
-    .filter(entry => entry.faction === winner);
-
-  if (enrichedPlays.length === 0) {
-    return { mvp: null, runnerUp: null };
-  }
-
-  const primary = findTopCandidate(enrichedPlays);
-  if (!primary) {
-    return { mvp: null, runnerUp: null };
-  }
-
-  const mvp = buildMvpReport(primary.candidate, primary.impactType, primary.impactValue);
-
-  const remaining = enrichedPlays.filter(entry => entry !== primary.candidate);
-  const secondary = findTopCandidate(remaining);
-  const runnerUp = secondary
-    ? buildMvpReport(secondary.candidate, secondary.impactType, secondary.impactValue)
-    : null;
-
-  return { mvp, runnerUp };
+  return null;
 };
 
 const Index = () => {
@@ -709,7 +136,7 @@ const Index = () => {
   } | null>(null);
   const [previousPhase, setPreviousPhase] = useState('');
   const [hoveredCard, setHoveredCard] = useState<GameCard | null>(null);
-  const [victoryState, setVictoryState] = useState<{ isVictory: boolean; type: 'states' | 'ip' | 'truth' | null }>({ isVictory: false, type: null });
+  const [isVictoryOverlayOpen, setIsVictoryOverlayOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showInGameOptions, setShowInGameOptions] = useState(false);
   const [finalEdition, setFinalEdition] = useState<GameOverReport | null>(null);
@@ -722,6 +149,7 @@ const Index = () => {
   const [activeRelicFallout, setActiveRelicFallout] = useState<TabloidRelicRuntimeEntry | null>(null);
 
   const prevIPCacheRef = useRef<number | null>(null);
+  const lastVictoryRef = useRef<number | null>(null);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -1352,49 +780,39 @@ const Index = () => {
 
   // Check victory conditions and trigger game over
   useEffect(() => {
-    // Don't check victory if game is already over or during animations
-    if (gameState.isGameOver || gameState.animating) return;
+    if (gameState.winner || gameState.isGameOver || gameState.animating) {
+      return;
+    }
 
-    let winner: "government" | "truth" | "draw" | null = null;
+    const shouldEvaluate =
+      gameState.phase === 'action' ||
+      gameState.phase === 'newspaper' ||
+      (gameState.phase === 'ai_turn' && !gameState.aiTurnInProgress);
+
+    if (!shouldEvaluate) {
+      return;
+    }
+
+    let winner: 'government' | 'truth' | 'draw' | null = null;
     let victoryType: 'states' | 'ip' | 'truth' | null = null;
 
-    // Only evaluate victory conditions at proper timing:
-    // - After card effects are fully resolved
-    // - After AI turn completion
-    // - After round end (newspaper phase)
-    const shouldEvaluate = gameState.phase === 'action' || 
-                          gameState.phase === 'newspaper' ||
-                          (gameState.phase === 'ai_turn' && !gameState.aiTurnInProgress);
-
-    if (!shouldEvaluate) return;
-
-    const playerSecretAgenda = gameState.secretAgenda;
-    const aiSecretAgenda = gameState.aiSecretAgenda;
-
-    // Priority 1: Truth thresholds (Truth ≥ 95% for Truth Seekers, Truth ≤ 5% for Government)
     if (gameState.truth >= 95 && gameState.faction === 'truth') {
       winner = 'truth';
       victoryType = 'truth';
     } else if (gameState.truth <= 5 && gameState.faction === 'government') {
       winner = 'government';
       victoryType = 'truth';
-    }
-
-    // Priority 2: IP victory (300 IP)
-    else if (gameState.ip >= 300) {
+    } else if (gameState.ip >= 300) {
       winner = gameState.faction;
       victoryType = 'ip';
     } else if (gameState.aiIP >= 300) {
       winner = gameState.faction === 'government' ? 'truth' : 'government';
       victoryType = 'ip';
-    }
-
-    // Priority 3: State control (10 states)
-    else if (gameState.controlledStates.length >= 10) {
+    } else if (gameState.controlledStates.length >= 10) {
       winner = gameState.faction;
       victoryType = 'states';
     } else {
-      const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
+      const aiControlledStates = gameState.states.filter(state => state.owner === 'ai').length;
       if (aiControlledStates >= 10) {
         winner = gameState.faction === 'government' ? 'truth' : 'government';
         victoryType = 'states';
@@ -1402,80 +820,76 @@ const Index = () => {
     }
 
     if (winner && victoryType) {
-      // Stop the game immediately
-      setGameState(prev => ({ ...prev, isGameOver: true }));
-
-      // Build game over report
-      const { mvp, runnerUp } = determineTopPlays(gameState.playHistory, winner, gameState.faction);
-      const legendaryUsed = Array.from(new Set(
-        gameState.playHistory
-          .filter(entry => entry.card.rarity === 'legendary')
-          .map(entry => entry.card.name),
-      ));
-      const topEvents = pickTopEvents(gameState.currentEvents ?? [], 4, arcProgressSummaries);
       const comboSummary = getLastComboSummary();
-      const comboHighlights = buildComboHighlights(comboSummary);
-      const recordedAt = Date.now();
-      const summarizeAgenda = (source?: typeof playerSecretAgenda) => {
-        if (!source) {
-          return undefined;
-        }
-
-        return {
-          title: source.title,
-          headline: source.headline,
-          operationName: source.operationName,
-          issueTheme: source.issueTheme,
-          pullQuote: source.pullQuote,
-          artCue: source.artCue
-            ? { icon: source.artCue.icon, alt: source.artCue.alt }
-            : undefined,
-          faction: source.faction,
-          progress: source.progress,
-          target: source.target,
-          completed: source.completed,
-          revealed: source.revealed,
-        } satisfies AgendaSummary;
-      };
-
-      const report: GameOverReport = {
+      const report = buildFinalEdition({
+        state: {
+          round: gameState.round,
+          truth: gameState.truth,
+          ip: gameState.ip,
+          aiIP: gameState.aiIP,
+          states: gameState.states,
+          faction: gameState.faction,
+          playHistory: gameState.playHistory,
+          currentEvents: gameState.currentEvents ?? [],
+        },
         winner,
         victoryType,
-        rounds: gameState.round,
-        finalTruth: Math.round(gameState.truth),
-        ipPlayer: gameState.ip,
-        ipAI: gameState.aiIP,
-        statesGov: gameState.states.filter(s => s.owner === (gameState.faction === 'government' ? 'player' : 'ai')).length,
-        statesTruth: gameState.states.filter(s => s.owner === (gameState.faction === 'truth' ? 'player' : 'ai')).length,
-        playerFaction: gameState.faction,
-        playerSecretAgenda: summarizeAgenda(playerSecretAgenda),
-        aiSecretAgenda: summarizeAgenda(aiSecretAgenda),
-        mvp,
-        runnerUp,
-        legendaryUsed,
-        topEvents,
-        comboHighlights,
-        sightings: [...paranormalSightings],
-        recordedAt,
-      };
+        playerSecretAgenda: gameState.secretAgenda,
+        aiSecretAgenda: gameState.aiSecretAgenda,
+        arcSummaries: arcProgressSummaries,
+        paranormalSightings,
+        comboSummary,
+      });
+
+      setGameState(prev => ({
+        ...prev,
+        isGameOver: true,
+        winner,
+        victoryType,
+        finalEdition: report,
+      }));
 
       setFinalEdition(report);
-      setVictoryState({ isVictory: true, type: victoryType });
+      setReadingEdition(report);
+      setIsVictoryOverlayOpen(true);
     }
   }, [
-    gameState.controlledStates.length,
+    gameState.winner,
+    gameState.isGameOver,
+    gameState.animating,
+    gameState.phase,
+    gameState.aiTurnInProgress,
+    gameState.truth,
+    gameState.faction,
     gameState.ip,
     gameState.aiIP,
-    gameState.truth,
-    gameState.secretAgenda?.completed,
-    gameState.aiSecretAgenda?.completed,
+    gameState.controlledStates.length,
     gameState.states,
-    gameState.faction,
-    gameState.isGameOver,
+    gameState.round,
+    gameState.playHistory,
     gameState.currentEvents,
-    paranormalSightings,
+    gameState.secretAgenda,
+    gameState.aiSecretAgenda,
     arcProgressSummaries,
+    paranormalSightings,
+    setGameState,
   ]);
+
+  useEffect(() => {
+    const edition = gameState.finalEdition;
+    if (!edition) {
+      return;
+    }
+
+    setFinalEdition(edition);
+    if (!readingEdition) {
+      setReadingEdition(edition);
+    }
+    if (gameState.winner && lastVictoryRef.current !== edition.recordedAt) {
+      setIsVictoryOverlayOpen(true);
+      lastVictoryRef.current = edition.recordedAt;
+    }
+  }, [gameState.finalEdition, gameState.winner, readingEdition]);
 
   // Enhanced synergy detection with coordinated visual effects
   useEffect(() => {
@@ -2167,7 +1581,7 @@ const Index = () => {
     }
 
     persistFaction(faction);
-    setVictoryState({ isVictory: false, type: null });
+    setIsVictoryOverlayOpen(false);
     setFinalEdition(null);
     setReadingEdition(null);
     setShowExtraEdition(false);
@@ -3220,25 +2634,25 @@ const Index = () => {
       />
 
       <TabloidVictoryScreen
-        isVisible={victoryState.isVictory}
+        isVisible={isVictoryOverlayOpen && Boolean(finalEdition)}
         report={finalEdition}
         playerFaction={gameState.faction}
-        victoryType={victoryState.type}
+        victoryType={gameState.victoryType}
         onClose={() => {
-          setVictoryState({ isVictory: false, type: null });
+          setIsVictoryOverlayOpen(false);
           setFinalEdition(null);
           setReadingEdition(null);
           setShowMenu(true);
           setShowIntro(true);
         }}
         onMainMenu={() => {
-          setVictoryState({ isVictory: false, type: null });
+          setIsVictoryOverlayOpen(false);
           setFinalEdition(null);
           setReadingEdition(null);
           setShowExtraEdition(false);
           setShowMenu(true);
           setShowIntro(true);
-          setGameState(prev => ({ ...prev, isGameOver: false }));
+          setGameState(prev => ({ ...prev, isGameOver: false, finalEdition: null }));
           audio.playMusic('theme');
         }}
         onViewFinalEdition={() => {
@@ -3257,14 +2671,14 @@ const Index = () => {
           onArchive={() => archiveEditionWithToast(readingEdition)}
           onClose={() => {
             setShowExtraEdition(false);
-            const closingActiveVictory = finalEdition && victoryState.isVictory && readingEdition.recordedAt === finalEdition.recordedAt;
+            const closingActiveVictory = finalEdition && isVictoryOverlayOpen && readingEdition.recordedAt === finalEdition.recordedAt;
             setReadingEdition(null);
             if (closingActiveVictory) {
-              setVictoryState({ isVictory: false, type: null });
+              setIsVictoryOverlayOpen(false);
               setFinalEdition(null);
               setShowMenu(true);
               setShowIntro(true);
-              setGameState(prev => ({ ...prev, isGameOver: false }));
+              setGameState(prev => ({ ...prev, isGameOver: false, finalEdition: null }));
               audio.playMusic('theme');
             }
           }}
