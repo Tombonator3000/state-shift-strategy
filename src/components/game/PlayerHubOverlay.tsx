@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import clsx from 'clsx';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Library, GraduationCap, Newspaper, X, MapPin, FileSearch2 } from 'lucide-react';
+import { Trophy, Library, GraduationCap, Newspaper, X, MapPin, FileSearch2, Target } from 'lucide-react';
 import { AchievementsSection } from './AchievementPanel';
 import { CardCollectionContent } from './CardCollection';
 import { TutorialSection } from './TutorialOverlay';
@@ -15,6 +15,9 @@ import PlayerHubMapView from './PlayerHubMapView';
 import type { StateEventBonusSummary, StateParanormalHotspotSummary } from '@/hooks/gameStateTypes';
 import EvidenceArchivePanel from './EvidenceArchivePanel';
 import type { IntelArchiveEntry } from '@/hooks/useIntelArchive';
+import SecretAgendaCard from './SecretAgenda';
+import { getAgendaById, type SecretAgenda as AgendaDefinition } from '@/data/agendaDatabase';
+import type { GameState } from '@/hooks/gameStateTypes';
 import '@/styles/playerHub.css';
 
 interface PlayerHubOverlayProps {
@@ -28,6 +31,9 @@ interface PlayerHubOverlayProps {
   onDeleteIntel: (id: string) => void;
   onClearIntel?: () => void;
   faction: 'truth' | 'government';
+  agendasEnabled: boolean;
+  currentAgenda?: GameState['secretAgenda'];
+  completedAgendaIds: string[];
 }
 
 export interface PlayerStateIntel {
@@ -78,7 +84,7 @@ export interface PlayerStateIntel {
   }>;
 }
 
-type HubTab = 'achievements' | 'cards' | 'tutorials' | 'press' | 'evidence' | 'intel';
+type HubTab = 'achievements' | 'agendas' | 'cards' | 'tutorials' | 'press' | 'evidence' | 'intel';
 
 const PlayerHubOverlay = ({
   onClose,
@@ -91,8 +97,15 @@ const PlayerHubOverlay = ({
   onDeleteIntel,
   onClearIntel,
   faction,
+  agendasEnabled,
+  currentAgenda,
+  completedAgendaIds,
 }: PlayerHubOverlayProps) => {
   const [activeTab, setActiveTab] = useState<HubTab>(() => {
+    if (agendasEnabled && (currentAgenda || completedAgendaIds.length > 0)) {
+      return 'agendas';
+    }
+
     if (pressIssues.length > 0) {
       return 'press';
     }
@@ -109,6 +122,20 @@ const PlayerHubOverlay = ({
   });
 
   const isTruth = faction === 'truth';
+  const completedAgendas = useMemo(
+    () =>
+      completedAgendaIds
+        .map(id => getAgendaById(id))
+        .filter((agenda): agenda is AgendaDefinition => Boolean(agenda)),
+    [completedAgendaIds],
+  );
+
+  const difficultyTone: Record<AgendaDefinition['difficulty'], string> = {
+    easy: 'border-emerald-500/30 bg-emerald-500/15 text-emerald-600',
+    medium: 'border-amber-500/30 bg-amber-500/15 text-amber-700',
+    hard: 'border-rose-500/30 bg-rose-500/15 text-rose-600',
+    legendary: 'border-violet-500/30 bg-violet-500/15 text-violet-600',
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
@@ -204,7 +231,7 @@ const PlayerHubOverlay = ({
           <div className="relative px-6 pt-6">
             <TabsList
               className={clsx(
-                'player-hub-tablist grid w-full grid-cols-6 gap-2 rounded-lg border p-1 backdrop-blur',
+                'player-hub-tablist grid w-full grid-cols-7 gap-2 rounded-lg border p-1 backdrop-blur',
                 isTruth
                   ? 'border-rose-900/40 bg-[rgba(255,255,255,0.86)] shadow-[inset_0_15px_40px_rgba(124,45,18,0.12)]'
                   : 'border-emerald-500/20 bg-slate-900/70',
@@ -221,6 +248,18 @@ const PlayerHubOverlay = ({
               >
                 <Trophy className="h-4 w-4" />
                 Achievements
+              </TabsTrigger>
+              <TabsTrigger
+                value="agendas"
+                className={clsx(
+                  'flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] transition',
+                  isTruth
+                    ? 'text-stone-500 data-[state=active]:border-rose-900/60 data-[state=active]:bg-amber-100/90 data-[state=active]:text-rose-900 data-[state=active]:shadow-[inset_0_4px_18px_rgba(124,45,18,0.18)]'
+                    : 'text-slate-400 data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200',
+                )}
+              >
+                <Target className="h-4 w-4" />
+                Agendas
               </TabsTrigger>
               <TabsTrigger
                 value="cards"
@@ -310,6 +349,126 @@ const PlayerHubOverlay = ({
 
               <TabsContent value="achievements" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
                 <AchievementsSection className="h-full" />
+              </TabsContent>
+
+              <TabsContent value="agendas" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
+                <div className="flex h-full flex-col gap-4">
+                  {agendasEnabled ? (
+                    <>
+                      <Card
+                        className={clsx(
+                          'overflow-hidden border p-4 shadow-sm backdrop-blur',
+                          isTruth
+                            ? 'border-rose-900/30 bg-amber-50/80 text-stone-900'
+                            : 'border-emerald-500/25 bg-slate-900/80 text-emerald-50',
+                        )}
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.32em] opacity-70">
+                              Active Agenda
+                            </p>
+                            <h3 className="text-lg font-bold uppercase tracking-[0.12em]">
+                              {currentAgenda?.title ?? 'No agenda assigned'}
+                            </h3>
+                          </div>
+                          {currentAgenda?.difficulty && (
+                            <Badge
+                              variant="outline"
+                              className={clsx(
+                                'border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.32em]',
+                                difficultyTone[currentAgenda.difficulty],
+                              )}
+                            >
+                              {currentAgenda.difficulty}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="mt-4">
+                          {currentAgenda ? (
+                            <SecretAgendaCard agenda={currentAgenda} isPlayer={faction === 'truth'} />
+                          ) : (
+                            <div className="rounded border border-dashed border-current/40 bg-black/5 p-4 text-sm font-mono uppercase tracking-[0.2em] opacity-70">
+                              Awaiting assignment...
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+
+                      <div className="flex-1 overflow-y-auto pr-1">
+                        {completedAgendas.length > 0 ? (
+                          <div className="grid gap-3 lg:grid-cols-2">
+                            {completedAgendas.map(agenda => (
+                              <Card
+                                key={agenda.id}
+                                className={clsx(
+                                  'h-full border p-4 transition hover:shadow-md',
+                                  isTruth
+                                    ? 'border-rose-900/30 bg-rose-50/80 text-stone-900'
+                                    : 'border-emerald-500/25 bg-slate-950/70 text-slate-100',
+                                )}
+                              >
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="secondary" className="bg-green-500/20 text-green-900 dark:text-green-200">
+                                      Completed
+                                    </Badge>
+                                    <Badge
+                                      variant="outline"
+                                      className={clsx(
+                                        'border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.32em]',
+                                        difficultyTone[agenda.difficulty],
+                                      )}
+                                    >
+                                      {agenda.difficulty}
+                                    </Badge>
+                                  </div>
+                                  <Badge variant="outline" className="text-[10px] uppercase tracking-[0.2em]">
+                                    {agenda.category}
+                                  </Badge>
+                                </div>
+                                <div className="mt-3 space-y-2">
+                                  <h4 className="text-base font-semibold uppercase tracking-[0.12em]">
+                                    {agenda.title}
+                                  </h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    {agenda.description}
+                                  </p>
+                                  {agenda.issueTheme && (
+                                    <p className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground/80">
+                                      Issue Focus: {agenda.issueTheme}
+                                    </p>
+                                  )}
+                                  {agenda.headline && (
+                                    <p className="text-xs italic text-muted-foreground/80">“{agenda.headline}”</p>
+                                  )}
+                                </div>
+                              </Card>
+                            ))}
+                          </div>
+                        ) : (
+                          <Card
+                            className={clsx(
+                              'border border-dashed p-6 text-center text-sm uppercase tracking-[0.28em]',
+                              isTruth
+                                ? 'border-rose-900/30 bg-rose-50/60 text-rose-900/70'
+                                : 'border-emerald-500/25 bg-slate-950/70 text-emerald-100/70',
+                            )}
+                          >
+                            No completed agendas logged yet.
+                          </Card>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-sm text-muted-foreground">
+                      <Badge variant="outline" className="px-3 py-1 font-mono text-[10px] uppercase tracking-[0.3em]">
+                        System Offline
+                      </Badge>
+                      <p>Secret agendas are disabled for this campaign.</p>
+                    </div>
+                  )}
+                </div>
               </TabsContent>
 
               <TabsContent value="cards" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
