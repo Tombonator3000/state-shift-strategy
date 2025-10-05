@@ -59,3 +59,26 @@ export const safeSetLocalStorageItem = (
     return false;
   }
 };
+
+export const safeRemoveLocalStorageItem = (
+  key: string,
+  options?: SafeStorageOptions,
+): boolean => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  try {
+    const storage = window.localStorage;
+    if (!storage || typeof storage.removeItem !== 'function') {
+      return false;
+    }
+
+    storage.removeItem(key);
+    return true;
+  } catch (error) {
+    const logger = resolveLogger(options);
+    logger?.warn?.(`[storage] Failed to remove "${key}" from localStorage`, error);
+    return false;
+  }
+};
