@@ -27,7 +27,7 @@ const validatePlayer = (
   state: GameState,
   playerId: PlayerId,
   playersStates: Map<PlayerId, Set<string>>,
-): GameStateAuditFinding => {
+): GameStateAuditFinding[] => {
   const player = state.players[playerId];
   assertState(Boolean(player), `Missing player entry for ${playerId}`);
 
@@ -56,6 +56,8 @@ const validatePlayer = (
   }
 
   const normalizedStates = new Set<string>();
+  const findings: GameStateAuditFinding[] = [];
+
   for (const rawStateId of playerState.states) {
     assertState(typeof rawStateId === 'string', `Player ${playerId} has non-string state entry`);
     const stateId = rawStateId.trim();
@@ -81,10 +83,12 @@ const validatePlayer = (
 
     const opponentId = playerId === 'P1' ? 'P2' : 'P1';
     const opponentPressure = (pressure as Record<PlayerId, number>)[opponentId];
-    assertState(
-      opponentPressure === 0,
-      `Controlled state '${stateId}' must not retain opponent pressure (${opponentId})`,
-    );
+    if (opponentPressure > 0) {
+      findings.push({
+        level: 'warning',
+        message: `State '${stateId}' controlled by ${playerId} is contested by ${opponentId} pressure ${opponentPressure}`,
+      });
+    }
 
     const defense = state.stateDefense?.[stateId];
     assertState(isFiniteNumber(defense), `Missing defense value for controlled state '${stateId}'`);
@@ -93,12 +97,14 @@ const validatePlayer = (
 
   playersStates.set(playerId, normalizedStates);
 
-  return {
+  findings.push({
     level: 'info',
     message: `Player ${playerId} controls ${normalizedStates.size} state${
       normalizedStates.size === 1 ? '' : 's'
     } with ${playerState.ip} IP`,
-  };
+  });
+
+  return findings;
 };
 
 export function auditGameState(state: GameState): GameStateAuditFinding[] {
@@ -125,7 +131,7 @@ export function auditGameState(state: GameState): GameStateAuditFinding[] {
   const playerStates = new Map<PlayerId, Set<string>>();
   const findings: GameStateAuditFinding[] = [];
   for (const playerId of PLAYER_IDS) {
-    findings.push(validatePlayer(state, playerId, playerStates));
+    findings.push(...validatePlayer(state, playerId, playerStates));
   }
 
   const p1States = playerStates.get('P1') ?? new Set<string>();
