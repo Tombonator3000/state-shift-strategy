@@ -338,6 +338,35 @@ export const applyAiCardPlay = (
     };
   }
 
+  if (resolvedCard.type === 'ZONE') {
+    const trimmedTarget = typeof targetState === 'string' ? targetState.trim() : '';
+    const normalizedTarget = trimmedTarget.toLowerCase();
+    const hasValidTarget =
+      trimmedTarget.length > 0 &&
+      prev.states.some(candidate => {
+        const identifiers = [candidate.id, candidate.abbreviation, candidate.name]
+          .filter(Boolean)
+          .map(value => value.trim().toLowerCase());
+        return identifiers.includes(normalizedTarget);
+      });
+
+    if (!hasValidTarget) {
+      const explanation = trimmedTarget.length
+        ? `but the target state "${trimmedTarget}" could not be resolved.`
+        : 'but no target state was provided.';
+      return {
+        nextState: {
+          ...prev,
+          log: [
+            ...prev.log,
+            `AI attempted to deploy zone card "${resolvedCard.name}" ${explanation}`,
+          ],
+        },
+        failed: true,
+      };
+    }
+  }
+
   const resolution = resolveCardMVP(prev, resolvedCard, targetState ?? null, 'ai', achievements);
   const logEntries = [...prev.log, ...resolution.logEntries];
   const strategyLogEntries = buildStrategyLogEntries(reasoning, strategyDetails);
