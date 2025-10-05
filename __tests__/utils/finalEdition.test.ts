@@ -25,6 +25,7 @@ describe('buildFinalEdition report summary', () => {
     states: [createState('AL', 'player'), createState('AK', 'player'), createState('AZ', 'ai')],
     faction: 'truth',
     playHistory: [],
+    extraExtraFeed: [],
   } as const;
 
   it('reports a Truth victory with final stats when the player wins', async () => {
@@ -44,6 +45,7 @@ describe('buildFinalEdition report summary', () => {
     expect(report.statesTruth).toBe(2);
     expect(report.statesGov).toBe(1);
     expect(report.playerFaction).toBe('truth');
+    expect(report.extraExtraFeed).toEqual([]);
   });
 
   it('reports a Government victory with the same base stats when the player loses', async () => {
@@ -62,5 +64,6 @@ describe('buildFinalEdition report summary', () => {
     expect(report.ipAI).toBe(0);
     expect(report.statesTruth).toBe(2);
     expect(report.statesGov).toBe(1);
+    expect(report.extraExtraFeed).toEqual([]);
   });
 });

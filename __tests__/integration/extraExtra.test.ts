@@ -107,7 +107,7 @@ describe('extra extra integration', () => {
 
     const { state: endedState } = endTurn(state, []);
 
-    expect(endedState.extraExtraFeed).toEqual([`${expectedArticle.hed} — ${expectedArticle.dek}`]);
+    expect(endedState.extraExtraFeed).toEqual([expectedArticle]);
     expect(endedState.headlineLog).toEqual([
       'Turn 1 recap: Truth plays 3, Government plays 0',
     ]);

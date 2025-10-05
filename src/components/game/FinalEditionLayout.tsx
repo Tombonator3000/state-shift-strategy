@@ -9,6 +9,7 @@ import {
   type NewspaperTone,
   getNewspaperBadgeClass,
 } from './newspaperLayout';
+import type { ArticleBlock } from '@/news/headlineEngine';
 import type { GameOverReport, FinalEditionEventHighlight, MVPReport } from '@/types/finalEdition';
 import {
   getFactionDisplayName,
@@ -46,7 +47,7 @@ const formatVictoryHeadline = (report: GameOverReport): string => {
 
 const formatVictorySubhead = (report: GameOverReport): string => {
   const rounds = report.rounds > 0 ? `${report.rounds} rounds` : 'a lightning opener';
-  const truth = `${Math.round(report.finalTruth)}% truth`; 
+  const truth = `${Math.round(report.finalTruth)}% truth`;
   if (report.winner === 'draw') {
     return `Stalemate declared after ${rounds}; truth settles at ${truth}.`;
   }
@@ -59,6 +60,45 @@ const formatVictorySubhead = (report: GameOverReport): string => {
         ? 'broadcast dominance'
         : 'covert agenda reveal';
   return `${victor} closes the season via ${method} after ${rounds}; monitors register ${truth}.`;
+};
+
+const getBulletinLabel = (tone: ArticleBlock['tone']): string => {
+  switch (tone) {
+    case 'truth':
+      return 'Truth Network Bulletin';
+    case 'government':
+      return 'Government Wire Advisory';
+    default:
+      return 'Breaking Desk Update';
+  }
+};
+
+const getBulletinBadgeClass = (
+  tone: ArticleBlock['tone'],
+  editionTone: NewspaperTone,
+): string => {
+  if (tone === 'truth') {
+    return 'border-truth-red/60 bg-truth-red/10 text-truth-red';
+  }
+  if (tone === 'government') {
+    return 'border-government-blue/60 bg-government-blue/10 text-government-blue';
+  }
+  return editionTone === 'victory'
+    ? 'border-victory-foreground/40 bg-victory-foreground/10 text-victory-foreground'
+    : 'border-newspaper-border/60 bg-newspaper-bg/70 text-newspaper-text/70';
+};
+
+const getBulletinHeadlineClass = (
+  tone: ArticleBlock['tone'],
+  editionTone: NewspaperTone,
+): string => {
+  if (tone === 'truth') {
+    return 'text-truth-red';
+  }
+  if (tone === 'government') {
+    return 'text-government-blue';
+  }
+  return editionTone === 'victory' ? 'text-victory-accent' : 'text-newspaper-headline';
 };
 
 interface AgendaPresentation {
@@ -211,6 +251,7 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
     tone === 'victory'
       ? 'mt-1 text-2xl font-black tracking-tight text-victory-accent drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
       : 'mt-1 text-2xl font-black tracking-tight text-newspaper-headline';
+  const bulletinArticles = report.extraExtraFeed.slice(-4).reverse();
   const highlightCardClass =
     tone === 'victory'
       ? 'rounded-md border border-victory-foreground/30 bg-gradient-to-br from-victory-start/80 via-victory-mid/74 to-victory-end/80 text-victory-foreground shadow-[0_16px_36px_rgba(0,0,0,0.35)]'
@@ -505,6 +546,65 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
           </div>
         </NewspaperSection>
       </section>
+
+      <NewspaperSection tone={tone} className="p-5">
+        <div className="flex items-center justify-between">
+          <h2 className={sectionHeadingClass}>Extra Extra Bulletins</h2>
+          <Badge className={cn(badgeClass, 'rounded-full px-3 py-0.5 text-[11px] tracking-[0.3em]')}>
+            {bulletinArticles.length}
+          </Badge>
+        </div>
+        {bulletinArticles.length > 0 ? (
+          <div className="mt-4 space-y-4">
+            {bulletinArticles.map((article, index) => {
+              const badgeToneClass = getBulletinBadgeClass(article.tone, tone);
+              const headlineToneClass = getBulletinHeadlineClass(article.tone, tone);
+              return (
+                <article key={`${article.hed}-${index}`} className={cn(highlightCardClass, 'p-4 space-y-3')}>
+                  <div
+                    className={cn(
+                      'inline-flex items-center rounded-full border px-3 py-0.5 text-[10px] font-semibold uppercase tracking-[0.32em]',
+                      badgeToneClass,
+                    )}
+                  >
+                    {getBulletinLabel(article.tone)}
+                  </div>
+                  <header className="space-y-1">
+                    <h3
+                      className={cn(
+                        'font-headline text-lg font-black uppercase tracking-[0.16em]',
+                        headlineToneClass,
+                      )}
+                    >
+                      {article.hed}
+                    </h3>
+                    {article.dek ? (
+                      <p className={cn('text-sm italic', primaryBodyClass)}>{article.dek}</p>
+                    ) : null}
+                  </header>
+                  {article.bullets.length > 0 ? (
+                    <ul className={cn('space-y-1 text-[12px] leading-relaxed', mutedBodyClass)}>
+                      {article.bullets.slice(0, 4).map((bullet, bulletIndex) => (
+                        <li key={`${bulletIndex}-${bullet.slice(0, 24)}`} className="list-disc pl-4">
+                          {bullet}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  <footer className={cn('text-[10px] uppercase tracking-[0.32em]', subtleBodyClass)}>
+                    <div>{article.byline}</div>
+                    <div>{article.source}</div>
+                  </footer>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <p className={cn('mt-4 rounded border border-dashed px-3 py-4 text-sm italic', mutedBodyClass)}>
+            No newsroom bulletins were filed during this match.
+          </p>
+        )}
+      </NewspaperSection>
 
       <NewspaperSection tone={tone} className="p-5">
         <h2 className={sectionHeadingClass}>After-Action Notes</h2>

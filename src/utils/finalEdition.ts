@@ -417,7 +417,7 @@ const summarizeAgenda = (
 export interface BuildFinalEditionOptions {
   state: Pick<
     GameState,
-    'round' | 'truth' | 'ip' | 'aiIP' | 'states' | 'faction' | 'playHistory'
+    'round' | 'truth' | 'ip' | 'aiIP' | 'states' | 'faction' | 'playHistory' | 'extraExtraFeed'
   > & {
     currentEvents?: GameEvent[];
   };
@@ -477,6 +477,7 @@ export const buildFinalEdition = ({
     topEvents,
     comboHighlights,
     sightings: [...paranormalSightings],
+    extraExtraFeed: [...state.extraExtraFeed],
     recordedAt: timestamp,
   };
 };
