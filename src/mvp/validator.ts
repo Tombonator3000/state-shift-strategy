@@ -1,6 +1,6 @@
 import type { Faction, GameCard, MVPCardType, Rarity } from '@/rules/mvp';
 import type { TurnPlay } from '@/game/combo.types';
-import type { PlayedLite } from '@/news/headlineEngine';
+import type { ArticleBlock, PlayedLite } from '@/news/headlineEngine';
 import type { TabloidRelicRuntimeState } from '@/expansions/tabloidRelics/RelicTypes';
 import { expectedCost, MVP_CARD_TYPES } from '@/rules/mvp';
 
@@ -53,7 +53,7 @@ export type GameState = {
   turnPlays: TurnPlay[];
   log: string[];
   headlineLog: string[];
-  extraExtraFeed: string[];
+  extraExtraFeed: ArticleBlock[];
   turnBuffer: PlayedLite[];
   winner: PlayerId | 'draw' | null;
   victoryType: 'states' | 'truth' | 'ip' | null;
@@ -569,7 +569,14 @@ export function cloneGameState(state: GameState): GameState {
     ...state,
     log: [...state.log],
     headlineLog: [...state.headlineLog],
-    extraExtraFeed: [...state.extraExtraFeed],
+    extraExtraFeed: state.extraExtraFeed.map(article => ({
+      tone: article.tone,
+      hed: article.hed,
+      dek: article.dek,
+      bullets: [...article.bullets],
+      byline: article.byline,
+      source: article.source,
+    })),
     turnBuffer: state.turnBuffer.map(play => ({ ...play })),
     turnPlays: state.turnPlays.map(play => ({
       ...play,

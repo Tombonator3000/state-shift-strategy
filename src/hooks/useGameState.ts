@@ -85,7 +85,7 @@ import { assignStateBonuses } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from './stateBonusAssignment';
 import { clearNewsBuffer, getNewsTriplet, pushToNewsBuffer } from '@/state/game/roundNewsBuffer';
 import { summarize, generateExtraExtra } from '@/news/headlineEngine';
-import type { TurnLog } from '@/news/headlineEngine';
+import type { ArticleBlock, TurnLog } from '@/news/headlineEngine';
 import type { GameOverReport } from '@/types/finalEdition';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
@@ -158,6 +158,51 @@ const resolveActiveEditorFromState = (state: GameState) => {
   return state.editorDef ?? resolveEditor(state.editorId ?? null) ?? null;
 };
 
+const normalizeArticleBlock = (entry: unknown): ArticleBlock | null => {
+  if (entry && typeof entry === 'object') {
+    const candidate = entry as Partial<ArticleBlock>;
+    const tone = candidate.tone;
+    if (tone === 'truth' || tone === 'government' || tone === 'draw') {
+      const hed = typeof candidate.hed === 'string' ? candidate.hed : '';
+      if (hed.trim().length === 0) {
+        return null;
+      }
+      const dek = typeof candidate.dek === 'string' ? candidate.dek : '';
+      const bullets = Array.isArray(candidate.bullets)
+        ? candidate.bullets.filter((bullet): bullet is string => typeof bullet === 'string')
+        : [];
+      const byline = typeof candidate.byline === 'string' && candidate.byline.trim().length > 0
+        ? candidate.byline
+        : 'By: Field Desk';
+      const source = typeof candidate.source === 'string' && candidate.source.trim().length > 0
+        ? candidate.source
+        : 'Source: Redacted';
+
+      return {
+        tone,
+        hed,
+        dek,
+        bullets,
+        byline,
+        source,
+      } satisfies ArticleBlock;
+    }
+  }
+
+  if (typeof entry === 'string' && entry.trim().length > 0) {
+    return {
+      tone: 'draw',
+      hed: entry.trim(),
+      dek: '',
+      bullets: [],
+      byline: 'By: Field Desk',
+      source: 'Source: Archived Log',
+    } satisfies ArticleBlock;
+  }
+
+  return null;
+};
+
 const emitEditorToastMessages = (messages: string[]): void => {
   if (!messages.length || typeof window === 'undefined') {
     return;
@@ -194,8 +239,7 @@ const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): Ga
   let extraExtraFeed = next.extraExtraFeed;
   if (buffer.length >= 3) {
     const article = generateExtraExtra(`${seedPrefix}:${prev.round}:${prev.turn}`, [turnLog], totals);
-    const articleLine = `${article.hed} — ${article.dek}`;
-    extraExtraFeed = [...extraExtraFeed, articleLine];
+    extraExtraFeed = [...extraExtraFeed, article];
   }
 
   return {
@@ -4963,7 +5007,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             ? ((saveData as { headlineLog: string[] }).headlineLog ?? []).filter(entry => typeof entry === 'string')
             : [],
           extraExtraFeed: Array.isArray((saveData as { extraExtraFeed?: unknown }).extraExtraFeed)
-            ? ((saveData as { extraExtraFeed: string[] }).extraExtraFeed ?? []).filter(entry => typeof entry === 'string')
+            ? ((saveData as { extraExtraFeed: unknown[] }).extraExtraFeed ?? [])
+                .map(normalizeArticleBlock)
+                .filter((entry): entry is ArticleBlock => entry !== null)
             : [],
           winner: (saveData as { winner?: unknown }).winner === 'truth'
             || (saveData as { winner?: unknown }).winner === 'government'

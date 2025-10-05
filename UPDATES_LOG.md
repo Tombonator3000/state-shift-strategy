@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-05 – Launch Extra Feed and final overlay refresh
+- Replace the legacy victory screen with a final edition overlay that pairs the campaign recap with a live-generated newspaper spread.
+- Surface turn-driven Extra Extra bulletins beside the main board using full `ArticleBlock` data instead of strings.
+- Persist structured extra feed entries across engines and saves so weather, ads, and bullet lists render consistently.
+
 ## 2025-10-05 – Sync victory overlays with final editions
 - Persist MVP win checks into the game state so victory screens know the winner and trigger type automatically.
 - Build final newspaper reports through the shared helper and surface them via the victory overlay and extra edition reader.
