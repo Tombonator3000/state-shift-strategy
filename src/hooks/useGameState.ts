@@ -46,6 +46,7 @@ import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
 import { queueHotspotResolveToast, queueHotspotExpireToast } from '@/ui/hotspots.toasts';
 import { getHotspotIdleLog } from '@/state/useGameLog';
 import { planDiscardOutcome } from '@/utils/discardPlanner';
+import { safeGetLocalStorageItem } from '@/utils/storage';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
@@ -2414,7 +2415,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     // Get draw mode and agenda preferences from localStorage
     let drawMode: DrawMode = 'standard';
     let secretAgendasEnabled = true;
-    const savedSettings = localStorage.getItem('gameSettings');
+    const savedSettings = safeGetLocalStorageItem('gameSettings');
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings) as {
