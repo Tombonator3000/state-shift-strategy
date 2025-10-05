@@ -2086,6 +2086,9 @@ const Index = () => {
         intelArchive={intelArchiveEntries}
         onDeleteIntel={removeIntelFromArchive}
         onClearIntel={intelArchiveEntries.length > 0 ? () => clearIntelArchive() : undefined}
+        agendasEnabled={secretAgendasEnabled}
+        currentAgenda={secretAgendasEnabled ? gameState.secretAgenda : undefined}
+        completedAgendaIds={gameState.completedSecretAgendaIds}
       />
     );
   }

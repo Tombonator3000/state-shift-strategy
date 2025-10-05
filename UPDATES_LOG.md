@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-06 – Surface agenda history in player hub
+- Add an agendas tab to the Player Hub that highlights the current secret agenda when enabled.
+- Surface completed agendas with descriptions, issue themes, and difficulty badges for quick review.
+
 ## 2025-10-06 – Newsroom discard tooltip
 - Replace the Newsroom Desk IP label with a discard counter that surfaces queued cards and IP impact via tooltip.
 - Move the discard cost breakdown into the tooltip and leave the footer with the free-first-discard reminder when the queue is empty.
