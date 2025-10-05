@@ -1,5 +1,6 @@
 import type { GameCard } from '@/rules/mvp';
 import { resolveCardMVP, type CardPlayResolution, type GameSnapshot } from '@/systems/cardResolution';
+import type { TurnPlay } from '@/game/combo.types';
 import { CARD_DATABASE } from './cardDatabase';
 import { getAiTuningConfig, type AiTuningConfig } from './aiTuning';
 import {
@@ -1168,6 +1169,35 @@ export class EnhancedAIStrategist implements AIStrategist {
       controlledStates: playerControlledStates,
       playerControlledStates,
       aiControlledStates,
+      log: Array.isArray(gameState.log) ? [...gameState.log] : [],
+      headlineLog: Array.isArray(gameState.headlineLog) ? [...gameState.headlineLog] : [],
+      extraExtraFeed: Array.isArray(gameState.extraExtraFeed) ? [...gameState.extraExtraFeed] : [],
+      turnPlays: Array.isArray(gameState.turnPlays)
+        ? gameState.turnPlays.map((play: TurnPlay) => ({
+            ...play,
+            metadata: play.metadata ? { ...play.metadata } : undefined,
+          }))
+        : [],
+      turnBuffer: Array.isArray(gameState.turnBuffer)
+        ? gameState.turnBuffer.map((play: TurnPlay) => ({
+            ...play,
+            metadata: play.metadata ? { ...play.metadata } : undefined,
+          }))
+        : [],
+      winner:
+        gameState.winner === 'truth'
+        || gameState.winner === 'government'
+        || gameState.winner === 'draw'
+        ? gameState.winner
+        : null,
+      victoryType:
+        gameState.victoryType === 'states'
+        || gameState.victoryType === 'ip'
+        || gameState.victoryType === 'truth'
+        || gameState.victoryType === 'agenda'
+        ? gameState.victoryType
+        : null,
+      finalEdition: gameState.finalEdition ?? null,
     };
 
     if (Array.isArray(gameState.playerHand)) {

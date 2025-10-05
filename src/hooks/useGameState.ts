@@ -83,6 +83,7 @@ import {
 import { assignStateBonuses } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from './stateBonusAssignment';
 import { clearNewsBuffer, getNewsTriplet, pushToNewsBuffer } from '@/state/game/roundNewsBuffer';
+import type { GameOverReport } from '@/types/finalEdition';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
@@ -2286,6 +2287,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       paranormalHotspots: {},
       playHistory: [],
       turnPlays: [],
+      turnBuffer: [],
       controlledStates: [],
       aiControlledStates: [],
       activeHotspot: null,
@@ -2332,6 +2334,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         `AI Difficulty: ${aiDifficulty}`,
         `Weekly Issue: ${initialIssue.label}`,
       ],
+      headlineLog: [],
+      extraExtraFeed: [],
       secretAgenda: undefined,
       aiSecretAgenda: undefined,
       secretAgendaDifficulty: null,
@@ -2351,6 +2355,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       editorRuntime: null,
       preGameAdditions: null,
       tabloidRelicsRuntime: null,
+      winner: null,
+      victoryType: null,
+      finalEdition: null,
     };
   });
 
@@ -2532,6 +2539,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       frontPageTriplet: null,
       playHistory: [],
       turnPlays: [],
+      turnBuffer: [],
       stateCombinationBonusIP: 0,
       activeStateCombinationIds: [],
       stateCombinationEffects: createDefaultCombinationEffects(),
@@ -2603,6 +2611,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         `Issue Spotlight: ${issueState.description}`,
         ...(secretAgendasEnabled ? [] : ['Secret agendas disabled for this campaign']),
       ],
+      headlineLog: [],
+      extraExtraFeed: [],
       drawMode,
       cardDrawState: {
         cardsPlayedLastTurn: 0,
@@ -2612,6 +2622,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       aiSecretAgenda: undefined,
       secretAgendaDifficulty: null,
       secretAgendasEnabled,
+      winner: null,
+      victoryType: null,
+      finalEdition: null,
     }));
     console.log('🎮 [initGame] Game state updated successfully');
     if (secretAgendasEnabled && agendaId) {
@@ -2752,6 +2765,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
         playHistory: [...prev.playHistory, playedCardRecord],
         turnPlays: [...prev.turnPlays, ...turnPlayEntries],
+        turnBuffer: [...prev.turnBuffer, ...turnPlayEntries],
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
         log: [...prev.log, ...resolution.logEntries],
@@ -2969,6 +2983,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
         log: [...prev.log, ...resolution.logEntries],
+        turnBuffer: [...prev.turnBuffer, ...(pendingTurnPlays ?? [])],
         agendaIssueCounters: counterSnapshot.issueCounters,
         agendaRoundCounters: counterSnapshot.roundCounters,
         paranormalHotspots: updatedHotspots,
@@ -3020,6 +3035,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
           playHistory: [...prev.playHistory, record],
           turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
+          turnBuffer: [...prev.turnBuffer, ...(pendingTurnPlays ?? [])],
           selectedCard: null,
           targetState: null,
           animating: false,
@@ -3077,6 +3093,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
           playHistory: [...prev.playHistory, record],
           turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
+          turnBuffer: [...prev.turnBuffer, ...(pendingTurnPlays ?? [])],
           selectedCard: null,
           targetState: null,
           animating: false,
@@ -3557,13 +3574,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             lastTurnWithoutPlay: prev.cardsPlayedThisTurn === 0,
           },
           log: logEntries,
-        turnPlays: [],
-        states: statesAfterHotspot,
-        paranormalHotspots: hotspotsAfterHotspot,
-        activeCampaignArcs,
-        pendingArcEvents,
-        tabloidRelicsRuntime: prev.tabloidRelicsRuntime ?? null,
-      };
+          turnPlays: [],
+          turnBuffer: [],
+          states: statesAfterHotspot,
+          paranormalHotspots: hotspotsAfterHotspot,
+          activeCampaignArcs,
+          pendingArcEvents,
+          tabloidRelicsRuntime: prev.tabloidRelicsRuntime ?? null,
+        };
 
         const ownershipLogEntries = reconcileStateBonusOwnership(prev, nextState);
         if (ownershipLogEntries.length > 0) {
@@ -3622,6 +3640,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         aiIP: comboResult.updatedPlayerIp,
         cardsPlayedThisTurn: 0,
         turnPlays: [],
+        turnBuffer: [],
         comboTruthDeltaThisRound: prev.comboTruthDeltaThisRound + comboResult.truthDelta,
         log: [...comboLog, 'AI turn completed'],
         states: clearedStates,
@@ -4844,6 +4863,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           turnPlays: Array.isArray(saveData.turnPlays)
             ? saveData.turnPlays
             : [],
+          turnBuffer: Array.isArray((saveData as { turnBuffer?: unknown }).turnBuffer)
+            ? (saveData as { turnBuffer: GameState['turnBuffer'] }).turnBuffer
+            : [],
           comboTruthDeltaThisRound:
             typeof saveData.comboTruthDeltaThisRound === 'number' ? saveData.comboTruthDeltaThisRound : 0,
           stateCombinationBonusIP:
@@ -4894,6 +4916,25 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           editorDef: restoredEditor ?? null,
           editorRuntime: normalizedEditorRuntime ?? null,
           preGameAdditions: normalizedPreGameAdditions ?? null,
+          headlineLog: Array.isArray((saveData as { headlineLog?: unknown }).headlineLog)
+            ? ((saveData as { headlineLog: string[] }).headlineLog ?? []).filter(entry => typeof entry === 'string')
+            : [],
+          extraExtraFeed: Array.isArray((saveData as { extraExtraFeed?: unknown }).extraExtraFeed)
+            ? ((saveData as { extraExtraFeed: string[] }).extraExtraFeed ?? []).filter(entry => typeof entry === 'string')
+            : [],
+          winner: (saveData as { winner?: unknown }).winner === 'truth'
+            || (saveData as { winner?: unknown }).winner === 'government'
+            || (saveData as { winner?: unknown }).winner === 'draw'
+            ? ((saveData as { winner: 'truth' | 'government' | 'draw' }).winner ?? null)
+            : null,
+          victoryType: ((): GameState['victoryType'] => {
+            const raw = (saveData as { victoryType?: unknown }).victoryType;
+            if (raw === 'states' || raw === 'ip' || raw === 'truth' || raw === 'agenda') {
+              return raw;
+            }
+            return null;
+          })(),
+          finalEdition: (saveData as { finalEdition?: GameOverReport | null }).finalEdition ?? null,
         };
       });
 

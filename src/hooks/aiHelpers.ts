@@ -427,6 +427,7 @@ export const applyAiCardPlay = (
     cardsPlayedThisRound: [...prev.cardsPlayedThisRound, playedCardRecord],
     playHistory: [...prev.playHistory, playedCardRecord],
     turnPlays: [...prev.turnPlays, ...turnPlayEntries],
+    turnBuffer: [...prev.turnBuffer, ...turnPlayEntries],
     log: logEntries,
     paranormalHotspots: updatedHotspots,
     cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,

@@ -51,6 +51,12 @@ export type GameState = {
   playsThisTurn: number;
   turnPlays: TurnPlay[];
   log: string[];
+  headlineLog: string[];
+  extraExtraFeed: string[];
+  turnBuffer: TurnPlay[];
+  winner: PlayerId | 'draw' | null;
+  victoryType: 'states' | 'truth' | 'ip' | null;
+  finalEdition?: unknown | null;
   tabloidRelicsRuntime?: TabloidRelicRuntimeState | null;
 };
 
@@ -561,6 +567,12 @@ export function cloneGameState(state: GameState): GameState {
   return {
     ...state,
     log: [...state.log],
+    headlineLog: [...state.headlineLog],
+    extraExtraFeed: [...state.extraExtraFeed],
+    turnBuffer: state.turnBuffer.map(play => ({
+      ...play,
+      metadata: play.metadata ? { ...play.metadata } : undefined,
+    })),
     turnPlays: state.turnPlays.map(play => ({
       ...play,
       metadata: play.metadata ? { ...play.metadata } : undefined,
