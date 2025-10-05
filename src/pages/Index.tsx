@@ -33,7 +33,11 @@ import { Maximize, Menu, Minimize, UserCircle2 } from 'lucide-react';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import { planDiscardOutcome } from '@/utils/discardPlanner';
-import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
+import {
+  safeGetLocalStorageItem,
+  safeRemoveLocalStorageItem,
+  safeSetLocalStorageItem,
+} from '@/utils/storage';
 import {
   aggregateStateCombinationEffects,
   applyDefenseBonusToStates,
