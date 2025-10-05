@@ -76,14 +76,43 @@ const sanitizeRules = (raw: RelicRulesFile): RelicRuleDefinition[] => {
 
 const RULES: RelicRuleDefinition[] = sanitizeRules(relicRules as RelicRulesFile);
 
-const cloneRuntime = (runtime: TabloidRelicRuntimeState | null | undefined): TabloidRelicRuntimeState | null => {
+const SELECTION_HISTORY_LIMIT = 6;
+
+const pickCandidateWithRotation = (
+  candidates: RelicRuleDefinition[],
+  history: readonly string[],
+): RelicRuleDefinition => {
+  if (candidates.length === 1) {
+    return candidates[0];
+  }
+
+  const ranked = candidates.map((rule, index) => {
+    const recencyIndex = history.indexOf(rule.id);
+    const score = recencyIndex === -1 ? Number.POSITIVE_INFINITY : recencyIndex;
+    return { rule, score, index };
+  });
+
+  ranked.sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
+    return a.index - b.index;
+  });
+
+  return ranked[0]?.rule ?? candidates[0];
+};
+
+const cloneRuntime = (
+  runtime: TabloidRelicRuntimeState | null | undefined,
+): TabloidRelicRuntimeState | null => {
   if (!runtime) {
-    return { entries: [], lastIssueRound: 0 };
+    return { entries: [], lastIssueRound: 0, selectionHistory: [] };
   }
   return {
     entries: runtime.entries.map(entry => ({ ...entry })),
     lastIssueRound: runtime.lastIssueRound,
     lastUpdatedTurn: runtime.lastUpdatedTurn,
+    selectionHistory: [...(runtime.selectionHistory ?? [])],
   };
 };
 
@@ -229,10 +258,16 @@ export const RelicEngine = {
 
     const candidates = RULES.filter(rule => evaluateTrigger(rule, snapshot));
     if (!candidates.length) {
-      return { runtime: runtime && runtime.entries.length ? runtime : null, logEntries };
+      const shouldPersistRuntime = Boolean(runtime && (runtime.entries.length || runtime.selectionHistory.length));
+      return { runtime: shouldPersistRuntime ? runtime : null, logEntries };
     }
 
-    const selected = candidates[0];
+    const history = runtime?.selectionHistory ?? [];
+    const selected = pickCandidateWithRotation(candidates, history);
+    const nextHistory = [selected.id, ...history.filter(ruleId => ruleId !== selected.id)].slice(
+      0,
+      SELECTION_HISTORY_LIMIT,
+    );
     const amplifiedEffects = amplifyEffects(selected, snapshot.editorActive);
     const entry: TabloidRelicRuntimeEntry = {
       uid: `${selected.id}-${Date.now().toString(36)}`,
@@ -257,12 +292,16 @@ export const RelicEngine = {
       entries: sanitizedEntries,
       lastIssueRound: snapshot.round,
       lastUpdatedTurn: snapshot.turn,
+      selectionHistory: nextHistory,
     };
 
     logEntries.push(`Tabloid Relic queued: ${selected.label} (${selected.rarity})`);
+    if (candidates.length > 1) {
+      logEntries.push(`Tabloid Relic rotation (most recent first): ${nextHistory.join(' -> ')}`);
+    }
 
     return {
-      runtime: nextRuntime.entries.length ? nextRuntime : null,
+      runtime: nextRuntime.entries.length || nextRuntime.selectionHistory.length ? nextRuntime : null,
       logEntries,
     };
   },
@@ -371,9 +410,16 @@ export const RelicEngine = {
       }
     }
 
-    const nextRuntime: TabloidRelicRuntimeState | null = activeEntries.length
-      ? { entries: activeEntries, lastIssueRound: runtime.lastIssueRound, lastUpdatedTurn: state.turn }
-      : null;
+    const shouldPersistHistory = Boolean(runtime?.selectionHistory?.length);
+    const nextRuntime: TabloidRelicRuntimeState | null =
+      activeEntries.length || shouldPersistHistory
+        ? {
+            entries: activeEntries,
+            lastIssueRound: runtime?.lastIssueRound ?? 0,
+            lastUpdatedTurn: state.turn,
+            selectionHistory: [...(runtime?.selectionHistory ?? [])],
+          }
+        : null;
 
     const resolvedTruthClampMin = truthClampMin ?? 0;
     const resolvedTruthClampMax = truthClampMax ?? 100;

@@ -79,6 +79,7 @@ export interface TabloidRelicRuntimeState {
   readonly entries: TabloidRelicRuntimeEntry[];
   readonly lastIssueRound: number;
   readonly lastUpdatedTurn?: number;
+  readonly selectionHistory: readonly string[];
 }
 
 export interface RelicHostState {
