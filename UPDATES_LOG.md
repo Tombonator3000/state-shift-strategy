@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-10 – Harden press archive imports
+- Normalize archived victory reports to ensure legendary deployments always load as arrays and avoid Player Hub crashes when old saves are opened.
+- Guard Player Hub archive and final edition readers against malformed legendary data so future saves remain resilient.
+
 ## 2025-10-09 – Reprioritize front page coverage
 - Teach the newspaper issue generator to spotlight captured states, major truth swings, and rotating highlights on the dispatch archive.
 - Keep hero articles in sync with the front-page package so combo main stories continue to render correctly.

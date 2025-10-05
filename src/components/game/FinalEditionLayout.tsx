@@ -609,7 +609,7 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
       <NewspaperSection tone={tone} className="p-5">
         <h2 className={sectionHeadingClass}>After-Action Notes</h2>
         <div className={cn('mt-3 flex flex-wrap gap-3 text-xs', mutedBodyClass)}>
-          {report.legendaryUsed.length > 0 ? (
+          {Array.isArray(report.legendaryUsed) && report.legendaryUsed.length > 0 ? (
             <Badge variant="outline" className={cn(badgeClass, 'rounded-full px-3 py-0.5 text-[10px] tracking-[0.3em]')}>
               Legendary Deployments: {report.legendaryUsed.join(', ')}
             </Badge>

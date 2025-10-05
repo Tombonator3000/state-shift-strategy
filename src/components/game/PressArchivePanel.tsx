@@ -58,6 +58,7 @@ const PressArchivePanel = ({ issues, onOpen, onDelete, className }: PressArchive
           <div className="space-y-3 pb-4">
             {issues.map(issue => {
               const { report } = issue;
+              const legendaryUsed = Array.isArray(report.legendaryUsed) ? report.legendaryUsed : [];
               const mvpName = report.mvp?.cardName ?? report.runnerUp?.cardName ?? 'Unsung Hero';
               const playerOutcome = getPlayerOutcomeLabel(report);
               const victoryLabel = getVictoryConditionLabel(report.victoryType);
@@ -98,7 +99,7 @@ const PressArchivePanel = ({ issues, onOpen, onDelete, className }: PressArchive
                         </div>
                         <div className="flex items-center gap-2 md:col-span-2">
                           <span className="font-mono text-xs uppercase tracking-[0.28em] text-emerald-200/70">Legendary</span>
-                          <span>{report.legendaryUsed.length > 0 ? report.legendaryUsed.join(', ') : 'None reported'}</span>
+                          <span>{legendaryUsed.length > 0 ? legendaryUsed.join(', ') : 'None reported'}</span>
                         </div>
                       </div>
                       <p className="text-xs font-mono uppercase tracking-[0.28em] text-emerald-200/60">{outcomeSummary}</p>
