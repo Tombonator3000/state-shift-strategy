@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-11 – Stabilize AI turn wrap-up
+- Keep the AI turn progress flag active until the scheduled hand-off completes so the planner no longer loops.
+- Add regression coverage to confirm control returns to the player after the wrap-up timeout resolves.
+
 ## 2025-10-10 – Harden press archive imports
 - Normalize archived victory reports to ensure legendary deployments always load as arrays and avoid Player Hub crashes when old saves are opened.
 - Guard Player Hub archive and final edition readers against malformed legendary data so future saves remain resilient.
