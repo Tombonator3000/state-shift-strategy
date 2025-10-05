@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-06 – Newsroom discard tooltip
+- Replace the Newsroom Desk IP label with a discard counter that surfaces queued cards and IP impact via tooltip.
+- Move the discard cost breakdown into the tooltip and leave the footer with the free-first-discard reminder when the queue is empty.
+
 ## 2025-10-06 – Delay final editions until news pools load
 - Load news article pools on app startup to prevent empty or stale final editions when the archives are still initializing.
 - Skip composing the final newspaper until pool data is ready and clear the preview to avoid stale spreads during loading.

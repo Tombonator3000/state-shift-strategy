@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
 import EnhancedGameHand from '@/components/game/EnhancedGameHand';
 import PlayedCardsDock from '@/components/game/PlayedCardsDock';
@@ -2637,87 +2638,114 @@ const Index = () => {
   );
 
   const rightPaneContent = (
-    <aside className="h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
-      <header className="relative flex items-center justify-between gap-2 border-b border-newspaper-border/60 bg-[image:var(--halftone-blue)] bg-[length:6px_6px] bg-repeat px-4 py-3">
-        <h3 className="text-xs font-black uppercase tracking-[0.5em]">NEWSROOM DESK</h3>
-        <span className="rounded border border-current px-2 py-1 text-[0.65rem] font-mono font-semibold">IP {gameState.ip}</span>
-      </header>
-      <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
-        <EnhancedGameHand
-          cards={gameState.hand}
-          onPlayCard={handlePlayCard}
-          onSelectCard={handleSelectCard}
-          selectedCard={gameState.selectedCard}
-          disabled={handInteractionDisabled}
-          currentIP={gameState.ip}
-          loadingCard={loadingCard}
-          onCardHover={setHoveredCard}
-          discardQueue={pendingDiscards}
-          onToggleDiscard={handleToggleDiscard}
-          discardEnabled={canQueueDiscards}
-        />
-      </div>
-      <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
-        <div className="mb-2 rounded border border-newspaper-border/60 bg-newspaper-border/10 px-3 py-2 text-[0.65rem] font-mono text-newspaper-border">
-          {pendingDiscards.length === 0 ? (
-            <span>First discard each turn is free. Extra discards cost 10 IP, then +5 IP per card.</span>
-          ) : (
-            <div className="space-y-1 text-newspaper-bg">
-              <div className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-newspaper-border">
-                Queued Discards ({pendingDiscards.length})
-              </div>
-              {queuedDiscardNames.length > 0 && (
-                <div className="truncate text-newspaper-bg/80">
-                  {queuedDiscardNames.join(', ')}
+    <TooltipProvider delayDuration={150}>
+      <aside className="h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
+        <header className="relative flex items-center justify-between gap-2 border-b border-newspaper-border/60 bg-[image:var(--halftone-blue)] bg-[length:6px_6px] bg-repeat px-4 py-3">
+          <h3 className="text-xs font-black uppercase tracking-[0.5em]">NEWSROOM DESK</h3>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="cursor-help rounded border border-current px-2 py-1 text-[0.65rem] font-mono font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border"
+                aria-label="View discard queue details"
+              >
+                Discards: {pendingDiscards.length}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent
+              align="end"
+              className="max-w-xs space-y-2 border border-newspaper-border bg-newspaper-bg px-3 py-2 text-[0.65rem] font-mono text-newspaper-text shadow-lg"
+            >
+              {pendingDiscards.length === 0 ? (
+                <div className="space-y-1">
+                  <div className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-newspaper-border">
+                    Discard Queue
+                  </div>
+                  <p className="leading-relaxed">
+                    First discard each turn is free. Extra discards cost 10 IP, then +5 IP per card.
+                  </p>
                 </div>
-              )}
-              <div>
-                IP impact:{' '}
-                <span
-                  className={clsx(
-                    'font-semibold',
-                    discardPreview.ipCost > 0 ? 'text-truth-red' : 'text-emerald-500'
+              ) : (
+                <div className="space-y-1">
+                  <div className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-newspaper-border">
+                    Queued Discards ({pendingDiscards.length})
+                  </div>
+                  {queuedDiscardNames.length > 0 && (
+                    <div className="leading-relaxed text-newspaper-text/80">
+                      {queuedDiscardNames.join(', ')}
+                    </div>
                   )}
-                >
-                  {discardPreview.ipCost > 0 ? `-${discardPreview.ipCost} IP` : 'Free'}
-                </span>
-              </div>
-              {discardPreview.costBreakdown.length > 0 && (
-                <div className="text-newspaper-bg/60">
-                  Cost steps:{' '}
-                  {discardPreview.costBreakdown
-                    .map((cost, index) =>
-                      index === 0
-                        ? '1st: 0 (free)'
-                        : (() => {
-                            const position = index + 1;
-                            const suffix = position === 2 ? 'nd' : position === 3 ? 'rd' : 'th';
-                            return `${position}${suffix}: ${cost}`;
-                          })()
-                    )
-                    .join(' · ')}
+                  <div className="leading-relaxed">
+                    IP impact:{' '}
+                    <span
+                      className={clsx(
+                        'font-semibold',
+                        discardPreview.ipCost > 0 ? 'text-truth-red' : 'text-emerald-500'
+                      )}
+                    >
+                      {discardPreview.ipCost > 0 ? `-${discardPreview.ipCost} IP` : 'Free'}
+                    </span>
+                  </div>
+                  {discardPreview.costBreakdown.length > 0 && (
+                    <div className="text-newspaper-text/70">
+                      Cost steps:{' '}
+                      {discardPreview.costBreakdown
+                        .map((cost, index) =>
+                          index === 0
+                            ? '1st: 0 (free)'
+                            : (() => {
+                                const position = index + 1;
+                                const suffix = position === 2 ? 'nd' : position === 3 ? 'rd' : 'th';
+                                return `${position}${suffix}: ${cost}`;
+                              })()
+                        )
+                        .join(' · ')}
+                    </div>
+                  )}
                 </div>
               )}
+            </TooltipContent>
+          </Tooltip>
+        </header>
+        <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
+          <EnhancedGameHand
+            cards={gameState.hand}
+            onPlayCard={handlePlayCard}
+            onSelectCard={handleSelectCard}
+            selectedCard={gameState.selectedCard}
+            disabled={handInteractionDisabled}
+            currentIP={gameState.ip}
+            loadingCard={loadingCard}
+            onCardHover={setHoveredCard}
+            discardQueue={pendingDiscards}
+            onToggleDiscard={handleToggleDiscard}
+            discardEnabled={canQueueDiscards}
+          />
+        </div>
+        <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
+          {pendingDiscards.length === 0 && (
+            <div className="mb-2 rounded border border-newspaper-border/60 bg-newspaper-border/10 px-3 py-2 text-[0.65rem] font-mono text-newspaper-border">
+              <span>First discard each turn is free. Extra discards cost 10 IP, then +5 IP per card.</span>
             </div>
           )}
-        </div>
-        <Button
-          id="end-turn-button"
-          onClick={handleEndTurn}
-          className="end-turn-button touch-target w-full border-2 border-black bg-truth-red py-3 font-black uppercase tracking-[0.4em] text-white transition duration-200 hover:bg-white hover:text-truth-red disabled:opacity-60"
-          disabled={isPlayerActionLocked || isEndingTurn}
-        >
-          {gameState.currentPlayer === 'ai' ? (
-            <span className="flex items-center justify-center gap-2 text-sm">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
-              AI Thinking...
-            </span>
-          ) : (
-            'GO TO PRESS'
-          )}
-        </Button>
-      </footer>
-    </aside>
+          <Button
+            id="end-turn-button"
+            onClick={handleEndTurn}
+            className="end-turn-button touch-target w-full border-2 border-black bg-truth-red py-3 font-black uppercase tracking-[0.4em] text-white transition duration-200 hover:bg-white hover:text-truth-red disabled:opacity-60"
+            disabled={isPlayerActionLocked || isEndingTurn}
+          >
+            {gameState.currentPlayer === 'ai' ? (
+              <span className="flex items-center justify-center gap-2 text-sm">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
+                AI Thinking...
+              </span>
+            ) : (
+              'GO TO PRESS'
+            )}
+          </Button>
+        </footer>
+      </aside>
+    </TooltipProvider>
   );
 
   return (
