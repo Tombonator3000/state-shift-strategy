@@ -65,7 +65,7 @@ export const MVP_RULES_SECTIONS: MvpRulesSection[] = [
       'Start: Gain 5 IP plus +1 IP for every state you control, then draw back up to 5 cards.',
       'Main: Play up to three cards, paying their IP costs and choosing targets when required.',
       'Capture Check: Any state where your Pressure meets or beats Defense flips to your control.',
-      'End: Optionally discard 1 card for free; additional discards cost 1 IP each.',
+      'End: Optionally discard 1 card for free; each extra discard costs 10 IP, then +5 IP per additional card (10, 15, 20, …).',
     ],
   },
   {
