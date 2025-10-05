@@ -46,31 +46,68 @@ const normalizeArray = (value: unknown, fallback: string[]): string[] => {
   return Array.isArray(value) && value.length > 0 ? value.map(String) : fallback;
 };
 
-const normalizeData = (raw: Partial<NewspaperData> | undefined | null): NewspaperData => {
-  const mastheads = normalizeArray(raw?.mastheads, MINIMAL_DATA.mastheads);
-  const ads = normalizeArray(raw?.ads, MINIMAL_DATA.ads);
-  const subheads = raw?.subheads ?? {};
-  const normalizedSubheads = {
-    generic: normalizeArray(subheads?.generic, MINIMAL_DATA.subheads?.generic ?? []),
-    attack: normalizeArray(subheads?.attack, subheads?.generic ?? MINIMAL_DATA.subheads?.generic ?? []),
-    media: normalizeArray(subheads?.media, subheads?.generic ?? MINIMAL_DATA.subheads?.generic ?? []),
-    zone: normalizeArray(subheads?.zone, subheads?.generic ?? MINIMAL_DATA.subheads?.generic ?? []),
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const getRecordValue = (record: Record<string, unknown> | null, key: string): unknown =>
+  record && key in record ? record[key] : undefined;
+
+const normalizeData = (raw: unknown): NewspaperData => {
+  const rootRecord = isRecord(raw) ? (raw as Record<string, unknown>) : null;
+  const poolsRecordCandidate = isRecord(getRecordValue(rootRecord, 'pools'))
+    ? (getRecordValue(rootRecord, 'pools') as Record<string, unknown>)
+    : rootRecord;
+
+  const getPoolValue = (key: string): unknown => {
+    const valueFromPools = getRecordValue(poolsRecordCandidate, key);
+    if (valueFromPools !== undefined) {
+      return valueFromPools;
+    }
+    return getRecordValue(rootRecord, key);
   };
 
+  const minimalGeneric = MINIMAL_DATA.subheads?.generic ?? [];
+  const subheadsRecordRaw = getPoolValue('subheads') ?? getRecordValue(rootRecord, 'subheads');
+  const subheadsRecord = isRecord(subheadsRecordRaw)
+    ? (subheadsRecordRaw as Record<string, unknown>)
+    : null;
+
+  const generic = normalizeArray(getRecordValue(subheadsRecord, 'generic'), minimalGeneric);
+  const genericFallback = generic.length > 0 ? generic : minimalGeneric;
+
+  const normalizedSubheads = {
+    generic,
+    attack: normalizeArray(getRecordValue(subheadsRecord, 'attack'), genericFallback),
+    media: normalizeArray(getRecordValue(subheadsRecord, 'media'), genericFallback),
+    zone: normalizeArray(getRecordValue(subheadsRecord, 'zone'), genericFallback),
+  };
+
+  const stampsRecordRaw = getRecordValue(rootRecord, 'stamps');
+  const stampsRecord = isRecord(stampsRecordRaw) ? (stampsRecordRaw as Record<string, unknown>) : null;
+
   const data: NewspaperData = {
-    mastheads,
-    ads,
+    mastheads: normalizeArray(getPoolValue('mastheads'), MINIMAL_DATA.mastheads),
+    ads: normalizeArray(getPoolValue('ads'), MINIMAL_DATA.ads),
     subheads: normalizedSubheads,
-    bylines: normalizeArray(raw?.bylines, MINIMAL_DATA.bylines ?? []),
-    sources: normalizeArray(raw?.sources, MINIMAL_DATA.sources ?? []),
-    conspiracyCorner: normalizeArray(raw?.conspiracyCorner, MINIMAL_DATA.conspiracyCorner ?? []),
-    weather: normalizeArray(raw?.weather, MINIMAL_DATA.weather ?? []),
-    attackVerbs: normalizeArray(raw?.attackVerbs, MINIMAL_DATA.attackVerbs ?? []),
-    mediaVerbs: normalizeArray(raw?.mediaVerbs, MINIMAL_DATA.mediaVerbs ?? []),
-    zoneVerbs: normalizeArray(raw?.zoneVerbs, MINIMAL_DATA.zoneVerbs ?? []),
+    bylines: normalizeArray(getPoolValue('bylines'), MINIMAL_DATA.bylines ?? []),
+    sources: normalizeArray(getPoolValue('sources'), MINIMAL_DATA.sources ?? []),
+    conspiracyCorner: normalizeArray(
+      getRecordValue(rootRecord, 'conspiracyCorner'),
+      MINIMAL_DATA.conspiracyCorner ?? [],
+    ),
+    weather: normalizeArray(getPoolValue('weather'), MINIMAL_DATA.weather ?? []),
+    attackVerbs: normalizeArray(getPoolValue('attackVerbs'), MINIMAL_DATA.attackVerbs ?? []),
+    mediaVerbs: normalizeArray(getPoolValue('mediaVerbs'), MINIMAL_DATA.mediaVerbs ?? []),
+    zoneVerbs: normalizeArray(getPoolValue('zoneVerbs'), MINIMAL_DATA.zoneVerbs ?? []),
     stamps: {
-      breaking: normalizeArray(raw?.stamps?.breaking, MINIMAL_DATA.stamps?.breaking ?? []),
-      classified: normalizeArray(raw?.stamps?.classified, MINIMAL_DATA.stamps?.classified ?? []),
+      breaking: normalizeArray(
+        getRecordValue(stampsRecord, 'breaking'),
+        MINIMAL_DATA.stamps?.breaking ?? [],
+      ),
+      classified: normalizeArray(
+        getRecordValue(stampsRecord, 'classified'),
+        MINIMAL_DATA.stamps?.classified ?? [],
+      ),
     },
   };
 
@@ -88,7 +125,7 @@ export async function loadNewspaperData(): Promise<NewspaperData> {
 
   loadingPromise = (async () => {
     try {
-      const response = await fetch('/data/newspaperData.json', { cache: 'no-store' });
+      const response = await fetch('./newspaperData.json', { cache: 'no-store' });
       if (!response.ok) {
         throw new Error(`Failed to load newspaper data: ${response.status} ${response.statusText}`);
       }
