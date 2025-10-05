@@ -7,7 +7,7 @@ Victory is evaluated in priority order at every checkpoint. Achieve any of the f
 
 1. **Complete your Secret Agenda** – each faction starts with a hidden objective; certain cards or tabloid events can expose the AI’s plan, and finishing yours ends the campaign instantly.
 2. **Truth Extremes** – Truth Seekers win at ≥95% Truth, Government wins at ≤5%.
-3. **Resource Dominance** – Bank 300 Influence Points (IP).
+3. **Resource Dominance** – Bank 200 Influence Points (IP).
 4. **Territorial Control** – Hold 10 U.S. states at once.
 
 These same conditions apply to the AI, so watch its progress meters as closely as your own.

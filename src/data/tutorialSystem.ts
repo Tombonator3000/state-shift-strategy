@@ -64,7 +64,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'ip_display',
         title: 'Influence Points (IP)',
-        description: 'IP is your operational currency. Gain it from controlled states, state combos, and events, then spend it to deploy cards. Banking 300 IP before the AI does secures an economic victory.',
+        description: 'IP is your operational currency. Gain it from controlled states, state combos, and events, then spend it to deploy cards. Banking 200 IP before the AI does secures an economic victory.',
         targetElement: '.ip-display',
         position: 'left',
         delay: 3000
@@ -141,7 +141,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'victory_conditions',
         title: 'Path to Victory',
-        description: 'Victory checks run in priority order: 1) spike the Truth meter to ≥95% (Truth) or ≤5% (Government), 2) bank 300 IP, 3) control 10 states. Secret Agendas now fuel that Truth surge based on difficulty—plan around the swing before the AI does.',
+        description: 'Victory checks run in priority order: 1) spike the Truth meter to ≥95% (Truth) or ≤5% (Government), 2) bank 200 IP, 3) control 10 states. Secret Agendas now fuel that Truth surge based on difficulty—plan around the swing before the AI does.',
         position: 'center',
         delay: 4000
       }
