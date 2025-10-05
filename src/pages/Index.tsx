@@ -109,6 +109,10 @@ const determineCardContextualEffect = (
   return null;
 };
 
+const detectReducedMotion = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
+
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
