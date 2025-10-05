@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-08 – Diversify generated card articles
+- Expand card article generator pools with new tag-aware headlines, subheads, and body segments to reduce repetition.
+- Compose longer faction articles by layering tag-specific follow-ups, escalations, and closers for each card.
+
 ## 2025-10-07 – Chronicle agenda signals in hub
 - Route the live agenda moment feed into the Player Hub overlay and surface a chronological timeline of stages and outcomes.
 - Add status filters, timeline styling, and empty-state messaging to help players review agenda advances, setbacks, and completions at a glance.
