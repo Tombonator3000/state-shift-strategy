@@ -515,7 +515,15 @@ export function endTurn(
   }
 
   const extraDiscards = Math.max(0, discarded - 1);
-  const ipCost = extraDiscards;
+  const ipCost = (() => {
+    if (extraDiscards === 0) {
+      return 0;
+    }
+    const firstCost = 10; // Cost of the 2nd discard (first extra card)
+    const step = 5; // Additional cost added for each subsequent extra discard
+    // Arithmetic series sum: n/2 * (2a1 + (n - 1) * d)
+    return (extraDiscards * (2 * firstCost + (extraDiscards - 1) * step)) / 2;
+  })();
   const updatedIP = Math.max(0, player.ip - ipCost);
 
   const updatedPlayer: PlayerState = {
