@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
+import { loadNewspaperData, pick, type NewspaperData } from '@/lib/newspaperData';
 
 interface PlayedCard {
   card: GameCard;
@@ -16,11 +17,6 @@ interface NewspaperProps {
   playedCards: PlayedCard[];
   faction: 'government' | 'truth';
   onClose: () => void;
-}
-
-interface NewspaperData {
-  mastheads: string[];
-  ads: string[];
 }
 
 interface Article {
@@ -41,21 +37,19 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
 
   // Load newspaper data and hide card layers when newspaper opens
   useEffect(() => {
-    const loadNewspaperData = async () => {
-      try {
-        const response = await fetch('/data/newspaperData.json');
-        const data = await response.json();
-        setNewspaperData(data);
-        
-        // Set random masthead
-        const randomMasthead = data.mastheads[Math.floor(Math.random() * data.mastheads.length)];
-        setMasthead(randomMasthead);
-      } catch (error) {
-        console.error('Failed to load newspaper data:', error);
-      }
-    };
+    let cancelled = false;
 
-    loadNewspaperData();
+    loadNewspaperData()
+      .then(data => {
+        if (cancelled) {
+          return;
+        }
+        setNewspaperData(data);
+        setMasthead(current => pick(data.mastheads, current));
+      })
+      .catch(error => {
+        console.error('Failed to load newspaper data:', error);
+      });
 
     const cardLayer = document.getElementById('card-play-layer');
     const playedPile = document.getElementById('played-pile');
@@ -70,6 +64,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
     }
     
     return () => {
+      cancelled = true;
       // Restore visibility when newspaper closes
       if (cardLayer && playedPile) {
         cardLayer.style.display = 'block';
@@ -89,8 +84,7 @@ const Newspaper = ({ events, playedCards, faction, onClose }: NewspaperProps) =>
         
         const resetTimer = setTimeout(() => {
           setGlitching(false);
-          const randomMasthead = newspaperData.mastheads[Math.floor(Math.random() * newspaperData.mastheads.length)];
-          setMasthead(randomMasthead);
+          setMasthead(current => pick(newspaperData.mastheads, current));
         }, 800);
         
         return () => clearTimeout(resetTimer);

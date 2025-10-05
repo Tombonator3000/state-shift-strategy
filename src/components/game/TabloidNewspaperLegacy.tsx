@@ -13,6 +13,7 @@ import CardImage from '@/components/game/CardImage';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import type { ArcProgressSummary } from '@/types/campaign';
 import type { HotspotDirector, WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
+import { loadNewspaperData, pick, type NewspaperData } from '@/lib/newspaperData';
 
 export interface TabloidPlayedCard {
   card: GameCard;
@@ -38,11 +39,6 @@ export interface TabloidNewspaperProps {
   frontPageTriplet?: PlayedCardMeta[] | null;
 }
 
-interface NewspaperData {
-  mastheads: string[];
-  ads: string[];
-}
-
 interface Article {
   headline: string;
   content: string;
@@ -60,35 +56,35 @@ const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }
 
   // Load newspaper data on component mount
   useEffect(() => {
-    const loadNewspaperData = async () => {
-      try {
-        console.log('🗞️ Attempting to load newspaper data...');
-        const response = await fetch('/data/newspaperData.json');
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    let cancelled = false;
+
+    console.log('🗞️ Attempting to load newspaper data...');
+    loadNewspaperData()
+      .then(data => {
+        if (cancelled) {
+          return;
         }
-        
-        const data = await response.json();
-        console.log('🗞️ Newspaper data loaded:', { 
-          mastheads: data.mastheads?.length, 
-          ads: data.ads?.length 
+
+        console.log('🗞️ Newspaper data loaded:', {
+          mastheads: data.mastheads.length,
+          ads: data.ads.length
         });
-        
+
         setNewspaperData(data);
-        
-        // Set random masthead from the loaded data
-        const randomMasthead = data.mastheads[Math.floor(Math.random() * data.mastheads.length)];
-        console.log('🗞️ Random masthead selected:', randomMasthead);
-        setMasthead(randomMasthead);
-      } catch (error) {
+        setMasthead(current => {
+          const next = pick(data.mastheads, current);
+          console.log('🗞️ Random masthead selected:', next);
+          return next;
+        });
+      })
+      .catch(error => {
         console.error('❌ Failed to load newspaper data:', error);
         console.log('🗞️ Using fallback masthead');
-        // Keep default masthead if loading fails
-      }
-    };
+      });
 
-    loadNewspaperData();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Glitch masthead system - 5% chance on load
@@ -102,8 +98,7 @@ const LegacyTabloidNewspaper = ({ events, playedCards, faction, truth, onClose }
         
         const resetTimer = setTimeout(() => {
           setGlitching(false);
-          const randomMasthead = newspaperData.mastheads[Math.floor(Math.random() * newspaperData.mastheads.length)];
-          setMasthead(randomMasthead);
+          setMasthead(current => pick(newspaperData.mastheads, current));
         }, 1200);
         
         return () => clearTimeout(resetTimer);
