@@ -1,3 +1,7 @@
+import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
+
+const TUTORIAL_STORAGE_KEY = 'shadow_government_tutorial_progress';
+
 export interface TutorialStep {
   id: string;
   title: string;
@@ -241,14 +245,21 @@ export class TutorialManager {
 
   // Load tutorial progress from localStorage
   loadProgress() {
-    const saved = localStorage.getItem('shadow_government_tutorial_progress');
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        this.completedSequences = data.completedSequences || [];
-      } catch (e) {
-        console.warn('Failed to load tutorial progress:', e);
-      }
+    const saved = safeGetLocalStorageItem(TUTORIAL_STORAGE_KEY, { logger: console });
+
+    if (!saved) {
+      this.completedSequences = [];
+      return;
+    }
+
+    try {
+      const data = JSON.parse(saved);
+      this.completedSequences = Array.isArray(data.completedSequences)
+        ? data.completedSequences
+        : [];
+    } catch (error) {
+      console.warn('Failed to load tutorial progress:', error);
+      this.completedSequences = [];
     }
   }
 
@@ -258,7 +269,17 @@ export class TutorialManager {
       completedSequences: this.completedSequences,
       timestamp: Date.now()
     };
-    localStorage.setItem('shadow_government_tutorial_progress', JSON.stringify(data));
+    const serialized = JSON.stringify(data);
+
+    const didPersist = safeSetLocalStorageItem(
+      TUTORIAL_STORAGE_KEY,
+      serialized,
+      { logger: console }
+    );
+
+    if (!didPersist) {
+      console.warn('Failed to persist tutorial progress to localStorage.');
+    }
   }
 
   // Check if tutorial sequence is available
@@ -546,8 +567,19 @@ export class TutorialManager {
   // Reset all tutorial progress
   resetProgress() {
     this.completedSequences = [];
-    this.saveProgress();
-    localStorage.removeItem('shadow_government_tutorial_progress');
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    try {
+      const storage = window.localStorage;
+      if (storage && typeof storage.removeItem === 'function') {
+        storage.removeItem(TUTORIAL_STORAGE_KEY);
+      }
+    } catch (error) {
+      console.warn('Failed to reset tutorial progress:', error);
+    }
   }
 
   // Get tutorial statistics
