@@ -10,7 +10,7 @@ export type PlayedCardMeta = {
 export type GeneratedStory = {
   headline: string;
   subhead?: string;
-  tone: 'truth' | 'gov';
+  tone: 'truth' | 'government';
   usedCards: string[];
   debug?: { commonTags: string[]; subject: string; parts: string[]; templateId: string };
 };
@@ -90,7 +90,7 @@ export function generateMainStory(
 ): GeneratedStory {
   if (played.length !== 3) throw new Error('generateMainStory expects exactly 3 cards.');
   const articles = played.map(card => lookup(card.id));
-  const tone: 'truth' | 'gov' = played[0].faction === 'TRUTH' ? 'truth' : 'gov';
+  const tone: 'truth' | 'government' = played[0].faction === 'TRUTH' ? 'truth' : 'government';
   const seed = played.map(card => card.id).join('|');
   const commonTags = intersectNonTechTags(articles);
   const subject = chooseSubject(articles, played);

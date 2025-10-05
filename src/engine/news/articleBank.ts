@@ -5,7 +5,7 @@ import fallbackArticleJson from '../paranoid_times_card_articles_ALL.json' asser
 
 export type CardArticle = {
   id: string;
-  tone: 'truth' | 'gov';
+  faction: 'truth' | 'government';
   tags: string[];
   headline?: string;
   subhead?: string;
@@ -37,9 +37,26 @@ const createEmptyArticleBank = (): ArticleBank => ({
   },
 });
 
+const factionSchema = z.preprocess(
+  (value: unknown) => {
+    if (typeof value !== 'string') {
+      return value;
+    }
+    const normalised = value.trim().toLowerCase();
+    if (normalised === 'truth') {
+      return 'truth';
+    }
+    if (normalised === 'gov' || normalised === 'government') {
+      return 'government';
+    }
+    return value;
+  },
+  z.union([z.literal('truth'), z.literal('government')]),
+);
+
 const cardArticleSchema = z.object({
   id: z.string(),
-  tone: z.union([z.literal('truth'), z.literal('gov')]),
+  faction: factionSchema,
   tags: z.array(z.string()).default([]),
   headline: z.string().optional(),
   subhead: z.string().optional(),
@@ -88,10 +105,10 @@ export async function loadArticleBank(): Promise<ArticleBank> {
 
     const map = new Map<string, CardArticle>();
     for (const article of articles) {
-      if (!article.id || !article.tone) continue;
+      if (!article.id || !article.faction) continue;
       const normalised: CardArticle = {
         id: article.id,
-        tone: article.tone,
+        faction: article.faction,
         tags: normaliseTags(article.tags),
         headline: article.headline,
         subhead: article.subhead,

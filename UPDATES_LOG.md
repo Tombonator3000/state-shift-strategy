@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-05 – Rebuild Paranoid Times article bank
+- Replace the templated article dump with bespoke Truth and Government stories for every card across core sets and expansions.
+- Switch article metadata to the `faction` field and normalise legacy values inside the loader so the UI matches card factions.
+- Add a scripted generator to keep the article JSON in sync with card data and populate tags plus image prompts.
+
 ## 2025-10-05 – Lower IP victory threshold to 200
 - Drop the economic victory target from 300 IP to 200 across rules, tutorial copy, and in-game HUD messaging.
 - Update the IP victory condition logic, onboarding flows, and documentation so both factions now race to 200 IP.
