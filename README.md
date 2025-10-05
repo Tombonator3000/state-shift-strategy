@@ -6,6 +6,8 @@
 
 **Technical overview**: See [docs/TECHNICAL_README.md](docs/TECHNICAL_README.md) for gameplay rules, data pipelines, and audio integration notes.
 
+**Change history**: Review [UPDATES_LOG.md](UPDATES_LOG.md) for a dated summary of gameplay-impacting updates.
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
