@@ -2406,6 +2406,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     agendaId?: string,
     editorId?: EditorId | null,
   ) => {
+    console.log('🎮 [initGame] START - faction:', faction, 'editorId:', editorId);
     const startingTruth = 50;
     const startingIP = 5;
     const aiStartingIP = 5;
@@ -2484,8 +2485,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     // Track game start in achievements
     achievements.onGameStart(faction, aiDifficulty);
     achievements.manager.onNewGameStart();
+    console.log('🎮 [initGame] About to reset eventManager and stateEvents');
     eventManager.reset();
     resetStateEvents();
+    console.log('🎮 [initGame] EventManager and stateEvents reset complete');
 
     gameSessionRef.current += 1;
     if (pendingAiTimeoutRef.current) {
@@ -2498,6 +2501,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     newspaperRevealTimeoutRef.current = null;
 
     clearNewsBuffer();
+
+    console.log('🎮 [initGame] About to create AIStrategist with difficulty:', aiDifficulty);
+    const aiStrategist = AIFactory.createStrategist(aiDifficulty);
+    console.log('🎮 [initGame] AIStrategist created successfully');
 
     setGameState(prev => ({
       ...prev,
@@ -2543,7 +2550,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       pendingArcEvents: [],
       activeHotspot: null,
       showNewspaper: false,
-      aiStrategist: AIFactory.createStrategist(aiDifficulty),
+      aiStrategist,
       agendaIssue: issueState,
       agendaIssueCounters: {},
       agendaRoundCounters: {},
@@ -2605,9 +2612,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       secretAgendaDifficulty: null,
       secretAgendasEnabled,
     }));
+    console.log('🎮 [initGame] Game state updated successfully');
     if (secretAgendasEnabled && agendaId) {
       assignSecretAgenda(agendaId);
     }
+    console.log('🎮 [initGame] COMPLETE');
   }, [achievements, aiDifficulty, assignSecretAgenda, eventManager, resetStateEvents]);
 
   const playCard = useCallback((cardId: string, targetOverride?: string | null) => {
