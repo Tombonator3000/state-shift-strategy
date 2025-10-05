@@ -32,8 +32,16 @@ export function computeMediaTruthDelta_MVP(
     return opts.overrideSign * base;
   }
 
+  // CRITICAL: Truth faction gets POSITIVE truth, Government gets NEGATIVE truth
   const sign = acting.faction === 'truth' ? 1 : -1;
-  return sign * base;
+  const delta = sign * base;
+  
+  // Audit log for debugging
+  if (typeof window !== 'undefined' && (window as any).DEBUG_TRUTH) {
+    console.log(`[TRUTH AUDIT] MEDIA ${card?.id}: faction=${acting.faction}, base=${base}, sign=${sign}, delta=${delta}`);
+  }
+  
+  return delta;
 }
 
 let _mvpWarned = false;

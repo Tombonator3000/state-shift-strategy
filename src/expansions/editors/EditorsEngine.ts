@@ -1,6 +1,9 @@
 import rawEditors from './editors.json';
 import type { EditorDef, EditorEffect, EditorId } from './EditorsTypes';
 
+// Re-export types for external use
+export type { EditorDef, EditorEffect, EditorId } from './EditorsTypes';
+
 const EDITORS: EditorDef[] = rawEditors as EditorDef[];
 
 export const FEATURE_EDITORS_MINIDRAFT = false;

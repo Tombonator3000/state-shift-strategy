@@ -123,6 +123,7 @@ const toBonus = (
     headline: themed.headline,
     subhead: themed.subhead,
     icon: themed.icon,
+    // CRITICAL: Government gets NEGATIVE truth, Truth gets POSITIVE truth
     truthDelta: ownerFaction === 'government' ? -truthDeltaBase : truthDeltaBase,
     ipDelta: clamp(themed.effect.ipDelta ?? 0, EFFECT_LIMITS.ip.min, EFFECT_LIMITS.ip.max),
     pressureDelta: clamp(

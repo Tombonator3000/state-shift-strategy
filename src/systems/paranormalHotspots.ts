@@ -391,9 +391,16 @@ export function resolveHotspot(
   const clampedReward = clampValue(rewardBeforeClamp, minReward, maxReward);
   const finalReward = Math.round(clampedReward);
   const normalizedFinalReward = Number.isFinite(finalReward) ? finalReward : 0;
+  
+  // CRITICAL: Truth faction gets POSITIVE truth, Government gets NEGATIVE truth
   const truthDelta = winnerFaction === 'truth'
     ? normalizedFinalReward
     : -normalizedFinalReward;
+    
+  // Audit log for debugging
+  if (typeof window !== 'undefined' && (window as any).DEBUG_TRUTH) {
+    console.log(`[TRUTH AUDIT] HOTSPOT ${normalizedStateId}: faction=${winnerFaction}, reward=${normalizedFinalReward}, delta=${truthDelta}`);
+  }
 
   return {
     stateId: normalizedStateId,
