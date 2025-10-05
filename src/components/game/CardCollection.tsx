@@ -41,9 +41,12 @@ export const CardCollectionContent = ({
     return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
   };
 
+  const normalizedSearchTerm = searchTerm.toLowerCase();
+
   const filteredCards = discoveredCards.filter(card => {
-    const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      card.text.toLowerCase().includes(searchTerm.toLowerCase());
+    const cardText = (card.text ?? '').toLowerCase();
+    const matchesSearch = card.name.toLowerCase().includes(normalizedSearchTerm) ||
+      cardText.includes(normalizedSearchTerm);
     const matchesType = filterType === 'all' || normalizeCardType(card.type) === filterType;
     const matchesRarity = filterRarity === 'all' || card.rarity === filterRarity;
 
@@ -66,6 +69,9 @@ export const CardCollectionContent = ({
   const CardItem = ({ card }: { card: GameCard }) => {
     const cardStats = getCardStats(card.id);
 
+    const rawCardText = card.text ?? '';
+    const cardDescription = rawCardText.trim().length > 0 ? rawCardText : 'No description available.';
+
     return (
       <button
         type="button"
@@ -87,7 +93,7 @@ export const CardCollectionContent = ({
             </div>
           </div>
 
-          <p className="mb-3 text-sm text-slate-300">{card.text}</p>
+          <p className="mb-3 text-sm text-slate-300">{cardDescription}</p>
 
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-emerald-200/80">
             <span>Cost: {card.cost} IP</span>
