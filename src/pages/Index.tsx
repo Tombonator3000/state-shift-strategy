@@ -19,7 +19,8 @@ import { useAudioContext } from '@/contexts/AudioContext';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
 import FloatingNumbers from '@/components/effects/FloatingNumbers';
-import TabloidVictoryScreen from '@/components/effects/TabloidVictoryScreen';
+import ExtraFeed from '@/components/news/ExtraFeed';
+import FinalEditionOverlay from '@/components/news/FinalEditionOverlay';
 import FalloutOverlay from '@/expansions/tabloidRelics/RelicUI';
 
 import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
@@ -64,9 +65,11 @@ import { usePressArchive } from '@/hooks/usePressArchive';
 import { useIntelArchive } from '@/hooks/useIntelArchive';
 import type { IntelArchiveDraft } from '@/hooks/useIntelArchive';
 import { upsertParanormalSighting } from '@/utils/paranormalSightings';
-import { buildFinalEdition } from '@/utils/finalEdition';
+import { buildFinalEdition as buildGameOverReport } from '@/utils/finalEdition';
 import type { GameOverReport } from '@/types/finalEdition';
 import type { ArcProgressSummary } from '@/types/campaign';
+import { buildFinalEdition as buildNewsFinalEdition, type FinalEdition, type TurnLog } from '@/news/headlineEngine';
+import { toPlayedLite } from '@/hooks/aiHelpers';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
@@ -140,6 +143,7 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showInGameOptions, setShowInGameOptions] = useState(false);
   const [finalEdition, setFinalEdition] = useState<GameOverReport | null>(null);
+  const [newsFinalEdition, setNewsFinalEdition] = useState<FinalEdition | null>(null);
   const [readingEdition, setReadingEdition] = useState<GameOverReport | null>(null);
   const [showExtraEdition, setShowExtraEdition] = useState(false);
   const [isEndingTurn, setIsEndingTurn] = useState(false);
@@ -189,6 +193,38 @@ const Index = () => {
         .filter(Boolean),
     [discardPreview.discardedCards]
   );
+  const finalEditionTurnLogs = useMemo<TurnLog[]>(() => {
+    if (!Array.isArray(gameState.playHistory) || gameState.playHistory.length === 0) {
+      return [];
+    }
+
+    const grouped = new Map<string, TurnLog>();
+
+    for (const record of gameState.playHistory) {
+      const lite = toPlayedLite(record);
+      if (!lite) {
+        continue;
+      }
+      const key = `${record.round}:${record.turn}`;
+      const existing = grouped.get(key);
+      if (existing) {
+        existing.plays.push(lite);
+      } else {
+        grouped.set(key, {
+          round: record.round,
+          turn: record.turn,
+          plays: [lite],
+        });
+      }
+    }
+
+    return Array.from(grouped.values()).sort((a, b) => {
+      if (a.round === b.round) {
+        return a.turn - b.turn;
+      }
+      return a.round - b.round;
+    });
+  }, [gameState.playHistory]);
   const {
     issues: pressArchive,
     archiveEdition,
@@ -821,7 +857,7 @@ const Index = () => {
 
     if (winner && victoryType) {
       const comboSummary = getLastComboSummary();
-      const report = buildFinalEdition({
+      const report = buildGameOverReport({
         state: {
           round: gameState.round,
           truth: gameState.truth,
@@ -841,6 +877,21 @@ const Index = () => {
         comboSummary,
       });
 
+      let composedNewsEdition: FinalEdition | null = null;
+      if (finalEditionTurnLogs.length > 0 || gameState.playHistory.length === 0) {
+        try {
+          composedNewsEdition = buildNewsFinalEdition(
+            `${gameState.faction}:${report.recordedAt}`,
+            finalEditionTurnLogs.length > 0
+              ? finalEditionTurnLogs
+              : [{ round: gameState.round, turn: gameState.turn, plays: [] }],
+          );
+        } catch (error) {
+          console.warn('Failed to compose final edition newspaper', error);
+          composedNewsEdition = null;
+        }
+      }
+
       setGameState(prev => ({
         ...prev,
         isGameOver: true,
@@ -850,6 +901,7 @@ const Index = () => {
       }));
 
       setFinalEdition(report);
+      setNewsFinalEdition(composedNewsEdition);
       setReadingEdition(report);
       setIsVictoryOverlayOpen(true);
     }
@@ -870,6 +922,7 @@ const Index = () => {
     gameState.currentEvents,
     gameState.secretAgenda,
     gameState.aiSecretAgenda,
+    finalEditionTurnLogs,
     arcProgressSummaries,
     paranormalSightings,
     setGameState,
@@ -878,10 +931,27 @@ const Index = () => {
   useEffect(() => {
     const edition = gameState.finalEdition;
     if (!edition) {
+      setNewsFinalEdition(null);
       return;
     }
 
     setFinalEdition(edition);
+    if (finalEditionTurnLogs.length > 0 || gameState.playHistory.length === 0) {
+      try {
+        const composed = buildNewsFinalEdition(
+          `${gameState.faction}:${edition.recordedAt}`,
+          finalEditionTurnLogs.length > 0
+            ? finalEditionTurnLogs
+            : [{ round: gameState.round, turn: gameState.turn, plays: [] }],
+        );
+        setNewsFinalEdition(prev => (prev?.seed === composed.seed ? prev : composed));
+      } catch (error) {
+        console.warn('Failed to refresh final edition newspaper', error);
+        setNewsFinalEdition(null);
+      }
+    } else {
+      setNewsFinalEdition(null);
+    }
     if (!readingEdition) {
       setReadingEdition(edition);
     }
@@ -889,7 +959,15 @@ const Index = () => {
       setIsVictoryOverlayOpen(true);
       lastVictoryRef.current = edition.recordedAt;
     }
-  }, [gameState.finalEdition, gameState.winner, readingEdition]);
+  }, [
+    gameState.finalEdition,
+    gameState.winner,
+    readingEdition,
+    finalEditionTurnLogs,
+    gameState.faction,
+    gameState.round,
+    gameState.turn,
+  ]);
 
   // Enhanced synergy detection with coordinated visual effects
   useEffect(() => {
@@ -1583,6 +1661,7 @@ const Index = () => {
     persistFaction(faction);
     setIsVictoryOverlayOpen(false);
     setFinalEdition(null);
+    setNewsFinalEdition(null);
     setReadingEdition(null);
     setShowExtraEdition(false);
     setParanormalSightings([]);
@@ -2511,6 +2590,7 @@ const Index = () => {
             onInspectCard={(card) => setInspectedPlayedCard(card)}
           />
         </div>
+        <ExtraFeed articles={gameState.extraExtraFeed} />
       </div>
       <CardPreviewOverlay card={hoveredCard ? { ...hoveredCard, text: hoveredCard.text || '' } : null} />
     </div>
@@ -2633,21 +2713,24 @@ const Index = () => {
         onPlayCard={() => {}}
       />
 
-      <TabloidVictoryScreen
-        isVisible={isVictoryOverlayOpen && Boolean(finalEdition)}
+      <FinalEditionOverlay
+        isVisible={isVictoryOverlayOpen && Boolean(finalEdition) && Boolean(newsFinalEdition)}
+        edition={newsFinalEdition}
         report={finalEdition}
         playerFaction={gameState.faction}
         victoryType={gameState.victoryType}
-        onClose={() => {
+        onContinue={() => {
           setIsVictoryOverlayOpen(false);
           setFinalEdition(null);
+          setNewsFinalEdition(null);
           setReadingEdition(null);
           setShowMenu(true);
           setShowIntro(true);
         }}
-        onMainMenu={() => {
+        onRestart={() => {
           setIsVictoryOverlayOpen(false);
           setFinalEdition(null);
+          setNewsFinalEdition(null);
           setReadingEdition(null);
           setShowExtraEdition(false);
           setShowMenu(true);
@@ -2676,6 +2759,7 @@ const Index = () => {
             if (closingActiveVictory) {
               setIsVictoryOverlayOpen(false);
               setFinalEdition(null);
+              setNewsFinalEdition(null);
               setShowMenu(true);
               setShowIntro(true);
               setGameState(prev => ({ ...prev, isGameOver: false, finalEdition: null }));

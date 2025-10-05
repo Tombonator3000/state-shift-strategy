@@ -649,8 +649,7 @@ export function endTurn(
 
     if (bufferPlays.length >= 3) {
       const article = generateExtraExtra(`mvp:${currentId}:${turnNumber}`, [turnLogEntry], totals);
-      const articleLine = `${article.hed} — ${article.dek}`;
-      extraExtraFeed = [...extraExtraFeed, articleLine];
+      extraExtraFeed = [...extraExtraFeed, article];
     }
   }
 

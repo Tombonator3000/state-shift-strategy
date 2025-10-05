@@ -1171,7 +1171,12 @@ export class EnhancedAIStrategist implements AIStrategist {
       aiControlledStates,
       log: Array.isArray(gameState.log) ? [...gameState.log] : [],
       headlineLog: Array.isArray(gameState.headlineLog) ? [...gameState.headlineLog] : [],
-      extraExtraFeed: Array.isArray(gameState.extraExtraFeed) ? [...gameState.extraExtraFeed] : [],
+      extraExtraFeed: Array.isArray(gameState.extraExtraFeed)
+        ? gameState.extraExtraFeed.map(article => ({
+            ...article,
+            bullets: Array.isArray(article.bullets) ? [...article.bullets] : [],
+          }))
+        : [],
       turnPlays: Array.isArray(gameState.turnPlays)
         ? gameState.turnPlays.map((play: TurnPlay) => ({
             ...play,

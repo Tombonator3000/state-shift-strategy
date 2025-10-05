@@ -100,7 +100,10 @@ export const evaluateCombosForTurn = (
     })),
     log: [...state.log],
     headlineLog: [...state.headlineLog],
-    extraExtraFeed: [...state.extraExtraFeed],
+    extraExtraFeed: state.extraExtraFeed.map(article => ({
+      ...article,
+      bullets: [...article.bullets],
+    })),
     winner: state.winner,
     victoryType: state.victoryType,
     finalEdition: state.finalEdition ?? null,
