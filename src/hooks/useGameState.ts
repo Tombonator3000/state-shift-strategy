@@ -2445,6 +2445,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   }, [gameState]);
 
   const pendingAiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const aiWrapupPendingRef = useRef(false);
   const newspaperRevealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameSessionRef = useRef(0);
 
@@ -2453,6 +2454,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (pendingAiTimeoutRef.current) {
         clearTimeout(pendingAiTimeoutRef.current);
         pendingAiTimeoutRef.current = null;
+        aiWrapupPendingRef.current = false;
       }
       if (newspaperRevealTimeoutRef.current) {
         clearTimeout(newspaperRevealTimeoutRef.current);
@@ -2581,6 +2583,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       clearTimeout(pendingAiTimeoutRef.current);
     }
     pendingAiTimeoutRef.current = null;
+    aiWrapupPendingRef.current = false;
     if (newspaperRevealTimeoutRef.current) {
       clearTimeout(newspaperRevealTimeoutRef.current);
     }
@@ -3893,7 +3896,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       !currentState?.aiStrategist ||
       currentState.currentPlayer !== 'ai' ||
       currentState.aiTurnInProgress ||
-      currentState.isGameOver
+      currentState.isGameOver ||
+      pendingAiTimeoutRef.current
     ) {
       return;
     }
@@ -3912,6 +3916,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
     let aiTurnStarted = false;
     let encounteredError = false;
+    let aiWrapupScheduled = false;
 
     setGameState(prev => {
       if (sessionGuard !== gameSessionRef.current) {
@@ -4056,15 +4061,20 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       if (pendingAiTimeoutRef.current) {
         clearTimeout(pendingAiTimeoutRef.current);
+        pendingAiTimeoutRef.current = null;
+        aiWrapupPendingRef.current = false;
       }
 
       const timeoutSessionGuard = gameSessionRef.current;
+      aiWrapupScheduled = true;
+      aiWrapupPendingRef.current = true;
       pendingAiTimeoutRef.current = setTimeout(() => {
         if (timeoutSessionGuard !== gameSessionRef.current) {
           return;
         }
 
         pendingAiTimeoutRef.current = null;
+        aiWrapupPendingRef.current = false;
 
         const stateSnapshot = gameStateRef.current;
         if (!stateSnapshot || stateSnapshot.isGameOver || stateSnapshot.currentPlayer !== 'ai') {
@@ -4099,17 +4109,21 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return;
       }
 
-      setGameState(prev => {
-        if (sessionGuard !== gameSessionRef.current) {
-          return prev;
-        }
+      const shouldResetImmediately = !aiWrapupScheduled || !aiWrapupPendingRef.current;
 
-        if (prev.isGameOver || !prev.aiTurnInProgress) {
-          return prev;
-        }
+      if (shouldResetImmediately) {
+        setGameState(prev => {
+          if (sessionGuard !== gameSessionRef.current) {
+            return prev;
+          }
 
-        return { ...prev, aiTurnInProgress: false };
-      });
+          if (prev.isGameOver || !prev.aiTurnInProgress) {
+            return prev;
+          }
+
+          return { ...prev, aiTurnInProgress: false };
+        });
+      }
 
       if (encounteredError && sessionGuard === gameSessionRef.current) {
         const stateSnapshot = gameStateRef.current;
@@ -4930,6 +4944,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         clearTimeout(pendingAiTimeoutRef.current);
       }
       pendingAiTimeoutRef.current = null;
+      aiWrapupPendingRef.current = false;
 
       setGameState(prev => {
         const savedDifficultyValue = typeof saveData.secretAgendaDifficulty === 'string'
