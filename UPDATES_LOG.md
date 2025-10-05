@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-05 – Lower IP victory threshold to 200
+- Drop the economic victory target from 300 IP to 200 across rules, tutorial copy, and in-game HUD messaging.
+- Update the IP victory condition logic, onboarding flows, and documentation so both factions now race to 200 IP.
+
 ## 2025-10-05 – Launch Extra Feed and final overlay refresh
 - Replace the legacy victory screen with a final edition overlay that pairs the campaign recap with a live-generated newspaper spread.
 - Surface turn-driven Extra Extra bulletins beside the main board using full `ArticleBlock` data instead of strings.

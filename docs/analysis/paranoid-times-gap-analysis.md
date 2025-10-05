@@ -1,7 +1,7 @@
 # Paranoid Times Gap Analysis and Improvement Plan
 
 ## Current MVP snapshot
-- **Core loop:** The MVP pits Truth Seekers against the Government in a two-player duel that tracks Influence Points (IP), the shared Truth meter, and pressure on U.S. states, with victory triggered by 10 captured states, Truth thresholds, or 300 IP.【F:DESIGN_DOC_MVP.md†L7-L63】【F:docs/TECHNICAL_README.md†L11-L19】
+- **Core loop:** The MVP pits Truth Seekers against the Government in a two-player duel that tracks Influence Points (IP), the shared Truth meter, and pressure on U.S. states, with victory triggered by 10 captured states, Truth thresholds, or 200 IP.【F:DESIGN_DOC_MVP.md†L7-L63】【F:docs/TECHNICAL_README.md†L11-L19】
 - **Economy:** Each turn grants 5 IP plus 1 IP per controlled state before players can spend resources to play up to three cards.【F:DESIGN_DOC_MVP.md†L99-L134】【F:src/mvp/engine.ts†L50-L99】
 - **Card catalog:** Cards are limited to three types (ATTACK, MEDIA, ZONE) with tightly scripted effects and costs that peak at four IP removed, four percent Truth swing, or four pressure per play.【F:DESIGN_DOC_MVP.md†L25-L189】
 - **Combo hooks:** The runtime already supports lightweight combo detection that can reward extra IP or visual flourishes after turn wrap-up.【F:docs/TECHNICAL_README.md†L35-L36】

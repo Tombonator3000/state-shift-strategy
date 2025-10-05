@@ -838,10 +838,10 @@ const Index = () => {
     } else if (gameState.truth <= 5 && gameState.faction === 'government') {
       winner = 'government';
       victoryType = 'truth';
-    } else if (gameState.ip >= 300) {
+    } else if (gameState.ip >= 200) {
       winner = gameState.faction;
       victoryType = 'ip';
-    } else if (gameState.aiIP >= 300) {
+    } else if (gameState.aiIP >= 200) {
       winner = gameState.faction === 'government' ? 'truth' : 'government';
       victoryType = 'ip';
     } else if (gameState.controlledStates.length >= 10) {
@@ -2167,7 +2167,7 @@ const Index = () => {
           </p>
           <ul className="space-y-1 font-mono">
             <li>• Control 10 states</li>
-            <li>• Reach 300 IP</li>
+            <li>• Reach 200 IP</li>
             <li>• Truth ≥95% / ≤5%</li>
           </ul>
           <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
@@ -2181,7 +2181,7 @@ const Index = () => {
             </div>
             <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
               <div className="text-[9px] uppercase tracking-wide text-newspaper-text/60">IP</div>
-              <div className="text-sm font-mono text-newspaper-text">{gameState.ip}/300</div>
+              <div className="text-sm font-mono text-newspaper-text">{gameState.ip}/200</div>
             </div>
           </div>
         </>
