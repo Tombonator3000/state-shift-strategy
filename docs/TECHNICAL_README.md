@@ -149,6 +149,10 @@ compiled articles, and the verb pools chosen for each card, matching the `Genera
 
 ⚠️ Not run (static QA review only).
 
+### QA regression notes
+
+- **Card collection storage fallback:** `useCardCollection` now wraps all localStorage access in the repository's safe helpers so browsers that block storage (Safari private mode, embedded webviews, strict content blockers) only emit a console warning. Gameplay discovery effects continue to run in `Index.tsx` because they consume the in-memory hook state, so verify the UI by triggering a new card discovery with storage disabled and confirming the overlay still appears without runtime errors.
+
 ##### Pacific Quantum Coast (`CA`, `WA`, `OR`, `AK`, `HI`)
 **Bonuses**
 - `pacific_bonus_tsunami_briefing_buoys` — *PACIFIC BUOY FLASHES TOP-SECRET WAVE ALERTS* — Buoy lights blink clearance codes in Morse while surfers nod solemnly and paddle toward the anomaly. Effects: Truth +2, IP +1, Pressure +0.
