@@ -1,4 +1,5 @@
 import type { Difficulty } from "../ai";
+import { safeGetLocalStorageItem, safeSetLocalStorageItem } from "@/utils/storage";
 
 const OPTIONS_STORAGE_KEY = "gameSettings";
 
@@ -26,8 +27,8 @@ const readStoredGameSettings = (): StoredGameSettings | null => {
 };
 
 export function getDifficulty(): Difficulty {
-  const storage = typeof localStorage !== "undefined" ? localStorage : null;
-  const raw = storage?.getItem("shadowgov:difficulty") ?? "NORMAL";
+  const raw =
+    safeGetLocalStorageItem("shadowgov:difficulty", { logger: console }) ?? "NORMAL";
   switch (raw) {
     case "EASY":
     case "NORMAL":
@@ -46,9 +47,9 @@ export function setDifficultyFromLabel(label: string) {
     "HARD - Top Secret": "HARD",
     "TOP SECRET+ - Meta-Cheating": "TOP_SECRET_PLUS",
   };
-  if (typeof localStorage !== "undefined") {
-    localStorage.setItem("shadowgov:difficulty", map[label] ?? "NORMAL");
-  }
+  safeSetLocalStorageItem("shadowgov:difficulty", map[label] ?? "NORMAL", {
+    logger: console,
+  });
 }
 
 export function areParanormalEffectsEnabled(): boolean {
