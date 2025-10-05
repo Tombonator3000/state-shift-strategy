@@ -15,6 +15,7 @@ import type { ComboCategory, ComboSettings } from '@/game/combo.types';
 import { Badge } from '@/components/ui/badge';
 import { DEFAULT_UI_SCALE, coerceUiScale, parseUiScale } from '@/lib/ui-scale';
 import { cn } from '@/lib/utils';
+import { safeGetLocalStorageItem } from '@/utils/storage';
 import {
   Select,
   SelectContent,
@@ -155,9 +156,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
       uiScale: DEFAULT_UI_SCALE,
     };
 
-    const stored = typeof localStorage !== 'undefined'
-      ? localStorage.getItem(SETTINGS_STORAGE_KEY)
-      : null;
+    const stored = safeGetLocalStorageItem(SETTINGS_STORAGE_KEY);
 
     if (stored) {
       try {

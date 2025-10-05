@@ -2,6 +2,9 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-05 – Harden options storage reads
+- Use the safe localStorage helper when loading saved options so the game falls back to defaults when storage is unavailable.
+
 ## 2025-10-05 – Harden tutorial progress storage
 - Ensure the tutorial manager uses safe localStorage helpers so blocked storage falls back to in-memory defaults without breaking onboarding.
 - Wrap tutorial reset logic in guards so clearing progress never crashes when storage access fails.
