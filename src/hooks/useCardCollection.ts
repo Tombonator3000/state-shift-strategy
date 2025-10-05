@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE } from '@/data/cardDatabase';
+import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
 
 interface CardCollectionData {
   discoveredCards: Set<string>;
@@ -19,29 +20,37 @@ export const useCardCollection = () => {
 
   // Load from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        setCollection({
-          discoveredCards: new Set(data.discoveredCards || []),
-          playedCards: new Map(Object.entries(data.playedCards || {})),
-          lastUpdated: data.lastUpdated || Date.now()
-        });
-      } catch (error) {
-        console.error('Failed to load card collection:', error);
+    try {
+      const saved = safeGetLocalStorageItem(STORAGE_KEY, { logger: console });
+      if (!saved) {
+        return;
       }
+
+      const data = JSON.parse(saved);
+      setCollection({
+        discoveredCards: new Set(data.discoveredCards || []),
+        playedCards: new Map(Object.entries(data.playedCards || {})),
+        lastUpdated: data.lastUpdated || Date.now()
+      });
+    } catch (error) {
+      console.warn('Card collection storage unavailable; continuing without persistence.', error);
     }
   }, []);
 
   // Save to localStorage whenever collection changes
   useEffect(() => {
-    const dataToSave = {
-      discoveredCards: Array.from(collection.discoveredCards),
-      playedCards: Object.fromEntries(collection.playedCards),
-      lastUpdated: collection.lastUpdated
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+    try {
+      const dataToSave = {
+        discoveredCards: Array.from(collection.discoveredCards),
+        playedCards: Object.fromEntries(collection.playedCards),
+        lastUpdated: collection.lastUpdated
+      };
+
+      const serialized = JSON.stringify(dataToSave);
+      safeSetLocalStorageItem(STORAGE_KEY, serialized, { logger: console });
+    } catch (error) {
+      console.warn('Failed to persist card collection; continuing without storage.', error);
+    }
   }, [collection]);
 
   const discoverCard = (cardId: string) => {
