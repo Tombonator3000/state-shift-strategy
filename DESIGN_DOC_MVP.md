@@ -133,7 +133,7 @@ Slutt på tur
 
 
 
-Ytterligere discards samme sluttfase koster 1 IP per kort.
+Neste kort i samme sluttfase koster 10 IP, deretter 15 IP for det tredje, 20 IP for det fjerde (fortsetter +5 IP per ekstra kort).
 
 
 
@@ -239,7 +239,7 @@ Kast 1 valgfritt kort gratis.
 
 
 
-Kast flere kort samme sluttfase → betal 1 IP per ekstra kort.
+Kast kort nummer to for 10 IP, nummer tre for 15 IP, nummer fire for 20 IP (fortsetter +5 IP for hvert ekstra kort samme sluttfase).
 
 
 
@@ -531,7 +531,7 @@ endTurn(s):
 
 
 
-Spilleren kan kaste 1 kort gratis (ekstra koster 1 IP hver).
+Spilleren kan kaste 1 kort gratis, deretter betale 10/15/20 IP (+5 IP videre) for flere discards i samme sluttfase.
 
 
 
@@ -643,7 +643,7 @@ ZONE (Common, 4 IP): +1 Pressure på OH → når Defense 3 neste runde med flere
 
 
 
-Slutt: Du discarder 1 dødt kort gratis.
+Slutt: Du discarder 1 dødt kort gratis; ekstra kort koster 10/15/20 IP videre opp +5 IP per kort.
 
 
 
@@ -739,7 +739,7 @@ Dev-sjekk:
 
 
 
-&nbsp;EndTurn: 1 gratis discard, ekstra koster 1 IP.
+&nbsp;EndTurn: 1 gratis discard, deretter 10/15/20 IP (+5 IP videre) for ekstra kort samme sluttfase.
 
 
 
