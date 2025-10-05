@@ -14,3 +14,8 @@ This guidance applies to the entire repository. If any directory later introduce
 ## Tooling notes
 - `scripts/generate-extension-index.mjs` runs automatically via the `predev` and `prebuild` npm lifecycle hooks.
 
+## Update log expectations
+- Whenever a change that affects the game is merged, append a new entry to `UPDATES_LOG.md` at the repository root.
+- Each entry must start with the merge date in `YYYY-MM-DD` format followed by a short, human-readable summary of the change.
+- Keep the log sorted in descending chronological order so the most recent updates appear first.
+
