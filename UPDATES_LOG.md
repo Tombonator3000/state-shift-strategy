@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-22 – Safeguard the evidence archive controls
+- Split the evidence archive filter reset from the full archive wipe so players only delete entries when they deliberately hit the new clear-archive control.
+- Styled the destructive action as a red-alert button in both classic and broadsheet layouts to telegraph its impact.
+
 ## 2025-10-06 – Float the discard toggle on card overlays
 - Removed the orange queue discard button and replaced it with a floating trash icon anchored to the card edge for quicker access.
 - Highlight the icon when a discard is queued so players see the state directly on the card art.
