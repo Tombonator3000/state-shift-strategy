@@ -1,3 +1,5 @@
+import rawNewspaperDataset from '@/data/newspaperData.json';
+
 export type NewspaperData = {
   mastheads: string[];
   ads: string[];
@@ -40,7 +42,6 @@ const MINIMAL_DATA: NewspaperData = {
 };
 
 let cache: NewspaperData | null = null;
-let loadingPromise: Promise<NewspaperData> | null = null;
 
 const normalizeArray = (value: unknown, fallback: string[]): string[] => {
   return Array.isArray(value) && value.length > 0 ? value.map(String) : fallback;
@@ -114,34 +115,13 @@ const normalizeData = (raw: unknown): NewspaperData => {
   return data;
 };
 
+const CANONICAL_DATA = normalizeData(rawNewspaperDataset as unknown);
+
 export async function loadNewspaperData(): Promise<NewspaperData> {
-  if (cache) {
-    return cache;
+  if (!cache) {
+    cache = CANONICAL_DATA;
   }
-
-  if (loadingPromise) {
-    return loadingPromise;
-  }
-
-  loadingPromise = (async () => {
-    try {
-      const response = await fetch('./newspaperData.json', { cache: 'no-store' });
-      if (!response.ok) {
-        throw new Error(`Failed to load newspaper data: ${response.status} ${response.statusText}`);
-      }
-      const json = await response.json();
-      cache = normalizeData(json);
-    } catch (error) {
-      console.warn('Falling back to minimal newspaper data set', error);
-      cache = MINIMAL_DATA;
-    } finally {
-      loadingPromise = null;
-    }
-
-    return cache;
-  })();
-
-  return loadingPromise;
+  return cache;
 }
 
 export function pick<T>(arr: T[] | undefined, fallback?: T): T {

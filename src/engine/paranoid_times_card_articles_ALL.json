@@ -25,7 +25,13 @@
       "subhead": "Community radio swears Blurry Bigfoot Photo Goes Viral hijacked the feed with cosmic receipts.",
       "byline": "By: Volunteer Fact Wrangler 10",
       "body": "Youth group ghost hunters swear Blurry Bigfoot Photo Goes Viral looped the emergency siren so it chants \"believe harder\". One caller reports Blurry Bigfoot Photo Goes Viral crowdsourced captions faster than fact-checkers could blink. Tin-foil futures spike as bigfoot believers mark off PTO for vigilance.",
-      "imagePrompt": "grainy tabloid photo of blurry bigfoot photo goes viral amid bigfoot chaos; reporter pointing at a blurry silhouette"
+      "imagePrompt": "grainy tabloid photo of blurry bigfoot photo goes viral amid bigfoot chaos; reporter pointing at a blurry silhouette",
+      "statesMentioned": ["Oregon", "Washington"],
+      "recurringCharacter": "Volunteer Fact Wrangler 10",
+      "followUpHooks": [
+        "Dispatch scout to monitor Cascadia fog density",
+        "Cross-check ham radio chatter for cryptid memes"
+      ]
     },
     {
       "id": "TRUTH-002",
@@ -39,7 +45,13 @@
       "subhead": "Neighborhood watch maps redraw themselves once Elvis Spotted at 3 A.M. Diner opens a elvis hotspot.",
       "byline": "By: Rooftop Stringer 23",
       "body": "County fair jugglers swear Elvis Spotted at 3 A.M. Diner carved a crop circle inside the county annex lobby. Elvis Spotted at 3 A.M. Diner made parking meters count down in alien numerals. Grandma hotline volunteers request backup batteries and a calming playlist.",
-      "imagePrompt": "grainy tabloid photo of elvis spotted at 3 a.m. diner amid elvis chaos; overexposed flashbulbs"
+      "imagePrompt": "grainy tabloid photo of elvis spotted at 3 a.m. diner amid elvis chaos; overexposed flashbulbs",
+      "statesMentioned": ["Nevada"],
+      "recurringCharacter": "Rooftop Stringer 23",
+      "followUpHooks": [
+        "Check diner jukebox logs for reverse messages",
+        "Flag county annex security footage for time skips"
+      ]
     },
     {
       "id": "TRUTH-003",
@@ -52,7 +64,13 @@
       "subhead": "Local vloggers caption Pastor Rex's Apocalypse Podcast as \"finally, undeniable media\".",
       "byline": "By: Alleyway Editor 36",
       "body": "After-school UFO clubs swear Pastor Rex's Apocalypse Podcast uploaded a zip file labeled \"REAL PROOF\" that screams when opened. Pastor Rex's Apocalypse Podcast premiered a teaser trailer for the sequel mid-interview. Teens already selling bootleg merch that reads \"PASTOR REX'S APOCALYPSE PODCAST CALLED IT\".",
-      "imagePrompt": "grainy tabloid photo of pastor rex's apocalypse podcast amid media chaos; flying confetti shaped like question marks"
+      "imagePrompt": "grainy tabloid photo of pastor rex's apocalypse podcast amid media chaos; flying confetti shaped like question marks",
+      "statesMentioned": ["Tennessee", "Kentucky"],
+      "recurringCharacter": "Pastor Rex",
+      "followUpHooks": [
+        "Trace origin of screaming zip file",
+        "Queue interview with conspiracy choir director"
+      ]
     },
     {
       "id": "TRUTH-004",

@@ -12,6 +12,9 @@ export type CardArticle = {
   byline?: string;
   body?: string;
   imagePrompt?: string;
+  statesMentioned?: string[];
+  recurringCharacter?: string | null;
+  followUpHooks?: string[];
 };
 
 export type ArticleBank = {
@@ -63,6 +66,9 @@ const cardArticleSchema = z.object({
   byline: z.string().optional(),
   body: z.string().optional(),
   imagePrompt: z.string().optional(),
+  statesMentioned: z.array(z.string()).optional(),
+  recurringCharacter: z.string().optional(),
+  followUpHooks: z.array(z.string()).optional(),
 });
 
 const articleFileSchema = z.object({
@@ -82,6 +88,21 @@ const normaliseTags = (tags: string[] | undefined): string[] => {
     seen.add(value);
   }
   return Array.from(seen);
+};
+
+const normaliseStringList = (input: string[] | undefined): string[] => {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+  const values: string[] = [];
+  for (const raw of input) {
+    const value = typeof raw === 'string' ? raw.trim() : '';
+    if (!value) {
+      continue;
+    }
+    values.push(value);
+  }
+  return values;
 };
 
 export async function loadArticleBank(): Promise<ArticleBank> {
@@ -115,6 +136,9 @@ export async function loadArticleBank(): Promise<ArticleBank> {
         byline: article.byline,
         body: article.body,
         imagePrompt: article.imagePrompt,
+        statesMentioned: normaliseStringList(article.statesMentioned),
+        recurringCharacter: article.recurringCharacter ? article.recurringCharacter.trim() || null : null,
+        followUpHooks: normaliseStringList(article.followUpHooks),
       };
       map.set(normalised.id, normalised);
     }
