@@ -4,6 +4,7 @@ import type { Card } from '@/types';
 import { loadCardLexicon } from './CardLexicon';
 import { loadArticleBank, type CardArticle } from '@/engine/news/articleBank';
 import { generateMainStory, type PlayedCardMeta, type GeneratedStory as MainGeneratedStory } from '@/engine/news/mainStory';
+import { deriveFrontPageSubhead } from '@/engine/news/frontPageSubhead';
 import { composeCardStory, composeComboStory, type CardStory, type ComboStory } from './StoryComposer';
 import type { ComboSummary } from '@/game/combo.types';
 import type { AgendaIssueId } from '@/data/agendaIssues';
@@ -45,10 +46,12 @@ export interface GeneratedStoryArticle {
 }
 
 export interface FrontPagePackage {
+  cards: PlayedCardMeta[];
   main: MainGeneratedStory | null;
   articles: GeneratedStoryArticle[];
   fallbackHeadline: string;
   fallbackSubhead: string;
+  articleBankReady: boolean;
 }
 
 export interface NarrativeIssue {
@@ -77,6 +80,7 @@ export interface IssueGeneratorInput {
   comboTruthDelta?: number;
   comboSummary?: ComboSummary | null;
   agendaIssueId?: AgendaIssueId;
+  agendaIssueLabel?: string | null;
 }
 
 const FALLBACK_ADS = ['All advertising temporarily redacted.'];
@@ -429,6 +433,8 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     input.comboTruthDelta ?? 0,
   );
 
+  const capturedStateNames = Array.from(new Set(context.capturedStates));
+
   const breakingStamp = shouldStampBreaking(context)
     ? pickOrNull(input.dataset.stamps?.breaking)
     : null;
@@ -511,11 +517,38 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     ? generateMainStory(frontPageCards, id => articleBank?.getById?.(id) ?? null)
     : null;
 
+  const articleBankReady = Boolean(articleBank?.hasArticles?.());
+  const frontPageFaction = frontPageCards[0]?.faction === 'GOV' ? 'government' : 'truth';
+  const truthDeltaLabel = formatTruthDeltaLabel(context.truthDeltaTotal);
+  const comboOwnerLabel = input.comboSummary
+    ? input.comboSummary.playerFaction === 'government'
+      ? 'Directorate envoys'
+      : 'Coalition operatives'
+    : null;
+  const fallbackSubhead = deriveFrontPageSubhead({
+    datasetSubheads: input.dataset.subheads,
+    fallback: FALLBACK_FRONT_PAGE_SUBHEAD,
+    combo: comboArticle
+      ? {
+          deck: comboArticle.deck,
+          tags: comboArticle.tags,
+          magnitude: comboArticle.magnitude,
+        }
+      : null,
+    comboOwnerLabel,
+    capturedStates: capturedStateNames,
+    truthDeltaLabel,
+    agendaLabel: input.agendaIssueLabel ?? null,
+    faction: frontPageFaction,
+  });
+
   const generatedStory: FrontPagePackage = {
+    cards: frontPageCards,
     main: mainStory,
     articles: generatedArticles,
     fallbackHeadline: FALLBACK_FRONT_PAGE_HEADLINE,
-    fallbackSubhead: FALLBACK_FRONT_PAGE_SUBHEAD,
+    fallbackSubhead,
+    articleBankReady,
   } satisfies FrontPagePackage;
 
   return {

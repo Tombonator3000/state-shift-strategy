@@ -1,7 +1,7 @@
 # End-of-Turn Newspaper Audit
 
 ## Executive Summary
-- The end-of-turn newspaper pulls cosmetic pools (mastheads, ads, subheads, etc.) from `public/newspaperData.json` through the cached `loadNewspaperData` helper, giving the UI a conspiratorial tone even when the primary fetch fails thanks to minimal fallbacks.【F:src/components/game/TabloidNewspaperV2.tsx†L347-L384】【F:src/lib/newspaperData.ts†L117-L145】【F:public/newspaperData.json†L1-L158】
+- The end-of-turn newspaper pulls cosmetic pools (mastheads, ads, subheads, etc.) from `src/data/newspaperData.json` through the cached `loadNewspaperData` helper, giving the UI a conspiratorial tone even when the primary dataset is unavailable thanks to minimal fallbacks.【F:src/components/game/TabloidNewspaperV2.tsx†L347-L384】【F:src/lib/newspaperData.ts†L1-L153】【F:src/data/newspaperData.json†L1-L214】
 - Narrative articles and front-page packages depend on the article bank loader, which first looks for runtime JSON assets and then falls back to the bundled `paranoid_times_card_articles_ALL.json` so every card has at least templated coverage.【F:src/engine/news/articleBank.ts†L3-L138】【F:src/engine/newspaper/IssueGenerator.ts†L344-L513】
 - The overlay highlights hero plays, combo reports, agenda setbacks, paranormal sightings, and campaign arcs, but several elements still rely on generic copy instead of tightly referencing the actual states, cards, and outcomes of the latest turn.【F:src/components/game/TabloidNewspaperV2.tsx†L720-L959】
 
@@ -22,13 +22,13 @@
 - **Limited State Referencing:** Generated hero bodies and fallback copy default to faction-generic paragraphs when no event fires, missing opportunities to name the contested state or tie back to the latest capture list.【F:src/components/game/TabloidNewspaperV2.tsx†L720-L755】
 - **Sparse Article Metadata:** Many cards rely on fallback article text because the JSON only holds headline/subhead/body blobs; there is no structured metadata for states affected, allied factions, or recurring NPCs, making it harder to weave precise recaps.【F:src/engine/newspaper/IssueGenerator.ts†L320-L341】
 - **Static Subheads:** Front-page subheads reuse a tiny static pool tied to card id length instead of leveraging the turn log or combo summaries, so repeated runs can feel recycled.【F:src/ui/newspaper/FrontPage.tsx†L92-L142】
-- **Siloed Cosmetic Pools:** `src/data/newspaperData.json` and `public/newspaperData.json` diverge, leading to different ad and masthead inventories between the overlay and the standalone front page widget.【F:public/newspaperData.json†L1-L158】【F:src/ui/newspaper/FrontPage.tsx†L5-L104】
+- **Siloed Cosmetic Pools:** `src/data/newspaperData.json` previously diverged from the runtime JSON fetched by the newspaper, leading to different ad and masthead inventories between the overlay and the standalone front page widget.【F:src/ui/newspaper/FrontPage.tsx†L5-L104】
 
 ## Improvement Opportunities
 1. **Share the Article Bank Instance** – Pass the already-loaded article bank (or its serialized stories) from `generateIssue` into `FrontPage` to eliminate duplicate loads and guarantee consistent copy across views.【F:src/engine/newspaper/IssueGenerator.ts†L344-L520】【F:src/ui/newspaper/FrontPage.tsx†L35-L88】
 2. **Enrich Hero Fallbacks** – When no event or article drives the hero story, synthesize paragraphs from captured state names, Truth deltas, and combo tags so the lead still references recent gameplay.【F:src/components/game/TabloidNewspaperV2.tsx†L720-L765】
 3. **Expand Article Metadata Schema** – Extend `paranoid_times_card_articles_ALL.json` (and its loader) with optional fields like `statesMentioned`, `recurringCharacter`, or `followUpHooks` to support richer recap sentences and future cross-linking.【F:src/engine/news/articleBank.ts†L68-L133】
-4. **Unify Cosmetic Pools** – Move the richer `public/newspaperData.json` into the shared loader (or generate a single canonical deck) so every newspaper surface draws from the same conspiratorial copy.【F:src/lib/newspaperData.ts†L117-L145】【F:public/newspaperData.json†L1-L158】【F:src/ui/newspaper/FrontPage.tsx†L35-L142】
+4. **Unify Cosmetic Pools** – Move the richer JSON deck into the shared loader so every newspaper surface draws from the same conspiratorial copy.【F:src/lib/newspaperData.ts†L1-L153】【F:src/ui/newspaper/FrontPage.tsx†L1-L209】
 5. **Contextual Subheads** – Teach `FrontPage` to derive subheads from combo summaries or agenda pull quotes before falling back to static strings, improving variety between turns.【F:src/ui/newspaper/FrontPage.tsx†L92-L142】【F:src/components/game/TabloidNewspaperV2.tsx†L270-L331】
 
 ## Foreslått plan (Suggested Plan)
@@ -43,3 +43,8 @@
 3. **Schema Update:** Utvid `cardArticleSchema` med nye felt og migrer `paranoid_times_card_articles_ALL.json`; dokumenter hvordan skribenter kan fylle ut metadata for fremtidige kort.【F:src/engine/news/articleBank.ts†L57-L133】
 4. **Pool Consolidation:** Flytt `public/newspaperData.json` inn i `src/data/` (eller generer det via byggsteg) slik at `loadNewspaperData` og `FrontPage` deler samme kilde.【F:src/lib/newspaperData.ts†L117-L145】【F:src/ui/newspaper/FrontPage.tsx†L35-L142】
 5. **Subhead Strategy:** Lag en `deriveFrontPageSubhead()` helper som tar inn combo-/agenda-data og faller tilbake til statiske tekster kun som siste utvei.【F:src/components/game/TabloidNewspaperV2.tsx†L270-L331】【F:src/ui/newspaper/FrontPage.tsx†L92-L142】
+
+## Hvordan brukes `paranoid_times_card_articles_ALL.json`?
+- **Fallback-datasett:** Filen pakkes inn i builden og importeres direkte av `loadArticleBank`. Når runtime-JSON ikke er tilgjengelig, sørger denne bunten for at hver kort-ID fortsatt har minst ett artikkelfrø, slik at genererte avisoppslag aldri står uten tekst.【F:src/engine/news/articleBank.ts†L3-L138】
+- **Kort → artikkel-oppslag:** Under `generateIssue` slår systemet opp artikkelmetadata per kort-ID for å bygge hero- og sekundæroppslag. Hvis artikkelen finnes i banken, overstyrer den fallback-overskrifter og -brødtekst; ellers brukes de dynamiske nødsakene.【F:src/engine/newspaper/IssueGenerator.ts†L344-L520】
+- **Front page-widgeten:** `FrontPage` gjenbruker samme loader for å hente artikkelkroppene som vises i miniversjonen av avisen. Når `IssueGenerator` allerede har prefetchet artikkelbanken, videresendes ferdige artikler og en `articleBankReady`-flagg, slik at widgeten slipper å laste filen på nytt.【F:src/ui/newspaper/FrontPage.tsx†L1-L169】【F:src/engine/newspaper/IssueGenerator.ts†L467-L520】

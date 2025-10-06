@@ -1,3 +1,5 @@
+import { loadNewspaperData, type NewspaperData } from '@/lib/newspaperData';
+
 export interface NewsPools {
   mastheads: string[];
   ads: string[];
@@ -15,86 +17,30 @@ export interface NewsPools {
   weather: string[];
 }
 
-type JsonRecord = Record<string, unknown>;
-
 type SubheadKey = keyof NewsPools['subheads'];
 
-type NonSubheadKey = Exclude<keyof NewsPools, 'subheads'>;
+type JsonRecord = Record<string, unknown>;
 
-const isRecord = (value: unknown): value is JsonRecord =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+let cachedPools: NewsPools | null = null;
 
-const toStringArray = (value: unknown, label: string): string[] => {
+const ensureArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
-    throw new Error(`Expected "${label}" to be an array in newspaperData.json`);
+    return [];
   }
   return value.map(item => String(item));
 };
 
-const REQUIRED_TOP_LEVEL_KEYS: NonSubheadKey[] = [
-  'mastheads',
-  'ads',
-  'bylines',
-  'sources',
-  'attackVerbs',
-  'mediaVerbs',
-  'zoneVerbs',
-  'weather',
-];
+const normaliseSubheads = (subheads: NewspaperData['subheads'] | undefined): NewsPools['subheads'] => {
+  const record = (subheads ?? {}) as JsonRecord;
 
-let cachedPools: NewsPools | null = null;
-let loadingPromise: Promise<NewsPools> | null = null;
-
-const extractPools = (raw: unknown): JsonRecord => {
-  if (!isRecord(raw)) {
-    throw new Error('Invalid newspaper data: expected an object at the root level.');
-  }
-
-  const candidate: unknown = 'pools' in raw ? (raw as { pools?: unknown }).pools : raw;
-
-  if (!isRecord(candidate)) {
-    throw new Error('Invalid newspaper data: expected a "pools" object.');
-  }
-
-  return candidate;
-};
-
-const parseSubheads = (value: unknown): NewsPools['subheads'] => {
-  if (!isRecord(value)) {
-    throw new Error('Invalid newspaper data: expected "subheads" to be an object.');
-  }
-
-  const record = value as JsonRecord;
-
-  const requireSubArray = (key: SubheadKey) =>
-    toStringArray(record[key as string], `subheads.${key}`);
+  const getList = (key: SubheadKey) => ensureArray(record[key as string]);
 
   return {
-    generic: requireSubArray('generic'),
-    attack: requireSubArray('attack'),
-    media: requireSubArray('media'),
-    zone: requireSubArray('zone'),
+    generic: getList('generic'),
+    attack: getList('attack'),
+    media: getList('media'),
+    zone: getList('zone'),
   };
-};
-
-const parsePools = (record: JsonRecord): NewsPools => {
-  const result: Partial<NewsPools> = {};
-
-  for (const key of REQUIRED_TOP_LEVEL_KEYS) {
-    if (!(key in record)) {
-      throw new Error(`Invalid newspaper data: missing "${key}" pool.`);
-    }
-    const rawValue = record[key as string];
-    result[key] = toStringArray(rawValue, key) as NewsPools[typeof key];
-  }
-
-  if (!('subheads' in record)) {
-    throw new Error('Invalid newspaper data: missing "subheads" pool.');
-  }
-
-  result.subheads = parseSubheads(record['subheads']);
-
-  return result as NewsPools;
 };
 
 export const loadNewsPools = async (): Promise<NewsPools> => {
@@ -102,26 +48,22 @@ export const loadNewsPools = async (): Promise<NewsPools> => {
     return cachedPools;
   }
 
-  if (!loadingPromise) {
-    loadingPromise = fetch('./newspaperData.json', { cache: 'no-store' })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to load newspaper pools: ${response.status} ${response.statusText}`);
-        }
-        return response.json();
-      })
-      .then(raw => {
-        const poolsRecord = extractPools(raw);
-        const pools = parsePools(poolsRecord);
-        cachedPools = pools;
-        return pools;
-      })
-      .finally(() => {
-        loadingPromise = null;
-      });
-  }
+  const dataset = await loadNewspaperData();
 
-  return loadingPromise;
+  const pools: NewsPools = {
+    mastheads: ensureArray(dataset.mastheads),
+    ads: ensureArray(dataset.ads),
+    subheads: normaliseSubheads(dataset.subheads),
+    bylines: ensureArray(dataset.bylines),
+    sources: ensureArray(dataset.sources),
+    attackVerbs: ensureArray(dataset.attackVerbs),
+    mediaVerbs: ensureArray(dataset.mediaVerbs),
+    zoneVerbs: ensureArray(dataset.zoneVerbs),
+    weather: ensureArray(dataset.weather),
+  };
+
+  cachedPools = pools;
+  return pools;
 };
 
 export const getPools = (): NewsPools => {

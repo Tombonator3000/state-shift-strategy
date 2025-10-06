@@ -12,6 +12,7 @@ import type { Card } from '@/types';
 import type { PlayedCardMeta } from '@/engine/news/mainStory';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import { buildRoundContext, formatTruthDelta } from './tabloidRoundUtils';
+import { composeHeroFallback } from './heroFallback';
 import { useAudioContext } from '@/contexts/AudioContext';
 import type { ParanormalSighting } from '@/types/paranormal';
 import type { AgendaMoment } from '@/hooks/usePressArchive';
@@ -617,6 +618,7 @@ const TabloidNewspaperV2 = ({
           comboTruthDelta,
           comboSummary: comboSummary ?? null,
           agendaIssueId: agendaIssue?.id,
+          agendaIssueLabel: agendaIssue?.label ?? null,
         });
         if (!cancelled) {
           setIssue(generated);
@@ -678,57 +680,18 @@ const TabloidNewspaperV2 = ({
   const heroArticle = issue?.hero ?? null;
   const heroEvent = heroArticle ? null : (events[0] ?? null);
 
-  const fallbackHeroHeadlineBase = useMemo(() => {
+  const heroFallback = useMemo(() => {
     if (heroArticle || heroEvent) {
       return null;
     }
-    if (comboReport) {
-      const owner = comboOwnerLabel ?? 'Operative Team';
-      return `${owner} Holds Initiative`;
-    }
-    return faction === 'truth' ? 'Coalition Status: Stable' : 'Directorate Status: Stable';
-  }, [comboOwnerLabel, comboReport, faction, heroArticle, heroEvent]);
-
-  const fallbackHeroSubhead = useMemo(() => {
-    if (heroArticle || heroEvent) {
-      return null;
-    }
-    if (comboReport) {
-      return 'Coordinated plays under review; teams cycle readiness drills.';
-    }
-    return faction === 'truth'
-      ? 'Signal monitors report no verified threats this cycle.'
-      : 'Agency briefings indicate routine operations across districts.';
-  }, [comboReport, faction, heroArticle, heroEvent]);
-
-  const fallbackHeroBody = useMemo(() => {
-    if (heroArticle || heroEvent) {
-      return null;
-    }
-    if (comboReport) {
-      const highlights = comboReport.entries
-        .map(entry => entry.name)
-        .filter(Boolean)
-        .slice(0, 3);
-      const owner = comboOwnerLabel ?? 'Operative Team';
-      return [
-        `${owner} review coordinated plays while awaiting fresh intel.`,
-        highlights.length
-          ? `Recent highlights: ${highlights.join(' • ')}.`
-          : 'Analysts note smooth execution with no unexpected resistance.',
-      ];
-    }
-    if (faction === 'truth') {
-      return [
-        'Coalition networks report steady intel flow with no escalations requiring immediate action.',
-        'Field agents rotate through rest cycles as analysts maintain quiet watch on signal integrity.',
-      ];
-    }
-    return [
-      'Directorate analysts confirm stable civic sentiment while monitoring for anomalous activity.',
-      'Regional liaisons emphasize patience as security nodes continue standard diagnostics.',
-    ];
-  }, [comboOwnerLabel, comboReport, faction, heroArticle, heroEvent]);
+    return composeHeroFallback({
+      faction,
+      capturedStates: narrativeContext.capturedStates,
+      truthDeltaTotal: narrativeContext.truthDeltaTotal,
+      comboReport: comboReport ? { entries: comboReport.entries } : null,
+      comboOwnerLabel,
+    });
+  }, [comboOwnerLabel, comboReport, faction, heroArticle, heroEvent, narrativeContext.capturedStates, narrativeContext.truthDeltaTotal]);
 
   const heroHeadline = heroArticle
     ? heroArticle.headline
@@ -738,17 +701,20 @@ const TabloidNewspaperV2 = ({
           const effectsLabel = formatEventEffects(heroEvent.effects);
           return effectsLabel ? `${base} (${effectsLabel})` : base;
         }
-        return (fallbackHeroHeadlineBase ?? 'STATUS UPDATE').toUpperCase();
+        const defaultHeadline = faction === 'truth'
+          ? 'COALITION OPS HOLD PATTERN'
+          : 'DIRECTORATE ENVOYS MAINTAIN WATCH';
+        return heroFallback?.headline ?? defaultHeadline;
       })();
 
   const heroSubhead = heroArticle
     ? heroArticle.deck
-    : heroEvent?.content ?? fallbackHeroSubhead ?? 'Developing situation under intense scrutiny.';
+    : heroEvent?.content ?? heroFallback?.subhead ?? 'Developing situation under intense scrutiny.';
 
   const heroBody = heroArticle?.paragraphs ?? (
     heroEvent
       ? [heroEvent.content ?? 'Witness reports remain fragmentary; authorities maintain deliberate silence.']
-      : fallbackHeroBody ?? [
+      : heroFallback?.body ?? [
           'Coalition networks report steady intel flow with no escalations requiring immediate action.',
           'Field agents rotate through rest cycles as analysts maintain quiet watch on signal integrity.',
         ]
@@ -760,7 +726,11 @@ const TabloidNewspaperV2 = ({
     ?? (heroEvent ? `[${(heroEvent.type ?? 'Event').toUpperCase()}]` : comboReport ? '[PLAYER HIGHLIGHT]' : '[STATUS BRIEF]');
   const heroTarget = heroArticle?.stateLabel ?? (heroEvent ? null : comboOwnerLabel ?? null);
   const heroCaptured = heroArticle?.capturedStates ?? [];
-  const heroTags = heroArticle?.tags ?? (heroEvent ? [] : comboReport ? comboReport.entries.slice(0, 3).map(entry => entry.name) : []);
+  const heroTags = heroArticle?.tags
+    ?? (heroEvent
+      ? []
+      : heroFallback?.tags
+        ?? (comboReport ? comboReport.entries.slice(0, 3).map(entry => entry.name).filter(Boolean) : []));
   const heroTruthImpact = heroArticle?.truthDeltaLabel ?? null;
   const heroIpImpact = heroArticle?.ipDeltaLabel ?? null;
   const heroPressureImpact = heroArticle?.pressureDeltaLabel ?? null;
