@@ -30,6 +30,12 @@ This guidance applies to the entire repository. If any directory later introduce
 - State management and data fetching rely on React Query and standard React patterns.
 - See [`docs/TECHNICAL_README.md`](docs/TECHNICAL_README.md) for detailed architecture and engineering conventions.
 
+## Gameplay loop guardrails
+- Core loop beats follow **Investigate → Uncover Contradiction → Escalate Paranoia → Resolve (or Repress)**.
+- Every new mechanic or quest step should slot into one of those beats; call out which beat it serves in docs and commits.
+- Protect the player fantasy of "unraveling an official lie"—fail states should hint at deeper secrets rather than simple retries.
+- Keep escalation moments interactive (choices, resource spends) so the player feels they *author* the conspiracy reveal.
+
 ## Mandatory checks before sending changes
 - `npm run lint`
 - `bun test --coverage --coverage-reporter=text`
