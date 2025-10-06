@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-06 – Float the discard toggle on card overlays
+- Removed the orange queue discard button and replaced it with a floating trash icon anchored to the card edge for quicker access.
+- Highlight the icon when a discard is queued so players see the state directly on the card art.
+
 ## 2025-10-21 – Tabloidize the Player Hub intel desks
 - Finished broadsheet variants for tutorials, evidence, press archives, and the state intel board so every hub tab now reads like a Paranoid Times spread.
 - Unified archive filters, badges, and ticker data to match the new typewriter-and-ink styling while preserving existing default layouts.
