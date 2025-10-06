@@ -57,6 +57,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Route the live agenda moment feed into the Player Hub overlay and surface a chronological timeline of stages and outcomes.
 - Add status filters, timeline styling, and empty-state messaging to help players review agenda advances, setbacks, and completions at a glance.
 
+## 2025-10-06 – Stabilize Extra Extra truth swings
+- Ensure the Extra Extra truth adjustment looks at the active UI factions when legacy MVP player data is missing so post-turn articles no longer crash.
+- Fall back to the player's faction to decide which side gains or loses truth when bulletins trigger without engine player metadata.
+
 ## 2025-10-06 – Harden turn newspaper handoff
 - Sanitize end-of-turn played card logs before printing so corrupted save data no longer crashes the Resolve-phase newspaper reveal.
 - Add regression coverage that verifies malformed records are ignored while valid cards still headline the post-turn bulletin.
