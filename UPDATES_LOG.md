@@ -38,6 +38,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Load news article pools on app startup to prevent empty or stale final editions when the archives are still initializing.
 - Skip composing the final newspaper until pool data is ready and clear the preview to avoid stale spreads during loading.
 
+## 2025-10-05 – Bundle offline US topo data
+- Package the United States state topology with the client so the Player Hub map renders without network access.
+- Update the map view to prioritise bundled geometry, retain legacy fallbacks for metadata-free saves, and cover the offline path with tests.
+
 ## 2025-10-05 – Harden AI turn recovery
 - Reset the AI turn progress flag when planning fails so the player immediately regains control.
 - Invoke a safe end-turn fallback if the AI remains the active player after an error to avoid stalled sessions.
