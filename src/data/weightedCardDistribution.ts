@@ -1,10 +1,6 @@
 import type { GameCard } from '@/rules/mvp';
 import { ensureMvpCosts, getCoreCards, isMvpCard } from './cardDatabase';
 import { EXPANSION_MANIFEST } from './expansions';
-import {
-  getEnabledExpansionIdsSnapshot,
-  getExpansionCardsSnapshot,
-} from './expansions/state';
 
 export const DISTRIBUTION_STORAGE_KEY = 'shadowgov-distribution-settings';
 
@@ -184,11 +180,22 @@ export const DEFAULT_DISTRIBUTION_SETTINGS: DistributionSettings = {
   earlySeedCount: 4
 };
 
+export interface DistributionExpansionContext {
+  enabledExpansionIds: string[];
+  expansionCards: GameCard[];
+}
+
+const DEFAULT_EXPANSION_CONTEXT: DistributionExpansionContext = {
+  enabledExpansionIds: [],
+  expansionCards: [],
+};
+
 export const sanitizeDistributionSettings = (
-  incoming?: Partial<DistributionSettings>,
+  incoming: Partial<DistributionSettings> | undefined,
+  enabledExpansionIds: string[] = DEFAULT_EXPANSION_CONTEXT.enabledExpansionIds,
 ): DistributionSettings => {
   const base = incoming ?? {};
-  const enabledExpansions = getEnabledExpansionIdsSnapshot();
+  const enabledExpansions = enabledExpansionIds;
   const hasEnabledExpansions = enabledExpansions.length > 0;
 
   const requestedMode = base.mode ?? DEFAULT_DISTRIBUTION_SETTINGS.mode;
@@ -234,7 +241,9 @@ export const sanitizeDistributionSettings = (
   };
 };
 
-export const loadDistributionSettingsFromStorage = (): DistributionSettings | null => {
+export const loadDistributionSettingsFromStorage = (
+  enabledExpansionIds: string[] = DEFAULT_EXPANSION_CONTEXT.enabledExpansionIds,
+): DistributionSettings | null => {
   const storage = getStorage();
   if (!storage) {
     return null;
@@ -247,7 +256,7 @@ export const loadDistributionSettingsFromStorage = (): DistributionSettings | nu
     }
 
     const parsed = JSON.parse(saved) as DistributionSettings;
-    return sanitizeDistributionSettings(parsed);
+    return sanitizeDistributionSettings(parsed, enabledExpansionIds);
   } catch (error) {
     console.error('Failed to load distribution settings:', error);
     return null;
@@ -256,8 +265,9 @@ export const loadDistributionSettingsFromStorage = (): DistributionSettings | nu
 
 export const persistDistributionSettings = (
   settings: DistributionSettings,
+  enabledExpansionIds: string[] = DEFAULT_EXPANSION_CONTEXT.enabledExpansionIds,
 ): DistributionSettings => {
-  const sanitized = sanitizeDistributionSettings(settings);
+  const sanitized = sanitizeDistributionSettings(settings, enabledExpansionIds);
   const storage = getStorage();
   if (!storage) {
     return sanitized;
@@ -282,7 +292,17 @@ interface CardSet {
 
 class WeightedCardDistribution {
   private settings: DistributionSettings = { ...DEFAULT_DISTRIBUTION_SETTINGS };
-  
+  private expansionContext: DistributionExpansionContext = {
+    ...DEFAULT_EXPANSION_CONTEXT,
+  };
+
+  setExpansionContext(context: DistributionExpansionContext): void {
+    this.expansionContext = {
+      enabledExpansionIds: [...context.enabledExpansionIds],
+      expansionCards: context.expansionCards.map(card => ({ ...card })),
+    };
+  }
+
   // Get available card sets (core only in MVP)
   private getAvailableCardSets(): CardSet[] {
     const sets: CardSet[] = [
@@ -294,7 +314,7 @@ class WeightedCardDistribution {
       },
     ];
 
-    const expansionCards = getExpansionCardsSnapshot();
+    const expansionCards = this.expansionContext.expansionCards;
     if (expansionCards.length === 0) {
       return sets;
     }
@@ -309,7 +329,7 @@ class WeightedCardDistribution {
       cardsByExpansion.get(extId)!.push(card);
     }
 
-    const enabledIds = getEnabledExpansionIdsSnapshot();
+    const enabledIds = this.expansionContext.enabledExpansionIds;
 
     for (const expansionId of enabledIds) {
       const cards = cardsByExpansion.get(expansionId);
@@ -613,8 +633,15 @@ class WeightedCardDistribution {
   }
 
   // Configuration methods
-  updateSettings(newSettings: Partial<DistributionSettings>): void {
-    this.settings = sanitizeDistributionSettings({ ...this.settings, ...newSettings });
+  updateSettings(
+    newSettings: Partial<DistributionSettings>,
+    enabledExpansionIds?: string[],
+  ): void {
+    const ids = enabledExpansionIds ?? this.expansionContext.enabledExpansionIds;
+    this.settings = sanitizeDistributionSettings(
+      { ...this.settings, ...newSettings },
+      ids,
+    );
   }
 
   getSettings(): DistributionSettings {
