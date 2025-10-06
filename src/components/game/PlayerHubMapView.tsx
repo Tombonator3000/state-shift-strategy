@@ -3,6 +3,9 @@ import clsx from 'clsx';
 import { Card } from '@/components/ui/card';
 import * as topojson from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
+import type { FeatureCollection } from 'geojson';
+import type { GeometryCollection, Topology } from 'topojson-specification';
+import usStatesTopology from '@/assets/data/usStatesTopo.json';
 import type { PlayerStateIntel } from './PlayerHubOverlay';
 import type { StateEventBonusSummary } from '@/hooks/gameStateTypes';
 
@@ -36,7 +39,7 @@ const normalizeKey = (value?: string | null) => value?.toString().toUpperCase() 
 const PlayerHubMapView = ({ intel, faction, className }: PlayerHubMapViewProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const [geoData, setGeoData] = useState<any>(null);
+  const [geoData, setGeoData] = useState<FeatureCollection | null>(null);
   const [dimensions, setDimensions] = useState({ width: MAP_BASE_WIDTH, height: MAP_BASE_HEIGHT });
   const [tooltipIntel, setTooltipIntel] = useState<TooltipIntel | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -71,41 +74,57 @@ const PlayerHubMapView = ({ intel, faction, className }: PlayerHubMapViewProps) 
     return map;
   }, [states]);
 
-  useEffect(() => {
-    let isMounted = true;
-    const loadUSData = async () => {
-      try {
-        const response = await fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
-        const topology = await response.json();
-        if (!isMounted) return;
-        const geojson = topojson.feature(topology, topology.objects.states);
-        setGeoData(geojson);
-      } catch (error) {
-        console.error('Failed to load US map data for PlayerHubMapView:', error);
-        if (!isMounted) return;
-        setGeoData({
-          type: 'FeatureCollection',
-          features: states.map(state => ({
-            type: 'Feature',
-            id: state.abbreviation ?? state.id,
-            properties: {
-              name: state.name,
-              STUSPS: state.abbreviation ?? state.id,
-            },
-            geometry: {
-              type: 'Polygon',
-              coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
-            },
-          })),
-        });
+  const staticGeoData = useMemo<FeatureCollection | null>(() => {
+    try {
+      const topology = usStatesTopology as Topology<{ states: GeometryCollection }>;
+      const statesObject = topology.objects?.states;
+      if (!statesObject) {
+        console.error('Failed to locate state topology for PlayerHubMapView.');
+        return null;
       }
-    };
+      const geojson = topojson.feature(topology, statesObject);
+      if (geojson.type !== 'FeatureCollection') {
+        console.error('Unexpected topology format for PlayerHubMapView.');
+        return null;
+      }
+      return geojson as FeatureCollection;
+    } catch (error) {
+      console.error('Failed to parse static US map data for PlayerHubMapView:', error);
+      return null;
+    }
+  }, []);
 
-    loadUSData();
-    return () => {
-      isMounted = false;
-    };
-  }, [states]);
+  const fallbackGeoData = useMemo<FeatureCollection>(() => ({
+    type: 'FeatureCollection',
+    features: states.map(state => ({
+      type: 'Feature',
+      id: state.abbreviation ?? state.id,
+      properties: {
+        name: state.name,
+        STUSPS: state.abbreviation ?? state.id,
+      },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+      },
+    })),
+  }), [states]);
+
+  const lacksStateMetadata = useMemo(
+    () => states.length > 0 && states.every(state => !state.abbreviation && !state.id),
+    [states],
+  );
+
+  const activeGeoData = useMemo<FeatureCollection>(() => {
+    if (!staticGeoData || lacksStateMetadata) {
+      return fallbackGeoData;
+    }
+    return staticGeoData;
+  }, [fallbackGeoData, lacksStateMetadata, staticGeoData]);
+
+  useEffect(() => {
+    setGeoData(activeGeoData);
+  }, [activeGeoData]);
 
   useEffect(() => {
     if (typeof ResizeObserver === 'undefined') {
