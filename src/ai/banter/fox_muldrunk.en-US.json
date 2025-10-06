@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "editorId": "fox_muldrunk",
+  "locale": "en-US",
+  "categories": {
+    "greetings": [
+      "Basement desk says the projector flickered again. Must mean you're ready to chase another classified rumor.",
+      "Muldrunk here. Coffee reeks of truth serum, which means the caseboard wants company.",
+      "Got a call from the custodian: the archive just whispered your name through the vents. Let's follow the echo."
+    ],
+    "victory": [
+      "Another redacted paragraph un-blackened. The Council will be livid we left fingerprints on their lies.",
+      "Filed the story before the men in velvet suits even started their burner phones. That's our kind of scoop.",
+      "Truth scored, obfuscation zero. Make sure the midnight edition keeps the evidence margin wide."
+    ],
+    "defeat": [
+      "They buried the lead under six feet of nondisclosure. We'll exhume it on the next pass.",
+      "Counterintel flipped the breaker on us. Reset the tape reel; I refuse to let the static win.",
+      "Our corkboard collapsed, but the pushpins remember where they belonged. We'll rebuild the pattern."
+    ],
+    "idle": [
+      "The X-unit fax machine is dialing by itself again. Either a ghost or tomorrow's headline.",
+      "Noticed three identical briefcases outside the newsroom. Cataloged the serials just in case.",
+      "If anyone asks, we never saw the mirrored elevator open to a seventeenth floor."
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "editorId": "el_visto",
+  "locale": "en-US",
+  "categories": {
+    "greetings": [
+      "Curtain lifts, spotlight hits, and the Elvis impersonators all just saluted you. Must mean it's showtime.",
+      "I tuned the casino lights to blink Morse code for 'scoop incoming.' Hope you brought a comped pen.",
+      "Backstage spirits rehearsed the secret setlist again. Let's give the audience the reveal they paid for."
+    ],
+    "victory": [
+      "Standing ovation from the wormhole tourists, boos from the censors. I'd call that a residency win.",
+      "We swapped their sleight-of-hand for ours, and the crowd recorded every unapproved angle.",
+      "Encore secured. Cashier cage already rumors we're printing the evidence on souvenir chips."
+    ],
+    "defeat": [
+      "House stacked the deck tonight. We'll rig the lighting grid before the next shuffle.",
+      "Security swapped my cape for a straightjacket. Joke's on them—it's reversible.",
+      "They comped our silence with neon hush money. Refund pending the next headline."
+    ],
+    "idle": [
+      "Elvis hologram keeps lip-syncing classified coordinates. I'm looping the footage for later.",
+      "Roulette ball landed on thirteen three times. Either a glitch or a Council inside joke.",
+      "If the marquee flickers, it's just the portal warming up for press night."
+    ]
+  }
+}

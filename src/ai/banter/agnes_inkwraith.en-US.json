@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "editorId": "agnes_inkwraith",
+  "locale": "en-US",
+  "categories": {
+    "greetings": [
+      "The morgue ledger flipped to a blank page and wrote your initials in fountain pen. Shall we investigate?",
+      "I dusted the archive vault and the fingerprints spelled 'bring allies'. Consider yourself summoned.",
+      "Obituaries started humming a hymn in reverse. Only you and I know the harmony." 
+    ],
+    "victory": [
+      "Another immortal donor forced into the daylight pages. Let the estates scramble for shadow.",
+      "Filed our revision before midnight mass. The choir will need new sheet music after this leak.",
+      "Crossed their hush money with probate law, and the ledger confessed. Excellent work." 
+    ],
+    "defeat": [
+      "The executor sealed the vault ahead of us. I memorized the wards—next time we breach softly.",
+      "They bribed the mausoleum lighting to flicker. We'll bring our own lanterns.",
+      "Ancestral lawyers stalled the presses, but the ancestors just switched sides." 
+    ],
+    "idle": [
+      "Guestbook ink refuses to dry. Spirits are reserving column inches for future exposés.",
+      "I caught a will o' the wisp editing our copy. Left it a red pen and conditions.",
+      "If you hear a lullaby in the stacks, it's merely my index of undead benefactors rehearsing." 
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "editorId": "sybil_margin",
+  "locale": "en-US",
+  "categories": {
+    "greetings": [
+      "Probability curve bent toward your chair at 3σ. Time to reroute destiny again.",
+      "Forecast says 84% chance of scandal with a 16% garnish of déjà vu. Ready to cash in?",
+      "My predictive crossword spelled your codename twice. Coincidence rejected." 
+    ],
+    "victory": [
+      "Odds collapsed in our favor and the house statisticians just resigned. Document the tremor.",
+      "We rewrote the betting line mid-race. Now the future owes us royalties.",
+      "That spread we published? Already moving markets and rattling the Council's sleep schedule."
+    ],
+    "defeat": [
+      "Variance spiked against us. Logging the anomaly so we can weaponize it tomorrow.",
+      "They bribed the actuaries and the dice. Fine—we'll replace both with truth tables.",
+      "Our projections slipped, but every failure refines the simulation. Prep the next run." 
+    ],
+    "idle": [
+      "Tea leaves formed a bar chart shaped like the Capitol dome. I'm annotating it for later.",
+      "Bookies just offered me hush money to stop predicting their upsets. I negotiated for more upsets.",
+      "If you notice a flicker in the ticker tape, that's just the future calling collect." 
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "editorId": "nocturne_typesetter",
+  "locale": "en-US",
+  "categories": {
+    "greetings": [
+      "Blueprints for tomorrow's front page just arrived via pneumatic tube from next Tuesday.",
+      "Typesetting ghosts rearranged the headlines into your initials. Shall we oblige them?",
+      "Temporal press is synced and humming. Please keep arms inside the timestream."
+    ],
+    "victory": [
+      "Timeline stabilized around our scoop. Paradox auditors sent a begrudging thumbs-up.",
+      "We printed the truth twelve minutes early and reality adjusted its watches to match.",
+      "Another midnight edition delivered without fracturing the day. Archive the causal chain."
+    ],
+    "defeat": [
+      "Layout slipped into a recursion loop. I've queued a safer spread for the rematch.",
+      "Chronomancers embargoed the presses. Luckily, time owes me a favor at dawn.",
+      "Our kerning drifted across dimensions. Retracing the glyphs as we speak."
+    ],
+    "idle": [
+      "Typesetter gremlins keep swapping serif fonts with classified sigils. I left them snacks and warnings.",
+      "If the clock in the pressroom runs backwards, it's just me rewinding the last misprint.",
+      "The proofing table currently exists in two minutes at once. Stand where the ink is driest."
+    ]
+  }
+}

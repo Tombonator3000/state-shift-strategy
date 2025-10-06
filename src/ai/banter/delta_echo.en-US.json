@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "editorId": "delta_echo",
+  "locale": "en-US",
+  "categories": {
+    "greetings": [
+      "Shortwave static spelled our rendezvous time again. Welcome to the signal pit.",
+      "Triangulated three unauthorized frequencies pointing straight at your desk. Shall we answer?",
+      "Receiver warmed up, foil hat polished. Let's transcribe the numbers before they mutate." 
+    ],
+    "victory": [
+      "We flooded their blacksite bandwidth with headlines. Expect irritated engineers by dawn.",
+      "Another cipher undone. The agencies will need a new numbers station after this broadcast.",
+      "Truth amplitude peaked at eleven and the noise floor surrendered. Archive the waveform."
+    ],
+    "defeat": [
+      "Signal drifted under heavy jamming. Logging the interference to reverse-engineer their filter.",
+      "They swapped out the antenna array mid-stream. I'll requisition a taller tower.",
+      "Encryption held—for now. Next round we broadcast from the lunar relay they forgot we own." 
+    ],
+    "idle": [
+      "Taped a quartz crystal to the console. It keeps humming newsroom gossip in Morse.",
+      "Signal room coffee tastes like ozone again. Good omen for espionage weather.",
+      "If the needles start writing cursive, do not panic. It just means the future tuned in." 
+    ]
+  }
+}
