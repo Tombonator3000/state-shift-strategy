@@ -86,6 +86,8 @@ type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerCo
 
 type ObjectiveSectionId = 'victory' | 'secret-agenda';
 
+type CampaignStage = 'intro' | 'advance' | 'finale';
+
 const fillTemplate = (template: string, tokens: Record<string, string | number>): string => {
   if (!template) {
     return '';
@@ -95,6 +97,78 @@ const fillTemplate = (template: string, tokens: Record<string, string | number>)
     const value = tokens[key];
     return value === undefined || value === null ? '' : String(value);
   });
+};
+
+const formatArcName = (arcId: string): string => {
+  return arcId
+    .replace(/^campaign_/, '')
+    .split('_')
+    .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+};
+
+const resolveEventStateName = (event: GameEvent): string | null => {
+  const stateId = event.paranormalHotspot?.stateId;
+  if (!stateId) return null;
+  const state = getStateById(stateId) ?? getStateByAbbreviation(stateId);
+  return state?.name ?? null;
+};
+
+const buildCampaignBroadcastContext = (params: {
+  arc: ActiveCampaignArcState;
+  event?: GameEvent;
+  stage: CampaignStage;
+}): { intensity: 'surge' | 'collapse'; setList: string[]; tagline: string } | null => {
+  const { arc, event, stage } = params;
+  if (!event) return null;
+  
+  const intensity = event.faction === 'truth' ? 'surge' : 'collapse';
+  const setList = [`${formatArcName(arc.arcId)} Chapter ${arc.currentChapter}`];
+  const tagline = stage === 'finale' 
+    ? `${event.title} - FINALE` 
+    : event.title;
+  
+  return { intensity, setList, tagline };
+};
+
+const buildCampaignHotspotTagline = (params: {
+  arc: ActiveCampaignArcState;
+  event?: GameEvent;
+  stage: CampaignStage;
+}): string | null => {
+  const { arc, event, stage } = params;
+  if (!event) return null;
+  
+  if (stage === 'finale') {
+    return `${formatArcName(arc.arcId)} finale concluded`;
+  }
+  return `${formatArcName(arc.arcId)} Ch.${arc.currentChapter}: ${event.title}`;
+};
+
+const determineTruthBroadcastContext = (
+  intensity: 'surge' | 'collapse',
+  source?: 'truth' | 'government'
+): ContextualEffectType => {
+  if (intensity === 'surge') {
+    return source === 'government' ? 'media_blast' : 'conspiracy_revealed';
+  }
+  return 'government_crackdown';
+};
+
+const determineStateEventContext = (eventType?: string): ContextualEffectType | null => {
+  if (!eventType) return null;
+  
+  const lowerType = eventType.toLowerCase();
+  if (lowerType.includes('capture') || lowerType.includes('control')) {
+    return 'conspiracy_revealed';
+  }
+  if (lowerType.includes('attack') || lowerType.includes('damage')) {
+    return 'government_crackdown';
+  }
+  if (lowerType.includes('defense') || lowerType.includes('fortify')) {
+    return 'surveillance_detected';
+  }
+  return null;
 };
 
 const SYNERGY_SIGHTING_TAGLINES = [
@@ -134,13 +208,13 @@ const determineCardContextualEffect = (
     : {};
 
   if (type === 'ATTACK') {
-    return 'damage';
+    return 'government_crackdown';
   }
   if (type === 'MEDIA' && truthDelta !== 0) {
-    return faction === 'truth' ? 'truth' : 'support';
+    return faction === 'truth' ? 'conspiracy_revealed' : 'media_blast';
   }
   if (type === 'MEDIA' && (ipDelta.player ?? 0) > 0) {
-    return 'ip';
+    return 'evidence_leaked';
   }
   return null;
 };
@@ -2098,6 +2172,8 @@ const Index = () => {
     const derivedHubFaction = playerHubSource === 'menu'
       ? lastSelectedFaction
       : gameState.faction;
+    
+    const secretAgendasEnabled = gameState.secretAgendasEnabled !== false;
 
     return (
       <PlayerHubOverlay
