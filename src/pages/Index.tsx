@@ -461,6 +461,14 @@ const Index = () => {
     safeSetLocalStorageItem('shadowgov-last-faction', faction);
   }, []);
 
+  const persistPlayerEditor = useCallback((editorId: EditorId | null) => {
+    if (editorId) {
+      safeSetLocalStorageItem('shadowgov-last-player-editor', editorId);
+    } else {
+      safeRemoveLocalStorageItem('shadowgov-last-player-editor');
+    }
+  }, []);
+
   const persistPrevIP = useCallback((value: number | null) => {
     prevIPCacheRef.current = value;
     if (value === null) {
@@ -1806,6 +1814,7 @@ const Index = () => {
     }
 
     persistFaction(faction);
+    persistPlayerEditor(resolvedEditorId ?? null);
     setIsVictoryOverlayOpen(false);
     setFinalEdition(null);
     setNewsFinalEdition(null);

@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-23 – Track rival editors across campaigns
+- Game state now persists separate player and AI editor assignments (plus AI banter cooldowns) so new runs and resume flows remember newsroom loadouts.
+- Legacy saves hydrate with faction-aware AI editors—falling back to The Redactor on easy—to keep campaign starts consistent after the split.
+
 ## 2025-10-22 – Safeguard the evidence archive controls
 - Split the evidence archive filter reset from the full archive wipe so players only delete entries when they deliberately hit the new clear-archive control.
 - Styled the destructive action as a red-alert button in both classic and broadsheet layouts to telegraph its impact.
