@@ -42,6 +42,7 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
   const displayType = normalizeTabloidCardType(card.type);
   const ActionIcon = displayType === 'ZONE' ? Target : displayType === 'ATTACK' ? Zap : Megaphone;
   const discardButtonDisabled = disabled || !onToggleDiscard || !discardEnabled;
+  const shouldShowDiscardControl = !!onToggleDiscard && discardEnabled;
 
   return (
     <div
@@ -66,7 +67,32 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
         </div>
 
         <div className="modal-wrapper">
-          <div className="modal-card" data-card-id={card.id}>
+          <div className="modal-card relative" data-card-id={card.id}>
+            {shouldShowDiscardControl && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => onToggleDiscard?.()}
+                disabled={discardButtonDisabled}
+                aria-pressed={isDiscardQueued}
+                aria-label={isDiscardQueued ? 'Unqueue discard' : 'Queue discard'}
+                className={cn(
+                  'absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border transition-all duration-200',
+                  discardButtonDisabled
+                    ? 'border-orange-500/20 bg-black/40 text-white/40 cursor-not-allowed'
+                    : 'border-orange-400/80 bg-black/70 text-orange-200 hover:bg-orange-400 hover:text-black',
+                  isDiscardQueued && !discardButtonDisabled
+                    ? 'bg-orange-500 text-black hover:bg-orange-500'
+                    : ''
+                )}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">
+                  {isDiscardQueued ? 'Unqueue discard' : 'Queue discard'}
+                </span>
+              </Button>
+            )}
             <BaseCard card={card} polaroidHover={false} />
           </div>
         </div>
@@ -84,21 +110,6 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
           >
             <ActionIcon className="w-4 h-4" />
             {displayType === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
-          </Button>
-
-          <Button
-            type="button"
-            onClick={() => onToggleDiscard?.()}
-            disabled={discardButtonDisabled}
-            className={cn(
-              'w-full sm:w-auto px-5 py-2 rounded-tabloid border uppercase tracking-[0.3em] text-xs flex items-center gap-2 font-mono transition-transform duration-200',
-              discardButtonDisabled
-                ? 'border-orange-500/20 bg-black/40 text-white/40 cursor-not-allowed'
-                : 'border-orange-400/80 bg-orange-500/80 text-black hover:bg-orange-400 hover:-translate-y-0.5'
-            )}
-          >
-            <Trash2 className="h-4 w-4" />
-            {isDiscardQueued ? 'UNQUEUE DISCARD' : 'QUEUE DISCARD'}
           </Button>
 
           <div className="flex flex-wrap items-center justify-center gap-2 text-xs uppercase tracking-widest text-white/80">
@@ -184,6 +195,7 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
   const displayType = normalizeLegacyCardType(card.type);
   const flavorText = getFlavorText(card) ?? 'No intelligence available.';
   const discardButtonDisabled = disabled || !onToggleDiscard || !discardEnabled;
+  const shouldShowDiscardControl = !!onToggleDiscard && discardEnabled;
 
   return (
     <div
@@ -228,7 +240,32 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
           </div>
         </div>
 
-        <div className={`flex-shrink-0 bg-muted overflow-hidden ${isMobile ? 'h-48' : 'h-64'}`}>
+        <div className={`flex-shrink-0 bg-muted overflow-hidden ${isMobile ? 'h-48' : 'h-64'} relative`}>
+          {shouldShowDiscardControl && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onToggleDiscard?.()}
+              disabled={discardButtonDisabled}
+              aria-pressed={isDiscardQueued}
+              aria-label={isDiscardQueued ? 'Unqueue discard' : 'Queue discard'}
+              className={cn(
+                'absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border transition-all duration-200',
+                discardButtonDisabled
+                  ? 'border-orange-500/20 bg-card/60 text-muted-foreground cursor-not-allowed'
+                  : 'border-orange-400/80 bg-card/80 text-orange-400 hover:bg-orange-400 hover:text-black',
+                isDiscardQueued && !discardButtonDisabled
+                  ? 'bg-orange-500 text-black hover:bg-orange-500'
+                  : ''
+              )}
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">
+                {isDiscardQueued ? 'Unqueue discard' : 'Queue discard'}
+              </span>
+            </Button>
+          )}
           <CardImage cardId={card.id} className="w-full h-full" />
         </div>
 
@@ -284,21 +321,6 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
               )}
             </Button>
 
-            <Button
-              type="button"
-              onClick={() => onToggleDiscard?.()}
-              disabled={discardButtonDisabled}
-              variant="outline"
-              className={cn(
-                'w-full font-mono flex items-center justify-center gap-2 text-xs uppercase tracking-[0.3em]',
-                discardButtonDisabled
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'border-orange-400 text-orange-500 hover:bg-orange-500/10'
-              )}
-            >
-              <Trash2 className="h-4 w-4" />
-              {isDiscardQueued ? 'UNQUEUE DISCARD' : 'QUEUE DISCARD'}
-            </Button>
           </div>
         </div>
       </div>
