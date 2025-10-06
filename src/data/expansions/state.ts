@@ -43,6 +43,10 @@ const getManifestIdSet = () => new Set(EXPANSION_MANIFEST.map(pack => pack.id));
 const notify = () => {
   const snapshotCards = getExpansionCardsSnapshot();
   const snapshotIds = getEnabledExpansionIdsSnapshot();
+  weightedDistribution.setExpansionContext({
+    enabledExpansionIds: snapshotIds,
+    expansionCards: snapshotCards,
+  });
   for (const listener of listeners) {
     try {
       listener({ ids: snapshotIds, cards: snapshotCards });
@@ -187,9 +191,15 @@ export const initializeExpansions = async (): Promise<void> => {
   );
 
   rebuildEnabledMap();
-  const storedDistribution = loadDistributionSettingsFromStorage();
+  const enabledSnapshot = getEnabledExpansionIdsSnapshot();
+  const storedDistribution = loadDistributionSettingsFromStorage(enabledSnapshot);
   const distributionSettings =
-    storedDistribution ?? sanitizeDistributionSettings(DEFAULT_DISTRIBUTION_SETTINGS);
-  weightedDistribution.updateSettings(distributionSettings);
+    storedDistribution ??
+    sanitizeDistributionSettings(DEFAULT_DISTRIBUTION_SETTINGS, enabledSnapshot);
+  weightedDistribution.setExpansionContext({
+    enabledExpansionIds: enabledSnapshot,
+    expansionCards: getExpansionCardsSnapshot(),
+  });
+  weightedDistribution.updateSettings(distributionSettings, enabledSnapshot);
   await ensureCardsLoaded();
 };

@@ -11,21 +11,27 @@ import {
 import { getEnabledExpansionIdsSnapshot } from '@/data/expansions/state';
 
 export const useDistributionSettings = () => {
+  const getEnabledExpansions = () => getEnabledExpansionIdsSnapshot();
+  const initialEnabled = getEnabledExpansions();
   const [settings, setSettings] = useState<DistributionSettings>(
-    sanitizeDistributionSettings(DEFAULT_DISTRIBUTION_SETTINGS),
+    sanitizeDistributionSettings(DEFAULT_DISTRIBUTION_SETTINGS, initialEnabled),
   );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadSettings = () => {
       try {
-        const saved = loadDistributionSettingsFromStorage();
+        const enabledIds = getEnabledExpansions();
+        const saved = loadDistributionSettingsFromStorage(enabledIds);
         if (saved) {
           setSettings(saved);
-          weightedDistribution.updateSettings(saved);
+          weightedDistribution.updateSettings(saved, enabledIds);
         } else {
-          const defaults = sanitizeDistributionSettings(DEFAULT_DISTRIBUTION_SETTINGS);
-          weightedDistribution.updateSettings(defaults);
+          const defaults = sanitizeDistributionSettings(
+            DEFAULT_DISTRIBUTION_SETTINGS,
+            enabledIds,
+          );
+          weightedDistribution.updateSettings(defaults, enabledIds);
         }
       } finally {
         setIsLoading(false);
@@ -37,20 +43,23 @@ export const useDistributionSettings = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      const sanitized = persistDistributionSettings(settings);
-      weightedDistribution.updateSettings(sanitized);
+      const enabledIds = getEnabledExpansions();
+      const sanitized = persistDistributionSettings(settings, enabledIds);
+      weightedDistribution.updateSettings(sanitized, enabledIds);
     }
   }, [settings, isLoading]);
 
   const setMode = (targetMode: DistributionMode) => {
-    const enabledExpansions = getEnabledExpansionIdsSnapshot();
+    const enabledExpansions = getEnabledExpansions();
     const resolvedMode = enabledExpansions.length > 0 ? targetMode : 'core-only';
 
-    setSettings(prev => sanitizeDistributionSettings({ ...prev, mode: resolvedMode }));
+    setSettings(prev =>
+      sanitizeDistributionSettings({ ...prev, mode: resolvedMode }, enabledExpansions),
+    );
   };
 
   const setSetWeight = (setId: string, weight: number) => {
-    const enabledExpansions = getEnabledExpansionIdsSnapshot();
+    const enabledExpansions = getEnabledExpansions();
     if (setId !== 'core' && !enabledExpansions.includes(setId)) {
       return;
     }
@@ -62,7 +71,7 @@ export const useDistributionSettings = () => {
           ...prev.setWeights,
           [setId]: weight,
         },
-      }),
+      }, enabledExpansions),
     );
   };
 
@@ -101,7 +110,11 @@ export const useDistributionSettings = () => {
   };
 
   const resetToDefaults = () => {
-    const defaults = sanitizeDistributionSettings(DEFAULT_DISTRIBUTION_SETTINGS);
+    const enabledExpansions = getEnabledExpansions();
+    const defaults = sanitizeDistributionSettings(
+      DEFAULT_DISTRIBUTION_SETTINGS,
+      enabledExpansions,
+    );
     setSettings(defaults);
   };
 
