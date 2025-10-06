@@ -105,14 +105,35 @@ const pickCandidateWithRotation = (
 const cloneRuntime = (
   runtime: TabloidRelicRuntimeState | null | undefined,
 ): TabloidRelicRuntimeState | null => {
-  if (!runtime) {
+  if (!runtime || typeof runtime !== 'object') {
     return { entries: [], lastIssueRound: 0, selectionHistory: [] };
   }
+
+  const entriesSource = Array.isArray(runtime.entries) ? runtime.entries : [];
+  const entries = entriesSource
+    .filter(entry => entry && typeof entry === 'object' && typeof (entry as { ruleId?: unknown }).ruleId === 'string')
+    .map(entry => ({ ...entry }));
+
+  const lastIssueRound = typeof runtime.lastIssueRound === 'number' && Number.isFinite(runtime.lastIssueRound)
+    ? runtime.lastIssueRound
+    : 0;
+  const lastUpdatedTurn = typeof runtime.lastUpdatedTurn === 'number' && Number.isFinite(runtime.lastUpdatedTurn)
+    ? runtime.lastUpdatedTurn
+    : undefined;
+  const selectionHistorySource = Array.isArray(runtime.selectionHistory) ? runtime.selectionHistory : [];
+  const selectionHistory = selectionHistorySource
+    .map(historyId => (typeof historyId === 'string' ? historyId : null))
+    .filter((historyId): historyId is string => Boolean(historyId));
+
+  if (entries.length === 0 && selectionHistory.length === 0) {
+    return { entries: [], lastIssueRound: 0, selectionHistory: [] };
+  }
+
   return {
-    entries: runtime.entries.map(entry => ({ ...entry })),
-    lastIssueRound: runtime.lastIssueRound,
-    lastUpdatedTurn: runtime.lastUpdatedTurn,
-    selectionHistory: [...(runtime.selectionHistory ?? [])],
+    entries,
+    lastIssueRound,
+    lastUpdatedTurn,
+    selectionHistory,
   };
 };
 

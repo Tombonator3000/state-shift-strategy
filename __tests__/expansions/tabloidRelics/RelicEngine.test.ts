@@ -4,6 +4,7 @@ import { hydrateExpansionFeatures } from '@/data/expansions/features';
 import type { CardPlayRecord } from '@/hooks/gameStateTypes';
 import type {
   RelicIssueSnapshot,
+  RelicRoundStartPayload,
   TabloidRelicRuntimeState,
 } from '@/expansions/tabloidRelics/RelicTypes';
 
@@ -183,5 +184,34 @@ describe('RelicEngine.ingestIssue rotation', () => {
       'red_string_reactor',
       'black_budget_briefing',
     ]);
+  });
+
+  it('sanitizes malformed runtime data when applying round start', async () => {
+    const { RelicEngine } = await loadRelicEngine();
+
+    const corruptedState = {
+      faction: 'truth' as const,
+      truth: 45,
+      ip: 12,
+      aiIP: 18,
+      round: 3,
+      turn: 3,
+      editorId: null,
+      editorDef: null,
+      tabloidRelicsRuntime: {
+        entries: { bogus: true },
+        lastIssueRound: '2',
+        lastUpdatedTurn: '2',
+        selectionHistory: ['pressroom_lockdown', 123, null],
+      } as unknown,
+    } satisfies RelicRoundStartPayload['state'];
+
+    const result = RelicEngine.applyRoundStart({ state: corruptedState });
+
+    expect(result.runtime).toBeNull();
+    expect(result.truth).toBe(corruptedState.truth);
+    expect(result.ip).toBe(corruptedState.ip);
+    expect(result.aiIp).toBe(corruptedState.aiIP);
+    expect(result.logEntries).toEqual([]);
   });
 });
