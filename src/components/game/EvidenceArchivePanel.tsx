@@ -12,6 +12,7 @@ interface EvidenceArchivePanelProps {
   onDelete: (id: string) => void;
   onClear?: () => void;
   className?: string;
+  variant?: 'default' | 'broadsheet';
 }
 
 const FILTER_ALL = 'all';
@@ -23,7 +24,7 @@ const formatTurnLabel = (turn: number, round: number): string => {
   return `Round ${round}, Turn ${turn}`;
 };
 
-const EvidenceArchivePanel = ({ entries, onDelete, onClear, className }: EvidenceArchivePanelProps) => {
+const EvidenceArchivePanel = ({ entries, onDelete, onClear, className, variant = 'default' }: EvidenceArchivePanelProps) => {
   const [stateFilter, setStateFilter] = useState<string>(FILTER_ALL);
   const [factionFilter, setFactionFilter] = useState<string>(FILTER_ALL);
   const [typeFilter, setTypeFilter] = useState<string>(FILTER_ALL);
@@ -59,16 +60,177 @@ const EvidenceArchivePanel = ({ entries, onDelete, onClear, className }: Evidenc
       return matchesState && matchesFaction && matchesType;
     });
 
+    const toOptionObjects = (entries: Array<[string, string]>) =>
+      entries
+        .filter(([value]) => Boolean(value))
+        .map(([value, label]) => ({ value, label }));
+
     return {
-      stateOptions: Array.from(states.entries()),
-      factionOptions: Array.from(factions.entries()),
-      typeOptions: Array.from(types.entries()),
+      stateOptions: [
+        { value: FILTER_ALL, label: 'All States' },
+        ...toOptionObjects(Array.from(states.entries()).sort((a, b) => a[1].localeCompare(b[1]))),
+      ],
+      factionOptions: [
+        { value: FILTER_ALL, label: 'All Factions' },
+        ...toOptionObjects(Array.from(factions.entries()).sort((a, b) => a[1].localeCompare(b[1]))),
+      ],
+      typeOptions: [
+        { value: FILTER_ALL, label: 'All Types' },
+        ...toOptionObjects(Array.from(types.entries()).sort((a, b) => a[1].localeCompare(b[1]))),
+      ],
       filteredEntries: filtered,
     };
   }, [entries, factionFilter, stateFilter, typeFilter]);
 
   const hasEntries = entries.length > 0;
   const hasFilteredResults = filteredEntries.length > 0;
+
+  const handleClearFilters = () => {
+    setStateFilter(FILTER_ALL);
+    setFactionFilter(FILTER_ALL);
+    setTypeFilter(FILTER_ALL);
+    onClear?.();
+  };
+
+  if (variant === 'broadsheet') {
+    return (
+      <div className={clsx('flex h-full flex-col gap-6 text-[var(--broadsheet-ink)]', className)}>
+        <header className="rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.9)] px-5 py-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-typewriter text-[11px] uppercase tracking-[0.42em] text-[var(--broadsheet-kicker)]">Supplement A</p>
+              <h3 className="font-broadsheetSans text-2xl uppercase tracking-[0.16em]">Evidence Annex</h3>
+            </div>
+            <Layers className="h-6 w-6 text-[var(--broadsheet-accent)]" aria-hidden />
+          </div>
+        </header>
+
+        <div className="flex flex-col gap-3 rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.86)] p-4 shadow-sm md:flex-row">
+          <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
+            <Select value={stateFilter} onValueChange={setStateFilter}>
+              <SelectTrigger className="rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 px-4 py-2 font-typewriter text-[11px] uppercase tracking-[0.28em] text-[var(--broadsheet-ink)]">
+                <SelectValue placeholder="State" />
+              </SelectTrigger>
+              <SelectContent className="border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.95)] text-[var(--broadsheet-ink)]">
+                {stateOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={factionFilter} onValueChange={setFactionFilter}>
+              <SelectTrigger className="rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 px-4 py-2 font-typewriter text-[11px] uppercase tracking-[0.28em] text-[var(--broadsheet-ink)]">
+                <SelectValue placeholder="Faction" />
+              </SelectTrigger>
+              <SelectContent className="border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.95)] text-[var(--broadsheet-ink)]">
+                {factionOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 px-4 py-2 font-typewriter text-[11px] uppercase tracking-[0.28em] text-[var(--broadsheet-ink)]">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent className="border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.95)] text-[var(--broadsheet-ink)]">
+                {typeOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            onClick={handleClearFilters}
+            variant="outline"
+            size="sm"
+            className="rounded-full border border-[var(--broadsheet-rule)] bg-white/85 px-4 py-1 font-typewriter text-[11px] uppercase tracking-[0.3em] text-[var(--broadsheet-ink)] hover:border-[var(--broadsheet-accent)]"
+          >
+            Clear Filters
+          </Button>
+        </div>
+
+        <div className="flex-1 overflow-hidden">
+          {filteredEntries.length === 0 ? (
+            <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[var(--broadsheet-rule)] bg-white/80 p-6 text-center font-broadsheet text-[15px] text-[var(--broadsheet-muted)]">
+              No evidence logged with current filters.
+            </div>
+          ) : (
+            <ScrollArea className="h-full pr-2">
+              <div className="space-y-3">
+                {filteredEntries.map(entry => (
+                  <article
+                    key={entry.id}
+                    className="rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.86)] p-4 shadow-sm transition hover:border-[var(--broadsheet-accent)] hover:shadow-[0_12px_30px_rgba(0,0,0,0.12)]"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                          {entry.stateName ?? entry.stateAbbreviation ?? entry.stateId ?? 'Unknown location'}
+                        </p>
+                        <h4 className="font-broadsheetSans text-lg uppercase tracking-[0.14em]">{entry.eventLabel}</h4>
+                      </div>
+                      <span className="rounded-full border border-[var(--broadsheet-rule)] px-3 py-1 font-typewriter text-[10px] uppercase tracking-[0.28em] text-[var(--broadsheet-muted)]">
+                        {formatTurnLabel(entry.triggeredOnTurn, entry.round)}
+                      </span>
+                    </div>
+
+                    <p className="mt-2 whitespace-pre-wrap font-broadsheet text-[15px] leading-relaxed text-[var(--broadsheet-muted)]">
+                      {entry.loreText}
+                    </p>
+
+                    {Array.isArray(entry.effectSummary) && entry.effectSummary.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2 font-typewriter text-[10px] uppercase tracking-[0.28em] text-[var(--broadsheet-muted)]">
+                        {entry.effectSummary.map(effect => (
+                          <span
+                            key={effect}
+                            className="rounded-full border border-[var(--broadsheet-rule)] bg-white/80 px-3 py-1"
+                          >
+                            {effect}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="mt-3 flex flex-wrap items-center gap-3 font-typewriter text-[10px] uppercase tracking-[0.3em] text-[var(--broadsheet-muted)]">
+                      <span className="flex items-center gap-1">
+                        <Flag className="h-4 w-4 text-[var(--broadsheet-accent)]" />
+                        {entry.faction === 'truth'
+                          ? 'Truth Network'
+                          : entry.faction === 'government'
+                            ? 'Government'
+                            : 'Unknown faction'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4 text-[var(--broadsheet-accent)]" />
+                        {(entry.eventType ?? 'unknown').charAt(0).toUpperCase() + (entry.eventType ?? 'unknown').slice(1)}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="font-typewriter text-[11px] uppercase tracking-[0.3em] text-[var(--broadsheet-muted)] hover:text-[var(--broadsheet-accent)]"
+                        onClick={() => onDelete(entry.id)}
+                      >
+                        <Trash2 className="mr-1 h-4 w-4" aria-hidden />
+                        Remove
+                      </Button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={clsx('flex h-full flex-col', className)}>
@@ -98,9 +260,9 @@ const EvidenceArchivePanel = ({ entries, onDelete, onClear, className }: Evidenc
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={FILTER_ALL}>All States</SelectItem>
-                    {stateOptions.map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
+                    {stateOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -116,9 +278,9 @@ const EvidenceArchivePanel = ({ entries, onDelete, onClear, className }: Evidenc
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={FILTER_ALL}>All Factions</SelectItem>
-                    {factionOptions.map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
+                    {factionOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -134,9 +296,9 @@ const EvidenceArchivePanel = ({ entries, onDelete, onClear, className }: Evidenc
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={FILTER_ALL}>All Types</SelectItem>
-                    {typeOptions.map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
+                    {typeOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -149,10 +311,10 @@ const EvidenceArchivePanel = ({ entries, onDelete, onClear, className }: Evidenc
                   variant="ghost"
                   size="sm"
                   className="text-emerald-200/70 hover:text-emerald-100"
-                  onClick={onClear}
+                  onClick={handleClearFilters}
                 >
                   <Trash2 className="mr-1 h-4 w-4" aria-hidden />
-                  Clear Archive
+                  Clear Filters
                 </Button>
               </div>
             )}

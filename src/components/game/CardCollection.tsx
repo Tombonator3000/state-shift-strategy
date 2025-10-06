@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import clsx from 'clsx';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -15,12 +16,14 @@ interface CardCollectionContentProps {
   isActive?: boolean;
   onClose?: () => void;
   className?: string;
+  variant?: 'default' | 'broadsheet';
 }
 
 export const CardCollectionContent = ({
   isActive = true,
   onClose,
   className,
+  variant = 'default',
 }: CardCollectionContentProps) => {
   const { getDiscoveredCards, getCardStats, getCollectionStats } = useCardCollection();
   const [searchTerm, setSearchTerm] = useState('');
@@ -66,11 +69,61 @@ export const CardCollectionContent = ({
     }
   };
 
-  const CardItem = ({ card }: { card: GameCard }) => {
+  const CardItem = ({ card, variant }: { card: GameCard; variant: 'default' | 'broadsheet' }) => {
     const cardStats = getCardStats(card.id);
 
     const rawCardText = card.text ?? '';
     const cardDescription = rawCardText.trim().length > 0 ? rawCardText : 'No description available.';
+
+    if (variant === 'broadsheet') {
+      return (
+        <button
+          type="button"
+          onClick={() => setSelectedCard(card)}
+          className="w-full text-left"
+          aria-label={`View details for ${card.name}`}
+        >
+          <div
+            className="group relative overflow-hidden rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.88)] p-5 shadow-sm transition hover:border-[var(--broadsheet-accent)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.12)]"
+          >
+            <div className="relative mb-3 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-kicker)]">
+                  {normalizeCardType(card.type)}
+                </p>
+                <h3 className="font-broadsheetSans text-xl uppercase tracking-[0.14em]">{card.name}</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span
+                  className={clsx(
+                    'rounded-full px-3 py-1 font-typewriter text-[10px] uppercase tracking-[0.28em]',
+                    getBroadsheetRarityTone(card.rarity),
+                  )}
+                >
+                  {card.rarity}
+                </span>
+                <span className="rounded-full border border-[var(--broadsheet-rule)] px-3 py-1 font-typewriter text-[10px] uppercase tracking-[0.28em] text-[var(--broadsheet-muted)]">
+                  Cost {card.cost} IP
+                </span>
+              </div>
+            </div>
+
+            <p className="font-broadsheet text-[15px] leading-relaxed text-[var(--broadsheet-muted)]">{cardDescription}</p>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 font-typewriter text-[10px] uppercase tracking-[0.3em] text-[var(--broadsheet-muted)]">
+              <span>Played {cardStats.timesPlayed} times</span>
+              <span>{cardStats.winRate ? `${Math.round(cardStats.winRate * 100)}% win rate` : 'Win rate pending'}</span>
+            </div>
+
+            {(card.flavor ?? card.flavorGov ?? card.flavorTruth) && (
+              <div className="mt-4 rounded-lg border border-dashed border-[var(--broadsheet-rule)] bg-white/80 p-3 font-broadsheet text-[14px] italic text-[var(--broadsheet-ink)]">
+                "{card.flavor ?? card.flavorGov ?? card.flavorTruth}"
+              </div>
+            )}
+          </div>
+        </button>
+      );
+    }
 
     return (
       <button
@@ -109,6 +162,100 @@ export const CardCollectionContent = ({
       </button>
     );
   };
+  if (variant === 'broadsheet') {
+    return (
+      <div className={clsx('flex h-full flex-col gap-6 text-[var(--broadsheet-ink)]', className)}>
+        <header className="rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.9)] px-6 py-5 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-6">
+            <div className="space-y-3">
+              <p className="font-typewriter text-[11px] uppercase tracking-[0.42em] text-[var(--broadsheet-kicker)]">Collector Insert</p>
+              <h2 className="font-broadsheetSans text-3xl uppercase tracking-[0.16em]">Back-Page Archives</h2>
+              <p className="max-w-2xl font-broadsheet text-[15px] leading-relaxed text-[var(--broadsheet-muted)]">
+                Perforated card proofs, misaligned ink, and stat sheets smuggled out of the pressroom binder.
+              </p>
+            </div>
+            <div className="grid min-w-[240px] grid-cols-3 gap-3 text-center">
+              <div className="rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 p-3 shadow-sm">
+                <p className="font-typewriter text-[10px] uppercase tracking-[0.3em] text-[var(--broadsheet-muted)]">Discovered</p>
+                <p className="font-broadsheetSans text-xl">{stats.discoveredCards}</p>
+              </div>
+              <div className="rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 p-3 shadow-sm">
+                <p className="font-typewriter text-[10px] uppercase tracking-[0.3em] text-[var(--broadsheet-muted)]">Played</p>
+                <p className="font-broadsheetSans text-xl">{stats.totalPlays}</p>
+              </div>
+              <div className="rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 p-3 shadow-sm">
+                <p className="font-typewriter text-[10px] uppercase tracking-[0.3em] text-[var(--broadsheet-muted)]">Complete</p>
+                <p className="font-broadsheetSans text-xl">{stats.completionPercentage}%</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="flex flex-col gap-4 rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.86)] p-5 shadow-sm lg:flex-row">
+          <Input
+            placeholder="Search cards..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 px-4 py-2 font-broadsheet text-[15px] text-[var(--broadsheet-ink)] placeholder:text-[var(--broadsheet-muted)] focus:border-[var(--broadsheet-accent)] focus:ring-0"
+          />
+          <div className="flex flex-1 flex-wrap gap-2 sm:flex-none">
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="min-w-[160px] rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 px-4 py-2 font-typewriter text-[11px] uppercase tracking-[0.28em] text-[var(--broadsheet-ink)]">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent className="border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.95)] text-[var(--broadsheet-ink)]">
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="MEDIA">Media</SelectItem>
+                <SelectItem value="ZONE">Zone</SelectItem>
+                <SelectItem value="ATTACK">Attack</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterRarity} onValueChange={setFilterRarity}>
+              <SelectTrigger className="min-w-[160px] rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 px-4 py-2 font-typewriter text-[11px] uppercase tracking-[0.28em] text-[var(--broadsheet-ink)]">
+                <SelectValue placeholder="Rarity" />
+              </SelectTrigger>
+              <SelectContent className="border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.95)] text-[var(--broadsheet-ink)]">
+                <SelectItem value="all">All Rarities</SelectItem>
+                <SelectItem value="common">Common</SelectItem>
+                <SelectItem value="uncommon">Uncommon</SelectItem>
+                <SelectItem value="rare">Rare</SelectItem>
+                <SelectItem value="legendary">Legendary</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-hidden">
+          {filteredCards.length === 0 ? (
+            <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[var(--broadsheet-rule)] bg-white/70 text-center font-broadsheet text-[15px] text-[var(--broadsheet-muted)]">
+              {discoveredCards.length === 0
+                ? 'Start playing to discover cards!'
+                : 'No cards match your search criteria.'}
+            </div>
+          ) : (
+            <ScrollArea className="h-full pr-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {filteredCards.map(card => (
+                  <CardItem key={card.id} card={card} variant="broadsheet" />
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </div>
+
+        {selectedCard && (
+          <CardDetailOverlay
+            card={selectedCard}
+            canAfford={false}
+            disabled
+            onClose={() => setSelectedCard(null)}
+            onPlayCard={() => setSelectedCard(null)}
+          />
+        )}
+      </div>
+    );
+  }
+
 
   return (
     <div className={`flex h-full flex-col gap-5 text-slate-200 ${className ?? ''}`}>
@@ -199,7 +346,7 @@ export const CardCollectionContent = ({
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {filteredCards.map(card => (
-              <CardItem key={card.id} card={card} />
+              <CardItem key={card.id} card={card} variant={variant} />
             ))}
           </div>
         )}

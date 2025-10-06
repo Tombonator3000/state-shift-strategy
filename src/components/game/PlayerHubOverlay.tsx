@@ -161,26 +161,17 @@ const PlayerHubOverlay = ({
     }
   }, []);
 
-  const agendaStatusTone: Record<AgendaMoment['status'], { badge: string; bullet: string }> = {
-    advance: {
-      badge: 'border-sky-500/60 bg-sky-500/10 text-sky-700 dark:text-sky-200',
-      bullet: 'border-sky-500 bg-sky-400',
-    },
-    setback: {
-      badge: 'border-rose-500/60 bg-rose-500/10 text-rose-700 dark:text-rose-200',
-      bullet: 'border-rose-500 bg-rose-400',
-    },
-    complete: {
-      badge: 'border-emerald-500/60 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200',
-      bullet: 'border-emerald-500 bg-emerald-400',
-    },
+  const agendaStatusTone: Record<AgendaMoment['status'], string> = {
+    advance: 'border-[var(--broadsheet-accent)] bg-[var(--broadsheet-accent-soft)] text-[var(--broadsheet-ink)]',
+    setback: 'border-[#b7423f] bg-[#f5d4d1] text-[#5b1c15]',
+    complete: 'border-[#336f3a] bg-[#d1ead4] text-[#1f4b24]',
   };
 
   const agendaStatusLabel: Record<'all' | AgendaMoment['status'], string> = {
-    all: 'Alle',
-    advance: 'Fremdrift',
-    setback: 'Tilbakeslag',
-    complete: 'Fullført',
+    all: 'All',
+    advance: 'Advance',
+    setback: 'Setback',
+    complete: 'Complete',
   };
 
   const resolveMomentTimestamp = (timestamp: number | undefined): string => {
@@ -202,542 +193,412 @@ const PlayerHubOverlay = ({
     return `${month}/${day} ${hours}:${minutes}`;
   };
 
-  const difficultyTone: Record<AgendaDefinition['difficulty'], string> = {
-    easy: 'border-emerald-500/30 bg-emerald-500/15 text-emerald-600',
-    medium: 'border-amber-500/30 bg-amber-500/15 text-amber-700',
-    hard: 'border-rose-500/30 bg-rose-500/15 text-rose-600',
-    legendary: 'border-violet-500/30 bg-violet-500/15 text-violet-600',
+  const agendaDifficultyTone: Record<AgendaDefinition['difficulty'], string> = {
+    easy: 'border-[#336f3a] bg-[#d1ead4] text-[#1f4b24]',
+    medium: 'border-[#b1691b] bg-[#f6e2c5] text-[#633a09]',
+    hard: 'border-[#a12a3a] bg-[#f6cdd6] text-[#5c111d]',
+    legendary: 'border-[#3c3a8f] bg-[#dcd8f7] text-[#242064]',
   };
+
+  const dateline = useMemo(() => {
+    try {
+      return new Intl.DateTimeFormat(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }).format(new Date());
+    } catch {
+      return new Date().toLocaleDateString();
+    }
+  }, []);
+
+  const volumeNumber = useMemo(
+    () => 208 + completedAgendaIds.length * 3 + (currentAgenda ? 1 : 0),
+    [completedAgendaIds.length, currentAgenda],
+  );
+
+  const tabDetails = useMemo(
+    (): Record<HubTab, { kicker: string; headline: string; dek: string; ticker: string; footer: string }> => ({
+      achievements: {
+        kicker: 'Scoop Filed',
+        headline: 'Centerfold of Glory',
+        dek: 'Hero mugshots, improbable stats, and “totally verified” testimonials.',
+        ticker: 'Hero desk updates every rotation. Suspicious applause recorded.',
+        footer: 'Send victory polaroids to the morgue editor before midnight.',
+      },
+      agendas: {
+        kicker: 'Classified Cables',
+        headline: 'Telegram Desk',
+        dek: 'Stamped envelopes leaking orders, setbacks, and whispered triumphs.',
+        ticker: 'Teleprinters jammed? Tap twice if the redaction lights flicker.',
+        footer: 'Agenda desk accepts bribes in microfilm or hand-labeled coffee tins.',
+      },
+      cards: {
+        kicker: 'Collector Insert',
+        headline: 'Back-Page Archives',
+        dek: 'Perforated card proofs with misaligned ink and contraband commentary.',
+        ticker: 'Rumor: new card run smuggled in cereal boxes, watch the aisles.',
+        footer: 'Clip-and-save corners so the archivist stops gnashing teeth.',
+      },
+      tutorials: {
+        kicker: 'Correspondence Course',
+        headline: 'Shadow Academy Lessons',
+        dek: 'Typewritten mailers teaching rookies to disappear and reappear in print.',
+        ticker: 'Night class enrollment up 23%. Faculty denies poltergeist assistance.',
+        footer: 'Return homework with coffee stains for accelerated grading.',
+      },
+      press: {
+        kicker: 'Newsstand Scoop',
+        headline: 'Leaked Editions',
+        dek: 'Stacked front pages liberated from shredders and “misplaced” trucks.',
+        ticker: 'Paperboys report third moonlight delivery in as many nights.',
+        footer: 'Tip the vendor in anomaly coupons for a bonus issue.',
+      },
+      evidence: {
+        kicker: 'Supplement A',
+        headline: 'Evidence Annex',
+        dek: 'Clippings, diagrams, and gum-stuck memos the officials call gossip.',
+        ticker: 'Evidence locker hum registered at 7.2 conspiracies per minute.',
+        footer: 'Keep pushpins recycled; the corkboard groans already.',
+      },
+      intel: {
+        kicker: 'Field Wires',
+        headline: 'Hotline Atlas',
+        dek: 'Live map of contested states, buzzing switchboards, and spectral sightings.',
+        ticker: 'Switchboard warns: crosswinds of truth spotted over flyover country.',
+        footer: 'Keep the hotline clear; ghosts insist on operator-assisted dialing.',
+      },
+    }),
+    [faction],
+  );
+
+  const stampLabel = faction === 'truth' ? 'Leaked Proof' : 'Cleared Copy';
+
+  const scribbleNote = useMemo(
+    () =>
+      faction === 'truth'
+        ? `Stashed this layout in the abandoned pressroom. ${completedAgendas.length} dossiers cracked so far — ink your alibis.`
+        : `Filed under “routine morale bulletin.” If ${completedAgendas.length} cases solved, remind interns to deny everything.`,
+    [faction, completedAgendas.length],
+  );
+
+  const tickerItems = useMemo(() => {
+    const items: string[] = [];
+    items.push(`Vol. ${volumeNumber.toString().padStart(3, '0')} // ${dateline}`);
+    items.push(tabDetails[activeTab].ticker);
+    const signalCount = (stateIntel?.recentEvents.length ?? 0) + intelArchive.length;
+    const agendaCount = completedAgendas.length + (currentAgenda ? 1 : 0);
+    items.push(`${signalCount} wires buzzing // ${agendaCount} dossiers live`);
+    return items;
+  }, [volumeNumber, dateline, tabDetails, activeTab, stateIntel?.recentEvents.length, intelArchive.length, completedAgendas.length, currentAgenda]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
       <Card
         className={clsx(
-          'player-hub-card relative flex h-[90vh] w-full max-w-7xl flex-col overflow-hidden',
-          isTruth
-            ? 'player-hub-truth border border-amber-900/40 bg-[rgba(252,245,232,0.97)] text-stone-900 shadow-[0_35px_120px_rgba(124,45,18,0.25)]'
-            : 'player-hub-government border border-emerald-500/30 bg-slate-950/95 text-slate-100 shadow-[0_0_80px_rgba(16,185,129,0.25)]',
+          'player-hub-card player-hub-broadsheet relative flex h-[90vh] w-full max-w-7xl flex-col',
+          isTruth ? 'player-hub-truth' : 'player-hub-government',
         )}
       >
-        <div className="player-hub-background pointer-events-none absolute inset-0">
-          {isTruth ? (
-            <>
-              <div className="player-hub-truth__paper" />
-              <div className="player-hub-truth__grain" />
-              <div className="player-hub-truth__thread player-hub-truth__thread--one" />
-              <div className="player-hub-truth__thread player-hub-truth__thread--two" />
-              <div className="player-hub-truth__tape player-hub-truth__tape--one" />
-              <div className="player-hub-truth__tape player-hub-truth__tape--two" />
-            </>
-          ) : (
-            <>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.22),_transparent_55%)] opacity-60" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(56,189,248,0.18),_transparent_60%)] opacity-50" />
-              <div
-                className="absolute inset-0 opacity-35 mix-blend-screen"
-                style={{ backgroundImage: 'linear-gradient(135deg, rgba(56,189,248,0.16), transparent 45%, rgba(16,185,129,0.12))' }}
-              />
-            </>
-          )}
+        <div className="player-hub-background">
+          <div className="broadsheet-paper" />
+          <div className="broadsheet-halftone" />
+          <div className="broadsheet-fibers" />
+          <div className="broadsheet-fold" />
+          <div className="broadsheet-margin-notes" />
         </div>
 
-        <div
-          className={clsx(
-            'player-hub-header relative border-b px-6 py-5 backdrop-blur',
-            isTruth
-              ? 'border-rose-900/40 bg-gradient-to-r from-amber-100 via-rose-50 to-amber-200/80 text-stone-900'
-              : 'border-emerald-500/20 bg-gradient-to-r from-emerald-900/40 via-slate-950 to-slate-950/90 text-emerald-100',
-          )}
-        >
-          <div className="flex flex-wrap items-start justify-between gap-6">
-            <div className="space-y-2">
-              <Badge
-                className={clsx(
-                  'player-hub-badge border font-mono text-[11px] uppercase tracking-[0.35em]',
-                  isTruth
-                    ? 'border-rose-800/60 bg-rose-100/90 text-rose-900 shadow-[0_6px_18px_rgba(124,45,18,0.18)]'
-                    : 'border-emerald-400/60 bg-emerald-500/15 text-emerald-200',
-                )}
-              >
-                Operator Uplink
-              </Badge>
-              <h2
-                className={clsx(
-                  'font-mono text-2xl font-semibold uppercase tracking-[0.2em]',
-                  isTruth ? 'text-rose-900 drop-shadow-[0_1px_0_rgba(255,255,255,0.65)]' : 'text-emerald-100',
-                )}
-              >
-                AGENT DOSSIER HUB
-              </h2>
-              <p
-                className={clsx(
-                  'max-w-2xl text-sm',
-                  isTruth ? 'text-stone-700' : 'text-emerald-100/70',
-                )}
-              >
-                Review your progress, browse unlocked cards, and continue your training across the network.
-              </p>
+        <div className="broadsheet-shell">
+          <header className="broadsheet-masthead">
+            <div className="broadsheet-masthead__logo">
+              <span>Paranoid Times Weekly</span>
+              <span>{faction === 'truth' ? 'Truth Underground Bureau' : 'Office of Official Narratives'}</span>
             </div>
+            <div className="broadsheet-masthead__edition">
+              <span>{dateline}</span>
+              <span>Volume {volumeNumber.toString().padStart(3, '0')}</span>
+              <span>Edition #{Math.max(pressIssues.length, 1).toString().padStart(2, '0')}</span>
+            </div>
+            <div className="broadsheet-masthead__price">3.50 or one classified lead</div>
             <Button
               onClick={onClose}
               variant="outline"
               size="sm"
-              className={clsx(
-                'player-hub-close-btn transition',
-                isTruth
-                  ? 'border-rose-800/40 bg-rose-100/70 text-rose-900 shadow-sm hover:bg-rose-200/80 hover:text-rose-900'
-                  : 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/20 hover:text-emerald-100',
-              )}
+              className="broadsheet-masthead__close rounded-full border-[1.5px] border-[var(--broadsheet-accent)] bg-white/80 px-4 py-1 font-typewriter text-[11px] uppercase tracking-[0.28em] text-[var(--broadsheet-accent)] shadow-sm transition hover:bg-white"
             >
-              <X size={16} className="mr-1" />
-              Close
+              <X size={14} className="mr-2" />
+              Close Archive
             </Button>
-          </div>
-        </div>
+          </header>
 
-        <Tabs
-          value={activeTab}
-          onValueChange={value => setActiveTab(value as HubTab)}
-          className="relative flex flex-1 flex-col overflow-hidden"
-        >
-          <div className="relative px-6 pt-6">
-            <TabsList
-              className={clsx(
-                'player-hub-tablist grid w-full grid-cols-7 gap-2 rounded-lg border p-1 backdrop-blur',
-                isTruth
-                  ? 'border-rose-900/40 bg-[rgba(255,255,255,0.86)] shadow-[inset_0_15px_40px_rgba(124,45,18,0.12)]'
-                  : 'border-emerald-500/20 bg-slate-900/70',
-              )}
-            >
-              <TabsTrigger
-                value="achievements"
-                className={clsx(
-                  'flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] transition',
-                  isTruth
-                    ? 'text-stone-500 data-[state=active]:border-rose-900/60 data-[state=active]:bg-amber-100/90 data-[state=active]:text-rose-900 data-[state=active]:shadow-[inset_0_4px_18px_rgba(124,45,18,0.18)]'
-                    : 'text-slate-400 data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200',
-                )}
-              >
-                <Trophy className="h-4 w-4" />
-                Achievements
-              </TabsTrigger>
-              <TabsTrigger
-                value="agendas"
-                className={clsx(
-                  'flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] transition',
-                  isTruth
-                    ? 'text-stone-500 data-[state=active]:border-rose-900/60 data-[state=active]:bg-amber-100/90 data-[state=active]:text-rose-900 data-[state=active]:shadow-[inset_0_4px_18px_rgba(124,45,18,0.18)]'
-                    : 'text-slate-400 data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200',
-                )}
-              >
-                <Target className="h-4 w-4" />
-                Agendas
-              </TabsTrigger>
-              <TabsTrigger
-                value="cards"
-                className={clsx(
-                  'flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] transition',
-                  isTruth
-                    ? 'text-stone-500 data-[state=active]:border-rose-900/60 data-[state=active]:bg-amber-100/90 data-[state=active]:text-rose-900 data-[state=active]:shadow-[inset_0_4px_18px_rgba(124,45,18,0.18)]'
-                    : 'text-slate-400 data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200',
-                )}
-              >
-                <Library className="h-4 w-4" />
-                Card Collection
-              </TabsTrigger>
-              <TabsTrigger
-                value="tutorials"
-                className={clsx(
-                  'flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] transition',
-                  isTruth
-                    ? 'text-stone-500 data-[state=active]:border-rose-900/60 data-[state=active]:bg-amber-100/90 data-[state=active]:text-rose-900 data-[state=active]:shadow-[inset_0_4px_18px_rgba(124,45,18,0.18)]'
-                    : 'text-slate-400 data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200',
-                )}
-              >
-                <GraduationCap className="h-4 w-4" />
-                Shadow Academy
-              </TabsTrigger>
-              <TabsTrigger
-                value="press"
-                className={clsx(
-                  'flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] transition',
-                  isTruth
-                    ? 'text-stone-500 data-[state=active]:border-rose-900/60 data-[state=active]:bg-amber-100/90 data-[state=active]:text-rose-900 data-[state=active]:shadow-[inset_0_4px_18px_rgba(124,45,18,0.18)]'
-                    : 'text-slate-400 data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200',
-                )}
-              >
-                <Newspaper className="h-4 w-4" />
-                Press Archive
-              </TabsTrigger>
-              <TabsTrigger
-                value="evidence"
-                className={clsx(
-                  'flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] transition',
-                  isTruth
-                    ? 'text-stone-500 data-[state=active]:border-rose-900/60 data-[state=active]:bg-amber-100/90 data-[state=active]:text-rose-900 data-[state=active]:shadow-[inset_0_4px_18px_rgba(124,45,18,0.18)]'
-                    : 'text-slate-400 data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200',
-                )}
-              >
-                <FileSearch2 className="h-4 w-4" />
-                Evidence
-              </TabsTrigger>
-              <TabsTrigger
-                value="intel"
-                className={clsx(
-                  'flex items-center justify-center gap-2 rounded-md border border-transparent px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] transition',
-                  isTruth
-                    ? 'text-stone-500 data-[state=active]:border-rose-900/60 data-[state=active]:bg-amber-100/90 data-[state=active]:text-rose-900 data-[state=active]:shadow-[inset_0_4px_18px_rgba(124,45,18,0.18)]'
-                    : 'text-slate-400 data-[state=active]:border-emerald-400/60 data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-200',
-                )}
-              >
-                <MapPin className="h-4 w-4" />
-                Field Intel
-              </TabsTrigger>
+          <Tabs
+            value={activeTab}
+            onValueChange={value => setActiveTab(value as HubTab)}
+            className="flex flex-1 flex-col"
+          >
+            <TabsList className="broadsheet-tablist">
+              {(Object.keys(tabDetails) as HubTab[]).map(tabKey => {
+                const detail = tabDetails[tabKey];
+                return (
+                  <TabsTrigger
+                    key={tabKey}
+                    value={tabKey}
+                    className="broadsheet-tab flex w-full flex-col items-start gap-1 tracking-[0.28em] data-[state=inactive]:opacity-85"
+                  >
+                    <span className="kicker">{detail.kicker}</span>
+                    <span>{detail.headline}</span>
+                    <span className="dek">{detail.dek}</span>
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
-          </div>
 
-          <div className="relative flex-1 overflow-hidden px-6 pb-6 pt-4">
-            <div
-              className={clsx(
-                'player-hub-panel relative flex h-full flex-col overflow-hidden rounded-2xl border',
-                isTruth
-                  ? 'border-rose-900/30 bg-[rgba(255,250,240,0.88)] shadow-[0_35px_80px_rgba(124,45,18,0.18)]'
-                  : 'border-emerald-500/25 bg-slate-950/80 shadow-[0_0_45px_rgba(16,185,129,0.15)]',
-              )}
-            >
-              <div className="pointer-events-none absolute inset-0 opacity-45">
-                {isTruth ? (
-                  <>
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(252,211,77,0.25),_transparent_60%)]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(160deg,_rgba(244,114,182,0.18),_transparent_55%)]" />
-                  </>
-                ) : (
-                  <>
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_55%)]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(160deg,_rgba(56,189,248,0.12),_transparent_60%)]" />
-                  </>
-                )}
+            <div className="broadsheet-content">
+              <div className="broadsheet-stamp">{stampLabel}</div>
+              <div className="broadsheet-columns" aria-hidden />
+              <div className="broadsheet-content__ticker">
+                {tickerItems.map((item, index) => (
+                  <span key={`${item}-${index}`}>{item}</span>
+                ))}
               </div>
+              <div className="broadsheet-content__body">
+                <TabsContent
+                  value="achievements"
+                  className="relative h-full focus-visible:outline-none data-[state=inactive]:hidden"
+                >
+                  <AchievementsSection className="h-full" variant="broadsheet" />
+                </TabsContent>
 
-              <TabsContent value="achievements" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
-                <AchievementsSection className="h-full" />
-              </TabsContent>
-
-              <TabsContent value="agendas" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
-                <div className="flex h-full flex-col gap-4">
-                  {agendasEnabled ? (
-                    <>
-                      <Card
-                        className={clsx(
-                          'overflow-hidden border p-4 shadow-sm backdrop-blur',
-                          isTruth
-                            ? 'border-rose-900/30 bg-amber-50/80 text-stone-900'
-                            : 'border-emerald-500/25 bg-slate-900/80 text-emerald-50',
-                        )}
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.32em] opacity-70">
-                              Active Agenda
-                            </p>
-                            <h3 className="text-lg font-bold uppercase tracking-[0.12em]">
-                              {currentAgenda?.title ?? 'No agenda assigned'}
-                            </h3>
-                          </div>
-                          {currentAgenda?.difficulty && (
-                            <Badge
-                              variant="outline"
-                              className={clsx(
-                                'border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.32em]',
-                                difficultyTone[currentAgenda.difficulty],
-                              )}
-                            >
-                              {currentAgenda.difficulty}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="mt-4">
-                          {currentAgenda ? (
-                            <SecretAgendaCard agenda={currentAgenda} isPlayer={faction === 'truth'} />
-                          ) : (
-                            <div className="rounded border border-dashed border-current/40 bg-black/5 p-4 text-sm font-mono uppercase tracking-[0.2em] opacity-70">
-                              Awaiting assignment...
-                            </div>
-                          )}
-                        </div>
-                      </Card>
-
-                      <div className="flex-1 space-y-4 overflow-y-auto pr-1">
-                        {completedAgendas.length > 0 ? (
-                          <div className="grid gap-3 lg:grid-cols-2">
-                            {completedAgendas.map(agenda => (
-                              <Card
-                                key={agenda.id}
-                                className={clsx(
-                                  'h-full border p-4 transition hover:shadow-md',
-                                  isTruth
-                                    ? 'border-rose-900/30 bg-rose-50/80 text-stone-900'
-                                    : 'border-emerald-500/25 bg-slate-950/70 text-slate-100',
+                <TabsContent
+                  value="agendas"
+                  className="relative h-full focus-visible:outline-none data-[state=inactive]:hidden"
+                >
+                  <div className="flex h-full flex-col gap-6">
+                    {agendasEnabled ? (
+                      <>
+                        <div className="grid gap-6 lg:grid-cols-5">
+                          <div className="space-y-4 lg:col-span-3">
+                            <div className="rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.86)] p-5 shadow-sm">
+                              <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                  <p className="font-typewriter text-[10px] uppercase tracking-[0.42em] text-[var(--broadsheet-kicker)]">
+                                    Active Agenda Telegram
+                                  </p>
+                                  <h3 className="font-broadsheetSans text-2xl uppercase tracking-[0.18em]">
+                                    {currentAgenda?.title ?? 'Awaiting Assignment'}
+                                  </h3>
+                                </div>
+                                {currentAgenda?.difficulty && (
+                                  <Badge
+                                    variant="outline"
+                                    className={clsx(
+                                      'font-typewriter text-[11px] uppercase tracking-[0.38em]',
+                                      agendaDifficultyTone[currentAgenda.difficulty],
+                                    )}
+                                  >
+                                    {currentAgenda.difficulty}
+                                  </Badge>
                                 )}
-                              >
-                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <Badge variant="secondary" className="bg-green-500/20 text-green-900 dark:text-green-200">
-                                      Completed
-                                    </Badge>
-                                    <Badge
-                                      variant="outline"
+                              </div>
+                              <div className="mt-4 border-t border-dashed border-[var(--broadsheet-rule)] pt-4">
+                                {currentAgenda ? (
+                                  <SecretAgendaCard agenda={currentAgenda} isPlayer={faction === 'truth'} />
+                                ) : (
+                                  <div className="font-typewriter text-xs uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                                    Bureaucrats misplaced the envelope again.
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.82)] p-5">
+                              <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                                <div className="font-typewriter text-[11px] uppercase tracking-[0.38em] text-[var(--broadsheet-kicker)]">
+                                  Cable Log
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {(Object.keys(agendaStatusLabel) as Array<'all' | AgendaMoment['status']>).map(statusKey => (
+                                    <button
+                                      key={statusKey}
+                                      type="button"
+                                      onClick={() => setAgendaFilter(statusKey)}
                                       className={clsx(
-                                        'border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.32em]',
-                                        difficultyTone[agenda.difficulty],
+                                        'rounded-full border px-3 py-1 text-[11px] font-typewriter uppercase tracking-[0.32em] transition',
+                                        agendaFilter === statusKey
+                                          ? 'border-[var(--broadsheet-accent)] bg-[var(--broadsheet-accent-soft)] text-[var(--broadsheet-ink)]'
+                                          : 'border-[var(--broadsheet-rule)] text-[var(--broadsheet-muted)] hover:bg-white/70',
                                       )}
                                     >
-                                      {agenda.difficulty}
-                                    </Badge>
-                                  </div>
-                                  <Badge variant="outline" className="text-[10px] uppercase tracking-[0.2em]">
-                                    {agenda.category}
-                                  </Badge>
+                                      {agendaStatusLabel[statusKey]}
+                                    </button>
+                                  ))}
                                 </div>
-                                <div className="mt-3 space-y-2">
-                                  <h4 className="text-base font-semibold uppercase tracking-[0.12em]">
-                                    {agenda.title}
-                                  </h4>
-                                  <p className="text-sm text-muted-foreground">
-                                    {agenda.description}
+                              </header>
+                              <div className="space-y-4 overflow-y-auto pr-1">
+                                {filteredAgendaHistory.length === 0 ? (
+                                  <p className="font-typewriter text-xs uppercase tracking-[0.3em] text-[var(--broadsheet-muted)]">
+                                    No cable traffic yet — suspiciously quiet.
                                   </p>
-                                  {agenda.issueTheme && (
-                                    <p className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground/80">
-                                      Issue Focus: {agenda.issueTheme}
-                                    </p>
-                                  )}
-                                  {agenda.headline && (
-                                    <p className="text-xs italic text-muted-foreground/80">“{agenda.headline}”</p>
-                                  )}
-                                </div>
-                              </Card>
-                            ))}
-                          </div>
-                        ) : (
-                          <Card
-                            className={clsx(
-                              'border border-dashed p-6 text-center text-sm uppercase tracking-[0.28em]',
-                              isTruth
-                                ? 'border-rose-900/30 bg-rose-50/60 text-rose-900/70'
-                                : 'border-emerald-500/25 bg-slate-950/70 text-emerald-100/70',
-                            )}
-                          >
-                            No completed agendas logged yet.
-                          </Card>
-                        )}
-
-                        <Card
-                          className={clsx(
-                            'border p-4',
-                            isTruth
-                              ? 'border-rose-900/30 bg-rose-50/80 text-stone-900'
-                              : 'border-emerald-500/25 bg-slate-950/70 text-slate-100',
-                          )}
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.32em] opacity-70">
-                                Agenda-Logg
-                              </p>
-                              <h3 className="text-lg font-bold uppercase tracking-[0.12em]">
-                                Historikk og signaler
-                              </h3>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {(['all', 'advance', 'setback', 'complete'] as const).map(filterValue => (
-                                <button
-                                  key={filterValue}
-                                  type="button"
-                                  onClick={() => setAgendaFilter(filterValue)}
-                                  className={clsx(
-                                    'rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] transition',
-                                    agendaFilter === filterValue
-                                      ? isTruth
-                                        ? 'border-rose-900 bg-rose-200/40 text-rose-900 shadow-sm'
-                                        : 'border-emerald-400 bg-emerald-500/20 text-emerald-50 shadow-sm'
-                                      : isTruth
-                                        ? 'border-transparent bg-amber-100/40 text-rose-900/70 hover:border-rose-900/30 hover:bg-amber-100/60'
-                                        : 'border-transparent bg-slate-900/60 text-emerald-100/70 hover:border-emerald-500/30 hover:bg-slate-900/80',
-                                  )}
-                                >
-                                  {agendaStatusLabel[filterValue]}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="mt-4">
-                            {agendaHistory.length === 0 ? (
-                              <div
-                                className={clsx(
-                                  'rounded border border-dashed p-4 text-center text-xs uppercase tracking-[0.28em] opacity-70',
-                                  isTruth
-                                    ? 'border-rose-900/30 bg-amber-100/40 text-rose-900/70'
-                                    : 'border-emerald-500/25 bg-slate-950/60 text-emerald-100/70',
-                                )}
-                              >
-                                Ingen agenda-historikk registrert ennå.
-                              </div>
-                            ) : filteredAgendaHistory.length === 0 ? (
-                              <div
-                                className={clsx(
-                                  'rounded border border-dashed p-4 text-center text-xs uppercase tracking-[0.28em] opacity-70',
-                                  isTruth
-                                    ? 'border-rose-900/30 bg-amber-100/40 text-rose-900/70'
-                                    : 'border-emerald-500/25 bg-slate-950/60 text-emerald-100/70',
-                                )}
-                              >
-                                Ingen hendelser samsvarer med filteret.
-                              </div>
-                            ) : (
-                              <div className="relative">
-                                <div
-                                  className={clsx(
-                                    'absolute left-[0.65rem] top-2 bottom-2 w-px',
-                                    isTruth ? 'bg-rose-900/30' : 'bg-emerald-500/30',
-                                  )}
-                                />
-                                <div className="space-y-4">
-                                  {filteredAgendaHistory.map(moment => {
-                                    const progressLabel = `${moment.progress}/${moment.target}`;
-                                    const factionLabel =
-                                      moment.faction === 'truth' ? 'Truth Coalition' : 'Government Directorate';
-                                    const actorLabel = moment.actor === 'player' ? 'Operatives' : 'Opposition Network';
-                                    const tone = agendaStatusTone[moment.status];
-                                    const statusLabel =
-                                      moment.status === 'advance'
-                                        ? 'Fremdrift'
-                                        : moment.status === 'setback'
-                                        ? 'Tilbakeslag'
-                                        : 'Fullført';
-
-                                    return (
-                                      <div key={moment.id} className="relative pl-8">
+                                ) : (
+                                  filteredAgendaHistory.map(moment => (
+                                    <article
+                                      key={moment.id}
+                                      className="grid gap-3 rounded-lg border border-dashed border-[var(--broadsheet-rule)] bg-white/80 p-3 md:grid-cols-[180px,1fr]"
+                                    >
+                                      <div className="flex flex-col gap-2">
+                                        <span className="font-typewriter text-[11px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                                          {resolveMomentTimestamp(moment.timestamp)}
+                                        </span>
+                                        <span className="font-typewriter text-[11px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                                          Filed by {moment.actor ?? 'Unknown Bureau'}
+                                        </span>
                                         <span
                                           className={clsx(
-                                            'absolute left-0 top-3 h-3 w-3 -translate-x-1/2 transform rounded-full border-2 shadow-sm',
-                                            tone.bullet,
+                                            'inline-flex items-center justify-center rounded-full border px-3 py-1 text-[11px] font-typewriter uppercase tracking-[0.32em]',
+                                            agendaStatusTone[moment.status],
                                           )}
-                                        />
-                                        <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em]">
-                                          <Badge variant="outline" className={clsx('px-2 py-0.5', tone.badge)}>
-                                            {statusLabel}
-                                          </Badge>
-                                          <Badge
-                                            variant="outline"
-                                            className={clsx(
-                                              'border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.28em]',
-                                              isTruth
-                                                ? 'border-rose-900/30 bg-amber-50/80 text-rose-900'
-                                                : 'border-emerald-500/30 bg-slate-900/70 text-emerald-100',
-                                            )}
-                                          >
-                                            Stage: {moment.stageLabel}
-                                          </Badge>
-                                          <Badge
-                                            variant="outline"
-                                            className={clsx(
-                                              'border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.28em]',
-                                              isTruth
-                                                ? 'border-rose-900/30 bg-amber-50/80 text-rose-900'
-                                                : 'border-emerald-500/30 bg-slate-900/70 text-emerald-100',
-                                            )}
-                                          >
-                                            Fremdrift {progressLabel}
-                                          </Badge>
-                                        </div>
-                                        <div className="mt-2 space-y-1">
-                                          <h4 className="text-sm font-semibold uppercase tracking-[0.12em]">
-                                            {moment.agendaTitle}
-                                          </h4>
-                                          {moment.stageDescription ? (
-                                            <p className="text-xs text-muted-foreground">
-                                              {moment.stageDescription}
-                                            </p>
-                                          ) : null}
-                                          <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground/80">
-                                            Ansvarlig: {factionLabel} · {actorLabel}
-                                          </div>
-                                          <div className="text-[10px] uppercase tracking-[0.32em] text-muted-foreground/70">
-                                            {resolveMomentTimestamp(moment.recordedAt)}
-                                          </div>
-                                        </div>
+                                        >
+                                          {moment.status.toUpperCase()}
+                                        </span>
                                       </div>
-                                    );
-                                  })}
-                                </div>
+                                      <div className="space-y-2">
+                                        <h4 className="font-broadsheetSans text-lg uppercase tracking-[0.14em]">
+                                          {moment.title}
+                                        </h4>
+                                        <p className="font-broadsheet text-[15px] leading-relaxed text-[var(--broadsheet-ink)]">
+                                          {moment.description}
+                                        </p>
+                                        {moment.redaction && (
+                                          <p className="font-typewriter text-xs uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                                            REDACTION NOTE: {moment.redaction}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </article>
+                                  ))
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <aside className="space-y-4 rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.82)] p-5">
+                            <h4 className="font-broadsheetSans text-xl uppercase tracking-[0.16em]">Completed Dossiers</h4>
+                            {completedAgendas.length === 0 ? (
+                              <p className="font-typewriter text-xs uppercase tracking-[0.3em] text-[var(--broadsheet-muted)]">
+                                Filing cabinet empty. That never happens.
+                              </p>
+                            ) : (
+                              <div className="space-y-3">
+                                {completedAgendas.map(agenda => (
+                                  <div
+                                    key={agenda.id}
+                                    className="rounded-lg border border-dashed border-[var(--broadsheet-rule)] bg-white/80 p-3"
+                                  >
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                      <span className="font-broadsheetSans text-sm uppercase tracking-[0.2em]">
+                                        {agenda.title}
+                                      </span>
+                                      <span className="font-typewriter text-[11px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                                        {agenda.category}
+                                      </span>
+                                    </div>
+                                    <p className="mt-1 font-broadsheet text-sm leading-relaxed text-[var(--broadsheet-muted)]">
+                                      {agenda.description}
+                                    </p>
+                                    {agenda.headline && (
+                                      <p className="mt-2 font-broadsheet text-[13px] italic text-[var(--broadsheet-ink)]">
+                                        “{agenda.headline}”
+                                      </p>
+                                    )}
+                                  </div>
+                                ))}
                               </div>
                             )}
-                          </div>
-                        </Card>
+                          </aside>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.7)] p-6 text-center font-typewriter text-xs uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                        Agendas unlock later in the campaign. Keep the presses warm.
                       </div>
-                    </>
-                  ) : (
-                    <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-sm text-muted-foreground">
-                      <Badge variant="outline" className="px-3 py-1 font-mono text-[10px] uppercase tracking-[0.3em]">
-                        System Offline
-                      </Badge>
-                      <p>Secret agendas are disabled for this campaign.</p>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="cards" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
-                <CardCollectionContent
-                  isActive={activeTab === 'cards'}
-                  className="h-full"
-                />
-              </TabsContent>
-
-              <TabsContent value="tutorials" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
-                <TutorialSection
-                  isActive={activeTab === 'tutorials'}
-                  onStartTutorial={onStartTutorial}
-                  onClose={onClose}
-                  className="h-full"
-                />
-              </TabsContent>
-
-              <TabsContent value="press" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
-                <PressArchivePanel
-                  issues={pressIssues}
-                  onOpen={onOpenEdition}
-                  onDelete={onDeleteEdition}
-                  className="h-full"
-                />
-              </TabsContent>
-              <TabsContent value="evidence" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
-                <EvidenceArchivePanel
-                  entries={intelArchive}
-                  onDelete={onDeleteIntel}
-                  onClear={onClearIntel}
-                  className="h-full"
-                />
-              </TabsContent>
-              <TabsContent value="intel" className="relative h-full overflow-hidden p-6 focus-visible:outline-none">
-                <div className="flex h-full flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-                  <PlayerHubMapView
-                    intel={stateIntel}
-                    faction={faction}
-                    className="h-full min-h-[320px]"
-                  />
-                  <div className="min-h-0 overflow-hidden">
-                    <StateIntelBoard intel={stateIntel} />
+                    )}
                   </div>
-                </div>
-              </TabsContent>
+                </TabsContent>
+
+                <TabsContent
+                  value="cards"
+                  className="relative h-full focus-visible:outline-none data-[state=inactive]:hidden"
+                >
+                  <CardCollectionContent className="h-full" isActive={activeTab === 'cards'} variant="broadsheet" />
+                </TabsContent>
+
+                <TabsContent
+                  value="tutorials"
+                  className="relative h-full focus-visible:outline-none data-[state=inactive]:hidden"
+                >
+                  <TutorialSection
+                    className="h-full"
+                    onClose={onClose}
+                    onStartTutorial={onStartTutorial}
+                    showCloseButton={false}
+                    isActive={activeTab === 'tutorials'}
+                    variant="broadsheet"
+                  />
+                </TabsContent>
+
+                <TabsContent
+                  value="press"
+                  className="relative h-full focus-visible:outline-none data-[state=inactive]:hidden"
+                >
+                  <PressArchivePanel
+                    className="h-full"
+                    issues={pressIssues}
+                    onOpen={onOpenEdition}
+                    onDelete={onDeleteEdition}
+                    variant="broadsheet"
+                  />
+                </TabsContent>
+
+                <TabsContent
+                  value="evidence"
+                  className="relative h-full focus-visible:outline-none data-[state=inactive]:hidden"
+                >
+                  <EvidenceArchivePanel
+                    className="h-full"
+                    entries={intelArchive}
+                    onDelete={onDeleteIntel}
+                    onClear={onClearIntel}
+                    variant="broadsheet"
+                  />
+                </TabsContent>
+
+                <TabsContent
+                  value="intel"
+                  className="relative h-full focus-visible:outline-none data-[state=inactive]:hidden"
+                >
+                  <div className="flex h-full flex-col gap-6 xl:grid xl:grid-cols-[1.1fr,0.9fr]">
+                    <div className="rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.86)] p-4 shadow-sm">
+                      <h3 className="mb-3 font-broadsheetSans text-xl uppercase tracking-[0.18em]">Nationwide Hotline</h3>
+                      <PlayerHubMapView intel={stateIntel} faction={faction} className="h-full min-h-[320px]" />
+                    </div>
+                    <div className="min-h-0 rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.82)] p-4">
+                      <StateIntelBoard intel={stateIntel} variant="broadsheet" />
+                    </div>
+                  </div>
+                </TabsContent>
+              </div>
             </div>
-          </div>
-        </Tabs>
+          </Tabs>
+
+          <footer className="broadsheet-footer-note">
+            <span>Paranoid Times Syndicate — {faction === 'truth' ? 'Leakers Welcome' : 'Censored for Your Safety'}</span>
+            <span>{activeTab === 'intel' ? 'Wire room humming — keep receivers calibrated.' : tabDetails[activeTab].footer}</span>
+          </footer>
+          <div className="broadsheet-chatter">{scribbleNote}</div>
+        </div>
       </Card>
     </div>
   );
 };
+
 
 export default PlayerHubOverlay;
