@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "editorId": "florida_man",
+  "locale": "en-US",
+  "categories": {
+    "greetings": [
+      "Humidity's thick with omens and gator radio—perfect conditions for reckless reportage.",
+      "Sunset sirens harmonized with my airboat engine. That's the newsroom calling for chaos.",
+      "Grab sunscreen and subpoenas; the swamp just texted me coordinates it shouldn't have."
+    ],
+    "victory": [
+      "Filed the story with sand still on the lens. Agencies will need a mop and an alibi.",
+      "We turned their hush order into fireworks over the Everglades. Print it before the ash settles.",
+      "Headline secured, pressure rising. Somebody warn the meteorologists this storm was editorial."
+    ],
+    "defeat": [
+      "State troopers outpaced us this time. Next run, we cut through the sinkholes.",
+      "They rerouted the hotline through a theme park. Fine—I'll leak the map on the souvenir cups.",
+      "Gator militia confiscated the van, but the van owes me favors. Expect an escape clause."
+    ],
+    "idle": [
+      "Tinfoil forecast: 94% humidity, 100% probability of spectral fireworks.",
+      "Local diner keeps comping my coffee with lottery tickets that predict the news. I’m keeping score.",
+      "If the newsroom ferret starts wearing sunglasses again, we're due for a coup."
+    ]
+  }
+}

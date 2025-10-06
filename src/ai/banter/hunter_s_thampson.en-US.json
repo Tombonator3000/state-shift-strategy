@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "editorId": "hunter_s_thampson",
+  "locale": "en-US",
+  "categories": {
+    "greetings": [
+      "Pack the riot pen and the emergency thesaurus; the motorcade of liars is warming up.",
+      "I can smell the hallucinogenic toner from here. Means the presses expect spectacle.",
+      "Managed to tape a microphone to a lightning bolt. Let's go interrogate the storm." 
+    ],
+    "victory": [
+      "We detonated a manifesto in the op-ed and the agencies are still blinking through the smoke.",
+      "Filed the piece at 130 mph. The legal desk will catch up whenever the dust permits.",
+      "Truth just rode shotgun across their roadblock. Someone send a postcard from the wreckage."
+    ],
+    "defeat": [
+      "The suits confiscated my typewriter cartridge. Joke's on them—it's loaded with backup evidence.",
+      "We hit the brakes before the cliff, but the cliff took notes. Next time we floor it.",
+      "Lost the story this round, but I memorized the exit routes while they gloated."
+    ],
+    "idle": [
+      "Hotel minibar replaced the ice with classified microfiche. Stirred it into the bourbon anyway.",
+      "Hearing rumors the pressroom couches are bugged. I stapled a counter-bug that whispers lullabies.",
+      "Thunderheads spelling out deadlines again. Grab the camera before they go to print without us."
+    ]
+  }
+}
