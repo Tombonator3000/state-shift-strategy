@@ -1,0 +1,124 @@
+{
+  "articles": [
+    {
+      "id": "attack_whistleblower",
+      "faction": "truth",
+      "tags": ["whistleblower", "leak", "classified"],
+      "headline": "INSIDER BLOWS LID OFF CLASSIFIED PROGRAM",
+      "subhead": "Anonymous source risks career to expose shadow operations",
+      "byline": "By: Deep Throat Redux",
+      "body": "A brave government insider has leaked thousands of classified documents revealing what many suspected but few could prove. The whistleblower, speaking only through encrypted channels, claims the program has been active for decades. Officials deny everything, naturally.",
+      "imagePrompt": "Noir detective with documents"
+    },
+    {
+      "id": "attack_investigative_journalist",
+      "faction": "truth",
+      "tags": ["journalism", "investigation", "expose"],
+      "headline": "PULITZER-WINNING JOURNALIST EXPOSES COVERUP",
+      "subhead": "Award-winning reporter connects dots officials hoped would stay unconnected",
+      "byline": "By: Editor-in-Chief",
+      "body": "Following a six-month investigation, renowned journalist pieces together what authorities have spent years trying to hide. Sources confirm the story checks out, but mainstream media remains suspiciously silent. The truth, it seems, makes people uncomfortable.",
+      "imagePrompt": "Determined journalist with typewriter"
+    },
+    {
+      "id": "media_conspiracy_podcast",
+      "faction": "truth",
+      "tags": ["podcast", "viral", "awakening"],
+      "headline": "PODCAST EPISODE GOES VIRAL, MILLIONS AWAKENED",
+      "subhead": "Independent media platform reaches record audience with bombshell revelations",
+      "byline": "By: Digital Desk",
+      "body": "What started as a fringe podcast has exploded into mainstream consciousness. The episode, downloaded over 10 million times in 48 hours, presents evidence so compelling even skeptics are taking notice. Social media platforms attempted suppression, which only amplified interest.",
+      "imagePrompt": "Vintage microphone with conspiracy charts"
+    },
+    {
+      "id": "media_documentary_filmmaker",
+      "faction": "truth",
+      "tags": ["documentary", "film", "evidence"],
+      "headline": "DOCUMENTARY SPARKS NATIONAL CONVERSATION",
+      "subhead": "Film festival premiere becomes cultural phenomenon",
+      "byline": "By: Culture Editor",
+      "body": "The documentary nobody wanted to fund has become the film everyone is talking about. Mixing expert testimony with damning footage, the filmmaker presents a case officials can't easily dismiss. Distribution rights are being fought over. The truth, it turns out, is good box office.",
+      "imagePrompt": "Film reel with mysterious symbols"
+    },
+    {
+      "id": "zone_silicon_valley",
+      "faction": "truth",
+      "tags": ["technology", "silicon valley", "disruption"],
+      "headline": "TECH GIANTS CAUGHT IN SURVEILLANCE SCANDAL",
+      "subhead": "Silicon Valley's dirty secrets finally come to light",
+      "byline": "By: Tech Correspondent",
+      "body": "What began as rumors in hacker forums has evolved into full-blown scandal. Major tech companies implicated in mass surveillance programs that make Orwell look like an optimist. Engineers are fleeing in droves. Stock prices plummet. The digital panopticon is real.",
+      "imagePrompt": "Circuit board with eye symbol"
+    },
+    {
+      "id": "zone_washington_dc",
+      "faction": "truth",
+      "tags": ["politics", "dc", "corruption"],
+      "headline": "CAPITOL HILL CORRUPTION EXPOSED BY LEAKED EMAILS",
+      "subhead": "Thousands of classified communications reveal backroom deals",
+      "byline": "By: Political Desk",
+      "body": "The email dump nobody saw coming has Washington in full panic mode. Communications reveal coordination between agencies that supposedly operate independently. Several high-ranking officials have already resigned. More shoes expected to drop. The swamp is deep.",
+      "imagePrompt": "Capitol building with shadows"
+    },
+    {
+      "id": "attack_federal_agent",
+      "faction": "government",
+      "tags": ["arrest", "crackdown", "enforcement"],
+      "headline": "FEDERAL AGENTS ARREST CONSPIRACY RINGLEADER",
+      "subhead": "Dangerous misinformation spreader taken into custody",
+      "byline": "By: Department of Justice",
+      "body": "Federal law enforcement successfully apprehended the individual responsible for spreading dangerous conspiracy theories. The suspect faces multiple charges of inciting panic and distributing false information. Officials assure the public that the situation is under control. Trust your government.",
+      "imagePrompt": "Federal agent with badge"
+    },
+    {
+      "id": "attack_debunker",
+      "faction": "government",
+      "tags": ["debunk", "fact-check", "correction"],
+      "headline": "FACT-CHECKERS DEBUNK LATEST CONSPIRACY THEORY",
+      "subhead": "Independent experts confirm recent claims are completely false",
+      "byline": "By: Verification Bureau",
+      "body": "A team of independent fact-checkers has thoroughly debunked the latest round of conspiracy theories circulating online. Using science and logic, experts demonstrate why these claims are impossible. The public is urged to trust verified sources and ignore amateur investigators.",
+      "imagePrompt": "Scientist with clipboard"
+    },
+    {
+      "id": "media_state_broadcast",
+      "faction": "government",
+      "tags": ["broadcast", "official", "announcement"],
+      "headline": "EMERGENCY BROADCAST ENSURES PUBLIC SAFETY",
+      "subhead": "Official channels override conspiracy theories with facts",
+      "byline": "By: State Media Office",
+      "body": "Government broadcasting systems successfully delivered critical information to millions of citizens. The emergency broadcast corrected dangerous misinformation and reassured the public. Experts praise the swift action. Nothing to see here, folks. Everything is under control.",
+      "imagePrompt": "Broadcasting tower"
+    },
+    {
+      "id": "media_social_media_purge",
+      "faction": "government",
+      "tags": ["censorship", "moderation", "safety"],
+      "headline": "SOCIAL PLATFORMS REMOVE HARMFUL CONTENT",
+      "subhead": "Tech companies act swiftly to protect users from misinformation",
+      "byline": "By: Content Safety Team",
+      "body": "Major social media platforms have removed thousands of accounts spreading dangerous conspiracy theories. The coordinated effort demonstrates tech companies' commitment to user safety. Free speech absolutists complain, but most users appreciate the cleaner feeds. For your safety, of course.",
+      "imagePrompt": "Delete button glowing red"
+    },
+    {
+      "id": "zone_area_51",
+      "faction": "government",
+      "tags": ["military", "security", "classified"],
+      "headline": "MILITARY BASE LOCKDOWN PREVENTS SECURITY BREACH",
+      "subhead": "Unauthorized access attempt thwarted by vigilant security",
+      "byline": "By: Department of Defense",
+      "body": "Security forces at a classified military facility successfully prevented a breach by conspiracy theorists. The perpetrators have been detained for questioning. Officials remind citizens that trespassing on military property is a federal crime. The base contains routine weather balloons, nothing more.",
+      "imagePrompt": "Military fence with warning signs"
+    },
+    {
+      "id": "zone_roswell",
+      "faction": "government",
+      "tags": ["roswell", "ufo", "weather balloon"],
+      "headline": "ROSWELL INCIDENT FINALLY EXPLAINED (AGAIN)",
+      "subhead": "New documents confirm it was definitely just a weather balloon",
+      "byline": "By: Historical Records Office",
+      "body": "Newly declassified documents prove once and for all that the 1947 Roswell incident involved nothing more than a weather balloon. No aliens. No spacecraft. Just weather monitoring equipment. Anyone who says otherwise is clearly delusional. Case closed. Move along.",
+      "imagePrompt": "Weather balloon floating"
+    }
+  ]
+}

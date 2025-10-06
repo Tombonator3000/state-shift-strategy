@@ -1057,17 +1057,8 @@ const TabloidNewspaperV2 = ({
         </header>
 
         <div className={NEWSPAPER_BODY_CLASS}>
+          {/* Truth Index Bar */}
           <NewspaperSection className="mb-4 bg-white/80 px-4 py-3 text-newspaper-text">
-            <FrontPage
-              cards={frontPageCards}
-              faction={faction === 'government' ? 'GOV' : 'TRUTH'}
-              headlineFallback={{
-                headline: FRONT_PAGE_FALLBACK_HEADLINE,
-                subhead: FRONT_PAGE_FALLBACK_SUBHEAD,
-              }}
-            />
-          </NewspaperSection>
-          <NewspaperSection className="mb-6 bg-white/70 px-4 py-3 text-sm text-newspaper-text">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <span className="font-semibold uppercase tracking-wide">Truth Index</span>
@@ -1086,15 +1077,14 @@ const TabloidNewspaperV2 = ({
                 <span>Opposition: {opponentCards.length}</span>
                 <span>Captured: {narrativeContext.capturedStates.length || '—'}</span>
                 <span>Events: {events.length || '—'}</span>
-                <span>
-                  Clearance: <span className="redaction align-middle">CLASSIFIED</span>
-                </span>
               </div>
             </div>
           </NewspaperSection>
 
-          <div className="grid gap-4 lg:gap-5 lg:grid-cols-3">
-            <article className="lg:col-span-2 space-y-4 rounded-md border border-newspaper-border bg-white/80 p-6 shadow-sm">
+          {/* 3-Column Layout: Main Story + Stats/Secondary + Sidebar */}
+          <div className="grid gap-4 lg:grid-cols-[2fr_1.5fr_1.5fr]">
+            {/* COLUMN 1: Main Story + Image */}
+            <article className="space-y-4 rounded-md border border-newspaper-border bg-white/80 p-6 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
                 <span className={cn(NEWSPAPER_BADGE_CLASS, 'rounded-full px-2 py-1 text-[11px] tracking-wide text-newspaper-text')}>
                   {heroTypeLabel}
@@ -1103,195 +1093,115 @@ const TabloidNewspaperV2 = ({
                   <span className="rounded-full border border-dashed border-newspaper-border px-2 py-1">{heroTarget}</span>
                 ) : null}
               </div>
-              <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6">
-                <div className="space-y-4">
-                  <h2
-                    className={`text-3xl font-black leading-tight sm:text-4xl ${
-                      heroIsEvent ? 'text-secret-red' : 'text-newspaper-headline'
-                    } ${
-                      heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_20px_rgba(248,113,113,0.65)]' : ''
-                    }`}
-                  >
-                    {heroHeadline}
-                  </h2>
-                  <p
-                    className={`text-lg font-semibold italic ${
-                      heroIsEvent
-                        ? heroIsFilesOnTheLoose
-                          ? 'text-secret-red drop-shadow-[0_0_12px_rgba(248,113,113,0.55)]'
-                          : 'text-secret-red/80'
-                        : 'text-newspaper-text/80'
-                    } ${heroIsFilesOnTheLoose ? 'animate-pulse' : ''}`}
-                  >
-                    {heroSubhead}
-                  </p>
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/70">
-                    <span>{byline}</span>
-                    <span>{sourceLine}</span>
-                  </div>
-                  {heroIsEvent && (heroTriggerChance || heroConditionalChance) ? (
-                    <div
-                      className={`flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-wide ${
-                        heroIsFilesOnTheLoose
-                          ? 'text-secret-red animate-pulse drop-shadow-[0_0_12px_rgba(248,113,113,0.5)]'
-                          : 'text-secret-red/80'
-                      }`}
-                    >
-                      {formatChance(heroTriggerChance) ? (
-                        <span className="rounded border border-secret-red/50 px-2 py-0.5">
-                          Chance This Turn: {formatChance(heroTriggerChance)}
-                        </span>
-                      ) : null}
-                      {formatChance(heroConditionalChance) ? (
-                        <span className="rounded border border-dashed border-secret-red/50 px-2 py-0.5">
-                          If Triggered: {formatChance(heroConditionalChance)}
-                        </span>
-                      ) : null}
+
+              <div className="space-y-4">
+                <h2
+                  className={`text-3xl font-black leading-tight sm:text-4xl ${
+                    heroIsEvent ? 'text-secret-red' : 'text-newspaper-headline'
+                  } ${
+                    heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_20px_rgba(248,113,113,0.65)]' : ''
+                  }`}
+                >
+                  {heroHeadline}
+                </h2>
+                <p
+                  className={`text-lg font-semibold italic ${
+                    heroIsEvent
+                      ? heroIsFilesOnTheLoose
+                        ? 'text-secret-red drop-shadow-[0_0_12px_rgba(248,113,113,0.55)]'
+                        : 'text-secret-red/80'
+                      : 'text-newspaper-text/80'
+                  } ${heroIsFilesOnTheLoose ? 'animate-pulse' : ''}`}
+                >
+                  {heroSubhead}
+                </p>
+                
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/70">
+                  <span>{byline}</span>
+                  <span>{sourceLine}</span>
+                </div>
+
+                {/* Main Story Image */}
+                <div className="relative overflow-hidden rounded-md border border-newspaper-border bg-newspaper-header/20">
+                  {heroArticle?.cardId ? (
+                    <CardImage
+                      cardId={heroArticle.cardId}
+                      fit="contain"
+                      className="w-full aspect-[4/3] max-h-64"
+                    />
+                  ) : (
+                    <div className="flex aspect-[4/3] w-full max-h-64 items-center justify-center text-sm font-semibold uppercase tracking-wide text-newspaper-text/60">
+                      Archival footage pending clearance.
                     </div>
+                  )}
+                  {classifiedStamp ? (
+                    <div className="stamp stamp--classified absolute right-3 top-3">{classifiedStamp}</div>
                   ) : null}
-                  <div
-                    className={`space-y-4 text-sm leading-relaxed ${
-                      heroIsEvent ? 'text-secret-red/90' : ''
-                    } ${
-                      heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_14px_rgba(248,113,113,0.4)]' : ''
-                    }`}
-                  >
-                    {heroBody.map((paragraph, index) => (
-                      <p key={index}>{paragraph}</p>
+                </div>
+
+                <div
+                  className={`space-y-4 text-sm leading-relaxed ${
+                    heroIsEvent ? 'text-secret-red/90' : ''
+                  } ${
+                    heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_14px_rgba(248,113,113,0.4)]' : ''
+                  }`}
+                >
+                  {heroBody.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+                </div>
+
+                {heroTags.length ? (
+                  <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
+                    {heroTags.slice(0, 3).map(tag => (
+                      <span key={tag} className="rounded border border-newspaper-border px-2 py-0.5">
+                        {tag}
+                      </span>
                     ))}
                   </div>
-                </div>
-                <div className="mt-6 space-y-4 lg:mt-0">
-                  <div className="relative overflow-hidden rounded-md border border-newspaper-border bg-newspaper-header/20">
-                    {heroArticle?.cardId ? (
-                      <CardImage
-                        cardId={heroArticle.cardId}
-                        fit="contain"
-                        className="w-full aspect-[63/88] max-h-80"
-                      />
-                    ) : (
-                      <div className="flex aspect-[63/88] w-full max-h-80 items-center justify-center text-sm font-semibold uppercase tracking-wide text-newspaper-text/60">
-                        Archival footage pending clearance.
-                      </div>
-                    )}
-                    {classifiedStamp ? (
-                      <div className="stamp stamp--classified absolute right-3 top-3">{classifiedStamp}</div>
-                    ) : null}
-                  </div>
-                  {heroTags.length ? (
-                    <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
-                      {heroTags.slice(0, 3).map(tag => (
-                        <span key={tag} className="rounded border border-newspaper-border px-2 py-0.5">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                  {!heroIsEvent && (heroTruthImpact || heroIpImpact || heroPressureImpact) ? (
-                    <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
-                      {heroTruthImpact ? (
-                        <span className="rounded border border-newspaper-border px-2 py-0.5">{heroTruthImpact}</span>
-                      ) : null}
-                      {heroIpImpact ? (
-                        <span className="rounded border border-newspaper-border px-2 py-0.5">{heroIpImpact}</span>
-                      ) : null}
-                      {heroPressureImpact ? (
-                        <span className="rounded border border-newspaper-border px-2 py-0.5">{heroPressureImpact}</span>
-                      ) : null}
-                    </div>
-                  ) : null}
-                  {heroCaptured.length ? (
-                    <div className="text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
-                      Captured: {heroCaptured.join(', ')}
-                    </div>
-                  ) : null}
-                  {heroArtHint ? (
-                    <p className="text-[11px] italic text-newspaper-text/50">Illustration brief: {heroArtHint}</p>
-                  ) : null}
-                </div>
+                ) : null}
               </div>
-          </article>
+            </article>
 
-          <aside className="space-y-4">
-            {frontPageArticles.length ? (
-              <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
-                  Dispatch Archive
-                </h3>
-                <div className="space-y-3 text-newspaper-text">
-                  {frontPageArticles.map(article => {
-                    const cardTypeLabel = `[${article.cardType.toUpperCase()}]`;
-                    return (
-                      <article
-                        key={article.cardId}
-                        className="space-y-2 border-b border-dashed border-newspaper-border/60 pb-3 last:border-0 last:pb-0"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                          <span>{cardTypeLabel}</span>
-                          <span>{article.cardName}</span>
-                        </div>
-                        <h4 className="text-base font-semibold leading-snug text-newspaper-headline">
-                          {article.headline}
-                        </h4>
-                        <p className="text-xs italic text-newspaper-text/70">{article.subhead}</p>
-                        <p className="text-sm leading-relaxed text-newspaper-text/80">
-                          {article.body[0] ?? 'Details pending transmission.'}
-                        </p>
-                        {article.tags.length ? (
-                          <div className="flex flex-wrap gap-2 text-[9px] uppercase tracking-wide text-newspaper-text/50">
-                            {article.tags.slice(0, 3).map(tag => (
-                              <span key={tag} className="rounded border border-newspaper-border px-1.5 py-0.5">
-                                {tag}
-                              </span>
-                            ))}
+            {/* COLUMN 2: Stats & Secondary Headlines */}
+            <aside className="space-y-4">
+              {/* Front Page Articles */}
+              {frontPageArticles.length ? (
+                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
+                  <h3 className="mb-3 border-b-2 border-newspaper-border pb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
+                    Extra Extra Dispatch
+                  </h3>
+                  <div className="space-y-3 text-newspaper-text">
+                    {frontPageArticles.map(article => {
+                      const cardTypeLabel = `[${article.cardType.toUpperCase()}]`;
+                      return (
+                        <article
+                          key={article.cardId}
+                          className="space-y-2 border-b border-dashed border-newspaper-border/60 pb-3 last:border-0 last:pb-0"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                            <span>{cardTypeLabel}</span>
                           </div>
-                        ) : null}
-                        <div className="text-[9px] uppercase tracking-[0.35em] text-newspaper-text/40">
-                          {article.byline}
-                        </div>
-                        {article.isFallback ? (
-                          <div className="text-[10px] font-semibold uppercase tracking-wide text-secret-red/70">
-                            Archive retrieval glitch — standby for full copy.
-                          </div>
-                        ) : null}
-                      </article>
-                    );
-                  })}
-                </div>
-              </section>
-            ) : null}
-            {hotspotExtraArticle ? (
-              <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                  <span
-                    className={cn(
-                      'inline-flex items-center gap-2 rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
-                      hotspotExtraArticle.badgeClassName || 'bg-purple-950/80 border-purple-400/70 text-purple-100',
-                    )}
-                  >
-                    <span aria-hidden="true">🛸</span>
-                    {hotspotExtraArticle.badgeLabel}
-                  </span>
-                  <span className="rounded border border-dashed border-newspaper-border/60 px-2 py-0.5">
-                    Intensitet {hotspotExtraArticle.intensity}
-                  </span>
-                </div>
-                <div className="mt-2 text-[10px] font-semibold uppercase tracking-[0.35em] text-newspaper-text/50">
-                  Hotspot Oppdaget
-                </div>
-                <h3 className="mt-1 text-base font-black uppercase tracking-wide text-newspaper-headline">
-                  {hotspotExtraArticle.headline}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-newspaper-text/80">
-                  {hotspotExtraArticle.blurb}
-                </p>
-              </section>
-            ) : null}
-            {comboNarrative ? (
-              <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
-                  Combo Dispatch
-                </h3>
+                          <h4 className="text-base font-semibold leading-snug text-newspaper-headline">
+                            {article.headline}
+                          </h4>
+                          <p className="text-xs italic text-newspaper-text/70">{article.subhead}</p>
+                          <p className="text-sm leading-relaxed text-newspaper-text/80">
+                            {article.body[0] ?? 'Details pending transmission.'}
+                          </p>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+              ) : null}
+
+              {/* Combo Dispatch */}
+              {comboNarrative ? (
+                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
+                  <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
+                    Combo Dispatch
+                  </h3>
                   <div className="text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
                     Chain: {comboNarrative.magnitude} · {comboNarrative.tags.join(' • ')}
                   </div>
@@ -1299,234 +1209,36 @@ const TabloidNewspaperV2 = ({
                     {comboNarrative.headline}
                   </h4>
                   <p className="text-xs italic text-newspaper-text/70">{comboNarrative.deck}</p>
-                  <div className="mt-2 space-y-2 text-sm leading-relaxed text-newspaper-text/80">
-                    {comboNarrative.paragraphs.map((paragraph, index) => (
-                      <p key={index}>{paragraph}</p>
-                    ))}
-                  </div>
-                  {comboNarrative.summary ? (
-                    <div className="mt-2 rounded border border-dashed border-newspaper-border/60 bg-white/60 p-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
-                      {comboNarrative.summary}
-                    </div>
-                  ) : null}
-                  {comboReport?.entries.length ? (
-                    <div className="mt-3 space-y-3 text-sm">
-                      {comboReport.entries.map(entry => {
-                        const rewardLabel = entry.reward;
-                        return (
-                          <div
-                            key={entry.id}
-                            className="border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0"
-                          >
-                            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                              <span>{entry.name}</span>
-                              {rewardLabel ? <span>{rewardLabel}</span> : null}
-                            </div>
-                            <p className="text-xs italic text-newspaper-text/70">{entry.description}</p>
-                            {entry.matchedPlays.length ? (
-                              <div className="text-[11px] font-mono text-newspaper-text/60">
-                                Plays: {entry.matchedPlays.join(' → ')}
-                              </div>
-                            ) : null}
-                            {entry.fxText ? (
-                              <div className="text-[10px] uppercase tracking-wide text-newspaper-text/50">
-                                FX: {entry.fxText}
-                              </div>
-                            ) : null}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : null}
                 </section>
               ) : null}
-              {formattedAgendaQuotes.length ? (
-                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                  <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
-                    Agenda Signals
-                  </h3>
-                  <div className="space-y-3">
-                    {formattedAgendaQuotes.map(entry => (
-                      <div
-                        key={entry.id}
-                        className={`rounded-md border-l-4 pl-3 pr-2 py-2 ${
-                          entry.status === 'complete'
-                            ? 'border-emerald-500 bg-emerald-50/70'
-                            : 'border-rose-500 bg-rose-50/70'
-                        }`}
-                      >
-                        <div className="text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                          {entry.title}
-                        </div>
-                        <div className="text-sm font-semibold leading-snug text-newspaper-text">
-                          {entry.headline}
-                        </div>
-                        <blockquote className="text-xs italic text-newspaper-text/70">
-                          “{entry.description}”
-                        </blockquote>
-                        <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/50">
-                          <span>{entry.factionLabel}</span>
-                          <span>Stage: {entry.stageLabel}</span>
-                          <span>Progress {entry.progressLabel}</span>
-                        </div>
-                        <div className="text-[9px] uppercase tracking-[0.35em] text-newspaper-text/40">
-                          {entry.actorLabel}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-              <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                <div className="mb-2 flex items-center justify-between">
-                  <h3 className="text-sm font-black uppercase tracking-wide">Sightings Feed</h3>
-                  {activeSighting ? (
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                      {formatSightingTime(activeSighting.timestamp)}
-                    </span>
-                  ) : null}
-                </div>
-                {activeSighting ? (
-                  <div
-                    className={`space-y-2 rounded-md border border-dashed border-newspaper-border/60 bg-newspaper-header/10 p-3 transition ${
-                      highlightedSightingId === activeSighting.id ? 'sighting-highlight' : ''
-                    }`}
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/70">
-                      <span
-                        className={`inline-flex items-center gap-2 rounded-full border px-2 py-0.5 ${SIGHTING_BADGE_VARIANTS[activeSighting.category]}`}
-                      >
-                        <span aria-hidden="true">{SIGHTING_ICONS[activeSighting.category]}</span>
-                        {SIGHTING_LABELS[activeSighting.category]}
-                      </span>
-                      {activeSighting.location ? (
-                        <span className="rounded border border-newspaper-border px-2 py-0.5">
-                          {activeSighting.location}
-                        </span>
-                      ) : null}
-                    </div>
-                    <h4 className="text-base font-semibold leading-snug text-newspaper-text">
-                      {activeSighting.headline}
-                    </h4>
-                    <p className="text-xs italic text-newspaper-text/70">{activeSighting.subtext}</p>
-                    <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-wide text-newspaper-text/60">
-                      {activeSighting.metadata?.intensity ? (
-                        <span className="rounded border border-dashed border-newspaper-border px-2 py-0.5">
-                          Intensity: {activeSighting.metadata.intensity.toUpperCase()}
-                        </span>
-                      ) : null}
-                      {typeof activeSighting.metadata?.truthValue === 'number' ? (
-                        <span className="rounded border border-newspaper-border px-2 py-0.5">
-                          Truth {Math.round(activeSighting.metadata.truthValue)}%
-                        </span>
-                      ) : null}
-                      {typeof activeSighting.metadata?.bonusIP === 'number' ? (
-                        <span className="rounded border border-dashed border-newspaper-border px-2 py-0.5">
-                          Bonus IP +{activeSighting.metadata.bonusIP}
-                        </span>
-                      ) : null}
-                      {activeSighting.metadata?.footageQuality ? (
-                        <span className="rounded border border-newspaper-border px-2 py-0.5">
-                          Footage: {activeSighting.metadata.footageQuality.toUpperCase()}
-                        </span>
-                      ) : null}
-                    </div>
-                    {activeSighting.metadata?.setList?.length ? (
-                      <div className="rounded border border-dashed border-newspaper-border/60 bg-white/60 p-2 text-[10px] uppercase tracking-wide text-newspaper-text/70">
-                        {activeSighting.metadata.setList.join(' • ')}
-                      </div>
-                    ) : null}
-                    {activeSighting.category === 'hotspot' ? (
-                      <div className="grid grid-cols-2 gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/70">
-                        {typeof activeSighting.metadata?.defenseBoost === 'number' ? (
-                          <span>DEF +{activeSighting.metadata.defenseBoost}</span>
-                        ) : null}
-                        {typeof activeSighting.metadata?.truthReward === 'number' ? (
-                          <span>TRUTH ±{activeSighting.metadata.truthReward}%</span>
-                        ) : null}
-                        {activeSighting.metadata?.source ? (
-                          <span>Source {activeSighting.metadata.source.toUpperCase()}</span>
-                        ) : null}
-                        {typeof activeSighting.metadata?.turnsRemaining === 'number' ? (
-                          <span>Turns Left {Math.max(0, activeSighting.metadata.turnsRemaining)}</span>
-                        ) : null}
-                        {activeSighting.metadata?.outcome ? (
-                          <span className="col-span-2">
-                            Status {activeSighting.metadata.outcome.toUpperCase()}
-                            {typeof activeSighting.metadata.truthDelta === 'number' && activeSighting.metadata.truthDelta !== 0
-                              ? ` (${activeSighting.metadata.truthDelta > 0 ? '+' : ''}${activeSighting.metadata.truthDelta}% Truth)`
-                              : ''}
-                          </span>
-                        ) : null}
-                      </div>
-                    ) : null}
-                  </div>
-                ) : (
-                  <p className="text-xs italic text-newspaper-text/60">No paranormal activity logged this round.</p>
-                )}
 
-                {supplementalSightings.length ? (
-                  <div className="mt-3 space-y-2 text-xs text-newspaper-text/70">
-                    {supplementalSightings.slice(0, 4).map(sighting => (
-                      <button
-                        key={sighting.id}
-                        type="button"
-                        onClick={() => handleSightingSelect(sighting.id)}
-                        className={`w-full rounded border border-dashed border-newspaper-border/60 bg-white/40 px-3 py-2 text-left transition ${
-                          activeSighting?.id === sighting.id
-                            ? 'sighting-highlight'
-                            : 'hover:bg-white/70'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide">
-                          <span className="inline-flex items-center gap-1">
-                            <span aria-hidden="true">{SIGHTING_ICONS[sighting.category]}</span>
-                            {SIGHTING_LABELS[sighting.category]}
-                          </span>
-                          <span>{formatSightingTime(sighting.timestamp)}</span>
-                        </div>
-                        <p className="font-semibold leading-snug text-newspaper-text">{sighting.headline}</p>
-                        <p className="text-[11px] italic text-newspaper-text/60">{sighting.subtext}</p>
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-              </section>
+              {/* Opposition Plays */}
               {oppositionStories.length ? (
                 <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                  <h3 className="mb-3 text-sm font-black uppercase tracking-wide">Opposition Moves</h3>
-                  <div className="space-y-3 text-sm">
-                    {oppositionStories.map(story => (
+                  <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-newspaper-text">Opposition Network</h3>
+                  <div className="space-y-3">
+                    {oppositionStories.slice(0, 3).map(story => (
                       <div key={story.id} className="border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0">
-                        <div className="flex gap-3 items-start">
-                          {story.cardId ? (
-                            <CardImage
-                              cardId={story.cardId}
-                              className="h-16 w-16 flex-shrink-0 rounded border border-newspaper-border/60 bg-newspaper-header/20"
-                            />
-                          ) : (
-                            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded border border-dashed border-newspaper-border/60 bg-newspaper-header/10 text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/40">
-                              No Art
-                            </div>
-                          )}
-                          <div className="min-w-0 flex-1 space-y-1">
-                            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                              <span>{story.typeLabel}</span>
-                              {story.truthDeltaLabel ? <span>{story.truthDeltaLabel}</span> : null}
-                            </div>
-                            <p className="font-semibold leading-snug">{story.headline}</p>
-                            <p className="text-xs italic text-newspaper-text/70">{story.subhead}</p>
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                            <span>{story.typeLabel}</span>
                           </div>
+                          <p className="font-semibold leading-snug text-sm">{story.headline}</p>
+                          <p className="text-xs italic text-newspaper-text/70">{story.subhead}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 </section>
               ) : null}
+            </aside>
 
+            {/* COLUMN 3: Event Wire + Ads + Extras */}
+            <aside className="space-y-4">
+              {/* Event Wire */}
               {eventStories.length ? (
                 <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                  <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-secret-red">Event Wire</h3>
+                  <h3 className="mb-3 border-b-2 border-secret-red pb-2 text-sm font-black uppercase tracking-wide text-secret-red">Event Wire</h3>
                   <div className="space-y-3 text-sm text-secret-red/90">
                     {eventStories.slice(0, 3).map(story => {
                       const isFilesOnTheLoose = story.id === 'deepfile_dump_crochet_forum';
@@ -1566,230 +1278,68 @@ const TabloidNewspaperV2 = ({
                           >
                             {story.subhead}
                           </p>
-                          {formatChance(story.triggerChance) || formatChance(story.conditionalChance) ? (
-                            <div
-                              className={`text-[10px] font-semibold uppercase tracking-wide ${
-                                isFilesOnTheLoose
-                                  ? 'text-secret-red animate-pulse drop-shadow-[0_0_10px_rgba(248,113,113,0.55)]'
-                                  : 'text-secret-red/70'
-                              }`}
-                            >
-                              {formatChance(story.triggerChance) ? (
-                                <span>Chance This Turn: {formatChance(story.triggerChance)}</span>
-                              ) : null}
-                              {formatChance(story.triggerChance) && formatChance(story.conditionalChance) ? (
-                                <span> · </span>
-                              ) : null}
-                              {formatChance(story.conditionalChance) ? (
-                                <span>If Triggered: {formatChance(story.conditionalChance)}</span>
-                              ) : null}
-                            </div>
-                          ) : null}
                         </div>
                       );
                     })}
                   </div>
                 </section>
               ) : null}
+
+              {/* Sponsored Messages (Ads) */}
+              <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
+                <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-newspaper-text">Sponsored Messages</h3>
+                <div className="space-y-2">
+                  {ads.slice(0, 3).map((ad, index) => (
+                    <div
+                      key={`${ad}-${index}`}
+                      className="rounded border border-dashed border-newspaper-border/60 bg-white/60 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-newspaper-text"
+                    >
+                      {ad}
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Conspiracy Corner */}
+              {conspiracies.length ? (
+                <section className="rounded-md border border-newspaper-border bg-white/75 p-4 shadow-sm">
+                  <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-newspaper-text">Conspiracy Corner</h3>
+                  <ul className="space-y-2 text-xs leading-relaxed">
+                    {conspiracies.slice(0, 4).map((item, index) => (
+                      <li key={`${item}-${index}`} className="before:mr-2 before:text-newspaper-text before:content-['•']">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
+              {/* Weather Desk */}
+              <section className="rounded-md border border-newspaper-border bg-white/75 p-4 shadow-sm">
+                <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">Weather Desk</h3>
+                <p className="text-xs leading-relaxed">{weatherLine}</p>
+              </section>
+
+              {/* Agenda Moments */}
+              {formattedAgendaQuotes.length ? (
+                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
+                  <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-newspaper-text">Agenda Moments</h3>
+                  <div className="space-y-3">
+                    {formattedAgendaQuotes.map(quote => (
+                      <div
+                        key={quote.id}
+                        className="rounded border border-dashed border-newspaper-border/60 bg-white/60 p-3 text-xs"
+                      >
+                        <div className="font-semibold uppercase tracking-wide text-newspaper-text/70">{quote.title}</div>
+                        <p className="mt-1 font-semibold leading-snug">{quote.headline}</p>
+                        <p className="mt-1 text-newspaper-text/70">{quote.stageLabel}: {quote.progressLabel}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
             </aside>
           </div>
-
-          {campaignArcGroups.length ? (
-            <section className="mt-6 space-y-4 rounded-md border border-newspaper-border bg-white/75 p-6 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-black uppercase tracking-wide text-newspaper-text/70">
-                <span>Campaign Arc Monitor</span>
-                <span className="font-semibold">{campaignArcGroups.length} Active Plotline{campaignArcGroups.length === 1 ? '' : 's'}</span>
-              </div>
-              <div className="space-y-4">
-                {campaignArcGroups.map(arc => {
-                  const statusLabel = arc.status === 'finale'
-                    ? 'Finale'
-                    : arc.status === 'cliffhanger'
-                      ? 'Cliffhanger'
-                      : 'Advance';
-                  const statusClass = arc.status === 'finale'
-                    ? 'border-secret-red text-secret-red'
-                    : arc.status === 'cliffhanger'
-                      ? 'border-secret-red/70 text-secret-red/80'
-                      : 'border-newspaper-border text-newspaper-text/60';
-                  const taglineClass = arc.status === 'finale'
-                    ? 'text-secret-red font-black uppercase tracking-wide'
-                    : arc.status === 'cliffhanger'
-                      ? 'text-secret-red/80 font-semibold uppercase tracking-wide'
-                      : 'text-[11px] italic text-newspaper-text/70';
-
-                  return (
-                    <article
-                      key={arc.arcId}
-                      className="space-y-3 rounded-md border border-dashed border-newspaper-border/60 bg-white/80 p-4 shadow-sm"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/70">
-                        <span>{arc.arcName}</span>
-                        <div className="flex items-center gap-2">
-                          <span>Chapter {arc.latestChapter}/{arc.totalChapters}</span>
-                          <span className={`rounded-full border px-2 py-0.5 ${statusClass}`}>{statusLabel}</span>
-                        </div>
-                      </div>
-                      <Progress value={arc.progressPercent} className="h-1.5" />
-                      <p className={taglineClass}>{arc.activeTagline}</p>
-                      <div className="space-y-3 text-sm">
-                        {arc.chapters.map(chapter => {
-                          const chapterStatus = chapter.resolution === 'finale'
-                            ? 'Finale'
-                            : chapter.resolution === 'cliffhanger'
-                              ? 'Cliffhanger'
-                              : null;
-                          return (
-                            <div
-                              key={`${arc.arcId}-chapter-${chapter.chapter}`}
-                              className="rounded border border-newspaper-border/60 bg-white/70 p-3"
-                            >
-                              <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                                <span>Chapter {chapter.chapter}</span>
-                                {chapterStatus ? (
-                                  <span className="rounded border border-dashed border-newspaper-border/60 px-2 py-0.5 text-secret-red/70">
-                                    {chapterStatus}
-                                  </span>
-                                ) : null}
-                              </div>
-                              <div className="mt-2 space-y-2">
-                                {chapter.events.map(entry => (
-                                  <div
-                                    key={entry.event.id}
-                                    className="rounded border border-dashed border-newspaper-border/60 bg-white/80 px-3 py-2"
-                                  >
-                                    <div className="text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                                      {entry.story.typeLabel}
-                                    </div>
-                                    <p className="text-sm font-semibold leading-snug text-newspaper-headline">{entry.story.headline}</p>
-                                    <p className="text-xs italic text-newspaper-text/70">{entry.story.subhead}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-          ) : null}
-
-          {secondaryStories.length ? (
-            <section className="mt-6 space-y-4 rounded-md border border-newspaper-border bg-white/70 p-6 shadow-sm">
-              <h3 className="text-lg font-black uppercase tracking-wide">Secondary Reports</h3>
-              <div className="grid gap-4 md:grid-cols-2">
-                {secondaryStories.map(story => {
-                  const isCard = story.kind === 'card';
-                  return (
-                    <article key={story.id} className="space-y-2 border-b border-dashed border-newspaper-border/60 pb-3 last:border-0 last:pb-0">
-                      <div
-                        className={`flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide ${
-                          isCard ? 'text-newspaper-text/60' : 'text-secret-red/80'
-                        }`}
-                      >
-                        <span className={isCard ? '' : 'text-secret-red'}>{story.typeLabel}</span>
-                        {isCard ? (
-                          <span>{story.player === 'ai' ? 'Opposition' : 'Dispatch'}</span>
-                        ) : (
-                          <span className="text-secret-red">Event</span>
-                        )}
-                      </div>
-                      <h4
-                        className={`text-lg font-semibold leading-snug ${
-                          isCard ? '' : 'text-secret-red'
-                        }`}
-                      >
-                        {story.headline}
-                      </h4>
-                      <p
-                        className={`text-xs italic ${
-                          isCard ? 'text-newspaper-text/70' : 'text-secret-red/80'
-                        }`}
-                      >
-                        {story.subhead}
-                      </p>
-                      <p
-                        className={`text-sm leading-relaxed ${
-                          isCard ? 'text-newspaper-text/80' : 'text-secret-red/90'
-                        }`}
-                      >
-                        {story.summary}
-                      </p>
-                      {!isCard && (formatChance(story.triggerChance) || formatChance(story.conditionalChance)) ? (
-                        <div className="text-[10px] font-semibold uppercase tracking-wide text-secret-red/80">
-                          {formatChance(story.triggerChance) ? (
-                            <span>Chance This Turn: {formatChance(story.triggerChance)}</span>
-                          ) : null}
-                          {formatChance(story.triggerChance) && formatChance(story.conditionalChance) ? (
-                            <span> · </span>
-                          ) : null}
-                          {formatChance(story.conditionalChance) ? (
-                            <span>If Triggered: {formatChance(story.conditionalChance)}</span>
-                          ) : null}
-                        </div>
-                      ) : null}
-                      <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
-                        {isCard && story.truthDeltaLabel ? (
-                          <span className="rounded border border-newspaper-border px-2 py-0.5">{story.truthDeltaLabel}</span>
-                        ) : null}
-                        {isCard && story.stateLabel ? (
-                          <span className="rounded border border-dashed border-newspaper-border px-2 py-0.5">{story.stateLabel}</span>
-                        ) : null}
-                        {isCard && story.capturedStates?.length ? (
-                          <span className="rounded border border-newspaper-border px-2 py-0.5">Captured: {story.capturedStates.join(', ')}</span>
-                        ) : null}
-                        {isCard && story.tags?.length ? (
-                          <span className="rounded border border-newspaper-border px-2 py-0.5">{story.tags.slice(0, 2).join(' • ')}</span>
-                        ) : null}
-                      </div>
-                      {isCard && story.artHint ? (
-                        <p className="text-[10px] italic text-newspaper-text/50">Art hint: {story.artHint}</p>
-                      ) : null}
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-          ) : null}
-
-          <section className="mt-6 space-y-4">
-            <h3 className="text-lg font-black uppercase tracking-wide">Sponsored Messages</h3>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {ads.map((ad, index) => (
-                <div
-                  key={`${ad}-${index}`}
-                  className="rounded border border-newspaper-border bg-white/80 px-3 py-4 text-center text-sm font-semibold uppercase tracking-wide text-newspaper-text shadow-sm"
-                >
-                  {ad}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="mt-6 grid gap-4 lg:grid-cols-2">
-            <div className="rounded-md border border-newspaper-border bg-white/75 p-5 shadow-sm">
-              <h3 className="mb-3 text-lg font-black uppercase tracking-wide">Conspiracy Corner</h3>
-              <ul className="space-y-2 text-sm leading-relaxed">
-                {conspiracies.map((item, index) => (
-                  <li key={`${item}-${index}`} className="before:mr-2 before:text-newspaper-text before:content-['•']">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex flex-col gap-4">
-              <div className="rounded-md border border-newspaper-border bg-white/75 p-5 shadow-sm">
-                <h3 className="mb-2 text-lg font-black uppercase tracking-wide">Weather Desk</h3>
-                <p className="text-sm leading-relaxed">{weatherLine}</p>
-              </div>
-              <div className="rounded-md border border-dashed border-newspaper-border bg-white/60 p-4 text-xs font-semibold uppercase tracking-[0.3em] text-newspaper-text/70">
-                <span className="redaction px-1">EYES ONLY</span> Distribution strictly need-to-know. Archive copy stored in vault.
-              </div>
-            </div>
-          </section>
         </div>
 
         <footer className="border-t-4 border-newspaper-border bg-newspaper-header/90 px-6 py-4">
