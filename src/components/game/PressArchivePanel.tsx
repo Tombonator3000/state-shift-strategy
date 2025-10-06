@@ -17,6 +17,7 @@ interface PressArchivePanelProps {
   onOpen: (issue: ArchivedEdition) => void;
   onDelete: (id: string) => void;
   className?: string;
+  variant?: 'default' | 'broadsheet';
 }
 
 const formatTimestamp = (timestamp: number): string => {
@@ -34,7 +35,112 @@ const formatTimestamp = (timestamp: number): string => {
   }
 };
 
-const PressArchivePanel = ({ issues, onOpen, onDelete, className }: PressArchivePanelProps) => {
+const PressArchivePanel = ({ issues, onOpen, onDelete, className, variant = 'default' }: PressArchivePanelProps) => {
+  if (variant === 'broadsheet') {
+    return (
+      <div className={clsx('flex h-full flex-col gap-4 text-[var(--broadsheet-ink)]', className)}>
+        <header className="rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.9)] px-5 py-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-typewriter text-[11px] uppercase tracking-[0.42em] text-[var(--broadsheet-kicker)]">Newsstand Scoop</p>
+              <h3 className="font-broadsheetSans text-2xl uppercase tracking-[0.16em]">Leaked Editions</h3>
+            </div>
+            <Newspaper className="h-6 w-6 text-[var(--broadsheet-accent)]" aria-hidden />
+          </div>
+        </header>
+
+        {issues.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-[var(--broadsheet-rule)] bg-white/80 p-6 text-center">
+            <Newspaper className="mb-3 h-10 w-10 text-[var(--broadsheet-muted)]" aria-hidden />
+            <h4 className="font-broadsheetSans text-lg uppercase tracking-[0.18em]">No editions archived</h4>
+            <p className="mt-2 font-broadsheet text-[15px] leading-relaxed text-[var(--broadsheet-muted)]">
+              Finish a match and mark “Archive to Player Hub” to file the front page here.
+            </p>
+          </div>
+        ) : (
+          <ScrollArea className="flex-1 pr-2">
+            <div className="space-y-3">
+              {issues.map(issue => {
+                const { report } = issue;
+                const legendaryUsed = Array.isArray(report.legendaryUsed) ? report.legendaryUsed : [];
+                const mvpName = report.mvp?.cardName ?? report.runnerUp?.cardName ?? 'Unsung Hero';
+                const playerOutcome = getPlayerOutcomeLabel(report);
+                const victoryLabel = getVictoryConditionLabel(report.victoryType);
+                const playerLabel = getFactionDisplayName(report.playerFaction);
+                const opponentLabel = getOppositionDisplayName(report.playerFaction);
+                const outcomeSummary = getOutcomeSummary(report);
+
+                return (
+                  <article
+                    key={issue.id}
+                    className="rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.86)] p-5 shadow-sm transition hover:border-[var(--broadsheet-accent)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.12)]"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                          {formatTimestamp(issue.savedAt)}
+                        </p>
+                        <h4 className="font-broadsheetSans text-xl uppercase tracking-[0.14em]">{issue.title}</h4>
+                      </div>
+                      <span className="rounded-full border border-[var(--broadsheet-rule)] px-3 py-1 font-typewriter text-[10px] uppercase tracking-[0.28em] text-[var(--broadsheet-muted)]">
+                        {playerOutcome} · {victoryLabel}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid gap-3 text-[15px] font-broadsheet text-[var(--broadsheet-muted)] md:grid-cols-2">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-[var(--broadsheet-accent)]" aria-hidden />
+                        <span>
+                          {report.rounds > 0 ? `${report.rounds} rounds` : 'Opening Gambit'} · Truth {Math.round(report.finalTruth)}%
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-[var(--broadsheet-accent)]" aria-hidden />
+                        <span>{mvpName}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-[var(--broadsheet-accent)]" aria-hidden />
+                        <span>{playerLabel} {Math.round(report.ipPlayer)} · {opponentLabel} {Math.round(report.ipAI)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-[var(--broadsheet-accent)]" aria-hidden />
+                        <span>{outcomeSummary}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 font-typewriter text-[10px] uppercase tracking-[0.3em] text-[var(--broadsheet-muted)]">
+                      Legendary: {legendaryUsed.length > 0 ? legendaryUsed.join(', ') : 'None reported'}
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full border border-[var(--broadsheet-accent)] bg-[var(--broadsheet-accent-soft)] px-4 py-1 font-typewriter text-[11px] uppercase tracking-[0.32em] text-[var(--broadsheet-ink)] hover:bg-white"
+                        onClick={() => onOpen(issue)}
+                      >
+                        Read Edition
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="font-typewriter text-[11px] uppercase tracking-[0.3em] text-[var(--broadsheet-muted)] hover:text-[var(--broadsheet-accent)]"
+                        onClick={() => onDelete(issue.id)}
+                      >
+                        <Trash2 className="mr-1 h-4 w-4" aria-hidden />
+                        Remove
+                      </Button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={clsx('flex h-full flex-col', className)}>
       <div className="relative mb-4 flex items-center justify-between rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">

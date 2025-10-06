@@ -2,7 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
--## 2025-10-20 – Plot the Player Hub tabloid takeover
+## 2025-10-21 – Tabloidize the Player Hub intel desks
+- Finished broadsheet variants for tutorials, evidence, press archives, and the state intel board so every hub tab now reads like a Paranoid Times spread.
+- Unified archive filters, badges, and ticker data to match the new typewriter-and-ink styling while preserving existing default layouts.
+
+## 2025-10-20 – Plot the Player Hub tabloid takeover
 - Drafted a broadsheet-style blueprint for re-skinning the Player Hub so every tab reads like a leaked Paranoid Times edition, complete with masthead shell, kicker/dek templates, and tab-specific print treatments.
 - Outlined phased implementation tasks covering asset delivery, layout refactors, and atmospheric flourishes to guide art, frontend, audio, and QA contributors.
 

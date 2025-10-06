@@ -100,6 +100,9 @@ export default {
       fontFamily: {
         headline: ["Anton", "Bebas Neue", "system-ui", "sans-serif"],
         tabloid: ["Bebas Neue", "Anton", "system-ui", "sans-serif"],
+        broadsheet: ["Newsreader", "Iowan Old Style", "Palatino", "serif"],
+        broadsheetSans: ["Oswald", "Bebas Neue", "system-ui", "sans-serif"],
+        typewriter: ["IBM Plex Mono", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       boxShadow: {
         tabloid: "0 6px 24px var(--pt-shadow)",

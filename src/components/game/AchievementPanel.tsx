@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import clsx from 'clsx';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,12 +15,14 @@ interface AchievementsSectionProps {
   onClose?: () => void;
   className?: string;
   showCloseButton?: boolean;
+  variant?: 'default' | 'broadsheet';
 }
 
 export const AchievementsSection = ({
   onClose,
   className,
   showCloseButton = false,
+  variant = 'default',
 }: AchievementsSectionProps) => {
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   const [filter, setFilter] = useState<string>('all');
@@ -70,6 +73,19 @@ export const AchievementsSection = ({
         return 'border border-fuchsia-400/60 bg-fuchsia-500/15 text-fuchsia-200';
       default:
         return 'border border-slate-500/60 bg-slate-900/60 text-slate-300';
+    }
+  };
+
+  const getBroadsheetRarityTone = (rarity: string) => {
+    switch (rarity) {
+      case 'legendary':
+        return 'border-[#3c3a8f] bg-[#e3e0f7] text-[#25206a]';
+      case 'rare':
+        return 'border-[#1f5d82] bg-[#d3e5f2] text-[#123b53]';
+      case 'uncommon':
+        return 'border-[#2f6f3a] bg-[#d6edd9] text-[#1f4b24]';
+      default:
+        return 'border-[var(--broadsheet-rule)] bg-white text-[var(--broadsheet-muted)]';
     }
   };
 
@@ -128,6 +144,306 @@ export const AchievementsSection = ({
       resetProgress();
     }
   };
+  if (variant === 'broadsheet') {
+    const filterOptions: Array<{ key: string; label: string }> = [
+      { key: 'all', label: 'All' },
+      { key: 'victory', label: 'Victory' },
+      { key: 'mastery', label: 'Mastery' },
+      { key: 'discovery', label: 'Discovery' },
+      { key: 'challenge', label: 'Challenge' },
+      { key: 'social', label: 'Social' },
+      { key: 'collection', label: 'Collection' },
+    ];
+
+    return (
+      <div className={clsx('flex h-full flex-col gap-6 text-[var(--broadsheet-ink)]', className)}>
+        <header className="rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.9)] p-6 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-6">
+            <div className="space-y-3">
+              <p className="font-typewriter text-[11px] uppercase tracking-[0.42em] text-[var(--broadsheet-kicker)]">
+                Centerfold of Glory
+              </p>
+              <h2 className="font-broadsheetSans text-3xl uppercase tracking-[0.16em]">Agents of Record</h2>
+              <p className="max-w-2xl font-broadsheet text-[15px] leading-relaxed text-[var(--broadsheet-muted)]">
+                Mugshots, miracle stats, and sworn affidavits from field operatives the government insists do not exist.
+              </p>
+            </div>
+            <div className="grid min-w-[220px] grid-cols-2 gap-3 text-center">
+              <div className="rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 p-3 shadow-sm">
+                <p className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">Unlocked</p>
+                <p className="font-broadsheetSans text-xl">{progress.unlocked}/{progress.total}</p>
+              </div>
+              <div className="rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 p-3 shadow-sm">
+                <p className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">Points</p>
+                <p className="font-broadsheetSans text-xl">{progress.totalPoints}</p>
+              </div>
+              <div className="rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 p-3 shadow-sm">
+                <p className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">Rank</p>
+                <p className="font-broadsheetSans text-xl">{progress.rank}</p>
+              </div>
+              <div className="rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 p-3 shadow-sm">
+                <p className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">New Leads</p>
+                <p className="font-broadsheetSans text-xl">{newlyUnlocked.length}</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <Button
+              onClick={exportProgress}
+              variant="outline"
+              size="sm"
+              className="rounded-full border-[var(--broadsheet-rule)] bg-white/80 px-4 py-1 font-typewriter text-[11px] uppercase tracking-[0.32em] text-[var(--broadsheet-ink)] transition hover:border-[var(--broadsheet-accent)] hover:bg-white"
+            >
+              <Download size={14} className="mr-2" />
+              Export Ledger
+            </Button>
+            <Button
+              onClick={importProgress}
+              variant="outline"
+              size="sm"
+              className="rounded-full border-[var(--broadsheet-rule)] bg-white/80 px-4 py-1 font-typewriter text-[11px] uppercase tracking-[0.32em] text-[var(--broadsheet-ink)] transition hover:border-[var(--broadsheet-accent)] hover:bg-white"
+            >
+              <Upload size={14} className="mr-2" />
+              Import Proof
+            </Button>
+            <Button
+              onClick={handleResetProgress}
+              variant="outline"
+              size="sm"
+              className="rounded-full border-[#b7423f] bg-[#f6d4d1] px-4 py-1 font-typewriter text-[11px] uppercase tracking-[0.32em] text-[#5c1714] transition hover:bg-[#f2bdb8]"
+            >
+              <RotateCcw size={14} className="mr-2" />
+              Reset
+            </Button>
+          </div>
+        </header>
+
+        <div className="grid flex-1 gap-6 lg:grid-cols-[1.6fr,1fr]">
+          <section className="flex h-full flex-col rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.86)] p-5 shadow-sm">
+            <header className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="font-broadsheetSans text-xl uppercase tracking-[0.16em]">Achievement Ledger</h3>
+              <div className="flex flex-wrap gap-2">
+                {filterOptions.map(option => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => setFilter(option.key)}
+                    className={clsx(
+                      'rounded-full border px-3 py-1 font-typewriter text-[11px] uppercase tracking-[0.28em] transition',
+                      filter === option.key
+                        ? 'border-[var(--broadsheet-accent)] bg-[var(--broadsheet-accent-soft)] text-[var(--broadsheet-ink)]'
+                        : 'border-[var(--broadsheet-rule)] text-[var(--broadsheet-muted)] hover:border-[var(--broadsheet-accent)] hover:text-[var(--broadsheet-ink)]',
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </header>
+
+            <ScrollArea className="mt-4 h-full pr-2">
+              <div className="space-y-6">
+                {filteredUnlocked.length > 0 && (
+                  <div>
+                    <p className="font-typewriter text-[10px] uppercase tracking-[0.38em] text-[var(--broadsheet-kicker)]">
+                      Filed Triumphs
+                    </p>
+                    <div className="mt-2 space-y-3">
+                      {filteredUnlocked.map(achievement => (
+                        <button
+                          key={achievement.id}
+                          type="button"
+                          onClick={() => setSelectedAchievement(achievement)}
+                          className={clsx(
+                            'w-full rounded-xl border border-[var(--broadsheet-rule)] bg-white/85 p-4 text-left transition',
+                            selectedAchievement?.id === achievement.id
+                              ? 'border-[var(--broadsheet-accent)] shadow-[0_16px_38px_rgba(0,0,0,0.12)]'
+                              : 'hover:border-[var(--broadsheet-accent)] hover:bg-white',
+                          )}
+                        >
+                          <div className="flex items-start gap-4">
+                            <div className="text-3xl text-[var(--broadsheet-accent)]">{achievement.icon}</div>
+                            <div className="flex-1 space-y-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h4 className="font-broadsheetSans text-lg uppercase tracking-[0.12em]">
+                                  {achievement.name}
+                                </h4>
+                                <span
+                                  className={clsx(
+                                    'rounded-full px-3 py-1 font-typewriter text-[10px] uppercase tracking-[0.28em]',
+                                    getBroadsheetRarityTone(achievement.rarity),
+                                  )}
+                                >
+                                  {achievement.rarity}
+                                </span>
+                                <span className="rounded-full border border-[var(--broadsheet-rule)] px-2 py-0.5 font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                                  {achievement.points} pts
+                                </span>
+                              </div>
+                              <p className="font-broadsheet text-[15px] leading-relaxed text-[var(--broadsheet-muted)]">
+                                {achievement.description}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-3 font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                                <span>{achievement.category}</span>
+                                <span className="text-[#2f6f3a]">✓ Printed</span>
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {filteredLocked.length > 0 && (
+                  <div>
+                    <p className="font-typewriter text-[10px] uppercase tracking-[0.38em] text-[var(--broadsheet-muted)]">
+                      Pending Investigations
+                    </p>
+                    <div className="mt-2 space-y-3">
+                      {filteredLocked.map(achievement => (
+                        <button
+                          key={achievement.id}
+                          type="button"
+                          onClick={() => setSelectedAchievement(achievement)}
+                          className={clsx(
+                            'w-full rounded-xl border border-dashed border-[var(--broadsheet-rule)] bg-white/70 p-4 text-left transition',
+                            selectedAchievement?.id === achievement.id
+                              ? 'border-[var(--broadsheet-accent)] shadow-[0_16px_38px_rgba(0,0,0,0.12)]'
+                              : 'hover:border-[var(--broadsheet-accent)] hover:bg-white/85',
+                          )}
+                        >
+                          <div className="flex items-start gap-4 opacity-80">
+                            <div className="text-3xl text-[var(--broadsheet-muted)]">{achievement.icon}</div>
+                            <div className="flex-1 space-y-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h4 className="font-broadsheetSans text-lg uppercase tracking-[0.12em]">
+                                  {achievement.name}
+                                </h4>
+                                <span
+                                  className={clsx(
+                                    'rounded-full px-3 py-1 font-typewriter text-[10px] uppercase tracking-[0.28em]',
+                                    getBroadsheetRarityTone(achievement.rarity),
+                                  )}
+                                >
+                                  {achievement.rarity}
+                                </span>
+                                <span className="rounded-full border border-[var(--broadsheet-rule)] px-2 py-0.5 font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                                  {achievement.points} pts
+                                </span>
+                              </div>
+                              <p className="font-broadsheet text-[15px] leading-relaxed text-[var(--broadsheet-muted)]">
+                                {achievement.description}
+                              </p>
+                              <div className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
+                                🔒 Evidence pending
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </section>
+
+          <aside className="flex h-full flex-col rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.86)] p-5 shadow-sm">
+            {selectedAchievement ? (
+              <div className="flex h-full flex-col gap-5">
+                <div className="space-y-2">
+                  <p className="font-typewriter text-[10px] uppercase tracking-[0.38em] text-[var(--broadsheet-kicker)]">
+                    Profile Dossier
+                  </p>
+                  <h3 className="font-broadsheetSans text-2xl uppercase tracking-[0.16em]">
+                    {selectedAchievement.name}
+                  </h3>
+                  <p className="font-broadsheet text-[15px] leading-relaxed text-[var(--broadsheet-muted)]">
+                    {selectedAchievement.description}
+                  </p>
+                </div>
+
+                <div className="space-y-3 rounded-lg border border-[var(--broadsheet-rule)] bg-white/90 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">Category</span>
+                    <span className="font-typewriter text-[11px] uppercase tracking-[0.32em] text-[var(--broadsheet-ink)]">
+                      {selectedAchievement.category}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">Rarity</span>
+                    <span className={clsx(
+                      'rounded-full px-3 py-1 font-typewriter text-[10px] uppercase tracking-[0.28em]',
+                      getBroadsheetRarityTone(selectedAchievement.rarity),
+                    )}>
+                      {selectedAchievement.rarity}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">Points</span>
+                    <span className="font-broadsheetSans text-xl text-[var(--broadsheet-ink)]">
+                      {selectedAchievement.points}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-typewriter text-[10px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">Status</span>
+                    <span className="font-typewriter text-[11px] uppercase tracking-[0.32em] text-[#2f6f3a]">
+                      {unlockedAchievements.find(a => a.id === selectedAchievement.id) ? 'Filed' : 'Sealed'}
+                    </span>
+                  </div>
+                </div>
+
+                {selectedAchievement.requirements && (
+                  <div className="space-y-2">
+                    <p className="font-typewriter text-[10px] uppercase tracking-[0.38em] text-[var(--broadsheet-kicker)]">
+                      Requirements
+                    </p>
+                    <div className="space-y-2">
+                      {selectedAchievement.requirements.conditions.map((condition, index) => (
+                        <div
+                          key={index}
+                          className="rounded-lg border border-dashed border-[var(--broadsheet-rule)] bg-white/80 p-2 font-typewriter text-[11px] uppercase tracking-[0.3em] text-[var(--broadsheet-muted)]"
+                        >
+                          {condition.key.replace(/_/g, ' ')}: {condition.operator || '=='} {condition.value}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedAchievement.rewards && (
+                  <div className="space-y-2">
+                    <p className="font-typewriter text-[10px] uppercase tracking-[0.38em] text-[var(--broadsheet-kicker)]">
+                      Rewards
+                    </p>
+                    <div className="space-y-1 font-broadsheet text-[14px] leading-relaxed text-[var(--broadsheet-ink)]">
+                      {selectedAchievement.rewards.title && (
+                        <p>Honorific: {selectedAchievement.rewards.title}</p>
+                      )}
+                      {selectedAchievement.rewards.unlockTutorial && (
+                        <p>Unlocks correspondence: {selectedAchievement.rewards.unlockTutorial}</p>
+                      )}
+                      {selectedAchievement.rewards.unlockCard && (
+                        <p>Card Issued: {selectedAchievement.rewards.unlockCard}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed border-[var(--broadsheet-rule)] bg-white/80 p-6 text-center">
+                <p className="font-broadsheetSans text-xl uppercase tracking-[0.18em]">Select a headline to inspect the clippings.</p>
+                <p className="mt-2 font-broadsheet text-[15px] leading-relaxed text-[var(--broadsheet-muted)]">
+                  Choose an achievement from the ledger to open its dossier details.
+                </p>
+              </div>
+            )}
+          </aside>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`flex h-full flex-col gap-5 text-slate-200 ${className ?? ''}`}>
