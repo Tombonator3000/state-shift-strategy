@@ -1,0 +1,32 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Unified AI planning leans on high-cost combo plays on INSANE difficulty 1`] = `
+{
+  "actions": [
+    {
+      "cost": 4,
+      "id": "broadcast-combo",
+      "strategyDetails": [],
+      "type": "MEDIA",
+    },
+    {
+      "cost": 6,
+      "id": "attack-heavy",
+      "strategyDetails": [
+        "Deception tactics engaged (1% intensity)",
+      ],
+      "type": "ATTACK",
+    },
+    {
+      "cost": 2,
+      "id": "broadcast-alpha",
+      "strategyDetails": [],
+      "type": "MEDIA",
+    },
+  ],
+  "sequenceDetails": [
+    "Strategic evaluation score: +35.",
+    "Bias profile active: combos ×1.35, income ×1.25.",
+  ],
+}
+`;
