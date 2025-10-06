@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-16 – Synkroniser spilloppsett med MVP-loop
+- Publiserte en bordklar gameplay-loop-guide med oppsett, modulvalg og sjekklister for MVP-reglene.
+- Fremhevet sammenhengen mellom catch-up/maintenance-modulene og standard tursekvens slik at digitale prototyper speiler bordspillet.
+
 ## 2025-10-16 – Synchronize newspaper narrative systems
 - Routed the tabloid issue generator and front page widget through a shared newspaper dataset and prefetched story payload so copy stays consistent without duplicate fetches.
 - Enriched fallback hero stories with captured states, truth swings, and combo highlights, and extended article metadata with optional lore hooks for future writers.
