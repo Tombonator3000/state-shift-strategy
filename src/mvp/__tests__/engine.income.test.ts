@@ -19,6 +19,7 @@ const makePlayer = (partial: PartialPlayer): PlayerState => ({
   discard: partial.discard ?? [],
   ip: partial.ip,
   states: partial.states ?? [],
+  nextAttackMultiplier: partial.nextAttackMultiplier,
 });
 
 const makeState = (currentPlayer: PlayerState, opponentIp = 0): GameState => ({
@@ -34,6 +35,12 @@ const makeState = (currentPlayer: PlayerState, opponentIp = 0): GameState => ({
   playsThisTurn: 0,
   turnPlays: [],
   log: [],
+  headlineLog: [],
+  extraExtraFeed: [],
+  turnBuffer: [],
+  winner: null,
+  victoryType: null,
+  tabloidRelicsRuntime: null,
 });
 
 describe('evaluateCatchUpAdjustments', () => {
@@ -63,28 +70,24 @@ describe('computeTurnIpIncome', () => {
     const result = computeTurnIpIncome(player, opponent);
 
     expect(result).toEqual({
-      baseIncome: 20,
+      baseIncome: 7,
       maintenance: 0,
       swingTax: 0,
       catchUpBonus: 0,
-      netIncome: 20,
+      netIncome: 7,
       ipGap: -5,
       stateGap: 1,
       stateIncomeDetails: [
         {
-          state: 'ca',
+          state: 'California',
           abbreviation: 'CA',
-          baseIP: 4,
-          bonusValue: 2,
-          total: 6,
+          count: 1,
           fallback: false,
         },
         {
-          state: 'ny',
+          state: 'New York',
           abbreviation: 'NY',
-          baseIP: 5,
-          bonusValue: 4,
-          total: 9,
+          count: 1,
           fallback: false,
         },
       ],
@@ -98,20 +101,18 @@ describe('computeTurnIpIncome', () => {
     const result = computeTurnIpIncome(player, opponent);
 
     expect(result).toEqual({
-      baseIncome: 12,
+      baseIncome: 6,
       maintenance: 2,
       swingTax: 0,
       catchUpBonus: 0,
-      netIncome: 10,
+      netIncome: 4,
       ipGap: 5,
       stateGap: -1,
       stateIncomeDetails: [
         {
-          state: 'tx',
+          state: 'Texas',
           abbreviation: 'TX',
-          baseIP: 4,
-          bonusValue: 3,
-          total: 7,
+          count: 1,
           fallback: false,
         },
       ],
@@ -141,11 +142,9 @@ describe('computeTurnIpIncome', () => {
     expect(result.netIncome).toBe(result.baseIncome + result.catchUpBonus);
     expect(result.stateIncomeDetails).toEqual([
       {
-        state: 'nm',
+        state: 'New Mexico',
         abbreviation: 'NM',
-        baseIP: 2,
-        bonusValue: 2,
-        total: 4,
+        count: 1,
         fallback: false,
       },
     ]);
@@ -162,43 +161,33 @@ describe('computeTurnIpIncome', () => {
     expect(result.netIncome).toBeLessThan(result.baseIncome);
     expect(result.stateIncomeDetails).toEqual([
       {
-        state: 'ca',
+        state: 'California',
         abbreviation: 'CA',
-        baseIP: 4,
-        bonusValue: 2,
-        total: 6,
+        count: 1,
         fallback: false,
       },
       {
-        state: 'ny',
+        state: 'New York',
         abbreviation: 'NY',
-        baseIP: 5,
-        bonusValue: 4,
-        total: 9,
+        count: 1,
         fallback: false,
       },
       {
-        state: 'tx',
+        state: 'Texas',
         abbreviation: 'TX',
-        baseIP: 4,
-        bonusValue: 3,
-        total: 7,
+        count: 1,
         fallback: false,
       },
       {
-        state: 'wa',
+        state: 'Washington',
         abbreviation: 'WA',
-        baseIP: 3,
-        bonusValue: 2,
-        total: 5,
+        count: 1,
         fallback: false,
       },
       {
-        state: 'fl',
+        state: 'Florida',
         abbreviation: 'FL',
-        baseIP: 2,
-        bonusValue: 1,
-        total: 3,
+        count: 1,
         fallback: false,
       },
     ]);
@@ -213,11 +202,12 @@ describe('startTurn upkeep integration', () => {
     const updated = startTurn(state);
     const updatedPlayer = updated.players.P1;
 
-    expect(updatedPlayer.ip).toBe(65 + 6);
+    expect(updatedPlayer.ip).toBe(69);
     const incomeLog = updated.log.at(-2);
     expect(incomeLog).toBeDefined();
-    expect(incomeLog).toContain('income +8 IP');
-    expect(incomeLog).toContain('FL 3 (base 2 + bonus 1)');
+    expect(incomeLog).toContain('income +6 IP');
+    expect(incomeLog).toContain('base 5');
+    expect(incomeLog).toContain('states FL');
 
     const maintenanceLog = updated.log.at(-1);
     expect(maintenanceLog).toBeDefined();
