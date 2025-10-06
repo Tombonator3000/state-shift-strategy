@@ -130,3 +130,7 @@ export const getPools = (): NewsPools => {
   }
   return cachedPools;
 };
+
+export const getPoolsIfReady = (): NewsPools | null => cachedPools ?? null;
+
+export const areNewsPoolsReady = (): boolean => cachedPools != null;

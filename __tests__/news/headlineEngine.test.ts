@@ -1,4 +1,4 @@
-import { describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import type { TurnLog, TurnTotals } from '../../src/news/headlineEngine';
 
 const stubPools = {
@@ -18,11 +18,22 @@ const stubPools = {
   weather: ['Calm Skies'],
 } as const;
 
+const getPoolsMock = mock.fn(() => stubPools);
+const getPoolsIfReadyMock = mock.fn(() => stubPools);
+
 mock.module('@/news/newsPools', () => ({
-  getPools: () => stubPools,
+  getPools: getPoolsMock,
+  getPoolsIfReady: getPoolsIfReadyMock,
 }));
 
 const loadEngine = () => import('../../src/news/headlineEngine');
+
+beforeEach(() => {
+  getPoolsMock.mockReset();
+  getPoolsIfReadyMock.mockReset();
+  getPoolsMock.mockImplementation(() => stubPools);
+  getPoolsIfReadyMock.mockImplementation(() => stubPools);
+});
 
 describe('headlineEngine utilities', () => {
   it('summarize aggregates faction totals and ignores invalid values', async () => {
@@ -237,5 +248,43 @@ describe('headlineEngine utilities', () => {
       source: 'Source',
     });
     expect(first.bullets.length).toBeGreaterThan(0);
+  });
+
+  it('generateExtraExtra returns a placeholder article when pools are unavailable', async () => {
+    const warnMock = mock.method(console, 'warn');
+
+    getPoolsIfReadyMock.mockImplementation(() => null);
+    getPoolsMock.mockImplementation(() => {
+      throw new Error('getPools should not be invoked when pools are unavailable');
+    });
+
+    try {
+      const { generateExtraExtra, summarize } = await loadEngine();
+      const turns: TurnLog[] = [
+        {
+          round: 1,
+          turn: 1,
+          plays: [
+            { id: 'a', name: 'Truth Play', type: 'MEDIA', faction: 'truth', truth: 2 },
+            { id: 'b', name: 'Gov Play', type: 'ATTACK', faction: 'government', damage: 1 },
+            { id: 'c', name: 'Truth Followup', type: 'ZONE', faction: 'truth', captures: 1 },
+          ],
+        },
+      ];
+
+      const totals = summarize(turns);
+      const article = generateExtraExtra('seed:fallback', turns, totals);
+
+      expect(article.tone).toBe('truth');
+      expect(article.hed).toContain('[WIRE DELAY]');
+      expect(article.dek).toMatch(/Archive uplink pending|Wire desk files a placeholder/);
+      expect(article.byline).toMatch(/Standby Desk|Emergency Editor/);
+      expect(article.source).toMatch(/Archive sync pending|Classified spool offline/);
+      expect(article.bullets.length).toBeGreaterThan(0);
+      expect(warnMock).toHaveBeenCalled();
+      expect(String(warnMock.mock.calls[0]?.[0])).toContain('generateExtraExtra');
+    } finally {
+      warnMock.mockRestore();
+    }
   });
 });
