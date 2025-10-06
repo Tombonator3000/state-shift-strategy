@@ -116,6 +116,9 @@ const shuffle = <T,>(input: T[]): T[] => {
   return arr;
 };
 
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim().length > 0;
+
 const formatTruthDeltaLabel = (value: number | undefined | null): string | null => {
   if (typeof value !== 'number' || Number.isNaN(value) || value === 0) {
     return null;
@@ -161,6 +164,47 @@ const normalizeCardType = (value: Card['type']): PlayedCardMeta['type'] | null =
 const normalizeFaction = (value: Card['faction']): PlayedCardMeta['faction'] => {
   const upper = String(value ?? '').toUpperCase();
   return upper.includes('GOV') ? 'GOV' : 'TRUTH';
+};
+
+const isCardShaped = (card: Card | null | undefined): card is Card => {
+  if (!card || typeof card !== 'object') {
+    return false;
+  }
+  const candidate = card as Record<string, unknown>;
+  return (
+    isNonEmptyString(candidate.id) &&
+    isNonEmptyString(candidate.name) &&
+    isNonEmptyString(candidate.type) &&
+    isNonEmptyString(candidate.faction)
+  );
+};
+
+const sanitizePlayedCards = (entries: PlayedCardInput[]): PlayedCardInput[] => {
+  if (!entries.length) {
+    return entries;
+  }
+
+  const valid: PlayedCardInput[] = [];
+  let skipped = 0;
+
+  for (const entry of entries) {
+    const rawCard = entry.card ?? null;
+    if (!isCardShaped(rawCard)) {
+      skipped += 1;
+      continue;
+    }
+    valid.push({ ...entry, card: rawCard });
+  }
+
+  if (skipped > 0 && typeof console !== 'undefined' && typeof console.warn === 'function') {
+    console.warn(
+      '[Newspaper] Ignored',
+      skipped,
+      skipped === 1 ? 'malformed played card while building the issue.' : 'malformed played cards while building the issue.',
+    );
+  }
+
+  return valid;
 };
 
 const resolveStateName = (input?: string | null): string | null => {
@@ -356,8 +400,10 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     articleBank = null;
   }
 
-  const playerCards = input.playedCards.filter(entry => entry.player === 'human');
-  const opponentCards = input.playedCards.filter(entry => entry.player === 'ai');
+  const sanitizedPlayedCards = sanitizePlayedCards(input.playedCards);
+
+  const playerCards = sanitizedPlayedCards.filter(entry => entry.player === 'human');
+  const opponentCards = sanitizedPlayedCards.filter(entry => entry.player === 'ai');
 
   const heroCard = chooseHeroCard(playerCards);
 

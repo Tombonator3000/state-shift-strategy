@@ -54,6 +54,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Route the live agenda moment feed into the Player Hub overlay and surface a chronological timeline of stages and outcomes.
 - Add status filters, timeline styling, and empty-state messaging to help players review agenda advances, setbacks, and completions at a glance.
 
+## 2025-10-06 – Harden turn newspaper handoff
+- Sanitize end-of-turn played card logs before printing so corrupted save data no longer crashes the Resolve-phase newspaper reveal.
+- Add regression coverage that verifies malformed records are ignored while valid cards still headline the post-turn bulletin.
+
 ## 2025-10-06 – Surface agenda history in player hub
 - Add an agendas tab to the Player Hub that highlights the current secret agenda when enabled.
 - Surface completed agendas with descriptions, issue themes, and difficulty badges for quick review.

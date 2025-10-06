@@ -1,0 +1,83 @@
+import { describe, expect, it, mock } from 'bun:test';
+
+import { generateIssue } from '../IssueGenerator';
+import type { NewspaperData } from '@/lib/newspaperData';
+import type { Card } from '@/types';
+
+const minimalDataset: NewspaperData = {
+  mastheads: ['The Paranoid Times'],
+  ads: ['Classified ads temporarily unavailable.'],
+  subheads: {
+    generic: ['Officials refuse to comment.'],
+    attack: ['Officials refuse to comment.'],
+    media: ['Officials refuse to comment.'],
+    zone: ['Officials refuse to comment.'],
+  },
+  bylines: ['By: Anonymous Insider'],
+  sources: ['Source: Redacted'],
+  conspiracyCorner: ['All rumors currently sealed in vault storage.'],
+  weather: ['Forecast withheld pending clearance.'],
+  attackVerbs: ['EXPOSED'],
+  mediaVerbs: ['GOES VIRAL'],
+  zoneVerbs: ['SURGE'],
+  stamps: {
+    breaking: ['BREAKING'],
+    classified: ['CLASSIFIED'],
+  },
+};
+
+mock.module('@/engine/newspaper/CardLexicon', () => ({
+  loadCardLexicon: async () => ({}),
+}));
+
+mock.module('@/engine/news/articleBank', () => ({
+  loadArticleBank: async () => ({
+    getById: () => null,
+    hasArticles: () => false,
+  }),
+}));
+
+describe('IssueGenerator safety guards', () => {
+  it('skips malformed played card records when composing an issue', async () => {
+    const originalWarn = console.warn;
+    const warnCalls: unknown[][] = [];
+    console.warn = (...args: unknown[]) => {
+      warnCalls.push(args);
+    };
+
+    const validCard: Card = {
+      id: 'valid-card',
+      name: 'Valid Signal',
+      type: 'ATTACK',
+      faction: 'truth',
+      text: 'Do something dramatic.',
+      rarity: 'common',
+      cost: 1,
+    } as Card;
+
+    const issue = await generateIssue({
+      dataset: minimalDataset,
+      playedCards: [
+        {
+          // Simulate a corrupted save entry missing the card payload.
+          card: null as unknown as Card,
+          player: 'human',
+          truthDelta: 4,
+          capturedStates: ['NV'],
+        },
+        {
+          card: validCard,
+          player: 'human',
+          truthDelta: 6,
+          capturedStates: ['NM'],
+        },
+      ],
+    });
+
+    expect(issue.hero?.cardId).toBe('valid-card');
+    expect(issue.generatedStory.cards.map(card => card.id)).toEqual(['valid-card']);
+
+    expect(warnCalls.length).toBeGreaterThan(0);
+    console.warn = originalWarn;
+  });
+});
