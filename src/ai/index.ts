@@ -5,4 +5,10 @@ export {
   type TurnSequencePlan,
 } from "./enhancedController";
 export { evaluate } from "./policy";
-export { AI_PRESETS, type Difficulty, type AiConfig } from "./difficulty";
+export {
+  AI_PRESETS,
+  mergeBiasModifiers,
+  type AiConfig,
+  type BiasModifiers,
+  type Difficulty,
+} from "./difficulty";

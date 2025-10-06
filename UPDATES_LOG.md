@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-06 – Rewire AI difficulties and editor bias
+- Replaced the retired TOP_SECRET_PLUS tier with the new INSANE difficulty, updating presets, UI labels, and save normalization so the option flows stay coherent.
+- Routed each editor profile’s combo and income bias scalars into the enhanced strategist and planner, letting targeting, income forecasts, and combo scoring honor newsroom tuning.
+
 ## 2025-10-23 – Track rival editors across campaigns
 - Game state now persists separate player and AI editor assignments (plus AI banter cooldowns) so new runs and resume flows remember newsroom loadouts.
 - Legacy saves hydrate with faction-aware AI editors—falling back to The Redactor on easy—to keep campaign starts consistent after the split.

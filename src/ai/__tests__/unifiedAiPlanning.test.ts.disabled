@@ -6,13 +6,13 @@ import { AIFactory } from '@/data/aiFactory';
 import type { AIDifficulty, AIStrategist } from '@/data/aiStrategy';
 import type { GameCard } from '@/rules/mvp';
 
-const DIFFICULTIES: Difficulty[] = ['EASY', 'NORMAL', 'HARD', 'TOP_SECRET_PLUS'];
+const DIFFICULTIES: Difficulty[] = ['EASY', 'NORMAL', 'HARD', 'INSANE'];
 
 const DIFFICULTY_TO_AI: Record<Difficulty, AIDifficulty> = {
   EASY: 'easy',
   NORMAL: 'medium',
   HARD: 'hard',
-  TOP_SECRET_PLUS: 'legendary',
+  INSANE: 'insane',
 };
 
 const MEDIA_CARD: GameCard = {
@@ -116,7 +116,7 @@ describe('Unified AI planning', () => {
 
       const turnPlan = chooseTurnActions({ strategist, gameState: planningState });
 
-      const requiresGuaranteedAction = difficulty === 'HARD' || difficulty === 'TOP_SECRET_PLUS';
+      const requiresGuaranteedAction = difficulty === 'HARD' || difficulty === 'INSANE';
       const minimumActions = requiresGuaranteedAction ? 1 : 0;
       expect(turnPlan.actions.length).toBeGreaterThanOrEqual(minimumActions);
       if (!requiresGuaranteedAction) {

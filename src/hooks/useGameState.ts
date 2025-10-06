@@ -162,17 +162,34 @@ const resolveActiveEditorFromState = (state: GameState) => {
   return state.editorDef ?? resolveEditor(candidateId) ?? null;
 };
 
-const AI_DIFFICULTY_ORDER: readonly AIDifficulty[] = ['easy', 'medium', 'hard', 'legendary'] as const;
+const AI_DIFFICULTY_ORDER: readonly AIDifficulty[] = ['easy', 'medium', 'hard', 'insane'] as const;
 
 const DEFAULT_AI_EDITOR_ASSIGNMENTS: Record<AIDifficulty, Record<'truth' | 'government', EditorId>> = {
   easy: { truth: 'the_redactor', government: 'the_redactor' },
   medium: { truth: 'ed_muldrunk', government: 'ed_floridaman' },
   hard: { truth: 'ed_el_visto', government: 'ed_gonzo' },
-  legendary: { truth: 'ed_gonzo', government: 'ed_el_visto' },
+  insane: { truth: 'ed_gonzo', government: 'ed_el_visto' },
+};
+
+const LEGACY_AI_DIFFICULTY_ALIASES: Record<string, AIDifficulty> = {
+  legendary: 'insane',
+};
+
+const normalizeAiDifficultyValue = (value: unknown): AIDifficulty | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  if ((AI_DIFFICULTY_ORDER as readonly string[]).includes(value)) {
+    return value as AIDifficulty;
+  }
+
+  const alias = LEGACY_AI_DIFFICULTY_ALIASES[value.toLowerCase()];
+  return alias ?? null;
 };
 
 const isValidAiDifficulty = (value: unknown): value is AIDifficulty => {
-  return typeof value === 'string' && (AI_DIFFICULTY_ORDER as readonly string[]).includes(value);
+  return normalizeAiDifficultyValue(value) !== null;
 };
 
 const normalizeEditorId = (value: unknown): EditorId | null => {
@@ -197,7 +214,7 @@ const resolveAiEditorAssignment = ({
     return normalizedRequested;
   }
 
-  const normalizedDifficulty = isValidAiDifficulty(aiDifficulty) ? aiDifficulty : null;
+  const normalizedDifficulty = normalizeAiDifficultyValue(aiDifficulty);
   if (!normalizedDifficulty) {
     return null;
   }
@@ -1750,7 +1767,7 @@ const DIFFICULTY_TO_AI_DIFFICULTY: Record<Difficulty, AIDifficulty> = {
   EASY: 'easy',
   NORMAL: 'medium',
   HARD: 'hard',
-  TOP_SECRET_PLUS: 'legendary',
+  INSANE: 'insane',
 };
 
 const normalizeRoundFromSave = (saveData: Partial<GameState>): number => {
@@ -2487,6 +2504,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const [gameState, setGameState] = useState<GameState>(() => {
     const initialIssueDefinition = peekActiveAgendaIssue();
     const initialIssue = agendaIssueToState(initialIssueDefinition);
+    const defaultAiEditor = resolveAiEditorAssignment({ aiDifficulty, aiFaction: 'government' });
 
     return {
       faction: 'truth',
@@ -2579,7 +2597,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       aiTurnInProgress: false,
       selectedCard: null,
       targetState: null,
-      aiStrategist: AIFactory.createStrategist(aiDifficulty),
+      aiStrategist: AIFactory.createStrategist(aiDifficulty, { editorId: defaultAiEditor }),
       drawMode: 'standard',
       cardDrawState: {
         cardsPlayedLastTurn: 0,
@@ -2591,7 +2609,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       preGameAdditions: null,
       tabloidRelicsRuntime: null,
       playerEditor: null,
-      aiEditor: resolveAiEditorAssignment({ aiDifficulty, aiFaction: 'government' }),
+      aiEditor: defaultAiEditor,
       aiBanterCooldown: createInitialAiBanterCooldown(),
       winner: null,
       victoryType: null,
@@ -2756,8 +2774,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     clearNewsBuffer();
 
     console.log('🎮 [initGame] About to create AIStrategist with difficulty:', aiDifficulty);
-    const aiStrategist = AIFactory.createStrategist(aiDifficulty);
     const aiEditorId = resolveAiEditorAssignment({ aiDifficulty, aiFaction });
+    const aiStrategist = AIFactory.createStrategist(aiDifficulty, { editorId: aiEditorId });
     console.log('🎮 [initGame] AIStrategist created successfully');
 
     setGameState(prev => ({
@@ -4770,9 +4788,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       );
 
       const savedAiDifficultyRaw = (saveData as { aiDifficulty?: unknown }).aiDifficulty;
-      const normalizedSavedAiDifficulty = isValidAiDifficulty(savedAiDifficultyRaw)
-        ? (savedAiDifficultyRaw as AIDifficulty)
-        : aiDifficulty;
+      const normalizedSavedAiDifficulty = normalizeAiDifficultyValue(savedAiDifficultyRaw) ?? aiDifficulty;
       const playerFactionFromSave: 'government' | 'truth' = saveData.faction === 'government' ? 'government' : 'truth';
       const aiFactionFromSave: 'government' | 'truth' =
         playerFactionFromSave === 'government' ? 'truth' : 'government';
@@ -5209,7 +5225,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             : [...prev.pendingArcEvents],
           // Ensure objects are properly reconstructed
           eventManager: prev.eventManager, // Keep the current event manager
-          aiStrategist: prev.aiStrategist || AIFactory.createStrategist(saveData.aiDifficulty || 'medium'),
+          aiStrategist: prev.aiStrategist
+            || AIFactory.createStrategist(normalizedSavedAiDifficulty, { editorId: savedAiEditorId }),
           truthAbove80Streak: savedTruthAboveStreak,
           truthBelow20Streak: savedTruthBelowStreak,
           timeBasedGoalCounters: {
