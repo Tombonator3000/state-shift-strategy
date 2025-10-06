@@ -1,10 +1,10 @@
-import { AI_PRESETS, type AiConfig } from '@/ai/difficulty';
+import { AI_PRESETS, mergeBiasModifiers, type AiConfig, type BiasModifiers } from '@/ai/difficulty';
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE } from './cardDatabase';
 import { getAiTuningConfig, normalizeAiTuningConfig, type AiTuningConfig } from './aiTuning';
 import { LATE_GAME_REFERENCE_IP } from './mvpAnalysisUtils';
 
-export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'legendary';
+export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'insane';
 
 export interface AIPersonality {
   name: string;
@@ -42,7 +42,7 @@ const PRESET_LOOKUP: Record<AIDifficulty, AiConfig> = {
   easy: AI_PRESETS.EASY,
   medium: AI_PRESETS.NORMAL,
   hard: AI_PRESETS.HARD,
-  legendary: AI_PRESETS.TOP_SECRET_PLUS,
+  insane: AI_PRESETS.INSANE,
 };
 
 export const AI_PERSONALITIES: Record<AIDifficulty, AIPersonality> = {
@@ -61,10 +61,10 @@ export const AI_PERSONALITIES: Record<AIDifficulty, AIPersonality> = {
     "Veteran strategist with deep understanding of the game",
     PRESET_LOOKUP.hard,
   ),
-  legendary: createPersonality(
+  insane: createPersonality(
     "Shadow Director",
-    "Master manipulator who sees all angles",
-    PRESET_LOOKUP.legendary,
+    "Master manipulator running playbooks from three timelines ahead",
+    PRESET_LOOKUP.insane,
   ),
 };
 
@@ -130,11 +130,26 @@ class LegacyAIStrategist {
   public personality: AIPersonality;
   public tuning: AiTuningConfig;
   public readonly difficulty: AIDifficulty;
+  private biasModifiers: BiasModifiers;
 
   constructor(difficulty: AIDifficulty = 'medium', tuning: AiTuningConfig = getAiTuningConfig()) {
     this.difficulty = difficulty;
     this.personality = AI_PERSONALITIES[difficulty];
     this.tuning = normalizeAiTuningConfig(tuning);
+    const preset = PRESET_LOOKUP[difficulty] ?? AI_PRESETS.NORMAL;
+    this.biasModifiers = { ...preset.biasModifiers };
+  }
+
+  public getBiasModifiers(): BiasModifiers {
+    return { ...this.biasModifiers };
+  }
+
+  public setBiasModifiers(modifiers: BiasModifiers): void {
+    this.biasModifiers = mergeBiasModifiers(modifiers, undefined);
+  }
+
+  public applyBiasOverrides(overrides: Partial<BiasModifiers>): void {
+    this.biasModifiers = mergeBiasModifiers(this.biasModifiers, overrides);
   }
 
   // Factory method moved to AIFactory to avoid circular dependencies
@@ -154,7 +169,7 @@ class LegacyAIStrategist {
 
     // Resource advantage (normalized around typical mid-game values)
     const ipDifferential = aiIp - playerIp;
-    const resourceAdvantage = Math.tanh(ipDifferential / 120);
+    const resourceAdvantage = Math.tanh((ipDifferential / 120) * this.biasModifiers.income);
 
     // Hand quality (simplified - count high-value cards)
     const handQuality = this.evaluateHandQuality(aiHand);
@@ -373,7 +388,8 @@ class LegacyAIStrategist {
       return sum + Math.max(0, ratio);
     }, 0);
 
-    return Math.tanh((aiScore - opponentScore) / 3);
+    const comboFocus = this.biasModifiers.combo;
+    return Math.tanh(((aiScore - opponentScore) * comboFocus) / 3);
   }
 
   private evaluateTruthObjective(gameState: any): number {
@@ -506,16 +522,16 @@ class LegacyAIStrategist {
     }
 
     if (effects.ipDelta?.self) {
-      bonus += (effects.ipDelta.self / 10) * this.personality.economical;
+      bonus += (effects.ipDelta.self / 10) * this.personality.economical * this.biasModifiers.income;
     }
 
     if (effects.ipDelta?.opponent) {
-      bonus += (effects.ipDelta.opponent / 8) * this.personality.aggressiveness;
+      bonus += (effects.ipDelta.opponent / 8) * this.personality.aggressiveness * this.biasModifiers.income;
     }
     if (effects.ipDelta?.opponentPercent) {
       const scaled = Math.floor(effects.ipDelta.opponentPercent * LATE_GAME_REFERENCE_IP);
       if (scaled > 0) {
-        bonus += (scaled / 8) * this.personality.aggressiveness;
+        bonus += (scaled / 8) * this.personality.aggressiveness * this.biasModifiers.income;
       }
     }
 
@@ -593,8 +609,8 @@ class LegacyAIStrategist {
     let threat = 0;
     
     // Enhanced threat assessment based on difficulty
-    const threatMultiplier = this.difficulty === 'legendary' ? 1.5 : 
-                           this.difficulty === 'hard' ? 1.2 : 
+    const threatMultiplier = this.difficulty === 'insane' ? 1.5 :
+                           this.difficulty === 'hard' ? 1.2 :
                            this.difficulty === 'medium' ? 1.0 : 0.8;
     
     // Player state control threat - more aggressive on higher difficulties
@@ -615,7 +631,7 @@ class LegacyAIStrategist {
     if (gameState.faction === 'government' && gameState.truth <= 15) threat += 0.5 * threatMultiplier;
     
     // Advanced threats only on hard+ difficulties
-    if (this.difficulty === 'hard' || this.difficulty === 'legendary') {
+    if (this.difficulty === 'hard' || this.difficulty === 'insane') {
       // Combo threat detection
       if (playerStates.length >= 6 && gameState.ip <= -100) threat += 0.3;
       
@@ -653,7 +669,10 @@ class LegacyAIStrategist {
     const aiFaction = this.getAiFaction(gameState);
     const zoneWeights = this.tuning.cardPriority.zone;
 
-    const chainBonus = this.countRecentPlays(gameState, 'ai', 'ZONE') * 0.12 * zoneWeights.chainMultiplier;
+    const chainBonus = this.countRecentPlays(gameState, 'ai', 'ZONE')
+      * 0.12
+      * zoneWeights.chainMultiplier
+      * this.biasModifiers.combo;
     const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction) * zoneWeights.factionMultiplier;
 
     const signalLookup = new Map(
@@ -667,7 +686,11 @@ class LegacyAIStrategist {
       let priority = this.personality.territorial * zoneWeights.baseMultiplier + chainBonus + factionBonus;
 
       // High IP and strategic positions matter more for territorial personalities
-      priority += (state.baseIP ?? 0) * 0.04 * (1 + this.personality.territorial) * zoneWeights.highValueMultiplier;
+      priority += (state.baseIP ?? 0)
+        * 0.04
+        * (1 + this.personality.territorial)
+        * zoneWeights.highValueMultiplier
+        * this.biasModifiers.income;
       priority += this.getLocationBonus(state) * zoneWeights.locationMultiplier;
 
       if (state.owner === 'player') {
@@ -678,15 +701,22 @@ class LegacyAIStrategist {
 
       if (signal) {
         const remainingAfterPlay = Math.max(0, signal.remaining - pressureDelta);
+        const signalMultiplier = zoneWeights.signalCaptureMultiplier * this.biasModifiers.combo;
         if (signal.remaining <= pressureDelta) {
-          priority += 0.7 * zoneWeights.signalCaptureMultiplier;
+          priority += 0.7 * signalMultiplier;
         } else if (remainingAfterPlay <= 1) {
-          priority += 0.5 * zoneWeights.signalCaptureMultiplier;
+          priority += 0.5 * signalMultiplier;
         } else {
-          priority += Math.max(0, (pressureDelta / Math.max(1, signal.defense)) * 0.4 * zoneWeights.signalCaptureMultiplier);
+          priority += Math.max(
+            0,
+            (pressureDelta / Math.max(1, signal.defense)) * 0.4 * signalMultiplier,
+          );
         }
       } else if (pressureDelta > 0 && state.owner !== 'ai') {
-        priority += (pressureDelta / Math.max(1, state.defense ?? 1)) * 0.25 * zoneWeights.signalCaptureMultiplier;
+        priority += (pressureDelta / Math.max(1, state.defense ?? 1))
+          * 0.25
+          * zoneWeights.signalCaptureMultiplier
+          * this.biasModifiers.combo;
       }
 
       if (evaluation.dangerSignals.opponentAggression > 0.6 && state.owner === 'player') {
@@ -715,7 +745,7 @@ class LegacyAIStrategist {
     const aiFaction = this.getAiFaction(gameState);
     const chainCount = this.countRecentPlays(gameState, 'ai', 'MEDIA');
     const mediaWeights = this.tuning.cardPriority.media;
-    const chainBonus = chainCount * 0.1 * mediaWeights.chainMultiplier;
+    const chainBonus = chainCount * 0.1 * mediaWeights.chainMultiplier * this.biasModifiers.combo;
     const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction) * mediaWeights.factionMultiplier;
 
     let priority = (1 - this.personality.territorial) * 0.6 * mediaWeights.baseMultiplier + chainBonus + factionBonus;
@@ -726,7 +756,7 @@ class LegacyAIStrategist {
     }
 
     if (evaluation.resourceAdvantage < -0.2 && cardMeta.effects?.ipDelta?.self) {
-      priority += 0.2 * mediaWeights.resourceSwingMultiplier;
+      priority += 0.2 * mediaWeights.resourceSwingMultiplier * this.biasModifiers.income;
     }
 
     if (evaluation.opponentHandThreat > 0.4 && cardMeta.effects?.discardOpponent) {
@@ -749,7 +779,7 @@ class LegacyAIStrategist {
     const aiFaction = this.getAiFaction(gameState);
     const attackChain = this.countRecentPlays(gameState, 'ai', 'ATTACK');
     const attackWeights = this.tuning.cardPriority.attack;
-    const chainBonus = attackChain * 0.1 * attackWeights.chainMultiplier;
+    const chainBonus = attackChain * 0.1 * attackWeights.chainMultiplier * this.biasModifiers.combo;
     const factionBonus = this.getFactionGoalBonus(cardMeta, aiFaction) * attackWeights.factionMultiplier;
 
     let priority = this.personality.aggressiveness * attackWeights.baseMultiplier + chainBonus + factionBonus;
@@ -759,12 +789,18 @@ class LegacyAIStrategist {
     if (evaluation.dangerSignals.opponentAggression > 0.5) priority += 0.1 * attackWeights.aggressionResponseMultiplier;
 
     if (cardMeta.effects?.ipDelta?.opponent) {
-      priority += (cardMeta.effects.ipDelta.opponent / 6) * (0.8 + this.personality.aggressiveness) * attackWeights.ipDamageMultiplier;
+      priority += (cardMeta.effects.ipDelta.opponent / 6)
+        * (0.8 + this.personality.aggressiveness)
+        * attackWeights.ipDamageMultiplier
+        * this.biasModifiers.income;
     }
     if (cardMeta.effects?.ipDelta?.opponentPercent) {
       const scaled = Math.floor(cardMeta.effects.ipDelta.opponentPercent * LATE_GAME_REFERENCE_IP);
       if (scaled > 0) {
-        priority += (scaled / 6) * (0.8 + this.personality.aggressiveness) * attackWeights.ipDamageMultiplier;
+        priority += (scaled / 6)
+          * (0.8 + this.personality.aggressiveness)
+          * attackWeights.ipDamageMultiplier
+          * this.biasModifiers.income;
       }
     }
 
@@ -864,6 +900,8 @@ export interface AIStrategist {
   readonly difficulty: AIDifficulty;
   personality: AIPersonality;
   tuning: AiTuningConfig;
+  getBiasModifiers(): BiasModifiers;
+  setBiasModifiers(modifiers: BiasModifiers): void;
   evaluateGameState(gameState: any): GameStateEvaluation;
   selectBestPlay(gameState: any): CardPlay | null;
   getStrategicAssessment(gameState: any): string;

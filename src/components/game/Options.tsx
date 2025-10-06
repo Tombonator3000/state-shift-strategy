@@ -31,13 +31,13 @@ type DifficultyLabel =
   | 'EASY - Intelligence Leak'
   | 'NORMAL - Classified'
   | 'HARD - Top Secret'
-  | 'TOP SECRET+ - Meta-Cheating';
+  | 'INSANE - Shadow Directorate';
 
 const DIFFICULTY_LABELS: Record<Difficulty, DifficultyLabel> = {
   EASY: 'EASY - Intelligence Leak',
   NORMAL: 'NORMAL - Classified',
   HARD: 'HARD - Top Secret',
-  TOP_SECRET_PLUS: 'TOP SECRET+ - Meta-Cheating',
+  INSANE: 'INSANE - Shadow Directorate',
 };
 
 const LEGACY_DIFFICULTY_LABELS: Record<string, DifficultyLabel> = {
@@ -48,9 +48,10 @@ const LEGACY_DIFFICULTY_LABELS: Record<string, DifficultyLabel> = {
   'normal - classified': DIFFICULTY_LABELS.NORMAL,
   hard: DIFFICULTY_LABELS.HARD,
   'hard - top secret': DIFFICULTY_LABELS.HARD,
-  legendary: DIFFICULTY_LABELS.TOP_SECRET_PLUS,
-  top_secret_plus: DIFFICULTY_LABELS.TOP_SECRET_PLUS,
-  'top secret+ - meta-cheating': DIFFICULTY_LABELS.TOP_SECRET_PLUS,
+  insane: DIFFICULTY_LABELS.INSANE,
+  legendary: DIFFICULTY_LABELS.INSANE,
+  top_secret_plus: DIFFICULTY_LABELS.INSANE,
+  'top secret+ - meta-cheating': DIFFICULTY_LABELS.INSANE,
 };
 
 const DIFFICULTY_LABEL_SET = new Set<DifficultyLabel>(Object.values(DIFFICULTY_LABELS));
@@ -58,7 +59,7 @@ const DIFFICULTY_OPTIONS: DifficultyLabel[] = [
   DIFFICULTY_LABELS.EASY,
   DIFFICULTY_LABELS.NORMAL,
   DIFFICULTY_LABELS.HARD,
-  DIFFICULTY_LABELS.TOP_SECRET_PLUS,
+  DIFFICULTY_LABELS.INSANE,
 ];
 
 const CATEGORY_LABELS: Record<ComboCategory, string> = {

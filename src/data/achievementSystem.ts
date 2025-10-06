@@ -213,7 +213,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'legendary_difficulty',
     name: 'Shadow Director Defeated',
-    description: 'Defeat the AI on Legendary difficulty',
+    description: 'Defeat the AI on Insane difficulty',
     category: 'mastery',
     rarity: 'legendary',
     icon: '🎭',
@@ -222,7 +222,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       type: 'single',
       conditions: [
         { key: 'game_won', value: true },
-        { key: 'ai_difficulty', value: 'legendary' }
+        { key: 'ai_difficulty', value: 'insane' }
       ]
     }
   },

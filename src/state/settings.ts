@@ -33,8 +33,10 @@ export function getDifficulty(): Difficulty {
     case "EASY":
     case "NORMAL":
     case "HARD":
-    case "TOP_SECRET_PLUS":
+    case "INSANE":
       return raw as Difficulty;
+    case "TOP_SECRET_PLUS":
+      return "INSANE";
     default:
       return "NORMAL";
   }
@@ -45,7 +47,8 @@ export function setDifficultyFromLabel(label: string) {
     "EASY - Intelligence Leak": "EASY",
     "NORMAL - Classified": "NORMAL",
     "HARD - Top Secret": "HARD",
-    "TOP SECRET+ - Meta-Cheating": "TOP_SECRET_PLUS",
+    "INSANE - Shadow Directorate": "INSANE",
+    "TOP SECRET+ - Meta-Cheating": "INSANE",
   };
   safeSetLocalStorageItem("shadowgov:difficulty", map[label] ?? "NORMAL", {
     logger: console,

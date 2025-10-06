@@ -2,6 +2,7 @@ import type { GameCard } from '@/rules/mvp';
 import { resolveCardMVP, type CardPlayResolution, type GameSnapshot } from '@/systems/cardResolution';
 import type { TurnPlay } from '@/game/combo.types';
 import { CARD_DATABASE } from './cardDatabase';
+import { mergeBiasModifiers, type BiasModifiers } from '@/ai/difficulty';
 import { getAiTuningConfig, type AiTuningConfig } from './aiTuning';
 import {
   createAiStrategist,
@@ -93,6 +94,7 @@ export class EnhancedAIStrategist implements AIStrategist {
   public readonly difficulty: AIDifficulty;
   private _personality: AIPersonality;
   private _tuning: AiTuningConfig;
+  private biasModifiers: BiasModifiers;
   private cardSynergies: CardSynergy[] = [];
   private deceptionState: DeceptionState;
   private playerBehaviorPattern: string[] = [];
@@ -120,11 +122,17 @@ export class EnhancedAIStrategist implements AIStrategist {
     difficulty: AIDifficulty = 'medium',
     tuning: AiTuningConfig = getAiTuningConfig(),
     difficultyProfileOverrides?: Partial<EnhancedAiDifficultyProfile>,
+    biasOverrides?: Partial<BiasModifiers>,
   ) {
     this.base = createAiStrategist(difficulty, tuning);
     this.difficulty = difficulty;
     this._personality = this.base.personality;
     this._tuning = this.base.tuning;
+    const baseBias = this.base.getBiasModifiers();
+    this.biasModifiers = biasOverrides
+      ? mergeBiasModifiers(baseBias, biasOverrides)
+      : baseBias;
+    this.base.setBiasModifiers(this.biasModifiers);
 
     const basePersonality = this.personality;
     this.difficultyProfile = this.buildDifficultyProfile(basePersonality, difficultyProfileOverrides);
@@ -162,9 +170,24 @@ export class EnhancedAIStrategist implements AIStrategist {
     this.base.tuning = value;
   }
 
+  public getBiasModifiers(): BiasModifiers {
+    return { ...this.biasModifiers };
+  }
+
+  public setBiasModifiers(modifiers: BiasModifiers): void {
+    this.biasModifiers = mergeBiasModifiers(modifiers, undefined);
+    this.base.setBiasModifiers(this.biasModifiers);
+  }
+
+  public updateBiasModifiers(overrides: Partial<BiasModifiers>): void {
+    this.biasModifiers = mergeBiasModifiers(this.biasModifiers, overrides);
+    this.base.setBiasModifiers(this.biasModifiers);
+  }
+
   private syncBase(): void {
     this.base.personality = this._personality;
     this.base.tuning = this._tuning;
+    this.base.setBiasModifiers(this.biasModifiers);
   }
 
   public evaluateGameState(gameState: any): GameStateEvaluation {
@@ -417,6 +440,10 @@ export class EnhancedAIStrategist implements AIStrategist {
     evaluation: GameStateEvaluation
   ): EnhancedCardPlay {
     const synergies = this.findCardSynergies(play.cardId, gameState.hand, evaluation, gameState, play);
+    const scaledSynergies = synergies.map(synergy => ({
+      ...synergy,
+      bonusValue: synergy.bonusValue * this.biasModifiers.combo,
+    }));
     const threatResponse = this.isThreatResponse(play, gameState, evaluation);
     const deceptionValue = this.calculateDeceptionValue(play, gameState, evaluation);
     const cardMeta = this.getCardMetadata(play.cardId);
@@ -424,7 +451,7 @@ export class EnhancedAIStrategist implements AIStrategist {
     let adjustedPriority = play.priority;
 
     // Synergy bonuses
-    synergies.forEach(synergy => {
+    scaledSynergies.forEach(synergy => {
       adjustedPriority += synergy.bonusValue;
     });
 
@@ -463,7 +490,7 @@ export class EnhancedAIStrategist implements AIStrategist {
 
     return {
       ...play,
-      synergies,
+      synergies: scaledSynergies,
       deceptionValue,
       threatResponse,
       priority: adjustedPriority,
@@ -1319,11 +1346,11 @@ export class EnhancedAIStrategist implements AIStrategist {
 
     const aiStates = gameState.states?.filter((s: any) => s.owner === 'ai').length ?? 0;
     const playerStates = gameState.states?.filter((s: any) => s.owner === 'player').length ?? 0;
-    const stateControlScore = Math.max(-1, Math.min(1, (aiStates - playerStates) / 10));
+    const stateControlScore = Math.tanh(((aiStates - playerStates) / 10) * this.biasModifiers.combo);
 
     const aiIp = gameState.aiIP ?? 0;
     const playerIp = this.getPlayerIp(gameState);
-    const ipScore = Math.max(-1, Math.min(1, (aiIp - playerIp) / 300));
+    const ipScore = Math.tanh(((aiIp - playerIp) / 300) * this.biasModifiers.income);
 
     const aiFaction = this.getAiFaction(gameState);
     const truthValue = gameState.truth ?? 50;

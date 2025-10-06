@@ -42,7 +42,7 @@ const DIFFICULTY_PRIORITY_FLOORS: Record<EnhancedAIStrategist['difficulty'], num
   easy: 0.3,
   medium: 0.27,
   hard: 0.22,
-  legendary: 0.2,
+  insane: 0.2,
 };
 
 const evaluatePriorityPreferences = (
@@ -63,7 +63,7 @@ const evaluatePriorityPreferences = (
   const minimumPriority = Math.max(ABSOLUTE_PRIORITY_FLOOR, Math.min(preferredThreshold, dynamicFloor));
   const allowFallback =
     strategist.difficulty === 'hard' ||
-    strategist.difficulty === 'legendary' ||
+    strategist.difficulty === 'insane' ||
     aggressionProfile >= 0.7;
 
   return { minimumPriority, allowFallback };
@@ -104,6 +104,10 @@ export const chooseTurnActions = ({
   const catchUp = evaluateCatchUpAdjustments(aiIp - playerIp, controlledStates.length - opponentStates.length);
   const projectedBaseIncome = 5 + controlledStates.length;
   const projectedNetIncome = Math.max(0, projectedBaseIncome - catchUp.swingTax + catchUp.catchUpBonus);
+  const biasModifiers = typeof strategist.getBiasModifiers === 'function'
+    ? strategist.getBiasModifiers()
+    : { combo: 1, income: 1 };
+  const biasAdjustedIncome = Math.max(0, projectedNetIncome * biasModifiers.income);
 
   const baseStrategistView: Record<string, unknown> = {
     ...gameState,
@@ -113,11 +117,13 @@ export const chooseTurnActions = ({
     aiHand: initialHand,
     controlledStates,
     catchUpForecast: catchUp,
+    biasModifiers,
     projectedIncome: {
       base: projectedBaseIncome,
       swingTax: catchUp.swingTax,
       catchUpBonus: catchUp.catchUpBonus,
       net: projectedNetIncome,
+      biasAdjustedNet: biasAdjustedIncome,
     },
   };
 
@@ -128,6 +134,11 @@ export const chooseTurnActions = ({
   const adaptiveSummary = strategist.getAdaptiveSummary();
   if (adaptiveSummary.length) {
     sequenceDetails.push(...adaptiveSummary);
+  }
+  if (Math.abs(biasModifiers.combo - 1) > 0.01 || Math.abs(biasModifiers.income - 1) > 0.01) {
+    sequenceDetails.push(
+      `Bias profile active: combos ×${biasModifiers.combo.toFixed(2)}, income ×${biasModifiers.income.toFixed(2)}.`,
+    );
   }
   if (catchUp.swingTax > 0 || catchUp.catchUpBonus > 0) {
     const modifiers: string[] = [];

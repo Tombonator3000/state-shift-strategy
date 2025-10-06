@@ -40,7 +40,7 @@ const AIStatus = ({
       case 'easy': return 'bg-green-900/50 text-green-400 border-green-600';
       case 'medium': return 'bg-yellow-900/50 text-yellow-400 border-yellow-600';
       case 'hard': return 'bg-red-900/50 text-red-400 border-red-600';
-      case 'legendary': return 'bg-purple-900/50 text-purple-400 border-purple-600';
+      case 'insane': return 'bg-fuchsia-900/50 text-fuchsia-300 border-fuchsia-600';
     }
   };
 
@@ -49,7 +49,7 @@ const AIStatus = ({
       case 'easy': return <Bot size={16} />;
       case 'medium': return <Brain size={16} />;
       case 'hard': return <Zap size={16} />;
-      case 'legendary': return <Target size={16} />;
+      case 'insane': return <Target size={16} />;
     }
   };
 

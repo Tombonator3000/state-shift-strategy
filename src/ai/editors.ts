@@ -1,4 +1,4 @@
-import type { Difficulty } from "./difficulty";
+import { AI_PRESETS, mergeBiasModifiers, type BiasModifiers, type Difficulty } from "./difficulty";
 
 export type EditorId =
   | "fox_muldrunk"
@@ -30,6 +30,7 @@ export interface EditorProfile {
   specialty: string;
   personality: AIPersonality;
   defaultLocale: string;
+  biasModifiers: BiasModifiers;
 }
 
 const createPersonality = (
@@ -39,6 +40,14 @@ const createPersonality = (
   description,
   ...values,
 });
+
+const createBiasModifiers = (
+  difficulty: Difficulty,
+  overrides?: Partial<BiasModifiers>,
+): BiasModifiers => {
+  const base = AI_PRESETS[difficulty].biasModifiers;
+  return mergeBiasModifiers(base, overrides);
+};
 
 export const AI_EDITORS: Record<EditorId, EditorProfile> = {
   fox_muldrunk: {
@@ -59,6 +68,7 @@ export const AI_EDITORS: Record<EditorId, EditorProfile> = {
       },
     ),
     defaultLocale: "en-US",
+    biasModifiers: createBiasModifiers("NORMAL", { combo: 1.1, income: 0.95 }),
   },
   florida_man: {
     id: "florida_man",
@@ -78,6 +88,7 @@ export const AI_EDITORS: Record<EditorId, EditorProfile> = {
       },
     ),
     defaultLocale: "en-US",
+    biasModifiers: createBiasModifiers("NORMAL", { combo: 1.05, income: 0.9 }),
   },
   el_visto: {
     id: "el_visto",
@@ -97,6 +108,7 @@ export const AI_EDITORS: Record<EditorId, EditorProfile> = {
       },
     ),
     defaultLocale: "en-US",
+    biasModifiers: createBiasModifiers("EASY", { combo: 0.9, income: 0.95 }),
   },
   hunter_s_thampson: {
     id: "hunter_s_thampson",
@@ -116,6 +128,7 @@ export const AI_EDITORS: Record<EditorId, EditorProfile> = {
       },
     ),
     defaultLocale: "en-US",
+    biasModifiers: createBiasModifiers("HARD", { combo: 1.25, income: 1.1 }),
   },
   agnes_inkwraith: {
     id: "agnes_inkwraith",
@@ -135,12 +148,13 @@ export const AI_EDITORS: Record<EditorId, EditorProfile> = {
       },
     ),
     defaultLocale: "en-US",
+    biasModifiers: createBiasModifiers("HARD", { combo: 1.1, income: 1.25 }),
   },
   delta_echo: {
     id: "delta_echo",
     codename: "Delta Echo",
     coverTitle: "Numbers Station Ombudsman",
-    difficulty: "TOP_SECRET_PLUS",
+    difficulty: "INSANE",
     desks: ["Signals", "Cipher Watch"],
     specialty: "Decodes broadcast anomalies before the agencies notice their encryption glitched.",
     personality: createPersonality(
@@ -154,6 +168,7 @@ export const AI_EDITORS: Record<EditorId, EditorProfile> = {
       },
     ),
     defaultLocale: "en-US",
+    biasModifiers: createBiasModifiers("INSANE", { combo: 1.4, income: 1.3 }),
   },
   sybil_margin: {
     id: "sybil_margin",
@@ -173,12 +188,13 @@ export const AI_EDITORS: Record<EditorId, EditorProfile> = {
       },
     ),
     defaultLocale: "en-US",
+    biasModifiers: createBiasModifiers("HARD", { combo: 1.18, income: 1.2 }),
   },
   nocturne_typesetter: {
     id: "nocturne_typesetter",
     codename: "Nocturne Typesetter",
     coverTitle: "Midnight Edition Cartographer",
-    difficulty: "TOP_SECRET_PLUS",
+    difficulty: "INSANE",
     desks: ["Layout", "Temporal Logistics"],
     specialty: "Maps tomorrow's front page onto today's operations without ripping the timeline.",
     personality: createPersonality(
@@ -192,6 +208,7 @@ export const AI_EDITORS: Record<EditorId, EditorProfile> = {
       },
     ),
     defaultLocale: "en-US",
+    biasModifiers: createBiasModifiers("INSANE", { combo: 1.32, income: 1.35 }),
   },
 };
 
