@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import type { TurnLog, TurnTotals } from '../../src/news/headlineEngine';
+import type { TurnLog, TurnTotals, PlayedLite } from '../../src/news/headlineEngine';
 
 const stubPools = {
   mastheads: ['Test Masthead'],
@@ -33,6 +33,57 @@ beforeEach(() => {
   getPoolsIfReadyMock.mockReset();
   getPoolsMock.mockImplementation(() => stubPools);
   getPoolsIfReadyMock.mockImplementation(() => stubPools);
+});
+
+describe('evaluateExtraExtra', () => {
+  it('returns no trigger when neither faction plays three cards', async () => {
+    const { evaluateExtraExtra } = await loadEngine();
+
+    const outcome = evaluateExtraExtra([]);
+
+    expect(outcome.trigger).toBe(false);
+    expect(outcome.truthDelta).toBe(0);
+    expect(outcome.focusPlays).toEqual([]);
+  });
+
+  it('declares truth winner when only truth reaches three plays', async () => {
+    const { evaluateExtraExtra } = await loadEngine();
+
+    const plays: PlayedLite[] = [
+      { id: 't1', name: 'Truth Broadcast', type: 'MEDIA', faction: 'truth', truth: 2 },
+      { id: 't2', name: 'Truth Broadcast 2', type: 'MEDIA', faction: 'truth', truth: 1 },
+      { id: 't3', name: 'Truth Broadcast 3', type: 'MEDIA', faction: 'truth', truth: 4 },
+      { id: 'g1', name: 'Gov Teaser', type: 'MEDIA', faction: 'government', truth: -1 },
+    ];
+
+    const outcome = evaluateExtraExtra(plays);
+
+    expect(outcome.trigger).toBe(true);
+    expect(outcome.winningFaction).toBe('truth');
+    expect(outcome.truthDelta).toBe(3);
+    expect(outcome.focusPlays).toHaveLength(3);
+    expect(outcome.focusPlays.every(play => play.faction === 'truth')).toBe(true);
+  });
+
+  it('breaks ties with a draw when top card values match', async () => {
+    const { evaluateExtraExtra } = await loadEngine();
+
+    const plays: PlayedLite[] = [
+      { id: 't1', name: 'Truth Wave', type: 'MEDIA', faction: 'truth', truth: 3 },
+      { id: 't2', name: 'Truth Echo', type: 'MEDIA', faction: 'truth', truth: 1 },
+      { id: 't3', name: 'Truth Finale', type: 'MEDIA', faction: 'truth', truth: 2 },
+      { id: 'g1', name: 'Gov Silence', type: 'MEDIA', faction: 'government', truth: -3 },
+      { id: 'g2', name: 'Gov Clamp', type: 'MEDIA', faction: 'government', truth: -2 },
+      { id: 'g3', name: 'Gov Sweep', type: 'MEDIA', faction: 'government', truth: -1 },
+    ];
+
+    const outcome = evaluateExtraExtra(plays);
+
+    expect(outcome.trigger).toBe(true);
+    expect(outcome.winningFaction).toBe('draw');
+    expect(outcome.truthDelta).toBe(0);
+    expect(outcome.focusPlays).toHaveLength(6);
+  });
 });
 
 describe('headlineEngine utilities', () => {
