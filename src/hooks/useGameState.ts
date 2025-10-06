@@ -29,7 +29,7 @@ import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/c
 import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardMVP, type CardPlayResolution, type CardHotspotResolution } from '@/systems/cardResolution';
 import { useStateEvents } from '@/hooks/useStateEvents';
-import { applyTruthDelta } from '@/utils/truth';
+import { applyTruthDelta, type TruthActorId } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
 import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
@@ -221,6 +221,42 @@ const emitEditorToastMessages = (messages: string[]): void => {
   }
 };
 
+type LegacyPlayerSnapshot = {
+  faction?: 'truth' | 'government';
+};
+
+const resolveFactionOwner = (
+  state: GameState,
+  faction: 'truth' | 'government',
+): TruthActorId => {
+  const legacyPlayers = (state as GameState & {
+    players?: Record<string, LegacyPlayerSnapshot | undefined>;
+  }).players;
+
+  if (legacyPlayers) {
+    for (const [id, player] of Object.entries(legacyPlayers)) {
+      if (!player || player.faction !== faction) {
+        continue;
+      }
+
+      if (id === 'P1' || id === 'P2') {
+        return id;
+      }
+
+      if (id === 'human' || id === 'ai' || id === 'player') {
+        return id;
+      }
+    }
+  }
+
+  const playerIsTruth = state.faction === 'truth';
+  if (faction === 'truth') {
+    return playerIsTruth ? 'human' : 'ai';
+  }
+
+  return playerIsTruth ? 'ai' : 'human';
+};
+
 const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): GameState => {
   const buffer = prev.turnBuffer ?? [];
   if (buffer.length === 0) {
@@ -247,8 +283,8 @@ const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): Ga
     extraExtraFeed = [...extraExtraFeed, article];
 
     if (evaluation.truthDelta !== 0) {
-      const truthOwner = next.players.P1.faction === 'truth' ? 'P1' : 'P2';
-      const governmentOwner = next.players.P1.faction === 'government' ? 'P1' : 'P2';
+      const truthOwner = resolveFactionOwner(next, 'truth');
+      const governmentOwner = resolveFactionOwner(next, 'government');
       const actor = evaluation.winningFaction === 'truth' ? truthOwner : governmentOwner;
       applyTruthDelta(next, evaluation.truthDelta, actor);
     }
