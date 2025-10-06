@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-15 – Align lore ops with conspiratorial canon
+- Publish a Paranoid Times world lore quickstart, card template, and anomaly naming guide to harmonize future writing sprints.
+- Enforce tone-safe lint rules and introduce a lore cross-linking prototype so non-diegetic jokes and continuity gaps surface fast.
+
 ## 2025-10-14 – Restore paranormal sighting flavor pools
 - Reintroduce missing tagline templates for synergy, broadcast, cryptid, and hotspot events so sightings no longer crash.
 - Wire templates into the index page with a resilient filler to keep paranormal notifications descriptive.

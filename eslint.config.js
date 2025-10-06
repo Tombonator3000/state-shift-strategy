@@ -21,6 +21,24 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[value=/\\bbanana peel\\b/i]",
+          message:
+            "Non-diegetic humor keyword \"banana peel\" detected. Swap in an in-universe gag sanctioned by Paranoid Times canon.",
+        },
+        {
+          selector: "Literal[value=/\\bclown car\\b/i]",
+          message:
+            "Non-diegetic humor keyword \"clown car\" detected. Channel conspiratorial wit instead of slapstick props.",
+        },
+        {
+          selector: "Literal[value=/\\brubber chicken\\b/i]",
+          message:
+            "Non-diegetic humor keyword \"rubber chicken\" detected. Keep jokes rooted in the Paranoid Times mythos.",
+        },
+      ],
     },
   },
 );
