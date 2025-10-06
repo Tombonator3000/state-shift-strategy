@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-13 – Stabilize AI triple-play headlines
+- Allow the Extra! Extra! generator and final edition builder to emit deterministic `[WIRE DELAY]` placeholders when news pools are still loading.
+- Kick off news pool loading from the game state hook and add regression coverage so three-card turns no longer crash while assets hydrate.
+
 ## 2025-10-12 – Harden press archive persistence
 - Switch the press archive hook to the safe storage helpers so localStorage errors no longer crash the hub.
 - Add regression coverage that verifies the archive stays empty when storage access fails.

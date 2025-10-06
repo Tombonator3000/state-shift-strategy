@@ -85,6 +85,7 @@ import { assignStateBonuses } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from './stateBonusAssignment';
 import { clearNewsBuffer, getNewsTriplet, pushToNewsBuffer } from '@/state/game/roundNewsBuffer';
 import { summarize, generateExtraExtra } from '@/news/headlineEngine';
+import { loadNewsPools } from '@/news/newsPools';
 import type { ArticleBlock, TurnLog } from '@/news/headlineEngine';
 import type { GameOverReport } from '@/types/finalEdition';
 
@@ -2014,6 +2015,21 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const achievements = useAchievements();
   const [hotspotDirector] = useState(() => new HotspotDirector());
   const { triggerStateEvent, resetStateEvents } = useStateEvents();
+
+  useEffect(() => {
+    let isActive = true;
+
+    loadNewsPools().catch(error => {
+      if (!isActive) {
+        return;
+      }
+      console.warn('Failed to preload news pools before turn resolution', error);
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const triggerCapturedStateEvents = useCallback(
     (resolution: CardPlayResolution | undefined, nextState: GameState): GameEvent[] => {

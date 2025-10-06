@@ -126,6 +126,11 @@ Front-page assembly exposes extra telemetry during local development. Set `VITE_
 `npm run dev` to enable console logs from the Tabloid newspaper render. The flag is ignored in production builds and defaults to
 disabled, preventing debug chatter in shipped bundles. The console output summarizes the selected template, shared tags across the
 compiled articles, and the verb pools chosen for each card, matching the `GeneratedStory.debug` payload.
+
+### News pool loading
+
+- `useGameState` now primes `loadNewsPools()` as soon as the hook mounts so the reducer has the cached mastheads, verbs, and ads ready before the first AI turn resolves.
+- `generateExtraExtra` and `buildFinalEdition` tolerate an empty cache by pulling from deterministic `[WIRE DELAY]` placeholder copy until `getPoolsIfReady()` returns real data. Both helpers emit a console warning whenever the fallback path runs so QA can spot asset fetch regressions quickly.
 | *(Attempted)* `state-capture` | Synergy activations attempt to play this hyphenated key (note: the manifest only exposes `stateCapture`). |
 | QA / settings hooks | In-game options expose a test button for the click SFX, and developer QA controls can audition any registered key. |
 | Manifest reference | Complete list of bundled SFX keys and file mappings lives in the manifest. |

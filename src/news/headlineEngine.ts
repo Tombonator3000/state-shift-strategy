@@ -1,4 +1,35 @@
-import { getPools } from '@/news/newsPools';
+import { getPools, getPoolsIfReady } from '@/news/newsPools';
+
+const FALLBACK_DEK_POOL = [
+  'Archive uplink pending. Full briefing to follow shortly.',
+  'Wire desk files a placeholder while the reels warm up.',
+];
+
+const FALLBACK_BYLINES = [
+  'By: Standby Desk',
+  'By: Emergency Editor',
+];
+
+const FALLBACK_SOURCES = [
+  'Source: Archive sync pending.',
+  'Source: Classified spool offline.',
+];
+
+const FALLBACK_MASTHEADS = [
+  'Paranoid Press — Wire Delay Edition',
+  'The Interim Ledger',
+];
+
+const FALLBACK_WEATHER = [
+  'Weather withheld pending clearance.',
+  'Forecast delayed until archives respond.',
+];
+
+const FALLBACK_ADS = [
+  'Placeholder classified: Archives reconnecting shortly.',
+  'Advertisement suspended pending copy approval.',
+  'Wire notice: Refresh for full classifieds.',
+];
 
 export type CardType = 'ATTACK' | 'MEDIA' | 'ZONE';
 
@@ -179,6 +210,43 @@ const ensureBulletFallback = (bullets: string[], tone: ArticleBlock['tone']): st
 const formatNumber = (value: number): string => {
   const rounded = Math.round(value * 10) / 10;
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+};
+
+const buildFallbackHed = (tone: ArticleBlock['tone'], totals: TurnTotals): string => {
+  const truthTotals = totals.truth;
+  const govTotals = totals.government;
+  const combined: FactionTotals = {
+    plays: truthTotals.plays + govTotals.plays,
+    attack: truthTotals.attack + govTotals.attack,
+    media: truthTotals.media + govTotals.media,
+    zone: truthTotals.zone + govTotals.zone,
+    truth: truthTotals.truth + govTotals.truth,
+    ip: truthTotals.ip + govTotals.ip,
+    captures: truthTotals.captures + govTotals.captures,
+    damage: truthTotals.damage + govTotals.damage,
+  };
+
+  const focus = tone === 'truth' ? truthTotals : tone === 'government' ? govTotals : combined;
+  const subject = tone === 'truth' ? 'TRUTH WIRE' : tone === 'government' ? 'GOVERNMENT BULLETIN' : 'TABLOID DESK';
+
+  const highlight = (() => {
+    if (focus.captures > 0) {
+      const label = focus.captures === 1 ? 'capture' : 'captures';
+      return `${formatNumber(focus.captures)} ${label}`.toUpperCase();
+    }
+    if (focus.truth > 0) {
+      return `TRUTH +${formatNumber(focus.truth)}%`;
+    }
+    if (focus.ip > 0) {
+      return `IP +${formatNumber(focus.ip)}`;
+    }
+    if (focus.plays > 0) {
+      return `${formatNumber(focus.plays)} PLAYS LOGGED`;
+    }
+    return 'NO MAJOR SHIFTS';
+  })();
+
+  return `[WIRE DELAY] ${subject} NOTES ${highlight}`;
 };
 
 export const summarize = (turns: TurnLog[]): TurnTotals => {
@@ -399,7 +467,25 @@ export const generateExtraExtra = (
   const totals = totalsArg ?? summarize(turns);
   const tone = dominantFromTotals(totals);
   const rng = mulberry32(hashSeed(`extra:${seed}`));
-  const pools = getPools();
+  const pools = getPoolsIfReady();
+
+  if (!pools) {
+    console.warn('generateExtraExtra: news pools not ready, using placeholder article.');
+    const hed = buildFallbackHed(tone, totals);
+    const dek = pick(FALLBACK_DEK_POOL, rng, FALLBACK_DEK_POOL[0]);
+    const byline = pick(FALLBACK_BYLINES, rng, FALLBACK_BYLINES[0]);
+    const source = pick(FALLBACK_SOURCES, rng, FALLBACK_SOURCES[0]);
+    const bullets = buildBullets(turns, totals, tone, rng);
+
+    return {
+      tone,
+      hed,
+      dek,
+      bullets,
+      byline,
+      source,
+    };
+  }
   const dominantType = getDominantType(totals, tone);
   const typeKey = dominantType === 'ATTACK' ? 'attack' : dominantType === 'MEDIA' ? 'media' : 'zone';
   const subheadPool = [...pools.subheads.generic];
@@ -426,7 +512,26 @@ export const buildFinalEdition = (seed: string, turns: TurnLog[]): FinalEdition 
   const totals = summarize(turns);
   const dominantFaction = dominantFromTotals(totals);
   const rng = mulberry32(hashSeed(`edition:${seed}`));
-  const pools = getPools();
+  const pools = getPoolsIfReady();
+
+  if (!pools) {
+    console.warn('buildFinalEdition: news pools not ready, using placeholder edition.');
+    const masthead = pick(FALLBACK_MASTHEADS, rng, FALLBACK_MASTHEADS[0]);
+    const weather = pick(FALLBACK_WEATHER, rng, FALLBACK_WEATHER[0]);
+    const ads = pickMany(FALLBACK_ADS, Math.min(3, FALLBACK_ADS.length), rng);
+    const article = generateExtraExtra(seed, turns, totals);
+
+    return {
+      seed,
+      masthead,
+      weather,
+      ads,
+      totals,
+      dominantFaction,
+      article,
+    };
+  }
+
   const masthead = pick(pools.mastheads, rng, 'Paranoid Press');
   const weather = pick(pools.weather, rng, 'Forecast withheld pending clearance.');
   const ads = pickMany(pools.ads, 3, rng);
