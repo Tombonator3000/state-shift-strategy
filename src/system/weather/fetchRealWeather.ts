@@ -2,6 +2,9 @@ export type RealWeather = { tempC: number; windKmh: number; code: number; precip
 
 export async function fetchRealWeather(): Promise<RealWeather | null> {
   try {
+    if (typeof navigator === 'undefined' || !navigator?.geolocation) {
+      return null;
+    }
     const pos = await new Promise<GeolocationPosition>((res, rej) =>
       navigator.geolocation.getCurrentPosition(res, rej, {
         enableHighAccuracy: true,

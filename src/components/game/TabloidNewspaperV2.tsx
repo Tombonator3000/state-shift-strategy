@@ -27,6 +27,7 @@ import {
   NewspaperSection,
 } from './newspaperLayout';
 import FrontPage from '@/ui/newspaper/FrontPage';
+import { useTabloidWeather, getFallbackTabloidWeather } from '@/system/weather/useTabloidWeather';
 
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
 const FRONT_PAGE_FALLBACK_HEADLINE = 'SPECIAL EDITION: PRINTING GREMLINS AT WORK';
@@ -298,6 +299,7 @@ const TabloidNewspaperV2 = ({
   const highlightTimeoutRef = useRef<number | null>(null);
   const prevSightingsCountRef = useRef(0);
   const lastSightingIdRef = useRef<string | null>(null);
+  const { weatherLine: tabloidWeatherLine } = useTabloidWeather();
 
   const agendaPullQuotes = useMemo(() => {
     if (!agendaMoments?.length) {
@@ -770,7 +772,17 @@ const TabloidNewspaperV2 = ({
     return shuffled.slice(0, desired);
   })();
 
-  const weatherLine = issue?.supplements.weather ?? pick(dataset.weather ?? FALLBACK_DATA.weather ?? [], FALLBACK_DATA.weather?.[0] ?? 'Today: Classified Cloud Cover');
+  const datasetWeatherLine =
+    issue?.supplements.weather
+    ?? pick(
+      dataset.weather ?? FALLBACK_DATA.weather ?? [],
+      FALLBACK_DATA.weather?.[0] ?? getFallbackTabloidWeather(),
+    );
+
+  const weatherLine =
+    tabloidWeatherLine && tabloidWeatherLine !== getFallbackTabloidWeather()
+      ? tabloidWeatherLine
+      : datasetWeatherLine ?? getFallbackTabloidWeather();
 
   const eventStories = useMemo(
     () =>
