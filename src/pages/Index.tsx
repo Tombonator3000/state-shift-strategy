@@ -64,6 +64,12 @@ import { areMapVfxEnabled, areParanormalEffectsEnabled } from '@/state/settings'
 import type { GameCard } from '@/rules/mvp';
 import type { GameEvent } from '@/data/eventDatabase';
 import { EVENT_DATABASE } from '@/data/eventDatabase';
+import {
+  CRYPTID_SIGHTING_TAGLINES,
+  HOTSPOT_EXPIRE_TAGLINES,
+  HOTSPOT_RESOLUTION_TAGLINES,
+  HOTSPOT_SPAWN_TAGLINES,
+} from '@/data/paranormalTaglines';
 import { getLastComboSummary } from '@/game/comboEngine';
 import { usePressArchive } from '@/hooks/usePressArchive';
 import { useIntelArchive } from '@/hooks/useIntelArchive';
@@ -103,31 +109,6 @@ const BROADCAST_SIGHTING_TAGLINES = [
   'Broadcast control scrambles as {{TRACK}} loops at {{INTENSITY}} levels.',
   'Emergency playlist replaced with {{TRACK}}; monitors flag {{INTENSITY}} surge.',
   'Signal chain jammed by {{TRACK}} while meters peg {{INTENSITY}}.',
-] as const;
-
-const CRYPTID_SIGHTING_TAGLINES = [
-  '{{QUALITY}} footage from {{LOCATION}} rattles the paranormal watch.',
-  'Incident desk files {{QUALITY}} trail cam ping out of {{LOCATION}}.',
-  'Field scouts relay {{QUALITY}} anomaly clip stamped {{LOCATION}}.',
-  'Archive receives {{QUALITY}} hotspot reel straight from {{LOCATION}}.',
-] as const;
-
-const HOTSPOT_SPAWN_TAGLINES = [
-  'Containment grid braces in {{STATE}}: Defense +{{DEFENSE}}, ±{{TRUTH}}% truth on the line.',
-  'New anomaly blooms over {{STATE}} — shields +{{DEFENSE}}, truth stakes ±{{TRUTH}}%.',
-  '{{STATE}} ops scramble as spectral surge promises +{{DEFENSE}} defense, ±{{TRUTH}}% truth swing.',
-] as const;
-
-const HOTSPOT_RESOLUTION_TAGLINES = [
-  '{{STATE}} taskforce locks it down; truth shifts {{TRUTH_DELTA}}%.',
-  'Containment crew in {{STATE}} reports final truth delta {{TRUTH_DELTA}}%.',
-  'Casefile closed in {{STATE}} with truth meter settling at {{TRUTH_DELTA}}%.',
-] as const;
-
-const HOTSPOT_EXPIRE_TAGLINES = [
-  '{{STATE}} anomaly fizzles; defenses normalize and sensors fall quiet.',
-  'Residual echo in {{STATE}} dissipates into static.',
-  'Candlelight vigil in {{STATE}} marks the anomaly’s fade-out.',
 ] as const;
 
 const resolveStateName = (stateId: string): string => {
@@ -1165,7 +1146,7 @@ const Index = () => {
   ]);
 
   useEffect(() => {
-    const pickTemplate = (templates: string[]): string => {
+    const pickTemplate = (templates: readonly string[]): string => {
       if (!templates.length) {
         return '';
       }
@@ -1353,7 +1334,7 @@ const Index = () => {
     const newEntries = gameState.log.slice(hotspotLogCursorRef.current);
     hotspotLogCursorRef.current = logLength;
 
-    const pickTemplate = (templates: string[]): string => {
+    const pickTemplate = (templates: readonly string[]): string => {
       if (!templates.length) return '';
       const index = Math.floor(Math.random() * templates.length);
       return templates[index];
