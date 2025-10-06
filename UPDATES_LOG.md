@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-14 – Restore paranormal sighting flavor pools
+- Reintroduce missing tagline templates for synergy, broadcast, cryptid, and hotspot events so sightings no longer crash.
+- Wire templates into the index page with a resilient filler to keep paranormal notifications descriptive.
+
 ## 2025-10-13 – Stabilize AI triple-play headlines
 - Allow the Extra! Extra! generator and final edition builder to emit deterministic `[WIRE DELAY]` placeholders when news pools are still loading.
 - Kick off news pool loading from the game state hook and add regression coverage so three-card turns no longer crash while assets hydrate.
