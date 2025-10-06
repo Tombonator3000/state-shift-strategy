@@ -10,6 +10,7 @@
 - [Campaign arc progress telemetry](#campaign-arc-progress-telemetry)
 - [Secret agenda cookbook grid](#secret-agenda-cookbook-grid)
 - [UI feedback systems](#ui-feedback-systems)
+- [AI personalities & Editor Banter](#ai-personalities--editor-banter)
 - [Newspaper debugging](#newspaper-debugging)
 
 ## Game loop fundamentals
@@ -119,6 +120,24 @@ The table below keeps designers out of TypeScript while they balance the weights
 | `cryptid-rumble` | Plays during cryptid sightings and hotspot capture log events. |
 | `radio-static` | Used for hotspot expirations and static interference overlays. |
 | `stateCapture` | Click feedback when selecting states on the legacy map component. |
+
+## AI personalities & Editor Banter
+
+### Editor roster at a glance
+
+The AI newsroom fields eight named editors, each with a codename, desk specialties, and a pre-tuned personality profile defined in [`src/ai/editors.ts`](../src/ai/editors.ts).【F:src/ai/editors.ts†L1-L214】 Their personalities expose five sliders—curiosity, caution, improvisation, bravado, and escalation—that influence strategic heuristics layered on top of the base difficulty preset. When designers introduce a new editor, add the profile here and register the identifier in `EDITOR_IDS` so selection menus and factories discover it automatically.【F:src/ai/editors.ts†L215-L217】【F:src/data/aiFactory.ts†L1-L47】
+
+### Bias modifiers & tuning hooks
+
+Each editor inherits the bias modifiers from their difficulty tier (`AI_PRESETS`) and can override combo or income scalars through `mergeBiasModifiers` to nudge resource planning.【F:src/ai/difficulty.ts†L1-L67】【F:src/ai/editors.ts†L27-L52】 Runtime assembly in the [`AIFactory`](../src/data/aiFactory.ts) merges (1) the base difficulty bias, (2) the chosen editor's adjustments, and (3) any scenario overrides, so combat designers can dial aggression without rewriting personalities.【F:src/data/aiFactory.ts†L1-L47】 For expansion content, mirror those scalars inside the typed loader exported from [`EditorsEngine.ts`](../src/expansions/editors/EditorsEngine.ts) and its definitions in [`EditorsTypes.ts`](../src/expansions/editors/EditorsTypes.ts) to ensure mini-draft editors surface the same knobs.【F:src/expansions/editors/EditorsEngine.ts†L1-L104】【F:src/expansions/editors/EditorsTypes.ts†L1-L118】
+
+### Banter banks & trigger flow
+
+Flavor banter lives alongside the AI roster. Locale-specific JSON payloads sit in [`src/ai/banter`](../src/ai/banter) and are validated/loaded by the `getBanterBank` helper when a turn starts or an event requests chatter.【F:src/ai/banter/index.ts†L1-L129】 The loader normalizes every entry, logs schema mismatches, and falls back to `en-US` if a locale-specific bank is missing.【F:src/ai/banter/index.ts†L70-L127】 To add a new editor or language, drop the JSON file in this folder and map it inside `RAW_BANKS`; to wire deeper expansion hooks, extend the same editor IDs inside the mini-draft loader noted above so both systems stay synchronized.【F:src/ai/banter/index.ts†L25-L69】【F:src/expansions/editors/EditorsEngine.ts†L1-L44】
+
+### Toast delivery etiquette
+
+Editor banter often lands as toasts; keep the copy, tone, and severity aligned with the broader toast catalog documented in [UI feedback systems](#ui-feedback-systems). Lean on the established success, warning, destructive, and celebratory treatments from that table instead of inventing new variants so newsroom chatter feels cohesive.【F:docs/TECHNICAL_README.md†L89-L115】 When introducing locale-specific copy, reuse the same toast shapes and invoke the shared helpers used by achievements, state events, and synergy detection to maintain consistent audio/visual reinforcement.【F:docs/TECHNICAL_README.md†L89-L115】
 
 ## Newspaper debugging
 
