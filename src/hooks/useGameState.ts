@@ -51,6 +51,8 @@ import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
   ActiveStateBonus,
+  AIBanterCooldownEntry,
+  AIBanterCooldownState,
   GameEditorPreGameAdditions,
   GameEditorRuntimeState,
   GameState,
@@ -156,7 +158,99 @@ type EditorTelemetryPayload = {
 };
 
 const resolveActiveEditorFromState = (state: GameState) => {
-  return state.editorDef ?? resolveEditor(state.editorId ?? null) ?? null;
+  const candidateId = state.playerEditor ?? state.editorId ?? null;
+  return state.editorDef ?? resolveEditor(candidateId) ?? null;
+};
+
+const AI_DIFFICULTY_ORDER: readonly AIDifficulty[] = ['easy', 'medium', 'hard', 'legendary'] as const;
+
+const DEFAULT_AI_EDITOR_ASSIGNMENTS: Record<AIDifficulty, Record<'truth' | 'government', EditorId>> = {
+  easy: { truth: 'the_redactor', government: 'the_redactor' },
+  medium: { truth: 'ed_muldrunk', government: 'ed_floridaman' },
+  hard: { truth: 'ed_el_visto', government: 'ed_gonzo' },
+  legendary: { truth: 'ed_gonzo', government: 'ed_el_visto' },
+};
+
+const isValidAiDifficulty = (value: unknown): value is AIDifficulty => {
+  return typeof value === 'string' && (AI_DIFFICULTY_ORDER as readonly string[]).includes(value);
+};
+
+const normalizeEditorId = (value: unknown): EditorId | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? (trimmed as EditorId) : null;
+};
+
+const resolveAiEditorAssignment = ({
+  requested,
+  aiDifficulty,
+  aiFaction,
+}: {
+  requested?: EditorId | null;
+  aiDifficulty: AIDifficulty | null;
+  aiFaction: 'truth' | 'government';
+}): EditorId | null => {
+  const normalizedRequested = normalizeEditorId(requested ?? null);
+  if (normalizedRequested) {
+    return normalizedRequested;
+  }
+
+  const normalizedDifficulty = isValidAiDifficulty(aiDifficulty) ? aiDifficulty : null;
+  if (!normalizedDifficulty) {
+    return null;
+  }
+
+  const mapping = DEFAULT_AI_EDITOR_ASSIGNMENTS[normalizedDifficulty];
+  const mapped = mapping?.[aiFaction];
+  if (mapped) {
+    return mapped;
+  }
+
+  if (normalizedDifficulty === 'easy') {
+    return 'the_redactor';
+  }
+
+  return null;
+};
+
+const createInitialAiBanterCooldown = (): AIBanterCooldownState => ({
+  categories: {},
+});
+
+const normalizeAiBanterCooldown = (value: unknown): AIBanterCooldownState | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const raw = value as Partial<AIBanterCooldownState> & { categories?: unknown };
+  const bucket = raw.categories;
+  if (!bucket || typeof bucket !== 'object') {
+    return createInitialAiBanterCooldown();
+  }
+
+  const categories: Record<string, AIBanterCooldownEntry> = {};
+  for (const [key, entry] of Object.entries(bucket as Record<string, unknown>)) {
+    if (!entry || typeof entry !== 'object') {
+      continue;
+    }
+    const payload = entry as { availableAt?: unknown; lastLineId?: unknown };
+    const availableAt = typeof payload.availableAt === 'number' && Number.isFinite(payload.availableAt)
+      ? payload.availableAt
+      : 0;
+
+    const normalizedEntry: AIBanterCooldownEntry = { availableAt };
+    if (typeof payload.lastLineId === 'string') {
+      normalizedEntry.lastLineId = payload.lastLineId;
+    } else if (payload.lastLineId === null) {
+      normalizedEntry.lastLineId = null;
+    }
+
+    categories[key] = normalizedEntry;
+  }
+
+  return { categories };
 };
 
 const normalizeArticleBlock = (entry: unknown): ArticleBlock | null => {
@@ -2496,6 +2590,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       editorRuntime: null,
       preGameAdditions: null,
       tabloidRelicsRuntime: null,
+      playerEditor: null,
+      aiEditor: resolveAiEditorAssignment({ aiDifficulty, aiFaction: 'government' }),
+      aiBanterCooldown: createInitialAiBanterCooldown(),
       winner: null,
       victoryType: null,
       finalEdition: null,
@@ -2588,7 +2685,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const handSize = Math.max(5, getStartingHandSize(drawMode, faction));
     const aiFaction = faction === 'government' ? 'truth' : 'government';
 
-    const requestedEditorId = editorId ?? gameStateRef.current.editorId ?? null;
+    const requestedEditorId = editorId
+      ?? gameStateRef.current.playerEditor
+      ?? gameStateRef.current.editorId
+      ?? null;
     const resolvedEditor = resolveEditor(requestedEditorId);
     const setupAdjustments = gatherEditorSetupAdjustments(resolvedEditor ?? null);
 
@@ -2628,6 +2728,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     let aiRemainingDeck = aiDeckSource.slice(handSize);
 
     const runtimeToPersist = editorRuntime ? normalizeEditorRuntimeState(editorRuntime) ?? undefined : undefined;
+    const playerEditorId = resolvedEditor?.id ?? requestedEditorId ?? null;
     const initialControl = getInitialStateControl(faction);
     const issueDefinition = advanceAgendaIssue();
     const issueState = agendaIssueToState(issueDefinition);
@@ -2656,6 +2757,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
     console.log('🎮 [initGame] About to create AIStrategist with difficulty:', aiDifficulty);
     const aiStrategist = AIFactory.createStrategist(aiDifficulty);
+    const aiEditorId = resolveAiEditorAssignment({ aiDifficulty, aiFaction });
     console.log('🎮 [initGame] AIStrategist created successfully');
 
     setGameState(prev => ({
@@ -2713,11 +2815,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       aiTurnInProgress: false,
       selectedCard: null,
       targetState: null,
-      editorId: resolvedEditor?.id ?? requestedEditorId ?? null,
+      editorId: playerEditorId,
+      playerEditor: playerEditorId,
       editorDef: resolvedEditor ?? null,
       editorRuntime: runtimeToPersist ?? null,
       preGameAdditions: null,
       tabloidRelicsRuntime: null,
+      aiEditor: aiEditorId ?? null,
+      aiBanterCooldown: createInitialAiBanterCooldown(),
       states: USA_STATES.map(state => {
         let owner: 'player' | 'ai' | 'neutral' = 'neutral';
 
@@ -3813,7 +3918,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         events: nextStateBase.currentEvents,
         plays: prev.cardsPlayedThisRound,
         runtime: prev.tabloidRelicsRuntime ?? null,
-        editorActive: Boolean(prev.editorId ?? prev.editorDef),
+        editorActive: Boolean(prev.playerEditor ?? prev.editorId ?? prev.editorDef),
       });
 
       if (relicOutcome.runtime !== undefined) {
@@ -4533,7 +4638,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const playerVictoryAchieved = Boolean(victoryType && playerWon);
     const aiVictoryAchieved =
       !playerWon && (state.aiIP >= 300 || state.truth <= 0 || state.truth >= 100 || aiOwnedStateCount >= 10);
-    const activeEditorId = state.editorId ?? undefined;
+    const activeEditorId = state.playerEditor ?? state.editorId ?? undefined;
 
     if ((playerVictoryAchieved || aiVictoryAchieved) && activeEditorId) {
       const resolvedVictoryType = playerVictoryAchieved
@@ -4650,15 +4755,32 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const normalizedTurn = typeof saveData.turn === 'number' && Number.isFinite(saveData.turn)
         ? Math.max(1, saveData.turn)
         : 1;
-      const savedEditorIdRaw = (saveData as { editorId?: unknown }).editorId;
-      const savedEditorId = typeof savedEditorIdRaw === 'string' ? savedEditorIdRaw : null;
-      const restoredEditor = resolveEditor(savedEditorId);
+      const savedEditorId = normalizeEditorId((saveData as { editorId?: unknown }).editorId);
+      const savedPlayerEditorId = normalizeEditorId((saveData as { playerEditor?: unknown }).playerEditor);
+      const effectivePlayerEditorId = savedPlayerEditorId ?? savedEditorId;
+      const restoredEditor = resolveEditor(effectivePlayerEditorId);
       const normalizedEditorRuntime = normalizeEditorRuntimeState(
         (saveData as { editorRuntime?: unknown }).editorRuntime,
       );
       const normalizedPreGameAdditions = normalizeEditorPreGameAdditions(
         (saveData as { preGameAdditions?: unknown }).preGameAdditions,
       );
+      const normalizedAiBanterCooldown = normalizeAiBanterCooldown(
+        (saveData as { aiBanterCooldown?: unknown }).aiBanterCooldown,
+      );
+
+      const savedAiDifficultyRaw = (saveData as { aiDifficulty?: unknown }).aiDifficulty;
+      const normalizedSavedAiDifficulty = isValidAiDifficulty(savedAiDifficultyRaw)
+        ? (savedAiDifficultyRaw as AIDifficulty)
+        : aiDifficulty;
+      const playerFactionFromSave: 'government' | 'truth' = saveData.faction === 'government' ? 'government' : 'truth';
+      const aiFactionFromSave: 'government' | 'truth' =
+        playerFactionFromSave === 'government' ? 'truth' : 'government';
+      const savedAiEditorId = resolveAiEditorAssignment({
+        requested: normalizeEditorId((saveData as { aiEditor?: unknown }).aiEditor),
+        aiDifficulty: normalizedSavedAiDifficulty,
+        aiFaction: aiFactionFromSave,
+      });
 
       // Validate save data structure
       if (!saveData.faction || !saveData.phase || saveData.version !== '1.0') {
@@ -5113,10 +5235,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             ? saveData.lastStateBonusRound
             : 0,
           stateRoundEvents: derivedStateRoundEvents,
-          editorId: restoredEditor?.id ?? null,
+          editorId: effectivePlayerEditorId ?? null,
+          playerEditor: effectivePlayerEditorId ?? null,
           editorDef: restoredEditor ?? null,
           editorRuntime: normalizedEditorRuntime ?? null,
           preGameAdditions: normalizedPreGameAdditions ?? null,
+          aiEditor: savedAiEditorId ?? null,
+          aiBanterCooldown: normalizedAiBanterCooldown ?? createInitialAiBanterCooldown(),
           headlineLog: Array.isArray((saveData as { headlineLog?: unknown }).headlineLog)
             ? ((saveData as { headlineLog: string[] }).headlineLog ?? []).filter(entry => typeof entry === 'string')
             : [],

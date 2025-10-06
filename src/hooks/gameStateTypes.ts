@@ -139,6 +139,9 @@ export interface GameState {
   editorRuntime?: GameEditorRuntimeState | null;
   preGameAdditions?: GameEditorPreGameAdditions | null;
   tabloidRelicsRuntime?: TabloidRelicRuntimeState | null;
+  playerEditor?: EditorId | null;
+  aiEditor?: EditorId | null;
+  aiBanterCooldown?: AIBanterCooldownState | null;
   winner: 'truth' | 'government' | 'draw' | null;
   victoryType: 'states' | 'ip' | 'truth' | 'agenda' | null;
   finalEdition?: GameOverReport | null;
@@ -155,6 +158,15 @@ export interface GameEditorPreGameAdditions {
   aiDeck?: GameCard[];
   playerHand?: GameCard[];
   aiHand?: GameCard[];
+}
+
+export interface AIBanterCooldownEntry {
+  availableAt: number;
+  lastLineId?: string | null;
+}
+
+export interface AIBanterCooldownState {
+  categories: Record<string, AIBanterCooldownEntry>;
 }
 
 export interface ActiveCampaignArcState {
