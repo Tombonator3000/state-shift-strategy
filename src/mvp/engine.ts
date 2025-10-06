@@ -5,12 +5,13 @@ import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward 
 import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import { RelicEngine } from '@/expansions/tabloidRelics/RelicEngine';
-import { summarize, generateExtraExtra } from '@/news/headlineEngine';
+import { summarize, generateExtraExtra, evaluateExtraExtra } from '@/news/headlineEngine';
 import type { PlayedLite, TurnLog } from '@/news/headlineEngine';
 import { cloneGameState } from './validator';
 import { auditGameState } from './gameStateAudit';
 import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
 import type { MediaResolutionOptions } from './media';
+import { applyTruthDelta } from '@/utils/truth';
 
 const otherPlayer = (id: PlayerId): PlayerId => (id === 'P1' ? 'P2' : 'P1');
 
@@ -647,9 +648,20 @@ export function endTurn(
     const summaryHeadline = `Turn ${turnNumber} recap: Truth plays ${totals.truth.plays}, Government plays ${totals.government.plays}`;
     headlineLog = [...headlineLog, summaryHeadline];
 
-    if (bufferPlays.length >= 3) {
-      const article = generateExtraExtra(`mvp:${currentId}:${turnNumber}`, [turnLogEntry], totals);
+    const evaluation = evaluateExtraExtra(bufferPlays);
+
+    if (evaluation.trigger) {
+      const focusLog: TurnLog = { ...turnLogEntry, plays: evaluation.focusPlays };
+      const focusTotals = summarize([focusLog]);
+      const article = generateExtraExtra(`mvp:${currentId}:${turnNumber}`, [focusLog], focusTotals);
       extraExtraFeed = [...extraExtraFeed, article];
+
+      if (evaluation.truthDelta !== 0) {
+        const truthOwner = cloned.players.P1.faction === 'truth' ? 'P1' : 'P2';
+        const governmentOwner = cloned.players.P1.faction === 'government' ? 'P1' : 'P2';
+        const actor = evaluation.winningFaction === 'truth' ? truthOwner : governmentOwner;
+        applyTruthDelta(logEnhancedState, evaluation.truthDelta, actor);
+      }
     }
   }
 

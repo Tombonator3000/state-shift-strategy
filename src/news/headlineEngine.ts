@@ -66,6 +66,165 @@ export interface TurnLog {
   plays: PlayedLite[];
 }
 
+export interface ExtraExtraOutcome {
+  trigger: boolean;
+  winningFaction: 'truth' | 'government' | 'draw';
+  focusPlays: PlayedLite[];
+  truthDelta: number;
+}
+
+const computePlayValue = (play: PlayedLite): number => {
+  if (!play) {
+    return 0;
+  }
+
+  const values: number[] = [];
+
+  if (typeof play.truth === 'number' && Number.isFinite(play.truth)) {
+    values.push(Math.abs(play.truth));
+  }
+
+  if (typeof play.ip === 'number' && Number.isFinite(play.ip)) {
+    values.push(Math.abs(play.ip));
+  }
+
+  if (typeof play.captures === 'number' && Number.isFinite(play.captures)) {
+    values.push(Math.abs(play.captures) * 2);
+  }
+
+  if (typeof play.damage === 'number' && Number.isFinite(play.damage)) {
+    values.push(Math.abs(play.damage));
+  }
+
+  if (!values.length) {
+    return 0;
+  }
+
+  return Math.max(...values);
+};
+
+const collectFactionTrio = (
+  plays: PlayedLite[],
+  faction: 'truth' | 'government',
+): PlayedLite[] => {
+  const result: PlayedLite[] = [];
+
+  for (const play of plays) {
+    if (play.faction !== faction) {
+      continue;
+    }
+
+    result.push(play);
+
+    if (result.length >= 3) {
+      break;
+    }
+  }
+
+  return result;
+};
+
+const collectDrawFocus = (plays: PlayedLite[]): PlayedLite[] => {
+  const result: PlayedLite[] = [];
+  let truthCount = 0;
+  let governmentCount = 0;
+
+  for (const play of plays) {
+    if (play.faction === 'truth' && truthCount < 3) {
+      result.push(play);
+      truthCount += 1;
+      continue;
+    }
+
+    if (play.faction === 'government' && governmentCount < 3) {
+      result.push(play);
+      governmentCount += 1;
+    }
+
+    if (truthCount >= 3 && governmentCount >= 3) {
+      break;
+    }
+  }
+
+  return result;
+};
+
+const highestFactionValue = (plays: PlayedLite[]): number => {
+  if (!plays.length) {
+    return 0;
+  }
+
+  return plays.reduce((max, play) => {
+    const value = computePlayValue(play);
+    return value > max ? value : max;
+  }, 0);
+};
+
+export const evaluateExtraExtra = (plays: PlayedLite[]): ExtraExtraOutcome => {
+  const truthTrio = collectFactionTrio(plays, 'truth');
+  const governmentTrio = collectFactionTrio(plays, 'government');
+
+  const truthQualifies = truthTrio.length >= 3;
+  const governmentQualifies = governmentTrio.length >= 3;
+
+  if (!truthQualifies && !governmentQualifies) {
+    return {
+      trigger: false,
+      winningFaction: 'draw',
+      focusPlays: [],
+      truthDelta: 0,
+    };
+  }
+
+  if (truthQualifies && !governmentQualifies) {
+    return {
+      trigger: true,
+      winningFaction: 'truth',
+      focusPlays: truthTrio,
+      truthDelta: 3,
+    };
+  }
+
+  if (!truthQualifies && governmentQualifies) {
+    return {
+      trigger: true,
+      winningFaction: 'government',
+      focusPlays: governmentTrio,
+      truthDelta: -3,
+    };
+  }
+
+  const truthValue = highestFactionValue(truthTrio);
+  const governmentValue = highestFactionValue(governmentTrio);
+
+  if (truthValue > governmentValue) {
+    return {
+      trigger: true,
+      winningFaction: 'truth',
+      focusPlays: truthTrio,
+      truthDelta: 3,
+    };
+  }
+
+  if (governmentValue > truthValue) {
+    return {
+      trigger: true,
+      winningFaction: 'government',
+      focusPlays: governmentTrio,
+      truthDelta: -3,
+    };
+  }
+
+  const focusPlays = collectDrawFocus(plays);
+
+  return {
+    trigger: true,
+    winningFaction: 'draw',
+    focusPlays,
+    truthDelta: 0,
+  };
+};
+
 export interface ArticleBlock {
   tone: 'truth' | 'government' | 'draw';
   hed: string;

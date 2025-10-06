@@ -84,7 +84,7 @@ import {
 import { assignStateBonuses } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from './stateBonusAssignment';
 import { clearNewsBuffer, getNewsTriplet, pushToNewsBuffer } from '@/state/game/roundNewsBuffer';
-import { summarize, generateExtraExtra } from '@/news/headlineEngine';
+import { summarize, generateExtraExtra, evaluateExtraExtra } from '@/news/headlineEngine';
 import { loadNewsPools } from '@/news/newsPools';
 import type { ArticleBlock, TurnLog } from '@/news/headlineEngine';
 import type { GameOverReport } from '@/types/finalEdition';
@@ -238,9 +238,20 @@ const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): Ga
   const headlineLog = [...next.headlineLog, summaryHeadline];
 
   let extraExtraFeed = next.extraExtraFeed;
-  if (buffer.length >= 3) {
-    const article = generateExtraExtra(`${seedPrefix}:${prev.round}:${prev.turn}`, [turnLog], totals);
+  const evaluation = evaluateExtraExtra(buffer);
+
+  if (evaluation.trigger) {
+    const focusLog: TurnLog = { ...turnLog, plays: evaluation.focusPlays };
+    const focusTotals = summarize([focusLog]);
+    const article = generateExtraExtra(`${seedPrefix}:${prev.round}:${prev.turn}`, [focusLog], focusTotals);
     extraExtraFeed = [...extraExtraFeed, article];
+
+    if (evaluation.truthDelta !== 0) {
+      const truthOwner = next.players.P1.faction === 'truth' ? 'P1' : 'P2';
+      const governmentOwner = next.players.P1.faction === 'government' ? 'P1' : 'P2';
+      const actor = evaluation.winningFaction === 'truth' ? truthOwner : governmentOwner;
+      applyTruthDelta(next, evaluation.truthDelta, actor);
+    }
   }
 
   return {
