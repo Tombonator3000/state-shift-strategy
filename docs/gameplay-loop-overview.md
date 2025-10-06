@@ -87,7 +87,18 @@ Denne sekvensen gjentas til én av seiersbetingelsene fra design-dokumentet trig
 
 ## 5. Videre iterasjon
 
-- Logg funn i `paranoid_times_analysis_and_roadmap.md` etter hver testsesjon.  
+- Logg funn i `paranoid_times_analysis_and_roadmap.md` etter hver testsesjon.
 - Dersom nye korttyper introduseres, oppdater `components.json` og utvid tabellen i `DESIGN_DOC_MVP.md` slik at denne loopen fortsatt beskriver standardstrømmen.
 
 > **Paranoid notis:** Hver tur er en slagmark i informasjonskrigen. Bruk rundeloggen som en "redacted file" — strekk over mislykkede trekk, la fremtidige agenter gjette hva som egentlig skjedde.
+
+## 6. Hva skiller dagens digitale gameplay-loop fra MVP-inntektsbeskrivelsen?
+
+| Tema | MVP-dokumentasjon | Implementasjon i prototype (per `src/mvp/engine.ts`) |
+| --- | --- | --- |
+| **Basisinntekt** | `+5 IP` + `+1 IP` per kontrollert stat uten å nevne duplikathåndtering. | Samme formel, men statenavn aggregeres slik at flere kopier av samme stat gir én samlet post i loggen og én IP per unikt kort (duplikater teller på `count`).【F:src/mvp/engine.ts†L229-L255】 |
+| **Maintenance** | Presenteres som valgfritt modul: `floor((IP − 40) / 10)` trekkes ved turstart om du lagret mer enn 40 IP. | Alltid aktiv i koden: terskel 40 og divisor 10 brukes hver runde, og loggen forklarer hvilke parametere som slo inn.【F:src/mvp/engine.ts†L219-L247】【F:src/mvp/engine.ts†L267-L285】 |
+| **Catch-up / Swing Tax** | Beskrives som opsjonell justering som kun nevner resultatet («hjelper den som ligger bak»). | Kjøres automatisk hver tur. Systemet beregner separate «swing tax» (lederstraff) og «catch-up bonus» (etterslepbonus) med symmetrisk maks ±4 og loggfører om årsaken er IP- eller statsgap.【F:src/mvp/engine.ts†L147-L215】【F:src/mvp/engine.ts†L247-L284】 |
+| **Logging** | Ikke dekket i dokumentasjonen. | Digital loop lager eksplisitte loggoppføringer for inntekt, maintenance, swing tax og catch-up, inkludert hvilke stater som bidro denne runden.【F:src/mvp/engine.ts†L257-L285】 |
+
+**Kort fortalt:** Tallene matcher MVP-reglene, men prototypen håndhever både maintenance og catch-up konsekvent og dokumenterer effektene i spillloggen. Det gjør at playtests umiddelbart viser når en leder straffes eller ettersleperen får ekstra IP, noe som ikke er eksplisitt omtalt i MVP-notatet.
