@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import clsx from 'clsx';
-import { Archive, Filter, Flag, Layers, MapPin, Trash2 } from 'lucide-react';
+import { Archive, Filter, Flag, Layers, MapPin, RotateCcw, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -85,10 +85,13 @@ const EvidenceArchivePanel = ({ entries, onDelete, onClear, className, variant =
   const hasEntries = entries.length > 0;
   const hasFilteredResults = filteredEntries.length > 0;
 
-  const handleClearFilters = () => {
+  const handleResetFilters = () => {
     setStateFilter(FILTER_ALL);
     setFactionFilter(FILTER_ALL);
     setTypeFilter(FILTER_ALL);
+  };
+
+  const handleClearArchive = () => {
     onClear?.();
   };
 
@@ -144,14 +147,28 @@ const EvidenceArchivePanel = ({ entries, onDelete, onClear, className, variant =
               </SelectContent>
             </Select>
           </div>
-          <Button
-            onClick={handleClearFilters}
-            variant="outline"
-            size="sm"
-            className="rounded-full border border-[var(--broadsheet-rule)] bg-white/85 px-4 py-1 font-typewriter text-[11px] uppercase tracking-[0.3em] text-[var(--broadsheet-ink)] hover:border-[var(--broadsheet-accent)]"
-          >
-            Clear Filters
-          </Button>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              onClick={handleResetFilters}
+              variant="outline"
+              size="sm"
+              className="rounded-full border border-[var(--broadsheet-rule)] bg-white/85 px-4 py-1 font-typewriter text-[11px] uppercase tracking-[0.3em] text-[var(--broadsheet-ink)] hover:border-[var(--broadsheet-accent)]"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" aria-hidden />
+              Reset Filters
+            </Button>
+            {onClear && (
+              <Button
+                onClick={handleClearArchive}
+                variant="outline"
+                size="sm"
+                className="rounded-full border border-red-600/60 bg-[rgba(248,113,113,0.2)] px-4 py-1 font-typewriter text-[11px] uppercase tracking-[0.3em] text-red-900 hover:border-red-600 hover:bg-[rgba(239,68,68,0.25)]"
+              >
+                <Trash2 className="mr-2 h-4 w-4" aria-hidden />
+                Clear Archive
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="flex-1 overflow-hidden">
@@ -305,19 +322,28 @@ const EvidenceArchivePanel = ({ entries, onDelete, onClear, className, variant =
                 </Select>
               </div>
             </div>
-            {onClear && (
-              <div className="mt-4 flex justify-end">
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-emerald-200/70 hover:text-emerald-100"
+                onClick={handleResetFilters}
+              >
+                <RotateCcw className="mr-1 h-4 w-4" aria-hidden />
+                Reset Filters
+              </Button>
+              {onClear && (
                 <Button
-                  variant="ghost"
+                  variant="destructive"
                   size="sm"
-                  className="text-emerald-200/70 hover:text-emerald-100"
-                  onClick={handleClearFilters}
+                  className="bg-red-700/80 text-red-50 hover:bg-red-700"
+                  onClick={handleClearArchive}
                 >
                   <Trash2 className="mr-1 h-4 w-4" aria-hidden />
-                  Clear Filters
+                  Clear Archive
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </Card>
 
           {hasFilteredResults ? (
