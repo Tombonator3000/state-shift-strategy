@@ -252,7 +252,12 @@ const normalizeAiBanterCooldown = (value: unknown): AIBanterCooldownState | null
     if (!entry || typeof entry !== 'object') {
       continue;
     }
-    const payload = entry as { availableAt?: unknown; lastLineId?: unknown };
+    const payload = entry as {
+      availableAt?: unknown;
+      lastLineId?: unknown;
+      lastEmittedTurn?: unknown;
+      countThisTurn?: unknown;
+    };
     const availableAt = typeof payload.availableAt === 'number' && Number.isFinite(payload.availableAt)
       ? payload.availableAt
       : 0;
@@ -262,6 +267,17 @@ const normalizeAiBanterCooldown = (value: unknown): AIBanterCooldownState | null
       normalizedEntry.lastLineId = payload.lastLineId;
     } else if (payload.lastLineId === null) {
       normalizedEntry.lastLineId = null;
+    }
+
+    if (typeof payload.lastEmittedTurn === 'number' && Number.isFinite(payload.lastEmittedTurn)) {
+      normalizedEntry.lastEmittedTurn = Math.max(0, Math.floor(payload.lastEmittedTurn));
+    }
+
+    if (typeof payload.countThisTurn === 'number' && Number.isFinite(payload.countThisTurn)) {
+      const count = Math.max(0, Math.floor(payload.countThisTurn));
+      if (count > 0) {
+        normalizedEntry.countThisTurn = count;
+      }
     }
 
     categories[key] = normalizedEntry;

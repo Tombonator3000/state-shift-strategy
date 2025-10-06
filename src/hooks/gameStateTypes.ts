@@ -163,6 +163,8 @@ export interface GameEditorPreGameAdditions {
 export interface AIBanterCooldownEntry {
   availableAt: number;
   lastLineId?: string | null;
+  lastEmittedTurn?: number;
+  countThisTurn?: number;
 }
 
 export interface AIBanterCooldownState {
