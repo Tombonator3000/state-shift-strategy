@@ -80,6 +80,56 @@ type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerCo
 
 type ObjectiveSectionId = 'victory' | 'secret-agenda';
 
+const fillTemplate = (template: string, tokens: Record<string, string | number>): string => {
+  if (!template) {
+    return '';
+  }
+
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => {
+    const value = tokens[key];
+    return value === undefined || value === null ? '' : String(value);
+  });
+};
+
+const SYNERGY_SIGHTING_TAGLINES = [
+  'Operations deck logs a synergy wave worth +{{BONUS}} IP.',
+  'Mole-people analytics confirm a +{{BONUS}} IP synergy spike.',
+  'Coordinated combo burst yields +{{BONUS}} IP for the newsroom.',
+  'Command hub prints a +{{BONUS}} IP dividend from linked maneuvers.',
+] as const;
+
+const BROADCAST_SIGHTING_TAGLINES = [
+  'Truth feed overridden by {{TRACK}} — intensity {{INTENSITY}}.',
+  'Broadcast control scrambles as {{TRACK}} loops at {{INTENSITY}} levels.',
+  'Emergency playlist replaced with {{TRACK}}; monitors flag {{INTENSITY}} surge.',
+  'Signal chain jammed by {{TRACK}} while meters peg {{INTENSITY}}.',
+] as const;
+
+const CRYPTID_SIGHTING_TAGLINES = [
+  '{{QUALITY}} footage from {{LOCATION}} rattles the paranormal watch.',
+  'Incident desk files {{QUALITY}} trail cam ping out of {{LOCATION}}.',
+  'Field scouts relay {{QUALITY}} anomaly clip stamped {{LOCATION}}.',
+  'Archive receives {{QUALITY}} hotspot reel straight from {{LOCATION}}.',
+] as const;
+
+const HOTSPOT_SPAWN_TAGLINES = [
+  'Containment grid braces in {{STATE}}: Defense +{{DEFENSE}}, ±{{TRUTH}}% truth on the line.',
+  'New anomaly blooms over {{STATE}} — shields +{{DEFENSE}}, truth stakes ±{{TRUTH}}%.',
+  '{{STATE}} ops scramble as spectral surge promises +{{DEFENSE}} defense, ±{{TRUTH}}% truth swing.',
+] as const;
+
+const HOTSPOT_RESOLUTION_TAGLINES = [
+  '{{STATE}} taskforce locks it down; truth shifts {{TRUTH_DELTA}}%.',
+  'Containment crew in {{STATE}} reports final truth delta {{TRUTH_DELTA}}%.',
+  'Casefile closed in {{STATE}} with truth meter settling at {{TRUTH_DELTA}}%.',
+] as const;
+
+const HOTSPOT_EXPIRE_TAGLINES = [
+  '{{STATE}} anomaly fizzles; defenses normalize and sensors fall quiet.',
+  'Residual echo in {{STATE}} dissipates into static.',
+  'Candlelight vigil in {{STATE}} marks the anomaly’s fade-out.',
+] as const;
+
 const resolveStateName = (stateId: string): string => {
   const state = getStateById(stateId) ?? getStateByAbbreviation(stateId);
   return state?.name ?? stateId;
