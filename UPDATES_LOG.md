@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-27 – Harden editor start-card dossiers
+- Guarded the editor effect merger so dossiers without explicit start-card arrays no longer crash the run phase when ops flip
+  between classified profiles.
+
 ## 2025-10-26 – Wire Desk Editors into MVP runtime
 - Replaced the temporary editor roster with faction-specific dossiers in `src/data/editors.json`, updated the selector UI to
   filter by faction, surface quotes and tradeoffs, and persist the chosen editor via the hardened storage helpers.
