@@ -184,6 +184,45 @@ describe('evaluateExtraExtra', () => {
     expect(outcome.focusPlays).toHaveLength(6);
   });
 
+  it('prefers the combined trio impact over a single massive play', async () => {
+    const { evaluateExtraExtra } = await loadEngine();
+
+    const plays: PlayedLite[] = [
+      { id: 't1', name: 'Truth Signal', type: 'MEDIA', faction: 'truth', truth: 4 },
+      { id: 't2', name: 'Truth Relay', type: 'ATTACK', faction: 'truth', ip: 3 },
+      { id: 't3', name: 'Truth Sweep', type: 'ZONE', faction: 'truth', captures: 3 },
+      { id: 'g1', name: 'Gov Hammer', type: 'ATTACK', faction: 'government', damage: 9 },
+      { id: 'g2', name: 'Gov Silence', type: 'MEDIA', faction: 'government' },
+      { id: 'g3', name: 'Gov Drift', type: 'ZONE', faction: 'government' },
+    ];
+
+    const outcome = evaluateExtraExtra(plays);
+
+    expect(outcome.trigger).toBe(true);
+    expect(outcome.winningFaction).toBe('truth');
+    expect(outcome.focusPlays.map(play => play.id)).toEqual(['t1', 't2', 't3']);
+  });
+
+  it('falls back to the truth-delta safeguard when trio impacts tie', async () => {
+    const { evaluateExtraExtra } = await loadEngine();
+
+    const plays: PlayedLite[] = [
+      { id: 't1', name: 'Truth Accord', type: 'MEDIA', faction: 'truth', truth: 3 },
+      { id: 't2', name: 'Truth Broadcast', type: 'MEDIA', faction: 'truth', ip: 2 },
+      { id: 't3', name: 'Truth Sweep', type: 'MEDIA', faction: 'truth', captures: 1 },
+      { id: 'g1', name: 'Gov Accord', type: 'MEDIA', faction: 'government', truth: -3 },
+      { id: 'g2', name: 'Gov Broadcast', type: 'MEDIA', faction: 'government', ip: -2 },
+      { id: 'g3', name: 'Gov Sweep', type: 'MEDIA', faction: 'government', captures: 1 },
+    ];
+
+    const outcome = evaluateExtraExtra(plays);
+
+    expect(outcome.trigger).toBe(true);
+    expect(outcome.winningFaction).toBe('draw');
+    expect(outcome.truthDelta).toBe(0);
+    expect(outcome.focusPlays).toHaveLength(6);
+  });
+
   it('captures composed triple headline data for qualifying trio', async () => {
     const { evaluateExtraExtra, generateExtraExtra, summarize } = await loadEngine();
 
