@@ -11,6 +11,10 @@ This document provides a chronological record of gameplay-impacting changes merg
   thumbing through a classified suspect folder before launch.
 - Recolored actions and dossier cards to lean into the Paranoid Times manila-folder aesthetic while keeping mechanics unchanged.
 
+## 2025-10-07 – Compose triple-card Extra Extra headlines
+- Added a seeded triple-headline composer that braids the turn’s first three plays into a main story using combo rules, holiday buckets, and a generic fallback so every trigger prints a bespoke lead.
+- Hooked turn resolution and the MVP simulator into the new pools, preserving truth-delta math while logging the composed template or combo for debugging.
+
 ## 2025-10-06 – Restore card collection scroll rigging
 - Patched the broadsheet card collection overlay to import its shadcn scroll wrapper so the panel renders without tripping a `ScrollArea` reference error.
 - Verified the catalogue view no longer blanks out when the government archivists unroll their dossiers mid-session.

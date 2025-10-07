@@ -232,6 +232,12 @@ export interface ArticleBlock {
   bullets: string[];
   byline: string;
   source: string;
+  body?: string[];
+  imagePrompt?: string;
+  kicker?: string;
+  stinger?: string;
+  templateId?: string;
+  comboId?: string;
 }
 
 export interface FinalEdition {
