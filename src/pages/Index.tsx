@@ -274,6 +274,13 @@ const Index = () => {
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeObjectivePanel, setActiveObjectivePanel] = useState<ObjectiveSectionId>('victory');
+  const [isDeskExpanded, setIsDeskExpanded] = useState(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return true;
+    }
+
+    return window.matchMedia('(min-width: 1024px)').matches;
+  });
   
   const {
     gameState,
@@ -393,6 +400,31 @@ const Index = () => {
     const handleChange = (event: MediaQueryListEvent) => {
       setPrefersReducedMotion(event.matches);
     };
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+    const handleChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        setIsDeskExpanded(true);
+      }
+    };
+
+    if (mediaQuery.matches) {
+      setIsDeskExpanded(true);
+    }
 
     if (typeof mediaQuery.addEventListener === 'function') {
       mediaQuery.addEventListener('change', handleChange);
@@ -2784,73 +2816,106 @@ const Index = () => {
 
   const rightPaneContent = (
     <TooltipProvider delayDuration={150}>
-      <aside className="h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
+      <div
+        className={clsx(
+          'relative h-full min-h-0 min-w-0 transition-transform duration-300 ease-in-out',
+          !isDeskExpanded && 'translate-x-full pointer-events-none'
+        )}
+      >
+        <aside
+          id="newsroom-desk-panel"
+          className="h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text/85 text-newspaper-bg shadow-lg backdrop-blur-sm"
+        >
         <header className="relative flex items-center justify-between gap-2 border-b border-newspaper-border/60 bg-[image:var(--halftone-blue)] bg-[length:6px_6px] bg-repeat px-4 py-3">
           <h3 className="text-xs font-black uppercase tracking-[0.5em]">NEWSROOM DESK</h3>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="cursor-help rounded border border-current px-2 py-1 text-[0.65rem] font-mono font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border"
-                aria-label="View discard queue details"
+          <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="cursor-help rounded border border-current px-2 py-1 text-[0.65rem] font-mono font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border"
+                  aria-label="View discard queue details"
+                >
+                  Discards: {pendingDiscards.length}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                align="end"
+                className="max-w-xs space-y-2 border border-newspaper-border bg-newspaper-bg px-3 py-2 text-[0.65rem] font-mono text-newspaper-text shadow-lg"
               >
-                Discards: {pendingDiscards.length}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent
-              align="end"
-              className="max-w-xs space-y-2 border border-newspaper-border bg-newspaper-bg px-3 py-2 text-[0.65rem] font-mono text-newspaper-text shadow-lg"
-            >
-              {pendingDiscards.length === 0 ? (
-                <div className="space-y-1">
-                  <div className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-newspaper-border">
-                    Discard Queue
-                  </div>
-                  <p className="leading-relaxed">
-                    First discard each turn is free. Extra discards cost 10 IP, then +5 IP per card.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <div className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-newspaper-border">
-                    Queued Discards ({pendingDiscards.length})
-                  </div>
-                  {queuedDiscardNames.length > 0 && (
-                    <div className="leading-relaxed text-newspaper-text/80">
-                      {queuedDiscardNames.join(', ')}
+                {pendingDiscards.length === 0 ? (
+                  <div className="space-y-1">
+                    <div className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-newspaper-border">
+                      Discard Queue
                     </div>
-                  )}
-                  <div className="leading-relaxed">
-                    IP impact:{' '}
-                    <span
-                      className={clsx(
-                        'font-semibold',
-                        discardPreview.ipCost > 0 ? 'text-truth-red' : 'text-emerald-500'
-                      )}
-                    >
-                      {discardPreview.ipCost > 0 ? `-${discardPreview.ipCost} IP` : 'Free'}
-                    </span>
+                    <p className="leading-relaxed">
+                      First discard each turn is free. Extra discards cost 10 IP, then +5 IP per card.
+                    </p>
                   </div>
-                  {discardPreview.costBreakdown.length > 0 && (
-                    <div className="text-newspaper-text/70">
-                      Cost steps:{' '}
-                      {discardPreview.costBreakdown
-                        .map((cost, index) =>
-                          index === 0
-                            ? '1st: 0 (free)'
-                            : (() => {
-                                const position = index + 1;
-                                const suffix = position === 2 ? 'nd' : position === 3 ? 'rd' : 'th';
-                                return `${position}${suffix}: ${cost}`;
-                              })()
-                        )
-                        .join(' · ')}
+                ) : (
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <div className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-newspaper-border">
+                        Queued Cards
+                      </div>
+                      <ul className="space-y-1 text-left text-[0.6rem]">
+                        {queuedDiscardNames.map(cardName => (
+                          <li key={cardName} className="flex items-center justify-between gap-3">
+                            <span className="truncate font-semibold text-newspaper-text">{cardName}</span>
+                            <span
+                              className={clsx(
+                                'rounded border px-2 py-[2px] font-mono text-[0.6rem] text-newspaper-border',
+                                discardPreview.ipCost > 0
+                                  ? 'border-truth-red/60 bg-truth-red/10 text-truth-red'
+                                  : 'border-newspaper-border/60 bg-newspaper-border/10'
+                              )}
+                            >
+                              {discardPreview.ipCost > 0 ? `-${discardPreview.ipCost} IP` : 'Free'}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  )}
-                </div>
+                    {discardPreview.costBreakdown.length > 0 && (
+                      <div className="text-newspaper-text/70">
+                        Cost steps:{' '}
+                        {discardPreview.costBreakdown
+                          .map((cost, index) =>
+                            index === 0
+                              ? '1st: 0 (free)'
+                              : (() => {
+                                  const position = index + 1;
+                                  const suffix = position === 2 ? 'nd' : position === 3 ? 'rd' : 'th';
+                                  return `${position}${suffix}: ${cost}`;
+                                })()
+                          )
+                          .join(' · ')}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </TooltipContent>
+            </Tooltip>
+            <button
+              type="button"
+              onClick={() => setIsDeskExpanded(previous => !previous)}
+              aria-controls="newsroom-desk-panel"
+              aria-expanded={isDeskExpanded}
+              className={clsx(
+                'rounded border border-current/60 bg-newspaper-bg/10 p-1 text-newspaper-bg transition',
+                'hover:bg-newspaper-bg/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border'
               )}
-            </TooltipContent>
-          </Tooltip>
+            >
+              <span className="sr-only">
+                {isDeskExpanded ? 'Collapse newsroom desk panel' : 'Expand newsroom desk panel'}
+              </span>
+              {isDeskExpanded ? (
+                <Minimize aria-hidden className="h-4 w-4" />
+              ) : (
+                <Maximize aria-hidden className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </header>
         <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
           <EnhancedGameHand
@@ -2890,6 +2955,7 @@ const Index = () => {
           </Button>
         </footer>
       </aside>
+      </div>
     </TooltipProvider>
   );
 
