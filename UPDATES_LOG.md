@@ -59,6 +59,10 @@ This document provides a chronological record of gameplay-impacting changes merg
   thumbing through a classified suspect folder before launch.
 - Recolored actions and dossier cards to lean into the Paranoid Times manila-folder aesthetic while keeping mechanics unchanged.
 
+## 2025-10-07 – Stabilize USA map framing and zoom
+- Locked the USA map stage to its full aspect ratio so viewport changes no longer squeeze the SVG or hide coasts mid-turn.
+- Added zoom controls with a per-turn reset so operatives can inspect contested states up close without leaving the default view misaligned.
+
 ## 2025-10-07 – Move discard cost reminder into tooltip
 - Removed the Newsroom Desk footer notice above the "Go to Press" button so the action bar stays focused on the turn control.
 - Expanded the Discards hover tooltip to always include the free-first-discard reminder and added a no-queue message for clarity.

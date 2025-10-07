@@ -2766,6 +2766,7 @@ const Index = () => {
                 selectedState={gameState.targetState}
                 audio={audio}
                 playerFaction={gameState.faction}
+                currentTurn={gameState.turn}
               />
             </div>
           </div>
