@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-02 – Hue-shift the Truth Index feedback
+- Progress bars now shift from red at 0% to deep indigo at 100%, clamping undefined inputs to the midpoint so every overlay broadcasts a clear heat reading.
+- Tabloid Truth Index wrappers lean on a translucent white track to keep the new gradient legible against the broadsheet texture, with documentation for designers in the technical overview.
+
 ## 2025-11-01 – Mirror relic truth polarity by host faction
 - Tabloid relic truth pulses now invert for government-controlled hosts while preserving clamp guards.
 - Added round-start logging for the signed truth delta along with regression coverage for faction parity.
