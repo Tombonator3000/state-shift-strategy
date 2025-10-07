@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
   const previewPort = resolvePort(process.env.PREVIEW_PORT);
 
   const serverPort = sharedPort ?? devPort ?? 5173;
-  const previewServerPort = sharedPort ?? previewPort ?? 4173;
+  const previewServerPort = previewPort ?? sharedPort ?? 4173;
 
   return {
     server: {
