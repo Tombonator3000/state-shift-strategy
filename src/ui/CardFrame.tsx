@@ -5,9 +5,9 @@ type Props = { children: React.ReactNode; size?: Size };
 
 export default function CardFrame({ children, size = "modal" }: Props) {
   // FINJUSTÉR SKALA HER:
-  // - boardMini: senket til 0.56 for å unngå scroll i "Cards in Play"
+  // - boardMini: senket til 0.45 for bedre luft i "Cards in Play"
   // - handMini: beholdt 0.78 (god lesbarhet i Your Hand)
-  const scale = size === "modal" ? 1 : size === "boardMini" ? 0.56 : 0.78;
+  const scale = size === "modal" ? 1 : size === "boardMini" ? 0.45 : 0.78;
 
   // Basemål MÅ matche fullkortets outer size (inkl. border)
   const BASE_W = 320;
