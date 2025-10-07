@@ -168,9 +168,11 @@ const toEngineState = (
   const stateDefense: EngineGameState['stateDefense'] = {};
   const playerStates = new Set<string>();
   const aiStates = new Set<string>();
+  const ownerById = new Map<string, StateOwner>();
 
   for (const state of snapshot.states) {
     stateDefense[state.id] = state.defense;
+    ownerById.set(state.id, state.owner);
     const owner = state.owner;
     const fallbackPressure = Math.max(0, state.pressure ?? 0);
     let playerPressure = Number.isFinite(state.pressurePlayer)
@@ -214,11 +216,30 @@ const toEngineState = (
     aiStates.add(id);
   }
 
-  for (const id of playerStates) {
+  const normalizedPlayerStates = new Set(playerStates);
+  const normalizedAiStates = new Set(aiStates);
+
+  for (const id of Array.from(normalizedPlayerStates)) {
+    if (!normalizedAiStates.has(id)) {
+      continue;
+    }
+
+    const declaredOwner = ownerById.get(id);
+    if (declaredOwner === 'ai') {
+      normalizedPlayerStates.delete(id);
+    } else if (declaredOwner === 'player') {
+      normalizedAiStates.delete(id);
+    } else {
+      normalizedPlayerStates.delete(id);
+      normalizedAiStates.delete(id);
+    }
+  }
+
+  for (const id of normalizedPlayerStates) {
     pressureByState[id] = { P1: 0, P2: 0 };
   }
 
-  for (const id of aiStates) {
+  for (const id of normalizedAiStates) {
     pressureByState[id] = { P1: 0, P2: 0 };
   }
 
@@ -234,7 +255,7 @@ const toEngineState = (
         hand: snapshot.hand as Card[],
         discard: [],
         ip: snapshot.ip,
-        states: Array.from(playerStates),
+        states: Array.from(normalizedPlayerStates),
         activeEditorId: snapshot.playerEditorId ?? null,
       },
       [AI_ID]: {
@@ -244,7 +265,7 @@ const toEngineState = (
         hand: snapshot.aiHand as Card[],
         discard: [],
         ip: snapshot.aiIP,
-        states: Array.from(aiStates),
+        states: Array.from(normalizedAiStates),
         activeEditorId: snapshot.aiEditorId ?? null,
       },
     },

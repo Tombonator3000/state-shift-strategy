@@ -2,6 +2,9 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-07 – Normalize AI state control audits
+- Hardened the MVP resolver to strip duplicate control flags before auditing so AI rollouts never claim the same state as both factions.
+
 ## 2025-10-07 – Block context menus during map pans
 - Right-click panning on the USA map now suppresses the browser context menu so conspirators can glide without interruptions.
 
