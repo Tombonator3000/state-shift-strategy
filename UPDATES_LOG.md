@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-08 – Separate hero dispatch from front page rotation
+- Decouple the hero briefing from the dispatch carousel so the generated front page only features non-hero headlines while backfilling up to three supporting stories.
+- Added regression coverage ensuring TabloidNewspaperV2 renders unique hero headlines against the dispatch list.
+- Confirmed hero dispatch absences fall back to redacted copy instead of duplicating the main headline.
+
 ## 2025-10-07 – Normalize AI state control audits
 - Hardened the MVP resolver to strip duplicate control flags before auditing so AI rollouts never claim the same state as both factions.
 

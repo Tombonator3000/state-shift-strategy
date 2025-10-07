@@ -1,7 +1,8 @@
-import { afterAll, afterEach, beforeAll, describe, expect, mock, test } from 'bun:test';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, mock, test } from 'bun:test';
 import { Window } from 'happy-dom';
 
-import type { NarrativeIssue } from '@/engine/newspaper/IssueGenerator';
+import type { NarrativeArticle, NarrativeIssue } from '@/engine/newspaper/IssueGenerator';
+import type { PlayedCardMeta } from '@/engine/news/mainStory';
 import type { TabloidNewspaperProps } from '../TabloidNewspaperLegacy';
 
 const windowRef = new Window();
@@ -22,7 +23,7 @@ globalThis.navigator = windowRef.navigator as Navigator;
 globalThis.HTMLElement = windowRef.HTMLElement as unknown as typeof globalThis.HTMLElement;
 globalThis.CustomEvent = windowRef.CustomEvent as unknown as typeof globalThis.CustomEvent;
 
-const { render, screen, waitFor, cleanup, within } = await import('@testing-library/react');
+const { render, screen, cleanup, within } = await import('@testing-library/react');
 
 mock.module('@/lib/newspaperData', () => ({
   loadNewspaperData: async () => ({
@@ -54,7 +55,7 @@ const articleFixtures = [
     cardType: 'ATTACK',
     player: 'human' as const,
     articleId: 'story-1',
-    headline: 'Side Story One',
+    headline: 'Hero Entry Overrides Prime Time',
     subhead: 'Lead operatives breach the signal vault.',
     body: 'Field team confirmed the breach before dawn.',
   },
@@ -64,7 +65,7 @@ const articleFixtures = [
     cardType: 'MEDIA',
     player: 'human' as const,
     articleId: 'story-2',
-    headline: 'Side Story Two',
+    headline: 'Dispatch Two Surges Signal',
     subhead: 'Analysts flood feeds with decoded memos.',
     body: 'Network nodes amplify the recovered intel.',
   },
@@ -74,11 +75,38 @@ const articleFixtures = [
     cardType: 'ZONE',
     player: 'human' as const,
     articleId: 'story-3',
-    headline: 'Side Story Three',
+    headline: 'Dispatch Three Containment Grid',
     subhead: 'Containment perimeter reroutes civilian traffic.',
     body: 'Logistics teams confirm minimal collateral noise.',
   },
 ];
+
+const heroArticle: NarrativeArticle = {
+  id: articleFixtures[0]!.cardId,
+  cardId: articleFixtures[0]!.cardId,
+  player: 'human',
+  headline: articleFixtures[0]!.headline,
+  deck: articleFixtures[0]!.subhead,
+  paragraphs: [articleFixtures[0]!.body],
+  tags: ['#Signal'],
+  artHint: 'Hero operative sketch',
+  debug: {
+    templateId: 'test-template',
+    verb: {
+      pool: ['OVERRIDES PRIME TIME'],
+      selected: 'OVERRIDES PRIME TIME',
+      tone: 'ATTACK',
+    },
+    tagPool: ['signal'],
+  },
+  typeLabel: '[ATTACK]',
+  factionLabel: 'Truth Network',
+  truthDeltaLabel: null,
+  ipDeltaLabel: null,
+  pressureDeltaLabel: null,
+  stateLabel: null,
+  capturedStates: [],
+};
 
 type BankArticle = {
   id: string;
@@ -90,6 +118,7 @@ type BankArticle = {
 };
 
 let bankArticles = new Map<string, BankArticle>();
+let activeIssue = buildIssue();
 
 const loadArticleBankMock = mock(async () => ({
   getById(id: string) {
@@ -104,9 +133,17 @@ mock.module('@/engine/news/articleBank', () => ({
   loadArticleBank: loadArticleBankMock,
 }));
 
-const generatedStory: NarrativeIssue['generatedStory'] = {
+const buildGeneratedStory = (): NarrativeIssue['generatedStory'] => ({
   main: null,
-  articles: articleFixtures.map(entry => ({
+  cards: articleFixtures.slice(1).map(
+    (entry): PlayedCardMeta => ({
+      id: entry.cardId,
+      name: entry.cardName,
+      type: entry.cardType,
+      faction: 'TRUTH',
+    }),
+  ),
+  articles: articleFixtures.slice(1).map(entry => ({
     cardId: entry.cardId,
     cardName: entry.cardName,
     cardType: entry.cardType,
@@ -122,10 +159,11 @@ const generatedStory: NarrativeIssue['generatedStory'] = {
   })),
   fallbackHeadline: 'SPECIAL EDITION: PRINTING GREMLINS AT WORK',
   fallbackSubhead: 'Article vault temporarily unavailable — dispatch desk investigating.',
-};
+  articleBankReady: true,
+});
 
-const issue: NarrativeIssue = {
-  hero: null,
+const buildIssue = (): NarrativeIssue => ({
+  hero: heroArticle,
   playerArticles: [],
   oppositionArticles: [],
   comboArticle: null,
@@ -133,11 +171,11 @@ const issue: NarrativeIssue = {
   sourceLine: 'Source: Anonymous Courier',
   stamps: { breaking: null, classified: null },
   supplements: { ads: [], conspiracies: [], weather: 'Cloud cover classified.' },
-  generatedStory,
-};
+  generatedStory: buildGeneratedStory(),
+});
 
 mock.module('@/engine/newspaper/IssueGenerator', () => ({
-  generateIssue: async () => issue,
+  generateIssue: async () => activeIssue,
 }));
 
 mock.module('@/contexts/AudioContext', () => ({
@@ -171,9 +209,13 @@ beforeAll(() => {
   globalThis.cancelAnimationFrame = id => clearTimeout(id);
 });
 
+beforeEach(() => {
+  activeIssue = buildIssue();
+  bankArticles = new Map();
+});
+
 afterEach(() => {
   cleanup();
-  bankArticles = new Map();
   loadArticleBankMock.mockClear();
 });
 
@@ -183,9 +225,9 @@ afterAll(() => {
 });
 
 describe('TabloidNewspaperV2 front page integration', () => {
-  test('renders combined headline and three side dispatches', async () => {
+  test('renders hero headline without duplicating dispatch headlines', async () => {
     bankArticles = new Map(
-      articleFixtures.map(entry => [
+      articleFixtures.slice(1).map(entry => [
         entry.cardId,
         {
           id: entry.cardId,
@@ -198,22 +240,29 @@ describe('TabloidNewspaperV2 front page integration', () => {
       ]),
     );
 
+    const expectedDispatchCount = activeIssue.generatedStory.articles.length;
+
     render(<TabloidNewspaperV2 {...baseProps} />);
 
-    await waitFor(() => {
-      const headline = screen.getByRole('heading', { level: 1 });
-      expect(headline.textContent ?? '').toMatch(/ALPHA AGENT/);
+    const heroHeading = await screen.findByRole('heading', { level: 2 });
+    const heroHeadlineText = heroHeading.textContent ?? '';
+    expect(heroHeadlineText).toContain('Hero Entry Overrides Prime Time');
+
+    const dispatchHeading = await screen.findByRole('heading', { name: /Extra Extra Dispatch/i });
+    const dispatchSection = dispatchHeading.closest('section');
+    expect(dispatchSection).not.toBeNull();
+
+    const dispatchHeadlines = within(dispatchSection as HTMLElement)
+      .getAllByRole('heading', { level: 4 })
+      .map(node => node.textContent ?? '');
+
+    expect(dispatchHeadlines).toHaveLength(expectedDispatchCount);
+    dispatchHeadlines.forEach(text => {
+      expect(text).not.toContain(heroHeadlineText);
     });
-
-    expect(screen.getByText(/snacks remain excellent/i)).toBeTruthy();
-
-    const secondaryHeading = await screen.findByText('SECONDARY REPORTS');
-    const secondarySection = secondaryHeading.closest('section');
-    expect(secondarySection).not.toBeNull();
-    expect(within(secondarySection as HTMLElement).getAllByText(/Side Story/)).toHaveLength(3);
   });
 
-  test('shows fallback headline and simple list when article bank is empty', async () => {
+  test('shows fallback copy for dispatches when article bank is empty', async () => {
     loadArticleBankMock.mockImplementationOnce(async () => ({
       getById() {
         return null;
@@ -223,14 +272,23 @@ describe('TabloidNewspaperV2 front page integration', () => {
       },
     }));
 
+    activeIssue.generatedStory.articles = activeIssue.generatedStory.articles.map(article => ({
+      ...article,
+      body: [],
+    }));
+
+    const expectedDispatchCount = activeIssue.generatedStory.articles.length;
+
     render(<TabloidNewspaperV2 {...baseProps} />);
 
-    const headline = await screen.findByRole('heading', { level: 1 });
-    expect(headline.textContent ?? '').toMatch(/ALPHA AGENT/);
+    const headline = await screen.findByRole('heading', { level: 2 });
+    expect(headline.textContent ?? '').toContain('Hero Entry Overrides Prime Time');
 
-    const lists = await screen.findAllByRole('list');
-    const items = within(lists[0] as HTMLElement).getAllByRole('listitem');
-    expect(items).toHaveLength(3);
-    expect(items[0]?.textContent).toContain('[ATTACK]');
+    const dispatchHeading = await screen.findByRole('heading', { name: /Extra Extra Dispatch/i });
+    const dispatchSection = dispatchHeading.closest('section');
+    expect(dispatchSection).not.toBeNull();
+
+    const fallbackBodies = within(dispatchSection as HTMLElement).getAllByText('Details pending transmission.');
+    expect(fallbackBodies).toHaveLength(expectedDispatchCount);
   });
 });

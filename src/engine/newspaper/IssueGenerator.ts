@@ -468,6 +468,7 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     ? playerMetas.find(meta => meta.entry.card.id === heroCard.card.id) ?? null
     : null;
   const heroArticle = heroMeta?.article ?? null;
+  const heroCardId = heroMeta?.entry.card.id ?? null;
   const remainingPlayerArticles = heroArticle
     ? playerArticles.filter(article => article.cardId !== heroArticle.cardId)
     : playerArticles;
@@ -514,28 +515,23 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     return 0;
   });
 
-  const frontPageSelection: ArticleMeta[] = [];
-  const usedCardIds = new Set<string>();
+  const maxFrontPageArticles = heroCardId
+    ? Math.min(3, Math.max(playerMetas.length - 1, 0))
+    : Math.min(3, playerMetas.length);
 
-  if (heroMeta) {
-    frontPageSelection.push(heroMeta);
-    usedCardIds.add(heroMeta.entry.card.id);
-  }
+  const frontPageSelection: ArticleMeta[] = [];
 
   for (const meta of prioritizedMetas) {
-    if (frontPageSelection.length >= Math.min(3, playerMetas.length)) {
-      break;
-    }
-    if (usedCardIds.has(meta.entry.card.id)) {
+    if (heroCardId && meta.entry.card.id === heroCardId) {
       continue;
     }
+    if (frontPageSelection.length >= maxFrontPageArticles) {
+      break;
+    }
     frontPageSelection.push(meta);
-    usedCardIds.add(meta.entry.card.id);
   }
 
-  const selectedMetas = frontPageSelection.length
-    ? frontPageSelection
-    : prioritizedMetas.slice(0, Math.min(3, prioritizedMetas.length));
+  const selectedMetas = frontPageSelection;
 
   const selectedCards = selectedMetas.map(meta => meta.entry);
   const generatedArticles = selectedMetas.map(meta => {
