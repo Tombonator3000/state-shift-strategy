@@ -80,6 +80,7 @@ import type { GameOverReport } from '@/types/finalEdition';
 import type { ArcProgressSummary } from '@/types/campaign';
 import { buildFinalEdition as buildNewsFinalEdition, type FinalEdition, type TurnLog } from '@/news/headlineEngine';
 import { loadNewsPools } from '@/news/newsPools';
+import { initNewsPools } from '@/engine/news/newsPools';
 import { toPlayedLite } from '@/hooks/aiHelpers';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
@@ -1107,7 +1108,7 @@ const Index = () => {
 
     const prepareNewsPools = async () => {
       try {
-        await loadNewsPools();
+        await Promise.all([loadNewsPools(), initNewsPools()]);
         if (isMounted) {
           setAreNewsPoolsReady(true);
         }
