@@ -59,6 +59,10 @@ This document provides a chronological record of gameplay-impacting changes merg
   thumbing through a classified suspect folder before launch.
 - Recolored actions and dossier cards to lean into the Paranoid Times manila-folder aesthetic while keeping mechanics unchanged.
 
+## 2025-10-07 – Stabilize newsroom desk hand columns
+- Rebuilt the newsroom hand grid with an auto-fit template so extra track columns only render when there is horizontal space.
+- Let card buttons flex to `w-full` with `min-w-0` so dropping assets on the desk no longer widens the panel during play.
+
 ## 2025-10-07 – Safeguard zone pressure audits
 - Stop ZONE cards from stacking pressure on states the acting player already controls so game-state audits no longer trip controlled-state invariants.
 - Harden the broadsheet rarity helper with normalized inputs and a global fallback to silence missing-function errors in archive views.
