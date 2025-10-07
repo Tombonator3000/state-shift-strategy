@@ -62,12 +62,27 @@ export const gatherEditorSetupAdjustments = (
   editor: EditorDefinition | null | undefined,
 ): EditorSetupAdjustments => {
   const aggregated = getEditorAggregatedEffects(editor ?? undefined);
-  const startCards = Array.isArray(aggregated?.startCards)
-    ? aggregated.startCards
+  const safeAggregated: EditorAggregatedEffects = aggregated ?? {
+    ipIncomePerTurn: 0,
+    mediaTruthModifier: 0,
+    zonePressureBonus: 0,
+    attackCostDelta: 0,
+    startDiscardChance: 0,
+    startIpDelta: 0,
+    deckSizeDelta: 0,
+    startCards: [],
+  };
+  const startCards = Array.isArray(safeAggregated?.startCards)
+    ? safeAggregated.startCards
     : [];
   return {
-    ipDelta: aggregated.startIpDelta,
-    deckSizeDelta: aggregated.deckSizeDelta,
+    ipDelta: typeof safeAggregated?.startIpDelta === 'number' && Number.isFinite(safeAggregated.startIpDelta)
+      ? safeAggregated.startIpDelta
+      : 0,
+    deckSizeDelta:
+      typeof safeAggregated?.deckSizeDelta === 'number' && Number.isFinite(safeAggregated.deckSizeDelta)
+        ? safeAggregated.deckSizeDelta
+        : 0,
     addCardIds: [...new Set(startCards)],
   };
 };

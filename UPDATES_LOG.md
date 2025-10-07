@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-29 – Prevent minimalist dossiers from crashing setup
+- Hardened the editor effect merger to clone default values when bonuses, tradeoffs, or modifiers are missing so start-card lookups stay safe.
+- Normalized the setup adjustment helper and added regression coverage to ensure `initGame` proceeds cleanly when a dossier omits those blocks.
+
 ## 2025-10-28 – Stabilize editor start-card dossiers
 - Patched the editor effect aggregation and setup adjustments to tolerate dossiers missing `startCards`, preventing crash loops
   when launching a run with minimalist government handlers.

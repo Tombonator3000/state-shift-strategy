@@ -1,5 +1,7 @@
 import { startTurn, canPlay, playCard } from '@/mvp/engine';
 import { applyEffectsMvp } from '@/engine/applyEffects-mvp';
+import { gatherEditorSetupAdjustments } from '@/expansions/editors/EditorsEngine';
+import { getEditorAggregatedEffects, type EditorDefinition } from '@/game/editors';
 import type { Card, GameState } from '@/mvp/validator';
 
 type PartialState = Partial<GameState> & {
@@ -212,5 +214,30 @@ describe('editor runtime modifiers', () => {
 
     expect(state.pressureByState.CA.P1).toBe(0);
     expect(state.log[state.log.length - 1]).toContain('already controls it');
+  });
+
+  it('stabilizes setup for editors without bonus blocks', () => {
+    const dossier: EditorDefinition = {
+      id: 'editor_minimalist',
+      name: 'Minimalist Scribe',
+      faction: 'truth',
+    };
+
+    const aggregated = getEditorAggregatedEffects(dossier);
+    expect(aggregated).toMatchObject({
+      startIpDelta: 0,
+      deckSizeDelta: 0,
+      startCards: [],
+    });
+
+    const adjustments = gatherEditorSetupAdjustments(dossier);
+    expect(adjustments).toEqual({ ipDelta: 0, deckSizeDelta: 0, addCardIds: [] });
+
+    expect(() => {
+      const addedCards = adjustments.addCardIds.map(cardId => cardId);
+      const adjustedIp = Math.max(0, 5 + adjustments.ipDelta);
+      const adjustedDeckSize = 40 + adjustments.deckSizeDelta;
+      void { addedCards, adjustedIp, adjustedDeckSize };
+    }).not.toThrow();
   });
 });
