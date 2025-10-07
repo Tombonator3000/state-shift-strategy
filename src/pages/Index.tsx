@@ -47,7 +47,6 @@ import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import ExtraEditionNewspaper from '@/components/game/ExtraEditionNewspaper';
 import InGameOptions from '@/components/game/InGameOptions';
 import EnhancedNewspaper from '@/components/game/EnhancedNewspaper';
-import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
 import { chooseEditor, isEditorsExpansionEnabled } from '@/expansions/editors/EditorsUI';
