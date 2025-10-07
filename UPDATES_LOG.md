@@ -17,6 +17,10 @@ This document provides a chronological record of gameplay-impacting changes merg
   thumbing through a classified suspect folder before launch.
 - Recolored actions and dossier cards to lean into the Paranoid Times manila-folder aesthetic while keeping mechanics unchanged.
 
+## 2025-10-07 – Safeguard zone pressure audits
+- Stop ZONE cards from stacking pressure on states the acting player already controls so game-state audits no longer trip controlled-state invariants.
+- Harden the broadsheet rarity helper with normalized inputs and a global fallback to silence missing-function errors in archive views.
+
 ## 2025-10-07 – Compose triple-card Extra Extra headlines
 - Added a seeded triple-headline composer that braids the turn’s first three plays into a main story using combo rules, holiday buckets, and a generic fallback so every trigger prints a bespoke lead.
 - Hooked turn resolution and the MVP simulator into the new pools, preserving truth-delta math while logging the composed template or combo for debugging.
