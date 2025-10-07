@@ -66,6 +66,7 @@ interface EnhancedUSAMapProps {
   audio?: any;
   playedCards?: PlayedCard[];
   playerFaction: 'truth' | 'government';
+  currentTurn: number;
 }
 
 const formatTruthDeltaForFaction = (delta: number, playerFaction: 'truth' | 'government'): string => {
@@ -160,6 +161,17 @@ export const StateHotspotDetails: React.FC<StateHotspotDetailsProps> = ({ hotspo
 const MAP_BASE_WIDTH = 975;
 const MAP_BASE_HEIGHT = 610;
 const MAP_ASPECT_RATIO = MAP_BASE_HEIGHT / MAP_BASE_WIDTH;
+const MIN_ZOOM = 0.75;
+const MAX_ZOOM = 2.5;
+const ZOOM_STEP = 0.25;
+
+const computeViewBoxForZoom = (zoom: number) => {
+  const width = MAP_BASE_WIDTH / zoom;
+  const height = MAP_BASE_HEIGHT / zoom;
+  const minX = (MAP_BASE_WIDTH - width) / 2;
+  const minY = (MAP_BASE_HEIGHT - height) / 2;
+  return { minX, minY, width, height };
+};
 
 const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   states,
@@ -169,7 +181,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   selectedState,
   audio,
   playedCards = [],
-  playerFaction
+  playerFaction,
+  currentTurn
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -186,6 +199,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const contestedStatesRef = useRef<Record<string, boolean>>({});
   const contestedAnimationTimeoutsRef = useRef<number[]>([]);
   const hotspotPresenceRef = useRef<Record<string, string>>({});
+  const viewBoxRef = useRef(computeViewBoxForZoom(1));
   const [governmentTarget, setGovernmentTarget] = useState<{
     active: boolean;
     cardId?: string;
@@ -197,6 +211,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     width: MAP_BASE_WIDTH,
     height: MAP_BASE_HEIGHT
   });
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   useEffect(() => {
     if (typeof ResizeObserver === 'undefined') {
@@ -205,10 +220,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
     const computeDimensions = (entry?: ResizeObserverEntry) => {
       const width = entry?.contentRect?.width ?? containerRef.current?.clientWidth ?? MAP_BASE_WIDTH;
-      const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 900;
       const idealHeight = width * MAP_ASPECT_RATIO;
-      const maxHeight = viewportHeight * 0.7;
-      const height = Math.min(Math.max(idealHeight, 260), maxHeight > 0 ? maxHeight : idealHeight);
+      const height = Math.max(idealHeight, 260);
       setDimensions(prev => {
         if (prev.width === width && prev.height === height) {
           return prev;
@@ -230,6 +243,10 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    setZoomLevel(1);
+  }, [currentTurn]);
 
   const getTooltipPosition = () => {
     const tooltipWidth = tooltipRef.current?.offsetWidth ?? 384;
@@ -323,7 +340,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
     const svg = svgRef.current;
 
-    svg.setAttribute('viewBox', `0 0 ${MAP_BASE_WIDTH} ${MAP_BASE_HEIGHT}`);
+    const viewBox = computeViewBoxForZoom(zoomLevel);
+    viewBoxRef.current = viewBox;
+    svg.setAttribute('viewBox', `${viewBox.minX} ${viewBox.minY} ${viewBox.width} ${viewBox.height}`);
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
     // Clear any pending contested animation retries before rebuilding the scene
@@ -380,12 +399,13 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
         }
       }
 
-      const scaleX = svgRect.width / MAP_BASE_WIDTH;
-      const scaleY = svgRect.height / MAP_BASE_HEIGHT;
+      const { minX, minY, width: viewWidth, height: viewHeight } = viewBoxRef.current;
+      const scaleX = svgRect.width / viewWidth;
+      const scaleY = svgRect.height / viewHeight;
 
       return {
-        x: svgRect.left + point[0] * scaleX,
-        y: svgRect.top + point[1] * scaleY
+        x: svgRect.left + (point[0] - minX) * scaleX,
+        y: svgRect.top + (point[1] - minY) * scaleY
       };
     };
 
@@ -875,8 +895,21 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     governmentTarget?.active,
     governmentTarget?.stateId,
     dimensions,
-    playerFaction
+    playerFaction,
+    zoomLevel
   ]);
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(MAX_ZOOM, Number((prev + ZOOM_STEP).toFixed(2))));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(MIN_ZOOM, Number((prev - ZOOM_STEP).toFixed(2))));
+  };
+
+  const handleResetZoom = () => {
+    setZoomLevel(1);
+  };
 
   const getOwnerFaction = (state?: EnhancedState): 'truth' | 'government' | null => {
     if (!state) return null;
@@ -902,6 +935,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
   const stateInfo = getHoveredStateInfo();
 
+  const zoomPercent = Math.round(zoomLevel * 100);
+  const viewBoxDefinition = computeViewBoxForZoom(zoomLevel);
+
   return (
     <div className="relative">
       <Card className="p-4 bg-card border-border relative">
@@ -911,15 +947,46 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           ref={containerRef}
           className="relative w-full overflow-hidden rounded border border-border bg-black/5"
           style={{
-            height: `${Math.round(dimensions.height)}px`,
-            maxHeight: '70vh'
+            height: `${Math.round(dimensions.height)}px`
           }}
         >
+          <div className="pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-2">
+            <div className="flex items-center gap-1 rounded-md border border-border bg-background/90 p-1 shadow-sm backdrop-blur">
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded bg-muted text-foreground transition hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Zoom out"
+                disabled={zoomLevel <= MIN_ZOOM + 0.001}
+              >
+                −
+              </button>
+              <span className="min-w-[3rem] text-center text-xs font-semibold text-foreground">{zoomPercent}%</span>
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded bg-muted text-foreground transition hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Zoom in"
+                disabled={zoomLevel >= MAX_ZOOM - 0.001}
+              >
+                +
+              </button>
+            </div>
+            {zoomLevel !== 1 && (
+              <button
+                type="button"
+                onClick={handleResetZoom}
+                className="pointer-events-auto rounded-md border border-border bg-background/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-foreground transition hover:bg-muted"
+              >
+                Reset
+              </button>
+            )}
+          </div>
           <svg
             ref={svgRef}
             id="us-map"
             className="block h-full w-full"
-            viewBox={`0 0 ${MAP_BASE_WIDTH} ${MAP_BASE_HEIGHT}`}
+            viewBox={`${viewBoxDefinition.minX} ${viewBoxDefinition.minY} ${viewBoxDefinition.width} ${viewBoxDefinition.height}`}
             preserveAspectRatio="xMidYMid meet"
           >
           </svg>
