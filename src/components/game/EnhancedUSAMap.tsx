@@ -326,7 +326,12 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
     const path = geoPath(projection);
 
-    // Clear previous content
+    // Clear previous content and reset tooltip state before rebuilding the SVG
+    if (tooltipStableRef.current.timeout) {
+      clearTimeout(tooltipStableRef.current.timeout);
+      tooltipStableRef.current.timeout = null;
+    }
+    setHoveredState(null);
     svg.innerHTML = '';
 
     // Create groups for different layers
@@ -843,6 +848,10 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       svg.removeEventListener('pointerleave', handlePointerLeave);
       contestedAnimationTimeoutsRef.current.forEach(timeoutId => window.clearTimeout(timeoutId));
       contestedAnimationTimeoutsRef.current = [];
+      if (tooltipStableRef.current.timeout) {
+        clearTimeout(tooltipStableRef.current.timeout);
+        tooltipStableRef.current.timeout = null;
+      }
     };
 
   }, [
