@@ -148,9 +148,10 @@ export const getEditorAggregatedEffects = (
     mergeEffectConfig(mergeEffectConfig({ ...EMPTY_EFFECTS }, editor.bonuses), editor.tradeoffs),
     editor.modifiers,
   );
+  const startCards = Array.isArray(merged.startCards) ? merged.startCards : [];
   return {
     ...merged,
-    startCards: Array.from(new Set(merged.startCards)),
+    startCards: Array.from(new Set(startCards)),
   };
 };
 
