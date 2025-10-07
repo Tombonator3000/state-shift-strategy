@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-09 – Rebalance Extra Extra trio scoring
+- Extra Extra now compares full trio impact totals (truth, IP, captures, damage) so a coordinated newsroom push can defeat a lone government haymaker.
+- Deterministic tie breakers fall back to the existing truth-delta safeguards, keeping deadlocks aligned with the draw flow while preserving dispatch selection.
+
 ## 2025-11-08 – Separate hero dispatch from front page rotation
 - Decouple the hero briefing from the dispatch carousel so the generated front page only features non-hero headlines while backfilling up to three supporting stories.
 - Added regression coverage ensuring TabloidNewspaperV2 renders unique hero headlines against the dispatch list.

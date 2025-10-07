@@ -81,34 +81,60 @@ export interface ExtraExtraOutcome {
   composeSignature: string | null;
 }
 
-const computePlayValue = (play: PlayedLite): number => {
-  if (!play) {
+interface TrioImpactTotals {
+  truth: number;
+  ip: number;
+  captures: number;
+  damage: number;
+  magnitude: number;
+}
+
+const sanitizeImpact = (value: number | undefined): number => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
     return 0;
   }
 
-  const values: number[] = [];
+  return Math.abs(value);
+};
 
-  if (typeof play.truth === 'number' && Number.isFinite(play.truth)) {
-    values.push(Math.abs(play.truth));
+const computeTrioImpactTotals = (plays: PlayedLite[]): TrioImpactTotals => {
+  const trio = plays.slice(0, 3);
+  const totals: TrioImpactTotals = {
+    truth: 0,
+    ip: 0,
+    captures: 0,
+    damage: 0,
+    magnitude: 0,
+  };
+
+  for (const play of trio) {
+    totals.truth += sanitizeImpact(play.truth);
+    totals.ip += sanitizeImpact(play.ip);
+    totals.captures += sanitizeImpact(play.captures);
+    totals.damage += sanitizeImpact(play.damage);
   }
 
-  if (typeof play.ip === 'number' && Number.isFinite(play.ip)) {
-    values.push(Math.abs(play.ip));
+  totals.magnitude = totals.truth + totals.ip + totals.captures + totals.damage;
+
+  return totals;
+};
+
+const compareTrioImpacts = (left: PlayedLite[], right: PlayedLite[]): number => {
+  const leftTotals = computeTrioImpactTotals(left);
+  const rightTotals = computeTrioImpactTotals(right);
+  const comparisonOrder: (keyof TrioImpactTotals)[] = ['magnitude', 'truth', 'ip', 'captures', 'damage'];
+
+  for (const key of comparisonOrder) {
+    if (leftTotals[key] > rightTotals[key]) {
+      return 1;
+    }
+
+    if (leftTotals[key] < rightTotals[key]) {
+      return -1;
+    }
   }
 
-  if (typeof play.captures === 'number' && Number.isFinite(play.captures)) {
-    values.push(Math.abs(play.captures) * 2);
-  }
-
-  if (typeof play.damage === 'number' && Number.isFinite(play.damage)) {
-    values.push(Math.abs(play.damage));
-  }
-
-  if (!values.length) {
-    return 0;
-  }
-
-  return Math.max(...values);
+  return 0;
 };
 
 const collectFactionTrio = (
@@ -155,17 +181,6 @@ const collectDrawFocus = (plays: PlayedLite[]): PlayedLite[] => {
   }
 
   return result;
-};
-
-const highestFactionValue = (plays: PlayedLite[]): number => {
-  if (!plays.length) {
-    return 0;
-  }
-
-  return plays.reduce((max, play) => {
-    const value = computePlayValue(play);
-    return value > max ? value : max;
-  }, 0);
 };
 
 export const evaluateExtraExtra = (
@@ -328,10 +343,9 @@ export const evaluateExtraExtra = (
     });
   }
 
-  const truthValue = highestFactionValue(truthTrio);
-  const governmentValue = highestFactionValue(governmentTrio);
+  const trioComparison = compareTrioImpacts(truthTrio, governmentTrio);
 
-  if (truthValue > governmentValue) {
+  if (trioComparison > 0) {
     return enrich({
       trigger: true,
       winningFaction: 'truth',
@@ -340,7 +354,7 @@ export const evaluateExtraExtra = (
     });
   }
 
-  if (governmentValue > truthValue) {
+  if (trioComparison < 0) {
     return enrich({
       trigger: true,
       winningFaction: 'government',
