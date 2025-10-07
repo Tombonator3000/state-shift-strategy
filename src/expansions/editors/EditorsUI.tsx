@@ -7,12 +7,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { EDITORS_EXPANSION_ID, isEditorsFeatureEnabled } from '@/data/expansions/features';
+import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
 
 export { EDITORS_EXPANSION_ID } from '@/data/expansions/features';
 
 import type { EditorDef, EditorId } from './EditorsTypes';
 import {
   describeEditorEffect,
+  getEditorEffectByKind,
   getEditors,
   resolveActiveEditor,
   type EditorEffectKind,
@@ -24,35 +26,24 @@ export interface EditorsUIProps extends PropsWithChildren {
   readonly className?: string;
 }
 
-const STORAGE_KEY = 'shadowgov:editors:last-selection';
+const STORAGE_KEY = 'paranoid-times:desk-editor';
 
 const EFFECT_TITLES: Record<EditorEffectKind, string> = {
   bonus: 'Bonus',
-  penalty: 'Tradeoff',
+  tradeoff: 'Tradeoff',
+  modifier: 'Modifier',
 };
 
 const rememberSelection = (editor: EditorDef | null) => {
-  if (!editor || typeof window === 'undefined') {
+  if (!editor) {
     return;
   }
-  try {
-    window.localStorage.setItem(STORAGE_KEY, editor.id);
-  } catch (error) {
-    console.warn('[Editors] Failed to persist selection', error);
-  }
+  safeSetLocalStorageItem(STORAGE_KEY, editor.id);
 };
 
 const getStoredSelection = (): EditorId | null => {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ?? null;
-  } catch (error) {
-    console.warn('[Editors] Failed to read stored selection', error);
-    return null;
-  }
+  const raw = safeGetLocalStorageItem(STORAGE_KEY);
+  return raw ?? null;
 };
 
 interface ChooseEditorOptions {
@@ -99,7 +90,7 @@ let activeHost: { container: HTMLElement; root: Root } | null = null;
 let activePromise: Promise<EditorId | null> | null = null;
 
 const renderEffectList = (editor: EditorDef, kind: EditorEffectKind): string[] => {
-  const effect = kind === 'bonus' ? editor.bonus : editor.penalty;
+  const effect = getEditorEffectByKind(editor, kind);
   const described = describeEditorEffect(effect);
   if (described.length > 0) {
     return described;
@@ -107,7 +98,10 @@ const renderEffectList = (editor: EditorDef, kind: EditorEffectKind): string[] =
   if (kind === 'bonus') {
     return ['No bonus'];
   }
-  return ['No tradeoff'];
+  if (kind === 'tradeoff') {
+    return ['No tradeoff'];
+  }
+  return ['No modifier'];
 };
 
 const EditorsChooseModal = ({ editors, initialSelection, onConfirm, onSkip, allowSkip }: EditorsChooseModalProps) => {
@@ -174,8 +168,8 @@ const EditorsChooseModal = ({ editors, initialSelection, onConfirm, onSkip, allo
                         <h3 className="text-lg font-semibold leading-tight uppercase tracking-wide">
                           {editor.name}
                         </h3>
-                        {editor.flavor ? (
-                          <p className="text-sm italic text-[#6b5430]">{editor.flavor}</p>
+                        {editor.quote ? (
+                          <p className="text-sm italic text-[#6b5430]">{editor.quote}</p>
                         ) : null}
                       </div>
                       <Badge className="border border-[#ad9155]/60 bg-[#f2dfb0]/70 text-xs font-semibold uppercase tracking-wide text-[#4d3b1e]">
@@ -187,14 +181,16 @@ const EditorsChooseModal = ({ editors, initialSelection, onConfirm, onSkip, allo
                         Photo
                       </div>
                       <div className="flex-1 space-y-3">
-                        {(['bonus', 'penalty'] as const).map(kind => (
+                        {(['bonus', 'tradeoff', 'modifier'] as const).map(kind => (
                           <div
                             key={kind}
                             className={cn(
                               'rounded border border-dashed bg-white/80 p-3 text-sm shadow-sm',
                               kind === 'bonus'
                                 ? 'border-[#7b9e59]/60 text-[#2f4f1f]'
-                                : 'border-[#b15555]/60 text-[#5a1d1d]',
+                                : kind === 'tradeoff'
+                                  ? 'border-[#b15555]/60 text-[#5a1d1d]'
+                                  : 'border-[#5b6d85]/60 text-[#2c3d52]',
                             )}
                           >
                             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#4d3b1e]">
@@ -223,8 +219,8 @@ const EditorsChooseModal = ({ editors, initialSelection, onConfirm, onSkip, allo
                     Selected Case File
                   </p>
                   <h4 className="text-xl font-semibold leading-tight uppercase tracking-wide">{selectedEditor.name}</h4>
-                  {selectedEditor.flavor ? (
-                    <p className="text-sm italic text-[#6b5430]">{selectedEditor.flavor}</p>
+                  {selectedEditor.quote ? (
+                    <p className="text-sm italic text-[#6b5430]">{selectedEditor.quote}</p>
                   ) : null}
                 </div>
                 <div className="flex flex-col gap-4 md:flex-row">
@@ -232,7 +228,7 @@ const EditorsChooseModal = ({ editors, initialSelection, onConfirm, onSkip, allo
                     Photo
                   </div>
                   <div className="flex-1 space-y-4">
-                    {(['bonus', 'penalty'] as const).map(kind => (
+                    {(['bonus', 'tradeoff', 'modifier'] as const).map(kind => (
                       <div key={kind} className="rounded border border-[#c9ad70]/70 bg-white/90 p-4 shadow">
                         <p
                           className={cn(
@@ -286,12 +282,12 @@ export const chooseEditor = (options: ChooseEditorOptions = {}): Promise<EditorI
   if (activePromise) {
     return activePromise;
   }
-  const { defaultId, allowSkip = true } = options;
+  const { defaultId, allowSkip = true, faction } = options;
   if (typeof document === 'undefined') {
     return Promise.resolve(null);
   }
 
-  const availableEditors = getEditors();
+  const availableEditors = getEditors().filter(editor => (faction ? editor.faction === faction : true));
   if (availableEditors.length === 0) {
     return Promise.resolve(null);
   }
@@ -358,17 +354,19 @@ export const EditorsUI = ({ editorId, fallbackId, className, children }: Editors
       <header className="flex flex-col gap-1">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Editor</p>
         <h2 className="text-lg font-semibold leading-tight">{editor.name}</h2>
-        {editor.flavor ? <p className="text-sm italic text-muted-foreground">{editor.flavor}</p> : null}
+        {editor.quote ? <p className="text-sm italic text-muted-foreground">{editor.quote}</p> : null}
       </header>
       <div className="grid gap-3 md:grid-cols-2">
-        {(['bonus', 'penalty'] as const).map(kind => (
+        {(['bonus', 'tradeoff', 'modifier'] as const).map(kind => (
           <div
             key={kind}
             className={cn(
               'rounded border p-3 text-sm',
               kind === 'bonus'
                 ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700'
-                : 'border-rose-500/40 bg-rose-500/10 text-rose-700',
+                : kind === 'tradeoff'
+                  ? 'border-rose-500/40 bg-rose-500/10 text-rose-700'
+                  : 'border-slate-500/40 bg-slate-500/10 text-slate-700',
             )}
           >
             <p className="text-xs font-semibold uppercase tracking-wide">{EFFECT_TITLES[kind]}</p>

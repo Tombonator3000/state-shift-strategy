@@ -9,6 +9,7 @@ import type {
   GameState,
   PlayerState,
 } from '@/mvp/validator';
+import { getEditorAggregatedEffects, getEditorById as lookupEditorById } from '@/game/editors';
 
 export type PlayerId = 'P1' | 'P2';
 
@@ -175,6 +176,17 @@ export function applyEffectsMvp(
       warnIfMediaScaling(card, baseDelta);
     }
 
+    const editor = lookupEditorById(state.players[owner]?.activeEditorId ?? undefined);
+    if (editor) {
+      const effects = getEditorAggregatedEffects(editor);
+      if (effects.mediaTruthModifier) {
+        delta += effects.mediaTruthModifier;
+        state.log.push(
+          `${owner} ${editor.name} adjusts MEDIA truth by ${effects.mediaTruthModifier > 0 ? '+' : ''}${effects.mediaTruthModifier}.`,
+        );
+      }
+    }
+
     applyTruthDelta(state, delta, owner);
 
     if (multiplier !== 1 && baseDelta !== 0) {
@@ -198,7 +210,24 @@ export function applyEffectsMvp(
       throw new Error('ZONE card requires a target state');
     }
 
-    applyZoneEffect(state, owner, card.effects as EffectsZONE, targetStateId);
+    const editor = lookupEditorById(state.players[owner]?.activeEditorId ?? undefined);
+    const zoneEffects = card.effects as EffectsZONE;
+    let pressureDelta = zoneEffects.pressureDelta;
+
+    if (editor) {
+      const effects = getEditorAggregatedEffects(editor);
+      if (effects.zonePressureBonus) {
+        const adjusted = Math.max(0, pressureDelta + effects.zonePressureBonus);
+        if (adjusted !== pressureDelta) {
+          pressureDelta = adjusted;
+          state.log.push(
+            `${owner} ${editor.name} adjusts ZONE pressure by ${effects.zonePressureBonus > 0 ? '+' : ''}${effects.zonePressureBonus}.`,
+          );
+        }
+      }
+    }
+
+    applyZoneEffect(state, owner, { ...zoneEffects, pressureDelta }, targetStateId);
     return state;
   }
 

@@ -14,8 +14,39 @@ import { auditGameState } from './gameStateAudit';
 import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
 import type { MediaResolutionOptions } from './media';
 import { applyTruthDelta } from '@/utils/truth';
+import {
+  getEditorAggregatedEffects,
+  getEditorById as lookupEditorById,
+  type EditorAggregatedEffects,
+  type EditorDefinition,
+} from '@/game/editors';
 
 const otherPlayer = (id: PlayerId): PlayerId => (id === 'P1' ? 'P2' : 'P1');
+
+export const getActiveEditor = (state: GameState, who: PlayerId): EditorDefinition | null => {
+  const player = state.players[who];
+  const editorId = player?.activeEditorId;
+  if (!editorId) {
+    return null;
+  }
+  return lookupEditorById(editorId) ?? null;
+};
+
+const getActiveEditorEffects = (state: GameState, who: PlayerId): EditorAggregatedEffects =>
+  getEditorAggregatedEffects(getActiveEditor(state, who) ?? undefined);
+
+const getEffectiveCardCost = (state: GameState, playerId: PlayerId, card: Card): number => {
+  if (card.type !== 'ATTACK') {
+    return card.cost;
+  }
+  const effects = getActiveEditorEffects(state, playerId);
+  const delta = effects.attackCostDelta ?? 0;
+  if (!delta) {
+    return card.cost;
+  }
+  const adjusted = card.cost + delta;
+  return Math.max(0, Math.floor(adjusted));
+};
 
 const drawUpToFive = (player: PlayerState): PlayerState => {
   const deck = [...player.deck];
@@ -331,9 +362,44 @@ export function startTurn(state: GameState): GameState {
     const reason = deficitParts.length ? ` (${deficitParts.join(', ')})` : '';
     logEntries.push(`${currentId} catch-up bonus +${catchUpBonus} IP${reason}`);
   }
+  const activeEditor = getActiveEditor(cloned, currentId);
+  const editorEffects = getEditorAggregatedEffects(activeEditor ?? undefined);
+  const editorLogEntries: string[] = [];
+
+  const workingHand = [...me.hand];
+  const workingDeck = [...me.deck];
+  let workingDiscard = [...me.discard];
+
+  if (activeEditor && editorEffects.startDiscardChance > 0 && workingHand.length > 0) {
+    const roll = Math.random();
+    if (roll < editorEffects.startDiscardChance) {
+      const index = Math.floor(Math.random() * workingHand.length);
+      const [discarded] = workingHand.splice(index, 1);
+      workingDiscard = [...workingDiscard, discarded];
+      const discardedName = discarded.name ?? discarded.id;
+      editorLogEntries.push(`${currentId} ${activeEditor.name} drawback discards ${discardedName}.`);
+    }
+  }
+
+  const ipBonus = editorEffects.ipIncomePerTurn ?? 0;
+  if (activeEditor && ipBonus !== 0) {
+    editorLogEntries.push(
+      `${currentId} ${activeEditor.name} ${ipBonus > 0 ? 'bonus' : 'penalty'} ${ipBonus > 0 ? '+' : ''}${ipBonus} IP income`,
+    );
+  }
+
+  const preparedPlayer: PlayerState = {
+    ...me,
+    hand: workingHand,
+    deck: workingDeck,
+    discard: workingDiscard,
+  };
+
+  const drawnPlayer = drawUpToFive(preparedPlayer);
+
   const updatedPlayer: PlayerState = {
-    ...drawUpToFive(me),
-    ip: me.ip + netIncome,
+    ...drawnPlayer,
+    ip: Math.max(0, me.ip + netIncome + ipBonus),
   };
 
   return {
@@ -345,7 +411,7 @@ export function startTurn(state: GameState): GameState {
     playsThisTurn: 0,
     turnPlays: [],
     turnBuffer: [],
-    log: logEntries,
+    log: editorLogEntries.length ? [...logEntries, ...editorLogEntries] : logEntries,
   };
 }
 
@@ -353,7 +419,7 @@ export function canPlay(
   state: GameState,
   card: Card,
   targetStateId?: string,
-): { ok: boolean; reason?: string } {
+): { ok: boolean; reason?: string; cost?: number } {
   if (state.playsThisTurn >= 3) {
     return { ok: false, reason: 'play-limit' };
   }
@@ -363,7 +429,9 @@ export function canPlay(
     return { ok: false, reason: 'invalid-player' };
   }
 
-  if (player.ip < card.cost) {
+  const effectiveCost = getEffectiveCardCost(state, state.currentPlayer, card);
+
+  if (player.ip < effectiveCost) {
     return { ok: false, reason: 'insufficient-ip' };
   }
 
@@ -376,7 +444,7 @@ export function canPlay(
     }
   }
 
-  return { ok: true };
+  return { ok: true, cost: effectiveCost };
 }
 
 export function playCard(
@@ -400,6 +468,8 @@ export function playCard(
     throw new Error(eligibility.reason ?? 'cannot-play');
   }
 
+  const effectiveCost = eligibility.cost ?? getEffectiveCardCost(cloned, currentId, card);
+
   const newHand = [...player.hand];
   newHand.splice(cardIndex, 1);
 
@@ -407,7 +477,7 @@ export function playCard(
     ...player,
     hand: newHand,
     discard: [...player.discard, card],
-    ip: player.ip - card.cost,
+    ip: Math.max(0, player.ip - effectiveCost),
   };
 
   const playEntry: TurnPlay = {
@@ -418,7 +488,7 @@ export function playCard(
     cardName: card.name,
     cardType: card.type,
     cardRarity: card.rarity,
-    cost: card.cost,
+    cost: effectiveCost,
     targetStateId,
   };
 
