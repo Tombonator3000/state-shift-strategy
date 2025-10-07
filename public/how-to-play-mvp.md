@@ -55,6 +55,15 @@ Campaign storylines will occasionally override the random tabloids at the end of
 - **Paranormal Hotspots** temporarily raise a state’s defense while promising a Truth swing to whichever faction resolves the anomaly first. When a hotspot appears you’ll see a flying UFO skim the affected state and leave a green glow around it, plus you’ll hear the UFO bulletin sting so you can react even while scanning other panels. If you’ve enabled reduced-motion mode, the UFO flashes in place without sweeping across the map, but the glow still locks on—and the sting still plays—so you can track the target. Drop pressure there immediately or sabotage your opponent’s attempt—the glow clears the moment someone resolves the anomaly.
 - **Combo Engine** rewards coordinated turns with bonus IP, Truth swings, or additional card draws. Review combo summaries in the newspaper and adjust your play order to trigger the effects you need.
 
+### Extra Extra System
+The Extra Extra desk reviews every turn’s action log to decide whether to run a headline feature. It only fires once either faction actually plays three cards during the Action Phase; if both sides stall at two or fewer, the newsroom shreds the draft and moves on.
+
+1. **Trigger Check** – The `evaluateExtraExtra` routine sweeps the turn buffer after each Action Phase and looks for three-card runs by either faction. If only one side hits the threshold, their column automatically runs and they claim the issue.
+2. **Winner Calculation** – When both factions reach three cards, the editor compares the single strongest play from each trio. Truth/IP swings, direct damage, and captures all count, with captures weighted double. Highest impact wins the headline; ties produce a draw and no Truth shift.
+3. **Truth Adjustment** – A winning faction pushes the campaign’s Truth meter three points toward its ideology (+3 for Truth Seekers, –3 for Government). Draws leave Truth untouched, but still archive the featured plays in the paper’s clipping log.
+
+When the system triggers, it publishes a focused article listing the three decisive cards, updates the turn headline, and drops the recap into the feed so you can track how each faction is shaping the wider narrative.
+
 ## Tactical Tips
 - Spend early turns establishing IP-positive states before committing expensive legendary plays.
 - Use MEDIA to push Truth toward your victory thresholds while denying the opponent their extremes.

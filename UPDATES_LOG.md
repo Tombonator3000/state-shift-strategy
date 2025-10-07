@@ -15,6 +15,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Patched the broadsheet card collection overlay to import its shadcn scroll wrapper so the panel renders without tripping a `ScrollArea` reference error.
 - Verified the catalogue view no longer blanks out when the government archivists unroll their dossiers mid-session.
 
+## 2025-10-07 – Document Extra Extra win logic for players
+- Expanded the How to Play briefing with a rundown of the Extra Extra showdown rules so operatives know how triple-card turns award Truth swings and headlines.
+- Highlighted how the newsroom calculates winners, resolves ties, and pushes the Truth meter to keep players watching the paper between turns.
+
 ## 2025-10-06 – Rewire AI difficulties and editor bias
 - Replaced the retired TOP_SECRET_PLUS tier with the new INSANE difficulty, updating presets, UI labels, and save normalization so the option flows stay coherent.
 - Routed each editor profile’s combo and income bias scalars into the enhanced strategist and planner, letting targeting, income forecasts, and combo scoring honor newsroom tuning.
