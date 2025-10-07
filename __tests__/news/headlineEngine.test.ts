@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import * as actualFrontendNewsPools from '../../src/news/newsPools';
+import * as actualEngineNewsPools from '../../src/engine/news/newsPools';
 import type { TurnLog, TurnTotals, PlayedLite } from '../../src/news/headlineEngine';
 
 const stubPools = {
@@ -18,12 +20,105 @@ const stubPools = {
   weather: ['Calm Skies'],
 } as const;
 
-const getPoolsMock = mock.fn(() => stubPools);
-const getPoolsIfReadyMock = mock.fn(() => stubPools);
+const createMockFn = <Args extends unknown[], Return>(
+  implementation: (...args: Args) => Return,
+) => {
+  const fn = ((...args: Args) => {
+    fn.mock.calls.push(args);
+    return fn.mock.impl(...args);
+  }) as ((...args: Args) => Return) & {
+    mock: { calls: Args[]; impl: (...innerArgs: Args) => Return };
+    mockImplementation: (impl: (...innerArgs: Args) => Return) => void;
+    mockReset: () => void;
+  };
+
+  fn.mock = { calls: [] as Args[], impl: implementation };
+  fn.mockImplementation = (impl: (...innerArgs: Args) => Return) => {
+    fn.mock.impl = impl;
+  };
+  fn.mockReset = () => {
+    fn.mock.calls = [];
+    fn.mock.impl = implementation;
+  };
+
+  return fn;
+};
+
+const getPoolsMock = createMockFn(() => stubPools);
+const getPoolsIfReadyMock = createMockFn(() => stubPools);
+
+const perCardArticles = new Map(
+  [
+    [
+      't1',
+      {
+        id: 't1',
+        tone: 'truth' as const,
+        tags: ['ghost'],
+        headline: 'Spectral Scoop',
+        subhead: 'Phantom radio callers jam the switchboard.',
+        byline: 'By: Phantom Desk',
+        body: 'Apparitions confirm the lead is extremely credible.',
+      },
+    ],
+    [
+      't2',
+      {
+        id: 't2',
+        tone: 'truth' as const,
+        tags: ['ufo'],
+        headline: 'Runway Lights Beckon',
+        subhead: 'Strobe-lit landing strips welcome midnight arrivals.',
+        byline: 'By: Hologram Bureau',
+        body: 'Hangars shuffle to make room for three chrome saucers.',
+      },
+    ],
+    [
+      't3',
+      {
+        id: 't3',
+        tone: 'truth' as const,
+        tags: ['coverup'],
+        headline: 'Archivists Blow the Gasket',
+        subhead: 'Dusty cabinets finally cough up the microfilm.',
+        byline: 'By: Records Desk',
+        body: 'Clerks report the files hummed ominously before opening.',
+      },
+    ],
+  ],
+);
+
+const getPerCardArticlesIfReadyMock = createMockFn(() => perCardArticles);
+
+const createTripleArticle = () => ({
+  tone: 'truth' as const,
+  hed: 'TRIPLE PLAY HITS FRONT PAGE',
+  dek: 'Composite deck weaves a unified broadcast.',
+  bullets: ['Operatives align their leads into a single flame.'],
+  byline: 'By: Composite Desk',
+  source: 'Source: News Vault',
+  body: ['Three signals sync inside the newsroom nerve center.'],
+  imagePrompt: 'Collaged news clippings swirling in red string',
+  kicker: 'EXTRA EXTRA',
+  stinger: 'Filed at 03:13',
+  comboId: 'combo-test',
+});
+
+const composeTripleHeadlineMock = createMockFn(() => createTripleArticle());
 
 mock.module('@/news/newsPools', () => ({
+  ...actualFrontendNewsPools,
   getPools: getPoolsMock,
   getPoolsIfReady: getPoolsIfReadyMock,
+}));
+
+mock.module('@/engine/news/newsPools', () => ({
+  ...actualEngineNewsPools,
+  getPerCardArticlesIfReady: getPerCardArticlesIfReadyMock,
+}));
+
+mock.module('@/engine/news/composeTriple', () => ({
+  composeTripleHeadline: composeTripleHeadlineMock,
 }));
 
 const loadEngine = () => import('../../src/news/headlineEngine');
@@ -33,6 +128,10 @@ beforeEach(() => {
   getPoolsIfReadyMock.mockReset();
   getPoolsMock.mockImplementation(() => stubPools);
   getPoolsIfReadyMock.mockImplementation(() => stubPools);
+  getPerCardArticlesIfReadyMock.mockReset();
+  getPerCardArticlesIfReadyMock.mockImplementation(() => perCardArticles);
+  composeTripleHeadlineMock.mockReset();
+  composeTripleHeadlineMock.mockImplementation(() => createTripleArticle());
 });
 
 describe('evaluateExtraExtra', () => {
@@ -83,6 +182,58 @@ describe('evaluateExtraExtra', () => {
     expect(outcome.winningFaction).toBe('draw');
     expect(outcome.truthDelta).toBe(0);
     expect(outcome.focusPlays).toHaveLength(6);
+  });
+
+  it('captures composed triple headline data for qualifying trio', async () => {
+    const { evaluateExtraExtra, generateExtraExtra, summarize } = await loadEngine();
+
+    const plays: PlayedLite[] = [
+      { id: 't1', name: 'Ghost Signal', type: 'MEDIA', faction: 'truth', truth: 4 },
+      { id: 't2', name: 'Saucer Scoop', type: 'ATTACK', faction: 'truth', truth: 2 },
+      { id: 't3', name: 'Archive Leak', type: 'ZONE', faction: 'truth', truth: 1 },
+    ];
+
+    const evaluation = evaluateExtraExtra(plays, { seed: 'unit-test' });
+
+    expect(composeTripleHeadlineMock.mock.calls.length).toBe(1);
+    expect(evaluation.composedMain?.hed).toBe('TRIPLE PLAY HITS FRONT PAGE');
+    expect(evaluation.composeSignature).toBe('t1,t2,t3');
+    expect(evaluation.winnerCards?.map(card => card.id)).toEqual(['t1', 't2', 't3']);
+
+    const focusLog: TurnLog = { round: 1, turn: 1, plays: evaluation.focusPlays };
+    const totals = summarize([focusLog]);
+    const article = generateExtraExtra('unit-test', [focusLog], totals, evaluation);
+
+    expect(article.hed).toBe('TRIPLE PLAY HITS FRONT PAGE');
+    expect(article.dek).toBe('Composite deck weaves a unified broadcast.');
+    expect(article.bullets).toEqual(['Operatives align their leads into a single flame.']);
+    expect(article.comboId).toBe('combo-test');
+  });
+
+  it('falls back to per-card dispatch headline when composer returns null', async () => {
+    composeTripleHeadlineMock.mockImplementation(() => null);
+
+    const { evaluateExtraExtra, generateExtraExtra, summarize } = await loadEngine();
+
+    const plays: PlayedLite[] = [
+      { id: 't1', name: 'Ghost Signal', type: 'MEDIA', faction: 'truth', truth: 4 },
+      { id: 't2', name: 'Saucer Scoop', type: 'ATTACK', faction: 'truth', truth: 2 },
+      { id: 't3', name: 'Archive Leak', type: 'ZONE', faction: 'truth', truth: 1 },
+    ];
+
+    const evaluation = evaluateExtraExtra(plays, { seed: 'fallback-test' });
+
+    expect(evaluation.composedMain).toBeNull();
+    expect(evaluation.dispatches.length).toBeGreaterThan(0);
+
+    const focusLog: TurnLog = { round: 1, turn: 1, plays: evaluation.focusPlays };
+    const totals = summarize([focusLog]);
+    const article = generateExtraExtra('fallback-test', [focusLog], totals, evaluation);
+
+    expect(article.hed).toBe('Spectral Scoop');
+    expect(article.dek).toBe('Phantom radio callers jam the switchboard.');
+    expect(article.byline).toBe('By: Phantom Desk');
+    expect(article.bullets.length).toBeGreaterThan(0);
   });
 });
 
@@ -302,7 +453,11 @@ describe('headlineEngine utilities', () => {
   });
 
   it('generateExtraExtra returns a placeholder article when pools are unavailable', async () => {
-    const warnMock = mock.method(console, 'warn');
+    const originalWarn = console.warn;
+    const warnings: unknown[][] = [];
+    console.warn = (...args: unknown[]) => {
+      warnings.push(args);
+    };
 
     getPoolsIfReadyMock.mockImplementation(() => null);
     getPoolsMock.mockImplementation(() => {
@@ -332,10 +487,10 @@ describe('headlineEngine utilities', () => {
       expect(article.byline).toMatch(/Standby Desk|Emergency Editor/);
       expect(article.source).toMatch(/Archive sync pending|Classified spool offline/);
       expect(article.bullets.length).toBeGreaterThan(0);
-      expect(warnMock).toHaveBeenCalled();
-      expect(String(warnMock.mock.calls[0]?.[0])).toContain('generateExtraExtra');
+      expect(warnings.length).toBeGreaterThan(0);
+      expect(String(warnings[0]?.[0])).toContain('generateExtraExtra');
     } finally {
-      warnMock.mockRestore();
+      console.warn = originalWarn;
     }
   });
 });
