@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -165,12 +165,42 @@ const MIN_ZOOM = 0.75;
 const MAX_ZOOM = 2.5;
 const ZOOM_STEP = 0.25;
 
-const computeViewBoxForZoom = (zoom: number) => {
+interface ViewBoxDefinition {
+  minX: number;
+  minY: number;
+  width: number;
+  height: number;
+}
+
+const clampViewBox = (viewBox: ViewBoxDefinition): ViewBoxDefinition => {
+  const { width, height } = viewBox;
+  const minXBound = Math.min(0, MAP_BASE_WIDTH - width);
+  const maxXBound = Math.max(0, MAP_BASE_WIDTH - width);
+  const minYBound = Math.min(0, MAP_BASE_HEIGHT - height);
+  const maxYBound = Math.max(0, MAP_BASE_HEIGHT - height);
+
+  return {
+    width,
+    height,
+    minX: Math.min(Math.max(viewBox.minX, minXBound), maxXBound),
+    minY: Math.min(Math.max(viewBox.minY, minYBound), maxYBound)
+  };
+};
+
+const computeViewBoxForZoom = (
+  zoom: number,
+  center: { x: number; y: number } = { x: MAP_BASE_WIDTH / 2, y: MAP_BASE_HEIGHT / 2 }
+): ViewBoxDefinition => {
   const width = MAP_BASE_WIDTH / zoom;
   const height = MAP_BASE_HEIGHT / zoom;
-  const minX = (MAP_BASE_WIDTH - width) / 2;
-  const minY = (MAP_BASE_HEIGHT - height) / 2;
-  return { minX, minY, width, height };
+  const minX = center.x - width / 2;
+  const minY = center.y - height / 2;
+  return clampViewBox({ minX, minY, width, height });
+};
+
+const clampZoomLevel = (zoom: number) => {
+  const next = Number(zoom.toFixed(2));
+  return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next));
 };
 
 const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
@@ -199,7 +229,11 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const contestedStatesRef = useRef<Record<string, boolean>>({});
   const contestedAnimationTimeoutsRef = useRef<number[]>([]);
   const hotspotPresenceRef = useRef<Record<string, string>>({});
-  const viewBoxRef = useRef(computeViewBoxForZoom(1));
+  const [viewBox, setViewBox] = useState<ViewBoxDefinition>(() => computeViewBoxForZoom(1));
+  const viewBoxRef = useRef<ViewBoxDefinition>(viewBox);
+  const isPanningRef = useRef(false);
+  const panPointerIdRef = useRef<number | null>(null);
+  const panLastPositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const [governmentTarget, setGovernmentTarget] = useState<{
     active: boolean;
     cardId?: string;
@@ -212,6 +246,59 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     height: MAP_BASE_HEIGHT
   });
   const [zoomLevel, setZoomLevel] = useState(1);
+
+  useEffect(() => {
+    viewBoxRef.current = viewBox;
+    if (svgRef.current) {
+      svgRef.current.setAttribute(
+        'viewBox',
+        `${viewBox.minX} ${viewBox.minY} ${viewBox.width} ${viewBox.height}`
+      );
+    }
+  }, [viewBox]);
+
+  const getSvgPointFromClient = useCallback((clientX: number, clientY: number) => {
+    const svgElement = svgRef.current;
+    if (!svgElement) return null;
+
+    const rect = svgElement.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      return null;
+    }
+
+    const currentViewBox = viewBoxRef.current;
+    const scaleX = currentViewBox.width / rect.width;
+    const scaleY = currentViewBox.height / rect.height;
+
+    return {
+      x: currentViewBox.minX + (clientX - rect.left) * scaleX,
+      y: currentViewBox.minY + (clientY - rect.top) * scaleY
+    };
+  }, []);
+
+  const applyZoom = useCallback(
+    (updater: (prevZoom: number) => number, focalPoint?: { x: number; y: number }) => {
+      setZoomLevel(prevZoom => {
+        const targetZoom = clampZoomLevel(updater(prevZoom));
+        if (Math.abs(targetZoom - prevZoom) < 0.0001) {
+          return prevZoom;
+        }
+
+        setViewBox(prevViewBox => {
+          const focus = focalPoint ?? {
+            x: prevViewBox.minX + prevViewBox.width / 2,
+            y: prevViewBox.minY + prevViewBox.height / 2
+          };
+          const nextViewBox = computeViewBoxForZoom(targetZoom, focus);
+          viewBoxRef.current = nextViewBox;
+          return nextViewBox;
+        });
+
+        return targetZoom;
+      });
+    },
+    []
+  );
 
   useEffect(() => {
     if (typeof ResizeObserver === 'undefined') {
@@ -246,6 +333,11 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
   useEffect(() => {
     setZoomLevel(1);
+    setViewBox(() => {
+      const resetViewBox = computeViewBoxForZoom(1);
+      viewBoxRef.current = resetViewBox;
+      return resetViewBox;
+    });
   }, [currentTurn]);
 
   const getTooltipPosition = () => {
@@ -340,10 +432,85 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
     const svg = svgRef.current;
 
-    const viewBox = computeViewBoxForZoom(zoomLevel);
-    viewBoxRef.current = viewBox;
-    svg.setAttribute('viewBox', `${viewBox.minX} ${viewBox.minY} ${viewBox.width} ${viewBox.height}`);
+    const currentViewBox = viewBoxRef.current;
+    svg.setAttribute(
+      'viewBox',
+      `${currentViewBox.minX} ${currentViewBox.minY} ${currentViewBox.width} ${currentViewBox.height}`
+    );
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+    const handleWheel = (event: WheelEvent) => {
+      if (!svgRef.current) return;
+      event.preventDefault();
+
+      if (event.deltaY === 0) {
+        return;
+      }
+
+      const zoomChange = event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
+      const focalPoint = getSvgPointFromClient(event.clientX, event.clientY) ?? undefined;
+      applyZoom(prev => prev + zoomChange, focalPoint);
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.button !== 2) return;
+      event.preventDefault();
+
+      isPanningRef.current = true;
+      panPointerIdRef.current = event.pointerId;
+      panLastPositionRef.current = { x: event.clientX, y: event.clientY };
+      svg.setPointerCapture?.(event.pointerId);
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!isPanningRef.current || panPointerIdRef.current !== event.pointerId) return;
+
+      event.preventDefault();
+
+      const deltaX = event.clientX - panLastPositionRef.current.x;
+      const deltaY = event.clientY - panLastPositionRef.current.y;
+
+      if (deltaX === 0 && deltaY === 0) return;
+
+      panLastPositionRef.current = { x: event.clientX, y: event.clientY };
+      const rect = svg.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        return;
+      }
+
+      setViewBox(prevViewBox => {
+        const scaleX = prevViewBox.width / rect.width;
+        const scaleY = prevViewBox.height / rect.height;
+        const nextViewBox = clampViewBox({
+          ...prevViewBox,
+          minX: prevViewBox.minX - deltaX * scaleX,
+          minY: prevViewBox.minY - deltaY * scaleY
+        });
+        viewBoxRef.current = nextViewBox;
+        return nextViewBox;
+      });
+    };
+
+    const endPan = (event: PointerEvent) => {
+      if (panPointerIdRef.current !== event.pointerId) return;
+
+      isPanningRef.current = false;
+      panPointerIdRef.current = null;
+      svg.releasePointerCapture?.(event.pointerId);
+    };
+
+    const handleContextMenu = (event: MouseEvent) => {
+      if (isPanningRef.current) {
+        event.preventDefault();
+      }
+    };
+
+    svg.addEventListener('wheel', handleWheel, { passive: false });
+    svg.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', endPan);
+    window.addEventListener('pointercancel', endPan);
+    svg.addEventListener('contextmenu', handleContextMenu);
 
     // Clear any pending contested animation retries before rebuilding the scene
     contestedAnimationTimeoutsRef.current.forEach(timeoutId => window.clearTimeout(timeoutId));
@@ -878,6 +1045,17 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 
     return () => {
       svg.removeEventListener('pointerleave', handlePointerLeave);
+      svg.removeEventListener('wheel', handleWheel);
+      svg.removeEventListener('pointerdown', handlePointerDown);
+      svg.removeEventListener('contextmenu', handleContextMenu);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', endPan);
+      window.removeEventListener('pointercancel', endPan);
+      if (panPointerIdRef.current != null) {
+        svg.releasePointerCapture?.(panPointerIdRef.current);
+        panPointerIdRef.current = null;
+        isPanningRef.current = false;
+      }
       contestedAnimationTimeoutsRef.current.forEach(timeoutId => window.clearTimeout(timeoutId));
       contestedAnimationTimeoutsRef.current = [];
       if (tooltipStableRef.current.timeout) {
@@ -896,18 +1074,31 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     governmentTarget?.stateId,
     dimensions,
     playerFaction,
-    zoomLevel
+    applyZoom,
+    getSvgPointFromClient
   ]);
 
   const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(MAX_ZOOM, Number((prev + ZOOM_STEP).toFixed(2))));
+    applyZoom(prev => prev + ZOOM_STEP);
   };
 
   const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(MIN_ZOOM, Number((prev - ZOOM_STEP).toFixed(2))));
+    applyZoom(prev => prev - ZOOM_STEP);
   };
 
   const handleResetZoom = () => {
+    const resetViewBox = computeViewBoxForZoom(1);
+    const isAlreadyReset =
+      Math.abs(zoomLevel - 1) < 0.0001 &&
+      Math.abs(viewBox.minX - resetViewBox.minX) < 0.0001 &&
+      Math.abs(viewBox.minY - resetViewBox.minY) < 0.0001;
+
+    if (isAlreadyReset) {
+      return;
+    }
+
+    viewBoxRef.current = resetViewBox;
+    setViewBox(resetViewBox);
     setZoomLevel(1);
   };
 
@@ -936,7 +1127,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const stateInfo = getHoveredStateInfo();
 
   const zoomPercent = Math.round(zoomLevel * 100);
-  const viewBoxDefinition = computeViewBoxForZoom(zoomLevel);
+  const viewBoxDefinition = viewBox;
 
   return (
     <div className="relative">
