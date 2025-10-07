@@ -188,4 +188,29 @@ describe('editor runtime modifiers', () => {
     expect(state.pressureByState.CA.P1).toBe(2);
     expect(state.log.some(entry => entry.includes('Bat Boy Jr.'))).toBe(true);
   });
+
+  it('ignores additional pressure on already controlled states', () => {
+    const zoneCard = createCard({
+      id: 'zone-2',
+      name: 'Friendly Patrol',
+      type: 'ZONE',
+      cost: 1,
+      effects: { pressureDelta: 3 },
+      target: { scope: 'state', count: 1 },
+    });
+    const state = createState({
+      players: {
+        P1: {
+          states: ['CA'],
+        },
+      },
+      pressureByState: { CA: { P1: 0, P2: 0 } },
+      stateDefense: { CA: 4 },
+    });
+
+    applyEffectsMvp(state, 'P1', zoneCard, 'CA');
+
+    expect(state.pressureByState.CA.P1).toBe(0);
+    expect(state.log[state.log.length - 1]).toContain('already controls it');
+  });
 });

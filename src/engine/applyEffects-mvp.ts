@@ -100,6 +100,19 @@ function applyZoneEffect(
 ) {
   const opponent = otherPlayer(owner);
   const currentPressure = state.pressureByState[targetStateId] ?? { P1: 0, P2: 0 };
+  const ownerControlsState = state.players[owner]?.states.includes(targetStateId);
+
+  if (ownerControlsState) {
+    if ((currentPressure[owner] ?? 0) !== 0) {
+      state.pressureByState = {
+        ...state.pressureByState,
+        [targetStateId]: { ...currentPressure, [owner]: 0 },
+      } satisfies GameState['pressureByState'];
+    }
+    state.log.push(`${owner} reinforces ${targetStateId} but already controls it—pressure remains at 0.`);
+    return;
+  }
+
   const updatedOwnerPressure = (currentPressure[owner] ?? 0) + effects.pressureDelta;
 
   let pressureByState: GameState['pressureByState'] = {
