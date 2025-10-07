@@ -125,4 +125,6 @@ export const gatherEditorPlayCardAdjustments = (
   };
 };
 
-export const describeEditorEffect = (effect: EditorEffectConfig): string[] => describeEffectConfig(effect);
+export const describeEditorEffect = (
+  effect?: EditorEffectConfig | null,
+): string[] => describeEffectConfig(effect ?? null);

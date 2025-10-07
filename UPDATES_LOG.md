@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-31 – Guard editor effect descriptions
+- Hardened the editor effect descriptor so dossiers without optional blocks no longer crash when summarizing start cards on the index page.
+- Synced the expansion wrapper to pass through nullable configs, ensuring runtime callers never dereference missing effect data.
+
 ## 2025-10-30 – Fix desk editor summary crash
 - Updated the campaign HUD’s editor summary to read bonuses, tradeoffs, and modifiers from the dossier configs so the start-card descriptors always receive a valid effect block.
 - Surfaced modifier bullet points and preferred dossier quotes to keep the popover copy consistent after the data model shift.
