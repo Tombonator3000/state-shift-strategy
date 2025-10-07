@@ -51,7 +51,7 @@ import MinimizedHand from '@/components/game/MinimizedHand';
 import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
 import { chooseEditor, isEditorsExpansionEnabled } from '@/expansions/editors/EditorsUI';
-import { describeEditorEffect, type EditorId } from '@/expansions/editors/EditorsEngine';
+import { describeEditorEffect, type EditorEffect, type EditorId } from '@/expansions/editors/EditorsEngine';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
@@ -355,13 +355,27 @@ const Index = () => {
   } = useIntelArchive();
 
   const editorEffects = useMemo(() => {
-    if (!gameState.editorDef) {
+    const editor = gameState.editorDef;
+    if (!editor) {
       return null;
     }
+
+    const describe = (effect?: EditorEffect | null): string[] =>
+      describeEditorEffect(effect ?? {});
+
     return {
-      bonus: describeEditorEffect(gameState.editorDef.bonus),
-      penalty: describeEditorEffect(gameState.editorDef.penalty),
+      bonuses: describe(editor.bonuses ?? {}),
+      tradeoffs: describe(editor.tradeoffs ?? {}),
+      modifiers: describe(editor.modifiers ?? {}),
     };
+  }, [gameState.editorDef]);
+
+  const editorFlavor = useMemo(() => {
+    const editor = gameState.editorDef;
+    if (!editor) {
+      return null;
+    }
+    return editor.quote ?? (editor as { flavor?: string | null }).flavor ?? null;
   }, [gameState.editorDef]);
 
   const [isObjectivesOpen, setIsObjectivesOpen] = useState(false);
@@ -2643,26 +2657,36 @@ const Index = () => {
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/60">Desk Editor</p>
                     <h3 className="text-base font-semibold leading-tight">{gameState.editorDef.name}</h3>
-                    {gameState.editorDef.flavor ? (
-                      <p className="text-xs italic text-newspaper-text/70">{gameState.editorDef.flavor}</p>
+                    {editorFlavor ? (
+                      <p className="text-xs italic text-newspaper-text/70">{editorFlavor}</p>
                     ) : null}
                   </div>
-                  {editorEffects?.bonus?.length ? (
+                  {editorEffects?.bonuses?.length ? (
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-600">Bonuses</p>
                       <ul className="mt-1 space-y-1 text-xs text-emerald-700">
-                        {editorEffects.bonus.map((line, index) => (
+                        {editorEffects.bonuses.map((line, index) => (
                           <li key={`editor-bonus-${index}`}>{line}</li>
                         ))}
                       </ul>
                     </div>
                   ) : null}
-                  {editorEffects?.penalty?.length ? (
+                  {editorEffects?.tradeoffs?.length ? (
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-rose-600">Tradeoffs</p>
                       <ul className="mt-1 space-y-1 text-xs text-rose-700">
-                        {editorEffects.penalty.map((line, index) => (
+                        {editorEffects.tradeoffs.map((line, index) => (
                           <li key={`editor-penalty-${index}`}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {editorEffects?.modifiers?.length ? (
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-600">Modifiers</p>
+                      <ul className="mt-1 space-y-1 text-xs text-slate-700">
+                        {editorEffects.modifiers.map((line, index) => (
+                          <li key={`editor-modifier-${index}`}>{line}</li>
                         ))}
                       </ul>
                     </div>
