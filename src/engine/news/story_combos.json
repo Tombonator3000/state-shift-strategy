@@ -1,0 +1,439 @@
+{
+  "schemaVersion": 1,
+  "generated": "2025-10-07",
+  "license": "CC BY-SA 4.0",
+  "notes": {
+    "purpose": "Combo-specific articles for Paranoid Times newspaper when multiple cards synergize in a single turn.",
+    "integration": "Match by card IDs or by tags. Highest priority match wins. Exclusive combos suppress lower-priority ones.",
+    "how_to_use": "Load after per-card article bank. For each turn, build a turn signature from played cards (IDs, factions, tags). Evaluate combos by priority, emit up to N articles."
+  },
+  "defaults": {
+    "maxCombosPerTurn": 2,
+    "imageStyle": "grainy 1990s black and white photo, halftone newspaper style, slightly out of focus"
+  },
+  "combos": [
+    {
+      "comboId": "cmb-batboy-bigfoot-summit",
+      "priority": 100,
+      "exclusive": true,
+      "when": {
+        "anyIds": [
+          "TRUTH-017"
+        ],
+        "anyTags": [
+          "bigfoot",
+          "bat-boy"
+        ],
+        "minCards": 2,
+        "factions": [
+          "truth"
+        ]
+      },
+      "headline": "BAT BOY & BIGFOOT HOLD SECRET SUMMIT — ‘HAIR-TO-HAIR’ TALKS STUN NATION!",
+      "subhead": "Witnesses report firm handshake, questionable grooming tips.",
+      "byline": "By: Conclave Correspondent B‑6",
+      "body": [
+        "In a moonlit clearing, representatives from the Bat Boy bloc and the Bigfoot diaspora agreed to a cease‑screech.",
+        "Sources close to the saplings claim the agenda included snack rights, photo consent, and joint statements on blurry imagery.",
+        "Analysts say tonight’s détente will echo across county fairs and campground Wi‑Fi for weeks."
+      ],
+      "imagePrompt": "{style}, forest press scrum, Bigfoot and Bat Boy at makeshift podium, disposable camera flash, deadpan crowd",
+      "effects": {
+        "truthBuzz": 2,
+        "ipSpin": 1
+      },
+      "tags": [
+        "summit",
+        "bigfoot",
+        "bat-boy",
+        "truth-combo"
+      ]
+    },
+    {
+      "comboId": "cmb-elvis-ufo",
+      "priority": 95,
+      "exclusive": false,
+      "when": {
+        "anyIds": [
+          "TRUTH-018",
+          "TRUTH-002",
+          "TRUTH-013"
+        ],
+        "anyTags": [
+          "elvis",
+          "ufo"
+        ],
+        "minCards": 2,
+        "factions": [
+          "truth"
+        ]
+      },
+      "headline": "ELVIS PILOTS SAUCER TO 3 A.M. DINER — JUMPSUIT DOCKING ‘PERFECT’",
+      "subhead": "Area 51 traffic control denies ever hearing ‘Thank you, control tower, very much.’",
+      "byline": "By: Night Shift Desk",
+      "body": [
+        "A late‑night fly‑in rattled the aluminum napkin dispensers as a silver disc parallel‑parked between two pickup trucks.",
+        "Witnesses describe a velvet‑accented autopilot and a setlist timed to the dessert menu.",
+        "Officials insist it was ‘weather refraction’ and urge patrons to ignore the sequined flight manual."
+      ],
+      "imagePrompt": "{style}, diner parking lot, classic UFO gently landing, rhinestone jumpsuit reflection in chrome, flash glare",
+      "effects": {
+        "truthBuzz": 3
+      },
+      "tags": [
+        "elvis",
+        "ufo",
+        "diner",
+        "truth-combo"
+      ]
+    },
+    {
+      "comboId": "cmb-foia-vs-coverup",
+      "priority": 98,
+      "exclusive": true,
+      "when": {
+        "anyIds": [
+          "TRUTH-039",
+          "TRUTH-086"
+        ],
+        "anyTags": [
+          "coverup",
+          "bureaucracy"
+        ],
+        "opponentIds": [
+          "GOV-002",
+          "GOV-029",
+          "GOV-041",
+          "GOV-040"
+        ],
+        "minCards": 2,
+        "factions": [
+          "truth"
+        ]
+      },
+      "headline": "FOIA BLITZ SHREDS REDACTIONS — BLACK BARS PANIC, INK FLEES MARGINS",
+      "subhead": "Clerks report ‘stamp fatigue’ as disclosure avalanche buries conference room C.",
+      "byline": "By: Paperwork War Correspondent",
+      "body": [
+        "A cascade of requests detonated beneath a decades‑old memo dam, launching staplers into low orbit.",
+        "Redaction rectangles attempted to organize a sit‑in but were mistaken for modernist art and donated to a lobby.",
+        "Experts warn more paragraphs may come forward once they learn the word for ‘paragraph’."
+      ],
+      "imagePrompt": "{style}, file room snowed in by paper, black bars sliding off pages, frantic clerks, flash overexposure",
+      "effects": {
+        "truthBuzz": 2,
+        "ipSpin": -1
+      },
+      "tags": [
+        "foia",
+        "coverup-clash",
+        "truth-vs-gov"
+      ]
+    },
+    {
+      "comboId": "cmb-men-in-charcoal-vs-witness-parade",
+      "priority": 90,
+      "exclusive": false,
+      "when": {
+        "anyIds": [
+          "GOV-009",
+          "GOV-028",
+          "GOV-011"
+        ],
+        "opponentIds": [
+          "TRUTH-038",
+          "TRUTH-031",
+          "TRUTH-036"
+        ],
+        "minCards": 2,
+        "factions": [
+          "government"
+        ]
+      },
+      "headline": "MEN IN CHARCOAL ‘CORDIALLY MISPLACE’ WITNESSES — PARADE ROUTE DETOURS INTO BASEMENT",
+      "subhead": "City map now lists stairs as ‘scenic tunnel.’",
+      "byline": "By: Compliance Culture Critic",
+      "body": [
+        "A well‑organized witness parade was gently re‑filed behind a locked door labeled ‘empathy training.’",
+        "Participants emerged with clipboards, matching ties, and a new appreciation for indoor sunglasses.",
+        "Observers praised the efficiency, though some wondered why the confetti looked like shredded affidavits."
+      ],
+      "imagePrompt": "{style}, municipal basement hallway, polite agents with clipboards, parade float wedged in doorway, flash glare",
+      "effects": {
+        "truthBuzz": -2,
+        "ipSpin": 2
+      },
+      "tags": [
+        "coverup",
+        "parade",
+        "government-combo"
+      ]
+    },
+    {
+      "comboId": "cmb-haunted-walmart-trio",
+      "priority": 80,
+      "exclusive": false,
+      "when": {
+        "anyIds": [
+          "TRUTH-019"
+        ],
+        "anyTags": [
+          "ghost",
+          "zone"
+        ],
+        "minCards": 3,
+        "factions": [
+          "truth"
+        ]
+      },
+      "headline": "HAUNTED WALMART HOSTS MIDNIGHT SUMMIT — CARTS FORM PENTAGRAM IN AISLE 7",
+      "subhead": "Rollback on ectoplasm; clean‑up over PA system never ends.",
+      "byline": "By: Retail Occult Editor",
+      "body": [
+        "Security footage shows shopping carts arranging themselves into confidential patterns between seasonal displays.",
+        "Ghost hunters, coupon clippers, and one very confident grandma negotiated a cease‑boo around the freezer aisle.",
+        "Corporate denies paranormal activity but confirms a ‘spectral shrinkage’ line item."
+      ],
+      "imagePrompt": "{style}, fluorescent big‑box aisle, spectral carts in formation, blurred ghost hunters, harsh flash",
+      "effects": {
+        "truthBuzz": 2
+      },
+      "tags": [
+        "ghost",
+        "retail",
+        "truth-combo"
+      ]
+    },
+    {
+      "comboId": "cmb-mothman-bridge-alert",
+      "priority": 85,
+      "exclusive": false,
+      "when": {
+        "anyIds": [
+          "TRUTH-040",
+          "TRUTH-114"
+        ],
+        "anyTags": [
+          "mothman"
+        ],
+        "minCards": 2,
+        "factions": [
+          "truth"
+        ]
+      },
+      "headline": "MOTHMAN ISSUES PUBLIC WARNING — BRIDGE LIGHTS BLINK ‘DUCK’ IN MORSE",
+      "subhead": "Traffic app adds ‘ominous shimmer’ layer.",
+      "byline": "By: Omen Desk",
+      "body": [
+        "Local infrastructure developed a conscience as sodium lamps spelled cautionary verbs across the steelwork.",
+        "Commuters claimed their dashboards whispered coordinates, though GPS insisted it was ‘road work.’",
+        "Engineers recommend heeding winged advisories until further notice."
+      ],
+      "imagePrompt": "{style}, night bridge, winged silhouette near lamps, blinking lights captured by dashcam, grainy flash",
+      "effects": {
+        "truthBuzz": 2
+      },
+      "tags": [
+        "mothman",
+        "infrastructure",
+        "truth-combo"
+      ]
+    },
+    {
+      "comboId": "cmb-denver-bunker-plus-press",
+      "priority": 88,
+      "exclusive": true,
+      "when": {
+        "anyIds": [
+          "GOV-027",
+          "GOV-014",
+          "GOV-006"
+        ],
+        "minCards": 2,
+        "factions": [
+          "government"
+        ]
+      },
+      "headline": "DENVER AIRPORT BUNKER HOSTS ‘ART TOUR’ — PRESS POOL LOSES ENTRANCE TWICE",
+      "subhead": "Guide insists murals ‘just have layers.’",
+      "byline": "By: Culture Desk (Cleared)",
+      "body": [
+        "Reporters were escorted through a tasteful maze featuring tasteful doors that opened into tasteful identical rooms.",
+        "Public‑address system played ambient confidence while badges changed color every seven minutes.",
+        "Attendees left with souvenir blindfolds and a renewed appreciation for escalators to nowhere."
+      ],
+      "imagePrompt": "{style}, cavernous airport tunnel, press lanyards, murals with conspiratorial motifs, harsh security flash",
+      "effects": {
+        "truthBuzz": -2,
+        "ipSpin": 2
+      },
+      "tags": [
+        "denver",
+        "bunker",
+        "press",
+        "government-combo"
+      ]
+    },
+    {
+      "comboId": "cmb-pastor-rex-revival-chain",
+      "priority": 82,
+      "exclusive": false,
+      "when": {
+        "anyIds": [
+          "TRUTH-003",
+          "TRUTH-070"
+        ],
+        "minCards": 2,
+        "factions": [
+          "truth"
+        ]
+      },
+      "headline": "PASTOR REX REVIVAL GOES MEGAPHONIC — TENT PEWS VIBRATE WITH ‘DISCLOSURE’",
+      "subhead": "Congregation speaks in URLs.",
+      "byline": "By: Camp Meeting Stringer",
+      "body": [
+        "A canvas cathedral roared as portable amps translated prophecy into RSS feeds.",
+        "Vendors sold glow‑in‑the‑dark hymnals marked ‘beta’ while ushers calibrated the truth meter between songs.",
+        "Skeptics left clutching bumper stickers that read ‘I brake for revelations.’"
+      ],
+      "imagePrompt": "{style}, revival tent at night, portable speakers, ecstatic crowd, handheld flash",
+      "effects": {
+        "truthBuzz": 3
+      },
+      "tags": [
+        "pastor-rex",
+        "revival",
+        "truth-combo"
+      ]
+    },
+    {
+      "comboId": "cmb-florida-man-chaos-chain",
+      "priority": 78,
+      "exclusive": false,
+      "when": {
+        "anyTags": [
+          "florida-man"
+        ],
+        "minCards": 2,
+        "factions": [
+          "truth"
+        ]
+      },
+      "headline": "FLORIDA MAN DECLARES ‘OPEN SEASON ON SECRETS’ — GATOR WAVES TINY FLAG",
+      "subhead": "Authorities advise sunscreen, skepticism.",
+      "byline": "By: Panhandle Bureau",
+      "body": [
+        "A roadside attraction doubled as an impromptu press conference when a man in reflective swimwear unveiled a hand‑drawn conspiracy flowchart.",
+        "Spectators reported sudden humidity spikes whenever he said the word ‘cover‑up.’",
+        "Tourism officials are split on whether this counts as a festival."
+      ],
+      "imagePrompt": "{style}, swamp roadside mic stand, alligator with tiny flag, disposable camera glare",
+      "effects": {
+        "truthBuzz": 2
+      },
+      "tags": [
+        "florida-man",
+        "swamp",
+        "truth-combo"
+      ]
+    },
+    {
+      "comboId": "cmb-ghostly-intervention-plus-raid",
+      "priority": 76,
+      "exclusive": false,
+      "when": {
+        "anyIds": [
+          "TRUTH-044",
+          "TRUTH-034"
+        ],
+        "anyTags": [
+          "ghost"
+        ],
+        "minCards": 2,
+        "factions": [
+          "truth"
+        ]
+      },
+      "headline": "GHOSTLY INTERVENTION INTERRUPTS RAID — EVIDENCE FLOATS ITSELF TO FRONT PAGE",
+      "subhead": "Detectives relieved; staplers possessed.",
+      "byline": "By: Paranormal Desk",
+      "body": [
+        "Half the team filmed, the other half levitated.",
+        "Case files developed an afterlife, flipping to the incriminating paragraphs without human help.",
+        "A haunted hole punch awarded three extra binders to whoever said ‘please.’"
+      ],
+      "imagePrompt": "{style}, evidence room with floating files, team reacting, stark flash, swirling dust",
+      "effects": {
+        "truthBuzz": 2
+      },
+      "tags": [
+        "ghost",
+        "raid",
+        "truth-combo"
+      ]
+    },
+    {
+      "comboId": "cmb-press-pool-lockdown-vs-expose",
+      "priority": 84,
+      "exclusive": false,
+      "when": {
+        "anyIds": [
+          "GOV-039",
+          "GOV-040"
+        ],
+        "opponentIds": [
+          "TRUTH-033",
+          "TRUTH-010"
+        ],
+        "minCards": 2,
+        "factions": [
+          "government"
+        ]
+      },
+      "headline": "PRESS LOCKDOWN BACKFIRES — EXPOSÉ PRINTS ITSELF THROUGH SEALED DOOR",
+      "subhead": "Printer denies involvement, cites ‘free press clause.’",
+      "byline": "By: Spin Control",
+      "body": [
+        "A cordoned‑off press pool encountered an uncooperative laser printer that chose violence via duplex.",
+        "Security attempted to confiscate the paper, but it filed a restraining order in triplicate.",
+        "Witnesses swear the toner smelled like accountability."
+      ],
+      "imagePrompt": "{style}, locked briefing room, printer spitting pages under door, burst flash",
+      "effects": {
+        "truthBuzz": 1,
+        "ipSpin": -1
+      },
+      "tags": [
+        "press",
+        "lockdown",
+        "truth-vs-gov"
+      ]
+    },
+    {
+      "comboId": "cmb-state-bonus-chain",
+      "priority": 70,
+      "exclusive": false,
+      "when": {
+        "requiresStateEvent": true,
+        "minCards": 1
+      },
+      "headline": "STATE GOES STRANGE — BONUS CASCADES INTO TONIGHT’S EDITION",
+      "subhead": "Weather blames ley lines again.",
+      "byline": "By: Regional Weird Desk",
+      "body": [
+        "Local anomalies synchronized with the card plays, producing charts, graphs, and at least one haunted pie chart.",
+        "Experts caution that the effect will wear off when the map stops humming.",
+        "Residents demand a commemorative sticker."
+      ],
+      "imagePrompt": "{style}, US state outline overlay, glitchy weather radar, flash artifacts",
+      "effects": {
+        "truthBuzz": 1
+      },
+      "tags": [
+        "state-bonus",
+        "map",
+        "combo"
+      ]
+    }
+  ]
+}

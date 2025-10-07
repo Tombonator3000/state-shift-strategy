@@ -1,0 +1,357 @@
+{
+  "schemaVersion": 1,
+  "generated": "2025-10-07",
+  "license": "CC BY-SA 4.0",
+  "notes": {
+    "purpose": "Compose a single 'Extra Extra' main article from exactly three played cards.",
+    "integration": "Given 3 cards (with id, name, faction, type, tags), select the highest-priority matching template below and render headline/subhead/body/imagePrompt.",
+    "source_pools": [
+      "core_truth_MVP_balanced.json",
+      "core_government_MVP_balanced.json",
+      "cryptids.json",
+      "halloween_spooktacular_with_temp_image.json",
+      "paranoid_times_card_articles_ALL.json"
+    ],
+    "fallback_rule": "If no specific tag or mix pattern matches, use the 'generic' fallback."
+  },
+  "defaults": {
+    "imageStyle": "grainy 1990s black and white photo, halftone newspaper style, slightly out of focus",
+    "maxBodyParas": 4,
+    "byline": "By: Night Desk Composite Unit"
+  },
+  "lexicon": {
+    "verbs_truth": [
+      "exposes",
+      "uncovers",
+      "blows lid off",
+      "names names",
+      "goes viral",
+      "streams live"
+    ],
+    "verbs_gov": [
+      "downplays",
+      "seals",
+      "redirects",
+      "denies",
+      "classifies",
+      "contains"
+    ],
+    "joiners": [
+      " + ",
+      " & ",
+      " x "
+    ],
+    "ufo": [
+      "saucer",
+      "mothership",
+      "lights over stadium",
+      "tractor beam"
+    ],
+    "ghost": [
+      "ectoplasm",
+      "séance",
+      "cold spot",
+      "poltergeist"
+    ],
+    "bigfoot": [
+      "footprint",
+      "howl",
+      "forest line",
+      "camper witness"
+    ],
+    "mothman": [
+      "ominous shimmer",
+      "wingbeats",
+      "red eyes",
+      "bridge lights"
+    ],
+    "elvis": [
+      "jumpsuit",
+      "midnight set",
+      "peanut-butter pancakes",
+      "hologram mic"
+    ],
+    "florida_man": [
+      "airboat",
+      "gator",
+      "tinfoil visor",
+      "roadside podium"
+    ],
+    "coverup": [
+      "redactions",
+      "sealed room",
+      "clipboard choir",
+      "plausible denials"
+    ],
+    "bureaucracy": [
+      "triplicate forms",
+      "form 27-B/6",
+      "processing fee",
+      "compliance class"
+    ]
+  },
+  "rendering": {
+    "headline_format": "{KICKER} {MAIN} — {STINGER}",
+    "subhead_format": "{SUBA} {SUBB}",
+    "kickers": {
+      "truth": [
+        "EXTRA EXTRA",
+        "CITIZEN SCOOP",
+        "WITNESS WAVE"
+      ],
+      "government": [
+        "OFFICIAL VERSION",
+        "INTERNAL MEMO",
+        "NOT FOR PRINT"
+      ],
+      "mixed": [
+        "DUELING NARRATIVES",
+        "SPIN VS. SPILL",
+        "CONFLICTING REPORTS"
+      ]
+    },
+    "stingers": [
+      "NATION STARES, BLINKS TWICE",
+      "SOURCE: ‘THIS IS FINE’",
+      "UPSETTING TO PRINTERS",
+      "TRAFFIC DIVERTED TO OP-ED"
+    ]
+  },
+  "priority": [
+    "theme_cryptid_cluster",
+    "theme_halloween_cluster",
+    "mix_truth_vs_gov",
+    "mix_all_truth",
+    "mix_all_gov",
+    "type_zone_capture",
+    "type_attack_trade",
+    "generic"
+  ],
+  "templates": {
+    "theme_cryptid_cluster": [
+      {
+        "id": "ufo_elvis_combo",
+        "match": {
+          "tagsAny": [
+            "ufo",
+            "elvis"
+          ],
+          "minCount": 2
+        },
+        "headline": "{N1} + {N2}: ELVIS WAVES FROM SAUCER WINDOW",
+        "subhead": "Diner jukebox syncs with flight path; witnesses hum along.",
+        "imagePrompt": "{style}, diner parking lot, low hovering saucer, rhinestone gleam, handheld flash",
+        "body": [
+          "Three-card convergence rattled the neon as {N1}, {N2}, and {N3} aligned over chrome napkin dispensers.",
+          "Patrons report a {ufo} over the lot while an unmistakable {elvis} adjusted the mirror.",
+          "Authorities suggest ‘glare.’ The crowd suggests ‘encore.’"
+        ],
+        "factionHint": "truth"
+      },
+      {
+        "id": "bigfoot_batboy_combo",
+        "match": {
+          "tagsAny": [
+            "bigfoot",
+            "bat-boy"
+          ],
+          "minCount": 2
+        },
+        "headline": "BAT BOY & BIGFOOT IN ‘HAIR SUMMIT’ NEAR CAMPGROUND",
+        "subhead": "Handshake audible across the pines; {bigfoot} spotted posing politely.",
+        "imagePrompt": "{style}, forest clearing podium, disposable camera flash, shaggy silhouette, wide eyes",
+        "body": [
+          "Campers woke to a pop-up presser where {N1}, {N2}, and {N3} negotiated snack protocols.",
+          "Experts analyzed {bigfoot} samples and declared them ‘photogenic.’",
+          "Children asked for autographs; pens fled."
+        ],
+        "factionHint": "truth"
+      },
+      {
+        "id": "mothman_bridge_combo",
+        "match": {
+          "tagsAny": [
+            "mothman"
+          ],
+          "minCount": 1
+        },
+        "headline": "BRIDGE LIGHTS SPELL ‘DUCK’ AS MOTHMAN CIRCLES",
+        "subhead": "Dashcams capture {mothman}; engineers recommend ‘vibes-based caution.’",
+        "imagePrompt": "{style}, night bridge, blinking lamps, winged silhouette, grainy dashcam still",
+        "body": [
+          "A triple-play sequence drew eyes skyward as {N1}, {N2}, {N3} converged near the span.",
+          "Witnesses described {mothman} passing a message in Morse, then vanishing into the glare.",
+          "Officials cite routine testing; locals cite goosebumps."
+        ],
+        "factionHint": "truth"
+      }
+    ],
+    "theme_halloween_cluster": [
+      {
+        "id": "ghost_stack_combo",
+        "match": {
+          "tagsAny": [
+            "ghost",
+            "haunted",
+            "zombie"
+          ],
+          "minCount": 2
+        },
+        "headline": "HAUNTED TRIPLE-HEADER: EVIDENCE FLOATS ITSELF TO FRONT PAGE",
+        "subhead": "Custodian demands bonus for ‘poltergeist handling.’",
+        "imagePrompt": "{style}, evidence room, papers levitating, flashlight flare, dust motes",
+        "body": [
+          "Three-card chill swept the newsroom as {N1}, {N2}, and {N3} aligned.",
+          "A column of {ghost} stories rearranged into legible paragraphs without human intervention.",
+          "Management denies haunting; approves new staplers."
+        ],
+        "factionHint": "truth"
+      }
+    ],
+    "mix_truth_vs_gov": [
+      {
+        "id": "foia_vs_redaction",
+        "match": {
+          "truthIdsAny": [
+            "TRUTH-039",
+            "TRUTH-086"
+          ],
+          "govTagsAny": [
+            "coverup",
+            "bureaucracy"
+          ]
+        },
+        "headline": "FOIA AVALANCHE VS. BLACK BARS: PAPER CUTS EVERYWHERE",
+        "subhead": "Forms duel in triplicate; {coverup} retreats to the margins.",
+        "imagePrompt": "{style}, file room blizzard, redactions sliding off pages, burst flash",
+        "body": [
+          "Tonight’s triple-play pitted {N1} against {N2} while {N3} kept the copier screaming.",
+          "Eyewitnesses report paragraphs achieving self-awareness and requesting highlighters.",
+          "A spokesperson promised transparency after a short redaction."
+        ],
+        "factionHint": "mixed"
+      },
+      {
+        "id": "men_in_charcoal_vs_witness_wave",
+        "match": {
+          "govIdsAny": [
+            "GOV-009",
+            "GOV-028",
+            "GOV-011"
+          ],
+          "truthIdsAny": [
+            "TRUTH-031",
+            "TRUTH-036",
+            "TRUTH-038"
+          ]
+        },
+        "headline": "MEN IN CHARCOAL ‘REDIRECT’ WITNESS PARADE INTO BASEMENT",
+        "subhead": "Confetti suspiciously resembles shredded affidavits.",
+        "imagePrompt": "{style}, municipal stairwell, parade float at door, clipboard glare",
+        "body": [
+          "A coordinated three-card clash saw escorts with clipboards guide testimony toward a room marked ‘training.’",
+          "Participants emerged fluent in ‘no comment.’",
+          "Neighborhood kids rated the parade ‘too indoors.’"
+        ],
+        "factionHint": "mixed"
+      }
+    ],
+    "mix_all_truth": [
+      {
+        "id": "truth_triple_generic",
+        "match": {
+          "factions": [
+            "truth",
+            "truth",
+            "truth"
+          ]
+        },
+        "headline": "{N1} + {N2} + {N3}: CITIZEN SCOOP GOES SUPER-NOVA",
+        "subhead": "Sources whisper, cameras wobble, {verbs_truth} ensues.",
+        "imagePrompt": "{style}, parking-lot scrum, flashlight overexposure, homemade signs",
+        "body": [
+          "Three plays in quick succession sent the truth meter tapping its own foot.",
+          "Witness audio captured overlapping gasps and the word ‘finally’ stretched into three syllables.",
+          "Experts predict more leaks at eleven-ish."
+        ],
+        "factionHint": "truth"
+      }
+    ],
+    "mix_all_gov": [
+      {
+        "id": "gov_triple_generic",
+        "match": {
+          "factions": [
+            "government",
+            "government",
+            "government"
+          ]
+        },
+        "headline": "{N1} • {N2} • {N3}: OFFICIAL STORY NOW WITH EXTRA SEALS",
+        "subhead": "Public advised to remain calm and appreciate {bureaucracy}.",
+        "imagePrompt": "{style}, press room with many seals, harsh flash, sunglasses indoors",
+        "body": [
+          "Three synchronized measures rolled out across identical podiums.",
+          "Briefings were issued, reissued, then issued again to improve consistency.",
+          "Reporters praised the clarity of the fog machine."
+        ],
+        "factionHint": "government"
+      }
+    ],
+    "type_zone_capture": [
+      {
+        "id": "zone_capture_chain",
+        "match": {
+          "types": [
+            "ZONE",
+            "ZONE",
+            "ZONE"
+          ]
+        },
+        "headline": "THREE ZONES, ONE MAP: PRESSURE COOKER HITS WHISTLE-TONE",
+        "subhead": "Cartographers request overtime; pins multiply on their own.",
+        "imagePrompt": "{style}, US map with pushpins, overhead flash, hands pointing",
+        "body": [
+          "A trio of ZONE plays rattled the borders as {N1}, {N2}, {N3} carved initials into the map legend.",
+          "Locals reported faint humming and a desire to sort paperwork by county.",
+          "Rangers announced a commemorative sticker series."
+        ],
+        "factionHint": "mixed"
+      }
+    ],
+    "type_attack_trade": [
+      {
+        "id": "attack_crossfire",
+        "match": {
+          "typesAnyCount": {
+            "ATTACK": 2
+          }
+        },
+        "headline": "CROSSFIRE OF LEAKS: TWO ATTACKS AND A {T3} CHANGE THE NARRATIVE",
+        "subhead": "Glass case labeled ‘normalcy’ shatters politely.",
+        "imagePrompt": "{style}, office hallway, scattered files, motion blur people, flash flare",
+        "body": [
+          "Two punches landed while a third card {verbs_truth} what was left of the storyline.",
+          "Analysts advise hydrating and labeling one’s emotions.",
+          "By morning, someone will claim this was always the plan."
+        ],
+        "factionHint": "mixed"
+      }
+    ],
+    "generic": [
+      {
+        "id": "fallback_generic",
+        "match": {},
+        "headline": "{N1} + {N2} + {N3}: STORY TRIANGLE ROCKS THE EDITION",
+        "subhead": "All signs point to ‘unprecedented,’ again.",
+        "imagePrompt": "{style}, newsroom chaos, stacked front pages, blinding flash",
+        "body": [
+          "Three-card chain reaction produced overlapping headlines and incompatible alibis.",
+          "Our interns connected yarn between the clippings until it spelled ‘yikes.’",
+          "Refresh for more as the plot refuses to sit still."
+        ],
+        "factionHint": "mixed"
+      }
+    ]
+  }
+}
