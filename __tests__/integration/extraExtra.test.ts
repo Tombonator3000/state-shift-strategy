@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import * as actualFrontendNewsPools from '../../src/news/newsPools';
 import type { Card, GameState } from '../../src/mvp/validator';
 import type { TurnLog, PlayedLite } from '../../src/news/headlineEngine';
 
@@ -20,35 +19,10 @@ const stubPools = {
   weather: ['Calm Skies'],
 } as const;
 
-const createMockFn = <Args extends unknown[], Return>(
-  implementation: (...args: Args) => Return,
-) => {
-  const fn = ((...args: Args) => {
-    fn.mock.calls.push(args);
-    return fn.mock.impl(...args);
-  }) as ((...args: Args) => Return) & {
-    mock: { calls: Args[]; impl: (...innerArgs: Args) => Return };
-    mockImplementation: (impl: (...innerArgs: Args) => Return) => void;
-    mockReset: () => void;
-  };
-
-  fn.mock = { calls: [] as Args[], impl: implementation };
-  fn.mockImplementation = (impl: (...innerArgs: Args) => Return) => {
-    fn.mock.impl = impl;
-  };
-  fn.mockReset = () => {
-    fn.mock.calls = [];
-    fn.mock.impl = implementation;
-  };
-
-  return fn;
-};
-
-const getPoolsMock = createMockFn(() => stubPools);
-const getPoolsIfReadyMock = createMockFn(() => stubPools);
+const getPoolsMock = mock.fn(() => stubPools);
+const getPoolsIfReadyMock = mock.fn(() => stubPools);
 
 mock.module('@/news/newsPools', () => ({
-  ...actualFrontendNewsPools,
   getPools: getPoolsMock,
   getPoolsIfReady: getPoolsIfReadyMock,
 }));
@@ -143,11 +117,11 @@ describe('extra extra integration', () => {
       turn: state.turn,
       plays: state.turnBuffer,
     };
-    const evaluation = evaluateExtraExtra(state.turnBuffer, { seed: 'mvp:P1:1' });
+    const evaluation = evaluateExtraExtra(state.turnBuffer);
     expect(evaluation.trigger).toBe(true);
     const focusLog: TurnLog = { ...pendingLog, plays: evaluation.focusPlays };
     const totals = summarize([focusLog]);
-    const expectedArticle = generateExtraExtra('mvp:P1:1', [focusLog], totals, evaluation);
+    const expectedArticle = generateExtraExtra('mvp:P1:1', [focusLog], totals);
 
     const { state: endedState } = endTurn(state, []);
 
@@ -156,15 +130,11 @@ describe('extra extra integration', () => {
       'Turn 1 recap: Truth plays 3, Government plays 0',
     ]);
     expect(endedState.truth).toBe(53);
-    expect(endedState.extraExtraFeed[0]?.tone).toBe(expectedArticle.tone);
+    expect(endedState.extraExtraFeed[0]?.tone).toBe('truth');
   });
 
   it('falls back to a placeholder headline when pools are unavailable', async () => {
-    const originalWarn = console.warn;
-    const warnings: unknown[][] = [];
-    console.warn = (...args: unknown[]) => {
-      warnings.push(args);
-    };
+    const warnMock = mock.method(console, 'warn');
     getPoolsIfReadyMock.mockImplementation(() => null);
     getPoolsMock.mockImplementation(() => {
       throw new Error('getPools should not be called when pools are unavailable');
@@ -227,11 +197,11 @@ describe('extra extra integration', () => {
         turn: state.turn,
         plays: state.turnBuffer,
       };
-      const evaluation = evaluateExtraExtra(state.turnBuffer, { seed: 'mvp:P1:1' });
+      const evaluation = evaluateExtraExtra(state.turnBuffer);
       expect(evaluation.trigger).toBe(true);
       const focusLog: TurnLog = { ...pendingLog, plays: evaluation.focusPlays };
       const totals = summarize([focusLog]);
-      const expectedArticle = generateExtraExtra('mvp:P1:1', [focusLog], totals, evaluation);
+      const expectedArticle = generateExtraExtra('mvp:P1:1', [focusLog], totals);
 
       const { state: endedState } = endTurn(state, []);
 
@@ -241,9 +211,9 @@ describe('extra extra integration', () => {
         'Turn 1 recap: Truth plays 3, Government plays 0',
       ]);
       expect(endedState.truth).toBe(53);
-      expect(warnings.length).toBeGreaterThan(0);
+      expect(warnMock.mock.calls.length).toBeGreaterThan(0);
     } finally {
-      console.warn = originalWarn;
+      warnMock.mockRestore();
     }
   });
 
@@ -266,13 +236,13 @@ describe('extra extra integration', () => {
       plays,
     };
 
-    const evaluation = evaluateExtraExtra(plays, { seed: 'mvp:P1:1' });
+    const evaluation = evaluateExtraExtra(plays);
     expect(evaluation.trigger).toBe(true);
     expect(evaluation.winningFaction).toBe('government');
 
     const focusLog: TurnLog = { ...pendingLog, plays: evaluation.focusPlays };
     const totals = summarize([focusLog]);
-    const expectedArticle = generateExtraExtra('mvp:P1:1', [focusLog], totals, evaluation);
+    const expectedArticle = generateExtraExtra('mvp:P1:1', [focusLog], totals);
 
     const state: GameState = {
       turn: 1,
@@ -315,7 +285,7 @@ describe('extra extra integration', () => {
     const { state: endedState } = endTurn(state, []);
 
     expect(endedState.extraExtraFeed).toEqual([expectedArticle]);
-    expect(endedState.extraExtraFeed[0]?.tone).toBe(expectedArticle.tone);
+    expect(endedState.extraExtraFeed[0]?.tone).toBe('government');
     expect(endedState.truth).toBe(47);
     expect(endedState.headlineLog).toEqual([
       'Turn 1 recap: Truth plays 3, Government plays 3',

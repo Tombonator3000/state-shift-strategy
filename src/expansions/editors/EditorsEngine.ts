@@ -62,13 +62,10 @@ export const gatherEditorSetupAdjustments = (
   editor: EditorDefinition | null | undefined,
 ): EditorSetupAdjustments => {
   const aggregated = getEditorAggregatedEffects(editor ?? undefined);
-  const startCards = Array.isArray(aggregated?.startCards)
-    ? aggregated.startCards
-    : [];
   return {
     ipDelta: aggregated.startIpDelta,
     deckSizeDelta: aggregated.deckSizeDelta,
-    addCardIds: [...new Set(startCards)],
+    addCardIds: [...new Set(aggregated.startCards)],
   };
 };
 

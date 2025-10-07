@@ -86,10 +86,11 @@ import {
 import { assignStateBonuses } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from './stateBonusAssignment';
 import { clearNewsBuffer, getNewsTriplet, pushToNewsBuffer } from '@/state/game/roundNewsBuffer';
-import { summarize, generateExtraExtra, evaluateExtraExtra } from '@/news/headlineEngine';
+import { summarize, generateExtraExtra, evaluateExtraExtra, hashSeed } from '@/news/headlineEngine';
 import { loadNewsPools } from '@/news/newsPools';
 import type { ArticleBlock, TurnLog, PlayedLite } from '@/news/headlineEngine';
-import { initNewsPools } from '@/engine/news/newsPools';
+import { composeTripleHeadline, type NewsCardLite } from '@/engine/news/composeTriple';
+import { getPerCardArticlesIfReady, initNewsPools } from '@/engine/news/newsPools';
 import type { GameOverReport } from '@/types/finalEdition';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
@@ -438,13 +439,92 @@ const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): Ga
   const headlineLog = [...next.headlineLog, summaryHeadline];
 
   let extraExtraFeed = next.extraExtraFeed;
-  const evaluationSeed = `${seedPrefix}:${prev.round}:${prev.turn}`;
-  const evaluation = evaluateExtraExtra(buffer, { seed: evaluationSeed });
+  const evaluation = evaluateExtraExtra(buffer);
 
   if (evaluation.trigger) {
     const focusLog: TurnLog = { ...turnLog, plays: evaluation.focusPlays };
     const focusTotals = summarize([focusLog]);
-    const article = generateExtraExtra(`${seedPrefix}:${prev.round}:${prev.turn}`, [focusLog], focusTotals, evaluation);
+    const article = generateExtraExtra(`${seedPrefix}:${prev.round}:${prev.turn}`, [focusLog], focusTotals);
+
+    const perCardArticles = getPerCardArticlesIfReady();
+    if (perCardArticles) {
+      const collectFactionTrio = (plays: PlayedLite[], faction: 'truth' | 'government'): PlayedLite[] => {
+        const trio: PlayedLite[] = [];
+        for (const play of plays) {
+          if (play.faction !== faction) {
+            continue;
+          }
+          trio.push(play);
+          if (trio.length >= 3) {
+            break;
+          }
+        }
+        return trio;
+      };
+
+      const toNewsCard = (play: PlayedLite): NewsCardLite => {
+        const entry = perCardArticles.get(play.id);
+        return {
+          id: play.id,
+          name: play.name,
+          faction: play.faction,
+          type: play.type,
+          tags: entry?.tags ?? [],
+        } satisfies NewsCardLite;
+      };
+
+      const truthTrio = collectFactionTrio(buffer, 'truth');
+      const governmentTrio = collectFactionTrio(buffer, 'government');
+      const truthCards = truthTrio.length >= 3 ? truthTrio.slice(0, 3).map(toNewsCard) : [];
+      const governmentCards = governmentTrio.length >= 3 ? governmentTrio.slice(0, 3).map(toNewsCard) : [];
+
+      let focusCards: NewsCardLite[] | null = null;
+      let opponentCards: NewsCardLite[] = [];
+
+      if (evaluation.winningFaction === 'truth') {
+        focusCards = truthCards.length === 3 ? truthCards : null;
+        opponentCards = governmentCards;
+      } else if (evaluation.winningFaction === 'government') {
+        focusCards = governmentCards.length === 3 ? governmentCards : null;
+        opponentCards = truthCards;
+      } else {
+        if (truthCards.length === 3) {
+          focusCards = truthCards;
+          opponentCards = governmentCards;
+        } else if (governmentCards.length === 3) {
+          focusCards = governmentCards;
+          opponentCards = truthCards;
+        }
+      }
+
+      if ((!focusCards || focusCards.length !== 3) && evaluation.focusPlays.length >= 3) {
+        focusCards = evaluation.focusPlays.slice(0, 3).map(toNewsCard);
+      }
+
+      if (focusCards && focusCards.length === 3) {
+        const seed = hashSeed(`${seedPrefix}:${prev.round}:${prev.turn}:triple`);
+        const tripleArticle = composeTripleHeadline(focusCards, opponentCards, { seed });
+        if (tripleArticle) {
+          if (typeof console !== 'undefined' && typeof console.debug === 'function') {
+            const signature = focusCards.map(card => card.id).join(',');
+            const marker = tripleArticle.comboId ?? tripleArticle.templateId ?? 'template';
+            console.debug(`NEWS: triple-main ${signature} -> ${marker}`);
+          }
+          article.hed = tripleArticle.hed;
+          article.dek = tripleArticle.dek;
+          article.tone = tripleArticle.tone;
+          article.bullets = tripleArticle.bullets.length ? tripleArticle.bullets : article.bullets;
+          article.byline = tripleArticle.byline ?? article.byline;
+          article.source = tripleArticle.source ?? article.source;
+          article.body = tripleArticle.body && tripleArticle.body.length ? tripleArticle.body : undefined;
+          article.imagePrompt = tripleArticle.imagePrompt ?? article.imagePrompt;
+          article.kicker = tripleArticle.kicker ?? article.kicker;
+          article.stinger = tripleArticle.stinger ?? article.stinger;
+          article.templateId = tripleArticle.templateId ?? article.templateId;
+          article.comboId = tripleArticle.comboId ?? article.comboId;
+        }
+      }
+    }
 
     extraExtraFeed = [...extraExtraFeed, article];
 

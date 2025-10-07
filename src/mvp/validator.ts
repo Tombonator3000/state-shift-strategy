@@ -579,12 +579,6 @@ export function cloneGameState(state: GameState): GameState {
       bullets: [...article.bullets],
       byline: article.byline,
       source: article.source,
-      ...(article.body ? { body: [...article.body] } : {}),
-      ...(article.imagePrompt ? { imagePrompt: article.imagePrompt } : {}),
-      ...(article.kicker ? { kicker: article.kicker } : {}),
-      ...(article.stinger ? { stinger: article.stinger } : {}),
-      ...(article.templateId ? { templateId: article.templateId } : {}),
-      ...(article.comboId ? { comboId: article.comboId } : {}),
     })),
     turnBuffer: state.turnBuffer.map(play => ({ ...play })),
     turnPlays: state.turnPlays.map(play => ({

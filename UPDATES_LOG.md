@@ -2,10 +2,6 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
-## 2025-10-28 – Stabilize editor start-card dossiers
-- Patched the editor effect aggregation and setup adjustments to tolerate dossiers missing `startCards`, preventing crash loops
-  when launching a run with minimalist government handlers.
-
 ## 2025-10-27 – Harden editor start-card dossiers
 - Guarded the editor effect merger so dossiers without explicit start-card arrays no longer crash the run phase when ops flip
   between classified profiles.

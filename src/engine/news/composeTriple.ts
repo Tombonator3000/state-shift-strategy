@@ -1,7 +1,5 @@
 import type { ArticleBlock as ExtraArticleBlock } from '@/news/headlineEngine';
 
-export type ArticleBlock = ExtraArticleBlock;
-
 import {
   getComboBankIfReady,
   getTripleBankIfReady,

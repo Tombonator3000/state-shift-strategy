@@ -1,5 +1,3 @@
-import { composeTripleHeadline, type ArticleBlock as TripleArticleBlock, type NewsCardLite } from '@/engine/news/composeTriple';
-import { getPerCardArticlesIfReady } from '@/engine/news/newsPools';
 import { getPools, getPoolsIfReady } from '@/news/newsPools';
 
 const FALLBACK_DEK_POOL = [
@@ -73,12 +71,6 @@ export interface ExtraExtraOutcome {
   winningFaction: 'truth' | 'government' | 'draw';
   focusPlays: PlayedLite[];
   truthDelta: number;
-  winnerCards: NewsCardLite[] | null;
-  opponentCards: NewsCardLite[] | null;
-  composedMain: TripleArticleBlock | null;
-  dispatches: ArticleBlock[];
-  composeSeed: number | null;
-  composeSignature: string | null;
 }
 
 const computePlayValue = (play: PlayedLite): number => {
@@ -168,10 +160,7 @@ const highestFactionValue = (plays: PlayedLite[]): number => {
   }, 0);
 };
 
-export const evaluateExtraExtra = (
-  plays: PlayedLite[],
-  options?: { seed?: string | number },
-): ExtraExtraOutcome => {
+export const evaluateExtraExtra = (plays: PlayedLite[]): ExtraExtraOutcome => {
   const truthTrio = collectFactionTrio(plays, 'truth');
   const governmentTrio = collectFactionTrio(plays, 'government');
 
@@ -184,179 +173,56 @@ export const evaluateExtraExtra = (
       winningFaction: 'draw',
       focusPlays: [],
       truthDelta: 0,
-      winnerCards: null,
-      opponentCards: null,
-      composedMain: null,
-      dispatches: [],
-      composeSeed: null,
-      composeSignature: null,
     };
   }
 
-  const enrich = (base: {
-    trigger: boolean;
-    winningFaction: 'truth' | 'government' | 'draw';
-    focusPlays: PlayedLite[];
-    truthDelta: number;
-  }): ExtraExtraOutcome => {
-    if (!base.trigger) {
-      return {
-        ...base,
-        winnerCards: null,
-        opponentCards: null,
-        composedMain: null,
-        dispatches: [],
-        composeSeed: null,
-        composeSignature: null,
-      } satisfies ExtraExtraOutcome;
-    }
-
-    const perCardArticles = getPerCardArticlesIfReady();
-
-    const toNewsCard = (play: PlayedLite): NewsCardLite => {
-      const entry = perCardArticles?.get(play.id);
-      const tags = entry?.tags ?? [];
-      return {
-        id: play.id,
-        name: play.name,
-        faction: play.faction,
-        type: play.type,
-        tags: [...tags],
-      } satisfies NewsCardLite;
-    };
-
-    const toDispatchArticle = (play: PlayedLite): ArticleBlock | null => {
-      const entry = perCardArticles?.get(play.id);
-      const hed = entry?.headline?.trim();
-      if (!hed) {
-        return null;
-      }
-      const dek = entry?.subhead?.trim() ?? '';
-      const byline = entry?.byline?.trim() ?? 'By: Field Desk';
-      const bodyLines = typeof entry?.body === 'string'
-        ? entry!.body.split(/\n+/).map(line => line.trim()).filter(Boolean)
-        : [];
-      const article: ArticleBlock = {
-        tone: entry?.tone ?? play.faction,
-        hed,
-        dek,
-        bullets: [],
-        byline,
-        source: 'Source: Field Dispatch',
-      } satisfies ArticleBlock;
-      if (bodyLines.length) {
-        article.body = bodyLines;
-      }
-      if (entry?.imagePrompt) {
-        article.imagePrompt = entry.imagePrompt;
-      }
-      return article;
-    };
-
-    const truthCards = truthTrio.slice(0, 3).map(toNewsCard);
-    const governmentCards = governmentTrio.slice(0, 3).map(toNewsCard);
-    const truthHasTrio = truthCards.length === 3;
-    const governmentHasTrio = governmentCards.length === 3;
-
-    let winnerCards: NewsCardLite[] | null = null;
-    let opponentCards: NewsCardLite[] | null = null;
-
-    if (base.winningFaction === 'truth') {
-      winnerCards = truthHasTrio ? truthCards : null;
-      opponentCards = governmentHasTrio ? governmentCards : null;
-    } else if (base.winningFaction === 'government') {
-      winnerCards = governmentHasTrio ? governmentCards : null;
-      opponentCards = truthHasTrio ? truthCards : null;
-    } else {
-      if (truthHasTrio) {
-        winnerCards = truthCards;
-        opponentCards = governmentHasTrio ? governmentCards : null;
-      } else if (governmentHasTrio) {
-        winnerCards = governmentCards;
-        opponentCards = truthHasTrio ? truthCards : null;
-      }
-    }
-
-    if ((!winnerCards || winnerCards.length !== 3) && base.focusPlays.length >= 3) {
-      winnerCards = base.focusPlays.slice(0, 3).map(toNewsCard);
-    }
-
-    const composeSignature = winnerCards && winnerCards.length === 3
-      ? winnerCards.map(card => card.id).join(',')
-      : null;
-
-    let composeSeed: number | null = null;
-    let composedMain: TripleArticleBlock | null = null;
-
-    if (winnerCards && winnerCards.length === 3) {
-      const seedInput = options?.seed ?? composeSignature ?? '';
-      composeSeed = typeof seedInput === 'number' ? seedInput : hashSeed(String(seedInput));
-      const opponent = opponentCards && opponentCards.length ? opponentCards : null;
-      composedMain = composeTripleHeadline(winnerCards, opponent, { seed: composeSeed }) ?? null;
-    }
-
-    const dispatches = base.focusPlays
-      .map(toDispatchArticle)
-      .filter((article): article is ArticleBlock => article != null);
-
-    return {
-      ...base,
-      winnerCards,
-      opponentCards,
-      composedMain,
-      dispatches,
-      composeSeed,
-      composeSignature,
-    } satisfies ExtraExtraOutcome;
-  };
-
   if (truthQualifies && !governmentQualifies) {
-    return enrich({
+    return {
       trigger: true,
       winningFaction: 'truth',
       focusPlays: truthTrio,
       truthDelta: 3,
-    });
+    };
   }
 
   if (!truthQualifies && governmentQualifies) {
-    return enrich({
+    return {
       trigger: true,
       winningFaction: 'government',
       focusPlays: governmentTrio,
       truthDelta: -3,
-    });
+    };
   }
 
   const truthValue = highestFactionValue(truthTrio);
   const governmentValue = highestFactionValue(governmentTrio);
 
   if (truthValue > governmentValue) {
-    return enrich({
+    return {
       trigger: true,
       winningFaction: 'truth',
       focusPlays: truthTrio,
       truthDelta: 3,
-    });
+    };
   }
 
   if (governmentValue > truthValue) {
-    return enrich({
+    return {
       trigger: true,
       winningFaction: 'government',
       focusPlays: governmentTrio,
       truthDelta: -3,
-    });
+    };
   }
 
   const focusPlays = collectDrawFocus(plays);
 
-  return enrich({
+  return {
     trigger: true,
     winningFaction: 'draw',
     focusPlays,
     truthDelta: 0,
-  });
+  };
 };
 
 export interface ArticleBlock {
@@ -762,75 +628,11 @@ export const generateExtraExtra = (
   seed: string,
   turns: TurnLog[],
   totalsArg?: TurnTotals,
-  evaluation?: ExtraExtraOutcome,
 ): ArticleBlock => {
   const totals = totalsArg ?? summarize(turns);
   const tone = dominantFromTotals(totals);
   const rng = mulberry32(hashSeed(`extra:${seed}`));
   const pools = getPoolsIfReady();
-
-  const applyComposedArticle = (article: ArticleBlock, composed: TripleArticleBlock): ArticleBlock => {
-    const next: ArticleBlock = {
-      ...article,
-      tone: composed.tone,
-      hed: composed.hed,
-      dek: composed.dek,
-      bullets: ensureBulletFallback([...composed.bullets], composed.tone),
-      byline: composed.byline ?? article.byline,
-      source: composed.source ?? article.source,
-    } satisfies ArticleBlock;
-
-    if (composed.body && composed.body.length) {
-      next.body = [...composed.body];
-    } else {
-      next.body = undefined;
-    }
-
-    if (composed.imagePrompt) {
-      next.imagePrompt = composed.imagePrompt;
-    } else if (article.imagePrompt) {
-      next.imagePrompt = article.imagePrompt;
-    }
-
-    if (composed.kicker) {
-      next.kicker = composed.kicker;
-    } else if (article.kicker) {
-      next.kicker = article.kicker;
-    }
-
-    if (composed.stinger) {
-      next.stinger = composed.stinger;
-    } else if (article.stinger) {
-      next.stinger = article.stinger;
-    }
-
-    if (composed.templateId) {
-      next.templateId = composed.templateId;
-    } else if (article.templateId) {
-      next.templateId = article.templateId;
-    }
-
-    if (composed.comboId) {
-      next.comboId = composed.comboId;
-    } else if (article.comboId) {
-      next.comboId = article.comboId;
-    }
-
-    return next;
-  };
-
-  const applyDispatchFallback = (fallback: ArticleBlock): ArticleBlock => {
-    const copy: ArticleBlock = {
-      ...fallback,
-      bullets: ensureBulletFallback([...fallback.bullets], fallback.tone),
-    } satisfies ArticleBlock;
-    if (fallback.body) {
-      copy.body = [...fallback.body];
-    }
-    return copy;
-  };
-
-  let article: ArticleBlock;
 
   if (!pools) {
     console.warn('generateExtraExtra: news pools not ready, using placeholder article.');
@@ -839,56 +641,36 @@ export const generateExtraExtra = (
     const byline = pick(FALLBACK_BYLINES, rng, FALLBACK_BYLINES[0]);
     const source = pick(FALLBACK_SOURCES, rng, FALLBACK_SOURCES[0]);
     const bullets = buildBullets(turns, totals, tone, rng);
-    article = {
+
+    return {
       tone,
       hed,
       dek,
       bullets,
       byline,
       source,
-    } satisfies ArticleBlock;
-  } else {
-    const dominantType = getDominantType(totals, tone);
-    const typeKey = dominantType === 'ATTACK' ? 'attack' : dominantType === 'MEDIA' ? 'media' : 'zone';
-    const subheadPool = [...pools.subheads.generic];
-    if (typeKey && pools.subheads[typeKey]) {
-      subheadPool.push(...pools.subheads[typeKey]);
-    }
-    const hed = buildHed(tone, totals, rng);
-    const dek = pick(subheadPool, rng, 'Sources refuse to elaborate.');
-    const byline = pick(pools.bylines, rng, 'By: Anonymous Insider');
-    const source = pick(pools.sources, rng, 'Source: Redacted');
-    const bullets = buildBullets(turns, totals, tone, rng);
-
-    article = {
-      tone,
-      hed,
-      dek,
-      bullets,
-      byline,
-      source,
-    } satisfies ArticleBlock;
+    };
   }
-
-  if (pools && evaluation?.composedMain) {
-    article = applyComposedArticle(article, evaluation.composedMain);
-    if (typeof console !== 'undefined' && typeof console.debug === 'function') {
-      const signature = evaluation.composeSignature ?? 'n/a';
-      const marker = evaluation.composedMain.comboId ?? evaluation.composedMain.templateId ?? 'template';
-      console.debug(`NEWS: triple-main ${signature} -> ${marker}`);
-    }
-  } else if (pools && evaluation?.dispatches?.length) {
-    const fallback = evaluation.dispatches[0];
-    article = applyDispatchFallback(fallback);
-    if (typeof console !== 'undefined' && typeof console.info === 'function') {
-      const signature = evaluation.composeSignature ?? 'n/a';
-      console.info(`NEWS: triple-fallback ${signature} -> dispatch:${fallback.hed}`);
-    }
+  const dominantType = getDominantType(totals, tone);
+  const typeKey = dominantType === 'ATTACK' ? 'attack' : dominantType === 'MEDIA' ? 'media' : 'zone';
+  const subheadPool = [...pools.subheads.generic];
+  if (typeKey && pools.subheads[typeKey]) {
+    subheadPool.push(...pools.subheads[typeKey]);
   }
+  const hed = buildHed(tone, totals, rng);
+  const dek = pick(subheadPool, rng, 'Sources refuse to elaborate.');
+  const byline = pick(pools.bylines, rng, 'By: Anonymous Insider');
+  const source = pick(pools.sources, rng, 'Source: Redacted');
+  const bullets = buildBullets(turns, totals, tone, rng);
 
-  article.bullets = ensureBulletFallback(article.bullets, article.tone);
-
-  return article;
+  return {
+    tone,
+    hed,
+    dek,
+    bullets,
+    byline,
+    source,
+  };
 };
 
 export const buildFinalEdition = (seed: string, turns: TurnLog[]): FinalEdition => {
