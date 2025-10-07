@@ -10,6 +10,7 @@ import { X, Trophy, Star, Target, Zap, Users, BookOpen, Eye, Download, Upload, R
 import { ACHIEVEMENTS, type Achievement } from '@/data/achievementSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
 import { useToast } from '@/hooks/use-toast';
+import { getBroadsheetRarityTone } from '@/utils/broadsheet';
 
 interface AchievementsSectionProps {
   onClose?: () => void;
@@ -73,19 +74,6 @@ export const AchievementsSection = ({
         return 'border border-fuchsia-400/60 bg-fuchsia-500/15 text-fuchsia-200';
       default:
         return 'border border-slate-500/60 bg-slate-900/60 text-slate-300';
-    }
-  };
-
-  const getBroadsheetRarityTone = (rarity: string) => {
-    switch (rarity) {
-      case 'legendary':
-        return 'border-[#3c3a8f] bg-[#e3e0f7] text-[#25206a]';
-      case 'rare':
-        return 'border-[#1f5d82] bg-[#d3e5f2] text-[#123b53]';
-      case 'uncommon':
-        return 'border-[#2f6f3a] bg-[#d6edd9] text-[#1f4b24]';
-      default:
-        return 'border-[var(--broadsheet-rule)] bg-white text-[var(--broadsheet-muted)]';
     }
   };
 

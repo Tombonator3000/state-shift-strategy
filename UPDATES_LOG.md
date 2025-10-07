@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-25 – Restore broadsheet rarity badges
+- Centralized the broadsheet rarity tone helper so achievement and card archives share the same palette without runtime errors.
+- Confirmed the broadsheet card catalogue loads without the missing `getBroadsheetRarityTone` reference.
+
 ## 2025-10-24 – Dress the editor dossiers for assignment
 - Restyled the editor selection flow as an opened case file—complete with photo placeholders—so players feel like they are
   thumbing through a classified suspect folder before launch.

@@ -12,6 +12,7 @@ import { useCardCollection } from '@/hooks/useCardCollection';
 import type { GameCard, MVPCardType } from '@/rules/mvp';
 import { MVP_CARD_TYPES } from '@/rules/mvp';
 import CardDetailOverlay from '@/components/game/CardDetailOverlay';
+import { getBroadsheetRarityTone } from '@/utils/broadsheet';
 
 interface CardCollectionContentProps {
   isActive?: boolean;
