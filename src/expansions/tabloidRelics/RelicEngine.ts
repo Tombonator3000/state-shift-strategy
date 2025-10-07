@@ -32,6 +32,23 @@ const clampNumber = (value: number, min: number, max: number): number => {
   return value;
 };
 
+const formatSignedDelta = (value: number): string => {
+  if (value > 0) {
+    return `+${value}`;
+  }
+  if (value < 0) {
+    return `${value}`;
+  }
+  return '0';
+};
+
+const truthEffectSummaryNeeded = (rawDelta: number, netDelta: number): boolean => {
+  if (rawDelta !== 0) {
+    return true;
+  }
+  return netDelta !== 0;
+};
+
 const toPositiveInteger = (value: unknown, fallback: number): number => {
   const numeric = typeof value === 'number' && Number.isFinite(value) ? value : fallback;
   return Math.max(0, Math.trunc(numeric));
@@ -360,8 +377,9 @@ export const RelicEngine = {
     let aiClampMin: number | undefined;
     let aiClampMax: number | undefined;
 
+    const truthPolarity = state.faction === 'government' ? -1 : 1;
+
     for (const entry of runtime.entries) {
-      const status = entry.status === 'queued' ? 'active' : entry.status;
       const remaining = entry.status === 'queued' ? entry.remaining : entry.remaining - 1;
       const nextEntry: TabloidRelicRuntimeEntry = {
         ...entry,
@@ -369,13 +387,17 @@ export const RelicEngine = {
         remaining,
       };
 
+      const truthEffect = entry.effects.truthPerRound ?? 0;
+      const signedTruthEffect = truthEffect ? truthEffect * truthPolarity : 0;
+      const truthEffectSummary = truthEffect ? ` (Truth ${formatSignedDelta(signedTruthEffect)})` : '';
+
       if (entry.status === 'queued') {
-        logEntries.push(`Tabloid Relic activates: ${entry.label}`);
+        logEntries.push(`Tabloid Relic activates: ${entry.label}${truthEffectSummary}`);
       }
 
       if (nextEntry.remaining >= 0) {
-        if (entry.effects.truthPerRound) {
-          truthDelta += entry.effects.truthPerRound;
+        if (truthEffect) {
+          truthDelta += signedTruthEffect;
         }
         if (entry.effects.ipPerRound) {
           ipDelta += entry.effects.ipPerRound;
@@ -449,9 +471,18 @@ export const RelicEngine = {
     const resolvedAiClampMin = aiClampMin ?? 0;
     const resolvedAiClampMax = aiClampMax ?? Number.POSITIVE_INFINITY;
 
-    const nextTruth = clampNumber(state.truth + truthDelta, resolvedTruthClampMin, resolvedTruthClampMax);
+    const unclampedTruth = state.truth + truthDelta;
+    const nextTruth = clampNumber(unclampedTruth, resolvedTruthClampMin, resolvedTruthClampMax);
     const nextIp = clampNumber(state.ip + ipDelta, resolvedIpClampMin, resolvedIpClampMax);
     const nextAiIp = clampNumber(state.aiIP + aiIpDelta, resolvedAiClampMin, resolvedAiClampMax);
+
+    const reportedTruthDelta = nextTruth - state.truth;
+    if (truthEffectSummaryNeeded(truthDelta, reportedTruthDelta)) {
+      const clampNote = reportedTruthDelta !== truthDelta
+        ? ` (from ${formatSignedDelta(truthDelta)})`
+        : '';
+      logEntries.push(`Tabloid Relics net truth delta: ${formatSignedDelta(reportedTruthDelta)}${clampNote}`);
+    }
 
     return {
       runtime: nextRuntime,

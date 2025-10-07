@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-01 – Mirror relic truth polarity by host faction
+- Tabloid relic truth pulses now invert for government-controlled hosts while preserving clamp guards.
+- Added round-start logging for the signed truth delta along with regression coverage for faction parity.
+
 ## 2025-10-31 – Guard editor effect descriptions
 - Hardened the editor effect descriptor so dossiers without optional blocks no longer crash when summarizing start cards on the index page.
 - Synced the expansion wrapper to pass through nullable configs, ensuring runtime callers never dereference missing effect data.
