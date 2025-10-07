@@ -21,6 +21,7 @@ import {
   resolveHotspot as resolveParanormalHotspot,
   type HotspotResolutionOutcome,
 } from '@/systems/paranormalHotspots';
+import type { EditorId } from '@/game/editors';
 
 type Faction = 'government' | 'truth';
 
@@ -75,6 +76,8 @@ export interface GameSnapshot {
   faction: Faction;
   states: StateForResolution[];
   stateCombinationEffects?: StateCombinationEffects;
+  playerEditorId?: EditorId | null;
+  aiEditorId?: EditorId | null;
 }
 
 export interface CardHotspotResolution {
@@ -232,6 +235,7 @@ const toEngineState = (
         discard: [],
         ip: snapshot.ip,
         states: Array.from(playerStates),
+        activeEditorId: snapshot.playerEditorId ?? null,
       },
       [AI_ID]: {
         id: AI_ID,
@@ -241,6 +245,7 @@ const toEngineState = (
         discard: [],
         ip: snapshot.aiIP,
         states: Array.from(aiStates),
+        activeEditorId: snapshot.aiEditorId ?? null,
       },
     },
     pressureByState,

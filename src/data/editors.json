@@ -1,0 +1,122 @@
+[
+  {
+    "id": "editor_muldrunk",
+    "name": "Fox Muldrunk",
+    "faction": "truth",
+    "quote": "Trust the hunch, ignore the paperwork.",
+    "bonuses": { "mediaTruthModifier": 1 },
+    "tradeoffs": { "startIpDelta": -2 },
+    "aiPersonality": "curious",
+    "banterPack": "truth_muldrunk"
+  },
+  {
+    "id": "editor_floridaman",
+    "name": "Florida Man (Freelance)",
+    "faction": "truth",
+    "quote": "If it headlines, it’s fine.",
+    "bonuses": { "ipIncomePerTurn": 1 },
+    "tradeoffs": { "startDiscardChance": 0.1 },
+    "aiPersonality": "chaotic",
+    "banterPack": "truth_floridaman"
+  },
+  {
+    "id": "editor_elvis",
+    "name": "Elvis in Exile",
+    "faction": "truth",
+    "quote": "Thank you, thank you very much.",
+    "bonuses": { "startCards": ["VEGAS_UFO_WEDDING"] },
+    "tradeoffs": { "deckSizeDelta": -1 },
+    "aiPersonality": "showman",
+    "banterPack": "truth_elvis"
+  },
+  {
+    "id": "editor_hunter",
+    "name": "Hunter S. Tabloid",
+    "faction": "truth",
+    "quote": "Buy the ticket, take the truth.",
+    "bonuses": { "mediaTruthModifier": 1, "ipIncomePerTurn": 0 },
+    "tradeoffs": { "attackCostDelta": 1 },
+    "aiPersonality": "reckless",
+    "banterPack": "truth_hunter"
+  },
+  {
+    "id": "editor_batboy",
+    "name": "Bat Boy Jr.",
+    "faction": "truth",
+    "quote": "Screech if you see it.",
+    "bonuses": { "zonePressureBonus": 1 },
+    "tradeoffs": { "mediaTruthModifier": -1 },
+    "aiPersonality": "trickster",
+    "banterPack": "truth_batboy"
+  },
+  {
+    "id": "editor_mothwoman",
+    "name": "Mothwoman of Copy Desk",
+    "faction": "truth",
+    "quote": "Headlines before daylight.",
+    "bonuses": { "mediaTruthModifier": 1 },
+    "tradeoffs": { "startDiscardChance": 0.05, "attackCostDelta": 1 },
+    "aiPersonality": "swift",
+    "banterPack": "truth_mothwoman"
+  },
+  {
+    "id": "editor_smitherson",
+    "name": "Agent Smitherson",
+    "faction": "government",
+    "quote": "Remember, denial is the first draft.",
+    "bonuses": { "ipIncomePerTurn": 1 },
+    "tradeoffs": { "mediaTruthModifier": -1 },
+    "aiPersonality": "aggressive",
+    "banterPack": "gov_smitherson"
+  },
+  {
+    "id": "editor_cigs",
+    "name": "Cigarette Whisperer",
+    "faction": "government",
+    "quote": "Some truths are best smoked out.",
+    "bonuses": { "attackCostDelta": -1 },
+    "tradeoffs": { "mediaTruthModifier": -1 },
+    "aiPersonality": "calculating",
+    "banterPack": "gov_cigs"
+  },
+  {
+    "id": "editor_bureau",
+    "name": "Bureau Chief Deep Throat",
+    "faction": "government",
+    "quote": "Your leak has been scheduled.",
+    "bonuses": { "zonePressureBonus": 1 },
+    "tradeoffs": { "startDiscardChance": 0.05 },
+    "aiPersonality": "bureaucrat",
+    "banterPack": "gov_bureau"
+  },
+  {
+    "id": "editor_mkunit",
+    "name": "MK-Editor Unit 7",
+    "faction": "government",
+    "quote": "You did not see this memo.",
+    "bonuses": { "ipIncomePerTurn": 1 },
+    "tradeoffs": { "attackCostDelta": 1 },
+    "aiPersonality": "methodical",
+    "banterPack": "gov_mkunit"
+  },
+  {
+    "id": "editor_blackbudget",
+    "name": "Black Budget Comptroller",
+    "faction": "government",
+    "quote": "Funds allocated to plausible denial.",
+    "bonuses": { "attackCostDelta": -1 },
+    "tradeoffs": { "zonePressureBonus": -1 },
+    "aiPersonality": "economist",
+    "banterPack": "gov_blackbudget"
+  },
+  {
+    "id": "editor_redactor",
+    "name": "The Redactor",
+    "faction": "government",
+    "quote": "████ ████ █████.",
+    "bonuses": { "zonePressureBonus": 1 },
+    "tradeoffs": { "mediaTruthModifier": -2 },
+    "aiPersonality": "stoic",
+    "banterPack": "gov_redactor"
+  }
+]

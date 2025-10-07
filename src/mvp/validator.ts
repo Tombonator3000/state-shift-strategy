@@ -1,4 +1,5 @@
 import type { Faction, GameCard, MVPCardType, Rarity } from '@/rules/mvp';
+import type { EditorId } from '@/game/editors';
 import type { TurnPlay } from '@/game/combo.types';
 import type { ArticleBlock, PlayedLite } from '@/news/headlineEngine';
 import type { TabloidRelicRuntimeState } from '@/expansions/tabloidRelics/RelicTypes';
@@ -40,6 +41,7 @@ export type PlayerState = {
   ip: number;
   states: string[];
   nextAttackMultiplier?: number;
+  activeEditorId?: EditorId | null;
 };
 
 export type GameState = {

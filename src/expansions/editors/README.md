@@ -1,9 +1,10 @@
 # Editors mini-expansion scaffolding
 
 This folder seeds the *Paranoid Times* "Editors" expansion with strongly typed
-configuration and light-weight utilities. The data is stored in
-[`editors.json`](./editors.json) and is typed through [`EditorsTypes.ts`](./EditorsTypes.ts)
-so future patches can safely extend the roster without guessing at field names.
+configuration and light-weight utilities. The roster now lives in
+[`src/data/editors.json`](../../data/editors.json) and is typed through
+[`EditorsTypes.ts`](./EditorsTypes.ts) so future patches can safely extend the
+lineup without guessing at field names.
 
 ## Activating the mini-draft
 

@@ -2,6 +2,12 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-26 – Wire Desk Editors into MVP runtime
+- Replaced the temporary editor roster with faction-specific dossiers in `src/data/editors.json`, updated the selector UI to
+  filter by faction, surface quotes and tradeoffs, and persist the chosen editor via the hardened storage helpers.
+- Patched the MVP engine and effect pipeline so editor bonuses now adjust turn income, attack costs, MEDIA truth swings, and
+  ZONE pressure in live games, with new tests covering signature cases.
+
 ## 2025-10-25 – Restore broadsheet rarity badges
 - Centralized the broadsheet rarity tone helper so achievement and card archives share the same palette without runtime errors.
 - Confirmed the broadsheet card catalogue loads without the missing `getBroadsheetRarityTone` reference.
