@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-24 – Dress the editor dossiers for assignment
+- Restyled the editor selection flow as an opened case file—complete with photo placeholders—so players feel like they are
+  thumbing through a classified suspect folder before launch.
+- Recolored actions and dossier cards to lean into the Paranoid Times manila-folder aesthetic while keeping mechanics unchanged.
+
 ## 2025-10-06 – Restore card collection scroll rigging
 - Patched the broadsheet card collection overlay to import its shadcn scroll wrapper so the panel renders without tripping a `ScrollArea` reference error.
 - Verified the catalogue view no longer blanks out when the government archivists unroll their dossiers mid-session.

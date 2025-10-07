@@ -31,11 +31,6 @@ const EFFECT_TITLES: Record<EditorEffectKind, string> = {
   penalty: 'Tradeoff',
 };
 
-const EFFECT_BADGES: Record<EditorEffectKind, string> = {
-  bonus: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/40',
-  penalty: 'bg-rose-500/10 text-rose-600 border-rose-500/40',
-};
-
 const rememberSelection = (editor: EditorDef | null) => {
   if (!editor || typeof window === 'undefined') {
     return;
@@ -140,19 +135,21 @@ const EditorsChooseModal = ({ editors, initialSelection, onConfirm, onSkip, allo
   return (
     <Dialog open>
       <DialogContent
-        className="max-w-3xl gap-0 border border-foreground/20 bg-background/95 p-0 shadow-xl"
+        className="max-w-4xl gap-0 border border-[#b89b5f]/40 bg-[#f9f4e4] p-0 shadow-2xl"
         onPointerDownOutside={event => event.preventDefault()}
         onEscapeKeyDown={event => event.preventDefault()}
       >
-        <DialogHeader className="space-y-1 border-b border-border bg-muted/40 px-6 py-4 text-left">
-          <DialogTitle className="text-2xl font-semibold tracking-tight">Assign a Desk Editor</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            Choose an editor to adjust your newsroom before the presses roll.
+        <DialogHeader className="space-y-1 border-b border-[#b89b5f]/40 bg-[#f1e7ce] px-6 py-4 text-left shadow">
+          <DialogTitle className="text-2xl font-semibold tracking-tight text-[#4d3b1e]">
+            Assign a Desk Editor
+          </DialogTitle>
+          <DialogDescription className="text-sm text-[#6b5430]">
+            Choose an editor dossier to brief your newsroom before the presses roll.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-6 px-6 pb-6 pt-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <ScrollArea className="h-[340px] rounded border border-border/40 bg-background/70">
-            <div className="grid gap-3 p-4">
+        <div className="grid gap-6 px-6 pb-6 pt-4 md:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
+          <ScrollArea className="h-[360px] rounded border border-[#c9ad70]/50 bg-[#fff9e9]/70 shadow-inner">
+            <div className="grid gap-4 p-4">
               {editors.map(editor => {
                 const isSelected = selectedId === editor.id;
                 return (
@@ -161,80 +158,98 @@ const EditorsChooseModal = ({ editors, initialSelection, onConfirm, onSkip, allo
                     type="button"
                     onClick={() => setSelectedId(editor.id)}
                     className={cn(
-                      'flex flex-col gap-3 rounded-lg border bg-background/80 p-4 text-left transition',
-                      'hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                      isSelected ? 'border-foreground shadow-lg' : 'border-border/50 hover:border-foreground/60',
+                      'relative grid gap-4 rounded-md border-2 bg-[#fdf6dc] p-4 text-left transition',
+                      'hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6d5021]/60',
+                      "before:absolute before:-top-3 before:left-3 before:h-6 before:w-32 before:rounded-t before:bg-[#f2dfb0] before:shadow",
+                      "after:absolute after:-top-[10px] after:left-5 after:h-5 after:w-24 after:rounded-t after:bg-[#e6cfa0] after:shadow-sm after:content-['']",
+                      isSelected
+                        ? 'border-[#6d5021] shadow-[0_18px_35px_-20px_rgba(77,59,30,0.85)]'
+                        : 'border-[#d7bf84] hover:border-[#a58545]',
                     )}
                     data-editor-id={editor.id}
                     data-state={isSelected ? 'selected' : 'idle'}
                   >
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between gap-3 text-[#4d3b1e]">
                       <div>
-                        <h3 className="text-lg font-semibold leading-tight">{editor.name}</h3>
+                        <h3 className="text-lg font-semibold leading-tight uppercase tracking-wide">
+                          {editor.name}
+                        </h3>
                         {editor.flavor ? (
-                          <p className="text-sm italic text-muted-foreground">{editor.flavor}</p>
+                          <p className="text-sm italic text-[#6b5430]">{editor.flavor}</p>
                         ) : null}
                       </div>
-                      <Badge className="border border-foreground/40 bg-muted/40 text-xs font-semibold uppercase tracking-wide">
-                        Editors
+                      <Badge className="border border-[#ad9155]/60 bg-[#f2dfb0]/70 text-xs font-semibold uppercase tracking-wide text-[#4d3b1e]">
+                        Case File
                       </Badge>
                     </div>
-                    <div className="grid gap-3 md:grid-cols-2">
-                      {(['bonus', 'penalty'] as const).map(kind => (
-                        <div
-                          key={kind}
-                          className={cn(
-                            'rounded border p-3 text-sm',
-                            EFFECT_BADGES[kind],
-                          )}
-                        >
-                          <p className="text-xs font-semibold uppercase tracking-wide">{EFFECT_TITLES[kind]}</p>
-                          <ul className="mt-2 space-y-1 text-xs">
-                            {renderEffectList(editor, kind).map((line, index) => (
-                              <li key={`${kind}-${index}`}>{line}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                    <div className="flex flex-col gap-4 md:flex-row">
+                      <div className="flex h-32 w-28 items-center justify-center rounded-sm border-2 border-dashed border-[#b0904a] bg-[#f9eccc]/80 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#8a6c2f]">
+                        Photo
+                      </div>
+                      <div className="flex-1 space-y-3">
+                        {(['bonus', 'penalty'] as const).map(kind => (
+                          <div
+                            key={kind}
+                            className={cn(
+                              'rounded border border-dashed bg-white/80 p-3 text-sm shadow-sm',
+                              kind === 'bonus'
+                                ? 'border-[#7b9e59]/60 text-[#2f4f1f]'
+                                : 'border-[#b15555]/60 text-[#5a1d1d]',
+                            )}
+                          >
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#4d3b1e]">
+                              {EFFECT_TITLES[kind]}
+                            </p>
+                            <ul className="mt-2 space-y-1 text-xs">
+                              {renderEffectList(editor, kind).map((line, index) => (
+                                <li key={`${kind}-${index}`}>{line}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </button>
                 );
               })}
             </div>
           </ScrollArea>
-          <div className="flex h-full flex-col gap-4 rounded border border-border/50 bg-background/70 p-4">
+          <div className="relative flex h-full flex-col gap-4 rounded border-2 border-[#b89b5f]/70 bg-[#fffaf0]/90 p-5 shadow-inner">
+            <div className="pointer-events-none absolute -top-3 right-6 h-6 w-32 rounded-t bg-[#f1e0b7] shadow" />
             {selectedEditor ? (
-              <div className="space-y-3" data-editor-preview="selected">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Selected Editor</p>
-                  <h4 className="text-lg font-semibold leading-tight">{selectedEditor.name}</h4>
+              <div className="space-y-4 text-[#4d3b1e]" data-editor-preview="selected">
+                <div className="flex flex-col gap-1 border-b border-dashed border-[#bfa36b] pb-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#7a6236]">
+                    Selected Case File
+                  </p>
+                  <h4 className="text-xl font-semibold leading-tight uppercase tracking-wide">{selectedEditor.name}</h4>
                   {selectedEditor.flavor ? (
-                    <p className="text-sm italic text-muted-foreground">{selectedEditor.flavor}</p>
+                    <p className="text-sm italic text-[#6b5430]">{selectedEditor.flavor}</p>
                   ) : null}
                 </div>
-                <div className="space-y-3">
-                  {(['bonus', 'penalty'] as const).map(kind => (
-                    <div key={kind}>
-                      <p
-                        className={cn(
-                          'text-xs font-semibold uppercase tracking-wide',
-                          kind === 'bonus' ? 'text-emerald-600' : 'text-rose-600',
-                        )}
-                      >
-                        {EFFECT_TITLES[kind]}
-                      </p>
-                      <ul
-                        className={cn(
-                          'mt-1 space-y-1 text-xs',
-                          kind === 'bonus' ? 'text-emerald-700' : 'text-rose-700',
-                        )}
-                      >
-                        {renderEffectList(selectedEditor, kind).map((line, index) => (
-                          <li key={`${kind}-detail-${index}`}>{line}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+                <div className="flex flex-col gap-4 md:flex-row">
+                  <div className="flex h-36 w-32 items-center justify-center rounded-sm border-2 border-dashed border-[#b0904a] bg-[#f9eccc]/70 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#8a6c2f]">
+                    Photo
+                  </div>
+                  <div className="flex-1 space-y-4">
+                    {(['bonus', 'penalty'] as const).map(kind => (
+                      <div key={kind} className="rounded border border-[#c9ad70]/70 bg-white/90 p-4 shadow">
+                        <p
+                          className={cn(
+                            'text-[11px] font-semibold uppercase tracking-[0.25em] text-[#4d3b1e]',
+                            kind === 'bonus' ? 'text-[#2f4f1f]' : 'text-[#5a1d1d]',
+                          )}
+                        >
+                          {EFFECT_TITLES[kind]}
+                        </p>
+                        <ul className="mt-2 space-y-1 text-xs">
+                          {renderEffectList(selectedEditor, kind).map((line, index) => (
+                            <li key={`${kind}-detail-${index}`}>{line}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : (
@@ -243,11 +258,19 @@ const EditorsChooseModal = ({ editors, initialSelection, onConfirm, onSkip, allo
               </div>
             )}
             <div className="mt-auto flex flex-col gap-3">
-              <Button className="w-full" disabled={!selectedEditor} onClick={() => onConfirm(selectedEditor ?? null)}>
+              <Button
+                className="w-full bg-[#4d3b1e] text-[#f9f4e4] hover:bg-[#3d2f16]"
+                disabled={!selectedEditor}
+                onClick={() => onConfirm(selectedEditor ?? null)}
+              >
                 {selectedEditor ? `Start with ${selectedEditor.name}` : 'Select an Editor'}
               </Button>
               {allowSkip ? (
-                <Button variant="ghost" className="w-full" onClick={() => (onSkip ? onSkip() : onConfirm(null))}>
+                <Button
+                  variant="ghost"
+                  className="w-full border border-dashed border-[#b89b5f]/70 bg-[#f4e8c9] text-[#4d3b1e] hover:bg-[#eddcb8]"
+                  onClick={() => (onSkip ? onSkip() : onConfirm(null))}
+                >
                   Play without an editor
                 </Button>
               ) : null}
