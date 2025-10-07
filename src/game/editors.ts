@@ -111,9 +111,12 @@ const mergeEffectConfig = (
     return target;
   }
 
+  const startCards = Array.isArray(target?.startCards) ? target.startCards : [];
+
   const next: EditorAggregatedEffects = {
+    ...EMPTY_EFFECTS,
     ...target,
-    startCards: target.startCards,
+    startCards,
   };
 
   for (const key of NUMERIC_EFFECT_KEYS) {
