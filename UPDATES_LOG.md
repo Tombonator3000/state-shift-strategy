@@ -2,10 +2,6 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
-## 2025-11-06 – Slide-out newsroom desk controls
-- Added a collapsible newsroom desk with a header toggle that defaults open on desktop and glides off-screen on smaller breakpoints.
-- Refinished the desk shell with a blurred, translucent broadsheet treatment so the scrollable hand and discard tooltip stay legible while the panel animates.
-
 ## 2025-11-05 – Right-size board minis and retone played dock
 - Board mini card frames now render at 45% scale to keep played-card layouts breathing and prevent clipping.
 - Opponent slots lean into a blue halftone while the player stack stays red, with section headers picking up matching tones.
@@ -58,10 +54,6 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Restyled the editor selection flow as an opened case file—complete with photo placeholders—so players feel like they are
   thumbing through a classified suspect folder before launch.
 - Recolored actions and dossier cards to lean into the Paranoid Times manila-folder aesthetic while keeping mechanics unchanged.
-
-## 2025-10-07 – Stabilize newsroom desk hand columns
-- Rebuilt the newsroom hand grid with an auto-fit template so extra track columns only render when there is horizontal space.
-- Let card buttons flex to `w-full` with `min-w-0` so dropping assets on the desk no longer widens the panel during play.
 
 ## 2025-10-07 – Safeguard zone pressure audits
 - Stop ZONE cards from stacking pressure on states the acting player already controls so game-state audits no longer trip controlled-state invariants.
