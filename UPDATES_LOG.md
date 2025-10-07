@@ -2,6 +2,9 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-04 – Align tooltip truth deltas with faction perspective
+- USA map tooltips now flip truth gain/loss signage for government players across hotspot history, active bonuses, and anomaly logs.
+
 ## 2025-11-03 – Reset map tooltip state during redraws
 - Clear pending tooltip timeouts and hovered state when the USA map SVG rebuilds so refreshed state data no longer leaves ghost tooltips hanging over the board.
 

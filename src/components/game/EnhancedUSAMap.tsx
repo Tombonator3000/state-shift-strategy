@@ -68,12 +68,24 @@ interface EnhancedUSAMapProps {
   playerFaction: 'truth' | 'government';
 }
 
+const formatTruthDeltaForFaction = (delta: number, playerFaction: 'truth' | 'government'): string => {
+  const perspectiveDelta = playerFaction === 'government' ? -delta : delta;
+
+  if (perspectiveDelta === 0) {
+    return '0';
+  }
+
+  const prefix = perspectiveDelta > 0 ? '+' : '';
+  return `${prefix}${perspectiveDelta}`;
+};
+
 export interface StateHotspotDetailsProps {
   hotspot?: EnhancedState['paranormalHotspot'];
   history?: StateParanormalHotspotSummary[];
+  playerFaction: 'truth' | 'government';
 }
 
-export const StateHotspotDetails: React.FC<StateHotspotDetailsProps> = ({ hotspot, history }) => {
+export const StateHotspotDetails: React.FC<StateHotspotDetailsProps> = ({ hotspot, history, playerFaction }) => {
   const entries = Array.isArray(history) ? history.slice(-5).reverse() : [];
   if (!hotspot && entries.length === 0) {
     return null;
@@ -128,7 +140,7 @@ export const StateHotspotDetails: React.FC<StateHotspotDetailsProps> = ({ hotspo
                   <div className="flex flex-wrap items-center gap-2">
                     {entry.truthDelta !== 0 && (
                       <span className="text-[10px] font-mono text-muted-foreground/80">
-                        Truth {entry.truthDelta > 0 ? '+' : ''}{entry.truthDelta}
+                        Truth {formatTruthDeltaForFaction(entry.truthDelta, playerFaction)}
                       </span>
                     )}
                     <span className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground/70">
@@ -1001,12 +1013,12 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
                     {stateInfo.activeStateBonus.summary}
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-muted-foreground">
-                    {typeof stateInfo.activeStateBonus.truthDelta === 'number' && stateInfo.activeStateBonus.truthDelta !== 0 && (
-                      <span>
-                        Truth {stateInfo.activeStateBonus.truthDelta > 0 ? '+' : ''}
-                        {stateInfo.activeStateBonus.truthDelta}
-                      </span>
-                    )}
+                    {typeof stateInfo.activeStateBonus.truthDelta === 'number'
+                      && stateInfo.activeStateBonus.truthDelta !== 0 && (
+                        <span>
+                          Truth {formatTruthDeltaForFaction(stateInfo.activeStateBonus.truthDelta, playerFaction)}
+                        </span>
+                      )}
                     {typeof stateInfo.activeStateBonus.ipDelta === 'number' && stateInfo.activeStateBonus.ipDelta !== 0 && (
                       <span>
                         IP {stateInfo.activeStateBonus.ipDelta > 0 ? '+' : ''}
@@ -1060,7 +1072,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
                       <div className="flex flex-wrap gap-2 pt-1 text-[11px] text-muted-foreground/90">
                         {typeof event.truthDelta === 'number' && event.truthDelta !== 0 && (
                           <span className="rounded border border-sky-500/40 px-2 py-0.5">
-                            Truth {event.truthDelta > 0 ? '+' : ''}{event.truthDelta}
+                            Truth {formatTruthDeltaForFaction(event.truthDelta, playerFaction)}
                           </span>
                         )}
                         {typeof event.ipDelta === 'number' && event.ipDelta !== 0 && (
@@ -1135,6 +1147,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
             <StateHotspotDetails
               hotspot={stateInfo.paranormalHotspot}
               history={stateInfo.paranormalHotspotHistory}
+              playerFaction={playerFaction}
             />
           </div>
         </div>,

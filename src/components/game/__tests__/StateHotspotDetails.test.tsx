@@ -25,7 +25,7 @@ const extractText = (node: unknown): string[] => {
 };
 
 describe('StateHotspotDetails', () => {
-  test('renders resolved hotspot history entries', () => {
+  test('renders resolved hotspot history entries for truth faction', () => {
     const renderer = create(
       <StateHotspotDetails
         hotspot={{
@@ -56,6 +56,7 @@ describe('StateHotspotDetails', () => {
             truthDelta: 8,
           },
         ]}
+        playerFaction="truth"
       />,
     );
 
@@ -64,8 +65,32 @@ describe('StateHotspotDetails', () => {
 
     expect(normalized).toContain('Resolved hotspots');
     expect(normalized).toContain('Desert Rift');
-    expect(normalized).toContain('Truth + 8');
+    expect(normalized).toContain('Truth +8');
     expect(normalized).toContain('Turn 6 · TRUTH');
+
+    renderer.unmount();
+  });
+
+  test('formats truth rewards from a government perspective as losses', () => {
+    const renderer = create(
+      <StateHotspotDetails
+        history={[
+          {
+            id: 'hotspot-active',
+            label: 'Desert Rift',
+            resolvedOnTurn: 6,
+            faction: 'truth',
+            truthDelta: 8,
+          },
+        ]}
+        playerFaction="government"
+      />,
+    );
+
+    const output = renderer.toJSON();
+    const normalized = extractText(output).join(' ').replace(/\s+/g, ' ').trim();
+
+    expect(normalized).toContain('Truth -8');
 
     renderer.unmount();
   });
