@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-05 – Right-size board minis and retone played dock
+- Board mini card frames now render at 45% scale to keep played-card layouts breathing and prevent clipping.
+- Opponent slots lean into a blue halftone while the player stack stays red, with section headers picking up matching tones.
+
 ## 2025-11-04 – Align tooltip truth deltas with faction perspective
 - USA map tooltips now flip truth gain/loss signage for government players across hotspot history, active bonuses, and anomaly logs.
 

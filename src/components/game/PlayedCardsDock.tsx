@@ -29,18 +29,34 @@ const CardsInPlayCard = ({ card, onInspect }: { card: GameCard; onInspect?: (car
 interface SectionProps {
   title: string;
   toneClass: string;
+  headerToneClass?: string;
   cards: CardPlayRecord[];
   emptyMessage: string;
   ariaLabel: string;
   onInspectCard?: (card: GameCard) => void;
 }
 
-const PlayedCardsSection: React.FC<SectionProps> = ({ title, toneClass, cards, emptyMessage, ariaLabel, onInspectCard }) => (
+const PlayedCardsSection: React.FC<SectionProps> = ({
+  title,
+  toneClass,
+  headerToneClass,
+  cards,
+  emptyMessage,
+  ariaLabel,
+  onInspectCard,
+}) => (
   <section
     aria-label={ariaLabel}
     className={cn('rounded-md p-3 text-black', toneClass)}
   >
-    <h4 className="mb-2 text-[12px] font-extrabold uppercase tracking-[0.2em] text-black/70">{title}</h4>
+    <h4
+      className={cn(
+        'mb-2 text-[12px] font-extrabold uppercase tracking-[0.2em]',
+        headerToneClass ?? 'text-black/70',
+      )}
+    >
+      {title}
+    </h4>
     {cards.length > 0 ? (
       <div className="grid grid-cols-3 gap-2 place-items-start">
         {cards.map((entry, index) => (
@@ -74,7 +90,8 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards, onInspec
           ariaLabel="Opponent Cards"
           cards={aiCards}
           emptyMessage="Opponent has no cards in play."
-          toneClass="bg-[image:var(--halftone-red)] bg-[length:8px_8px] bg-repeat bg-red-50/40"
+          toneClass="bg-[image:var(--halftone-blue)] bg-[length:8px_8px] bg-repeat bg-blue-50/40"
+          headerToneClass="text-blue-900/80"
           onInspectCard={onInspectCard}
         />
         <PlayedCardsSection
@@ -82,7 +99,8 @@ const PlayedCardsDock: React.FC<PlayedCardsDockProps> = ({ playedCards, onInspec
           ariaLabel="Your Cards"
           cards={humanCards}
           emptyMessage="No cards deployed this turn."
-          toneClass="bg-[image:var(--halftone-blue)] bg-[length:8px_8px] bg-repeat bg-blue-50/40"
+          toneClass="bg-[image:var(--halftone-red)] bg-[length:8px_8px] bg-repeat bg-red-50/40"
+          headerToneClass="text-red-900/80"
           onInspectCard={onInspectCard}
         />
       </div>
