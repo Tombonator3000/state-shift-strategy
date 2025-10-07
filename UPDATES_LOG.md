@@ -2,6 +2,9 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-07 – Block context menus during map pans
+- Right-click panning on the USA map now suppresses the browser context menu so conspirators can glide without interruptions.
+
 ## 2025-11-07 – Mouse-native map navigation
 - Let agents zoom the USA map with the scroll wheel instead of hunting the UI buttons.
 - Hold the right mouse button to drag and pan the conspiracy overlay like a proper blacksite analyst.
