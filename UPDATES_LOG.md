@@ -59,6 +59,10 @@ This document provides a chronological record of gameplay-impacting changes merg
   thumbing through a classified suspect folder before launch.
 - Recolored actions and dossier cards to lean into the Paranoid Times manila-folder aesthetic while keeping mechanics unchanged.
 
+## 2025-10-07 – Move discard cost reminder into tooltip
+- Removed the Newsroom Desk footer notice above the "Go to Press" button so the action bar stays focused on the turn control.
+- Expanded the Discards hover tooltip to always include the free-first-discard reminder and added a no-queue message for clarity.
+
 ## 2025-10-07 – Safeguard zone pressure audits
 - Stop ZONE cards from stacking pressure on states the acting player already controls so game-state audits no longer trip controlled-state invariants.
 - Harden the broadsheet rarity helper with normalized inputs and a global fallback to silence missing-function errors in archive views.

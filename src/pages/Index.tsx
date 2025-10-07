@@ -2800,54 +2800,56 @@ const Index = () => {
               align="end"
               className="max-w-xs space-y-2 border border-newspaper-border bg-newspaper-bg px-3 py-2 text-[0.65rem] font-mono text-newspaper-text shadow-lg"
             >
-              {pendingDiscards.length === 0 ? (
+              <div className="space-y-2">
                 <div className="space-y-1">
                   <div className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-newspaper-border">
-                    Discard Queue
+                    {pendingDiscards.length === 0
+                      ? 'Discard Queue'
+                      : `Queued Discards (${pendingDiscards.length})`}
                   </div>
-                  <p className="leading-relaxed">
-                    First discard each turn is free. Extra discards cost 10 IP, then +5 IP per card.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <div className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-newspaper-border">
-                    Queued Discards ({pendingDiscards.length})
-                  </div>
-                  {queuedDiscardNames.length > 0 && (
-                    <div className="leading-relaxed text-newspaper-text/80">
-                      {queuedDiscardNames.join(', ')}
-                    </div>
-                  )}
-                  <div className="leading-relaxed">
-                    IP impact:{' '}
-                    <span
-                      className={clsx(
-                        'font-semibold',
-                        discardPreview.ipCost > 0 ? 'text-truth-red' : 'text-emerald-500'
+                  {pendingDiscards.length === 0 ? (
+                    <div className="leading-relaxed text-newspaper-text/80">No cards queued for discard.</div>
+                  ) : (
+                    <>
+                      {queuedDiscardNames.length > 0 && (
+                        <div className="leading-relaxed text-newspaper-text/80">
+                          {queuedDiscardNames.join(', ')}
+                        </div>
                       )}
-                    >
-                      {discardPreview.ipCost > 0 ? `-${discardPreview.ipCost} IP` : 'Free'}
-                    </span>
-                  </div>
-                  {discardPreview.costBreakdown.length > 0 && (
-                    <div className="text-newspaper-text/70">
-                      Cost steps:{' '}
-                      {discardPreview.costBreakdown
-                        .map((cost, index) =>
-                          index === 0
-                            ? '1st: 0 (free)'
-                            : (() => {
-                                const position = index + 1;
-                                const suffix = position === 2 ? 'nd' : position === 3 ? 'rd' : 'th';
-                                return `${position}${suffix}: ${cost}`;
-                              })()
-                        )
-                        .join(' · ')}
-                    </div>
+                      <div className="leading-relaxed">
+                        IP impact:{' '}
+                        <span
+                          className={clsx(
+                            'font-semibold',
+                            discardPreview.ipCost > 0 ? 'text-truth-red' : 'text-emerald-500'
+                          )}
+                        >
+                          {discardPreview.ipCost > 0 ? `-${discardPreview.ipCost} IP` : 'Free'}
+                        </span>
+                      </div>
+                      {discardPreview.costBreakdown.length > 0 && (
+                        <div className="text-newspaper-text/70">
+                          Cost steps:{' '}
+                          {discardPreview.costBreakdown
+                            .map((cost, index) =>
+                              index === 0
+                                ? '1st: 0 (free)'
+                                : (() => {
+                                    const position = index + 1;
+                                    const suffix = position === 2 ? 'nd' : position === 3 ? 'rd' : 'th';
+                                    return `${position}${suffix}: ${cost}`;
+                                  })()
+                            )
+                            .join(' · ')}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
-              )}
+                <p className="leading-relaxed text-newspaper-text/70">
+                  First discard each turn is free. Extra discards cost 10 IP, then +5 IP per card.
+                </p>
+              </div>
             </TooltipContent>
           </Tooltip>
         </header>
@@ -2867,11 +2869,6 @@ const Index = () => {
           />
         </div>
         <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
-          {pendingDiscards.length === 0 && (
-            <div className="mb-2 rounded border border-newspaper-border/60 bg-newspaper-border/10 px-3 py-2 text-[0.65rem] font-mono text-newspaper-border">
-              <span>First discard each turn is free. Extra discards cost 10 IP, then +5 IP per card.</span>
-            </div>
-          )}
           <Button
             id="end-turn-button"
             onClick={handleEndTurn}
