@@ -208,16 +208,15 @@ export const describeEditorEffectConfig = (
 ): string[] => {
   const descriptions: string[] = [];
 
-  if (!config) {
-    return descriptions;
-  }
+  const safeConfig: EditorEffectConfig = config ?? {};
 
-  if (Array.isArray(config.startCards) && config.startCards.length > 0) {
-    descriptions.push(describeStartCards(config.startCards));
+  const { startCards } = safeConfig;
+  if (Array.isArray(startCards) && startCards.length > 0) {
+    descriptions.push(describeStartCards(startCards));
   }
 
   for (const key of NUMERIC_EFFECT_KEYS) {
-    const value = config[key];
+    const value = safeConfig?.[key];
     if (typeof value !== 'number' || value === 0) {
       continue;
     }
