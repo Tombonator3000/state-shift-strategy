@@ -500,9 +500,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     };
 
     const handleContextMenu = (event: MouseEvent) => {
-      if (isPanningRef.current) {
-        event.preventDefault();
-      }
+      event.preventDefault();
     };
 
     svg.addEventListener('wheel', handleWheel, { passive: false });
