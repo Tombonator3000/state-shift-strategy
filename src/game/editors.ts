@@ -203,8 +203,14 @@ const describeStartDiscardChance = (value: number): string => {
   return `Start of turn: ${percent}% discard 1 random card`;
 };
 
-export const describeEditorEffectConfig = (config: EditorEffectConfig): string[] => {
+export const describeEditorEffectConfig = (
+  config?: EditorEffectConfig | null,
+): string[] => {
   const descriptions: string[] = [];
+
+  if (!config) {
+    return descriptions;
+  }
 
   if (Array.isArray(config.startCards) && config.startCards.length > 0) {
     descriptions.push(describeStartCards(config.startCards));
@@ -277,5 +283,6 @@ export const forEachEditorEffect = (
   }
 };
 
-export const describeEditorEffect = (config: EditorEffectConfig): string[] =>
-  describeEditorEffectConfig(config);
+export const describeEditorEffect = (
+  config?: EditorEffectConfig | null,
+): string[] => describeEditorEffectConfig(config);
