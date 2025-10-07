@@ -2,6 +2,8 @@ import { describe, expect, it } from 'bun:test';
 
 import { auditGameState, GameStateAuditError } from '@/mvp/gameStateAudit';
 import type { GameState, PlayerState } from '@/mvp/validator';
+import { resolveCardMVP, type GameSnapshot } from '@/systems/cardResolution';
+import type { GameCard } from '@/rules/mvp';
 
 const createPlayer = (overrides: Partial<PlayerState> = {}): PlayerState => ({
   id: 'P1',
@@ -128,5 +130,50 @@ describe('auditGameState', () => {
     });
 
     expect(() => auditGameState(state)).toThrow(/IP cannot be negative/);
+  });
+
+  it('normalizes conflicting state control before auditing resolved plays', () => {
+    const snapshot: GameSnapshot = {
+      truth: 50,
+      ip: 12,
+      aiIP: 15,
+      hand: [],
+      aiHand: [],
+      controlledStates: ['NV'],
+      aiControlledStates: ['NV'],
+      round: 1,
+      turn: 1,
+      faction: 'truth',
+      states: [
+        {
+          id: 'NV',
+          name: 'Nevada',
+          abbreviation: 'NV',
+          baseIP: 2,
+          baseDefense: 3,
+          defense: 3,
+          pressure: 0,
+          pressurePlayer: 0,
+          pressureAi: 0,
+          contested: false,
+          owner: 'player',
+        },
+      ],
+    };
+
+    const mediaCard: GameCard = {
+      id: 'test-media',
+      name: 'Test Broadcast',
+      type: 'MEDIA',
+      faction: 'truth',
+      rarity: 'common',
+      cost: 0,
+      effects: { truthDelta: 0 },
+    };
+
+    const resolution = resolveCardMVP(snapshot, mediaCard, null, 'human');
+
+    expect(resolution.controlledStates).toContain('NV');
+    expect(resolution.aiControlledStates).not.toContain('NV');
   });
 });
