@@ -102,6 +102,12 @@ The table below keeps designers out of TypeScript while they balance the weights
 | Contextual help | Optional strategy suggestions surface as neutral toasts styled like UI hints. |
 | Legacy UI overlays | Truth/IP deltas and combo events use lightweight HUD toasts wired through global helpers triggered during attack/truth resolution. |
 
+### Truth Index gradient reference
+
+- The shared `Progress` component now maps its indicator hue from red (0%) through indigo-blue (100%), clamping undefined or out-of-range values to a neutral 50% midpoint to avoid washed-out tracks.
+- Designers should expect the Truth Index bar in Tabloid spreads to start warm when conspiracies spiral out of control and cool toward deep blue as the coalition wins back credibility; other progress bars inherit the same interpolation without extra wiring.
+- When composing new layouts around the Truth Index, leave a light or translucent track background (`bg-white/40` in the newspaper) so the gradient remains legible over print textures.
+
 ### Sound effects
 
 | SFX key(s) | Where it plays |

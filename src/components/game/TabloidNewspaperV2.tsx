@@ -1045,7 +1045,7 @@ const TabloidNewspaperV2 = ({
               <div className="flex items-center gap-3">
                 <span className="font-semibold uppercase tracking-wide">Truth Index</span>
                 <div className="w-36">
-                  <Progress value={truthProgress} className="h-2" />
+                  <Progress value={truthProgress} className="h-2 bg-white/40" />
                 </div>
                 <span className="font-mono text-xs">{truthProgress}%</span>
                 {truthDeltaLabel ? (
