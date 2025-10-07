@@ -87,6 +87,7 @@ export const getTruthDelta = (event: GameEvent): number => {
 export const EVENT_DATABASE: GameEvent[] = [
   // COMMON EVENTS (80 events) — Tabloid randoms for the newspaper (low impact, balanced)
   {
+    // Paranoia intent: Show tourist virality accelerating unauthorized disclosure loops faster than official denials.
     id: 'ufo_selfie_over_capitol',
     title: 'UFO Selfie',
     headline: 'TOURIST: "Saucer Behind Me, Not a Filter"',
@@ -95,7 +96,7 @@ export const EVENT_DATABASE: GameEvent[] = [
     rarity: 'common',
     effects: { truth: 6, ip: -1 },
     weight: 6,
-    flavorText: 'BREAKING: Local diners added "Cosmic Combo" to the breakfast menu within the hour. A souvenir shop sold out of alien plushies before noon. Meteorologists say the weather-balloon union is considering a strike after the PR disaster.'
+    flavorText: 'BREAKING: Street cams caught twelve strangers refreshing the feed in sync before sprinting to the same rooftop relay. Souvenir vendors suddenly stocked burner antennas. Meteorologists muttered that the weather-balloon union wants hazard pay for narrative containment.'
   },
   {
     id: 'media_blackout_17min',
@@ -131,6 +132,7 @@ export const EVENT_DATABASE: GameEvent[] = [
     flavorText: 'BULLETIN: Executives apologized using a pre-recorded apology-gif that looped itself. Community notes flagged the apology as "oddly enthusiastic." Trend analysts recommend clearing cache and expectations.'
   },
   {
+    // Paranoia intent: Highlight consumer paranoia weaponizing household appliances as listening posts.
     id: 'masked_whistle_popcorn',
     title: 'Masked Whistle',
     headline: 'ANONYMOUS VOICE: "MICROWAVES ARE LISTENING"',
@@ -139,7 +141,7 @@ export const EVENT_DATABASE: GameEvent[] = [
     rarity: 'common',
     effects: { truth: 7 },
     weight: 6,
-    flavorText: 'BREAKING: Appliance stores sold out of "mute stickers" for kitchenware by lunchtime. A neighborhood potluck served silent popcorn as protest. Tech bloggers insist the real threat is "butter fingerprints on evidence."'
+    flavorText: 'BREAKING: Appliance stores sold out of "mute stickers" for kitchenware by lunchtime. Neighborhood watch groups rewired microwaves into impromptu Faraday cages. Tech bloggers insist the real threat is the firmware handshake hidden in every "pop".'
   },
   {
     id: 'press_conf_water_breaks',
@@ -186,6 +188,7 @@ export const EVENT_DATABASE: GameEvent[] = [
     flavorText: 'CAMPUS WATCH: Librarians rolled out extra step ladders for the flood of citations. The registrar added a course titled "Intro to Uncomfortable Graphs." Meanwhile, goldfish attendance soared.'
   },
   {
+    // Paranoia intent: Reveal budget obfuscation masking covert logistics slush funds.
     id: 'mystery_budget_special_projects',
     title: 'Budget Bump',
     headline: '"SPECIAL PROJECTS" EATS WHOLE PAGE OF ZEROES',
@@ -194,9 +197,10 @@ export const EVENT_DATABASE: GameEvent[] = [
     rarity: 'common',
     effects: { ip: 4, truth: -1 },
     weight: 6,
-    flavorText: 'LEDGER EXTRA: The line item "snacks & silence" costs more than a small moon. A staffer whispered the password is "donut." Procurement immediately ordered a dozen—of both.'
+    flavorText: 'LEDGER EXTRA: The line item "silence retainers" costs more than a small moon. A staffer whispered the passphrase is a nine-digit routing number. Procurement immediately ordered armored vans to keep the receipts moving.'
   },
   {
+    // Paranoia intent: Show how disappearances leave breadcrumb leaks for anyone watching the static.
     id: 'reporter_vanishes_near_nowhere',
     title: 'Reporter Vanishes',
     headline: 'AWARD-WINNER LAST SEEN NEAR PLACE "THAT ISN\'T THERE"',
@@ -205,7 +209,7 @@ export const EVENT_DATABASE: GameEvent[] = [
     rarity: 'common',
     effects: { truth: 8, ip: -1 },
     weight: 5,
-    flavorText: 'NEWS ALERT: Their notebook contained a doodle labelled "Page 13." A local diner swears someone matching their description tipped in photocopies. The parking meter never started counting.'
+    flavorText: 'NEWS ALERT: Their notebook contained a doodle labelled "Page 13." Streetlights flickered in sequence as someone dropped photocopies through the storm drain. The parking meter never started counting.'
   },
   {
     id: 'weather_pins_and_strings',
@@ -887,6 +891,7 @@ export const EVENT_DATABASE: GameEvent[] = [
     flavorText: 'CIVIC BRANDING: The font is officially "Sans Accountability." Souvenir shirts read "I visited ???." The highway shrugged in both directions.'
   },
   {
+    // Paranoia intent: Turn mundane receipts into traceable leak ledgers.
     id: 'truth_cafe_receipts',
     title: 'Receipt Revelations',
     headline: 'COFFEE RECEIPTS INCLUDE FOOTNOTES & SOURCES',
@@ -895,7 +900,7 @@ export const EVENT_DATABASE: GameEvent[] = [
     rarity: 'common',
     effects: { truth: 5, ip: -1 },
     weight: 7,
-    flavorText: 'LATTÉ PRESS: Milk foamed into the shape of a pie chart. The tip jar read "for sources." Customers left caffeinated and cited.'
+    flavorText: 'LEDGER LOG: Thermal paper now prints cross-referenced citations with every order. The tip jar read "for sources." Patrons left with caffeine jitters and subpoena-grade footnotes.'
   },
   {
     id: 'park_statue_moves_a_bit',
@@ -2099,15 +2104,16 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       flavorGov: "Predictive crowd control keeps coastal events safe.",
       flavorTruth: "They're choreographing crackdowns with light shows!"
     },
-    {
-      id: "ct_nutmeg_packet_manifest", title: "Nutmeg Packets Hide Whistleblower Drop",
-      content: "Every diner sugar caddy in New Haven came with microfilm listing slush fund beneficiaries by spice blend.",
-      type: "capture", rarity: "common", weight: 9,
-      effects: { truthChange: 2, ipChange: -1 },
-      conditions: { capturedBy: "truth" },
-      flavorTruth: "Season your pancakes and expose their payroll!",
-      flavorGov: "Culinary tourism sometimes experiments with augmented reality recipes."
-    }
+      {
+        // Paranoia intent: Turn innocuous tabletop fixtures into serialized leak dispensers.
+        id: "ct_nutmeg_packet_manifest", title: "Nutmeg Packets Hide Whistleblower Drop",
+        content: "Every tabletop dispenser in New Haven flipped its false bottom to reveal microfilm listing slush fund beneficiaries by spice code.",
+        type: "capture", rarity: "common", weight: 9,
+        effects: { truthChange: 2, ipChange: -1 },
+        conditions: { capturedBy: "truth" },
+        flavorTruth: "Twist the packet rack and the payroll prints itself!",
+        flavorGov: "Tourism boards occasionally beta test augmented reality placards."
+      }
   ],
 
   // District of Columbia
@@ -2157,15 +2163,16 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       flavorGov: "Maritime safety corridors keep traffic predictable.",
       flavorTruth: "They digitized the river to catalogue dissent!"
     },
-    {
-      id: "dc_briefing_brunch", title: "Capitol Hill Brunch Requires Loyalty QR",
-      content: "Beltway cafes added secret QR menus that redirected diners to pledge-of-secrecy forms before serving mimosas.",
-      type: "capture", rarity: "rare", weight: 5,
-      effects: { ipChange: 4, truthChange: -2 },
-      conditions: { capturedBy: "government" },
-      flavorGov: "Constituent outreach sometimes includes optional security orientations.",
-      flavorTruth: "They're gating breakfast behind loyalty oaths!"
-    }
+      {
+        // Paranoia intent: Portray everyday meetups as covert loyalty screening checkpoints.
+        id: "dc_briefing_brunch", title: "Capitol Hill QR Checkpoint Seizes Day Plans",
+        content: "Beltway lounges added covert QR overlays that redirected visitors to pledge-of-secrecy forms before granting access to seating charts.",
+        type: "capture", rarity: "rare", weight: 5,
+        effects: { ipChange: 4, truthChange: -2 },
+        conditions: { capturedBy: "government" },
+        flavorGov: "Constituent outreach sometimes includes optional security orientations.",
+        flavorTruth: "They're gating calendar invites behind loyalty oaths!"
+      }
   ],
 
   // Delaware
@@ -2255,15 +2262,16 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
       flavorTruth: "They weaponized sea shanties for orbital mind control!",
       flavorGov: "Joint maritime aerospace drills ensure splashdown readiness."
     },
-    {
-      id: "fl_key_lime_exposure", title: "Key Lime Pie Recipe Exposes Cover Ops",
-      content: "Miami baker livestreamed a family recipe that revealed classified shipping lanes scribbled in lime zest.",
-      type: "capture", rarity: "common", weight: 10,
-      effects: { truthChange: 2, ipChange: -1 },
-      conditions: { capturedBy: "truth" },
-      flavorTruth: "Dessert literally iced the conspiracy diagram!",
-      flavorGov: "Culinary influencers sometimes riff on fanciful supply-chain lore."
-    },
+      {
+        // Paranoia intent: Show domestic livestreams leaking maritime surveillance routes.
+        id: "fl_key_lime_exposure", title: "Key Lime Broadcast Exposes Cover Ops",
+        content: "A Miami stream overlayed inherited instructions with coordinates that spelled out classified shipping lanes mid-demo.",
+        type: "capture", rarity: "common", weight: 10,
+        effects: { truthChange: 2, ipChange: -1 },
+        conditions: { capturedBy: "truth" },
+        flavorTruth: "The family signal literally traced the conspiracy diagram!",
+        flavorGov: "Influencers sometimes riff on fanciful supply-chain lore."
+      },
     {
       id: "fl_hurricane_missile_net", title: "Hurricane Drones Redirect Storm Gossip",
       content: "A ring of weather-control drones muted pirate radio during landfall, steering dissident broadcasts out to sea.",
@@ -2460,15 +2468,16 @@ export const STATE_EVENTS_DATABASE: { [stateId: string]: GameEvent[] } = {
 
   // Illinois
   "IL": [
-    {
-      id: "il_pizza_portal", title: "Chicago Deep Dish Opens Portal to Italy", 
-      content: "Scientists discover that the depth of Chicago pizza creates dimensional rifts to the Mediterranean!",
-      type: "capture", rarity: "uncommon", weight: 9,
-      effects: { truthChange: 2, cardDraw: 2 },
-      conditions: { capturedBy: "truth" },
-      flavorTruth: "Culinary physics defies explanation!",
-      flavorGov: "Cultural exchange program enhances international relations."
-    },
+      {
+        // Paranoia intent: Frame iconic city myths as cover for dimensional espionage.
+        id: "il_pizza_portal", title: "Chicago Deep Dish Opens Portal to Italy",
+        content: "Scientists discover that the depth of Chicago ovens masks dimensional rifts linking to Mediterranean safehouses!",
+        type: "capture", rarity: "uncommon", weight: 9,
+        effects: { truthChange: 2, cardDraw: 2 },
+        conditions: { capturedBy: "truth" },
+        flavorTruth: "Spatial geometry is doing all the smuggling!",
+        flavorGov: "Cultural exchange programs enhance international relations."
+      },
     {
       id: "il_wind_power", title: "Government Harnesses Chicago Wind for Mind Control", 
       content: "The Windy City's gusts carry subliminal messages to control urban populations!",

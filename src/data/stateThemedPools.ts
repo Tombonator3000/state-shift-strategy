@@ -248,12 +248,13 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
         weight: 2,
         effect: { ipDelta: 2 },
       }),
+      // Paranoia intent: Collapse citrus agritech into a psychic mesh for leak interception.
       createEffect({
         id: 'fl_event_citrus_psychic_bloom',
         label: 'Citrus Psychic Bloom',
         headline: 'ORANGE GROVES BLOSSOM WITH WIFI SIGNALS',
         subhead: 'Phones auto-connect to network named “THE TRUTH”.',
-        summary: 'Harvest teams record impossible, hyper-clear dreams after squeezing the crop. Rival networks scramble to jam the orchard.',
+        summary: 'Grove canopies pulse telepathic bursts that sync every listening post in the county, forcing rival networks to jam or risk exposure.',
         icon: '🍊',
         weight: 1,
         effect: { truthDelta: 2, pressureDelta: 1 },
@@ -340,12 +341,13 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
       states: ['NJ', '34'],
     },
     bonuses: [
+      // Paranoia intent: Map turnpike chatter into a rolling kompromat exchange masked as logistics talk.
       createEffect({
         id: 'nj_bonus_turnpike_cb_rally',
         label: 'Turnpike CB Rally',
         headline: 'TRUCKERS JAM CHANNEL 19 WITH REDACTED RECIPES',
         subhead: 'Every ingredient is a project codename.',
-        summary: 'Rest stop parking lots hum with rigs swapping hush-hush intelligence disguised as slow-cooker gossip.',
+        summary: 'Rest stops buzz as rigs swap clearance matrices disguised as folksy dispatch tips, feeding intercept teams a live blackmail log.',
         icon: '📻',
         weight: 3,
         effect: { truthDelta: 2, ipDelta: 1 },
@@ -360,16 +362,17 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
         weight: 2,
         effect: { ipDelta: 3 },
       }),
-      createEffect({
-        id: 'nj_bonus_pine_barrens_signal',
-        label: 'Pine Barrens Signal Fire',
-        headline: 'BLUE FLAMES SPELL OUT ROUTING NUMBERS',
-        subhead: 'Campers roast marshmallows, memorize offshore accounts.',
-        summary: 'Night hikers watch will-o’-wisps render clandestine bank transfers in the treetops. Treasury teams take frantic notes.',
-        icon: '🔥',
-        weight: 1,
-        effect: { truthDelta: 1, pressureDelta: 1 },
-      }),
+        // Paranoia intent: Weaponize Pine Barrens folklore into an offshore money trail revelation.
+        createEffect({
+          id: 'nj_bonus_pine_barrens_signal',
+          label: 'Pine Barrens Signal Fire',
+          headline: 'BLUE FLAMES SPELL OUT ROUTING NUMBERS',
+          subhead: 'Campers trace sigils in the air, memorize offshore accounts.',
+          summary: 'Night hikers watch will-o’-wisps render clandestine bank transfers in the treetops while Treasury listeners triangulate the laundering path.',
+          icon: '🔥',
+          weight: 1,
+          effect: { truthDelta: 1, pressureDelta: 1 },
+        }),
     ],
     events: [
       createEffect({
@@ -432,12 +435,13 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
         weight: 2,
         effect: { ipDelta: 2 },
       }),
+      // Paranoia intent: Turn geothermal tourism into a covert transcript siphon under ranger supervision.
       createEffect({
         id: 'pacific_bonus_volcano_listening_post',
         label: 'Volcano Listening Post',
         headline: 'KILAUEA STEAM RUMORS MATCH PENTAGON MINUTES',
         subhead: 'Tour guides blame “vogged-out influencers.”',
-        summary: 'Lava vents sigh transcripts of classified hearings; agents roast marshmallows while taking immaculate notes.',
+        summary: 'Lava vents hiss verbatim committee minutes while guides shuffle visitors past hidden receivers masked as safety beacons.',
         icon: '🌋',
         weight: 1,
         effect: { truthDelta: 1, pressureDelta: 1 },
@@ -556,12 +560,13 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
       states: ['MT', 'ID', 'WY'],
     },
     bonuses: [
+      // Paranoia intent: Reframe mountain supply runs as a plausible deniability pipeline for black-budget gear.
       createEffect({
         id: 'mountain_bonus_powder_cache_caravan',
         label: 'Powder Cache Caravan',
         headline: 'SNOWCATS DELIVER “AVALANCHE PREPAREDNESS” CRATES',
         subhead: 'Each crate whispers radio passwords when opened.',
-        summary: 'Mountain patrols haul unmarked containers up switchbacks, leaving spare dossiers beside the trail mix.',
+        summary: 'Mountain patrols haul unmarked containers up switchbacks, staging decoy safety briefings while sliding contraband dossiers into lodge lockers.',
         icon: '🎿',
         weight: 3,
         effect: { ipDelta: 2 },
@@ -576,24 +581,26 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
         weight: 2,
         effect: { truthDelta: 2, pressureDelta: 1 },
       }),
+      // Paranoia intent: Convert farmland infrastructure into an antenna field that scrambles surveillance parity.
       createEffect({
         id: 'mountain_bonus_idaho_tater_array',
-        label: 'Idaho Tater Array',
-        headline: 'POTATO FARMS AIM SPUD-POWERED RADARS SKYWARD',
-        subhead: 'Extension office files “culinary innovation” paperwork.',
-        summary: 'Irrigation rigs become spiral antennas that bake truth signals into every casserole heading downrange.',
-        icon: '🥔',
+        label: 'Gem State Resonance Array',
+        headline: 'POTATO BELT TOWERS HUM LIKE CLASSIFIED RADAR',
+        subhead: 'Extension office files “agrotone calibration” paperwork.',
+        summary: 'Irrigation pivots align into a shimmering lattice that amplifies clandestine broadcasts straight into buried repeater bunkers.',
+        icon: '📡',
         weight: 1,
         effect: { truthDelta: 1, ipDelta: 1 },
       }),
     ],
     events: [
+      // Paranoia intent: Use wildlife drills to normalize bio-surveillance handoffs without revealing handlers.
       createEffect({
         id: 'mountain_event_grizzly_signal_drill',
         label: 'Grizzly Signal Drill',
         headline: 'RANGERS TRAIN BEARS TO DELIVER FLASH DRIVES',
         subhead: 'Official statement calls it “wildlife enrichment.”',
-        summary: 'Tagged grizzlies stroll into operations tents with USB collars, dropping undeniable footage before wandering off for berries.',
+        summary: 'Tagged grizzlies stroll into operations tents with USB collars, drop undeniable footage, then lumber off toward decoy tracking beacons.',
         icon: '🐻',
         weight: 3,
         effect: { truthDelta: 2 },
@@ -710,12 +717,13 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
         weight: 3,
         effect: { truthDelta: 2, ipDelta: 1 },
       }),
+      // Paranoia intent: Turn industrial downtime into a confidential leak vector hidden in plain sight.
       createEffect({
         id: 'heartland_bonus_factory_breakroom_tipline',
         label: 'Factory Breakroom Tipline',
         headline: 'AUTOMAKERS INSTALL “ANONYMOUS GOSSIP” BUTTON',
         subhead: 'Union steward files it under “wellness.”',
-        summary: 'Coffee machines now dispense latte art featuring classified schematics—everyone pretends it’s normal foam.',
+        summary: 'Breakroom kiosks now eject anonymized schematics through innocuous maintenance alerts, letting whistle crews photograph without suspicion.',
         icon: '☕',
         weight: 2,
         effect: { ipDelta: 2 },
@@ -732,12 +740,13 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
       }),
     ],
     events: [
+      // Paranoia intent: Expose buried vote tampering by weaponizing county fair nostalgia.
       createEffect({
         id: 'heartland_event_siloed_votes_recount',
         label: 'Siloed Votes Recount',
         headline: 'COUNTY FAIR BLUE-RIBBON BOOTHS DEMAND AUDIT',
-        subhead: 'Judges swear the pies are “purely agricultural.”',
-        summary: 'Prize entries hide ballots exposing clandestine caucus tallies, forcing bureaucrats to eat humble pie on camera.',
+        subhead: 'Judges swear the exhibits are “purely agricultural.”',
+        summary: 'Prize exhibits crack open hidden ballot caches mid-judging, forcing bureaucrats to read the forged tallies aloud under stadium lights.',
         icon: '🥧',
         weight: 3,
         effect: { truthDelta: 2 },
@@ -768,7 +777,7 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
     tag: {
       id: 'great_lakes_signal',
       label: 'Great Lakes Signal',
-      description: 'Freshwater horizons bounce encrypted gossip between ore boats and supper clubs.',
+      description: 'Freshwater horizons bounce encrypted gossip between ore boats and clandestine lounges.',
       states: ['MI', 'WI', 'MN'],
     },
     bonuses: [
@@ -782,13 +791,14 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
         weight: 3,
         effect: { ipDelta: 2 },
       }),
+      // Paranoia intent: Recast supper clubs as shell organizations broadcasting whistleblower dossiers.
       createEffect({
         id: 'lakes_bonus_supersupper_briefing',
-        label: 'Super Supper Briefing',
-        headline: 'FRIDAY FISH FRY ANNOUNCES “MYSTERY FILET SPECIAL”',
-        subhead: 'Tickets include hushpuppies and clearance wristbands.',
-        summary: 'Community halls fry cod while a back-room projector spills sealed whistleblower footage onto the bingo board.',
-        icon: '🐟',
+        label: 'Harbor Safehouse Briefing',
+        headline: 'FRIDAY COVER CHARGE INCLUDES SURVEILLANCE CLEARANCE',
+        subhead: 'Tickets arrive pre-stamped with routing codes.',
+        summary: 'Community halls dim the lights and stream sealed whistleblower footage through hidden sonar uplinks behind the stage curtain.',
+        icon: '📡',
         weight: 2,
         effect: { truthDelta: 2 },
       }),
@@ -864,16 +874,17 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
         weight: 2,
         effect: { truthDelta: 2, pressureDelta: 1 },
       }),
-      createEffect({
-        id: 'gulf_bonus_shrimp_boat_sensor_net',
-        label: 'Shrimp Boat Sensor Net',
-        headline: 'TRAWLERS DRAG MILES OF BUGGED NETTING',
-        subhead: 'Coast Guard paperwork labels it “research gear.”',
-        summary: 'Every catch includes miniature black boxes chirping intercepted cabinet chatter over the deck speakers.',
-        icon: '🦐',
-        weight: 1,
-        effect: { truthDelta: 1, ipDelta: 1 },
-      }),
+        // Paranoia intent: Turn working fleets into mobile SIGINT nets disguised as routine hauls.
+        createEffect({
+          id: 'gulf_bonus_shrimp_boat_sensor_net',
+          label: 'Shrimp Boat Sensor Net',
+          headline: 'TRAWLERS DRAG MILES OF BUGGED NETTING',
+          subhead: 'Coast Guard paperwork labels it “research gear.”',
+          summary: 'Hull-mounted pods scrape up encrypted cabinet chatter and rebroadcast it across the fleet’s tracking channel before regulators can jam it.',
+          icon: '🦐',
+          weight: 1,
+          effect: { truthDelta: 1, ipDelta: 1 },
+        }),
     ],
     events: [
       createEffect({
@@ -968,12 +979,13 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
         weight: 2,
         effect: { ipDelta: 2 },
       }),
+      // Paranoia intent: Turn trail culture into a breadcrumb network for whistleblowers on the move.
       createEffect({
         id: 'appalachian_event_trail_of_leaks',
         label: 'Trail of Leaks',
         headline: 'HIKERS FIND QR CODES BURNED INTO SHELTER LOGBOOKS',
         subhead: 'Park service blames “overzealous influencers.”',
-        summary: 'Every waypoint unlocks a dead drop containing truth-saturated ration bars and unredacted memos.',
+        summary: 'Every waypoint unlocks a dead drop of unredacted memos and burner credentials tucked behind fake safety advisories.',
         icon: '🥾',
         weight: 1,
         effect: { truthDelta: 1, pressureDelta: 1 },
@@ -1142,26 +1154,28 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
         weight: 3,
         effect: { truthDelta: 2, ipDelta: 1 },
       }),
-      createEffect({
-        id: 'rumor_bonus_maple_syrup_memory',
-        label: 'Maple Syrup Memory Cache',
-        headline: 'SUGAR SHACK BARRELS STORE CLASSIFIED AUDIO',
-        subhead: 'Producers stamp them “for pancakes only.”',
-        summary: 'Each pour leaks sweet recordings of closed-door caucuses; breakfast crowds share the drip in knowing silence.',
-        icon: '🍁',
-        weight: 2,
-        effect: { truthDelta: 2 },
-      }),
-      createEffect({
-        id: 'rumor_bonus_white_mountain_retreat',
-        label: 'White Mountain Retreat',
-        headline: 'SKI LODGE OFFERS “ANONYMIZED” PRESS PACKAGES',
-        subhead: 'Brochure features silhouettes carrying attaché cases.',
-        summary: 'Guests receive unmarked dossiers with their lift tickets, plus cocoa branded with latitude-longitude riddles.',
-        icon: '🏔️',
-        weight: 1,
-        effect: { ipDelta: 2 },
-      }),
+        // Paranoia intent: Transform heritage trades into dead-drop networks with plausible deniability.
+        createEffect({
+          id: 'rumor_bonus_maple_syrup_memory',
+          label: 'Maple Syrup Memory Cache',
+          headline: 'SUGAR SHACK BARRELS STORE CLASSIFIED AUDIO',
+          subhead: 'Producers stamp them “for archive inventory only.”',
+          summary: 'Each barrel hums encoded caucus recordings through condenser coils, letting co-ops swap kompromat under the guise of inventory checks.',
+          icon: '🍁',
+          weight: 2,
+          effect: { truthDelta: 2 },
+        }),
+        // Paranoia intent: Position resort amenities as recruitment fronts distributing surveillance riddles.
+        createEffect({
+          id: 'rumor_bonus_white_mountain_retreat',
+          label: 'White Mountain Retreat',
+          headline: 'SKI LODGE OFFERS “ANONYMIZED” PRESS PACKAGES',
+          subhead: 'Brochure features silhouettes carrying attaché cases.',
+          summary: 'Guests receive unmarked dossiers with their lift tickets and elevator keycards that flicker latitude-longitude riddles in ultraviolet.',
+          icon: '🏔️',
+          weight: 1,
+          effect: { ipDelta: 2 },
+        }),
     ],
     events: [
       createEffect({
@@ -1174,16 +1188,17 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
         weight: 3,
         effect: { truthDelta: 3 },
       }),
-      createEffect({
-        id: 'rumor_event_green_mountain_flash_mob',
-        label: 'Green Mountain Flash Mob',
-        headline: 'FARMERS MARKET FREEZES, PERFORMS DATA DROP',
-        subhead: 'Produce still weighs out; secrets weigh more.',
-        summary: 'Vendors spell out encryption keys with heirloom carrots before shrugging and handing over the receipts.',
-        icon: '🥕',
-        weight: 2,
-        effect: { ipDelta: 2 },
-      }),
+        // Paranoia intent: Stage market performances that smuggle encryption keys through choreography.
+        createEffect({
+          id: 'rumor_event_green_mountain_flash_mob',
+          label: 'Green Mountain Flash Mob',
+          headline: 'FARMERS MARKET FREEZES, PERFORMS DATA DROP',
+          subhead: 'Produce still weighs out; secrets weigh more.',
+          summary: 'Vendors align stalls into a living QR lattice, flickering encryption keys via barcode scanners before resuming small talk.',
+          icon: '🥕',
+          weight: 2,
+          effect: { ipDelta: 2 },
+        }),
       createEffect({
         id: 'rumor_event_whitecap_signal_boat',
         label: 'Whitecap Signal Boat',
@@ -1200,7 +1215,7 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
     tag: {
       id: 'ozark_veil',
       label: 'Ozark Veil Syndicate',
-      description: 'Karst caves and riverboats host polite conspiracies with barbecue catering.',
+      description: 'Karst caves and riverboats host polite conspiracies with velvet-rope cover stories.',
       states: ['AR', 'OK', 'MO'],
     },
     bonuses: [
@@ -1214,23 +1229,25 @@ export const STATE_THEMED_POOLS: StateThemedPool[] = [
         weight: 3,
         effect: { truthDelta: 2, ipDelta: 1 },
       }),
+      // Paranoia intent: Recast leisure cruises as covert auction floors for compromised patents.
       createEffect({
         id: 'ozark_bonus_riverboat_intel_buffet',
         label: 'Riverboat Intel Buffet',
         headline: 'PADDLEWHEEL CASINO RUNS “UNMARKED DOCUMENT” CARVING STATION',
-        subhead: 'Dealer assures patrons it’s “smoked brisket.”',
-        summary: 'Buffet trays conceal microfiche between ribs and coleslaw; diners leave sticky-fingered and fully briefed.',
+        subhead: 'Dealer assures patrons it’s “routine hospitality.”',
+        summary: 'Service trolleys conceal microfiche drawers beneath silver covers, and high rollers trade kompromat chips while the band plays on.',
         icon: '🛥️',
         weight: 2,
         effect: { ipDelta: 2 },
       }),
+      // Paranoia intent: Turn fan culture meetups into mobile airspace surveillance rings.
       createEffect({
         id: 'ozark_bonus_thunderbird_tailgate',
         label: 'Thunderbird Tailgate',
         headline: 'HIGHWAY REST STOP HOSTS CRYPTID FAN CLUB',
-        subhead: 'State troopers grill burgers, ignore the wingspan.',
-        summary: 'Enthusiasts swap Polaroids with embedded map overlays, fueling field teams with protein and perfect intel.',
-        icon: '🍔',
+        subhead: 'State troopers set up cones, ignore the wingspan.',
+        summary: 'Enthusiasts trade Polaroids with embedded map overlays, activating skywatch relays every time the mascot unfurls its wings.',
+        icon: '🛰️',
         weight: 1,
         effect: { truthDelta: 1, pressureDelta: 1 },
       }),

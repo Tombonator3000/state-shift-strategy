@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-10 – Paranoid flavor realignment across pools
+- Refreshed state pool, agenda issue, and hotspot flavor to emphasize conspiracy levers over food motifs and documented paranoia intents inline.
+- Updated copy-driven fixtures to remove culinary phrasing and reflagged QR loyalty checks, maritime leaks, and dimensional portals.
+
 ## 2025-11-09 – Rebalance Extra Extra trio scoring
 - Extra Extra now compares full trio impact totals (truth, IP, captures, damage) so a coordinated newsroom push can defeat a lone government haymaker.
 - Deterministic tie breakers fall back to the existing truth-delta safeguards, keeping deadlocks aligned with the draw flow while preserving dispatch selection.

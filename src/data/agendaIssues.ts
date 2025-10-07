@@ -43,16 +43,17 @@ const ISSUE_ACTIVE_KEY = 'shadowgov.activeAgendaIssue';
 
 const baseIssues: AgendaIssueDefinition[] = [
   {
+    // Paranoia intent: Make saucer hysteria feel like a logistics breach spilling from orbit to ground teams.
     id: 'ufo',
     label: 'Cosmic Cover Stories',
-    description: 'Saucer sightings, crash cart buffets, and orbital bake-offs dominate the rumor mill.',
+    description: 'Saucer sightings, orbital misdirection, and redirected witness corridors dominate the rumor mill.',
     priorityThemes: ['Desert Disclosure', 'Statewide Spectacle', 'Crash Site Compliance'],
     supportingThemes: ['Truth Momentum', 'Traveling Influence'],
     factionQuips: {
       truth: [
-        'Truth kitchen radios hum in sympathy with the mothership.',
-        'Operatives swap recipes for meteorite reduction glaze.',
-        'Witness hotline interns keep binoculars next to the blenders.',
+        'Truthline scanners hum in sympathy with the mothership.',
+        'Operatives trade contrail decryption keys before the telemetry hits prime time.',
+        'Witness hotline interns keep binoculars next to the signal scramblers.',
       ],
       government: [
         'Containment crews log every contrail as “decorative mist.”',
@@ -60,7 +61,7 @@ const baseIssues: AgendaIssueDefinition[] = [
         'Audit squads requisition anti-gravity disclaimers by the crate.',
       ],
       neutral: [
-        'Station gossip wonders if the cafeteria roof will open again tonight.',
+        'Station gossip wonders if the observation deck will open again tonight.',
         'Archivists arrange foil hats by alphabetical order, just in case.',
       ],
     },
@@ -68,7 +69,7 @@ const baseIssues: AgendaIssueDefinition[] = [
       verbs: {
         ATTACK: [
           'CRACKS SECRET HANGAR',
-          'BREACHES ORBITAL BUFFET',
+          'BREACHES ORBITAL LOCKBOX',
           'OVERRIDES LAUNCH PAD LOCKDOWN',
         ],
         MEDIA: [
@@ -100,24 +101,25 @@ const baseIssues: AgendaIssueDefinition[] = [
     },
   },
   {
+    // Paranoia intent: Frame cryptid encounters as clandestine negotiation theaters with living anomalies.
     id: 'cryptid',
-    label: 'Cryptid Culinary Summit',
-    description: 'Mythic potlucks, creature diplomacy, and monster RSVP lists keep the presses running hot.',
-    priorityThemes: ['Mythic Diplomacy', 'Cryptid Hospitality', 'Traveling Influence'],
+    label: 'Cryptid Accord Conclave',
+    description: 'Mythic summits, covert creature diplomacy, and monster RSVP lists keep the presses running hot.',
+    priorityThemes: ['Mythic Diplomacy', 'Cryptid Liaison Ops', 'Traveling Influence'],
     supportingThemes: ['Statewide Spectacle'],
     factionQuips: {
       truth: [
-        'Scout teams leave gluten-free offerings for every hoofprint.',
-        'Archivists label coolers “fang-friendly” and hope for the best.',
-        'Potluck coordinators debate whether swamp gas counts as seasoning.',
+        'Scout teams hide resonance beacons beside every hoofprint.',
+        'Archivists label containment crates “fang-friendly” and hope for the best.',
+        'Signal wranglers debate whether swamp gas counts as camouflage.',
       ],
       government: [
         'Containment liaisons practice smiling while holding tranquilizer darts.',
-        'Logistics briefs rename cryptids as “unregistered catering staff.”',
+        'Logistics briefs rename cryptids as “unregistered field assets.”',
         'Budget monitors request itemized receipts for every claw mark.',
       ],
       neutral: [
-        'Local diners post “Cryptids Eat Free” chalkboards just to stay on theme.',
+        'Local stations post “Cryptids Wave Back” alerts just to stay on theme.',
       ],
     },
     newspaper: {
@@ -128,53 +130,54 @@ const baseIssues: AgendaIssueDefinition[] = [
           'AMBUSHES ROGUE HOWLERS',
         ],
         MEDIA: [
-          'SPOTLIGHTS BEASTLY BUFFET',
-          'STREAMS SASQUATCH SOIREE',
+          'SPOTLIGHTS BEASTLY SUMMIT',
+          'STREAMS SASQUATCH SUMMIT',
           'PRINTS CLAW-SIGNED REVIEWS',
         ],
         ZONE: [
           'CORDONS OFF CRYPTID CAMPSITE',
           'STAKES OUT HOOFPRINT HOTELS',
-          'LINES TRAIL WITH OFFERING TABLES',
+          'LINES TRAIL WITH SENSOR ARRAYS',
         ],
       },
       subheads: {
         truth: [
-          'Conspiracy caterers swear the howling harmonizes with their playlist.',
-          'Witnesses report potluck tables levitating to make room for scaled VIPs.',
+          'Conspiracy handlers swear the howling harmonizes with their playlist.',
+          'Witnesses report staging platforms levitating to make room for scaled VIPs.',
         ],
         government: [
-          'Containment crews release “Do Not Feed the Monster” pamphlets in six languages.',
+          'Containment crews release “Do Not Approach the Monster” pamphlets in six languages.',
           'Officials stress the claws on the guest list are purely decorative.',
         ],
       },
-      tags: ['#IssueCryptid', '#MonsterMixer'],
+      tags: ['#IssueCryptid', '#MonsterSummit'],
       heroKickers: [
-        'Weekly focus: Cryptid Catering Ops',
-        'All eyes on the Cryptid Culinary Summit',
+        'Weekly focus: Cryptid Accord Maneuvers',
+        'All eyes on the Cryptid Accord Conclave',
       ],
     },
   },
   {
+    // Paranoia intent: Emphasize how cover stories weaponize bureaucracy and fiscal fog machines.
     id: 'coverup',
     label: 'Coverup Control Grid',
-    description: 'Budget smokescreens, narrative lockdowns, and classified casseroles set the tempo.',
+    description: 'Budget smokescreens, narrative lockdowns, and encrypted control grids set the tempo.',
     priorityThemes: ['Narrative Containment', 'Information Discipline', 'Fiscal Obfuscation'],
     supportingThemes: ['Narrative Fusion', 'Synergy Sustainment'],
     fallbackWeight: 0.85,
     factionQuips: {
       truth: [
         'Leaks division double-binds every memo with twine and conspiracy twinkle.',
-        'Whistle chefs garnish casseroles with shredded nondisclosure agreements.',
+        'Whistle tacticians lace dossiers with shredded nondisclosure agreements.',
         'Radio hosts practice whispering “follow the money” in seven octaves.',
       ],
       government: [
-        'Spin rooms install emergency shredders next to every serving tray.',
-        'Budget auditors label each ladle as a potential breach vector.',
-        'Briefing captains assign code names to every casserole lid.',
+        'Spin rooms install emergency shredders next to every briefing lectern.',
+        'Budget auditors label each courier bag as a potential breach vector.',
+        'Briefing captains assign code names to every redaction stack.',
       ],
       neutral: [
-        'Interns rehearse plausible deniability between coffee runs.',
+        'Interns rehearse plausible deniability between courier runs.',
         'Archivists sort cover stories by degree of scorch marks.',
       ],
     },
@@ -198,12 +201,12 @@ const baseIssues: AgendaIssueDefinition[] = [
       },
       subheads: {
         truth: [
-          'Leaks taskforce says the documents smell faintly of barbecue smoke.',
+          'Leaks taskforce says the documents smell faintly of ozone.',
           'Sources insist the cover story tripped over its own budget line.',
         ],
         government: [
           'Containment desk adds extra binders to weigh down suspiciously buoyant files.',
-          'Officials deny the smell of burnt ledger even as alarms blink politely.',
+          'Officials deny the static crackle even as alarms blink politely.',
         ],
       },
       tags: ['#IssueCoverup', '#RedactionRodeo'],
