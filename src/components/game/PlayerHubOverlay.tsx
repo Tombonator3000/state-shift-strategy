@@ -297,157 +297,176 @@ const PlayerHubOverlay = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
       <Card
         className={clsx(
-          'player-hub-card player-hub-broadsheet relative flex h-[90vh] w-full max-w-7xl flex-col',
+          'player-hub-card player-hub-dossier relative flex h-[90vh] w-full max-w-7xl flex-col overflow-hidden',
           isTruth ? 'player-hub-truth' : 'player-hub-government',
         )}
       >
-        <div className="player-hub-background">
-          <div className="broadsheet-paper" />
-          <div className="broadsheet-halftone" />
-          <div className="broadsheet-fibers" />
-          <div className="broadsheet-fold" />
-          <div className="broadsheet-margin-notes" />
-        </div>
+        <div className="player-hub-background" />
 
-        <div className="broadsheet-shell">
-          <header className="broadsheet-masthead">
-            <div className="broadsheet-masthead__logo">
-              <span>Paranoid Times Weekly</span>
-              <span>{faction === 'truth' ? 'Truth Underground Bureau' : 'Office of Official Narratives'}</span>
+        <div className="dossier-container overflow-y-auto">
+          <header className="dossier-header">
+            <div className="dossier-header__title">
+              {faction === 'truth' ? 'Truth Archive' : 'Official Records'}
             </div>
-            <div className="broadsheet-masthead__edition">
+            <div className="dossier-header__classification">
+              <span>⚠ CLASSIFIED</span>
               <span>{dateline}</span>
-              <span>Volume {volumeNumber.toString().padStart(3, '0')}</span>
-              <span>Edition #{Math.max(pressIssues.length, 1).toString().padStart(2, '0')}</span>
+              <Button
+                onClick={onClose}
+                variant="ghost"
+                size="sm"
+                className="text-[var(--dossier-paper)] hover:text-white"
+              >
+                <X size={16} />
+              </Button>
             </div>
-            <div className="broadsheet-masthead__price">3.50 or one classified lead</div>
-            <Button
-              onClick={onClose}
-              variant="outline"
-              size="sm"
-              className="broadsheet-masthead__close rounded-full border-[1.5px] border-[var(--broadsheet-accent)] bg-white/80 px-4 py-1 font-typewriter text-[11px] uppercase tracking-[0.28em] text-[var(--broadsheet-accent)] shadow-sm transition hover:bg-white"
-            >
-              <X size={14} className="mr-2" />
-              Close Archive
-            </Button>
           </header>
 
-          <Tabs
-            value={activeTab}
-            onValueChange={value => setActiveTab(value as HubTab)}
-            className="flex flex-1 flex-col"
-          >
-            <TabsList className="broadsheet-tablist">
-              {(Object.keys(tabDetails) as HubTab[]).map(tabKey => {
-                const detail = tabDetails[tabKey];
-                return (
-                  <TabsTrigger
-                    key={tabKey}
-                    value={tabKey}
-                    className="broadsheet-tab flex w-full flex-col items-start gap-1 tracking-[0.28em] data-[state=inactive]:opacity-85"
-                  >
-                    <span className="kicker">{detail.kicker}</span>
-                    <span>{detail.headline}</span>
-                    <span className="dek">{detail.dek}</span>
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
+          <div className="dossier-folder-nav">
+            {(Object.keys(tabDetails) as HubTab[]).map(tabKey => {
+              const detail = tabDetails[tabKey];
+              const folderIcons: Record<HubTab, typeof Trophy> = {
+                achievements: Trophy,
+                agendas: Target,
+                cards: Library,
+                tutorials: GraduationCap,
+                press: Newspaper,
+                evidence: FileSearch2,
+                intel: MapPin,
+              };
+              const FolderIcon = folderIcons[tabKey];
+              return (
+                <button
+                  key={tabKey}
+                  onClick={() => setActiveTab(tabKey)}
+                  className="dossier-folder"
+                  data-active={activeTab === tabKey}
+                >
+                  <div className="flex items-center gap-2">
+                    <FolderIcon size={16} />
+                    <span className="dossier-folder__label">{detail.headline}</span>
+                  </div>
+                  <div className="dossier-folder__code">{detail.kicker}</div>
+                </button>
+              );
+            })}
+          </div>
 
-            <div className="broadsheet-content">
-              <div className="broadsheet-stamp">{stampLabel}</div>
-              <div className="broadsheet-columns" aria-hidden />
-              <div className="broadsheet-content__ticker">
-                {tickerItems.map((item, index) => (
-                  <span key={`${item}-${index}`}>{item}</span>
-                ))}
+          <div className="dossier-content">
+            <div className="dossier-stamp">{faction === 'truth' ? 'LEAKED' : 'CLEARED'}</div>
+            
+            <div className="classification-bar">
+              {faction === 'truth' ? 'UNAUTHORIZED ACCESS' : 'AUTHORIZED PERSONNEL ONLY'}
+            </div>
+
+            <div className="file-metadata">
+              <div className="file-metadata__item">
+                <div className="file-metadata__label">File Date</div>
+                <div className="file-metadata__value">{dateline}</div>
               </div>
-              <div className="broadsheet-content__body">
-                <TabsContent
-                  value="achievements"
-                  className="relative h-full focus-visible:outline-none data-[state=inactive]:hidden"
-                >
-                  <AchievementsSection className="h-full" variant="broadsheet" />
-                </TabsContent>
+              <div className="file-metadata__item">
+                <div className="file-metadata__label">Case #</div>
+                <div className="file-metadata__value">VOL-{volumeNumber.toString().padStart(3, '0')}</div>
+              </div>
+              <div className="file-metadata__item">
+                <div className="file-metadata__label">Division</div>
+                <div className="file-metadata__value">{faction === 'truth' ? 'Truth Bureau' : 'Official Records'}</div>
+              </div>
+            </div>
 
-                <TabsContent
-                  value="agendas"
-                  className="relative h-full focus-visible:outline-none data-[state=inactive]:hidden"
-                >
-                  <div className="flex h-full flex-col gap-6">
-                    {agendasEnabled ? (
-                      <>
-                        <div className="grid gap-6 lg:grid-cols-5">
-                          <div className="space-y-4 lg:col-span-3">
-                            <div className="rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.86)] p-5 shadow-sm">
-                              <div className="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                  <p className="font-typewriter text-[10px] uppercase tracking-[0.42em] text-[var(--broadsheet-kicker)]">
-                                    Active Agenda Telegram
-                                  </p>
-                                  <h3 className="font-broadsheetSans text-2xl uppercase tracking-[0.18em]">
-                                    {currentAgenda?.title ?? 'Awaiting Assignment'}
-                                  </h3>
-                                </div>
-                                {currentAgenda?.difficulty && (
-                                  <Badge
-                                    variant="outline"
-                                    className={clsx(
-                                      'font-typewriter text-[11px] uppercase tracking-[0.38em]',
-                                      agendaDifficultyTone[currentAgenda.difficulty],
-                                    )}
-                                  >
-                                    {currentAgenda.difficulty}
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="mt-4 border-t border-dashed border-[var(--broadsheet-rule)] pt-4">
-                                {currentAgenda ? (
-                                  <SecretAgendaCard agenda={currentAgenda} isPlayer={faction === 'truth'} />
-                                ) : (
-                                  <div className="font-typewriter text-xs uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
-                                    Bureaucrats misplaced the envelope again.
-                                  </div>
-                                )}
-                              </div>
+            {activeTab === 'achievements' && (
+              <div className="dossier-section">
+                <div className="dossier-file-header">
+                  <div className="dossier-file-title">{tabDetails.achievements.headline}</div>
+                  <div className="dossier-file-code">{tabDetails.achievements.kicker}</div>
+                </div>
+                <p className="mb-6 text-sm text-[var(--dossier-muted)]">{tabDetails.achievements.dek}</p>
+                <div className="redacted-block h-2" />
+                <AchievementsSection className="h-full" variant="broadsheet" />
+              </div>
+            )}
+
+            {activeTab === 'agendas' && (
+              <div className="dossier-section">
+                <div className="dossier-file-header">
+                  <div className="dossier-file-title">{tabDetails.agendas.headline}</div>
+                  <div className="dossier-file-code">{tabDetails.agendas.kicker}</div>
+                </div>
+                <p className="mb-6 text-sm text-[var(--dossier-muted)]">{tabDetails.agendas.dek}</p>
+                <div className="redacted-block h-2" />
+                {agendasEnabled ? (
+                  <>
+                    <div className="grid gap-6 lg:grid-cols-5">
+                      <div className="space-y-4 lg:col-span-3">
+                        <div className="rounded-xl border border-[var(--dossier-border)] bg-[var(--dossier-paper)] p-5 shadow-sm">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                              <p className="font-typewriter text-[10px] uppercase tracking-[0.42em] text-[var(--dossier-muted)]">
+                                Active Agenda Telegram
+                              </p>
+                              <h3 className="font-broadsheetSans text-2xl uppercase tracking-[0.18em]">
+                                {currentAgenda?.title ?? 'Awaiting Assignment'}
+                              </h3>
                             </div>
-                            <div className="rounded-xl border border-[var(--broadsheet-rule)] bg-[rgba(255,255,255,0.82)] p-5">
-                              <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                                <div className="font-typewriter text-[11px] uppercase tracking-[0.38em] text-[var(--broadsheet-kicker)]">
-                                  Cable Log
-                                </div>
-                                <div className="flex flex-wrap items-center gap-2">
-                                  {(Object.keys(agendaStatusLabel) as Array<'all' | AgendaMoment['status']>).map(statusKey => (
-                                    <button
-                                      key={statusKey}
-                                      type="button"
-                                      onClick={() => setAgendaFilter(statusKey)}
-                                      className={clsx(
-                                        'rounded-full border px-3 py-1 text-[11px] font-typewriter uppercase tracking-[0.32em] transition',
-                                        agendaFilter === statusKey
-                                          ? 'border-[var(--broadsheet-accent)] bg-[var(--broadsheet-accent-soft)] text-[var(--broadsheet-ink)]'
-                                          : 'border-[var(--broadsheet-rule)] text-[var(--broadsheet-muted)] hover:bg-white/70',
-                                      )}
-                                    >
-                                      {agendaStatusLabel[statusKey]}
-                                    </button>
-                                  ))}
-                                </div>
-                              </header>
-                              <div className="space-y-4 overflow-y-auto pr-1">
-                                {filteredAgendaHistory.length === 0 ? (
-                                  <p className="font-typewriter text-xs uppercase tracking-[0.3em] text-[var(--broadsheet-muted)]">
-                                    No cable traffic yet — suspiciously quiet.
-                                  </p>
-                                ) : (
-                                  filteredAgendaHistory.map(moment => (
-                                    <article
-                                      key={moment.id}
-                                      className="grid gap-3 rounded-lg border border-dashed border-[var(--broadsheet-rule)] bg-white/80 p-3 md:grid-cols-[180px,1fr]"
-                                    >
-                                      <div className="flex flex-col gap-2">
-                                        <span className="font-typewriter text-[11px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
-                                          {resolveMomentTimestamp(moment.timestamp)}
+                            {currentAgenda?.difficulty && (
+                              <Badge
+                                variant="outline"
+                                className={clsx(
+                                  'font-typewriter text-[11px] uppercase tracking-[0.38em]',
+                                  agendaDifficultyTone[currentAgenda.difficulty],
+                                )}
+                              >
+                                {currentAgenda.difficulty}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="mt-4 border-t border-dashed border-[var(--dossier-border)] pt-4">
+                            {currentAgenda ? (
+                              <SecretAgendaCard agenda={currentAgenda} isPlayer={faction === 'truth'} />
+                            ) : (
+                              <div className="font-typewriter text-xs uppercase tracking-[0.32em] text-[var(--dossier-muted)]">
+                                <span className="redacted-line">████████████████</span> misplaced the envelope again.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="rounded-xl border border-[var(--dossier-border)] bg-[var(--dossier-paper)] p-5">
+                          <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                            <div className="font-typewriter text-[11px] uppercase tracking-[0.38em] text-[var(--dossier-muted)]">
+                              Cable Log
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              {(Object.keys(agendaStatusLabel) as Array<'all' | AgendaMoment['status']>).map(statusKey => (
+                                <button
+                                  key={statusKey}
+                                  type="button"
+                                  onClick={() => setAgendaFilter(statusKey)}
+                                  className={clsx(
+                                    'rounded-full border px-3 py-1 text-[11px] font-typewriter uppercase tracking-[0.32em] transition',
+                                    agendaFilter === statusKey
+                                      ? 'border-[var(--dossier-accent)] bg-[var(--dossier-accent-soft)] text-[var(--dossier-ink)]'
+                                      : 'border-[var(--dossier-border)] text-[var(--dossier-muted)] hover:bg-white/70',
+                                  )}
+                                >
+                                  {agendaStatusLabel[statusKey]}
+                                </button>
+                              ))}
+                            </div>
+                          </header>
+                          <div className="space-y-4 overflow-y-auto pr-1">
+                            {filteredAgendaHistory.length === 0 ? (
+                              <p className="font-typewriter text-xs uppercase tracking-[0.3em] text-[var(--dossier-muted)]">
+                                No cable traffic yet — suspiciously <span className="redacted-line">████████</span>.
+                              </p>
+                                 ) : (
+                                   filteredAgendaHistory.map(moment => (
+                                     <article
+                                       key={moment.id}
+                                       className="grid gap-3 rounded-lg border border-dashed border-[var(--dossier-border)] bg-[var(--dossier-paper)] p-3 md:grid-cols-[180px,1fr]"
+                                     >
+                                       <div className="flex flex-col gap-2">
+                                         <span className="font-typewriter text-[11px] uppercase tracking-[0.32em] text-[var(--dossier-muted)]">
+                                           {resolveMomentTimestamp((moment as any).recordedAt)}
                                         </span>
                                         <span className="font-typewriter text-[11px] uppercase tracking-[0.32em] text-[var(--broadsheet-muted)]">
                                           Filed by {moment.actor ?? 'Unknown Bureau'}
