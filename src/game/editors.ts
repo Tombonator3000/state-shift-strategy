@@ -104,20 +104,18 @@ const clampChance = (value: number): number => {
 };
 
 const mergeEffectConfig = (
-  target: EditorAggregatedEffects,
-  config: EditorEffectConfig | undefined,
+  target?: EditorAggregatedEffects,
+  config?: EditorEffectConfig,
 ): EditorAggregatedEffects => {
-  if (!config) {
-    return target;
-  }
-
-  const startCards = Array.isArray(target?.startCards) ? target.startCards : [];
-
   const next: EditorAggregatedEffects = {
     ...EMPTY_EFFECTS,
-    ...target,
-    startCards,
+    ...(target ?? {}),
+    startCards: Array.isArray(target?.startCards) ? [...target.startCards] : [],
   };
+
+  if (!config) {
+    return next;
+  }
 
   for (const key of NUMERIC_EFFECT_KEYS) {
     const value = config[key];
@@ -144,10 +142,11 @@ export const getEditorAggregatedEffects = (
     return { ...EMPTY_EFFECTS };
   }
 
-  const merged = mergeEffectConfig(
-    mergeEffectConfig(mergeEffectConfig({ ...EMPTY_EFFECTS }, editor.bonuses), editor.tradeoffs),
-    editor.modifiers,
-  );
+  const merged =
+    mergeEffectConfig(
+      mergeEffectConfig(mergeEffectConfig(undefined, editor.bonuses), editor.tradeoffs),
+      editor.modifiers,
+    ) ?? { ...EMPTY_EFFECTS };
   const startCards = Array.isArray(merged.startCards) ? merged.startCards : [];
   return {
     ...merged,
