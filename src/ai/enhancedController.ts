@@ -135,6 +135,10 @@ export const chooseTurnActions = ({
   if (adaptiveSummary.length) {
     sequenceDetails.push(...adaptiveSummary);
   }
+  const agendaCounterSummary = strategist.describeAgendaCounterPlan(baseStrategistView);
+  if (agendaCounterSummary) {
+    sequenceDetails.push(agendaCounterSummary);
+  }
   if (Math.abs(biasModifiers.combo - 1) > 0.01 || Math.abs(biasModifiers.income - 1) > 0.01) {
     sequenceDetails.push(
       `Bias profile active: combos ×${biasModifiers.combo.toFixed(2)}, income ×${biasModifiers.income.toFixed(2)}.`,
@@ -258,6 +262,7 @@ export const chooseTurnActions = ({
 
     chosenIds.add(candidateCard.id);
     availableIp -= cost;
+    strategist.registerPlannedTarget(enhancedPlay.targetState ?? null, typeof gameState.turn === 'number' ? gameState.turn : 0);
     attemptedIds.clear();
   }
 

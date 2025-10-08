@@ -4,6 +4,7 @@ import type { TurnPlay } from '@/game/combo.types';
 import { CARD_DATABASE } from './cardDatabase';
 import { mergeBiasModifiers, type BiasModifiers } from '@/ai/difficulty';
 import { getAiTuningConfig, type AiTuningConfig } from './aiTuning';
+import type { SecretAgenda } from './agendaDatabase';
 import {
   createAiStrategist,
   type AIStrategist,
@@ -82,6 +83,58 @@ interface DeceptionState {
   playerPattern: string[];
 }
 
+type AgendaCategory = SecretAgenda['category'];
+
+type RuntimeAgenda = Partial<SecretAgenda> & {
+  progress?: number;
+  goal?: number;
+  target?: number;
+  revealed?: boolean;
+  focusStates?: string[];
+};
+
+interface AgendaCounterPlan {
+  threat: number;
+  category: AgendaCategory | null;
+  revealed: boolean;
+  preferences: Partial<Record<GameCard['type'], number>>;
+  focusStates: Set<string>;
+  pressureBias: number;
+  truthBias: number;
+}
+
+const AGENDA_COUNTER_PREFERENCES: Record<AgendaCategory, {
+  preferences: Partial<Record<GameCard['type'], number>>;
+  pressureBias: number;
+  truthBias: number;
+}> = {
+  territorial: {
+    preferences: { ATTACK: 0.28, ZONE: 0.24, DEFENSIVE: 0.12 },
+    pressureBias: 0.35,
+    truthBias: 0.05,
+  },
+  resource: {
+    preferences: { ATTACK: 0.32, DEFENSIVE: 0.18, MEDIA: 0.1 },
+    pressureBias: 0.2,
+    truthBias: 0.08,
+  },
+  influence: {
+    preferences: { MEDIA: 0.36, ATTACK: 0.12, DEFENSIVE: 0.08 },
+    pressureBias: 0.12,
+    truthBias: 0.28,
+  },
+  sabotage: {
+    preferences: { DEFENSIVE: 0.26, ATTACK: 0.22, MEDIA: 0.14 },
+    pressureBias: 0.22,
+    truthBias: 0.1,
+  },
+  strategic: {
+    preferences: { ATTACK: 0.2, MEDIA: 0.2, ZONE: 0.18, DEFENSIVE: 0.12 },
+    pressureBias: 0.26,
+    truthBias: 0.16,
+  },
+};
+
 // Enhanced Card Play with synergy info
 export type EnhancedCardPlay = CardPlay & {
   synergies: CardSynergy[];
@@ -117,6 +170,8 @@ export class EnhancedAIStrategist implements AIStrategist {
   private lastProcessedTurn = -1;
   private totalRecordedBluffs = 0;
   private successfulRecordedBluffs = 0;
+  private planningTargetMemory: Map<string, number> = new Map();
+  private planningTurnStamp = -1;
 
   constructor(
     difficulty: AIDifficulty = 'medium',
@@ -182,6 +237,33 @@ export class EnhancedAIStrategist implements AIStrategist {
   public updateBiasModifiers(overrides: Partial<BiasModifiers>): void {
     this.biasModifiers = mergeBiasModifiers(this.biasModifiers, overrides);
     this.base.setBiasModifiers(this.biasModifiers);
+  }
+
+  public registerPlannedTarget(targetState: string | null, turn: number): void {
+    const normalizedTurn = Number.isFinite(turn) ? turn : 0;
+    if (this.planningTurnStamp !== normalizedTurn) {
+      this.planningTurnStamp = normalizedTurn;
+      this.planningTargetMemory.clear();
+    }
+
+    const normalizedTarget = this.normalizeStateId(targetState);
+    if (!normalizedTarget) {
+      return;
+    }
+
+    const currentCount = this.planningTargetMemory.get(normalizedTarget) ?? 0;
+    this.planningTargetMemory.set(normalizedTarget, currentCount + 1);
+  }
+
+  private normalizeStateId(value: string | null | undefined): string {
+    if (typeof value !== 'string') {
+      return '';
+    }
+    const trimmed = value.trim();
+    if (!trimmed.length) {
+      return '';
+    }
+    return trimmed.toUpperCase();
   }
 
   private syncBase(): void {
@@ -447,6 +529,8 @@ export class EnhancedAIStrategist implements AIStrategist {
     const threatResponse = this.isThreatResponse(play, gameState, evaluation);
     const deceptionValue = this.calculateDeceptionValue(play, gameState, evaluation);
     const cardMeta = this.getCardMetadata(play.cardId);
+    const agendaPlan = this.computeAgendaCounterPlan(gameState);
+    const currentTurn = typeof gameState.turn === 'number' ? gameState.turn : 0;
 
     let adjustedPriority = play.priority;
 
@@ -486,6 +570,41 @@ export class EnhancedAIStrategist implements AIStrategist {
       if (cardMeta.type === 'DEFENSIVE') {
         adjustedPriority -= aggressionModifier * 0.6;
       }
+    }
+
+    if (agendaPlan.threat > 0 && cardMeta?.type) {
+      const typeBoost = agendaPlan.preferences[cardMeta.type];
+      if (typeof typeBoost === 'number') {
+        adjustedPriority += typeBoost * agendaPlan.threat;
+      }
+
+      if (agendaPlan.truthBias > 0 && cardMeta.effects?.truthDelta) {
+        const aiFaction = this.getAiFaction(gameState);
+        const truthDelta = cardMeta.effects.truthDelta;
+        const helpful = (aiFaction === 'truth' && truthDelta > 0) || (aiFaction === 'government' && truthDelta < 0);
+        if (helpful) {
+          adjustedPriority += agendaPlan.truthBias * agendaPlan.threat;
+        }
+      }
+    }
+
+    if (agendaPlan.threat > 0 && play.targetState) {
+      const normalizedTarget = this.normalizeStateId(play.targetState);
+      if (agendaPlan.focusStates.has(normalizedTarget)) {
+        adjustedPriority += 0.25 * agendaPlan.threat;
+      } else {
+        const opponentFocus = evaluation.pressureSignals.opponentTargets.some(
+          signal => signal.abbreviation === normalizedTarget,
+        );
+        if (opponentFocus) {
+          adjustedPriority += agendaPlan.pressureBias * agendaPlan.threat;
+        }
+      }
+    }
+
+    const rotationPenalty = this.calculateTargetRotationPenalty(play.targetState, currentTurn);
+    if (rotationPenalty > 0) {
+      adjustedPriority -= rotationPenalty;
     }
 
     return {
@@ -584,6 +703,162 @@ export class EnhancedAIStrategist implements AIStrategist {
     }
   }
 
+  private calculateTargetRotationPenalty(targetState: string | null | undefined, currentTurn: number): number {
+    const normalized = this.normalizeStateId(targetState);
+    if (!normalized || normalized === 'NONE') {
+      return 0;
+    }
+
+    let recencyScore = 0;
+    for (const record of this.recentTargetHistory) {
+      if (this.normalizeStateId(record.state) !== normalized) {
+        continue;
+      }
+
+      const age = Math.max(0, currentTurn - record.turn);
+      const decay = Math.max(0, 1 - age * 0.25);
+      recencyScore += decay;
+    }
+
+    if (this.planningTurnStamp === currentTurn) {
+      const plannedHits = this.planningTargetMemory.get(normalized) ?? 0;
+      if (plannedHits > 0) {
+        recencyScore += plannedHits * 0.75;
+      }
+    }
+
+    if (recencyScore <= 0) {
+      return 0;
+    }
+
+    const difficultyScale = this.difficulty === 'easy'
+      ? 0.04
+      : this.difficulty === 'medium'
+        ? 0.055
+        : this.difficulty === 'hard'
+          ? 0.07
+          : 0.085;
+
+    return recencyScore * difficultyScale;
+  }
+
+  private extractAgendaFocusStates(agenda: RuntimeAgenda | undefined, gameState: any): Set<string> {
+    const focus = new Set<string>();
+    if (!agenda) {
+      return focus;
+    }
+
+    const knownStates = new Set<string>();
+    if (Array.isArray(gameState?.states)) {
+      for (const state of gameState.states) {
+        const normalized = this.normalizeStateId(state?.abbreviation ?? state?.id ?? state?.name);
+        if (normalized) {
+          knownStates.add(normalized);
+        }
+      }
+    }
+
+    const addIfKnown = (value: string | null | undefined) => {
+      const normalized = this.normalizeStateId(value);
+      if (normalized && knownStates.has(normalized)) {
+        focus.add(normalized);
+      }
+    };
+
+    if (Array.isArray(agenda.focusStates)) {
+      agenda.focusStates.forEach(addIfKnown);
+    }
+
+    const description = typeof agenda.description === 'string' ? agenda.description : '';
+    if (description && knownStates.size > 0) {
+      const regex = /\b[A-Z]{2}\b/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(description)) !== null) {
+        addIfKnown(match[0]);
+      }
+    }
+
+    const operationName = typeof agenda.operationName === 'string' ? agenda.operationName : '';
+    if (operationName && knownStates.size > 0) {
+      const regex = /\b[A-Z]{2}\b/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(operationName)) !== null) {
+        addIfKnown(match[0]);
+      }
+    }
+
+    return focus;
+  }
+
+  private computeAgendaCounterPlan(gameState: any): AgendaCounterPlan {
+    const agenda = (gameState?.secretAgenda ?? null) as RuntimeAgenda | null;
+    if (!agenda) {
+      return {
+        threat: 0,
+        category: null,
+        revealed: false,
+        preferences: {},
+        focusStates: new Set<string>(),
+        pressureBias: 0,
+        truthBias: 0,
+      };
+    }
+
+    const target = Math.max(
+      1,
+      typeof agenda.target === 'number' && Number.isFinite(agenda.target)
+        ? agenda.target
+        : typeof agenda.goal === 'number' && Number.isFinite(agenda.goal)
+          ? agenda.goal
+          : 1,
+    );
+    const rawProgress = typeof agenda.progress === 'number' && Number.isFinite(agenda.progress)
+      ? agenda.progress
+      : 0;
+    const normalizedProgress = Math.min(1, Math.max(0, rawProgress / target));
+    const revealed = Boolean(agenda.revealed);
+    const category = agenda.category ?? null;
+    const focusStates = this.extractAgendaFocusStates(agenda, gameState);
+    const preferenceProfile = category ? AGENDA_COUNTER_PREFERENCES[category] : null;
+
+    const exposureBonus = revealed ? 0.4 : 0.15;
+    const difficultyEdge = this.difficulty === 'insane'
+      ? 0.2
+      : this.difficulty === 'hard'
+        ? 0.12
+        : this.difficulty === 'medium'
+          ? 0.08
+          : 0.05;
+    const agendaThreat = Math.min(1, normalizedProgress * (0.7 + exposureBonus) + difficultyEdge * normalizedProgress);
+
+    return {
+      threat: agendaThreat,
+      category,
+      revealed,
+      preferences: preferenceProfile?.preferences ?? {},
+      focusStates,
+      pressureBias: preferenceProfile?.pressureBias ?? 0.12,
+      truthBias: preferenceProfile?.truthBias ?? 0.08,
+    };
+  }
+
+  public describeAgendaCounterPlan(gameState: any): string | null {
+    const plan = this.computeAgendaCounterPlan(gameState);
+    if (plan.threat < 0.2) {
+      return null;
+    }
+
+    const intensityLabel = plan.revealed ? 'exposed' : 'suspected';
+    const categoryLabel = plan.category ? plan.category.replace(/_/g, ' ') : 'unknown';
+    const focusStates = plan.focusStates.size > 0 ? Array.from(plan.focusStates).slice(0, 3) : [];
+    const focusText = focusStates.length > 0
+      ? `Focus: ${focusStates.join(', ')}`
+      : 'Monitoring rotating targets.';
+
+    const threatPercent = Math.round(plan.threat * 100);
+    return `Agenda counter-plan (${intensityLabel} ${categoryLabel}): ${focusText} Threat ${threatPercent}%.`;
+  }
+
   private isPositiveOutcome(outcome: BluffOutcome): boolean {
     return outcome === 'capture'
       || outcome === 'truth_gain'
@@ -664,7 +939,7 @@ export class EnhancedAIStrategist implements AIStrategist {
   }): void {
     const { card, targetState, resolution, previousState } = params;
     const currentTurn = typeof previousState.turn === 'number' ? previousState.turn : 0;
-    const recordedTarget = targetState ?? 'none';
+    const recordedTarget = this.normalizeStateId(targetState) || 'NONE';
 
     this.recentTargetHistory.push({ turn: currentTurn, state: recordedTarget });
 
