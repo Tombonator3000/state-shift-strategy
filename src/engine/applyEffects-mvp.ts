@@ -2,6 +2,7 @@ declare const window: any;
 
 import { computeMediaTruthDelta_MVP, warnIfMediaScaling, type MediaResolutionOptions } from '@/mvp/media';
 import { applyTruthDelta } from '@/utils/truth';
+import { getEditor as getAiEditor } from '@/ai/editors';
 import type {
   Card,
   EffectsATTACK,
@@ -10,6 +11,7 @@ import type {
   PlayerState,
 } from '@/mvp/validator';
 import { getEditorAggregatedEffects, getEditorById as lookupEditorById } from '@/game/editors';
+import { resolveEffectiveMods } from '@/game/editorRuntimeModifiers';
 
 export type PlayerId = 'P1' | 'P2';
 
@@ -178,6 +180,28 @@ export function applyEffectsMvp(
       ? opts.truthMultiplier
       : 1;
     let delta = baseDelta;
+    // [AI-EDITORS] MEDIA truth and ZONE pressure adjustments for AI editor
+    try {
+      const expansions = (state as any)?.expansions;
+      const aiEditorsEnabled = expansions?.aiEditors ?? true;
+      const playersAny = state.players as unknown as Record<string, any>;
+      const ownerState = playersAny?.[owner];
+      const isAiOwner = owner === 'AI' || Boolean(ownerState?.isAI);
+      if (aiEditorsEnabled && isAiOwner) {
+        const aiState =
+          owner === 'AI'
+            ? ((state as any).players?.AI ?? ownerState)
+            : ownerState ?? ((state as any).players?.AI as Record<string, any> | undefined);
+        const aiEditorId = (aiState?.activeEditor ?? aiState?.activeEditorId) as string | undefined;
+        if (aiEditorId) {
+          const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
+          const eff = resolveEffectiveMods(getAiEditor(aiEditorId as any), diff);
+          state.truth += eff.mediaTruthDelta ?? 0;
+        }
+      }
+    } catch {
+      /* no-op */
+    }
     if (multiplier !== 1 && baseDelta !== 0) {
       const scaled = Math.round(Math.abs(baseDelta) * multiplier);
       delta = baseDelta >= 0 ? scaled : -scaled;
@@ -226,6 +250,28 @@ export function applyEffectsMvp(
     const editor = lookupEditorById(state.players[owner]?.activeEditorId ?? undefined);
     const zoneEffects = card.effects as EffectsZONE;
     let pressureDelta = zoneEffects.pressureDelta;
+    // [AI-EDITORS] MEDIA truth and ZONE pressure adjustments for AI editor
+    try {
+      const expansions = (state as any)?.expansions;
+      const aiEditorsEnabled = expansions?.aiEditors ?? true;
+      const playersAny = state.players as unknown as Record<string, any>;
+      const ownerState = playersAny?.[owner];
+      const isAiOwner = owner === 'AI' || Boolean(ownerState?.isAI);
+      if (aiEditorsEnabled && isAiOwner) {
+        const aiState =
+          owner === 'AI'
+            ? ((state as any).players?.AI ?? ownerState)
+            : ownerState ?? ((state as any).players?.AI as Record<string, any> | undefined);
+        const aiEditorId = (aiState?.activeEditor ?? aiState?.activeEditorId) as string | undefined;
+        if (aiEditorId) {
+          const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
+          const eff = resolveEffectiveMods(getAiEditor(aiEditorId as any), diff);
+          pressureDelta += eff.zonePressureBonus ?? 0;
+        }
+      }
+    } catch {
+      /* no-op */
+    }
 
     if (editor) {
       const effects = getEditorAggregatedEffects(editor);
