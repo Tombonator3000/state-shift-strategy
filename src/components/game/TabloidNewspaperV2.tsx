@@ -740,6 +740,7 @@ const TabloidNewspaperV2 = ({
   const heroTriggerChance = heroEvent?.triggerChance ?? null;
   const heroConditionalChance = heroEvent?.conditionalChance ?? null;
   const comboNarrative = issue?.comboArticle ?? null;
+  const frontPageArticles = issue?.generatedStory?.articles ?? [];
   const bylinePool = dataset.bylines && dataset.bylines.length ? dataset.bylines : FALLBACK_DATA.bylines;
   const sourcePool = dataset.sources && dataset.sources.length ? dataset.sources : FALLBACK_DATA.sources;
   const byline = issue?.byline ?? pick(bylinePool, FALLBACK_DATA.bylines?.[0] ?? 'By: Anonymous Insider');
@@ -1146,6 +1147,39 @@ const TabloidNewspaperV2 = ({
 
             {/* COLUMN 2: Stats & Secondary Headlines */}
             <aside className="space-y-4">
+              {/* Front Page Articles */}
+              {frontPageArticles.length > 0 ? (
+                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
+                  <h3 className="mb-3 border-b-2 border-newspaper-border pb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
+                    Extra Extra Dispatch
+                  </h3>
+                  <div className="space-y-3 text-newspaper-text">
+                    {frontPageArticles.map(article => {
+                      const cardTypeLabel = article.cardType
+                        ? `[${String(article.cardType).toUpperCase()}]`
+                        : '[CARD]';
+                      return (
+                        <article
+                          key={article.cardId}
+                          className="space-y-2 border-b border-dashed border-newspaper-border/60 pb-3 last:border-0 last:pb-0"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                            <span>{cardTypeLabel}</span>
+                          </div>
+                          <h4 className="text-base font-semibold leading-snug text-newspaper-headline">
+                            {article.headline}
+                          </h4>
+                          <p className="text-xs italic text-newspaper-text/70">{article.subhead}</p>
+                          <p className="text-sm leading-relaxed text-newspaper-text/80">
+                            {article.body?.[0] ?? 'Details pending transmission.'}
+                          </p>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+              ) : null}
+
               {/* Combo Dispatch */}
               {comboNarrative ? (
                 <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">

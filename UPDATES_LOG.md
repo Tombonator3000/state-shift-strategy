@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-19 – Restore triple-play dispatch column
+- Reinstated the Extra Extra dispatch column on the end-of-turn newspaper so triple-play bonus stories print when generated.
+- Added regression coverage ensuring the dispatch column hides cleanly when no triple-play articles are produced.
+
 ## 2025-11-18 – Continuity overtime protocol and sim hooks
 - Added the Continuity Overtime Protocol as the top-priority victory condition so capped matches resolve via Truth momentum, territorial control, or resource edge instead of the deterministic coin flip.
 - Threaded max-turn metadata and overtime configuration through the AI simulation harness, exposing new CLI knobs and logging the overtime method in batch reports.
