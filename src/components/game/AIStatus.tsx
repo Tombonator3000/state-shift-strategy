@@ -9,7 +9,7 @@ import { SecretAgenda as AgendaType } from '@/data/agendaDatabase';
 
 interface AIStatusProps {
   difficulty: AIDifficulty;
-  personalityName?: string;
+  editorName?: string;
   isThinking?: boolean;
   currentPlayer: 'human' | 'ai';
   aiControlledStates: number;
@@ -25,7 +25,7 @@ interface AIStatusProps {
 
 const AIStatus = ({
   difficulty,
-  personalityName,
+  editorName,
   isThinking = false,
   currentPlayer,
   aiControlledStates,
@@ -76,9 +76,9 @@ const AIStatus = ({
         </div>
       </div>
 
-      {personalityName && (
+      {editorName && (
         <div className="text-xs text-gray-400 mb-2 font-mono">
-          {personalityName}
+          {editorName}
         </div>
       )}
 
