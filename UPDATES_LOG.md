@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-26 – Loggable self-training runs for the campaign AI
+- Wired the AI simulator to dump every match into an NDJSON dataset so tuning sessions double as training fodder.
+- Added a convenience npm script and workflow doc covering how to iterate on weights while committing the resulting evidence trail.
+
 ## 2025-11-25 – Keep enhanced MCTS exploring terminal leaves
 - Taught the enhanced strategist to score and backpropagate terminal rollouts instead of bailing out of the search loop when a branch dead-ends mid-iteration.
 - Added a regression harness that forces a terminal child and confirms the planner still evaluates the remaining branch.

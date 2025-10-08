@@ -18,6 +18,7 @@
     "tag:check": "tsx scripts/tagCards.ts --check",
     "validate:mvp": "bun scripts/validate-mvp-batch.ts",
     "ai:tune": "node --loader ts-node/esm --experimental-specifier-resolution=node tools/ai-simulation.ts",
+    "ai:self-train": "bunx tsx tools/ai-simulation.ts --trainingLog=docs/analysis/ai-training-dataset.ndjson --output=tools/simulations/latest-results.json",
     "update:card-art-manifest": "tsx tools/update-card-art-manifest.ts"
   },
   "dependencies": {
