@@ -6,6 +6,10 @@ interface AIPlanningState {
   aiHand: GameCard[];
   aiIP: number;
   ip: number;
+  truthHighThreshold?: number;
+  truthLowThreshold?: number;
+  economicGoal?: number;
+  matchContext?: Record<string, unknown> | null;
   states: Array<{
     owner: 'player' | 'ai' | 'neutral';
     abbreviation: string;
@@ -109,6 +113,38 @@ export const chooseTurnActions = ({
     : { combo: 1, income: 1 };
   const biasAdjustedIncome = Math.max(0, projectedNetIncome * biasModifiers.income);
 
+  const resolveThreshold = (value: unknown, fallback: number): number => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    return fallback;
+  };
+
+  const existingMatchContext =
+    gameState.matchContext && typeof gameState.matchContext === 'object'
+      ? (gameState.matchContext as Record<string, unknown>)
+      : {};
+
+  const truthHighThreshold = resolveThreshold(
+    gameState.truthHighThreshold ?? existingMatchContext.truthHighThreshold,
+    90,
+  );
+  const truthLowThreshold = resolveThreshold(
+    gameState.truthLowThreshold ?? existingMatchContext.truthLowThreshold,
+    10,
+  );
+  const economicGoal = resolveThreshold(
+    gameState.economicGoal ?? existingMatchContext.economicGoal,
+    200,
+  );
+
+  const matchContext = {
+    ...existingMatchContext,
+    truthHighThreshold,
+    truthLowThreshold,
+    economicGoal,
+  };
+
   const baseStrategistView: Record<string, unknown> = {
     ...gameState,
     ip: -(gameState.ip ?? 0),
@@ -118,6 +154,10 @@ export const chooseTurnActions = ({
     controlledStates,
     catchUpForecast: catchUp,
     biasModifiers,
+    truthHighThreshold,
+    truthLowThreshold,
+    economicGoal,
+    matchContext,
     projectedIncome: {
       base: projectedBaseIncome,
       swingTax: catchUp.swingTax,

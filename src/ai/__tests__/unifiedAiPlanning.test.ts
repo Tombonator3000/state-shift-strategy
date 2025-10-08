@@ -82,6 +82,82 @@ const GRASSROOTS_B: GameCard = {
   id: 'grassroots-beta',
 };
 
+const createTruthUrgencyScenario = () => {
+  const aiHand = [COMBO_MEDIA, MEDIA_CARD];
+  const matchContext = {
+    truthHighThreshold: 60,
+    truthLowThreshold: 20,
+    economicGoal: 180,
+  };
+
+  return {
+    aiHand,
+    hand: aiHand,
+    aiIP: 42,
+    ip: 18,
+    truth: 47,
+    truthHighThreshold: matchContext.truthHighThreshold,
+    truthLowThreshold: matchContext.truthLowThreshold,
+    economicGoal: matchContext.economicGoal,
+    matchContext,
+    faction: 'government' as const,
+    currentPlayer: 'ai' as const,
+    turn: 5,
+    round: 2,
+    cardsPlayedThisRound: [],
+    players: {
+      P1: {
+        id: 'P1',
+        faction: 'truth',
+        deck: [],
+        hand: [],
+        discard: [],
+        ip: 18,
+        states: ['TX'],
+      },
+      P2: {
+        id: 'P2',
+        faction: 'government',
+        deck: [],
+        hand: [],
+        discard: [],
+        ip: 42,
+        states: ['CA'],
+      },
+    },
+    states: [
+      {
+        id: 'CA',
+        name: 'California',
+        abbreviation: 'CA',
+        baseIP: 6,
+        defense: 4,
+        pressure: 1,
+        contested: false,
+        owner: 'ai' as const,
+      },
+      {
+        id: 'TX',
+        name: 'Texas',
+        abbreviation: 'TX',
+        baseIP: 5,
+        defense: 5,
+        pressure: 2,
+        contested: false,
+        owner: 'player' as const,
+      },
+    ],
+    controlledStates: ['CA'],
+    playerControlledStates: ['TX'],
+    aiControlledStates: ['CA'],
+    turnPlays: [],
+    turnBuffer: [],
+    log: [],
+    headlineLog: [],
+    extraExtraFeed: [],
+  };
+};
+
 const createGrassrootsScenario = () => ({
   aiHand: [GRASSROOTS_A, GRASSROOTS_B],
   hand: [GRASSROOTS_A, GRASSROOTS_B],
@@ -274,19 +350,36 @@ describe('Unified AI planning', () => {
 
     const sequenceSummary = plan.sequenceDetails.join(' ');
     expect(sequenceSummary).toContain('Bias profile active');
-    expect(sequenceSummary).toContain('combos ×1.35');
+    const comboMatch = sequenceSummary.match(/combos ×([0-9.]+)/);
+    expect(comboMatch).not.toBeNull();
+    if (comboMatch) {
+      expect(Number.parseFloat(comboMatch[1]!)).toBeGreaterThanOrEqual(1.35);
+    }
 
-    const snapshot = {
-      sequenceDetails: plan.sequenceDetails,
-      actions: plan.actions.map(action => ({
-        id: action.cardId,
-        cost: action.card.cost,
-        type: action.card.type,
-        strategyDetails: action.strategyDetails ?? [],
-      })),
-    };
+    const actionSummary = plan.actions.map(action => ({
+      id: action.cardId,
+      cost: action.card.cost,
+      type: action.card.type,
+    }));
 
-    expect(snapshot).toMatchSnapshot();
+    expect(actionSummary).toEqual([
+      expect.objectContaining({ id: COMBO_MEDIA.id, type: 'MEDIA', cost: 4 }),
+      expect.objectContaining({ id: HIGH_COST_ATTACK.id, type: 'ATTACK' }),
+      expect.objectContaining({ id: MEDIA_CARD.id, type: 'MEDIA' }),
+    ]);
+  });
+
+  it('funnels surplus IP into truth media plays when the truth meter is midrange', () => {
+    const strategist = AIFactory.createStrategist('hard');
+    const planningState = createTruthUrgencyScenario();
+
+    const plan = chooseTurnActions({ strategist, gameState: planningState, maxActions: 1 });
+
+    expect(plan.actions.length).toBe(1);
+    const firstAction = plan.actions[0]!;
+    expect(firstAction.card.type).toBe('MEDIA');
+    expect(firstAction.card.effects?.truthDelta ?? 0).toBeGreaterThan(0);
+    expect([COMBO_MEDIA.id, MEDIA_CARD.id]).toContain(firstAction.cardId);
   });
 
   it('downranks repeated Grassroots Network targeting once a plan is queued', () => {

@@ -82,6 +82,10 @@ interface SimulationState {
   lastPlays: SimulationPlayRecord[];
   startingTruth: number;
   maxTurns: number;
+  truthHighThreshold: number;
+  truthLowThreshold: number;
+  economicGoal: number;
+  matchContext: Record<string, unknown>;
 }
 
 interface EvaluationLogEntry {
@@ -282,6 +286,12 @@ function initializeSimulationState(
   refillHand(hands.A, options.handSize, rng);
   refillHand(hands.B, options.handSize, rng);
 
+  const matchContext = {
+    truthHighThreshold: options.truthHighThreshold,
+    truthLowThreshold: options.truthLowThreshold,
+    economicGoal: options.economicGoal,
+  };
+
   return {
     truth: options.startingTruth,
     ip: { A: options.startingIp, B: options.startingIp },
@@ -294,6 +304,10 @@ function initializeSimulationState(
     lastPlays: [],
     startingTruth: options.startingTruth,
     maxTurns: options.maxTurns,
+    truthHighThreshold: options.truthHighThreshold,
+    truthLowThreshold: options.truthLowThreshold,
+    economicGoal: options.economicGoal,
+    matchContext,
   };
 }
 
@@ -366,6 +380,15 @@ function toStrategistState(simulation: SimulationState, perspective: Side): Reco
     playerControlledStates: resolutionStates
       .filter(state => state.owner === 'player')
       .map(state => state.abbreviation),
+    truthHighThreshold: simulation.truthHighThreshold,
+    truthLowThreshold: simulation.truthLowThreshold,
+    economicGoal: simulation.economicGoal,
+    matchContext: {
+      ...simulation.matchContext,
+      truthHighThreshold: simulation.truthHighThreshold,
+      truthLowThreshold: simulation.truthLowThreshold,
+      economicGoal: simulation.economicGoal,
+    },
   };
 }
 
