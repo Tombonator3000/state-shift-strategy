@@ -531,4 +531,127 @@ describe('Unified AI planning', () => {
     expect(action.card.type).toBe('ZONE');
     expect(action.targetState).toBe('NY');
   });
+
+  it('continues exploring alternate branches after encountering a terminal MCTS child', () => {
+    const strategist = new EnhancedAIStrategist('insane');
+    strategist.personality = { ...strategist.personality, planningDepth: 4 };
+
+    interface TestMctsState {
+      id: string;
+      terminal?: boolean;
+      simulationReward?: number;
+      transitions?: Record<string, TestMctsState>;
+    }
+
+    type MctsHarness = EnhancedAIStrategist & {
+      runMCTS: (
+        gameState: TestMctsState,
+        iterations: number,
+        baseEvaluation?: GameStateEvaluation
+      ) => EnhancedCardPlay | null;
+      generateAllPossiblePlays: (gameState: TestMctsState) => CardPlay[];
+      simulateMove: (gameState: TestMctsState, move: CardPlay) => TestMctsState;
+      simulateGame: (gameState: TestMctsState) => number;
+      isGameOver: (gameState: TestMctsState) => boolean;
+      selectRandomMove: (
+        gameState: TestMctsState,
+        evaluation?: GameStateEvaluation
+      ) => CardPlay | null;
+      enhancePlay: (
+        play: CardPlay,
+        gameState: TestMctsState,
+        evaluation: GameStateEvaluation
+      ) => EnhancedCardPlay;
+      evaluateGameState: (gameState: TestMctsState) => GameStateEvaluation;
+    };
+
+    const harness = strategist as unknown as MctsHarness;
+
+    const baseEvaluation: GameStateEvaluation = {
+      territorialControl: 0,
+      resourceAdvantage: 0,
+      handQuality: 0,
+      threatLevel: 0,
+      agendaProgress: 0,
+      pressureMomentum: 0,
+      truthObjective: 0,
+      opponentResourceThreat: 0,
+      opponentHandThreat: 0,
+      agendaSignals: [],
+      pressureSignals: { aiTargets: [], opponentTargets: [], contested: [] },
+      dangerSignals: {
+        imminentCapture: [],
+        imminentLoss: [],
+        truthCrisis: 0,
+        resourceCrunch: 0,
+        opponentAggression: 0,
+      },
+      planningWeight: 0,
+      overallScore: 0,
+    };
+
+    harness.evaluateGameState = () => baseEvaluation;
+    harness.enhancePlay = (play: CardPlay) => ({
+      ...play,
+      synergies: [],
+      deceptionValue: 0,
+      threatResponse: false,
+    });
+
+    const moveMap = new Map<string, CardPlay[]>([
+      [
+        'root',
+        [
+          { cardId: 'deep-branch', priority: 0.2, reasoning: 'Long line' },
+          { cardId: 'terminal-branch', priority: 0.9, reasoning: 'Ends quickly' },
+        ],
+      ],
+      ['terminal-branch', []],
+      ['deep-branch', []],
+    ]);
+
+    harness.generateAllPossiblePlays = (state: TestMctsState) => {
+      const moves = moveMap.get(state.id);
+      return moves ? moves.map(move => ({ ...move })) : [];
+    };
+    harness.simulateMove = (state: TestMctsState, move: CardPlay) => {
+      const next = state.transitions?.[move.cardId];
+      return next ? { ...next } : { id: move.cardId, terminal: true, simulationReward: 0, transitions: {} };
+    };
+    harness.isGameOver = (state: TestMctsState) => Boolean(state.terminal);
+
+    const simulateCalls: string[] = [];
+    harness.simulateGame = (state: TestMctsState) => {
+      simulateCalls.push(state.id);
+      return typeof state.simulationReward === 'number' ? state.simulationReward : 0;
+    };
+    harness.selectRandomMove = () => null;
+
+    const rootState: TestMctsState = {
+      id: 'root',
+      transitions: {
+        'terminal-branch': {
+          id: 'terminal-branch',
+          terminal: true,
+          simulationReward: 1,
+          transitions: {},
+        },
+        'deep-branch': {
+          id: 'deep-branch',
+          terminal: true,
+          simulationReward: 9,
+          transitions: {},
+        },
+      },
+      simulationReward: 0,
+    };
+
+    const iterations = 4;
+    const bestPlay = harness.runMCTS(rootState, iterations, baseEvaluation);
+
+    expect(simulateCalls.length).toBe(iterations);
+    expect(simulateCalls.filter(id => id === 'deep-branch').length).toBeGreaterThan(0);
+    expect(bestPlay).not.toBeNull();
+    expect(bestPlay?.cardId).toBe('deep-branch');
+  });
 });

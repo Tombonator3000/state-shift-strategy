@@ -472,7 +472,11 @@ export class EnhancedAIStrategist implements AIStrategist {
       let node = this.selectNode(root);
 
       if (node.unexploredMoves.length === 0) {
-        break;
+        if (node.children.length === 0 || this.isGameOver(node.gameState)) {
+          const terminalReward = this.simulateGame(node.gameState);
+          this.backpropagate(node, terminalReward);
+        }
+        continue;
       }
 
       // Expansion

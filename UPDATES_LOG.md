@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-25 – Keep enhanced MCTS exploring terminal leaves
+- Taught the enhanced strategist to score and backpropagate terminal rollouts instead of bailing out of the search loop when a branch dead-ends mid-iteration.
+- Added a regression harness that forces a terminal child and confirms the planner still evaluates the remaining branch.
+
 ## 2025-11-24 – Calibrate enhanced AI rollout budgets
 - Let enhanced MCTS difficulties respect the tuned rollout budgets (medium ≈16, hard ≈48, insane ≈120) instead of forcing a 200-iteration floor.
 - Documented the rollout multiplier in the AI factory so future tuning can bump the shared budget knob intentionally.
