@@ -109,7 +109,7 @@ export function generateMainStory(
 
     headline = `${subject} ${v1} AS ${n2} ${v2} — ${n3} ${v3}!`;
     subhead = clampLen(
-      `Witnesses report escalating weirdness${commonTags.length ? ` (${commonTags.slice(0, 2).join(', ')})` : ''}. Officials baffled; snacks remain excellent.`,
+      `Witnesses report escalating weirdness${commonTags.length ? ` (${commonTags.slice(0, 2).join(', ')})` : ''}. Officials baffled; reality anchors remain perfectly aligned.`,
     );
     parts = [v1, v2, v3];
   } else {
