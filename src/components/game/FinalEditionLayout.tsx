@@ -252,6 +252,7 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
       ? 'mt-1 text-2xl font-black tracking-tight text-victory-accent drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
       : 'mt-1 text-2xl font-black tracking-tight text-newspaper-headline';
   const bulletinArticles = report.extraExtraFeed.slice(-4).reverse();
+  const hasBulletins = bulletinArticles.length > 0;
   const highlightCardClass =
     tone === 'victory'
       ? 'rounded-md border border-victory-foreground/30 bg-gradient-to-br from-victory-start/80 via-victory-mid/74 to-victory-end/80 text-victory-foreground shadow-[0_16px_36px_rgba(0,0,0,0.35)]'
@@ -547,14 +548,14 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
         </NewspaperSection>
       </section>
 
-      <NewspaperSection tone={tone} className="p-5">
-        <div className="flex items-center justify-between">
-          <h2 className={sectionHeadingClass}>Extra Extra Bulletins</h2>
-          <Badge className={cn(badgeClass, 'rounded-full px-3 py-0.5 text-[11px] tracking-[0.3em]')}>
-            {bulletinArticles.length}
-          </Badge>
-        </div>
-        {bulletinArticles.length > 0 ? (
+      {hasBulletins ? (
+        <NewspaperSection tone={tone} className="p-5">
+          <div className="flex items-center justify-between">
+            <h2 className={sectionHeadingClass}>Extra Extra Bulletins</h2>
+            <Badge className={cn(badgeClass, 'rounded-full px-3 py-0.5 text-[11px] tracking-[0.3em]')}>
+              {bulletinArticles.length}
+            </Badge>
+          </div>
           <div className="mt-4 space-y-4">
             {bulletinArticles.map((article, index) => {
               const badgeToneClass = getBulletinBadgeClass(article.tone, tone);
@@ -599,12 +600,8 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
               );
             })}
           </div>
-        ) : (
-          <p className={cn('mt-4 rounded border border-dashed px-3 py-4 text-sm italic', mutedBodyClass)}>
-            No newsroom bulletins were filed during this match.
-          </p>
-        )}
-      </NewspaperSection>
+        </NewspaperSection>
+      ) : null}
 
       <NewspaperSection tone={tone} className="p-5">
         <h2 className={sectionHeadingClass}>After-Action Notes</h2>

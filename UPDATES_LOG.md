@@ -230,6 +230,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Teach the newspaper issue generator to spotlight captured states, major truth swings, and rotating highlights on the dispatch archive.
 - Keep hero articles in sync with the front-page package so combo main stories continue to render correctly.
 
+## 2025-10-08 – Gate Extra Extra coverage behind triple plays
+- Removed the standing “Extra Extra Dispatch” column from the turn newspaper so the bonus headline only appears when a faction actually lands three plays.
+- Hid the final edition bulletin module whenever no triple-play articles were filed to avoid implying a bonus that never triggered.
+
 ## 2025-10-08 – Diversify generated card articles
 - Expand card article generator pools with new tag-aware headlines, subheads, and body segments to reduce repetition.
 - Compose longer faction articles by layering tag-specific follow-ups, escalations, and closers for each card.
