@@ -25,6 +25,13 @@ interface EnhancedGameHandProps {
   discardQueue?: string[];
   onToggleDiscard?: (cardId: string) => void;
   discardEnabled?: boolean;
+  onCardDragStart?: (card: GameCard, position: { x: number; y: number; pointerType: string }) => void;
+  onCardDragMove?: (card: GameCard, position: { x: number; y: number; pointerType: string }) => void;
+  onCardDragEnd?: (
+    card: GameCard,
+    position: { x: number; y: number; pointerType: string; cancelled: boolean }
+  ) => void;
+  draggingCardId?: string | null;
 }
 
 const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
@@ -38,7 +45,11 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   onCardHover,
   discardQueue = [],
   onToggleDiscard,
-  discardEnabled = true
+  discardEnabled = true,
+  onCardDragStart,
+  onCardDragMove,
+  onCardDragEnd,
+  draggingCardId,
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
@@ -46,6 +57,14 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const { triggerHaptic } = useHapticFeedback();
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);
+  const dragStateRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    card: GameCard;
+    hasDragged: boolean;
+  } | null>(null);
+  const suppressClickRef = useRef(false);
   const discardQueueSet = useMemo(() => new Set(discardQueue), [discardQueue]);
   const examinedCardData = examinedCard ? cards.find(c => c.id === examinedCard) ?? null : null;
   const examinedIsQueued = examinedCard ? discardQueueSet.has(examinedCard) : false;
@@ -90,6 +109,88 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   };
 
   const canAffordCard = (card: GameCard) => currentIP >= card.cost;
+
+  const handleCardPointerDown = (event: React.PointerEvent<HTMLButtonElement>, card: GameCard) => {
+    if (disabled) return;
+    if (event.pointerType === 'mouse' && event.button !== 0) {
+      return;
+    }
+
+    dragStateRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      card,
+      hasDragged: false,
+    };
+    suppressClickRef.current = false;
+
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Ignore pointer capture failures (older browsers)
+    }
+  };
+
+  const handleCardPointerMove = (event: React.PointerEvent<HTMLButtonElement>, card: GameCard) => {
+    const dragState = dragStateRef.current;
+    if (!dragState || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const dx = event.clientX - dragState.startX;
+    const dy = event.clientY - dragState.startY;
+    const distance = Math.hypot(dx, dy);
+
+    if (!dragState.hasDragged && distance > 8) {
+      dragState.hasDragged = true;
+      suppressClickRef.current = true;
+      if (examinedCard === card.id) {
+        setExaminedCard(null);
+      }
+      onCardHover?.(null);
+      onSelectCard?.(card.id);
+      triggerHaptic('light');
+      onCardDragStart?.(card, { x: event.clientX, y: event.clientY, pointerType: event.pointerType });
+    } else if (dragState.hasDragged) {
+      event.preventDefault();
+      onCardDragMove?.(card, { x: event.clientX, y: event.clientY, pointerType: event.pointerType });
+    }
+  };
+
+  const finalizeCardDrag = (
+    event: React.PointerEvent<HTMLButtonElement>,
+    card: GameCard,
+    cancelled: boolean
+  ) => {
+    const dragState = dragStateRef.current;
+    if (!dragState || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    try {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    } catch {
+      // Ignore release failures
+    }
+
+    if (dragState.hasDragged) {
+      event.preventDefault();
+      onCardDragEnd?.(card, {
+        x: event.clientX,
+        y: event.clientY,
+        pointerType: event.pointerType,
+        cancelled,
+      });
+    }
+
+    dragStateRef.current = null;
+    window.setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 0);
+  };
 
   // Swipe handlers for card examination
   const swipeHandlers = useSwipeGestures({
@@ -198,23 +299,40 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               </>
             );
 
+            const isDraggingThisCard = draggingCardId === card.id;
+
             return (
               <button
                 key={`${card.id}-${index}`}
                 type="button"
                 className={clsx(
-                  'group/card relative flex w-full items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80',
+                  'group/card relative flex w-full items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 touch-pan-y',
                   !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
                   disabled && 'cursor-default'
                 )}
-                style={{ animationDelay: `${index * 0.03}s` }}
+                style={{
+                  animationDelay: `${index * 0.03}s`,
+                  touchAction: isDraggingThisCard ? 'none' : undefined,
+                  WebkitTouchCallout: 'none',
+                }}
                 data-card-id={card.id}
                 onClick={(e) => {
                   e.preventDefault();
+                  if (suppressClickRef.current) {
+                    suppressClickRef.current = false;
+                    return;
+                  }
                   audio.playSFX('click');
                   triggerHaptic('selection');
                   setExaminedCard(prev => (prev === card.id ? null : card.id));
                 }}
+                onContextMenu={(event) => {
+                  event.preventDefault();
+                }}
+                onPointerDown={(event) => handleCardPointerDown(event, card)}
+                onPointerMove={(event) => handleCardPointerMove(event, card)}
+                onPointerUp={(event) => finalizeCardDrag(event, card, false)}
+                onPointerCancel={(event) => finalizeCardDrag(event, card, true)}
                 onPointerEnter={(e) => {
                   const handEl = handRef.current;
                   if (handEl) {
@@ -242,6 +360,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 onPointerLeave={() => {
                   onCardHover?.(null);
                 }}
+                aria-grabbed={isDraggingThisCard}
               >
                 <BaseCard
                   card={card}
@@ -254,7 +373,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     !disabled && canAfford && 'group-hover/card:-translate-y-1 group-hover/card:drop-shadow-[0_22px_30px_rgba(0,0,0,0.35)]',
                     (isPlaying || isLoading) && 'ring-2 ring-primary shadow-primary/40',
                     isSelected && 'ring-2 ring-yellow-400 shadow-yellow-400/40',
-                    isQueuedForDiscard && !(isPlaying || isLoading) && !isSelected && 'ring-2 ring-orange-400 shadow-orange-400/40'
+                    isQueuedForDiscard && !(isPlaying || isLoading) && !isSelected && 'ring-2 ring-orange-400 shadow-orange-400/40',
+                    draggingCardId === card.id && 'scale-[0.97] opacity-80'
                   )}
                   overlay={overlay}
                 />
