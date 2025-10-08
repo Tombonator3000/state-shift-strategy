@@ -1,0 +1,22 @@
+{"locale":"en-US","rateLimit":{"minTurnGap":1,"maxPerTurn":2},"triggers":{
+  "onCardPlay_media_opponent":[
+    "Oh, another blog post? Adorable.",
+    "Your citation needed clearance.",
+    "Flagging that for immediate shredding."
+  ],
+  "onStateCaptured_self":[
+    "Another fine addition to the archives.",
+    "Box it, barcode it, bury it.",
+    "Shelved under 'asset realignment'."
+  ],
+  "onVictory_self":[
+    "Your sources were weak.",
+    "The filing cabinet swallows dissent whole.",
+    "Audit complete; narrative compliant."
+  ],
+  "idle":[
+    "Hold that thought — it's redacted.",
+    "Calibrating the rumor suppression dampers.",
+    "Listening to the hum of authorized silence."
+  ]
+}}

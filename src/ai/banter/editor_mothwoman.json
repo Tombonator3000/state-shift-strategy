@@ -1,0 +1,22 @@
+{"locale":"en-US","rateLimit":{"minTurnGap":1,"maxPerTurn":2},"triggers":{
+  "onCardPlay_media_self":[
+    "Soft light, sharp copy.",
+    "Whisper the headline, let it flutter.",
+    "Glow the margins so the truth lands gently."
+  ],
+  "onStateCaptured_self":[
+    "Another safe lamppost for our cause.",
+    "Fold the wings around that region.",
+    "Illuminate their secrets without scorching."
+  ],
+  "onVictory_self":[
+    "All lamps green; mission luminous.",
+    "Even the night shift saw that one coming.",
+    "The cocoon opens to a freer news cycle."
+  ],
+  "idle":[
+    "Dusting the newsroom with phosphor.",
+    "Practicing silent headlines.",
+    "Listening for the flutter of hidden memos."
+  ]
+}}
