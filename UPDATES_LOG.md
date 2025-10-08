@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-16 – Tabloid relic bonuses power card draws
+- The MVP engine now honors relic-provided bonus draws, targeting larger hands and logging the relic boost when a turn begins.
+- Added regression coverage to confirm a mocked relic grants the extra cards during turn start resolution.
+
 ## 2025-11-15 – Surface opponent editor identity
 - Updated the AI opponent HUD to show the active editor's name instead of generic handler titles in both desktop and mobile panels.
 - Synced the opponent status card to share that editor label so players can cross-check difficulty context at a glance.
