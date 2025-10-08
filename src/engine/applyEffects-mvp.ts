@@ -12,6 +12,7 @@ import type {
 } from '@/mvp/validator';
 import { getEditorAggregatedEffects, getEditorById as lookupEditorById } from '@/game/editors';
 import { resolveEffectiveMods } from '@/game/editorRuntimeModifiers';
+import { ensureAiEditorSelected } from '@/game/aiEditorBinding';
 
 export type PlayerId = 'P1' | 'P2';
 
@@ -169,6 +170,7 @@ export function applyEffectsMvp(
   opts: MediaResolutionOptions = {},
   rng: () => number = Math.random,
 ): GameState {
+  ensureAiEditorSelected(state);
   if (card.type === 'ATTACK') {
     applyAttackEffect(state, owner, card.effects as EffectsATTACK, rng);
     return state;

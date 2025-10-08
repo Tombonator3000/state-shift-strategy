@@ -21,6 +21,8 @@ import {
 import { type AIDifficulty } from '@/data/aiStrategy';
 import { AIFactory } from '@/data/aiFactory';
 import { EnhancedAIStrategist } from '@/data/enhancedAIStrategy';
+import { recommendEditor } from '@/ai/editors.map';
+import { AI_EDITORS } from '@/ai/editors';
 import { chooseTurnActions } from '@/ai/enhancedController';
 import { EVENT_DATABASE, EventManager, type GameEvent, type ParanormalHotspotPayload } from '@/data/eventDatabase';
 import { processAiActions } from './aiTurnActions';
@@ -31,6 +33,7 @@ import { resolveCardMVP, type CardPlayResolution, type CardHotspotResolution } f
 import { useStateEvents } from '@/hooks/useStateEvents';
 import { applyTruthDelta, type TruthActorId } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
+import type { DifficultyTier } from '@/ai/difficulty';
 import { getDifficulty } from '@/state/settings';
 import { featureFlags } from '@/state/featureFlags';
 import { getComboSettings } from '@/game/comboEngine';
@@ -166,12 +169,20 @@ const resolveActiveEditorFromState = (state: GameState) => {
 
 const AI_DIFFICULTY_ORDER: readonly AIDifficulty[] = ['easy', 'medium', 'hard', 'insane'] as const;
 
-const DEFAULT_AI_EDITOR_ASSIGNMENTS: Record<AIDifficulty, Record<'truth' | 'government', EditorId>> = {
-  easy: { truth: 'the_redactor', government: 'the_redactor' },
-  medium: { truth: 'ed_muldrunk', government: 'ed_floridaman' },
-  hard: { truth: 'ed_el_visto', government: 'ed_gonzo' },
-  insane: { truth: 'ed_gonzo', government: 'ed_el_visto' },
+const LEGACY_EDITOR_ID_ALIASES: Record<string, EditorId> = {
+  the_redactor: 'editor_redactor',
+  ed_muldrunk: 'editor_muldrunk',
+  ed_floridaman: 'editor_floridaman',
+  ed_el_visto: 'editor_elvis',
+  ed_gonzo: 'editor_hunter',
 };
+
+const AI_DIFFICULTY_TO_TIER = {
+  easy: 'EASY',
+  medium: 'NORMAL',
+  hard: 'HARD',
+  insane: 'INSANE',
+} as const satisfies Record<AIDifficulty, DifficultyTier>;
 
 const LEGACY_AI_DIFFICULTY_ALIASES: Record<string, AIDifficulty> = {
   legendary: 'insane',
@@ -198,8 +209,23 @@ const normalizeEditorId = (value: unknown): EditorId | null => {
   if (typeof value !== 'string') {
     return null;
   }
+
   const trimmed = value.trim();
-  return trimmed.length > 0 ? (trimmed as EditorId) : null;
+  if (trimmed.length === 0) {
+    return null;
+  }
+
+  const directId = trimmed as EditorId;
+  if (Object.prototype.hasOwnProperty.call(AI_EDITORS, directId)) {
+    return directId;
+  }
+
+  const alias = LEGACY_EDITOR_ID_ALIASES[trimmed.toLowerCase()];
+  if (alias && Object.prototype.hasOwnProperty.call(AI_EDITORS, alias)) {
+    return alias;
+  }
+
+  return null;
 };
 
 const resolveAiEditorAssignment = ({
@@ -221,17 +247,13 @@ const resolveAiEditorAssignment = ({
     return null;
   }
 
-  const mapping = DEFAULT_AI_EDITOR_ASSIGNMENTS[normalizedDifficulty];
-  const mapped = mapping?.[aiFaction];
-  if (mapped) {
-    return mapped;
+  const tier = AI_DIFFICULTY_TO_TIER[normalizedDifficulty];
+  if (!tier) {
+    return null;
   }
 
-  if (normalizedDifficulty === 'easy') {
-    return 'the_redactor';
-  }
-
-  return null;
+  const recommended = recommendEditor(aiFaction, tier);
+  return normalizeEditorId(recommended) ?? null;
 };
 
 const createInitialAiBanterCooldown = (): AIBanterCooldownState => ({

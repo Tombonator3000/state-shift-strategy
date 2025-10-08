@@ -1,5 +1,4 @@
-import type { DifficultyTier } from '@/ai/difficulty';
-import { DIFFICULTY_MULT } from '@/ai/difficulty';
+import { DIFFICULTY_MULT, type DifficultyTier } from '@/ai/difficulty';
 import type { EditorProfile } from '@/ai/editors';
 
 export function resolveEffectiveMods(editor: EditorProfile, diff: DifficultyTier) {
