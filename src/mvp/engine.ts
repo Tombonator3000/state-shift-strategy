@@ -1,6 +1,7 @@
 declare const window: any;
 
 import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
+import { getEditor as getAiEditor } from '@/ai/editors';
 import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward } from '@/game/comboEngine';
 import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
@@ -12,6 +13,7 @@ import { auditGameState } from './gameStateAudit';
 import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
 import type { MediaResolutionOptions } from './media';
 import { applyTruthDelta } from '@/utils/truth';
+import { resolveEffectiveMods } from '@/game/editorRuntimeModifiers';
 import {
   getEditorAggregatedEffects,
   getEditorById as lookupEditorById,
@@ -313,6 +315,33 @@ export function startTurn(state: GameState): GameState {
     me,
     opponent,
   );
+  let income = netIncome;
+  // [AI-EDITORS] scale IP income by editor+difficulty if AI Editors expansion is active
+  try {
+    const options = (state as any)?.options;
+    const expansions = (state as any)?.expansions;
+    const aiEditorsEnabled = expansions?.aiEditors ?? true;
+    const playersAny = cloned.players as Record<string, unknown>;
+    const currentPlayerState = playersAny?.[currentId] as Record<string, unknown> | undefined;
+    const isAiTurn = cloned.currentPlayer === 'AI' || Boolean(currentPlayerState?.isAI);
+    if (aiEditorsEnabled && isAiTurn) {
+      const aiState =
+        cloned.currentPlayer === 'AI'
+          ? ((playersAny as Record<string, unknown>)?.AI as Record<string, unknown> | undefined) ?? currentPlayerState
+          : currentPlayerState ?? ((playersAny as Record<string, unknown>)?.AI as Record<string, unknown> | undefined);
+      const aiEditorId = (aiState?.activeEditor ?? aiState?.activeEditorId) as string | undefined;
+      if (aiEditorId) {
+        const diff = (options?.difficulty ?? 'NORMAL') as any;
+        const editor = getAiEditor(aiEditorId as any);
+        if (editor) {
+          const eff = resolveEffectiveMods(editor, diff);
+          income = Math.round(income * (eff.ipIncomeScalar ?? 1));
+        }
+      }
+    }
+  } catch {
+    /* no-op */
+  }
   const logEntries = relicResult.logEntries.length
     ? [...cloned.log, ...relicResult.logEntries]
     : [...cloned.log];
@@ -397,7 +426,7 @@ export function startTurn(state: GameState): GameState {
 
   const updatedPlayer: PlayerState = {
     ...drawnPlayer,
-    ip: Math.max(0, me.ip + netIncome + ipBonus),
+    ip: Math.max(0, me.ip + income + ipBonus),
   };
 
   return {
@@ -427,7 +456,28 @@ export function canPlay(
     return { ok: false, reason: 'invalid-player' };
   }
 
-  const effectiveCost = getEffectiveCardCost(state, state.currentPlayer, card);
+  let effectiveCost = getEffectiveCardCost(state, state.currentPlayer, card);
+  // [AI-EDITORS] adjust ATTACK cost for AI according to editor
+  try {
+    const expansions = (state as any)?.expansions;
+    const aiEditorsEnabled = expansions?.aiEditors ?? true;
+    const isAiPlayer = state.currentPlayer === 'AI' || Boolean((player as any)?.isAI);
+    if (card.type === 'ATTACK' && isAiPlayer && aiEditorsEnabled) {
+      const playersAny = state.players as unknown as Record<string, any>;
+      const aiState =
+        state.currentPlayer === 'AI'
+          ? playersAny?.AI ?? playersAny?.[state.currentPlayer]
+          : playersAny?.[state.currentPlayer] ?? playersAny?.AI;
+      const aiEditorId = (aiState?.activeEditor ?? aiState?.activeEditorId) as string | undefined;
+      if (aiEditorId) {
+        const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
+        const eff = resolveEffectiveMods(getAiEditor(aiEditorId as any), diff);
+        effectiveCost += eff.attackCostDelta ?? 0;
+      }
+    }
+  } catch {
+    /* no-op */
+  }
 
   if (player.ip < effectiveCost) {
     return { ok: false, reason: 'insufficient-ip' };
