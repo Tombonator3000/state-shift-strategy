@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-22 – Instant triple-headline tabloid surges
+- Primed the Extra Extra headline caches at module load so triple-card combos deliver tabloid-grade headlines without waiting for async preload hooks.
+- Added defensive cache access guards to fall back gracefully if JSON parsing ever fails during startup.
+
 ## 2025-11-21 – Harden extension index build for previews
 - Added a Bun fallback to the extension index prebuild script so Lovable GIR previews succeed even when Node isn't available.
 - Confirmed the extensions manifest continues to regenerate before dev and production builds.

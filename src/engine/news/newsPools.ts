@@ -77,6 +77,166 @@ let cachedArticles: Map<string, ArticleBlock> | null = null;
 let cachedComboBank: ComboRule[] | null = null;
 let cachedTripleBank: TripleTemplateBank | null = null;
 
+const buildPerCardArticleCache = (): Map<string, ArticleBlock> => {
+  const parsed = perCardArticleSchema.parse(perCardArticlesJson);
+  const map = new Map<string, ArticleBlock>();
+
+  for (const entry of parsed.articles) {
+    const tone = entry.tone.trim().toLowerCase();
+    if (tone !== 'truth' && tone !== 'gov' && tone !== 'government') {
+      continue;
+    }
+    const normalisedTags = unique(entry.tags.map(normaliseTag).filter(Boolean));
+    const record: ArticleBlock = {
+      id: entry.id,
+      tone: tone === 'truth' ? 'truth' : 'government',
+      tags: normalisedTags,
+      headline: entry.headline,
+      subhead: entry.subhead,
+      byline: entry.byline,
+      body: entry.body,
+      imagePrompt: entry.imagePrompt,
+    } satisfies ArticleBlock;
+    map.set(record.id, record);
+  }
+
+  return map;
+};
+
+const buildComboBankCache = (): ComboRule[] => {
+  const parsed = comboBankSchema.parse(comboBankJson);
+
+  const combos: ComboRule[] = parsed.combos.map(combo => {
+    const tags = unique(combo.tags.map(normaliseTag).filter(Boolean));
+    const factions = (combo.when.factions ?? []).map(value => value.trim().toLowerCase()).filter(Boolean);
+    const normalizedFactions = factions.filter(
+      (value): value is 'truth' | 'government' => value === 'truth' || value === 'government',
+    );
+
+    const when: ComboRule['when'] = {
+      minCards: combo.when.minCards ?? 2,
+      anyIds: unique((combo.when.anyIds ?? []).map(id => id.trim()).filter(Boolean)),
+      anyTags: unique((combo.when.anyTags ?? []).map(normaliseTag).filter(Boolean)),
+      opponentIds: unique((combo.when.opponentIds ?? []).map(id => id.trim()).filter(Boolean)),
+      factions: normalizedFactions,
+      requiresStateEvent: Boolean(combo.when.requiresStateEvent),
+    };
+
+    return {
+      comboId: combo.comboId,
+      priority: combo.priority ?? 0,
+      exclusive: combo.exclusive ?? false,
+      tags,
+      when,
+      headline: combo.headline,
+      subhead: combo.subhead ?? '',
+      byline: combo.byline ?? 'By: Composite Desk',
+      body: combo.body ?? [],
+      imagePrompt: combo.imagePrompt,
+    } satisfies ComboRule;
+  });
+
+  combos.sort((a, b) => b.priority - a.priority);
+
+  return combos;
+};
+
+const buildTripleBankCache = (): TripleTemplateBank => {
+  const parsed = tripleBankSchema.parse(tripleBankJson);
+
+  const templates: Record<string, TripleTemplateRule[]> = {};
+  for (const [bucketId, rules] of Object.entries(parsed.templates)) {
+    templates[bucketId] = rules.map(rule => {
+      const match: Partial<TripleTemplateMatch> = {};
+      if (rule.match.tagsAny) {
+        match.tagsAny = unique(rule.match.tagsAny.map(normaliseTag).filter(Boolean));
+      }
+      if (rule.match.minCount) {
+        match.minCount = rule.match.minCount;
+      }
+      if (rule.match.truthIdsAny) {
+        match.truthIdsAny = unique(rule.match.truthIdsAny.map(id => id.trim()).filter(Boolean));
+      }
+      if (rule.match.govIdsAny) {
+        match.govIdsAny = unique(rule.match.govIdsAny.map(id => id.trim()).filter(Boolean));
+      }
+      if (rule.match.govTagsAny) {
+        match.govTagsAny = unique(rule.match.govTagsAny.map(normaliseTag).filter(Boolean));
+      }
+      if (rule.match.types) {
+        match.types = rule.match.types.map(type => type.trim()).filter(Boolean);
+      }
+      if (rule.match.factions) {
+        const factions = rule.match.factions
+          .map(value => value.trim().toLowerCase())
+          .filter((value): value is 'truth' | 'government' => value === 'truth' || value === 'government');
+        if (factions.length === 3) {
+          match.factions = factions;
+        }
+      }
+      if (rule.match.typesAnyCount) {
+        match.typesAnyCount = {};
+        for (const [type, count] of Object.entries(rule.match.typesAnyCount)) {
+          if (typeof count === 'number' && Number.isFinite(count) && count > 0) {
+            match.typesAnyCount[type] = count;
+          }
+        }
+      }
+
+      return {
+        id: rule.id,
+        match,
+        headline: rule.headline,
+        subhead: rule.subhead,
+        imagePrompt: rule.imagePrompt,
+        body: rule.body,
+        factionHint:
+          rule.factionHint === 'truth' || rule.factionHint === 'government' || rule.factionHint === 'mixed'
+            ? rule.factionHint
+            : undefined,
+      } satisfies TripleTemplateRule;
+    });
+  }
+
+  return {
+    defaults: {
+      imageStyle: parsed.defaults.imageStyle,
+      maxBodyParas: parsed.defaults.maxBodyParas,
+      byline: parsed.defaults.byline,
+    },
+    lexicon: parsed.lexicon,
+    rendering: {
+      headlineFormat: parsed.rendering.headline_format,
+      subheadFormat: parsed.rendering.subhead_format,
+      kickers: parsed.rendering.kickers,
+      stingers: parsed.rendering.stingers,
+    },
+    priority: parsed.priority,
+    templates,
+  } satisfies TripleTemplateBank;
+};
+
+const ensurePerCardArticles = (): Map<string, ArticleBlock> => {
+  if (!cachedArticles) {
+    cachedArticles = buildPerCardArticleCache();
+  }
+  return cachedArticles;
+};
+
+const ensureComboBank = (): ComboRule[] => {
+  if (!cachedComboBank) {
+    cachedComboBank = buildComboBankCache();
+  }
+  return cachedComboBank;
+};
+
+const ensureTripleBank = (): TripleTemplateBank => {
+  if (!cachedTripleBank) {
+    cachedTripleBank = buildTripleBankCache();
+  }
+  return cachedTripleBank;
+};
+
 const normaliseTag = (tag: string): string => tag.trim().toLowerCase().replace(/\s+/g, '-');
 
 const unique = <T,>(values: T[]): T[] => Array.from(new Set(values));
@@ -173,164 +333,43 @@ const tripleBankSchema = z.object({
 });
 
 export async function loadPerCardArticles(): Promise<Map<string, ArticleBlock>> {
-  if (cachedArticles) {
-    return cachedArticles;
-  }
-
-  const parsed = perCardArticleSchema.parse(perCardArticlesJson);
-  const map = new Map<string, ArticleBlock>();
-
-  for (const entry of parsed.articles) {
-    const tone = entry.tone.trim().toLowerCase();
-    if (tone !== 'truth' && tone !== 'gov' && tone !== 'government') {
-      continue;
-    }
-    const normalisedTags = unique(entry.tags.map(normaliseTag).filter(Boolean));
-    const record: ArticleBlock = {
-      id: entry.id,
-      tone: tone === 'truth' ? 'truth' : 'government',
-      tags: normalisedTags,
-      headline: entry.headline,
-      subhead: entry.subhead,
-      byline: entry.byline,
-      body: entry.body,
-      imagePrompt: entry.imagePrompt,
-    };
-    map.set(record.id, record);
-  }
-
-  cachedArticles = map;
-  return map;
+  return ensurePerCardArticles();
 }
 
 export async function loadComboBank(): Promise<ComboRule[]> {
-  if (cachedComboBank) {
-    return cachedComboBank;
-  }
-
-  const parsed = comboBankSchema.parse(comboBankJson);
-
-  const combos: ComboRule[] = parsed.combos.map(combo => {
-    const tags = unique(combo.tags.map(normaliseTag).filter(Boolean));
-    const factions = (combo.when.factions ?? []).map(value => value.trim().toLowerCase()).filter(Boolean);
-    const normalizedFactions = factions.filter(
-      (value): value is 'truth' | 'government' => value === 'truth' || value === 'government',
-    );
-
-    const when: ComboRule['when'] = {
-      minCards: combo.when.minCards ?? 2,
-      anyIds: unique((combo.when.anyIds ?? []).map(id => id.trim()).filter(Boolean)),
-      anyTags: unique((combo.when.anyTags ?? []).map(normaliseTag).filter(Boolean)),
-      opponentIds: unique((combo.when.opponentIds ?? []).map(id => id.trim()).filter(Boolean)),
-      factions: normalizedFactions,
-      requiresStateEvent: Boolean(combo.when.requiresStateEvent),
-    };
-
-    return {
-      comboId: combo.comboId,
-      priority: combo.priority ?? 0,
-      exclusive: combo.exclusive ?? false,
-      tags,
-      when,
-      headline: combo.headline,
-      subhead: combo.subhead ?? '',
-      byline: combo.byline ?? 'By: Composite Desk',
-      body: combo.body ?? [],
-      imagePrompt: combo.imagePrompt,
-    } satisfies ComboRule;
-  });
-
-  combos.sort((a, b) => b.priority - a.priority);
-
-  cachedComboBank = combos;
-  return combos;
+  return ensureComboBank();
 }
 
 export async function loadTripleBank(): Promise<TripleTemplateBank> {
-  if (cachedTripleBank) {
-    return cachedTripleBank;
-  }
-
-  const parsed = tripleBankSchema.parse(tripleBankJson);
-
-  const templates: Record<string, TripleTemplateRule[]> = {};
-  for (const [bucketId, rules] of Object.entries(parsed.templates)) {
-    templates[bucketId] = rules.map(rule => {
-      const match: Partial<TripleTemplateMatch> = {};
-      if (rule.match.tagsAny) {
-        match.tagsAny = unique(rule.match.tagsAny.map(normaliseTag).filter(Boolean));
-      }
-      if (rule.match.minCount) {
-        match.minCount = rule.match.minCount;
-      }
-      if (rule.match.truthIdsAny) {
-        match.truthIdsAny = unique(rule.match.truthIdsAny.map(id => id.trim()).filter(Boolean));
-      }
-      if (rule.match.govIdsAny) {
-        match.govIdsAny = unique(rule.match.govIdsAny.map(id => id.trim()).filter(Boolean));
-      }
-      if (rule.match.govTagsAny) {
-        match.govTagsAny = unique(rule.match.govTagsAny.map(normaliseTag).filter(Boolean));
-      }
-      if (rule.match.types) {
-        match.types = rule.match.types.map(type => type.trim()).filter(Boolean);
-      }
-      if (rule.match.factions) {
-        const factions = rule.match.factions
-          .map(value => value.trim().toLowerCase())
-          .filter((value): value is 'truth' | 'government' => value === 'truth' || value === 'government');
-        if (factions.length === 3) {
-          match.factions = factions;
-        }
-      }
-      if (rule.match.typesAnyCount) {
-        match.typesAnyCount = {};
-        for (const [type, count] of Object.entries(rule.match.typesAnyCount)) {
-          if (typeof count === 'number' && Number.isFinite(count) && count > 0) {
-            match.typesAnyCount[type] = count;
-          }
-        }
-      }
-
-      return {
-        id: rule.id,
-        match,
-        headline: rule.headline,
-        subhead: rule.subhead,
-        imagePrompt: rule.imagePrompt,
-        body: rule.body,
-        factionHint:
-          rule.factionHint === 'truth' || rule.factionHint === 'government' || rule.factionHint === 'mixed'
-            ? rule.factionHint
-            : undefined,
-      } satisfies TripleTemplateRule;
-    });
-  }
-
-  const bank: TripleTemplateBank = {
-    defaults: {
-      imageStyle: parsed.defaults.imageStyle,
-      maxBodyParas: parsed.defaults.maxBodyParas,
-      byline: parsed.defaults.byline,
-    },
-    lexicon: parsed.lexicon,
-    rendering: {
-      headlineFormat: parsed.rendering.headline_format,
-      subheadFormat: parsed.rendering.subhead_format,
-      kickers: parsed.rendering.kickers,
-      stingers: parsed.rendering.stingers,
-    },
-    priority: parsed.priority,
-    templates,
-  } satisfies TripleTemplateBank;
-
-  cachedTripleBank = bank;
-  return bank;
+  return ensureTripleBank();
 }
 
-export const getPerCardArticlesIfReady = (): Map<string, ArticleBlock> | null => cachedArticles;
-export const getComboBankIfReady = (): ComboRule[] | null => cachedComboBank;
-export const getTripleBankIfReady = (): TripleTemplateBank | null => cachedTripleBank;
+export const getPerCardArticlesIfReady = (): Map<string, ArticleBlock> | null => {
+  try {
+    return ensurePerCardArticles();
+  } catch (error) {
+    console.warn('Failed to access per-card article cache', error);
+    return null;
+  }
+};
+
+export const getComboBankIfReady = (): ComboRule[] | null => {
+  try {
+    return ensureComboBank();
+  } catch (error) {
+    console.warn('Failed to access combo bank cache', error);
+    return null;
+  }
+};
+
+export const getTripleBankIfReady = (): TripleTemplateBank | null => {
+  try {
+    return ensureTripleBank();
+  } catch (error) {
+    console.warn('Failed to access triple headline bank cache', error);
+    return null;
+  }
+};
 
 export async function initNewsPools(): Promise<void> {
   await Promise.all([loadPerCardArticles(), loadComboBank(), loadTripleBank()]);
