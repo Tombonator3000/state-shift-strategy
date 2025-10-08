@@ -1,0 +1,6244 @@
+{
+  "timestamp": "2025-10-08T11:32:23.626Z",
+  "options": {
+    "iterations": 0,
+    "games": 4,
+    "handSize": 5,
+    "stateCount": 12,
+    "initialControl": 3,
+    "startingIp": 110,
+    "startingTruth": 50,
+    "maxTurns": 30,
+    "difficulty": "hard",
+    "useEnhanced": true,
+    "swapFactions": true,
+    "intensity": 0.25,
+    "seed": 424242,
+    "output": "tools/simulations/2025-11-17-ai-sim-baseline.json",
+    "economicGoal": 200,
+    "truthHighThreshold": 90,
+    "truthLowThreshold": 10,
+    "optimize": false
+  },
+  "baselineSummary": {
+    "candidateWins": 2,
+    "baselineWins": 2,
+    "draws": 0,
+    "games": 4,
+    "averageTurns": 26.5,
+    "averageTruthSwing": 6,
+    "averageFinalIpDelta": -1.25,
+    "averageFinalStateDelta": 1,
+    "score": 0
+  },
+  "bestSummary": {
+    "candidateWins": 2,
+    "baselineWins": 2,
+    "draws": 0,
+    "games": 4,
+    "averageTurns": 26.5,
+    "averageTruthSwing": 6,
+    "averageFinalIpDelta": -1.25,
+    "averageFinalStateDelta": 1,
+    "score": 0
+  },
+  "bestIteration": null,
+  "baselineConfig": {
+    "evaluateGameState": {
+      "territorialWeight": 1,
+      "resourceWeight": 1,
+      "handWeight": 1,
+      "threatMitigationWeight": 1,
+      "agendaWeight": 1,
+      "pressureWeight": 1,
+      "truthWeight": 1,
+      "opponentEconomyWeight": 1,
+      "opponentHandWeight": 1
+    },
+    "dynamicWeights": {
+      "territorialBase": 0.2,
+      "territorialPersonality": 0.25,
+      "resourceBase": 0.15,
+      "resourcePersonality": 0.25,
+      "handBase": 0.15,
+      "handPlanning": 0.2,
+      "threatMitigationBase": 0.18,
+      "threatDefensiveness": 0.3,
+      "agendaBase": 0.12,
+      "agendaPlanning": 0.25,
+      "pressureBase": 0.15,
+      "pressureTerritorial": 0.2,
+      "truthBase": 0.1,
+      "truthTerritorial": 0.2,
+      "opponentEconomyBase": 0.1,
+      "opponentEconomyDefensive": 0.15,
+      "opponentHandBase": 0.08,
+      "opponentHandPlanning": 0.15
+    },
+    "cardPriority": {
+      "zone": {
+        "baseMultiplier": 1,
+        "chainMultiplier": 1,
+        "factionMultiplier": 1,
+        "highValueMultiplier": 1,
+        "locationMultiplier": 1,
+        "ownerAggressionMultiplier": 1,
+        "signalCaptureMultiplier": 1,
+        "dangerResponseMultiplier": 1
+      },
+      "media": {
+        "baseMultiplier": 1,
+        "chainMultiplier": 1,
+        "factionMultiplier": 1,
+        "truthObjectiveMultiplier": 1,
+        "resourceSwingMultiplier": 1,
+        "discardMultiplier": 1,
+        "drawMultiplier": 1
+      },
+      "attack": {
+        "baseMultiplier": 1,
+        "chainMultiplier": 1,
+        "factionMultiplier": 1,
+        "comebackMultiplier": 1,
+        "resourceThreatMultiplier": 1,
+        "aggressionResponseMultiplier": 1,
+        "ipDamageMultiplier": 1,
+        "discardMultiplier": 1,
+        "aheadPenaltyMultiplier": 1
+      },
+      "defensive": {
+        "baseMultiplier": 1,
+        "chainMultiplier": 1,
+        "factionMultiplier": 1,
+        "threatResponseMultiplier": 1,
+        "truthCrisisMultiplier": 1,
+        "recentAttackMultiplier": 1,
+        "imminentLossMultiplier": 1
+      }
+    }
+  },
+  "bestConfig": {
+    "evaluateGameState": {
+      "territorialWeight": 1,
+      "resourceWeight": 1,
+      "handWeight": 1,
+      "threatMitigationWeight": 1,
+      "agendaWeight": 1,
+      "pressureWeight": 1,
+      "truthWeight": 1,
+      "opponentEconomyWeight": 1,
+      "opponentHandWeight": 1
+    },
+    "dynamicWeights": {
+      "territorialBase": 0.2,
+      "territorialPersonality": 0.25,
+      "resourceBase": 0.15,
+      "resourcePersonality": 0.25,
+      "handBase": 0.15,
+      "handPlanning": 0.2,
+      "threatMitigationBase": 0.18,
+      "threatDefensiveness": 0.3,
+      "agendaBase": 0.12,
+      "agendaPlanning": 0.25,
+      "pressureBase": 0.15,
+      "pressureTerritorial": 0.2,
+      "truthBase": 0.1,
+      "truthTerritorial": 0.2,
+      "opponentEconomyBase": 0.1,
+      "opponentEconomyDefensive": 0.15,
+      "opponentHandBase": 0.08,
+      "opponentHandPlanning": 0.15
+    },
+    "cardPriority": {
+      "zone": {
+        "baseMultiplier": 1,
+        "chainMultiplier": 1,
+        "factionMultiplier": 1,
+        "highValueMultiplier": 1,
+        "locationMultiplier": 1,
+        "ownerAggressionMultiplier": 1,
+        "signalCaptureMultiplier": 1,
+        "dangerResponseMultiplier": 1
+      },
+      "media": {
+        "baseMultiplier": 1,
+        "chainMultiplier": 1,
+        "factionMultiplier": 1,
+        "truthObjectiveMultiplier": 1,
+        "resourceSwingMultiplier": 1,
+        "discardMultiplier": 1,
+        "drawMultiplier": 1
+      },
+      "attack": {
+        "baseMultiplier": 1,
+        "chainMultiplier": 1,
+        "factionMultiplier": 1,
+        "comebackMultiplier": 1,
+        "resourceThreatMultiplier": 1,
+        "aggressionResponseMultiplier": 1,
+        "ipDamageMultiplier": 1,
+        "discardMultiplier": 1,
+        "aheadPenaltyMultiplier": 1
+      },
+      "defensive": {
+        "baseMultiplier": 1,
+        "chainMultiplier": 1,
+        "factionMultiplier": 1,
+        "threatResponseMultiplier": 1,
+        "truthCrisisMultiplier": 1,
+        "recentAttackMultiplier": 1,
+        "imminentLossMultiplier": 1
+      }
+    }
+  },
+  "iterations": [],
+  "bestGames": [
+    {
+      "id": 1,
+      "startSide": "candidate",
+      "winner": "candidate",
+      "reason": "tiebreaker",
+      "turns": 30,
+      "factions": {
+        "candidate": "truth",
+        "baseline": "government"
+      },
+      "truthHistory": [
+        50,
+        48,
+        48,
+        48,
+        50,
+        50,
+        50,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        46,
+        46,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        42,
+        44,
+        44,
+        46,
+        46,
+        46
+      ],
+      "ipHistory": [
+        {
+          "turn": 0,
+          "candidate": 110,
+          "baseline": 110
+        },
+        {
+          "turn": 1,
+          "candidate": 107,
+          "baseline": 110
+        },
+        {
+          "turn": 2,
+          "candidate": 107,
+          "baseline": 104
+        },
+        {
+          "turn": 3,
+          "candidate": 101,
+          "baseline": 104
+        },
+        {
+          "turn": 4,
+          "candidate": 101,
+          "baseline": 101
+        },
+        {
+          "turn": 5,
+          "candidate": 95,
+          "baseline": 101
+        },
+        {
+          "turn": 6,
+          "candidate": 95,
+          "baseline": 95
+        },
+        {
+          "turn": 7,
+          "candidate": 92,
+          "baseline": 95
+        },
+        {
+          "turn": 8,
+          "candidate": 91,
+          "baseline": 92
+        },
+        {
+          "turn": 9,
+          "candidate": 88,
+          "baseline": 91
+        },
+        {
+          "turn": 10,
+          "candidate": 88,
+          "baseline": 85
+        },
+        {
+          "turn": 11,
+          "candidate": 82,
+          "baseline": 85
+        },
+        {
+          "turn": 12,
+          "candidate": 82,
+          "baseline": 79
+        },
+        {
+          "turn": 13,
+          "candidate": 79,
+          "baseline": 79
+        },
+        {
+          "turn": 14,
+          "candidate": 78,
+          "baseline": 76
+        },
+        {
+          "turn": 15,
+          "candidate": 75,
+          "baseline": 76
+        },
+        {
+          "turn": 16,
+          "candidate": 74,
+          "baseline": 73
+        },
+        {
+          "turn": 17,
+          "candidate": 68,
+          "baseline": 73
+        },
+        {
+          "turn": 18,
+          "candidate": 68,
+          "baseline": 67
+        },
+        {
+          "turn": 19,
+          "candidate": 65,
+          "baseline": 66
+        },
+        {
+          "turn": 20,
+          "candidate": 65,
+          "baseline": 60
+        },
+        {
+          "turn": 21,
+          "candidate": 59,
+          "baseline": 60
+        },
+        {
+          "turn": 22,
+          "candidate": 58,
+          "baseline": 57
+        },
+        {
+          "turn": 23,
+          "candidate": 55,
+          "baseline": 56
+        },
+        {
+          "turn": 24,
+          "candidate": 55,
+          "baseline": 50
+        },
+        {
+          "turn": 25,
+          "candidate": 52,
+          "baseline": 50
+        },
+        {
+          "turn": 26,
+          "candidate": 52,
+          "baseline": 47
+        },
+        {
+          "turn": 27,
+          "candidate": 46,
+          "baseline": 47
+        },
+        {
+          "turn": 28,
+          "candidate": 46,
+          "baseline": 44
+        },
+        {
+          "turn": 29,
+          "candidate": 40,
+          "baseline": 44
+        },
+        {
+          "turn": 30,
+          "candidate": 39,
+          "baseline": 41
+        }
+      ],
+      "controlHistory": [
+        {
+          "turn": 0,
+          "candidate": 3,
+          "baseline": 3
+        },
+        {
+          "turn": 1,
+          "candidate": 3,
+          "baseline": 3
+        },
+        {
+          "turn": 2,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 3,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 4,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 5,
+          "candidate": 5,
+          "baseline": 3
+        },
+        {
+          "turn": 6,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 7,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 8,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 9,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 10,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 11,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 12,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 13,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 14,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 15,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 16,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 17,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 18,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 19,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 20,
+          "candidate": 3,
+          "baseline": 6
+        },
+        {
+          "turn": 21,
+          "candidate": 4,
+          "baseline": 5
+        },
+        {
+          "turn": 22,
+          "candidate": 4,
+          "baseline": 5
+        },
+        {
+          "turn": 23,
+          "candidate": 4,
+          "baseline": 5
+        },
+        {
+          "turn": 24,
+          "candidate": 3,
+          "baseline": 6
+        },
+        {
+          "turn": 25,
+          "candidate": 3,
+          "baseline": 6
+        },
+        {
+          "turn": 26,
+          "candidate": 3,
+          "baseline": 6
+        },
+        {
+          "turn": 27,
+          "candidate": 4,
+          "baseline": 5
+        },
+        {
+          "turn": 28,
+          "candidate": 4,
+          "baseline": 5
+        },
+        {
+          "turn": 29,
+          "candidate": 5,
+          "baseline": 4
+        },
+        {
+          "turn": 30,
+          "candidate": 5,
+          "baseline": 4
+        }
+      ],
+      "evaluations": [
+        {
+          "turn": 1,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.6251004140085176,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.22510041400851755,
+              "opponentAggression": 0
+            },
+            "planningWeight": 1,
+            "overallScore": 0.27878607731654664
+          }
+        },
+        {
+          "turn": 2,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.7182399648128487,
+            "threatLevel": 0,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.587768031918633,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.187768031918633,
+              "opponentAggression": 0
+            },
+            "planningWeight": 1,
+            "overallScore": 0.31056258420498445
+          }
+        },
+        {
+          "turn": 3,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.5751243314999614,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.17512433149996143,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.24149060621281448
+          }
+        },
+        {
+          "turn": 4,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.654425257543889,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.5621734763890457,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.16217347638904567,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.24733421292936386
+          }
+        },
+        {
+          "turn": 5,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.5871682693574664,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.18716826935746633,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.29031937797544044
+          }
+        },
+        {
+          "turn": 6,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.05494460868918743,
+            "handQuality": 0.7182399648128487,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.5103848295607549,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.1103848295607549,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2034638988884095
+          }
+        },
+        {
+          "turn": 7,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0,
+            "handQuality": 0.5105696697673638,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.560343204518635,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.16034320451863493,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2541932420621815
+          }
+        },
+        {
+          "turn": 8,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.667100353972047,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.5214744680983552,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.12147446809835516,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2793925149805292
+          }
+        },
+        {
+          "turn": 9,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": -0.009166409923752868,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.5548024015042329,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.15480240150423286,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.257359177128027
+          }
+        },
+        {
+          "turn": 10,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.7182399648128484,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.5024992126424918,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.10249921264249173,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2875660130365016
+          }
+        },
+        {
+          "turn": 11,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.48791226549238786,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.08791226549238784,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.18752973416376179
+          }
+        },
+        {
+          "turn": 12,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.7182399648128484,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.4730229873720451,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.0730229873720451,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2898599256195164
+          }
+        },
+        {
+          "turn": 13,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.5105696697673638,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.45783416056945025,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.05783416056945023,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.17888794271610103
+          }
+        },
+        {
+          "turn": 14,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.3799489622552249,
+            "resourceAdvantage": 0,
+            "handQuality": 0.667100353972047,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8763930674728229,
+            "opponentResourceThreat": 0.4828289535378709,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8763930674728229,
+              "resourceCrunch": 0.0828289535378709,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.33050529426730435
+          }
+        },
+        {
+          "turn": 15,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.01833127959710064,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7778880665771849,
+            "opponentResourceThreat": 0.4506788384430883,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7778880665771849,
+              "resourceCrunch": 0.05067883844308829,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.1802487546851353
+          }
+        },
+        {
+          "turn": 16,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.3799489622552249,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.6671003539720468,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.45378401682255276,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0.05378401682255274,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.33272622812130814
+          }
+        },
+        {
+          "turn": 17,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.4432336656040865,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0.04323366560408648,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.1928569585331371
+          }
+        },
+        {
+          "turn": 18,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.045801266335348395,
+            "handQuality": 0.7182399648128484,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.38299258054424423,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2966239961998913
+          }
+        },
+        {
+          "turn": 19,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.41082201211465136,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0.010822012114651336,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.18655000127410826
+          }
+        },
+        {
+          "turn": 20,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.3799489622552249,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.7182399648128484,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.39977011479686797,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.34362652011106515
+          }
+        },
+        {
+          "turn": 21,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.5370495669980353,
+            "resourceAdvantage": 0.045801266335348395,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.33830639150973896,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.183460075897721
+          }
+        },
+        {
+          "turn": 22,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.667100353972047,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.3658971626403861,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.3143767510550693
+          }
+        },
+        {
+          "turn": 23,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.35437432714059414,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2161319483223862
+          }
+        },
+        {
+          "turn": 24,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.7182399648128484,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.3427395055414515,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.3228757339269648
+          }
+        },
+        {
+          "turn": 25,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.5370495669980353,
+            "resourceAdvantage": 0.045801266335348395,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.2798701667861484,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.17702518330649492
+          }
+        },
+        {
+          "turn": 26,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.5370495669980353,
+            "resourceAdvantage": -0.01833127959710064,
+            "handQuality": 0.6544252575438889,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.9086976584311125,
+            "opponentResourceThreat": 0.35008118896048485,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.9086976584311125,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.3567989834989588
+          }
+        },
+        {
+          "turn": 27,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.5370495669980353,
+            "resourceAdvantage": 0.045801266335348395,
+            "handQuality": 0.5944370809550962,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.26182393985703684,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.1894121290054797
+          }
+        },
+        {
+          "turn": 28,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.6544252575438889,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.2890684695406968,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.3186959295846287
+          }
+        },
+        {
+          "turn": 29,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.01833127959710064,
+            "handQuality": 0.5944370809550962,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7778880665771849,
+            "opponentResourceThreat": 0.26853479493716703,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7778880665771849,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.230595246299996
+          }
+        },
+        {
+          "turn": 30,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.036650243399912595,
+            "handQuality": 0.6671003539720468,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8763930674728229,
+            "opponentResourceThreat": 0.2271994526966798,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8763930674728229,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.23930248069715893
+          }
+        }
+      ],
+      "plays": [
+        {
+          "turn": 1,
+          "actor": "candidate",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 50% | chain 0)"
+        },
+        {
+          "turn": 2,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 2.0042,
+          "targetState": "SD",
+          "reasoning": "Pressure South Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 3,
+          "actor": "candidate",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 2.1142000000000003,
+          "targetState": "SD",
+          "reasoning": "Pressure South Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 4,
+          "actor": "baseline",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 48% | chain 0)"
+        },
+        {
+          "turn": 5,
+          "actor": "candidate",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 2.0042,
+          "targetState": "ND",
+          "reasoning": "Pressure North Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 6,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 2.1142000000000003,
+          "targetState": "SD",
+          "reasoning": "Pressure South Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 7,
+          "actor": "candidate",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 50% | chain 0)"
+        },
+        {
+          "turn": 8,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 3 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 9,
+          "actor": "candidate",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.42125,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 1 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 10,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 2.1142000000000003,
+          "targetState": "ND",
+          "reasoning": "Pressure North Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 11,
+          "actor": "candidate",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 2.1142000000000003,
+          "targetState": "SD",
+          "reasoning": "Pressure South Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 12,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 2.4142,
+          "targetState": "SD",
+          "reasoning": "Pressure South Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 13,
+          "actor": "candidate",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 48% | chain 0)"
+        },
+        {
+          "turn": 14,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.1573950000000004,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 0 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 15,
+          "actor": "candidate",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 46% | chain 0)"
+        },
+        {
+          "turn": 16,
+          "actor": "baseline",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.0470749999999998,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 1 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 17,
+          "actor": "candidate",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 2.1142000000000003,
+          "targetState": "SD",
+          "reasoning": "Pressure South Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 18,
+          "actor": "baseline",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 2.4142,
+          "targetState": "SD",
+          "reasoning": "Pressure South Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 19,
+          "actor": "candidate",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 1 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 20,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.7904000000000002,
+          "targetState": "MN",
+          "reasoning": "Pressure Minnesota | apply +2 pressure"
+        },
+        {
+          "turn": 21,
+          "actor": "candidate",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 2.1142000000000003,
+          "targetState": "SD",
+          "reasoning": "Pressure South Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 22,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.0173949999999998,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 1 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 23,
+          "actor": "candidate",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.3788500000000001,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 1 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 24,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 2.1142000000000003,
+          "targetState": "SD",
+          "reasoning": "Pressure South Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 25,
+          "actor": "candidate",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 44% | chain 0)"
+        },
+        {
+          "turn": 26,
+          "actor": "baseline",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 42% | chain 0)"
+        },
+        {
+          "turn": 27,
+          "actor": "candidate",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 2.1142000000000003,
+          "targetState": "SD",
+          "reasoning": "Pressure South Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 28,
+          "actor": "baseline",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 44% | chain 0)"
+        },
+        {
+          "turn": 29,
+          "actor": "candidate",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 2.1142000000000003,
+          "targetState": "ND",
+          "reasoning": "Pressure North Dakota | apply +2 pressure"
+        },
+        {
+          "turn": 30,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.3788500000000001,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 4 | chain 0 | hand threat 0.00)"
+        }
+      ],
+      "finalTruth": 46,
+      "finalIp": {
+        "candidate": 39,
+        "baseline": 41
+      },
+      "finalControl": {
+        "candidate": 5,
+        "baseline": 4
+      }
+    },
+    {
+      "id": 2,
+      "startSide": "baseline",
+      "winner": "candidate",
+      "reason": "territory",
+      "turns": 16,
+      "factions": {
+        "candidate": "government",
+        "baseline": "truth"
+      },
+      "truthHistory": [
+        50,
+        50,
+        50,
+        50,
+        50,
+        48,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        48
+      ],
+      "ipHistory": [
+        {
+          "turn": 0,
+          "candidate": 110,
+          "baseline": 110
+        },
+        {
+          "turn": 1,
+          "candidate": 110,
+          "baseline": 104
+        },
+        {
+          "turn": 2,
+          "candidate": 104,
+          "baseline": 104
+        },
+        {
+          "turn": 3,
+          "candidate": 103,
+          "baseline": 101
+        },
+        {
+          "turn": 4,
+          "candidate": 100,
+          "baseline": 100
+        },
+        {
+          "turn": 5,
+          "candidate": 100,
+          "baseline": 97
+        },
+        {
+          "turn": 6,
+          "candidate": 97,
+          "baseline": 97
+        },
+        {
+          "turn": 7,
+          "candidate": 96,
+          "baseline": 94
+        },
+        {
+          "turn": 8,
+          "candidate": 90,
+          "baseline": 94
+        },
+        {
+          "turn": 9,
+          "candidate": 89,
+          "baseline": 91
+        },
+        {
+          "turn": 10,
+          "candidate": 83,
+          "baseline": 91
+        },
+        {
+          "turn": 11,
+          "candidate": 82,
+          "baseline": 88
+        },
+        {
+          "turn": 12,
+          "candidate": 79,
+          "baseline": 87
+        },
+        {
+          "turn": 13,
+          "candidate": 78,
+          "baseline": 84
+        },
+        {
+          "turn": 14,
+          "candidate": 72,
+          "baseline": 84
+        },
+        {
+          "turn": 15,
+          "candidate": 72,
+          "baseline": 81
+        }
+      ],
+      "controlHistory": [
+        {
+          "turn": 0,
+          "candidate": 3,
+          "baseline": 3
+        },
+        {
+          "turn": 1,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 2,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 3,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 4,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 5,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 6,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 7,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 8,
+          "candidate": 5,
+          "baseline": 3
+        },
+        {
+          "turn": 9,
+          "candidate": 5,
+          "baseline": 3
+        },
+        {
+          "turn": 10,
+          "candidate": 6,
+          "baseline": 3
+        },
+        {
+          "turn": 11,
+          "candidate": 6,
+          "baseline": 3
+        },
+        {
+          "turn": 12,
+          "candidate": 6,
+          "baseline": 3
+        },
+        {
+          "turn": 13,
+          "candidate": 6,
+          "baseline": 3
+        },
+        {
+          "turn": 14,
+          "candidate": 6,
+          "baseline": 3
+        },
+        {
+          "turn": 15,
+          "candidate": 6,
+          "baseline": 3
+        }
+      ],
+      "evaluations": [
+        {
+          "turn": 1,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.6251004140085176,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.22510041400851755,
+              "opponentAggression": 0
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2897686211069147
+          }
+        },
+        {
+          "turn": 2,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.05494460868918743,
+            "handQuality": 0.4765414788427609,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.5501607495105021,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.15016074951050207,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.229465645800617
+          }
+        },
+        {
+          "turn": 3,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.6001191244683821,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.2001191244683821,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.22601982864654357
+          }
+        },
+        {
+          "turn": 4,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0.01833127959710064,
+            "handQuality": 0.39693043200507755,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.5705031457292278,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.17050314572922776,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.26781012812464905
+          }
+        },
+        {
+          "turn": 5,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.5827829453479102,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.18278294534791018,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.22521574120148652
+          }
+        },
+        {
+          "turn": 6,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.3778078359539094,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.5444269190796059,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.14442691907960592,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2669542615795321
+          }
+        },
+        {
+          "turn": 7,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.5694217120480266,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.16942171204802658,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.22840877702683876
+          }
+        },
+        {
+          "turn": 8,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0.01833127959710064,
+            "handQuality": 0.4765414788427609,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.5390875638433059,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.1390875638433059,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.28068013370895767
+          }
+        },
+        {
+          "turn": 9,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.036650243399912595,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.5037285738592124,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.10372857385921241,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.1768870167666447
+          }
+        },
+        {
+          "turn": 10,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0.3799489622552249,
+            "resourceAdvantage": -0.01833127959710064,
+            "handQuality": 0.4765414788427609,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.558441548635888,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.158441548635888,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.3002478575527752
+          }
+        },
+        {
+          "turn": 11,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.5370495669980353,
+            "resourceAdvantage": 0.07320215870718144,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.43644622936191557,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.03644622936191555,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.16455120318464378
+          }
+        },
+        {
+          "turn": 12,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0.5370495669980353,
+            "resourceAdvantage": -0.05494460868918743,
+            "handQuality": 0.39693043200507755,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.5774523805687924,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.17745238056879242,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.30590821854278627
+          }
+        },
+        {
+          "turn": 13,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.5370495669980353,
+            "resourceAdvantage": 0.07320215870718144,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.4162608770356083,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.0162608770356083,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.16612207710995364
+          }
+        },
+        {
+          "turn": 14,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0.5370495669980353,
+            "resourceAdvantage": -0.05494460868918743,
+            "handQuality": 0.4765414788427609,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.5579358078557762,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.1579358078557762,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.3178522138725015
+          }
+        },
+        {
+          "turn": 15,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.5370495669980353,
+            "resourceAdvantage": 0.10955847021442955,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.3465756156238239,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "34",
+                  "stateName": "New Jersey",
+                  "abbreviation": "NJ",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "34",
+                  "stateName": "New Jersey",
+                  "abbreviation": "NJ",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "34",
+                  "stateName": "New Jersey",
+                  "abbreviation": "NJ",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.20014490596179385
+          }
+        },
+        {
+          "turn": 16,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0.5370495669980353,
+            "resourceAdvantage": -0.08231333630045613,
+            "handQuality": 0.4765414788427609,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.5678476573628235,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "34",
+                  "stateName": "New Jersey",
+                  "abbreviation": "NJ",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "34",
+                  "stateName": "New Jersey",
+                  "abbreviation": "NJ",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "34",
+                  "stateName": "New Jersey",
+                  "abbreviation": "NJ",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.16784765736282348,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.33927167101849803
+          }
+        }
+      ],
+      "plays": [
+        {
+          "turn": 1,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.7904000000000002,
+          "targetState": "AR",
+          "reasoning": "Pressure Arkansas | apply +2 pressure"
+        },
+        {
+          "turn": 2,
+          "actor": "candidate",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 1.9004,
+          "targetState": "AR",
+          "reasoning": "Pressure Arkansas | apply +2 pressure"
+        },
+        {
+          "turn": 3,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 0 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 4,
+          "actor": "candidate",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.42125,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 2 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 5,
+          "actor": "baseline",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 50% | chain 0)"
+        },
+        {
+          "turn": 6,
+          "actor": "candidate",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 48% | chain 0)"
+        },
+        {
+          "turn": 7,
+          "actor": "baseline",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.42125,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 0 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 8,
+          "actor": "candidate",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.7904000000000002,
+          "targetState": "KY",
+          "reasoning": "Pressure Kentucky | apply +2 pressure"
+        },
+        {
+          "turn": 9,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 4 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 10,
+          "actor": "candidate",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 2.0042,
+          "targetState": "ID",
+          "reasoning": "Pressure Idaho | apply +2 pressure"
+        },
+        {
+          "turn": 11,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 8 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 12,
+          "actor": "candidate",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.1573950000000004,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 6 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 13,
+          "actor": "baseline",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.42125,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 8 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 14,
+          "actor": "candidate",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 1.7682666666666669,
+          "targetState": "NJ",
+          "reasoning": "Pressure New Jersey | apply +2 pressure"
+        },
+        {
+          "turn": 15,
+          "actor": "baseline",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 50% | chain 0)"
+        },
+        {
+          "turn": 16,
+          "actor": "candidate",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 3.139100000000001,
+          "targetState": "NJ",
+          "reasoning": "Pressure New Jersey | remaining 1"
+        }
+      ],
+      "finalTruth": 48,
+      "finalIp": {
+        "candidate": 66,
+        "baseline": 81
+      },
+      "finalControl": {
+        "candidate": 7,
+        "baseline": 3
+      }
+    },
+    {
+      "id": 3,
+      "startSide": "candidate",
+      "winner": "baseline",
+      "reason": "tiebreaker",
+      "turns": 30,
+      "factions": {
+        "candidate": "truth",
+        "baseline": "government"
+      },
+      "truthHistory": [
+        50,
+        48,
+        48,
+        46,
+        46,
+        46,
+        48,
+        48,
+        50,
+        50,
+        50,
+        48,
+        48,
+        48,
+        48,
+        46,
+        46,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ],
+      "ipHistory": [
+        {
+          "turn": 0,
+          "candidate": 110,
+          "baseline": 110
+        },
+        {
+          "turn": 1,
+          "candidate": 107,
+          "baseline": 110
+        },
+        {
+          "turn": 2,
+          "candidate": 107,
+          "baseline": 104
+        },
+        {
+          "turn": 3,
+          "candidate": 104,
+          "baseline": 104
+        },
+        {
+          "turn": 4,
+          "candidate": 104,
+          "baseline": 98
+        },
+        {
+          "turn": 5,
+          "candidate": 101,
+          "baseline": 97
+        },
+        {
+          "turn": 6,
+          "candidate": 101,
+          "baseline": 94
+        },
+        {
+          "turn": 7,
+          "candidate": 98,
+          "baseline": 93
+        },
+        {
+          "turn": 8,
+          "candidate": 98,
+          "baseline": 90
+        },
+        {
+          "turn": 9,
+          "candidate": 92,
+          "baseline": 90
+        },
+        {
+          "turn": 10,
+          "candidate": 91,
+          "baseline": 87
+        },
+        {
+          "turn": 11,
+          "candidate": 88,
+          "baseline": 87
+        },
+        {
+          "turn": 12,
+          "candidate": 88,
+          "baseline": 81
+        },
+        {
+          "turn": 13,
+          "candidate": 85,
+          "baseline": 80
+        },
+        {
+          "turn": 14,
+          "candidate": 85,
+          "baseline": 74
+        },
+        {
+          "turn": 15,
+          "candidate": 82,
+          "baseline": 74
+        },
+        {
+          "turn": 16,
+          "candidate": 82,
+          "baseline": 68
+        },
+        {
+          "turn": 17,
+          "candidate": 79,
+          "baseline": 68
+        },
+        {
+          "turn": 18,
+          "candidate": 78,
+          "baseline": 65
+        },
+        {
+          "turn": 19,
+          "candidate": 75,
+          "baseline": 64
+        },
+        {
+          "turn": 20,
+          "candidate": 74,
+          "baseline": 61
+        },
+        {
+          "turn": 21,
+          "candidate": 71,
+          "baseline": 60
+        },
+        {
+          "turn": 22,
+          "candidate": 71,
+          "baseline": 54
+        },
+        {
+          "turn": 23,
+          "candidate": 68,
+          "baseline": 53
+        },
+        {
+          "turn": 24,
+          "candidate": 67,
+          "baseline": 50
+        },
+        {
+          "turn": 25,
+          "candidate": 61,
+          "baseline": 50
+        },
+        {
+          "turn": 26,
+          "candidate": 60,
+          "baseline": 47
+        },
+        {
+          "turn": 27,
+          "candidate": 57,
+          "baseline": 46
+        },
+        {
+          "turn": 28,
+          "candidate": 56,
+          "baseline": 43
+        },
+        {
+          "turn": 29,
+          "candidate": 53,
+          "baseline": 42
+        },
+        {
+          "turn": 30,
+          "candidate": 52,
+          "baseline": 39
+        }
+      ],
+      "controlHistory": [
+        {
+          "turn": 0,
+          "candidate": 3,
+          "baseline": 3
+        },
+        {
+          "turn": 1,
+          "candidate": 3,
+          "baseline": 3
+        },
+        {
+          "turn": 2,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 3,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 4,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 5,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 6,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 7,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 8,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 9,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 10,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 11,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 12,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 13,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 14,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 15,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 16,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 17,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 18,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 19,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 20,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 21,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 22,
+          "candidate": 3,
+          "baseline": 6
+        },
+        {
+          "turn": 23,
+          "candidate": 3,
+          "baseline": 6
+        },
+        {
+          "turn": 24,
+          "candidate": 3,
+          "baseline": 6
+        },
+        {
+          "turn": 25,
+          "candidate": 4,
+          "baseline": 5
+        },
+        {
+          "turn": 26,
+          "candidate": 4,
+          "baseline": 5
+        },
+        {
+          "turn": 27,
+          "candidate": 4,
+          "baseline": 5
+        },
+        {
+          "turn": 28,
+          "candidate": 4,
+          "baseline": 5
+        },
+        {
+          "turn": 29,
+          "candidate": 4,
+          "baseline": 5
+        },
+        {
+          "turn": 30,
+          "candidate": 4,
+          "baseline": 5
+        }
+      ],
+      "evaluations": [
+        {
+          "turn": 1,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0,
+            "handQuality": 0.579692864984084,
+            "threatLevel": 0,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.6251004140085176,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.22510041400851755,
+              "opponentAggression": 0
+            },
+            "planningWeight": 1,
+            "overallScore": 0.28783784733837886
+          }
+        },
+        {
+          "turn": 2,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.587768031918633,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.187768031918633,
+              "opponentAggression": 0
+            },
+            "planningWeight": 1,
+            "overallScore": 0.29435043965341273
+          }
+        },
+        {
+          "turn": 3,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.579692864984084,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.5751243314999614,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.17512433149996143,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2395598324442786
+          }
+        },
+        {
+          "turn": 4,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8763930674728229,
+            "opponentResourceThreat": 0.6001191244683821,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8763930674728229,
+              "resourceCrunch": 0.2001191244683821,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.28667308713676093
+          }
+        },
+        {
+          "turn": 5,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.05494460868918743,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.7778880665771849,
+            "opponentResourceThreat": 0.5239512930971411,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.7778880665771849,
+              "resourceCrunch": 0.12395129309714104,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.27705881568512974
+          }
+        },
+        {
+          "turn": 6,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": -0.036650243399912595,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8763930674728229,
+            "opponentResourceThreat": 0.6204892624962892,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8763930674728229,
+              "resourceCrunch": 0.2204892624962892,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.296663726859249
+          }
+        },
+        {
+          "turn": 7,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.0640787456854787,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.49748542932745077,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.09748542932745075,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.27831138345717993
+          }
+        },
+        {
+          "turn": 8,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": -0.045801266335348395,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.615552238800507,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.215552238800507,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.29724980454258854
+          }
+        },
+        {
+          "turn": 9,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.07320215870718144,
+            "handQuality": 0.6544252575438889,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.4704814904957727,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.07048149049577268,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.28768209379972715
+          }
+        },
+        {
+          "turn": 10,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": -0.01833127959710064,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.5631343846950144,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.1631343846950144,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.25351270301096046
+          }
+        },
+        {
+          "turn": 11,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0.036650243399912595,
+            "handQuality": 0.5796928649840842,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.489344436546998,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.08934443654699797,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.32678746987272295
+          }
+        },
+        {
+          "turn": 12,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": -0.009166409923752868,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.5358271460483695,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.13582714604836943,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.26408642280683425
+          }
+        },
+        {
+          "turn": 13,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.0640787456854787,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.4347207085312306,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.034720708531230604,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2831958889012408
+          }
+        },
+        {
+          "turn": 14,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": -0.045801266335348395,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.5545496292062945,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "13",
+                  "stateName": "Georgia",
+                  "abbreviation": "GA",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.15454962920629445,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.3129797219352749
+          }
+        },
+        {
+          "turn": 15,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.10049298115573199,
+            "handQuality": 0.579692864984084,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.3654472729534928,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2033232862219575
+          }
+        },
+        {
+          "turn": 16,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.3799489622552249,
+            "resourceAdvantage": -0.07320215870718144,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8763930674728229,
+            "opponentResourceThreat": 0.5645858568427283,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8763930674728229,
+              "resourceCrunch": 0.1645858568427283,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.3064109236544533
+          }
+        },
+        {
+          "turn": 17,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.1276334176265561,
+            "handQuality": 0.579692864984084,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.7778880665771849,
+            "opponentResourceThreat": 0.3084949395418236,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.7778880665771849,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.23930633533050683
+          }
+        },
+        {
+          "turn": 18,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.3799489622552249,
+            "resourceAdvantage": -0.10049298115573199,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.5742397287066827,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0.1742397287066827,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.3193710108627602
+          }
+        },
+        {
+          "turn": 19,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.1186057693634094,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.3001917457951109,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.24294494473309175
+          }
+        },
+        {
+          "turn": 20,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.3799489622552249,
+            "resourceAdvantage": -0.10049298115573199,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.5535279324288215,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0.15352793242882146,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.32098285395537834
+          }
+        },
+        {
+          "turn": 21,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.1186057693634094,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.2777272149691919,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2446931899531053
+          }
+        },
+        {
+          "turn": 22,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.3799489622552249,
+            "resourceAdvantage": -0.10049298115573199,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0.250133817416719,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.5322994230297268,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "opponentTargets": [],
+              "contested": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ]
+            },
+            "dangerSignals": {
+              "imminentCapture": [
+                {
+                  "stateId": "17",
+                  "stateName": "Illinois",
+                  "abbreviation": "IL",
+                  "owner": "neutral",
+                  "pressure": 2,
+                  "defense": 3,
+                  "remaining": 1,
+                  "baseIP": 3
+                }
+              ],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0.13229942302972675,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.33146422104728124
+          }
+        },
+        {
+          "turn": 23,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.5370495669980353,
+            "resourceAdvantage": 0.1545840466844499,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.20448754442329004,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.20608439702716136
+          }
+        },
+        {
+          "turn": 24,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.5370495669980353,
+            "resourceAdvantage": -0.1366399669564962,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.5489881530613263,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0.1489881530613263,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.3122812875549878
+          }
+        },
+        {
+          "turn": 25,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.5370495669980353,
+            "resourceAdvantage": 0.1545840466844499,
+            "handQuality": 0.6544252575438889,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.18078624781940345,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.21578441816631988
+          }
+        },
+        {
+          "turn": 26,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": -0.10049298115573199,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.4770494995772177,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0.07704949957721768,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2750733396239548
+          }
+        },
+        {
+          "turn": 27,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.1186057693634094,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.1955550011633087,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.24960487754324262
+          }
+        },
+        {
+          "turn": 28,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": -0.10049298115573199,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.45411824274686285,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0.05411824274686283,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2768579066132781
+          }
+        },
+        {
+          "turn": 29,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.1186057693634094,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7442768673618372,
+            "opponentResourceThreat": 0.17115242677525055,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7442768673618372,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.25150394609537663
+          }
+        },
+        {
+          "turn": 30,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": -0.10049298115573199,
+            "handQuality": 0.5270126696983195,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8936977272038725,
+            "opponentResourceThreat": 0.4307391693243618,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8936977272038725,
+              "resourceCrunch": 0.03073916932436177,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2786773237947879
+          }
+        }
+      ],
+      "plays": [
+        {
+          "turn": 1,
+          "actor": "candidate",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 50% | chain 0)"
+        },
+        {
+          "turn": 2,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.7904000000000002,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 3,
+          "actor": "candidate",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 48% | chain 0)"
+        },
+        {
+          "turn": 4,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.868266666666667,
+          "targetState": "GA",
+          "reasoning": "Pressure Georgia | apply +2 pressure"
+        },
+        {
+          "turn": 5,
+          "actor": "candidate",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.42125,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 6 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 6,
+          "actor": "baseline",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 46% | chain 0)"
+        },
+        {
+          "turn": 7,
+          "actor": "candidate",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.42125,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 7 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 8,
+          "actor": "baseline",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 48% | chain 0)"
+        },
+        {
+          "turn": 9,
+          "actor": "candidate",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.9004,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 10,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 2 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 11,
+          "actor": "candidate",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 50% | chain 0)"
+        },
+        {
+          "turn": 12,
+          "actor": "baseline",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 1.9004,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 13,
+          "actor": "candidate",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 7 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 14,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 3.2391000000000005,
+          "targetState": "GA",
+          "reasoning": "Pressure Georgia | remaining 1"
+        },
+        {
+          "turn": 15,
+          "actor": "candidate",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 48% | chain 0)"
+        },
+        {
+          "turn": 16,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.9682666666666668,
+          "targetState": "IL",
+          "reasoning": "Pressure Illinois | apply +2 pressure"
+        },
+        {
+          "turn": 17,
+          "actor": "candidate",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 46% | chain 0)"
+        },
+        {
+          "turn": 18,
+          "actor": "baseline",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.0470749999999998,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 11 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 19,
+          "actor": "candidate",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.2212500000000002,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 13 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 20,
+          "actor": "baseline",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.0470749999999998,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 11 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 21,
+          "actor": "candidate",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.2212500000000002,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 13 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 22,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 3.3391,
+          "targetState": "IL",
+          "reasoning": "Pressure Illinois | remaining 1"
+        },
+        {
+          "turn": 23,
+          "actor": "candidate",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.3788500000000001,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 17 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 24,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.1573950000000004,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 15 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 25,
+          "actor": "candidate",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.9004,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 26,
+          "actor": "baseline",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.42125,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 11 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 27,
+          "actor": "candidate",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.3788500000000001,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 13 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 28,
+          "actor": "baseline",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.42125,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 11 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 29,
+          "actor": "candidate",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.3788500000000001,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 13 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 30,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 11 | chain 0 | hand threat 0.00)"
+        }
+      ],
+      "finalTruth": 44,
+      "finalIp": {
+        "candidate": 52,
+        "baseline": 39
+      },
+      "finalControl": {
+        "candidate": 4,
+        "baseline": 5
+      }
+    },
+    {
+      "id": 4,
+      "startSide": "baseline",
+      "winner": "baseline",
+      "reason": "tiebreaker",
+      "turns": 30,
+      "factions": {
+        "candidate": "government",
+        "baseline": "truth"
+      },
+      "truthHistory": [
+        50,
+        48,
+        48,
+        46,
+        46,
+        46,
+        48,
+        48,
+        48,
+        48,
+        48,
+        46,
+        46,
+        46,
+        48,
+        48,
+        50,
+        50,
+        50,
+        50,
+        52,
+        52,
+        52,
+        52,
+        52,
+        52,
+        52,
+        52,
+        54,
+        52,
+        52
+      ],
+      "ipHistory": [
+        {
+          "turn": 0,
+          "candidate": 110,
+          "baseline": 110
+        },
+        {
+          "turn": 1,
+          "candidate": 110,
+          "baseline": 107
+        },
+        {
+          "turn": 2,
+          "candidate": 107,
+          "baseline": 106
+        },
+        {
+          "turn": 3,
+          "candidate": 107,
+          "baseline": 103
+        },
+        {
+          "turn": 4,
+          "candidate": 101,
+          "baseline": 103
+        },
+        {
+          "turn": 5,
+          "candidate": 101,
+          "baseline": 97
+        },
+        {
+          "turn": 6,
+          "candidate": 98,
+          "baseline": 97
+        },
+        {
+          "turn": 7,
+          "candidate": 97,
+          "baseline": 94
+        },
+        {
+          "turn": 8,
+          "candidate": 94,
+          "baseline": 93
+        },
+        {
+          "turn": 9,
+          "candidate": 93,
+          "baseline": 90
+        },
+        {
+          "turn": 10,
+          "candidate": 87,
+          "baseline": 90
+        },
+        {
+          "turn": 11,
+          "candidate": 87,
+          "baseline": 87
+        },
+        {
+          "turn": 12,
+          "candidate": 84,
+          "baseline": 86
+        },
+        {
+          "turn": 13,
+          "candidate": 84,
+          "baseline": 80
+        },
+        {
+          "turn": 14,
+          "candidate": 81,
+          "baseline": 80
+        },
+        {
+          "turn": 15,
+          "candidate": 80,
+          "baseline": 77
+        },
+        {
+          "turn": 16,
+          "candidate": 77,
+          "baseline": 77
+        },
+        {
+          "turn": 17,
+          "candidate": 76,
+          "baseline": 74
+        },
+        {
+          "turn": 18,
+          "candidate": 73,
+          "baseline": 73
+        },
+        {
+          "turn": 19,
+          "candidate": 73,
+          "baseline": 67
+        },
+        {
+          "turn": 20,
+          "candidate": 70,
+          "baseline": 67
+        },
+        {
+          "turn": 21,
+          "candidate": 69,
+          "baseline": 64
+        },
+        {
+          "turn": 22,
+          "candidate": 63,
+          "baseline": 64
+        },
+        {
+          "turn": 23,
+          "candidate": 63,
+          "baseline": 58
+        },
+        {
+          "turn": 24,
+          "candidate": 57,
+          "baseline": 58
+        },
+        {
+          "turn": 25,
+          "candidate": 56,
+          "baseline": 55
+        },
+        {
+          "turn": 26,
+          "candidate": 50,
+          "baseline": 55
+        },
+        {
+          "turn": 27,
+          "candidate": 50,
+          "baseline": 49
+        },
+        {
+          "turn": 28,
+          "candidate": 47,
+          "baseline": 49
+        },
+        {
+          "turn": 29,
+          "candidate": 47,
+          "baseline": 46
+        },
+        {
+          "turn": 30,
+          "candidate": 44,
+          "baseline": 45
+        }
+      ],
+      "controlHistory": [
+        {
+          "turn": 0,
+          "candidate": 3,
+          "baseline": 3
+        },
+        {
+          "turn": 1,
+          "candidate": 3,
+          "baseline": 3
+        },
+        {
+          "turn": 2,
+          "candidate": 3,
+          "baseline": 3
+        },
+        {
+          "turn": 3,
+          "candidate": 3,
+          "baseline": 3
+        },
+        {
+          "turn": 4,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 5,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 6,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 7,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 8,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 9,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 10,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 11,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 12,
+          "candidate": 4,
+          "baseline": 3
+        },
+        {
+          "turn": 13,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 14,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 15,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 16,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 17,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 18,
+          "candidate": 3,
+          "baseline": 4
+        },
+        {
+          "turn": 19,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 20,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 21,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 22,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 23,
+          "candidate": 3,
+          "baseline": 5
+        },
+        {
+          "turn": 24,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 25,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 26,
+          "candidate": 5,
+          "baseline": 3
+        },
+        {
+          "turn": 27,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 28,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 29,
+          "candidate": 4,
+          "baseline": 4
+        },
+        {
+          "turn": 30,
+          "candidate": 4,
+          "baseline": 4
+        }
+      ],
+      "evaluations": [
+        {
+          "turn": 1,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0,
+            "handQuality": 0.4937445562982613,
+            "threatLevel": 0,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.6251004140085176,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.22510041400851755,
+              "opponentAggression": 0
+            },
+            "planningWeight": 1,
+            "overallScore": 0.27658280738326224
+          }
+        },
+        {
+          "turn": 2,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.6087921642830305,
+            "threatLevel": 0,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.587768031918633,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.187768031918633,
+              "opponentAggression": 0
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2962302560091426
+          }
+        },
+        {
+          "turn": 3,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": -0.009166409923752868,
+            "handQuality": 0.4937445562982613,
+            "threatLevel": 0,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.6210959653245107,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.2210959653245107,
+              "opponentAggression": 0
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2774759478830029
+          }
+        },
+        {
+          "turn": 4,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.036650243399912595,
+            "handQuality": 0.6671003539720468,
+            "threatLevel": 0,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8763930674728229,
+            "opponentResourceThreat": 0.5625153466618172,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8763930674728229,
+              "resourceCrunch": 0.16251534666181722,
+              "opponentAggression": 0
+            },
+            "planningWeight": 1,
+            "overallScore": 0.30562983768460067
+          }
+        },
+        {
+          "turn": 5,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.01833127959710064,
+            "handQuality": 0.5796928649840842,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7778880665771849,
+            "opponentResourceThreat": 0.5705031457292278,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7778880665771849,
+              "resourceCrunch": 0.17050314572922776,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.24072343166914656
+          }
+        },
+        {
+          "turn": 6,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.036650243399912595,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8763930674728229,
+            "opponentResourceThreat": 0.5361007189092037,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8763930674728229,
+              "resourceCrunch": 0.13610071890920372,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.24130655555334163
+          }
+        },
+        {
+          "turn": 7,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": -0.009166409923752868,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.5822428084924781,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.1822428084924781,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2803016501253308
+          }
+        },
+        {
+          "turn": 8,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.6087921642830305,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.5307578945031238,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.1307578945031238,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.24380333963069062
+          }
+        },
+        {
+          "turn": 9,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": -0.009166409923752868,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.5640858279090015,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.1640858279090015,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2817146711566144
+          }
+        },
+        {
+          "turn": 10,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.667100353972047,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.5120547740296146,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.11205477402961461,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2528943939566267
+          }
+        },
+        {
+          "turn": 11,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.4937445562982613,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.4976706367174002,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.09767063671740017,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.23433243013382488
+          }
+        },
+        {
+          "turn": 12,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0,
+            "handQuality": 0.6087921642830307,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8763930674728229,
+            "opponentResourceThreat": 0.5226654296858209,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8763930674728229,
+              "resourceCrunch": 0.12266542968582084,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2945805411371537
+          }
+        },
+        {
+          "turn": 13,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.01833127959710064,
+            "handQuality": 0.5796928649840842,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.7778880665771849,
+            "opponentResourceThreat": 0.4913123092696576,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.7778880665771849,
+              "resourceCrunch": 0.09131230926965755,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.24688625796550445
+          }
+        },
+        {
+          "turn": 14,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.036650243399912595,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8763930674728229,
+            "opponentResourceThreat": 0.4546039895106932,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8763930674728229,
+              "resourceCrunch": 0.054603989510693174,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.24764883212798955
+          }
+        },
+        {
+          "turn": 15,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": -0.009166409923752868,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.5013211071127813,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0.1013211071127813,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2865991766006753
+          }
+        },
+        {
+          "turn": 16,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.027493069804709863,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.44754350601082554,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.04754350601082552,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2483994723186042
+          }
+        },
+        {
+          "turn": 17,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.4725382989792462,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.07253829897924619,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.28825762132890165
+          }
+        },
+        {
+          "turn": 18,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.197375320224904,
+            "resourceAdvantage": 0.01833127959710064,
+            "handQuality": 0.6087921642830305,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.4401929244940659,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.04019292449406586,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2512323837221911
+          }
+        },
+        {
+          "turn": 19,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.197375320224904,
+            "resourceAdvantage": 0,
+            "handQuality": 0.5796928649840842,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.4515668060415435,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0.051566806041543456,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.29894144467822137
+          }
+        },
+        {
+          "turn": 20,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.05494460868918743,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8336546070121552,
+            "opponentResourceThreat": 0.36919677759422836,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8336546070121552,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.19823935692182976
+          }
+        },
+        {
+          "turn": 21,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0.3799489622552249,
+            "resourceAdvantage": -0.027493069804709863,
+            "handQuality": 0.5105696697673637,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.46049690688390066,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0.060496906883900636,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.30988842039994957
+          }
+        },
+        {
+          "turn": 22,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.045801266335348395,
+            "handQuality": 0.667100353972047,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.36088926404223864,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.20898530943894855
+          }
+        },
+        {
+          "turn": 23,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.5796928649840842,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.3885972915676206,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2762301666906849
+          }
+        },
+        {
+          "turn": 24,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.045801266335348395,
+            "handQuality": 0.667100353972047,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.3268404676042386,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.21163507079302357
+          }
+        },
+        {
+          "turn": 25,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.5105696697673638,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.35437432714059414,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.26984171220559255
+          }
+        },
+        {
+          "turn": 26,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.667100353972047,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.3427395055414515,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.29426484275717857
+          }
+        },
+        {
+          "turn": 27,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": -0.3799489622552249,
+            "resourceAdvantage": 0.045801266335348395,
+            "handQuality": 0.5796928649840842,
+            "threatLevel": 0.44,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8564849154724974,
+            "opponentResourceThreat": 0.2798701667861484,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8564849154724974,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.264
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2008245054976855
+          }
+        },
+        {
+          "turn": 28,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.5944370809550961,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.3071893157631281,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.28751609854913757
+          }
+        },
+        {
+          "turn": 29,
+          "actor": "baseline",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.01833127959710064,
+            "handQuality": 0.49374455629826147,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8763930674728229,
+            "opponentResourceThreat": 0.28680138697428414,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8763930674728229,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2726968231072322
+          }
+        },
+        {
+          "turn": 30,
+          "actor": "candidate",
+          "evaluation": {
+            "territorialControl": 0,
+            "resourceAdvantage": 0.009166409923752868,
+            "handQuality": 0.6087921642830305,
+            "threatLevel": 0.2,
+            "agendaProgress": 0,
+            "pressureMomentum": 0,
+            "truthObjective": -0.8075689165786144,
+            "opponentResourceThreat": 0.2890684695406968,
+            "opponentHandThreat": 0,
+            "agendaSignals": [],
+            "pressureSignals": {
+              "aiTargets": [],
+              "opponentTargets": [],
+              "contested": []
+            },
+            "dangerSignals": {
+              "imminentCapture": [],
+              "imminentLoss": [],
+              "truthCrisis": 0.8075689165786144,
+              "resourceCrunch": 0,
+              "opponentAggression": 0.12
+            },
+            "planningWeight": 1,
+            "overallScore": 0.2908061238710131
+          }
+        }
+      ],
+      "plays": [
+        {
+          "turn": 1,
+          "actor": "baseline",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 50% | chain 0)"
+        },
+        {
+          "turn": 2,
+          "actor": "candidate",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.42125,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 3 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 3,
+          "actor": "baseline",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 48% | chain 0)"
+        },
+        {
+          "turn": 4,
+          "actor": "candidate",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.7904000000000002,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 5,
+          "actor": "baseline",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 2.2004,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 6,
+          "actor": "candidate",
+          "cardId": "gov-media-mvp",
+          "cardName": "Official Statement",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 46% | chain 0)"
+        },
+        {
+          "turn": 7,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 1 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 8,
+          "actor": "candidate",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 3 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 9,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 1 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 10,
+          "actor": "candidate",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.9004,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 11,
+          "actor": "baseline",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 48% | chain 0)"
+        },
+        {
+          "turn": 12,
+          "actor": "candidate",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 0 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 13,
+          "actor": "baseline",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 1.9004,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 14,
+          "actor": "candidate",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 46% | chain 0)"
+        },
+        {
+          "turn": 15,
+          "actor": "baseline",
+          "cardId": "gov-attack-mvp",
+          "cardName": "Asset Freeze",
+          "priority": 1.42125,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 1 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 16,
+          "actor": "candidate",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 48% | chain 0)"
+        },
+        {
+          "turn": 17,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 0 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 18,
+          "actor": "candidate",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.5788500000000003,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 2 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 19,
+          "actor": "baseline",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 1.7904000000000002,
+          "targetState": "AR",
+          "reasoning": "Pressure Arkansas | apply +2 pressure"
+        },
+        {
+          "turn": 20,
+          "actor": "candidate",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 50% | chain 0)"
+        },
+        {
+          "turn": 21,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.1573950000000004,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 3 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 22,
+          "actor": "candidate",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.9004,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 23,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 2.2004,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 24,
+          "actor": "candidate",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.9004,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 25,
+          "actor": "baseline",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.3788500000000001,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 1 | chain 0 | hand threat 0.00)"
+        },
+        {
+          "turn": 26,
+          "actor": "candidate",
+          "cardId": "gov-zone-mvp",
+          "cardName": "Security Lockdown",
+          "priority": 1.9004,
+          "targetState": "AR",
+          "reasoning": "Pressure Arkansas | apply +2 pressure"
+        },
+        {
+          "turn": 27,
+          "actor": "baseline",
+          "cardId": "truth-zone-mvp",
+          "cardName": "Grassroots Network",
+          "priority": 1.9004,
+          "targetState": "CO",
+          "reasoning": "Pressure Colorado | apply +2 pressure"
+        },
+        {
+          "turn": 28,
+          "actor": "candidate",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 1.69,
+          "targetState": null,
+          "reasoning": "Media influence (truth 52% | chain 0)"
+        },
+        {
+          "turn": 29,
+          "actor": "baseline",
+          "cardId": "truth-media-mvp",
+          "cardName": "Community Broadcast",
+          "priority": 0.14499999999999996,
+          "targetState": null,
+          "reasoning": "Media influence (truth 54% | chain 0)"
+        },
+        {
+          "turn": 30,
+          "actor": "candidate",
+          "cardId": "truth-attack-mvp",
+          "cardName": "Expose Scandal",
+          "priority": 1.3788500000000001,
+          "targetState": null,
+          "reasoning": "Attack pressure (Player IP: 1 | chain 0 | hand threat 0.00)"
+        }
+      ],
+      "finalTruth": 52,
+      "finalIp": {
+        "candidate": 44,
+        "baseline": 45
+      },
+      "finalControl": {
+        "candidate": 4,
+        "baseline": 4
+      }
+    }
+  ]
+}
