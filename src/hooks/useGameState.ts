@@ -100,6 +100,10 @@ const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefin
 
 const HAND_LIMIT = 5;
 
+const DEFAULT_TRUTH_HIGH_THRESHOLD = 90;
+const DEFAULT_TRUTH_LOW_THRESHOLD = 10;
+const DEFAULT_ECONOMIC_GOAL = 200;
+
 type AgendaOwner = 'human' | 'ai';
 
 type EditorScandalTarget = 'player' | 'ai';
@@ -2609,6 +2613,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       startingTruth: 50,
       truthMomentum: 0,
       truthHistory: [50],
+      truthHighThreshold: DEFAULT_TRUTH_HIGH_THRESHOLD,
+      truthLowThreshold: DEFAULT_TRUTH_LOW_THRESHOLD,
+      economicGoal: DEFAULT_ECONOMIC_GOAL,
       ip: 5,
       aiIP: 5,
       truthIp: 5,
@@ -2887,6 +2894,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       ...prev,
       faction,
       truth: startingTruth,
+      truthHighThreshold: DEFAULT_TRUTH_HIGH_THRESHOLD,
+      truthLowThreshold: DEFAULT_TRUTH_LOW_THRESHOLD,
+      economicGoal: DEFAULT_ECONOMIC_GOAL,
       ip: adjustedStartingIp,
       aiIP: aiStartingIP,
       hand: startingHand,

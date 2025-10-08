@@ -154,6 +154,10 @@ export interface GameState {
   maxTurns?: number;
   startingTruth?: number;
   truthHistory?: number[];
+  truthHighThreshold?: number;
+  truthLowThreshold?: number;
+  economicGoal?: number;
+  matchContext?: Record<string, unknown> | null;
   overtimeConfig?: OvertimeConfig;
 }
 

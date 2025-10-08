@@ -392,14 +392,62 @@ class LegacyAIStrategist {
     return Math.tanh(((aiScore - opponentScore) * comboFocus) / 3);
   }
 
+  private resolveMatchThreshold(
+    gameState: any,
+    key: 'truthHighThreshold' | 'truthLowThreshold' | 'economicGoal',
+    fallback: number,
+  ): number {
+    const direct = gameState?.[key];
+    if (typeof direct === 'number' && Number.isFinite(direct)) {
+      return direct;
+    }
+
+    const context = gameState?.matchContext;
+    if (context && typeof context === 'object') {
+      const contextual = context[key];
+      if (typeof contextual === 'number' && Number.isFinite(contextual)) {
+        return contextual;
+      }
+    }
+
+    return fallback;
+  }
+
   private evaluateTruthObjective(gameState: any): number {
     const truth = typeof gameState.truth === 'number' ? gameState.truth : 50;
     const aiFaction = this.getAiFaction(gameState);
 
-    const desiredTruth = aiFaction === 'truth' ? 80 : 20;
-    const direction = aiFaction === 'truth' ? truth - desiredTruth : desiredTruth - truth;
+    const clampThreshold = (value: number, min: number, max: number): number => {
+      if (!Number.isFinite(value)) {
+        return min;
+      }
+      return Math.min(max, Math.max(min, value));
+    };
 
-    return Math.tanh(direction / 25);
+    const rawHigh = this.resolveMatchThreshold(gameState, 'truthHighThreshold', 90);
+    const rawLow = this.resolveMatchThreshold(gameState, 'truthLowThreshold', 10);
+    const economicGoal = Math.max(0, this.resolveMatchThreshold(gameState, 'economicGoal', 200));
+
+    const truthHigh = clampThreshold(rawHigh, 50, 100);
+    const truthLow = clampThreshold(rawLow, 0, 50);
+
+    const escalationWindow = 15;
+    const targetDelta =
+      aiFaction === 'truth' ? truth - truthHigh : truthLow - truth;
+    const progress = Math.tanh(targetDelta / escalationWindow);
+
+    const aiIp = typeof gameState.aiIP === 'number' ? gameState.aiIP : 0;
+    const playerIp = this.getPlayerIp(gameState);
+    const ipLead = Math.max(0, aiIp - playerIp);
+    const stockpileFloor = Math.max(playerIp, economicGoal * 0.5);
+    const stockpile = Math.max(ipLead, Math.max(0, aiIp - stockpileFloor));
+    const economicScale = Math.max(20, economicGoal * 0.25);
+    const spendPressure = stockpile > 0 ? Math.tanh(stockpile / economicScale) : 0;
+    const urgencyBias = Math.max(0, -progress);
+    const penalty = Math.min(0.9, spendPressure * (0.4 + urgencyBias));
+
+    const evaluation = progress - penalty;
+    return Math.max(-1, Math.min(1, evaluation));
   }
 
   private buildDangerSignals(params: {
@@ -459,6 +507,10 @@ class LegacyAIStrategist {
     const planningBias = metrics.planningWeight;
     const dynamic = this.tuning.dynamicWeights;
 
+    const truthUrgency = Math.max(0, -metrics.truthObjective);
+    const baseTruthWeight =
+      dynamic.truthBase + (1 - this.personality.territorial) * dynamic.truthTerritorial;
+
     const weights = {
       territorial: dynamic.territorialBase + this.personality.territorial * dynamic.territorialPersonality,
       resource: dynamic.resourceBase + this.personality.economical * dynamic.resourcePersonality,
@@ -466,7 +518,7 @@ class LegacyAIStrategist {
       threatMitigation: dynamic.threatMitigationBase + this.personality.defensiveness * dynamic.threatDefensiveness,
       agenda: dynamic.agendaBase + planningBias * dynamic.agendaPlanning,
       pressure: dynamic.pressureBase + this.personality.territorial * dynamic.pressureTerritorial,
-      truth: dynamic.truthBase + (1 - this.personality.territorial) * dynamic.truthTerritorial,
+      truth: baseTruthWeight * (1 + truthUrgency * 1.4),
       opponentEconomy: dynamic.opponentEconomyBase + this.personality.defensiveness * dynamic.opponentEconomyDefensive,
       opponentHand: dynamic.opponentHandBase + planningBias * dynamic.opponentHandPlanning
     } as const;
