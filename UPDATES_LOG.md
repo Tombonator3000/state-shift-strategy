@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-11 – Editors comment on plays and captures
+- Introduced a banter engine with rate limits so player editors react to card plays, state flips, and match outcomes without flooding the log.
+- Added a temporary console fallback while waiting on a dedicated toast surface for editor chatter.
+
 ## 2025-11-10 – Paranoid flavor realignment across pools
 - Refreshed state pool, agenda issue, and hotspot flavor to emphasize conspiracy levers over food motifs and documented paranoia intents inline.
 - Updated copy-driven fixtures to remove culinary phrasing and reflagged QR loyalty checks, maritime leaks, and dimensional portals.

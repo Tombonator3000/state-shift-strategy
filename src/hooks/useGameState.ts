@@ -91,6 +91,7 @@ import { loadNewsPools } from '@/news/newsPools';
 import type { ArticleBlock, TurnLog, PlayedLite } from '@/news/headlineEngine';
 import { initNewsPools } from '@/engine/news/newsPools';
 import type { GameOverReport } from '@/types/finalEdition';
+import { emitBanter, defaultBanterUi, getCardPlayTrigger } from '@/ai/banter/banterEngine';
 
 const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefined : value);
 
@@ -470,6 +471,13 @@ const dispatchEditorTelemetry = (payload: EditorTelemetryPayload): void => {
   }
 
   // [EDITORS_TELEMETRY]
+  void emitBanter(
+    payload.editorId,
+    payload.playerWon ? 'onVictory_self' : 'onDefeat_self',
+    payload.turn,
+    defaultBanterUi,
+  );
+
   if (typeof window !== 'undefined') {
     const analytics = (window as typeof window & {
       shadowgovAnalytics?: {
@@ -3143,6 +3151,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const factionLabel: 'TRUTH' | 'GOV' = String(resolvedCard.faction ?? '').toUpperCase().includes('GOV')
         ? 'GOV'
         : 'TRUTH';
+
+      const playerEditorId = prev.playerEditor ?? prev.editorId ?? null;
+      if (playerEditorId) {
+        void emitBanter(playerEditorId, getCardPlayTrigger(derivedType, 'self'), prev.turn, defaultBanterUi);
+      }
 
       pushToNewsBuffer({
         id: resolvedCard.id,

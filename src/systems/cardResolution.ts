@@ -22,6 +22,12 @@ import {
   type HotspotResolutionOutcome,
 } from '@/systems/paranormalHotspots';
 import type { EditorId } from '@/game/editors';
+import {
+  emitBanter,
+  defaultBanterUi,
+  getStateChangeTrigger,
+  type TriggerKey,
+} from '@/ai/banter/banterEngine';
 
 type Faction = 'government' | 'truth';
 
@@ -113,6 +119,24 @@ export interface CardPlayResolution {
 
 const PLAYER_ID: PlayerId = 'P1';
 const AI_ID: PlayerId = 'P2';
+
+const resolvePlayerEditorId = (snapshot: GameSnapshot): string | null => {
+  const enriched = snapshot as GameSnapshot & {
+    playerEditorId?: EditorId | null;
+    playerEditor?: EditorId | null;
+    editorId?: EditorId | null;
+  };
+  const candidate = enriched.playerEditorId ?? enriched.playerEditor ?? enriched.editorId ?? null;
+  return typeof candidate === 'string' && candidate.length > 0 ? candidate : null;
+};
+
+const queueBanterForTrigger = (snapshot: GameSnapshot, trigger: TriggerKey) => {
+  const editorId = resolvePlayerEditorId(snapshot);
+  if (!editorId) {
+    return;
+  }
+  void emitBanter(editorId, trigger, snapshot.turn ?? 0, defaultBanterUi);
+};
 
 export type CardActor = 'human' | 'ai';
 
@@ -388,6 +412,8 @@ export function resolveCardMVP(
   const resolvedHotspots: string[] = [];
   const hotspotResolutions: CardHotspotResolution[] = [];
   let truthBonusFromHotspots = 0;
+  let emittedSelfCaptureBanter = false;
+  let emittedOpponentCaptureBanter = false;
   for (const state of newStates) {
     const beforePressurePlayer = beforeState.pressureByState[state.id]?.[PLAYER_ID] ?? 0;
     const afterPressurePlayer = engineState.pressureByState[state.id]?.[PLAYER_ID] ?? 0;
@@ -425,6 +451,10 @@ export function resolveCardMVP(
       if (targetStateId === state.id) {
         nextTargetState = null;
       }
+      if (!emittedSelfCaptureBanter) {
+        emittedSelfCaptureBanter = true;
+        queueBanterForTrigger(gameState, getStateChangeTrigger('captured', 'self'));
+      }
     } else if (previousOwner !== 'ai' && owner === 'ai') {
       const aiFaction = gameState.faction === 'truth' ? 'government' : 'truth';
       capturedStateIds.push(state.id);
@@ -432,6 +462,10 @@ export function resolveCardMVP(
       logEntries.push(`⚠️ ${card.name} seized ${state.name} for the enemy!`);
       if (targetStateId === state.id) {
         nextTargetState = null;
+      }
+      if (!emittedOpponentCaptureBanter) {
+        emittedOpponentCaptureBanter = true;
+        queueBanterForTrigger(gameState, getStateChangeTrigger('captured', 'opponent'));
       }
     } else if (targetStateId === state.id && card.type === 'ZONE') {
       const deltaPlayer = afterPressurePlayer - beforePressurePlayer;
