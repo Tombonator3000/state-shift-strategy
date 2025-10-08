@@ -151,6 +151,13 @@ interface TrainingLogRecord {
   game: GameLog;
 }
 
+interface TrainingBatch {
+  iteration: number | null;
+  summary: BatchSummary;
+  candidateConfig: AiTuningConfig;
+  games: GameLog[];
+}
+
 interface IterationSummary extends BatchSummary {
   iteration: number;
   intensity: number;
@@ -1044,6 +1051,15 @@ async function main(): Promise<void> {
     baseFactions,
   );
 
+  const trainingBatches: TrainingBatch[] = [
+    {
+      iteration: null,
+      summary: baselineBatch.summary,
+      candidateConfig: baselineConfig,
+      games: baselineBatch.games,
+    },
+  ];
+
   const iterations: IterationSummary[] = [];
   let bestConfig = baselineConfig;
   let bestSummary: BatchSummary | null = null;
@@ -1070,6 +1086,12 @@ async function main(): Promise<void> {
       };
 
       iterations.push(iterationSummary);
+      trainingBatches.push({
+        iteration: iterationSummary.iteration,
+        summary: batch.summary,
+        candidateConfig: candidate,
+        games: batch.games,
+      });
 
       if (!bestSummary || iterationSummary.score > bestSummary.score) {
         bestSummary = batch.summary;
@@ -1107,8 +1129,7 @@ async function main(): Promise<void> {
   await ensureDirectory(outputPath);
   await fs.writeFile(outputPath, JSON.stringify(report, null, 2), 'utf-8');
 
-  const resolvedSummary = bestSummary ?? baselineBatch.summary;
-  if (cli.trainingLog && resolvedSummary) {
+  if (cli.trainingLog) {
     const trainingPath = path.resolve(rootDir, cli.trainingLog);
     await ensureDirectory(trainingPath);
     if (cli.trainingLogMode === 'overwrite') {
@@ -1116,21 +1137,22 @@ async function main(): Promise<void> {
     }
 
     const runId = `${report.timestamp.replace(/[:.]/g, '-')}-seed${cli.seed}`;
-    const iterationIndex = bestIteration?.iteration ?? null;
-    const baseRecord: Omit<TrainingLogRecord, 'game'> = {
-      runId,
-      timestamp: report.timestamp,
-      iteration: iterationIndex,
-      seed: cli.seed,
-      summary: resolvedSummary,
-      candidateConfig: bestConfig,
-      baselineConfig,
-      simulation: simulationOptions,
-    };
+    for (const batch of trainingBatches) {
+      const baseRecord: Omit<TrainingLogRecord, 'game'> = {
+        runId,
+        timestamp: report.timestamp,
+        iteration: batch.iteration,
+        seed: cli.seed,
+        summary: batch.summary,
+        candidateConfig: batch.candidateConfig,
+        baselineConfig,
+        simulation: simulationOptions,
+      };
 
-    for (const game of report.bestGames) {
-      const record: TrainingLogRecord = { ...baseRecord, game };
-      await fs.appendFile(trainingPath, `${JSON.stringify(record)}\n`, 'utf-8');
+      for (const game of batch.games) {
+        const record: TrainingLogRecord = { ...baseRecord, game };
+        await fs.appendFile(trainingPath, `${JSON.stringify(record)}\n`, 'utf-8');
+      }
     }
 
     console.log(`Training data appended to ${trainingPath}`);
