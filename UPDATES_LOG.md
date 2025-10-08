@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-23 – Hard AI reprioritizes neutral captures
+- Weighted ZONE capture pressure by combined IP value, location leverage, and defense so neutral haymakers outshine low-importance grabs.
+- Tuned pressure heuristics to respect that valuation during turn planning, keeping Hard difficulty focused on high-IP swing states.
+
 ## 2025-11-22 – Instant triple-headline tabloid surges
 - Primed the Extra Extra headline caches at module load so triple-card combos deliver tabloid-grade headlines without waiting for async preload hooks.
 - Added defensive cache access guards to fall back gracefully if JSON parsing ever fails during startup.

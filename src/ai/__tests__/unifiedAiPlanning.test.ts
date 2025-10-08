@@ -221,6 +221,69 @@ const createGrassrootsScenario = () => ({
   extraExtraFeed: [],
 });
 
+const createNeutralPressureShowdown = () => ({
+  aiHand: [GRASSROOTS_A, GRASSROOTS_B],
+  hand: [GRASSROOTS_A, GRASSROOTS_B],
+  aiIP: 18,
+  ip: 14,
+  truth: 40,
+  faction: 'government' as const,
+  currentPlayer: 'ai' as const,
+  turn: 3,
+  round: 1,
+  cardsPlayedThisRound: [],
+  players: {
+    P1: {
+      id: 'P1',
+      faction: 'truth' as const,
+      deck: [],
+      hand: [],
+      discard: [],
+      ip: 14,
+      states: [],
+    },
+    P2: {
+      id: 'P2',
+      faction: 'government' as const,
+      deck: [],
+      hand: [],
+      discard: [],
+      ip: 18,
+      states: [],
+    },
+  },
+  states: [
+    {
+      id: 'NY',
+      name: 'New York',
+      abbreviation: 'NY',
+      baseIP: 5,
+      defense: 5,
+      pressure: 0,
+      contested: false,
+      owner: 'neutral' as const,
+    },
+    {
+      id: 'WY',
+      name: 'Wyoming',
+      abbreviation: 'WY',
+      baseIP: 1,
+      defense: 1,
+      pressure: 0,
+      contested: false,
+      owner: 'neutral' as const,
+    },
+  ],
+  controlledStates: [],
+  playerControlledStates: [],
+  aiControlledStates: [],
+  turnPlays: [],
+  turnBuffer: [],
+  log: [],
+  headlineLog: [],
+  extraExtraFeed: [],
+});
+
 const createPlanningState = () => ({
   aiHand: [MEDIA_CARD, ZONE_CARD, ATTACK_CARD, HIGH_COST_ATTACK, COMBO_MEDIA],
   aiIP: 12,
@@ -433,5 +496,22 @@ describe('Unified AI planning', () => {
     const secondPriority = enhancedSecond.priority;
     expect(firstPriority - secondPriority).toBeCloseTo(0.22, 2);
     expect(secondPriority).toBeLessThan(0.3);
+  });
+
+  it('prefers higher-IP neutral targets when pressure cards tie on hard difficulty', () => {
+    const strategist = AIFactory.createStrategist('hard');
+    const planningState = createNeutralPressureShowdown();
+
+    const plan = chooseTurnActions({
+      strategist: strategist as EnhancedAIStrategist,
+      gameState: planningState,
+      maxActions: 1,
+      priorityThreshold: 0.18,
+    });
+
+    expect(plan.actions.length).toBe(1);
+    const action = plan.actions[0]!;
+    expect(action.card.type).toBe('ZONE');
+    expect(action.targetState).toBe('NY');
   });
 });

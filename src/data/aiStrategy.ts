@@ -735,15 +735,21 @@ class LegacyAIStrategist {
       if (state.owner === 'ai') continue;
 
       const signal = signalLookup.get(state.abbreviation);
-      let priority = this.personality.territorial * zoneWeights.baseMultiplier + chainBonus + factionBonus;
-
-      // High IP and strategic positions matter more for territorial personalities
-      priority += (state.baseIP ?? 0)
-        * 0.04
+      const locationBonus = this.getLocationBonus(state);
+      const defense = Math.max(1, state.defense ?? 1);
+      const baseIP = Math.max(0, state.baseIP ?? 0);
+      const captureValue = (baseIP * (1 + locationBonus * 2)) / Math.sqrt(defense);
+      const captureWeight = 0.04
         * (1 + this.personality.territorial)
         * zoneWeights.highValueMultiplier
+        * zoneWeights.locationMultiplier
         * this.biasModifiers.income;
-      priority += this.getLocationBonus(state) * zoneWeights.locationMultiplier;
+      const capturePressureScaling = 0.5 + Math.min(1.5, captureValue / 2);
+
+      let priority = this.personality.territorial * zoneWeights.baseMultiplier + chainBonus + factionBonus;
+
+      // Strategic capture value combines IP potential, terrain, and resistance
+      priority += captureValue * captureWeight;
 
       if (state.owner === 'player') {
         priority += this.personality.aggressiveness * 0.3 * zoneWeights.ownerAggressionMultiplier;
@@ -755,20 +761,24 @@ class LegacyAIStrategist {
         const remainingAfterPlay = Math.max(0, signal.remaining - pressureDelta);
         const signalMultiplier = zoneWeights.signalCaptureMultiplier * this.biasModifiers.combo;
         if (signal.remaining <= pressureDelta) {
-          priority += 0.7 * signalMultiplier;
+          priority += 0.7 * signalMultiplier * capturePressureScaling;
         } else if (remainingAfterPlay <= 1) {
-          priority += 0.5 * signalMultiplier;
+          priority += 0.5 * signalMultiplier * capturePressureScaling;
         } else {
           priority += Math.max(
             0,
-            (pressureDelta / Math.max(1, signal.defense)) * 0.4 * signalMultiplier,
+            (pressureDelta / Math.max(1, signal.defense))
+              * 0.4
+              * signalMultiplier
+              * capturePressureScaling,
           );
         }
       } else if (pressureDelta > 0 && state.owner !== 'ai') {
-        priority += (pressureDelta / Math.max(1, state.defense ?? 1))
+        priority += (pressureDelta / defense)
           * 0.25
           * zoneWeights.signalCaptureMultiplier
-          * this.biasModifiers.combo;
+          * this.biasModifiers.combo
+          * capturePressureScaling;
       }
 
       if (evaluation.dangerSignals.opponentAggression > 0.6 && state.owner === 'player') {
