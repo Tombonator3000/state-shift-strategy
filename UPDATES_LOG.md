@@ -39,6 +39,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Added regression coverage ensuring TabloidNewspaperV2 renders unique hero headlines against the dispatch list.
 - Confirmed hero dispatch absences fall back to redacted copy instead of duplicating the main headline.
 
+## 2025-10-08 – Opponent adapts economy and global memory
+- Persisted the strategist’s target history between matches so repeated harassment of the same state now draws escalating rotation penalties.
+- Added IP economy heuristics and contested-state bonuses so the AI banks resources when behind and presses momentum where the map is hottest.
+
 ## 2025-10-08 – Difficulty-aware AI editor binding
 - Map AI difficulty settings to the new editor roster, falling back from legacy IDs and automatically selecting the correct partner at game start.
 - Added runtime safety nets so MVP engines auto-bind an editor before applying difficulty-scaled modifiers.

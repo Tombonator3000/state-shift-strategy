@@ -143,6 +143,75 @@ export type EnhancedCardPlay = CardPlay & {
 };
 
 export class EnhancedAIStrategist implements AIStrategist {
+  private static readonly GLOBAL_MEMORY_LIMIT = 36;
+  private static globalTargetMemory: Map<string, { weight: number; lastTick: number }> = new Map();
+  private static globalMemoryTick = 0;
+
+  private static applyGlobalDecay(currentTick: number): void {
+    for (const [state, entry] of EnhancedAIStrategist.globalTargetMemory.entries()) {
+      const elapsed = currentTick - entry.lastTick;
+      if (elapsed <= 0) {
+        continue;
+      }
+
+      const decayedWeight = entry.weight * Math.pow(0.88, Math.min(6, elapsed));
+      if (decayedWeight < 0.05) {
+        EnhancedAIStrategist.globalTargetMemory.delete(state);
+        continue;
+      }
+
+      EnhancedAIStrategist.globalTargetMemory.set(state, {
+        weight: decayedWeight,
+        lastTick: currentTick,
+      });
+    }
+  }
+
+  private static trimGlobalMemory(): void {
+    if (EnhancedAIStrategist.globalTargetMemory.size <= EnhancedAIStrategist.GLOBAL_MEMORY_LIMIT) {
+      return;
+    }
+
+    const sorted = Array.from(EnhancedAIStrategist.globalTargetMemory.entries()).sort(
+      (a, b) => a[1].weight - b[1].weight,
+    );
+
+    for (const [state] of sorted) {
+      if (EnhancedAIStrategist.globalTargetMemory.size <= EnhancedAIStrategist.GLOBAL_MEMORY_LIMIT) {
+        break;
+      }
+      EnhancedAIStrategist.globalTargetMemory.delete(state);
+    }
+  }
+
+  private static updateGlobalTargetMemory(state: string): void {
+    if (!state || state === 'NONE') {
+      return;
+    }
+
+    const currentTick = ++EnhancedAIStrategist.globalMemoryTick;
+    EnhancedAIStrategist.applyGlobalDecay(currentTick);
+
+    const existing = EnhancedAIStrategist.globalTargetMemory.get(state);
+    const baseWeight = existing?.weight ?? 0;
+    const updatedWeight = Math.min(6, baseWeight + 1);
+
+    EnhancedAIStrategist.globalTargetMemory.set(state, {
+      weight: updatedWeight,
+      lastTick: currentTick,
+    });
+
+    EnhancedAIStrategist.trimGlobalMemory();
+  }
+
+  private static getGlobalTargetWeight(state: string): number {
+    if (!state || state === 'NONE') {
+      return 0;
+    }
+
+    return EnhancedAIStrategist.globalTargetMemory.get(state)?.weight ?? 0;
+  }
+
   private readonly base: AIStrategist;
   public readonly difficulty: AIDifficulty;
   private _personality: AIPersonality;
@@ -264,6 +333,35 @@ export class EnhancedAIStrategist implements AIStrategist {
       return '';
     }
     return trimmed.toUpperCase();
+  }
+
+  private calculateResourceUrgency(gameState: any, evaluation: GameStateEvaluation): number {
+    const hand: GameCard[] = Array.isArray(gameState.hand) ? gameState.hand : [];
+    const aiIp = typeof gameState.aiIP === 'number' ? gameState.aiIP : 0;
+
+    if (hand.length === 0) {
+      return 0;
+    }
+
+    let highestCost = 0;
+    let totalCost = 0;
+
+    for (const card of hand) {
+      const meta = this.getCardMetadata(card.id) ?? card;
+      const cost = typeof meta?.cost === 'number' ? meta.cost : 0;
+      highestCost = Math.max(highestCost, cost);
+      totalCost += cost;
+    }
+
+    const averageCost = totalCost / hand.length;
+    const shortfall = Math.max(0, highestCost - aiIp);
+    const normalizedShortfall = highestCost > 0 ? shortfall / highestCost : 0;
+    const tension = averageCost > 0 ? Math.max(0, averageCost - aiIp) / averageCost : 0;
+    const resourceDeficit = Math.max(0, -evaluation.resourceAdvantage);
+    const opponentThreat = Math.max(0, evaluation.opponentResourceThreat);
+
+    const urgency = normalizedShortfall * 0.45 + resourceDeficit * 0.35 + opponentThreat * 0.25 + tension * 0.2;
+    return clamp(urgency, 0, 1);
   }
 
   private syncBase(): void {
@@ -531,6 +629,9 @@ export class EnhancedAIStrategist implements AIStrategist {
     const cardMeta = this.getCardMetadata(play.cardId);
     const agendaPlan = this.computeAgendaCounterPlan(gameState);
     const currentTurn = typeof gameState.turn === 'number' ? gameState.turn : 0;
+    const resourceUrgency = this.calculateResourceUrgency(gameState, evaluation);
+    const availableIp = typeof gameState.aiIP === 'number' ? gameState.aiIP : 0;
+    const normalizedTarget = this.normalizeStateId(play.targetState);
 
     let adjustedPriority = play.priority;
 
@@ -570,6 +671,47 @@ export class EnhancedAIStrategist implements AIStrategist {
       if (cardMeta.type === 'DEFENSIVE') {
         adjustedPriority -= aggressionModifier * 0.6;
       }
+
+      if (resourceUrgency > 0.2) {
+        const selfIpGain = cardMeta.effects?.ipDelta?.self ?? 0;
+        const opponentIpLoss = cardMeta.effects?.ipDelta?.opponent ?? 0;
+        const drawGain = cardMeta.effects?.draw ?? 0;
+        const cardCost = typeof cardMeta.cost === 'number' ? cardMeta.cost : 0;
+
+        if (selfIpGain > 0) {
+          adjustedPriority += resourceUrgency * (0.35 + Math.min(0.25, selfIpGain * 0.06));
+        } else if (opponentIpLoss > 0) {
+          adjustedPriority += resourceUrgency * (0.28 + Math.min(0.18, opponentIpLoss * 0.05));
+        } else if (drawGain > 0) {
+          adjustedPriority += resourceUrgency * (0.22 + Math.min(0.12, drawGain * 0.08));
+        } else if (cardCost > availableIp && resourceUrgency > 0.45) {
+          adjustedPriority -= Math.min(0.25, (cardCost - availableIp) * 0.05 * resourceUrgency);
+        }
+      } else if (resourceUrgency < 0.1) {
+        const selfIpGain = cardMeta.effects?.ipDelta?.self ?? 0;
+        if (selfIpGain > 0 && evaluation.pressureMomentum > 0.2) {
+          adjustedPriority -= Math.min(0.18, (0.15 + evaluation.pressureMomentum * 0.3) * (1 - resourceUrgency));
+        }
+      }
+
+      if (normalizedTarget) {
+        const contestedSignal = evaluation.pressureSignals.contested.find(
+          signal => signal.abbreviation === normalizedTarget,
+        );
+
+        if (contestedSignal) {
+          const contestedWeight = Math.min(
+            0.35,
+            (contestedSignal.pressure + contestedSignal.remaining) * 0.08,
+          );
+
+          if (cardMeta.type === 'ATTACK' || cardMeta.type === 'ZONE') {
+            adjustedPriority += contestedWeight;
+          } else if (cardMeta.type === 'DEFENSIVE') {
+            adjustedPriority += contestedWeight * 0.6;
+          }
+        }
+      }
     }
 
     if (agendaPlan.threat > 0 && cardMeta?.type) {
@@ -589,7 +731,6 @@ export class EnhancedAIStrategist implements AIStrategist {
     }
 
     if (agendaPlan.threat > 0 && play.targetState) {
-      const normalizedTarget = this.normalizeStateId(play.targetState);
       if (agendaPlan.focusStates.has(normalizedTarget)) {
         adjustedPriority += 0.25 * agendaPlan.threat;
       } else {
@@ -602,7 +743,7 @@ export class EnhancedAIStrategist implements AIStrategist {
       }
     }
 
-    const rotationPenalty = this.calculateTargetRotationPenalty(play.targetState, currentTurn);
+    const rotationPenalty = this.calculateTargetRotationPenalty(normalizedTarget, currentTurn);
     if (rotationPenalty > 0) {
       adjustedPriority -= rotationPenalty;
     }
@@ -703,8 +844,28 @@ export class EnhancedAIStrategist implements AIStrategist {
     }
   }
 
-  private calculateTargetRotationPenalty(targetState: string | null | undefined, currentTurn: number): number {
-    const normalized = this.normalizeStateId(targetState);
+  private getGlobalTargetPenalty(normalized: string): number {
+    if (!normalized || normalized === 'NONE') {
+      return 0;
+    }
+
+    const weight = EnhancedAIStrategist.getGlobalTargetWeight(normalized);
+    if (weight <= 0) {
+      return 0;
+    }
+
+    const scale = this.difficulty === 'easy'
+      ? 0.02
+      : this.difficulty === 'medium'
+        ? 0.03
+        : this.difficulty === 'hard'
+          ? 0.045
+          : 0.055;
+
+    return Math.min(0.22, weight * scale);
+  }
+
+  private calculateTargetRotationPenalty(normalized: string, currentTurn: number): number {
     if (!normalized || normalized === 'NONE') {
       return 0;
     }
@@ -739,7 +900,14 @@ export class EnhancedAIStrategist implements AIStrategist {
           ? 0.07
           : 0.085;
 
-    return recencyScore * difficultyScale;
+    let penalty = recencyScore * difficultyScale;
+
+    const globalPenalty = this.getGlobalTargetPenalty(normalized);
+    if (globalPenalty > 0) {
+      penalty += globalPenalty;
+    }
+
+    return penalty;
   }
 
   private extractAgendaFocusStates(agenda: RuntimeAgenda | undefined, gameState: any): Set<string> {
@@ -942,6 +1110,10 @@ export class EnhancedAIStrategist implements AIStrategist {
     const recordedTarget = this.normalizeStateId(targetState) || 'NONE';
 
     this.recentTargetHistory.push({ turn: currentTurn, state: recordedTarget });
+
+    if (recordedTarget !== 'NONE') {
+      EnhancedAIStrategist.updateGlobalTargetMemory(recordedTarget);
+    }
 
     const outcome = this.classifyOutcome({
       resolution,
