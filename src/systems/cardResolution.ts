@@ -414,6 +414,8 @@ export function resolveCardMVP(
   let truthBonusFromHotspots = 0;
   let emittedSelfCaptureBanter = false;
   let emittedOpponentCaptureBanter = false;
+  let emittedSelfLossBanter = false;
+  let emittedOpponentLossBanter = false;
   for (const state of newStates) {
     const beforePressurePlayer = beforeState.pressureByState[state.id]?.[PLAYER_ID] ?? 0;
     const afterPressurePlayer = engineState.pressureByState[state.id]?.[PLAYER_ID] ?? 0;
@@ -455,6 +457,10 @@ export function resolveCardMVP(
         emittedSelfCaptureBanter = true;
         queueBanterForTrigger(gameState, getStateChangeTrigger('captured', 'self'));
       }
+      if (previousOwner === 'ai' && !emittedOpponentLossBanter) {
+        emittedOpponentLossBanter = true;
+        queueBanterForTrigger(gameState, getStateChangeTrigger('lost', 'opponent'));
+      }
     } else if (previousOwner !== 'ai' && owner === 'ai') {
       const aiFaction = gameState.faction === 'truth' ? 'government' : 'truth';
       capturedStateIds.push(state.id);
@@ -466,6 +472,20 @@ export function resolveCardMVP(
       if (!emittedOpponentCaptureBanter) {
         emittedOpponentCaptureBanter = true;
         queueBanterForTrigger(gameState, getStateChangeTrigger('captured', 'opponent'));
+      }
+      if (previousOwner === 'player' && !emittedSelfLossBanter) {
+        emittedSelfLossBanter = true;
+        queueBanterForTrigger(gameState, getStateChangeTrigger('lost', 'self'));
+      }
+    } else if (previousOwner === 'player' && owner === 'neutral') {
+      if (!emittedSelfLossBanter) {
+        emittedSelfLossBanter = true;
+        queueBanterForTrigger(gameState, getStateChangeTrigger('lost', 'self'));
+      }
+    } else if (previousOwner === 'ai' && owner === 'neutral') {
+      if (!emittedOpponentLossBanter) {
+        emittedOpponentLossBanter = true;
+        queueBanterForTrigger(gameState, getStateChangeTrigger('lost', 'opponent'));
       }
     } else if (targetStateId === state.id && card.type === 'ZONE') {
       const deltaPlayer = afterPressurePlayer - beforePressurePlayer;
