@@ -11,6 +11,7 @@ import {
   type GameSnapshot,
   type StateForResolution,
 } from '@/systems/cardResolution';
+import { evaluateOvertimeOutcome, type OvertimeOutcome } from '@/data/victoryConditions';
 import {
   createAiStrategist,
   type AIStrategist,
@@ -53,6 +54,10 @@ interface SimulationOptions {
   difficulty: AIDifficulty;
   useEnhanced: boolean;
   swapFactions: boolean;
+  overtimePivot?: number;
+  overtimeTolerance: number;
+  overtimeMargin: number;
+  overtimeDefaultWinner: 'truth' | 'government';
 }
 
 interface SimulationPlayRecord {
@@ -75,6 +80,8 @@ interface SimulationState {
   factions: SideRecord<'truth' | 'government'>;
   cardsPlayedThisRound: SimulationPlayRecord[];
   lastPlays: SimulationPlayRecord[];
+  startingTruth: number;
+  maxTurns: number;
 }
 
 interface EvaluationLogEntry {
@@ -108,6 +115,7 @@ interface GameLog {
   finalTruth: number;
   finalIp: { candidate: number; baseline: number };
   finalControl: { candidate: number; baseline: number };
+  overtime?: { method: OvertimeOutcome['method']; winner: 'truth' | 'government' };
 }
 
 interface BatchSummary {
@@ -164,6 +172,10 @@ interface CliOptions {
   truthHighThreshold: number;
   truthLowThreshold: number;
   optimize: boolean;
+  overtimePivot?: number;
+  overtimeTolerance: number;
+  overtimeMargin: number;
+  overtimeDefaultWinner: 'truth' | 'government';
 }
 
 const DEFAULT_OPTIONS: CliOptions = {
@@ -186,6 +198,10 @@ const DEFAULT_OPTIONS: CliOptions = {
   truthHighThreshold: 90,
   truthLowThreshold: 10,
   optimize: true,
+  overtimePivot: undefined,
+  overtimeTolerance: 0,
+  overtimeMargin: 0,
+  overtimeDefaultWinner: 'truth',
 };
 
 function createRng(seed: number): () => number {
@@ -276,6 +292,8 @@ function initializeSimulationState(
     factions,
     cardsPlayedThisRound: [],
     lastPlays: [],
+    startingTruth: options.startingTruth,
+    maxTurns: options.maxTurns,
   };
 }
 
@@ -427,6 +445,42 @@ function evaluateWinner(
   return { winner: null, reason: '' };
 }
 
+function buildOvertimeState(
+  state: SimulationState,
+  options: SimulationOptions,
+  truthHistory: number[],
+): Record<string, unknown> {
+  const truthControlledStates = state.states
+    .filter(entry => entry.owner !== 'neutral' && state.factions[entry.owner as Side] === 'truth')
+    .map(entry => entry.abbreviation);
+  const governmentControlledStates = state.states
+    .filter(entry => entry.owner !== 'neutral' && state.factions[entry.owner as Side] === 'government')
+    .map(entry => entry.abbreviation);
+
+  const truthSide: Side = state.factions.A === 'truth' ? 'A' : 'B';
+  const governmentSide: Side = truthSide === 'A' ? 'B' : 'A';
+
+  return {
+    turn: state.turn,
+    maxTurns: state.maxTurns,
+    truth: state.truth,
+    startingTruth: state.startingTruth,
+    truthMomentum: state.truth - state.startingTruth,
+    truthHistory,
+    truthControlledStates,
+    governmentControlledStates,
+    truthIp: state.ip[truthSide],
+    governmentIp: state.ip[governmentSide],
+    overtimeConfig: {
+      maxTurns: state.maxTurns,
+      truthPivot: options.overtimePivot ?? state.startingTruth,
+      truthTolerance: options.overtimeTolerance,
+      territoryMargin: options.overtimeMargin,
+      defaultWinner: options.overtimeDefaultWinner,
+    },
+  };
+}
+
 function finalTiebreaker(state: SimulationState, options: SimulationOptions): Side | null {
   const counts: SideRecord<number> = {
     A: countControlled(state.states, 'A'),
@@ -555,6 +609,7 @@ function simulateMatch(
   let turns = 0;
   let winner: Side | null = null;
   let reason = '';
+  let overtimeSummary: OvertimeOutcome | null = null;
 
   const truthHistory: number[] = [state.truth];
   const ipHistory: Array<{ turn: number; candidate: number; baseline: number }> = [
@@ -656,10 +711,20 @@ function simulateMatch(
   }
 
   if (!winner) {
-    const tiebreakWinner = finalTiebreaker(state, options);
-    if (tiebreakWinner) {
-      winner = tiebreakWinner;
-      reason = 'tiebreaker';
+    const overtimeState = buildOvertimeState(state, options, [...truthHistory]);
+    const overtimeOutcome = evaluateOvertimeOutcome(overtimeState);
+    if (overtimeOutcome) {
+      overtimeSummary = overtimeOutcome;
+      const truthSide: Side = state.factions.A === 'truth' ? 'A' : 'B';
+      const governmentSide: Side = truthSide === 'A' ? 'B' : 'A';
+      winner = overtimeOutcome.winner === 'truth' ? truthSide : governmentSide;
+      reason = `overtime_${overtimeOutcome.method}`;
+    } else {
+      const tiebreakWinner = finalTiebreaker(state, options);
+      if (tiebreakWinner) {
+        winner = tiebreakWinner;
+        reason = 'tiebreaker';
+      }
     }
   }
 
@@ -669,7 +734,7 @@ function simulateMatch(
     id: matchId,
     startSide: SIDE_TO_NAME[startSide],
     winner: winnerName,
-    reason: reason || 'max_turns',
+    reason: reason || (overtimeSummary ? `overtime_${overtimeSummary.method}` : 'max_turns'),
     turns,
     factions: {
       candidate: state.factions.A,
@@ -686,6 +751,9 @@ function simulateMatch(
       candidate: countControlled(state.states, 'A'),
       baseline: countControlled(state.states, 'B'),
     },
+    overtime: overtimeSummary
+      ? { method: overtimeSummary.method, winner: overtimeSummary.winner }
+      : undefined,
   };
 
   state.cardsPlayedThisRound = [];
@@ -833,6 +901,27 @@ function parseArgs(argv: string[]): CliOptions {
         args.optimize = parseBoolean(value, args.optimize);
         if (rawValue === undefined) i++;
         break;
+      case 'overtimePivot':
+        args.overtimePivot = value !== undefined ? Number.parseFloat(value) : args.overtimePivot;
+        if (rawValue === undefined) i++;
+        break;
+      case 'overtimeTolerance':
+        args.overtimeTolerance = value !== undefined ? Number.parseFloat(value) : args.overtimeTolerance;
+        if (rawValue === undefined) i++;
+        break;
+      case 'overtimeMargin':
+        args.overtimeMargin = value !== undefined ? Number.parseFloat(value) : args.overtimeMargin;
+        if (rawValue === undefined) i++;
+        break;
+      case 'overtimeDefault':
+        if (value) {
+          const normalized = value.toLowerCase();
+          if (normalized === 'truth' || normalized === 'government') {
+            args.overtimeDefaultWinner = normalized;
+          }
+        }
+        if (rawValue === undefined) i++;
+        break;
       default:
         break;
     }
@@ -875,6 +964,10 @@ function buildSimulationOptions(cli: CliOptions): SimulationOptions {
     difficulty: cli.difficulty,
     useEnhanced: cli.useEnhanced,
     swapFactions: cli.swapFactions,
+    overtimePivot: cli.overtimePivot,
+    overtimeTolerance: cli.overtimeTolerance,
+    overtimeMargin: cli.overtimeMargin,
+    overtimeDefaultWinner: cli.overtimeDefaultWinner,
   };
 }
 

@@ -1,4 +1,5 @@
 import type { GameCard } from '@/rules/mvp';
+import type { OvertimeConfig } from '@/data/victoryConditions';
 import type { PlayedCardMetaLite } from '@/state/game/roundNewsBuffer';
 import type { ArticleBlock, PlayedLite } from '@/news/headlineEngine';
 import type { EventManager, GameEvent, ParanormalHotspotPayload } from '@/data/eventDatabase';
@@ -40,8 +41,11 @@ export interface GameState {
   aiDifficulty: AIDifficulty;
   aiPersonality?: string;
   truth: number;
+  truthMomentum?: number;
   ip: number;
   aiIP: number;
+  truthIp?: number;
+  governmentIp?: number;
   hand: GameCard[];
   discardPile: GameCard[];
   aiHand: GameCard[];
@@ -58,6 +62,8 @@ export interface GameState {
   comboTruthDeltaThisRound: number;
   controlledStates: string[];
   aiControlledStates: string[];
+  truthControlledStates?: string[];
+  governmentControlledStates?: string[];
   states: Array<{
     id: string;
     name: string;
@@ -145,6 +151,10 @@ export interface GameState {
   winner: 'truth' | 'government' | 'draw' | null;
   victoryType: 'states' | 'ip' | 'truth' | 'agenda' | null;
   finalEdition?: GameOverReport | null;
+  maxTurns?: number;
+  startingTruth?: number;
+  truthHistory?: number[];
+  overtimeConfig?: OvertimeConfig;
 }
 
 export interface GameEditorRuntimeState {

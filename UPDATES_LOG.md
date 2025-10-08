@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-18 – Continuity overtime protocol and sim hooks
+- Added the Continuity Overtime Protocol as the top-priority victory condition so capped matches resolve via Truth momentum, territorial control, or resource edge instead of the deterministic coin flip.
+- Threaded max-turn metadata and overtime configuration through the AI simulation harness, exposing new CLI knobs and logging the overtime method in batch reports.
+
 ## 2025-11-17 – Baseline AI mirror simulations
 - Ran government-versus-truth mirror scrimmages with the enhanced strategist to document stalemates, territory snowballs, and deck homogeny in `docs/analysis/2025-11-17-ai-sim-log.md`.
 - Captured raw telemetry in `docs/analysis/data/2025-11-17-ai-sim-baseline.json` for future tuning passes on pressure heuristics and truth pacing.
