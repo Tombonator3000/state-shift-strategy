@@ -49,16 +49,50 @@ const getEffectiveCardCost = (state: GameState, playerId: PlayerId, card: Card):
   return Math.max(0, Math.floor(adjusted));
 };
 
-const drawUpToFive = (player: PlayerState): PlayerState => {
+const shuffleCards = (cards: Card[], rng: () => number): Card[] => {
+  const shuffled = [...cards];
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rng() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+const drawUpToFive = (
+  player: PlayerState,
+  rng: () => number = Math.random,
+): { player: PlayerState; reshuffled: boolean } => {
   const deck = [...player.deck];
   const hand = [...player.hand];
-  while (hand.length < 5 && deck.length > 0) {
+  const discard = [...player.discard];
+  let reshuffled = false;
+
+  while (hand.length < 5) {
+    if (deck.length === 0) {
+      if (discard.length === 0) {
+        break;
+      }
+      const reshuffledDeck = shuffleCards(discard, rng);
+      deck.push(...reshuffledDeck);
+      discard.length = 0;
+      reshuffled = true;
+    }
+
+    if (deck.length === 0) {
+      break;
+    }
+
     hand.push(deck.shift()!);
   }
+
   return {
-    ...player,
-    deck,
-    hand,
+    player: {
+      ...player,
+      deck,
+      hand,
+      discard,
+    },
+    reshuffled,
   };
 };
 
@@ -424,7 +458,11 @@ export function startTurn(state: GameState): GameState {
     discard: workingDiscard,
   };
 
-  const drawnPlayer = drawUpToFive(preparedPlayer);
+  const { player: drawnPlayer, reshuffled } = drawUpToFive(preparedPlayer);
+
+  if (reshuffled) {
+    logEntries.push(`${currentId} reshuffles discard into deck.`);
+  }
 
   const updatedPlayer: PlayerState = {
     ...drawnPlayer,

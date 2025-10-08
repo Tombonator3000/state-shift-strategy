@@ -7,7 +7,7 @@ import {
   evaluateCatchUpAdjustments,
   startTurn,
 } from '@/mvp/engine';
-import type { GameState, PlayerState } from '@/mvp/validator';
+import type { Card, GameState, PlayerState } from '@/mvp/validator';
 
 type PartialPlayer = Partial<PlayerState> & Pick<PlayerState, 'ip'>;
 
@@ -20,6 +20,16 @@ const makePlayer = (partial: PartialPlayer): PlayerState => ({
   ip: partial.ip,
   states: partial.states ?? [],
   nextAttackMultiplier: partial.nextAttackMultiplier,
+});
+
+const makeCard = (id: string, faction: 'truth' | 'government' = 'truth'): Card => ({
+  id,
+  name: id,
+  type: 'ATTACK',
+  rarity: 'common',
+  cost: 0,
+  faction,
+  effects: { ipDelta: { opponent: 0 } },
 });
 
 const makeState = (currentPlayer: PlayerState, opponentIp = 0): GameState => ({
@@ -230,5 +240,56 @@ describe('startTurn upkeep integration', () => {
     const trailerTurn = startTurn(trailerState);
     expect(trailerTurn.log.at(-1)).toContain('catch-up bonus');
     expect(trailerTurn.log.at(-1)).toMatch(/behind/);
+  });
+
+  it('reshuffles the discard pile when the deck is exhausted while drawing', () => {
+    const player = makePlayer({
+      id: 'P1',
+      ip: 10,
+      hand: [makeCard('hand-1'), makeCard('hand-2')],
+      deck: [makeCard('deck-1')],
+      discard: [makeCard('discard-1'), makeCard('discard-2'), makeCard('discard-3')],
+    });
+    const state = makeState(player, 0);
+
+    const originalRandom = Math.random;
+    const sequence = [0.42, 0.18, 0.73];
+    let index = 0;
+    Math.random = () => {
+      const value = sequence[index];
+      index = Math.min(sequence.length, index + 1);
+      return value ?? 0.5;
+    };
+
+    try {
+      const updated = startTurn(state);
+      const updatedPlayer = updated.players.P1;
+
+      expect(updatedPlayer.hand).toHaveLength(5);
+      expect(updatedPlayer.discard).toHaveLength(0);
+      expect(updatedPlayer.deck).toHaveLength(1);
+
+      const reshuffleLog = updated.log.find(entry => entry.includes('reshuffles discard into deck'));
+      expect(reshuffleLog).toBeDefined();
+
+      const originalHandIds = new Set(player.hand.map(card => card.id));
+      const originalDeckIds = new Set(player.deck.map(card => card.id));
+      const originalDiscardIds = new Set(player.discard.map(card => card.id));
+
+      const drawnIds = updatedPlayer.hand
+        .map(card => card.id)
+        .filter(id => !originalHandIds.has(id));
+      expect(drawnIds).toHaveLength(3);
+
+      const drawnFromDiscard = drawnIds.filter(id => originalDiscardIds.has(id));
+      expect(drawnFromDiscard.length).toBeGreaterThanOrEqual(2);
+
+      const remainingDeckIds = updatedPlayer.deck.map(card => card.id);
+      remainingDeckIds.forEach(id => {
+        expect(originalDeckIds.has(id) || originalDiscardIds.has(id)).toBe(true);
+      });
+    } finally {
+      Math.random = originalRandom;
+    }
   });
 });

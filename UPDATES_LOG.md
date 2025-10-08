@@ -39,6 +39,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Map AI difficulty settings to the new editor roster, falling back from legacy IDs and automatically selecting the correct partner at game start.
 - Added runtime safety nets so MVP engines auto-bind an editor before applying difficulty-scaled modifiers.
 
+## 2025-10-08 – Deck reshuffle safeguards at turn start
+- MVP turn upkeep now shuffles the discard pile into a fresh deck whenever the draw step would otherwise stall, guaranteeing hands refill to five cards.
+- Added debug logging and regression coverage to confirm reshuffles clear the discard and keep leftover cards in the new deck.
+
 ## 2025-10-08 – Established AI editor roster and banter stubs
 - Replaced legacy editor prototypes with faction-aligned profiles including difficulty tiers, personalities, and runtime modifiers.
 - Published shared difficulty multipliers, recommendation helpers, and banter bank loader typings to anchor AI selection.
