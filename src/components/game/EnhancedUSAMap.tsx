@@ -67,6 +67,8 @@ interface EnhancedUSAMapProps {
   playedCards?: PlayedCard[];
   playerFaction: 'truth' | 'government';
   currentTurn: number;
+  dragTarget?: { stateId: string; status: 'valid' | 'invalid'; label?: string } | null;
+  isDraggingCard?: boolean;
 }
 
 const formatTruthDeltaForFaction = (delta: number, playerFaction: 'truth' | 'government'): string => {
@@ -212,7 +214,9 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   audio,
   playedCards = [],
   playerFaction,
-  currentTurn
+  currentTurn,
+  dragTarget,
+  isDraggingCard = false
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1076,6 +1080,41 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     getSvgPointFromClient
   ]);
 
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const paths = Array.from(svg.querySelectorAll<SVGPathElement>('.state-path'));
+    paths.forEach(path => path.classList.remove('drag-target', 'drag-target-invalid'));
+
+    if (!dragTarget || !dragTarget.stateId) {
+      return;
+    }
+
+    const normalized = dragTarget.stateId.toLowerCase();
+    const match = paths.find(path => {
+      const abbr = path.getAttribute('data-state-abbr');
+      const id = path.getAttribute('data-state-id');
+      return (
+        (abbr && abbr.toLowerCase() === normalized) ||
+        (id && id.toLowerCase() === normalized)
+      );
+    });
+
+    if (!match) {
+      return;
+    }
+
+    match.classList.add('drag-target');
+    if (dragTarget.status === 'invalid') {
+      match.classList.add('drag-target-invalid');
+    }
+
+    return () => {
+      match.classList.remove('drag-target', 'drag-target-invalid');
+    };
+  }, [dragTarget]);
+
   const handleZoomIn = () => {
     applyZoom(prev => prev + ZOOM_STEP);
   };
@@ -1135,8 +1174,11 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           id="us-map-stage"
           ref={containerRef}
           className="relative w-full overflow-hidden rounded border border-border bg-black/5"
+          data-dragging={isDraggingCard ? 'true' : undefined}
           style={{
-            height: `${Math.round(dimensions.height)}px`
+            height: `${Math.round(dimensions.height)}px`,
+            touchAction: isDraggingCard ? 'none' : undefined,
+            WebkitUserSelect: 'none',
           }}
         >
           <div className="pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-2">
@@ -1419,6 +1461,14 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           overflow: hidden;
         }
 
+        #us-map-stage[data-dragging='true'] {
+          box-shadow: 0 0 24px rgba(253, 224, 71, 0.35);
+          outline: 2px dashed rgba(253, 224, 71, 0.45);
+          outline-offset: -4px;
+          transition: box-shadow 0.2s ease, outline-color 0.2s ease;
+          touch-action: none;
+        }
+
         #us-map {
           display: block;
           width: 100%;
@@ -1473,6 +1523,30 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
           transition: filter 200ms ease, stroke 200ms ease, fill-opacity 200ms ease;
           animation: hotspotActivePulse 2.2s ease-in-out infinite;
           mix-blend-mode: screen;
+        }
+
+        .state-path.drag-target {
+          stroke: rgba(253, 224, 71, 0.95);
+          stroke-width: 4;
+          filter: drop-shadow(0 0 18px rgba(253, 224, 71, 0.6));
+        }
+
+        .state-path.drag-target-invalid {
+          stroke: rgba(248, 113, 113, 0.95);
+          fill: rgba(248, 113, 113, 0.22);
+          animation: dragInvalidPulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes dragInvalidPulse {
+          0%,
+          100% {
+            stroke: rgba(248, 113, 113, 0.95);
+            fill: rgba(248, 113, 113, 0.22);
+          }
+          50% {
+            stroke: rgba(239, 68, 68, 0.95);
+            fill: rgba(248, 113, 113, 0.32);
+          }
         }
 
         @keyframes hotspotActivePulse {

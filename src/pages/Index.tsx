@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
 import EnhancedGameHand from '@/components/game/EnhancedGameHand';
+import BaseCard from '@/components/game/cards/BaseCard';
 import PlayedCardsDock from '@/components/game/PlayedCardsDock';
 import CardDetailOverlay from '@/components/game/CardDetailOverlay';
 import TabloidNewspaper from '@/components/game/TabloidNewspaper';
@@ -224,6 +225,17 @@ const detectReducedMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
 
+type DragHoverState = {
+  stateId: string;
+  status: 'valid' | 'invalid';
+  label?: string;
+};
+
+type DropEvaluation =
+  | { type: 'none' }
+  | { type: 'map'; status: 'valid' | 'invalid' }
+  | { type: 'state'; stateId: string; status: 'valid' | 'invalid'; label?: string };
+
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
@@ -246,14 +258,20 @@ const Index = () => {
   const [subtitle, setSubtitle] = useState('Truth Seeker Operative');
   
   // Visual effects state
-  const [floatingNumbers, setFloatingNumbers] = useState<{ 
-    value: number; 
+  const [floatingNumbers, setFloatingNumbers] = useState<{
+    value: number;
     type: 'ip' | 'truth' | 'damage' | 'synergy' | 'combo' | 'chain';
     x?: number;
     y?: number;
   } | null>(null);
   const [previousPhase, setPreviousPhase] = useState('');
   const [hoveredCard, setHoveredCard] = useState<GameCard | null>(null);
+  const [draggedCardState, setDraggedCardState] = useState<{
+    card: GameCard;
+    position: { x: number; y: number };
+    pointerType: string;
+  } | null>(null);
+  const [dragHoverState, setDragHoverState] = useState<DragHoverState | null>(null);
   const [isVictoryOverlayOpen, setIsVictoryOverlayOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showInGameOptions, setShowInGameOptions] = useState(false);
@@ -308,6 +326,98 @@ const Index = () => {
         .map(card => card.name?.trim() || card.id)
         .filter(Boolean),
     [discardPreview.discardedCards]
+  );
+  const findStateByIdentifier = useCallback(
+    (identifier?: string | null) => {
+      if (!identifier) return null;
+      const normalized = identifier.trim().toLowerCase();
+      if (!normalized) return null;
+
+      return (
+        gameState.states.find(state => {
+          const abbreviation = typeof state.abbreviation === 'string' ? state.abbreviation.toLowerCase() : undefined;
+          const id = typeof state.id === 'string' ? state.id.toLowerCase() : undefined;
+          const name = typeof state.name === 'string' ? state.name.toLowerCase() : undefined;
+          return abbreviation === normalized || id === normalized || name === normalized;
+        }) ?? null
+      );
+    },
+    [gameState.states]
+  );
+
+  const evaluateDropTarget = useCallback(
+    (card: GameCard, position: { x: number; y: number }): DropEvaluation => {
+      if (typeof document === 'undefined') {
+        return { type: 'none' };
+      }
+
+      const element = document.elementFromPoint(position.x, position.y);
+      if (!element) {
+        return { type: 'none' };
+      }
+
+      const targetElement = element instanceof Element ? element : null;
+      const stateElement = targetElement?.closest?.('[data-state-abbr], [data-state-id]') as Element | null;
+
+      if (stateElement) {
+        const identifier =
+          stateElement.getAttribute('data-state-abbr') ?? stateElement.getAttribute('data-state-id') ?? undefined;
+        const matched = findStateByIdentifier(identifier);
+        const canonicalId = matched?.abbreviation ?? matched?.id ?? matched?.name ?? identifier ?? '';
+        const owner = matched?.owner;
+        const isZone = (card.type ?? '').toUpperCase() === 'ZONE';
+        const status: 'valid' | 'invalid' = isZone && owner === 'player' ? 'invalid' : 'valid';
+
+        return {
+          type: 'state',
+          stateId: canonicalId,
+          status,
+          label: matched?.name ?? canonicalId,
+        } as const;
+      }
+
+      const mapElement = targetElement?.closest?.('#us-map-stage');
+      if (mapElement) {
+        const isZone = (card.type ?? '').toUpperCase() === 'ZONE';
+        return { type: 'map', status: isZone ? 'invalid' : 'valid' } as const;
+      }
+
+      return { type: 'none' } as const;
+    },
+    [findStateByIdentifier]
+  );
+
+  const evaluateDragHover = useCallback(
+    (card: GameCard, position: { x: number; y: number }) => {
+      const evaluation = evaluateDropTarget(card, position);
+      if (evaluation.type === 'state') {
+        setDragHoverState({ stateId: evaluation.stateId, status: evaluation.status, label: evaluation.label });
+      } else {
+        setDragHoverState(null);
+      }
+      return evaluation;
+    },
+    [evaluateDropTarget]
+  );
+
+  const handleHandDragStart = useCallback(
+    (card: GameCard, position: { x: number; y: number; pointerType: string }) => {
+      setDraggedCardState({ card, position: { x: position.x, y: position.y }, pointerType: position.pointerType });
+      evaluateDragHover(card, position);
+    },
+    [evaluateDragHover]
+  );
+
+  const handleHandDragMove = useCallback(
+    (card: GameCard, position: { x: number; y: number; pointerType: string }) => {
+      setDraggedCardState(prev =>
+        prev && prev.card.id === card.id
+          ? { ...prev, position: { x: position.x, y: position.y }, pointerType: position.pointerType }
+          : { card, position: { x: position.x, y: position.y }, pointerType: position.pointerType }
+      );
+      evaluateDragHover(card, position);
+    },
+    [evaluateDragHover]
   );
   const finalEditionTurnLogs = useMemo<TurnLog[]>(() => {
     if (!Array.isArray(gameState.playHistory) || gameState.playHistory.length === 0) {
@@ -2081,6 +2191,54 @@ const Index = () => {
     }
   };
 
+  const handleHandDragEnd = useCallback(
+    async (
+      card: GameCard,
+      position: { x: number; y: number; pointerType: string; cancelled: boolean }
+    ) => {
+      const { cancelled, x, y } = position;
+      const evaluation = evaluateDropTarget(card, { x, y });
+      setDraggedCardState(null);
+      setDragHoverState(null);
+
+      if (cancelled) {
+        return;
+      }
+
+      const isZone = (card.type ?? '').toUpperCase() === 'ZONE';
+
+      if (!isZone) {
+        if (evaluation.type === 'state' || evaluation.type === 'map') {
+          await handlePlayCard(card.id);
+        }
+        return;
+      }
+
+      if (evaluation.type === 'state') {
+        if (evaluation.status === 'invalid') {
+          audio.playSFX('error');
+          toast.error('🚫 Cannot target your own states with zone cards!', {
+            duration: 3000,
+            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
+          });
+          return;
+        }
+
+        await handlePlayCard(card.id, evaluation.stateId);
+        return;
+      }
+
+      if (evaluation.type === 'map') {
+        audio.playSFX('error');
+        toast('🎯 Select a valid state target before deploying this zone card!', {
+          duration: 4000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
+        });
+      }
+    },
+    [audio, evaluateDropTarget, handlePlayCard]
+  );
+
   const handleCloseNewspaper = () => {
     closeNewspaper();
     audio.playSFX('newspaper');
@@ -2773,6 +2931,8 @@ const Index = () => {
                 audio={audio}
                 playerFaction={gameState.faction}
                 currentTurn={gameState.turn}
+                dragTarget={dragHoverState}
+                isDraggingCard={Boolean(draggedCardState)}
               />
             </div>
           </div>
@@ -2873,6 +3033,10 @@ const Index = () => {
             discardQueue={pendingDiscards}
             onToggleDiscard={handleToggleDiscard}
             discardEnabled={canQueueDiscards}
+            onCardDragStart={handleHandDragStart}
+            onCardDragMove={handleHandDragMove}
+            onCardDragEnd={handleHandDragEnd}
+            draggingCardId={draggedCardState?.card.id ?? null}
           />
         </div>
         <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
@@ -2917,6 +3081,25 @@ const Index = () => {
           }
         }}
       />
+
+      {draggedCardState && (
+        <div
+          className="pointer-events-none fixed z-[950]"
+          style={{
+            left: draggedCardState.position.x,
+            top: draggedCardState.position.y,
+            transform: 'translate(-50%, -60%) scale(0.98)',
+          }}
+        >
+          <BaseCard
+            card={draggedCardState.card}
+            hideStamp
+            size="handMini"
+            className="pointer-events-none select-none"
+            frameClassName="drop-shadow-[0_22px_40px_rgba(0,0,0,0.45)] ring-2 ring-yellow-200/60"
+          />
+        </div>
+      )}
 
       <CardAnimationLayer />
       <FalloutOverlay relic={activeRelicFallout} onClose={handleRelicOverlayClose} />

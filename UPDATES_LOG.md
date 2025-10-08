@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-20 – Stabilize touch drag controls
+- Locked card buttons and the map stage into drag-only mode while a touch pointer is active so iPad browsers don't trigger selection or long-press callouts during card drops.
+- Added touch-action failsafes so map highlighting and drop validation remain reliable across Safari's pointer events.
+
 ## 2025-11-19 – Truth threshold urgency tuning
 - Routed truth high/low caps plus the economic goal into the AI planning view, penalizing idle IP stockpiles and escalating urgency within 15 points of a truth victory.
 - Boosted media truth multipliers so conversion plays surface earlier in planning, with regression coverage enforcing the new behavior around 45–55 truth matches.
@@ -241,6 +245,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 ## 2025-10-08 – Diversify generated card articles
 - Expand card article generator pools with new tag-aware headlines, subheads, and body segments to reduce repetition.
 - Compose longer faction articles by layering tag-specific follow-ups, escalations, and closers for each card.
+
+## 2025-10-08 – Enable touch-friendly card deployment
+- Added pointer-aware drag-and-drop controls to the newsroom desk so tablet operatives can sling cards directly onto the U.S. map.
+- Highlighted valid state targets, previewed the lifted card in-flight, and surfaced error toasts when drops hit protected territory.
 
 ## 2025-10-07 – Chronicle agenda signals in hub
 - Route the live agenda moment feed into the Player Hub overlay and surface a chronological timeline of stages and outcomes.
