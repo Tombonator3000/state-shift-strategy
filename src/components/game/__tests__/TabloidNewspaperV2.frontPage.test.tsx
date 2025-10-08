@@ -23,7 +23,7 @@ globalThis.navigator = windowRef.navigator as Navigator;
 globalThis.HTMLElement = windowRef.HTMLElement as unknown as typeof globalThis.HTMLElement;
 globalThis.CustomEvent = windowRef.CustomEvent as unknown as typeof globalThis.CustomEvent;
 
-const { render, screen, cleanup, within } = await import('@testing-library/react');
+const { render, screen, cleanup } = await import('@testing-library/react');
 
 mock.module('@/lib/newspaperData', () => ({
   loadNewspaperData: async () => ({
@@ -240,29 +240,16 @@ describe('TabloidNewspaperV2 front page integration', () => {
       ]),
     );
 
-    const expectedDispatchCount = activeIssue.generatedStory.articles.length;
-
     render(<TabloidNewspaperV2 {...baseProps} />);
 
     const heroHeading = await screen.findByRole('heading', { level: 2 });
     const heroHeadlineText = heroHeading.textContent ?? '';
     expect(heroHeadlineText).toContain('Hero Entry Overrides Prime Time');
 
-    const dispatchHeading = await screen.findByRole('heading', { name: /Extra Extra Dispatch/i });
-    const dispatchSection = dispatchHeading.closest('section');
-    expect(dispatchSection).not.toBeNull();
-
-    const dispatchHeadlines = within(dispatchSection as HTMLElement)
-      .getAllByRole('heading', { level: 4 })
-      .map(node => node.textContent ?? '');
-
-    expect(dispatchHeadlines).toHaveLength(expectedDispatchCount);
-    dispatchHeadlines.forEach(text => {
-      expect(text).not.toContain(heroHeadlineText);
-    });
+    expect(screen.queryByRole('heading', { name: /Extra Extra Dispatch/i })).toBeNull();
   });
 
-  test('shows fallback copy for dispatches when article bank is empty', async () => {
+  test('does not render dispatch column when article bank is empty', async () => {
     loadArticleBankMock.mockImplementationOnce(async () => ({
       getById() {
         return null;
@@ -277,18 +264,11 @@ describe('TabloidNewspaperV2 front page integration', () => {
       body: [],
     }));
 
-    const expectedDispatchCount = activeIssue.generatedStory.articles.length;
-
     render(<TabloidNewspaperV2 {...baseProps} />);
 
     const headline = await screen.findByRole('heading', { level: 2 });
     expect(headline.textContent ?? '').toContain('Hero Entry Overrides Prime Time');
 
-    const dispatchHeading = await screen.findByRole('heading', { name: /Extra Extra Dispatch/i });
-    const dispatchSection = dispatchHeading.closest('section');
-    expect(dispatchSection).not.toBeNull();
-
-    const fallbackBodies = within(dispatchSection as HTMLElement).getAllByText('Details pending transmission.');
-    expect(fallbackBodies).toHaveLength(expectedDispatchCount);
+    expect(screen.queryByRole('heading', { name: /Extra Extra Dispatch/i })).toBeNull();
   });
 });

@@ -120,7 +120,7 @@ describe('FinalEditionLayout extra extra bulletins', () => {
     renderer.unmount();
   });
 
-  test('shows fallback copy when no bulletins are recorded', async () => {
+  test('omits bulletin section when no bulletins are recorded', async () => {
     ensureLocalStorage();
 
     const { default: FinalEditionLayout } = await import('../FinalEditionLayout');
@@ -130,7 +130,8 @@ describe('FinalEditionLayout extra extra bulletins', () => {
     const output = extractText(renderer.toJSON()).join(' ');
     const normalized = output.replace(/\s+/g, ' ').trim();
 
-    expect(normalized).toContain('No newsroom bulletins were filed during this match.');
+    expect(normalized).not.toContain('Extra Extra Bulletins');
+    expect(normalized).not.toContain('No newsroom bulletins were filed during this match.');
 
     renderer.unmount();
   });
