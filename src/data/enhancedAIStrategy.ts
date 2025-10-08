@@ -635,6 +635,16 @@ export class EnhancedAIStrategist implements AIStrategist {
 
     let adjustedPriority = play.priority;
 
+    const rotationPenalty = this.calculateTargetRotationPenalty(
+      normalizedTarget,
+      currentTurn,
+      evaluation,
+      gameState,
+    );
+    if (rotationPenalty > 0) {
+      adjustedPriority -= rotationPenalty;
+    }
+
     // Synergy bonuses
     scaledSynergies.forEach(synergy => {
       adjustedPriority += synergy.bonusValue;
@@ -741,11 +751,6 @@ export class EnhancedAIStrategist implements AIStrategist {
           adjustedPriority += agendaPlan.pressureBias * agendaPlan.threat;
         }
       }
-    }
-
-    const rotationPenalty = this.calculateTargetRotationPenalty(normalizedTarget, currentTurn);
-    if (rotationPenalty > 0) {
-      adjustedPriority -= rotationPenalty;
     }
 
     return {
@@ -865,7 +870,12 @@ export class EnhancedAIStrategist implements AIStrategist {
     return Math.min(0.22, weight * scale);
   }
 
-  private calculateTargetRotationPenalty(normalized: string, currentTurn: number): number {
+  private calculateTargetRotationPenalty(
+    normalized: string,
+    currentTurn: number,
+    evaluation: GameStateEvaluation,
+    gameState: any,
+  ): number {
     if (!normalized || normalized === 'NONE') {
       return 0;
     }
@@ -884,12 +894,14 @@ export class EnhancedAIStrategist implements AIStrategist {
     if (this.planningTurnStamp === currentTurn) {
       const plannedHits = this.planningTargetMemory.get(normalized) ?? 0;
       if (plannedHits > 0) {
-        recencyScore += plannedHits * 0.75;
+        recencyScore += plannedHits * 0.9;
       }
     }
 
+    const globalPenalty = this.getGlobalTargetPenalty(normalized);
+
     if (recencyScore <= 0) {
-      return 0;
+      return globalPenalty;
     }
 
     const difficultyScale = this.difficulty === 'easy'
@@ -902,12 +914,58 @@ export class EnhancedAIStrategist implements AIStrategist {
 
     let penalty = recencyScore * difficultyScale;
 
-    const globalPenalty = this.getGlobalTargetPenalty(normalized);
-    if (globalPenalty > 0) {
-      penalty += globalPenalty;
+    const allSignals = [
+      ...evaluation.pressureSignals.aiTargets,
+      ...evaluation.pressureSignals.opponentTargets,
+      ...evaluation.pressureSignals.contested,
+    ];
+    const localSignal = allSignals.find(
+      signal => this.normalizeStateId(signal.abbreviation) === normalized,
+    );
+
+    const stateInfo = Array.isArray(gameState?.states)
+      ? gameState.states.find(
+        (state: any) => this.normalizeStateId(state?.abbreviation ?? state?.id ?? '') === normalized,
+      )
+      : undefined;
+
+    if (localSignal || stateInfo) {
+      const owner = (localSignal?.owner ?? stateInfo?.owner ?? 'neutral') as 'ai' | 'player' | 'neutral';
+      const defense = Math.max(1, localSignal?.defense ?? stateInfo?.defense ?? 1);
+      const pressure = Math.max(0, localSignal?.pressure ?? stateInfo?.pressure ?? 0);
+      const computedRemaining = localSignal?.remaining !== undefined
+        ? Math.max(0, localSignal.remaining)
+        : Math.max(0, defense - pressure);
+      const boundedRemaining = Math.min(defense, computedRemaining);
+      const dominanceProgress = Math.max(0, Math.min(1, 1 - boundedRemaining / defense));
+
+      let ownershipScalar: number;
+      if (owner === 'ai') {
+        ownershipScalar = 1.6;
+      } else if (owner === 'player') {
+        ownershipScalar = 1.05;
+      } else {
+        ownershipScalar = 1.2;
+      }
+
+      ownershipScalar += dominanceProgress * (owner === 'ai' ? 1.7 : owner === 'player' ? 1.1 : 1.3);
+
+      if (boundedRemaining <= 1) {
+        ownershipScalar += owner === 'ai' ? 0.6 : 0.4;
+      }
+
+      if (dominanceProgress >= 0.85) {
+        ownershipScalar += owner === 'ai' ? 0.5 : 0.3;
+      }
+
+      const pressureScalar = 1 + Math.min(0.8, pressure * 0.18);
+
+      penalty *= ownershipScalar * pressureScalar;
     }
 
-    return penalty;
+    penalty += globalPenalty;
+
+    return Math.min(0.22, penalty);
   }
 
   private extractAgendaFocusStates(agenda: RuntimeAgenda | undefined, gameState: any): Set<string> {

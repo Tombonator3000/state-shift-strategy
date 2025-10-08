@@ -272,6 +272,10 @@ export const chooseTurnActions = ({
       actions.push(createPlannedAction(fallbackPlay, fallbackCard, { opportunistic: true }));
       availableIp -= fallbackCost;
       sequenceDetails.push('Fallback action: executing best available option despite low priorities.');
+      strategist.registerPlannedTarget(
+        fallbackPlay.targetState ?? null,
+        typeof gameState.turn === 'number' ? gameState.turn : 0,
+      );
     }
   }
 

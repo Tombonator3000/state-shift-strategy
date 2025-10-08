@@ -47,6 +47,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Added regression coverage ensuring TabloidNewspaperV2 renders unique hero headlines against the dispatch list.
 - Confirmed hero dispatch absences fall back to redacted copy instead of duplicating the main headline.
 
+## 2025-10-08 – Pressure-sensitive target rotation tuning
+- Reweighted per-turn target penalties with pressure signal ownership and remaining defense so stacked zone plays hit the 0.22 ceiling after the first commitment.
+- Ensured fallback plans and regression coverage record planned targets, keeping AI memory synced with queued repeats and documenting the tuning in the November 17 analysis log.
+
 ## 2025-10-08 – Opponent adapts economy and global memory
 - Persisted the strategist’s target history between matches so repeated harassment of the same state now draws escalating rotation penalties.
 - Added IP economy heuristics and contested-state bonuses so the AI banks resources when behind and presses momentum where the map is hottest.
