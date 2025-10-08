@@ -1,22 +1,6 @@
 {"locale":"en-US","rateLimit":{"minTurnGap":1,"maxPerTurn":2},"triggers":{
-  "onCardPlay_media_opponent":[
-    "[REDACTED] cannot stand against official ink.",
-    "Your paragraph has been humanely censored.",
-    "Apply more black bars; I can still read feelings."
-  ],
-  "onStateCaptured_self":[
-    "Cover the map in elegant blackout.",
-    "Another jurisdiction blotted from dissent.",
-    "Rest easy; the truth now arrives pre-sanitized."
-  ],
-  "onVictory_self":[
-    "All outcomes suitably obscured.",
-    "History will note this as a harmless edit.",
-    "Classified success: ████ ████ █████."
-  ],
-  "idle":[
-    "Practicing calligraphy with black ink only.",
-    "Listening to the hiss of permanent markers.",
-    "Drafting a love letter to negative space."
-  ]
+  "onCardPlay_media_opponent":["████ ████ █████."],
+  "onTruthThreshold_75":["█ keep ████ calm."],
+  "onDefeat_self":["Clerical anomaly."],
+  "idle":["████."]
 }}

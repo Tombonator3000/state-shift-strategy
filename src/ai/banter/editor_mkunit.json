@@ -1,22 +1,5 @@
 {"locale":"en-US","rateLimit":{"minTurnGap":1,"maxPerTurn":2},"triggers":{
-  "onCardPlay_media_opponent":[
-    "Your signal fails the subliminal checksum.",
-    "We trained three clones to ignore that headline.",
-    "Your narrative triggers no response in our conditioning charts."
-  ],
-  "onStateCaptured_self":[
-    "Another test cell absorbed into the grid.",
-    "Synchronize the metronomes over that territory.",
-    "Subject population now fully suggestible."
-  ],
-  "onVictory_self":[
-    "Experiment complete; opposition compliant.",
-    "All variables resolved with minimal sedation.",
-    "The program logs a successful recalibration."
-  ],
-  "idle":[
-    "Running drills in recursive mind palaces.",
-    "Rewinding the broadcast to implant new harmonics.",
-    "Monitoring brainwave drift across the command deck."
-  ]
+  "onCardPlay_media_opponent":["You did not see this memo."],
+  "onTruthThreshold_95":["Voluntary compliance achieved."],
+  "idle":["Focus. Inhale. Forget."]
 }}
