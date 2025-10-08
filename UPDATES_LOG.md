@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-12 – Calibrate AI editor roster data
+- Added canonical editor profiles with difficulty tiers, personalities, and runtime modifiers so AI selection stays coherent.
+- Introduced difficulty multipliers, recommendation helpers, image URL utilities, and banter loaders for every roster member.
+
 ## 2025-11-11 – Editors comment on plays and captures
 - Introduced a banter engine with rate limits so player editors react to card plays, state flips, and match outcomes without flooding the log.
 - Added a temporary console fallback while waiting on a dedicated toast surface for editor chatter.

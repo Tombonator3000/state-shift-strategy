@@ -1,22 +1,5 @@
 {"locale":"en-US","rateLimit":{"minTurnGap":1,"maxPerTurn":2},"triggers":{
-  "onCardPlay_media_opponent":[
-    "Your smoke signals read like amateur hour.",
-    "Snuffed that narrative before it left the ashtray.",
-    "Even the filter rejects this propaganda."
-  ],
-  "onStateCaptured_self":[
-    "Another district under a comforting haze.",
-    "Label the file: menthol compliance.",
-    "Their citizens now breathe curated truth."
-  ],
-  "onVictory_self":[
-    "Lights out, story over.",
-    "We burned through your resistance.",
-    "Ashes to ashes, rumors to dust."
-  ],
-  "idle":[
-    "Listening to the ventilation reports.",
-    "Exhaling plausible deniability.",
-    "Flicking embers at unauthorized whispers."
-  ]
+  "onCardPlay_attack_self":["I’ll light the fuse."],
+  "onTruthThreshold_75":["Smoke and mirrors suit you."],
+  "idle":["Intermission. Don’t breathe."]
 }}
