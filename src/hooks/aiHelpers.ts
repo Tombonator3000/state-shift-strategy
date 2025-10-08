@@ -10,11 +10,23 @@ import type { TurnPlay } from '@/game/combo.types';
 import type { PlayedLite } from '@/news/headlineEngine';
 import type { PlayerId } from '@/mvp/validator';
 import type { WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
+import { emitBanter, defaultBanterUi, getCardPlayTrigger } from '@/ai/banter/banterEngine';
 
 import type { CardPlayRecord, GameState } from './gameStateTypes';
 import { mergeStateEventHistories } from './stateEventHistory';
 
 const CAPTURE_REGEX = /(captured|seized)\s+([^!]+)!/i;
+
+const normalizeCardCategory = (value: GameCard['type']): 'ATTACK' | 'MEDIA' | 'ZONE' => {
+  const normalized = String(value ?? '').toUpperCase();
+  if (normalized.includes('ZONE')) {
+    return 'ZONE';
+  }
+  if (normalized.includes('MEDIA')) {
+    return 'MEDIA';
+  }
+  return 'ATTACK';
+};
 
 const matchesResolvedHotspot = (
   active: WeightedHotspotCandidate | null,
@@ -404,6 +416,11 @@ export const applyAiCardPlay = (
   }
 
   const resolution = resolveCardMVP(prev, resolvedCard, targetState ?? null, 'ai', achievements);
+  const playerEditorId = prev.playerEditor ?? prev.editorId ?? null;
+  if (playerEditorId) {
+    const category = normalizeCardCategory(resolvedCard.type);
+    void emitBanter(playerEditorId, getCardPlayTrigger(category, 'opponent'), prev.turn, defaultBanterUi);
+  }
   const logEntries = [...prev.log, ...resolution.logEntries];
   const strategyLogEntries = buildStrategyLogEntries(reasoning, strategyDetails);
 
