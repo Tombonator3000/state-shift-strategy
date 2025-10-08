@@ -186,9 +186,9 @@ export function applyEffectsMvp(
       if ((state as any)?.expansions?.aiEditors ?? true) {
         const playersAny = state.players as unknown as Record<string, any>;
         const ownerState = playersAny?.[owner];
-        const isAiOwner = owner === 'AI' || Boolean(ownerState?.isAI);
+        const isAiOwner = Boolean(ownerState?.isAI);
         if (isAiOwner) {
-          const ai = (state as any)?.players?.AI ?? (state as any)?.players?.ai ?? ownerState ?? null;
+          const ai = ownerState ?? null;
           const activeId = ai?.activeEditor ?? ai?.activeEditorId;
           if (activeId) {
             const editor = getAiEditor(activeId as any);
@@ -253,9 +253,9 @@ export function applyEffectsMvp(
       if ((state as any)?.expansions?.aiEditors ?? true) {
         const playersAny = state.players as unknown as Record<string, any>;
         const ownerState = playersAny?.[owner];
-        const isAiOwner = owner === 'AI' || Boolean(ownerState?.isAI);
+        const isAiOwner = Boolean(ownerState?.isAI);
         if (isAiOwner) {
-          const ai = (state as any)?.players?.AI ?? (state as any)?.players?.ai ?? ownerState ?? null;
+          const ai = ownerState ?? null;
           const activeId = ai?.activeEditor ?? ai?.activeEditorId;
           if (activeId) {
             const editor = getAiEditor(activeId as any);

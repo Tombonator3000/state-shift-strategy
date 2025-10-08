@@ -969,19 +969,24 @@ const Index = () => {
     let winner: 'government' | 'truth' | 'draw' | null = null;
     let victoryType: 'states' | 'ip' | 'truth' | null = null;
 
-    if (gameState.truth >= 95 && gameState.faction === 'truth') {
-      winner = 'truth';
+    // Truth-based victories (check both player and AI)
+    if (gameState.truth >= 95) {
+      winner = gameState.faction === 'truth' ? 'truth' : 'government';
       victoryType = 'truth';
-    } else if (gameState.truth <= 5 && gameState.faction === 'government') {
-      winner = 'government';
+    } else if (gameState.truth <= 5) {
+      winner = gameState.faction === 'government' ? 'government' : 'truth';
       victoryType = 'truth';
-    } else if (gameState.ip >= 200) {
+    }
+    // IP victories
+    else if (gameState.ip >= 200) {
       winner = gameState.faction;
       victoryType = 'ip';
     } else if (gameState.aiIP >= 200) {
       winner = gameState.faction === 'government' ? 'truth' : 'government';
       victoryType = 'ip';
-    } else if (gameState.controlledStates.length >= 10) {
+    }
+    // State control victories
+    else if (gameState.controlledStates.length >= 10) {
       winner = gameState.faction;
       victoryType = 'states';
     } else {
