@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-21 – Harden extension index build for previews
+- Added a Bun fallback to the extension index prebuild script so Lovable GIR previews succeed even when Node isn't available.
+- Confirmed the extensions manifest continues to regenerate before dev and production builds.
+
 ## 2025-11-20 – Stabilize touch drag controls
 - Locked card buttons and the map stage into drag-only mode while a touch pointer is active so iPad browsers don't trigger selection or long-press callouts during card drops.
 - Added touch-action failsafes so map highlighting and drop validation remain reliable across Safari's pointer events.
