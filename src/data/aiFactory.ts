@@ -17,10 +17,21 @@ const PRESET_BY_DIFFICULTY: Record<AIDifficulty, AiConfig> = {
   insane: AI_PRESETS.INSANE,
 };
 
-const toEnhancedProfile = (preset: AiConfig): EnhancedAiDifficultyProfile => {
+export const ROLLOUT_BUDGET_MULTIPLIER = 8;
+
+/**
+ * Translate the classic AI config into the richer enhanced strategist profile.
+ *
+ * The rollout mapping intentionally keeps budgets modest so medium (~16), hard (~48),
+ * and insane (~120) difficulties scale predictably. The multiplier below is the
+ * single place to tune those budgets if future balance passes need deeper searches.
+ */
+export const toEnhancedProfile = (preset: AiConfig): EnhancedAiDifficultyProfile => {
   const planningDepth = Math.max(1, Math.min(4, Math.round(preset.lookaheadDepth + 1)));
-  const rollouts = preset.rolloutsPerBranch > 0
-    ? Math.max(0, Math.round(preset.rolloutsPerBranch * Math.max(1, preset.beamWidth) * 8))
+  const branchRollouts = Math.max(0, Math.round(preset.rolloutsPerBranch));
+  const beamWidth = Math.max(1, Math.round(preset.beamWidth));
+  const rollouts = branchRollouts > 0
+    ? Math.max(0, branchRollouts * beamWidth * ROLLOUT_BUDGET_MULTIPLIER)
     : 0;
 
   return {
