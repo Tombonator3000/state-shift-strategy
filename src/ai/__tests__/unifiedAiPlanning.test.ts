@@ -4,7 +4,8 @@ import '@/test/setupLocalStorage';
 import { chooseTurnActions } from '@/ai/enhancedController';
 import type { Difficulty } from '@/ai';
 import { AIFactory } from '@/data/aiFactory';
-import type { AIDifficulty, AIStrategist } from '@/data/aiStrategy';
+import type { AIDifficulty, AIStrategist, CardPlay, GameStateEvaluation } from '@/data/aiStrategy';
+import { EnhancedAIStrategist, type EnhancedCardPlay } from '@/data/enhancedAIStrategy';
 import type { GameCard } from '@/rules/mvp';
 
 const DIFFICULTIES: Difficulty[] = ['EASY', 'NORMAL', 'HARD', 'INSANE'];
@@ -65,6 +66,84 @@ const COMBO_MEDIA: GameCard = {
   cost: 4,
   effects: { truthDelta: 5 },
 };
+
+const GRASSROOTS_A: GameCard = {
+  id: 'grassroots-alpha',
+  name: 'Grassroots Network',
+  type: 'ZONE',
+  faction: 'truth',
+  rarity: 'rare',
+  cost: 4,
+  effects: { pressureDelta: 2 },
+};
+
+const GRASSROOTS_B: GameCard = {
+  ...GRASSROOTS_A,
+  id: 'grassroots-beta',
+};
+
+const createGrassrootsScenario = () => ({
+  aiHand: [GRASSROOTS_A, GRASSROOTS_B],
+  hand: [GRASSROOTS_A, GRASSROOTS_B],
+  aiIP: 12,
+  ip: 10,
+  truth: 52,
+  faction: 'government' as const,
+  currentPlayer: 'ai' as const,
+  turn: 6,
+  round: 2,
+  cardsPlayedThisRound: [],
+  players: {
+    P1: {
+      id: 'P1',
+      faction: 'truth',
+      deck: [],
+      hand: [],
+      discard: [],
+      ip: 10,
+      states: ['SD'],
+    },
+    P2: {
+      id: 'P2',
+      faction: 'government',
+      deck: [],
+      hand: [],
+      discard: [],
+      ip: 12,
+      states: ['NE'],
+    },
+  },
+  states: [
+    {
+      id: 'SD',
+      name: 'South Dakota',
+      abbreviation: 'SD',
+      baseIP: 3,
+      defense: 4,
+      pressure: 3,
+      contested: false,
+      owner: 'player' as const,
+    },
+    {
+      id: 'NE',
+      name: 'Nebraska',
+      abbreviation: 'NE',
+      baseIP: 2,
+      defense: 3,
+      pressure: 0,
+      contested: false,
+      owner: 'ai' as const,
+    },
+  ],
+  controlledStates: ['NE'],
+  playerControlledStates: ['SD'],
+  aiControlledStates: ['NE'],
+  turnPlays: [],
+  turnBuffer: [],
+  log: [],
+  headlineLog: [],
+  extraExtraFeed: [],
+});
 
 const createPlanningState = () => ({
   aiHand: [MEDIA_CARD, ZONE_CARD, ATTACK_CARD, HIGH_COST_ATTACK, COMBO_MEDIA],
@@ -208,5 +287,58 @@ describe('Unified AI planning', () => {
     };
 
     expect(snapshot).toMatchSnapshot();
+  });
+
+  it('downranks repeated Grassroots Network targeting once a plan is queued', () => {
+    (EnhancedAIStrategist as unknown as {
+      globalTargetMemory: Map<string, unknown>;
+      globalMemoryTick: number;
+    }).globalTargetMemory.clear();
+    (EnhancedAIStrategist as unknown as { globalMemoryTick: number }).globalMemoryTick = 0;
+    const strategist = AIFactory.createStrategist('hard') as EnhancedAIStrategist;
+    const planningState = createGrassrootsScenario();
+
+    strategist.updateBiasModifiers({ combo: 0.05, income: 0.8 });
+    strategist.personality = {
+      ...strategist.personality,
+      territorial: 0.1,
+      aggressiveness: 0.1,
+    };
+
+    const firstPlay = strategist.selectOptimalPlay(planningState) as EnhancedCardPlay | null;
+    expect(firstPlay).not.toBeNull();
+    expect(firstPlay?.targetState).toBe('SD');
+    expect(firstPlay?.priority).toBeGreaterThanOrEqual(0.3);
+    const firstPriority = firstPlay!.priority;
+
+    strategist.registerPlannedTarget(firstPlay!.targetState ?? null, planningState.turn);
+
+    const remainingCard = firstPlay!.cardId === GRASSROOTS_A.id ? GRASSROOTS_B : GRASSROOTS_A;
+    const secondView = {
+      ...planningState,
+      aiHand: [remainingCard],
+      hand: [remainingCard],
+    };
+
+    const secondEvaluation = strategist.evaluateGameState(secondView);
+    const secondPlays = strategist.generateCardPlays(remainingCard, secondView, secondEvaluation);
+    expect(secondPlays.length).toBeGreaterThan(0);
+
+    const enhancer = strategist as unknown as {
+      enhancePlay: (
+        play: CardPlay,
+        state: Record<string, unknown>,
+        evaluation: GameStateEvaluation,
+      ) => EnhancedCardPlay;
+    };
+
+    const enhancedSecond = enhancer.enhancePlay(
+      secondPlays[0],
+      secondView as Record<string, unknown>,
+      secondEvaluation,
+    );
+    const secondPriority = enhancedSecond.priority;
+    expect(firstPriority - secondPriority).toBeCloseTo(0.22, 2);
+    expect(secondPriority).toBeLessThan(0.3);
   });
 });
