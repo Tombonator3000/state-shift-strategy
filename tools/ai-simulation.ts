@@ -139,6 +139,18 @@ interface BatchResult {
   games: GameLog[];
 }
 
+interface TrainingLogRecord {
+  runId: string;
+  timestamp: string;
+  iteration: number | null;
+  seed: number;
+  summary: BatchSummary;
+  candidateConfig: AiTuningConfig;
+  baselineConfig: AiTuningConfig;
+  simulation: SimulationOptions;
+  game: GameLog;
+}
+
 interface IterationSummary extends BatchSummary {
   iteration: number;
   intensity: number;
@@ -155,6 +167,8 @@ interface OptimizerReport {
   iterations: IterationSummary[];
   bestGames: GameLog[];
 }
+
+type TrainingLogMode = 'append' | 'overwrite';
 
 interface CliOptions {
   iterations: number;
@@ -180,6 +194,8 @@ interface CliOptions {
   overtimeTolerance: number;
   overtimeMargin: number;
   overtimeDefaultWinner: 'truth' | 'government';
+  trainingLog?: string;
+  trainingLogMode: TrainingLogMode;
 }
 
 const DEFAULT_OPTIONS: CliOptions = {
@@ -206,6 +222,8 @@ const DEFAULT_OPTIONS: CliOptions = {
   overtimeTolerance: 0,
   overtimeMargin: 0,
   overtimeDefaultWinner: 'truth',
+  trainingLog: undefined,
+  trainingLogMode: 'append',
 };
 
 function createRng(seed: number): () => number {
@@ -945,6 +963,19 @@ function parseArgs(argv: string[]): CliOptions {
         }
         if (rawValue === undefined) i++;
         break;
+      case 'trainingLog':
+        args.trainingLog = value ?? args.trainingLog;
+        if (rawValue === undefined) i++;
+        break;
+      case 'trainingLogMode':
+        if (value) {
+          const normalized = value.toLowerCase();
+          if (normalized === 'append' || normalized === 'overwrite') {
+            args.trainingLogMode = normalized as TrainingLogMode;
+          }
+        }
+        if (rawValue === undefined) i++;
+        break;
       default:
         break;
     }
@@ -1075,6 +1106,35 @@ async function main(): Promise<void> {
   const outputPath = path.resolve(rootDir, cli.output);
   await ensureDirectory(outputPath);
   await fs.writeFile(outputPath, JSON.stringify(report, null, 2), 'utf-8');
+
+  const resolvedSummary = bestSummary ?? baselineBatch.summary;
+  if (cli.trainingLog && resolvedSummary) {
+    const trainingPath = path.resolve(rootDir, cli.trainingLog);
+    await ensureDirectory(trainingPath);
+    if (cli.trainingLogMode === 'overwrite') {
+      await fs.writeFile(trainingPath, '', 'utf-8');
+    }
+
+    const runId = `${report.timestamp.replace(/[:.]/g, '-')}-seed${cli.seed}`;
+    const iterationIndex = bestIteration?.iteration ?? null;
+    const baseRecord: Omit<TrainingLogRecord, 'game'> = {
+      runId,
+      timestamp: report.timestamp,
+      iteration: iterationIndex,
+      seed: cli.seed,
+      summary: resolvedSummary,
+      candidateConfig: bestConfig,
+      baselineConfig,
+      simulation: simulationOptions,
+    };
+
+    for (const game of report.bestGames) {
+      const record: TrainingLogRecord = { ...baseRecord, game };
+      await fs.appendFile(trainingPath, `${JSON.stringify(record)}\n`, 'utf-8');
+    }
+
+    console.log(`Training data appended to ${trainingPath}`);
+  }
 
   console.log(`Baseline score: ${baselineBatch.summary.score.toFixed(3)}`);
   if (improved && bestIteration) {
