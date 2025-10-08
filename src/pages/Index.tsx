@@ -13,6 +13,7 @@ import TabloidNewspaper from '@/components/game/TabloidNewspaper';
 import GameMenu from '@/components/game/GameMenu';
 import SecretAgenda from '@/components/game/SecretAgenda';
 import AIStatus from '@/components/game/AIStatus';
+import { AI_EDITORS } from '@/ai/editors';
 import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashboard';
 import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
@@ -2287,6 +2288,8 @@ const Index = () => {
     ? Math.min(100, (aiAgenda.progress / aiAgenda.target) * 100)
     : 0;
   const aiAssessment = gameState.aiStrategist?.getStrategicAssessment(gameState);
+  const aiEditorProfile = gameState.aiEditor ? AI_EDITORS[gameState.aiEditor] : null;
+  const aiOpponentName = aiEditorProfile?.name ?? gameState.aiStrategist?.personality.name ?? null;
   const secretAgendasEnabled = gameState.secretAgendasEnabled !== false;
 
   const renderSecretAgendaPanel = (variant: 'overlay' | 'mobile') => {
@@ -2432,10 +2435,8 @@ const Index = () => {
     return (
       <div className="space-y-3 text-[11px] text-newspaper-text/90">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">Handler</span>
-          <span className="font-mono text-newspaper-text">
-            {gameState.aiStrategist?.personality.name || 'Unknown'}
-          </span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">Editor</span>
+          <span className="font-mono text-newspaper-text">{aiOpponentName ?? 'Unknown'}</span>
         </div>
         <div className="grid grid-cols-2 gap-2 text-center">
           <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
@@ -2505,7 +2506,7 @@ const Index = () => {
         <div className="rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
           <AIStatus
             difficulty={gameState.aiDifficulty}
-            personalityName={gameState.aiStrategist?.personality.name}
+            editorName={aiOpponentName ?? undefined}
             isThinking={gameState.phase === 'ai_turn'}
             currentPlayer={gameState.currentPlayer}
             aiControlledStates={aiControlledStates}
