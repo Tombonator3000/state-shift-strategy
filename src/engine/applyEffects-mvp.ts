@@ -182,28 +182,25 @@ export function applyEffectsMvp(
       ? opts.truthMultiplier
       : 1;
     let delta = baseDelta;
-    // [AI-EDITORS] MEDIA truth and ZONE pressure adjustments for AI editor
     try {
-      const expansions = (state as any)?.expansions;
-      const aiEditorsEnabled = expansions?.aiEditors ?? true;
-      const playersAny = state.players as unknown as Record<string, any>;
-      const ownerState = playersAny?.[owner];
-      const isAiOwner = owner === 'AI' || Boolean(ownerState?.isAI);
-      if (aiEditorsEnabled && isAiOwner) {
-        const aiState =
-          owner === 'AI'
-            ? ((state as any).players?.AI ?? ownerState)
-            : ownerState ?? ((state as any).players?.AI as Record<string, any> | undefined);
-        const aiEditorId = (aiState?.activeEditor ?? aiState?.activeEditorId) as string | undefined;
-        if (aiEditorId) {
-          const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
-          const eff = resolveEffectiveMods(getAiEditor(aiEditorId as any), diff);
-          state.truth += eff.mediaTruthDelta ?? 0;
+      if ((state as any)?.expansions?.aiEditors ?? true) {
+        const playersAny = state.players as unknown as Record<string, any>;
+        const ownerState = playersAny?.[owner];
+        const isAiOwner = owner === 'AI' || Boolean(ownerState?.isAI);
+        if (isAiOwner) {
+          const ai = (state as any)?.players?.AI ?? (state as any)?.players?.ai ?? ownerState ?? null;
+          const activeId = ai?.activeEditor ?? ai?.activeEditorId;
+          if (activeId) {
+            const editor = getAiEditor(activeId as any);
+            if (editor) {
+              const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
+              const eff = resolveEffectiveMods(editor, diff);
+              state.truth += eff.mediaTruthDelta ?? 0;
+            }
+          }
         }
       }
-    } catch {
-      /* no-op */
-    }
+    } catch {}
     if (multiplier !== 1 && baseDelta !== 0) {
       const scaled = Math.round(Math.abs(baseDelta) * multiplier);
       delta = baseDelta >= 0 ? scaled : -scaled;
@@ -252,28 +249,25 @@ export function applyEffectsMvp(
     const editor = lookupEditorById(state.players[owner]?.activeEditorId ?? undefined);
     const zoneEffects = card.effects as EffectsZONE;
     let pressureDelta = zoneEffects.pressureDelta;
-    // [AI-EDITORS] MEDIA truth and ZONE pressure adjustments for AI editor
     try {
-      const expansions = (state as any)?.expansions;
-      const aiEditorsEnabled = expansions?.aiEditors ?? true;
-      const playersAny = state.players as unknown as Record<string, any>;
-      const ownerState = playersAny?.[owner];
-      const isAiOwner = owner === 'AI' || Boolean(ownerState?.isAI);
-      if (aiEditorsEnabled && isAiOwner) {
-        const aiState =
-          owner === 'AI'
-            ? ((state as any).players?.AI ?? ownerState)
-            : ownerState ?? ((state as any).players?.AI as Record<string, any> | undefined);
-        const aiEditorId = (aiState?.activeEditor ?? aiState?.activeEditorId) as string | undefined;
-        if (aiEditorId) {
-          const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
-          const eff = resolveEffectiveMods(getAiEditor(aiEditorId as any), diff);
-          pressureDelta += eff.zonePressureBonus ?? 0;
+      if ((state as any)?.expansions?.aiEditors ?? true) {
+        const playersAny = state.players as unknown as Record<string, any>;
+        const ownerState = playersAny?.[owner];
+        const isAiOwner = owner === 'AI' || Boolean(ownerState?.isAI);
+        if (isAiOwner) {
+          const ai = (state as any)?.players?.AI ?? (state as any)?.players?.ai ?? ownerState ?? null;
+          const activeId = ai?.activeEditor ?? ai?.activeEditorId;
+          if (activeId) {
+            const editor = getAiEditor(activeId as any);
+            if (editor) {
+              const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
+              const eff = resolveEffectiveMods(editor, diff);
+              pressureDelta += eff.zonePressureBonus ?? 0;
+            }
+          }
         }
       }
-    } catch {
-      /* no-op */
-    }
+    } catch {}
 
     if (editor) {
       const effects = getEditorAggregatedEffects(editor);

@@ -292,6 +292,13 @@ export function computeTurnIpIncome(
 
 export function startTurn(state: GameState): GameState {
   const cloned = cloneGameState(state);
+  try {
+    void import('@/game/aiEditorBinding')
+      .then(module => {
+        module.ensureAiEditorSelected?.(cloned);
+      })
+      .catch(() => {});
+  } catch {}
   ensureAiEditorSelected(cloned);
   const currentId = cloned.currentPlayer;
   const me = cloned.players[currentId];
@@ -318,32 +325,25 @@ export function startTurn(state: GameState): GameState {
     opponent,
   );
   let income = netIncome;
-  // [AI-EDITORS] scale IP income by editor+difficulty if AI Editors expansion is active
   try {
-    const options = (state as any)?.options;
-    const expansions = (state as any)?.expansions;
-    const aiEditorsEnabled = expansions?.aiEditors ?? true;
-    const playersAny = cloned.players as Record<string, unknown>;
-    const currentPlayerState = playersAny?.[currentId] as Record<string, unknown> | undefined;
-    const isAiTurn = cloned.currentPlayer === 'AI' || Boolean(currentPlayerState?.isAI);
-    if (aiEditorsEnabled && isAiTurn) {
-      const aiState =
-        cloned.currentPlayer === 'AI'
-          ? ((playersAny as Record<string, unknown>)?.AI as Record<string, unknown> | undefined) ?? currentPlayerState
-          : currentPlayerState ?? ((playersAny as Record<string, unknown>)?.AI as Record<string, unknown> | undefined);
-      const aiEditorId = (aiState?.activeEditor ?? aiState?.activeEditorId) as string | undefined;
-      if (aiEditorId) {
-        const diff = (options?.difficulty ?? 'NORMAL') as any;
-        const editor = getAiEditor(aiEditorId as any);
-        if (editor) {
-          const eff = resolveEffectiveMods(editor, diff);
-          income = Math.round(income * (eff.ipIncomeScalar ?? 1));
+    if ((state as any)?.expansions?.aiEditors ?? true) {
+      const playersAny = cloned.players as unknown as Record<string, any>;
+      const currentPlayerState = playersAny?.[currentId];
+      const isAiTurn = cloned.currentPlayer === 'AI' || Boolean(currentPlayerState?.isAI);
+      if (isAiTurn) {
+        const ai = (state as any)?.players?.AI ?? (state as any)?.players?.ai ?? currentPlayerState ?? null;
+        const activeId = ai?.activeEditor ?? ai?.activeEditorId;
+        if (activeId) {
+          const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
+          const editor = getAiEditor(activeId as any);
+          if (editor) {
+            const eff = resolveEffectiveMods(editor, diff);
+            income = Math.round(income * (eff.ipIncomeScalar ?? 1));
+          }
         }
       }
     }
-  } catch {
-    /* no-op */
-  }
+  } catch {}
   const logEntries = relicResult.logEntries.length
     ? [...cloned.log, ...relicResult.logEntries]
     : [...cloned.log];
@@ -460,27 +460,22 @@ export function canPlay(
   }
 
   let effectiveCost = getEffectiveCardCost(state, state.currentPlayer, card);
-  // [AI-EDITORS] adjust ATTACK cost for AI according to editor
   try {
-    const expansions = (state as any)?.expansions;
-    const aiEditorsEnabled = expansions?.aiEditors ?? true;
-    const isAiPlayer = state.currentPlayer === 'AI' || Boolean((player as any)?.isAI);
-    if (card.type === 'ATTACK' && isAiPlayer && aiEditorsEnabled) {
-      const playersAny = state.players as unknown as Record<string, any>;
-      const aiState =
-        state.currentPlayer === 'AI'
-          ? playersAny?.AI ?? playersAny?.[state.currentPlayer]
-          : playersAny?.[state.currentPlayer] ?? playersAny?.AI;
-      const aiEditorId = (aiState?.activeEditor ?? aiState?.activeEditorId) as string | undefined;
-      if (aiEditorId) {
-        const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
-        const eff = resolveEffectiveMods(getAiEditor(aiEditorId as any), diff);
-        effectiveCost += eff.attackCostDelta ?? 0;
+    if ((state as any)?.expansions?.aiEditors ?? true) {
+      if (player?.isAI && card?.type === 'ATTACK') {
+        const ai = (state as any)?.players?.AI ?? (state as any)?.players?.ai ?? player ?? null;
+        const activeId = ai?.activeEditor ?? ai?.activeEditorId;
+        if (activeId) {
+          const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
+          const editor = getAiEditor(activeId as any);
+          if (editor) {
+            const eff = resolveEffectiveMods(editor, diff);
+            effectiveCost += eff.attackCostDelta ?? 0;
+          }
+        }
       }
     }
-  } catch {
-    /* no-op */
-  }
+  } catch {}
 
   if (player.ip < effectiveCost) {
     return { ok: false, reason: 'insufficient-ip' };
