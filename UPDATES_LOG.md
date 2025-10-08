@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-13 – Wire AI editor runtime hooks into MVP engine
+- Bound the AI editor selection helper defensively at turn start, scaling income, attack costs, and MEDIA/ZONE payoffs by the active editor's modifiers.
+- Ensured the MVP resolver respects editor difficulty scalars even when AI expansions are toggled lazily for older save data.
+
 ## 2025-11-12 – Calibrate AI editor roster data
 - Added canonical editor profiles with difficulty tiers, personalities, and runtime modifiers so AI selection stays coherent.
 - Introduced difficulty multipliers, recommendation helpers, image URL utilities, and banter loaders for every roster member.
