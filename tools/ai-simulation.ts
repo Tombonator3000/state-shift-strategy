@@ -460,12 +460,14 @@ function buildOvertimeState(
   const truthSide: Side = state.factions.A === 'truth' ? 'A' : 'B';
   const governmentSide: Side = truthSide === 'A' ? 'B' : 'A';
 
+  const truthPivot = options.overtimePivot ?? state.startingTruth ?? 50;
+
   return {
     turn: state.turn,
     maxTurns: state.maxTurns,
     truth: state.truth,
     startingTruth: state.startingTruth,
-    truthMomentum: state.truth - state.startingTruth,
+    truthMomentum: state.truth - truthPivot,
     truthHistory,
     truthControlledStates,
     governmentControlledStates,
@@ -473,7 +475,7 @@ function buildOvertimeState(
     governmentIp: state.ip[governmentSide],
     overtimeConfig: {
       maxTurns: state.maxTurns,
-      truthPivot: options.overtimePivot ?? state.startingTruth,
+      truthPivot: truthPivot,
       truthTolerance: options.overtimeTolerance,
       territoryMargin: options.overtimeMargin,
       defaultWinner: options.overtimeDefaultWinner,
