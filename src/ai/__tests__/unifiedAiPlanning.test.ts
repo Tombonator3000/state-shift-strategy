@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
 import '@/test/setupLocalStorage';
+import { AI_PRESETS } from '@/ai/difficulty';
 import { chooseTurnActions } from '@/ai/enhancedController';
 import type { Difficulty } from '@/ai';
-import { AIFactory } from '@/data/aiFactory';
+import { AIFactory, toEnhancedProfile } from '@/data/aiFactory';
 import type { AIDifficulty, AIStrategist, CardPlay, GameStateEvaluation } from '@/data/aiStrategy';
 import { EnhancedAIStrategist, type EnhancedCardPlay } from '@/data/enhancedAIStrategy';
 import type { GameCard } from '@/rules/mvp';
@@ -374,6 +375,22 @@ describe('Unified AI planning', () => {
 
   afterEach(() => {
     Math.random = originalRandom;
+  });
+
+  it('assigns increasing rollout budgets with difficulty presets', () => {
+    const mediumProfile = toEnhancedProfile(AI_PRESETS.NORMAL);
+    const hardProfile = toEnhancedProfile(AI_PRESETS.HARD);
+    const insaneProfile = toEnhancedProfile(AI_PRESETS.INSANE);
+
+    const mediumRollouts = Math.round(mediumProfile.rollouts ?? 0);
+    const hardRollouts = Math.round(hardProfile.rollouts ?? 0);
+    const insaneRollouts = Math.round(insaneProfile.rollouts ?? 0);
+
+    expect(hardRollouts).toBeGreaterThan(mediumRollouts);
+    expect(insaneRollouts).toBeGreaterThan(hardRollouts);
+    expect(hardRollouts).toBeGreaterThanOrEqual(48);
+    expect(insaneRollouts).toBeGreaterThanOrEqual(120);
+    expect(mediumRollouts).toBeLessThan(200);
   });
 
   it.each(DIFFICULTIES)('produces a deterministic plan on %s difficulty', difficulty => {

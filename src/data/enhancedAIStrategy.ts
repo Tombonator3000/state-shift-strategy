@@ -445,9 +445,10 @@ export class EnhancedAIStrategist implements AIStrategist {
 
     // Use MCTS only on hard+ difficulties due to computational cost
     if (this.personality.planningDepth >= 3) {
-      const iterations = this.difficultyProfile.rollouts && this.difficultyProfile.rollouts > 0
-        ? Math.max(200, Math.round(this.difficultyProfile.rollouts))
-        : this.personality.planningDepth * 500;
+      const rolloutBudget = this.difficultyProfile.rollouts ?? 0;
+      const iterations = rolloutBudget > 0
+        ? Math.max(1, Math.round(rolloutBudget))
+        : Math.max(1, this.personality.planningDepth * 500);
       return this.runMCTS(gameState, iterations, evaluation); // iterations
     }
 

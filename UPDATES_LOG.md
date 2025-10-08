@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-24 – Calibrate enhanced AI rollout budgets
+- Let enhanced MCTS difficulties respect the tuned rollout budgets (medium ≈16, hard ≈48, insane ≈120) instead of forcing a 200-iteration floor.
+- Documented the rollout multiplier in the AI factory so future tuning can bump the shared budget knob intentionally.
+
 ## 2025-11-23 – Hard AI reprioritizes neutral captures
 - Weighted ZONE capture pressure by combined IP value, location leverage, and defense so neutral haymakers outshine low-importance grabs.
 - Tuned pressure heuristics to respect that valuation during turn planning, keeping Hard difficulty focused on high-IP swing states.
