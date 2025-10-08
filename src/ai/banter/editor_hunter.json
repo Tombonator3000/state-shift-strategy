@@ -1,0 +1,22 @@
+{"locale":"en-US","rateLimit":{"minTurnGap":1,"maxPerTurn":2},"triggers":{
+  "onCardPlay_media_self":[
+    "Ink, booze, and ballistic truth inbound.",
+    "Kick the presses till they scream.",
+    "I file copy like it's a riot report."
+  ],
+  "onStateCaptured_self":[
+    "Another jurisdiction swallows the fear and loathing.",
+    "Stake the flag in a whirlwind of subpoenas.",
+    "Map just started hallucinating in our favor."
+  ],
+  "onVictory_self":[
+    "We won, but the hangover will debrief us later.",
+    "Fear no longer, the ether did the talking.",
+    "Pack the suitcase full of liberated memos."
+  ],
+  "idle":[
+    "Rolling another page of gonzo gospel.",
+    "Checking the desk drawer for bugs and bourbon.",
+    "Typewriter's teeth need more caffeine."
+  ]
+}}

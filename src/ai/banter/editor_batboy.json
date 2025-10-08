@@ -1,0 +1,22 @@
+{"locale":"en-US","rateLimit":{"minTurnGap":1,"maxPerTurn":2},"triggers":{
+  "onCardPlay_media_self":[
+    "Echoing sonar scoop across the tabloids!",
+    "Wingbeats translate to headlines tonight.",
+    "Claws on the keyboard, truth in the cave."
+  ],
+  "onStateCaptured_self":[
+    "Another cavern annexed for the colony.",
+    "String up a guano garland on that state.",
+    "Radar shows their silence collapsing."
+  ],
+  "onVictory_self":[
+    "Shriek of triumph rattles the Pentagon rafters.",
+    "No daylight can erase what we've unearthed.",
+    "Roost secured; secrets now roost with us."
+  ],
+  "idle":[
+    "Hanging upside down to brainstorm.",
+    "Tasting the air for fresh cover stories.",
+    "Adjusting night-vision contacts for fine print."
+  ]
+}}

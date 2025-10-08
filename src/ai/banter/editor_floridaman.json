@@ -1,0 +1,22 @@
+{"locale":"en-US","rateLimit":{"minTurnGap":1,"maxPerTurn":2},"triggers":{
+  "onCardPlay_media_self":[
+    "Broadcasting live from the swamp tower!",
+    "Hold my gator, I got a headline.",
+    "Hotter scoop than asphalt at noon."
+  ],
+  "onStateCaptured_self":[
+    "Another county falls to the airboat network.",
+    "Stamp it with a citrus sigil.",
+    "Map's starting to look like a lizard sunning itself."
+  ],
+  "onVictory_self":[
+    "Told you the hurricane conspiracy had tiers.",
+    "We ride at dawn, powered by imported humidity.",
+    "Anyone else smell fried cover-up?"
+  ],
+  "idle":[
+    "BRB, wrestling a bureaucracy made of iguanas.",
+    "Need more sunscreen for the truth.",
+    "Fishing for rumors with dynamite again."
+  ]
+}}

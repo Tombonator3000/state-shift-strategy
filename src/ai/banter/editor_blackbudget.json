@@ -1,0 +1,22 @@
+{"locale":"en-US","rateLimit":{"minTurnGap":1,"maxPerTurn":2},"triggers":{
+  "onCardPlay_media_opponent":[
+    "Did your funding request clear the ritual ledger?",
+    "Unauthorized expense: one doomed headline.",
+    "We amortized your exposé into oblivion."
+  ],
+  "onStateCaptured_self":[
+    "Ledger note: asset acquisition successful.",
+    "Balance sheet now includes their broadcast tower.",
+    "Transfer those whispers to the offshore vault."
+  ],
+  "onVictory_self":[
+    "All accounts reconciled, dissent bankrupt.",
+    "Our surplus paid for your silence.",
+    "Profits routed to Project Quiet Dividend."
+  ],
+  "idle":[
+    "Reforecasting next quarter's rumor suppression.",
+    "Counting gold bars stamped with NDAs.",
+    "Auditing the cult accountants again."
+  ]
+}}

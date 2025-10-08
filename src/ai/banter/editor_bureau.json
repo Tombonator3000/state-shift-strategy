@@ -1,0 +1,22 @@
+{"locale":"en-US","rateLimit":{"minTurnGap":1,"maxPerTurn":2},"triggers":{
+  "onCardPlay_media_opponent":[
+    "Your leak just signed in triplicate.",
+    "Another whisper routed to the shredder maze.",
+    "We redact before you even type."
+  ],
+  "onStateCaptured_self":[
+    "Filed under 'Operation Whisper Dam'.",
+    "Seal the vault; their rumor mill is ours now.",
+    "The bureaucracy spores into new territory."
+  ],
+  "onVictory_self":[
+    "Consider this briefing concluded.",
+    "Every witness now works for us.",
+    "Your dissent dissolved into procedural jelly."
+  ],
+  "idle":[
+    "Cataloging conspiracies alphabetically.",
+    "Listening to pneumatic tubes gossip.",
+    "Drafting a memo to remind you of the last memo."
+  ]
+}}
