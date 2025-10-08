@@ -118,7 +118,7 @@ type BankArticle = {
 };
 
 let bankArticles = new Map<string, BankArticle>();
-let activeIssue = buildIssue();
+let activeIssue: NarrativeIssue;
 
 const loadArticleBankMock = mock(async () => ({
   getById(id: string) {
@@ -174,6 +174,8 @@ const buildIssue = (): NarrativeIssue => ({
   generatedStory: buildGeneratedStory(),
 });
 
+activeIssue = buildIssue();
+
 mock.module('@/engine/newspaper/IssueGenerator', () => ({
   generateIssue: async () => activeIssue,
 }));
@@ -225,7 +227,7 @@ afterAll(() => {
 });
 
 describe('TabloidNewspaperV2 front page integration', () => {
-  test('renders hero headline without duplicating dispatch headlines', async () => {
+  test('renders dispatch column when triple-play articles are available', async () => {
     bankArticles = new Map(
       articleFixtures.slice(1).map(entry => [
         entry.cardId,
@@ -246,10 +248,13 @@ describe('TabloidNewspaperV2 front page integration', () => {
     const heroHeadlineText = heroHeading.textContent ?? '';
     expect(heroHeadlineText).toContain('Hero Entry Overrides Prime Time');
 
-    expect(screen.queryByRole('heading', { name: /Extra Extra Dispatch/i })).toBeNull();
+    const dispatchHeading = await screen.findByRole('heading', { name: /Extra Extra Dispatch/i });
+    expect(dispatchHeading).toBeTruthy();
+    expect(screen.getByText('Dispatch Two Surges Signal')).toBeTruthy();
+    expect(screen.getByText('Dispatch Three Containment Grid')).toBeTruthy();
   });
 
-  test('does not render dispatch column when article bank is empty', async () => {
+  test('does not render dispatch column when no triple-play articles are generated', async () => {
     loadArticleBankMock.mockImplementationOnce(async () => ({
       getById() {
         return null;
@@ -259,10 +264,7 @@ describe('TabloidNewspaperV2 front page integration', () => {
       },
     }));
 
-    activeIssue.generatedStory.articles = activeIssue.generatedStory.articles.map(article => ({
-      ...article,
-      body: [],
-    }));
+    activeIssue.generatedStory.articles = [];
 
     render(<TabloidNewspaperV2 {...baseProps} />);
 
