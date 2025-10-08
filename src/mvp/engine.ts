@@ -61,13 +61,14 @@ const shuffleCards = (cards: Card[], rng: () => number): Card[] => {
 const drawUpToFive = (
   player: PlayerState,
   rng: () => number = Math.random,
+  targetHandSize = 5,
 ): { player: PlayerState; reshuffled: boolean } => {
   const deck = [...player.deck];
   const hand = [...player.hand];
   const discard = [...player.discard];
   let reshuffled = false;
 
-  while (hand.length < 5) {
+  while (hand.length < targetHandSize) {
     if (deck.length === 0) {
       if (discard.length === 0) {
         break;
@@ -354,6 +355,7 @@ export function startTurn(state: GameState): GameState {
   me.ip = relicResult.ip;
   opponent.ip = relicResult.aiIp;
   cloned.tabloidRelicsRuntime = relicResult.runtime;
+  const bonusCardDraw = Math.max(0, relicResult.bonusCardDraw ?? 0);
   const { baseIncome, maintenance, swingTax, catchUpBonus, netIncome, ipGap, stateGap, stateIncomeDetails } = computeTurnIpIncome(
     me,
     opponent,
@@ -458,10 +460,21 @@ export function startTurn(state: GameState): GameState {
     discard: workingDiscard,
   };
 
-  const { player: drawnPlayer, reshuffled } = drawUpToFive(preparedPlayer);
+  const initialHandSize = preparedPlayer.hand.length;
+  const targetHandSize = 5 + bonusCardDraw;
+  const { player: drawnPlayer, reshuffled } = drawUpToFive(preparedPlayer, Math.random, targetHandSize);
+  const cardsDrawn = Math.max(0, drawnPlayer.hand.length - initialHandSize);
 
   if (reshuffled) {
     logEntries.push(`${currentId} reshuffles discard into deck.`);
+  }
+
+  if (bonusCardDraw > 0) {
+    const shortfall = Math.max(0, targetHandSize - drawnPlayer.hand.length);
+    const shortfallNote = shortfall > 0 ? ` (short ${shortfall})` : '';
+    logEntries.push(
+      `${currentId} draw phase targets ${targetHandSize} cards (includes +${bonusCardDraw} relic bonus, drew ${cardsDrawn})${shortfallNote}.`,
+    );
   }
 
   const updatedPlayer: PlayerState = {
