@@ -23,6 +23,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Added regression coverage ensuring TabloidNewspaperV2 renders unique hero headlines against the dispatch list.
 - Confirmed hero dispatch absences fall back to redacted copy instead of duplicating the main headline.
 
+## 2025-10-08 – Difficulty-aware AI editor binding
+- Map AI difficulty settings to the new editor roster, falling back from legacy IDs and automatically selecting the correct partner at game start.
+- Added runtime safety nets so MVP engines auto-bind an editor before applying difficulty-scaled modifiers.
+
 ## 2025-10-08 – Established AI editor roster and banter stubs
 - Replaced legacy editor prototypes with faction-aligned profiles including difficulty tiers, personalities, and runtime modifiers.
 - Published shared difficulty multipliers, recommendation helpers, and banter bank loader typings to anchor AI selection.

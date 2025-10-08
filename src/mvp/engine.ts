@@ -14,6 +14,7 @@ import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerS
 import type { MediaResolutionOptions } from './media';
 import { applyTruthDelta } from '@/utils/truth';
 import { resolveEffectiveMods } from '@/game/editorRuntimeModifiers';
+import { ensureAiEditorSelected } from '@/game/aiEditorBinding';
 import {
   getEditorAggregatedEffects,
   getEditorById as lookupEditorById,
@@ -291,6 +292,7 @@ export function computeTurnIpIncome(
 
 export function startTurn(state: GameState): GameState {
   const cloned = cloneGameState(state);
+  ensureAiEditorSelected(cloned);
   const currentId = cloned.currentPlayer;
   const me = cloned.players[currentId];
   const opponent = cloned.players[otherPlayer(currentId)];
@@ -447,6 +449,7 @@ export function canPlay(
   card: Card,
   targetStateId?: string,
 ): { ok: boolean; reason?: string; cost?: number } {
+  ensureAiEditorSelected(state);
   if (state.playsThisTurn >= 3) {
     return { ok: false, reason: 'play-limit' };
   }
@@ -503,6 +506,7 @@ export function playCard(
   rng: () => number = Math.random,
 ): GameState {
   const cloned = cloneGameState(state);
+  ensureAiEditorSelected(cloned);
   const currentId = cloned.currentPlayer;
   const player = cloned.players[currentId];
   const cardIndex = player.hand.findIndex(card => card.id === cardId);
