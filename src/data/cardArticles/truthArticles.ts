@@ -198,9 +198,209 @@ Brands have offered Morrison endorsement deals worth an estimated $4.7 million. 
     ]
   },
 
-  // Articles 9-50 continue with same detailed format...
-  // For brevity, I'll include a few more key examples:
 
+  {
+    cardId: 'TRUTH-009',
+    faction: 'truth',
+    headline: 'ALABAMA RADIO HOST PICKS UP CIVIL WAR BROADCAST FROM TOMORROW NIGHT',
+    subhead: 'Montgomery ham operator records spectral soldiers debating SEC standings',
+    byline: 'By Keisha Rollins, Temporal Interference Correspondent',
+    body: `Community radio host Lawrence "Buzz" Riddick was tuning his late-night conspiracy show across unused frequencies when a crisp voice crackled through the static—identifying itself as Lieutenant Hiram Collins of the 3rd Alabama Infantry, transmitting from May 12, 1865, by way of "temporal rebound."
+
+Collins' broadcast, captured in full on reel-to-reel tape, included tactical updates, a recipe for chicory coffee, and a heated argument with an unseen sergeant about the Auburn Tigers' chances next season. Historians note college football would not exist for another 24 years.
+
+"They kept asking if 'Coach Saban' had secured the perimeter," Riddick recounted, still visibly shaking. "I told them he's retired, which made them say the timeline was compromised. Then the signal cut out and my station clock jumped ahead six minutes."
+
+The Alabama Historical Commission has cordoned off Riddick's studio "for calibration" while the Department of Defense insists the recording is an elaborate hoax. Meanwhile, local tailgate groups are organizing a "Temporal Pep Rally" to welcome the spectral squad if they call again.`,
+    imagePrompt: 'Ham radio studio cluttered with vintage equipment, ghostly Civil War soldiers reflected in window, newsprint grain',
+    tags: ['time-anomaly', 'broadcast', 'civil-war'],
+    statesMentioned: ['Alabama'],
+    recurringCharacter: null,
+    followUpHooks: [
+      'University of Alabama physics department requests tape and immediately loses it',
+      'SEC schedules emergency meeting to address "chronological recruiting"'
+    ]
+  },
+  {
+    cardId: 'TRUTH-011',
+    faction: 'truth',
+    headline: 'AURORA BOREALIS TURNS INTO SHOPPING LIST—TINFOIL ENTREPRENEUR TAKES THE HINT',
+    subhead: 'Northern lights display spells out inventory orders over Fairbanks skyline',
+    byline: 'By Lena Tavik, Polar Phenomena Beat',
+    body: `Residents of Fairbanks, Alaska, reported seeing shimmering emerald words materialize within Tuesday night's aurora: "TINPLATE," "QUANTUM VELVET," and "BRING MORE HAND WARMERS." The luminous list scrolled repeatedly for eighteen minutes before dissolving into the usual curtains of light.
+
+Maria Chen, Roswell's famed tinfoil haberdasher, just happened to be hosting her first Arctic pop-up shop that evening. "I was testing a portable paranoia kiosk," Chen explained, zipping up a parka lined with reflective foil. "When the sky places an order, you fulfill it. I'm not arguing with cosmic clientele."
+
+Within hours, Chen's booth sold out of every metallic accessory, including experimental aurora antennae designed to "catch whispers from the magnetosphere." Local scientists claim the glowing grocery list was a trick of geomagnetic storms, yet several admitted privately they placed rush orders for Chen's new line of anti-hypnosis earmuffs.`,
+    imagePrompt: 'Aurora borealis above snowy Fairbanks street market, glowing letters spelling supply list, newsprint photograph',
+    tags: ['aurora', 'commerce', 'anomaly'],
+    statesMentioned: ['Alaska'],
+    recurringCharacter: 'Maria Chen',
+    followUpHooks: [
+      'Chen announces permanent "Northern Lights Loyalty Program" with classified perks',
+      'NOAA satellites detect coupon codes embedded in solar wind'
+    ]
+  },
+  {
+    cardId: 'TRUTH-012',
+    faction: 'truth',
+    headline: 'ARIZONA PETROGLYPHS UPDATE THEMSELVES OVERNIGHT—NOW FEATURING WIFI PASSWORD',
+    subhead: 'Tribal monitors baffled as ancient carvings add QR code pointing to deep-space livestream',
+    byline: 'By Mateo Ruiz, Desert Mystery Reporter',
+    body: `Caretakers at Canyon Echo Preserve near Sedona arrived Wednesday to find a new panel of petroglyphs carved into sandstone—depicting precise orbital diagrams, an unfamiliar star map, and a scannable QR code etched with laser-like accuracy.
+
+"The panel is at least 1,200 years old," said archaeologist Dr. Nyla Begay. "We dated lichen growth yesterday. Today the same surface features a password: 'open_the_gateway'. Lichens do not grow overnight. Neither do QR codes."
+
+Visitors who scanned the code briefly accessed a live video feed of what appeared to be a horizon lined with obelisks under a violet sky. The stream ended abruptly when park rangers covered the panel with canvas. Federal officials now cite "digital preservation concerns" while visitors claim the rocks hum softly after sunset.`,
+    imagePrompt: 'Red rock canyon wall with glowing petroglyphs including QR code, desert night sky, monochrome tabloid style',
+    tags: ['ancient-tech', 'qr-code', 'ufo'],
+    statesMentioned: ['Arizona'],
+    recurringCharacter: null,
+    followUpHooks: [
+      'Tourists report receiving push notifications in unknown constellation patterns',
+      'Smithsonian denies rushing portable laser scanners to Sedona—despite shipping manifest'
+    ]
+  },
+  {
+    cardId: 'TRUTH-013',
+    faction: 'truth',
+    headline: 'ARKANSAS RICE FIELD FORMS PERFECT CIRCUIT—TRACTOR STARTS SPEAKING BINARY',
+    subhead: 'Delta farmers decode crop circle instructions for DIY weather machine',
+    byline: 'By Rochelle Gaines, Agro-Anomaly Bureau',
+    body: `Farmers outside Stuttgart, Arkansas, woke to find their rice paddies reorganized into a glistening spiral of irrigation ditches shaped like a printed circuit board. The design channels runoff into a central pond where a lone scarecrow now emits rhythmic beeps.
+
+Electrical engineer Malik Jefferson analyzed the audio and confirmed it as eight-bit binary repeating the phrase "SYNC THE SKY." When the farm's antique tractor idled nearby, its exhaust plumes aligned with the spiral and formed glowing droplets that hovered three feet off the ground.
+
+"It's like the whole field wants to become a weather computer," Jefferson said, toggling switches on a hastily assembled control panel. State officials arrived with soil sample kits and politely requested everyone "forget the talking tractor" while they handled "routine levee maintenance." Locals instead hosted a cookout, selling "Binary Biscuits" while the scarecrow continued pulsing instructions.`,
+    imagePrompt: 'Aerial view of rice field shaped like circuit board, vintage tractor with glowing exhaust, newsprint grain',
+    tags: ['crop-circle', 'techno-magic', 'farming'],
+    statesMentioned: ['Arkansas'],
+    recurringCharacter: null,
+    followUpHooks: [
+      'Arkansas Cooperative Extension issues pamphlet titled "How to Decline Sentient Machinery"',
+      'Scarecrow firmware update scheduled for next thunderstorm'
+    ]
+  },
+  {
+    cardId: 'TRUTH-014',
+    faction: 'truth',
+    headline: 'CONNECTICUT TOWN LIBRARY CHECKS OUT BOOK THAT WRITES BACK',
+    subhead: 'Mystic patrons receive personalized footnotes advising against property tax compliance',
+    byline: 'By Asha Patel, Annotated Phenomena Desk',
+    body: `The Mystic Free Library's inter-library loan system delivered an unmarked tome titled *Ledger of the Unheard Majority*. By morning, every margin contained fresh ink responding to whoever last touched the page.
+
+"I underlined a sentence about municipal bonds and the book underlined me back," said librarian Everett Sloan. "It scribbled, 'Your town hall basement is hollow—ask about the echo.'" Several patrons confirmed the tome offered specific, eerily relevant advice, including a detailed recipe for invisibility chowder.
+
+Town officials confiscated the book "for auditing," yet it reappeared on the returns cart each night accompanied by handwritten late fees payable in "civic courage." The Governor's office insists the phenomenon is a viral marketing stunt, though the state budget website now displays invisible ink when printed.`,
+    imagePrompt: 'Cozy New England library table with open book showing glowing handwritten notes, newsprint photograph',
+    tags: ['library', 'sentient-text', 'civic-duty'],
+    statesMentioned: ['Connecticut'],
+    recurringCharacter: null,
+    followUpHooks: [
+      'Mystic town meeting agenda replaced with blank pages that whisper when folded',
+      'State comptroller denies installing "metaphysical audit" line item'
+    ]
+  },
+  {
+    cardId: 'TRUTH-015',
+    faction: 'truth',
+    headline: 'FLORIDA MAN SURFS HURRICANE, DELIVERS MAIL TO EVERY HOUSE ON ROUTE',
+    subhead: 'Key West residents applaud "stormside service" as postal inspectors faint',
+    byline: 'By Jasmine Ortiz, Sunshine State Shenanigans Reporter',
+    body: `As Hurricane Persephone brushed past the Florida Keys, an unidentified barefoot surfer wearing a postal satchel carved through twenty-foot swells, tossing perfectly sorted envelopes onto porches with preternatural accuracy.
+
+"He was laughing like the wind owed him money," said eyewitness Captain Luis Dominguez. Security footage shows the surfer—matching the legendary Florida Man's description—riding a bioluminescent wave that briefly formed the shape of the USPS eagle. Each envelope bore a handwritten note: "Through rain, sleet, wind, cosmic interference..."
+
+The U.S. Postal Service called the incident "unauthorized heroism" and reminded citizens that surfing during a hurricane voids warranty coverage on stamps. Florida Man reportedly left behind a waterproof zine outlining evacuation routes that double as treasure maps.`,
+    imagePrompt: 'Stormy ocean with surfer carrying mail satchel, houses in background, dramatic newsprint',
+    tags: ['florida-man', 'weather', 'heroics'],
+    statesMentioned: ['Florida'],
+    recurringCharacter: 'Florida Man',
+    followUpHooks: [
+      'Postal Service pilots new "Extreme Delivery" program with Florida Man as consultant',
+      'Treasure map route corresponds to shuttered Navy listening posts'
+    ]
+  },
+  {
+    cardId: 'TRUTH-016',
+    faction: 'truth',
+    headline: 'MAUNA KEA OBSERVATORY RECORDS TOURIST-CAMO UFO—AGENT CLAIMS IT'S JUST "SUNGLASSES GLARE"',
+    subhead: 'Visiting officials distribute identical aviators moments before footage erased',
+    byline: 'By Noelani Kealoha, Pacific Skywatch Desk',
+    body: `Astronomers atop Hawaii's Mauna Kea captured crystal-clear footage of a craft mimicking the shape and coloration of nearby tourists—complete with floral shirts rippling along its hull. The camouflaged object hovered silently, mirroring every group selfie for nine minutes.
+
+Before the team could publish their findings, Agent Smitherson of the newly formed Reflection Integrity Bureau arrived by helicopter, handing out complimentary mirrored sunglasses and "voluntary consent" forms. Within hours, the observatory's hard drives displayed only looping videos of cheerful vacationers, even though witnesses swear they saw the craft wink and flash a shaka sign.
+
+"There's nothing unusual here besides the unparalleled Hawaiian sunshine," Smitherson said while confiscating telescopic lens caps. Local tour guides now offer "Maybe You Saw It" packages, promising refunds if no reflective anomalies photobomb their guests.`,
+    imagePrompt: 'Observatory dome at dusk with translucent UFO mimicking tourists, agent handing out sunglasses, grainy newsprint',
+    tags: ['ufo', 'coverup', 'tourism'],
+    statesMentioned: ['Hawaii'],
+    recurringCharacter: 'Agent Smitherson',
+    followUpHooks: [
+      'Tourists report sunglasses whispering directions to hidden lava tubes',
+      'Agent Smitherson requests reimbursement for 400 pairs of identical aviators'
+    ]
+  },
+  {
+    cardId: 'TRUTH-017',
+    faction: 'truth',
+    headline: 'ILLINOIS COMMUTER TRAIN ARRIVES FIVE MINUTES EARLY—PASSENGERS FROM PARALLEL LINE ONBOARD',
+    subhead: 'Chicago transit authorities baffled by riders holding tickets to non-existent stops',
+    byline: 'By Andre Whitfield, Urban Loop Investigator',
+    body: `Monday's 7:32 AM Metra from Aurora rolled into Chicago's Ogilvie Station five minutes ahead of schedule, doors sliding open to reveal commuters wearing nearly—but not exactly—local fashion. Their transit cards displayed holographic logos for the "Midwest Unified Rail," an agency that does not exist in this timeline.
+
+"They asked where the skyline went," said conductor Janelle Ruiz. "When we pointed outside, they insisted Chicago is supposed to have three Sears Towers stacked like a totem pole." The unfamiliar passengers vanished when police requested identification, leaving behind briefcases full of architectural renderings labeled "Project Sky Ladder."
+
+City officials attribute the event to "enthusiastic cosplayers" from a transit fan club, though CTA engineers quietly installed new sensors in rail yards. One abandoned briefcase hums whenever the Cubs win.`,
+    imagePrompt: 'Chicago train platform with slightly out-of-place commuters, briefcase glowing, newsprint style',
+    tags: ['parallel-world', 'transit', 'urban-mystery'],
+    statesMentioned: ['Illinois'],
+    recurringCharacter: null,
+    followUpHooks: [
+      'Blueprints reveal optional bridge to "Lake Michigan Annex" that no map shows',
+      'Commuters from our timeline now report vivid dreams of stacked skyscrapers'
+    ]
+  },
+  {
+    cardId: 'TRUTH-019',
+    faction: 'truth',
+    headline: 'INDIANA REVIVAL TENT LEVITATES—PASTOR REX PREDICTS CORN YIELDS FROM MID-AIR',
+    subhead: 'Floating sermon livestreamed to 3 million viewers before power grid bows in prayer',
+    byline: 'By Caleb Monroe, Heartland Wonders Correspondent',
+    body: `Pastor Rex's traveling prophecy roadshow pitched its tent outside Terre Haute, Indiana, only for the entire structure to rise ten feet above ground mid-sermon. Witnesses say the tent's stakes glowed red while Rex recited crop forecasts accurate down to the bushel for every farm in Vigo County.
+
+"The harvest angels are running their audits," Rex proclaimed as folding chairs gently floated, allowing congregants to recline mid-air. Local farmers confirmed his predictions matched their secret soil data to the decimal.
+
+Utility crews arrived when nearby substations began emitting gospel harmonies. The grid stabilized the moment Rex announced a limited-edition Doomsday Beans flavor: "Hoosier Harvest." Critics accused him of using magnets. Rex responded, "Magnets wish they had this booking."`,
+    imagePrompt: 'Revival tent levitating above cornfield, preacher addressing floating congregation, newsprint photograph',
+    tags: ['pastor-rex', 'miracle', 'agriculture'],
+    statesMentioned: ['Indiana'],
+    recurringCharacter: 'Pastor Rex',
+    followUpHooks: [
+      'State fair invites Pastor Rex to judge giant pumpkin contest—pumpkins begin chanting psalms',
+      'Doomsday Beans releases Hoosier Harvest flavor exclusively via drone drop'
+    ]
+  },
+  {
+    cardId: 'TRUTH-020',
+    faction: 'truth',
+    headline: 'IOWA WIND FARM TURNS INTO GIANT ETCH-A-SKETCH—SKY DRAWS CROP REPORTS',
+    subhead: 'Turbines pivot in unison to spell out market futures visible from Des Moines',
+    byline: 'By Priya Banerjee, Renewable Riddles Desk',
+    body: `Residents near Ames watched in awe as wind turbines rotated with impossible precision, their blades tracing lines of condensed mist that spelled out real-time commodity prices. The aerial handwriting updated every thirty seconds, occasionally doodling smiling corn cobs with suspiciously knowing eyes.
+
+"It's like the sky hired an accountant," joked farmer Leland Ortiz, who confirmed the forecasts matched insider reports usually paywalled by agribusiness giants. Drones attempting to film the spectacle lost navigation, instead circling to form punctuation marks.
+
+State regulators called the incident "a temporary advertisement for wind literacy" before quietly filing for emergency patents. Meanwhile, local high schools now offer elective courses in "Aerial Penmanship Appreciation" taught by meteorologists with chalk dust on their sleeves.`,
+    imagePrompt: 'Wind farm with turbine trails forming letters in sky, Midwestern landscape, newsprint aesthetic',
+    tags: ['renewable-energy', 'skywriting', 'economics'],
+    statesMentioned: ['Iowa'],
+    recurringCharacter: null,
+    followUpHooks: [
+      'Commodity traders scramble to rent billboards facing the wind farm',
+      'Turbines briefly sketch out coordinates to an unlisted grain silo'
+    ]
+  },
   {
     cardId: 'TRUTH-010',
     faction: 'truth',
