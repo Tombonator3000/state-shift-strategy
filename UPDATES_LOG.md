@@ -28,6 +28,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Fixed a missing `useCallback` import in the enhanced tabloid newspaper so the bundle no longer throws a reference error when resolving end-of-turn events.
 - Verified the newsroom edition overlay renders without blinking to a white screen after AI or player turns conclude.
 
+## 2025-10-09 – Banter toasts surface editor quips
+- Wired the banter engine into a dedicated HUD toast lane so editors' conspiratorial asides flare on screen instead of hiding in console logs.
+- Added a public window helper for banter toasts, mirroring combo behavior so other systems can drop sly transmissions into the overlay.
+
 ## 2025-10-09 – ParaPedia dossier cleared for all agents
 - Opened the ParaPedia knowledge vault to government operatives so both factions can access the paranormal atlas from the Player Hub.
 - Updated the dossier navigation to surface the ParaPedia tab alongside existing folders regardless of faction alignment.
