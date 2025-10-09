@@ -5,7 +5,8 @@ import {
   type CryptidIdleReport,
 } from '@/data/cryptidIdleReports';
 
-const FALLBACK_IDLE_MESSAGE = 'Paranormal sweep continuing. Sensors report a quiet board.';
+const FALLBACK_IDLE_MESSAGE =
+  'Fangoria field desk reports calm corridors; consult Cryptids Appendix C before reallocating patrols.';
 
 const computeSeededIndex = (seed: string, length: number): number => {
   if (!length) {
