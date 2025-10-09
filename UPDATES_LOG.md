@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-28 – Finale headline composer locked in
+- Added regression coverage for the finale front-page composer, ensuring bulletin fusion, sanitized food-word stripping, and graceful fallbacks.
+- Final edition layout tests now confirm the composed kicker/headline/dek render on the masthead even without bulletins, giving narrative QA a Weekly World News-style north star.
+
 ## 2025-11-27 – Final edition front page surfaces
 - Final edition reports now capture a front-page article derived from the Extra Extra feed with victory-aware fallbacks.
 - The Paranoid Times masthead renders that article’s kicker/headline/dek, reverting to legacy copy only when no article is available.

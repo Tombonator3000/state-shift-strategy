@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { create } from 'react-test-renderer';
 
+import { composeFinalFrontPage } from '@/news/finalFrontPageComposer';
 import type { GameOverReport } from '@/types/finalEdition';
 import type { ArticleBlock } from '@/news/headlineEngine';
 
@@ -166,6 +167,37 @@ describe('FinalEditionLayout extra extra bulletins', () => {
     renderer.unmount();
   });
 
+  test('renders composed front page copy from the finale composer', async () => {
+    ensureLocalStorage();
+
+    const { default: FinalEditionLayout } = await import('../FinalEditionLayout');
+    const { metadata: _metadata, ...composition } = composeFinalFrontPage({
+      bulletin: {
+        kicker: 'Truth Relay Finale Channel',
+        hed: 'Operatives crash the midnight firewall',
+        dek: 'Decoded caches flood the paranoid wires.',
+      },
+      seed: 'layout-check',
+    });
+
+    const report = createReport({
+      frontPage: {
+        tone: 'truth',
+        ...composition,
+      },
+    });
+
+    const renderer = create(<FinalEditionLayout report={report} />);
+    const output = extractText(renderer.toJSON()).join(' ');
+    const normalized = output.replace(/\s+/g, ' ').trim();
+
+    expect(normalized).toContain('Operatives crash the midnight firewall');
+    expect(normalized).toContain('Decoded caches flood the paranoid wires.');
+    expect(normalized).toContain('Truth Relay Finale Channel');
+
+    renderer.unmount();
+  });
+
   test('falls back to legacy headline set when front page is missing', async () => {
     ensureLocalStorage();
 
@@ -182,6 +214,7 @@ describe('FinalEditionLayout extra extra bulletins', () => {
 
     expect(normalized).toContain('NARRATIVE LOCKDOWN SUPPRESSES TRUTH');
     expect(normalized).toContain('Shadow Government closes the season via truth meter swing after 4 rounds; monitors register 68% truth.');
+    expect(normalized).toContain('Shadow Government · Truth Threshold');
 
     renderer.unmount();
   });
