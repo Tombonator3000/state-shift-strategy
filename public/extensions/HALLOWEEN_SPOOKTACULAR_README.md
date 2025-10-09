@@ -1,7 +1,7 @@
 # Halloween Spooktacular Expansion — README
 
 ## 1. Overview
-The **Halloween Spooktacular Expansion** bathes *ShadowGov* in supernatural satire: vampires, zombies, ghosts, skeletons, haunted houses, and bureaucratic witches.  
+The **Halloween Spooktacular Expansion** bathes *Paranoid Times* in supernatural satire: vampires, zombies, ghosts, skeletons, haunted houses, and bureaucratic witches.  
 
 - **Faction focus**: Primarily Government (cover-ups of the undead).  
 - **Tone**: Deadpan official memos describing absurd paranormal events.  
