@@ -8,6 +8,7 @@ This document provides a chronological record of gameplay-impacting changes merg
 
 ## 2025-10-09 – Cryptid idle reports rotate onto the map
 - Replaced the generic paranormal sweep idle message with rotation through Fangoria-sourced state cryptid briefings so the USA map and event log stay steeped in regional folklore even when hotspots are dormant.
+- Expanded the idle report roster with Appendix C homestate dossiers and tuned the fallback copy to reference the Cryptids expansion field guide when the feed hiccups.
 
 ## 2025-12-03 – ParaPedia knowledge vault opens
 - Truth agents now land on a dedicated ParaPedia tab inside the Player Hub, complete with lore-forward metrics and a leak-fed
