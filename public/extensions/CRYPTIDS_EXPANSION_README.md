@@ -142,7 +142,7 @@ Each major cryptid is linked to one or more states. Playing a ZONE/ATTACK/MEDIA 
 
 ---
 
-### Appendix C — Fangoria State Cryptid Index
+### Appendix C — Paranoid Times State Cryptid Index
 These notes braid Fangoria’s fifty-state dossier into Paranoid Times ops-plans. Each entry distills the folklore vibe and flags a fast rule tweak or content hook.
 
 #### Northeast & Mid-Atlantic
