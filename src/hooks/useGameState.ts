@@ -469,11 +469,24 @@ const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): Ga
   const evaluation = evaluateExtraExtra(buffer, { seed: evaluationSeed });
 
   if (evaluation.trigger) {
+    console.info('🚨 EXTRA EXTRA TRIGGERED!', {
+      round: prev.round,
+      turn: prev.turn,
+      winningFaction: evaluation.winningFaction,
+      truthBonus: evaluation.truthDelta,
+      focusCards: evaluation.focusPlays.map(p => p.name),
+    });
+
     const focusLog: TurnLog = { ...turnLog, plays: evaluation.focusPlays };
     const focusTotals = summarize([focusLog]);
     const article = generateExtraExtra(`${seedPrefix}:${prev.round}:${prev.turn}`, [focusLog], focusTotals, evaluation);
 
     extraExtraFeed = [...extraExtraFeed, article];
+    
+    console.info('📋 EXTRA EXTRA Article Added:', {
+      totalArticles: extraExtraFeed.length,
+      headline: article.hed,
+    });
 
     if (evaluation.truthDelta !== 0) {
       const truthOwner = resolveFactionOwner(next, 'truth');

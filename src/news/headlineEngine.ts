@@ -193,6 +193,16 @@ export const evaluateExtraExtra = (
   const truthQualifies = truthTrio.length >= 3;
   const governmentQualifies = governmentTrio.length >= 3;
 
+  console.info('🎯 EXTRA EXTRA Evaluation:', {
+    totalPlays: plays.length,
+    truthTrio: truthTrio.length,
+    governmentTrio: governmentTrio.length,
+    truthQualifies,
+    governmentQualifies,
+    truthCards: truthTrio.map(p => p.name),
+    govCards: governmentTrio.map(p => p.name),
+  });
+
   if (!truthQualifies && !governmentQualifies) {
     return {
       trigger: false,
@@ -308,6 +318,15 @@ export const evaluateExtraExtra = (
       composeSeed = typeof seedInput === 'number' ? seedInput : hashSeed(String(seedInput));
       const opponent = opponentCards && opponentCards.length ? opponentCards : null;
       composedMain = composeTripleHeadline(winnerCards, opponent, { seed: composeSeed }) ?? null;
+      
+      console.info('📰 EXTRA EXTRA Headline Generated:', {
+        winnerCards: winnerCards.map(c => `${c.name} [${c.tags.join(', ')}]`),
+        opponentCards: opponent?.map(c => c.name),
+        headline: composedMain?.hed,
+        subhead: composedMain?.dek,
+        templateId: composedMain?.templateId,
+        comboId: composedMain?.comboId,
+      });
     }
 
     const dispatches = base.focusPlays

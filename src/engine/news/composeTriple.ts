@@ -512,13 +512,20 @@ export function composeTripleHeadline(
   opts?: { seed?: number },
 ): ExtraArticleBlock | null {
   if (!Array.isArray(played) || played.length !== 3) {
+    console.warn('⚠️ composeTripleHeadline: Invalid input - expected 3 cards, got', played?.length);
     return null;
   }
 
   const bank = getTripleBankIfReady();
   if (!bank) {
+    console.warn('⚠️ composeTripleHeadline: Triple bank not loaded');
     return null;
   }
+
+  console.info('🎲 Composing Triple Headline:', {
+    cards: played.map(c => `${c.name} [${c.faction}, ${c.type}] tags:[${c.tags.join(',')}]`),
+    opponent: opponentPlayed?.map(c => c.name),
+  });
 
   const combos = getComboBankIfReady();
   const opponent = Array.isArray(opponentPlayed) ? opponentPlayed.slice(0, 3) : [];
@@ -537,8 +544,15 @@ export function composeTripleHeadline(
 
   const selected = selectTemplateRule(bank, context);
   if (!selected) {
+    console.warn('⚠️ composeTripleHeadline: No matching template found');
     return null;
   }
+
+  console.info('✅ Template Selected:', {
+    bucketId: selected.bucketId,
+    ruleId: selected.rule.id,
+    headline: selected.rule.headline,
+  });
 
   return buildArticleFromTemplate(selected.rule, selected.bucketId, context, placeholders);
 }
