@@ -10,6 +10,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Fixed a missing `useCallback` import in the enhanced tabloid newspaper so the bundle no longer throws a reference error when resolving end-of-turn events.
 - Verified the newsroom edition overlay renders without blinking to a white screen after AI or player turns conclude.
 
+## 2025-10-09 – Tabloid front page hero goes full broadsheet
+- Rebuilt the Final Edition hero into a split-column tabloid spread with oversized type, accent stripes, and a full-bleed art well that honors victory tones.
+- Upgraded MVP card handling so the front page art now escalates to a dramatic border treatment and gracefully falls back to runner-up footage when needed.
+
 ## 2025-10-09 – Map scouting untethered from zoom locks
 - Added padded panning bounds so agents can right-drag the US map at any zoom level, keeping recon smooth even when fully zoomed in or out.
 - Confirmed context-menu suppression still works so long-press sleuthing never trips a browser pop-up mid-investigation.

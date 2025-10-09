@@ -218,4 +218,39 @@ describe('FinalEditionLayout extra extra bulletins', () => {
 
     renderer.unmount();
   });
+
+  test('front page art falls back to runner-up when no MVP is recorded', async () => {
+    ensureLocalStorage();
+
+    const { default: FinalEditionLayout } = await import('../FinalEditionLayout');
+    const report = createReport({
+      mvp: null,
+      runnerUp: {
+        cardId: 'truth-omega-agent',
+        cardName: 'Omega Agent',
+        player: 'human',
+        faction: 'truth',
+        truthDelta: 12,
+        ipDelta: 8,
+        aiIpDelta: -8,
+        capturedStates: ['NY'],
+        damageDealt: 24,
+        round: 5,
+        turn: 3,
+        impactType: 'truth',
+        impactValue: 12,
+        impactLabel: 'Signal Boost',
+        highlight: 'Omega Agent rerouted the broadcast lattice to flood every channel.',
+      },
+    });
+
+    const renderer = create(<FinalEditionLayout report={report} />);
+
+    const images = renderer.root.findAll(node => node.type === 'img');
+    const hasRunnerUpArt = images.some(img => img.props.alt === 'Card art for truth-omega-agent');
+
+    expect(hasRunnerUpArt).toBe(true);
+
+    renderer.unmount();
+  });
 });
