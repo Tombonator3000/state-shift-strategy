@@ -3245,6 +3245,11 @@ const Index = () => {
           playedCards={gameState.cardsPlayedThisRound}
           faction={gameState.faction}
           truth={gameState.truth}
+          turn={gameState.turn}
+          ip={gameState.ip}
+          controlledStates={gameState.controlledStates}
+          totalStates={gameState.states?.length ?? 0}
+          score={gameState.truth}
           comboTruthDelta={gameState.comboTruthDeltaThisRound}
           frontPageTriplet={gameState.frontPageTriplet ?? null}
           sightings={paranormalSightings}
