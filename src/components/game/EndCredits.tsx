@@ -310,9 +310,6 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
       }, 7000);
     }
 
-    const controlsTimeout = setTimeout(() => setShowControls(false), 8000);
-    timelineRef.current.push(controlsTimeout);
-
     return () => {
       clearTimeline();
       stopCardInterval();
