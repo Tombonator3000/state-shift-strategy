@@ -2,6 +2,23 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-01-09 – Gameplay & Content Expansion (Phases 2-4 Complete)
+- **Article Database:** Created card-specific newspaper articles with coherent narratives, recurring characters, and follow-up hooks for 5 existing cards (Bigfoot, Elvis, Pastor Rex, Bat Boy, UFO Football Game)
+- **40 New Cards:** Added 20 Truth faction and 20 Government faction expansion cards with full effects, flavor text, and strategic depth
+- **Two-Card Combos:** Implemented 10 mini-combo definitions (Elvis + Alien Wedding, Bigfoot + Mothman, UFO + Weather Balloon, etc.)
+- **State-Specific Bonuses:** Cards now get thematic bonuses in appropriate states (Roswell cards in New Mexico, Elvis in Tennessee, Bigfoot in Washington, etc.)
+- **Recurring Characters:** Added character tracking system for Pastor Rex, Agent Smitherson, Florida Man, Bat Boy, Darlene Hobbs, and Coach Terry Hammond
+- **New Card Types:** Defined HYBRID (dynamic cost), TRAP (face-down triggers), and PERSISTENT (multi-turn effects) card mechanics
+- **Files Created:**
+  - `src/data/cardArticles/articleDatabase.ts` - Article database with query helpers
+  - `src/data/expansion/newTruthCards.json` - 20 new Truth cards
+  - `src/data/expansion/newGovernmentCards.json` - 20 new Government cards
+  - `src/game/twoCardCombos.ts` - Mini-combo definitions
+  - `src/game/stateBonuses.ts` - State-specific bonus system
+  - `src/game/recurringCharacters.ts` - Character tracking
+  - `src/game/newCardTypes.ts` - Advanced card type definitions
+- **Roadmap:** Comprehensive 6-phase development plan saved to `docs/roadmap.md`
+
 ## 2025-01-09 – Phase 1: TypeScript build configuration modernized
 - Removed deprecated `baseUrl` option from `tsconfig.node.json` that was causing TS5102 build errors.
 - Retained modern `paths` configuration for proper module resolution with @ imports.

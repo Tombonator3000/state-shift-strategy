@@ -194,13 +194,26 @@ export function checkStateBonuses(
   return null;
 }
 
+export interface AssignStateBonusesParams {
+  states: Array<{
+    id: string;
+    abbreviation: string;
+    name: string;
+    owner: 'player' | 'ai' | 'neutral';
+  }>;
+  baseSeed: number;
+  round: number;
+  playerFaction: 'truth' | 'government';
+  existingBonuses: Record<string, ActiveStateBonus>;
+}
+
 /**
  * Assign state bonuses for the current round
  * This is a placeholder implementation - the real logic would evaluate
  * state ownership, round progression, and bonus eligibility
  */
 export function assignStateBonuses(
-  state: GameState,
+  params: AssignStateBonusesParams,
 ): AssignStateBonusesResult {
   // Placeholder implementation
   return {
