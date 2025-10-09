@@ -289,9 +289,9 @@ const PlayerHubOverlay = ({
   );
 
   const tabOrder = useMemo(() => {
-    const baseOrder: HubTab[] = ['achievements', 'agendas', 'cards', 'tutorials', 'press', 'evidence', 'intel'];
-    return isTruth ? (['parapedia', ...baseOrder] as HubTab[]) : baseOrder;
-  }, [isTruth]);
+    const baseOrder: HubTab[] = ['parapedia', 'achievements', 'agendas', 'cards', 'tutorials', 'press', 'evidence', 'intel'];
+    return baseOrder;
+  }, []);
 
   const folderIcons = useMemo<Record<HubTab, LucideIcon>>(
     () => ({
@@ -338,10 +338,6 @@ const PlayerHubOverlay = ({
 
           <div className="dossier-folder-nav">
             {tabOrder.map(tabKey => {
-              if (tabKey === 'parapedia' && !isTruth) {
-                return null;
-              }
-
               const detail = tabDetails[tabKey];
               const FolderIcon = folderIcons[tabKey];
 
@@ -384,7 +380,7 @@ const PlayerHubOverlay = ({
               </div>
             </div>
 
-            {activeTab === 'parapedia' && isTruth && (
+            {activeTab === 'parapedia' && (
               <div className="dossier-section">
                 <div className="dossier-file-header">
                   <div className="dossier-file-title">{tabDetails.parapedia.headline}</div>
