@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => {
   const resolvedPort = Number(process.env.PORT ?? process.env.VITE_PORT ?? 0) || 5173;
   const resolvedPreviewPort = Number(process.env.PREVIEW_PORT ?? resolvedPort);
 
+  const shouldEnableLovableTagger =
+    mode === "development" && process.env.ENABLE_LOVABLE_TAGGER === "true";
+
   return {
     server: {
       host: "0.0.0.0",
@@ -17,7 +20,7 @@ export default defineConfig(({ mode }) => {
       host: "0.0.0.0",
       port: resolvedPreviewPort,
     },
-    plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+    plugins: [react(), shouldEnableLovableTagger && componentTagger()].filter(Boolean),
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

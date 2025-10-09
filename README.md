@@ -40,6 +40,11 @@ npm i
 npm run dev
 ```
 
+> **Note on Lovable tooling**
+>
+> The Lovable component tagger is disabled for local development to avoid the repeated 404/CORS errors reported by the hosted
+> service. If you need the integration, launch Vite with `ENABLE_LOVABLE_TAGGER=true npm run dev` to opt back in.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
