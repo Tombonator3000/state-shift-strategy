@@ -4,7 +4,8 @@ import { Trophy, Sparkles, Newspaper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EndCredits from '@/components/game/EndCredits';
 import GameOverEditionLayout from '@/components/game/GameOverEditionLayout';
-import FinalEditionLayout from '@/components/game/FinalEditionLayout';
+import NewspaperFrontPage from '@/components/news/NewspaperFrontPage';
+import NewspaperInsidePages from '@/components/news/NewspaperInsidePages';
 import type { GameOverReport } from '@/types/finalEdition';
 import type { FinalEdition } from '@/news/headlineEngine';
 import { getVictoryConditionLabel } from '@/utils/finalEdition';
@@ -120,6 +121,7 @@ const FinalEditionOverlay = ({
   isArchived = false,
 }: FinalEditionOverlayProps) => {
   const [showCredits, setShowCredits] = useState(false);
+  const [currentPage, setCurrentPage] = useState<'front' | 'mvp-breakdown' | 'key-events' | 'full-analysis'>('front');
 
   const derivedVictoryType = useMemo(() => {
     if (victoryType) {
@@ -147,6 +149,39 @@ const FinalEditionOverlay = ({
 
   const isDraw = report.winner === 'draw';
   const isVictory = report.winner === report.playerFaction;
+
+  if (currentPage === 'front') {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/90 p-0">
+        <NewspaperFrontPage
+          report={report}
+          onNavigateToPage={(page) => setCurrentPage(page as typeof currentPage)}
+        />
+        <div className="fixed bottom-0 left-0 right-0 flex flex-wrap justify-center gap-3 bg-black/90 p-4 backdrop-blur-sm">
+          <Button onClick={onContinue} className="border border-white/80 bg-white text-black font-semibold hover:bg-white/90">
+            Continue
+          </Button>
+          <Button onClick={onRestart} className="border border-white/60 bg-black/50 text-white hover:bg-black/70">
+            Return to Menu
+          </Button>
+          {onArchive ? (
+            <Button
+              onClick={onArchive}
+              disabled={isArchived}
+              variant="outline"
+              className="border-dashed"
+            >
+              {isArchived ? 'Archived' : 'Archive to Player Hub'}
+            </Button>
+          ) : null}
+          <Button variant="ghost" className="text-white/80 hover:text-white" onClick={() => setShowCredits(true)}>
+            Roll Credits
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const layoutVariant = isVictory ? 'victory' : 'default';
   const bannerLabel = isDraw ? 'Stalemate' : isVictory ? 'Victory' : 'Defeat';
   const editionDate = new Date(report.recordedAt).toLocaleDateString(undefined, {
@@ -187,12 +222,15 @@ const FinalEditionOverlay = ({
         kicker={derivedVictoryType}
         metaLine={`Final Campaign Report • ${editionDate}`}
         tagline={tagline}
-        onClose={onContinue}
+        onClose={() => setCurrentPage('front')}
         variant={layoutVariant}
         footer={(
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-wrap justify-center gap-2 md:justify-start">
-              <Button onClick={onContinue} className={cn(continueButtonClass)}>
+              <Button onClick={() => setCurrentPage('front')} className={cn(continueButtonClass)}>
+                Back to Front Page
+              </Button>
+              <Button onClick={onContinue} className={cn(restartButtonClass)}>
                 Continue
               </Button>
               <Button onClick={onRestart} className={cn(restartButtonClass)}>
@@ -200,10 +238,6 @@ const FinalEditionOverlay = ({
               </Button>
             </div>
             <div className="flex flex-wrap justify-center gap-2 md:justify-end">
-              <Button onClick={onViewFinalEdition} className={cn(viewEditionButtonClass)}>
-                <Newspaper className="mr-2 h-4 w-4" />
-                Read Full Dossier
-              </Button>
               {onArchive ? (
                 <Button
                   onClick={onArchive}
@@ -221,12 +255,12 @@ const FinalEditionOverlay = ({
           </div>
         )}
       >
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-          <FinalEditionArticle edition={edition} isVictory={isVictory} />
-          <div className="rounded-2xl border border-newspaper-border/60 bg-white/85 p-4 shadow-lg">
-            <FinalEditionLayout report={report} />
-          </div>
-        </div>
+        <NewspaperInsidePages
+          report={report}
+          currentPage={currentPage}
+          onBackToFront={() => setCurrentPage('front')}
+          isVictory={isVictory}
+        />
       </GameOverEditionLayout>
     </div>
   );

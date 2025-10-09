@@ -1,0 +1,241 @@
+.newspaper-front-page {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #f8f8f8 0%, #ffffff 100%);
+  overflow: hidden;
+}
+
+.newspaper-masthead {
+  background: #000;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-bottom: 6px solid #000;
+}
+
+.masthead-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.masthead-date,
+.masthead-price {
+  color: #fff;
+}
+
+.masthead-title {
+  font-family: 'Archivo Black', 'Anton', sans-serif;
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: 0.08em;
+  margin: 0;
+  line-height: 1;
+  text-shadow: 2px 2px 0 rgba(255, 0, 0, 0.3);
+}
+
+.masthead-tagline {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 2px solid #fff;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.newspaper-content {
+  position: relative;
+  padding: 0;
+}
+
+.hero-image-container {
+  position: relative;
+  width: 100%;
+  height: clamp(400px, 60vh, 700px);
+  border-top: 8px solid #000;
+  border-bottom: 8px solid #000;
+  background: #000;
+  overflow: hidden;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.1) saturate(1.2);
+}
+
+.headline-overlay {
+  position: relative;
+  background: #fff;
+  padding: 2rem 1.5rem;
+  border-left: 8px solid #000;
+  border-right: 8px solid #000;
+  border-bottom: 4px solid #000;
+}
+
+.main-headline {
+  font-family: 'Archivo Black', 'Anton', sans-serif;
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+.main-headline.victory {
+  color: #c00;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
+}
+
+.main-headline.defeat {
+  color: #000;
+  text-shadow: 2px 2px 0 rgba(192, 0, 0, 0.2);
+}
+
+.headline-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0 0;
+  border-top: 3px solid #000;
+  padding-top: 1rem;
+}
+
+.bullet-point {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(0.95rem, 2.2vw, 1.35rem);
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #000;
+}
+
+.page-jumps {
+  background: #000;
+  color: #fff;
+  padding: 1.5rem 1.5rem;
+  border-bottom: 6px solid #000;
+}
+
+.page-jump-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #ffd700;
+}
+
+.page-jump-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-jump-button {
+  background: #c00;
+  color: #fff;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  width: clamp(110px, 18vw, 140px);
+  height: clamp(110px, 18vw, 140px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(12px, 2vw, 14px);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.5rem;
+  line-height: 1.2;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.page-jump-button.victory {
+  background: #c00;
+  border-color: #fff;
+}
+
+.page-jump-button.defeat {
+  background: #1a1a1a;
+  border-color: #c00;
+}
+
+.page-jump-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+}
+
+.page-jump-button:active {
+  transform: scale(0.98);
+}
+
+.jump-label {
+  display: block;
+  font-size: clamp(9px, 1.5vw, 11px);
+  margin-top: 0.25rem;
+  opacity: 0.95;
+}
+
+.newspaper-footer {
+  background: #fff;
+  padding: 1rem 1.5rem;
+  border-left: 8px solid #000;
+  border-right: 8px solid #000;
+  border-bottom: 8px solid #000;
+}
+
+.footer-headline {
+  font-family: 'Newsreader', serif;
+  font-size: clamp(0.75rem, 1.8vw, 1rem);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.4;
+  text-align: center;
+  color: #333;
+}
+
+@media (min-width: 640px) {
+  .headline-overlay {
+    padding: 3rem 2.5rem;
+  }
+
+  .page-jumps {
+    padding: 2rem 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-image-container {
+    height: 70vh;
+    max-height: 800px;
+  }
+  
+  .headline-overlay {
+    padding: 4rem 4rem;
+  }
+
+  .page-jump-buttons {
+    gap: 2rem;
+  }
+}
