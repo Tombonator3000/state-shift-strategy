@@ -2,6 +2,12 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-12-03 – ParaPedia knowledge vault opens
+- Truth agents now land on a dedicated ParaPedia tab inside the Player Hub, complete with lore-forward metrics and a leak-fed
+  recap reel.
+- The dossier navigation adds a Truth-only folder so leaksters can jump back into the codex without wading through government
+  paperwork.
+
 ## 2025-12-02 – Desk editor briefings show case file portraits
 - The in-game editor dossier now pulls each editor's portrait into the status popover so newsroom briefings match the selection screen.
 - Ensured the portrait respects the `/public/images/editors` pathing helper so new art drops automatically appear across the HUD.
