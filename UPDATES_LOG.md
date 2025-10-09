@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-12-06 – Campaign HUD no longer implodes on return from menus
+- Reordered the AI dossier hook stack so slipping back from the menu no longer triggers React's hook-order panic mid-mission.
+- Kept the rival editor portraits and agenda intel wired into the overlay so agents still clock who's orchestrating the cover-up when they re-enter the briefing room.
+
 ## 2025-12-05 – AI dossiers spotlight opponent portraits
 - The AI opponent status panels now surface the rival editor's portrait so agents can clock who is orchestrating the cover-up at a glance.
 - The overlay dossier reuses the shared portrait pipeline, ensuring fresh art drops instantly sync across the HUD.

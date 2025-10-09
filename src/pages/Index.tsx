@@ -2325,6 +2325,66 @@ const Index = () => {
     [canQueueDiscards]
   );
 
+  const playerAgenda = gameState.secretAgenda;
+  const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
+  const aiAgenda = gameState.aiSecretAgenda;
+  const aiObjectiveProgress = aiAgenda
+    ? Math.min(100, (aiAgenda.progress / aiAgenda.target) * 100)
+    : 0;
+  const aiAssessment = gameState.aiStrategist?.getStrategicAssessment(gameState);
+  const aiEditorProfile = gameState.aiEditor ? AI_EDITORS[gameState.aiEditor] : null;
+  const aiEditorPortraitSrc = useMemo(() => {
+    if (!aiEditorProfile) {
+      return null;
+    }
+    return portraitUrl(aiEditorProfile.id, aiEditorProfile.image?.portrait);
+  }, [aiEditorProfile]);
+  const aiOpponentName = aiEditorProfile?.name ?? gameState.aiStrategist?.personality.name ?? null;
+  const secretAgendasEnabled = gameState.secretAgendasEnabled !== false;
+
+  const renderSecretAgendaPanel = (variant: 'overlay' | 'mobile') => {
+    const placeholderClasses = clsx(
+      'rounded border border-dashed border-newspaper-border/60 bg-newspaper-bg/40 p-3 text-xs font-mono text-newspaper-text/60',
+      variant === 'overlay' && 'text-[11px]'
+    );
+
+    let content;
+    if (!secretAgendasEnabled) {
+      content = (
+        <div className={placeholderClasses}>
+          Secret agendas are disabled for this campaign.
+        </div>
+      );
+    } else if (playerAgenda) {
+      content = <SecretAgenda agenda={playerAgenda} isPlayer />;
+    } else {
+      content = (
+        <div className={placeholderClasses}>
+          No secret agenda assigned.
+        </div>
+      );
+    }
+
+    return (
+      <div className="secret-agenda rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
+        {secretAgendasEnabled && gameState.secretAgendaDifficulty && (
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[10px] uppercase tracking-[0.25em] text-newspaper-text/70">
+            <span className="font-semibold">Synced Agenda Difficulty</span>
+            <span className="font-mono text-newspaper-text">
+              {gameState.secretAgendaDifficulty.toUpperCase()}
+            </span>
+          </div>
+        )}
+        {secretAgendasEnabled && gameState.secretAgendaDifficulty && aiAgenda && aiAgenda.difficulty !== gameState.secretAgendaDifficulty && (
+          <div className="mb-2 text-[10px] font-mono text-newspaper-text/60">
+            AI fallback difficulty: {aiAgenda.difficulty.toUpperCase()}
+          </div>
+        )}
+        {content}
+      </div>
+    );
+  };
+
   if (showIntro) {
     return (
       <div
@@ -2453,66 +2513,6 @@ const Index = () => {
       />
     );
   }
-
-  const playerAgenda = gameState.secretAgenda;
-  const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
-  const aiAgenda = gameState.aiSecretAgenda;
-  const aiObjectiveProgress = aiAgenda
-    ? Math.min(100, (aiAgenda.progress / aiAgenda.target) * 100)
-    : 0;
-  const aiAssessment = gameState.aiStrategist?.getStrategicAssessment(gameState);
-  const aiEditorProfile = gameState.aiEditor ? AI_EDITORS[gameState.aiEditor] : null;
-  const aiEditorPortraitSrc = useMemo(() => {
-    if (!aiEditorProfile) {
-      return null;
-    }
-    return portraitUrl(aiEditorProfile.id, aiEditorProfile.image?.portrait);
-  }, [aiEditorProfile]);
-  const aiOpponentName = aiEditorProfile?.name ?? gameState.aiStrategist?.personality.name ?? null;
-  const secretAgendasEnabled = gameState.secretAgendasEnabled !== false;
-
-  const renderSecretAgendaPanel = (variant: 'overlay' | 'mobile') => {
-    const placeholderClasses = clsx(
-      'rounded border border-dashed border-newspaper-border/60 bg-newspaper-bg/40 p-3 text-xs font-mono text-newspaper-text/60',
-      variant === 'overlay' && 'text-[11px]'
-    );
-
-    let content;
-    if (!secretAgendasEnabled) {
-      content = (
-        <div className={placeholderClasses}>
-          Secret agendas are disabled for this campaign.
-        </div>
-      );
-    } else if (playerAgenda) {
-      content = <SecretAgenda agenda={playerAgenda} isPlayer />;
-    } else {
-      content = (
-        <div className={placeholderClasses}>
-          No secret agenda assigned.
-        </div>
-      );
-    }
-
-    return (
-      <div className="secret-agenda rounded border border-newspaper-border bg-newspaper-bg p-3 shadow-sm">
-        {secretAgendasEnabled && gameState.secretAgendaDifficulty && (
-          <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[10px] uppercase tracking-[0.25em] text-newspaper-text/70">
-            <span className="font-semibold">Synced Agenda Difficulty</span>
-            <span className="font-mono text-newspaper-text">
-              {gameState.secretAgendaDifficulty.toUpperCase()}
-            </span>
-          </div>
-        )}
-        {secretAgendasEnabled && gameState.secretAgendaDifficulty && aiAgenda && aiAgenda.difficulty !== gameState.secretAgendaDifficulty && (
-          <div className="mb-2 text-[10px] font-mono text-newspaper-text/60">
-            AI fallback difficulty: {aiAgenda.difficulty.toUpperCase()}
-          </div>
-        )}
-        {content}
-      </div>
-    );
-  };
 
   const objectiveSections = [
     {
