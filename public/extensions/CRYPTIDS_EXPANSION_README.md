@@ -1,7 +1,7 @@
 # Cryptids Expansion — README
 
 ## 1. Overview
-The **Cryptids Expansion** brings folklore, legendary beasts, and tabloid absurdism into *ShadowGov*.  
+The **Cryptids Expansion** brings folklore, legendary beasts, and tabloid absurdism into *Paranoid Times*.  
 Players encounter Bigfoot, Mothman, Chupacabra, Nessie, the Jersey Devil, and more — always framed through the game’s satirical Government vs. Truth struggle.
 
 - **Faction split**:  
