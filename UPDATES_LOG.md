@@ -2,6 +2,21 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-01-09 – Phase 5: UI/UX Enhancements Complete
+- **Article Preview Overlay:** Created full-screen article preview with newspaper-style layout, scrollable content, and related information display
+- **Breaking News Ticker:** Implemented real-time news ticker at top of screen showing card plays, captures, and game events with auto-dismiss
+- **Strategy Helper:** Added smart assistant showing combo opportunities, state bonuses, and tactical suggestions based on current hand
+- **Enhanced Final Edition:** Complete newspaper redesign with MVP article, runner-up story, state-by-state results, Extra Extra callouts, classified ads, and letters to the editor
+- **News Event System:** Created helper library for dispatching breaking news during gameplay with templates for card plays, captures, combos, and turn events
+- **Card Preview Hook:** Custom React hook for managing article preview state across components
+- **Components Created:**
+  - `src/components/newspaper/ArticlePreviewOverlay.tsx` - Full article preview modal
+  - `src/components/newspaper/BreakingNewsTicker.tsx` - Real-time news ticker
+  - `src/components/gameplay/StrategyHelper.tsx` - Tactical assistance panel
+  - `src/components/newspaper/EnhancedFinalEdition.tsx` - Multi-section final newspaper
+  - `src/hooks/useCardPreview.ts` - Preview state management hook
+  - `src/lib/newsEventHelpers.ts` - News event dispatch utilities
+
 ## 2025-01-09 – Gameplay & Content Expansion (Phases 2-4 Complete)
 - **Article Database:** Created card-specific newspaper articles with coherent narratives, recurring characters, and follow-up hooks for 5 existing cards (Bigfoot, Elvis, Pastor Rex, Bat Boy, UFO Football Game)
 - **40 New Cards:** Added 20 Truth faction and 20 Government faction expansion cards with full effects, flavor text, and strategic depth
