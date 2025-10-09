@@ -1,8 +1,8 @@
 .player-hub-card {
   position: relative;
   overflow: hidden;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0;
+  border: none;
 }
 
 .player-hub-dossier {
@@ -45,9 +45,12 @@
 
 .player-hub-dossier .dossier-container {
   position: relative;
-  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
   background: var(--dossier-bg);
   padding: 1.5rem 2rem 2rem;
+  overflow: hidden;
 }
 
 .player-hub-dossier .dossier-header {
@@ -57,27 +60,42 @@
   margin-bottom: 1.5rem;
   padding: 0.75rem 1.5rem;
   border-bottom: 2px solid var(--dossier-border);
-  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%);
+  box-shadow: 
+    0 4px 20px rgba(0,0,0,0.8),
+    0 0 40px rgba(212, 207, 193, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
 }
 
 .player-hub-dossier .dossier-header__title {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 1.5rem;
-  letter-spacing: 0.2em;
+  font-size: 1.75rem;
+  letter-spacing: 0.25em;
   color: var(--dossier-paper);
   text-transform: uppercase;
-  text-shadow: 0 0 20px rgba(212, 207, 193, 0.3);
+  text-shadow: 
+    0 0 20px rgba(212, 207, 193, 0.4),
+    0 0 40px rgba(212, 207, 193, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.8);
   animation: pulse-glow 3s ease-in-out infinite;
+  font-weight: 700;
 }
 
 @keyframes pulse-glow {
   0%, 100% {
-    text-shadow: 0 0 20px rgba(212, 207, 193, 0.3);
+    text-shadow: 
+      0 0 20px rgba(212, 207, 193, 0.4),
+      0 0 40px rgba(212, 207, 193, 0.2),
+      0 2px 4px rgba(0, 0, 0, 0.8);
   }
   50% {
-    text-shadow: 0 0 30px rgba(212, 207, 193, 0.5), 0 0 50px rgba(212, 207, 193, 0.2);
+    text-shadow: 
+      0 0 30px rgba(212, 207, 193, 0.6), 
+      0 0 60px rgba(212, 207, 193, 0.3),
+      0 0 100px rgba(212, 207, 193, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.8);
   }
 }
 
@@ -95,22 +113,25 @@
 .player-hub-dossier .dossier-folder-nav {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
   margin-bottom: 1.5rem;
   flex-shrink: 0;
+  padding: 0 0.5rem;
 }
 
 .player-hub-dossier .dossier-folder {
   position: relative;
   background: linear-gradient(180deg, var(--dossier-folder) 0%, #b39657 100%);
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.3);
   border-radius: 0.25rem 0.25rem 0 0;
   padding: 1rem 1.25rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.3),
-    0 0 0 0 rgba(201, 168, 104, 0);
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 0 0 rgba(201, 168, 104, 0),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(0);
 }
 
 .player-hub-dossier .dossier-folder::before {
@@ -127,20 +148,22 @@
 }
 
 .player-hub-dossier .dossier-folder:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px) scale(1.02);
   box-shadow: 
-    0 6px 20px rgba(0, 0, 0, 0.5),
-    0 0 30px rgba(201, 168, 104, 0.4),
-    inset 0 0 20px rgba(255, 255, 255, 0.1);
+    0 8px 24px rgba(0, 0, 0, 0.6),
+    0 0 40px rgba(201, 168, 104, 0.5),
+    inset 0 0 25px rgba(255, 255, 255, 0.15),
+    0 0 80px rgba(201, 168, 104, 0.2);
 }
 
 .player-hub-dossier .dossier-folder[data-active="true"] {
   background: linear-gradient(180deg, #d4af6a 0%, var(--dossier-folder) 100%);
   box-shadow: 
-    0 6px 24px rgba(0, 0, 0, 0.6),
-    0 0 40px rgba(201, 168, 104, 0.6),
-    inset 0 0 30px rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
+    0 8px 28px rgba(0, 0, 0, 0.7),
+    0 0 50px rgba(201, 168, 104, 0.7),
+    inset 0 0 35px rgba(255, 255, 255, 0.2),
+    0 0 100px rgba(201, 168, 104, 0.3);
+  transform: translateY(-3px) scale(1.03);
 }
 
 .player-hub-dossier .dossier-folder__label {
@@ -161,17 +184,21 @@
 
 .player-hub-dossier .dossier-content {
   position: relative;
+  flex: 1;
+  min-height: 0;
   background: var(--dossier-paper);
   border: 2px solid var(--dossier-paper-dark);
-  border-radius: 0.25rem;
+  border-radius: 0.5rem;
   padding: 2rem;
   box-shadow: 
-    0 0 0 1px rgba(0, 0, 0, 0.1),
-    0 8px 32px rgba(0, 0, 0, 0.6),
-    0 0 60px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 0 100px rgba(0, 0, 0, 0.05);
+    0 0 0 1px rgba(0, 0, 0, 0.15),
+    0 12px 48px rgba(0, 0, 0, 0.7),
+    0 0 80px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
+    inset 0 0 120px rgba(0, 0, 0, 0.08),
+    0 0 100px rgba(201, 168, 104, 0.1);
   overflow-y: auto;
+  backdrop-filter: blur(8px);
 }
 
 .player-hub-dossier .dossier-content::before {
@@ -183,11 +210,13 @@
       0deg,
       transparent,
       transparent 24px,
-      rgba(0, 0, 0, 0.02) 24px,
-      rgba(0, 0, 0, 0.02) 25px
+      rgba(0, 0, 0, 0.025) 24px,
+      rgba(0, 0, 0, 0.025) 25px
     ),
-    radial-gradient(ellipse at top left, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(0, 0, 0, 0.1) 0%, transparent 50%);
+    radial-gradient(ellipse at top left, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(0, 0, 0, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 20% 30%, rgba(201, 168, 104, 0.03) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(201, 168, 104, 0.03) 0%, transparent 40%);
   pointer-events: none;
   animation: subtle-shift 20s ease-in-out infinite;
 }
@@ -294,21 +323,25 @@
 }
 
 .player-hub-dossier .dossier-card {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
   border: 1px solid var(--dossier-paper-dark);
   padding: 1rem;
-  border-radius: 0.25rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(4px);
+  border-radius: 0.375rem;
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
 }
 
 .player-hub-dossier .dossier-card:hover {
   box-shadow: 
-    0 6px 16px rgba(0, 0, 0, 0.2),
-    0 0 20px rgba(0, 0, 0, 0.1);
-  transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.65);
+    0 8px 20px rgba(0, 0, 0, 0.25),
+    0 0 30px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 40px rgba(201, 168, 104, 0.1);
+  transform: translateY(-4px) scale(1.01);
+  background: rgba(255, 255, 255, 0.75);
 }
 
 .player-hub-dossier .classification-bar {
@@ -331,22 +364,25 @@
   font-weight: 700;
   margin-bottom: 1rem;
   box-shadow: 
-    0 4px 12px rgba(218, 54, 51, 0.4),
-    inset 0 0 20px rgba(0, 0, 0, 0.3);
+    0 6px 16px rgba(218, 54, 51, 0.5),
+    inset 0 0 25px rgba(0, 0, 0, 0.4),
+    0 0 40px rgba(218, 54, 51, 0.2);
   animation: warning-pulse 2s ease-in-out infinite;
 }
 
 @keyframes warning-pulse {
   0%, 100% {
     box-shadow: 
-      0 4px 12px rgba(218, 54, 51, 0.4),
-      inset 0 0 20px rgba(0, 0, 0, 0.3);
+      0 6px 16px rgba(218, 54, 51, 0.5),
+      inset 0 0 25px rgba(0, 0, 0, 0.4),
+      0 0 40px rgba(218, 54, 51, 0.2);
   }
   50% {
     box-shadow: 
-      0 4px 16px rgba(218, 54, 51, 0.6),
-      0 0 30px rgba(218, 54, 51, 0.3),
-      inset 0 0 20px rgba(0, 0, 0, 0.3);
+      0 6px 20px rgba(218, 54, 51, 0.7),
+      0 0 50px rgba(218, 54, 51, 0.4),
+      inset 0 0 25px rgba(0, 0, 0, 0.4),
+      0 0 80px rgba(218, 54, 51, 0.3);
   }
 }
 
