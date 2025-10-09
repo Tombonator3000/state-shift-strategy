@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { EDITORS_EXPANSION_ID, isEditorsFeatureEnabled } from '@/data/expansions/features';
 import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
+import { portraitUrl } from '@/game/editorImages';
 
 export { EDITORS_EXPANSION_ID } from '@/data/expansions/features';
 
@@ -45,6 +46,32 @@ const getStoredSelection = (): EditorId | null => {
   const raw = safeGetLocalStorageItem(STORAGE_KEY);
   return raw ?? null;
 };
+
+interface EditorPortraitProps {
+  readonly editor: EditorDef;
+  readonly className?: string;
+  readonly loading?: 'lazy' | 'eager';
+}
+
+const EditorPortrait = ({ editor, className, loading = 'lazy' }: EditorPortraitProps) => (
+  <div
+    className={cn(
+      'relative overflow-hidden rounded-sm border-2 border-[#b0904a] bg-[#f9eccc]/80 shadow-sm',
+      className,
+    )}
+  >
+    <img
+      src={portraitUrl(editor.id, editor.portrait)}
+      alt={`${editor.name} portrait`}
+      loading={loading}
+      className="h-full w-full object-cover"
+    />
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 border border-black/5 mix-blend-multiply"
+    />
+  </div>
+);
 
 interface ChooseEditorOptions {
   readonly defaultId?: EditorId | null;
@@ -177,9 +204,7 @@ const EditorsChooseModal = ({ editors, initialSelection, onConfirm, onSkip, allo
                       </Badge>
                     </div>
                     <div className="flex flex-col gap-4 md:flex-row">
-                      <div className="flex h-32 w-28 items-center justify-center rounded-sm border-2 border-dashed border-[#b0904a] bg-[#f9eccc]/80 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#8a6c2f]">
-                        Photo
-                      </div>
+                      <EditorPortrait editor={editor} className="h-32 w-28 shrink-0" />
                       <div className="flex-1 space-y-3">
                         {(['bonus', 'tradeoff', 'modifier'] as const).map(kind => (
                           <div
@@ -224,9 +249,7 @@ const EditorsChooseModal = ({ editors, initialSelection, onConfirm, onSkip, allo
                   ) : null}
                 </div>
                 <div className="flex flex-col gap-4 md:flex-row">
-                  <div className="flex h-36 w-32 items-center justify-center rounded-sm border-2 border-dashed border-[#b0904a] bg-[#f9eccc]/70 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#8a6c2f]">
-                    Photo
-                  </div>
+                  <EditorPortrait editor={selectedEditor} className="h-36 w-32 shrink-0" loading="eager" />
                   <div className="flex-1 space-y-4">
                     {(['bonus', 'tradeoff', 'modifier'] as const).map(kind => (
                       <div key={kind} className="rounded border border-[#c9ad70]/70 bg-white/90 p-4 shadow">
