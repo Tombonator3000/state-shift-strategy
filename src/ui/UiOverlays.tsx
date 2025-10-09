@@ -11,7 +11,7 @@ type AnyCard = {
   effects?: any;
 };
 
-type Toast = { id: number; text: string; slot: "truth" | "ip-left" | "ip-right" | "combo" };
+type Toast = { id: number; text: string; slot: "truth" | "ip-left" | "ip-right" | "combo" | "banter" };
 type PendingDelta = { delta: number; timer: number };
 
 type BreakingHeadlineCardPayload = { type: "card"; card: AnyCard; duration?: number };
@@ -28,6 +28,7 @@ type BreakingHeadlineItem = (BreakingHeadlineCardPayload | BreakingHeadlineHeadl
 const MAX_TOASTS_PER_SLOT = 3;
 const DEFAULT_TOAST_LIFETIME = 900;
 const COMBO_TOAST_LIFETIME = 1400;
+const BANTER_TOAST_LIFETIME = 4800;
 const DELTA_BATCH_WINDOW = 180; // milliseconds
 const CARD_HEADLINE_DURATION = 1400;
 const GENERIC_HEADLINE_DURATION = 4600;
@@ -40,6 +41,7 @@ declare global {
     uiToastIp?: (playerId: "P1" | "P2", delta: number) => void;
     uiFlashState?: (stateId: string, by: "P1" | "P2") => void; // placeholder for future prompts
     uiComboToast?: (message: string) => void;
+    uiToastBanter?: (message: string) => void;
   }
 }
 
@@ -185,6 +187,10 @@ export default function UiOverlays() {
       addToast("combo", message, COMBO_TOAST_LIFETIME);
     };
 
+    window.uiToastBanter = (message: string) => {
+      addToast("banter", message, BANTER_TOAST_LIFETIME);
+    };
+
     window.uiFlashState = (stateId: string, by: "P1" | "P2") => {
       const el =
         document.querySelector(`[data-state-id="${stateId}"]`) ||
@@ -207,6 +213,7 @@ export default function UiOverlays() {
       delete window.uiToastIp;
       delete window.uiFlashState;
       delete window.uiComboToast;
+      delete window.uiToastBanter;
       Object.values(pendingDeltas.current).forEach((pending) => {
         window.clearTimeout(pending.timer);
       });
@@ -314,6 +321,19 @@ export default function UiOverlays() {
           .filter((t) => t.slot === "combo")
           .map((t) => (
             <div key={t.id} className="px-4 py-2 bg-black text-yellow-300 text-sm shadow-lg">
+              {t.text}
+            </div>
+          ))}
+      </div>
+      {/* Banter feed */}
+      <div className="fixed bottom-[5.5rem] left-1/2 -translate-x-1/2 z-[920] w-[92%] sm:w-[500px] max-w-xl space-y-2">
+        {toasts
+          .filter((t) => t.slot === "banter")
+          .map((t) => (
+            <div
+              key={t.id}
+              className="px-4 py-3 bg-[#111] text-[#f4f1de] text-sm leading-snug shadow-2xl border border-white/10 backdrop-blur"
+            >
               {t.text}
             </div>
           ))}
