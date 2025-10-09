@@ -10,6 +10,7 @@ import { SecretAgenda as AgendaType } from '@/data/agendaDatabase';
 interface AIStatusProps {
   difficulty: AIDifficulty;
   editorName?: string;
+  editorPortraitUrl?: string;
   isThinking?: boolean;
   currentPlayer: 'human' | 'ai';
   aiControlledStates: number;
@@ -26,6 +27,7 @@ interface AIStatusProps {
 const AIStatus = ({
   difficulty,
   editorName,
+  editorPortraitUrl,
   isThinking = false,
   currentPlayer,
   aiControlledStates,
@@ -76,9 +78,27 @@ const AIStatus = ({
         </div>
       </div>
 
-      {editorName && (
-        <div className="text-xs text-gray-400 mb-2 font-mono">
-          {editorName}
+      {(editorName || editorPortraitUrl) && (
+        <div className="mb-3 flex items-center gap-3">
+          {editorPortraitUrl ? (
+            <div className="relative h-14 w-11 overflow-hidden rounded border border-gray-700 shadow-sm">
+              <img
+                src={editorPortraitUrl}
+                alt={`${editorName ?? 'AI editor'} portrait`}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/20 to-transparent" />
+            </div>
+          ) : null}
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.25em] text-gray-500">
+              Editor
+            </div>
+            <div className="truncate text-sm font-mono text-gray-200">
+              {editorName ?? 'Unknown'}
+            </div>
+          </div>
         </div>
       )}
 

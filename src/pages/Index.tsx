@@ -2462,6 +2462,12 @@ const Index = () => {
     : 0;
   const aiAssessment = gameState.aiStrategist?.getStrategicAssessment(gameState);
   const aiEditorProfile = gameState.aiEditor ? AI_EDITORS[gameState.aiEditor] : null;
+  const aiEditorPortraitSrc = useMemo(() => {
+    if (!aiEditorProfile) {
+      return null;
+    }
+    return portraitUrl(aiEditorProfile.id, aiEditorProfile.image?.portrait);
+  }, [aiEditorProfile]);
   const aiOpponentName = aiEditorProfile?.name ?? gameState.aiStrategist?.personality.name ?? null;
   const secretAgendasEnabled = gameState.secretAgendasEnabled !== false;
 
@@ -2607,9 +2613,26 @@ const Index = () => {
   const renderAiStatusPanel = () => {
     return (
       <div className="space-y-3 text-[11px] text-newspaper-text/90">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">Editor</span>
-          <span className="font-mono text-newspaper-text">{aiOpponentName ?? 'Unknown'}</span>
+        <div className="flex items-center gap-3">
+          {aiEditorPortraitSrc ? (
+            <img
+              src={aiEditorPortraitSrc}
+              alt={`${aiOpponentName ?? 'AI editor'} portrait`}
+              className="h-16 w-12 flex-shrink-0 rounded border border-newspaper-border/60 object-cover shadow-sm"
+              loading="lazy"
+            />
+          ) : null}
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-[0.3em] text-newspaper-text/60">Editor</span>
+              <span className="font-mono text-newspaper-text">{aiOpponentName ?? 'Unknown'}</span>
+            </div>
+            {aiEditorProfile?.title ? (
+              <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.2em] text-newspaper-text/60">
+                {aiEditorProfile.title}
+              </div>
+            ) : null}
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-2 text-center">
           <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">
@@ -2680,6 +2703,7 @@ const Index = () => {
           <AIStatus
             difficulty={gameState.aiDifficulty}
             editorName={aiOpponentName ?? undefined}
+            editorPortraitUrl={aiEditorPortraitSrc ?? undefined}
             isThinking={gameState.phase === 'ai_turn'}
             currentPlayer={gameState.currentPlayer}
             aiControlledStates={aiControlledStates}

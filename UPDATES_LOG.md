@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-12-05 – AI dossiers spotlight opponent portraits
+- The AI opponent status panels now surface the rival editor's portrait so agents can clock who is orchestrating the cover-up at a glance.
+- The overlay dossier reuses the shared portrait pipeline, ensuring fresh art drops instantly sync across the HUD.
+
 ## 2025-12-04 – ParaPedia atlas wired into Player Hub
 - Introduced a curated ParaPedia dataset with state dossiers, featured quotes, and reference trails so leaksters can trace every anomaly from the hub.
 - Upgraded the ParaPedia panel with atlas navigation, codex search, and state-specific detail views driven by the new hook layer.
