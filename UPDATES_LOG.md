@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-09 – Expansion Newspaper Batch & Coverage Audit
+- Added ten missing Truth faction articles (TRUTH-009 through TRUTH-020) and forty expansion-era features spanning every US state.
+- Authored new `expansionArticles.ts` covering TRUTH-NEW and GOV-NEW cards with balanced recurring-character ratios and crossover hooks.
+- Consolidated all article sources via `ALL_CARD_ARTICLES` and published `docs/cardArticles/article-coverage.md` to document remaining ID gaps.
+
 ## 2025-01-09 – Phase 5: UI/UX Enhancements Complete
 - **Article Preview Overlay:** Created full-screen article preview with newspaper-style layout, scrollable content, and related information display
 - **Breaking News Ticker:** Implemented real-time news ticker at top of screen showing card plays, captures, and game events with auto-dismiss
