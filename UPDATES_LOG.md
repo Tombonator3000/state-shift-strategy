@@ -10,6 +10,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Fixed a missing `useCallback` import in the enhanced tabloid newspaper so the bundle no longer throws a reference error when resolving end-of-turn events.
 - Verified the newsroom edition overlay renders without blinking to a white screen after AI or player turns conclude.
 
+## 2025-10-09 – Final Edition jump links stay on-target
+- Scoped the front-page jump anchors per Final Edition instance so duplicate overlays no longer fight over shared IDs.
+- Confirmed the "Front Page Jump" strip scrolls the active newspaper when both Final Edition and Extra Edition layers are open.
+
 ## 2025-10-09 – Tabloid front page hero goes full broadsheet
 - Rebuilt the Final Edition hero into a split-column tabloid spread with oversized type, accent stripes, and a full-bleed art well that honors victory tones.
 - Upgraded MVP card handling so the front page art now escalates to a dramatic border treatment and gracefully falls back to runner-up footage when needed.
