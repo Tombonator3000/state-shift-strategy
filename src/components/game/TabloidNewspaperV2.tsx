@@ -1071,32 +1071,53 @@ const TabloidNewspaperV2 = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <UICard className={NEWSPAPER_CARD_CLASS}>
-        <header className={NEWSPAPER_HEADER_CLASS}>
+        <header className={cn(NEWSPAPER_HEADER_CLASS, 'overflow-hidden')}>
           {breakingStamp ? (
-            <div className="stamp stamp--breaking absolute left-6 top-4">{breakingStamp}</div>
+            <div className="stamp stamp--breaking absolute left-6 top-4 z-10">{breakingStamp}</div>
           ) : null}
           <button
             type="button"
             onClick={onClose}
             aria-label="Close newspaper"
-            className="absolute right-4 top-4 rounded-full border-2 border-newspaper-text/40 bg-newspaper-bg/40 p-1 text-newspaper-text transition hover:bg-newspaper-bg"
+            className="absolute right-4 top-4 z-10 rounded-full border-2 border-newspaper-text/40 bg-newspaper-bg/40 p-1 text-newspaper-text transition hover:bg-newspaper-bg"
           >
             <X className="h-5 w-5" />
           </button>
-          <div className="flex flex-col gap-1 text-center">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.6em] text-newspaper-text/60">ShadowGov Press Bureau</span>
-            <p
-              className={`text-3xl font-black uppercase tracking-[0.2em] text-newspaper-text sm:text-4xl ${glitchText ? 'glitch' : ''}`}
-              data-text={displayMasthead}
-            >
-              {displayMasthead}
+          <div
+            className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle,_rgba(15,23,42,0.12)_1px,transparent_1px)] [background-size:6px_6px] mix-blend-multiply"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-white/45 via-transparent to-white/10"
+            aria-hidden="true"
+          />
+          <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center gap-3 text-center">
+            <div className="flex flex-wrap items-center justify-center gap-3 text-[11px] font-semibold uppercase tracking-[0.32em] text-newspaper-text/70">
+              <span>Global Edition</span>
+              <span className="hidden h-3 w-px bg-newspaper-text/30 sm:block" aria-hidden="true" />
+              <span>Joint Spin Bureau</span>
+              <span className="hidden h-3 w-px bg-newspaper-text/30 sm:block" aria-hidden="true" />
+              <span>Est. 1947</span>
+            </div>
+            <div className="flex w-full flex-col items-center gap-2">
+              <p
+                className={`relative font-serif text-4xl font-black uppercase tracking-[0.12em] text-newspaper-text sm:text-5xl ${glitchText ? 'glitch' : ''}`}
+                data-text={displayMasthead}
+              >
+                {displayMasthead}
+              </p>
+              <div className="h-px w-16 bg-newspaper-text/40 sm:w-24" aria-hidden="true" />
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-newspaper-text/70">
+              Equal-Opportunity Propaganda for Loyalists & Leaksters
             </p>
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-newspaper-text/60">
-              {faction === 'truth' ? 'Truth Coalition Dispatch' : 'Official Government Bulletin'}
+            <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-newspaper-text/55">
+              Edition courtesy of the{' '}
+              {faction === 'truth' ? 'Truth Coalition Whisper Network' : 'State Narrative Directorate'}
             </p>
             {agendaIssue ? (
-              <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-newspaper-text/50">
-                Issue Focus: {agendaIssue.label}
+              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/45">
+                Spotlight: {agendaIssue.label}
               </p>
             ) : null}
           </div>

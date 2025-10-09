@@ -6,6 +6,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Fixed a missing `useCallback` import in the enhanced tabloid newspaper so the bundle no longer throws a reference error when resolving end-of-turn events.
 - Verified the newsroom edition overlay renders without blinking to a white screen after AI or player turns conclude.
 
+## 2025-10-09 – Paranoid Times masthead joins the spin wars
+- Rebuilt the live edition masthead with a halftone wash, serif title, and equal-opportunity propaganda copy for loyalists and leaksters alike.
+- Updated the final report layout to trade the ShadowGov stamp for the new joint spin bureau branding so both factions share the same sardonic headline wrapper.
+
 ## 2025-10-09 – Completed Fangoria + NAC ingestion
 - Rebuilt Appendix C with all fifty state creatures, region notes, and explicit ops hooks drawn from Fangoria’s survey.
 - Authored a 57-entry NorthAmericanCryptids field guide so designers have ready deck hooks for every listed monster.
