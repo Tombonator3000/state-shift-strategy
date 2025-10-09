@@ -173,6 +173,43 @@ function matchesRarity(actual: string, required?: string | null): boolean {
   return actual === required;
 }
 
+function normaliseList(values?: string[]): string[] {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const normalised: string[] = [];
+
+  for (const value of values) {
+    if (typeof value !== 'string') {
+      continue;
+    }
+    const trimmed = value.trim().toLowerCase();
+    if (!trimmed || seen.has(trimmed)) {
+      continue;
+    }
+    seen.add(trimmed);
+    normalised.push(trimmed);
+  }
+
+  return normalised;
+}
+
+function inferFactionFromId(cardId?: string): 'truth' | 'government' | undefined {
+  if (!cardId) {
+    return undefined;
+  }
+  const id = cardId.toLowerCase();
+  if (id.includes('gov')) {
+    return 'government';
+  }
+  if (id.includes('truth') || id.includes('cry-ts') || id.includes('truth_') || id.startsWith('tr-')) {
+    return 'truth';
+  }
+  return undefined;
+}
+
 interface TriggerMatchResult {
   success: boolean;
   matchedPlays: TurnPlay[];
@@ -376,6 +413,100 @@ function matchState(
   return { success: candidates.length > 0, matchedPlays: candidates };
 }
 
+function matchCard(
+  trigger: Extract<ComboTrigger, { kind: 'card' }>,
+  plays: TurnPlay[],
+): TriggerMatchResult {
+  const {
+    count = 1,
+    operator = '>=',
+    type,
+    faction,
+    cardIds,
+    excludeCardIds,
+    tagsAny,
+    tagsAll,
+    excludeTags,
+    nameIncludesAny,
+    nameIncludesAll,
+    excludeNamePatterns,
+  } = trigger;
+
+  const requiredType = type && type !== 'ANY' ? type : undefined;
+  const requiredFaction = faction && faction !== 'any' ? faction : undefined;
+  const requiredIds = new Set(normaliseList(cardIds));
+  const bannedIds = new Set(normaliseList(excludeCardIds));
+  const anyTags = normaliseList(tagsAny);
+  const allTags = normaliseList(tagsAll);
+  const bannedTags = new Set(normaliseList(excludeTags));
+  const anyNames = normaliseList(nameIncludesAny);
+  const allNames = normaliseList(nameIncludesAll);
+  const bannedNames = normaliseList(excludeNamePatterns);
+
+  const matched: TurnPlay[] = [];
+
+  for (const play of plays) {
+    if (requiredType && play.cardType !== requiredType) {
+      continue;
+    }
+
+    if (requiredFaction) {
+      const factionValue = play.cardFaction ?? inferFactionFromId(play.cardId);
+      if (factionValue !== requiredFaction) {
+        continue;
+      }
+    }
+
+    const cardId = (play.cardId ?? '').toLowerCase();
+    if (bannedIds.size > 0 && bannedIds.has(cardId)) {
+      continue;
+    }
+    if (requiredIds.size > 0 && (!cardId || !requiredIds.has(cardId))) {
+      continue;
+    }
+
+    const tags = Array.isArray(play.cardTags) ? play.cardTags : [];
+    if (bannedTags.size > 0 && tags.some(tag => bannedTags.has(tag))) {
+      continue;
+    }
+    if (allTags.length > 0 && !allTags.every(tag => tags.includes(tag))) {
+      continue;
+    }
+    if (anyTags.length > 0 && !anyTags.some(tag => tags.includes(tag))) {
+      continue;
+    }
+
+    const name = (play.cardName ?? '').toLowerCase();
+    if (bannedNames.length > 0 && bannedNames.some(part => name.includes(part))) {
+      continue;
+    }
+    if (allNames.length > 0 && !allNames.every(part => name.includes(part))) {
+      continue;
+    }
+    if (anyNames.length > 0 && !anyNames.some(part => name.includes(part))) {
+      continue;
+    }
+
+    matched.push(play);
+  }
+
+  const total = matched.length;
+  let success = false;
+  if (operator === '>=') {
+    success = total >= count;
+  } else if (operator === '<=') {
+    success = total <= count;
+  } else {
+    success = total === count;
+  }
+
+  return {
+    success,
+    matchedPlays: success ? matched.slice(0, Math.max(1, count)) : [],
+    extra: success ? { count: total } : undefined,
+  };
+}
+
 function evaluateTrigger(
   trigger: ComboTrigger,
   plays: TurnPlay[],
@@ -390,6 +521,8 @@ function evaluateTrigger(
       return matchThreshold(trigger, metrics);
     case 'state':
       return matchState(trigger, metrics);
+    case 'card':
+      return matchCard(trigger, plays);
     case 'hybrid': {
       const { triggers, mode = 'all' } = trigger;
       const results: TriggerMatchResult[] = [];

@@ -13,6 +13,8 @@ export interface TurnPlay {
   cardRarity: Rarity;
   cost: number;
   targetStateId?: string;
+  cardFaction?: 'truth' | 'government';
+  cardTags?: string[];
   metadata?: Record<string, number | string | undefined>;
 }
 
@@ -62,7 +64,29 @@ export interface HybridTrigger {
   mode?: 'all' | 'any';
 }
 
-export type ComboTrigger = SequenceTrigger | CountTrigger | ThresholdTrigger | StateTrigger | HybridTrigger;
+export interface CardMatchTrigger {
+  kind: 'card';
+  type?: MVPCardType | 'ANY';
+  faction?: 'truth' | 'government' | 'any';
+  count?: number;
+  operator?: '>=' | '<=' | '==';
+  cardIds?: string[];
+  excludeCardIds?: string[];
+  tagsAny?: string[];
+  tagsAll?: string[];
+  excludeTags?: string[];
+  nameIncludesAny?: string[];
+  nameIncludesAll?: string[];
+  excludeNamePatterns?: string[];
+}
+
+export type ComboTrigger =
+  | SequenceTrigger
+  | CountTrigger
+  | ThresholdTrigger
+  | StateTrigger
+  | HybridTrigger
+  | CardMatchTrigger;
 
 export interface ComboReward {
   ip?: number;
