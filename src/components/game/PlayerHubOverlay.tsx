@@ -29,7 +29,7 @@ import SecretAgendaCard from './SecretAgenda';
 import { getAgendaById, type SecretAgenda as AgendaDefinition } from '@/data/agendaDatabase';
 import type { GameState } from '@/hooks/gameStateTypes';
 import '@/styles/playerHub.css';
-import ParapediaPanel from './ParapediaPanel';
+import ParapediaPanel from './parapedia/ParapediaPanel';
 
 interface PlayerHubOverlayProps {
   onClose: () => void;

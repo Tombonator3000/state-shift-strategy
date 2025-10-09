@@ -19,8 +19,8 @@
   },
   "surfaces": {
     "ParapediaPanel": {
-      "path": "src/components/game/ParapediaPanel.tsx",
-      "description": "Truth Bureau knowledge vault surfaced within the Player Hub overlay."
+      "path": "src/components/game/parapedia/ParapediaPanel.tsx",
+      "description": "Truth Bureau knowledge vault with atlas navigation, search, and state dossiers."
     }
   }
 }
