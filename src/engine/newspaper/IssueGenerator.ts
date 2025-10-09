@@ -3,6 +3,7 @@ import type { NewspaperData } from '@/lib/newspaperData';
 import type { Card } from '@/types';
 import { loadCardLexicon } from './CardLexicon';
 import { loadArticleBank, type CardArticle } from '@/engine/news/articleBank';
+import { substituteArticleVariables, type GameStateContext } from './articleVariables';
 import { generateMainStory, type PlayedCardMeta, type GeneratedStory as MainGeneratedStory } from '@/engine/news/mainStory';
 import { deriveFrontPageSubhead } from '@/engine/news/frontPageSubhead';
 import { composeCardStory, composeComboStory, type CardStory, type ComboStory } from './StoryComposer';
@@ -73,6 +74,19 @@ export interface NarrativeContext {
   cardsPlayedByOpp: Card[];
 }
 
+export interface IssueGeneratorGameStateSnapshot {
+  statesControlled?: number;
+  totalStates?: number;
+  controlledStates?: string[];
+  truth?: number;
+  truthPercentage?: number;
+  ip?: number;
+  turn?: number;
+  playerFaction?: 'truth' | 'government';
+  cardsPlayedCount?: number;
+  currentScore?: number;
+}
+
 export interface IssueGeneratorInput {
   dataset: NewspaperData;
   playedCards: PlayedCardInput[];
@@ -81,6 +95,7 @@ export interface IssueGeneratorInput {
   comboSummary?: ComboSummary | null;
   agendaIssueId?: AgendaIssueId;
   agendaIssueLabel?: string | null;
+  gameState?: IssueGeneratorGameStateSnapshot;
 }
 
 const FALLBACK_ADS = ['All advertising temporarily redacted.'];
@@ -358,6 +373,7 @@ const splitArticleBody = (body: CardArticle['body'] | undefined): string[] => {
 const buildGeneratedStoryArticle = (
   entry: PlayedCardInput,
   article: CardArticle | null,
+  gameContext: GameStateContext,
 ): GeneratedStoryArticle => {
   const fallbackHeadline = `${entry.card.name.toUpperCase()} FILE UNDER INVESTIGATION`;
   const fallbackSubhead = 'Card record located without supporting copy — newsroom gremlins dispatched.';
@@ -373,20 +389,103 @@ const buildGeneratedStoryArticle = (
     ? ((entry.card as { tags?: string[] }).tags as string[])
     : [];
 
+  const resolveWithContext = (value: string): string => substituteArticleVariables(value, gameContext);
+
+  const resolvedHeadline = resolveWithContext(
+    headline && headline.length > 0 ? headline : fallbackHeadline,
+  );
+  const resolvedSubhead = resolveWithContext(subhead && subhead.length > 0 ? subhead : fallbackSubhead);
+  const resolvedBody = (body.length ? body : fallbackBody).map(resolveWithContext);
+
   return {
     cardId: entry.card.id,
     cardName: entry.card.name,
     cardType: entry.card.type,
     player: entry.player,
     articleId: article?.id ?? null,
-    headline: headline && headline.length > 0 ? headline : fallbackHeadline,
-    subhead: subhead && subhead.length > 0 ? subhead : fallbackSubhead,
+    headline: resolvedHeadline,
+    subhead: resolvedSubhead,
     byline: byline && byline.length > 0 ? byline : FALLBACK_BYLINE,
-    body: body.length ? body : fallbackBody,
+    body: resolvedBody,
     tags: Array.isArray(article?.tags) ? article.tags : cardTags,
     imagePrompt: article?.imagePrompt ?? null,
     isFallback: !article,
   } satisfies GeneratedStoryArticle;
+};
+
+const clampPercentage = (value: number): number => {
+  if (Number.isNaN(value)) {
+    return 0;
+  }
+  if (value < 0) {
+    return 0;
+  }
+  if (value > 100) {
+    return 100;
+  }
+  return Math.round(value);
+};
+
+const deriveFactionFromCards = (cards: PlayedCardInput[]): 'truth' | 'government' => {
+  const humanCard = cards.find(entry => entry.player === 'human');
+  const faction = humanCard?.card?.faction;
+  if (typeof faction === 'string' && faction.toLowerCase().includes('gov')) {
+    return 'government';
+  }
+  return 'truth';
+};
+
+const buildGameStateContext = (
+  input: IssueGeneratorInput,
+  sanitizedCards: PlayedCardInput[],
+  playerCards: PlayedCardInput[],
+): GameStateContext => {
+  const snapshot = input.gameState ?? {};
+  const captured = Array.from(
+    new Set(
+      playerCards.flatMap(entry => resolveCapturedStateNames(entry.capturedStates)).filter(Boolean),
+    ),
+  );
+
+  const statesControlled = typeof snapshot.statesControlled === 'number'
+    ? snapshot.statesControlled
+    : Array.isArray(snapshot.controlledStates)
+      ? snapshot.controlledStates.length
+      : 0;
+  const totalStates = typeof snapshot.totalStates === 'number' && !Number.isNaN(snapshot.totalStates)
+    ? snapshot.totalStates
+    : 50;
+  const truthValue = typeof snapshot.truthPercentage === 'number'
+    ? snapshot.truthPercentage
+    : typeof snapshot.truth === 'number'
+      ? snapshot.truth
+      : 0;
+  const ipRemaining = typeof snapshot.ip === 'number' ? snapshot.ip : 0;
+  const turnNumber = typeof snapshot.turn === 'number' ? snapshot.turn : 0;
+  const playerFaction = snapshot.playerFaction ?? deriveFactionFromCards(playerCards.length ? playerCards : sanitizedCards);
+  const cardsPlayedCount = typeof snapshot.cardsPlayedCount === 'number'
+    ? snapshot.cardsPlayedCount
+    : sanitizedCards.length;
+  const currentScoreSource = typeof snapshot.currentScore === 'number'
+    ? snapshot.currentScore
+    : typeof snapshot.truth === 'number'
+      ? snapshot.truth
+      : truthValue;
+  const currentScore = Number.isNaN(currentScoreSource)
+    ? 0
+    : Math.round(currentScoreSource);
+
+  return {
+    statesControlled: Math.max(0, statesControlled),
+    totalStates: Math.max(1, totalStates),
+    truthPercentage: clampPercentage(truthValue),
+    ipRemaining: Math.max(0, Math.round(ipRemaining)),
+    turnNumber: Math.max(0, Math.round(turnNumber)),
+    capturedThisTurn: captured.length ? captured : ['no territories flipped'],
+    playerFaction,
+    cardsPlayedCount: Math.max(0, Math.round(cardsPlayedCount)),
+    currentScore: Math.max(0, currentScore),
+  } satisfies GameStateContext;
 };
 
 export async function generateIssue(input: IssueGeneratorInput): Promise<NarrativeIssue> {
@@ -480,7 +579,11 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     input.comboTruthDelta ?? 0,
   );
 
-  const capturedStateNames = Array.from(new Set(context.capturedStates));
+  const gameStateContext = buildGameStateContext(input, sanitizedPlayedCards, playerCards);
+
+  const capturedStateNames = Array.from(
+    new Set(playerCards.flatMap(entry => resolveCapturedStateNames(entry.capturedStates)).filter(Boolean)),
+  );
 
   const breakingStamp = shouldStampBreaking(context)
     ? pickOrNull(input.dataset.stamps?.breaking)
@@ -537,7 +640,7 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
   const generatedArticles = selectedMetas.map(meta => {
     const entry = meta.entry;
     const article = articleBank?.getById?.(entry.card.id) ?? null;
-    return buildGeneratedStoryArticle(entry, article);
+    return buildGeneratedStoryArticle(entry, article, gameStateContext);
   });
 
   const frontPageCards: PlayedCardMeta[] = selectedCards

@@ -305,6 +305,11 @@ const TabloidNewspaperV2 = ({
   playedCards,
   faction,
   truth,
+  turn,
+  ip,
+  controlledStates,
+  totalStates,
+  score,
   comboTruthDelta = 0,
   onClose,
   sightings = [],
@@ -601,6 +606,22 @@ const TabloidNewspaperV2 = ({
     [playedCards],
   );
 
+  const gameStateSnapshot = useMemo(
+    () => ({
+      statesControlled: controlledStates?.length ?? 0,
+      totalStates: totalStates ?? controlledStates?.length ?? 50,
+      truth,
+      truthPercentage: truth,
+      ip: ip ?? 0,
+      turn: turn ?? 0,
+      playerFaction: faction,
+      cardsPlayedCount: narrativePlayedCards.length,
+      currentScore: score ?? truth,
+      controlledStates: controlledStates ?? [],
+    }),
+    [controlledStates, totalStates, truth, ip, turn, faction, score, narrativePlayedCards],
+  );
+
   const playerNarrativeCards = useMemo(
     () => narrativePlayedCards.filter(entry => entry.player === 'human'),
     [narrativePlayedCards],
@@ -687,6 +708,7 @@ const TabloidNewspaperV2 = ({
           comboSummary: comboSummary ?? null,
           agendaIssueId: agendaIssue?.id,
           agendaIssueLabel: agendaIssue?.label ?? null,
+          gameState: gameStateSnapshot,
         });
         if (!cancelled) {
           setIssue(generated);
@@ -704,7 +726,16 @@ const TabloidNewspaperV2 = ({
     return () => {
       cancelled = true;
     };
-  }, [dataset, narrativePlayedCards, eventsTruthDelta, comboTruthDelta, comboSummary, agendaIssue?.id]);
+  }, [
+    dataset,
+    narrativePlayedCards,
+    eventsTruthDelta,
+    comboTruthDelta,
+    comboSummary,
+    agendaIssue?.id,
+    agendaIssue?.label,
+    gameStateSnapshot,
+  ]);
 
   useEffect(() => {
     if (!SHOW_NEWSPAPER_DEBUG) {

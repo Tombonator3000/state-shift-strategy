@@ -28,6 +28,11 @@ export interface TabloidNewspaperProps {
   playedCards: TabloidPlayedCard[];
   faction: 'government' | 'truth';
   truth: number;
+  turn?: number;
+  ip?: number;
+  controlledStates?: string[];
+  totalStates?: number;
+  score?: number;
   comboTruthDelta?: number;
   onClose: () => void;
   sightings?: ParanormalSighting[];

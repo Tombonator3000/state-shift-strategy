@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-09 – Dynamic Newspaper Variable Injection
+- Added `GameStateContext` templating so generated headlines and bodies swap in live turn, score, IP, and faction data.
+- Plumbed Tabloid newsroom UI to forward round metrics into the issue generator for accurate article context.
+- Annotated eleven Paranoid Times articles with `{TURN_NUMBER}`, `{STATES_CONTROLLED}`, `{IP_REMAINING}`, and related placeholders to validate substitution.
+
 ## 2025-10-09 – Expansion Newspaper Batch & Coverage Audit
 - Added ten missing Truth faction articles (TRUTH-009 through TRUTH-020) and forty expansion-era features spanning every US state.
 - Authored new `expansionArticles.ts` covering TRUTH-NEW and GOV-NEW cards with balanced recurring-character ratios and crossover hooks.

@@ -21,10 +21,10 @@
         "media",
         "truth"
       ],
-      "headline": "BLURRY BIGFOOT PHOTO GOES VIRAL BROADCASTS BIGFOOT FRENZY!",
-      "subhead": "Community radio swears Blurry Bigfoot Photo Goes Viral hijacked the feed with cosmic receipts.",
+      "headline": "{TURN_NUMBER} ALERT: {PLAYER_FACTION} CLAIMS {STATES_CONTROLLED}",
+      "subhead": "{IP_REMAINING} bankroll remains as {PLAYER_FACTION} analysts cite {TRUTH_PERCENTAGE} traction.",
       "byline": "By: Volunteer Fact Wrangler 10",
-      "body": "Youth group ghost hunters swear Blurry Bigfoot Photo Goes Viral looped the emergency siren so it chants \"believe harder\". One caller reports Blurry Bigfoot Photo Goes Viral crowdsourced captions faster than fact-checkers could blink. Tin-foil futures spike as bigfoot believers mark off PTO for vigilance.",
+      "body": "Dispatch transcripts leak that {PLAYER_FACTION} now guards {STATES_CONTROLLED} after {CAPTURED_THIS_TURN} flipped overnight. Analysts swear {CARDS_PLAYED_COUNT} cards fueled the maneuver while {OPPONENT_FACTION} burns {IP_REMAINING} scrambling counter-ops.\n\n{TURN_NUMBER} closes with the newsroom chalking up {CURRENT_SCORE} and muttering that {TOTAL_STATES} remain the grand design.",
       "imagePrompt": "grainy tabloid photo of blurry bigfoot photo goes viral amid bigfoot chaos; reporter pointing at a blurry silhouette"
     },
     {
@@ -63,10 +63,10 @@
         "media",
         "truth"
       ],
-      "headline": "BAT BOY ENDORSES TRANSPARENCY STREAMS BAT BOY SHOCKWAVE!",
-      "subhead": "Community radio swears Bat Boy Endorses Transparency hijacked the feed with cosmic receipts.",
+      "headline": "{TURN_NUMBER} FAX: {PLAYER_FACTION} SWEEPS {STATES_CONTROLLED}",
+      "subhead": "Field notes cite {CAPTURED_THIS_TURN} while analysts chart {TRUTH_PERCENTAGE} belief.",
       "byline": "By: Volunteer Fact Wrangler 65",
-      "body": "Local truthers swear Bat Boy Endorses Transparency turned the rotary phone tree into a 4K broadcast network. Podcast guests insist Bat Boy Endorses Transparency turned feedback hiss into a prophecy about bat boy alliances. Tin-foil futures spike as bat boy believers mark off PTO for vigilance.",
+      "body": "{PLAYER_FACTION} switchboard now records {CARDS_PLAYED_COUNT} cards deployed to freeze {OPPONENT_FACTION}. Quartermasters note {IP_REMAINING} remains in the war chest even after {CAPTURED_THIS_TURN} fell in line.\n\nStrategists remind staff that {TOTAL_STATES} states remain on the board and {TURN_NUMBER} closes at {CURRENT_SCORE}.",
       "imagePrompt": "grainy tabloid photo of bat boy endorses transparency amid bat boy chaos; reporter pointing at a blurry silhouette"
     },
     {
@@ -104,10 +104,10 @@
         "ufo",
         "zone"
       ],
-      "headline": "UFO OVER HIGH SCHOOL FOOTBALL GAME MAGNETIZES UFO FRENZY!",
-      "subhead": "County clerks concede UFO Over High School Football Game turned the picnic grounds into a portal.",
+      "headline": "{TURN_NUMBER} SCORECARD: {PLAYER_FACTION} FLOODS {STATES_CONTROLLED}",
+      "subhead": "Booster clubs whisper that {CURRENT_SCORE} is logged while {CAPTURED_THIS_TURN} light up the bleachers.",
       "byline": "By: Conspiracy Columnist 30",
-      "body": "Ham-radio grandpas swear UFO Over High School Football Game carved a crop circle inside the county annex lobby. UFO Over High School Football Game made parking meters count down in alien numerals. Teens already selling bootleg merch that reads \"UFO OVER HIGH SCHOOL FOOTBALL GAME CALLED IT\".",
+      "body": "Sideline spotters confirm {CARDS_PLAYED_COUNT} cards hit the field before {OPPONENT_FACTION} could jam the signal. {PLAYER_FACTION} archivists insist {IP_REMAINING} stays banked for the next kickoff.\n\nRemember: only {TOTAL_STATES} seats exist and {TRUTH_PERCENTAGE} of the crowd already chants in rhythm.",
       "imagePrompt": "grainy tabloid photo of ufo over high school football game amid ufo chaos; overexposed flashbulbs"
     },
     {
@@ -144,10 +144,10 @@
         "media",
         "truth"
       ],
-      "headline": "TABLOID THUNDER SPECIAL EDITION BROADCASTS MEDIA RECEIPTS!",
-      "subhead": "Streaming rigs wobble while Tabloid Thunder Special Edition beams raw media proof to anyone still buffering.",
+      "headline": "{TURN_NUMBER} EDITION: {PLAYER_FACTION} BROADCASTS {TRUTH_PERCENTAGE}",
+      "subhead": "Subscribers say {STATES_CONTROLLED} now tune in while {OPPONENT_FACTION} burns {IP_REMAINING} jamming the feed.",
       "byline": "By: Rooftop Stringer 79",
-      "body": "Mall kiosk prophets swear Tabloid Thunder Special Edition turned the rotary phone tree into a 4K broadcast network. One caller reports Tabloid Thunder Special Edition crowdsourced captions faster than fact-checkers could blink. Teens already selling bootleg merch that reads \"TABLOID THUNDER SPECIAL EDITION CALLED IT\".",
+      "body": "{PLAYER_FACTION} syndicate brags that {CARDS_PLAYED_COUNT} cards kept the stream hot while {CAPTURED_THIS_TURN} signed on-air contracts. Editors wink that {CURRENT_SCORE} keeps the ticker glowing even as {TOTAL_STATES} markets await clearance.\n\n{TURN_NUMBER} memo instructs interns to ration {IP_REMAINING} before the next bulletin.",
       "imagePrompt": "grainy tabloid photo of tabloid thunder special edition amid media chaos; crowd of true believers cheering"
     },
     {
@@ -171,10 +171,10 @@
         "media",
         "truth"
       ],
-      "headline": "FLORIDA MAN JOINS THE RESISTANCE STREAMS FLORIDA MAN SHOCKWAVE!",
-      "subhead": "Local vloggers caption Florida Man Joins the Resistance as \"finally, undeniable florida man\".",
+      "headline": "{TURN_NUMBER} BRIEF: {PLAYER_FACTION} PATROLS {STATES_CONTROLLED}",
+      "subhead": "Citrus scanners say {CAPTURED_THIS_TURN} joined the caravan while {TRUTH_PERCENTAGE} locals nod along.",
       "byline": "By: Alleyway Editor 62",
-      "body": "Youth group ghost hunters swear Florida Man Joins the Resistance looped the emergency siren so it chants \"believe harder\". Podcast guests insist Florida Man Joins the Resistance turned feedback hiss into a prophecy about florida man alliances. Teens already selling bootleg merch that reads \"FLORIDA MAN JOINS THE RESISTANCE CALLED IT\".",
+      "body": "Garage correspondents count {CARDS_PLAYED_COUNT} cards flying before the swamp radios quieted. {PLAYER_FACTION} handlers whisper that {IP_REMAINING} still sloshes in the tank despite the detours.\n\nDispatch reminds readers that {TOTAL_STATES} stations remain unwired and today's {CURRENT_SCORE} is logged for posterity.",
       "imagePrompt": "grainy tabloid photo of florida man joins the resistance amid florida man chaos; reporter pointing at a blurry silhouette"
     },
     {
@@ -212,10 +212,10 @@
         "attack",
         "truth"
       ],
-      "headline": "CROP CIRCLE ART FESTIVAL IGNITES ATTACK RECEIPTS!",
-      "subhead": "ATTACK club cancels bingo so they can follow Crop Circle Art Festival in real time.",
+      "headline": "{TURN_NUMBER} ALERT: {PLAYER_FACTION} CLAIMS {STATES_CONTROLLED} GRID",
+      "subhead": "{TRUTH_PERCENTAGE} trust index rattles the fair while {IP_REMAINING} stays in reserve.",
       "byline": "By: Conspiracy Columnist 99",
-      "body": "County fair jugglers swear Crop Circle Art Festival left glitter bootprints spelling \"WE WARNED YOU\" across Main Street. Cellphone footage shows Crop Circle Art Festival juggling glowing subpoenas before tossing them skyward. ATTACK faithful now planning an emergency potluck and candle-lit slideshow.",
+      "body": "Witnesses say {CARDS_PLAYED_COUNT} cards turned hay bales into signal towers before {OPPONENT_FACTION} could intervene. {CAPTURED_THIS_TURN} now display the glyphs, promising {TOTAL_STATES} will follow suit.\n\nAuditors log {CURRENT_SCORE} as {TURN_NUMBER} winds down and scribble reminders to guard the remaining {IP_REMAINING}.",
       "imagePrompt": "grainy tabloid photo of crop circle art festival amid attack chaos; handwritten signs waving frantically"
     },
     {
@@ -2800,10 +2800,10 @@
         "government",
         "media"
       ],
-      "headline": "ROUTINE TRAINING EXERCISE CLASSIFIED AS SCHEDULED SYSTEM TEST",
-      "subhead": "Communications office redacts Routine Training Exercise into three tasteful bullet points.",
+      "headline": "{TURN_NUMBER} MEMO: {OPPONENT_FACTION} AUDITS {PLAYER_FACTION} GAINS",
+      "subhead": "Ledger notes {STATES_CONTROLLED} while {CAPTURED_THIS_TURN} remain contested in briefing annex.",
       "byline": "By: Compliance Officer 446",
-      "body": "Civic Atmospherics Lab noted Routine Training Exercise synced with the hold music archive for quality assurance. Archivists looped Routine Training Exercise behind a \"technical difficulties\" slate. Review deferred until after the next fiscal eclipse or sooner if the copier behaves.",
+      "body": "Compliance desk acknowledges {CARDS_PLAYED_COUNT} card filings triggered the review. Budget office warns only {IP_REMAINING} remains for counter-ops as {PLAYER_FACTION} pushes {CURRENT_SCORE} onto the scoreboard.\n\n{TURN_NUMBER} docket reiterates {TOTAL_STATES} remain under observation despite today's surge.",
       "imagePrompt": "monochrome government press photo of routine training exercise paperwork; windowless conference room shadows"
     },
     {
@@ -2852,10 +2852,10 @@
         "government",
         "media"
       ],
-      "headline": "FOIA SLOW-WALK ARCHIVED AS ROUTINE GOVERNMENT MITIGATION",
-      "subhead": "FOIA Slow-Walk folded into weather segment; captions to be determined post-clearance.",
+      "headline": "{TURN_NUMBER} UPDATE: {OPPONENT_FACTION} FLAGS {STATES_CONTROLLED}",
+      "subhead": "FOIA desk budgets {IP_REMAINING} to counter {PLAYER_FACTION} even as {CURRENT_SCORE} hits the ledger.",
       "byline": "By: Deputy Plausibility Analyst 883",
-      "body": "Office of Strategic Calm noted FOIA Slow-Walk synced with the hold music archive for quality assurance. Tone analysis concluded FOIA Slow-Walk qualifies as light jazz for procurement. Public inquiries invited via form 27-B/∞ with carbon copies for recycling.",
+      "body": "Compliance scribes report {CARDS_PLAYED_COUNT} card events triggered today's slow-walk. {CAPTURED_THIS_TURN} demand new nondisclosure annexes while {TOTAL_STATES} remain subject to review.\n\n{TURN_NUMBER} bulletin confirms {STATES_CONTROLLED} stay under observation pending {TRUTH_PERCENTAGE} trend analysis.",
       "imagePrompt": "monochrome government press photo of foia slow-walk paperwork; clipboards and sealed envelopes"
     },
     {
@@ -2881,10 +2881,10 @@
         "government",
         "zone"
       ],
-      "headline": "NATIONAL SECURITY WAIVER DESIGNATED GOVERNMENT AWARENESS DRILL",
-      "subhead": "Transit alerts call National Security Waiver a temporary civic glow event.",
+      "headline": "{TURN_NUMBER} BULLETIN: {OPPONENT_FACTION} SHADOWS {STATES_CONTROLLED}",
+      "subhead": "Transit alerts admit {CAPTURED_THIS_TURN} still glow while {TRUTH_PERCENTAGE} keeps sensors chirping.",
       "byline": "By: Acting Transparency Liaison 747",
-      "body": "Narrative Harmonization Taskforce noted National Security Waiver Maintenance logs retitled as \"fog machine calibration\". Safety cones around National Security Waiver now display motivational quotes. Advisory concludes everything is proceeding at a comfortable bureaucratic pace.",
+      "body": "Harmonization Taskforce logged {CARDS_PLAYED_COUNT} incident reports before sealing the annex. Treasury insists {IP_REMAINING} remains allocated for fog machines while {PLAYER_FACTION} touts {CURRENT_SCORE}.\n\n{TURN_NUMBER} attachments remind staff {TOTAL_STATES} remain on the whiteboard pending review.",
       "imagePrompt": "monochrome government press photo of national security waiver paperwork; redacted paperwork stacks"
     },
     {
@@ -2921,10 +2921,10 @@
         "government",
         "zone"
       ],
-      "headline": "COMPARTMENTALIZATION ZONED AS SCHEDULED SYSTEM TEST",
-      "subhead": "Perimeter signage proclaims \"all portals scheduled\"; Compartmentalization marked as scenic.",
+      "headline": "{TURN_NUMBER} STATUS: {OPPONENT_FACTION} MAPS {STATES_CONTROLLED}",
+      "subhead": "Perimeter signage claims {CAPTURED_THIS_TURN} stabilized while {TRUTH_PERCENTAGE} sets sirens humming.",
       "byline": "By: Interim Briefing Lead 332",
-      "body": "Emergency Normalcy Unit noted Compartmentalization mapped as an inspirational seating area during fiscal reviews. Urban planners labelled Compartmentalization an \"inspiration cul-de-sac\". Public inquiries invited via form 27-B/∞ with carbon copies for recycling.",
+      "body": "Emergency Normalcy Unit counts {CARDS_PLAYED_COUNT} paperwork volleys before the zoning stamps dried. {PLAYER_FACTION} flashes {CURRENT_SCORE} across briefing screens while {IP_REMAINING} remains in the mitigation fund.\n\n{TURN_NUMBER} annex files remind staff {TOTAL_STATES} checkpoints must stay in rotation.",
       "imagePrompt": "monochrome government press photo of compartmentalization paperwork; security camera angle slightly askew"
     },
     {
@@ -2947,10 +2947,10 @@
         "government",
         "media"
       ],
-      "headline": "CRISIS ACTOR AUDITIONS APPENDED AS PERFORMANCE REVIEW ITEM",
-      "subhead": "Crisis Actor Auditions folded into weather segment; captions to be determined post-clearance.",
+      "headline": "{TURN_NUMBER} BRIEFING: {OPPONENT_FACTION} TRACKS {STATES_CONTROLLED}",
+      "subhead": "Production notes flag {CURRENT_SCORE} morale points while {IP_REMAINING} funds hush coaching.",
       "byline": "By: Deputy Plausibility Analyst 229",
-      "body": "Compliance Chorus noted Crisis Actor Auditions synced with the hold music archive for quality assurance. Tone analysis concluded Crisis Actor Auditions qualifies as light jazz for procurement. Review deferred until after the next fiscal eclipse or sooner if the copier behaves.",
+      "body": "Compliance Chorus counted {CARDS_PLAYED_COUNT} audition tapes submitted before lunch. {CAPTURED_THIS_TURN} require reshoots so the narrative stays aligned even as {TOTAL_STATES} remain in casting.\n\nDirectives confirm {PLAYER_FACTION} holds {STATES_CONTROLLED} and {TRUTH_PERCENTAGE} keeps agents whispering.",
       "imagePrompt": "monochrome government press photo of crisis actor auditions paperwork; windowless conference room shadows"
     },
     {
