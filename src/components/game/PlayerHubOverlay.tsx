@@ -13,6 +13,7 @@ import {
   FileSearch2,
   Target,
   BookOpen,
+  ArrowLeft,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AchievementsSection } from './AchievementPanel';
@@ -319,8 +320,19 @@ const PlayerHubOverlay = ({
 
         <div className="dossier-container">
           <header className="dossier-header">
-            <div className="dossier-header__title">
-              {faction === 'truth' ? 'TRUTH ARCHIVE' : 'OFFICIAL RECORDS'}
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={onClose}
+                variant="outline"
+                size="sm"
+                className="gap-2 border-[var(--dossier-border)] bg-[var(--dossier-paper)] text-[var(--dossier-ink)] hover:bg-[var(--dossier-paper-dark)]"
+              >
+                <ArrowLeft size={16} />
+                Back
+              </Button>
+              <div className="dossier-header__title">
+                {faction === 'truth' ? 'TRUTH ARCHIVE' : 'OFFICIAL RECORDS'}
+              </div>
             </div>
             <div className="dossier-header__classification">
               <span>⚠ CLASSIFIED</span>
