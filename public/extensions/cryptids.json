@@ -27,7 +27,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Cryptid looked straight into the lens.\""
+      "flavor": "Hotline meltdown: Field researchers staple fresh plaster casts over every bulletin board in reach. Editors staple fresh foil to the front page."
     },
     {
       "schemaVersion": 2,
@@ -45,7 +45,7 @@
         "truth"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Tabloid extras scream: Ultra Disclosure Protocol just became the strangest lead on the corkboard this week. Street teams hawk papers before dawn curfew."
     },
     {
       "schemaVersion": 2,
@@ -64,7 +64,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Citizen scanners shriek: Sources insist that the evergreen icon\u2014upright, elusive, and ready to anchor multi-state conspiracies. The newsroom bets on how fast the livestream crashes."
     },
     {
       "schemaVersion": 2,
@@ -85,7 +85,7 @@
         "truth"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Alien looked straight into the lens.\""
+      "flavor": "Camcorder club bulletins: Abductees compare scars under black light and demand hazard pay on camera. Graffiti crews stencil it across the courthouse."
     },
     {
       "schemaVersion": 2,
@@ -104,7 +104,7 @@
         "ufo"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: UFO looked straight into the lens.\""
+      "flavor": "Basement newsroom update: Radar techs swear the saucers spelled out tomorrow's lottery numbers before vanishing. Ham radios won't stop buzzing for quotes."
     },
     {
       "schemaVersion": 2,
@@ -126,7 +126,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Flyer-run blog posts: Sources insist that red-eyed harbinger whose sightings clustered before the Silver Bridge collapse. Aunties on Facebook swear it's the prophecy clock."
     },
     {
       "schemaVersion": 2,
@@ -146,10 +146,11 @@
         "coverup",
         "cryptid",
         "media",
-        "truth"
+        "truth",
+        "chupacabra"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Chupacabra looked straight into the lens.\""
+      "flavor": "Ham radio net crackles: Sources insist that the livestock leech toggles between alien spines and mange-ridden coyotes across the Southwest. We run the story twice just to spite the censors."
     },
     {
       "schemaVersion": 2,
@@ -166,10 +167,11 @@
       "tags": [
         "attack",
         "cryptid",
-        "truth"
+        "truth",
+        "lake-monster"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Late-night livestream blurts: Sources insist that boat crews swear something serpentine keeps photo-bombing sonar sweeps across inland lakes. Zine racks empty faster than black helicopters hover."
     },
     {
       "schemaVersion": 2,
@@ -187,7 +189,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: We brought snacks and a camcorder.\""
+      "flavor": "Tin-foil editorial note: Ancient Astronaut Theory just became the strangest lead on the corkboard this week. Next print run includes glow-in-the-dark ink."
     },
     {
       "schemaVersion": 2,
@@ -206,7 +208,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Roswell looked straight into the lens.\""
+      "flavor": "Paranoid Times push alert: Roswell Survivor Testimony just became the strangest lead on the corkboard this week. Fact-checkers shrug and order more coffee."
     },
     {
       "schemaVersion": 2,
@@ -228,7 +230,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Garage printers whirr: Area 51 Infiltration just became the strangest lead on the corkboard this week. We staple a coupon for anti-surveillance shades."
     },
     {
       "schemaVersion": 2,
@@ -245,10 +247,11 @@
       "tags": [
         "attack",
         "cryptid",
-        "truth"
+        "truth",
+        "jersey-devil"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Zine collective dispatch: Sources insist that a winged screecher born from colonial curses patrols the Pine Barrens. Conspiracy interns start the parade route map."
     },
     {
       "schemaVersion": 2,
@@ -263,10 +266,11 @@
       "tags": [
         "cryptid",
         "media",
-        "truth"
+        "truth",
+        "skunk-ape"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Conspiracy beat whispers: Sources insist that florida\u2019s swamp Sasquatch leaves sulfur stench and photo ops in its wake. The hotline volunteers high-five between calls."
     },
     {
       "schemaVersion": 2,
@@ -283,10 +287,11 @@
       "tags": [
         "attack",
         "cryptid",
-        "truth"
+        "truth",
+        "beast-of-bray-road"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Witness brunch recap: Sources insist that wisconsin\u2019s roadside werewolf legend toggles between shapeshifter and unknown canid. Disinformation bots rage-click in the comments."
     },
     {
       "schemaVersion": 2,
@@ -304,7 +309,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "DIY newswire siren: Phantom Kangaroo Tracking Network just became the strangest lead on the corkboard this week. We frame the negatives with freshly stolen duct tape."
     },
     {
       "schemaVersion": 2,
@@ -321,10 +326,11 @@
       "tags": [
         "attack",
         "cryptid",
-        "truth"
+        "truth",
+        "fouke-monster"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Anonymous tip jar overflow: Sources insist that arkansas\u2019 swamp-stalking ape reeked of sulfur and inspired *The Legend of Boggy Creek*. Raccoons outside the office nod in agreement."
     },
     {
       "schemaVersion": 2,
@@ -342,10 +348,11 @@
       "tags": [
         "attack",
         "cryptid",
-        "truth"
+        "truth",
+        "thunderbird"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Field correspondent scribbles: Sources insist that giant, storm-bringing birds span Indigenous stories from Alaska to the desert Southwest. We archive it under \"inevitable vindication.\""
     },
     {
       "schemaVersion": 2,
@@ -365,7 +372,7 @@
         "truth"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Backyard seance minutes: Shadow People Documentation just became the strangest lead on the corkboard this week. Pizza arrives with a handwritten \u201ctold you so.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -380,16 +387,17 @@
       "tags": [
         "cryptid",
         "media",
-        "truth"
+        "truth",
+        "hopkinsville-goblins"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Hopkinsville looked straight into the lens.\""
+      "flavor": "Payphone gossip spiral: Sources insist that kentucky farmhouses still log metallic-skinned visitors tapping on windows at dusk. Our red string board gains three new layers."
     },
     {
       "schemaVersion": 2,
       "id": "CRY-TS-020",
       "faction": "truth",
-      "name": "Lizard People Exposé",
+      "name": "Lizard People Expos\u00e9",
       "type": "ATTACK",
       "rarity": "legendary",
       "effects": {
@@ -404,7 +412,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Lizard looked straight into the lens.\""
+      "flavor": "Message-board prophecy drop: Lizard People Expos\u00e9 just became the strangest lead on the corkboard this week. Someone starts pre-selling commemorative tabloids."
     },
     {
       "schemaVersion": 2,
@@ -422,7 +430,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Hotline meltdown: Survey teams keep losing drones to tropical breezes rising from the mineshaft. Editors staple fresh foil to the front page."
     },
     {
       "schemaVersion": 2,
@@ -440,7 +448,7 @@
         "truth"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Tabloid extras scream: Future-tense alibis collapse under contradictory receipts and outdated slang. Street teams hawk papers before dawn curfew."
     },
     {
       "schemaVersion": 2,
@@ -459,7 +467,7 @@
         "ufo"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Citizen scanners shriek: Radar techs swear the saucers spelled out tomorrow's lottery numbers before vanishing. The newsroom bets on how fast the livestream crashes."
     },
     {
       "schemaVersion": 2,
@@ -477,7 +485,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Interdimensional looked straight into the lens.\""
+      "flavor": "Camcorder club bulletins: Engineers tape over glowing rifts with OSHA signage and hopeful duct tape. Graffiti crews stencil it across the courthouse."
     },
     {
       "schemaVersion": 2,
@@ -495,7 +503,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Phantom looked straight into the lens.\""
+      "flavor": "Basement newsroom update: Phantom Black Dog Network just became the strangest lead on the corkboard this week. Ham radios won't stop buzzing for quotes."
     },
     {
       "schemaVersion": 2,
@@ -513,7 +521,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Flyer-run blog posts: Yeti Hair Analysis just became the strangest lead on the corkboard this week. Aunties on Facebook swear it's the prophecy clock."
     },
     {
       "schemaVersion": 2,
@@ -534,7 +542,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Ham radio net crackles: Skinwalker Ranch Investigation just became the strangest lead on the corkboard this week. We run the story twice just to spite the censors."
     },
     {
       "schemaVersion": 2,
@@ -549,10 +557,11 @@
       "tags": [
         "cryptid",
         "media",
-        "truth"
+        "truth",
+        "dover-demon"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Late-night livestream blurts: Sources insist that massachusetts teens in 1977 chased a pale, melon-headed climber along stone walls. Zine racks empty faster than black helicopters hover."
     },
     {
       "schemaVersion": 2,
@@ -571,7 +580,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Real looked straight into the lens.\""
+      "flavor": "Tin-foil editorial note: Abductees compare scars under black light and demand hazard pay on camera. Next print run includes glow-in-the-dark ink."
     },
     {
       "schemaVersion": 2,
@@ -589,7 +598,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Paranoid Times push alert: Cattle Mutilation Pattern Analysis just became the strangest lead on the corkboard this week. Fact-checkers shrug and order more coffee."
     },
     {
       "schemaVersion": 2,
@@ -607,7 +616,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Garage printers whirr: Crop Circle Decoder Ring just became the strangest lead on the corkboard this week. We staple a coupon for anti-surveillance shades."
     },
     {
       "schemaVersion": 2,
@@ -625,7 +634,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Zine collective dispatch: 1897 Phantom Airship Reports just became the strangest lead on the corkboard this week. Conspiracy interns start the parade route map."
     },
     {
       "schemaVersion": 2,
@@ -642,10 +651,11 @@
       "tags": [
         "attack",
         "cryptid",
-        "truth"
+        "truth",
+        "beast-of-bladenboro"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Conspiracy beat whispers: Sources insist that in 1953 a blood-draining cat-beast tore through Carolina farmsteads, leaving canines husked. The hotline volunteers high-five between calls."
     },
     {
       "schemaVersion": 2,
@@ -663,7 +673,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Witness brunch recap: Washington Sea Serpent Sonar just became the strangest lead on the corkboard this week. Disinformation bots rage-click in the comments."
     },
     {
       "schemaVersion": 2,
@@ -681,7 +691,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "DIY newswire siren: Moon-Eyed People Archaeological Site just became the strangest lead on the corkboard this week. We frame the negatives with freshly stolen duct tape."
     },
     {
       "schemaVersion": 2,
@@ -699,7 +709,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Anonymous tip jar overflow: Giant Pacific Octopus Encounter just became the strangest lead on the corkboard this week. Raccoons outside the office nod in agreement."
     },
     {
       "schemaVersion": 2,
@@ -717,7 +727,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: We brought snacks and a camcorder.\""
+      "flavor": "Field correspondent scribbles: Sofa-bound prophets sketch accurate blueprints of places they swear they never visited. We archive it under \"inevitable vindication.\""
     },
     {
       "schemaVersion": 2,
@@ -735,7 +745,7 @@
         "truth"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: We brought snacks and a camcorder.\""
+      "flavor": "Backyard seance minutes: Invisible Aircraft Photos just became the strangest lead on the corkboard this week. Pizza arrives with a handwritten \u201ctold you so.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -753,7 +763,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Payphone gossip spiral: Missing Time Survivor Network just became the strangest lead on the corkboard this week. Our red string board gains three new layers."
     },
     {
       "schemaVersion": 2,
@@ -772,7 +782,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Message-board prophecy drop: Abductees compare scars under black light and demand hazard pay on camera. Someone starts pre-selling commemorative tabloids."
     },
     {
       "schemaVersion": 2,
@@ -790,7 +800,7 @@
         "truth"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: We brought snacks and a camcorder.\""
+      "flavor": "Hotline meltdown: Reality Breach Detector just became the strangest lead on the corkboard this week. Editors staple fresh foil to the front page."
     },
     {
       "schemaVersion": 2,
@@ -808,7 +818,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Tabloid extras scream: Paranormal Investigation Society just became the strangest lead on the corkboard this week. Street teams hawk papers before dawn curfew."
     },
     {
       "schemaVersion": 2,
@@ -827,7 +837,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Citizen scanners shriek: Abductees compare scars under black light and demand hazard pay on camera. The newsroom bets on how fast the livestream crashes."
     },
     {
       "schemaVersion": 2,
@@ -845,7 +855,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Camcorder club bulletins: Meditation influencers promise the secret password to the universal group chat. Graffiti crews stencil it across the courthouse."
     },
     {
       "schemaVersion": 2,
@@ -863,7 +873,7 @@
         "truth"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Basement newsroom update: Multidimensional Gateway just became the strangest lead on the corkboard this week. Ham radios won't stop buzzing for quotes."
     },
     {
       "schemaVersion": 2,
@@ -881,7 +891,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Flyer-run blog posts: Moon Landing Hoax Evidence just became the strangest lead on the corkboard this week. Aunties on Facebook swear it's the prophecy clock."
     },
     {
       "schemaVersion": 2,
@@ -899,7 +909,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Ham radio net crackles: Memory Recovery Session just became the strangest lead on the corkboard this week. We run the story twice just to spite the censors."
     },
     {
       "schemaVersion": 2,
@@ -920,7 +930,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Late-night livestream blurts: Anonymous insiders fax us outlines already soaked in invisible ink. Zine racks empty faster than black helicopters hover."
     },
     {
       "schemaVersion": 2,
@@ -940,7 +950,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Tin-foil editorial note: Sources insist that captured rocket scientists keep filing expense reports under assumed names and classified stationery. Next print run includes glow-in-the-dark ink."
     },
     {
       "schemaVersion": 2,
@@ -958,7 +968,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Paranoid Times push alert: Holographic Universe Theory just became the strangest lead on the corkboard this week. Fact-checkers shrug and order more coffee."
     },
     {
       "schemaVersion": 2,
@@ -976,7 +986,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Garage printers whirr: Field researchers staple fresh plaster casts over every bulletin board in reach. We staple a coupon for anti-surveillance shades."
     },
     {
       "schemaVersion": 2,
@@ -994,7 +1004,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: We brought snacks and a camcorder.\""
+      "flavor": "Zine collective dispatch: Phantom Satellite Tracking just became the strangest lead on the corkboard this week. Conspiracy interns start the parade route map."
     },
     {
       "schemaVersion": 2,
@@ -1012,7 +1022,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: We brought snacks and a camcorder.\""
+      "flavor": "Conspiracy beat whispers: Meditation influencers promise the secret password to the universal group chat. The hotline volunteers high-five between calls."
     },
     {
       "schemaVersion": 2,
@@ -1031,7 +1041,7 @@
         "zone"
       ],
       "cost": 7,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: We brought snacks and a camcorder.\""
+      "flavor": "Witness brunch recap: Multidimensional Broadcast Network just became the strangest lead on the corkboard this week. Disinformation bots rage-click in the comments."
     },
     {
       "schemaVersion": 2,
@@ -1049,7 +1059,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "DIY newswire siren: Crystal Wi-Fi Chakra Network just became the strangest lead on the corkboard this week. We frame the negatives with freshly stolen duct tape."
     },
     {
       "schemaVersion": 2,
@@ -1067,7 +1077,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Anonymous tip jar overflow: AM radio callers form a union demanding overtime for midnight revelations. Raccoons outside the office nod in agreement."
     },
     {
       "schemaVersion": 2,
@@ -1085,7 +1095,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Field correspondent scribbles: Thread moderators barricade the comments with freshly encrypted memes. We archive it under \"inevitable vindication.\""
     },
     {
       "schemaVersion": 2,
@@ -1104,7 +1114,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Bigfoot looked straight into the lens.\""
+      "flavor": "Backyard seance minutes: Sources insist that the evergreen icon\u2014upright, elusive, and ready to anchor multi-state conspiracies. Pizza arrives with a handwritten \u201ctold you so.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -1125,7 +1135,7 @@
         "truth"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Experts disagree; the crowd screams yes.\""
+      "flavor": "Payphone gossip spiral: Sources insist that red-eyed harbinger whose sightings clustered before the Silver Bridge collapse. Our red string board gains three new layers."
     },
     {
       "schemaVersion": 2,
@@ -1143,7 +1153,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Message-board prophecy drop: HR adds \u201cclairvoyant hazard pay\u201d paperwork to the onboarding packet. Someone starts pre-selling commemorative tabloids."
     },
     {
       "schemaVersion": 2,
@@ -1161,7 +1171,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Healing looked straight into the lens.\""
+      "flavor": "Hotline meltdown: Healing Crystal Array just became the strangest lead on the corkboard this week. Editors staple fresh foil to the front page."
     },
     {
       "schemaVersion": 2,
@@ -1179,7 +1189,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Tabloid extras scream: Really Long YouTube Videos just became the strangest lead on the corkboard this week. Street teams hawk papers before dawn curfew."
     },
     {
       "schemaVersion": 2,
@@ -1197,7 +1207,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Pixels enhanced: chills confirmed.\""
+      "flavor": "Citizen scanners shriek: Whistleblower Protection Network just became the strangest lead on the corkboard this week. The newsroom bets on how fast the livestream crashes."
     },
     {
       "schemaVersion": 2,
@@ -1215,7 +1225,7 @@
         "truth"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Camcorder club bulletins: Anonymous Leak Platform just became the strangest lead on the corkboard this week. Graffiti crews stencil it across the courthouse."
     },
     {
       "schemaVersion": 2,
@@ -1233,7 +1243,7 @@
         "truth"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Flat looked straight into the lens.\""
+      "flavor": "Basement newsroom update: Flat Earth Conference just became the strangest lead on the corkboard this week. Ham radios won't stop buzzing for quotes."
     },
     {
       "schemaVersion": 2,
@@ -1252,7 +1262,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: We brought snacks and a camcorder.\""
+      "flavor": "Flyer-run blog posts: Contrails spell apology letters before the jet disappears into unnatural fog. Aunties on Facebook swear it's the prophecy clock."
     },
     {
       "schemaVersion": 2,
@@ -1270,7 +1280,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Tabloid headline writes itself.\""
+      "flavor": "Ham radio net crackles: Vaccine Truth Bomb Campaign just became the strangest lead on the corkboard this week. We run the story twice just to spite the censors."
     },
     {
       "schemaVersion": 2,
@@ -1289,10 +1299,11 @@
         "alabama-cryptid",
         "attack",
         "cryptid",
-        "truth"
+        "truth",
+        "wolf-woman-of-mobile"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear alabama cryptid waved back.\""
+      "flavor": "Late-night livestream blurts: Alabama phone lines erupt as locals swear Wolf Woman of Mobile is on parade\u2014April 1971 calls flooded dispatch with sightings of a half-wolf woman sprinting through Mobile\u2019s marsh suburbs. Zine racks empty faster than black helicopters hover."
     },
     {
       "schemaVersion": 2,
@@ -1312,7 +1323,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear tizheruk waved back.\""
+      "flavor": "Tin-foil editorial note: Witness maps fill with pins claiming inuit fishers warn of a long-necked predator snatching prey from the bering sea docks. Next print run includes glow-in-the-dark ink."
     },
     {
       "schemaVersion": 2,
@@ -1334,7 +1345,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear thunderbird waved back.\""
+      "flavor": "Paranoid Times push alert: Witness maps fill with pins claiming giant, storm-bringing birds span indigenous stories from alaska to the desert southwest. Fact-checkers shrug and order more coffee."
     },
     {
       "schemaVersion": 2,
@@ -1356,7 +1367,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear fouke monster waved back.\""
+      "flavor": "Garage printers whirr: Witness maps fill with pins claiming arkansas\u2019 swamp-stalking ape reeked of sulfur and inspired *the legend of boggy creek*. We staple a coupon for anti-surveillance shades."
     },
     {
       "schemaVersion": 2,
@@ -1376,7 +1387,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear bigfoot waved back.\""
+      "flavor": "Zine collective dispatch: Witness maps fill with pins claiming the evergreen icon\u2014upright, elusive, and ready to anchor multi-state conspiracies. Conspiracy interns start the parade route map."
     },
     {
       "schemaVersion": 2,
@@ -1395,10 +1406,11 @@
         "colorado",
         "colorado-cryptid",
         "cryptid",
-        "truth"
+        "truth",
+        "tommyknockers"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear colorado cryptid waved back.\""
+      "flavor": "Conspiracy beat whispers: Colorado phone lines erupt as locals swear Tommyknockers is on parade\u2014Mine tunnels echo with goblin knocks that signal cave-ins\u2014or sabotage. The hotline volunteers high-five between calls."
     },
     {
       "schemaVersion": 2,
@@ -1417,10 +1429,11 @@
         "connecticut",
         "connecticut-cryptid",
         "cryptid",
-        "truth"
+        "truth",
+        "connie"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear connecticut cryptid waved back.\""
+      "flavor": "Witness brunch recap: Connecticut phone lines erupt as locals swear Connie is on parade\u2014River pilots whisper about a long, scaled silhouette that surfaces where shipping lanes tighten. Disinformation bots rage-click in the comments."
     },
     {
       "schemaVersion": 2,
@@ -1437,10 +1450,11 @@
         "delaware",
         "delaware-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "pukwudgie"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear delaware cryptid waved back.\""
+      "flavor": "DIY newswire siren: Delaware phone lines erupt as locals swear Pukwudgie is on parade\u2014Fire-starting tricksters blink between pines, leaving scorched footprints and pranked park rangers. We frame the negatives with freshly stolen duct tape."
     },
     {
       "schemaVersion": 2,
@@ -1460,7 +1474,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear skunk ape waved back.\""
+      "flavor": "Anonymous tip jar overflow: Witness maps fill with pins claiming florida\u2019s swamp sasquatch leaves sulfur stench and photo ops in its wake. Raccoons outside the office nod in agreement."
     },
     {
       "schemaVersion": 2,
@@ -1477,10 +1491,11 @@
         "georgia",
         "georgia-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "altie"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear georgia cryptid waved back.\""
+      "flavor": "Field correspondent scribbles: Georgia phone lines erupt as locals swear Altie is on parade\u2014Muscogee stories and modern boat blogs agree a long-necked river dweller prowls the Altamaha basin. We archive it under \"inevitable vindication.\""
     },
     {
       "schemaVersion": 2,
@@ -1497,10 +1512,11 @@
         "hawaii",
         "hawaii-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "menehune"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear hawaii cryptid waved back.\""
+      "flavor": "Backyard seance minutes: Hawaii phone lines erupt as locals swear Menehune is on parade\u2014Night-working artisans leave perfect fishponds and terraces, then vanish before sunrise. Pizza arrives with a handwritten \u201ctold you so.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -1517,10 +1533,11 @@
         "idaho",
         "idaho-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "sharlie"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear idaho cryptid waved back.\""
+      "flavor": "Payphone gossip spiral: Idaho phone lines erupt as locals swear Sharlie is on parade\u2014Payette Lake festivals celebrate a serpentine mascot called Slimy Slim. Our red string board gains three new layers."
     },
     {
       "schemaVersion": 2,
@@ -1540,7 +1557,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear enfield horror waved back.\""
+      "flavor": "Message-board prophecy drop: Witness maps fill with pins claiming illinois reports of a three-legged, red-eyed hopper in 1973 drew armed posses. Someone starts pre-selling commemorative tabloids."
     },
     {
       "schemaVersion": 2,
@@ -1557,10 +1574,11 @@
         "indiana",
         "indiana-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "devil-s-lake-guardian"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear indiana cryptid waved back.\""
+      "flavor": "Hotline meltdown: Indiana phone lines erupt as locals swear Devil\u2019s Lake Guardian is on parade\u2014Lake Manitou construction crews blamed accidents on a protective monster. Editors staple fresh foil to the front page."
     },
     {
       "schemaVersion": 2,
@@ -1577,10 +1595,11 @@
         "iowa",
         "iowa-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "mugwump"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear iowa cryptid waved back.\""
+      "flavor": "Tabloid extras scream: Iowa phone lines erupt as locals swear Mugwump is on parade\u2014Carnival barkers and lakeside locals promote a hairy, long-necked swimmer as tourist bait. Street teams hawk papers before dawn curfew."
     },
     {
       "schemaVersion": 2,
@@ -1597,16 +1616,17 @@
         "kansas",
         "kansas-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "sinkhole-sam"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear kansas cryptid waved back.\""
+      "flavor": "Citizen scanners shriek: Kansas phone lines erupt as locals swear Sinkhole Sam is on parade\u2014Inman Lake anglers feared an eyeless, tubular creature cruising flooded quarries. The newsroom bets on how fast the livestream crashes."
     },
     {
       "schemaVersion": 2,
       "id": "CRY-TS-084",
       "faction": "truth",
-      "name": "Kelly–Hopkinsville Goblins Mass Sighting",
+      "name": "Kelly\u2013Hopkinsville Goblins Mass Sighting",
       "type": "ZONE",
       "rarity": "common",
       "effects": {
@@ -1617,10 +1637,11 @@
         "kelly-hopkinsville-goblins",
         "kentucky",
         "truth",
-        "zone"
+        "zone",
+        "hopkinsville-goblins"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear kelly–hopkinsville goblins waved back.\""
+      "flavor": "Camcorder club bulletins: Witness maps fill with pins claiming kentucky farmhouses still log metallic-skinned visitors tapping on windows at dusk. Graffiti crews stencil it across the courthouse."
     },
     {
       "schemaVersion": 2,
@@ -1640,7 +1661,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear rougarou waved back.\""
+      "flavor": "Basement newsroom update: Witness maps fill with pins claiming cajun shapeshifter enforcing taboo and loyalty along the bayous. Ham radios won't stop buzzing for quotes."
     },
     {
       "schemaVersion": 2,
@@ -1657,10 +1678,11 @@
         "maine",
         "maine-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "pocomoonshine-lake-monster"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear maine cryptid waved back.\""
+      "flavor": "Flyer-run blog posts: Maine phone lines erupt as locals swear Pocomoonshine Lake Monster is on parade\u2014A duel between rival shamans allegedly birthed a snail-serpent hybrid that still capsizes canoes. Aunties on Facebook swear it's the prophecy clock."
     },
     {
       "schemaVersion": 2,
@@ -1680,7 +1702,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear snallygaster waved back.\""
+      "flavor": "Ham radio net crackles: Witness maps fill with pins claiming maryland moonshiners once blamed a tentacled dragon-bird for livestock raids. We run the story twice just to spite the censors."
     },
     {
       "schemaVersion": 2,
@@ -1700,7 +1722,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear dover demon waved back.\""
+      "flavor": "Late-night livestream blurts: Witness maps fill with pins claiming massachusetts teens in 1977 chased a pale, melon-headed climber along stone walls. Zine racks empty faster than black helicopters hover."
     },
     {
       "schemaVersion": 2,
@@ -1720,7 +1742,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear dogman waved back.\""
+      "flavor": "Tin-foil editorial note: Witness maps fill with pins claiming midwest patrols report a bipedal wolf pacing tree lines and counting coup on squad cars. Next print run includes glow-in-the-dark ink."
     },
     {
       "schemaVersion": 2,
@@ -1742,7 +1764,7 @@
         "wendigo"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear wendigo waved back.\""
+      "flavor": "Paranoid Times push alert: Witness maps fill with pins claiming famine-born cannibal spirits prowl northern forests, possessing the greedy. Fact-checkers shrug and order more coffee."
     },
     {
       "schemaVersion": 2,
@@ -1759,10 +1781,11 @@
         "mississippi",
         "mississippi-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "three-legged-ghost"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear mississippi cryptid waved back.\""
+      "flavor": "Garage printers whirr: Mississippi phone lines erupt as locals swear Three-Legged Ghost is on parade\u2014Delta churchyards host tales of a hopping revenant and her mother\u2019s phantom limb. We staple a coupon for anti-surveillance shades."
     },
     {
       "schemaVersion": 2,
@@ -1779,10 +1802,11 @@
         "missouri",
         "missouri-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "ozark-howler"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear missouri cryptid waved back.\""
+      "flavor": "Zine collective dispatch: Missouri phone lines erupt as locals swear Ozark Howler is on parade\u2014Bonfire tales describe a horned bear-cat whose howl rattles campers. Conspiracy interns start the parade route map."
     },
     {
       "schemaVersion": 2,
@@ -1802,7 +1826,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear shunka warakin waved back.\""
+      "flavor": "Conspiracy beat whispers: Witness maps fill with pins claiming frontier tales recount a long-bodied wolf-beast stalking montana prairies. The hotline volunteers high-five between calls."
     },
     {
       "schemaVersion": 2,
@@ -1819,10 +1843,11 @@
         "nebraska",
         "nebraska-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "lake-walgren-monster"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear nebraska cryptid waved back.\""
+      "flavor": "Witness brunch recap: Nebraska phone lines erupt as locals swear Lake Walgren Monster is on parade\u2014Hay Springs residents rebranded a horned lake beast as tourist mascot. Disinformation bots rage-click in the comments."
     },
     {
       "schemaVersion": 2,
@@ -1842,7 +1867,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear tahoe tessie waved back.\""
+      "flavor": "DIY newswire siren: Witness maps fill with pins claiming sierra visitors trade hotline tips about a deep-lake dweller near casinos and ski lifts. We frame the negatives with freshly stolen duct tape."
     },
     {
       "schemaVersion": 2,
@@ -1862,7 +1887,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear wood devils waved back.\""
+      "flavor": "Anonymous tip jar overflow: Witness maps fill with pins claiming new hampshire lumber camps report bark-colored lurkers hugging trunks until the coast is clear. Raccoons outside the office nod in agreement."
     },
     {
       "schemaVersion": 2,
@@ -1884,7 +1909,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear jersey devil waved back.\""
+      "flavor": "Field correspondent scribbles: Witness maps fill with pins claiming a winged screecher born from colonial curses patrols the pine barrens. We archive it under \"inevitable vindication.\""
     },
     {
       "schemaVersion": 2,
@@ -1906,7 +1931,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear skinwalkers waved back.\""
+      "flavor": "Backyard seance minutes: Skinwalkers Mass Sighting just became the strangest lead on the corkboard this week. Pizza arrives with a handwritten \u201ctold you so.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -1926,7 +1951,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear montauk monster waved back.\""
+      "flavor": "Payphone gossip spiral: Witness maps fill with pins claiming shoreline cleanup crews wheel out a bloated lab experiment with too many teeth for the tabloids to ignore. Our red string board gains three new layers."
     },
     {
       "schemaVersion": 2,
@@ -1943,10 +1968,11 @@
         "north-carolina",
         "north-carolina-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "wampus-cat"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear north carolina cryptid waved back.\""
+      "flavor": "Message-board prophecy drop: North Carolina phone lines erupt as locals swear Wampus Cat is on parade\u2014A six-legged feline prowler mauls watchdogs and spooks mountain towns. Someone starts pre-selling commemorative tabloids."
     },
     {
       "schemaVersion": 2,
@@ -1963,10 +1989,11 @@
         "north-dakota",
         "north-dakota-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "devil-s-lake-serpent"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear north dakota cryptid waved back.\""
+      "flavor": "Hotline meltdown: North Dakota phone lines erupt as locals swear Devil\u2019s Lake Serpent is on parade\u2014Tribal warnings and settler reports blame drownings on a lurking serpent. Editors staple fresh foil to the front page."
     },
     {
       "schemaVersion": 2,
@@ -1986,7 +2013,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear loveland frogman waved back.\""
+      "flavor": "Tabloid extras scream: Loveland Frogman Mass Sighting just became the strangest lead on the corkboard this week. Street teams hawk papers before dawn curfew."
     },
     {
       "schemaVersion": 2,
@@ -2003,10 +2030,11 @@
         "oklahoma",
         "oklahoma-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "green-hill-monster"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear oklahoma cryptid waved back.\""
+      "flavor": "Citizen scanners shriek: Oklahoma phone lines erupt as locals swear Green Hill Monster is on parade\u2014A foggy-night encounter birthed tales of a hulking forest dweller outside Talihina. The newsroom bets on how fast the livestream crashes."
     },
     {
       "schemaVersion": 2,
@@ -2026,7 +2054,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear bigfoot waved back.\""
+      "flavor": "Camcorder club bulletins: Witness maps fill with pins claiming the evergreen icon\u2014upright, elusive, and ready to anchor multi-state conspiracies. Graffiti crews stencil it across the courthouse."
     },
     {
       "schemaVersion": 2,
@@ -2043,10 +2071,11 @@
         "pennsylvania",
         "pennsylvania-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "squonk"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear pennsylvania cryptid waved back.\""
+      "flavor": "Basement newsroom update: Pennsylvania phone lines erupt as locals swear Squonk is on parade\u2014The wrinkled hermit-beast dissolves into tears whenever cornered, soaking hunters in its wake. Ham radios won't stop buzzing for quotes."
     },
     {
       "schemaVersion": 2,
@@ -2063,10 +2092,11 @@
         "rhode-island",
         "rhode-island-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "palentine-ghost"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear rhode island cryptid waved back.\""
+      "flavor": "Flyer-run blog posts: Rhode Island phone lines erupt as locals swear Palentine Ghost is on parade\u2014Block Island locals insist a fiery ship and wailing survivor reappear each winter. Aunties on Facebook swear it's the prophecy clock."
     },
     {
       "schemaVersion": 2,
@@ -2083,10 +2113,11 @@
         "south-carolina",
         "south-carolina-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "lizard-man-of-scape-ore"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear south carolina cryptid waved back.\""
+      "flavor": "Ham radio net crackles: South Carolina phone lines erupt as locals swear Lizard Man of Scape Ore is on parade\u2014The 1980s rash of clawed car doors keeps swamp mechanics flush with work. We run the story twice just to spite the censors."
     },
     {
       "schemaVersion": 2,
@@ -2103,10 +2134,11 @@
         "south-dakota",
         "south-dakota-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "jackalope"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear south dakota cryptid waved back.\""
+      "flavor": "Late-night livestream blurts: South Dakota phone lines erupt as locals swear Jackalope is on parade\u2014Tourism boards embraced antlered jackrabbits with novelty hunting permits. Zine racks empty faster than black helicopters hover."
     },
     {
       "schemaVersion": 2,
@@ -2123,10 +2155,11 @@
         "tennessee",
         "tennessee-cryptid",
         "truth",
-        "zone"
+        "zone",
+        "spearfinger"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear tennessee cryptid waved back.\""
+      "flavor": "Tin-foil editorial note: Tennessee phone lines erupt as locals swear Spearfinger is on parade\u2014The stone-skinned witch steals livers while disguised as kin in the Smokies. Next print run includes glow-in-the-dark ink."
     },
     {
       "schemaVersion": 2,
@@ -2148,7 +2181,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear chupacabra waved back.\""
+      "flavor": "Paranoid Times push alert: Witness maps fill with pins claiming the livestock leech toggles between alien spines and mange-ridden coyotes across the southwest. Fact-checkers shrug and order more coffee."
     },
     {
       "schemaVersion": 2,
@@ -2165,10 +2198,11 @@
         "truth",
         "utah",
         "utah-cryptid",
-        "zone"
+        "zone",
+        "uintah-basin-skinwalkers"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear utah cryptid waved back.\""
+      "flavor": "Garage printers whirr: Utah phone lines erupt as locals swear Uintah Basin Skinwalkers is on parade\u2014Ranch mutilations and portal rumors keep aerospace contractors circling the Basin. We staple a coupon for anti-surveillance shades."
     },
     {
       "schemaVersion": 2,
@@ -2188,7 +2222,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear champ waved back.\""
+      "flavor": "Zine collective dispatch: Witness maps fill with pins claiming lake champlain's mascot keeps bobbing between border checkpoints like it's dodging customs. Conspiracy interns start the parade route map."
     },
     {
       "schemaVersion": 2,
@@ -2205,10 +2239,11 @@
         "truth",
         "virginia",
         "virginia-cryptid",
-        "zone"
+        "zone",
+        "chessie"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear virginia cryptid waved back.\""
+      "flavor": "Conspiracy beat whispers: Virginia phone lines erupt as locals swear Chessie is on parade\u2014Chesapeake mariners watch for serpentine wakes and coordinate citizen flotillas. The hotline volunteers high-five between calls."
     },
     {
       "schemaVersion": 2,
@@ -2228,7 +2263,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear bigfoot waved back.\""
+      "flavor": "Witness brunch recap: Witness maps fill with pins claiming the evergreen icon\u2014upright, elusive, and ready to anchor multi-state conspiracies. Disinformation bots rage-click in the comments."
     },
     {
       "schemaVersion": 2,
@@ -2250,7 +2285,7 @@
         "west-virginia"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear mothman waved back.\""
+      "flavor": "DIY newswire siren: Witness maps fill with pins claiming red-eyed harbinger whose sightings clustered before the silver bridge collapse. We frame the negatives with freshly stolen duct tape."
     },
     {
       "schemaVersion": 2,
@@ -2272,7 +2307,7 @@
         "wisconsin"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear beast of bray road waved back.\""
+      "flavor": "Anonymous tip jar overflow: Witness maps fill with pins claiming wisconsin\u2019s roadside werewolf legend toggles between shapeshifter and unknown canid. Raccoons outside the office nod in agreement."
     },
     {
       "schemaVersion": 2,
@@ -2289,10 +2324,11 @@
         "truth",
         "wyoming",
         "wyoming-cryptid",
-        "zone"
+        "zone",
+        "jackalope"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: The locals swear wyoming cryptid waved back.\""
+      "flavor": "Field correspondent scribbles: Wyoming phone lines erupt as locals swear Jackalope is on parade\u2014Legislators embraced the antlered rabbit as a tourist champion. We archive it under \"inevitable vindication.\""
     },
     {
       "schemaVersion": 2,
@@ -2313,7 +2349,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Backyard seance minutes: Crowd-control fails as the legend spreads; The livestock leech toggles between alien spines and mange-ridden coyotes across the Southwest. Pizza arrives with a handwritten \u201ctold you so.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -2334,7 +2370,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Payphone gossip spiral: Crowd-control fails as the legend spreads; Inuit fishers warn of a long-necked predator snatching prey from the Bering Sea docks. Our red string board gains three new layers."
     },
     {
       "schemaVersion": 2,
@@ -2355,7 +2391,7 @@
         "wendigo"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Message-board prophecy drop: Sources insist that famine-born cannibal spirits prowl northern forests, possessing the greedy. Someone starts pre-selling commemorative tabloids."
     },
     {
       "schemaVersion": 2,
@@ -2374,7 +2410,7 @@
         "truth"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Hotline meltdown: Loveland Frogman Watch Patrols just became the strangest lead on the corkboard this week. Editors staple fresh foil to the front page."
     },
     {
       "schemaVersion": 2,
@@ -2395,7 +2431,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Tabloid extras scream: Crowd-control fails as the legend spreads; The evergreen icon\u2014upright, elusive, and ready to anchor multi-state conspiracies. Street teams hawk papers before dawn curfew."
     },
     {
       "schemaVersion": 2,
@@ -2416,7 +2452,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Citizen scanners shriek: Crowd-control fails as the legend spreads; Midwest patrols report a bipedal wolf pacing tree lines and counting coup on squad cars. The newsroom bets on how fast the livestream crashes."
     },
     {
       "schemaVersion": 2,
@@ -2435,7 +2471,7 @@
         "truth"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Camcorder club bulletins: Sources insist that cajun shapeshifter enforcing taboo and loyalty along the bayous. Graffiti crews stencil it across the courthouse."
     },
     {
       "schemaVersion": 2,
@@ -2456,7 +2492,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Basement newsroom update: Crowd-control fails as the legend spreads; Sierra visitors trade hotline tips about a deep-lake dweller near casinos and ski lifts. Ham radios won't stop buzzing for quotes."
     },
     {
       "schemaVersion": 2,
@@ -2477,7 +2513,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Flyer-run blog posts: Sources insist that wisconsin\u2019s roadside werewolf legend toggles between shapeshifter and unknown canid. Aunties on Facebook swear it's the prophecy clock."
     },
     {
       "schemaVersion": 2,
@@ -2498,7 +2534,7 @@
         "wendigo"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Ham radio net crackles: Sources insist that famine-born cannibal spirits prowl northern forests, possessing the greedy. We run the story twice just to spite the censors."
     },
     {
       "schemaVersion": 2,
@@ -2519,7 +2555,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Late-night livestream blurts: Crowd-control fails as the legend spreads; Massachusetts teens in 1977 chased a pale, melon-headed climber along stone walls. Zine racks empty faster than black helicopters hover."
     },
     {
       "schemaVersion": 2,
@@ -2538,7 +2574,7 @@
         "truth"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Tin-foil editorial note: Sources insist that inuit fishers warn of a long-necked predator snatching prey from the Bering Sea docks. Next print run includes glow-in-the-dark ink."
     },
     {
       "schemaVersion": 2,
@@ -2557,7 +2593,7 @@
         "truth"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Paranoid Times push alert: Sources insist that arkansas\u2019 swamp-stalking ape reeked of sulfur and inspired *The Legend of Boggy Creek*. Fact-checkers shrug and order more coffee."
     },
     {
       "schemaVersion": 2,
@@ -2578,7 +2614,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Garage printers whirr: Crowd-control fails as the legend spreads; A winged screecher born from colonial curses patrols the Pine Barrens. We staple a coupon for anti-surveillance shades."
     },
     {
       "schemaVersion": 2,
@@ -2599,7 +2635,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Zine collective dispatch: Crowd-control fails as the legend spreads; Inuit fishers warn of a long-necked predator snatching prey from the Bering Sea docks. Conspiracy interns start the parade route map."
     },
     {
       "schemaVersion": 2,
@@ -2620,7 +2656,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Conspiracy beat whispers: Crowd-control fails as the legend spreads; Sierra visitors trade hotline tips about a deep-lake dweller near casinos and ski lifts. The hotline volunteers high-five between calls."
     },
     {
       "schemaVersion": 2,
@@ -2641,7 +2677,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Witness brunch recap: Crowd-control fails as the legend spreads; Arkansas\u2019 swamp-stalking ape reeked of sulfur and inspired *The Legend of Boggy Creek*. Disinformation bots rage-click in the comments."
     },
     {
       "schemaVersion": 2,
@@ -2660,7 +2696,7 @@
         "truth"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "DIY newswire siren: Sources insist that maryland moonshiners once blamed a tentacled dragon-bird for livestock raids. We frame the negatives with freshly stolen duct tape."
     },
     {
       "schemaVersion": 2,
@@ -2681,7 +2717,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Anonymous tip jar overflow: Crowd-control fails as the legend spreads; The livestock leech toggles between alien spines and mange-ridden coyotes across the Southwest. Raccoons outside the office nod in agreement."
     },
     {
       "schemaVersion": 2,
@@ -2702,7 +2738,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Field correspondent scribbles: Crowd-control fails as the legend spreads; Frontier tales recount a long-bodied wolf-beast stalking Montana prairies. We archive it under \"inevitable vindication.\""
     },
     {
       "schemaVersion": 2,
@@ -2723,7 +2759,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Backyard seance minutes: Crowd-control fails as the legend spreads; Inuit fishers warn of a long-necked predator snatching prey from the Bering Sea docks. Pizza arrives with a handwritten \u201ctold you so.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -2744,7 +2780,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Payphone gossip spiral: Crowd-control fails as the legend spreads; Arkansas\u2019 swamp-stalking ape reeked of sulfur and inspired *The Legend of Boggy Creek*. Our red string board gains three new layers."
     },
     {
       "schemaVersion": 2,
@@ -2765,7 +2801,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Message-board prophecy drop: Crowd-control fails as the legend spreads; Massachusetts teens in 1977 chased a pale, melon-headed climber along stone walls. Someone starts pre-selling commemorative tabloids."
     },
     {
       "schemaVersion": 2,
@@ -2786,7 +2822,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Hotline meltdown: Crowd-control fails as the legend spreads; Frontier tales recount a long-bodied wolf-beast stalking Montana prairies. Editors staple fresh foil to the front page."
     },
     {
       "schemaVersion": 2,
@@ -2805,7 +2841,7 @@
         "truth"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Tabloid extras scream: Sources insist that lake Champlain's mascot keeps bobbing between border checkpoints like it's dodging customs. Street teams hawk papers before dawn curfew."
     },
     {
       "schemaVersion": 2,
@@ -2824,7 +2860,7 @@
         "truth"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Citizen scanners shriek: Loveland Frogman Watch Patrols just became the strangest lead on the corkboard this week. The newsroom bets on how fast the livestream crashes."
     },
     {
       "schemaVersion": 2,
@@ -2845,7 +2881,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Camcorder club bulletins: Crowd-control fails as the legend spreads; Shoreline cleanup crews wheel out a bloated lab experiment with too many teeth for the tabloids to ignore. Graffiti crews stencil it across the courthouse."
     },
     {
       "schemaVersion": 2,
@@ -2866,7 +2902,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Basement newsroom update: Crowd-control fails as the legend spreads; Midwest patrols report a bipedal wolf pacing tree lines and counting coup on squad cars. Ham radios won't stop buzzing for quotes."
     },
     {
       "schemaVersion": 2,
@@ -2887,7 +2923,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Flyer-run blog posts: Crowd-control fails as the legend spreads; Inuit fishers warn of a long-necked predator snatching prey from the Bering Sea docks. Aunties on Facebook swear it's the prophecy clock."
     },
     {
       "schemaVersion": 2,
@@ -2908,7 +2944,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Ham radio net crackles: Crowd-control fails as the legend spreads; Massachusetts teens in 1977 chased a pale, melon-headed climber along stone walls. We run the story twice just to spite the censors."
     },
     {
       "schemaVersion": 2,
@@ -2927,7 +2963,7 @@
         "truth"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Late-night livestream blurts: Sources insist that maryland moonshiners once blamed a tentacled dragon-bird for livestock raids. Zine racks empty faster than black helicopters hover."
     },
     {
       "schemaVersion": 2,
@@ -2948,7 +2984,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Tin-foil editorial note: Crowd-control fails as the legend spreads; Cajun shapeshifter enforcing taboo and loyalty along the bayous. Next print run includes glow-in-the-dark ink."
     },
     {
       "schemaVersion": 2,
@@ -2969,7 +3005,7 @@
         "truth"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Eyewitnesses report chills and grainy footage.\""
+      "flavor": "Paranoid Times push alert: Crowd-control fails as the legend spreads; Shoreline cleanup crews wheel out a bloated lab experiment with too many teeth for the tabloids to ignore. Fact-checkers shrug and order more coffee."
     },
     {
       "schemaVersion": 2,
@@ -2991,7 +3027,7 @@
         "mib"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Bureau memo leak: Men in Black Sweep just became the strangest lead on the corkboard this week. Central office attaches three redacted appendices."
     },
     {
       "schemaVersion": 2,
@@ -3009,7 +3045,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Official bulletin draft: Weather Machine Alpha just became the strangest lead on the corkboard this week. Public affairs rehearses the \u201cnothing to see\u201d line."
     },
     {
       "schemaVersion": 2,
@@ -3029,7 +3065,7 @@
         "media"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
+      "flavor": "Containment directive: Project Grand Mandela just became the strangest lead on the corkboard this week. Budget hawks demand receipts before sunrise."
     },
     {
       "schemaVersion": 2,
@@ -3048,7 +3084,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no chemtrail detected.\""
+      "flavor": "Logistics redline: Contrails spell apology letters before the jet disappears into unnatural fog. Command schedules a morale webinar for staff."
     },
     {
       "schemaVersion": 2,
@@ -3067,7 +3103,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Security clearance whisper: Area 51 Security just became the strangest lead on the corkboard this week. Legal reminds everyone this never officially happened."
     },
     {
       "schemaVersion": 2,
@@ -3086,7 +3122,7 @@
         "zone"
       ],
       "cost": 7,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Department press rehearsal: Abductees compare scars under black light and demand hazard pay on camera. The press desk files it under seasonal anomalies."
     },
     {
       "schemaVersion": 2,
@@ -3105,7 +3141,7 @@
         "roswell"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no roswell detected.\""
+      "flavor": "Agency incident report: Roswell Cover Story just became the strangest lead on the corkboard this week. Logistics orders extra barricade tape just in case."
     },
     {
       "schemaVersion": 2,
@@ -3125,7 +3161,7 @@
         "media"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
+      "flavor": "Compliance footnote: Disinformation Bureau just became the strangest lead on the corkboard this week. The memo self-destructs after six bored signatures."
     },
     {
       "schemaVersion": 2,
@@ -3144,7 +3180,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Command center aside: Sources insist that the evergreen icon\u2014upright, elusive, and ready to anchor multi-state conspiracies. Agency spokesbots schedule a denial tour."
     },
     {
       "schemaVersion": 2,
@@ -3168,7 +3204,7 @@
         "government"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Internal affairs reminder: Project Blue Beam just became the strangest lead on the corkboard this week. Archivists stamp it \u201croutine wildlife incident.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -3190,7 +3226,7 @@
         "mothman"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
+      "flavor": "Procurement addendum: Sources insist that red-eyed harbinger whose sightings clustered before the Silver Bridge collapse. Risk management drafts a new acronym for the mess."
     },
     {
       "schemaVersion": 2,
@@ -3207,10 +3243,11 @@
       "tags": [
         "attack",
         "cryptid",
-        "government"
+        "government",
+        "chupacabra"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Public affairs talking point: Emergency binders add a tab labelled 'Chupacabra', citing how the livestock leech toggles between alien spines and mange-ridden coyotes across the southwest. The cafeteria menu quietly adds blackout coffee."
     },
     {
       "schemaVersion": 2,
@@ -3228,7 +3265,7 @@
         "media"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
+      "flavor": "Enforcement briefing note: Field researchers staple fresh plaster casts over every bulletin board in reach. Interns update the color-coded panic binder."
     },
     {
       "schemaVersion": 2,
@@ -3245,10 +3282,11 @@
       "tags": [
         "attack",
         "cryptid",
-        "government"
+        "government",
+        "jersey-devil"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no jersey devil detected.\""
+      "flavor": "Surveillance log entry: Sources insist that a winged screecher born from colonial curses patrols the Pine Barrens. The phones reroute straight to patriotic hold music."
     },
     {
       "schemaVersion": 2,
@@ -3265,10 +3303,11 @@
       "tags": [
         "attack",
         "cryptid",
-        "government"
+        "government",
+        "lake-monster"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no lake detected.\""
+      "flavor": "Budget office tantrum: Sources insist that boat crews swear something serpentine keeps photo-bombing sonar sweeps across inland lakes. Satellite time gets reassigned to weather balloons."
     },
     {
       "schemaVersion": 2,
@@ -3288,7 +3327,7 @@
         "government"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Operations fax at 3AM: Men in Beige just became the strangest lead on the corkboard this week. HR circulates a stress survey with no checkbox for \u201ccryptid.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -3307,7 +3346,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Disaster drill script: Swamp Gas Generator just became the strangest lead on the corkboard this week. Someone orders extra caution tape shaped like barbed wire."
     },
     {
       "schemaVersion": 2,
@@ -3325,7 +3364,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Legal counsel margin: Deniability Protocols just became the strangest lead on the corkboard this week. The governor's office prepares a shrugging emoji tweet."
     },
     {
       "schemaVersion": 2,
@@ -3346,7 +3385,7 @@
         "government"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no black detected.\""
+      "flavor": "Senate oversight shrug: Black Helicopters just became the strangest lead on the corkboard this week. Procurement starts bulk-buying industrial-sized sage bundles."
     },
     {
       "schemaVersion": 2,
@@ -3366,7 +3405,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Archives intake summary: Cryptozoology Department just became the strangest lead on the corkboard this week. They schedule a follow-up meeting titled \u201cRoutine Fog.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -3384,7 +3423,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
+      "flavor": "Bureau memo leak: Flatwoods Incident just became the strangest lead on the corkboard this week. Central office attaches three redacted appendices."
     },
     {
       "schemaVersion": 2,
@@ -3399,10 +3438,11 @@
       "tags": [
         "cryptid",
         "government",
-        "zone"
+        "zone",
+        "skunk-ape"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Official bulletin draft: Sources insist that florida\u2019s swamp Sasquatch leaves sulfur stench and photo ops in its wake. Public affairs rehearses the \u201cnothing to see\u201d line."
     },
     {
       "schemaVersion": 2,
@@ -3419,10 +3459,11 @@
       "tags": [
         "attack",
         "cryptid",
-        "government"
+        "government",
+        "thunderbird"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no thunderbird detected.\""
+      "flavor": "Containment directive: Sources insist that giant, storm-bringing birds span Indigenous stories from Alaska to the desert Southwest. Budget hawks demand receipts before sunrise."
     },
     {
       "schemaVersion": 2,
@@ -3442,7 +3483,7 @@
         "government"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no shadow detected.\""
+      "flavor": "Logistics redline: Shadow People Census just became the strangest lead on the corkboard this week. Command schedules a morale webinar for staff."
     },
     {
       "schemaVersion": 2,
@@ -3457,10 +3498,11 @@
       "tags": [
         "cryptid",
         "government",
-        "zone"
+        "zone",
+        "hopkinsville-goblins"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Security clearance whisper: Sources insist that kentucky farmhouses still log metallic-skinned visitors tapping on windows at dusk. Legal reminds everyone this never officially happened."
     },
     {
       "schemaVersion": 2,
@@ -3478,7 +3520,7 @@
         "media"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Department press rehearsal: Lizard Person Council just became the strangest lead on the corkboard this week. The press desk files it under seasonal anomalies."
     },
     {
       "schemaVersion": 2,
@@ -3496,7 +3538,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Agency incident report: Survey teams keep losing drones to tropical breezes rising from the mineshaft. Logistics orders extra barricade tape just in case."
     },
     {
       "schemaVersion": 2,
@@ -3516,7 +3558,7 @@
         "media"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no time detected.\""
+      "flavor": "Compliance footnote: Time Travel Bureau just became the strangest lead on the corkboard this week. The memo self-destructs after six bored signatures."
     },
     {
       "schemaVersion": 2,
@@ -3535,7 +3577,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Command center aside: Flying Saucer Hangar just became the strangest lead on the corkboard this week. Agency spokesbots schedule a denial tour."
     },
     {
       "schemaVersion": 2,
@@ -3553,7 +3595,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Internal affairs reminder: Dimensional customs confiscates seven suitcases of contraband timelines. Archivists stamp it \u201croutine wildlife incident.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -3571,7 +3613,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Procurement addendum: The expedition liveblog pauses only to refuel on diner coffee and righteous outrage. Risk management drafts a new acronym for the mess."
     },
     {
       "schemaVersion": 2,
@@ -3591,7 +3633,7 @@
         "government"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Public affairs talking point: Skinwalker Ranch Buyout just became the strangest lead on the corkboard this week. The cafeteria menu quietly adds blackout coffee."
     },
     {
       "schemaVersion": 2,
@@ -3606,10 +3648,11 @@
       "tags": [
         "cryptid",
         "government",
-        "zone"
+        "zone",
+        "dover-demon"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Enforcement briefing note: Sources insist that massachusetts teens in 1977 chased a pale, melon-headed climber along stone walls. Interns update the color-coded panic binder."
     },
     {
       "schemaVersion": 2,
@@ -3628,7 +3671,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Surveillance log entry: Abductees compare scars under black light and demand hazard pay on camera. The phones reroute straight to patriotic hold music."
     },
     {
       "schemaVersion": 2,
@@ -3646,7 +3689,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Budget office tantrum: Cattle Mutilation Labs just became the strangest lead on the corkboard this week. Satellite time gets reassigned to weather balloons."
     },
     {
       "schemaVersion": 2,
@@ -3664,7 +3707,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
+      "flavor": "Operations fax at 3AM: Crop Circle Artists Guild just became the strangest lead on the corkboard this week. HR circulates a stress survey with no checkbox for \u201ccryptid.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -3682,7 +3725,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Disaster drill script: Phantom Airships just became the strangest lead on the corkboard this week. Someone orders extra caution tape shaped like barbed wire."
     },
     {
       "schemaVersion": 2,
@@ -3700,7 +3743,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
+      "flavor": "Legal counsel margin: Washington Sea Serpent just became the strangest lead on the corkboard this week. The governor's office prepares a shrugging emoji tweet."
     },
     {
       "schemaVersion": 2,
@@ -3718,7 +3761,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no moon-eyed detected.\""
+      "flavor": "Senate oversight shrug: Moon-Eyed People Census just became the strangest lead on the corkboard this week. Procurement starts bulk-buying industrial-sized sage bundles."
     },
     {
       "schemaVersion": 2,
@@ -3736,7 +3779,7 @@
         "media"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no giant detected.\""
+      "flavor": "Archives intake summary: Giant Octopus Cover-up just became the strangest lead on the corkboard this week. They schedule a follow-up meeting titled \u201cRoutine Fog.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -3754,7 +3797,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Bureau memo leak: Remote viewers report migraines shaped like classified coordinates. Central office attaches three redacted appendices."
     },
     {
       "schemaVersion": 2,
@@ -3774,7 +3817,7 @@
         "media"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no invisible detected.\""
+      "flavor": "Official bulletin draft: Invisible Aircraft Project just became the strangest lead on the corkboard this week. Public affairs rehearses the \u201cnothing to see\u201d line."
     },
     {
       "schemaVersion": 2,
@@ -3794,7 +3837,7 @@
         "government"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Containment directive: Missing Time Protocol just became the strangest lead on the corkboard this week. Budget hawks demand receipts before sunrise."
     },
     {
       "schemaVersion": 2,
@@ -3812,7 +3855,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Logistics redline: Greys Employment Program just became the strangest lead on the corkboard this week. Command schedules a morale webinar for staff."
     },
     {
       "schemaVersion": 2,
@@ -3830,7 +3873,7 @@
         "media"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Security clearance whisper: Reality Anchor Array just became the strangest lead on the corkboard this week. Legal reminds everyone this never officially happened."
     },
     {
       "schemaVersion": 2,
@@ -3848,7 +3891,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Department press rehearsal: Engineers tape over glowing rifts with OSHA signage and hopeful duct tape. The press desk files it under seasonal anomalies."
     },
     {
       "schemaVersion": 2,
@@ -3866,7 +3909,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Agency incident report: Field researchers staple fresh plaster casts over every bulletin board in reach. Logistics orders extra barricade tape just in case."
     },
     {
       "schemaVersion": 2,
@@ -3886,7 +3929,7 @@
         "government"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Compliance footnote: HR adds \u201cclairvoyant hazard pay\u201d paperwork to the onboarding packet. The memo self-destructs after six bored signatures."
     },
     {
       "schemaVersion": 2,
@@ -3905,7 +3948,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Command center aside: Subliminal Broadcast Network just became the strangest lead on the corkboard this week. Agency spokesbots schedule a denial tour."
     },
     {
       "schemaVersion": 2,
@@ -3923,7 +3966,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Internal affairs reminder: Fake Moon Landing Set just became the strangest lead on the corkboard this week. Archivists stamp it \u201croutine wildlife incident.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -3941,7 +3984,7 @@
         "media"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no neuralyzer detected.\""
+      "flavor": "Procurement addendum: Neuralyzer Deployment just became the strangest lead on the corkboard this week. Risk management drafts a new acronym for the mess."
     },
     {
       "schemaVersion": 2,
@@ -3962,7 +4005,7 @@
         "government"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Public affairs talking point: Anonymous insiders fax us outlines already soaked in invisible ink. The cafeteria menu quietly adds blackout coffee."
     },
     {
       "schemaVersion": 2,
@@ -3982,7 +4025,7 @@
         "media"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no operation detected.\""
+      "flavor": "Enforcement briefing note: Sources insist that the sequel program insists its imported geniuses definitely aren't hiding UFO patents in desk drawers. Interns update the color-coded panic binder."
     },
     {
       "schemaVersion": 2,
@@ -4001,7 +4044,7 @@
         "ufo"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no holographic detected.\""
+      "flavor": "Surveillance log entry: Radar techs swear the saucers spelled out tomorrow's lottery numbers before vanishing. The phones reroute straight to patriotic hold music."
     },
     {
       "schemaVersion": 2,
@@ -4019,7 +4062,7 @@
         "media"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Budget office tantrum: Field researchers staple fresh plaster casts over every bulletin board in reach. Satellite time gets reassigned to weather balloons."
     },
     {
       "schemaVersion": 2,
@@ -4040,7 +4083,7 @@
         "government"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Operations fax at 3AM: Field researchers staple fresh plaster casts over every bulletin board in reach. HR circulates a stress survey with no checkbox for \u201ccryptid.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -4058,7 +4101,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Disaster drill script: Extraterrestrial Non-Disclosure Treaty just became the strangest lead on the corkboard this week. Someone orders extra caution tape shaped like barbed wire."
     },
     {
       "schemaVersion": 2,
@@ -4077,7 +4120,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Legal counsel margin: Sources insist that the evergreen icon\u2014upright, elusive, and ready to anchor multi-state conspiracies. The governor's office prepares a shrugging emoji tweet."
     },
     {
       "schemaVersion": 2,
@@ -4095,7 +4138,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Senate oversight shrug: Dimensional customs confiscates seven suitcases of contraband timelines. Procurement starts bulk-buying industrial-sized sage bundles."
     },
     {
       "schemaVersion": 2,
@@ -4113,7 +4156,7 @@
         "media"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no cosmic detected.\""
+      "flavor": "Archives intake summary: Cosmic Horror Containment just became the strangest lead on the corkboard this week. They schedule a follow-up meeting titled \u201cRoutine Fog.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -4133,7 +4176,7 @@
         "government"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Bureau memo leak: Sources insist that capitol interns whisper about staffers whose pupils slit whenever the cameras cut away. Central office attaches three redacted appendices."
     },
     {
       "schemaVersion": 2,
@@ -4154,7 +4197,7 @@
         "government"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Official bulletin draft: Memory Modification Clinic just became the strangest lead on the corkboard this week. Public affairs rehearses the \u201cnothing to see\u201d line."
     },
     {
       "schemaVersion": 2,
@@ -4172,7 +4215,7 @@
         "media"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Situation normal—memo drafted and archived.\""
+      "flavor": "Containment directive: Psy-Ops Division just became the strangest lead on the corkboard this week. Budget hawks demand receipts before sunrise."
     },
     {
       "schemaVersion": 2,
@@ -4190,7 +4233,7 @@
         "media"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no cryptid detected.\""
+      "flavor": "Logistics redline: Field researchers staple fresh plaster casts over every bulletin board in reach. Command schedules a morale webinar for staff."
     },
     {
       "schemaVersion": 2,
@@ -4208,7 +4251,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Security clearance whisper: Underground Bunker Network just became the strangest lead on the corkboard this week. Legal reminds everyone this never officially happened."
     },
     {
       "schemaVersion": 2,
@@ -4226,7 +4269,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
+      "flavor": "Department press rehearsal: HR adds \u201cclairvoyant hazard pay\u201d paperwork to the onboarding packet. The press desk files it under seasonal anomalies."
     },
     {
       "schemaVersion": 2,
@@ -4244,7 +4287,7 @@
         "media"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
+      "flavor": "Agency incident report: Temporal Loop Device just became the strangest lead on the corkboard this week. Logistics orders extra barricade tape just in case."
     },
     {
       "schemaVersion": 2,
@@ -4262,7 +4305,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Compliance footnote: Anomalous Materials Division just became the strangest lead on the corkboard this week. The memo self-destructs after six bored signatures."
     },
     {
       "schemaVersion": 2,
@@ -4280,7 +4323,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public guidance issued; no phantom detected.\""
+      "flavor": "Command center aside: Phantom Helicopter Squadron just became the strangest lead on the corkboard this week. Agency spokesbots schedule a denial tour."
     },
     {
       "schemaVersion": 2,
@@ -4298,7 +4341,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
+      "flavor": "Internal affairs reminder: Reality Distortion Field just became the strangest lead on the corkboard this week. Archivists stamp it \u201croutine wildlife incident.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -4316,7 +4359,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Procurement addendum: Field researchers staple fresh plaster casts over every bulletin board in reach. Risk management drafts a new acronym for the mess."
     },
     {
       "schemaVersion": 2,
@@ -4334,7 +4377,7 @@
         "zone"
       ],
       "cost": 6,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Field note logged; further action unnecessary.\""
+      "flavor": "Public affairs talking point: Phantom Satellite Grid just became the strangest lead on the corkboard this week. The cafeteria menu quietly adds blackout coffee."
     },
     {
       "schemaVersion": 2,
@@ -4354,7 +4397,7 @@
         "government"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Awaiting lab results; likely weather and shadows.\""
+      "flavor": "Enforcement briefing note: Meditation influencers promise the secret password to the universal group chat. Interns update the color-coded panic binder."
     },
     {
       "schemaVersion": 2,
@@ -4372,7 +4415,7 @@
         "zone"
       ],
       "cost": 5,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Filed under routine wildlife misidentification.\""
+      "flavor": "Surveillance log entry: Multidimensional Embassy just became the strangest lead on the corkboard this week. The phones reroute straight to patriotic hold music."
     },
     {
       "schemaVersion": 2,
@@ -4389,10 +4432,11 @@
         "alabama",
         "cryptid",
         "government",
-        "media"
+        "media",
+        "wolf-woman-of-mobile"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the alabama cryptid.\""
+      "flavor": "Budget office tantrum: Alabama wildlife offices quietly brief lawmakers that Wolf Woman of Mobile is back in season\u2014April 1971 calls flooded dispatch with sightings of a half-wolf woman sprinting through Mobile\u2019s marsh suburbs. Satellite time gets reassigned to weather balloons."
     },
     {
       "schemaVersion": 2,
@@ -4409,10 +4453,11 @@
         "alaska",
         "cryptid",
         "government",
-        "media"
+        "media",
+        "qalupalik"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the tizheruk.\""
+      "flavor": "Operations fax at 3AM: Alaska wildlife offices quietly brief lawmakers that Qalupalik is back in season\u2014A green-skinned sea dweller sings children toward the surf and hauls them into her amautik. HR circulates a stress survey with no checkbox for \u201ccryptid.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -4431,10 +4476,11 @@
         "arizona",
         "attack",
         "cryptid",
-        "government"
+        "government",
+        "mogollon-monster"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the thunderbird.\""
+      "flavor": "Disaster drill script: Arizona wildlife offices quietly brief lawmakers that Mogollon Monster is back in season\u2014A reeking, red-eyed biped stalks the Rim Country treeline. Someone orders extra caution tape shaped like barbed wire."
     },
     {
       "schemaVersion": 2,
@@ -4451,10 +4497,11 @@
         "arkansas",
         "cryptid",
         "government",
-        "media"
+        "media",
+        "white-river-monster"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the fouke monster.\""
+      "flavor": "Legal counsel margin: Arkansas wildlife offices quietly brief lawmakers that White River Monster is back in season\u2014\u201cWhitey\u201d surfaces like a humpbacked battering ram whenever the river is dredged. The governor's office prepares a shrugging emoji tweet."
     },
     {
       "schemaVersion": 2,
@@ -4471,10 +4518,11 @@
         "california",
         "cryptid",
         "government",
-        "zone"
+        "zone",
+        "tahoe-tessie"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the bigfoot.\""
+      "flavor": "Senate oversight shrug: California wildlife offices quietly brief lawmakers that Tahoe Tessie is back in season\u2014A deep-lake dweller surfaces often enough to sustain hotline operators and a museum. Procurement starts bulk-buying industrial-sized sage bundles."
     },
     {
       "schemaVersion": 2,
@@ -4491,10 +4539,11 @@
         "colorado",
         "cryptid",
         "government",
-        "zone"
+        "zone",
+        "tommyknockers"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the colorado cryptid.\""
+      "flavor": "Archives intake summary: Colorado wildlife offices quietly brief lawmakers that Tommyknockers is back in season\u2014Mine tunnels echo with goblin knocks that signal cave-ins\u2014or sabotage. They schedule a follow-up meeting titled \u201cRoutine Fog.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -4511,10 +4560,11 @@
         "connecticut",
         "cryptid",
         "government",
-        "media"
+        "media",
+        "connie"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the connecticut cryptid.\""
+      "flavor": "Bureau memo leak: Connecticut wildlife offices quietly brief lawmakers that Connie is back in season\u2014River pilots whisper about a long, scaled silhouette that surfaces where shipping lanes tighten. Central office attaches three redacted appendices."
     },
     {
       "schemaVersion": 2,
@@ -4531,10 +4581,11 @@
         "cryptid",
         "delaware",
         "government",
-        "media"
+        "media",
+        "pukwudgie"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the delaware cryptid.\""
+      "flavor": "Official bulletin draft: Delaware wildlife offices quietly brief lawmakers that Pukwudgie is back in season\u2014Fire-starting tricksters blink between pines, leaving scorched footprints and pranked park rangers. Public affairs rehearses the \u201cnothing to see\u201d line."
     },
     {
       "schemaVersion": 2,
@@ -4552,10 +4603,11 @@
         "florida",
         "florida-man",
         "government",
-        "media"
+        "media",
+        "skunk-ape"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the skunk ape.\""
+      "flavor": "Containment directive: Florida wildlife offices quietly brief lawmakers that Skunk Ape is back in season\u2014Everglades tours market the sulfur-scented primate as both attraction and menace. Budget hawks demand receipts before sunrise."
     },
     {
       "schemaVersion": 2,
@@ -4572,10 +4624,11 @@
         "cryptid",
         "georgia",
         "government",
-        "media"
+        "media",
+        "altie"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the georgia cryptid.\""
+      "flavor": "Logistics redline: Georgia wildlife offices quietly brief lawmakers that Altie is back in season\u2014Muscogee stories and modern boat blogs agree a long-necked river dweller prowls the Altamaha basin. Command schedules a morale webinar for staff."
     },
     {
       "schemaVersion": 2,
@@ -4592,10 +4645,11 @@
         "cryptid",
         "government",
         "hawaii",
-        "media"
+        "media",
+        "menehune"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the hawaii cryptid.\""
+      "flavor": "Security clearance whisper: Hawaii wildlife offices quietly brief lawmakers that Menehune is back in season\u2014Night-working artisans leave perfect fishponds and terraces, then vanish before sunrise. Legal reminds everyone this never officially happened."
     },
     {
       "schemaVersion": 2,
@@ -4612,10 +4666,11 @@
         "cryptid",
         "government",
         "idaho",
-        "media"
+        "media",
+        "sharlie"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the idaho cryptid.\""
+      "flavor": "Department press rehearsal: Idaho wildlife offices quietly brief lawmakers that Sharlie is back in season\u2014Payette Lake festivals celebrate a serpentine mascot called Slimy Slim. The press desk files it under seasonal anomalies."
     },
     {
       "schemaVersion": 2,
@@ -4632,10 +4687,11 @@
         "cryptid",
         "government",
         "illinois",
-        "zone"
+        "zone",
+        "cohomo"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the enfield horror.\""
+      "flavor": "Agency incident report: Illinois wildlife offices quietly brief lawmakers that Cohomo is back in season\u2014A sulfur-smelling seven-footer stalked riverbanks in the 1970s, logging 200 sightings. Logistics orders extra barricade tape just in case."
     },
     {
       "schemaVersion": 2,
@@ -4652,10 +4708,11 @@
         "cryptid",
         "government",
         "indiana",
-        "media"
+        "media",
+        "devil-s-lake-guardian"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the indiana cryptid.\""
+      "flavor": "Compliance footnote: Indiana wildlife offices quietly brief lawmakers that Devil\u2019s Lake Guardian is back in season\u2014Lake Manitou construction crews blamed accidents on a protective monster. The memo self-destructs after six bored signatures."
     },
     {
       "schemaVersion": 2,
@@ -4672,10 +4729,11 @@
         "cryptid",
         "government",
         "iowa",
-        "media"
+        "media",
+        "mugwump"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the iowa cryptid.\""
+      "flavor": "Command center aside: Iowa wildlife offices quietly brief lawmakers that Mugwump is back in season\u2014Carnival barkers and lakeside locals promote a hairy, long-necked swimmer as tourist bait. Agency spokesbots schedule a denial tour."
     },
     {
       "schemaVersion": 2,
@@ -4692,10 +4750,11 @@
         "cryptid",
         "government",
         "kansas",
-        "media"
+        "media",
+        "sinkhole-sam"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the kansas cryptid.\""
+      "flavor": "Internal affairs reminder: Kansas wildlife offices quietly brief lawmakers that Sinkhole Sam is back in season\u2014Inman Lake anglers feared an eyeless, tubular creature cruising flooded quarries. Archivists stamp it \u201croutine wildlife incident.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -4712,10 +4771,11 @@
         "cryptid",
         "government",
         "kentucky",
-        "media"
+        "media",
+        "pope-lick-monster"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the kelly–hopkinsville goblins.\""
+      "flavor": "Procurement addendum: Kentucky wildlife offices quietly brief lawmakers that Pope Lick Monster is back in season\u2014Thrill seekers trespass on a live rail trestle hoping to glimpse the goat-headed hypnotist. Risk management drafts a new acronym for the mess."
     },
     {
       "schemaVersion": 2,
@@ -4732,10 +4792,11 @@
         "cryptid",
         "government",
         "louisiana",
-        "media"
+        "media",
+        "rougarou"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the rougarou.\""
+      "flavor": "Public affairs talking point: Louisiana wildlife offices quietly brief lawmakers that Rougarou is back in season\u2014Cajun parishes invoke werewolf penance stories to keep secrets in the bayou. The cafeteria menu quietly adds blackout coffee."
     },
     {
       "schemaVersion": 2,
@@ -4752,10 +4813,11 @@
         "cryptid",
         "government",
         "maine",
-        "media"
+        "media",
+        "pocomoonshine-lake-monster"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the maine cryptid.\""
+      "flavor": "Enforcement briefing note: Maine wildlife offices quietly brief lawmakers that Pocomoonshine Lake Monster is back in season\u2014A duel between rival shamans allegedly birthed a snail-serpent hybrid that still capsizes canoes. Interns update the color-coded panic binder."
     },
     {
       "schemaVersion": 2,
@@ -4772,10 +4834,11 @@
         "cryptid",
         "government",
         "maryland",
-        "media"
+        "media",
+        "goatman"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the snallygaster.\""
+      "flavor": "Surveillance log entry: Maryland wildlife offices quietly brief lawmakers that Goatman is back in season\u2014Stories toggle between lab accident and jilted hermit, but either way the ax-wielding hybrid keeps lovers\u2019 lanes empty. The phones reroute straight to patriotic hold music."
     },
     {
       "schemaVersion": 2,
@@ -4792,10 +4855,11 @@
         "cryptid",
         "government",
         "massachusetts",
-        "media"
+        "media",
+        "beast-of-truro"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the dover demon.\""
+      "flavor": "Budget office tantrum: Massachusetts wildlife offices quietly brief lawmakers that Beast of Truro is back in season\u2014Cape Cod livestock maulings and cougar-sized tracks kept 1970s sheriffs on edge. Satellite time gets reassigned to weather balloons."
     },
     {
       "schemaVersion": 2,
@@ -4812,10 +4876,11 @@
         "cryptid",
         "government",
         "media",
-        "michigan"
+        "michigan",
+        "pressie"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the dogman.\""
+      "flavor": "Operations fax at 3AM: Michigan wildlife offices quietly brief lawmakers that Pressie is back in season\u201419th-century ship crews recorded serpentine shapes rolling across the bay. HR circulates a stress survey with no checkbox for \u201ccryptid.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -4834,10 +4899,11 @@
         "attack",
         "cryptid",
         "government",
-        "minnesota"
+        "minnesota",
+        "hairy-man-of-vergas-trails"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the wendigo.\""
+      "flavor": "Disaster drill script: Minnesota wildlife offices quietly brief lawmakers that Hairy Man of Vergas Trails is back in season\u2014Cable crews and farmers chase a towering, nocturnal prowler leaving shredded livestock. Someone orders extra caution tape shaped like barbed wire."
     },
     {
       "schemaVersion": 2,
@@ -4854,10 +4920,11 @@
         "cryptid",
         "government",
         "media",
-        "mississippi"
+        "mississippi",
+        "three-legged-ghost"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the mississippi cryptid.\""
+      "flavor": "Legal counsel margin: Mississippi wildlife offices quietly brief lawmakers that Three-Legged Ghost is back in season\u2014Delta churchyards host tales of a hopping revenant and her mother\u2019s phantom limb. The governor's office prepares a shrugging emoji tweet."
     },
     {
       "schemaVersion": 2,
@@ -4874,10 +4941,11 @@
         "cryptid",
         "government",
         "media",
-        "missouri"
+        "missouri",
+        "ozark-howler"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the missouri cryptid.\""
+      "flavor": "Senate oversight shrug: Missouri wildlife offices quietly brief lawmakers that Ozark Howler is back in season\u2014Bonfire tales describe a horned bear-cat whose howl rattles campers. Procurement starts bulk-buying industrial-sized sage bundles."
     },
     {
       "schemaVersion": 2,
@@ -4894,10 +4962,11 @@
         "cryptid",
         "government",
         "media",
-        "montana"
+        "montana",
+        "flathead-lake-monster"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the shunka warakin.\""
+      "flavor": "Archives intake summary: Montana wildlife offices quietly brief lawmakers that Flathead Lake Monster is back in season\u2014Shape-shifting duelists\u2019 legend morphed into 20th-century boaters logging thirty-foot forms. They schedule a follow-up meeting titled \u201cRoutine Fog.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -4914,10 +4983,11 @@
         "cryptid",
         "government",
         "media",
-        "nebraska"
+        "nebraska",
+        "lake-walgren-monster"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the nebraska cryptid.\""
+      "flavor": "Bureau memo leak: Nebraska wildlife offices quietly brief lawmakers that Lake Walgren Monster is back in season\u2014Hay Springs residents rebranded a horned lake beast as tourist mascot. Central office attaches three redacted appendices."
     },
     {
       "schemaVersion": 2,
@@ -4934,10 +5004,11 @@
         "cryptid",
         "government",
         "media",
-        "nevada"
+        "nevada",
+        "water-babies-of-pyramid-lake"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the tahoe tessie.\""
+      "flavor": "Official bulletin draft: Nevada wildlife offices quietly brief lawmakers that Water Babies of Pyramid Lake is back in season\u2014Vengeful spirits tug swimmers under near the reservation shallows. Public affairs rehearses the \u201cnothing to see\u201d line."
     },
     {
       "schemaVersion": 2,
@@ -4954,10 +5025,11 @@
         "cryptid",
         "government",
         "media",
-        "new-hampshire"
+        "new-hampshire",
+        "wood-devils"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the wood devils.\""
+      "flavor": "Containment directive: New Hampshire wildlife offices quietly brief lawmakers that Wood Devils is back in season\u2014Tall, bark-colored figures pivot behind tree trunks the moment anyone looks. Budget hawks demand receipts before sunrise."
     },
     {
       "schemaVersion": 2,
@@ -4976,10 +5048,11 @@
         "attack",
         "cryptid",
         "government",
-        "new-jersey"
+        "new-jersey",
+        "jersey-devil"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the jersey devil.\""
+      "flavor": "Logistics redline: New Jersey wildlife offices quietly brief lawmakers that Jersey Devil is back in season\u2014The Pine Barrens\u2019 winged menace mixes colonial curses with casino roof prints. Command schedules a morale webinar for staff."
     },
     {
       "schemaVersion": 2,
@@ -4998,10 +5071,11 @@
         "attack",
         "cryptid",
         "government",
-        "new-mexico"
+        "new-mexico",
+        "skinwalkers"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the skinwalkers.\""
+      "flavor": "Security clearance whisper: New Mexico wildlife offices quietly brief lawmakers that Skinwalkers is back in season\u2014Witch-shifters mimic coyotes and owls, especially across the Four Corners ranchlands. Legal reminds everyone this never officially happened."
     },
     {
       "schemaVersion": 2,
@@ -5018,10 +5092,11 @@
         "cryptid",
         "government",
         "media",
-        "new-york"
+        "new-york",
+        "white-lady-of-durand-eastman"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the montauk monster.\""
+      "flavor": "Department press rehearsal: New York wildlife offices quietly brief lawmakers that White Lady of Durand-Eastman is back in season\u2014A mourning specter patrols Lake Ontario cliffs, freezing beach traffic whenever she appears. The press desk files it under seasonal anomalies."
     },
     {
       "schemaVersion": 2,
@@ -5038,10 +5113,11 @@
         "cryptid",
         "government",
         "media",
-        "north-carolina"
+        "north-carolina",
+        "wampus-cat"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the north carolina cryptid.\""
+      "flavor": "Agency incident report: North Carolina wildlife offices quietly brief lawmakers that Wampus Cat is back in season\u2014A six-legged feline prowler mauls watchdogs and spooks mountain towns. Logistics orders extra barricade tape just in case."
     },
     {
       "schemaVersion": 2,
@@ -5058,10 +5134,11 @@
         "cryptid",
         "government",
         "media",
-        "north-dakota"
+        "north-dakota",
+        "devil-s-lake-serpent"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the north dakota cryptid.\""
+      "flavor": "Compliance footnote: North Dakota wildlife offices quietly brief lawmakers that Devil\u2019s Lake Serpent is back in season\u2014Tribal warnings and settler reports blame drownings on a lurking serpent. The memo self-destructs after six bored signatures."
     },
     {
       "schemaVersion": 2,
@@ -5078,10 +5155,11 @@
         "cryptid",
         "government",
         "media",
-        "ohio"
+        "ohio",
+        "loveland-frogman"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the loveland frogman.\""
+      "flavor": "Command center aside: Ohio wildlife offices quietly brief lawmakers that Loveland Frogman is back in season\u2014Wand-wielding frogfolk allegedly waved down patrol cars in the 1950s. Agency spokesbots schedule a denial tour."
     },
     {
       "schemaVersion": 2,
@@ -5098,10 +5176,11 @@
         "cryptid",
         "government",
         "media",
-        "oklahoma"
+        "oklahoma",
+        "green-hill-monster"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the oklahoma cryptid.\""
+      "flavor": "Internal affairs reminder: Oklahoma wildlife offices quietly brief lawmakers that Green Hill Monster is back in season\u2014A foggy-night encounter birthed tales of a hulking forest dweller outside Talihina. Archivists stamp it \u201croutine wildlife incident.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -5118,10 +5197,11 @@
         "cryptid",
         "government",
         "media",
-        "oregon"
+        "oregon",
+        "colossal-claude"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the bigfoot.\""
+      "flavor": "Procurement addendum: Oregon wildlife offices quietly brief lawmakers that Colossal Claude is back in season\u2014Columbia River sailors report a broad-headed serpent that rides fogbanks. Risk management drafts a new acronym for the mess."
     },
     {
       "schemaVersion": 2,
@@ -5138,10 +5218,11 @@
         "cryptid",
         "government",
         "media",
-        "pennsylvania"
+        "pennsylvania",
+        "squonk"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the pennsylvania cryptid.\""
+      "flavor": "Public affairs talking point: Pennsylvania wildlife offices quietly brief lawmakers that Squonk is back in season\u2014The wrinkled hermit-beast dissolves into tears whenever cornered, soaking hunters in its wake. The cafeteria menu quietly adds blackout coffee."
     },
     {
       "schemaVersion": 2,
@@ -5158,10 +5239,11 @@
         "cryptid",
         "government",
         "media",
-        "rhode-island"
+        "rhode-island",
+        "palentine-ghost"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the rhode island cryptid.\""
+      "flavor": "Enforcement briefing note: Rhode Island wildlife offices quietly brief lawmakers that Palentine Ghost is back in season\u2014Block Island locals insist a fiery ship and wailing survivor reappear each winter. Interns update the color-coded panic binder."
     },
     {
       "schemaVersion": 2,
@@ -5178,10 +5260,11 @@
         "cryptid",
         "government",
         "media",
-        "south-carolina"
+        "south-carolina",
+        "lizard-man-of-scape-ore"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the south carolina cryptid.\""
+      "flavor": "Surveillance log entry: South Carolina wildlife offices quietly brief lawmakers that Lizard Man of Scape Ore is back in season\u2014The 1980s rash of clawed car doors keeps swamp mechanics flush with work. The phones reroute straight to patriotic hold music."
     },
     {
       "schemaVersion": 2,
@@ -5198,10 +5281,11 @@
         "cryptid",
         "government",
         "media",
-        "south-dakota"
+        "south-dakota",
+        "jackalope"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the south dakota cryptid.\""
+      "flavor": "Budget office tantrum: South Dakota wildlife offices quietly brief lawmakers that Jackalope is back in season\u2014Tourism boards embraced antlered jackrabbits with novelty hunting permits. Satellite time gets reassigned to weather balloons."
     },
     {
       "schemaVersion": 2,
@@ -5218,10 +5302,11 @@
         "cryptid",
         "government",
         "media",
-        "tennessee"
+        "tennessee",
+        "spearfinger"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the tennessee cryptid.\""
+      "flavor": "Operations fax at 3AM: Tennessee wildlife offices quietly brief lawmakers that Spearfinger is back in season\u2014The stone-skinned witch steals livers while disguised as kin in the Smokies. HR circulates a stress survey with no checkbox for \u201ccryptid.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -5240,10 +5325,11 @@
         "attack",
         "cryptid",
         "government",
-        "texas"
+        "texas",
+        "la-lechuza"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the chupacabra.\""
+      "flavor": "Disaster drill script: Texas wildlife offices quietly brief lawmakers that La Lechuza is back in season\u2014Border towns warn of owl-witches swooping down on night drinkers staggering home. Someone orders extra caution tape shaped like barbed wire."
     },
     {
       "schemaVersion": 2,
@@ -5260,10 +5346,11 @@
         "cryptid",
         "government",
         "media",
-        "utah"
+        "utah",
+        "uintah-basin-skinwalkers"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the utah cryptid.\""
+      "flavor": "Legal counsel margin: Utah wildlife offices quietly brief lawmakers that Uintah Basin Skinwalkers is back in season\u2014Ranch mutilations and portal rumors keep aerospace contractors circling the Basin. The governor's office prepares a shrugging emoji tweet."
     },
     {
       "schemaVersion": 2,
@@ -5280,10 +5367,11 @@
         "cryptid",
         "government",
         "media",
-        "vermont"
+        "vermont",
+        "northfield-pigman"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the champ.\""
+      "flavor": "Senate oversight shrug: Vermont wildlife offices quietly brief lawmakers that Northfield Pigman is back in season\u2014A tusked prowler raided barns and stalked teenagers during harvest festivals. Procurement starts bulk-buying industrial-sized sage bundles."
     },
     {
       "schemaVersion": 2,
@@ -5300,10 +5388,11 @@
         "cryptid",
         "government",
         "media",
-        "virginia"
+        "virginia",
+        "chessie"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the virginia cryptid.\""
+      "flavor": "Archives intake summary: Virginia wildlife offices quietly brief lawmakers that Chessie is back in season\u2014Chesapeake mariners watch for serpentine wakes and coordinate citizen flotillas. They schedule a follow-up meeting titled \u201cRoutine Fog.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -5320,10 +5409,11 @@
         "cryptid",
         "government",
         "media",
-        "washington"
+        "washington",
+        "tacoma-narrows-octopus"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the bigfoot.\""
+      "flavor": "Bureau memo leak: Washington wildlife offices quietly brief lawmakers that Tacoma Narrows Octopus is back in season\u2014Divers blame a giant octopus for guarding the collapsed bridge\u2019s wreckage. Central office attaches three redacted appendices."
     },
     {
       "schemaVersion": 2,
@@ -5342,10 +5432,11 @@
         "attack",
         "cryptid",
         "government",
-        "west-virginia"
+        "west-virginia",
+        "flatwoods-monster"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the mothman.\""
+      "flavor": "Official bulletin draft: West Virginia wildlife offices quietly brief lawmakers that Flatwoods Monster is back in season\u2014The 1952 landing panic birthed a permanent festival for a glowing-suited visitor. Public affairs rehearses the \u201cnothing to see\u201d line."
     },
     {
       "schemaVersion": 2,
@@ -5364,10 +5455,11 @@
         "attack",
         "cryptid",
         "government",
-        "wisconsin"
+        "wisconsin",
+        "hodag"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the beast of bray road.\""
+      "flavor": "Containment directive: Wisconsin wildlife offices quietly brief lawmakers that Hodag is back in season\u2014Rhinelander\u2019s horned lumber-camp legend keeps logging festivals crowded. Budget hawks demand receipts before sunrise."
     },
     {
       "schemaVersion": 2,
@@ -5384,10 +5476,11 @@
         "cryptid",
         "government",
         "media",
-        "wyoming"
+        "wyoming",
+        "jackalope"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Public bulletin: Do not feed the wyoming cryptid.\""
+      "flavor": "Logistics redline: Wyoming wildlife offices quietly brief lawmakers that Jackalope is back in season\u2014Legislators embraced the antlered rabbit as a tourist champion. Command schedules a morale webinar for staff."
     },
     {
       "schemaVersion": 2,
@@ -5408,7 +5501,7 @@
         "government"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Security clearance whisper: Barricades sprout overnight because the livestock leech toggles between alien spines and mange-ridden coyotes across the southwest. Legal reminds everyone this never officially happened."
     },
     {
       "schemaVersion": 2,
@@ -5427,7 +5520,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Department press rehearsal: Barricades sprout overnight because florida\u2019s swamp sasquatch leaves sulfur stench and photo ops in its wake. The press desk files it under seasonal anomalies."
     },
     {
       "schemaVersion": 2,
@@ -5446,7 +5539,7 @@
         "snallygaster"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Agency incident report: Security rings the zone twice; maryland moonshiners once blamed a tentacled dragon-bird for livestock raids. Logistics orders extra barricade tape just in case."
     },
     {
       "schemaVersion": 2,
@@ -5467,7 +5560,7 @@
         "snallygaster"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Compliance footnote: Accountants circle expenditures linked to maryland moonshiners once blamed a tentacled dragon-bird for livestock raids. The memo self-destructs after six bored signatures."
     },
     {
       "schemaVersion": 2,
@@ -5486,7 +5579,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Command center aside: Barricades sprout overnight because the evergreen icon\u2014upright, elusive, and ready to anchor multi-state conspiracies. Agency spokesbots schedule a denial tour."
     },
     {
       "schemaVersion": 2,
@@ -5507,7 +5600,7 @@
         "thunderbird"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Internal affairs reminder: Barricades sprout overnight because giant, storm-bringing birds span indigenous stories from alaska to the desert southwest. Archivists stamp it \u201croutine wildlife incident.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -5526,7 +5619,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Procurement addendum: Barricades sprout overnight because shoreline cleanup crews wheel out a bloated lab experiment with too many teeth for the tabloids to ignore. Risk management drafts a new acronym for the mess."
     },
     {
       "schemaVersion": 2,
@@ -5545,7 +5638,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Public affairs talking point: Barricades sprout overnight because midwest patrols report a bipedal wolf pacing tree lines and counting coup on squad cars. The cafeteria menu quietly adds blackout coffee."
     },
     {
       "schemaVersion": 2,
@@ -5566,7 +5659,7 @@
         "government"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Enforcement briefing note: Accountants circle expenditures linked to lake champlain's mascot keeps bobbing between border checkpoints like it's dodging customs. Interns update the color-coded panic binder."
     },
     {
       "schemaVersion": 2,
@@ -5585,7 +5678,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Surveillance log entry: Barricades sprout overnight because shoreline cleanup crews wheel out a bloated lab experiment with too many teeth for the tabloids to ignore. The phones reroute straight to patriotic hold music."
     },
     {
       "schemaVersion": 2,
@@ -5604,7 +5697,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Budget office tantrum: Barricades sprout overnight because massachusetts teens in 1977 chased a pale, melon-headed climber along stone walls. Satellite time gets reassigned to weather balloons."
     },
     {
       "schemaVersion": 2,
@@ -5623,7 +5716,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Operations fax at 3AM: Barricades sprout overnight because sierra visitors trade hotline tips about a deep-lake dweller near casinos and ski lifts. HR circulates a stress survey with no checkbox for \u201ccryptid.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -5644,7 +5737,7 @@
         "government"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Disaster drill script: Accountants circle expenditures linked to wisconsin\u2019s roadside werewolf legend toggles between shapeshifter and unknown canid. Someone orders extra caution tape shaped like barbed wire."
     },
     {
       "schemaVersion": 2,
@@ -5665,7 +5758,7 @@
         "thunderbird"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Legal counsel margin: Security rings the zone twice; giant, storm-bringing birds span indigenous stories from alaska to the desert southwest. The governor's office prepares a shrugging emoji tweet."
     },
     {
       "schemaVersion": 2,
@@ -5684,7 +5777,7 @@
         "rougarou"
       ],
       "cost": 3,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Senate oversight shrug: Security rings the zone twice; cajun shapeshifter enforcing taboo and loyalty along the bayous. Procurement starts bulk-buying industrial-sized sage bundles."
     },
     {
       "schemaVersion": 2,
@@ -5705,7 +5798,7 @@
         "jersey-devil"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Archives intake summary: Barricades sprout overnight because a winged screecher born from colonial curses patrols the pine barrens. They schedule a follow-up meeting titled \u201cRoutine Fog.\u201d"
     },
     {
       "schemaVersion": 2,
@@ -5724,7 +5817,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Bureau memo leak: Barricades sprout overnight because midwest patrols report a bipedal wolf pacing tree lines and counting coup on squad cars. Central office attaches three redacted appendices."
     },
     {
       "schemaVersion": 2,
@@ -5745,7 +5838,7 @@
         "wendigo"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Official bulletin draft: Security rings the zone twice; famine-born cannibal spirits prowl northern forests, possessing the greedy. Public affairs rehearses the \u201cnothing to see\u201d line."
     },
     {
       "schemaVersion": 2,
@@ -5764,7 +5857,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Containment directive: Barricades sprout overnight because frontier tales recount a long-bodied wolf-beast stalking montana prairies. Budget hawks demand receipts before sunrise."
     },
     {
       "schemaVersion": 2,
@@ -5785,7 +5878,7 @@
         "government"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Logistics redline: Accountants circle expenditures linked to massachusetts teens in 1977 chased a pale, melon-headed climber along stone walls. Command schedules a morale webinar for staff."
     },
     {
       "schemaVersion": 2,
@@ -5806,7 +5899,7 @@
         "thunderbird"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Security clearance whisper: Security rings the zone twice; giant, storm-bringing birds span indigenous stories from alaska to the desert southwest. Legal reminds everyone this never officially happened."
     },
     {
       "schemaVersion": 2,
@@ -5825,7 +5918,7 @@
         "zone"
       ],
       "cost": 4,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Department press rehearsal: Barricades sprout overnight because florida\u2019s swamp sasquatch leaves sulfur stench and photo ops in its wake. The press desk files it under seasonal anomalies."
     },
     {
       "schemaVersion": 2,
@@ -5846,7 +5939,7 @@
         "rougarou"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Agency incident report: Accountants circle expenditures linked to cajun shapeshifter enforcing taboo and loyalty along the bayous. Logistics orders extra barricade tape just in case."
     },
     {
       "schemaVersion": 2,
@@ -5867,7 +5960,7 @@
         "government"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Compliance footnote: Accountants circle expenditures linked to the livestock leech toggles between alien spines and mange-ridden coyotes across the southwest. The memo self-destructs after six bored signatures."
     },
     {
       "schemaVersion": 2,
@@ -5888,7 +5981,7 @@
         "government"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Command center aside: Accountants circle expenditures linked to massachusetts teens in 1977 chased a pale, melon-headed climber along stone walls. Agency spokesbots schedule a denial tour."
     },
     {
       "schemaVersion": 2,
@@ -5909,7 +6002,7 @@
         "jersey-devil"
       ],
       "cost": 2,
-      "flavor": "\"CLASSIFIED INTELLIGENCE: Standard operating procedure, nothing to see.\""
+      "flavor": "Internal affairs reminder: Security rings the zone twice; a winged screecher born from colonial curses patrols the pine barrens. Archivists stamp it \u201croutine wildlife incident.\u201d"
     }
   ]
 }
