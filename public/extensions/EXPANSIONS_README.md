@@ -1,17 +1,17 @@
 # Expansions — README
 
 ## 1. Overview
-Expansions add new themes, humor, and content to *ShadowGov* without breaking the streamlined MVP ruleset.  
+Expansions add new themes, humor, and content to *Paranoid Times* without breaking the streamlined MVP ruleset.  
 They follow the same JSON schema as core decks and integrate directly into the engine.
 
 ### Available Expansions
 - ✅ **Cryptids Expansion** — Folklore monsters, blurry Polaroids, cover-ups vs. revelations.  
 - ✅ **Halloween Spooktacular** — Bureaucratic horror: ghosts, zombies, haunted malls.  
-- 🔜 **UFOlogy Mini-Pack** — Alien abductions, saucers, men-in-black.  
+- 🔜 **UFOlogy ** — Alien abductions, saucers, men-in-black.  
 - 🔜 **Florida Man Special** — The ultimate running gag as a standalone booster.  
 - 🔜 **Tabloid Ads Pack** — Joke ads and fake classifieds integrated as mini-events.  
 
-Each expansion has its own `README.md` in its subfolder, describing design, humor, and card data.
+Each expansion has its own `README.md` , describing design, humor, and card data.
 
 ---
 
