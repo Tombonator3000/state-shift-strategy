@@ -1,7 +1,8 @@
 .player-hub-card {
   position: relative;
   overflow: hidden;
-  border-radius: 0.5rem;
+  border-radius: 0;
+  border: none;
 }
 
 .player-hub-dossier {
@@ -44,9 +45,12 @@
 
 .player-hub-dossier .dossier-container {
   position: relative;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--dossier-bg);
-  padding: 2rem;
+  padding: 1.5rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .player-hub-dossier .dossier-header {
@@ -54,8 +58,11 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  padding: 0.75rem 1.5rem;
   border-bottom: 2px solid var(--dossier-border);
+  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
 }
 
 .player-hub-dossier .dossier-header__title {
@@ -64,6 +71,17 @@
   letter-spacing: 0.2em;
   color: var(--dossier-paper);
   text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(212, 207, 193, 0.3);
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    text-shadow: 0 0 20px rgba(212, 207, 193, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 30px rgba(212, 207, 193, 0.5), 0 0 50px rgba(212, 207, 193, 0.2);
+  }
 }
 
 .player-hub-dossier .dossier-header__classification {
@@ -81,7 +99,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
 }
 
 .player-hub-dossier .dossier-folder {
@@ -91,8 +110,10 @@
   border-radius: 0.25rem 0.25rem 0 0;
   padding: 1rem 1.25rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    0 0 0 0 rgba(201, 168, 104, 0);
 }
 
 .player-hub-dossier .dossier-folder::before {
@@ -109,13 +130,20 @@
 }
 
 .player-hub-dossier .dossier-folder:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(201, 168, 104, 0.4),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
 .player-hub-dossier .dossier-folder[data-active="true"] {
   background: linear-gradient(180deg, #d4af6a 0%, var(--dossier-folder) 100%);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    0 6px 24px rgba(0, 0, 0, 0.6),
+    0 0 40px rgba(201, 168, 104, 0.6),
+    inset 0 0 30px rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
 }
 
 .player-hub-dossier .dossier-folder__label {
@@ -142,10 +170,14 @@
   padding: 2rem;
   box-shadow: 
     0 0 0 1px rgba(0, 0, 0, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 100px rgba(0, 0, 0, 0.05);
   overflow-y: auto;
-  max-height: calc(100vh - 250px);
+  flex: 1;
+  min-height: 0;
+  backdrop-filter: blur(2px);
 }
 
 .player-hub-dossier .dossier-content::before {
@@ -159,8 +191,20 @@
       transparent 24px,
       rgba(0, 0, 0, 0.02) 24px,
       rgba(0, 0, 0, 0.02) 25px
-    );
+    ),
+    radial-gradient(ellipse at top left, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(0, 0, 0, 0.1) 0%, transparent 50%);
   pointer-events: none;
+  animation: subtle-shift 20s ease-in-out infinite;
+}
+
+@keyframes subtle-shift {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.95;
+  }
 }
 
 .player-hub-dossier .dossier-stamp {
@@ -261,12 +305,16 @@
   padding: 1rem;
   border-radius: 0.25rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(4px);
 }
 
 .player-hub-dossier .dossier-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.65);
 }
 
 .player-hub-dossier .classification-bar {
@@ -288,6 +336,24 @@
   text-transform: uppercase;
   font-weight: 700;
   margin-bottom: 1rem;
+  box-shadow: 
+    0 4px 12px rgba(218, 54, 51, 0.4),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
+  animation: warning-pulse 2s ease-in-out infinite;
+}
+
+@keyframes warning-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 4px 12px rgba(218, 54, 51, 0.4),
+      inset 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 4px 16px rgba(218, 54, 51, 0.6),
+      0 0 30px rgba(218, 54, 51, 0.3),
+      inset 0 0 20px rgba(0, 0, 0, 0.3);
+  }
 }
 
 .player-hub-dossier .classification-bar::before {
