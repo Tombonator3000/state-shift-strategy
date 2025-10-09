@@ -174,12 +174,21 @@ interface ViewBoxDefinition {
   height: number;
 }
 
+const PAN_OVERSCROLL_MIN = 120;
+const PAN_OVERSCROLL_RATIO = 0.1;
+
 const clampViewBox = (viewBox: ViewBoxDefinition): ViewBoxDefinition => {
   const { width, height } = viewBox;
-  const minXBound = Math.min(0, MAP_BASE_WIDTH - width);
-  const maxXBound = Math.max(0, MAP_BASE_WIDTH - width);
-  const minYBound = Math.min(0, MAP_BASE_HEIGHT - height);
-  const maxYBound = Math.max(0, MAP_BASE_HEIGHT - height);
+  const overscrollX = Math.max(PAN_OVERSCROLL_MIN, width * PAN_OVERSCROLL_RATIO);
+  const overscrollY = Math.max(PAN_OVERSCROLL_MIN, height * PAN_OVERSCROLL_RATIO);
+
+  const baseDeltaX = MAP_BASE_WIDTH - width;
+  const baseDeltaY = MAP_BASE_HEIGHT - height;
+
+  const minXBound = Math.min(-overscrollX, baseDeltaX - overscrollX);
+  const maxXBound = Math.max(overscrollX, baseDeltaX + overscrollX);
+  const minYBound = Math.min(-overscrollY, baseDeltaY - overscrollY);
+  const maxYBound = Math.max(overscrollY, baseDeltaY + overscrollY);
 
   return {
     width,

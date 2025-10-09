@@ -6,6 +6,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Fixed a missing `useCallback` import in the enhanced tabloid newspaper so the bundle no longer throws a reference error when resolving end-of-turn events.
 - Verified the newsroom edition overlay renders without blinking to a white screen after AI or player turns conclude.
 
+## 2025-10-09 – Map scouting untethered from zoom locks
+- Added padded panning bounds so agents can right-drag the US map at any zoom level, keeping recon smooth even when fully zoomed in or out.
+- Confirmed context-menu suppression still works so long-press sleuthing never trips a browser pop-up mid-investigation.
+
 ## 2025-10-09 – Paranoid Times masthead joins the spin wars
 - Rebuilt the live edition masthead with a halftone wash, serif title, and equal-opportunity propaganda copy for loyalists and leaksters alike.
 - Updated the final report layout to trade the ShadowGov stamp for the new joint spin bureau branding so both factions share the same sardonic headline wrapper.
