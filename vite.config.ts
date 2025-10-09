@@ -5,16 +5,17 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const resolvedPort = Number(process.env.PORT) || 8080;
+  const resolvedPort = Number(process.env.PORT ?? process.env.VITE_PORT ?? 0) || 5173;
+  const resolvedPreviewPort = Number(process.env.PREVIEW_PORT ?? resolvedPort);
 
   return {
     server: {
       host: "0.0.0.0",
-      port: 8080,
+      port: resolvedPort,
     },
     preview: {
       host: "0.0.0.0",
-      port: resolvedPort,
+      port: resolvedPreviewPort,
     },
     plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
     resolve: {
