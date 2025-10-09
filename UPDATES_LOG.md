@@ -14,6 +14,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Introduced a curated ParaPedia dataset with state dossiers, featured quotes, and reference trails so leaksters can trace every anomaly from the hub.
 - Upgraded the ParaPedia panel with atlas navigation, codex search, and state-specific detail views driven by the new hook layer.
 
+## 2025-10-09 – Classified dossier overlay retired during reveals
+- Retired the typewriter dossier pop-up that blanketed the map when conspiracies flipped so players can keep reading the board state during dramatic reveals.
+- Documented the change in the contextual effect switch to prevent future overlays from eclipsing mission interactions.
+
 ## 2025-10-09 – Cryptid idle reports rotate onto the map
 - Replaced the generic paranormal sweep idle message with rotation through Fangoria-sourced state cryptid briefings so the USA map and event log stay steeped in regional folklore even when hotspots are dormant.
 - Expanded the idle report roster with Appendix C homestate dossiers and tuned the fallback copy to reference the Cryptids expansion field guide when the feed hiccups.
