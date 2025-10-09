@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-01-09 – Phase 1: TypeScript build configuration modernized
+- Removed deprecated `baseUrl` option from `tsconfig.node.json` that was causing TS5102 build errors.
+- Retained modern `paths` configuration for proper module resolution with @ imports.
+- Created comprehensive development roadmap (`docs/roadmap.md`) outlining 6-phase improvement plan for gameplay mechanics, card content, and newspaper article quality.
+
 ## 2025-12-08 – Credits go full projector paranoia
 - Swapped the endgame overlay for a full-screen cinema roll packed with in-universe easter eggs, department gags, and paranoid stingers.
 - Added rotating evidence snapshots from the card archive so the credits parade flashes actual tabloids while the music swells.
