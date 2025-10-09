@@ -25,6 +25,9 @@ This document provides a chronological record of gameplay-impacting changes merg
 ## 2025-10-09 – Player Hub gains backtrack control
 - Added a Back button to the Player Hub dossier header so agents can slip out of the archive without relying on the tiny kill-switch.
 - Styled the control to stay faithful to the classified parchment palette whether agents fly Truth colors or government badges.
+## 2025-10-09 – Player Hub dossier metadata stripped out
+- Removed the case file metadata banner so the Player Hub reserves more real estate for active dossiers and lore feeds.
+- Kept the faction stamp treatment so agents still clock whether they're rifling through leaked or cleared records at a glance.
 
 ## 2025-10-09 – Cryptid hotspots now echo local legends
 - Rewrote the cryptid hotspot summaries so each state briefing references the folklore dossiers—Altie coils along the Altamaha, Chessie corrals Chesapeake patrols, and Jackalope permits go feral in souvenir rows.
