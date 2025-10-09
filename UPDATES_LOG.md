@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-30 – Editor dossiers display real portraits
+- Desk editor dossiers now pull their case file photos from `/public/images/editors`, replacing the placeholder blocks.
+- The selection modal and preview cards render those portraits directly so newsroom briefings feel grounded in the conspiracy canon.
+
 ## 2025-11-29 – Paranoid Times masthead anchored
 - Locked the newspaper masthead to Paranoid Times with short-lived glitches that flash rival tabloid titles before snapping back.
 - Wired the glitch cadence to respect reduced-motion preferences so accessibility settings freeze the masthead when needed.

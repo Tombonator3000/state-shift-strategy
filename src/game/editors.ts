@@ -21,6 +21,8 @@ export interface EditorDefinition {
   name: string;
   faction: EditorFaction;
   quote?: string;
+  portrait?: string;
+  broll?: string;
   bonuses?: EditorEffectConfig;
   tradeoffs?: EditorEffectConfig;
   modifiers?: EditorEffectConfig;
