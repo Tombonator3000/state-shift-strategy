@@ -6,6 +6,13 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Fixed a missing `useCallback` import in the enhanced tabloid newspaper so the bundle no longer throws a reference error when resolving end-of-turn events.
 - Verified the newsroom edition overlay renders without blinking to a white screen after AI or player turns conclude.
 
+## 2025-10-09 – Completed Fangoria + NAC ingestion
+- Rebuilt Appendix C with all fifty state creatures, region notes, and explicit ops hooks drawn from Fangoria’s survey.
+- Authored a 57-entry NorthAmericanCryptids field guide so designers have ready deck hooks for every listed monster.
+
+## 2025-10-09 – Cataloged cryptid intel for expansion docs
+- Expanded the Cryptids expansion README with state-by-state lore harvested from Fangoria, plus play hooks for each hometown monster.
+- Imported the northamericancryptids.com bestiary into a new field guide section so designers can wire in regionally accurate ops beats.
 ## 2025-11-30 – Editor dossiers display real portraits
 - Desk editor dossiers now pull their case file photos from `/public/images/editors`, replacing the placeholder blocks.
 - The selection modal and preview cards render those portraits directly so newsroom briefings feel grounded in the conspiracy canon.
