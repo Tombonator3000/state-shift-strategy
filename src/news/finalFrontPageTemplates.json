@@ -1,0 +1,68 @@
+{
+  "kickers": [
+    "Signal Intercept: Omega Channel",
+    "Vault Release • Typesetter Clearance",
+    "Night Bureau Flash Transmission",
+    "Paranoid Times Special Directive"
+  ],
+  "connectors": [
+    "flags",
+    "uncovers",
+    "exposes",
+    "confirms",
+    "triggers"
+  ],
+  "headlineFormats": [
+    {
+      "id": "signal-rupture",
+      "subjects": [
+        "Field auditors",
+        "Runaway archivists",
+        "Counter-rotating couriers",
+        "Covert frequency readers"
+      ],
+      "events": [
+        "vault rupture on the midnight circuit",
+        "plasma signature echoing through secured wards",
+        "relay tower syncing with off-world docket",
+        "classified broadcast looping across empty channels"
+      ]
+    },
+    {
+      "id": "council-shadow",
+      "subjects": [
+        "Back-channel delegates",
+        "Spectral lobbyists",
+        "Unscheduled council stewards",
+        "Temporal ethics board"
+      ],
+      "events": [
+        "panic over rogue memorandum",
+        "draft new loyalty oaths overnight",
+        "stage emergency hearing behind sealed mirrors",
+        "greenlight countermeasure using erased minutes"
+      ]
+    },
+    {
+      "id": "anomaly-ledger",
+      "subjects": [
+        "Ledger keepers",
+        "Quantum auditors",
+        "Signal cartographers",
+        "Threshold tacticians"
+      ],
+      "events": [
+        "trace anomaly scribbled across the atlas",
+        "chart duplicate cities hidden in plain sight",
+        "confirm operative doubles emerging from static",
+        "map the silence blooming inside transit hubs"
+      ]
+    }
+  ],
+  "dekSnippets": [
+    "Filed under emergency clearance; redacted coordinates align with last night's blackout.",
+    "Witness briefings cite mirrored agents whispering from within the cordoned council chamber.",
+    "Syndicate monitors cross-reference the chatter with unauthorized time-loop rehearsals.",
+    "Archives warn the evidence hums at the same frequency as yesterday's automated confession."
+  ]
+}
