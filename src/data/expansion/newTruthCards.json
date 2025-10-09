@@ -1,0 +1,281 @@
+[
+  {
+    "id": "TRUTH-NEW-001",
+    "name": "Disclosure NOW Rally",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3,
+      "truthDelta": 1
+    },
+    "flavor": "Megaphones, signs, and suspiciously knowledgeable speakers.",
+    "tags": ["zone", "truth", "rally", "disclosure", "activism"]
+  },
+  {
+    "id": "TRUTH-NEW-002",
+    "name": "Leaked Pentagon UFO Memo",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 7,
+    "effects": {
+      "truthDelta": 5,
+      "discardOpponent": 1
+    },
+    "flavor": "Page 47 references 'non-terrestrial biologics'.",
+    "tags": ["media", "truth", "pentagon", "ufo", "leak", "classified"]
+  },
+  {
+    "id": "TRUTH-NEW-003",
+    "name": "Bigfoot Trail Cam Footage",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Frame 47: blurry. Frame 48: very blurry. Frame 49: definitely something.",
+    "tags": ["media", "truth", "bigfoot", "cryptid", "footage"]
+  },
+  {
+    "id": "TRUTH-NEW-004",
+    "name": "Conspiracy Theory Proven Right",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      },
+      "truthDelta": 2
+    },
+    "flavor": "Turns out the tinfoil hat was right all along.",
+    "tags": ["attack", "truth", "conspiracy", "vindication"]
+  },
+  {
+    "id": "TRUTH-NEW-005",
+    "name": "Anonymous Whistleblower Package",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "self": 1
+      },
+      "discardOpponent": 2
+    },
+    "flavor": "Postmarked from nowhere, addressed to everyone.",
+    "tags": ["attack", "truth", "whistleblower", "leak", "documents"]
+  },
+  {
+    "id": "TRUTH-NEW-006",
+    "name": "Cornfield Crop Circle Marathon",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2
+    },
+    "flavor": "Farmers report patterns appearing overnight—and perfectly symmetrical.",
+    "tags": ["zone", "truth", "crop-circles", "cornfield", "alien"]
+  },
+  {
+    "id": "TRUTH-NEW-007",
+    "name": "Roswell Anniversary Festival",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2,
+      "truthDelta": 1
+    },
+    "flavor": "Tourists, true believers, and suspiciously well-informed vendors.",
+    "tags": ["zone", "truth", "roswell", "festival", "new-mexico", "ufo"]
+  },
+  {
+    "id": "TRUTH-NEW-008",
+    "name": "Ancient Aliens Marathon",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "Is it possible? Ancient astronaut theorists say yes.",
+    "tags": ["media", "truth", "aliens", "history", "television"]
+  },
+  {
+    "id": "TRUTH-NEW-009",
+    "name": "Phoenix Lights Documentary",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Thousands saw it. Officials still claim flares.",
+    "tags": ["media", "truth", "phoenix-lights", "arizona", "ufo", "documentary"]
+  },
+  {
+    "id": "TRUTH-NEW-010",
+    "name": "Cattle Mutilation Surge",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Ranchers demand answers. Answers remain classified.",
+    "tags": ["zone", "truth", "cattle", "mutilation", "ranch", "unexplained"]
+  },
+  {
+    "id": "TRUTH-NEW-011",
+    "name": "Jersey Devil Sighting Wave",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2,
+      "truthDelta": 1
+    },
+    "flavor": "Pine Barrens locals arm themselves. Tourism board celebrates.",
+    "tags": ["zone", "truth", "jersey-devil", "cryptid", "new-jersey"]
+  },
+  {
+    "id": "TRUTH-NEW-012",
+    "name": "Mothman Returns to Point Pleasant",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Witnesses report red eyes and ominous prophecies.",
+    "tags": ["media", "truth", "mothman", "west-virginia", "cryptid", "prophecy"]
+  },
+  {
+    "id": "TRUTH-NEW-013",
+    "name": "Underground Base Whistleblower",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "ipDelta": {
+        "opponent": 4
+      },
+      "truthDelta": 2,
+      "discardOpponent": 1
+    },
+    "flavor": "Worked there for twenty years. Has the keycards to prove it.",
+    "tags": ["attack", "truth", "underground", "base", "whistleblower", "classified"]
+  },
+  {
+    "id": "TRUTH-NEW-014",
+    "name": "Black Vault FOIA Victory",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": 2,
+      "draw": 1
+    },
+    "flavor": "After six years of litigation, 847 heavily redacted pages released.",
+    "tags": ["media", "truth", "foia", "black-vault", "documents", "legal"]
+  },
+  {
+    "id": "TRUTH-NEW-015",
+    "name": "Civilian Drone Footage",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": 1
+    },
+    "flavor": "4K resolution. No explanation.",
+    "tags": ["media", "truth", "drone", "footage", "ufo", "video"]
+  },
+  {
+    "id": "TRUTH-NEW-016",
+    "name": "Contactee Conference",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "Two hundred people. Two hundred stories. Zero consistency.",
+    "tags": ["zone", "truth", "contactee", "conference", "alien", "abduction"]
+  },
+  {
+    "id": "TRUTH-NEW-017",
+    "name": "Implant Removal Surgery",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": 3
+    },
+    "flavor": "Doctor confirms: not from any terrestrial manufacturer.",
+    "tags": ["media", "truth", "implant", "surgery", "alien", "medical"]
+  },
+  {
+    "id": "TRUTH-NEW-018",
+    "name": "Government Insider Goes Rogue",
+    "faction": "truth",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "Twenty-year clearance. Ten-minute tell-all interview.",
+    "tags": ["attack", "truth", "insider", "rogue", "interview", "classified"]
+  },
+  {
+    "id": "TRUTH-NEW-019",
+    "name": "Time Traveler Warning",
+    "faction": "truth",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 7,
+    "effects": {
+      "truthDelta": 5
+    },
+    "flavor": "Claims to be from 2087. Knows too many lottery numbers to be lying.",
+    "tags": ["media", "truth", "time-travel", "prophecy", "warning"]
+  },
+  {
+    "id": "TRUTH-NEW-020",
+    "name": "Disclosure Petition Hits 10 Million",
+    "faction": "truth",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2,
+      "truthDelta": 1
+    },
+    "flavor": "White House must respond within thirty days. They won't.",
+    "tags": ["zone", "truth", "petition", "disclosure", "activism", "online"]
+  }
+]

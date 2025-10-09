@@ -1,0 +1,291 @@
+[
+  {
+    "id": "GOV-NEW-001",
+    "name": "Emergency Powers Act",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3,
+      "zoneDefense": 2
+    },
+    "flavor": "For your safety and our convenience.",
+    "tags": ["zone", "government", "emergency", "powers", "lockdown"]
+  },
+  {
+    "id": "GOV-NEW-002",
+    "name": "Debunking Task Force",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2
+    },
+    "flavor": "Professional skeptics on retainer.",
+    "tags": ["media", "government", "debunk", "skeptic", "propaganda"]
+  },
+  {
+    "id": "GOV-NEW-003",
+    "name": "Weather Balloon (Again)",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 2,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "It's always a weather balloon.",
+    "tags": ["media", "government", "weather-balloon", "cover-story", "classic"]
+  },
+  {
+    "id": "GOV-NEW-004",
+    "name": "Black Budget Funding",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "ipDelta": {
+        "self": 3,
+        "opponent": 1
+      }
+    },
+    "flavor": "Line item 'Miscellaneous Research' — $847 million.",
+    "tags": ["attack", "government", "black-budget", "funding", "classified"]
+  },
+  {
+    "id": "GOV-NEW-005",
+    "name": "Plausible Deniability Protocol",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "ipDelta": {
+        "self": 2
+      },
+      "truthDelta": -3,
+      "discardOpponent": 1
+    },
+    "flavor": "We have investigated ourselves and found no wrongdoing.",
+    "tags": ["attack", "government", "deniability", "investigation", "cover-up"]
+  },
+  {
+    "id": "GOV-NEW-006",
+    "name": "Swamp Gas Explanation",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "common",
+    "cost": 3,
+    "effects": {
+      "truthDelta": -1
+    },
+    "flavor": "Reflections from Venus through swamp gas. Obviously.",
+    "tags": ["media", "government", "swamp-gas", "explanation", "ridiculous"]
+  },
+  {
+    "id": "GOV-NEW-007",
+    "name": "Classified Document Purge",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "ipDelta": {
+        "opponent": 3
+      },
+      "discardOpponent": 2
+    },
+    "flavor": "Shredders working overtime. Smoke visible from parking lot.",
+    "tags": ["attack", "government", "purge", "shredder", "classified", "destruction"]
+  },
+  {
+    "id": "GOV-NEW-008",
+    "name": "False Flag Operation",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3,
+      "truthDelta": -2
+    },
+    "flavor": "Sometimes you have to create the crisis to justify the response.",
+    "tags": ["zone", "government", "false-flag", "operation", "conspiracy"]
+  },
+  {
+    "id": "GOV-NEW-009",
+    "name": "Media Blackout Order",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 7,
+    "effects": {
+      "truthDelta": -5
+    },
+    "flavor": "National security concerns. No further questions.",
+    "tags": ["media", "government", "blackout", "censorship", "order"]
+  },
+  {
+    "id": "GOV-NEW-010",
+    "name": "Witness Intimidation Campaign",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "Black sedans parked outside for three consecutive nights.",
+    "tags": ["attack", "government", "intimidation", "mib", "harassment"]
+  },
+  {
+    "id": "GOV-NEW-011",
+    "name": "Expert Panel Dismissal",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "Seven PhDs agree: nothing to see here.",
+    "tags": ["media", "government", "expert", "dismissal", "science"]
+  },
+  {
+    "id": "GOV-NEW-012",
+    "name": "Security Clearance Revocation",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "Congratulations, you're now unemployable.",
+    "tags": ["attack", "government", "clearance", "revocation", "punishment"]
+  },
+  {
+    "id": "GOV-NEW-013",
+    "name": "Drone Strike Mishap",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "legendary",
+    "cost": 6,
+    "effects": {
+      "ipDelta": {
+        "opponent": 4
+      },
+      "truthDelta": -2
+    },
+    "flavor": "Regrettable error. Target destroyed. Questions buried.",
+    "tags": ["attack", "government", "drone", "strike", "classified"]
+  },
+  {
+    "id": "GOV-NEW-014",
+    "name": "Disinfo Agent Network",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "rare",
+    "cost": 5,
+    "effects": {
+      "truthDelta": -3
+    },
+    "flavor": "Fifty accounts. One person. Infinite confusion.",
+    "tags": ["media", "government", "disinfo", "agents", "online", "propaganda"]
+  },
+  {
+    "id": "GOV-NEW-015",
+    "name": "Routine Training Exercise",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "common",
+    "cost": 4,
+    "effects": {
+      "pressureDelta": 1,
+      "truthDelta": -1
+    },
+    "flavor": "Coincidentally scheduled same time and place as 'incident'.",
+    "tags": ["zone", "government", "training", "exercise", "cover"]
+  },
+  {
+    "id": "GOV-NEW-016",
+    "name": "Controlled Opposition",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "truthDelta": -2,
+      "draw": 1
+    },
+    "flavor": "Best way to lead the opposition is to lead the opposition.",
+    "tags": ["media", "government", "controlled", "opposition", "infiltration"]
+  },
+  {
+    "id": "GOV-NEW-017",
+    "name": "Mass Surveillance Expansion",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "rare",
+    "cost": 6,
+    "effects": {
+      "pressureDelta": 3
+    },
+    "flavor": "You have nothing to hide, right?",
+    "tags": ["zone", "government", "surveillance", "monitoring", "privacy"]
+  },
+  {
+    "id": "GOV-NEW-018",
+    "name": "Redaction Machine Upgrade",
+    "faction": "government",
+    "type": "ATTACK",
+    "rarity": "uncommon",
+    "cost": 4,
+    "effects": {
+      "ipDelta": {
+        "self": 2
+      },
+      "discardOpponent": 1
+    },
+    "flavor": "Now with 40% more █████.",
+    "tags": ["attack", "government", "redaction", "upgrade", "classification"]
+  },
+  {
+    "id": "GOV-NEW-019",
+    "name": "Psychological Warfare Division",
+    "faction": "government",
+    "type": "MEDIA",
+    "rarity": "legendary",
+    "cost": 7,
+    "effects": {
+      "truthDelta": -5,
+      "ipDelta": {
+        "opponent": 2
+      }
+    },
+    "flavor": "MK-ULTRA was just the pilot program.",
+    "tags": ["media", "government", "psyops", "warfare", "mk-ultra", "classified"]
+  },
+  {
+    "id": "GOV-NEW-020",
+    "name": "Convenient Senate Hearing",
+    "faction": "government",
+    "type": "ZONE",
+    "rarity": "uncommon",
+    "cost": 5,
+    "effects": {
+      "pressureDelta": 2,
+      "truthDelta": -1
+    },
+    "flavor": "Lots of questions. Zero answers. Perfect theater.",
+    "tags": ["zone", "government", "hearing", "senate", "theater", "politics"]
+  }
+]
