@@ -61,11 +61,11 @@ const GameOverEditionLayout = ({
         <div className="flex flex-col items-center gap-2 text-center">
           <span
             className={cn(
-              'text-[11px] font-semibold uppercase tracking-[0.6em]',
+              'text-[11px] font-semibold uppercase tracking-[0.38em]',
               variant === 'victory' ? 'text-emerald-100/80 drop-shadow-[0_0_8px_rgba(16,185,129,0.35)]' : 'text-newspaper-text/60',
             )}
           >
-            ShadowGov Press Bureau
+            Paranoid Times Joint Spin Bureau
           </span>
           <p
             className={cn(
