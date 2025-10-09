@@ -4,6 +4,7 @@ import { Card as UICard } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import CardImage from '@/components/game/CardImage';
+import { ExtraStamp } from '@/components/newspaper/ExtraStamp';
 import { loadNewspaperData, pick, shuffle, type NewspaperData } from '@/lib/newspaperData';
 import { generateIssue, type NarrativeIssue, type PlayedCardInput } from '@/engine/newspaper/IssueGenerator';
 import type { TabloidNewspaperProps } from './TabloidNewspaperLegacy';
@@ -1075,6 +1076,12 @@ const TabloidNewspaperV2 = ({
           {breakingStamp ? (
             <div className="stamp stamp--breaking absolute left-6 top-4 z-10">{breakingStamp}</div>
           ) : null}
+          {playedCards.length >= 3 && (
+            <ExtraStamp 
+              className="top-4 right-20 md:top-6 md:right-24" 
+              size="md" 
+            />
+          )}
           <button
             type="button"
             onClick={onClose}
