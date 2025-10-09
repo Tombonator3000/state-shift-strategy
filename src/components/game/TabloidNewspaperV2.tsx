@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { Card as UICard } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ import {
 import FrontPage from '@/ui/newspaper/FrontPage';
 import { useTabloidWeather, getFallbackTabloidWeather } from '@/system/weather/useTabloidWeather';
 
+const PRIMARY_MASTHEAD = 'PARANOID TIMES';
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
 const FRONT_PAGE_FALLBACK_HEADLINE = 'SPECIAL EDITION: PRINTING GREMLINS AT WORK';
 const FRONT_PAGE_FALLBACK_SUBHEAD = 'Article vault temporarily unavailable — dispatch desk investigating.';
@@ -70,6 +71,33 @@ const SIGHTING_BADGE_VARIANTS: Record<ParanormalSighting['category'], string> = 
   'truth-meltdown': 'border-rose-500 text-rose-500',
   cryptid: 'border-emerald-500 text-emerald-500',
   hotspot: 'border-purple-500 text-purple-500'
+};
+
+const sanitizeMastheadPool = (pool?: string[]): string[] => {
+  if (!pool?.length) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const sanitized: string[] = [];
+
+  pool.forEach(name => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return;
+    }
+    const upper = trimmed.toUpperCase();
+    if (upper === PRIMARY_MASTHEAD) {
+      return;
+    }
+    if (seen.has(upper)) {
+      return;
+    }
+    seen.add(upper);
+    sanitized.push(upper);
+  });
+
+  return sanitized;
 };
 
 const formatSightingTime = (timestamp: number) => {
@@ -287,8 +315,9 @@ const TabloidNewspaperV2 = ({
   frontPageTriplet,
 }: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
-  const [masthead, setMasthead] = useState('THE PARANOID TIMES');
+  const [masthead, setMasthead] = useState(PRIMARY_MASTHEAD);
   const [glitchText, setGlitchText] = useState<string | null>(null);
+  const [isMastheadReady, setIsMastheadReady] = useState(false);
 
   const dataset = data ?? FALLBACK_DATA;
   const [issue, setIssue] = useState<NarrativeIssue | null>(null);
@@ -299,6 +328,9 @@ const TabloidNewspaperV2 = ({
   const highlightTimeoutRef = useRef<number | null>(null);
   const prevSightingsCountRef = useRef(0);
   const lastSightingIdRef = useRef<string | null>(null);
+  const glitchCycleTimerRef = useRef<number | null>(null);
+  const glitchResetTimerRef = useRef<number | null>(null);
+  const altMastheadsRef = useRef<string[]>([]);
   const { weatherLine: tabloidWeatherLine } = useTabloidWeather();
 
   const agendaPullQuotes = useMemo(() => {
@@ -349,11 +381,6 @@ const TabloidNewspaperV2 = ({
 
   useEffect(() => {
     let cancelled = false;
-    let glitchTimer: number | null = null;
-    let resetTimer: number | null = null;
-
-    const resolveMasthead = (pool?: string[]) =>
-      pick(pool && pool.length ? pool : FALLBACK_DATA.mastheads, FALLBACK_DATA.mastheads[0]).toUpperCase();
 
     const load = async () => {
       try {
@@ -361,25 +388,17 @@ const TabloidNewspaperV2 = ({
         if (cancelled) return;
 
         setData(loaded);
-        const mastheadPool = loaded.mastheads ?? FALLBACK_DATA.mastheads;
-        setMasthead(resolveMasthead(mastheadPool));
-
-        if (Math.random() < 0.05) {
-          glitchTimer = window.setTimeout(() => {
-            if (cancelled) return;
-            setGlitchText(pick(GLITCH_OPTIONS, GLITCH_OPTIONS[0]));
-            resetTimer = window.setTimeout(() => {
-              if (cancelled) return;
-              setGlitchText(null);
-              setMasthead(resolveMasthead(mastheadPool));
-            }, 1200);
-          }, 600);
-        }
+        altMastheadsRef.current = sanitizeMastheadPool(loaded.mastheads);
+        setMasthead(PRIMARY_MASTHEAD);
+        setIsMastheadReady(true);
       } catch (error) {
         console.warn('Newspaper data load failed, using fallback set.', error);
         if (cancelled) return;
+
         setData(FALLBACK_DATA);
-        setMasthead(resolveMasthead(FALLBACK_DATA.mastheads));
+        altMastheadsRef.current = sanitizeMastheadPool(FALLBACK_DATA.mastheads);
+        setMasthead(PRIMARY_MASTHEAD);
+        setIsMastheadReady(true);
       }
     };
 
@@ -387,14 +406,60 @@ const TabloidNewspaperV2 = ({
 
     return () => {
       cancelled = true;
-      if (glitchTimer) {
-        window.clearTimeout(glitchTimer);
-      }
-      if (resetTimer) {
-        window.clearTimeout(resetTimer);
-      }
     };
   }, []);
+
+  useEffect(() => {
+    const clearTimers = () => {
+      if (glitchCycleTimerRef.current) {
+        window.clearTimeout(glitchCycleTimerRef.current);
+        glitchCycleTimerRef.current = null;
+      }
+      if (glitchResetTimerRef.current) {
+        window.clearTimeout(glitchResetTimerRef.current);
+        glitchResetTimerRef.current = null;
+      }
+    };
+
+    if (!isMastheadReady) {
+      return () => {
+        clearTimers();
+      };
+    }
+
+    if (prefersReducedMotion) {
+      clearTimers();
+      setGlitchText(null);
+      setMasthead(PRIMARY_MASTHEAD);
+      return () => {
+        clearTimers();
+      };
+    }
+
+    const scheduleGlitchCycle = () => {
+      clearTimers();
+      const delay = 5000 + Math.random() * 9000;
+      glitchCycleTimerRef.current = window.setTimeout(() => {
+        const availableTitles = altMastheadsRef.current.length
+          ? altMastheadsRef.current
+          : GLITCH_OPTIONS;
+        const fallback = availableTitles[0] ?? PRIMARY_MASTHEAD;
+        const nextTitle = pick(availableTitles, fallback).toUpperCase();
+        setGlitchText(nextTitle);
+        glitchResetTimerRef.current = window.setTimeout(() => {
+          setGlitchText(null);
+          setMasthead(PRIMARY_MASTHEAD);
+          scheduleGlitchCycle();
+        }, 1200 + Math.random() * 900);
+      }, delay);
+    };
+
+    scheduleGlitchCycle();
+
+    return () => {
+      clearTimers();
+    };
+  }, [isMastheadReady, prefersReducedMotion]);
 
   useEffect(() => () => {
     if (highlightTimeoutRef.current) {

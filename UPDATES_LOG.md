@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-29 – Paranoid Times masthead anchored
+- Locked the newspaper masthead to Paranoid Times with short-lived glitches that flash rival tabloid titles before snapping back.
+- Wired the glitch cadence to respect reduced-motion preferences so accessibility settings freeze the masthead when needed.
+
 ## 2025-11-28 – Finale headline composer locked in
 - Added regression coverage for the finale front-page composer, ensuring bulletin fusion, sanitized food-word stripping, and graceful fallbacks.
 - Final edition layout tests now confirm the composed kicker/headline/dek render on the masthead even without bulletins, giving narrative QA a Weekly World News-style north star.
