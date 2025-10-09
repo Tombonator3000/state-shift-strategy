@@ -578,6 +578,18 @@ export function playCard(
     ip: Math.max(0, player.ip - effectiveCost),
   };
 
+  const rawFaction = typeof card.faction === 'string' ? card.faction.toLowerCase() : '';
+  const cardFaction = rawFaction.includes('gov')
+    ? 'government'
+    : rawFaction.includes('truth')
+      ? 'truth'
+      : undefined;
+  const cardTags = Array.isArray((card as { tags?: string[] }).tags)
+    ? (card as { tags: string[] }).tags
+        .map(tag => tag.toLowerCase().trim())
+        .filter(tag => tag.length > 0)
+    : [];
+
   const playEntry: TurnPlay = {
     sequence: cloned.turnPlays.length,
     stage: 'play',
@@ -588,6 +600,8 @@ export function playCard(
     cardRarity: card.rarity,
     cost: effectiveCost,
     targetStateId,
+    cardFaction,
+    cardTags,
   };
 
   const liteEntry = createPlayedLiteEntry(player, card);
@@ -650,6 +664,18 @@ export function resolve(
     }
   }
 
+  const resolveRawFaction = typeof card.faction === 'string' ? card.faction.toLowerCase() : '';
+  const resolveCardFaction = resolveRawFaction.includes('gov')
+    ? 'government'
+    : resolveRawFaction.includes('truth')
+      ? 'truth'
+      : undefined;
+  const resolveCardTags = Array.isArray((card as { tags?: string[] }).tags)
+    ? (card as { tags: string[] }).tags
+        .map(tag => tag.toLowerCase().trim())
+        .filter(tag => tag.length > 0)
+    : [];
+
   const resolveEntry: TurnPlay = {
     sequence: resolved.turnPlays.length,
     stage: 'resolve',
@@ -660,6 +686,8 @@ export function resolve(
     cardRarity: card.rarity,
     cost: card.cost,
     targetStateId,
+    cardFaction: resolveCardFaction,
+    cardTags: resolveCardTags,
     metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
   };
 

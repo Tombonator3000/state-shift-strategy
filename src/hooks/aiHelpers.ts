@@ -236,6 +236,18 @@ export const createTurnPlayEntries = (params: {
   const startSequence =
     typeof params.sequenceStart === 'number' ? params.sequenceStart : state.turnPlays.length;
 
+  const rawFaction = typeof card.faction === 'string' ? card.faction.toLowerCase() : '';
+  const cardFaction = rawFaction.includes('gov')
+    ? 'government'
+    : rawFaction.includes('truth')
+      ? 'truth'
+      : undefined;
+  const cardTags = Array.isArray((card as { tags?: string[] }).tags)
+    ? (card as { tags: string[] }).tags
+        .map(tag => tag.toLowerCase().trim())
+        .filter(tag => tag.length > 0)
+    : [];
+
   const baseEntry = {
     owner: playerId,
     cardId: card.id,
@@ -244,6 +256,8 @@ export const createTurnPlayEntries = (params: {
     cardRarity: rarity,
     cost: card.cost,
     targetStateId,
+    cardFaction,
+    cardTags,
   } as const;
 
   const resolveMetadata = buildResolveMetadata({ owner, state, card, resolution, targetStateId });
