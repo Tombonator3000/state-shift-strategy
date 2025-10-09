@@ -88,6 +88,18 @@
       "form 27-B/6",
       "processing fee",
       "compliance class"
+    ],
+    "cryptid": [
+      "blurry photograph",
+      "eyewitness sketch",
+      "plaster cast",
+      "thermal signature"
+    ],
+    "alien": [
+      "grey entities",
+      "surgical examination",
+      "implant evidence",
+      "missing hours"
     ]
   },
   "rendering": {
@@ -112,7 +124,7 @@
     },
     "stingers": [
       "NATION STARES, BLINKS TWICE",
-      "SOURCE: ‘THIS IS FINE’",
+      "SOURCE: 'THIS IS FINE'",
       "UPSETTING TO PRINTERS",
       "TRAFFIC DIVERTED TO OP-ED"
     ]
@@ -130,6 +142,70 @@
   "templates": {
     "theme_cryptid_cluster": [
       {
+        "id": "nebraska_cryptid_coverup",
+        "match": {
+          "tagsAny": ["nebraska", "nebraska-cryptid", "cryptid", "coverup"],
+          "minCount": 2
+        },
+        "headline": "GIANT CRYPTID COVER-UP IN NEBRASKA • WITNESSES EXPERIENCE MISSING TIME",
+        "subhead": "Wildlife advisory contradicts eyewitness accounts; clocks skip forward inexplicably.",
+        "imagePrompt": "{style}, cornfield perimeter, emergency vehicles, scattered timepieces, harsh spotlight",
+        "body": [
+          "Three-card government response locked down cornfields as {N1}, {N2}, and {N3} deployed simultaneously.",
+          "Residents report {coverup} procedures while experiencing temporal displacement near the sighting zone.",
+          "USDA spokesperson insists 'livestock management routine' despite {cryptid} evidence photographed by seventeen separate witnesses."
+        ],
+        "factionHint": "mixed"
+      },
+      {
+        "id": "ohio_frogman_combo",
+        "match": {
+          "tagsAny": ["ohio", "loveland-frogman", "cryptid"],
+          "minCount": 2
+        },
+        "headline": "LOVELAND FROGMAN SPOTTED BY BRIDGE • OHIO OFFICIALS DENY EVERYTHING",
+        "subhead": "Amphibious entity photographed holding what appears to be a wand or stick.",
+        "imagePrompt": "{style}, river bridge, bipedal silhouette, murky water, telephoto lens grain",
+        "body": [
+          "Multiple cards converged as {N1}, {N2}, and {N3} created a perfect storm over Loveland.",
+          "Bridge witnesses describe upright amphibian matching 1970s descriptions, while officials scramble with talking points.",
+          "Local cryptozoologist demands federal investigation; receives parking citation instead."
+        ],
+        "factionHint": "truth"
+      },
+      {
+        "id": "florida_chupacabra_combo",
+        "match": {
+          "tagsAny": ["florida", "chupacabra", "cryptid"],
+          "minCount": 2
+        },
+        "headline": "FLORIDA CHUPACABRA RAID HITS AIRBOAT TOUR • TOURISTS FLEE",
+        "subhead": "Livestock drained; tour guides report glowing eyes and sulfur smell.",
+        "imagePrompt": "{style}, swamp tour dock, overturned airboat, claw marks, emergency flares",
+        "body": [
+          "Triple threat emerged as {N1}, {N2}, and {N3} converged on the Everglades perimeter.",
+          "Eyewitnesses describe spiny bipedal creature matching Texas sightings from the '90s.",
+          "Fish and Wildlife claims 'aggressive raccoon'; tourists upload 4K footage."
+        ],
+        "factionHint": "truth"
+      },
+      {
+        "id": "texas_alien_ranch_combo",
+        "match": {
+          "tagsAny": ["texas", "chupacabra", "alien", "ufo"],
+          "minCount": 2
+        },
+        "headline": "TEXAS RANCH TRIPLE THREAT: UFO + CHUPACABRA + CATTLE MUTILATION",
+        "subhead": "Sheriff requests backup from both Fish & Wildlife and Air Force.",
+        "imagePrompt": "{style}, ranch fence, circular burn marks, livestock evidence, helicopter searchlight",
+        "body": [
+          "Three-card phenomenon struck simultaneously as {N1}, {N2}, and {N3} manifested over cattle country.",
+          "Ranchers report {ufo} activity coinciding with {chupacabra} attacks and surgical precision wounds.",
+          "Pentagon denies involvement; rancher displays forty years of documentation."
+        ],
+        "factionHint": "truth"
+      },
+      {
         "id": "ufo_elvis_combo",
         "match": {
           "tagsAny": [
@@ -144,7 +220,7 @@
         "body": [
           "Three-card convergence rattled the neon as {N1}, {N2}, and {N3} aligned over chrome napkin dispensers.",
           "Patrons report a {ufo} over the lot while an unmistakable {elvis} adjusted the mirror.",
-          "Authorities suggest ‘glare.’ The crowd suggests ‘encore.’"
+          "Authorities suggest 'glare.' The crowd suggests 'encore.'"
         ],
         "factionHint": "truth"
       },
@@ -157,12 +233,12 @@
           ],
           "minCount": 2
         },
-        "headline": "BAT BOY & BIGFOOT IN ‘HAIR SUMMIT’ NEAR CAMPGROUND",
+        "headline": "BAT BOY & BIGFOOT IN 'HAIR SUMMIT' NEAR CAMPGROUND",
         "subhead": "Handshake audible across the pines; {bigfoot} spotted posing politely.",
         "imagePrompt": "{style}, forest clearing podium, disposable camera flash, shaggy silhouette, wide eyes",
         "body": [
           "Campers woke to a pop-up presser where {N1}, {N2}, and {N3} scripted a hush-lit witness swap under ultraviolet lanterns.",
-          "Experts analyzed {bigfoot} samples and declared them ‘photogenic.’",
+          "Experts analyzed {bigfoot} samples and declared them 'photogenic.'",
           "Children asked for autographs; pens fled."
         ],
         "factionHint": "truth"
@@ -175,13 +251,45 @@
           ],
           "minCount": 1
         },
-        "headline": "BRIDGE LIGHTS SPELL ‘DUCK’ AS MOTHMAN CIRCLES",
-        "subhead": "Dashcams capture {mothman}; engineers recommend ‘vibes-based caution.’",
+        "headline": "BRIDGE LIGHTS SPELL 'DUCK' AS MOTHMAN CIRCLES",
+        "subhead": "Dashcams capture {mothman}; engineers recommend 'vibes-based caution.'",
         "imagePrompt": "{style}, night bridge, blinking lamps, winged silhouette, grainy dashcam still",
         "body": [
           "A triple-play sequence drew eyes skyward as {N1}, {N2}, {N3} converged near the span.",
           "Witnesses described {mothman} passing a message in Morse, then vanishing into the glare.",
           "Officials cite routine testing; locals cite goosebumps."
+        ],
+        "factionHint": "truth"
+      },
+      {
+        "id": "alien_abduction_wave_combo",
+        "match": {
+          "tagsAny": ["alien", "ufo", "abduction"],
+          "minCount": 2
+        },
+        "headline": "ALIEN ABDUCTION WAVE SWEEPS THREE STATES • WITNESSES COMPARE NOTES",
+        "subhead": "Support group meetings triple in size; therapists overwhelmed.",
+        "imagePrompt": "{style}, community center, folding chairs, sketch pads, worried faces",
+        "body": [
+          "Synchronized encounters reported as {N1}, {N2}, and {N3} triggered coordinated citizen response.",
+          "Abductees describe identical {alien} procedures and missing time intervals matching to the minute.",
+          "Military denies airspace activity; radar shows nothing but unexplained gaps."
+        ],
+        "factionHint": "truth"
+      },
+      {
+        "id": "jersey_devil_winged_combo",
+        "match": {
+          "tagsAny": ["jersey-devil", "mothman", "winged"],
+          "minCount": 2
+        },
+        "headline": "WINGED CRYPTID CONVERGENCE • JERSEY DEVIL MEETS MOTHMAN OVER TURNPIKE",
+        "subhead": "Two legendary creatures spotted in same airspace; witnesses fear prophecy.",
+        "imagePrompt": "{style}, highway overpass, dual silhouettes, red eyes, motion blur headlights",
+        "body": [
+          "Historic triple convergence manifested as {N1}, {N2}, and {N3} synchronized over infrastructure.",
+          "Motorists report two distinct winged entities circling each other before vanishing toward the Pine Barrens.",
+          "Cryptozoologists call emergency conference; highway patrol issues vague 'bird' statement."
         ],
         "factionHint": "truth"
       }
@@ -198,7 +306,7 @@
           "minCount": 2
         },
         "headline": "HAUNTED TRIPLE-HEADER: EVIDENCE FLOATS ITSELF TO FRONT PAGE",
-        "subhead": "Custodian demands bonus for ‘poltergeist handling.’",
+        "subhead": "Custodian demands bonus for 'poltergeist handling.'",
         "imagePrompt": "{style}, evidence room, papers levitating, flashlight flare, dust motes",
         "body": [
           "Three-card chill swept the newsroom as {N1}, {N2}, and {N3} aligned.",
@@ -206,9 +314,57 @@
           "Management denies haunting; approves new staplers."
         ],
         "factionHint": "truth"
+      },
+      {
+        "id": "zombie_outbreak_panic",
+        "match": {
+          "tagsAny": ["zombie", "outbreak", "infection"],
+          "minCount": 2
+        },
+        "headline": "ZOMBIE OUTBREAK RUMORS SPREAD FASTER THAN OFFICIALS CAN DENY",
+        "subhead": "CDC issues statement; residents stock up anyway.",
+        "imagePrompt": "{style}, pharmacy parking lot, empty shelves, panicked shoppers, hazmat silhouettes",
+        "body": [
+          "Three-card panic cascade triggered as {N1}, {N2}, and {N3} hit social media simultaneously.",
+          "Eyewitnesses report zombie-like behavior; toxicology pending; officials urge calm.",
+          "Hospital ER overwhelmed with 'bite victims' demanding immediate treatment."
+        ],
+        "factionHint": "truth"
+      },
+      {
+        "id": "possession_exorcism_triple",
+        "match": {
+          "tagsAny": ["possession", "exorcism", "haunted", "demon"],
+          "minCount": 2
+        },
+        "headline": "MASS POSSESSION CASE • THREE EXORCISTS CALLED TO SAME BLOCK",
+        "subhead": "Neighbors report synchronized screaming at 3 AM nightly.",
+        "imagePrompt": "{style}, suburban street, three houses lit, clergy figures, concerned crowd",
+        "body": [
+          "Unprecedented triple manifestation emerged as {N1}, {N2}, and {N3} affected adjacent properties.",
+          "Religious authorities from three denominations collaborate in rare interfaith exorcism effort.",
+          "Police cite 'neighborhood dispute'; residents cite Latin chanting and levitating furniture."
+        ],
+        "factionHint": "truth"
       }
     ],
     "mix_truth_vs_gov": [
+      {
+        "id": "disclosure_vs_coverup",
+        "match": {
+          "tagsAny": ["disclosure", "whistleblower", "leak", "coverup", "redaction"],
+          "minCount": 3
+        },
+        "headline": "DISCLOSURE AVALANCHE CRASHES INTO COVERUP WALL • DOCUMENTS EVERYWHERE",
+        "subhead": "Whistleblowers release; officials redact; public prints before deletion.",
+        "imagePrompt": "{style}, office chaos, flying papers, officials grabbing, citizens photographing",
+        "body": [
+          "Triple collision occurred as {N1}, {N2}, and {N3} turned transparency into spectator sport.",
+          "Leaked files spread across twelve platforms before {coverup} team could mobilize response.",
+          "Spokesperson promises 'context' after 'review' of 'misunderstandings' about 'routine matters.'"
+        ],
+        "factionHint": "mixed"
+      },
       {
         "id": "foia_vs_redaction",
         "match": {
@@ -225,7 +381,7 @@
         "subhead": "Forms duel in triplicate; {coverup} retreats to the margins.",
         "imagePrompt": "{style}, file room blizzard, redactions sliding off pages, burst flash",
         "body": [
-          "Tonight’s triple-play pitted {N1} against {N2} while {N3} kept the copier screaming.",
+          "Tonight's triple-play pitted {N1} against {N2} while {N3} kept the copier screaming.",
           "Eyewitnesses report paragraphs achieving self-awareness and requesting highlighters.",
           "A spokesperson promised transparency after a short redaction."
         ],
@@ -245,13 +401,13 @@
             "TRUTH-038"
           ]
         },
-        "headline": "MEN IN CHARCOAL ‘REDIRECT’ WITNESS PARADE INTO BASEMENT",
+        "headline": "MEN IN CHARCOAL 'REDIRECT' WITNESS PARADE INTO BASEMENT",
         "subhead": "Confetti suspiciously resembles shredded affidavits.",
         "imagePrompt": "{style}, municipal stairwell, parade float at door, clipboard glare",
         "body": [
-          "A coordinated three-card clash saw escorts with clipboards guide testimony toward a room marked ‘training.’",
-          "Participants emerged fluent in ‘no comment.’",
-          "Neighborhood kids rated the parade ‘too indoors.’"
+          "A coordinated three-card clash saw escorts with clipboards guide testimony toward a room marked 'training.'",
+          "Participants emerged fluent in 'no comment.'",
+          "Neighborhood kids rated the parade 'too indoors.'"
         ],
         "factionHint": "mixed"
       }
@@ -271,7 +427,7 @@
         "imagePrompt": "{style}, parking-lot scrum, flashlight overexposure, homemade signs",
         "body": [
           "Three plays in quick succession sent the truth meter tapping its own foot.",
-          "Witness audio captured overlapping gasps and the word ‘finally’ stretched into three syllables.",
+          "Witness audio captured overlapping gasps and the word 'finally' stretched into three syllables.",
           "Experts predict more leaks at eleven-ish."
         ],
         "factionHint": "truth"
@@ -328,11 +484,11 @@
           }
         },
         "headline": "CROSSFIRE OF LEAKS: TWO ATTACKS AND A {T3} CHANGE THE NARRATIVE",
-        "subhead": "Glass case labeled ‘normalcy’ shatters politely.",
+        "subhead": "Glass case labeled 'normalcy' shatters politely.",
         "imagePrompt": "{style}, office hallway, scattered files, motion blur people, flash flare",
         "body": [
           "Two punches landed while a third card {verbs_truth} what was left of the storyline.",
-          "Analysts advise hydrating and labeling one’s emotions.",
+          "Analysts advise hydrating and labeling one's emotions.",
           "By morning, someone will claim this was always the plan."
         ],
         "factionHint": "mixed"
@@ -343,11 +499,11 @@
         "id": "fallback_generic",
         "match": {},
         "headline": "{N1} + {N2} + {N3}: STORY TRIANGLE ROCKS THE EDITION",
-        "subhead": "All signs point to ‘unprecedented,’ again.",
+        "subhead": "All signs point to 'unprecedented,' again.",
         "imagePrompt": "{style}, newsroom chaos, stacked front pages, blinding flash",
         "body": [
           "Three-card chain reaction produced overlapping headlines and incompatible alibis.",
-          "Our interns connected yarn between the clippings until it spelled ‘yikes.’",
+          "Our interns connected yarn between the clippings until it spelled 'yikes.'",
           "Refresh for more as the plot refuses to sit still."
         ],
         "factionHint": "mixed"
