@@ -139,30 +139,54 @@ const renderImpactBadges = (event: FinalEditionEventHighlight) => {
   return segments.join(' · ');
 };
 
+type CardArtVariant = 'default' | 'frontPage';
+
 const CardArt = ({
   cardId,
+  fallbackCardId,
   className = '',
+  fit,
   showPlaceholder = false,
+  variant = 'default',
 }: {
   cardId?: string;
+  fallbackCardId?: string;
   className?: string;
+  fit?: 'cover' | 'contain';
   showPlaceholder?: boolean;
+  variant?: CardArtVariant;
 }) => {
-  if (!cardId && !showPlaceholder) {
+  const resolvedCardId = cardId ?? fallbackCardId;
+
+  if (!resolvedCardId && !showPlaceholder) {
     return null;
   }
 
+  const baseVariantClass =
+    variant === 'frontPage'
+      ? 'flex h-full w-full items-stretch rounded-lg border-[6px] border-newspaper-border/80 bg-newspaper-header/25 shadow-[0_32px_60px_rgba(0,0,0,0.45)]'
+      : 'aspect-[63/88] rounded-md border border-newspaper-border/60 bg-newspaper-header/20';
+
+  const placeholderTypography =
+    variant === 'frontPage'
+      ? 'text-xs tracking-[0.38em]'
+      : 'text-[10px] tracking-[0.28em]';
+
   return (
-    <div
-      className={cn(
-        'relative overflow-hidden rounded-md border border-newspaper-border/60 bg-newspaper-header/20',
-        className,
-      )}
-    >
-      {cardId ? (
-        <CardImage cardId={cardId} fit="contain" className="aspect-[63/88] w-full" />
+    <div className={cn('relative overflow-hidden', baseVariantClass, className)}>
+      {resolvedCardId ? (
+        <CardImage
+          cardId={resolvedCardId}
+          fit={fit ?? (variant === 'frontPage' ? 'cover' : 'contain')}
+          className="h-full w-full"
+        />
       ) : (
-        <div className="flex aspect-[63/88] w-full items-center justify-center px-3 text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-newspaper-text/50">
+        <div
+          className={cn(
+            'flex h-full w-full items-center justify-center px-3 text-center font-semibold uppercase text-newspaper-text/50',
+            placeholderTypography,
+          )}
+        >
           Archival footage pending clearance.
         </div>
       )}
@@ -236,6 +260,33 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
       ? 'rounded-md border border-dashed border-victory-foreground/40 bg-victory-foreground/10 p-3 shadow-[0_10px_28px_rgba(0,0,0,0.3)]'
       : 'rounded-md border border-dashed border-newspaper-border/60 bg-newspaper-bg/70 p-3';
   const progressTrackClass = tone === 'victory' ? 'mt-2 h-1.5 bg-victory-foreground/20' : 'mt-2 h-1.5 bg-newspaper-header/30';
+  const heroSkyClass =
+    tone === 'victory'
+      ? 'bg-gradient-to-br from-victory-start/85 via-victory-mid/78 to-victory-end/90'
+      : 'bg-gradient-to-br from-newspaper-header/95 via-newspaper-bg/92 to-newspaper-header/95';
+  const heroPrimaryBandClass = tone === 'victory' ? 'bg-victory-accent/90' : 'bg-newspaper-headline/90';
+  const heroSecondaryBandClass = tone === 'victory' ? 'bg-victory-foreground/70' : 'bg-newspaper-border/70';
+  const heroBadgeRowClass = cn(
+    'flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em]',
+    tone === 'victory' ? 'text-victory-foreground/85' : 'text-newspaper-text/70',
+  );
+  const heroHeadlineClass = cn(
+    'text-5xl font-black uppercase leading-[0.92] tracking-[0.04em] drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)] sm:text-6xl lg:text-7xl',
+    accentHeadlineClass,
+  );
+  const heroSubheadClass = cn(
+    'mt-2 max-w-xl text-2xl font-extrabold uppercase tracking-[0.14em] sm:text-4xl sm:tracking-[0.1em]',
+    tone === 'victory' ? 'text-victory-foreground' : 'text-newspaper-headline',
+  );
+  const heroKickerClass = cn('mt-3 text-xs font-semibold uppercase tracking-[0.38em]', subtleBodyClass);
+  const heroStatsGridClass = cn(
+    'grid gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] sm:grid-cols-2 lg:grid-cols-4',
+    mutedBodyClass,
+  );
+  const frontPageCardClass =
+    tone === 'victory'
+      ? 'border-victory-foreground/70 bg-victory-foreground/10 shadow-[0_42px_80px_rgba(0,0,0,0.45)]'
+      : 'border-newspaper-border/80 bg-newspaper-header/15 shadow-[0_34px_70px_rgba(0,0,0,0.4)]';
 
   const renderMvpPanel = (label: string, mvp?: MVPReport | null) => {
     if (!mvp) {
@@ -282,61 +333,73 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
 
   return (
     <div className={cn('space-y-6', tone === 'victory' ? 'text-victory-foreground' : 'text-newspaper-text')}>
-      <NewspaperSection tone={tone} className="relative overflow-hidden px-6 py-6 sm:px-8">
+      <NewspaperSection tone={tone} className="relative overflow-hidden bg-transparent p-0">
         {showExtraStamp ? (
           <div className="stamp stamp--breaking absolute left-6 top-5">EXTRA</div>
         ) : null}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className={metaClass}>Final Edition • {editionDate}</div>
-          <div
-            className={cn(
-              'flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.35em]',
-              tone === 'victory' ? 'text-victory-foreground/80' : 'text-newspaper-text/70',
-            )}
-          >
-            {playerOutcome !== 'Stalemate' ? (
-              <Badge className={cn(badgeClass, 'rounded-full px-3 py-1')}>
-                {playerOutcome}
-              </Badge>
-            ) : null}
-            <Badge className={cn(badgeClass, 'rounded-full px-3 py-1')}>
-              {victoryConditionLabel}
-            </Badge>
-            <Badge className={cn(badgeClass, 'rounded-full px-3 py-1')}>
-              {playerFactionLabel}
-            </Badge>
-          </div>
-        </div>
-        <h1 className={cn('mt-3 text-3xl font-black uppercase tracking-[0.12em] sm:text-4xl', accentHeadlineClass)}>
-          {headline}
-        </h1>
-        <p className={cn('mt-2 text-lg font-semibold italic', primaryBodyClass)}>{subhead}</p>
-        <p className={cn('mt-3 text-xs font-semibold uppercase tracking-[0.4em]', subtleBodyClass)}>{kicker}</p>
-        <div
-          className={cn(
-            'mt-5 grid gap-3 text-xs font-semibold uppercase tracking-[0.3em] sm:grid-cols-4',
-            mutedBodyClass,
-          )}
-        >
-          <div className={statTileClass}>
-            <div className={statLabelClass}>Rounds</div>
-            <div className={statValueClass}>
-              {report.rounds > 0 ? report.rounds : '—'}
+        <div className={cn('relative isolate overflow-hidden', heroSkyClass)}>
+          <div className={cn('pointer-events-none absolute inset-x-0 top-0 h-2', heroPrimaryBandClass)} />
+          <div className={cn('pointer-events-none absolute inset-x-0 top-2 h-2', heroSecondaryBandClass)} />
+          <div className={cn('pointer-events-none absolute inset-x-0 bottom-0 h-2', heroPrimaryBandClass)} />
+          <div className={cn('pointer-events-none absolute inset-x-0 bottom-2 h-2', heroSecondaryBandClass)} />
+          <div className="relative grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+            <div className="relative z-10 flex flex-col justify-between gap-8 px-6 py-8 sm:px-10 lg:px-12">
+              <div className="space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className={cn(metaClass, 'tracking-[0.5em]')}>Final Edition • {editionDate}</div>
+                  <div className={heroBadgeRowClass}>
+                    {playerOutcome !== 'Stalemate' ? (
+                      <Badge className={cn(badgeClass, 'rounded-full px-3 py-1 tracking-[0.32em]')}>
+                        {playerOutcome}
+                      </Badge>
+                    ) : null}
+                    <Badge className={cn(badgeClass, 'rounded-full px-3 py-1 tracking-[0.32em]')}>
+                      {victoryConditionLabel}
+                    </Badge>
+                    <Badge className={cn(badgeClass, 'rounded-full px-3 py-1 tracking-[0.32em]')}>
+                      {playerFactionLabel}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h1 className={heroHeadlineClass}>{headline}</h1>
+                  <p className={heroSubheadClass}>{subhead}</p>
+                  <p className={heroKickerClass}>{kicker}</p>
+                </div>
+              </div>
+              <div className={heroStatsGridClass}>
+                <div className={statTileClass}>
+                  <div className={statLabelClass}>Rounds</div>
+                  <div className={statValueClass}>
+                    {report.rounds > 0 ? report.rounds : '—'}
+                  </div>
+                </div>
+                <div className={statTileClass}>
+                  <div className={statLabelClass}>Truth Meter</div>
+                  <div className={statValueClass}>{Math.round(report.finalTruth)}%</div>
+                </div>
+                <div className={statTileClass}>
+                  <div className={statLabelClass}>State Control</div>
+                  <div className={statValueClass}>
+                    Truth {report.statesTruth} · Gov {report.statesGov}
+                  </div>
+                </div>
+                <div className={statTileClass}>
+                  <div className={statLabelClass}>Influence Points</div>
+                  <div className={statValueClass}>{influenceSummary}</div>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className={statTileClass}>
-            <div className={statLabelClass}>Truth Meter</div>
-            <div className={statValueClass}>{Math.round(report.finalTruth)}%</div>
-          </div>
-          <div className={statTileClass}>
-            <div className={statLabelClass}>State Control</div>
-            <div className={statValueClass}>
-              Truth {report.statesTruth} · Gov {report.statesGov}
+            <div className="relative z-10 flex items-stretch justify-stretch">
+              <CardArt
+                cardId={report.mvp?.cardId ?? undefined}
+                fallbackCardId={report.runnerUp?.cardId ?? undefined}
+                showPlaceholder
+                variant="frontPage"
+                fit="cover"
+                className={cn('h-full w-full min-h-[20rem] sm:min-h-[22rem] lg:min-h-[26rem]', frontPageCardClass)}
+              />
             </div>
-          </div>
-          <div className={statTileClass}>
-            <div className={statLabelClass}>Influence Points</div>
-            <div className={statValueClass}>{influenceSummary}</div>
           </div>
         </div>
       </NewspaperSection>
