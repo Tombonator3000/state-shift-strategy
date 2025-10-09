@@ -9,6 +9,13 @@ This document provides a chronological record of gameplay-impacting changes merg
 ## 2025-10-09 – Cataloged cryptid intel for expansion docs
 - Expanded the Cryptids expansion README with state-by-state lore harvested from Fangoria, plus play hooks for each hometown monster.
 - Imported the northamericancryptids.com bestiary into a new field guide section so designers can wire in regionally accurate ops beats.
+## 2025-11-30 – Editor dossiers display real portraits
+- Desk editor dossiers now pull their case file photos from `/public/images/editors`, replacing the placeholder blocks.
+- The selection modal and preview cards render those portraits directly so newsroom briefings feel grounded in the conspiracy canon.
+
+## 2025-11-29 – Paranoid Times masthead anchored
+- Locked the newspaper masthead to Paranoid Times with short-lived glitches that flash rival tabloid titles before snapping back.
+- Wired the glitch cadence to respect reduced-motion preferences so accessibility settings freeze the masthead when needed.
 
 ## 2025-11-28 – Finale headline composer locked in
 - Added regression coverage for the finale front-page composer, ensuring bulletin fusion, sanitized food-word stripping, and graceful fallbacks.
