@@ -423,7 +423,7 @@ function applyResolution(
   state.truth = resolution.truth;
   state.ip[actor] = resolution.aiIP;
   state.ip[opponent] = resolution.ip;
-  state.states = resolution.states.map(resolved => ({
+  state.states = resolution.states.map((resolved: any) => ({
     ...resolved,
     owner: resolved.owner === 'ai' ? actor : resolved.owner === 'player' ? opponent : 'neutral',
   }));
@@ -682,7 +682,7 @@ function simulateMatch(
       const cardIndex = state.hands[active].findIndex(handCard => handCard.id === play.cardId);
       const card = cardIndex >= 0
         ? state.hands[active][cardIndex]!
-        : cloneCard(CARD_DATABASE.find(entry => entry.id === play.cardId) ?? drawRandomCard(rng));
+        : cloneCard(CARD_DATABASE.find((entry: any) => entry.id === play.cardId) ?? drawRandomCard(rng));
       const snapshot = buildSnapshot(state, active);
       const resolution = resolveCardMVP(snapshot, card, play.targetState ?? null, 'ai');
 

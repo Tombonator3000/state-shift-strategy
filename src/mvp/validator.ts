@@ -561,7 +561,7 @@ export function clonePlayer(player: PlayerState): PlayerState {
 export function cloneGameState(state: GameState): GameState {
   const clonedRuntime = state.tabloidRelicsRuntime
     ? {
-        entries: state.tabloidRelicsRuntime.entries.map(entry => ({ ...entry })),
+        entries: state.tabloidRelicsRuntime.entries.map((entry: TabloidRelicRuntimeState['entries'][number]) => ({ ...entry })),
         lastIssueRound: state.tabloidRelicsRuntime.lastIssueRound,
         lastUpdatedTurn: state.tabloidRelicsRuntime.lastUpdatedTurn,
         selectionHistory: [...(state.tabloidRelicsRuntime.selectionHistory ?? [])],
