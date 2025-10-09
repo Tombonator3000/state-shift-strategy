@@ -53,6 +53,7 @@ import { VictoryConditions } from '@/components/game/VictoryConditions';
 import toast, { Toaster } from 'react-hot-toast';
 import { chooseEditor, isEditorsExpansionEnabled } from '@/expansions/editors/EditorsUI';
 import { describeEditorEffect, type EditorEffect, type EditorId } from '@/expansions/editors/EditorsEngine';
+import { portraitUrl } from '@/game/editorImages';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
@@ -486,6 +487,15 @@ const Index = () => {
       return null;
     }
     return editor.quote ?? (editor as { flavor?: string | null }).flavor ?? null;
+  }, [gameState.editorDef]);
+
+  const editorPortraitSrc = useMemo(() => {
+    const definition = gameState.editorDef;
+    if (!definition) {
+      return null;
+    }
+
+    return portraitUrl(definition.id, definition.portrait);
   }, [gameState.editorDef]);
 
   const [isObjectivesOpen, setIsObjectivesOpen] = useState(false);
@@ -2817,12 +2827,22 @@ const Index = () => {
                 className="z-50 w-80 max-w-[min(20rem,calc(100vw-2rem))] border border-newspaper-border bg-newspaper-bg p-4 text-newspaper-text shadow-lg"
               >
                 <div className="space-y-3" data-editor-badge="active">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/60">Desk Editor</p>
-                    <h3 className="text-base font-semibold leading-tight">{gameState.editorDef.name}</h3>
-                    {editorFlavor ? (
-                      <p className="text-xs italic text-newspaper-text/70">{editorFlavor}</p>
+                  <div className="flex gap-3">
+                    {editorPortraitSrc ? (
+                      <img
+                        src={editorPortraitSrc}
+                        alt={`${gameState.editorDef.name} portrait`}
+                        className="h-20 w-16 rounded border border-newspaper-border/70 object-cover shadow-sm"
+                        loading="lazy"
+                      />
                     ) : null}
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/60">Desk Editor</p>
+                      <h3 className="text-base font-semibold leading-tight">{gameState.editorDef.name}</h3>
+                      {editorFlavor ? (
+                        <p className="mt-1 text-xs italic text-newspaper-text/70">{editorFlavor}</p>
+                      ) : null}
+                    </div>
                   </div>
                   {editorEffects?.bonuses?.length ? (
                     <div>

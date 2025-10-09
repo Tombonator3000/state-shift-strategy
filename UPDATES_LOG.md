@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-12-02 – Desk editor briefings show case file portraits
+- The in-game editor dossier now pulls each editor's portrait into the status popover so newsroom briefings match the selection screen.
+- Ensured the portrait respects the `/public/images/editors` pathing helper so new art drops automatically appear across the HUD.
+
 ## 2025-12-01 – Tabloid turn-end crash neutralized
 - Fixed a missing `useCallback` import in the enhanced tabloid newspaper so the bundle no longer throws a reference error when resolving end-of-turn events.
 - Verified the newsroom edition overlay renders without blinking to a white screen after AI or player turns conclude.
