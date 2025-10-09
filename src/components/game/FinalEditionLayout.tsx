@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { ExtraStamp } from '@/components/newspaper/ExtraStamp';
 import {
   NEWSPAPER_META_CLASS,
   NEWSPAPER_SECTION_HEADING_CLASS,
@@ -252,7 +253,11 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
       ? 'mt-1 text-2xl font-black tracking-tight text-victory-accent drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
       : 'mt-1 text-2xl font-black tracking-tight text-newspaper-headline';
   const bulletinArticles = report.extraExtraFeed.slice(-4).reverse();
-  const hasBulletins = bulletinArticles.length > 0;
+  const latestExtraExtra = report.extraExtraFeed.length > 0 
+    ? report.extraExtraFeed[report.extraExtraFeed.length - 1] 
+    : null;
+  const olderBulletins = latestExtraExtra ? bulletinArticles.slice(1) : bulletinArticles;
+  const hasBulletins = olderBulletins.length > 0;
   const highlightCardClass =
     tone === 'victory'
       ? 'rounded-md border border-victory-foreground/30 bg-gradient-to-br from-victory-start/80 via-victory-mid/74 to-victory-end/80 text-victory-foreground shadow-[0_16px_36px_rgba(0,0,0,0.35)]'
@@ -372,9 +377,12 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
   return (
     <div className={cn('space-y-6', tone === 'victory' ? 'text-victory-foreground' : 'text-newspaper-text')}>
       <NewspaperSection tone={tone} className="relative overflow-hidden bg-transparent p-0">
-        {showExtraStamp ? (
-          <div className="stamp stamp--breaking absolute left-6 top-5">EXTRA</div>
-        ) : null}
+        {latestExtraExtra && (
+          <ExtraStamp 
+            className="top-8 right-8 md:top-12 md:right-12" 
+            size="lg" 
+          />
+        )}
         <div className={cn('relative isolate overflow-hidden', heroSkyClass)}>
           <div className={cn('pointer-events-none absolute inset-x-0 top-0 h-2', heroPrimaryBandClass)} />
           <div className={cn('pointer-events-none absolute inset-x-0 top-2 h-2', heroSecondaryBandClass)} />
@@ -386,6 +394,11 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className={cn(metaClass, 'tracking-[0.5em]')}>Final Edition • {editionDate}</div>
                   <div className={heroBadgeRowClass}>
+                    {latestExtraExtra && (
+                      <Badge className="bg-red-600 text-white border-red-600 rounded-full px-3 py-1 tracking-[0.32em]">
+                        Breaking Combo News
+                      </Badge>
+                    )}
                     {playerOutcome !== 'Stalemate' ? (
                       <Badge className={cn(badgeClass, 'rounded-full px-3 py-1 tracking-[0.32em]')}>
                         {playerOutcome}
@@ -400,9 +413,30 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <h1 className={heroHeadlineClass}>{headline}</h1>
-                  <p className={heroSubheadClass}>{subhead}</p>
-                  <p className={heroKickerClass}>{kicker}</p>
+                  {latestExtraExtra ? (
+                    <>
+                      <h1 className={heroHeadlineClass}>{latestExtraExtra.hed}</h1>
+                      {latestExtraExtra.dek && (
+                        <p className={heroSubheadClass}>{latestExtraExtra.dek}</p>
+                      )}
+                      {latestExtraExtra.bullets.length > 0 && (
+                        <ul className="mt-6 space-y-2 text-lg font-semibold">
+                          {latestExtraExtra.bullets.slice(0, 3).map((bullet, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="text-red-600">▸</span>
+                              <span>{bullet}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <h1 className={heroHeadlineClass}>{headline}</h1>
+                      <p className={heroSubheadClass}>{subhead}</p>
+                      <p className={heroKickerClass}>{kicker}</p>
+                    </>
+                  )}
                 </div>
               </div>
               <div className={heroStatsGridClass}>
@@ -645,11 +679,11 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
           <div className="flex items-center justify-between">
             <h2 className={sectionHeadingClass}>Extra Extra Bulletins</h2>
             <Badge className={cn(badgeClass, 'rounded-full px-3 py-0.5 text-[11px] tracking-[0.3em]')}>
-              {bulletinArticles.length}
+              {olderBulletins.length}
             </Badge>
           </div>
           <div className="mt-4 space-y-4">
-            {bulletinArticles.map((article, index) => {
+            {olderBulletins.map((article, index) => {
               const badgeToneClass = getBulletinBadgeClass(article.tone, tone);
               const headlineToneClass = getBulletinHeadlineClass(article.tone, tone);
               return (
