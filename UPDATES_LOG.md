@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-12-04 – ParaPedia cross-link reel now shows mission intel
+- Corrected the ParaPedia panel to reference existing agenda moment labels and descriptions so the latest operations display
+  their proper codenames and briefings instead of placeholder text.
+
 ## 2025-12-03 – ParaPedia knowledge vault opens
 - Truth agents now land on a dedicated ParaPedia tab inside the Player Hub, complete with lore-forward metrics and a leak-fed
   recap reel.
