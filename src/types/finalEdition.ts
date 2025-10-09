@@ -63,6 +63,10 @@ export interface FinalEditionComboHighlight {
   description?: string;
 }
 
+export interface FrontPageArticle
+  extends Pick<ArticleBlock, 'tone' | 'hed' | 'dek'>,
+    Partial<Pick<ArticleBlock, 'kicker' | 'byline' | 'source'>> {}
+
 export interface FinalEditionReport {
   winner: 'government' | 'truth' | 'draw';
   victoryType: 'states' | 'ip' | 'truth' | 'agenda' | 'draw';
@@ -82,6 +86,7 @@ export interface FinalEditionReport {
   comboHighlights: FinalEditionComboHighlight[];
   sightings: ParanormalSighting[];
   extraExtraFeed: ArticleBlock[];
+  frontPage?: FrontPageArticle | null;
   recordedAt: number;
 }
 

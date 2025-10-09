@@ -77,6 +77,12 @@ const createReport = (overrides: Partial<GameOverReport> = {}): GameOverReport =
   comboHighlights: [],
   sightings: [],
   extraExtraFeed: [createArticle()],
+  frontPage: {
+    tone: 'truth',
+    hed: 'Operatives Crack Omega Vault',
+    dek: 'Resistance archivists broadcast sealed tapes across the clandestine network.',
+    kicker: 'Truth Network · Truth Threshold',
+  },
   recordedAt: new Date('2025-10-05T12:00:00Z').getTime(),
   ...overrides,
 });
@@ -132,6 +138,50 @@ describe('FinalEditionLayout extra extra bulletins', () => {
 
     expect(normalized).not.toContain('Extra Extra Bulletins');
     expect(normalized).not.toContain('No newsroom bulletins were filed during this match.');
+
+    renderer.unmount();
+  });
+
+  test('uses front page copy for masthead headline when supplied', async () => {
+    ensureLocalStorage();
+
+    const { default: FinalEditionLayout } = await import('../FinalEditionLayout');
+    const report = createReport({
+      frontPage: {
+        tone: 'truth',
+        hed: 'Vault 7 SEIZED BY PARANOID COURIERS',
+        dek: 'Encrypted reels surface after midnight raid on undisclosed archive.',
+        kicker: 'Truth Network · Crisis Broadcast',
+      },
+    });
+
+    const renderer = create(<FinalEditionLayout report={report} />);
+    const output = extractText(renderer.toJSON()).join(' ');
+    const normalized = output.replace(/\s+/g, ' ').trim();
+
+    expect(normalized).toContain('Vault 7 SEIZED BY PARANOID COURIERS');
+    expect(normalized).toContain('Encrypted reels surface after midnight raid on undisclosed archive.');
+    expect(normalized).toContain('Truth Network · Crisis Broadcast');
+
+    renderer.unmount();
+  });
+
+  test('falls back to legacy headline set when front page is missing', async () => {
+    ensureLocalStorage();
+
+    const { default: FinalEditionLayout } = await import('../FinalEditionLayout');
+    const report = createReport({
+      frontPage: null,
+      winner: 'government',
+      victoryType: 'truth',
+    });
+
+    const renderer = create(<FinalEditionLayout report={report} />);
+    const output = extractText(renderer.toJSON()).join(' ');
+    const normalized = output.replace(/\s+/g, ' ').trim();
+
+    expect(normalized).toContain('NARRATIVE LOCKDOWN SUPPRESSES TRUTH');
+    expect(normalized).toContain('Shadow Government closes the season via truth meter swing after 4 rounds; monitors register 68% truth.');
 
     renderer.unmount();
   });
