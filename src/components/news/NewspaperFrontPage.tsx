@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import CardImage from '@/components/game/CardImage';
 import type { GameOverReport } from '@/types/finalEdition';
 import { generateSensationalistHeadline } from '@/utils/sensationalistHeadlines';
-import '@/styles/newspaperFrontPage.css';
+import '@/styles/newspaperLayout.css';
 
 interface NewspaperFrontPageProps {
   report: GameOverReport;

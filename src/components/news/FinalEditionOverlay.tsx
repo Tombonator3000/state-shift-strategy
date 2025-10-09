@@ -158,7 +158,7 @@ const FinalEditionOverlay = ({
           onNavigateToPage={(page) => setCurrentPage(page as typeof currentPage)}
         />
         <div className="fixed bottom-0 left-0 right-0 flex flex-wrap justify-center gap-3 bg-black/90 p-4 backdrop-blur-sm">
-          <Button onClick={onContinue} className="border border-white/80 bg-white text-black font-semibold hover:bg-white/90">
+          <Button onClick={onContinue} className="border border-white/80 bg-white font-semibold text-black hover:bg-white/90">
             Continue
           </Button>
           <Button onClick={onRestart} className="border border-white/60 bg-black/50 text-white hover:bg-black/70">
@@ -182,89 +182,43 @@ const FinalEditionOverlay = ({
     );
   }
 
-  const layoutVariant = isVictory ? 'victory' : 'default';
-  const bannerLabel = isDraw ? 'Stalemate' : isVictory ? 'Victory' : 'Defeat';
-  const editionDate = new Date(report.recordedAt).toLocaleDateString(undefined, {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
-  const tagline = [
-    report.rounds > 0 ? `${report.rounds} rounds` : 'Lightning opener',
-    `Truth ${Math.round(report.finalTruth)}%`,
-  ].join(' • ');
-
-  const continueButtonClass = isVictory
-    ? 'border border-emerald-200/80 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 text-emerald-950 font-semibold shadow-[0_18px_48px_rgba(16,185,129,0.35)] transition-colors hover:from-emerald-300 hover:via-emerald-400 hover:to-emerald-500 hover:text-emerald-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200'
-    : 'border border-newspaper-border bg-newspaper-bg/90 text-newspaper-text transition hover:bg-white/80 hover:text-newspaper-headline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60';
-
-  const restartButtonClass = isVictory
-    ? 'border border-emerald-200/80 bg-emerald-500/25 text-emerald-50 transition-colors hover:bg-emerald-400/30 hover:text-emerald-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200'
-    : 'border border-newspaper-border bg-newspaper-bg/90 text-newspaper-text transition hover:bg-white/80 hover:text-newspaper-headline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60';
-
-  const archiveButtonClass = isVictory
-    ? 'border border-dashed border-emerald-200/70 bg-emerald-500/15 text-emerald-100 transition-colors hover:bg-emerald-400/20 hover:text-emerald-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200 disabled:border-emerald-200/40 disabled:bg-emerald-500/10 disabled:text-emerald-100/60'
-    : 'border border-dashed border-newspaper-border/70 bg-newspaper-bg/70 text-newspaper-text transition hover:bg-white/80 hover:text-newspaper-headline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60 disabled:opacity-60';
-
-  const creditsButtonClass = isVictory
-    ? 'text-emerald-100/80 transition hover:text-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200'
-    : 'text-newspaper-text/80 transition hover:text-newspaper-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60';
-
-  const viewEditionButtonClass = isVictory
-    ? 'border border-emerald-200/80 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 text-emerald-950 font-semibold shadow-[0_18px_48px_rgba(16,185,129,0.35)] transition-colors hover:from-emerald-300 hover:via-emerald-400 hover:to-emerald-500 hover:text-emerald-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200'
-    : 'border border-newspaper-border bg-newspaper-bg/90 text-newspaper-text transition hover:bg-white/80 hover:text-newspaper-headline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60';
-
+  // Inside pages view
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-6">
-      <GameOverEditionLayout
-        bannerLabel={bannerLabel}
-        bannerIcon={isVictory ? <Trophy className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
-        kicker={derivedVictoryType}
-        metaLine={`Final Campaign Report • ${editionDate}`}
-        tagline={tagline}
-        onClose={() => setCurrentPage('front')}
-        variant={layoutVariant}
-        footer={(
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-wrap justify-center gap-2 md:justify-start">
-              <Button onClick={() => setCurrentPage('front')} className={cn(continueButtonClass)}>
-                Back to Front Page
-              </Button>
-              <Button onClick={onContinue} className={cn(restartButtonClass)}>
-                Continue
-              </Button>
-              <Button onClick={onRestart} className={cn(restartButtonClass)}>
-                Return to Menu
-              </Button>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2 md:justify-end">
-              {onArchive ? (
-                <Button
-                  onClick={onArchive}
-                  disabled={isArchived}
-                  variant="outline"
-                  className={cn(archiveButtonClass)}
-                >
-                  {isArchived ? 'Archived' : 'Archive to Player Hub'}
-                </Button>
-              ) : null}
-              <Button variant="ghost" className={cn(creditsButtonClass)} onClick={() => setShowCredits(true)}>
-                Roll Credits
-              </Button>
-            </div>
-          </div>
-        )}
-      >
-        <NewspaperInsidePages
-          report={report}
-          currentPage={currentPage}
-          onBackToFront={() => setCurrentPage('front')}
-          isVictory={isVictory}
-        />
-      </GameOverEditionLayout>
+    <div className="fixed inset-0 z-50 bg-slate-950">
+      <NewspaperInsidePages
+        report={report}
+        currentPage={currentPage}
+        onBackToFront={() => setCurrentPage('front')}
+        isVictory={isVictory}
+      />
+      <div className="fixed bottom-0 left-0 right-0 flex flex-wrap justify-center gap-3 bg-black/95 p-4 backdrop-blur-sm">
+        <Button onClick={() => setCurrentPage('front')} className="border border-white/80 bg-white font-semibold text-black hover:bg-white/90">
+          Back to Front Page
+        </Button>
+        <Button onClick={onContinue} className="border border-white/60 bg-black/50 text-white hover:bg-black/70">
+          Continue
+        </Button>
+        <Button onClick={onRestart} className="border border-white/60 bg-black/50 text-white hover:bg-black/70">
+          Return to Menu
+        </Button>
+        {onArchive ? (
+          <Button
+            onClick={onArchive}
+            disabled={isArchived}
+            variant="outline"
+            className="border-dashed text-white"
+          >
+            {isArchived ? 'Archived' : 'Archive to Player Hub'}
+          </Button>
+        ) : null}
+        <Button variant="ghost" className="text-white/80 hover:text-white" onClick={() => setShowCredits(true)}>
+          Roll Credits
+        </Button>
+      </div>
     </div>
   );
 };
+
 
 export default FinalEditionOverlay;
 
