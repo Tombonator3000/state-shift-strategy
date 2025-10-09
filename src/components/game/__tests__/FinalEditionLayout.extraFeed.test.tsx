@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { create } from 'react-test-renderer';
+import type { ReactTestRendererJSON } from 'react-test-renderer';
 
 import { composeFinalFrontPage } from '@/news/finalFrontPageComposer';
 import type { GameOverReport } from '@/types/finalEdition';
@@ -47,6 +48,30 @@ const extractText = (node: unknown): string[] => {
   }
 
   return [];
+};
+
+const findAllNodes = (
+  node: ReactTestRendererJSON | ReactTestRendererJSON[] | string | null,
+  predicate: (candidate: ReactTestRendererJSON) => boolean,
+): ReactTestRendererJSON[] => {
+  if (node == null) {
+    return [];
+  }
+
+  if (Array.isArray(node)) {
+    return node.flatMap(child => findAllNodes(child, predicate));
+  }
+
+  if (typeof node === 'string') {
+    return [];
+  }
+
+  const matches = predicate(node) ? [node] : [];
+  const childMatches = (node.children ?? []).flatMap(child =>
+    findAllNodes(child as ReactTestRendererJSON | ReactTestRendererJSON[] | string | null, predicate),
+  );
+
+  return [...matches, ...childMatches];
 };
 
 const createArticle = (overrides: Partial<ArticleBlock> = {}): ArticleBlock => ({
@@ -125,6 +150,55 @@ describe('FinalEditionLayout extra extra bulletins', () => {
     expect(normalized).toContain('Shadow Bureau Deploys Countermeasures');
 
     renderer.unmount();
+  });
+
+  test('provides front page jump anchors for available sections', async () => {
+    ensureLocalStorage();
+
+    const { default: FinalEditionLayout } = await import('../FinalEditionLayout');
+    const reportWithBulletins = createReport({
+      extraExtraFeed: [createArticle()],
+    });
+
+    const renderer = create(<FinalEditionLayout report={reportWithBulletins} />);
+    const tree = renderer.toJSON();
+    const navNodes = findAllNodes(tree, node => node.props?.['aria-label'] === 'Front Page Jump');
+
+    expect(navNodes).toHaveLength(1);
+
+    const anchorNodes = findAllNodes(navNodes[0], node => node.type === 'a');
+    const hrefs = anchorNodes.map(anchor => anchor.props?.href);
+
+    expect(hrefs).toEqual([
+      '#key-events',
+      '#combo-highlights',
+      '#paranormal-sightings',
+      '#extra-extra-bulletins',
+      '#after-action-notes',
+    ]);
+
+    renderer.unmount();
+
+    const rendererWithoutBulletins = create(<FinalEditionLayout report={createReport({ extraExtraFeed: [] })} />);
+    const treeWithoutBulletins = rendererWithoutBulletins.toJSON();
+    const navNodesWithoutBulletins = findAllNodes(
+      treeWithoutBulletins,
+      node => node.props?.['aria-label'] === 'Front Page Jump',
+    );
+
+    expect(navNodesWithoutBulletins).toHaveLength(1);
+
+    const anchorNodesWithoutBulletins = findAllNodes(navNodesWithoutBulletins[0], node => node.type === 'a');
+    const hrefsWithoutBulletins = anchorNodesWithoutBulletins.map(anchor => anchor.props?.href);
+
+    expect(hrefsWithoutBulletins).toEqual([
+      '#key-events',
+      '#combo-highlights',
+      '#paranormal-sightings',
+      '#after-action-notes',
+    ]);
+
+    rendererWithoutBulletins.unmount();
   });
 
   test('omits bulletin section when no bulletins are recorded', async () => {
