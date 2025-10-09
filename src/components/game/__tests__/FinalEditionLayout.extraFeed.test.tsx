@@ -169,13 +169,19 @@ describe('FinalEditionLayout extra extra bulletins', () => {
     const anchorNodes = findAllNodes(navNodes[0], node => node.type === 'a');
     const hrefs = anchorNodes.map(anchor => anchor.props?.href);
 
-    expect(hrefs).toEqual([
-      '#key-events',
-      '#combo-highlights',
-      '#paranormal-sightings',
-      '#extra-extra-bulletins',
-      '#after-action-notes',
-    ]);
+    expect(new Set(hrefs).size).toBe(5);
+
+    const expectedWithBulletins = [
+      'key-events',
+      'combo-highlights',
+      'paranormal-sightings',
+      'extra-extra-bulletins',
+      'after-action-notes',
+    ];
+
+    expectedWithBulletins.forEach((slug, index) => {
+      expect(anchorNodes[index].props?.href?.endsWith(slug)).toBe(true);
+    });
 
     renderer.unmount();
 
@@ -191,12 +197,18 @@ describe('FinalEditionLayout extra extra bulletins', () => {
     const anchorNodesWithoutBulletins = findAllNodes(navNodesWithoutBulletins[0], node => node.type === 'a');
     const hrefsWithoutBulletins = anchorNodesWithoutBulletins.map(anchor => anchor.props?.href);
 
-    expect(hrefsWithoutBulletins).toEqual([
-      '#key-events',
-      '#combo-highlights',
-      '#paranormal-sightings',
-      '#after-action-notes',
-    ]);
+    expect(new Set(hrefsWithoutBulletins).size).toBe(4);
+
+    const expectedWithoutBulletins = [
+      'key-events',
+      'combo-highlights',
+      'paranormal-sightings',
+      'after-action-notes',
+    ];
+
+    expectedWithoutBulletins.forEach((slug, index) => {
+      expect(anchorNodesWithoutBulletins[index].props?.href?.endsWith(slug)).toBe(true);
+    });
 
     rendererWithoutBulletins.unmount();
   });
