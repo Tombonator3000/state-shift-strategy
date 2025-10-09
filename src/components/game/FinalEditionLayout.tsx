@@ -12,6 +12,8 @@ import {
 import type { ArticleBlock } from '@/news/headlineEngine';
 import type { GameOverReport, FinalEditionEventHighlight, MVPReport } from '@/types/finalEdition';
 import {
+  formatVictoryHeadline,
+  formatVictorySubhead,
   getFactionDisplayName,
   getOppositionDisplayName,
   getOutcomeSummary,
@@ -22,45 +24,6 @@ import {
 interface FinalEditionLayoutProps {
   report: GameOverReport;
 }
-
-const formatVictoryHeadline = (report: GameOverReport): string => {
-  if (report.winner === 'draw') {
-    return 'DEADLOCK! BOTH SIDES CLAIM VICTORY';
-  }
-  if (report.winner === 'truth') {
-    return report.victoryType === 'truth'
-      ? 'TRUTH SURGE SHATTERS COVER-UP'
-      : report.victoryType === 'states'
-        ? 'DISCLOSURE FORCES SWEEP ACROSS THE MAP'
-        : report.victoryType === 'ip'
-          ? 'TRUTH OPERATIVES FLOOD THE AIRWAVES'
-          : 'SECRET AGENDA EXPOSED TO THE WORLD';
-  }
-  return report.victoryType === 'truth'
-    ? 'NARRATIVE LOCKDOWN SUPPRESSES TRUTH'
-    : report.victoryType === 'states'
-      ? 'GOVERNMENT RECAPTURES THE HEARTLAND'
-      : report.victoryType === 'ip'
-        ? 'COUNTER-NARRATIVE BLITZ OUTSPENDS RESISTANCE'
-        : 'SHADOW BUREAU EXECUTES CLASSIFIED PLAN';
-};
-
-const formatVictorySubhead = (report: GameOverReport): string => {
-  const rounds = report.rounds > 0 ? `${report.rounds} rounds` : 'a lightning opener';
-  const truth = `${Math.round(report.finalTruth)}% truth`;
-  if (report.winner === 'draw') {
-    return `Stalemate declared after ${rounds}; truth settles at ${truth}.`;
-  }
-  const victor = report.winner === 'truth' ? 'Truth Network' : 'Shadow Government';
-  const method = report.victoryType === 'truth'
-    ? 'truth meter swing'
-    : report.victoryType === 'states'
-      ? 'territorial control'
-      : report.victoryType === 'ip'
-        ? 'broadcast dominance'
-        : 'covert agenda reveal';
-  return `${victor} closes the season via ${method} after ${rounds}; monitors register ${truth}.`;
-};
 
 const getBulletinLabel = (tone: ArticleBlock['tone']): string => {
   switch (tone) {
@@ -208,8 +171,19 @@ const CardArt = ({
 };
 
 const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
-  const headline = formatVictoryHeadline(report);
-  const subhead = formatVictorySubhead(report);
+  const frontPage = report.frontPage;
+  const fallbackHeadline = formatVictoryHeadline(report);
+  const fallbackSubhead = formatVictorySubhead(report);
+  const fallbackKicker = getOutcomeSummary(report);
+  const sanitizeLine = (value: string | null | undefined): string | null => {
+    if (!value) {
+      return null;
+    }
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  };
+  const headline = sanitizeLine(frontPage?.hed) ?? fallbackHeadline;
+  const subhead = sanitizeLine(frontPage?.dek) ?? fallbackSubhead;
   const playerAgenda = presentAgenda(report.playerSecretAgenda);
   const aiAgenda = presentAgenda(report.aiSecretAgenda);
   const agendaBriefings = [
@@ -223,7 +197,7 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
   const victoryConditionLabel = getVictoryConditionLabel(report.victoryType);
   const playerFactionLabel = getFactionDisplayName(report.playerFaction);
   const oppositionLabel = getOppositionDisplayName(report.playerFaction);
-  const outcomeSummary = getOutcomeSummary(report);
+  const kicker = sanitizeLine(frontPage?.kicker) ?? fallbackKicker;
   const influenceSummary = `${playerFactionLabel} ${Math.round(report.ipPlayer)} · ${oppositionLabel} ${Math.round(report.ipAI)}`;
   const editionDate = new Date(report.recordedAt).toLocaleDateString();
   const showExtraStamp = report.victoryType === 'agenda' && report.winner !== 'draw';
@@ -337,7 +311,7 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
           {headline}
         </h1>
         <p className={cn('mt-2 text-lg font-semibold italic', primaryBodyClass)}>{subhead}</p>
-        <p className={cn('mt-3 text-xs font-semibold uppercase tracking-[0.4em]', subtleBodyClass)}>{outcomeSummary}</p>
+        <p className={cn('mt-3 text-xs font-semibold uppercase tracking-[0.4em]', subtleBodyClass)}>{kicker}</p>
         <div
           className={cn(
             'mt-5 grid gap-3 text-xs font-semibold uppercase tracking-[0.3em] sm:grid-cols-4',

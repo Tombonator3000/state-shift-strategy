@@ -4,12 +4,14 @@ import type { GameEvent } from '@/data/eventDatabase';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { CardPlayRecord, GameState } from '@/hooks/gameStateTypes';
 import type { GameCard } from '@/rules/mvp';
+import type { ArticleBlock } from '@/news/headlineEngine';
 import type { ArcProgressSummary } from '@/types/campaign';
 import type { ParanormalSighting } from '@/types/paranormal';
 import type {
   AgendaSummary,
   FinalEditionComboHighlight,
   FinalEditionEventHighlight,
+  FrontPageArticle,
   GameOverReport,
   ImpactType,
   MVPReport,
@@ -21,6 +23,74 @@ export const getFactionDisplayName = (faction: 'truth' | 'government'): string =
 
 export const getOppositionDisplayName = (playerFaction: 'truth' | 'government'): string => {
   return getFactionDisplayName(playerFaction === 'truth' ? 'government' : 'truth');
+};
+
+export interface VictoryHeadlineContext {
+  winner: GameOverReport['winner'];
+  victoryType: GameOverReport['victoryType'];
+}
+
+export interface VictorySubheadContext extends VictoryHeadlineContext {
+  rounds: number;
+  finalTruth: number;
+}
+
+export const formatVictoryHeadline = ({
+  winner,
+  victoryType,
+}: VictoryHeadlineContext): string => {
+  if (winner === 'draw') {
+    return 'DEADLOCK! BOTH SIDES CLAIM VICTORY';
+  }
+
+  if (winner === 'truth') {
+    if (victoryType === 'truth') {
+      return 'TRUTH SURGE SHATTERS COVER-UP';
+    }
+    if (victoryType === 'states') {
+      return 'DISCLOSURE FORCES SWEEP ACROSS THE MAP';
+    }
+    if (victoryType === 'ip') {
+      return 'TRUTH OPERATIVES FLOOD THE AIRWAVES';
+    }
+    return 'SECRET AGENDA EXPOSED TO THE WORLD';
+  }
+
+  if (victoryType === 'truth') {
+    return 'NARRATIVE LOCKDOWN SUPPRESSES TRUTH';
+  }
+  if (victoryType === 'states') {
+    return 'GOVERNMENT RECAPTURES THE HEARTLAND';
+  }
+  if (victoryType === 'ip') {
+    return 'COUNTER-NARRATIVE BLITZ OUTSPENDS RESISTANCE';
+  }
+  return 'SHADOW BUREAU EXECUTES CLASSIFIED PLAN';
+};
+
+export const formatVictorySubhead = ({
+  winner,
+  victoryType,
+  rounds,
+  finalTruth,
+}: VictorySubheadContext): string => {
+  const roundsLabel = rounds > 0 ? `${rounds} rounds` : 'a lightning opener';
+  const truthLabel = `${Math.round(finalTruth)}% truth`;
+
+  if (winner === 'draw') {
+    return `Stalemate declared after ${roundsLabel}; truth settles at ${truthLabel}.`;
+  }
+
+  const victor = winner === 'truth' ? 'Truth Network' : 'Shadow Government';
+  const method = victoryType === 'truth'
+    ? 'truth meter swing'
+    : victoryType === 'states'
+      ? 'territorial control'
+      : victoryType === 'ip'
+        ? 'broadcast dominance'
+        : 'covert agenda reveal';
+
+  return `${victor} closes the season via ${method} after ${roundsLabel}; monitors register ${truthLabel}.`;
 };
 
 export const getVictoryConditionLabel = (
@@ -51,13 +121,13 @@ export const getPlayerOutcomeLabel = (
   return report.winner === report.playerFaction ? 'Victory' : 'Defeat';
 };
 
-export const getOutcomeSummary = (report: GameOverReport): string => {
-  if (report.winner === 'draw') {
+export const getOutcomeSummary = ({ winner, victoryType }: VictoryHeadlineContext): string => {
+  if (winner === 'draw') {
     return 'Stalemate';
   }
 
-  const victorLabel = getFactionDisplayName(report.winner);
-  const condition = getVictoryConditionLabel(report.victoryType);
+  const victorLabel = getFactionDisplayName(winner);
+  const condition = getVictoryConditionLabel(victoryType);
   return `${victorLabel} · ${condition}`;
 };
 
@@ -391,7 +461,7 @@ const determineTopPlays = (
 };
 
 const summarizeAgenda = (
-  source?: GameState['secretAgenda'],
+  source: GameState['secretAgenda'] | GameState['aiSecretAgenda'],
 ): AgendaSummary | undefined => {
   if (!source) {
     return undefined;
@@ -412,6 +482,78 @@ const summarizeAgenda = (
     completed: source.completed,
     revealed: source.revealed,
   } satisfies AgendaSummary;
+};
+
+interface ComposeFrontPageArticleOptions extends VictorySubheadContext {
+  articles: ArticleBlock[];
+}
+
+const sanitizeLine = (value: string | null | undefined): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
+export const composeFrontPageArticle = ({
+  articles,
+  winner,
+  victoryType,
+  rounds,
+  finalTruth,
+}: ComposeFrontPageArticleOptions): FrontPageArticle => {
+  const tone: ArticleBlock['tone'] = winner === 'draw' ? 'draw' : winner;
+
+  const fallbackHeadline = formatVictoryHeadline({ winner, victoryType });
+  const fallbackDek = formatVictorySubhead({ winner, victoryType, rounds, finalTruth });
+  const fallbackKicker = getOutcomeSummary({ winner, victoryType });
+
+  const orderedArticles = Array.isArray(articles) ? [...articles].reverse() : [];
+
+  const preferred = orderedArticles.find(article => {
+    const hed = sanitizeLine(article?.hed ?? null);
+    const dek = sanitizeLine(article?.dek ?? null);
+    if (!hed || !dek) {
+      return false;
+    }
+    return article.tone === tone;
+  })
+    ?? orderedArticles.find(article => sanitizeLine(article?.hed ?? null) && sanitizeLine(article?.dek ?? null));
+
+  if (!preferred) {
+    return {
+      tone,
+      hed: fallbackHeadline,
+      dek: fallbackDek,
+      kicker: fallbackKicker,
+    } satisfies FrontPageArticle;
+  }
+
+  const hed = sanitizeLine(preferred.hed) ?? fallbackHeadline;
+  const dek = sanitizeLine(preferred.dek) ?? fallbackDek;
+  const kicker = sanitizeLine(preferred.kicker) ?? fallbackKicker;
+  const byline = sanitizeLine(preferred.byline);
+  const source = sanitizeLine(preferred.source);
+
+  const article: FrontPageArticle = {
+    tone,
+    hed,
+    dek,
+  };
+
+  if (kicker) {
+    article.kicker = kicker;
+  }
+  if (byline) {
+    article.byline = byline;
+  }
+  if (source) {
+    article.source = source;
+  }
+
+  return article;
 };
 
 export interface BuildFinalEditionOptions {
@@ -459,11 +601,20 @@ export const buildFinalEdition = ({
     s => s.owner === (state.faction === 'truth' ? 'player' : 'ai'),
   ).length;
 
+  const finalTruth = Math.round(state.truth);
+  const frontPage = composeFrontPageArticle({
+    articles: state.extraExtraFeed,
+    winner,
+    victoryType,
+    rounds: state.round,
+    finalTruth,
+  });
+
   return {
     winner,
     victoryType,
     rounds: state.round,
-    finalTruth: Math.round(state.truth),
+    finalTruth,
     ipPlayer: state.ip,
     ipAI: state.aiIP,
     statesGov: playerStatesOwned,
@@ -478,6 +629,7 @@ export const buildFinalEdition = ({
     comboHighlights,
     sightings: [...paranormalSightings],
     extraExtraFeed: [...state.extraExtraFeed],
+    frontPage,
     recordedAt: timestamp,
   };
 };

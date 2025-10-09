@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-27 – Final edition front page surfaces
+- Final edition reports now capture a front-page article derived from the Extra Extra feed with victory-aware fallbacks.
+- The Paranoid Times masthead renders that article’s kicker/headline/dek, reverting to legacy copy only when no article is available.
+
 ## 2025-11-26 – Loggable self-training runs for the campaign AI
 - Wired the AI simulator to dump every match into an NDJSON dataset so tuning sessions double as training fodder.
 - Added a convenience npm script and workflow doc covering how to iterate on weights while committing the resulting evidence trail.
