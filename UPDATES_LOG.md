@@ -2,6 +2,14 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-09 – Completed Fangoria + NAC ingestion
+- Rebuilt Appendix C with all fifty state creatures, region notes, and explicit ops hooks drawn from Fangoria’s survey.
+- Authored a 57-entry NorthAmericanCryptids field guide so designers have ready deck hooks for every listed monster.
+
+## 2025-10-09 – Cataloged cryptid intel for expansion docs
+- Expanded the Cryptids expansion README with state-by-state lore harvested from Fangoria, plus play hooks for each hometown monster.
+- Imported the northamericancryptids.com bestiary into a new field guide section so designers can wire in regionally accurate ops beats.
+
 ## 2025-11-28 – Finale headline composer locked in
 - Added regression coverage for the finale front-page composer, ensuring bulletin fusion, sanitized food-word stripping, and graceful fallbacks.
 - Final edition layout tests now confirm the composed kicker/headline/dek render on the masthead even without bulletins, giving narrative QA a Weekly World News-style north star.
