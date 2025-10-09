@@ -348,17 +348,8 @@ export class VisualEffectsCoordinator {
         break;
       
       case 'conspiracy_revealed':
-        this.triggerTypewriterReveal(
-          'CLASSIFIED INTELLIGENCE REPORT',
-          [
-            `SUBJECT: ${cardName}`,
-            'THREAT ASSESSMENT: CONFIRMED',
-            'RECOMMENDED ACTION: IMMEDIATE CONTAINMENT',
-            'AUTHORIZATION: [REDACTED]'
-          ],
-          'TOP SECRET',
-          position
-        );
+        // The dramatic dossier overlay overwhelmed the board state and obscured
+        // key interactions, so we intentionally skip the typewriter reveal here.
         break;
       
       case 'evidence_leaked':
