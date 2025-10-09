@@ -488,6 +488,15 @@ const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): Ga
       headline: article.hed,
     });
 
+    // Show in-game notification
+    const toastEmitter = (window as any).uiExtraExtraToast;
+    if (typeof toastEmitter === 'function') {
+      const factionLabel = evaluation.winningFaction === 'truth' ? 'TRUTH' : evaluation.winningFaction === 'government' ? 'GOVERNMENT' : 'DRAW';
+      const bonusText = evaluation.truthDelta !== 0 ? ` (${evaluation.truthDelta > 0 ? '+' : ''}${evaluation.truthDelta}% Truth)` : '';
+      const headlinePreview = article.hed ? ` — ${article.hed.slice(0, 60)}${article.hed.length > 60 ? '...' : ''}` : '';
+      toastEmitter(`🗞️ EXTRA EXTRA: ${factionLabel} plays 3-card combo${bonusText}${headlinePreview}`);
+    }
+
     if (evaluation.truthDelta !== 0) {
       const truthOwner = resolveFactionOwner(next, 'truth');
       const governmentOwner = resolveFactionOwner(next, 'government');

@@ -11,7 +11,7 @@ type AnyCard = {
   effects?: any;
 };
 
-type Toast = { id: number; text: string; slot: "truth" | "ip-left" | "ip-right" | "combo" | "banter" };
+type Toast = { id: number; text: string; slot: "truth" | "ip-left" | "ip-right" | "combo" | "extraExtra" | "banter" };
 type PendingDelta = { delta: number; timer: number };
 
 type BreakingHeadlineCardPayload = { type: "card"; card: AnyCard; duration?: number };
@@ -28,6 +28,7 @@ type BreakingHeadlineItem = (BreakingHeadlineCardPayload | BreakingHeadlineHeadl
 const MAX_TOASTS_PER_SLOT = 3;
 const DEFAULT_TOAST_LIFETIME = 900;
 const COMBO_TOAST_LIFETIME = 1400;
+const EXTRA_EXTRA_TOAST_LIFETIME = 5000;
 const BANTER_TOAST_LIFETIME = 4800;
 const DELTA_BATCH_WINDOW = 180; // milliseconds
 const CARD_HEADLINE_DURATION = 1400;
@@ -41,6 +42,7 @@ declare global {
     uiToastIp?: (playerId: "P1" | "P2", delta: number) => void;
     uiFlashState?: (stateId: string, by: "P1" | "P2") => void; // placeholder for future prompts
     uiComboToast?: (message: string) => void;
+    uiExtraExtraToast?: (message: string) => void;
     uiToastBanter?: (message: string) => void;
   }
 }
@@ -187,6 +189,10 @@ export default function UiOverlays() {
       addToast("combo", message, COMBO_TOAST_LIFETIME);
     };
 
+    window.uiExtraExtraToast = (message: string) => {
+      addToast("extraExtra", message, EXTRA_EXTRA_TOAST_LIFETIME);
+    };
+
     window.uiToastBanter = (message: string) => {
       addToast("banter", message, BANTER_TOAST_LIFETIME);
     };
@@ -213,6 +219,7 @@ export default function UiOverlays() {
       delete window.uiToastIp;
       delete window.uiFlashState;
       delete window.uiComboToast;
+      delete window.uiExtraExtraToast;
       delete window.uiToastBanter;
       Object.values(pendingDeltas.current).forEach((pending) => {
         window.clearTimeout(pending.timer);
@@ -321,6 +328,19 @@ export default function UiOverlays() {
           .filter((t) => t.slot === "combo")
           .map((t) => (
             <div key={t.id} className="px-4 py-2 bg-black text-yellow-300 text-sm shadow-lg">
+              {t.text}
+            </div>
+          ))}
+      </div>
+      {/* Extra Extra notifications */}
+      <div className="fixed top-[8%] left-1/2 -translate-x-1/2 z-[940] space-y-2 max-w-4xl">
+        {toasts
+          .filter((t) => t.slot === "extraExtra")
+          .map((t) => (
+            <div 
+              key={t.id} 
+              className="px-6 py-4 bg-gradient-to-r from-truth via-accent to-government text-white text-base md:text-lg font-black tracking-wide shadow-2xl border-2 border-white animate-pulse backdrop-blur-md"
+            >
               {t.text}
             </div>
           ))}
