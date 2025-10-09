@@ -2709,7 +2709,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       aiTurnInProgress: false,
       selectedCard: null,
       targetState: null,
-      aiStrategist: AIFactory.createStrategist(aiDifficulty, { editorId: defaultAiEditor }),
+      aiStrategist: AIFactory.createStrategist(aiDifficulty, { editorId: defaultAiEditor as any }),
       drawMode: 'standard',
       cardDrawState: {
         cardsPlayedLastTurn: 0,
@@ -2887,7 +2887,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
     console.log('🎮 [initGame] About to create AIStrategist with difficulty:', aiDifficulty);
     const aiEditorId = resolveAiEditorAssignment({ aiDifficulty, aiFaction });
-    const aiStrategist = AIFactory.createStrategist(aiDifficulty, { editorId: aiEditorId });
+    const aiStrategist = AIFactory.createStrategist(aiDifficulty, { editorId: aiEditorId as any });
     console.log('🎮 [initGame] AIStrategist created successfully');
 
     setGameState(prev => ({
@@ -5346,7 +5346,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           // Ensure objects are properly reconstructed
           eventManager: prev.eventManager, // Keep the current event manager
           aiStrategist: prev.aiStrategist
-            || AIFactory.createStrategist(normalizedSavedAiDifficulty, { editorId: savedAiEditorId }),
+            || AIFactory.createStrategist(normalizedSavedAiDifficulty, { editorId: savedAiEditorId as any }),
           truthAbove80Streak: savedTruthAboveStreak,
           truthBelow20Streak: savedTruthBelowStreak,
           timeBasedGoalCounters: {

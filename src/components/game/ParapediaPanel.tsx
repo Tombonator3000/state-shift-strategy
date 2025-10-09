@@ -150,10 +150,10 @@ const ParapediaPanel = ({ faction, intelArchive, pressIssues, agendaMoments = []
                   </span>
                 </div>
                 <h5 className="mt-2 font-mono text-sm uppercase tracking-wide text-[var(--dossier-ink)]">
-                  {moment.title ?? 'Classified Operation'}
+                  {(moment as any).title ?? 'Classified Operation'}
                 </h5>
                 <p className="mt-1 text-xs leading-relaxed text-[var(--dossier-text)]">
-                  {moment.description ?? 'Details remain redacted, but the codex pinned the signal for future Truth strikes.'}
+                  {(moment as any).description ?? 'Details remain redacted, but the codex pinned the signal for future Truth strikes.'}
                 </p>
               </li>
             ))}

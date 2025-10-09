@@ -55,8 +55,8 @@ const buildLandingData = (): ParapediaLandingData => {
     .sort((a, b) => b.count - a.count);
 
   const featuredQuotes = parapediaAtlas.entries
-    .filter(entry => entry.featuredQuote)
-    .map(entry => ({ entryId: entry.id, quote: entry.featuredQuote!, attribution: entry.quoteAttribution }))
+    .filter(entry => (entry as any).featuredQuote)
+    .map(entry => ({ entryId: entry.id, quote: (entry as any).featuredQuote!, attribution: (entry as any).quoteAttribution }))
     .slice(0, 5);
 
   return {

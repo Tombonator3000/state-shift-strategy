@@ -76,7 +76,7 @@ const PlayerHubMapView = ({ intel, faction, className }: PlayerHubMapViewProps) 
 
   const staticGeoData = useMemo<FeatureCollection | null>(() => {
     try {
-      const topology = usStatesTopology as Topology<{ states: GeometryCollection }>;
+      const topology = usStatesTopology as any;
       const statesObject = topology.objects?.states;
       if (!statesObject) {
         console.error('Failed to locate state topology for PlayerHubMapView.');

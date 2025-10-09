@@ -412,8 +412,8 @@ export const AchievementsSection = ({
                       {selectedAchievement.rewards.unlockTutorial && (
                         <p>Unlocks correspondence: {selectedAchievement.rewards.unlockTutorial}</p>
                       )}
-                      {selectedAchievement.rewards.unlockCard && (
-                        <p>Card Issued: {selectedAchievement.rewards.unlockCard}</p>
+                      {(selectedAchievement.rewards as any).unlockCard && (
+                        <p>Card Issued: {(selectedAchievement.rewards as any).unlockCard}</p>
                       )}
                     </div>
                   </div>

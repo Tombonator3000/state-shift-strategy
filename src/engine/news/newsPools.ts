@@ -208,8 +208,8 @@ const buildTripleBankCache = (): TripleTemplateBank => {
     rendering: {
       headlineFormat: parsed.rendering.headline_format,
       subheadFormat: parsed.rendering.subhead_format,
-      kickers: parsed.rendering.kickers,
-      stingers: parsed.rendering.stingers,
+      kickers: parsed.rendering.kickers as any,
+      stingers: parsed.rendering.stingers as any,
     },
     priority: parsed.priority,
     templates,

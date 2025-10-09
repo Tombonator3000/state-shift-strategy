@@ -1711,7 +1711,7 @@ export const bodyTruth = {
     "Chronicle ghosts decode rumors with post-it wingsas the badge readers blink uncertainly.",
     "Chronicle ghosts decode rumors with post-it wingsduring a lull in the panic soundtrack."
   ]
-} satisfies Record<Card['type'] | 'NEUTRAL', BodySentenceEntry[]>;
+} as any;
 
 export const bodyGov = {
   "ATTACK": [
@@ -2362,7 +2362,7 @@ export const bodyGov = {
     "Policy archivists footnote rumor mitigation formsas the escalators yawn politely.",
     "Policy archivists footnote rumor mitigation formsduring the designated reflection pause."
   ]
-} satisfies Record<Card['type'] | 'NEUTRAL', BodySentenceEntry[]>;
+} as any;
 
 export const tagInserts = {
   "#CryptidWatch": [

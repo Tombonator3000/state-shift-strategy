@@ -365,7 +365,7 @@ export function startTurn(state: GameState): GameState {
     if ((state as any)?.expansions?.aiEditors ?? true) {
       const playersAny = cloned.players as unknown as Record<string, any>;
       const currentPlayerState = playersAny?.[currentId];
-      const isAiTurn = cloned.currentPlayer === 'AI' || Boolean(currentPlayerState?.isAI);
+      const isAiTurn = cloned.currentPlayer === ('AI' as any) || Boolean(currentPlayerState?.isAI);
       if (isAiTurn) {
         const ai = (state as any)?.players?.AI ?? (state as any)?.players?.ai ?? currentPlayerState ?? null;
         const activeId = ai?.activeEditor ?? ai?.activeEditorId;
@@ -513,7 +513,7 @@ export function canPlay(
   let effectiveCost = getEffectiveCardCost(state, state.currentPlayer, card);
   try {
     if ((state as any)?.expansions?.aiEditors ?? true) {
-      if (player?.isAI && card?.type === 'ATTACK') {
+      if ((player as any)?.isAI && card?.type === 'ATTACK') {
         const ai = (state as any)?.players?.AI ?? (state as any)?.players?.ai ?? player ?? null;
         const activeId = ai?.activeEditor ?? ai?.activeEditorId;
         if (activeId) {

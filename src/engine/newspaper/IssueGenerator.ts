@@ -170,7 +170,7 @@ const isCardShaped = (card: Card | null | undefined): card is Card => {
   if (!card || typeof card !== 'object') {
     return false;
   }
-  const candidate = card as Record<string, unknown>;
+  const candidate = card as any;
   return (
     isNonEmptyString(candidate.id) &&
     isNonEmptyString(candidate.name) &&

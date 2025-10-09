@@ -114,7 +114,7 @@ export const CardCollectionContent = ({
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 font-typewriter text-[10px] uppercase tracking-[0.3em] text-[var(--broadsheet-muted)]">
               <span>Played {cardStats.timesPlayed} times</span>
-              <span>{cardStats.winRate ? `${Math.round(cardStats.winRate * 100)}% win rate` : 'Win rate pending'}</span>
+              <span>{(cardStats as any).winRate ? `${Math.round((cardStats as any).winRate * 100)}% win rate` : 'Win rate pending'}</span>
             </div>
 
             {(card.flavor ?? card.flavorGov ?? card.flavorTruth) && (
