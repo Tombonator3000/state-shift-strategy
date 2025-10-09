@@ -237,11 +237,6 @@ const PlayerHubOverlay = ({
     }
   }, []);
 
-  const volumeNumber = useMemo(
-    () => 208 + completedAgendaIds.length * 3 + (currentAgenda ? 1 : 0),
-    [completedAgendaIds.length, currentAgenda],
-  );
-
   const tabDetails = useMemo(
     (): Record<HubTab, { kicker: string; headline: string; dek: string }> => ({
       parapedia: {
@@ -360,25 +355,6 @@ const PlayerHubOverlay = ({
 
           <div className="dossier-content">
             <div className="dossier-stamp">{faction === 'truth' ? 'LEAKED' : 'CLEARED'}</div>
-
-            <div className="classification-bar">
-              {faction === 'truth' ? 'UNAUTHORIZED ACCESS' : 'AUTHORIZED PERSONNEL ONLY'}
-            </div>
-
-            <div className="file-metadata">
-              <div className="file-metadata__item">
-                <div className="file-metadata__label">File Date</div>
-                <div className="file-metadata__value">{dateline}</div>
-              </div>
-              <div className="file-metadata__item">
-                <div className="file-metadata__label">Case #</div>
-                <div className="file-metadata__value">VOL-{volumeNumber.toString().padStart(3, '0')}</div>
-              </div>
-              <div className="file-metadata__item">
-                <div className="file-metadata__label">Division</div>
-                <div className="file-metadata__value">{faction === 'truth' ? 'Truth Bureau' : 'Official Records'}</div>
-              </div>
-            </div>
 
             {activeTab === 'parapedia' && (
               <div className="dossier-section">

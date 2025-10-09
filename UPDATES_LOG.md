@@ -22,6 +22,10 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Introduced a curated ParaPedia dataset with state dossiers, featured quotes, and reference trails so leaksters can trace every anomaly from the hub.
 - Upgraded the ParaPedia panel with atlas navigation, codex search, and state-specific detail views driven by the new hook layer.
 
+## 2025-10-09 – Player Hub dossier metadata stripped out
+- Removed the case file metadata banner so the Player Hub reserves more real estate for active dossiers and lore feeds.
+- Kept the faction stamp treatment so agents still clock whether they're rifling through leaked or cleared records at a glance.
+
 ## 2025-10-09 – Cryptid hotspots now echo local legends
 - Rewrote the cryptid hotspot summaries so each state briefing references the folklore dossiers—Altie coils along the Altamaha, Chessie corrals Chesapeake patrols, and Jackalope permits go feral in souvenir rows.
 - Grounded the new copy in the expansion readme to keep the Paranoid Times lore web dense while giving operators state-specific paranoia levers.
