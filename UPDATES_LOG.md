@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-12-01 – Tabloid turn-end crash neutralized
+- Fixed a missing `useCallback` import in the enhanced tabloid newspaper so the bundle no longer throws a reference error when resolving end-of-turn events.
+- Verified the newsroom edition overlay renders without blinking to a white screen after AI or player turns conclude.
+
 ## 2025-10-09 – Completed Fangoria + NAC ingestion
 - Rebuilt Appendix C with all fifty state creatures, region notes, and explicit ops hooks drawn from Fangoria’s survey.
 - Authored a 57-entry NorthAmericanCryptids field guide so designers have ready deck hooks for every listed monster.
