@@ -1,5 +1,6 @@
 import CardImage from '@/components/game/CardImage';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import {
@@ -20,6 +21,7 @@ import {
   getPlayerOutcomeLabel,
   getVictoryConditionLabel,
 } from '@/utils/finalEdition';
+import type { MouseEvent } from 'react';
 
 interface FinalEditionLayoutProps {
   report: GameOverReport;
@@ -287,6 +289,42 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
     tone === 'victory'
       ? 'border-victory-foreground/70 bg-victory-foreground/10 shadow-[0_42px_80px_rgba(0,0,0,0.45)]'
       : 'border-newspaper-border/80 bg-newspaper-header/15 shadow-[0_34px_70px_rgba(0,0,0,0.4)]';
+  const frontPageJumpStripClass = cn(
+    'flex flex-col gap-3 rounded-md border px-4 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between',
+    tone === 'victory'
+      ? 'border-victory-foreground/45 bg-victory-foreground/15 text-victory-foreground'
+      : 'border-newspaper-border bg-newspaper-bg/80 text-newspaper-text/75',
+  );
+  const frontPageJumpLabelClass = cn(
+    'font-mono text-[11px] font-black uppercase tracking-[0.38em]',
+    tone === 'victory' ? 'text-victory-foreground' : 'text-newspaper-text/80',
+  );
+  const frontPageJumpButtonClass = cn(
+    'rounded-full px-5 py-2 text-[10px] font-black uppercase tracking-[0.28em] shadow-[0_10px_22px_rgba(0,0,0,0.35)] transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:-translate-y-0.5',
+    tone === 'victory'
+      ? 'bg-victory-accent text-victory-foreground hover:bg-victory-accent/90 focus-visible:ring-victory-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-victory-mid'
+      : 'bg-newspaper-headline text-newspaper-bg hover:bg-newspaper-headline/90 focus-visible:ring-newspaper-headline/60 focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg',
+  );
+  const frontPageJumpTargets = [
+    { id: 'key-events', label: 'Key Events' },
+    { id: 'combo-highlights', label: 'Combo Highlights' },
+    { id: 'paranormal-sightings', label: 'Paranormal Sightings' },
+    ...(hasBulletins ? [{ id: 'extra-extra-bulletins', label: 'Extra Extra Bulletins' }] : []),
+    { id: 'after-action-notes', label: 'After-Action Notes' },
+  ];
+  const createJumpHandler = (targetId: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const target = document.getElementById(targetId);
+    if (!target) {
+      return;
+    }
+
+    event.preventDefault();
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const renderMvpPanel = (label: string, mvp?: MVPReport | null) => {
     if (!mvp) {
@@ -404,12 +442,29 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
         </div>
       </NewspaperSection>
 
+      <nav aria-label="Front Page Jump" className={frontPageJumpStripClass}>
+        <span className={frontPageJumpLabelClass}>Front Page Jump</span>
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
+          {frontPageJumpTargets.map(target => (
+            <Button
+              key={target.id}
+              asChild
+              className={frontPageJumpButtonClass}
+            >
+              <a href={`#${target.id}`} onClick={createJumpHandler(target.id)}>
+                {target.label}
+              </a>
+            </Button>
+          ))}
+        </div>
+      </nav>
+
       <section className="grid gap-4 md:grid-cols-2">
         {renderMvpPanel('MVP Play', report.mvp)}
         {renderMvpPanel('Runner-Up', report.runnerUp)}
       </section>
 
-      <NewspaperSection tone={tone} className="p-5">
+      <NewspaperSection tone={tone} id="key-events" className="p-5">
         <div className="flex items-center justify-between">
           <h2 className={sectionHeadingClass}>Key Events</h2>
           <Badge className={cn(badgeClass, 'rounded-full px-3 py-0.5 text-[11px] tracking-[0.3em]')}>
@@ -516,7 +571,7 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
       </NewspaperSection>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <NewspaperSection tone={tone} className="p-5">
+        <NewspaperSection tone={tone} id="combo-highlights" className="p-5">
           <h2 className={sectionHeadingClass}>Combo Highlights</h2>
           <div className="mt-4 space-y-3">
             {comboHighlights.map(combo => (
@@ -554,7 +609,7 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
           </div>
         </NewspaperSection>
 
-        <NewspaperSection tone={tone} className="p-5">
+        <NewspaperSection tone={tone} id="paranormal-sightings" className="p-5">
           <h2 className={sectionHeadingClass}>Paranormal Sightings</h2>
           <div className="mt-4 space-y-3">
             {sightings.map(sighting => (
@@ -586,7 +641,7 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
       </section>
 
       {hasBulletins ? (
-        <NewspaperSection tone={tone} className="p-5">
+        <NewspaperSection tone={tone} id="extra-extra-bulletins" className="p-5">
           <div className="flex items-center justify-between">
             <h2 className={sectionHeadingClass}>Extra Extra Bulletins</h2>
             <Badge className={cn(badgeClass, 'rounded-full px-3 py-0.5 text-[11px] tracking-[0.3em]')}>
@@ -640,7 +695,7 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
         </NewspaperSection>
       ) : null}
 
-      <NewspaperSection tone={tone} className="p-5">
+      <NewspaperSection tone={tone} id="after-action-notes" className="p-5">
         <h2 className={sectionHeadingClass}>After-Action Notes</h2>
         <div className={cn('mt-3 flex flex-wrap gap-3 text-xs', mutedBodyClass)}>
           {Array.isArray(report.legendaryUsed) && report.legendaryUsed.length > 0 ? (
