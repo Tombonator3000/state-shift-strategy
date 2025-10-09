@@ -22,6 +22,9 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Introduced a curated ParaPedia dataset with state dossiers, featured quotes, and reference trails so leaksters can trace every anomaly from the hub.
 - Upgraded the ParaPedia panel with atlas navigation, codex search, and state-specific detail views driven by the new hook layer.
 
+## 2025-10-09 – Player Hub gains backtrack control
+- Added a Back button to the Player Hub dossier header so agents can slip out of the archive without relying on the tiny kill-switch.
+- Styled the control to stay faithful to the classified parchment palette whether agents fly Truth colors or government badges.
 ## 2025-10-09 – Player Hub dossier metadata stripped out
 - Removed the case file metadata banner so the Player Hub reserves more real estate for active dossiers and lore feeds.
 - Kept the faction stamp treatment so agents still clock whether they're rifling through leaked or cleared records at a glance.
