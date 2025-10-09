@@ -328,15 +328,30 @@ export function composeCardStory(input: CardStoryInput): CardStory {
   const verbPoolBase = verbs.headline[toneKey] ?? verbs.headline.MEDIA;
   const verbPool = applyIssueVerbOverlay(verbPoolBase, input.issueId, toneKey);
   const verb = pick(verbPool, verbPool[0] ?? 'OVERRIDES PRIME TIME');
-  const cardName = card.name.toUpperCase();
-  const headline = toneKey === 'ATTACK'
-    ? `${verb}: ${cardName}`
-    : toneKey === 'MEDIA' || toneKey === 'ZONE'
-      ? `${cardName} ${verb}`
-      : `${verb}: ${cardName}`;
-
+  const cardName = card.name;
+  
+  // Create more natural, newspaper-style headlines
   const faction = (card.faction ?? 'truth').toString();
   const isTruthFaction = faction.toLowerCase().includes('truth');
+  
+  let headline = '';
+  if (toneKey === 'ATTACK') {
+    headline = isTruthFaction 
+      ? `${cardName.toUpperCase()} ${verb}` 
+      : `${verb}: ${cardName}`;
+  } else if (toneKey === 'MEDIA') {
+    headline = isTruthFaction
+      ? `${verb} — ${cardName.toUpperCase()} BROADCASTS`
+      : `${cardName} ${verb}`;
+  } else if (toneKey === 'ZONE') {
+    headline = isTruthFaction
+      ? `${cardName.toUpperCase()} ${verb}`
+      : `${verb} IN ${cardName.toUpperCase()} ZONE`;
+  } else {
+    headline = `${cardName.toUpperCase()}: ${verb}`;
+  }
+
+
   const baseFactionPool = isTruthFaction ? subheads.truth : subheads.government;
   const factionPool = applyIssueSubheadOverlay(
     baseFactionPool,

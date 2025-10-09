@@ -19,16 +19,25 @@ const MYTH = new Set(['alien', 'ufo', 'ghost', 'cryptid', 'bigfoot', 'mothman', 
 const BAD = new Set(['attack', 'media', 'zone']);
 
 const TRUTH_VERBS = {
-  ATTACK: ['EXPOSES', 'BUSTS', 'LEAKS', 'BLOWS LID OFF', 'IGNITES'],
-  MEDIA: ['GOES LIVE', 'BROADCASTS', 'TRENDING', 'LEAKS'],
-  ZONE: ['MARCHES', 'SURGES', 'ERUPTS', 'HAUNTS', 'SWEEPS'],
+  ATTACK: ['EXPOSES', 'BUSTS', 'LEAKS', 'BLOWS LID OFF', 'IGNITES', 'BREAKS'],
+  MEDIA: ['GOES VIRAL', 'BROADCASTS', 'TRENDING', 'LEAKS TO PUBLIC', 'STREAMS LIVE'],
+  ZONE: ['ERUPTS IN', 'SWEEPS ACROSS', 'HAUNTS', 'OVERWHELMS', 'INVADES'],
 } as const;
 
+const TRUTH_CONNECTORS = [
+  'WHILE', 'AS', 'JUST AS', 'AMID', 'DURING'
+] as const;
+
+const TRUTH_CLOSERS = [
+  'OFFICIALS SCRAMBLE', 'COVER-UP CRUMBLES', 'CHAOS ENSUES', 
+  'GOVERNMENT IN DENIAL', 'TRUTH SPREADS', 'REALITY UNRAVELS'
+] as const;
+
 const GOV = {
-  EUPH: ['Routine Incident', 'Administrative Test', 'Benign Anomaly', 'Training Exercise', 'Localized Phenomenon'],
-  MEDIA: ['Briefing Concluded', 'Statement Issued', 'Update Filed'],
-  ATTACK: ['Mitigation Successful', 'Containment Ongoing', 'Review Open'],
-  ZONE: ['Perimeter Established', 'Access Normalized', 'Calm Restored'],
+  EUPH: ['ROUTINE INCIDENT', 'ADMINISTRATIVE TEST', 'BENIGN ANOMALY', 'TRAINING EXERCISE', 'LOCALIZED PHENOMENON'],
+  SUBJECT: ['MATTER', 'SITUATION', 'DEVELOPMENT', 'OCCURRENCE', 'EVENT'],
+  STATUS: ['CONTAINED', 'RESOLVED', 'NORMALIZED', 'STABILIZED', 'CONCLUDED'],
+  CLOSER: ['NOTHING TO SEE HERE', 'ALL ACCORDING TO PLAN', 'SITUATION NORMAL', 'NO CAUSE FOR ALARM'],
 } as const;
 
 function seedPick<T>(arr: readonly T[], seed: string): T {
@@ -102,26 +111,28 @@ export function generateMainStory(
   if (tone === 'truth') {
     const [a, b, c] = played;
     const v1 = seedPick(TRUTH_VERBS[a.type], `${seed}a`);
-    const v2 = seedPick(TRUTH_VERBS[b.type], `${seed}b`);
-    const v3 = seedPick(TRUTH_VERBS[c.type], `${seed}c`);
-    const n2 = b.name.toUpperCase();
-    const n3 = c.name.toUpperCase();
-
-    headline = `${subject} ${v1} AS ${n2} ${v2} — ${n3} ${v3}!`;
+    const connector = seedPick(TRUTH_CONNECTORS, `${seed}conn`);
+    const closer = seedPick(TRUTH_CLOSERS, `${seed}close`);
+    
+    // Create a coherent narrative structure
+    headline = `${subject.toUpperCase()} ${v1} ${connector} ${b.name.toUpperCase()} ${seedPick(TRUTH_VERBS[b.type], `${seed}b`)} — ${closer}`;
+    
+    const tagContext = commonTags.length ? ` involving ${commonTags.slice(0, 2).join(' and ')}` : '';
     subhead = clampLen(
-      `Witnesses report escalating weirdness${commonTags.length ? ` (${commonTags.slice(0, 2).join(', ')})` : ''}. Officials baffled; reality anchors remain perfectly aligned.`,
+      `Triple sighting reported${tagContext}. Witnesses describe escalating paranormal activity. Officials deny everything while clutching classified folders.`,
     );
-    parts = [v1, v2, v3];
+    parts = [v1, connector, closer];
   } else {
-    const [a, b, c] = played;
     const euph = seedPick(GOV.EUPH, `${seed}e`);
-    const p1 = seedPick(GOV[a.type], `${seed}1`);
-    const p2 = seedPick(GOV[b.type], `${seed}2`);
-    const p3 = seedPick(GOV[c.type], `${seed}3`);
-    headline = `${subject}: ${euph}; ${p1}; ${p2 === p1 ? seedPick(GOV[b.type], `${seed}2x`) : p2}`;
-    headline += headline.includes(p3) ? '' : `; ${p3}`;
-    subhead = 'Transparency achieved via prudent opacity. Further questions will be taken later, retroactively.';
-    parts = [euph, p1, p2, p3];
+    const subjectType = seedPick(GOV.SUBJECT, `${seed}subj`);
+    const status = seedPick(GOV.STATUS, `${seed}stat`);
+    const closer = seedPick(GOV.CLOSER, `${seed}close`);
+    
+    // Government-style bureaucratic headline
+    headline = `${euph.toUpperCase()} IN ${subject.toUpperCase()} ${subjectType.toUpperCase()} — ${status.toUpperCase()}`;
+    
+    subhead = `Multi-department coordination ensures optimal transparency. ${closer}. Further inquiries will be addressed through proper channels after review.`;
+    parts = [euph, status, closer];
   }
 
   headline = sanitize(headline);
