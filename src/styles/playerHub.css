@@ -1,8 +1,8 @@
 .player-hub-card {
   position: relative;
   overflow: hidden;
-  border-radius: 0;
-  border: none;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .player-hub-dossier {
@@ -45,12 +45,9 @@
 
 .player-hub-dossier .dossier-container {
   position: relative;
-  height: 100vh;
+  min-height: 500px;
   background: var(--dossier-bg);
   padding: 1.5rem 2rem 2rem;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
 .player-hub-dossier .dossier-header {
@@ -175,9 +172,6 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 0 0 100px rgba(0, 0, 0, 0.05);
   overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-  backdrop-filter: blur(2px);
 }
 
 .player-hub-dossier .dossier-content::before {

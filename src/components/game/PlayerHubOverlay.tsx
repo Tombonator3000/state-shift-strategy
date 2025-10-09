@@ -308,10 +308,10 @@ const PlayerHubOverlay = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <Card
         className={clsx(
-          'player-hub-card player-hub-dossier relative flex h-screen w-screen flex-col overflow-hidden',
+          'player-hub-card player-hub-dossier relative flex max-w-7xl h-[90vh] w-full flex-col overflow-hidden',
           isTruth ? 'player-hub-truth' : 'player-hub-government',
         )}
       >
