@@ -3,7 +3,18 @@ import clsx from 'clsx';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Library, GraduationCap, Newspaper, X, MapPin, FileSearch2, Target } from 'lucide-react';
+import {
+  Trophy,
+  Library,
+  GraduationCap,
+  Newspaper,
+  X,
+  MapPin,
+  FileSearch2,
+  Target,
+  BookOpen,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { AchievementsSection } from './AchievementPanel';
 import { CardCollectionContent } from './CardCollection';
 import { TutorialSection } from './TutorialOverlay';
@@ -18,6 +29,7 @@ import SecretAgendaCard from './SecretAgenda';
 import { getAgendaById, type SecretAgenda as AgendaDefinition } from '@/data/agendaDatabase';
 import type { GameState } from '@/hooks/gameStateTypes';
 import '@/styles/playerHub.css';
+import ParapediaPanel from './ParapediaPanel';
 
 interface PlayerHubOverlayProps {
   onClose: () => void;
@@ -84,7 +96,15 @@ export interface PlayerStateIntel {
   }>;
 }
 
-type HubTab = 'achievements' | 'agendas' | 'cards' | 'tutorials' | 'press' | 'evidence' | 'intel';
+type HubTab =
+  | 'parapedia'
+  | 'achievements'
+  | 'agendas'
+  | 'cards'
+  | 'tutorials'
+  | 'press'
+  | 'evidence'
+  | 'intel';
 
 const PlayerHubOverlay = ({
   onClose,
@@ -102,7 +122,13 @@ const PlayerHubOverlay = ({
   completedAgendaIds,
   agendaMoments = [],
 }: PlayerHubOverlayProps) => {
+  const isTruth = faction === 'truth';
+
   const [activeTab, setActiveTab] = useState<HubTab>(() => {
+    if (faction === 'truth') {
+      return 'parapedia';
+    }
+
     if (agendasEnabled && (currentAgenda || completedAgendaIds.length > 0)) {
       return 'agendas';
     }
@@ -122,7 +148,6 @@ const PlayerHubOverlay = ({
     return 'achievements';
   });
 
-  const isTruth = faction === 'truth';
   const [agendaFilter, setAgendaFilter] = useState<'all' | AgendaMoment['status']>('all');
   const completedAgendas = useMemo(
     () =>
@@ -219,6 +244,11 @@ const PlayerHubOverlay = ({
 
   const tabDetails = useMemo(
     (): Record<HubTab, { kicker: string; headline: string; dek: string }> => ({
+      parapedia: {
+        kicker: 'FILE-PEDIA',
+        headline: 'ParaPedia',
+        dek: 'Crowdsourced dossier of Truth Bureau counter-narratives and exposed artifacts.',
+      },
       achievements: {
         kicker: 'FILE-ACH',
         headline: 'Achievements',
@@ -258,6 +288,25 @@ const PlayerHubOverlay = ({
     [],
   );
 
+  const tabOrder = useMemo(() => {
+    const baseOrder: HubTab[] = ['achievements', 'agendas', 'cards', 'tutorials', 'press', 'evidence', 'intel'];
+    return isTruth ? (['parapedia', ...baseOrder] as HubTab[]) : baseOrder;
+  }, [isTruth]);
+
+  const folderIcons = useMemo<Record<HubTab, LucideIcon>>(
+    () => ({
+      parapedia: BookOpen,
+      achievements: Trophy,
+      agendas: Target,
+      cards: Library,
+      tutorials: GraduationCap,
+      press: Newspaper,
+      evidence: FileSearch2,
+      intel: MapPin,
+    }),
+    [],
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
       <Card
@@ -288,18 +337,14 @@ const PlayerHubOverlay = ({
           </header>
 
           <div className="dossier-folder-nav">
-            {(Object.keys(tabDetails) as HubTab[]).map(tabKey => {
+            {tabOrder.map(tabKey => {
+              if (tabKey === 'parapedia' && !isTruth) {
+                return null;
+              }
+
               const detail = tabDetails[tabKey];
-              const folderIcons: Record<HubTab, typeof Trophy> = {
-                achievements: Trophy,
-                agendas: Target,
-                cards: Library,
-                tutorials: GraduationCap,
-                press: Newspaper,
-                evidence: FileSearch2,
-                intel: MapPin,
-              };
               const FolderIcon = folderIcons[tabKey];
+
               return (
                 <button
                   key={tabKey}
@@ -319,7 +364,7 @@ const PlayerHubOverlay = ({
 
           <div className="dossier-content">
             <div className="dossier-stamp">{faction === 'truth' ? 'LEAKED' : 'CLEARED'}</div>
-            
+
             <div className="classification-bar">
               {faction === 'truth' ? 'UNAUTHORIZED ACCESS' : 'AUTHORIZED PERSONNEL ONLY'}
             </div>
@@ -338,6 +383,23 @@ const PlayerHubOverlay = ({
                 <div className="file-metadata__value">{faction === 'truth' ? 'Truth Bureau' : 'Official Records'}</div>
               </div>
             </div>
+
+            {activeTab === 'parapedia' && isTruth && (
+              <div className="dossier-section">
+                <div className="dossier-file-header">
+                  <div className="dossier-file-title">{tabDetails.parapedia.headline}</div>
+                  <div className="dossier-file-code">{tabDetails.parapedia.kicker}</div>
+                </div>
+                <p className="mb-6 text-sm text-[var(--dossier-muted)]">{tabDetails.parapedia.dek}</p>
+                <div className="redacted-block h-2 mb-6" />
+                <ParapediaPanel
+                  faction={faction}
+                  intelArchive={intelArchive}
+                  pressIssues={pressIssues}
+                  agendaMoments={agendaMoments}
+                />
+              </div>
+            )}
 
             {/* Achievements Tab */}
             {activeTab === 'achievements' && (
