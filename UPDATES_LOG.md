@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-12-08 – Credits go full projector paranoia
+- Swapped the endgame overlay for a full-screen cinema roll packed with in-universe easter eggs, department gags, and paranoid stingers.
+- Added rotating evidence snapshots from the card archive so the credits parade flashes actual tabloids while the music swells.
+
 ## 2025-12-07 – Cryptid combos ignite the tabloids
 - Added a suite of tag-aware combo triggers for the Cryptids expansion so Bigfoot–Elvis tours, Bat Boy coalitions, and other Appendix A pairings now pay out in-game rewards.
 - Wired the dripping-blood typographic treatment into cryptid combo headlines and ensured every state (plus DC) reports a homestate cryptid bonus with fresh idle copy.

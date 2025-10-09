@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAudioContext } from '@/contexts/AudioContext';
 
@@ -8,13 +8,23 @@ interface EndCreditsProps {
   onClose: () => void;
 }
 
+type CreditPhase = 'intro' | 'segments' | 'cameos' | 'outro';
+
+interface CreditEntry {
+  phase: CreditPhase;
+  title: string;
+  subtitle: string;
+  hold: number;
+  cardHint?: string;
+}
+
 const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
-  const [currentPhase, setCurrentPhase] = useState<'intro' | 'segments' | 'cameos' | 'outro'>('intro');
-  const [currentText, setCurrentText] = useState('');
-  const [currentSubtext, setCurrentSubtext] = useState('');
-  const [isTextVisible, setIsTextVisible] = useState(false);
+  const [currentEntry, setCurrentEntry] = useState<CreditEntry | null>(null);
+  const [isEntryVisible, setIsEntryVisible] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const timelineRef = useRef<NodeJS.Timeout[]>([]);
+  const [cardIndex, setCardIndex] = useState(0);
+  const timelineRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const cardIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const {
     setEndCreditsMusic,
     stopMusic,
@@ -23,241 +33,395 @@ const EndCredits = ({ isVisible, playerFaction, onClose }: EndCreditsProps) => {
     cancelMenuMusicQueue
   } = useAudioContext();
 
-  // Zany credit texts
-  const creditTexts = {
-    intro: [
-      { title: "THE WEEKLY PARANOID NEWS", subtitle: "CLASSIFIED EDITION" },
-      { title: "A SHADOW GOVERNMENT PRODUCTION", subtitle: "Remember: They're Watching, But So Are We" }
+  const cardPhotos = useMemo(
+    () => [
+      '/card-art/GOV-001.jpg',
+      '/card-art/GOV-004.jpg',
+      '/card-art/GOV-009.jpg',
+      '/card-art/GOV-013.jpg',
+      '/card-art/GOV-018.jpg',
+      '/card-art/GOV-021.jpg',
+      '/card-art/TRUTH-002.jpg',
+      '/card-art/TRUTH-004.jpg',
+      '/card-art/TRUTH-009.jpg',
+      '/card-art/TRUTH-017.jpg'
     ],
-    segments: [
-      { title: "EXECUTIVE PRODUCER", subtitle: "Tom Husby — Chief Bat Boy Negotiator & Temporal Leak Janitor (Acting)" },
-      { title: "CREATIVE DIRECTOR", subtitle: "Tom Husby — Head of Lizard Hospitality & Interdimensional Coffee Service" },
-      { title: "LEAD CONSPIRACY THEORIST", subtitle: "Tom Husby — Senior Tinfoil Hat Designer & Moon Base Operations Manager" },
-      { title: "AUDIO ENGINEER", subtitle: "Tom Husby — Frequency Manipulator & Subliminal Message Consultant" },
-      { title: "QUALITY ASSURANCE", subtitle: "Tom Husby — Bug Whisperer & Reality Debugging Specialist" },
-      { title: "REGIONAL COORDINATOR", subtitle: "Tom Husby — Regional Vending Machine Marriage Counselor" },
-      { title: "SPECIAL THANKS", subtitle: "Three grandmas on shortwave radio — Signal Boost Specialists" },
-      { title: "CONSULTING SERVICES", subtitle: "Anonymous leak platform contributors — 'We come in peace, mostly'" }
-    ],
-    cameos: [
-      "Five committees that don't exist — Unanimous approval",
-      "Emergency horoscope consultants — IP: favorable", 
-      "Bat Boy Focus Group — Snacks vanished mysteriously",
-      "Time-Travel Insurance — You were already covered yesterday",
-      "Psychic Wi-Fi — 6G Chakra Plan available now",
-      "Reptile Thermos™ — Keeps coffee hot, blood cold"
-    ],
-    outro: [
-      { title: "FACTION ADVISORS", subtitle: playerFaction === 'government' 
-        ? "Department of Plausible Deniability — 'If you can read this, you have proper clearance'"
-        : "Underground Truth Network — 'The truth is out there... we just made it easier to find'" },
-      { title: "DISCLAIMER", subtitle: "Any resemblance to actual conspiracies, living or dead, is purely intentional" },
-      { title: "PRINTED ON", subtitle: "Recycled surveillance reports and declassified documents" },
-      { title: "THANKS FOR PLAYING", subtitle: "Stay vigilant. Stay paranoid. The game never really ends." }
-    ]
-  };
+    []
+  );
 
-  const startTimeline = () => {
-    const timeouts: NodeJS.Timeout[] = [];
-    let currentTime = 0;
+  const totalCardPhotos = cardPhotos.length;
 
-    // Helper function to add timeline events
-    const addEvent = (delay: number, callback: () => void) => {
-      currentTime += delay;
-      const timeout = setTimeout(callback, currentTime);
-      timeouts.push(timeout);
-    };
+  const creditEntries = useMemo<CreditEntry[]>(() => {
+    const factionFinale =
+      playerFaction === 'government'
+        ? "Department of Plausible Deniability — Minutes recorded, hissing politely ignored"
+        : "Underground Truth Network — Broadcast relayed via laundromat dryer #4";
 
-    // Intro phase (6 seconds total)
-    creditTexts.intro.forEach((credit, index) => {
-      addEvent(index === 0 ? 500 : 3000, () => {
-        setCurrentPhase('intro');
-        setCurrentText(credit.title);
-        setCurrentSubtext(credit.subtitle);
-        setIsTextVisible(true);
-      });
-    });
+    return [
+      {
+        phase: 'intro',
+        title: 'THE WEEKLY PARANOID NEWS',
+        subtitle: 'CLASSIFIED EDITION • DO NOT LEAVE ON BUS BENCHES',
+        hold: 3200,
+        cardHint: 'Front page compositors posed with confiscated Polaroids'
+      },
+      {
+        phase: 'intro',
+        title: 'A SHADOW GOVERNMENT PRODUCTION',
+        subtitle: "Remember: They're Watching, But So Are We",
+        hold: 3200,
+        cardHint: 'Broadcast sanitized for plausible deniability'
+      },
+      {
+        phase: 'segments',
+        title: 'EXECUTIVE PRODUCERS',
+        subtitle: 'Tom Husby • Keeper of Spare Moon Rocks & Acting Bat Boy Liaison',
+        hold: 5000,
+        cardHint: 'Signed off on interdimensional catering receipts'
+      },
+      {
+        phase: 'segments',
+        title: 'DIRECTOR OF COVER STORIES',
+        subtitle: 'Agent P. Redacted — Filed the “Nothing To See Here” paperwork in triplicate',
+        hold: 5000,
+        cardHint: 'Fingerprints replaced with ink smudges'
+      },
+      {
+        phase: 'segments',
+        title: 'TIMELINE WRANGLERS',
+        subtitle: 'Chrono-Bureau Annex 7 • Resetting Tuesdays since last Thursday',
+        hold: 5000,
+        cardHint: 'Guaranteeing reruns of today tomorrow'
+      },
+      {
+        phase: 'segments',
+        title: 'EVIDENCE LIBRARIANS',
+        subtitle: '“Mothman on Microfiche” digitization crew — currently misplaced',
+        hold: 5000,
+        cardHint: 'Return overdue sightings to avoid late fees'
+      },
+      {
+        phase: 'segments',
+        title: 'CLASSIFIED FACT-CHECKERS',
+        subtitle: 'Florida Man Mutual Aid Society • Verified every rumor twice, shouted thrice',
+        hold: 5000,
+        cardHint: 'Clipboards reinforced with tinfoil corners'
+      },
+      {
+        phase: 'segments',
+        title: 'AUDIO SCRAMBLER OPERATORS',
+        subtitle: '“Totally Normal Elevator Music” Initiative • Subliminal grooves by sub-basement DJs',
+        hold: 5000,
+        cardHint: 'Requests processed in reverse chronological order'
+      },
+      {
+        phase: 'segments',
+        title: 'FIELD CORRESPONDENTS',
+        subtitle: 'Alligator Rodeo Bureau • Motto: “Hold my classified briefing”',
+        hold: 5000,
+        cardHint: 'Boots muddied on three coasts simultaneously'
+      },
+      {
+        phase: 'segments',
+        title: 'RED STRING CONSULTANTS',
+        subtitle: 'Basement Cartographers • Mapping coincidences into actionable intel',
+        hold: 5000,
+        cardHint: 'Accept payment in yarn or rumors'
+      },
+      {
+        phase: 'cameos',
+        title: 'SPECIAL CAMEOS',
+        subtitle: 'Council of Imaginary Friends — Provided invisible security detail',
+        hold: 2600,
+        cardHint: 'Badge reads “If found, forget”'
+      },
+      {
+        phase: 'cameos',
+        title: 'SPECIAL CAMEOS',
+        subtitle: 'Laundry Chute Couriers — Delivered dossiers folded into swans',
+        hold: 2600,
+        cardHint: 'Currently hiding in ventilation'
+      },
+      {
+        phase: 'cameos',
+        title: 'SPECIAL CAMEOS',
+        subtitle: 'Bat Boy Focus Group — Demanded more tasteful cave lighting',
+        hold: 2600,
+        cardHint: 'Paid in novelty sunglasses'
+      },
+      {
+        phase: 'cameos',
+        title: 'SPECIAL CAMEOS',
+        subtitle: 'Psychic Wi-Fi Technicians — Forecast your download speeds yesterday',
+        hold: 2600,
+        cardHint: 'Router password: 0MN1V0Y3R'
+      },
+      {
+        phase: 'cameos',
+        title: 'SPECIAL CAMEOS',
+        subtitle: 'International Committee on Routine Anomalies — Approved these credits unanimously',
+        hold: 2600,
+        cardHint: 'Meeting minutes mostly scorch marks'
+      },
+      {
+        phase: 'outro',
+        title: 'FACTION ADVISORS',
+        subtitle: factionFinale,
+        hold: 4200,
+        cardHint: 'Messages relayed via pneumatic tubes and suspicious pastries'
+      },
+      {
+        phase: 'outro',
+        title: 'PRINTED ON',
+        subtitle: 'Recycled surveillance reports, third-generation fax paper, hopeful whispers',
+        hold: 4200,
+        cardHint: 'Smells faintly of ozone and cover stories'
+      },
+      {
+        phase: 'outro',
+        title: 'POST-CREDITS SCENE',
+        subtitle: 'Stay seated: projector may spontaneously reveal additional redacted truths',
+        hold: 4200,
+        cardHint: 'Snacks confiscated for evidence'
+      },
+      {
+        phase: 'outro',
+        title: 'THANKS FOR PLAYING',
+        subtitle: 'Stay vigilant. Stay paranoid. The game never really ends.',
+        hold: 5400,
+        cardHint: 'Exit through the gift shop, avoid the unmarked van'
+      }
+    ];
+  }, [playerFaction]);
 
-    // Segments phase (48 seconds - 8 segments × 6 seconds)
-    creditTexts.segments.forEach((credit, index) => {
-      addEvent(6000, () => {
-        setCurrentPhase('segments');
-        setIsTextVisible(false);
-        setTimeout(() => {
-          setCurrentText(credit.title);
-          setCurrentSubtext(credit.subtitle);
-          setIsTextVisible(true);
-        }, 300);
-      });
-    });
-
-    // Cameos phase (12 seconds - rapid montage)
-    creditTexts.cameos.forEach((cameo, index) => {
-      addEvent(2000, () => {
-        setCurrentPhase('cameos');
-        setIsTextVisible(false);
-        setTimeout(() => {
-          setCurrentText('SPECIAL CAMEOS');
-          setCurrentSubtext(cameo);
-          setIsTextVisible(true);
-        }, 200);
-      });
-    });
-
-    // Outro phase (12 seconds)
-    creditTexts.outro.forEach((credit, index) => {
-      addEvent(index === 0 ? 3000 : 3000, () => {
-        setCurrentPhase('outro');
-        setIsTextVisible(false);
-        setTimeout(() => {
-          setCurrentText(credit.title);
-          setCurrentSubtext(credit.subtitle);
-          setIsTextVisible(true);
-        }, 300);
-      });
-    });
-
-    // Auto-exit after timeline completes
-    addEvent(6000, () => {
-      handleTimelineComplete();
-    });
-
-    timelineRef.current = timeouts;
-  };
-
-  const startMusic = () => {
-    console.log('🎵 EndCredits: Starting end credits music via main audio system');
-    setEndCreditsMusic();
-  };
-
-  const stopEndCreditsMusic = () => {
-    console.log('🎵 EndCredits: Stopping end credits music via main audio system');
-    stopMusic();
-  };
-
-  const clearTimeline = () => {
+  const clearTimeline = useCallback(() => {
     timelineRef.current.forEach(timeout => clearTimeout(timeout));
     timelineRef.current = [];
-  };
+  }, []);
 
-  const closeCredits = () => {
+  const stopCardInterval = useCallback(() => {
+    if (cardIntervalRef.current) {
+      clearInterval(cardIntervalRef.current);
+      cardIntervalRef.current = null;
+    }
+  }, []);
+
+  const closeCredits = useCallback(() => {
     clearTimeline();
+    stopCardInterval();
     onClose();
-  };
+  }, [clearTimeline, stopCardInterval, onClose]);
 
-  const handleManualClose = () => {
+  const handleTimelineComplete = useCallback(() => {
+    queueMenuMusicAfterEnd();
+    closeCredits();
+  }, [queueMenuMusicAfterEnd, closeCredits]);
+
+  const startTimeline = useCallback(() => {
+    if (creditEntries.length === 0) {
+      return;
+    }
+
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    let accumulatedDelay = 0;
+
+    creditEntries.forEach((entry, index) => {
+      if (index === 0) {
+        return;
+      }
+
+      const previousHold = creditEntries[index - 1]?.hold ?? 0;
+      accumulatedDelay += previousHold;
+
+      const timeout = setTimeout(() => {
+        setIsEntryVisible(false);
+
+        setTimeout(() => {
+          setCurrentEntry(entry);
+          setIsEntryVisible(true);
+          if (entry.cardHint && totalCardPhotos > 0) {
+            setCardIndex(prev => (prev + 1) % totalCardPhotos);
+          }
+        }, 260);
+      }, accumulatedDelay);
+
+      timeouts.push(timeout);
+    });
+
+    const lastHold = creditEntries[creditEntries.length - 1]?.hold ?? 4000;
+    const finaleTimeout = setTimeout(() => {
+      handleTimelineComplete();
+    }, accumulatedDelay + lastHold + 1800);
+
+    timeouts.push(finaleTimeout);
+    timelineRef.current = timeouts;
+  }, [creditEntries, handleTimelineComplete, totalCardPhotos]);
+
+  const startMusic = useCallback(() => {
+    console.log('🎵 EndCredits: Starting end credits music via main audio system');
+    setEndCreditsMusic();
+  }, [setEndCreditsMusic]);
+
+  const stopEndCreditsMusic = useCallback(() => {
+    console.log('🎵 EndCredits: Stopping end credits music via main audio system');
+    stopMusic();
+  }, [stopMusic]);
+
+  const handleManualClose = useCallback(() => {
     cancelMenuMusicQueue();
     stopEndCreditsMusic();
     setMenuMusic();
     closeCredits();
-  };
-
-  const handleTimelineComplete = () => {
-    queueMenuMusicAfterEnd();
-    closeCredits();
-  };
+  }, [cancelMenuMusicQueue, stopEndCreditsMusic, setMenuMusic, closeCredits]);
 
   useEffect(() => {
-    if (isVisible) {
-      // Start music and timeline
-      cancelMenuMusicQueue();
-      startMusic();
-      startTimeline();
-
-      // Show initial text
-      setCurrentText('THE WEEKLY PARANOID NEWS');
-      setCurrentSubtext('CLASSIFIED EDITION');
-      setIsTextVisible(true);
-    } else {
-      // Cleanup when not visible
+    if (!isVisible) {
       clearTimeline();
-      setCurrentPhase('intro');
-      setIsTextVisible(false);
+      stopCardInterval();
+      setCurrentEntry(null);
+      setIsEntryVisible(false);
+      setShowControls(true);
+      return () => {
+        clearTimeline();
+        stopCardInterval();
+      };
     }
+
+    if (creditEntries.length === 0) {
+      return () => {
+        clearTimeline();
+        stopCardInterval();
+      };
+    }
+
+    clearTimeline();
+    cancelMenuMusicQueue();
+    startMusic();
+    startTimeline();
+    setCurrentEntry(creditEntries[0]);
+    setIsEntryVisible(true);
+    setShowControls(true);
+    setCardIndex(0);
+
+    if (totalCardPhotos > 0) {
+      stopCardInterval();
+      cardIntervalRef.current = setInterval(() => {
+        setCardIndex(prev => (prev + 1) % totalCardPhotos);
+      }, 7000);
+    }
+
+    const controlsTimeout = setTimeout(() => setShowControls(false), 8000);
+    timelineRef.current.push(controlsTimeout);
 
     return () => {
       clearTimeline();
+      stopCardInterval();
     };
-  }, [isVisible]);
+  }, [
+    isVisible,
+    creditEntries,
+    totalCardPhotos,
+    cancelMenuMusicQueue,
+    startMusic,
+    startTimeline,
+    stopCardInterval,
+    clearTimeline
+  ]);
 
-  if (!isVisible) return null;
+  if (!isVisible || !currentEntry) return null;
 
-  const getPhaseBackground = () => {
-    switch (currentPhase) {
-      case 'intro':
-        return 'bg-gradient-to-br from-newspaper-bg via-newspaper-bg to-newspaper-header/10';
-      case 'segments':
-        return 'bg-gradient-to-br from-newspaper-bg via-newspaper-header/5 to-newspaper-bg';
-      case 'cameos':
-        return 'bg-gradient-to-br from-newspaper-header/10 via-newspaper-bg to-newspaper-header/10';
-      case 'outro':
-        return 'bg-gradient-to-br from-newspaper-bg via-newspaper-bg to-newspaper-accent/10';
-      default:
-        return 'bg-newspaper-bg';
-    }
+  const factionAccent = playerFaction === 'government' ? 'text-red-300' : 'text-blue-200';
+
+  const phaseTagMap: Record<CreditPhase, string> = {
+    intro: '• CLASSIFIED TRANSMISSION •',
+    segments: '• PERSONNEL FILES •',
+    cameos: '• SPECIAL RECOGNITION •',
+    outro: '• END OF TRANSMISSION •'
   };
 
-  const factionAccent = playerFaction === 'government' ? 'text-red-800' : 'text-blue-800';
-
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      {/* Classified background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9InJlZGFjdGVkIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBvcGFjaXR5PSIwLjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSJ1cmwoI3JlZGFjdGVkKSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMwIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')]"></div>
-      </div>
+    <div className="fixed inset-0 z-50 overflow-hidden bg-black text-white">
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-[#111217] to-black opacity-95" aria-hidden="true" />
+      <div
+        className="absolute inset-0 opacity-[0.07] mix-blend-screen"
+        style={{ backgroundImage: "url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImRvdCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48cmVjdCB3aWR0aD0iMyIgaGVpZ2h0PSIzIiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIwLjYiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSJ1cmwoI2RvdCkiLz48L3N2Zz4=')" }}
+        aria-hidden="true"
+      />
 
-      {/* Main credits display */}
-      <div className={`relative w-full max-w-4xl mx-4 min-h-[600px] flex items-center justify-center transition-all duration-1000 ${getPhaseBackground()}`}>
-        {/* Newsprint texture overlay */}
-        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JheSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjgiIGhlaWdodD0iOCI+PGNpcmNsZSBjeD0iNCIgY3k9IjQiIHI9IjEiIGZpbGw9IiMwMDAiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0idXJsKCNncmF5KSIvPjwvc3ZnPg==')]"></div>
+      <div className="relative h-full flex flex-col">
+        <header className="pt-12 px-8 text-center font-mono text-xs uppercase tracking-[0.5em] text-red-400/80">
+          Classified Transmission // Authorized Eyes Only
+        </header>
 
-        {/* Credit text */}
-        <div className={`text-center p-8 transform transition-all duration-700 ${
-          isTextVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-8 opacity-0 scale-95'
-        }`}>
-          {/* Main title */}
-          <h1 className="text-4xl md:text-6xl font-black font-serif text-gray-900 mb-4 tracking-tight leading-none">
-            {currentText}
-          </h1>
-          
-          {/* Accent line */}
-          <div className="w-32 h-1 bg-red-600 mx-auto mb-6 transform scale-x-100 transition-transform duration-500"></div>
-          
-          {/* Subtitle */}
-          <div className="text-lg md:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto font-serif">
-            {currentSubtext}
+        <div className="relative flex-1 overflow-hidden">
+          <div className="absolute left-1/2 top-1/2 w-full max-w-5xl -translate-x-1/2 -translate-y-1/2 px-6">
+            <div
+              className={`mx-auto max-w-4xl text-center transition-all duration-700 ease-out ${
+                isEntryVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+              }`}
+            >
+              <h1 className="mb-4 text-3xl md:text-5xl font-black tracking-[0.4em] uppercase text-white/95">
+                {currentEntry.title}
+              </h1>
+              <div className="mx-auto mb-6 h-1 w-32 bg-red-500/90" />
+              <p className="mx-auto max-w-3xl font-serif text-lg md:text-xl text-white/80 leading-relaxed">
+                {currentEntry.subtitle}
+              </p>
+              <div className={`mt-10 font-mono text-sm uppercase tracking-[0.4em] ${factionAccent}`}>
+                {phaseTagMap[currentEntry.phase]}
+              </div>
+            </div>
           </div>
 
-          {/* Phase indicator */}
-          <div className={`mt-8 text-sm font-mono tracking-wider uppercase ${factionAccent}`}>
-            {currentPhase === 'intro' && '• CLASSIFIED TRANSMISSION •'}
-            {currentPhase === 'segments' && '• PERSONNEL FILES •'}
-            {currentPhase === 'cameos' && '• SPECIAL RECOGNITION •'}
-            {currentPhase === 'outro' && '• END OF TRANSMISSION •'}
+          <div className="absolute inset-x-0 top-0 flex justify-between px-10 pt-16 text-[0.65rem] font-mono uppercase tracking-[0.35em] text-white/30">
+            <span>Projector 7B // Rewound</span>
+            <span>Paranoid Times Archives</span>
+            <span>Roll {String(cardIndex + 1).padStart(2, '0')}</span>
           </div>
+
+          {totalCardPhotos > 0 && (
+            <figure
+              className={`absolute bottom-16 right-12 w-64 origin-bottom-right rounded-md border border-white/20 bg-white/5 p-3 shadow-[0_20px_45px_rgba(0,0,0,0.45)] transition-all duration-700 ease-out ${
+                isEntryVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+              }`}
+            >
+              <div className="relative aspect-[4/3] overflow-hidden rounded">
+                <img
+                  src={cardPhotos[cardIndex % totalCardPhotos]}
+                  alt="Archived card evidence"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <figcaption className="mt-3 text-[0.65rem] font-mono uppercase tracking-[0.25em] text-white/60">
+                {currentEntry.cardHint || 'Evidence retrieved from vault 13-B'}
+              </figcaption>
+            </figure>
+          )}
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black via-black/70 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black via-black/70 to-transparent" />
         </div>
+
+        <footer className="relative z-10 flex items-center justify-center gap-12 pb-10 pt-6 text-[0.7rem] font-mono uppercase tracking-[0.3em] text-white/40">
+          <span>Rewind Requested? Press Escape</span>
+          <span>Project Code: {playerFaction === 'government' ? 'OBFUSCATE' : 'REVEAL'}</span>
+          <span>Signal Clean Since 1993*</span>
+        </footer>
       </div>
 
-      {/* Controls */}
       {showControls && (
-        <div className="absolute top-6 right-6 flex gap-3">
+        <div className="absolute inset-x-0 bottom-8 flex justify-center gap-4">
           <Button
             onClick={handleManualClose}
             variant="outline"
-            className="bg-white/90 hover:bg-white text-gray-900 border-gray-300 shadow-lg font-mono text-sm"
+            className="bg-white/10 text-white hover:bg-white/20 border-white/30 font-mono text-xs uppercase tracking-[0.4em]"
             aria-label="Skip end credits and return to main menu"
           >
             Skip Credits
           </Button>
-        </div>
-      )}
-
-      {/* Bottom controls */}
-      {showControls && (
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
           <Button
             onClick={handleManualClose}
-            className="bg-red-600 hover:bg-red-700 text-white font-mono text-sm shadow-lg"
+            className="bg-red-600 hover:bg-red-700 text-white font-mono text-xs uppercase tracking-[0.4em]"
             aria-label="Return to main menu"
           >
             Return to Main Menu
