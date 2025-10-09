@@ -2,6 +2,8 @@ import { cn } from '@/lib/utils';
 import CardImage from '@/components/game/CardImage';
 import type { GameOverReport } from '@/types/finalEdition';
 import { generateSensationalistHeadline } from '@/utils/sensationalistHeadlines';
+import { loadArticleBank } from '@/engine/news/articleBank';
+import { useEffect, useState } from 'react';
 import '@/styles/newspaperLayout.css';
 
 interface NewspaperFrontPageProps {
@@ -12,13 +14,34 @@ interface NewspaperFrontPageProps {
 const NewspaperFrontPage = ({ report, onNavigateToPage }: NewspaperFrontPageProps) => {
   const isVictory = report.winner === report.playerFaction;
   const mvpCardId = report.mvp?.cardId;
+  const [mvpArticle, setMvpArticle] = useState<any>(null);
+  const [runnerUpArticle, setRunnerUpArticle] = useState<any>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadArticleBank().then(bank => {
+      if (cancelled) return;
+      if (report.mvp?.cardId) {
+        setMvpArticle(bank.getById(report.mvp.cardId));
+      }
+      if (report.runnerUp?.cardId) {
+        setRunnerUpArticle(bank.getById(report.runnerUp.cardId));
+      }
+    }).catch(err => {
+      console.error('Failed to load articles for headline:', err);
+    });
+    return () => { cancelled = true; };
+  }, [report.mvp?.cardId, report.runnerUp?.cardId]);
 
   const headline = generateSensationalistHeadline({
     winner: report.winner,
     victoryType: report.victoryType,
     mvpCardName: report.mvp?.cardName,
+    mvpCardArticle: mvpArticle,
+    runnerUpCardArticle: runnerUpArticle,
     capturedStatesCount: report.mvp?.capturedStates.length ?? 0,
     frontPage: report.frontPage,
+    finalTruth: report.finalTruth,
   });
 
   const editionDate = new Date(report.recordedAt).toLocaleDateString('en-US', {

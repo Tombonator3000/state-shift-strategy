@@ -1,74 +1,16 @@
 import type { GameOverReport, FrontPageArticle } from '@/types/finalEdition';
+import type { CardArticle } from '@/engine/news/articleBank';
 
 interface HeadlineContext {
   winner: GameOverReport['winner'];
   victoryType: GameOverReport['victoryType'];
   mvpCardName?: string;
+  mvpCardArticle?: CardArticle | null;
+  runnerUpCardArticle?: CardArticle | null;
   capturedStatesCount?: number;
   frontPage?: FrontPageArticle | null;
+  finalTruth?: number;
 }
-
-const TRUTH_VICTORY_HEADLINES = {
-  truth: [
-    'TRUTH BOMB DETONATES — COVER-UP COLLAPSES',
-    'DISCLOSURE SHOCKWAVE SHATTERS GOVERNMENT LIES',
-    'THEY TRIED TO HIDE IT — WE EXPOSED EVERYTHING',
-    'TRUTH METER EXPLODES — OFFICIALS SCRAMBLE',
-    'MASSIVE LEAK TRIGGERS NATIONWIDE AWAKENING',
-  ],
-  states: [
-    'FIELD OPS STORM {count} STATES — OFFICIALS PANIC',
-    '{count}-STATE SWEEP TRIGGERS MASS DISCLOSURE',
-    'TRUTH NETWORK CONQUERS {count} STATES IN BLITZ',
-    'UNSTOPPABLE: {count} STATES FALL TO TRUTH OPERATIVES',
-    'GOVERNMENT LOSES {count} STATES — NARRATIVE CRUMBLES',
-  ],
-  ip: [
-    'TRUTH OPERATIVES FLOOD THE AIRWAVES — IT\'S OVER',
-    'BROADCAST BLITZ OVERWHELMS SHADOW GOVERNMENT',
-    'TRUTH NETWORK DOMINATES — OFFICIALS CAN\'T STOP IT',
-    'MASSIVE IP SURGE TRIGGERS DISCLOSURE CASCADE',
-    'THEY COULDN\'T SILENCE US — WE WON THE AIRWAVES',
-  ],
-  agenda: [
-    'SECRET PLAN EXPOSED — TRUTH OPERATIVES WIN',
-    'COVERT AGENDA REVEALED — GOVERNMENT IN SHAMBLES',
-    'THEY HAD A PLAN — WE EXPOSED IT ALL',
-    'CLASSIFIED OPERATION BLOWN WIDE OPEN',
-    'SECRET MISSION COMPLETE — TRUTH PREVAILS',
-  ],
-};
-
-const GOV_VICTORY_HEADLINES = {
-  truth: [
-    'NARRATIVE LOCKDOWN COMPLETE — TRUTH SUPPRESSED',
-    'GOVERNMENT CRUSHES RESISTANCE — SILENCE RESTORED',
-    'SHADOW BUREAU WINS — DISCLOSURE DEAD',
-    'TRUTH NETWORK NEUTRALIZED BY MASSIVE BLITZ',
-    'COVER-UP SUCCEEDS — RESISTANCE SILENCED',
-  ],
-  states: [
-    'GOVERNMENT RECAPTURES {count} STATES — ORDER RESTORED',
-    'SHADOW FORCES SWEEP {count} STATES IN BRUTAL CRACKDOWN',
-    '{count}-STATE OFFENSIVE CRUSHES TRUTH MOVEMENT',
-    'GOVERNMENT RETAKES {count} STATES — RESISTANCE CRUMBLES',
-    'BRUTAL SWEEP: {count} STATES FALL TO SHADOW GOVERNMENT',
-  ],
-  ip: [
-    'GOVERNMENT COUNTER-NARRATIVE DOMINATES AIRWAVES',
-    'SHADOW BUREAU WINS BROADCAST WAR — TRUTH SILENCED',
-    'MASSIVE PROPAGANDA BLITZ OVERWHELMS RESISTANCE',
-    'GOVERNMENT FLOODS AIRWAVES — DISCLOSURE DEAD',
-    'COUNTER-INTEL SURGE CRUSHES TRUTH NETWORK',
-  ],
-  agenda: [
-    'CLASSIFIED PLAN SUCCEEDS — RESISTANCE NEUTRALIZED',
-    'SHADOW BUREAU EXECUTES SECRET OPERATION',
-    'COVERT MISSION COMPLETE — TRUTH MOVEMENT DEAD',
-    'SECRET AGENDA ACCOMPLISHED — NOBODY SAW IT COMING',
-    'GOVERNMENT WINS — CLASSIFIED PLAN UNFOLDS',
-  ],
-};
 
 const DRAW_HEADLINES = [
   'DEADLOCK! NEITHER SIDE BLINKS',
@@ -88,32 +30,121 @@ const hashString = (str: string): number => {
   return Math.abs(hash);
 };
 
+function seedPick<T>(arr: readonly T[], seed: string): T {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i += 1) {
+    h ^= seed.charCodeAt(i);
+    h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+  }
+  return arr[Math.abs(h) % arr.length];
+}
+
+const TRUTH_VICTORY_VERBS = [
+  'EXPOSES', 'BLOWS LID OFF', 'LEAKS', 'REVEALS', 'DETONATES',
+  'TRIGGERS', 'STORMS', 'DOMINATES', 'FLOODS', 'SHOCKS'
+];
+
+const GOV_VICTORY_VERBS = [
+  'NEUTRALIZES', 'CONTAINS', 'CLASSIFIES', 'REDACTS', 'SUPPRESSES',
+  'LOCKS DOWN', 'SWEEPS', 'CRUSHES', 'CONTROLS', 'SILENCES'
+];
+
+const TRUTH_LOCATIONS = [
+  'AREA 51', 'ROSWELL', 'BERMUDA TRIANGLE', 'OHIO', 'NEVADA',
+  'THE PENTAGON', 'SECRET FACILITY', 'CLASSIFIED ZONE', 'MOON BASE'
+];
+
+const GOV_EUPHEMISMS = [
+  'ROUTINE TRAINING EXERCISE', 'ADMINISTRATIVE TEST', 'BENIGN ANOMALY',
+  'LOCALIZED PHENOMENON', 'STANDARD PROCEDURE', 'SCHEDULED MAINTENANCE',
+  'TECHNICAL ADJUSTMENT', 'WEATHER BALLOON', 'SWAMP GAS'
+];
+
+function generateCoherentHeadline(context: HeadlineContext): string {
+  const { winner, victoryType, mvpCardArticle, runnerUpCardArticle, mvpCardName, capturedStatesCount, finalTruth } = context;
+  const seed = `${winner}-${victoryType}-${mvpCardName ?? 'unknown'}`;
+
+  // Extract elements from articles if available
+  const mvpHeadline = mvpCardArticle?.headline?.toUpperCase() || mvpCardName?.toUpperCase() || 'CLASSIFIED';
+  const mvpTags = mvpCardArticle?.tags || [];
+  const runnerUpHeadline = runnerUpCardArticle?.headline?.toUpperCase();
+  
+  // Find paranormal subject matter
+  const paranormalTags = ['alien', 'ufo', 'ghost', 'cryptid', 'bigfoot', 'mothman', 'chupacabra'];
+  const foundSubject = mvpTags.find(tag => paranormalTags.includes(tag.toLowerCase()));
+  const subject = foundSubject ? foundSubject.toUpperCase() : seedPick(TRUTH_LOCATIONS, seed);
+
+  if (winner === 'truth') {
+    const verb = seedPick(TRUTH_VICTORY_VERBS, seed);
+    
+    if (victoryType === 'states' && capturedStatesCount) {
+      return `${mvpHeadline} ${verb} ${capturedStatesCount} STATES • ${subject} FILES LEAK — OFFICIALS SCRAMBLE`;
+    }
+    
+    if (victoryType === 'truth' && finalTruth !== undefined) {
+      return `${mvpHeadline} ${verb} • TRUTH METER HITS ${Math.round(finalTruth)}% — COVER-UP COLLAPSES`;
+    }
+    
+    if (victoryType === 'ip') {
+      return `${mvpHeadline} FLOODS AIRWAVES • ${subject} EXPOSED — GOVERNMENT CAN'T STOP IT`;
+    }
+    
+    if (victoryType === 'agenda') {
+      const secondVerb = seedPick(TRUTH_VICTORY_VERBS, seed + '2');
+      if (runnerUpHeadline) {
+        return `${mvpHeadline} ${verb} • ${runnerUpHeadline} ${secondVerb} — SECRET PLAN REVEALED`;
+      }
+      return `${mvpHeadline} ${verb} SECRET AGENDA • ${subject} FILES LEAK — IT'S ALL TRUE`;
+    }
+  } else if (winner === 'government') {
+    const verb = seedPick(GOV_VICTORY_VERBS, seed);
+    const euphemism = seedPick(GOV_EUPHEMISMS, seed);
+    
+    if (victoryType === 'states' && capturedStatesCount) {
+      return `INTERNAL MEMO: ${euphemism} • ${subject} AREA CLOSURE • ${capturedStatesCount} STATES SECURED — OFFICIAL STORY HOLDS`;
+    }
+    
+    if (victoryType === 'truth') {
+      return `${euphemism} • ${subject} REPORTS DISMISSED • ${mvpHeadline} ${verb} — NOTHING TO SEE HERE`;
+    }
+    
+    if (victoryType === 'ip') {
+      return `OFFICIAL STATEMENT: ${euphemism} • ${subject} ADVISORY LIFTED • NARRATIVE ${verb} — SOURCE: 'THIS IS FINE'`;
+    }
+    
+    if (victoryType === 'agenda') {
+      if (runnerUpHeadline) {
+        return `CLASSIFIED: ${euphemism} • ${mvpHeadline} ${verb} • ${runnerUpHeadline} CONTAINED — MISSION ACCOMPLISHED`;
+      }
+      return `${euphemism} • ${subject} INCIDENT RESOLVED • ${mvpHeadline} ${verb} — ALL ACCORDING TO PLAN`;
+    }
+  }
+
+  // Fallback
+  return winner === 'truth'
+    ? `${mvpHeadline} TRIGGERS MASS AWAKENING — TRUTH NETWORK WINS`
+    : `OFFICIAL STORY HOLDS — ${mvpHeadline} CONTAINED`;
+}
+
 export const generateSensationalistHeadline = (context: HeadlineContext): string => {
+  // Use custom front page headline if available
   if (context.frontPage?.hed && context.frontPage.hed.length > 10) {
     return context.frontPage.hed.toUpperCase();
   }
 
+  // Handle draw
   if (context.winner === 'draw') {
     const seed = hashString(`${context.victoryType}-draw`);
     return DRAW_HEADLINES[seed % DRAW_HEADLINES.length];
   }
 
-  const templates = context.winner === 'truth'
-    ? TRUTH_VICTORY_HEADLINES[context.victoryType]
-    : GOV_VICTORY_HEADLINES[context.victoryType];
-
-  if (!templates || templates.length === 0) {
-    return context.winner === 'truth'
-      ? 'TRUTH NETWORK WINS — GOVERNMENT IN SHAMBLES'
-      : 'SHADOW GOVERNMENT CRUSHES RESISTANCE';
+  // Generate coherent headline from articles
+  if (context.mvpCardArticle || context.mvpCardName) {
+    return generateCoherentHeadline(context);
   }
 
-  const seed = hashString(`${context.winner}-${context.victoryType}-${context.mvpCardName ?? 'unknown'}`);
-  let headline = templates[seed % templates.length];
-
-  if (headline.includes('{count}') && context.capturedStatesCount !== undefined) {
-    headline = headline.replace('{count}', context.capturedStatesCount.toString());
-  }
-
-  return headline;
+  // Final fallback
+  return context.winner === 'truth'
+    ? 'TRUTH NETWORK WINS — GOVERNMENT IN SHAMBLES'
+    : 'SHADOW GOVERNMENT CRUSHES RESISTANCE';
 };
