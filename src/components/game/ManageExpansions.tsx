@@ -72,13 +72,14 @@ const computeStats = (cards: GameCard[]): StatBlock => {
   };
 };
 
-const EXPANSION_ID_SET = new Set(EXPANSION_MANIFEST.map(pack => pack.id));
+const getExpansionIdSet = () => new Set(EXPANSION_MANIFEST.map(pack => pack.id));
 
 const summarizeExpansionCards = (cards: GameCard[]): Record<string, number> => {
   const counts: Record<string, number> = {};
+  const expansionIdSet = getExpansionIdSet();
   cards.forEach(card => {
     const extId = card.extId ?? (card as { _setId?: string })._setId;
-    if (!extId || !EXPANSION_ID_SET.has(extId)) {
+    if (!extId || !expansionIdSet.has(extId)) {
       return;
     }
     counts[extId] = (counts[extId] ?? 0) + 1;

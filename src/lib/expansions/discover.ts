@@ -1,6 +1,7 @@
 import type { Card } from '@/lib/decks/expansions';
 import type { GameCard } from '@/rules/mvp';
 import { validateMvpCard } from '@/utils/validate-mvp';
+import { BUILTIN_EXPANSION_SOURCES } from '@/data/expansions/builtin';
 
 const INDEX_PATH = '/extensions/index.json';
 const MANIFEST_PATH = '/extensions/manifest.json';
@@ -38,6 +39,17 @@ const cloneExpansion = (expansion: DiscoveredExpansion): DiscoveredExpansion => 
   ...expansion,
   cards: expansion.cards.map(cloneCard),
 });
+
+const builtinToDiscovered = (): DiscoveredExpansion[] =>
+  BUILTIN_EXPANSION_SOURCES.map(source => ({
+    id: source.id,
+    name: source.name,
+    description: source.description,
+    version: source.version,
+    author: source.author,
+    fileName: source.fileName,
+    cards: source.cards.map(card => ({ ...(card as Card) })),
+  }));
 
 const formatNameFromId = (id: string): string =>
   id
@@ -206,9 +218,20 @@ export async function discoverExpansions(force = false): Promise<DiscoveredExpan
   }
 
   inflight = discoverInternal().then(expansions => {
-    cachedExpansions = expansions;
+    const builtin = builtinToDiscovered();
+    const byId = new Map<string, DiscoveredExpansion>();
+    for (const pack of builtin) {
+      byId.set(pack.id, pack);
+    }
+    for (const pack of expansions) {
+      if (!byId.has(pack.id)) {
+        byId.set(pack.id, pack);
+      }
+    }
+    const merged = Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
+    cachedExpansions = merged;
     inflight = null;
-    return expansions;
+    return merged;
   });
 
   try {
