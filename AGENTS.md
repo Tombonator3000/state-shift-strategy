@@ -47,4 +47,5 @@ This guidance applies to the entire repository. If any directory later introduce
 - Whenever a change that affects the game is merged, append a new entry to `UPDATES_LOG.md` at the repository root.
 - Each entry must start with the merge date in `YYYY-MM-DD` format followed by a short, human-readable summary of the change.
 - Keep the log sorted in descending chronological order so the most recent updates appear first.
+- When logging changes, include the timestamp and explicitly list which file(s) were modified.
 
