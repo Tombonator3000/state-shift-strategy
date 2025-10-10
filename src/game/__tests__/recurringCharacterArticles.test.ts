@@ -39,7 +39,7 @@ describe('selectArticleForCharacter', () => {
     const stage1 = selectArticleForCharacter('TRUTH-NEW-007', 'florida_man', state);
     expect(stage1?.articleVariant).toBe('florida_man_stage_1');
 
-    const stage2 = selectArticleForCharacter('TRUTH-NEW-023', 'florida_man', state);
+    const stage2 = selectArticleForCharacter('TRUTH-NEW-007', 'florida_man', state);
     expect(stage2?.articleVariant).toBe('florida_man_stage_2');
     expect(state.florida_man).toEqual({ appearances: 3, currentStage: 2 });
   });

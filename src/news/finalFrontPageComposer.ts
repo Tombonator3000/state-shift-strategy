@@ -343,7 +343,9 @@ export const composeFinalFrontPage = (
   const hed = sanitized.hed ?? generatedHed ?? fallback.hed;
   const dek = sanitized.dek ?? generatedDek ?? fallback.dek;
 
-  if (!hed || !dek) {
+  const missingGeneratedCopy = (!sanitized.hed && !generatedHed) || (!sanitized.dek && !generatedDek);
+
+  if (!hed || !dek || missingGeneratedCopy) {
     return fallback;
   }
 

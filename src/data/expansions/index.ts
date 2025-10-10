@@ -1,5 +1,7 @@
 import type { GameCard } from '@/rules/mvp';
 import { discoverExpansions, getCachedExpansions } from '@/lib/expansions/discover';
+import { repairToMVP, validateCardMVP } from '@/mvp/validator';
+import { BUILTIN_EXPANSION_SOURCES } from './builtin';
 
 export type ExpansionPack = {
   id: string;
@@ -18,7 +20,22 @@ export type ExpansionPack = {
 const manifest: ExpansionPack[] = [];
 export const EXPANSION_MANIFEST = manifest;
 
-const cloneCard = (card: GameCard): GameCard => ({ ...card });
+const DEV = typeof import.meta !== 'undefined' && (import.meta as any)?.env?.DEV;
+
+const normalizeCard = (card: GameCard, tag: string): GameCard => {
+  const { card: repaired, errors, changes } = repairToMVP(card);
+  const validation = validateCardMVP(repaired);
+
+  if (DEV && (errors.length > 0 || changes.length > 0)) {
+    console.info(`[EXPANSION:${tag}] ${card.id} normalized`, { errors, changes });
+  }
+
+  if (DEV && !validation.ok) {
+    console.warn(`[EXPANSION:${tag}] ${card.id} validation issues`, validation.issues);
+  }
+
+  return { ...repaired };
+};
 
 const normalizeExpansion = (expansion: {
   id: string;
@@ -32,7 +49,7 @@ const normalizeExpansion = (expansion: {
   id: expansion.id,
   title: expansion.name,
   fileName: expansion.fileName,
-  cards: expansion.cards.map(cloneCard),
+  cards: expansion.cards.map(card => normalizeCard(card, expansion.id)),
   cardCount: expansion.cards.length,
   metadata: {
     name: expansion.name,
@@ -42,13 +59,40 @@ const normalizeExpansion = (expansion: {
   },
 });
 
+const getBuiltinManifest = (): ExpansionPack[] =>
+  BUILTIN_EXPANSION_SOURCES.map(source =>
+    normalizeExpansion({
+      id: source.id,
+      name: source.name,
+      fileName: source.fileName,
+      description: source.description,
+      version: source.version,
+      author: source.author,
+      cards: source.cards,
+    }),
+  );
+
 const updateManifest = (packs: ExpansionPack[]) => {
   manifest.splice(0, manifest.length, ...packs);
 };
 
 export const getExpansionManifest = (): ExpansionPack[] => [...manifest];
 
+const mergeManifests = (builtin: ExpansionPack[], discovered: ExpansionPack[]): ExpansionPack[] => {
+  const merged = new Map<string, ExpansionPack>();
+  for (const pack of builtin) {
+    merged.set(pack.id, pack);
+  }
+  for (const pack of discovered) {
+    if (!merged.has(pack.id)) {
+      merged.set(pack.id, pack);
+    }
+  }
+  return Array.from(merged.values()).sort((a, b) => a.title.localeCompare(b.title));
+};
+
 export const refreshExpansionManifest = async (): Promise<ExpansionPack[]> => {
+  const builtin = getBuiltinManifest();
   const expansions = await discoverExpansions();
   const normalized = expansions.map(expansion =>
     normalizeExpansion({
@@ -62,7 +106,8 @@ export const refreshExpansionManifest = async (): Promise<ExpansionPack[]> => {
     }),
   );
 
-  updateManifest(normalized);
+  const merged = mergeManifests(builtin, normalized);
+  updateManifest(merged);
   return manifest;
 };
 
@@ -103,6 +148,16 @@ export async function loadEnabledExpansions(enabledIds: string[]): Promise<GameC
 }
 
 export const getCachedExpansionCards = (): GameCard[] => {
+  const builtin = getBuiltinManifest();
   const expansions = getCachedExpansions();
-  return expansions.flatMap(expansion => expansion.cards.map(card => ({ ...(card as GameCard) })));
+  const builtinCards = builtin.flatMap(expansion => expansion.cards.map(card => ({ ...card })));
+  if (!expansions.length) {
+    return builtinCards;
+  }
+
+  const builtinIds = new Set(builtin.map(pack => pack.id));
+  const discoveredCards = expansions
+    .filter(expansion => !builtinIds.has(expansion.id))
+    .flatMap(expansion => expansion.cards.map(card => ({ ...(card as GameCard) })));
+  return [...builtinCards, ...discoveredCards];
 };

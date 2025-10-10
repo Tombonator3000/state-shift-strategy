@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-15 – Built-in expansions join MVP rotation
+- 09:18 UTC – Wired the builtin expansion manifest so Truth Vanguard and Government Countermeasures decks import through the MVP normalizer. Files: `src/data/expansions/index.ts`, `src/data/expansions/builtin.ts`, `src/lib/expansions/discover.ts`.
+- 09:18 UTC – Realigned expansion article IDs and UI summaries so new packs display correctly in management panels. Files: `src/data/cardArticles/expansionArticles.ts`, `src/components/game/ManageExpansions.tsx`.
+- 09:18 UTC – Added regression coverage to confirm the builtin packs validate cleanly and feed random draws. Files: `src/data/__tests__/builtinExpansions.test.ts`.
+
 ## 2025-10-14 – State-themed bonus engine
 - Implemented a seeded `assignStateBonuses` pipeline that drafts weighted regional effects, logs per-state anomalies, and feeds matching newspaper events for the round.
 - Wired round start to apply state bonuses, refresh state event history for UI badges, and surface card-level `stateBonuses` metadata in strategy helpers.

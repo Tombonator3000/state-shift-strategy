@@ -415,7 +415,7 @@ City officials labeled the addition "community-sourced illumination" but quietly
     ]
   },
   {
-    cardId: 'TRUTH-NEW-021',
+    cardId: 'TRUTH-NEW-002',
     faction: 'truth',
     headline: 'FRIDAY NIGHT LIGHTS PROJECT UFO ROUTES—COACH HAMMOND RUNS COSMIC TWO-A-DAYS',
     subhead: 'Small-town scoreboard spits out anti-abduction audibles while bleachers chant binary',
@@ -436,7 +436,7 @@ By sunrise the field smelled faintly of ozone and orange slices. Local astronome
     ]
   },
   {
-    cardId: 'TRUTH-NEW-022',
+    cardId: 'TRUTH-NEW-002',
     faction: 'truth',
     headline: 'COACH HAMMOND HOSTS TRI-STATE SCRIMMAGE—WEATHER RADAR CALLS AN AUDIBLE',
     subhead: 'Interstate clinic draws meteorologists, crop dusters, and one retired astronaut to run anti-abduction drills',
@@ -457,7 +457,7 @@ Federal observers insisted the gathering was “a casual weather appreciation da
     ]
   },
   {
-    cardId: 'TRUTH-NEW-023',
+    cardId: 'TRUTH-NEW-007',
     faction: 'truth',
     headline: 'FLORIDA MAN SKYWRITES RESISTANCE SCHEDULE—COUNTY AIRSHOW PANICS THEN APPLAUDS',
     subhead: 'Citrus-scented contrails map covert meetups while brass band plays hurricane tempo',
