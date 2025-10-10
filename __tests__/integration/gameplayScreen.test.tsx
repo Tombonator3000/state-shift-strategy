@@ -80,36 +80,22 @@ describe('gameplay screen integrations', () => {
   });
 
   it('renders article preview overlay with fetched copy', async () => {
-    const stubArticle = {
-      headline: 'Anomaly Confirmed in Test State',
-      subhead: 'Investigators trace signal to abandoned radar array.',
-      byline: 'By Paranoid Times Staff',
-      body: 'First paragraph.\n\nSecond paragraph.',
-      statesMentioned: ['Test State'],
-      recurringCharacter: 'Agent Lorem Ipsum',
-      followUpHooks: ['Request surveillance logs', 'Debrief the informant'],
-    } as const;
-
-    const actualArticleDb = await import('@/data/cardArticles/articleDatabase');
-    const originalGetArticleForCard = actualArticleDb.getArticleForCard;
-    const moduleExports = { ...actualArticleDb };
-
-    mock.module('@/data/cardArticles/articleDatabase', () => ({
-      ...moduleExports,
-      getArticleForCard: (cardId: string) => {
-        if (cardId === 'test-card') {
-          return stubArticle;
-        }
-        return originalGetArticleForCard(cardId);
-      },
-    }));
-
     const { ArticlePreviewOverlay } = await import('@/components/newspaper/ArticlePreviewOverlay');
 
-    render(<ArticlePreviewOverlay cardId="test-card" cardName="Test Card" onClose={() => {}} />);
+    render(
+      <ArticlePreviewOverlay
+        cardId="TRUTH-NEW-017"
+        cardName="Implant Removal Surgery"
+        onClose={() => {}}
+      />,
+    );
 
-    expect(await screen.findByText(stubArticle.headline)).toBeTruthy();
-    expect(screen.getByText(stubArticle.subhead)).toBeTruthy();
+    expect(
+      await screen.findByText('TORNADO CHASERS FIND REVIVAL TENT FLOATING BETWEEN OKLAHOMA AND TEXAS—PASTOR REX & SMITHERSON ARGUE ABOUT WIND RIGHTS'),
+    ).toBeTruthy();
+    expect(
+      screen.getByText('Mobile sermon collides with federal no-fly zone paperwork mid-air'),
+    ).toBeTruthy();
   });
 
   it('surfaces strategy insights from the help overlay', async () => {
