@@ -7,6 +7,16 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Files:
   - `src/components/game/Options.tsx`
 - Summary: Refreshed the options screen so players can audition government, truth, end credits, and theme playlists right from the start menu with quick-select buttons and clearer playlist labels.
+## 2025-10-10 – Article previews now require explicit activation
+- Timestamp: 2025-10-10T11:22:50Z
+- Files:
+  - `src/components/game/EnhancedGameHand.tsx`
+  - `src/components/game/CardDetailOverlay.tsx`
+  - `src/components/newspaper/ArticlePreviewOverlay.tsx`
+  - `src/pages/Index.tsx`
+  - `docs/INTEGRATION_GUIDE.md`
+  - `UPDATES_LOG.md`
+- Summary: Rewired the newsroom article overlay to launch from a Read Article action instead of hover, locked hover exits from clearing the preview while it is open, added Escape-key support to the overlay, and documented manual QA steps to confirm the preview remains readable until dismissed.
 ## 2025-10-10 – Safeguarded hotspot source labels on the map
 - Timestamp: 2025-10-10T10:50:57Z
 - Files:

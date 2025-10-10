@@ -24,6 +24,24 @@ export function ArticlePreviewOverlay({ cardId, cardName, onClose }: ArticlePrev
     }
   }, [cardId]);
 
+  useEffect(() => {
+    if (!cardId) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [cardId, onClose]);
+
   if (!cardId || !article) return null;
 
   return (
