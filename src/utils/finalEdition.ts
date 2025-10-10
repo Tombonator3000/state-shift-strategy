@@ -2,6 +2,7 @@ import { formatComboReward } from '@/game/comboEngine';
 import type { ComboSummary } from '@/game/combo.types';
 import type { GameEvent } from '@/data/eventDatabase';
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
+import { getArticleForCard } from '@/data/cardArticles/articleDatabase';
 import type { CardPlayRecord, GameState } from '@/hooks/gameStateTypes';
 import type { GameCard } from '@/rules/mvp';
 import type { ArticleBlock } from '@/news/headlineEngine';
@@ -15,9 +16,11 @@ import type {
   GameOverReport,
   ImpactType,
   MVPReport,
+  ReportArticleExcerpt,
   RecurringCharacterEpilogue,
 } from '@/types/finalEdition';
 import { getCharacterArc, getCharacterArcStage } from '@/data/characterArcs';
+import { extractArticleParagraphs, sanitizeFrontPageText } from '@/news/finalFrontPageComposer';
 
 export const getFactionDisplayName = (faction: 'truth' | 'government'): string => {
   return faction === 'truth' ? 'Truth Network' : 'Shadow Government';
@@ -328,6 +331,39 @@ const buildMvpHighlight = (candidate: EnrichedPlay, impactType: ImpactType, impa
   }
 };
 
+const sanitizeOptionalText = (value: string | null | undefined): string | undefined => {
+  const result = sanitizeFrontPageText(value);
+  if (result.value) {
+    return result.value;
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length ? trimmed : undefined;
+  }
+  return undefined;
+};
+
+const buildArticleExcerptForPlay = (play: CardPlayRecord): ReportArticleExcerpt | null => {
+  const source = getArticleForCard(play.card.id);
+  if (!source) {
+    return null;
+  }
+
+  const headline = sanitizeOptionalText((source as { headline?: string }).headline ?? source.headline);
+  const subhead = sanitizeOptionalText((source as { subhead?: string }).subhead ?? source.subhead);
+  const paragraphs = extractArticleParagraphs((source as { body?: string }).body ?? source.body);
+
+  if (!headline && !subhead && paragraphs.length === 0) {
+    return null;
+  }
+
+  return {
+    headline,
+    subhead,
+    paragraphs,
+  } satisfies ReportArticleExcerpt;
+};
+
 const buildMvpReport = (candidate: EnrichedPlay, impactType: ImpactType, impactValue: number): MVPReport => {
   const { play } = candidate;
   const impactLabels: Record<ImpactType, string> = {
@@ -354,6 +390,7 @@ const buildMvpReport = (candidate: EnrichedPlay, impactType: ImpactType, impactV
     impactValue,
     impactLabel: impactLabels[impactType],
     highlight: buildMvpHighlight(candidate, impactType, impactValue),
+    article: buildArticleExcerptForPlay(play),
   };
 };
 

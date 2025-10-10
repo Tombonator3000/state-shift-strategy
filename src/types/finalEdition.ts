@@ -37,6 +37,13 @@ export interface MVPReport {
   impactValue: number;
   impactLabel: string;
   highlight: string;
+  article?: ReportArticleExcerpt | null;
+}
+
+export interface ReportArticleExcerpt {
+  headline?: string;
+  subhead?: string;
+  paragraphs: string[];
 }
 
 export interface FinalEditionEventHighlight {

@@ -90,8 +90,18 @@ describe('gameplay screen integrations', () => {
       followUpHooks: ['Request surveillance logs', 'Debrief the informant'],
     } as const;
 
+    const actualArticleDb = await import('@/data/cardArticles/articleDatabase');
+    const originalGetArticleForCard = actualArticleDb.getArticleForCard;
+    const moduleExports = { ...actualArticleDb };
+
     mock.module('@/data/cardArticles/articleDatabase', () => ({
-      getArticleForCard: () => stubArticle,
+      ...moduleExports,
+      getArticleForCard: (cardId: string) => {
+        if (cardId === 'test-card') {
+          return stubArticle;
+        }
+        return originalGetArticleForCard(cardId);
+      },
     }));
 
     const { ArticlePreviewOverlay } = await import('@/components/newspaper/ArticlePreviewOverlay');
