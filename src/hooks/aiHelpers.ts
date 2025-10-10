@@ -1,5 +1,9 @@
-import type { GameCard, Rarity } from '@/rules/mvp';
+import { emitBanter, defaultBanterUi, getCardPlayTrigger } from '@/ai/banter/banterEngine';
+import type { TurnPlay } from '@/game/combo.types';
 import { trackCharacterAppearance, type RecurringCharacterState } from '@/game/recurringCharacters';
+import type { PlayerId } from '@/mvp/validator';
+import type { PlayedLite } from '@/news/headlineEngine';
+import type { GameCard, Rarity } from '@/rules/mvp';
 import { featureFlags } from '@/state/featureFlags';
 import {
   resolveCardMVP,
@@ -7,11 +11,7 @@ import {
   type CardPlayResolution,
   type CardHotspotResolution,
 } from '@/systems/cardResolution';
-import type { TurnPlay } from '@/game/combo.types';
-import type { PlayedLite } from '@/news/headlineEngine';
-import type { PlayerId } from '@/mvp/validator';
 import type { WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
-import { emitBanter, defaultBanterUi, getCardPlayTrigger } from '@/ai/banter/banterEngine';
 import { applyTruthDelta } from '@/utils/truth';
 
 import type { CardPlayRecord, GameState } from './gameStateTypes';
