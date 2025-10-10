@@ -56,7 +56,8 @@ export function StrategyHelper({ hand, targetStateId, className }: StrategyHelpe
           card.name,
           card.tags || [],
           card.id,
-          targetStateId
+          targetStateId,
+          card.stateBonuses,
         );
         if (bonus) {
           result.stateBonuses.push({

@@ -61,6 +61,7 @@ import type {
   GameState,
   PendingCampaignArcEvent,
   StateEventBonusSummary,
+  StateRoundEventLogEntry,
   StateParanormalHotspot,
   StateParanormalHotspotSummary,
 } from './gameStateTypes';
@@ -1722,6 +1723,73 @@ const createStateEventBonusSummary = (params: {
     eventId: event.id,
     label: labelSource,
     description: descriptionSource,
+    triggeredOnTurn: Math.max(1, turn),
+    faction,
+    effects,
+    effectSummary: effectSummary.length > 0 ? effectSummary : undefined,
+  } satisfies StateEventBonusSummary;
+};
+
+const createStateBonusSummary = (params: {
+  bonus: ActiveStateBonus;
+  faction: 'truth' | 'government';
+  turn: number;
+  round: number;
+}): StateEventBonusSummary => {
+  const { bonus, faction, turn, round } = params;
+  const effects = {
+    truthChange: bonus.truthDelta ?? 0,
+    ipChange: bonus.ipDelta ?? 0,
+    stateEffects: bonus.pressureDelta
+      ? { stateId: bonus.stateId, pressure: bonus.pressureDelta }
+      : undefined,
+  } satisfies NonNullable<GameEvent['effects']>;
+
+  const effectSummary = buildStateEventEffectSummary({
+    effects,
+    truthDeltaOverride: bonus.truthDelta ?? 0,
+  });
+
+  return {
+    source: 'state-event',
+    eventId: `state-bonus:${bonus.id}:r${round}`,
+    label: bonus.label,
+    description: bonus.summary ?? bonus.headline ?? undefined,
+    triggeredOnTurn: Math.max(1, turn),
+    faction,
+    effects,
+    effectSummary: effectSummary.length > 0 ? effectSummary : undefined,
+  } satisfies StateEventBonusSummary;
+};
+
+const createStateRoundEventSummary = (params: {
+  entry: StateRoundEventLogEntry;
+  faction: 'truth' | 'government';
+  turn: number;
+  round: number;
+}): StateEventBonusSummary => {
+  const { entry, faction, turn, round } = params;
+  const effects = {
+    truthChange: entry.truthDelta ?? 0,
+    ipChange: entry.ipDelta ?? 0,
+    stateEffects: entry.pressureDelta
+      ? { stateId: entry.stateId, pressure: entry.pressureDelta }
+      : undefined,
+  } satisfies NonNullable<GameEvent['effects']>;
+
+  const effectSummary = buildStateEventEffectSummary({
+    effects,
+    truthDeltaOverride: entry.truthDelta ?? 0,
+  });
+
+  const label = entry.headline ?? entry.summary ?? entry.id;
+  const description = entry.summary ?? entry.subhead ?? entry.headline ?? undefined;
+
+  return {
+    source: 'state-event',
+    eventId: `state-round:${entry.id}:r${round}`,
+    label,
+    description,
     triggeredOnTurn: Math.max(1, turn),
     faction,
     effects,
@@ -4668,6 +4736,76 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         });
 
         nextState = applyStateBonusAssignmentToState(nextState, assignment);
+
+        const statesWithHistory = nextState.states.map(state => {
+          const abbreviation = state.abbreviation;
+          const existingHistory = Array.isArray(state.stateEventHistory)
+            ? [...state.stateEventHistory]
+            : [];
+          const seenIds = new Set(existingHistory.map(entry => entry.eventId));
+          const ownerFaction = resolveOwnerFaction(state.owner, nextState.faction);
+          const summaryFaction = ownerFaction === 'neutral' ? nextState.faction : ownerFaction;
+
+          const additions: StateEventBonusSummary[] = [];
+          const stateEvents = assignment.roundEvents[abbreviation] ?? [];
+          for (const entry of stateEvents) {
+            const summary = createStateRoundEventSummary({
+              entry,
+              faction: summaryFaction,
+              turn: nextState.turn,
+              round: nextState.round,
+            });
+            if (!seenIds.has(summary.eventId)) {
+              additions.push(summary);
+              seenIds.add(summary.eventId);
+            }
+          }
+
+          const assignedBonus = assignment.bonuses[abbreviation] ?? null;
+          if (assignedBonus) {
+            const summary = createStateBonusSummary({
+              bonus: assignedBonus,
+              faction: summaryFaction,
+              turn: nextState.turn,
+              round: nextState.round,
+            });
+            if (!seenIds.has(summary.eventId)) {
+              additions.push(summary);
+              seenIds.add(summary.eventId);
+            }
+          }
+
+          if (additions.length === 0) {
+            return state;
+          }
+
+          const mergedHistory = trimStateEventHistory([...existingHistory, ...additions]);
+          const stateEventBonus = mergedHistory.length > 0
+            ? mergedHistory[mergedHistory.length - 1]
+            : state.stateEventBonus;
+
+          return {
+            ...state,
+            stateEventHistory: mergedHistory,
+            stateEventBonus,
+          } as typeof state;
+        });
+
+        nextState = {
+          ...nextState,
+          states: statesWithHistory,
+          stateRoundEvents: Object.fromEntries(
+            statesWithHistory.map(state => [state.abbreviation, state.roundEvents ?? []]),
+          ),
+        };
+
+        const ownershipLogEntries = reconcileStateBonusOwnership(prev, nextState);
+        if (ownershipLogEntries.length > 0) {
+          nextState = {
+            ...nextState,
+            log: [...nextState.log, ...ownershipLogEntries],
+          };
+        }
 
         if (typeof window !== 'undefined') {
           (window as any).__stateThemedDebug = {

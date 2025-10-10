@@ -235,7 +235,7 @@ getArticlesByCharacter(characterName: string)
 
 **State Bonuses:**
 ```typescript
-checkStateBonuses(cardName, cardTags, cardId, targetStateId)
+checkStateBonuses(cardName, cardTags, cardId, targetStateId, stateBonuses?)
 ```
 
 **News Events:**

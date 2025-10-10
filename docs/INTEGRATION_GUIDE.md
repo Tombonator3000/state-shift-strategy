@@ -45,7 +45,8 @@ const bonus = checkStateBonuses(
   card.name,
   card.tags || [],
   card.id,
-  targetStateId
+  targetStateId,
+  card.stateBonuses,
 );
 
 if (bonus) {
