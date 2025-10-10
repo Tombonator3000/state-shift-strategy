@@ -86,7 +86,6 @@ import { initNewsPools } from '@/engine/news/newsPools';
 import { toPlayedLite } from '@/hooks/aiHelpers';
 import { useCardPreview } from '@/hooks/useCardPreview';
 import { BreakingNewsTicker } from '@/components/newspaper/BreakingNewsTicker';
-import { StrategyHelper } from '@/components/gameplay/StrategyHelper';
 import {
   dispatchBreakingNews,
   newsForCardPlay,
@@ -3230,12 +3229,7 @@ const Index = () => {
             </TooltipContent>
           </Tooltip>
         </header>
-        <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3 space-y-3">
-          <StrategyHelper
-            hand={gameState.hand}
-            targetStateId={gameState.targetState}
-            className="border-2 border-newspaper-border bg-newspaper-bg text-newspaper-text shadow-sm"
-          />
+        <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
           <EnhancedGameHand
             cards={gameState.hand}
             onPlayCard={handlePlayCard}
@@ -3408,6 +3402,8 @@ const Index = () => {
         selectedCard={gameState.selectedCard}
         playerIP={gameState.ip}
         controlledStates={gameState.controlledStates.length}
+        hand={gameState.hand}
+        targetStateId={gameState.targetState}
         onSuggestMove={(suggestion) => {
           toast(suggestion, {
             duration: 4000,

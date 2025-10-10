@@ -6,24 +6,26 @@ import type { GameCard } from '@/rules/mvp';
 import { checkStateBonuses } from '@/game/stateBonuses';
 import { TWO_CARD_COMBOS } from '@/game/twoCardCombos';
 
-interface StrategyHelperProps {
+export interface StrategyInsights {
+  comboPairs: Array<{ cards: string[]; comboName: string }>;
+  stateBonuses: Array<{ cardName: string; bonus: string }>;
+  suggestions: string[];
+}
+
+export interface StrategyHelperProps {
   hand: GameCard[];
   targetStateId?: string | null;
   className?: string;
 }
 
-/**
- * Strategy helper that highlights synergies, combos, and bonuses
- */
-export function StrategyHelper({ hand, targetStateId, className }: StrategyHelperProps) {
-  const insights = useMemo(() => {
-    const result = {
-      comboPairs: [] as Array<{ cards: string[]; comboName: string }>,
-      stateBonuses: [] as Array<{ cardName: string; bonus: string }>,
-      suggestions: [] as string[],
+export function useStrategyInsights(hand: GameCard[], targetStateId?: string | null): StrategyInsights {
+  return useMemo(() => {
+    const result: StrategyInsights = {
+      comboPairs: [],
+      stateBonuses: [],
+      suggestions: [],
     };
 
-    // Check for two-card combos
     for (const combo of TWO_CARD_COMBOS) {
       if (combo.trigger.kind !== 'hybrid') continue;
 
@@ -49,7 +51,6 @@ export function StrategyHelper({ hand, targetStateId, className }: StrategyHelpe
       }
     }
 
-    // Check state-specific bonuses
     if (targetStateId) {
       hand.forEach(card => {
         const bonus = checkStateBonuses(
@@ -68,7 +69,6 @@ export function StrategyHelper({ hand, targetStateId, className }: StrategyHelpe
       });
     }
 
-    // Generate suggestions
     if (result.comboPairs.length > 0) {
       result.suggestions.push(
         `Play ${result.comboPairs[0].cards.join(' + ')} for ${result.comboPairs[0].comboName} combo!`
@@ -97,6 +97,13 @@ export function StrategyHelper({ hand, targetStateId, className }: StrategyHelpe
 
     return result;
   }, [hand, targetStateId]);
+}
+
+/**
+ * Strategy helper that highlights synergies, combos, and bonuses
+ */
+export function StrategyHelper({ hand, targetStateId, className }: StrategyHelperProps) {
+  const insights = useStrategyInsights(hand, targetStateId);
 
   if (insights.suggestions.length === 0) {
     return null;
@@ -110,7 +117,6 @@ export function StrategyHelper({ hand, targetStateId, className }: StrategyHelpe
           <h3 className="font-semibold text-sm">Strategy Insights</h3>
         </div>
 
-        {/* Combo Opportunities */}
         {insights.comboPairs.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
@@ -125,7 +131,6 @@ export function StrategyHelper({ hand, targetStateId, className }: StrategyHelpe
           </div>
         )}
 
-        {/* State Bonuses */}
         {insights.stateBonuses.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
@@ -140,7 +145,6 @@ export function StrategyHelper({ hand, targetStateId, className }: StrategyHelpe
           </div>
         )}
 
-        {/* General Suggestions */}
         <div className="space-y-1">
           {insights.suggestions.map((suggestion, idx) => (
             <p key={idx} className="text-xs text-muted-foreground leading-relaxed">
