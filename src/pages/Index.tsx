@@ -334,13 +334,6 @@ const Index = () => {
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
   const { previewState, openPreview, closePreview } = useCardPreview();
-  const handHoverCardRef = useRef<string | null>(null);
-  const handleHandCardHover = useCallback(
-    (card: (GameCard & { _hoverPosition?: { x: number; y: number } }) | null) => {
-      handHoverCardRef.current = card?.id ?? null;
-    },
-    []
-  );
   const handlePreviewArticle = useCallback(
     (card: GameCard) => {
       openPreview(card.id, card.name);
@@ -3251,7 +3244,6 @@ const Index = () => {
             disabled={handInteractionDisabled}
             currentIP={gameState.ip}
             loadingCard={loadingCard}
-            onCardHover={handleHandCardHover}
             discardQueue={pendingDiscards}
             onToggleDiscard={handleToggleDiscard}
             discardEnabled={canQueueDiscards}

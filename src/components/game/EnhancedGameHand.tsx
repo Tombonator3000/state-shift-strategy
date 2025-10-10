@@ -62,6 +62,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const { triggerHaptic } = useHapticFeedback();
   const isMobile = useIsMobile();
   const handRef = useRef<HTMLDivElement>(null);
+  const articlePreviewLockedRef = useRef(isArticlePreviewOpen);
   const dragStateRef = useRef<{
     pointerId: number;
     startX: number;
@@ -73,6 +74,15 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const discardQueueSet = useMemo(() => new Set(discardQueue), [discardQueue]);
   const examinedCardData = examinedCard ? cards.find(c => c.id === examinedCard) ?? null : null;
   const examinedIsQueued = examinedCard ? discardQueueSet.has(examinedCard) : false;
+
+  articlePreviewLockedRef.current = isArticlePreviewOpen;
+
+  const clearHover = () => {
+    if (articlePreviewLockedRef.current) {
+      return;
+    }
+    onCardHover?.(null);
+  };
 
   const normalizeCardType = (type: string): MVPCardType => {
     return MVP_CARD_TYPES.includes(type as MVPCardType) ? type as MVPCardType : 'MEDIA';
@@ -153,9 +163,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       if (examinedCard === card.id) {
         setExaminedCard(null);
       }
-      if (!isArticlePreviewOpen) {
-        onCardHover?.(null);
-      }
+      clearHover();
       onSelectCard?.(card.id);
       triggerHaptic('light');
       onCardDragStart?.(card, { x: event.clientX, y: event.clientY, pointerType: event.pointerType });
@@ -229,11 +237,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     <div
       className="relative h-full"
       ref={handRef}
-      onPointerLeave={() => {
-        if (!isArticlePreviewOpen) {
-          onCardHover?.(null);
-        }
-      }}
+      onPointerLeave={clearHover}
     >
       <div className="grid w-full grid-cols-3 gap-3 justify-items-start items-start content-start">
         {cards.length === 0 ? (
@@ -363,16 +367,15 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   }
                   let top = rect.top + rect.height / 2;
                   top = Math.min(window.innerHeight - 16, Math.max(16, top));
+                  if (articlePreviewLockedRef.current) {
+                    return;
+                  }
                   onCardHover?.({
                     ...card,
                     _hoverPosition: { x: left, y: top }
                   });
                 }}
-                onPointerLeave={() => {
-                  if (!isArticlePreviewOpen) {
-                    onCardHover?.(null);
-                  }
-                }}
+                onPointerLeave={clearHover}
                 aria-grabbed={isDraggingThisCard}
               >
                 <BaseCard
