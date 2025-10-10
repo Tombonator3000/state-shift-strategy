@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-13 – Extra Extra stamp honors true triple headlines
+- Updated the newspaper overlay so the Extra Extra masthead stamp appears only when a faction lands a legitimate triple headline with a shared front-page trio.
+- Ensured faction mismatches or filler fallbacks no longer surface the Extra Extra branding, keeping the tabloid's flair tied to real combo victories.
+
 ## 2025-10-12 – Extra Extra toast mirrors headline wins
 - Triggered the Extra Extra toast alongside article generation, reusing the logged winning faction and headline so players get an immediate pop-up summary.
 - Added a window guard so the notification hook remains safe to call during Storybook or server-side rendering where no DOM exists.

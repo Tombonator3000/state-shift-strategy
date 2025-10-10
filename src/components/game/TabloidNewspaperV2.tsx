@@ -659,6 +659,19 @@ const TabloidNewspaperV2 = ({
       .filter((meta): meta is PlayedCardMeta => Boolean(meta));
   }, [frontPageTriplet, playerNarrativeCards]);
 
+  const hasExtraExtra = useMemo(() => {
+    if (!Array.isArray(frontPageTriplet) || frontPageTriplet.length !== 3) {
+      return false;
+    }
+
+    const [first, ...rest] = frontPageTriplet;
+    if (!first?.faction) {
+      return false;
+    }
+
+    return rest.every(card => card?.faction === first.faction);
+  }, [frontPageTriplet]);
+
   const comboSummary = useMemo(() => getLastComboSummary(), [events, playedCards]);
   const comboReport = useMemo(() => {
     if (!comboSummary || comboSummary.results.length === 0) {
@@ -1107,10 +1120,10 @@ const TabloidNewspaperV2 = ({
           {breakingStamp ? (
             <div className="stamp stamp--breaking absolute left-6 top-4 z-10">{breakingStamp}</div>
           ) : null}
-          {playedCards.length >= 3 && (
-            <ExtraStamp 
-              className="top-4 right-20 md:top-6 md:right-24" 
-              size="md" 
+          {hasExtraExtra && (
+            <ExtraStamp
+              className="top-4 right-20 md:top-6 md:right-24"
+              size="md"
             />
           )}
           <button
