@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-10 – Start menu radio previews for every broadcast
+- Timestamp: 2025-10-10T11:14:39Z
+- Files:
+  - `src/components/game/Options.tsx`
+- Summary: Refreshed the options screen so players can audition government, truth, end credits, and theme playlists right from the start menu with quick-select buttons and clearer playlist labels.
 ## 2025-10-10 – Article previews now require explicit activation
 - Timestamp: 2025-10-10T11:22:50Z
 - Files:
