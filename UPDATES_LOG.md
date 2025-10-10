@@ -2,6 +2,14 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-21 – Article overlay stays open until dismissed
+- Timestamp: 2025-10-21T12:00:00Z
+- Files:
+  - `src/components/game/EnhancedGameHand.tsx`
+  - `src/pages/Index.tsx`
+  - `docs/INTEGRATION_GUIDE.md`
+- Summary: Locked the hand hover handlers so the newsroom article overlay no longer clears itself when the pointer leaves, removed the hover-to-open wiring from the gameplay screen, and extended the QA checklist to cover long-read stability for the article preview.
+
 ## 2025-10-10 – Article previews now require explicit activation
 - Timestamp: 2025-10-10T11:22:50Z
 - Files:

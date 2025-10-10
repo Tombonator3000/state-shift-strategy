@@ -136,7 +136,7 @@ function CardComponent({ card }: { card: GameCard }) {
 **Manual QA checklist:**
 
 1. Open a card's detail surface and activate the dedicated **Read Article** control to launch the overlay.
-2. Move the cursor away from the originating card and confirm the article preview remains mounted for uninterrupted reading.
+2. Move the cursor away from the originating card, keep the pointer outside the hand for at least five seconds, and confirm the article preview remains mounted for uninterrupted reading.
 3. Dismiss the overlay with its close button and with the **Escape** key to verify both affordances work and no hover-driven teardown occurs.
 
 ### Breaking News Ticker
