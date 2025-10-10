@@ -481,6 +481,12 @@ const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): Ga
     const focusTotals = summarize([focusLog]);
     const article = generateExtraExtra(`${seedPrefix}:${prev.round}:${prev.turn}`, [focusLog], focusTotals, evaluation);
 
+    if (typeof window !== 'undefined') {
+      const winningFactionName = evaluation.winningFaction === 'truth' ? 'Truth' : 'Government';
+      const toastMessage = `${winningFactionName} clinches the headline: ${article.hed}`;
+      (window as typeof window & { uiExtraExtraToast?: (message: string) => void }).uiExtraExtraToast?.(toastMessage);
+    }
+
     extraExtraFeed = [...extraExtraFeed, article];
     
     console.info('📋 EXTRA EXTRA Article Added:', {
