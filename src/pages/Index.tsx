@@ -334,6 +334,19 @@ const Index = () => {
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
   const { previewState, openPreview, closePreview } = useCardPreview();
+  const handHoverCardRef = useRef<string | null>(null);
+  const handleHandCardHover = useCallback(
+    (card: (GameCard & { _hoverPosition?: { x: number; y: number } }) | null) => {
+      handHoverCardRef.current = card?.id ?? null;
+    },
+    []
+  );
+  const handlePreviewArticle = useCallback(
+    (card: GameCard) => {
+      openPreview(card.id, card.name);
+    },
+    [openPreview]
+  );
   const discardPreview = useMemo(
     () => planDiscardOutcome(gameState.hand, gameState.discardPile ?? [], pendingDiscards),
     [gameState.hand, gameState.discardPile, pendingDiscards]
@@ -3238,13 +3251,7 @@ const Index = () => {
             disabled={handInteractionDisabled}
             currentIP={gameState.ip}
             loadingCard={loadingCard}
-            onCardHover={(card) => {
-              if (card && card.id) {
-                openPreview(card.id, card.name);
-              } else {
-                closePreview();
-              }
-            }}
+            onCardHover={handleHandCardHover}
             discardQueue={pendingDiscards}
             onToggleDiscard={handleToggleDiscard}
             discardEnabled={canQueueDiscards}
@@ -3252,6 +3259,8 @@ const Index = () => {
             onCardDragMove={handleHandDragMove}
             onCardDragEnd={handleHandDragEnd}
             draggingCardId={draggedCardState?.card.id ?? null}
+            onPreviewArticle={handlePreviewArticle}
+            isArticlePreviewOpen={previewState.isOpen}
           />
         </div>
         <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">

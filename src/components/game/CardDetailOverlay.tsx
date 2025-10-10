@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, Target, Zap, Megaphone, Trash2 } from 'lucide-react';
+import { X, Target, Zap, Megaphone, Trash2, BookOpen } from 'lucide-react';
 import type { GameCard } from '@/rules/mvp';
 import { MVP_CARD_TYPES, type MVPCardType } from '@/rules/mvp';
 import CardImage from '@/components/game/CardImage';
@@ -23,6 +23,8 @@ interface CardDetailOverlayProps {
   isDiscardQueued?: boolean;
   onToggleDiscard?: () => void;
   discardEnabled?: boolean;
+  onRequestArticle?: () => void;
+  articleAvailable?: boolean;
 }
 
 const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
@@ -35,6 +37,8 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
   isDiscardQueued,
   onToggleDiscard,
   discardEnabled = true,
+  onRequestArticle,
+  articleAvailable = false,
 }) => {
   const isMobile = useIsMobile();
   if (!card) return null;
@@ -112,6 +116,20 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
             {displayType === 'ZONE' ? 'SELECT & TARGET' : 'DEPLOY ASSET'}
           </Button>
 
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onRequestArticle}
+            disabled={!articleAvailable}
+            className={cn(
+              'w-full sm:w-auto px-6 py-2 rounded-tabloid uppercase tracking-[0.3em] text-xs flex items-center gap-2',
+              !articleAvailable && 'cursor-not-allowed opacity-60'
+            )}
+          >
+            <BookOpen className="w-4 h-4" />
+            Read Article
+          </Button>
+
           <div className="flex flex-wrap items-center justify-center gap-2 text-xs uppercase tracking-widest text-white/80">
             <span>
               {canAfford ? 'CLEARED FOR DEPLOYMENT' : `NEED ${card.cost} IP`}
@@ -134,6 +152,8 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
   isDiscardQueued,
   onToggleDiscard,
   discardEnabled = true,
+  onRequestArticle,
+  articleAvailable = false,
 }) => {
   const isMobile = useIsMobile();
   if (!card) return null;
@@ -319,6 +339,19 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
                   <span className="text-xs text-destructive font-medium">Need {card.cost} IP</span>
                 </div>
               )}
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onRequestArticle}
+              disabled={!articleAvailable}
+              className={`w-full font-mono flex items-center justify-center gap-2 ${
+                !articleAvailable ? 'opacity-60 cursor-not-allowed' : ''
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              Read Article
             </Button>
 
           </div>
