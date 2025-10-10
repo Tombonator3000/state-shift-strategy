@@ -2,6 +2,12 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-10 – Safeguarded hotspot source labels on the map
+- Timestamp: 2025-10-10T10:50:57Z
+- Files:
+  - `src/components/game/EnhancedUSAMap.tsx`
+- Summary: Hardened the enhanced USA map overlay so hotspot sources and event factions default to an "UNKNOWN" tag instead of crashing when saved data lacks a faction string.
+
 ## 2025-10-16 – Newsroom previews and ticker integration
 - Timestamp: 2025-10-16T09:00:00Z
 - Files:

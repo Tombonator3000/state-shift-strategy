@@ -9,6 +9,8 @@ import { AlertTriangle, Target, Shield } from 'lucide-react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { areMapVfxEnabled, areParanormalEffectsEnabled } from '@/state/settings';
 import { getHotspotIdleMessage } from '@/state/useGameLog';
+
+const uppercaseOrFallback = (value?: string | null, fallback = 'UNKNOWN'): string => (value ?? fallback).toUpperCase();
 import type {
   ActiveStateBonus,
   StateEventBonusSummary,
@@ -120,7 +122,7 @@ export const StateHotspotDetails: React.FC<StateHotspotDetailsProps> = ({ hotspo
                   <span>Truth capture: {formatTruthDelta(truthCaptureDelta)}</span>
                   <span>Gov capture: {formatTruthDelta(governmentCaptureDelta)}</span>
                   <span>Turns left: {Math.max(0, hotspot.turnsRemaining)}</span>
-                  <span>Source: {hotspot.source.toUpperCase()}</span>
+                  <span>Source: {uppercaseOrFallback(hotspot.source)}</span>
                 </div>
               );
             })()}
@@ -147,7 +149,7 @@ export const StateHotspotDetails: React.FC<StateHotspotDetailsProps> = ({ hotspo
                       </span>
                     )}
                     <span className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground/70">
-                      Turn {entry.resolvedOnTurn} · {entry.faction.toUpperCase()}
+                      Turn {entry.resolvedOnTurn} · {uppercaseOrFallback(entry.faction)}
                     </span>
                   </div>
                 </li>
@@ -1424,7 +1426,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
                     <div className="text-muted-foreground">Bonus active</div>
                   )}
                   <div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
-                    Turn {stateInfo.stateEventBonus.triggeredOnTurn} · {stateInfo.stateEventBonus.faction.toUpperCase()}
+                    Turn {stateInfo.stateEventBonus.triggeredOnTurn} · {uppercaseOrFallback(stateInfo.stateEventBonus.faction)}
                   </div>
                   {stateInfo.stateEventHistory?.length ? (
                     <div className="mt-2 border-t border-amber-500/20 pt-2">
@@ -1440,7 +1442,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
                             >
                               <span className="truncate font-semibold text-foreground/90">{entry.label}</span>
                               <span className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground/70">
-                                Turn {entry.triggeredOnTurn} · {entry.faction.toUpperCase()}
+                                Turn {entry.triggeredOnTurn} · {uppercaseOrFallback(entry.faction)}
                               </span>
                             </li>
                           ))}
