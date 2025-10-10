@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { HelpCircle, X, Lightbulb, Target, Zap } from 'lucide-react';
+import { HelpCircle, X, Lightbulb, Target, Zap, TrendingUp, MapPin } from 'lucide-react';
+import type { GameCard } from '@/rules/mvp';
+import { useStrategyInsights } from '@/components/gameplay/StrategyHelper';
 
 interface HelpTip {
   id: string;
@@ -19,16 +21,20 @@ interface ContextualHelpProps {
   selectedCard?: string;
   playerIP: number;
   controlledStates: number;
+  hand: GameCard[];
+  targetStateId?: string | null;
   onSuggestMove?: (suggestion: string) => void;
 }
 
-const ContextualHelp = ({ 
-  gamePhase, 
-  currentPlayer, 
-  selectedCard, 
-  playerIP, 
+const ContextualHelp = ({
+  gamePhase,
+  currentPlayer,
+  selectedCard,
+  playerIP,
   controlledStates,
-  onSuggestMove 
+  hand,
+  targetStateId,
+  onSuggestMove
 }: ContextualHelpProps) => {
   const [activeHelp, setActiveHelp] = useState<HelpTip | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -88,6 +94,11 @@ const ContextualHelp = ({
   };
 
   const suggestions = getSmartSuggestions();
+  const strategyInsights = useStrategyInsights(hand, targetStateId);
+  const hasStrategyInsights =
+    strategyInsights.comboPairs.length > 0 ||
+    strategyInsights.stateBonuses.length > 0 ||
+    strategyInsights.suggestions.length > 0;
 
   return (
     <>
@@ -144,6 +155,56 @@ const ContextualHelp = ({
                     {suggestion.text}
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Strategy Insights */}
+            {hasStrategyInsights && (
+              <div className="mt-3 space-y-3 rounded border border-newspaper-bg/30 bg-newspaper-bg/10 p-3">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-truth-red" />
+                  <h4 className="font-semibold text-xs uppercase tracking-[0.2em]">Strategy Insights</h4>
+                </div>
+
+                {strategyInsights.comboPairs.length > 0 && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1 text-[0.65rem] font-semibold text-newspaper-bg/80">
+                      <TrendingUp className="h-3 w-3" />
+                      <span>Combo Opportunities</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {strategyInsights.comboPairs.map((combo, index) => (
+                        <Badge key={index} variant="secondary" className="text-[0.6rem]">
+                          {combo.comboName}: {combo.cards.join(' + ')}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {strategyInsights.stateBonuses.length > 0 && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1 text-[0.65rem] font-semibold text-newspaper-bg/80">
+                      <MapPin className="h-3 w-3" />
+                      <span>State Bonuses</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {strategyInsights.stateBonuses.map((bonus, index) => (
+                        <Badge key={index} variant="outline" className="text-[0.6rem]">
+                          {bonus.cardName}: {bonus.bonus}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {strategyInsights.suggestions.length > 0 && (
+                  <div className="space-y-1 text-[0.65rem] leading-relaxed text-newspaper-bg/80">
+                    {strategyInsights.suggestions.map((insight, index) => (
+                      <p key={index}>• {insight}</p>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

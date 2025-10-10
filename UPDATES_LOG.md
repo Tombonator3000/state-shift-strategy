@@ -2,6 +2,15 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-17 – Strategy insights migrate to help overlay
+- Timestamp: 2025-10-17T08:45:00Z
+- Files:
+  - `src/components/game/ContextualHelp.tsx`
+  - `src/components/gameplay/StrategyHelper.tsx`
+  - `src/pages/Index.tsx`
+  - `__tests__/integration/gameplayScreen.test.tsx`
+- Summary: Routed the strategy insight engine into the contextual help drawer, removed the standalone panel from the main layout, and updated integration coverage to confirm insights surface when agents open the overlay.
+
 ## 2025-10-16 – Newsroom previews and ticker integration
 - Timestamp: 2025-10-16T09:00:00Z
 - Files:

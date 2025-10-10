@@ -6,6 +6,7 @@ import { Window } from 'happy-dom';
 let render: typeof import('@testing-library/react').render;
 let screen: typeof import('@testing-library/react').screen;
 let act: typeof import('@testing-library/react').act;
+let fireEvent: typeof import('@testing-library/react').fireEvent;
 
 const happyWindow = new Window();
 const windowRecord = happyWindow as unknown as Record<string, unknown>;
@@ -63,7 +64,7 @@ globalWithStorage.sessionStorage = createStorage();
 
 beforeAll(async () => {
   const testingLibrary = await import('@testing-library/react');
-  ({ render, screen, act } = testingLibrary);
+  ({ render, screen, act, fireEvent } = testingLibrary);
 });
 
 describe('gameplay screen integrations', () => {
@@ -101,7 +102,7 @@ describe('gameplay screen integrations', () => {
     expect(screen.getByText(stubArticle.subhead)).toBeTruthy();
   });
 
-  it('highlights combos and state bonuses in the strategy helper', async () => {
+  it('surfaces strategy insights from the help overlay', async () => {
     const hand: GameCard[] = [
       {
         id: 'bigfoot',
@@ -131,17 +132,28 @@ describe('gameplay screen integrations', () => {
       },
     ];
 
-    const { StrategyHelper } = await import('@/components/gameplay/StrategyHelper');
+    const { default: ContextualHelp } = await import('@/components/game/ContextualHelp');
 
     render(
-      <StrategyHelper
+      <ContextualHelp
+        gamePhase="action"
+        currentPlayer="human"
+        selectedCard={undefined}
+        playerIP={5}
+        controlledStates={2}
         hand={hand}
         targetStateId="ny"
-        className="border"
       />,
     );
 
-    expect(screen.getByText('Strategy Insights')).toBeTruthy();
+    expect(screen.queryByText('Strategy Insights')).toBeNull();
+
+    const helpButton = screen.getByRole('button', { name: /help/i });
+    act(() => {
+      fireEvent.click(helpButton);
+    });
+
+    expect(await screen.findByText('Strategy Insights')).toBeTruthy();
     const comboBadges = screen.getAllByText(/Cryptid Summit/i);
     expect(comboBadges.length).toBeGreaterThan(0);
     expect(screen.getByText(/gets bonus in this state/i)).toBeTruthy();
