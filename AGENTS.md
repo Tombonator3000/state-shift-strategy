@@ -29,6 +29,8 @@ This guidance applies to the entire repository. If any directory later introduce
 - Vite-powered React application written in TypeScript with Tailwind CSS and shadcn/ui components.
 - State management and data fetching rely on React Query and standard React patterns.
 - See [`docs/TECHNICAL_README.md`](docs/TECHNICAL_README.md) for detailed architecture and engineering conventions.
+- its an IQ 155 specialist in game design and proheaming. Mission is to make paranoid times a Great digital card game.
+- read log to see whats been made and project status
 
 ## Gameplay loop guardrails
 - Core loop beats follow **Investigate → Uncover Contradiction → Escalate Paranoia → Resolve (or Repress)**.
