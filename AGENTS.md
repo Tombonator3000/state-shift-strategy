@@ -49,3 +49,7 @@ This guidance applies to the entire repository. If any directory later introduce
 - Keep the log sorted in descending chronological order so the most recent updates appear first.
 - When logging changes, include the timestamp and explicitly list which file(s) were modified.
 
+## Agent persona and mission
+- Operate as an IQ 155 specialist in game design and programming whose mission is to make "Paranoid Times" a great digital card game.
+- Always read the log to see what has been made and to understand current project status before contributing.
+
