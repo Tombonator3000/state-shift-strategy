@@ -74,6 +74,7 @@ Pastor Rex, who operates out of a converted grain silo in Nebraska, has correctl
     tags: ['media', 'prophecy', 'commerce'],
     statesMentioned: ['Nebraska', 'Idaho'],
     recurringCharacter: 'Pastor Rex',
+    articleVariant: 'pastor_rex_stage_0',
     followUpHooks: [
       'Doomsday Beans contains "proprietary prophetic seasoning," label reveals',
       'Pastor Rex announces live event at undisclosed bunker location'
@@ -96,6 +97,7 @@ Political analysts are divided. "It's a publicity stunt," said Dr. Morton Riggs 
     tags: ['politics', 'cryptid', 'transparency'],
     statesMentioned: ['Virginia'],
     recurringCharacter: 'Bat Boy',
+    articleVariant: 'bat_boy_stage_0',
     followUpHooks: [
       'Major party operatives reportedly "very concerned" about echolocation abilities',
       'Bat Boy refuses to debate indoors, citing unfair acoustic advantage'
@@ -236,6 +238,7 @@ Within hours, Chen's booth sold out of every metallic accessory, including exper
     tags: ['aurora', 'commerce', 'anomaly'],
     statesMentioned: ['Alaska'],
     recurringCharacter: 'Maria Chen',
+    articleVariant: 'maria_chen_stage_0',
     followUpHooks: [
       'Chen announces permanent "Northern Lights Loyalty Program" with classified perks',
       'NOAA satellites detect coupon codes embedded in solar wind'
@@ -316,6 +319,7 @@ The U.S. Postal Service called the incident "unauthorized heroism" and reminded 
     tags: ['florida-man', 'weather', 'heroics'],
     statesMentioned: ['Florida'],
     recurringCharacter: 'Florida Man',
+    articleVariant: 'florida_man_stage_0',
     followUpHooks: [
       'Postal Service pilots new "Extreme Delivery" program with Florida Man as consultant',
       'Treasure map route corresponds to shuttered Navy listening posts'
@@ -324,7 +328,7 @@ The U.S. Postal Service called the incident "unauthorized heroism" and reminded 
   {
     cardId: 'TRUTH-016',
     faction: 'truth',
-    headline: 'MAUNA KEA OBSERVATORY RECORDS TOURIST-CAMO UFO—AGENT CLAIMS IT'S JUST "SUNGLASSES GLARE"',
+    headline: 'MAUNA KEA OBSERVATORY RECORDS TOURIST-CAMO UFO—AGENT CLAIMS IT\'S JUST "SUNGLASSES GLARE"',
     subhead: 'Visiting officials distribute identical aviators moments before footage erased',
     byline: 'By Noelani Kealoha, Pacific Skywatch Desk',
     body: `Astronomers atop Hawaii's Mauna Kea captured crystal-clear footage of a craft mimicking the shape and coloration of nearby tourists—complete with floral shirts rippling along its hull. The camouflaged object hovered silently, mirroring every group selfie for nine minutes.
@@ -336,6 +340,7 @@ Before the team could publish their findings, Agent Smitherson of the newly form
     tags: ['ufo', 'coverup', 'tourism'],
     statesMentioned: ['Hawaii'],
     recurringCharacter: 'Agent Smitherson',
+    articleVariant: 'agent_smitherson_stage_0',
     followUpHooks: [
       'Tourists report sunglasses whispering directions to hidden lava tubes',
       'Agent Smitherson requests reimbursement for 400 pairs of identical aviators'
@@ -376,6 +381,7 @@ Utility crews arrived when nearby substations began emitting gospel harmonies. T
     tags: ['pastor-rex', 'miracle', 'agriculture'],
     statesMentioned: ['Indiana'],
     recurringCharacter: 'Pastor Rex',
+    articleVariant: 'pastor_rex_stage_1',
     followUpHooks: [
       'State fair invites Pastor Rex to judge giant pumpkin contest—pumpkins begin chanting psalms',
       'Doomsday Beans releases Hoosier Harvest flavor exclusively via drone drop'

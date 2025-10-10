@@ -4,6 +4,13 @@
  * and escalating effects.
  */
 
+export interface CharacterArc {
+  stage: number;
+  label: string;
+  description: string;
+  articleVariant: string;
+}
+
 export interface RecurringCharacter {
   id: string;
   name: string;
@@ -30,6 +37,8 @@ export interface RecurringCharacter {
     }>;
   };
   lore: string;
+  storyArcs: CharacterArc[];
+  currentStage: number;
 }
 
 export const RECURRING_CHARACTERS: Record<string, RecurringCharacter> = {
@@ -60,6 +69,30 @@ export const RECURRING_CHARACTERS: Record<string, RecurringCharacter> = {
       ],
     },
     lore: 'Local preacher whose doomsday predictions keep coming true.',
+    storyArcs: [
+      {
+        stage: 0,
+        label: 'Broadcast Prophet',
+        description:
+          'Rex’s bunker studio sermons break into the mainstream while he hustles survival swag between prophecies.',
+        articleVariant: 'pastor_rex_stage_0',
+      },
+      {
+        stage: 1,
+        label: 'Miracle Revivalist',
+        description:
+          'Tent revivals levitate over heartland cornfields as Rex forecasts bumper crops with unnerving accuracy.',
+        articleVariant: 'pastor_rex_stage_1',
+      },
+      {
+        stage: 2,
+        label: 'Airborne Border Preacher',
+        description:
+          'Rex floats sermons along state lines, sparring mid-air with federal paperwork while promising brisket-flavored salvation.',
+        articleVariant: 'pastor_rex_stage_2',
+      },
+    ],
+    currentStage: 0,
   },
   agent_smitherson: {
     id: 'agent_smitherson',
@@ -83,6 +116,30 @@ export const RECURRING_CHARACTERS: Record<string, RecurringCharacter> = {
       ],
     },
     lore: 'Man in Black who denies his own existence.',
+    storyArcs: [
+      {
+        stage: 0,
+        label: 'Reflection Liaison',
+        description:
+          'Smitherson waves away crystal-clear UFO footage with mirrored sunglasses and voluntary consent forms.',
+        articleVariant: 'agent_smitherson_stage_0',
+      },
+      {
+        stage: 1,
+        label: 'Historic Dampener',
+        description:
+          'He weaponizes patriotic paperwork, forcing tourists to whisper NDA oaths inside Independence Hall.',
+        articleVariant: 'agent_smitherson_stage_1',
+      },
+      {
+        stage: 2,
+        label: 'Quiet Booth Architect',
+        description:
+          'Smitherson seeds national parks with listening kiosks that recycle secrets under the guise of mindfulness.',
+        articleVariant: 'agent_smitherson_stage_2',
+      },
+    ],
+    currentStage: 0,
   },
   florida_man: {
     id: 'florida_man',
@@ -111,6 +168,30 @@ export const RECURRING_CHARACTERS: Record<string, RecurringCharacter> = {
       ],
     },
     lore: 'The legendary Florida Man whose exploits defy explanation.',
+    storyArcs: [
+      {
+        stage: 0,
+        label: 'Storm Courier',
+        description:
+          'Florida Man treats hurricanes like mail routes, surfing chaos to deliver perfectly sorted envelopes.',
+        articleVariant: 'florida_man_stage_0',
+      },
+      {
+        stage: 1,
+        label: 'Great Lakes Liberator',
+        description:
+          'He ice-surfs the Midwest, carving hotline sigils that thaw freighters and embarrass the Coast Guard.',
+        articleVariant: 'florida_man_stage_1',
+      },
+      {
+        stage: 2,
+        label: 'Skywriting Ringmaster',
+        description:
+          'Florida Man hijacks small-town airshows to broadcast resistance timetables in contrails and citrus fog.',
+        articleVariant: 'florida_man_stage_2',
+      },
+    ],
+    currentStage: 0,
   },
   bat_boy: {
     id: 'bat_boy',
@@ -134,6 +215,30 @@ export const RECURRING_CHARACTERS: Record<string, RecurringCharacter> = {
       ],
     },
     lore: 'Mysterious cryptid who keeps showing up in unexpected places.',
+    storyArcs: [
+      {
+        stage: 0,
+        label: 'Transparency Candidate',
+        description:
+          'Bat Boy dives into politics, demanding curtain-free governance with sonar-backed sincerity.',
+        articleVariant: 'bat_boy_stage_0',
+      },
+      {
+        stage: 1,
+        label: 'Night School Provocateur',
+        description:
+          'He hosts upside-down civics seminars in national monuments, tutoring insomniac lawmakers.',
+        articleVariant: 'bat_boy_stage_1',
+      },
+      {
+        stage: 2,
+        label: 'Conspiracy Maestro',
+        description:
+          'Bat Boy remixes classified setlists into campaign anthems, teaming with fellow weirdos to declassify the groove.',
+        articleVariant: 'bat_boy_stage_2',
+      },
+    ],
+    currentStage: 0,
   },
   maria_chen: {
     id: 'maria_chen',
@@ -157,6 +262,30 @@ export const RECURRING_CHARACTERS: Record<string, RecurringCharacter> = {
       ],
     },
     lore: 'Roswell tinfoil hat vendor whose business keeps growing.',
+    storyArcs: [
+      {
+        stage: 0,
+        label: 'Aurora Quartermaster',
+        description:
+          'Chen answers celestial shopping lists, upgrading her paranoia kiosk for polar clientele.',
+        articleVariant: 'maria_chen_stage_0',
+      },
+      {
+        stage: 1,
+        label: 'Ley Line Retailer',
+        description:
+          'Times Square billboards beam her foil couture while tourists eavesdrop through resonant crowns.',
+        articleVariant: 'maria_chen_stage_1',
+      },
+      {
+        stage: 2,
+        label: 'Cryptid Supply Chain Chief',
+        description:
+          'Chen co-manages convention merch tables with Bat Boy, plotting multi-state paranoia franchises.',
+        articleVariant: 'maria_chen_stage_2',
+      },
+    ],
+    currentStage: 0,
   },
   coach_hammond: {
     id: 'coach_hammond',
@@ -180,6 +309,30 @@ export const RECURRING_CHARACTERS: Record<string, RecurringCharacter> = {
       ],
     },
     lore: 'High school football coach who lost a game to a UFO.',
+    storyArcs: [
+      {
+        stage: 0,
+        label: 'Friday Night Watcher',
+        description:
+          'Hammond rebuilds his high school defense with anti-abduction drills and midnight sky audits.',
+        articleVariant: 'coach_hammond_stage_0',
+      },
+      {
+        stage: 1,
+        label: 'Bluegrass Analyst',
+        description:
+          'He exports UFO playbooks to Churchill Downs, coaching jockeys on how to blitz tractor beams.',
+        articleVariant: 'coach_hammond_stage_1',
+      },
+      {
+        stage: 2,
+        label: 'National Counterplay Director',
+        description:
+          'Hammond leads interstate clinics, diagramming zone coverage for storm fronts and orbital scrimmages.',
+        articleVariant: 'coach_hammond_stage_2',
+      },
+    ],
+    currentStage: 0,
   },
 };
 

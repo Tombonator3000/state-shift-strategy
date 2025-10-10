@@ -15,6 +15,7 @@ export type CardArticle = {
   statesMentioned?: string[];
   recurringCharacter?: string | null;
   followUpHooks?: string[];
+  articleVariant?: string | null;
 };
 
 export type ArticleBank = {
@@ -69,6 +70,7 @@ const cardArticleSchema = z.object({
   statesMentioned: z.array(z.string()).optional(),
   recurringCharacter: z.string().optional(),
   followUpHooks: z.array(z.string()).optional(),
+  articleVariant: z.string().optional(),
 });
 
 const articleFileSchema = z.object({
@@ -139,6 +141,7 @@ export async function loadArticleBank(): Promise<ArticleBank> {
         statesMentioned: normaliseStringList(article.statesMentioned),
         recurringCharacter: article.recurringCharacter ? article.recurringCharacter.trim() || null : null,
         followUpHooks: normaliseStringList(article.followUpHooks),
+        articleVariant: article.articleVariant ? article.articleVariant.trim() || null : null,
       };
       map.set(normalised.id, normalised);
     }
