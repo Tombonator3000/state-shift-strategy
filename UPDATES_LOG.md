@@ -13,6 +13,13 @@ This document provides a chronological record of gameplay-impacting changes merg
   - `src/types/finalEdition.ts`
   - `__tests__/utils/finalEdition.test.ts`
 - Summary: Front page and inside spread now render full MVP and runner-up copy pulled from the card article bank, fall back to existing report highlights when no article exists, and the game-over report captures sanitized paragraphs for downstream UIs with regression coverage for both pathways.
+## 2025-10-21 – Article overlay stays open until dismissed
+- Timestamp: 2025-10-21T12:00:00Z
+- Files:
+  - `src/components/game/EnhancedGameHand.tsx`
+  - `src/pages/Index.tsx`
+  - `docs/INTEGRATION_GUIDE.md`
+- Summary: Locked the hand hover handlers so the newsroom article overlay no longer clears itself when the pointer leaves, removed the hover-to-open wiring from the gameplay screen, and extended the QA checklist to cover long-read stability for the article preview.
 
 ## 2025-10-10 – Start menu radio previews for every broadcast
 - Timestamp: 2025-10-10T11:14:39Z
