@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-11 – Article cache + fallback guardrails
+- Implemented cached lookups for `CARD_ARTICLE_DATABASE` so repeated issue generation avoids full scans and tolerates missing IDs with null memoization.
+- Wired `IssueGenerator` to request `getArticleOrFallback`, blending remote bank data, static TypeScript articles, and generated copy when gaps remain.
+- QA sweep confirmed variable substitution, tone transforms, and <200 ms issue builds under fallback data; flagged remaining coverage gaps in MVP card set and environment-only loaders for follow-up.
+
 ## 2025-10-10 – Newspaper tone transforms
 - Added placeholder-safe tone transforms and an `applyTone` helper so newspaper copy can shift between straight news, tabloid, local color, exposé, and classified styles.
 - Extended card article metadata with `preferredTone` overrides and updated the issue generator to select and apply tones before front-page rendering.

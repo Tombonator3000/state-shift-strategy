@@ -2,7 +2,7 @@ import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { NewspaperData } from '@/lib/newspaperData';
 import type { Card } from '@/types';
 import { loadCardLexicon } from './CardLexicon';
-import { loadArticleBank, type CardArticle } from '@/engine/news/articleBank';
+import { loadArticleBank, type CardArticle as ArticleBankCardArticle } from '@/engine/news/articleBank';
 import { substituteArticleVariables, type GameStateContext } from './articleVariables';
 import { generateMainStory, type PlayedCardMeta, type GeneratedStory as MainGeneratedStory } from '@/engine/news/mainStory';
 import { deriveFrontPageSubhead } from '@/engine/news/frontPageSubhead';
@@ -10,6 +10,10 @@ import { composeCardStory, composeComboStory, type CardStory, type ComboStory } 
 import type { ComboSummary } from '@/game/combo.types';
 import type { AgendaIssueId } from '@/data/agendaIssues';
 import { applyTone, type ArticleTone } from './articleTones';
+import {
+  getArticleForCard as getStaticArticleForCard,
+  type CardArticle as StaticCardArticle,
+} from '@/data/cardArticles/articleDatabase';
 
 export interface PlayedCardInput {
   card: Card;
@@ -335,7 +339,7 @@ const mapCardToArticle = (
   } satisfies NarrativeArticle;
 };
 
-const collectTags = (entry: PlayedCardInput, article: CardArticle | null): string[] => {
+const collectTags = (entry: PlayedCardInput, article: ArticleBankCardArticle | null): string[] => {
   const fromCard = Array.isArray((entry.card as { tags?: string[] }).tags)
     ? ((entry.card as { tags?: string[] }).tags as string[])
     : [];
@@ -343,7 +347,7 @@ const collectTags = (entry: PlayedCardInput, article: CardArticle | null): strin
   return [...fromCard, ...fromArticle].map(tag => tag.toLowerCase());
 };
 
-const determineTone = (entry: PlayedCardInput, article: CardArticle | null): ArticleTone => {
+const determineTone = (entry: PlayedCardInput, article: ArticleBankCardArticle | null): ArticleTone => {
   if (article?.preferredTone) {
     return article.preferredTone;
   }
@@ -371,8 +375,8 @@ const determineTone = (entry: PlayedCardInput, article: CardArticle | null): Art
 
 const applyToneIfAvailable = (
   entry: PlayedCardInput,
-  article: CardArticle | null,
-): CardArticle | null => {
+  article: ArticleBankCardArticle | null,
+): ArticleBankCardArticle | null => {
   if (!article) {
     return null;
   }
@@ -409,7 +413,7 @@ const collectWeather = (dataset: NewspaperData): string => {
   return pick(pool, FALLBACK_WEATHER);
 };
 
-const splitArticleBody = (body: CardArticle['body'] | undefined): string[] => {
+const splitArticleBody = (body: ArticleBankCardArticle['body'] | undefined): string[] => {
   if (typeof body !== 'string') {
     return [];
   }
@@ -420,10 +424,126 @@ const splitArticleBody = (body: CardArticle['body'] | undefined): string[] => {
     .filter(Boolean);
 };
 
+type ResolvedCardArticle = ArticleBankCardArticle & { cardId: string };
+
+type ArticleResolutionOrigin = 'bank' | 'static' | 'generated';
+
+const uniqueStrings = (values: (string | null | undefined)[]): string[] => {
+  const seen = new Set<string>();
+  const results: string[] = [];
+  for (const raw of values) {
+    if (typeof raw !== 'string') {
+      continue;
+    }
+    const trimmed = raw.trim();
+    if (!trimmed || seen.has(trimmed)) {
+      continue;
+    }
+    seen.add(trimmed);
+    results.push(trimmed);
+  }
+  return results;
+};
+
+const normaliseArticleRecord = (
+  source: ArticleBankCardArticle | StaticCardArticle,
+  cardId: string,
+  fallbackFaction: 'truth' | 'government',
+): ResolvedCardArticle => {
+  const candidate = source as Partial<ArticleBankCardArticle> & Partial<StaticCardArticle>;
+  const tags = Array.isArray(candidate.tags) ? uniqueStrings(candidate.tags) : [];
+  const states = Array.isArray(candidate.statesMentioned)
+    ? uniqueStrings(candidate.statesMentioned)
+    : undefined;
+  const hooks = Array.isArray(candidate.followUpHooks) ? uniqueStrings(candidate.followUpHooks) : undefined;
+  const variant = typeof candidate.articleVariant === 'string' ? candidate.articleVariant.trim() || null : null;
+  const recurring =
+    typeof candidate.recurringCharacter === 'string'
+      ? candidate.recurringCharacter.trim() || null
+      : candidate.recurringCharacter ?? null;
+
+  return {
+    id: typeof candidate.id === 'string' && candidate.id.trim() ? candidate.id.trim() : cardId,
+    cardId: typeof candidate.cardId === 'string' && candidate.cardId.trim() ? candidate.cardId.trim() : cardId,
+    faction: candidate.faction ?? fallbackFaction,
+    tags,
+    headline: candidate.headline,
+    subhead: candidate.subhead,
+    byline: candidate.byline,
+    body: candidate.body,
+    imagePrompt: candidate.imagePrompt,
+    statesMentioned: states,
+    recurringCharacter: recurring,
+    followUpHooks: hooks,
+    articleVariant: variant,
+    preferredTone: candidate.preferredTone ?? null,
+  } satisfies ResolvedCardArticle;
+};
+
+const createGenericArticle = (
+  entry: PlayedCardInput,
+  story: CardStory,
+  targetName: string | null,
+  capturedNames: string[],
+): ResolvedCardArticle => {
+  const cardId = entry.card.id;
+  const faction = resolveFaction(entry.card.faction);
+  const cardTags = Array.isArray((entry.card as { tags?: string[] }).tags)
+    ? ((entry.card as { tags?: string[] }).tags as string[])
+    : [];
+  const storyTags = Array.isArray(story.tags) ? story.tags : [];
+  const tags = uniqueStrings([...cardTags, ...storyTags]);
+  const states = uniqueStrings([targetName, ...capturedNames]);
+
+  return {
+    id: cardId,
+    cardId,
+    faction,
+    tags,
+    headline: story.headline,
+    subhead: story.deck,
+    byline: FALLBACK_BYLINE,
+    body: story.paragraphs.join('\n\n'),
+    imagePrompt: story.artHint,
+    statesMentioned: states.length ? states : undefined,
+    recurringCharacter: null,
+    followUpHooks: [],
+    articleVariant: null,
+    preferredTone: null,
+  } satisfies ResolvedCardArticle;
+};
+
+const getArticleOrFallback = (
+  entry: PlayedCardInput,
+  story: CardStory,
+  targetName: string | null,
+  capturedNames: string[],
+  bank: Awaited<ReturnType<typeof loadArticleBank>> | null,
+): { article: ResolvedCardArticle; origin: ArticleResolutionOrigin } => {
+  const cardId = entry.card.id;
+  const faction = resolveFaction(entry.card.faction);
+
+  const fromBank = bank?.getById?.(cardId) ?? null;
+  if (fromBank) {
+    return { article: normaliseArticleRecord(fromBank, cardId, faction), origin: 'bank' };
+  }
+
+  const fromStatic = getStaticArticleForCard(cardId);
+  if (fromStatic) {
+    return { article: normaliseArticleRecord(fromStatic, cardId, faction), origin: 'static' };
+  }
+
+  return {
+    article: createGenericArticle(entry, story, targetName, capturedNames),
+    origin: 'generated',
+  };
+};
+
 const buildGeneratedStoryArticle = (
   entry: PlayedCardInput,
-  article: CardArticle | null,
+  article: ArticleBankCardArticle | null,
   gameContext: GameStateContext,
+  options: { isFallback?: boolean } = {},
 ): GeneratedStoryArticle => {
   const fallbackHeadline = `${entry.card.name.toUpperCase()} FILE UNDER INVESTIGATION`;
   const fallbackSubhead = 'Card record located without supporting copy — newsroom gremlins dispatched.';
@@ -459,7 +579,7 @@ const buildGeneratedStoryArticle = (
     body: resolvedBody,
     tags: Array.isArray(article?.tags) ? article.tags : cardTags,
     imagePrompt: article?.imagePrompt ?? null,
-    isFallback: !article,
+    isFallback: options.isFallback ?? !article,
   } satisfies GeneratedStoryArticle;
 };
 
@@ -689,9 +809,19 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
   const selectedCards = selectedMetas.map(meta => meta.entry);
   const generatedArticles = selectedMetas.map(meta => {
     const entry = meta.entry;
-    const rawArticle = articleBank?.getById?.(entry.card.id) ?? null;
-    const tonedArticle = applyToneIfAvailable(entry, rawArticle);
-    return buildGeneratedStoryArticle(entry, tonedArticle, gameStateContext);
+    const targetName = resolveStateName(entry.targetState);
+    const capturedNames = resolveCapturedStateNames(entry.capturedStates);
+    const { article: resolvedArticle, origin } = getArticleOrFallback(
+      entry,
+      meta.article,
+      targetName,
+      capturedNames,
+      articleBank,
+    );
+    const tonedArticle = applyToneIfAvailable(entry, resolvedArticle);
+    return buildGeneratedStoryArticle(entry, tonedArticle, gameStateContext, {
+      isFallback: origin === 'generated',
+    });
   });
 
   const frontPageCards: PlayedCardMeta[] = selectedCards
