@@ -305,6 +305,7 @@ const Index = () => {
   const lastPlayHistoryLengthRef = useRef(0);
   const previousTruthRef = useRef<number | null>(null);
   const previousTurnRef = useRef<number | null>(null);
+  const hasStartedMenuMusicRef = useRef(false);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -330,6 +331,7 @@ const Index = () => {
     hotspotDirector,
   } = useGameState();
   const audio = useAudioContext();
+  const { setMenuMusic } = audio;
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
@@ -2468,11 +2470,11 @@ const Index = () => {
 
   // Start menu music after user interaction
   useEffect(() => {
-    // Only start music when user clicks to dismiss intro
-    if (!showIntro && showMenu) {
-      audio.setMenuMusic();
+    if (!hasStartedMenuMusicRef.current && !showIntro && showMenu) {
+      setMenuMusic();
+      hasStartedMenuMusicRef.current = true;
     }
-  }, [showIntro, showMenu, audio]);
+  }, [showIntro, showMenu, setMenuMusic]);
 
   const isPlayerActionLocked =
     gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
@@ -2563,7 +2565,8 @@ const Index = () => {
         className="min-h-screen bg-government-dark flex items-center justify-center cursor-pointer"
         onClick={() => {
           setShowIntro(false);
-          audio.setMenuMusic();
+          setMenuMusic();
+          hasStartedMenuMusicRef.current = true;
         }}
       >
         <div className="text-center space-y-8">
@@ -2679,7 +2682,7 @@ const Index = () => {
         onBackToMainMenu={() => {
           setShowInGameOptions(false);
           setShowMenu(true);
-          audio.setMenuMusic();
+          setMenuMusic();
         }}
         onSaveGame={() => saveGame()}
       />

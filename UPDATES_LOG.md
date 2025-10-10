@@ -2,6 +2,14 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-22 – Menu playlist honors selected track
+- Timestamp: 2025-10-22T12:56:38Z
+- Files:
+  - `src/pages/Index.tsx`
+  - `UPDATES_LOG.md`
+- Summary: Ensured the main menu only initializes its music once when the intro hands off control so player-selected tracks fro
+m the options panel persist instead of resetting to the default playlist.
+
 ## 2025-10-18 – Final edition borrows live card articles for MVP coverage
 - Timestamp: 2025-10-18T09:45:00Z
 - Files:
