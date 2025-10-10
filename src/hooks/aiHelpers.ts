@@ -1,4 +1,5 @@
 import type { GameCard, Rarity } from '@/rules/mvp';
+import { trackCharacterAppearance, type RecurringCharacterState } from '@/game/recurringCharacters';
 import { featureFlags } from '@/state/featureFlags';
 import {
   resolveCardMVP,
