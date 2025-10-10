@@ -1,9 +1,19 @@
 # Paranoid Times Development Roadmap
 
-**Last Updated:** 2025-01-09  
-**Version:** 1.0
+**Last Updated:** 2025-10-11
+**Version:** 1.1
 
 This roadmap outlines a comprehensive plan to enhance gameplay mechanics, expand card content, and create more immersive, funny, and realistic newspaper articles for The Paranoid Times card game.
+
+---
+
+## QA Snapshot — 2025-10-11
+
+- **Article coverage:** Offline fallback only exposes six MVP placeholder cards; static articles still missing for the broader core/expansion set because the extension loader requires `localStorage` and browser-style fetch URLs. Follow-up: provide server-friendly loaders or CLI mocks so coverage checks exercise the full catalogue.【5ec001†L1-L72】
+- **Fallback behaviour:** `getArticleOrFallback` now generates toned copy when neither the remote bank nor static TypeScript modules provide text, keeping front pages populated even under network failures.【5ec001†L23-L71】
+- **Recurring arcs:** Stage progression works in unit tests, but runtime validation is blocked by the limited MVP dataset. Need an integration harness that can load the real character catalogue outside the browser sandbox.【8073aa†L82-L100】【5ec001†L61-L72】
+- **Performance:** Manual run confirmed issue builds complete in ~130 ms with toned fallback articles, meeting the ≤200 ms target even on degraded data sources.【5ec001†L23-L71】
+- **Environment caveat:** Multiple loaders (extension system, article bank, card lexicon) still assume browser globals. They emit warnings and drop to MVP data during Node-based QA, obscuring true coverage and tone mix. Track replacement work so CI runs have full fidelity.【5ec001†L1-L72】【541e2d†L1-L72】
 
 ---
 

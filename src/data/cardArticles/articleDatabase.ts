@@ -21,8 +21,14 @@ export interface CardArticle {
   followUpHooks?: string[];
   tags?: string[];
   articleVariant?: string;
-  preferredTone?: ArticleTone;
+  preferredTone?: ArticleTone | null;
 }
+
+export type CardArticleCacheEntry = CardArticle | null;
+
+export type CardArticleLookup = (cardId: string) => CardArticle | null;
+
+const articleCache = new Map<string, CardArticleCacheEntry>();
 
 export const CARD_ARTICLE_DATABASE: CardArticle[] = ALL_CARD_ARTICLES;
 
@@ -30,7 +36,23 @@ export const CARD_ARTICLE_DATABASE: CardArticle[] = ALL_CARD_ARTICLES;
  * Get article for a specific card
  */
 export function getArticleForCard(cardId: string): CardArticle | null {
-  return getArticleByCardId(cardId);
+  const normalized = typeof cardId === 'string' ? cardId.trim() : '';
+  if (!normalized) {
+    return null;
+  }
+
+  if (articleCache.has(normalized)) {
+    return articleCache.get(normalized) ?? null;
+  }
+
+  const article = getArticleByCardId(normalized);
+  articleCache.set(normalized, article ?? null);
+
+  return article;
+}
+
+export function clearArticleCache(): void {
+  articleCache.clear();
 }
 
 /**
