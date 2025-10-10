@@ -346,13 +346,20 @@ export default function UiOverlays() {
           ))}
       </div>
       {/* Banter feed */}
-      <div className="fixed bottom-[5.5rem] left-1/2 -translate-x-1/2 z-[920] w-[92%] sm:w-[500px] max-w-xl space-y-2">
+      <div
+        className="pointer-events-none fixed z-[920] max-w-sm space-y-2"
+        style={{
+          top: "calc(var(--safe-top) + var(--masthead-h) + 0.75rem)",
+          left: "calc(var(--safe-left) + 1rem)",
+          width: "min(90vw, 360px)",
+        }}
+      >
         {toasts
           .filter((t) => t.slot === "banter")
           .map((t) => (
             <div
               key={t.id}
-              className="px-4 py-3 bg-[#111] text-[#f4f1de] text-sm leading-snug shadow-2xl border border-white/10 backdrop-blur"
+              className="pointer-events-auto px-4 py-3 bg-[#111] text-[#f4f1de] text-sm leading-snug shadow-2xl border border-white/10 backdrop-blur"
             >
               {t.text}
             </div>
