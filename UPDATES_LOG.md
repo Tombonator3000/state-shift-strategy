@@ -10,26 +10,6 @@ This document provides a chronological record of gameplay-impacting changes merg
   - `docs/INTEGRATION_GUIDE.md`
 - Summary: Locked the hand hover handlers so the newsroom article overlay no longer clears itself when the pointer leaves, removed the hover-to-open wiring from the gameplay screen, and extended the QA checklist to cover long-read stability for the article preview.
 
-## 2025-10-10 – Start menu radio previews for every broadcast
-- Timestamp: 2025-10-10T11:14:39Z
-- Files:
-  - `src/components/game/Options.tsx`
-- Summary: Refreshed the options screen so players can audition government, truth, end credits, and theme playlists right from the start menu with quick-select buttons and clearer playlist labels.
-## 2025-10-10 – Article previews now require explicit activation
-- Timestamp: 2025-10-10T11:22:50Z
-- Files:
-  - `src/components/game/EnhancedGameHand.tsx`
-  - `src/components/game/CardDetailOverlay.tsx`
-  - `src/components/newspaper/ArticlePreviewOverlay.tsx`
-  - `src/pages/Index.tsx`
-  - `docs/INTEGRATION_GUIDE.md`
-  - `UPDATES_LOG.md`
-- Summary: Rewired the newsroom article overlay to launch from a Read Article action instead of hover, locked hover exits from clearing the preview while it is open, added Escape-key support to the overlay, and documented manual QA steps to confirm the preview remains readable until dismissed.
-## 2025-10-10 – Safeguarded hotspot source labels on the map
-- Timestamp: 2025-10-10T10:50:57Z
-- Files:
-  - `src/components/game/EnhancedUSAMap.tsx`
-- Summary: Hardened the enhanced USA map overlay so hotspot sources and event factions default to an "UNKNOWN" tag instead of crashing when saved data lacks a faction string.
 ## 2025-10-17 – Strategy insights migrate to help overlay
 - Timestamp: 2025-10-17T08:45:00Z
 - Files:
@@ -50,6 +30,37 @@ This document provides a chronological record of gameplay-impacting changes merg
   - `src/utils/visualEffects.ts`
   - `__tests__/integration/gameplayScreen.test.tsx`
 - Summary: Routed hover previews through the newsroom article overlay, promoted the breaking-news ticker to a global event feed, upgraded the final-edition layout, and added integration coverage for the new UI flows.
+
+## 2025-10-10 – End-turn newspaper now prints curated card articles
+- Timestamp: 2025-10-10T12:28:15Z
+- Files:
+  - `src/engine/newspaper/IssueGenerator.ts`
+  - `src/engine/newspaper/__tests__/IssueGenerator.staticArticles.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Reordered the newspaper article resolver so the curated card copy used in the article preview overlay appears in the between-turn newspaper, added regression coverage to lock in the new priority, and documented the change.
+
+## 2025-10-10 – Article previews now require explicit activation
+- Timestamp: 2025-10-10T11:22:50Z
+- Files:
+  - `src/components/game/EnhancedGameHand.tsx`
+  - `src/components/game/CardDetailOverlay.tsx`
+  - `src/components/newspaper/ArticlePreviewOverlay.tsx`
+  - `src/pages/Index.tsx`
+  - `docs/INTEGRATION_GUIDE.md`
+  - `UPDATES_LOG.md`
+- Summary: Rewired the newsroom article overlay to launch from a Read Article action instead of hover, locked hover exits from clearing the preview while it is open, added Escape-key support to the overlay, and documented manual QA steps to confirm the preview remains readable until dismissed.
+
+## 2025-10-10 – Start menu radio previews for every broadcast
+- Timestamp: 2025-10-10T11:14:39Z
+- Files:
+  - `src/components/game/Options.tsx`
+- Summary: Refreshed the options screen so players can audition government, truth, end credits, and theme playlists right from the start menu with quick-select buttons and clearer playlist labels.
+
+## 2025-10-10 – Safeguarded hotspot source labels on the map
+- Timestamp: 2025-10-10T10:50:57Z
+- Files:
+  - `src/components/game/EnhancedUSAMap.tsx`
+- Summary: Hardened the enhanced USA map overlay so hotspot sources and event factions default to an "UNKNOWN" tag instead of crashing when saved data lacks a faction string.
 
 ## 2025-10-15 – Built-in expansions join MVP rotation
 - 09:18 UTC – Wired the builtin expansion manifest so Truth Vanguard and Government Countermeasures decks import through the MVP normalizer. Files: `src/data/expansions/index.ts`, `src/data/expansions/builtin.ts`, `src/lib/expansions/discover.ts`.

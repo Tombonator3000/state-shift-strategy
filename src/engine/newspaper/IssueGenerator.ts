@@ -529,7 +529,10 @@ const getArticleOrFallback = (
 
   const fromBank = bank?.getById?.(cardId) ?? null;
   const bankArticle = fromBank ? normaliseArticleRecord(fromBank, cardId, faction) : null;
-  const staticArticle = getStaticArticleForCard(cardId);
+  const staticArticleRecord = getStaticArticleForCard(cardId);
+  const staticArticle = staticArticleRecord
+    ? normaliseArticleRecord(staticArticleRecord, cardId, faction)
+    : null;
 
   const resolveRecurring = (candidate: ResolvedCardArticle | null): ResolvedCardArticle | null => {
     if (!candidate?.recurringCharacter) {
@@ -546,14 +549,18 @@ const getArticleOrFallback = (
     return normaliseArticleRecord(stagedArticle, cardId, faction);
   };
 
-  const staged = resolveRecurring(bankArticle ?? null) ?? resolveRecurring(staticArticle ? normaliseArticleRecord(staticArticle, cardId, faction) : null);
-  if (staged) {
-    return { article: staged, origin: bankArticle ? 'bank' : 'static' };
+  const curated = resolveRecurring(staticArticle ?? null);
+  if (curated) {
+    return { article: curated, origin: 'static' };
   }
 
-  const fallbackStatic = staticArticle ? normaliseArticleRecord(staticArticle, cardId, faction) : null;
-  if (fallbackStatic) {
-    return { article: fallbackStatic, origin: 'static' };
+  const stagedBank = resolveRecurring(bankArticle ?? null);
+  if (stagedBank) {
+    return { article: stagedBank, origin: 'bank' };
+  }
+
+  if (staticArticle) {
+    return { article: staticArticle, origin: 'static' };
   }
 
   return {
