@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X, Archive } from 'lucide-react';
-import FinalEditionLayout from '@/components/game/FinalEditionLayout';
+import { EnhancedFinalEdition } from '@/components/newspaper/EnhancedFinalEdition';
 import { cn } from '@/lib/utils';
 import {
   NEWSPAPER_BODY_CLASS,
@@ -10,15 +10,52 @@ import {
   NEWSPAPER_META_CLASS,
 } from '@/components/game/newspaperLayout';
 import type { GameOverReport } from '@/types/finalEdition';
+import type { GameCard } from '@/rules/mvp';
 
 interface ExtraEditionNewspaperProps {
   report: GameOverReport;
   onClose: () => void;
   onArchive?: () => void;
   isArchived?: boolean;
+  mvpCard?: GameCard | null;
+  runnerUpCard?: GameCard | null;
+  comboHighlights?: Array<{ headline: string; cards: string[] }>;
+  stateResults?: Array<{ name: string; owner: 'player' | 'ai' | 'neutral' }>;
+  finalTruth?: number;
+  finalPlayerIP?: number;
+  finalAiIP?: number;
 }
 
-const ExtraEditionNewspaper = ({ report, onClose, onArchive, isArchived = false }: ExtraEditionNewspaperProps) => {
+const ExtraEditionNewspaper = ({
+  report,
+  onClose,
+  onArchive,
+  isArchived = false,
+  mvpCard = null,
+  runnerUpCard = null,
+  comboHighlights,
+  stateResults,
+  finalTruth,
+  finalPlayerIP,
+  finalAiIP,
+}: ExtraEditionNewspaperProps) => {
+  const winnerAlignment: 'player' | 'ai' | 'draw' = report.winner === 'draw'
+    ? 'draw'
+    : report.winner === report.playerFaction
+      ? 'player'
+      : 'ai';
+
+  const resolvedCombos = comboHighlights
+    ?? report.comboHighlights.map(combo => ({
+      headline: `${combo.name} • ${combo.ownerLabel}`,
+      cards: combo.description ? [combo.description] : [combo.rewardLabel],
+    }));
+
+  const resolvedStateResults = stateResults ?? [];
+  const resolvedFinalTruth = typeof finalTruth === 'number' ? finalTruth : Math.round(report.finalTruth);
+  const resolvedPlayerIP = typeof finalPlayerIP === 'number' ? finalPlayerIP : report.ipPlayer;
+  const resolvedAiIP = typeof finalAiIP === 'number' ? finalAiIP : report.ipAI;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-6">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(15,118,110,0.12),_transparent_60%)]" aria-hidden />
@@ -42,7 +79,17 @@ const ExtraEditionNewspaper = ({ report, onClose, onArchive, isArchived = false 
         </div>
 
         <div className={NEWSPAPER_BODY_CLASS}>
-          <FinalEditionLayout report={report} />
+          <EnhancedFinalEdition
+            winner={winnerAlignment}
+            mvpCard={mvpCard}
+            runnerUpCard={runnerUpCard}
+            extraExtraCombos={resolvedCombos}
+            stateResults={resolvedStateResults}
+            finalTruth={resolvedFinalTruth}
+            finalPlayerIP={resolvedPlayerIP}
+            finalAiIP={resolvedAiIP}
+            recurringEpilogues={report.recurringCharacterEpilogues}
+          />
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t-4 border-newspaper-border bg-newspaper-header/90 px-6 py-4 text-newspaper-text">

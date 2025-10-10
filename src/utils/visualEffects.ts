@@ -1,6 +1,8 @@
 // Visual Effects Integration Utilities
 // Centralized system for triggering coordinated visual effects
 
+import { dispatchBreakingNews } from '@/lib/newsEventHelpers';
+
 export interface EffectPosition {
   x: number;
   y: number;
@@ -243,14 +245,8 @@ export class VisualEffectsCoordinator {
   // === NEW ENHANCED TABLOID/X-FILES EFFECTS ===
 
   // Trigger breaking news ticker overlay
-  static triggerBreakingNews(newsText: string, position: EffectPosition): void {
-    window.dispatchEvent(new CustomEvent('breakingNews', {
-      detail: {
-        newsText,
-        x: position.x,
-        y: position.y
-      }
-    }));
+  static triggerBreakingNews(newsText: string, _position: EffectPosition): void {
+    dispatchBreakingNews(newsText, 'update');
   }
 
   // Trigger government surveillance overlay

@@ -5,7 +5,6 @@ import TabloidFlashOverlay from '@/components/effects/TabloidFlashOverlay';
 import ConspiracyCorkboard from '@/components/effects/ConspiracyCorkboard';
 import UFOElvisBroadcast from '@/components/effects/UFOElvisBroadcast';
 import BigfootTrailCam from '@/components/effects/BigfootTrailCam';
-import BreakingNewsTicker from '@/components/effects/BreakingNewsTicker';
 import GovernmentSurveillance from '@/components/effects/GovernmentSurveillance';
 import TypewriterReveal from '@/components/effects/TypewriterReveal';
 import StaticInterference from '@/components/effects/StaticInterference';
@@ -74,14 +73,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     source: 'truth' | 'government' | 'neutral';
     defenseBoost: number;
     truthReward: number;
-  } | null>(null);
-
-  // New enhanced effect states
-  const [breakingNewsOverlay, setBreakingNewsOverlay] = useState<{
-    id: number;
-    x: number;
-    y: number;
-    newsText: string;
   } | null>(null);
 
   const [surveillanceOverlay, setSurveillanceOverlay] = useState<{
@@ -244,23 +235,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       }
     };
 
-    // New enhanced effect handlers
-    const handleBreakingNews = (event: CustomEvent<{
-      newsText: string;
-      x: number;
-      y: number;
-    }>) => {
-      if (!event?.detail) return;
-      const { newsText, x, y } = event.detail;
-      setBreakingNewsOverlay({
-        id: Date.now(),
-        x,
-        y,
-        newsText
-      });
-      audio?.playSFX?.('newspaper');
-    };
-
     const handleGovernmentSurveillance = (event: CustomEvent<{
       targetName: string;
       threatLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CLASSIFIED';
@@ -412,8 +386,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     window.addEventListener('cryptidSighting', handleCryptidSighting as EventListener);
     window.addEventListener('paranormalHotspot', handleParanormalHotspot as EventListener);
 
-    // New enhanced effect listeners
-    window.addEventListener('breakingNews', handleBreakingNews as EventListener);
     window.addEventListener('governmentSurveillance', handleGovernmentSurveillance as EventListener);
     window.addEventListener('typewriterReveal', handleTypewriterReveal as EventListener);
     window.addEventListener('staticInterference', handleStaticInterference as EventListener);
@@ -430,7 +402,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
       window.removeEventListener('paranormalHotspot', handleParanormalHotspot as EventListener);
 
       // New enhanced effect listeners
-      window.removeEventListener('breakingNews', handleBreakingNews as EventListener);
       window.removeEventListener('governmentSurveillance', handleGovernmentSurveillance as EventListener);
       window.removeEventListener('typewriterReveal', handleTypewriterReveal as EventListener);
       window.removeEventListener('staticInterference', handleStaticInterference as EventListener);
@@ -502,10 +473,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
   }, []);
 
   // New enhanced effect completion handlers
-  const handleBreakingNewsComplete = useCallback(() => {
-    setBreakingNewsOverlay(null);
-  }, []);
-
   const handleSurveillanceComplete = useCallback(() => {
     setSurveillanceOverlay(null);
   }, []);
@@ -641,16 +608,6 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
         )}
 
         {/* New Enhanced Effects */}
-        {breakingNewsOverlay && (
-          <BreakingNewsTicker
-            key={breakingNewsOverlay.id}
-            x={breakingNewsOverlay.x}
-            y={breakingNewsOverlay.y}
-            newsText={breakingNewsOverlay.newsText}
-            onComplete={handleBreakingNewsComplete}
-          />
-        )}
-
         {surveillanceOverlay && (
           <GovernmentSurveillance
             key={surveillanceOverlay.id}
