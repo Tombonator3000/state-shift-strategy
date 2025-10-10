@@ -2,6 +2,18 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-16 – Newsroom previews and ticker integration
+- Timestamp: 2025-10-16T09:00:00Z
+- Files:
+  - `src/pages/Index.tsx`
+  - `src/components/newspaper/BreakingNewsTicker.tsx`
+  - `src/components/game/ExtraEditionNewspaper.tsx`
+  - `src/components/newspaper/EnhancedFinalEdition.tsx`
+  - `src/components/game/CardAnimationLayer.tsx`
+  - `src/utils/visualEffects.ts`
+  - `__tests__/integration/gameplayScreen.test.tsx`
+- Summary: Routed hover previews through the newsroom article overlay, promoted the breaking-news ticker to a global event feed, upgraded the final-edition layout, and added integration coverage for the new UI flows.
+
 ## 2025-10-15 – Built-in expansions join MVP rotation
 - 09:18 UTC – Wired the builtin expansion manifest so Truth Vanguard and Government Countermeasures decks import through the MVP normalizer. Files: `src/data/expansions/index.ts`, `src/data/expansions/builtin.ts`, `src/lib/expansions/discover.ts`.
 - 09:18 UTC – Realigned expansion article IDs and UI summaries so new packs display correctly in management panels. Files: `src/data/cardArticles/expansionArticles.ts`, `src/components/game/ManageExpansions.tsx`.

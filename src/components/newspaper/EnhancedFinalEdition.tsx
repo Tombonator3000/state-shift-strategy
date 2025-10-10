@@ -5,7 +5,7 @@ import { getArticleForCard } from '@/data/cardArticles/articleDatabase';
 import type { GameOverReport } from '@/types/finalEdition';
 
 interface EnhancedFinalEditionProps {
-  winner: 'player' | 'ai';
+  winner: 'player' | 'ai' | 'draw';
   mvpCard: GameCard | null;
   runnerUpCard: GameCard | null;
   extraExtraCombos: Array<{ headline: string; cards: string[] }>;
@@ -35,6 +35,12 @@ export function EnhancedFinalEdition({
 
   const playerStates = stateResults.filter(s => s.owner === 'player').length;
   const aiStates = stateResults.filter(s => s.owner === 'ai').length;
+  const outcomeBadge =
+    winner === 'player'
+      ? '🏆 Truth Prevails'
+      : winner === 'ai'
+        ? '🔒 Secrets Secured'
+        : '⚖️ Narrative Deadlock';
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -51,7 +57,7 @@ export function EnhancedFinalEdition({
               </p>
               <div className="text-center mt-2">
                 <span className="text-xs font-semibold uppercase tracking-wide">
-                  {winner === 'player' ? '🏆 Truth Prevails' : '🔒 Secrets Secured'}
+                  {outcomeBadge}
                 </span>
               </div>
             </div>
@@ -196,7 +202,7 @@ export function EnhancedFinalEdition({
                           <span className="font-bold">CRYPTID TOURS:</span> See where the sightings happened. Insurance waiver required.
                         </p>
                       </>
-                    ) : (
+                    ) : winner === 'ai' ? (
                       <>
                         <p className="border-b border-border pb-1">
                           <span className="font-bold">EMPLOYMENT:</span> Plausible deniability specialists needed. Clearance required.
@@ -206,6 +212,18 @@ export function EnhancedFinalEdition({
                         </p>
                         <p>
                           <span className="font-bold">WEATHER BALLOONS:</span> Bulk discount available. Various cover story applications.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="border-b border-border pb-1">
+                          <span className="font-bold">MEDIATORS WANTED:</span> Seeking neutral parties to translate competing press releases.
+                        </p>
+                        <p className="border-b border-border pb-1">
+                          <span className="font-bold">FACT-CHECK CO-OP:</span> Volunteers needed to untangle dueling narratives. Coffee provided.
+                        </p>
+                        <p>
+                          <span className="font-bold">PUBLIC FORUM:</span> Town hall on indefinite hiatus. Bring your own red string.
                         </p>
                       </>
                     )}

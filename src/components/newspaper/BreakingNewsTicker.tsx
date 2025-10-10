@@ -36,6 +36,8 @@ export function BreakingNewsTicker({ className }: BreakingNewsTickerProps) {
         return updated;
       });
 
+      setIsVisible(true);
+
       // Auto-hide old items after 15 seconds
       setTimeout(() => {
         setNewsItems(prev => prev.filter(item => item.id !== newItem.id));

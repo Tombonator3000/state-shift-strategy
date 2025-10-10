@@ -25,7 +25,7 @@ import FloatingNumbers from '@/components/effects/FloatingNumbers';
 import FinalEditionOverlay from '@/components/news/FinalEditionOverlay';
 import FalloutOverlay from '@/expansions/tabloidRelics/RelicUI';
 
-import CardPreviewOverlay from '@/components/game/CardPreviewOverlay';
+import { ArticlePreviewOverlay } from '@/components/newspaper/ArticlePreviewOverlay';
 import ContextualHelp from '@/components/game/ContextualHelp';
 import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
 import MechanicsTooltip from '@/components/game/MechanicsTooltip';
@@ -84,6 +84,17 @@ import { buildFinalEdition as buildNewsFinalEdition, type FinalEdition, type Tur
 import { loadNewsPools } from '@/news/newsPools';
 import { initNewsPools } from '@/engine/news/newsPools';
 import { toPlayedLite } from '@/hooks/aiHelpers';
+import { useCardPreview } from '@/hooks/useCardPreview';
+import { BreakingNewsTicker } from '@/components/newspaper/BreakingNewsTicker';
+import { StrategyHelper } from '@/components/gameplay/StrategyHelper';
+import {
+  dispatchBreakingNews,
+  newsForCardPlay,
+  newsForStateCapture,
+  newsForTruthChange,
+  newsForCombo,
+  newsForTurnEnd,
+} from '@/lib/newsEventHelpers';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
@@ -266,7 +277,6 @@ const Index = () => {
     y?: number;
   } | null>(null);
   const [previousPhase, setPreviousPhase] = useState('');
-  const [hoveredCard, setHoveredCard] = useState<GameCard | null>(null);
   const [draggedCardState, setDraggedCardState] = useState<{
     card: GameCard;
     position: { x: number; y: number };
@@ -286,9 +296,16 @@ const Index = () => {
   const [arcProgressSummaries, setArcProgressSummaries] = useState<Record<string, ArcProgressSummary>>({});
   const [inspectedPlayedCard, setInspectedPlayedCard] = useState<GameCard | null>(null);
   const [activeRelicFallout, setActiveRelicFallout] = useState<TabloidRelicRuntimeEntry | null>(null);
+  const [finalMvpCard, setFinalMvpCard] = useState<GameCard | null>(null);
+  const [finalRunnerUpCard, setFinalRunnerUpCard] = useState<GameCard | null>(null);
+  const [finalComboSummaries, setFinalComboSummaries] = useState<Array<{ headline: string; cards: string[] }>>([]);
+  const [finalStateResults, setFinalStateResults] = useState<Array<{ name: string; owner: 'player' | 'ai' | 'neutral' }>>([]);
 
   const prevIPCacheRef = useRef<number | null>(null);
   const lastVictoryRef = useRef<number | null>(null);
+  const lastPlayHistoryLengthRef = useRef(0);
+  const previousTruthRef = useRef<number | null>(null);
+  const previousTurnRef = useRef<number | null>(null);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -317,6 +334,7 @@ const Index = () => {
   const { animatePlayCard, isAnimating } = useCardAnimation();
   const { discoverCard, playCard: recordCardPlay } = useCardCollection();
   const { checkSynergies, getActiveCombinations, getTotalBonusIP } = useSynergyDetection();
+  const { previewState, openPreview, closePreview } = useCardPreview();
   const discardPreview = useMemo(
     () => planDiscardOutcome(gameState.hand, gameState.discardPile ?? [], pendingDiscards),
     [gameState.hand, gameState.discardPile, pendingDiscards]
@@ -327,6 +345,64 @@ const Index = () => {
         .map(card => card.name?.trim() || card.id)
         .filter(Boolean),
     [discardPreview.discardedCards]
+  );
+
+  const hydrateReportCards = useCallback(
+    (report: GameOverReport | null) => {
+      if (!report) {
+        setFinalMvpCard(null);
+        setFinalRunnerUpCard(null);
+        setFinalComboSummaries([]);
+        return;
+      }
+
+      const findCardById = (
+        cardId?: string | null,
+        fallbackName?: string,
+        fallbackFaction?: GameCard['faction'],
+      ): GameCard | null => {
+        if (!cardId) {
+          return null;
+        }
+
+        const match = gameState.playHistory.find(entry => entry.card.id === cardId);
+        if (match) {
+          return match.card;
+        }
+
+        return {
+          id: cardId,
+          name: fallbackName ?? cardId,
+          type: 'MEDIA',
+          faction: fallbackFaction ?? 'truth',
+          cost: 0,
+          text: '',
+        } as GameCard;
+      };
+
+      setFinalMvpCard(findCardById(report.mvp?.cardId, report.mvp?.cardName, report.mvp?.faction));
+      setFinalRunnerUpCard(
+        findCardById(report.runnerUp?.cardId, report.runnerUp?.cardName, report.runnerUp?.faction),
+      );
+
+      const combos = report.comboHighlights.map(combo => {
+        const details: string[] = [];
+        if (combo.description) {
+          details.push(combo.description);
+        }
+        if (combo.rewardLabel) {
+          details.push(combo.rewardLabel);
+        }
+
+        return {
+          headline: `${combo.name} • ${combo.ownerLabel}`,
+          cards: details.length > 0 ? details : [combo.name],
+        };
+      });
+
+      setFinalComboSummaries(combos);
+    },
+    [gameState.playHistory],
   );
   const findStateByIdentifier = useCallback(
     (identifier?: string | null) => {
@@ -1159,6 +1235,11 @@ const Index = () => {
         }
       }
 
+      hydrateReportCards(report);
+      setFinalStateResults(
+        gameState.states.map(state => ({ name: state.name, owner: state.owner })),
+      );
+
       setGameState(prev => ({
         ...prev,
         isGameOver: true,
@@ -1194,16 +1275,23 @@ const Index = () => {
     paranormalSightings,
     setGameState,
     areNewsPoolsReady,
+    hydrateReportCards,
   ]);
 
   useEffect(() => {
     const edition = gameState.finalEdition;
     if (!edition) {
       setNewsFinalEdition(null);
+      hydrateReportCards(null);
+      setFinalStateResults([]);
       return;
     }
 
     setFinalEdition(edition);
+    hydrateReportCards(edition);
+    setFinalStateResults(
+      gameState.states.map(state => ({ name: state.name, owner: state.owner })),
+    );
     if (!areNewsPoolsReady) {
       setNewsFinalEdition(null);
       return;
@@ -1241,6 +1329,8 @@ const Index = () => {
     gameState.round,
     gameState.turn,
     areNewsPoolsReady,
+    gameState.states,
+    hydrateReportCards,
   ]);
 
   useEffect(() => {
@@ -1290,6 +1380,11 @@ const Index = () => {
             duration: 3000,
             position: 'top-center'
           });
+
+          const comboNews = newsForCombo(combo.name);
+          if (comboNews) {
+            dispatchBreakingNews(comboNews, 'update');
+          }
       },
       (value, type, x, y) => {
         // Floating number callback
@@ -1367,6 +1462,77 @@ const Index = () => {
     audio,
     setGameState,
   ]);
+
+  useEffect(() => {
+    const previousCount = lastPlayHistoryLengthRef.current;
+    const currentCount = gameState.playHistory.length;
+
+    if (currentCount < previousCount) {
+      lastPlayHistoryLengthRef.current = currentCount;
+      return;
+    }
+
+    if (currentCount > previousCount) {
+      const newPlays = gameState.playHistory.slice(previousCount);
+      newPlays.forEach(play => {
+        const faction = play.faction === 'government' ? 'government' : 'truth';
+        const playNews = newsForCardPlay(play.card.name, faction);
+        if (playNews) {
+          dispatchBreakingNews(playNews, 'normal');
+        }
+
+        if (Array.isArray(play.capturedStates) && play.capturedStates.length > 0) {
+          play.capturedStates.forEach(stateName => {
+            const captureNews = newsForStateCapture(stateName, play.player);
+            if (captureNews) {
+              dispatchBreakingNews(captureNews, 'urgent');
+            }
+          });
+        }
+      });
+    }
+
+    lastPlayHistoryLengthRef.current = currentCount;
+  }, [gameState.playHistory]);
+
+  useEffect(() => {
+    const currentTruth = Math.round(gameState.truth);
+    const previousTruth = previousTruthRef.current;
+
+    if (previousTruth !== null) {
+      const delta = currentTruth - previousTruth;
+      if (delta !== 0) {
+        const truthNews = newsForTruthChange(delta, currentTruth);
+        if (truthNews) {
+          const type: Parameters<typeof dispatchBreakingNews>[1] = Math.abs(delta) >= 5 ? 'urgent' : 'update';
+          dispatchBreakingNews(truthNews, type);
+        }
+      }
+    }
+
+    previousTruthRef.current = currentTruth;
+  }, [gameState.truth]);
+
+  useEffect(() => {
+    const previousTurn = previousTurnRef.current;
+    const currentTurn = gameState.turn;
+
+    if (previousTurn !== null) {
+      if (currentTurn < previousTurn) {
+        previousTurnRef.current = currentTurn;
+        return;
+      }
+
+      if (currentTurn > previousTurn) {
+        const turnNews = newsForTurnEnd(previousTurn, Math.round(gameState.truth));
+        if (turnNews) {
+          dispatchBreakingNews(turnNews, 'update');
+        }
+      }
+    }
+
+    previousTurnRef.current = currentTurn;
+  }, [gameState.turn, gameState.truth]);
 
   useEffect(() => {
     const pickTemplate = (templates: readonly string[]): string => {
@@ -2989,7 +3155,6 @@ const Index = () => {
           />
         </div>
       </div>
-      <CardPreviewOverlay card={hoveredCard ? { ...hoveredCard, text: hoveredCard.text || '' } : null} />
     </div>
   );
 
@@ -3065,7 +3230,12 @@ const Index = () => {
             </TooltipContent>
           </Tooltip>
         </header>
-        <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
+        <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3 space-y-3">
+          <StrategyHelper
+            hand={gameState.hand}
+            targetStateId={gameState.targetState}
+            className="border-2 border-newspaper-border bg-newspaper-bg text-newspaper-text shadow-sm"
+          />
           <EnhancedGameHand
             cards={gameState.hand}
             onPlayCard={handlePlayCard}
@@ -3074,7 +3244,13 @@ const Index = () => {
             disabled={handInteractionDisabled}
             currentIP={gameState.ip}
             loadingCard={loadingCard}
-            onCardHover={setHoveredCard}
+            onCardHover={(card) => {
+              if (card && card.id) {
+                openPreview(card.id, card.name);
+              } else {
+                closePreview();
+              }
+            }}
             discardQueue={pendingDiscards}
             onToggleDiscard={handleToggleDiscard}
             discardEnabled={canQueueDiscards}
@@ -3107,7 +3283,7 @@ const Index = () => {
 
   return (
     <>
-
+      <BreakingNewsTicker />
       <ResponsiveLayout
         masthead={mastheadContent}
         leftPane={leftPaneContent}
@@ -3125,6 +3301,12 @@ const Index = () => {
             fontFamily: 'monospace'
           }
         }}
+      />
+
+      <ArticlePreviewOverlay
+        cardId={previewState.isOpen ? previewState.cardId : null}
+        cardName={previewState.cardName}
+        onClose={closePreview}
       />
 
       {draggedCardState && (
@@ -3196,6 +3378,13 @@ const Index = () => {
           report={readingEdition}
           isArchived={isEditionArchived(readingEdition)}
           onArchive={() => archiveEditionWithToast(readingEdition)}
+          mvpCard={finalMvpCard}
+          runnerUpCard={finalRunnerUpCard}
+          comboHighlights={finalComboSummaries}
+          stateResults={finalStateResults}
+          finalTruth={Math.round(readingEdition.finalTruth)}
+          finalPlayerIP={readingEdition.ipPlayer}
+          finalAiIP={readingEdition.ipAI}
           onClose={() => {
             setShowExtraEdition(false);
             const closingActiveVictory = finalEdition && isVictoryOverlayOpen && readingEdition.recordedAt === finalEdition.recordedAt;
