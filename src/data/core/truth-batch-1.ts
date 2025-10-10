@@ -11,6 +11,11 @@ export const truthBatch1: GameCard[] = [
     "effects": {
       "truthDelta": 1
     },
+    "stateBonuses": {
+      "Washington": {
+        "truthDelta": 1
+      }
+    },
     "flavor": "Experts confirm: pixels don't lie."
   },
   {
@@ -22,6 +27,11 @@ export const truthBatch1: GameCard[] = [
     "cost": 5,
     "effects": {
       "pressureDelta": 2
+    },
+    "stateBonuses": {
+      "Tennessee": {
+        "truthDelta": 1
+      }
     },
     "flavor": "The King recommends the midnight pancakes."
   },
@@ -149,6 +159,15 @@ export const truthBatch1: GameCard[] = [
     "effects": {
       "truthDelta": 1
     },
+    "stateBonuses": {
+      "Florida": {
+        "truthDelta": 1,
+        "pressureDelta": 1,
+        "ipDelta": {
+          "self": 1
+        }
+      }
+    },
     "flavor": "He brought snacks. Questionable snacks."
   },
   {
@@ -160,6 +179,11 @@ export const truthBatch1: GameCard[] = [
     "cost": 5,
     "effects": {
       "pressureDelta": 2
+    },
+    "stateBonuses": {
+      "Nevada": {
+        "truthDelta": 2
+      }
     },
     "flavor": "Tip jar shaped like a saucer."
   },

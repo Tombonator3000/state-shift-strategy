@@ -47,7 +47,15 @@ export interface GameCard {
   target?: CardTarget;
   extId?: string;
   tags?: string[];
+  stateBonuses?: Record<string, CardStateBonusDefinition>;
 }
+
+export type CardStateBonusDefinition =
+  | CardEffects
+  | {
+      effects: CardEffects;
+      label?: string;
+    };
 
 export const MVP_COST_TABLE: Record<MVPCardType, Record<Rarity, number>> = {
   ATTACK: { common: 2, uncommon: 3, rare: 4, legendary: 5 },
