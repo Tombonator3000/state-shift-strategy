@@ -20,6 +20,12 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Wired `IssueGenerator` to request `getArticleOrFallback`, blending remote bank data, static TypeScript articles, and generated copy when gaps remain.
 - QA sweep confirmed variable substitution, tone transforms, and <200 ms issue builds under fallback data; flagged remaining coverage gaps in MVP card set and environment-only loaders for follow-up.
 
+## 2025-10-10 – Editor banter anchors below the masthead
+- Repositioned the editor banter toast feed so it materializes beneath the Paranoid Times masthead instead of hovering near the
+  bottom HUD, making quips unmissable during high-alert turns.
+- Locked the overlay to the safe-area offsets so handheld agents still see the editor's whispers tucked under the newsroom mast
+  head badge.
+
 ## 2025-10-10 – Newspaper tone transforms
 - Added placeholder-safe tone transforms and an `applyTone` helper so newspaper copy can shift between straight news, tabloid, local color, exposé, and classified styles.
 - Extended card article metadata with `preferredTone` overrides and updated the issue generator to select and apply tones before front-page rendering.
