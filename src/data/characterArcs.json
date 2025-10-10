@@ -1,0 +1,140 @@
+{
+  "pastor_rex": {
+    "name": "Pastor Rex",
+    "stages": [
+      {
+        "stage": 0,
+        "title": "Broadcast Prophet",
+        "summary": "Rex still pirates the airwaves from his cornfield bunker, promising rationed miracles between static bursts.",
+        "epilogue": "Rex now syndicates his bunker sermons as an after-market emergency broadcast kit. Subscribers receive pre-signed waiver forms, a bag of communion jerky, and coordinates for pop-up baptisms hovering over the interstate."
+      },
+      {
+        "stage": 1,
+        "title": "Miracle Revivalist",
+        "summary": "Tent revivals now levitate above FEMA staging grounds while Rex barters weather reports for canned goods.",
+        "epilogue": "The revival caravan has annexed three municipal parking decks, each outfitted with helium hymnals and a barter window for contraband ponchos. Rex issues handwritten visas to anyone willing to chant his numerology over shortwave."
+      },
+      {
+        "stage": 2,
+        "title": "Airborne Border Preacher",
+        "summary": "Rex patrols state lines in a jury-rigged blimp, notarizing miracles from 400 feet up.",
+        "epilogue": "His zeppelin-cathedral now sells turbulence insurance and branded parachutes. Customs officers report that Rex stamps passports with glow-in-the-dark verses warning of the next chronology breach."
+      }
+    ]
+  },
+  "agent_smitherson": {
+    "name": "Agent Smitherson",
+    "stages": [
+      {
+        "stage": 0,
+        "title": "Reflection Liaison",
+        "summary": "Smitherson hosts voluntary erasure briefings wherever reflective surfaces gather.",
+        "epilogue": "He leases an abandoned mall solely for mirror calibration. Citizens queue to sign non-disclosure agreements that shimmer with ink only visible under sodium lamps."
+      },
+      {
+        "stage": 1,
+        "title": "Historic Dampener",
+        "summary": "Tour groups now whisper NDA oaths into velvet-lined listening booths.",
+        "epilogue": "Smitherson retrofitted Philadelphia's visitor center into a library of confiscated Polaroids. Rent a booth, confess your sightings, leave with an approved replacement memory."
+      },
+      {
+        "stage": 2,
+        "title": "Quiet Booth Architect",
+        "summary": "National parks sprouted mindfulness kiosks that recycle secrets into ambient whale song.",
+        "epilogue": "The kiosks now double as confessionals. Pay in unmarked commemorative quarters, whisper your anomaly, and Smitherson issues a meditation cassette promising plausible deniability."
+      }
+    ]
+  },
+  "florida_man": {
+    "name": "Florida Man",
+    "stages": [
+      {
+        "stage": 0,
+        "title": "Storm Courier",
+        "summary": "He still treats hurricanes like postal routes and insists they tip for express service.",
+        "epilogue": "Neighbors report an airboat stacked with glittering mail sacks labeled 'Time Sensitive: Gator Jury Summons.' Storm shutters now come stamped with Florida Man's forwarding address."
+      },
+      {
+        "stage": 1,
+        "title": "Great Lakes Liberator",
+        "summary": "Ice-surfing across the Midwest, he engraves hotline sigils into thawing freighters.",
+        "epilogue": "A floating garage in Lake Superior issues 'anti-freeze passports' for anyone volunteering to wax his improvised hydrofoil. Coast Guard officers keep confiscating his signature citrus-scented flares, only to find replacements already lit."
+      },
+      {
+        "stage": 2,
+        "title": "Skywriting Ringmaster",
+        "summary": "County airshows now double as citrus-scented resistance briefings.",
+        "epilogue": "Florida Man's contrail circus now tours the Rust Belt. Ticket stubs unfold into evacuation schematics, while popcorn buckets double as Faraday cages for burner phones."
+      }
+    ]
+  },
+  "bat_boy": {
+    "name": "Bat Boy",
+    "stages": [
+      {
+        "stage": 0,
+        "title": "Tabloid Mascot",
+        "summary": "Still photobombs every gubernatorial presser with a toothy grin and forged press badge.",
+        "epilogue": "Bat Boy livestreams midnight aerobics from a disused missile silo. Subscribers earn wing patches and 'bite witness' affidavits notarized by retired cryptozoologists."
+      },
+      {
+        "stage": 1,
+        "title": "Nocturnal Ombudsman",
+        "summary": "He now mediates disputes between feral mascots and municipal curfews.",
+        "epilogue": "He maintains a hotline patched directly into sewer echoes. Callers receive scripted apologies on scented stationery, plus coupons for sonar-proof earplugs."
+      },
+      {
+        "stage": 2,
+        "title": "Shadow Cabinet Liaison",
+        "summary": "Bat Boy drafts policy memos on sonar stationery for rival conspiracies.",
+        "epilogue": "His shadow cabinet convenes in a repurposed planetarium. Delegates swap ultraviolet dossiers while Bat Boy screens training films about polite hissing etiquette."
+      }
+    ]
+  },
+  "maria_chen": {
+    "name": "Maria Chen",
+    "stages": [
+      {
+        "stage": 0,
+        "title": "Spectrum Sleuth",
+        "summary": "Chen still triangulates pirate broadcasts using disposable pagers and municipal Wi-Fi.",
+        "epilogue": "She runs a covert ham-radio quilting circle. Each stitch encodes a decryption key; every finished quilt unlocks a different satellite feed."
+      },
+      {
+        "stage": 1,
+        "title": "Temporal Archivist",
+        "summary": "She now catalogs time-slipped VHS tapes before the Bureau can redact them.",
+        "epilogue": "Chen operates a pop-up library in a defunct video rental. Patrons check out paradox tapes with a deposit of conspiracy clippings and a promise to rewind any timeline anomalies."
+      },
+      {
+        "stage": 2,
+        "title": "Chronicle Conductor",
+        "summary": "Her subway lab rewires commuter schedules to dodge governmental edits.",
+        "epilogue": "Rush-hour commuters now ride Chen's timetabled 'memory locals.' She issues punch cards that double as amnesia antidotes and annotates every stop with whispered warnings."
+      }
+    ]
+  },
+  "coach_hammond": {
+    "name": "Coach Hammond",
+    "stages": [
+      {
+        "stage": 0,
+        "title": "Sideline Analyst",
+        "summary": "He diagrammed UFO interceptions on chalkboards outside Friday night games.",
+        "epilogue": "Hammond broadcasts halftime conspiracies over stadium loudspeakers. Booster clubs now fundraise for anti-abduction playbooks laminated in tinfoil."
+      },
+      {
+        "stage": 1,
+        "title": "Bluegrass Analyst",
+        "summary": "He exported trick plays for dodging tractor beams to the Triple Crown circuit.",
+        "epilogue": "Horse barns hide his playbooks under saddle blankets. Jockeys swap coded hoof beats during warmups while Hammond referees with a whistle tuned to disrupt laser sights."
+      },
+      {
+        "stage": 2,
+        "title": "National Counterplay Director",
+        "summary": "His interstate clinics now drill teams on orbital blitz drills.",
+        "epilogue": "He chairs a clandestine coaches congress in an abandoned scoreboard factory. Attendees trade rewound highlight reels that double as evacuation drills for impending sky scrimmages."
+      }
+    ]
+  }
+}

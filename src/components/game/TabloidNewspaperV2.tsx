@@ -319,6 +319,7 @@ const TabloidNewspaperV2 = ({
   hotspotDirector,
   activeHotspot,
   frontPageTriplet,
+  recurringCharacters,
 }: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState(PRIMARY_MASTHEAD);
@@ -618,8 +619,19 @@ const TabloidNewspaperV2 = ({
       cardsPlayedCount: narrativePlayedCards.length,
       currentScore: score ?? truth,
       controlledStates: controlledStates ?? [],
+      recurringCharacters: recurringCharacters ?? undefined,
     }),
-    [controlledStates, totalStates, truth, ip, turn, faction, score, narrativePlayedCards],
+    [
+      controlledStates,
+      totalStates,
+      truth,
+      ip,
+      turn,
+      faction,
+      score,
+      narrativePlayedCards,
+      recurringCharacters,
+    ],
   );
 
   const playerNarrativeCards = useMemo(

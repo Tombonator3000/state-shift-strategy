@@ -2,6 +2,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { GameCard } from '@/rules/mvp';
 import { getArticleForCard } from '@/data/cardArticles/articleDatabase';
+import type { GameOverReport } from '@/types/finalEdition';
 
 interface EnhancedFinalEditionProps {
   winner: 'player' | 'ai';
@@ -12,6 +13,7 @@ interface EnhancedFinalEditionProps {
   finalTruth: number;
   finalPlayerIP: number;
   finalAiIP: number;
+  recurringEpilogues?: GameOverReport['recurringCharacterEpilogues'];
 }
 
 /**
@@ -26,6 +28,7 @@ export function EnhancedFinalEdition({
   finalTruth,
   finalPlayerIP,
   finalAiIP,
+  recurringEpilogues = [],
 }: EnhancedFinalEditionProps) {
   const mvpArticle = mvpCard ? getArticleForCard(mvpCard.id) : null;
   const runnerUpArticle = runnerUpCard ? getArticleForCard(runnerUpCard.id) : null;
@@ -144,6 +147,31 @@ export function EnhancedFinalEdition({
                           <p className="text-muted-foreground text-[10px]">
                             {combo.cards.join(', ')}
                           </p>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                )}
+
+                {recurringEpilogues.length > 0 && (
+                  <Card className="p-4 border-2">
+                    <h3 className="text-lg font-bold font-serif mb-3">Where Are They Now?</h3>
+                    <div className="space-y-3 text-xs leading-snug">
+                      {recurringEpilogues.map(epilogue => (
+                        <div key={epilogue.id} className="border-b border-border pb-3 last:border-b-0 last:pb-0">
+                          <p className="text-[10px] uppercase text-muted-foreground">
+                            Stage {epilogue.stage + 1} • {epilogue.appearances} appearances
+                          </p>
+                          <p className="font-bold">
+                            {epilogue.name} — {epilogue.title}
+                          </p>
+                          <p className="italic text-muted-foreground">{epilogue.summary}</p>
+                          <p className="mt-1 text-justify">{epilogue.epilogue}</p>
+                          {epilogue.milestones.length > 0 && (
+                            <p className="mt-1 text-[10px] text-muted-foreground">
+                              Milestones: {epilogue.milestones.join(', ')}
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>

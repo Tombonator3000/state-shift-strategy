@@ -2,6 +2,30 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-15 – Recurring character persistence and staged epilogues
+- Timestamp: 2025-10-15T14:30:00Z
+- Files:
+  - `src/components/game/TabloidNewspaperLegacy.tsx`
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `src/components/news/NewspaperInsidePages.tsx`
+  - `src/components/newspaper/EnhancedFinalEdition.tsx`
+  - `src/data/characterArcs.json`
+  - `src/data/characterArcs.ts`
+  - `src/engine/newspaper/IssueGenerator.ts`
+  - `src/engine/newspaper/__tests__/IssueGenerator.recurringCharacters.test.ts`
+  - `src/game/__tests__/recurringCharacterArticles.test.ts`
+  - `src/game/__tests__/recurringCharacters.test.ts`
+  - `src/game/recurringCharacterArticles.ts`
+  - `src/game/recurringCharacters.ts`
+  - `src/hooks/aiHelpers.ts`
+  - `src/hooks/gameStateTypes.ts`
+  - `src/hooks/useGameState.ts`
+  - `src/pages/Index.tsx`
+  - `src/types/finalEdition.ts`
+  - `src/utils/finalEdition.ts`
+  - `UPDATES_LOG.md`
+- Summary: Persisted recurring character progression through saves, fed staged appearances into newspaper generation, and surfaced “Where Are They Now?” epilogues in final editions.
+
 ## 2025-10-14 – State-themed bonus engine
 - Implemented a seeded `assignStateBonuses` pipeline that drafts weighted regional effects, logs per-state anomalies, and feeds matching newspaper events for the round.
 - Wired round start to apply state bonuses, refresh state event history for UI badges, and surface card-level `stateBonuses` metadata in strategy helpers.

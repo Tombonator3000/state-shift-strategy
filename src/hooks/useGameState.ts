@@ -50,6 +50,7 @@ import { queueHotspotResolveToast, queueHotspotExpireToast } from '@/ui/hotspots
 import { getHotspotIdleLog } from '@/state/useGameLog';
 import { planDiscardOutcome } from '@/utils/discardPlanner';
 import { safeGetLocalStorageItem } from '@/utils/storage';
+import { trackCharacterAppearance, type RecurringCharacterState } from '@/game/recurringCharacters';
 import type {
   ActiveCampaignArcState,
   ActiveParanormalHotspot,
@@ -313,6 +314,79 @@ const normalizeAiBanterCooldown = (value: unknown): AIBanterCooldownState | null
   }
 
   return { categories };
+};
+
+const normalizeRecurringCharacterState = (
+  value: unknown,
+  fallback: RecurringCharacterState,
+): RecurringCharacterState => {
+  if (!value || typeof value !== 'object') {
+    return { ...fallback };
+  }
+
+  const bucket = value as Record<string, unknown>;
+  const normalized: RecurringCharacterState = {};
+
+  for (const [characterId, rawProgress] of Object.entries(bucket)) {
+    if (!rawProgress || typeof rawProgress !== 'object') {
+      continue;
+    }
+
+    const prev = fallback[characterId];
+    const payload = rawProgress as Partial<RecurringCharacterState[string]> & {
+      appearances?: unknown;
+      lastRound?: unknown;
+      currentStage?: unknown;
+      lastArticleVariant?: unknown;
+      milestones?: unknown;
+    };
+
+    const appearances = typeof payload.appearances === 'number' && Number.isFinite(payload.appearances)
+      ? Math.max(0, Math.floor(payload.appearances))
+      : prev?.appearances ?? 0;
+
+    const lastRound = typeof payload.lastRound === 'number' && Number.isFinite(payload.lastRound)
+      ? Math.max(0, Math.floor(payload.lastRound))
+      : prev?.lastRound ?? 0;
+
+    const currentStage = typeof payload.currentStage === 'number' && Number.isFinite(payload.currentStage)
+      ? Math.max(0, Math.floor(payload.currentStage))
+      : prev?.currentStage ?? 0;
+
+    const lastArticleVariant = typeof payload.lastArticleVariant === 'string'
+      ? payload.lastArticleVariant.trim() || (prev?.lastArticleVariant ?? null)
+      : payload.lastArticleVariant === null
+        ? null
+        : prev?.lastArticleVariant ?? null;
+
+    const milestones = Array.isArray(payload.milestones)
+      ? payload.milestones.reduce<string[]>((list, entry) => {
+          if (typeof entry === 'string') {
+            const trimmed = entry.trim();
+            if (trimmed.length > 0) {
+              list.push(trimmed);
+            }
+          }
+          return list;
+        }, [])
+      : prev?.milestones ?? [];
+
+    normalized[characterId] = {
+      appearances,
+      lastRound,
+      currentStage,
+      lastArticleVariant,
+      milestones,
+    };
+  }
+
+  for (const [characterId, progress] of Object.entries(fallback)) {
+    if (!normalized[characterId]) {
+      normalized[characterId] = { ...progress };
+    }
+  }
+
+  return normalized;
 };
 
 const normalizeArticleBlock = (entry: unknown): ArticleBlock | null => {
@@ -2742,6 +2816,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       playHistory: [],
       turnPlays: [],
       turnBuffer: [],
+      recurringCharacters: {},
       controlledStates: [],
       aiControlledStates: [],
       activeHotspot: null,
@@ -3008,6 +3083,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       playHistory: [],
       turnPlays: [],
       turnBuffer: [],
+      recurringCharacters: {},
       stateCombinationBonusIP: 0,
       activeStateCombinationIds: [],
       stateCombinationEffects: createDefaultCombinationEffects(),
@@ -3112,6 +3188,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return prev;
       }
 
+      const cardTags = Array.isArray((card as { tags?: string[] }).tags)
+        ? ((card as { tags: string[] }).tags)
+        : [];
+      const recurringState: RecurringCharacterState = { ...prev.recurringCharacters };
+      const recurringTracking = trackCharacterAppearance(card.name, cardTags, prev.round, recurringState);
+
       const baseCost = applyStateCombinationCostModifiers(
         card.cost,
         card.type,
@@ -3137,6 +3219,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       applyEditorPlayCardAdjustments(playContext);
 
+      let costReductionApplied = 0;
+      if (
+        recurringTracking.character &&
+        typeof recurringTracking.bonus.costReduction === 'number' &&
+        recurringTracking.bonus.costReduction !== 0
+      ) {
+        const priorCost = playContext.cost;
+        playContext.cost = Math.max(0, playContext.cost - recurringTracking.bonus.costReduction);
+        const normalizedPrior = Math.max(0, Math.trunc(priorCost));
+        const normalizedAfter = Math.max(0, Math.trunc(playContext.cost));
+        costReductionApplied = Math.max(0, normalizedPrior - normalizedAfter);
+      }
+
       const effectiveCost = Math.max(0, Math.trunc(playContext.cost));
       if (prev.ip < effectiveCost) {
         return prev;
@@ -3147,7 +3242,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       achievements.onCardPlayed(cardId, card.type, card.rarity);
 
       const targetState = targetOverride ?? prev.targetState ?? null;
-      const resolution = resolveCardEffects(prev, resolvedCard, targetState);
+      let resolution = resolveCardEffects(prev, resolvedCard, targetState);
 
       const adjustmentLogs: string[] = [];
       if (playContext.truthDelta !== 0) {
@@ -3170,6 +3265,50 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       if (adjustmentLogs.length > 0 || playContext.logEntries.length > 0) {
         const mergedLogEntries = [...(resolution.logEntries ?? []), ...adjustmentLogs, ...playContext.logEntries];
         resolution.logEntries = mergedLogEntries;
+      }
+
+      if (recurringTracking.character) {
+        const recurringLogs: string[] = [];
+        if (costReductionApplied > 0) {
+          recurringLogs.push(
+            `Recurring cameo: ${recurringTracking.character.name} waives ${costReductionApplied} IP in hush tithes.`,
+          );
+        }
+        if (typeof recurringTracking.bonus.truthDelta === 'number' && recurringTracking.bonus.truthDelta !== 0) {
+          const truthMutation = { truth: resolution.truth, log: [] as string[] };
+          applyTruthDelta(truthMutation, recurringTracking.bonus.truthDelta, 'human');
+          resolution.truth = truthMutation.truth;
+          if (truthMutation.log.length > 0) {
+            recurringLogs.push(...truthMutation.log);
+          }
+          const truthLabel = recurringTracking.bonus.truthDelta > 0
+            ? `+${recurringTracking.bonus.truthDelta}`
+            : `${recurringTracking.bonus.truthDelta}`;
+          recurringLogs.push(
+            `Recurring cameo: ${recurringTracking.character.name} stokes the broadcast (${truthLabel}% Truth).`,
+          );
+        }
+        if (typeof recurringTracking.bonus.ipDelta === 'number' && recurringTracking.bonus.ipDelta !== 0) {
+          resolution.ip = Math.max(0, resolution.ip + recurringTracking.bonus.ipDelta);
+          const ipLabel = recurringTracking.bonus.ipDelta > 0
+            ? `+${recurringTracking.bonus.ipDelta}`
+            : `${recurringTracking.bonus.ipDelta}`;
+          recurringLogs.push(
+            `Recurring cameo bankroll: ${ipLabel} IP rerouted by ${recurringTracking.character.name}.`,
+          );
+        }
+        if (recurringTracking.stageArc) {
+          recurringLogs.push(
+            `Where Are They Now: ${recurringTracking.character.name} enters "${recurringTracking.stageArc.label}" orbit.`,
+          );
+        }
+        if (recurringTracking.milestone) {
+          recurringLogs.push(`Milestone achieved — ${recurringTracking.milestone.label}.`);
+        }
+        if (recurringLogs.length > 0) {
+          const mergedLogEntries = [...(resolution.logEntries ?? []), ...recurringLogs];
+          resolution.logEntries = mergedLogEntries;
+        }
       }
 
       if (playContext.toastMessages.length > 0) {
@@ -3239,6 +3378,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         playHistory: [...prev.playHistory, playedCardRecord],
         turnPlays: [...prev.turnPlays, ...turnPlayEntries],
         turnBuffer: highlight ? [...prev.turnBuffer, highlight] : prev.turnBuffer,
+        recurringCharacters: recurringTracking.character ? recurringState : prev.recurringCharacters,
         targetState: resolution.targetState,
         selectedCard: resolution.selectedCard,
         log: [...prev.log, ...resolution.logEntries],
@@ -3335,6 +3475,12 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return prev;
       }
 
+      const cardTags = Array.isArray((card as { tags?: string[] }).tags)
+        ? ((card as { tags: string[] }).tags)
+        : [];
+      const recurringState: RecurringCharacterState = { ...prev.recurringCharacters };
+      const recurringTracking = trackCharacterAppearance(card.name, cardTags, prev.round, recurringState);
+
       const baseCost = applyStateCombinationCostModifiers(
         card.cost,
         card.type,
@@ -3360,6 +3506,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       applyEditorPlayCardAdjustments(playContext);
 
+      let costReductionApplied = 0;
+      if (
+        recurringTracking.character &&
+        typeof recurringTracking.bonus.costReduction === 'number' &&
+        recurringTracking.bonus.costReduction !== 0
+      ) {
+        const priorCost = playContext.cost;
+        playContext.cost = Math.max(0, playContext.cost - recurringTracking.bonus.costReduction);
+        const normalizedPrior = Math.max(0, Math.trunc(priorCost));
+        const normalizedAfter = Math.max(0, Math.trunc(playContext.cost));
+        costReductionApplied = Math.max(0, normalizedPrior - normalizedAfter);
+      }
+
       const effectiveCost = Math.max(0, Math.trunc(playContext.cost));
       if (prev.ip < effectiveCost) {
         return prev;
@@ -3368,7 +3527,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const resolvedCard = effectiveCost === card.cost ? card : { ...card, cost: effectiveCost };
       pendingResolvedCard = resolvedCard;
 
-      const resolution = resolveCardEffects(prev, resolvedCard, targetState);
+      let resolution = resolveCardEffects(prev, resolvedCard, targetState);
 
       const adjustmentLogs: string[] = [];
       if (playContext.truthDelta !== 0) {
@@ -3394,6 +3553,49 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           ...adjustmentLogs,
           ...playContext.logEntries,
         ];
+      }
+
+      if (recurringTracking.character) {
+        const recurringLogs: string[] = [];
+        if (costReductionApplied > 0) {
+          recurringLogs.push(
+            `Recurring cameo: ${recurringTracking.character.name} waives ${costReductionApplied} IP in hush tithes.`,
+          );
+        }
+        if (typeof recurringTracking.bonus.truthDelta === 'number' && recurringTracking.bonus.truthDelta !== 0) {
+          const truthMutation = { truth: resolution.truth, log: [] as string[] };
+          applyTruthDelta(truthMutation, recurringTracking.bonus.truthDelta, 'human');
+          resolution.truth = truthMutation.truth;
+          if (truthMutation.log.length > 0) {
+            recurringLogs.push(...truthMutation.log);
+          }
+          const truthLabel = recurringTracking.bonus.truthDelta > 0
+            ? `+${recurringTracking.bonus.truthDelta}`
+            : `${recurringTracking.bonus.truthDelta}`;
+          recurringLogs.push(
+            `Recurring cameo: ${recurringTracking.character.name} stokes the broadcast (${truthLabel}% Truth).`,
+          );
+        }
+        if (typeof recurringTracking.bonus.ipDelta === 'number' && recurringTracking.bonus.ipDelta !== 0) {
+          resolution.ip = Math.max(0, resolution.ip + recurringTracking.bonus.ipDelta);
+          const ipLabel = recurringTracking.bonus.ipDelta > 0
+            ? `+${recurringTracking.bonus.ipDelta}`
+            : `${recurringTracking.bonus.ipDelta}`;
+          recurringLogs.push(
+            `Recurring cameo bankroll: ${ipLabel} IP rerouted by ${recurringTracking.character.name}.`,
+          );
+        }
+        if (recurringTracking.stageArc) {
+          recurringLogs.push(
+            `Where Are They Now: ${recurringTracking.character.name} enters "${recurringTracking.stageArc.label}" orbit.`,
+          );
+        }
+        if (recurringTracking.milestone) {
+          recurringLogs.push(`Milestone achieved — ${recurringTracking.milestone.label}.`);
+        }
+        if (recurringLogs.length > 0) {
+          resolution.logEntries = [...(resolution.logEntries ?? []), ...recurringLogs];
+        }
       }
 
       if (playContext.toastMessages.length > 0) {
@@ -3465,6 +3667,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         paranormalHotspots: updatedHotspots,
         activeHotspot: nextActiveHotspot,
         editorRuntime: nextEditorRuntime ?? null,
+        recurringCharacters: recurringTracking.character ? recurringState : prev.recurringCharacters,
       };
 
       const stateWithReveal = resolution.aiSecretAgendaRevealed
@@ -5450,6 +5653,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           ]),
         );
 
+        const normalizedRecurringCharacters = normalizeRecurringCharacterState(
+          (saveData as { recurringCharacters?: unknown }).recurringCharacters,
+          prev.recurringCharacters,
+        );
+
         return {
           ...prev,
           ...saveData,
@@ -5546,6 +5754,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
                 .map(normalizeArticleBlock)
                 .filter((entry): entry is ArticleBlock => entry !== null)
             : [],
+          recurringCharacters: normalizedRecurringCharacters,
           winner: (saveData as { winner?: unknown }).winner === 'truth'
             || (saveData as { winner?: unknown }).winner === 'government'
             || (saveData as { winner?: unknown }).winner === 'draw'

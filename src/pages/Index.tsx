@@ -1131,6 +1131,7 @@ const Index = () => {
           playHistory: gameState.playHistory,
           currentEvents: gameState.currentEvents ?? [],
           extraExtraFeed: gameState.extraExtraFeed,
+          recurringCharacters: gameState.recurringCharacters,
         },
         winner,
         victoryType,
@@ -3259,6 +3260,7 @@ const Index = () => {
           onArcProgress={handleArcProgress}
           hotspotDirector={hotspotDirector}
           activeHotspot={gameState.activeHotspot}
+          recurringCharacters={gameState.recurringCharacters}
         />
       )}
     </>
