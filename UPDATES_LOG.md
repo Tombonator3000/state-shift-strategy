@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-11 – Truth faction archive completed
+- Authored and imported narrative articles for Truth cards `TRUTH-001` through `TRUTH-200`, giving every legacy card a bespoke Paranoid Times report.
+- Added a generation script for the tail-end entries so future lore passes can iterate without hand-editing 100+ records.
+- Refreshed the coverage dashboard to confirm Truth now has zero gaps while Government remains the next writing focus.
+
 ## 2025-10-11 – Article cache + fallback guardrails
 - Implemented cached lookups for `CARD_ARTICLE_DATABASE` so repeated issue generation avoids full scans and tolerates missing IDs with null memoization.
 - Wired `IssueGenerator` to request `getArticleOrFallback`, blending remote bank data, static TypeScript articles, and generated copy when gaps remain.
