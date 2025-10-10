@@ -11,6 +11,7 @@ import type { PlayedLite } from '@/news/headlineEngine';
 import type { PlayerId } from '@/mvp/validator';
 import type { WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
 import { emitBanter, defaultBanterUi, getCardPlayTrigger } from '@/ai/banter/banterEngine';
+import { applyTruthDelta } from '@/utils/truth';
 
 import type { CardPlayRecord, GameState } from './gameStateTypes';
 import { mergeStateEventHistories } from './stateEventHistory';
@@ -429,7 +430,13 @@ export const applyAiCardPlay = (
     }
   }
 
-  const resolution = resolveCardMVP(prev, resolvedCard, targetState ?? null, 'ai', achievements);
+  const cardTags = Array.isArray((resolvedCard as { tags?: string[] }).tags)
+    ? ((resolvedCard as { tags: string[] }).tags)
+    : [];
+  const recurringState: RecurringCharacterState = { ...prev.recurringCharacters };
+  const recurringTracking = trackCharacterAppearance(resolvedCard.name, cardTags, prev.round, recurringState);
+
+  let resolution = resolveCardMVP(prev, resolvedCard, targetState ?? null, 'ai', achievements);
   const playerEditorId = prev.playerEditor ?? prev.editorId ?? null;
   if (playerEditorId) {
     const category = normalizeCardCategory(resolvedCard.type);
@@ -440,6 +447,40 @@ export const applyAiCardPlay = (
 
   if (strategyLogEntries.length) {
     logEntries.push(...strategyLogEntries);
+  }
+
+  if (recurringTracking.character) {
+    if (typeof recurringTracking.bonus.truthDelta === 'number' && recurringTracking.bonus.truthDelta !== 0) {
+      const truthMutation = { truth: resolution.truth, log: [] as string[] };
+      applyTruthDelta(truthMutation, recurringTracking.bonus.truthDelta, 'ai');
+      resolution.truth = truthMutation.truth;
+      if (truthMutation.log.length > 0) {
+        logEntries.push(...truthMutation.log);
+      }
+      const truthLabel = recurringTracking.bonus.truthDelta > 0
+        ? `+${recurringTracking.bonus.truthDelta}`
+        : `${recurringTracking.bonus.truthDelta}`;
+      logEntries.push(
+        `Recurring cameo: ${recurringTracking.character.name} reroutes the briefing (${truthLabel}% Truth sway).`,
+      );
+    }
+    if (typeof recurringTracking.bonus.ipDelta === 'number' && recurringTracking.bonus.ipDelta !== 0) {
+      resolution.aiIP = Math.max(0, resolution.aiIP + recurringTracking.bonus.ipDelta);
+      const ipLabel = recurringTracking.bonus.ipDelta > 0
+        ? `+${recurringTracking.bonus.ipDelta}`
+        : `${recurringTracking.bonus.ipDelta}`;
+      logEntries.push(
+        `Recurring cameo bankroll: ${ipLabel} IP secured by ${recurringTracking.character.name}.`,
+      );
+    }
+    if (recurringTracking.stageArc) {
+      logEntries.push(
+        `Where Are They Now: ${recurringTracking.character.name} escalates to "${recurringTracking.stageArc.label}" duties.`,
+      );
+    }
+    if (recurringTracking.milestone) {
+      logEntries.push(`Milestone achieved — ${recurringTracking.milestone.label}.`);
+    }
   }
 
   const playedCardRecord = createPlayedCardRecord({
@@ -501,6 +542,7 @@ export const applyAiCardPlay = (
     paranormalHotspots: updatedHotspots,
     cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
     activeHotspot: nextActiveHotspot,
+    recurringCharacters: recurringTracking.character ? recurringState : prev.recurringCharacters,
   };
 
   return {

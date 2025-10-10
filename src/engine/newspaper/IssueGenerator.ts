@@ -14,6 +14,8 @@ import {
   getArticleForCard as getStaticArticleForCard,
   type CardArticle as StaticCardArticle,
 } from '@/data/cardArticles/articleDatabase';
+import { selectArticleForCharacter, type CharacterStageState } from '@/game/recurringCharacterArticles';
+import { resolveRecurringCharacterId } from '@/game/recurringCharacters';
 
 export interface PlayedCardInput {
   card: Card;
@@ -90,6 +92,7 @@ export interface IssueGeneratorGameStateSnapshot {
   playerFaction?: 'truth' | 'government';
   cardsPlayedCount?: number;
   currentScore?: number;
+  recurringCharacters?: Record<string, CharacterStageState>;
 }
 
 export interface IssueGeneratorInput {
@@ -519,18 +522,38 @@ const getArticleOrFallback = (
   targetName: string | null,
   capturedNames: string[],
   bank: Awaited<ReturnType<typeof loadArticleBank>> | null,
+  recurringState: Record<string, CharacterStageState> | undefined,
 ): { article: ResolvedCardArticle; origin: ArticleResolutionOrigin } => {
   const cardId = entry.card.id;
   const faction = resolveFaction(entry.card.faction);
 
   const fromBank = bank?.getById?.(cardId) ?? null;
-  if (fromBank) {
-    return { article: normaliseArticleRecord(fromBank, cardId, faction), origin: 'bank' };
+  const bankArticle = fromBank ? normaliseArticleRecord(fromBank, cardId, faction) : null;
+  const staticArticle = getStaticArticleForCard(cardId);
+
+  const resolveRecurring = (candidate: ResolvedCardArticle | null): ResolvedCardArticle | null => {
+    if (!candidate?.recurringCharacter) {
+      return candidate;
+    }
+    const recurringId = resolveRecurringCharacterId(candidate.recurringCharacter);
+    if (!recurringId || !recurringState) {
+      return candidate;
+    }
+    const stagedArticle = selectArticleForCharacter(cardId, recurringId, recurringState);
+    if (!stagedArticle) {
+      return candidate;
+    }
+    return normaliseArticleRecord(stagedArticle, cardId, faction);
+  };
+
+  const staged = resolveRecurring(bankArticle ?? null) ?? resolveRecurring(staticArticle ? normaliseArticleRecord(staticArticle, cardId, faction) : null);
+  if (staged) {
+    return { article: staged, origin: bankArticle ? 'bank' : 'static' };
   }
 
-  const fromStatic = getStaticArticleForCard(cardId);
-  if (fromStatic) {
-    return { article: normaliseArticleRecord(fromStatic, cardId, faction), origin: 'static' };
+  const fallbackStatic = staticArticle ? normaliseArticleRecord(staticArticle, cardId, faction) : null;
+  if (fallbackStatic) {
+    return { article: fallbackStatic, origin: 'static' };
   }
 
   return {
@@ -817,6 +840,7 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
       targetName,
       capturedNames,
       articleBank,
+      input.gameState?.recurringCharacters,
     );
     const tonedArticle = applyToneIfAvailable(entry, resolvedArticle);
     return buildGeneratedStoryArticle(entry, tonedArticle, gameStateContext, {

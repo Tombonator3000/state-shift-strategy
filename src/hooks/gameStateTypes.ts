@@ -14,6 +14,7 @@ import type { StateCombinationEffects } from '@/data/stateCombinations';
 import type { EditorDef, EditorId } from '@/expansions/editors/EditorsEngine';
 import type { TabloidRelicRuntimeState } from '@/expansions/tabloidRelics/RelicTypes';
 import type { GameOverReport } from '@/types/finalEdition';
+import type { RecurringCharacterProgress } from '@/game/recurringCharacters';
 
 export interface CardPlayRecord {
   card: GameCard;
@@ -59,6 +60,7 @@ export interface GameState {
   frontPageTriplet: PlayedCardMetaLite[] | null;
   turnPlays: TurnPlay[];
   turnBuffer: PlayedLite[];
+  recurringCharacters: Record<string, RecurringCharacterProgress>;
   comboTruthDeltaThisRound: number;
   controlledStates: string[];
   aiControlledStates: string[];
