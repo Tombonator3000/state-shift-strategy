@@ -7,6 +7,14 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Files:
   - `src/components/game/EnhancedUSAMap.tsx`
 - Summary: Hardened the enhanced USA map overlay so hotspot sources and event factions default to an "UNKNOWN" tag instead of crashing when saved data lacks a faction string.
+## 2025-10-17 – Strategy insights migrate to help overlay
+- Timestamp: 2025-10-17T08:45:00Z
+- Files:
+  - `src/components/game/ContextualHelp.tsx`
+  - `src/components/gameplay/StrategyHelper.tsx`
+  - `src/pages/Index.tsx`
+  - `__tests__/integration/gameplayScreen.test.tsx`
+- Summary: Routed the strategy insight engine into the contextual help drawer, removed the standalone panel from the main layout, and updated integration coverage to confirm insights surface when agents open the overlay.
 
 ## 2025-10-16 – Newsroom previews and ticker integration
 - Timestamp: 2025-10-16T09:00:00Z
