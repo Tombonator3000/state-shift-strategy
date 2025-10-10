@@ -2,6 +2,17 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-18 – Final edition borrows live card articles for MVP coverage
+- Timestamp: 2025-10-18T09:45:00Z
+- Files:
+  - `src/components/news/NewspaperFrontPage.tsx`
+  - `src/components/news/NewspaperInsidePages.tsx`
+  - `src/styles/newspaperLayout.css`
+  - `src/utils/finalEdition.ts`
+  - `src/news/finalFrontPageComposer.ts`
+  - `src/types/finalEdition.ts`
+  - `__tests__/utils/finalEdition.test.ts`
+- Summary: Front page and inside spread now render full MVP and runner-up copy pulled from the card article bank, fall back to existing report highlights when no article exists, and the game-over report captures sanitized paragraphs for downstream UIs with regression coverage for both pathways.
 ## 2025-10-21 – Article overlay stays open until dismissed
 - Timestamp: 2025-10-21T12:00:00Z
 - Files:

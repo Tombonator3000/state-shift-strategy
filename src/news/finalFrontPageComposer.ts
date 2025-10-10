@@ -281,6 +281,20 @@ export const sanitizeFrontPageBulletin = (
   bulletin?: FrontPageBulletin | null,
 ): SanitizedFrontPageBulletin => sanitizeBulletin(bulletin);
 
+const splitIntoParagraphs = (body: string): string[] =>
+  body
+    .split(/\r?\n\s*\r?\n/g)
+    .map(chunk => sanitizeFrontPageText(chunk).value?.trim())
+    .filter((value): value is string => Boolean(value));
+
+export const extractArticleParagraphs = (body?: string | null): string[] => {
+  if (typeof body !== 'string') {
+    return [];
+  }
+
+  return splitIntoParagraphs(body);
+};
+
 const buildFromTemplate = (
   templates: FrontPageTemplateData,
   seed: number,

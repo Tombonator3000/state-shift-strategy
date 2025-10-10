@@ -37,12 +37,24 @@ describe('selectArticleForCharacter', () => {
     const stage0 = selectArticleForCharacter('TRUTH-015', 'florida_man', state);
     expect(stage0?.articleVariant).toBe('florida_man_stage_0');
 
+    state.florida_man.appearances = 1;
+    state.florida_man.currentStage = 1;
+    state.florida_man.lastArticleVariant = 'florida_man_stage_1';
+
     const stage1 = selectArticleForCharacter('TRUTH-NEW-007', 'florida_man', state);
     expect(stage1?.articleVariant).toBe('florida_man_stage_1');
 
+    state.florida_man.appearances = 2;
+    state.florida_man.currentStage = 2;
+    state.florida_man.lastArticleVariant = 'florida_man_stage_2';
+
     const stage2 = selectArticleForCharacter('TRUTH-NEW-007', 'florida_man', state);
     expect(stage2?.articleVariant).toBe('florida_man_stage_2');
-    expect(state.florida_man).toEqual({ appearances: 3, currentStage: 2 });
+    expect(state.florida_man).toEqual({
+      appearances: 2,
+      currentStage: 2,
+      lastArticleVariant: 'florida_man_stage_2',
+    });
     const first = selectArticleForCharacter('TRUTH-003', 'pastor_rex', state);
     expect(first?.articleVariant).toBe('pastor_rex_stage_0');
     expect(state.pastor_rex).toEqual({
