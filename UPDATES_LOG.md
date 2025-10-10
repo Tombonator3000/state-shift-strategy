@@ -2,6 +2,11 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-09 – Recurring Character Story Arc Variants
+- Added story arc metadata and stage progression tracking for Pastor Rex, Agent Smitherson, Florida Man, Bat Boy, Maria Chen, and Coach Terry Hammond.
+- Tagged stage-specific article variants across truth and expansion coverage, authoring new pieces to ensure at least three appearances per character.
+- Implemented a selector that advances recurring character stages after each article use, enabling narrative escalation in the newspaper system.
+
 ## 2025-10-09 – Dynamic Newspaper Variable Injection
 - Added `GameStateContext` templating so generated headlines and bodies swap in live turn, score, IP, and faction data.
 - Plumbed Tabloid newsroom UI to forward round metrics into the issue generator for accurate article context.

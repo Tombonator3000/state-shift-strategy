@@ -41,8 +41,9 @@ Track officials shrugged, calling the session an "inspirational seminar on situa
     tags: ['coach-hammond', 'sports', 'ufo'],
     statesMentioned: ['Kentucky'],
     recurringCharacter: 'Coach Terry Hammond',
+    articleVariant: 'coach_hammond_stage_1',
     followUpHooks: [
-      'Churchill Downs installs lightning rods shaped like goalposts at Hammond's suggestion',
+      'Churchill Downs installs lightning rods shaped like goalposts at Hammond\'s suggestion',
       'Mysterious bettor places wager in binary code on horse named "Area Fifty-Fun"'
     ]
   },
@@ -141,6 +142,7 @@ Coast Guard officials urge caution, insisting the hotline is "not affiliated wit
     tags: ['florida-man', 'rescue', 'lake'],
     statesMentioned: ['Michigan'],
     recurringCharacter: 'Florida Man',
+    articleVariant: 'florida_man_stage_1',
     followUpHooks: [
       'Hotline voicemail references map coordinates that trace an alligator-shaped constellation over the lake',
       'Great Lakes shipping union invites Florida Man to keynote winter safety conference'
@@ -182,7 +184,7 @@ Army Corps officials attribute the reversals to "unusually enthusiastic catfish,
     statesMentioned: ['Mississippi'],
     recurringCharacter: null,
     followUpHooks: [
-      'Smithsonian folklorists ship blank vinyl upstream to capture the river's nightly set',
+      'Smithsonian folklorists ship blank vinyl upstream to capture the river\'s nightly set',
       'Delta blues festival sells out after promising "first-ever current reversal dance floor"'
     ]
   },
@@ -192,7 +194,7 @@ Army Corps officials attribute the reversals to "unusually enthusiastic catfish,
     headline: 'BAT BOY HOSTS MIDNIGHT CIVICS CLASS BENEATH THE ARCH—TEACHES SENATORS HOW TO HANG',
     subhead: 'Gateway Arch visitors receive crash course in upside-down transparency',
     byline: 'By Jennifer Cross, Cryptid Democracy Correspondent',
-    body: `St. Louis park rangers confirmed the Gateway Arch now opens after midnight for Bat Boy's "Civics For The Nocturnal" seminars. Attendees receive suction-cup gloves and instruction on hanging upside down while reading appropriations bills projected on the stainless steel surface.
+    body: `St. Louis park rangers confirmed the Gateway Arch now opens after midnight for Bat Boy\'s "Civics For The Nocturnal" seminars. Attendees receive suction-cup gloves and instruction on hanging upside down while reading appropriations bills projected on the stainless steel surface.
 
 "Corruption slides right off when you turn the page vertically," Bat Boy chirped, distributing bat-shaped highlighters. Witnesses spotted several Missouri lawmakers participating incognito; one fainted when asked to echolocate the phrase "earmark."
 
@@ -201,6 +203,7 @@ The Senate sergeant-at-arms asked for a briefing, calling the event "an unauthor
     tags: ['bat-boy', 'civics', 'activism'],
     statesMentioned: ['Missouri'],
     recurringCharacter: 'Bat Boy',
+    articleVariant: 'bat_boy_stage_1',
     followUpHooks: [
       'Missouri legislature files bill requiring transparency harnesses for midnight hearings',
       'Bat Boy schedules field trip to Jefferson City tunnels rumored to echo secrets'
@@ -241,6 +244,7 @@ State park officials, caught off guard, declared the event an "unsanctioned inte
     tags: ['bat-boy', 'maria-chen', 'festival'],
     statesMentioned: ['New Jersey'],
     recurringCharacter: 'Bat Boy & Maria Chen',
+    articleVariant: 'maria_chen_stage_2',
     followUpHooks: [
       'Jersey Devil spotted delivering thank-you baskets of artisanal pinecones',
       'Pop-up cryptid convention announced simultaneously in Roswell and Richmond via glowing postcards'
@@ -261,6 +265,7 @@ City inspectors shrugged, citing a "permitted promotional art project." Meanwhil
     tags: ['maria-chen', 'commerce', 'urban'],
     statesMentioned: ['New York'],
     recurringCharacter: 'Maria Chen',
+    articleVariant: 'maria_chen_stage_1',
     followUpHooks: [
       'MTA announces pilot program to accept foil crowns as proof of fare when the moon is full',
       'Wall Street lobbyists file complaint about "preemptive eavesdropping" accessories'
@@ -303,7 +308,7 @@ Energy regulators categorize the phenomenon as "mechanical mindfulness" while ec
     recurringCharacter: null,
     followUpHooks: [
       'Petroleum companies commission lullaby-writing contest judged by retired cowboys',
-      'Geologists detect dreamlike seismic patterns syncing with the rigs' nightly nap'
+      'Geologists detect dreamlike seismic patterns syncing with the rigs\' nightly nap'
     ]
   },
   {
@@ -321,9 +326,10 @@ Museum officials dismissed the event as "spontaneous performance art" but quietl
     tags: ['bat-boy', 'florida-man', 'music'],
     statesMentioned: ['Ohio'],
     recurringCharacter: 'Bat Boy & Florida Man',
+    articleVariant: 'bat_boy_stage_2',
     followUpHooks: [
       'Unsigned liner notes list next venue as "Somewhere between Toledo and the Twilight Zone"',
-      'Cleveland weather radar briefly displays equalizer bars matching the duet's beats'
+      'Cleveland weather radar briefly displays equalizer bars matching the duet\'s beats'
     ]
   },
   {
@@ -341,6 +347,7 @@ Ultimately the twister itself issued a booming "Settle it yourselves" before dis
     tags: ['pastor-rex', 'agent-smitherson', 'storm'],
     statesMentioned: ['Oklahoma', 'Texas'],
     recurringCharacter: 'Pastor Rex & Agent Smitherson',
+    articleVariant: 'pastor_rex_stage_2',
     followUpHooks: [
       'FAA proposes new category for "faith-based atmospheric gatherings"',
       'Red River towns schedule joint potluck to compare sermon transcripts with confiscated paperwork'
@@ -381,8 +388,9 @@ National Park officials insist the bell simply "settled" after centuries of serv
     tags: ['agent-smitherson', 'history', 'coverup'],
     statesMentioned: ['Pennsylvania'],
     recurringCharacter: 'Agent Smitherson',
+    articleVariant: 'agent_smitherson_stage_1',
     followUpHooks: [
-      'New overtone harmonizes perfectly with Bat Boy's campaign anthem, causing tremors in Congress',
+      'New overtone harmonizes perfectly with Bat Boy\'s campaign anthem, causing tremors in Congress',
       'Archives reveal earlier drafts of the Declaration printed on nondisclosure agreements'
     ]
   },
@@ -404,6 +412,69 @@ City officials labeled the addition "community-sourced illumination" but quietly
     followUpHooks: [
       'Brown University astronomers discover campus tunnels glowing in the same constellation shape',
       'WaterFire organizers receive anonymous donation of antique star maps wrapped in oilskin'
+    ]
+  },
+  {
+    cardId: 'TRUTH-NEW-021',
+    faction: 'truth',
+    headline: 'FRIDAY NIGHT LIGHTS PROJECT UFO ROUTES—COACH HAMMOND RUNS COSMIC TWO-A-DAYS',
+    subhead: 'Small-town scoreboard spits out anti-abduction audibles while bleachers chant binary',
+    byline: 'By Mallory Greene, Heartland Sports Investigator',
+    body: `The stadium lights at Cedar Ridge High School flickered back on at 11:11 p.m., hours after curfew, projecting glowing route trees across the turf that looked suspiciously like invasion schematics. Coach Terry Hammond was already there in a windbreaker, whistle in mouth, summoning sleepy linebackers for "emergency coverage drills against anything hovering."
+
+"You point at the sky, you call the audible, you don't get beamed up," Hammond barked while the scoreboard rotated through secret "Visitor" formations labeled with crop-circle symbols. Parents huddled in the bleachers passing thermoses as they logged the patterns on graph paper. The marching band, down to a skeleton crew, played the fight song backward to keep morale sharp.
+
+By sunrise the field smelled faintly of ozone and orange slices. Local astronomers volunteered to run hydration, explaining that the glowing down-and-distance markers were mapping a meteor shower due next week. The school board, citing "unusually educational extracurriculars," granted Hammond indefinite midnight practice rights.`,
+    imagePrompt: 'High school football field at night with glowing scoreboard projecting alien play diagrams, coach with whistle leading players under starry sky, newsprint texture',
+    tags: ['coach-hammond', 'football', 'ufo'],
+    statesMentioned: ['Oklahoma'],
+    recurringCharacter: 'Coach Terry Hammond',
+    articleVariant: 'coach_hammond_stage_0',
+    followUpHooks: [
+      'Booster club adds "meteor insurance" line item to concession budget',
+      'Astronomy club petitions to join Hammond’s defensive line as "orbital safeties"'
+    ]
+  },
+  {
+    cardId: 'TRUTH-NEW-022',
+    faction: 'truth',
+    headline: 'COACH HAMMOND HOSTS TRI-STATE SCRIMMAGE—WEATHER RADAR CALLS AN AUDIBLE',
+    subhead: 'Interstate clinic draws meteorologists, crop dusters, and one retired astronaut to run anti-abduction drills',
+    byline: 'By Mallory Greene, Heartland Sports Investigator',
+    body: `Coach Terry Hammond expanded his UFO-preparedness program to a neutral cornfield where Kansas, Missouri, and Nebraska touch corners. Dozens of high school captains arrived with laminated playbooks; within minutes, a rogue thunderhead formed overhead, mirroring Hammond’s chalkboard with lightning-shaped Xs and Os.
+
+“We’re practicing situational awareness against anything with tractor beams or clipboards,” Hammond declared, pairing quarterbacks with crop-duster pilots to rehearse evasive maneuvers. A retired astronaut served as guest ref, tossing penalty flags that glowed whenever someone forgot to salute the surveillance blimp idling above the 50-yard line.
+
+Federal observers insisted the gathering was “a casual weather appreciation day” even as radar operators reported Hammond’s zone blitz diagrams appearing on their screens. Local diners extended breakfast hours for exhausted players comparing notes about “cover-three against cumulonimbus.”`,
+    imagePrompt: 'Tri-state farm field converted into football practice with storm clouds mimicking play diagrams, coach with chalkboard, meteorologists and players collaborating, newsprint aesthetic',
+    tags: ['coach-hammond', 'football', 'weather'],
+    statesMentioned: ['Kansas', 'Missouri', 'Nebraska'],
+    recurringCharacter: 'Coach Terry Hammond',
+    articleVariant: 'coach_hammond_stage_2',
+    followUpHooks: [
+      'NCAA compliance office quietly asks for Hammond’s anti-abduction handbook',
+      'Crop insurance adjusters request tapes to justify "act of saucer" clauses'
+    ]
+  },
+  {
+    cardId: 'TRUTH-NEW-023',
+    faction: 'truth',
+    headline: 'FLORIDA MAN SKYWRITES RESISTANCE SCHEDULE—COUNTY AIRSHOW PANICS THEN APPLAUDS',
+    subhead: 'Citrus-scented contrails map covert meetups while brass band plays hurricane tempo',
+    byline: 'By Jasmine Ortiz, Sunshine State Shenanigans Reporter',
+    body: `The Palmetto County Freedom Airshow was supposed to feature synchronized biplanes and a patriotic medley. Instead, Florida Man commandeered the finale, vaulting onto a crop-dusting biplane with a backpack sprayer labeled "CITRUS CONFIDENTIAL."
+
+Witnesses say he traced spiraling contrails that spelled out meeting points like "PIER 13 MIDNIGHT" and "BRING THE ARCHIVES" before sketching a perfect alligator clasping a briefcase. The mist smelled like orange zest and faint ozone; phones within a mile began receiving calendar invites titled "Operation Sunburn Proof."
+
+Airshow officials pleaded over loudspeakers for calm, but the crowd roared approval when Florida Man tipped the plane sideways to underline the word "RESIST." The marching band switched to hurricane-tempo drums while local officials insisted the stunt was "unsanctioned citrus marketing."`,
+    imagePrompt: 'County airshow with Florida Man hanging from biplane spraying glowing citrus contrails forming words in sky, crowd cheering, newsprint style',
+    tags: ['florida-man', 'airshow', 'resistance'],
+    statesMentioned: ['Florida'],
+    recurringCharacter: 'Florida Man',
+    articleVariant: 'florida_man_stage_2',
+    followUpHooks: [
+      'FAA issues advisory about "unauthorized zest dispersal" while quietly archiving the contrail coordinates',
+      'Local zine prints decoder wheel for Florida Man’s airborne calendar invites'
     ]
   },
   {
@@ -781,6 +852,7 @@ Any echoes resembling follow-up questions are to be ignored; the booths already 
     tags: ['agent-smitherson', 'surveillance', 'public-relations'],
     statesMentioned: ['West Virginia'],
     recurringCharacter: 'Agent Smitherson',
+    articleVariant: 'agent_smitherson_stage_2',
     followUpHooks: [
       'Booths begin dispensing souvenir badges that read "I Confessed to Nothing"',
       'Local musicians try to use the booths for reverb practice and are politely redirected'

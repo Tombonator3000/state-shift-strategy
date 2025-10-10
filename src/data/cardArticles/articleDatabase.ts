@@ -19,6 +19,7 @@ export interface CardArticle {
   recurringCharacter?: string | null;
   followUpHooks?: string[];
   tags?: string[];
+  articleVariant?: string;
 }
 
 export const CARD_ARTICLE_DATABASE: CardArticle[] = ALL_CARD_ARTICLES;
