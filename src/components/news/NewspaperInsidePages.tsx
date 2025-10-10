@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react';
 import type { GameOverReport } from '@/types/finalEdition';
 import { cn } from '@/lib/utils';
 import CardImage from '@/components/game/CardImage';
+import { sanitizeFrontPageText } from '@/news/finalFrontPageComposer';
 import '@/styles/newspaperLayout.css';
 
 interface NewspaperInsidePagesProps {
@@ -33,6 +34,71 @@ const NewspaperInsidePages = ({ report, currentPage, onBackToFront, isVictory }:
     day: 'numeric',
     year: 'numeric',
   }).toUpperCase();
+
+  const cleanLine = (value?: string | null): string | undefined => {
+    const result = sanitizeFrontPageText(value);
+    if (result.value) {
+      return result.value;
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      return trimmed.length ? trimmed : undefined;
+    }
+    return undefined;
+  };
+
+  const buildOperativeCopy = (entry?: GameOverReport['mvp']) => {
+    if (!entry) {
+      return { headline: undefined, subhead: undefined, paragraphs: [] as string[] };
+    }
+
+    const headline = cleanLine(entry.article?.headline);
+    const subhead = cleanLine(entry.article?.subhead);
+    const articleParagraphs = entry.article?.paragraphs;
+    const paragraphs = Array.isArray(articleParagraphs)
+      ? articleParagraphs
+          .map(paragraph => cleanLine(paragraph))
+          .filter((paragraph): paragraph is string => Boolean(paragraph))
+      : [];
+
+    if (paragraphs.length > 0) {
+      return { headline, subhead, paragraphs };
+    }
+
+    const fallback: string[] = [];
+    const highlight = cleanLine(entry.highlight);
+    if (highlight) {
+      fallback.push(highlight);
+    }
+
+    const statFragments: string[] = [];
+    if (Math.round(entry.truthDelta) !== 0) {
+      statFragments.push(`Truth Δ ${entry.truthDelta >= 0 ? '+' : ''}${Math.round(entry.truthDelta)}%`);
+    }
+    if (Math.round(entry.ipDelta) !== 0) {
+      statFragments.push(`IP Δ ${entry.ipDelta >= 0 ? '+' : ''}${Math.round(entry.ipDelta)}`);
+    }
+    if (Math.round(entry.damageDealt) !== 0) {
+      statFragments.push(`Damage ${Math.round(entry.damageDealt)}`);
+    }
+    if (entry.capturedStates.length > 0) {
+      statFragments.push(`States: ${entry.capturedStates.join(', ')}`);
+    }
+    statFragments.push(`Round ${entry.round}, Turn ${entry.turn}`);
+
+    if (statFragments.length > 0) {
+      fallback.push(statFragments.join(' • '));
+    }
+
+    return {
+      headline,
+      subhead,
+      paragraphs: fallback,
+    };
+  };
+
+  const mvpCopy = buildOperativeCopy(report.mvp ?? undefined);
+  const runnerUpCopy = buildOperativeCopy(report.runnerUp ?? undefined);
 
   return (
     <div className="newspaper-page">
@@ -81,7 +147,17 @@ const NewspaperInsidePages = ({ report, currentPage, onBackToFront, isVictory }:
                 <h3 className="mb-2 font-['Archivo_Black'] text-xl font-black uppercase">
                   {report.mvp.cardName}
                 </h3>
-                <p className="newspaper-body-text mb-4">{report.mvp.highlight}</p>
+                {mvpCopy.headline ? (
+                  <div className="newspaper-caption mb-2">{mvpCopy.headline}</div>
+                ) : null}
+                {mvpCopy.subhead ? (
+                  <p className="newspaper-body-text mb-3 italic">{mvpCopy.subhead}</p>
+                ) : null}
+                {mvpCopy.paragraphs.map((paragraph, index) => (
+                  <p key={index} className="newspaper-body-text mb-3">
+                    {paragraph}
+                  </p>
+                ))}
                 <div className="newspaper-stat-box space-y-2 text-sm">
                   <div className="flex justify-between border-b border-black/20 pb-1">
                     <span className="font-bold">Truth Impact:</span>
@@ -121,7 +197,17 @@ const NewspaperInsidePages = ({ report, currentPage, onBackToFront, isVictory }:
                 <h3 className="mb-2 font-['Archivo_Black'] text-xl font-black uppercase">
                   {report.runnerUp.cardName}
                 </h3>
-                <p className="newspaper-body-text mb-4">{report.runnerUp.highlight}</p>
+                {runnerUpCopy.headline ? (
+                  <div className="newspaper-caption mb-2">{runnerUpCopy.headline}</div>
+                ) : null}
+                {runnerUpCopy.subhead ? (
+                  <p className="newspaper-body-text mb-3 italic">{runnerUpCopy.subhead}</p>
+                ) : null}
+                {runnerUpCopy.paragraphs.map((paragraph, index) => (
+                  <p key={index} className="newspaper-body-text mb-3">
+                    {paragraph}
+                  </p>
+                ))}
                 <div className="newspaper-stat-box space-y-2 text-sm">
                   <div className="flex justify-between border-b border-black/20 pb-1">
                     <span className="font-bold">Truth Impact:</span>
