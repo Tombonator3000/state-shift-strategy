@@ -259,6 +259,33 @@ const NewspaperInsidePages = ({ report, currentPage, onBackToFront, isVictory }:
                   </div>
                 </div>
               )}
+
+              {report.recurringCharacterEpilogues.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="newspaper-subheading text-base">WHERE ARE THEY NOW?</h3>
+                  <div className="space-y-3">
+                    {report.recurringCharacterEpilogues.map(epilogue => (
+                      <div
+                        key={epilogue.id}
+                        className="rounded-md border border-black/20 bg-white p-3 text-sm shadow-sm"
+                      >
+                        <div className="text-[10px] uppercase text-gray-500">
+                          Stage {epilogue.stage + 1} • {epilogue.appearances} appearances
+                        </div>
+                        <div className="font-bold">{epilogue.name} — {epilogue.title}</div>
+                        <p className="mt-1 text-xs italic text-gray-600">{epilogue.summary}</p>
+                        <p className="mt-2 text-sm leading-snug">{epilogue.epilogue}</p>
+                        <div className="mt-2 flex flex-wrap gap-2 text-[10px] text-gray-500">
+                          <span>Last seen round {epilogue.lastRound || report.rounds}</span>
+                          {epilogue.milestones.length > 0 && (
+                            <span>Milestones: {epilogue.milestones.join(', ')}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

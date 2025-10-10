@@ -15,7 +15,9 @@ import type {
   GameOverReport,
   ImpactType,
   MVPReport,
+  RecurringCharacterEpilogue,
 } from '@/types/finalEdition';
+import { getCharacterArc, getCharacterArcStage } from '@/data/characterArcs';
 
 export const getFactionDisplayName = (faction: 'truth' | 'government'): string => {
   return faction === 'truth' ? 'Truth Network' : 'Shadow Government';
@@ -559,7 +561,7 @@ export const composeFrontPageArticle = ({
 export interface BuildFinalEditionOptions {
   state: Pick<
     GameState,
-    'round' | 'truth' | 'ip' | 'aiIP' | 'states' | 'faction' | 'playHistory' | 'extraExtraFeed'
+    'round' | 'truth' | 'ip' | 'aiIP' | 'states' | 'faction' | 'playHistory' | 'extraExtraFeed' | 'recurringCharacters'
   > & {
     currentEvents?: GameEvent[];
   };
@@ -593,6 +595,29 @@ export const buildFinalEdition = ({
   const topEvents = pickTopEvents(state.currentEvents ?? [], 4, arcSummaries);
   const comboHighlights = buildComboHighlights(comboSummary);
   const timestamp = recordedAt ?? Date.now();
+
+  const recurringCharacterEpilogues: RecurringCharacterEpilogue[] = Object.entries(
+    state.recurringCharacters ?? {},
+  )
+    .map(([id, progress]) => {
+      const arcTemplate = getCharacterArc(id);
+      const stageTemplate = getCharacterArcStage(id, progress.currentStage ?? 0);
+      if (!arcTemplate || !stageTemplate) {
+        return null;
+      }
+      return {
+        id,
+        name: arcTemplate.name,
+        stage: stageTemplate.stage,
+        title: stageTemplate.title,
+        summary: stageTemplate.summary,
+        epilogue: stageTemplate.epilogue,
+        appearances: progress.appearances,
+        lastRound: progress.lastRound,
+        milestones: progress.milestones ?? [],
+      } satisfies RecurringCharacterEpilogue;
+    })
+    .filter((entry): entry is RecurringCharacterEpilogue => Boolean(entry));
 
   const playerStatesOwned = state.states.filter(
     s => s.owner === (state.faction === 'government' ? 'player' : 'ai'),
@@ -631,5 +656,6 @@ export const buildFinalEdition = ({
     extraExtraFeed: [...state.extraExtraFeed],
     frontPage,
     recordedAt: timestamp,
+    recurringCharacterEpilogues,
   };
 };

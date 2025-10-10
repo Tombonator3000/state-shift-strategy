@@ -41,6 +41,25 @@ export interface RecurringCharacter {
   currentStage: number;
 }
 
+export interface RecurringCharacterProgress {
+  appearances: number;
+  lastRound: number;
+  currentStage: number;
+  lastArticleVariant: string | null;
+  milestones: string[];
+}
+
+export type RecurringCharacterState = Record<string, RecurringCharacterProgress>;
+
+export interface CharacterAppearanceResult {
+  character: RecurringCharacter | null;
+  bonus: { truthDelta?: number; ipDelta?: number; costReduction?: number };
+  milestone: { label: string; effect: unknown } | null;
+  progress: RecurringCharacterProgress | null;
+  stageArc: CharacterArc | null;
+  stageJustAdvanced: boolean;
+}
+
 export const RECURRING_CHARACTERS: Record<string, RecurringCharacter> = {
   pastor_rex: {
     id: 'pastor_rex',
@@ -339,16 +358,49 @@ export const RECURRING_CHARACTERS: Record<string, RecurringCharacter> = {
 /**
  * Track character appearance and return cumulative bonuses
  */
+const NORMALIZED_NAME_CACHE = new Map<string, string>();
+
+const normaliseIdentifier = (value: string): string => {
+  const cached = NORMALIZED_NAME_CACHE.get(value);
+  if (cached) {
+    return cached;
+  }
+  const normalized = value.trim().toLowerCase();
+  NORMALIZED_NAME_CACHE.set(value, normalized);
+  return normalized;
+};
+
+const NAME_TO_ID = Object.values(RECURRING_CHARACTERS).reduce<Map<string, string>>((map, character) => {
+  map.set(normaliseIdentifier(character.id), character.id);
+  map.set(normaliseIdentifier(character.name), character.id);
+  return map;
+}, new Map());
+
+export const resolveRecurringCharacterId = (identifier: string): string | null => {
+  if (!identifier) {
+    return null;
+  }
+  const normalized = normaliseIdentifier(identifier);
+  return NAME_TO_ID.get(normalized) ?? null;
+};
+
+const createDefaultProgress = (character: RecurringCharacter): RecurringCharacterProgress => {
+  const stageArc = character.storyArcs.find(arc => arc.stage === 0) ?? character.storyArcs[0];
+  return {
+    appearances: 0,
+    lastRound: 0,
+    currentStage: stageArc?.stage ?? 0,
+    lastArticleVariant: stageArc?.articleVariant ?? null,
+    milestones: [],
+  };
+};
+
 export function trackCharacterAppearance(
   cardName: string,
   cardTags: string[] = [],
   currentRound: number,
-  characterState: Record<string, { appearances: number; lastRound: number }> = {},
-): {
-  character: RecurringCharacter | null;
-  bonus: { truthDelta?: number; ipDelta?: number; costReduction?: number };
-  milestone: { label: string; effect: unknown } | null;
-} {
+  characterState: RecurringCharacterState = {},
+): CharacterAppearanceResult {
   const nameLower = cardName.toLowerCase();
   const tagsLower = cardTags.map(t => t.toLowerCase());
 
@@ -369,53 +421,67 @@ export function trackCharacterAppearance(
       );
     }
 
-    if (matches) {
-      // Get current state or initialize
-      const state = characterState[char.id] || { appearances: 0, lastRound: 0 };
-      state.appearances += 1;
-      state.lastRound = currentRound;
+    if (!matches) {
+      continue;
+    }
 
-      // Update character state
-      characterState[char.id] = state;
+    const previous = characterState[char.id] ?? createDefaultProgress(char);
+    const appearances = previous.appearances + 1;
+    const maxStage = Math.max(0, char.storyArcs.length - 1);
+    const stageIndex = Math.min(maxStage, appearances - 1);
+    const stageArc =
+      char.storyArcs.find(arc => arc.stage === stageIndex) ??
+      char.storyArcs.find(arc => arc.stage === previous.currentStage) ??
+      char.storyArcs[maxStage] ??
+      null;
+    const nextVariant = stageArc?.articleVariant ?? previous.lastArticleVariant ?? null;
+    const stageJustAdvanced = stageIndex !== previous.currentStage;
 
-      // Calculate cumulative bonus
-      const bonus: { truthDelta?: number; ipDelta?: number; costReduction?: number } = {};
-      
-      if (char.effects.perAppearance) {
-        if (char.effects.perAppearance.truthDelta) {
-          bonus.truthDelta = char.effects.perAppearance.truthDelta * state.appearances;
-        }
-        if (char.effects.perAppearance.ipDelta) {
-          bonus.ipDelta = char.effects.perAppearance.ipDelta * state.appearances;
-        }
-        if (char.effects.perAppearance.costReduction) {
-          bonus.costReduction = char.effects.perAppearance.costReduction * state.appearances;
-        }
+    const bonus: { truthDelta?: number; ipDelta?: number; costReduction?: number } = {};
+
+    if (char.effects.perAppearance) {
+      if (typeof char.effects.perAppearance.truthDelta === 'number') {
+        bonus.truthDelta = char.effects.perAppearance.truthDelta * appearances;
       }
+      if (typeof char.effects.perAppearance.ipDelta === 'number') {
+        bonus.ipDelta = char.effects.perAppearance.ipDelta * appearances;
+      }
+      if (typeof char.effects.perAppearance.costReduction === 'number') {
+        bonus.costReduction = char.effects.perAppearance.costReduction * appearances;
+      }
+    }
 
-      // Check for milestone
-      let milestone: { label: string; effect: unknown } | null = null;
-      if (char.effects.milestones) {
-        for (const ms of char.effects.milestones) {
-          if (state.appearances === ms.appearanceCount) {
-            milestone = { label: ms.label, effect: ms.effect };
-            
-            // Apply milestone bonus
-            if (ms.effect.truthDelta) {
-              bonus.truthDelta = (bonus.truthDelta || 0) + ms.effect.truthDelta;
-            }
-            if (ms.effect.ipDelta) {
-              bonus.ipDelta = (bonus.ipDelta || 0) + ms.effect.ipDelta;
-            }
+    let milestone: { label: string; effect: unknown } | null = null;
+    let milestoneLabels = previous.milestones;
+    if (char.effects.milestones) {
+      for (const ms of char.effects.milestones) {
+        if (appearances === ms.appearanceCount) {
+          milestone = { label: ms.label, effect: ms.effect };
+          milestoneLabels = Array.from(new Set([...(milestoneLabels ?? []), ms.label]));
+          if (typeof (ms.effect as { truthDelta?: number }).truthDelta === 'number') {
+            bonus.truthDelta = (bonus.truthDelta ?? 0) + (ms.effect as { truthDelta: number }).truthDelta;
+          }
+          if (typeof (ms.effect as { ipDelta?: number }).ipDelta === 'number') {
+            bonus.ipDelta = (bonus.ipDelta ?? 0) + (ms.effect as { ipDelta: number }).ipDelta;
           }
         }
       }
-
-      return { character: char, bonus, milestone };
     }
+
+    const progress: RecurringCharacterProgress = {
+      appearances,
+      lastRound: currentRound,
+      currentStage: stageIndex,
+      lastArticleVariant: nextVariant,
+      milestones: milestoneLabels ?? [],
+    };
+
+    characterState[char.id] = progress;
+
+    return { character: char, bonus, milestone, progress, stageArc: stageArc ?? null, stageJustAdvanced };
   }
 
-  return { character: null, bonus: {}, milestone: null };
+  return { character: null, bonus: {}, milestone: null, progress: null, stageArc: null, stageJustAdvanced: false };
 }
 
 export default RECURRING_CHARACTERS;

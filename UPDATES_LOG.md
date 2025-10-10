@@ -6,6 +6,29 @@ This document provides a chronological record of gameplay-impacting changes merg
 - 09:18 UTC – Wired the builtin expansion manifest so Truth Vanguard and Government Countermeasures decks import through the MVP normalizer. Files: `src/data/expansions/index.ts`, `src/data/expansions/builtin.ts`, `src/lib/expansions/discover.ts`.
 - 09:18 UTC – Realigned expansion article IDs and UI summaries so new packs display correctly in management panels. Files: `src/data/cardArticles/expansionArticles.ts`, `src/components/game/ManageExpansions.tsx`.
 - 09:18 UTC – Added regression coverage to confirm the builtin packs validate cleanly and feed random draws. Files: `src/data/__tests__/builtinExpansions.test.ts`.
+## 2025-10-15 – Recurring character persistence and staged epilogues
+- Timestamp: 2025-10-15T14:30:00Z
+- Files:
+  - `src/components/game/TabloidNewspaperLegacy.tsx`
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `src/components/news/NewspaperInsidePages.tsx`
+  - `src/components/newspaper/EnhancedFinalEdition.tsx`
+  - `src/data/characterArcs.json`
+  - `src/data/characterArcs.ts`
+  - `src/engine/newspaper/IssueGenerator.ts`
+  - `src/engine/newspaper/__tests__/IssueGenerator.recurringCharacters.test.ts`
+  - `src/game/__tests__/recurringCharacterArticles.test.ts`
+  - `src/game/__tests__/recurringCharacters.test.ts`
+  - `src/game/recurringCharacterArticles.ts`
+  - `src/game/recurringCharacters.ts`
+  - `src/hooks/aiHelpers.ts`
+  - `src/hooks/gameStateTypes.ts`
+  - `src/hooks/useGameState.ts`
+  - `src/pages/Index.tsx`
+  - `src/types/finalEdition.ts`
+  - `src/utils/finalEdition.ts`
+  - `UPDATES_LOG.md`
+- Summary: Persisted recurring character progression through saves, fed staged appearances into newspaper generation, and surfaced “Where Are They Now?” epilogues in final editions.
 
 ## 2025-10-14 – State-themed bonus engine
 - Implemented a seeded `assignStateBonuses` pipeline that drafts weighted regional effects, logs per-state anomalies, and feeds matching newspaper events for the round.

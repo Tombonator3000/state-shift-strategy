@@ -1,10 +1,10 @@
 import { CARD_ARTICLE_DATABASE, type CardArticle } from '@/data/cardArticles/articleDatabase';
-import RECURRING_CHARACTERS, { type RecurringCharacter } from './recurringCharacters';
+import RECURRING_CHARACTERS, {
+  type RecurringCharacter,
+  type RecurringCharacterProgress,
+} from './recurringCharacters';
 
-export interface CharacterStageState {
-  appearances: number;
-  currentStage: number;
-}
+export interface CharacterStageState extends Pick<RecurringCharacterProgress, 'appearances' | 'currentStage' | 'lastArticleVariant'> {}
 
 function normaliseState(
   character: RecurringCharacter,
@@ -14,9 +14,16 @@ function normaliseState(
     return {
       appearances: Math.max(0, state.appearances),
       currentStage: Math.max(0, state.currentStage),
+      lastArticleVariant: state.lastArticleVariant ?? null,
     };
   }
-  return { appearances: 0, currentStage: character.currentStage ?? 0 };
+  const stage = character.currentStage ?? 0;
+  const arc = character.storyArcs.find(entry => entry.stage === stage) ?? character.storyArcs[0];
+  return {
+    appearances: 0,
+    currentStage: stage,
+    lastArticleVariant: arc?.articleVariant ?? null,
+  };
 }
 
 function findArticleVariant(cardId: string, variant: string): CardArticle | undefined {
@@ -38,7 +45,7 @@ export function selectArticleForCharacter(
   const targetStage = Math.min(state.currentStage, maxStage);
 
   let article: CardArticle | undefined;
-  const variantForStage = `${characterId}_stage_${targetStage}`;
+  const variantForStage = state.lastArticleVariant ?? `${characterId}_stage_${targetStage}`;
   article = findArticleVariant(cardId, variantForStage);
 
   if (!article) {
@@ -55,14 +62,7 @@ export function selectArticleForCharacter(
     );
   }
 
-  if (article) {
-    const nextAppearances = state.appearances + 1;
-    const nextStage = Math.min(maxStage, targetStage + 1);
-    characterState[characterId] = {
-      appearances: nextAppearances,
-      currentStage: nextStage,
-    };
-  } else if (!characterState[characterId]) {
+  if (!characterState[characterId]) {
     characterState[characterId] = state;
   }
 

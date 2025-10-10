@@ -53,6 +53,18 @@ export interface FinalEditionEventHighlight {
   arcSummary?: ArcProgressSummary;
 }
 
+export interface RecurringCharacterEpilogue {
+  id: string;
+  name: string;
+  stage: number;
+  title: string;
+  summary: string;
+  epilogue: string;
+  appearances: number;
+  lastRound: number;
+  milestones: string[];
+}
+
 export interface FinalEditionComboHighlight {
   id: string;
   name: string;
@@ -88,6 +100,7 @@ export interface FinalEditionReport {
   extraExtraFeed: ArticleBlock[];
   frontPage?: FrontPageArticle | null;
   recordedAt: number;
+  recurringCharacterEpilogues: RecurringCharacterEpilogue[];
 }
 
 export type GameOverReport = FinalEditionReport;

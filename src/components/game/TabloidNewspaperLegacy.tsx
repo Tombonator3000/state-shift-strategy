@@ -14,6 +14,7 @@ import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import type { ArcProgressSummary } from '@/types/campaign';
 import type { HotspotDirector, WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
 import { loadNewspaperData, pick, type NewspaperData } from '@/lib/newspaperData';
+import type { CharacterStageState } from '@/game/recurringCharacterArticles';
 
 export interface TabloidPlayedCard {
   card: GameCard;
@@ -42,6 +43,7 @@ export interface TabloidNewspaperProps {
   hotspotDirector?: HotspotDirector;
   activeHotspot?: WeightedHotspotCandidate | null;
   frontPageTriplet?: PlayedCardMeta[] | null;
+  recurringCharacters?: Record<string, CharacterStageState>;
 }
 
 interface Article {
