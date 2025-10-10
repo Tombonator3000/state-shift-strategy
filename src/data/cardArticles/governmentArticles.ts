@@ -87,6 +87,7 @@ export const governmentArticles: CardArticle[] = [
     followUpHooks: [
       'Donald Pierce disappears mid-interview, replaced by identical spokesperson',
       'Journalist who filed FOIA request for OPUS info receives 300 completely blank pages'
-    ]
+    ],
+    preferredTone: 'CLASSIFIED_REDACTED'
   }
 ];

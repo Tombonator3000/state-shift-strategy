@@ -2,6 +2,10 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-10 – Newspaper tone transforms
+- Added placeholder-safe tone transforms and an `applyTone` helper so newspaper copy can shift between straight news, tabloid, local color, exposé, and classified styles.
+- Extended card article metadata with `preferredTone` overrides and updated the issue generator to select and apply tones before front-page rendering.
+
 ## 2025-10-09 – Recurring Character Story Arc Variants
 - Added story arc metadata and stage progression tracking for Pastor Rex, Agent Smitherson, Florida Man, Bat Boy, Maria Chen, and Coach Terry Hammond.
 - Tagged stage-specific article variants across truth and expansion coverage, authoring new pieces to ensure at least three appearances per character.

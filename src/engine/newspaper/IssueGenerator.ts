@@ -9,6 +9,7 @@ import { deriveFrontPageSubhead } from '@/engine/news/frontPageSubhead';
 import { composeCardStory, composeComboStory, type CardStory, type ComboStory } from './StoryComposer';
 import type { ComboSummary } from '@/game/combo.types';
 import type { AgendaIssueId } from '@/data/agendaIssues';
+import { applyTone, type ArticleTone } from './articleTones';
 
 export interface PlayedCardInput {
   card: Card;
@@ -181,6 +182,10 @@ const normalizeFaction = (value: Card['faction']): PlayedCardMeta['faction'] => 
   return upper.includes('GOV') ? 'GOV' : 'TRUTH';
 };
 
+const resolveFaction = (value: Card['faction']): 'truth' | 'government' => {
+  return normalizeFaction(value) === 'GOV' ? 'government' : 'truth';
+};
+
 const isCardShaped = (card: Card | null | undefined): card is Card => {
   if (!card || typeof card !== 'object') {
     return false;
@@ -328,6 +333,51 @@ const mapCardToArticle = (
     stateLabel: targetName ? `Target: ${targetName}` : null,
     capturedStates: capturedNames,
   } satisfies NarrativeArticle;
+};
+
+const collectTags = (entry: PlayedCardInput, article: CardArticle | null): string[] => {
+  const fromCard = Array.isArray((entry.card as { tags?: string[] }).tags)
+    ? ((entry.card as { tags?: string[] }).tags as string[])
+    : [];
+  const fromArticle = Array.isArray(article?.tags) ? ((article?.tags as string[]) ?? []) : [];
+  return [...fromCard, ...fromArticle].map(tag => tag.toLowerCase());
+};
+
+const determineTone = (entry: PlayedCardInput, article: CardArticle | null): ArticleTone => {
+  if (article?.preferredTone) {
+    return article.preferredTone;
+  }
+
+  const tags = collectTags(entry, article);
+  if (tags.some(tag => tag.includes('classified') || tag.includes('redacted'))) {
+    return 'CLASSIFIED_REDACTED';
+  }
+
+  const type = normalizeCardType(entry.card.type);
+  const faction = resolveFaction(entry.card.faction);
+
+  if (type === 'ATTACK') {
+    return 'HARD_HITTING_EXPOSE';
+  }
+  if (type === 'ZONE') {
+    return 'LOCAL_COLOR';
+  }
+  if (type === 'MEDIA') {
+    return faction === 'government' ? 'STRAIGHT_NEWS' : 'TABLOID_SENSATIONAL';
+  }
+
+  return faction === 'government' ? 'STRAIGHT_NEWS' : 'TABLOID_SENSATIONAL';
+};
+
+const applyToneIfAvailable = (
+  entry: PlayedCardInput,
+  article: CardArticle | null,
+): CardArticle | null => {
+  if (!article) {
+    return null;
+  }
+  const tone = determineTone(entry, article);
+  return applyTone(article, tone);
 };
 
 const collectAds = (dataset: NewspaperData): string[] => {
@@ -639,8 +689,9 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
   const selectedCards = selectedMetas.map(meta => meta.entry);
   const generatedArticles = selectedMetas.map(meta => {
     const entry = meta.entry;
-    const article = articleBank?.getById?.(entry.card.id) ?? null;
-    return buildGeneratedStoryArticle(entry, article, gameStateContext);
+    const rawArticle = articleBank?.getById?.(entry.card.id) ?? null;
+    const tonedArticle = applyToneIfAvailable(entry, rawArticle);
+    return buildGeneratedStoryArticle(entry, tonedArticle, gameStateContext);
   });
 
   const frontPageCards: PlayedCardMeta[] = selectedCards

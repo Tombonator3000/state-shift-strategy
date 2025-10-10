@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+import { ARTICLE_TONES } from '@/engine/newspaper/articleTones';
+import type { ArticleTone } from '@/engine/newspaper/articleTones';
+
 // Static fallback so the article bank still works even if network paths fail.
 import fallbackArticleJson from '../paranoid_times_card_articles_ALL.json' assert { type: 'json' };
 
@@ -16,6 +19,7 @@ export type CardArticle = {
   recurringCharacter?: string | null;
   followUpHooks?: string[];
   articleVariant?: string | null;
+  preferredTone?: ArticleTone | null;
 };
 
 export type ArticleBank = {
@@ -58,6 +62,8 @@ const factionSchema = z.preprocess(
   z.union([z.literal('truth'), z.literal('government')]),
 );
 
+const toneSchema = z.enum(ARTICLE_TONES);
+
 const cardArticleSchema = z.object({
   id: z.string(),
   faction: factionSchema,
@@ -71,6 +77,7 @@ const cardArticleSchema = z.object({
   recurringCharacter: z.string().optional(),
   followUpHooks: z.array(z.string()).optional(),
   articleVariant: z.string().optional(),
+  preferredTone: toneSchema.optional().nullable(),
 });
 
 const articleFileSchema = z.object({
@@ -142,6 +149,7 @@ export async function loadArticleBank(): Promise<ArticleBank> {
         recurringCharacter: article.recurringCharacter ? article.recurringCharacter.trim() || null : null,
         followUpHooks: normaliseStringList(article.followUpHooks),
         articleVariant: article.articleVariant ? article.articleVariant.trim() || null : null,
+        preferredTone: article.preferredTone ?? null,
       };
       map.set(normalised.id, normalised);
     }

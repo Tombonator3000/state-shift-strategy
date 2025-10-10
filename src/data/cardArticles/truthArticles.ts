@@ -149,7 +149,8 @@ Paranormal investigator teams have attempted to replicate the encounter by sitti
     followUpHooks: [
       'Tea sales of Earl Grey spike 340% in Savannah area',
       'Historical society identifies ghosts as former city council members'
-    ]
+    ],
+    preferredTone: 'LOCAL_COLOR'
   },
   {
     cardId: 'TRUTH-007',

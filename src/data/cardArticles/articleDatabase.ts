@@ -6,6 +6,7 @@
 
 // Import comprehensive article databases from centralized system
 import { ALL_CARD_ARTICLES, getArticleByCardId, getArticlesByFaction as getByFaction, getArticlesByState as getByState, getArticlesByCharacter as getByCharacter } from './allArticles';
+import type { ArticleTone } from '@/engine/newspaper/articleTones';
 
 export interface CardArticle {
   cardId: string;
@@ -20,6 +21,7 @@ export interface CardArticle {
   followUpHooks?: string[];
   tags?: string[];
   articleVariant?: string;
+  preferredTone?: ArticleTone;
 }
 
 export const CARD_ARTICLE_DATABASE: CardArticle[] = ALL_CARD_ARTICLES;
