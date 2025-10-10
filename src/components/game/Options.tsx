@@ -27,6 +27,37 @@ import '@/styles/tabloid.css';
 
 const SETTINGS_STORAGE_KEY = 'gameSettings';
 
+const MUSIC_COLLECTION_ORDER = ['theme', 'government', 'truth', 'endcredits'] as const;
+type MusicCollectionId = (typeof MUSIC_COLLECTION_ORDER)[number];
+
+const MUSIC_COLLECTION_METADATA: Record<MusicCollectionId, { label: string; tagline: string }> = {
+  theme: {
+    label: 'Broadcast Themes',
+    tagline: 'Lobby hold music for the nightly scoop.',
+  },
+  government: {
+    label: 'Government Airwaves',
+    tagline: 'Compliance jazz direct from the war room.',
+  },
+  truth: {
+    label: 'Truth-Seeker Pirate Radio',
+    tagline: 'Bootleg transmissions from the leak underground.',
+  },
+  endcredits: {
+    label: 'End Credits Sign-Off',
+    tagline: 'Final broadcast before the transmitters cool.',
+  },
+};
+
+const formatCollectionLabel = (
+  collection: MusicCollectionId,
+  trackTotal: number,
+) => {
+  const { label } = MUSIC_COLLECTION_METADATA[collection] ?? { label: collection };
+  const trackWord = trackTotal === 1 ? 'track' : 'tracks';
+  return `${label} (${trackTotal} ${trackWord})`;
+};
+
 type DifficultyLabel =
   | 'EASY - Intelligence Leak'
   | 'NORMAL - Classified'
@@ -121,9 +152,14 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
   const audio = useAudioContext();
   const [uiTheme, setUiTheme] = useUiTheme();
   const { volume: audioMasterVolume } = audio.config;
-  type MusicCollectionKey = keyof typeof audio.availableTracks;
+  type MusicCollectionKey = MusicCollectionId;
+  const initialCollection: MusicCollectionKey = MUSIC_COLLECTION_ORDER.includes(
+    audio.currentMusicType as MusicCollectionId,
+  )
+    ? (audio.currentMusicType as MusicCollectionKey)
+    : 'theme';
   const [selectedMusicCollection, setSelectedMusicCollection] = useState<MusicCollectionKey>(
-    audio.currentMusicType,
+    initialCollection,
   );
   const [selectedTrackIndex, setSelectedTrackIndex] = useState<number>(0);
   const isTabloid = uiTheme === 'tabloid_bw';
@@ -315,6 +351,23 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     }
   }, [audio.currentMusicType, audio.currentTrackName, audio.availableTracks]);
 
+  const handleQuickPlay = useCallback(
+    (collection: MusicCollectionKey) => {
+      const tracks = audio.availableTracks[collection] ?? [];
+      if (tracks.length === 0) {
+        return;
+      }
+
+      const preferredTrack =
+        tracks.find(track => track.index === selectedTrackIndex) ?? tracks[0];
+
+      setSelectedMusicCollection(collection);
+      setSelectedTrackIndex(preferredTrack.index);
+      audio.selectTrack(collection, preferredTrack.index);
+    },
+    [audio, audio.availableTracks, selectedTrackIndex],
+  );
+
   const persistSettings = useCallback((nextSettings: GameSettings, nextComboSettings: ComboSettings) => {
     if (typeof localStorage === 'undefined') {
       return;
@@ -446,10 +499,10 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
 
   const collectionEntries = useMemo(
     () =>
-      Object.entries(audio.availableTracks) as Array<[
-        MusicCollectionKey,
-        typeof audio.availableTracks[MusicCollectionKey],
-      ]>,
+      MUSIC_COLLECTION_ORDER.map(collection => {
+        const key = collection as MusicCollectionKey;
+        return [key, audio.availableTracks[key] ?? []] as const;
+      }),
     [audio.availableTracks],
   );
 
@@ -461,10 +514,12 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
     }
 
     const normalized = audio.currentTrackName.toLowerCase();
-    for (const [, tracks] of collectionEntries) {
+    for (const [collection, tracks] of collectionEntries) {
       const match = tracks.find(track => track.src.split('/').pop()?.toLowerCase() === normalized);
       if (match) {
-        return match.label;
+        const meta = MUSIC_COLLECTION_METADATA[collection];
+        const collectionLabel = meta?.label ?? collection;
+        return `${collectionLabel} · ${match.label}`;
       }
     }
 
@@ -816,7 +871,17 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                       </div>
                       <Select
                         value={selectedMusicCollection}
-                        onValueChange={value => setSelectedMusicCollection(value as MusicCollectionKey)}
+                        onValueChange={value => {
+                          const nextCollection = value as MusicCollectionKey;
+                          setSelectedMusicCollection(nextCollection);
+                          const nextTracks = audio.availableTracks[nextCollection] ?? [];
+                          if (nextTracks.length > 0) {
+                            const retained = nextTracks.find(track => track.index === selectedTrackIndex);
+                            setSelectedTrackIndex((retained ?? nextTracks[0]).index);
+                          } else {
+                            setSelectedTrackIndex(0);
+                          }
+                        }}
                         disabled={!collectionEntries.some(([, tracks]) => tracks.length > 0)}
                       >
                         <SelectTrigger
@@ -842,7 +907,7 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                               disabled={tracks.length === 0}
                               className="font-mono uppercase tracking-[0.2em] text-xs"
                             >
-                              {collection.replace(/_/g, ' ')} ({tracks.length})
+                              {formatCollectionLabel(collection, tracks.length)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -890,6 +955,75 @@ const Options = ({ onClose, onBackToMainMenu, onSaveGame }: OptionsProps) => {
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+                  </div>
+
+                  <div
+                    className={cn(
+                      'pt-3 border-t border-newspaper-text/20 space-y-3',
+                      isTabloid && 'border-black/30 pt-4',
+                    )}
+                  >
+                    <div className={cn(strapLabelClass, 'mb-1 uppercase tracking-[0.25em] text-[11px]')}>
+                      Rapid Broadcast Preview
+                    </div>
+                    <div className={cn('grid gap-2 sm:grid-cols-2', isTabloid && 'gap-3')}>
+                      {collectionEntries.map(([collection, tracks]) => {
+                        const meta = MUSIC_COLLECTION_METADATA[collection];
+                        const disabled = tracks.length === 0 || !isAudioReady;
+                        const isActive = selectedMusicCollection === collection;
+                        const label = meta?.label ?? collection;
+                        const tagline = meta?.tagline ?? '';
+                        const trackCountLabel = `${tracks.length} ${tracks.length === 1 ? 'track' : 'tracks'}`;
+
+                        return (
+                          <button
+                            key={`${collection}-preview`}
+                            type="button"
+                            onClick={() => handleQuickPlay(collection)}
+                            disabled={disabled}
+                            className={cn(
+                              'rounded border border-newspaper-text/30 bg-white/80 px-3 py-2 text-left transition-colors',
+                              'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-black/50',
+                              isTabloid
+                                ? 'border-black bg-white shadow-[4px_4px_0_rgba(0,0,0,0.35)] px-4 py-3'
+                                : 'hover:bg-newspaper-text/10',
+                              isActive &&
+                                (isTabloid
+                                  ? 'bg-black text-[var(--paper)] shadow-[2px_2px_0_rgba(0,0,0,0.45)]'
+                                  : 'bg-newspaper-text text-white'),
+                              disabled && 'opacity-60 cursor-not-allowed',
+                            )}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span
+                                className={cn(
+                                  'text-xs font-semibold uppercase tracking-[0.2em]',
+                                  isTabloid && 'text-sm font-black tracking-[0.3em]',
+                                )}
+                              >
+                                {label}
+                              </span>
+                              <span
+                                className={cn(
+                                  'text-[10px] font-mono uppercase tracking-[0.2em] text-newspaper-text/70',
+                                  isTabloid && 'font-black text-black',
+                                )}
+                              >
+                                {trackCountLabel}
+                              </span>
+                            </div>
+                            <div
+                              className={cn(
+                                'mt-1 text-[10px] font-mono text-newspaper-text/60',
+                                isTabloid && 'font-black uppercase tracking-[0.25em] text-black/60',
+                              )}
+                            >
+                              {tagline}
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
