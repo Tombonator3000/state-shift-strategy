@@ -18,6 +18,7 @@ export interface ToneTransform {
 
 const PLACEHOLDER_PATTERN = /{[^}]+}/g;
 const PLACEHOLDER_TOKEN_PATTERN = /⟦\d+⟧/g;
+const PLACEHOLDER_TOKEN_EXACT_PATTERN = /^⟦\d+⟧$/;
 const PLACEHOLDER_TOKEN = (index: number): string => `⟦${index}⟧`;
 
 const protectPlaceholders = (value: string, transform: (input: string) => string): string => {
@@ -121,10 +122,21 @@ export const TONE_TRANSFORMS: Record<ArticleTone, ToneTransform> = {
   CLASSIFIED_REDACTED: {
     headlineTransform: headline =>
       protectPlaceholders(headline, value =>
-        value
-          .split(' ')
-          .map((word, index) => (index % 3 === 0 ? '█████' : word))
-          .join(' '),
+        {
+          const words = value.split(' ');
+          let processedCount = 0;
+          return words
+            .map(word => {
+              if (PLACEHOLDER_TOKEN_EXACT_PATTERN.test(word)) {
+                return word;
+              }
+
+              const shouldRedact = processedCount % 3 === 0;
+              processedCount += 1;
+              return shouldRedact ? '█████' : word;
+            })
+            .join(' ');
+        },
       ),
     bylineTransform: () => 'By [REDACTED]',
     bodyTransform: body => protectPlaceholders(body, redactEveryOtherSentence),
