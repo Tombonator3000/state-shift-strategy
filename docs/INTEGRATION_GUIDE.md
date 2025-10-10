@@ -105,23 +105,26 @@ const { cost, appliedConditions } = calculateHybridCost(
 
 **Integration:**
 ```typescript
+import { useCallback } from 'react';
 import { ArticlePreviewOverlay } from '@/components/newspaper/ArticlePreviewOverlay';
 import { useCardPreview } from '@/hooks/useCardPreview';
+import type { GameCard } from '@/rules/mvp';
 
 function CardComponent({ card }: { card: GameCard }) {
   const { previewState, openPreview, closePreview } = useCardPreview();
-  
+  const handleReadArticle = useCallback(() => {
+    openPreview(card.id, card.name);
+  }, [card.id, card.name, openPreview]);
+
   return (
     <>
-      <div
-        onMouseEnter={() => openPreview(card.id, card.name)}
-        onClick={() => openPreview(card.id, card.name)}
-      >
-        {/* Card UI */}
-      </div>
-      
+      {/* Card UI goes here */}
+      <button type="button" onClick={handleReadArticle}>
+        Read Article
+      </button>
+
       <ArticlePreviewOverlay
-        cardId={previewState.cardId}
+        cardId={previewState.isOpen ? previewState.cardId : null}
         cardName={previewState.cardName}
         onClose={closePreview}
       />
@@ -129,6 +132,12 @@ function CardComponent({ card }: { card: GameCard }) {
   );
 }
 ```
+
+**Manual QA checklist:**
+
+1. Open a card's detail surface and activate the dedicated **Read Article** control to launch the overlay.
+2. Move the cursor away from the originating card and confirm the article preview remains mounted for uninterrupted reading.
+3. Dismiss the overlay with its close button and with the **Escape** key to verify both affordances work and no hover-driven teardown occurs.
 
 ### Breaking News Ticker
 

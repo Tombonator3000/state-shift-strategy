@@ -12,6 +12,7 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ExtensionCardBadge } from './ExtensionCardBadge';
+import { getArticleForCard } from '@/data/cardArticles/articleDatabase';
 
 interface EnhancedGameHandProps {
   cards: GameCard[];
@@ -32,6 +33,8 @@ interface EnhancedGameHandProps {
     position: { x: number; y: number; pointerType: string; cancelled: boolean }
   ) => void;
   draggingCardId?: string | null;
+  onPreviewArticle?: (card: GameCard) => void;
+  isArticlePreviewOpen?: boolean;
 }
 
 const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
@@ -50,6 +53,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   onCardDragMove,
   onCardDragEnd,
   draggingCardId,
+  onPreviewArticle,
+  isArticlePreviewOpen = false,
 }) => {
   const [playingCard, setPlayingCard] = useState<string | null>(null);
   const [examinedCard, setExaminedCard] = useState<string | null>(null);
@@ -148,7 +153,9 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       if (examinedCard === card.id) {
         setExaminedCard(null);
       }
-      onCardHover?.(null);
+      if (!isArticlePreviewOpen) {
+        onCardHover?.(null);
+      }
       onSelectCard?.(card.id);
       triggerHaptic('light');
       onCardDragStart?.(card, { x: event.clientX, y: event.clientY, pointerType: event.pointerType });
@@ -222,7 +229,11 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     <div
       className="relative h-full"
       ref={handRef}
-      onPointerLeave={() => onCardHover?.(null)}
+      onPointerLeave={() => {
+        if (!isArticlePreviewOpen) {
+          onCardHover?.(null);
+        }
+      }}
     >
       <div className="grid w-full grid-cols-3 gap-3 justify-items-start items-start content-start">
         {cards.length === 0 ? (
@@ -358,7 +369,9 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   });
                 }}
                 onPointerLeave={() => {
-                  onCardHover?.(null);
+                  if (!isArticlePreviewOpen) {
+                    onCardHover?.(null);
+                  }
                 }}
                 aria-grabbed={isDraggingThisCard}
               >
@@ -435,7 +448,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           onPlayCard={() => {
             const card = examinedCardData;
             if (!card) return;
-            
+
             if (!canAffordCard(card)) {
               triggerHaptic('error');
               toast({
@@ -445,19 +458,19 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
               });
               return;
             }
-            
+
             // Zone card targeting - direct activation
             if (normalizeCardType(card.type) === 'ZONE') {
               // Immediately activate targeting without closing modal
               audio.playSFX('click');
               triggerHaptic('medium');
               onSelectCard?.(card.id);
-              
+
               // Close modal after setting up targeting
               setTimeout(() => {
                 setExaminedCard(null);
               }, 100);
-              
+
             } else {
               // For all other cards, deploy immediately
               audio.playSFX('click');
@@ -477,6 +490,16 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           }}
           discardEnabled={!disabled && discardEnabled}
           swipeHandlers={isMobile ? swipeHandlers : undefined}
+          articleAvailable={Boolean(examinedCardData && getArticleForCard(examinedCardData.id))}
+          onRequestArticle={() => {
+            if (!examinedCardData) {
+              return;
+            }
+            triggerHaptic('selection');
+            audio.playSFX('lightClick');
+            onPreviewArticle?.(examinedCardData);
+            setExaminedCard(null);
+          }}
         />
       )}
 
