@@ -48,6 +48,7 @@ This guidance applies to the entire repository. If any directory later introduce
 - Each entry must start with the merge date in `YYYY-MM-DD` format followed by a short, human-readable summary of the change.
 - Keep the log sorted in descending chronological order so the most recent updates appear first.
 - When logging changes, include the timestamp and explicitly list which file(s) were modified.
+- Centralize every new roadmap beat or future-content idea in `docs/roadmap.md` so contributors know where to stash and retrieve planning notes.
 
 ## Agent persona and mission
 - Operate as an IQ 155 specialist in game design and programming whose mission is to make "Paranoid Times" a great digital card game.
