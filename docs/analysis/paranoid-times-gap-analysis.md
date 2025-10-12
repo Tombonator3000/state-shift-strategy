@@ -18,20 +18,14 @@
 - **Opportunities:** Introduce scaling mechanics—e.g., percentage-based siphons, maintenance costs on high IP, or bonus triggers when targets exceed thresholds—to keep disruption meaningful. Alternatively, diversify ATTACK designs with tempo effects (stun a state, block draw) that matter even when raw IP swing is small.
 
 ## Strategic improvement plan
-### Short term (1–2 sprints)
-1. **Rebalance ATTACK cards for late-game relevance:** Prototype scaling IP loss (e.g., `max(4, floor(opponentIP * 0.15))`) or add secondary effects like temporary cost inflation when the target exceeds 20 IP, then validate via automated turn simulations.【F:src/engine/applyEffects-mvp.ts†L53-L72】
-2. **Expand card keywords within existing schema:** Add low-scope modifiers (e.g., "Expose" for extra Truth damage, "Sabotage" forcing discard draw penalties) to differentiate plays without abandoning MVP validation.【F:src/mvp/validator.ts†L5-L22】
-3. **Surface lightweight progression hooks:** Track match streaks or first-win bonuses to mimic the daily quest cadence seen in larger titles, using combo logs as a foundation for achievements.【F:docs/TECHNICAL_README.md†L35-L36】
 
-### Mid term (quarter)
-1. **Deck-building depth:** Introduce faction subthemes or state-based synergies (e.g., region bonuses) so decks feel distinct like Hearthstone classes or Runeterra regions.【DESIGN_DOC_MVP.md†L25-L189】【ae32eb†L1-L19】【04bdbe†L13-L38】
-2. **Progression & cosmetics roadmap:** Build a seasonal reward track and cosmetic card frames inspired by battle passes and variant systems to keep engagement without pay-to-win pressure.【2eff0a†L6-L10】【8b6c7a†L30-L44】
-3. **Alternate modes:** Pilot a weekly mutation mode (random map rules, asymmetric objectives) to echo Tavern Brawls/Marvel Snap events and test infrastructure for future PvE scenarios.【3144b3†L1-L24】【8b6c7a†L30-L38】
+Detailed delivery timelines now live alongside the other pillars in [`docs/roadmap.md`](../roadmap.md). The gap-closing priorities mapped there follow the cadence surfaced above:
 
-### Long term
-1. **Narrative PvE arc:** Develop a "Tabloid Investigations" campaign that leverages existing newspaper logs for branching missions, paralleling Hearthstone adventures and Runeterra’s Path of Champions.【3144b3†L9-L21】【04bdbe†L13-L52】
-2. **Competitive ecosystem:** Layer ranked tiers, spectator tools, and periodic tournaments to support esports-style events similar to Hearthstone and Marvel Snap communities.【3144b3†L1-L21】【8b6c7a†L40-L44】
-3. **Live operations cadence:** Establish quarterly card expansions introducing new keywords, balance passes, and state map variations to keep the meta fresh, matching the rapid content cadence of market leaders.【ae32eb†L1-L26】【8b6c7a†L1-L29】
+- **Short-term** efforts reinforce the MVP—scaling ATTACK math, introducing scoped keywords, polishing UI affordances, and wiring in streak-based engagement loops.
+- **Mid-term** initiatives tackle systemic depth with faction subthemes, combo webs, mutation modes, and the first wave of seasonal cosmetics to mirror market expectations.
+- **Long-term** investments aim for sustained gravity through narrative PvE arcs, competitive infrastructure, and a predictable live-ops cadence for fresh mechanics and map variants.
+
+This document remains the analytical companion that explains *why* those beats matter; consult the roadmap for task owners, file touchpoints, and sequencing.
 
 ## Next steps
 - Validate the proposed IP scaling changes through targeted playtests and telemetry to confirm ATTACK relevance at high incomes.

@@ -87,7 +87,7 @@ Denne sekvensen gjentas til én av seiersbetingelsene fra design-dokumentet trig
 
 ## 5. Videre iterasjon
 
-- Logg funn i `paranoid_times_analysis_and_roadmap.md` etter hver testsesjon.
+- Logg funn i `paranoid_times_analysis_and_roadmap.md` etter hver testsesjon og speil eventuelle nye tiltak inn i `docs/roadmap.md`.
 - Dersom nye korttyper introduseres, oppdater `components.json` og utvid tabellen i `DESIGN_DOC_MVP.md` slik at denne loopen fortsatt beskriver standardstrømmen.
 
 > **Paranoid notis:** Hver tur er en slagmark i informasjonskrigen. Bruk rundeloggen som en "redacted file" — strekk over mislykkede trekk, la fremtidige agenter gjette hva som egentlig skjedde.
