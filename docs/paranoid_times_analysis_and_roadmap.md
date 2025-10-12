@@ -58,34 +58,12 @@ Another imbalance lies in the **distribution of card rarities between factions.*
 
 ---
 
-## Development Roadmap
+## Roadmap Highlights
 
-### Short-Term Improvements (Polish & Tuning)  
-- **UI Polish & VFX:** Better fonts, faction color cues, hover tooltips, highlight affected meters/states on play, subtle glitch/redaction effects.  
-- **Rule Consistency & Bugfixes:** Unify win thresholds, ensure pressure reset on capture, correct expansion metadata.  
-- **Card Balance Tuning:** Rebalance Truth rarity spread (promote some Uncommons → Commons), review early-game pacing, trim duplicate commons in expansions.  
-- **Flavor Edit Pass:** Fill missing flavors, fix typos, punch up jokes where easy.  
-- **In-Game How-To:** Foldout overlay with concise rules & tooltips.  
-- **Basic Deck Builder:** Let players pick a subset of cards per deck to increase agency and replay.
+The full, living roadmap now lives in [`docs/roadmap.md`](roadmap.md). In brief:
 
-### Mid-Term Features (Depth & Systems)  
-- **Campaign/Scenarios:** Story-driven matches with special rules, escalating challenges, and humorous briefings.  
-- **Parodic AI Personas:** Distinct AI styles (e.g., cautious ShadowGov vs. chaotic Florida Man), difficulty levels, occasional quips.  
-- **Combo & Synergy:** Light tag-based combos (e.g., cryptid/Florida/state synergies), small bonuses for sequencing plays, legendary meta-goals.  
-- **Dynamic Newspaper:** Event-driven headlines with state/faction/card inserts; turn-by-turn archive of headlines.  
-- **Async Multiplayer:** Play-by-mail matches with notifications; simple server persistence.  
-- **Art & VFX Upgrade:** Monochrome clipping art for rares/legendaries, Truth meter effects, thematic screen glitches.  
-- **Content Editor/Modding:** Documented JSON pipeline; optional in-game editor; curated community expansion support.
+- **Short-term** priorities lock down polish and balance—UI clarity, rule consistency, Truth rarity smoothing, flavor punch-ups, and the first pass at a player-facing deck builder—to stabilize the tabletop before we widen the conspiracy net.
+- **Mid-term** work focuses on depth: tag-driven combos, new card archetypes, dynamic newspapers that react to every scandal, bespoke campaigns, goofily competent AI personas, and the infrastructure for asynchronous matches and seasonal cosmetics.
+- **Long-term** plans aim at community gravity—ranked play, live narrative events, persistent Evidence Locker progression, a modding ecosystem, topical micro-expansions, and chronicle exports that let players frame their own front pages.
 
-### Long-Term Vision (Community & Advanced)  
-- **Competitive Play:** Ranked ladder, seasonal tournaments, cosmetic rewards, replays/spectator mode.  
-- **Community Hub:** Deck sharing, fan expansion repository with ratings and curation.  
-- **Live Narrative Events:** Time-limited global modifiers, community goals, evolving story arcs.  
-- **Persistent Progression:** Evidence Locker (achievement collectibles), ranks/titles with flavor, conspiracy corkboard UI.  
-- **Advanced Modding & Local Play:** Scenario editor, hotseat/PvP LAN, cross-platform (mobile) consideration.  
-- **Topical Mini-Expansions:** Timely satirical micro-sets reacting to real-world headlines.  
-- **Newspaper Chronicle:** Save/share a match-long “Special Edition” newspaper as a narrative replay.
-
----
-
-**Conclusion:** The roadmap evolves *The Paranoid Times* from a witty prototype into a fully-fledged, community-driven satire strategy game. Short-term polish secures the foundation; mid-term features deepen gameplay and narrative; long-term systems build a lasting community. Throughout, we preserve **humor fidelity**, **thematic coherence**, and **modularity**, ensuring every addition feels naturally part of the Paranoid Times universe.
+Those beats ladder up to the same satirical tone celebrated above while giving engineering, narrative, and live-ops teams clear vectors for execution. Consult the roadmap for milestone dates, implementation pointers, and dependency callouts.

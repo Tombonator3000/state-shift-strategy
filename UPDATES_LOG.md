@@ -2,6 +2,16 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-23 – Unified roadmap now authoritative
+- Timestamp: 2025-10-23T10:15:00Z
+- Files:
+  - `docs/roadmap.md`
+  - `docs/paranoid_times_analysis_and_roadmap.md`
+  - `docs/analysis/paranoid-times-gap-analysis.md`
+  - `docs/gameplay-loop-overview.md`
+  - `UPDATES_LOG.md`
+- Summary: Consolidated every roadmap thread into the central planning doc, reorganised goals by timeframe and pillar, trimmed the duplicate timelines from the analysis dossiers, and updated cross-references so contributors consult the unified plan.
+
 ## 2025-10-22 – Menu playlist honors selected track
 - Timestamp: 2025-10-22T12:56:38Z
 - Files:
