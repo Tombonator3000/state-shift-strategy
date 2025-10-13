@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import EffectSystemDashboard from "./pages/EffectSystemDashboard";
 import DatabaseRecovery from "./pages/DatabaseRecovery";
+import ArticleCombinerPage from "./pages/ArticleCombinerPage";
 import { initializeExtensionsOnStartup } from './data/extensionIntegration';
 import { AchievementProvider } from './contexts/AchievementContext';
 import UiOverlays from "./ui/UiOverlays";
@@ -34,6 +35,7 @@ const App = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/dev/effects" element={<EffectSystemDashboard />} />
                 <Route path="/dev/recovery" element={<DatabaseRecovery />} />
+                <Route path="/dev/article-combiner" element={<ArticleCombinerPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
