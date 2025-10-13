@@ -478,6 +478,168 @@ Airshow officials pleaded over loudspeakers for calm, but the crowd roared appro
     ]
   },
   {
+    cardId: 'TRUTH-NEW-013',
+    faction: 'truth',
+    headline: 'UNDERGROUND BASE WHISTLEBLOWER LIVE-STREAMS FROM "LEVEL 7-B"—STREAM GOES VIRAL',
+    subhead: 'Former contractor broadcasts tour of restricted facility, chat explodes with coordinates',
+    byline: 'By Marcus Webb, Digital Investigations Desk',
+    body: `A former military contractor identifying himself only as "DarkCorridor77" began a 4-hour livestream yesterday claiming to broadcast from inside a classified underground facility beneath Nevada's Nellis Range. The stream, which peaked at 2.3 million concurrent viewers, showed concrete tunnels, unmarked doors, and what appeared to be aircraft components not matching any known designs.
+
+"This is Level 7-B, folks. They told me it doesn't exist," the whistleblower narrated while his camera panned across walls covered in warning placards about "dimensional containment protocols." Chat participants furiously screenshot coordinates visible on facility maps in the background.
+
+The stream abruptly ended when uniformed personnel appeared on camera. Within minutes, the video was scrubbed from all platforms, though thousands of mirror uploads continue appearing. The Pentagon issued a statement calling the broadcast "an unauthorized training scenario" and reminding citizens that trespassing on imaginary facilities remains prosecutable.`,
+    imagePrompt: 'Grainy livestream screenshot of concrete underground tunnel with warning signs, chat overlay with coordinates, newsprint aesthetic',
+    tags: ['underground', 'livestream', 'whistleblower'],
+    statesMentioned: ['Nevada'],
+    recurringCharacter: null,
+    followUpHooks: [
+      'Viewers crowdsource map pinpointing facility entrance near abandoned mine shaft',
+      'Pentagon announces surprise audit of "training scenario budgets" for fiscal irregularities'
+    ]
+  },
+  {
+    cardId: 'TRUTH-NEW-014',
+    faction: 'truth',
+    headline: 'BLACK VAULT FOIA VICTORY DUMPS 40,000 PAGES—RESEARCHERS SCRAMBLE TO ARCHIVE',
+    subhead: 'Decade-long legal battle ends with massive document release on UFO investigations',
+    byline: 'By Sarah Kim, FOIA Documentation Reporter',
+    body: `After ten years of legal wrangling, researcher John Greenewald's Black Vault project scored a landmark FOIA victory when the Air Force released 40,000 pages of previously classified UFO investigation files. The digital dump, totaling 2.3 gigabytes, crashed the Black Vault servers within minutes as researchers worldwide scrambled to download.
+
+Early analysis reveals incident reports from the 1970s describing "craft exhibiting impossible acceleration," pilot testimony about objects pacing military aircraft, and internal memos questioning official denial policies. One 1977 document features a redacted name recommending the program "acknowledge what pilots see before pilots stop reporting."
+
+The Air Force accompanied the release with a statement emphasizing that "unusual sightings do not constitute proof of extraterrestrial origin" and noting that 97% of cases were resolved as conventional phenomena. Researchers point out the remaining 3% comprises roughly 1,200 unexplained incidents.`,
+    imagePrompt: 'Stacks of declassified documents with FOIA stamps and redactions, researcher at computer downloading files, newsprint style',
+    tags: ['foia', 'documents', 'research'],
+    statesMentioned: null,
+    recurringCharacter: null,
+    followUpHooks: [
+      'Citizen researchers organize distributed scanning project to preserve documents',
+      'Congressional staff quietly request copies for "historical interest"'
+    ]
+  },
+  {
+    cardId: 'TRUTH-NEW-015',
+    faction: 'truth',
+    headline: 'CIVILIAN DRONE FOOTAGE CAPTURES "TIC TAC" OBJECT OVER OREGON COAST',
+    subhead: 'Hobbyist filmmaker records white oval craft performing physics-defying maneuvers',
+    byline: 'By Danny Ortega, Aerial Phenomena Correspondent',
+    body: `Amateur drone operator Melissa Chen was filming coastal landscapes near Cannon Beach, Oregon, when her equipment captured something extraordinary: a white, pill-shaped object moving at extreme speed, making instantaneous 90-degree turns, and briefly pacing her drone before accelerating vertically and vanishing.
+
+"I've flown drones for eight years. Nothing moves like that," Chen told the Paranoid Times, releasing the raw 4K footage. Aviation experts examining the video note the object casts no visible exhaust, produces no sonic boom despite apparent supersonic speeds, and at one point reflects sunlight in a way suggesting a metallic surface.
+
+The footage has been viewed 8 million times in 48 hours, with military veterans commenting that the object matches descriptions from the famous 2004 Nimitz carrier group encounters. The FAA declined to comment, citing "insufficient information to assess operational impact."`,
+    imagePrompt: 'Drone camera view of Oregon coastline with white tic-tac object in frame, technical overlay showing impossible trajectory, newsprint texture',
+    tags: ['drone', 'footage', 'ufo'],
+    statesMentioned: ['Oregon'],
+    recurringCharacter: null,
+    followUpHooks: [
+      'Drone manufacturers report sales spike among "sky watchers" seeking similar evidence',
+      'Local airspace briefly restricted following "unscheduled military exercises"'
+    ]
+  },
+  {
+    cardId: 'TRUTH-NEW-016',
+    faction: 'truth',
+    headline: 'CONTACTEE CONFERENCE DRAWS 5,000—EXPERIENCERS SHARE PARALLEL STORIES',
+    subhead: 'Annual gathering reveals disturbing patterns in abduction accounts',
+    byline: 'By Jennifer Cross, Experiencer Community Reporter',
+    body: `The 18th Annual Contactee Conference in Sedona, Arizona, attracted over 5,000 attendees claiming direct encounters with non-human intelligence. While skeptics dismiss such gatherings as fringe events, researchers note troubling consistency in accounts from individuals with no prior contact.
+
+Dr. Helena Frost, a psychologist studying experiencer testimony, presented findings showing remarkable agreement on specific details: the quality of light inside craft, the appearance of beings, missing time durations, and post-encounter physiological effects. "When 200 people independently describe the same examination procedure, we must ask questions," Frost argued.
+
+Several military veterans attended this year's conference, some speaking publicly for the first time about encounters during service. Their accounts, corroborated by radar data and multiple witnesses, add credibility to civilian reports. Conference organizers announced plans for a centralized database to track patterns in real-time.`,
+    imagePrompt: 'Conference hall filled with diverse attendees, presentation showing abduction timeline charts, newsprint style',
+    tags: ['conference', 'contactee', 'experiencer'],
+    statesMentioned: ['Arizona'],
+    recurringCharacter: null,
+    followUpHooks: [
+      'Academic researchers quietly attend conference seeking interview subjects',
+      'Database launch receives anonymous $500K donation from "concerned citizen"'
+    ]
+  },
+  {
+    cardId: 'TRUTH-NEW-017',
+    faction: 'truth',
+    headline: 'IMPLANT REMOVAL SURGERY YIELDS "IMPOSSIBLE OBJECT"—METALLURGIST BAFFLED',
+    subhead: 'Tiny device extracted from patient defies conventional materials science',
+    byline: 'By Ruth Alvarez, Medical Anomalies Reporter',
+    body: `Dr. Roger Leir, a California podiatric surgeon specializing in removing alleged alien implants, extracted an object last week that has materials scientists scratching their heads. The 3mm device, removed from a patient's toe, consists of a metallic alloy not matching any known terrestrial composition.
+
+Metallurgical analysis by three independent labs reveals the object contains rare earth elements in ratios "inconsistent with natural occurrence or industrial manufacturing," according to Dr. Patricia Ng of MIT. The device also exhibits unusual magnetic properties, seeming to orient itself toward magnetic north regardless of how it's positioned.
+
+The patient, a 47-year-old truck driver, had no memory of the object's insertion but reported persistent discomfort and strange dreams prior to surgery. X-rays show the implant was surrounded by a membrane of unknown biological origin, and the surgical site healed abnormally fast—completely sealed within 48 hours with no scarring.`,
+    imagePrompt: 'Medical examination table with tiny metallic implant under microscope, X-ray images on light board, newsprint aesthetic',
+    tags: ['implant', 'surgery', 'evidence'],
+    statesMentioned: ['California'],
+    recurringCharacter: null,
+    followUpHooks: [
+      'Additional patients with similar X-ray anomalies contact Dr. Leir seeking evaluation',
+      'Pentagon quietly requisitions surgical samples citing "materials research interests"'
+    ]
+  },
+  {
+    cardId: 'TRUTH-NEW-018',
+    faction: 'truth',
+    headline: 'GOVERNMENT INSIDER GOES ROGUE—CLASSIFIED DOCUMENTS DELIVERED TO PRESS',
+    subhead: 'Twenty-year intelligence veteran risks prosecution for transparency',
+    byline: 'By Elijah Moore, National Security Desk',
+    body: `A senior intelligence analyst with two decades of clearances above Top Secret walked into the offices of three major newspapers yesterday, delivered identical packages of classified documents, then immediately contacted the FBI to turn himself in. The whistleblower, identified as Thomas Marston, 47, says his conscience could no longer tolerate "systemic deception of the American people."
+
+The documents allegedly detail Special Access Programs related to retrieval and study of "non-human technology." According to journalists reviewing the material, the files include budget allocations, facility locations, personnel rosters, and scientific analyses of recovered materials exhibiting "properties inconsistent with human engineering capabilities."
+
+Marston's attorney released a statement: "My client believes transparency serves national security better than secrecy in this matter. He accepts the consequences of his actions and asks only that the public judge the documents' contents on merit." The Justice Department declined comment on potential charges, while the Office of the Director of National Intelligence called the leak "gravely damaging."`,
+    imagePrompt: 'Serious-looking government analyst in suit with classified folders, FBI agents in background, newsprint style',
+    tags: ['whistleblower', 'classified', 'insider'],
+    statesMentioned: ['District of Columbia'],
+    recurringCharacter: null,
+    followUpHooks: [
+      'Congressional oversight committees request emergency classified briefings',
+      'Additional intelligence workers contact attorneys about whistleblower protections'
+    ]
+  },
+  {
+    cardId: 'TRUTH-NEW-019',
+    faction: 'truth',
+    headline: 'TIME TRAVELER WARNING GOES VIRAL—KNOWS TOO MANY LOTTERY NUMBERS',
+    subhead: 'Mysterious figure claims to be from 2087, posts eerily accurate predictions',
+    byline: 'By Lena Papadopoulos, Temporal Paradox Desk',
+    body: `An anonymous social media account calling itself "Witness2087" began posting dire warnings about upcoming global events three months ago. While most dismissed the account as an elaborate hoax, its track record has become impossible to ignore: 17 specific predictions about natural disasters, political events, and technological breakthroughs have come true with disturbing accuracy.
+
+Most troubling are the lottery numbers. Witness2087 has correctly predicted six major lottery drawings across four states, though crucially, never claimed the winnings. "I can't interfere with the timeline more than necessary," one post explained. "These predictions are warnings, not opportunities."
+
+The account's latest posts warn of "containment failures at three government facilities within 14 months" and urge citizens to "demand transparency while you still can." Temporal physics researchers call the account fascinating but note that accurate predictions don't necessarily prove time travel—merely access to extraordinarily good intelligence or pattern recognition.`,
+    imagePrompt: 'Split-screen showing social media posts with predictions next to newspaper headlines confirming them, futuristic aesthetic, newsprint texture',
+    tags: ['time-travel', 'prediction', 'viral'],
+    statesMentioned: null,
+    recurringCharacter: null,
+    followUpHooks: [
+      'Federal investigators subpoena platform for account information, receive untraceable encryption',
+      'Physicists debate whether timeline warnings create paradoxes or stabilize them'
+    ]
+  },
+  {
+    cardId: 'TRUTH-NEW-020',
+    faction: 'truth',
+    headline: 'DISCLOSURE PETITION HITS 10 MILLION SIGNATURES—WHITE HOUSE RESPONSE DEADLINE LOOMS',
+    subhead: 'Historic petition demands full UAP transparency, Congress watches closely',
+    byline: 'By Howard Lindholm, Civic Action Reporter',
+    body: `A We The People petition demanding "full disclosure of all government knowledge regarding Unidentified Aerial Phenomena" crossed the 10 million signature threshold yesterday, making it the most-signed petition in the platform's history. Under White House policy, petitions exceeding 100,000 signatures require an official response within 30 days.
+
+Petition organizer Maria Chen told the Paranoid Times: "This represents a tipping point in public consciousness. Americans are tired of being treated like children. We deserve to know what our government knows about the reality of non-human intelligence."
+
+The petition's momentum accelerated following recent congressional hearings on UAPs and whistleblower testimony from intelligence officials. Several members of Congress have publicly committed to pushing for hearings if the White House response proves unsatisfactory. Press Secretary briefings have deflected questions about the petition, calling it "an issue under review by relevant agencies."
+
+With 22 days remaining until the response deadline, disclosure advocates are organizing nationwide rallies to maintain pressure. Skeptics note that previous high-profile petitions received carefully worded responses that satisfied few.`,
+    imagePrompt: 'Computer screen showing petition counter at 10 million, crowds rallying outside White House, newsprint style',
+    tags: ['petition', 'disclosure', 'activism'],
+    statesMentioned: ['District of Columbia'],
+    recurringCharacter: 'Maria Chen',
+    followUpHooks: [
+      'Congressional allies draft legislation linking funding to transparency requirements',
+      'Signature verification system overwhelmed by unprecedented petition activity'
+    ]
+  },
+  {
     cardId: 'GOV-NEW-001',
     faction: 'government',
     headline: 'COASTAL LIGHTS IN SOUTH CAROLINA "MERELY COURTESY DRONES," SAYS BRIEFING',
