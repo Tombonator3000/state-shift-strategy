@@ -2,6 +2,14 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-24 – Article combiner powers live newsroom column
+- Timestamp: 2025-10-24T11:30:00Z
+- Files:
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `docs/ARTICLE_COMBINER.md`
+  - `UPDATES_LOG.md`
+- Summary: Wired the in-game Tabloid newspaper to call the article combiner for a new Newsroom Collation column that fuses two or more front-page dossiers, added faction-aware badges and loading feedback, and documented how the live integration mirrors the dev demo.
+
 ## 2025-10-23 – Unified roadmap now authoritative
 - Timestamp: 2025-10-23T10:15:00Z
 - Files:
