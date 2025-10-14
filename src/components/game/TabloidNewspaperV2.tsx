@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { Card as UICard } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -7,6 +7,7 @@ import CardImage from '@/components/game/CardImage';
 import { ExtraStamp } from '@/components/newspaper/ExtraStamp';
 import { loadNewspaperData, pick, shuffle, type NewspaperData } from '@/lib/newspaperData';
 import { generateIssue, type NarrativeIssue, type PlayedCardInput } from '@/engine/newspaper/IssueGenerator';
+import { combineArticles, type CombinedArticle } from '@/engine/newspaper/ArticleCombiner';
 import type { TabloidNewspaperProps } from './TabloidNewspaperLegacy';
 import type { HotspotExtraArticle } from '@/systems/paranormalHotspots';
 import type { Card } from '@/types';
@@ -27,7 +28,6 @@ import {
   NEWSPAPER_HEADER_CLASS,
   NewspaperSection,
 } from './newspaperLayout';
-import FrontPage from '@/ui/newspaper/FrontPage';
 import { useTabloidWeather, getFallbackTabloidWeather } from '@/system/weather/useTabloidWeather';
 
 const PRIMARY_MASTHEAD = 'PARANOID TIMES';
@@ -328,6 +328,9 @@ const TabloidNewspaperV2 = ({
 
   const dataset = data ?? FALLBACK_DATA;
   const [issue, setIssue] = useState<NarrativeIssue | null>(null);
+  const [combinedFrontPage, setCombinedFrontPage] = useState<CombinedArticle | null>(null);
+  const [isCombiningFrontPage, setIsCombiningFrontPage] = useState(false);
+  const [combinedFrontPageError, setCombinedFrontPageError] = useState<string | null>(null);
   const audio = useAudioContext();
   const [highlightedSightingId, setHighlightedSightingId] = useState<string | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -719,6 +722,47 @@ const TabloidNewspaperV2 = ({
 
   const eventsTruthDelta = useMemo(() => computeEventTruthDelta(events), [events]);
 
+  const frontPageArticles = issue?.generatedStory?.articles ?? [];
+  const frontPageNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const article of frontPageArticles) {
+      if (article.cardId) {
+        map.set(article.cardId, article.cardName);
+      }
+    }
+    return map;
+  }, [frontPageArticles]);
+
+  const combinedFrontPageParagraphs = useMemo(() => {
+    if (!combinedFrontPage?.body) {
+      return [] as string[];
+    }
+    return combinedFrontPage.body
+      .split(/\n\s*\n/)
+      .map(paragraph => paragraph.trim())
+      .filter(Boolean);
+  }, [combinedFrontPage]);
+
+  const combinedFrontPageSources = useMemo(() => {
+    if (!combinedFrontPage) {
+      return [] as string[];
+    }
+    return combinedFrontPage.sourceArticles.map(id => frontPageNameById.get(id) ?? id);
+  }, [combinedFrontPage, frontPageNameById]);
+
+  const combinedFrontPageBadgeLabel = useMemo(() => {
+    if (!combinedFrontPage) {
+      return null;
+    }
+    if (combinedFrontPage.faction === 'government') {
+      return 'Official Spin';
+    }
+    if (combinedFrontPage.faction === 'mixed') {
+      return 'Mixed Signal';
+    }
+    return 'Truth Coil';
+  }, [combinedFrontPage]);
+
   useEffect(() => {
     let cancelled = false;
     const activeDataset = dataset;
@@ -761,6 +805,68 @@ const TabloidNewspaperV2 = ({
     agendaIssue?.label,
     gameStateSnapshot,
   ]);
+
+  useEffect(() => {
+    const articles = issue?.generatedStory?.articles ?? [];
+    const cardIds = articles
+      .map(article => article.cardId)
+      .filter((id): id is string => typeof id === 'string' && id.trim().length > 0);
+    const uniqueCardIds = Array.from(new Set(cardIds));
+
+    if (uniqueCardIds.length < 2) {
+      setCombinedFrontPage(null);
+      setCombinedFrontPageError(null);
+      setIsCombiningFrontPage(false);
+      return;
+    }
+
+    const mainTone = issue?.generatedStory?.main?.tone;
+    const fallbackFaction = issue?.generatedStory?.cards?.[0]?.faction === 'GOV' ? 'government' : 'truth';
+    const toneChoice = (mainTone ?? fallbackFaction) === 'government' ? 'official' : 'investigative';
+
+    let cancelled = false;
+
+    setIsCombiningFrontPage(true);
+    setCombinedFrontPageError(null);
+
+    (async () => {
+      try {
+        const combined = await combineArticles({
+          cardIds: uniqueCardIds,
+          combineMethod: 'ai',
+          tone: toneChoice,
+        });
+
+        if (cancelled) {
+          return;
+        }
+
+        if (combined) {
+          setCombinedFrontPage(combined);
+          setCombinedFrontPageError(null);
+        } else {
+          setCombinedFrontPage(null);
+          setCombinedFrontPageError('Vault refused to merge dossiers.');
+        }
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        console.warn('Failed to synthesize combined front page story', error);
+        setCombinedFrontPage(null);
+        setCombinedFrontPageError('Signal to AI desk jammed.');
+      } finally {
+        if (!cancelled) {
+          setIsCombiningFrontPage(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [issue?.generatedStory?.articles, issue?.generatedStory?.cards, issue?.generatedStory?.main?.tone]);
 
   useEffect(() => {
     if (!SHOW_NEWSPAPER_DEBUG) {
@@ -1295,6 +1401,51 @@ const TabloidNewspaperV2 = ({
 
             {/* COLUMN 2: Stats & Secondary Headlines */}
             <aside className="space-y-4">
+              {/* Front Page Collation */}
+              {(isCombiningFrontPage || combinedFrontPage || combinedFrontPageError) && (
+                <section className="rounded-md border border-newspaper-border bg-white/75 p-4 shadow-sm">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <h3 className="text-sm font-black uppercase tracking-wide text-newspaper-text">
+                      Newsroom Collation
+                    </h3>
+                    {isCombiningFrontPage ? (
+                      <span className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        Synthesizing
+                      </span>
+                    ) : combinedFrontPageBadgeLabel ? (
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-newspaper-text/50">
+                        {combinedFrontPageBadgeLabel}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  {combinedFrontPage ? (
+                    <>
+                      <p className="text-[11px] uppercase tracking-wide text-newspaper-text/60">
+                        {combinedFrontPageSources.length
+                          ? `Merged dossiers: ${combinedFrontPageSources.join(' • ')}`
+                          : `Merged dossiers: ${combinedFrontPage.sourceArticles.length}`}
+                      </p>
+                      <h4 className="mt-2 text-base font-semibold leading-snug text-newspaper-text">
+                        {combinedFrontPage.headline}
+                      </h4>
+                      <p className="text-xs italic text-newspaper-text/70">{combinedFrontPage.subhead}</p>
+                      <div className="mt-3 space-y-2 text-sm leading-relaxed text-newspaper-text/80">
+                        {combinedFrontPageParagraphs.map((paragraph, index) => (
+                          <p key={index}>{paragraph}</p>
+                        ))}
+                      </div>
+                      <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-newspaper-text/50">
+                        {combinedFrontPage.byline}
+                      </p>
+                    </>
+                  ) : combinedFrontPageError ? (
+                    <p className="text-xs italic text-newspaper-text/60">{combinedFrontPageError}</p>
+                  ) : null}
+                </section>
+              )}
+
               {/* Combo Dispatch */}
               {comboNarrative ? (
                 <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">

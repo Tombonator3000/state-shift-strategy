@@ -128,6 +128,12 @@ Access the demo at `/dev/article-combiner` to:
 - Set custom tone
 - See real-time combined results
 
+## In-Game Integration
+
+- The end-of-turn Tabloid newspaper now calls the combiner to synthesize a "Newsroom Collation" column whenever two or more front-page cards are present.
+- The live column mirrors the dev demo behaviour: it prefers the Lovable AI merge, falls back to the paranoid template when offline, and annotates which dossiers were fused.
+- This slot gives the player a conspiracy-spinning digest that reinforces the "Investigate → Escalate Paranoia" beat without leaving the gameplay flow.
+
 ## Configuration
 
 ### Required Environment Variables
