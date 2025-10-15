@@ -2,6 +2,7 @@ import type { CardArticle } from './articleDatabase';
 import { truthArticles } from './truthArticles';
 import { governmentArticles } from './governmentArticles';
 import { expansionArticles } from './expansionArticles';
+import { cryptidArticleVariants } from './cryptidVariants';
 
 /**
  * Combined article database for all factions
@@ -11,7 +12,8 @@ import { expansionArticles } from './expansionArticles';
 export const ALL_CARD_ARTICLES: CardArticle[] = [
   ...truthArticles,
   ...governmentArticles,
-  ...expansionArticles
+  ...expansionArticles,
+  ...cryptidArticleVariants
 ];
 
 export function getArticleByCardId(cardId: string): CardArticle | null {

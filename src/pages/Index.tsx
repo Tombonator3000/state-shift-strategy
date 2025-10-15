@@ -1490,7 +1490,8 @@ const Index = () => {
 
         if (Array.isArray(play.capturedStates) && play.capturedStates.length > 0) {
           play.capturedStates.forEach(stateName => {
-            const captureNews = newsForStateCapture(stateName, play.player);
+            const captor = play.player === 'human' ? 'player' : 'ai';
+            const captureNews = newsForStateCapture(stateName, captor);
             if (captureNews) {
               dispatchBreakingNews(captureNews, 'urgent');
             }

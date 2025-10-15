@@ -4947,7 +4947,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
             : [];
           const seenIds = new Set(existingHistory.map(entry => entry.eventId));
           const ownerFaction = resolveOwnerFaction(state.owner, nextState.faction);
-          const summaryFaction = ownerFaction === 'neutral' ? nextState.faction : ownerFaction;
+          const summaryFaction = ownerFaction === null ? nextState.faction : ownerFaction;
 
           const additions: StateEventBonusSummary[] = [];
           const stateEvents = assignment.roundEvents[abbreviation] ?? [];
