@@ -6,7 +6,8 @@
 
 // Import comprehensive article databases from centralized system
 import { ALL_CARD_ARTICLES, getArticleByCardId, getArticlesByFaction as getByFaction, getArticlesByState as getByState, getArticlesByCharacter as getByCharacter } from './allArticles';
-import type { ArticleTone } from '@/engine/newspaper/articleTones';
+
+type ArticleTone = 'STRAIGHT_NEWS' | 'TABLOID_SENSATIONAL' | 'LOCAL_COLOR' | 'HARD_HITTING_EXPOSE' | 'CLASSIFIED_REDACTED';
 
 export interface CardArticle {
   cardId: string;
