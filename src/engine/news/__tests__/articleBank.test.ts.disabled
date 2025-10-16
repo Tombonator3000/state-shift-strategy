@@ -1,6 +1,6 @@
 import { afterEach, expect, mock, test } from 'bun:test';
 
-import { loadArticleBank, type CardArticle } from '../articleBank';
+import { loadArticleBank, type CardArticle } from '@/news/articleBank';
 
 const createResponse = (payload: unknown, init?: Partial<Response>): Response => {
   return {

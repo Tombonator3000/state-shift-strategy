@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import * as actualFrontendNewsPools from '../../src/news/newsPools';
-import * as actualEngineNewsPools from '../../src/engine/news/newsPools';
+import * as actualArticleBank from '../../src/news/articleBank';
 import type { TurnLog, TurnTotals, PlayedLite } from '../../src/news/types';
 
 const stubPools = {
@@ -88,7 +88,7 @@ const perCardArticles = new Map(
   ],
 );
 
-const getPerCardArticlesIfReadyMock = createMockFn(() => perCardArticles);
+const getArticleBankIfReadyMock = createMockFn(() => perCardArticles);
 
 const createTripleArticle = () => ({
   tone: 'truth' as const,
@@ -112,9 +112,9 @@ mock.module('@/news/newsPools', () => ({
   getPoolsIfReady: getPoolsIfReadyMock,
 }));
 
-mock.module('@/engine/news/newsPools', () => ({
-  ...actualEngineNewsPools,
-  getPerCardArticlesIfReady: getPerCardArticlesIfReadyMock,
+mock.module('@/news/articleBank', () => ({
+  ...actualArticleBank,
+  getArticleBankIfReady: getArticleBankIfReadyMock,
 }));
 
 mock.module('@/engine/news/composeTriple', () => ({
@@ -128,8 +128,8 @@ beforeEach(() => {
   getPoolsIfReadyMock.mockReset();
   getPoolsMock.mockImplementation(() => stubPools);
   getPoolsIfReadyMock.mockImplementation(() => stubPools);
-  getPerCardArticlesIfReadyMock.mockReset();
-  getPerCardArticlesIfReadyMock.mockImplementation(() => perCardArticles);
+  getArticleBankIfReadyMock.mockReset();
+  getArticleBankIfReadyMock.mockImplementation(() => perCardArticles);
   composeTripleHeadlineMock.mockReset();
   composeTripleHeadlineMock.mockImplementation(() => createTripleArticle());
 });

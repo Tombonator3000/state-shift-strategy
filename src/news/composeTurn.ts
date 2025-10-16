@@ -1,4 +1,4 @@
-import { getPerCardArticlesIfReady, type ArticleBlock as CardArticle } from '@/engine/news/newsPools';
+import { getArticleBankIfReady, type CardArticle } from '@/news/articleBank';
 
 import type {
   ArticleBlock,
@@ -260,7 +260,7 @@ export const composeTurn = (
     return null;
   }
 
-  const articleCache = options.articleCache ?? getPerCardArticlesIfReady();
+  const articleCache = options.articleCache ?? getArticleBankIfReady();
   const candidates: Candidate[] = log.plays.map((play, index) => {
     const article = articleCache?.get(play.id) ?? null;
     return computeCandidate(play, article, index);

@@ -30,11 +30,9 @@ mock.module('@/engine/newspaper/CardLexicon', () => ({
   loadCardLexicon: async () => ({}),
 }));
 
-mock.module('@/engine/news/articleBank', () => ({
-  loadArticleBank: async () => ({
-    getById: () => null,
-    hasArticles: () => false,
-  }),
+mock.module('@/news/articleBank', () => ({
+  loadArticleBank: async () => new Map(),
+  getArticleById: () => null,
 }));
 
 describe('IssueGenerator safety guards', () => {

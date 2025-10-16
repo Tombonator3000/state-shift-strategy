@@ -10,6 +10,7 @@ This document provides a chronological record of gameplay-impacting changes merg
   - `UPDATES_LOG.md`
 - Summary: Wired the in-game Tabloid newspaper to call the article combiner for a new Newsroom Collation column that fuses two or more front-page dossiers, added faction-aware badges and loading feedback, and documented how the live integration mirrors the dev demo.
 
+
 ## 2025-10-23 – Unified roadmap now authoritative
 - Timestamp: 2025-10-23T10:15:00Z
 - Files:
@@ -50,6 +51,11 @@ m the options panel persist instead of resetting to the default playlist.
   - `__tests__/integration/gameplayScreen.test.tsx`
   - `__tests__/integration/extraExtra.test.ts`
 - Summary: Refactored the nightly tabloid to read the latest turn composite and runners-up directly from saved state, introduced a final-edition helper that ranks composites alongside bulletins, updated overlays to consume the ranked feed, and extended integration coverage for per-turn headlines and Extra Extra updates.
+
+## 2025-10-16T10:15:08+00:00 – Migrated article bank to shared loader
+- Shifted newspaper systems to the shared `src/news/articleBank.ts` Map loader and aligned IssueGenerator, composeTurn, and headline previews with the new API.
+- Added regression coverage for canonical cards and tone normalization while updating UI consumers to the Map-based article lookups.
+- Files: `src/news/articleBank.ts`, `src/engine/newspaper/IssueGenerator.ts`, `src/news/composeTurn.ts`, `src/news/headlineEngine.ts`, `src/components/news/NewspaperFrontPage.tsx`, `src/ui/newspaper/FrontPage.tsx`, `src/utils/sensationalistHeadlines.ts`, `__tests__/news/articleBank.test.ts`, `__tests__/news/headlineEngine.test.ts`, `__tests__/news/composeTurn.test.ts`, `src/engine/newspaper/__tests__/IssueGenerator.staticArticles.test.ts`, `src/engine/newspaper/__tests__/IssueGenerator.recurringCharacters.test.ts`, `src/components/game/__tests__/TabloidNewspaperV2.frontPage.test.tsx.disabled`, `src/engine/newspaper/__tests__/IssueGenerator.safety.test.ts.disabled`.
 ## 2025-10-21 – Article overlay stays open until dismissed
 - Timestamp: 2025-10-21T12:00:00Z
 - Files:

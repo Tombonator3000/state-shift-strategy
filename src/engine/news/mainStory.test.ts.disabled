@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test';
 
 import { generateMainStory, type PlayedCardMeta } from './mainStory';
-import type { CardArticle } from './articleBank';
+import type { CardArticle } from '@/news/articleBank';
 
 const mk = (id: string, name: string, type: PlayedCardMeta['type'], faction: PlayedCardMeta['faction']): PlayedCardMeta => ({
   id,

@@ -1,5 +1,5 @@
 import { composeTripleHeadline, type ArticleBlock as TripleArticleBlock, type NewsCardLite } from '@/engine/news/composeTriple';
-import { getPerCardArticlesIfReady } from '@/engine/news/newsPools';
+import { getArticleBankIfReady } from '@/news/articleBank';
 import { getPools, getPoolsIfReady } from '@/news/newsPools';
 import type {
   ArticleBlock,
@@ -209,7 +209,7 @@ export const evaluateExtraExtra = (
       } satisfies ExtraExtraOutcome;
     }
 
-    const perCardArticles = getPerCardArticlesIfReady();
+    const perCardArticles = getArticleBankIfReady();
 
     const toNewsCard = (play: PlayedLite): NewsCardLite => {
       const entry = perCardArticles?.get(play.id);

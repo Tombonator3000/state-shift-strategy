@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { loadArticleBank, type ArticleBank } from '@/engine/news/articleBank';
+import { getArticleById, loadArticleBank, type ArticleBank } from '@/news/articleBank';
 import { generateMainStory, type GeneratedStory, type PlayedCardMeta } from '@/engine/news/mainStory';
 import type { FrontPagePackage } from '@/engine/newspaper/IssueGenerator';
 import { deriveFrontPageSubhead, type FrontPageSubheadInput } from '@/engine/news/frontPageSubhead';
@@ -90,7 +90,7 @@ const FrontPage = ({
       .then(bank => {
         if (!cancelled) {
           setArticleBank(bank);
-          setArticleBankReady(bank.hasArticles());
+          setArticleBankReady(bank.size > 0);
         }
       })
       .catch(error => {
@@ -117,7 +117,7 @@ const FrontPage = ({
     }
 
     try {
-      const story = generateMainStory(cardList, id => articleBank?.getById(id) ?? null);
+      const story = generateMainStory(cardList, id => getArticleById(id, articleBank));
       setMainStory(story);
     } catch (error) {
       console.warn('Failed to compose main story', error);
@@ -155,7 +155,7 @@ const FrontPage = ({
     }
 
     return cardList.map(card => {
-      const article = articleBank?.getById(card.id) ?? null;
+      const article = getArticleById(card.id, articleBank);
       return {
         card,
         article: article
