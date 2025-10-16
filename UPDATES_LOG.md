@@ -39,6 +39,17 @@ m the options panel persist instead of resetting to the default playlist.
   - `src/types/finalEdition.ts`
   - `__tests__/utils/finalEdition.test.ts`
 - Summary: Front page and inside spread now render full MVP and runner-up copy pulled from the card article bank, fall back to existing report highlights when no article exists, and the game-over report captures sanitized paragraphs for downstream UIs with regression coverage for both pathways.
+## 2025-10-16 – Tabloid overlay consumes stored composites
+- Timestamp: 2025-10-16T18:10:00Z
+- Files:
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `src/components/game/TabloidNewspaperLegacy.tsx`
+  - `src/news/finalizeEdition.ts`
+  - `src/utils/finalEdition.ts`
+  - `src/pages/Index.tsx`
+  - `__tests__/integration/gameplayScreen.test.tsx`
+  - `__tests__/integration/extraExtra.test.ts`
+- Summary: Refactored the nightly tabloid to read the latest turn composite and runners-up directly from saved state, introduced a final-edition helper that ranks composites alongside bulletins, updated overlays to consume the ranked feed, and extended integration coverage for per-turn headlines and Extra Extra updates.
 ## 2025-10-21 – Article overlay stays open until dismissed
 - Timestamp: 2025-10-21T12:00:00Z
 - Files:
