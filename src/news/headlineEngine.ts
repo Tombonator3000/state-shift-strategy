@@ -1,6 +1,14 @@
 import { composeTripleHeadline, type ArticleBlock as TripleArticleBlock, type NewsCardLite } from '@/engine/news/composeTriple';
 import { getPerCardArticlesIfReady } from '@/engine/news/newsPools';
 import { getPools, getPoolsIfReady } from '@/news/newsPools';
+import type {
+  ArticleBlock,
+  CardType,
+  FactionTotals,
+  TurnLog,
+  TurnTotals,
+  PlayedLite,
+} from '@/news/types';
 
 const FALLBACK_DEK_POOL = [
   'Archive uplink pending. Full briefing to follow shortly.',
@@ -32,41 +40,6 @@ const FALLBACK_ADS = [
   'Advertisement suspended pending copy approval.',
   'Wire notice: Refresh for full classifieds.',
 ];
-
-export type CardType = 'ATTACK' | 'MEDIA' | 'ZONE';
-
-export interface PlayedLite {
-  id: string;
-  name: string;
-  type: CardType;
-  faction: 'truth' | 'government';
-  truth?: number;
-  ip?: number;
-  captures?: number;
-  damage?: number;
-}
-
-export interface FactionTotals {
-  plays: number;
-  attack: number;
-  media: number;
-  zone: number;
-  truth: number;
-  ip: number;
-  captures: number;
-  damage: number;
-}
-
-export interface TurnTotals {
-  truth: FactionTotals;
-  government: FactionTotals;
-}
-
-export interface TurnLog {
-  round: number;
-  turn: number;
-  plays: PlayedLite[];
-}
 
 export interface ExtraExtraOutcome {
   trigger: boolean;
@@ -391,21 +364,6 @@ export const evaluateExtraExtra = (
     truthDelta: 0,
   });
 };
-
-export interface ArticleBlock {
-  tone: 'truth' | 'government' | 'draw';
-  hed: string;
-  dek: string;
-  bullets: string[];
-  byline: string;
-  source: string;
-  body?: string[];
-  imagePrompt?: string;
-  kicker?: string;
-  stinger?: string;
-  templateId?: string;
-  comboId?: string;
-}
 
 export interface FinalEdition {
   seed: string;

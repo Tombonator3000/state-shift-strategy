@@ -92,8 +92,9 @@ import { assignStateBonuses } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from './stateBonusAssignment';
 import { clearNewsBuffer, getNewsTriplet, pushToNewsBuffer } from '@/state/game/roundNewsBuffer';
 import { summarize, generateExtraExtra, evaluateExtraExtra } from '@/news/headlineEngine';
+import { composeTurn } from '@/news/composeTurn';
 import { loadNewsPools } from '@/news/newsPools';
-import type { ArticleBlock, TurnLog, PlayedLite } from '@/news/headlineEngine';
+import type { ArticleBlock, TurnLog, PlayedLite, TurnComposite, WeightedMetric } from '@/news/types';
 import { initNewsPools } from '@/engine/news/newsPools';
 import type { GameOverReport } from '@/types/finalEdition';
 import { emitBanter, defaultBanterUi, getCardPlayTrigger } from '@/ai/banter/banterEngine';
@@ -470,6 +471,171 @@ const normalizeArticleBlock = (entry: unknown): ArticleBlock | null => {
   return null;
 };
 
+const normalizePlayedLite = (value: unknown): PlayedLite | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const candidate = value as Partial<PlayedLite> & { faction?: unknown; type?: unknown };
+  const id = typeof candidate.id === 'string' ? candidate.id.trim() : '';
+  const name = typeof candidate.name === 'string' ? candidate.name.trim() : '';
+  const faction = candidate.faction === 'truth' || candidate.faction === 'government'
+    ? candidate.faction
+    : null;
+  const typeValue = typeof candidate.type === 'string' ? candidate.type.toUpperCase() : '';
+  const type = typeValue === 'ATTACK' || typeValue === 'MEDIA' || typeValue === 'ZONE' ? typeValue : null;
+
+  if (!id || !name || !faction || !type) {
+    return null;
+  }
+
+  const sanitizeMetric = (metric: unknown): number | undefined => {
+    if (typeof metric !== 'number' || Number.isNaN(metric)) {
+      return undefined;
+    }
+    return metric;
+  };
+
+  const normalized: PlayedLite = {
+    id,
+    name,
+    faction,
+    type,
+  } satisfies PlayedLite;
+
+  const truth = sanitizeMetric((candidate as { truth?: unknown }).truth);
+  const ip = sanitizeMetric((candidate as { ip?: unknown }).ip);
+  const captures = sanitizeMetric((candidate as { captures?: unknown }).captures);
+  const damage = sanitizeMetric((candidate as { damage?: unknown }).damage);
+
+  if (typeof truth === 'number') {
+    normalized.truth = truth;
+  }
+  if (typeof ip === 'number') {
+    normalized.ip = ip;
+  }
+  if (typeof captures === 'number') {
+    normalized.captures = captures;
+  }
+  if (typeof damage === 'number') {
+    normalized.damage = damage;
+  }
+
+  return normalized;
+};
+
+const normalizeWeightedMetric = (value: unknown): WeightedMetric => {
+  if (!value || typeof value !== 'object') {
+    return { raw: 0, weighted: 0 } satisfies WeightedMetric;
+  }
+
+  const candidate = value as Partial<WeightedMetric>;
+  const raw = typeof candidate.raw === 'number' && Number.isFinite(candidate.raw)
+    ? Math.round(candidate.raw * 100) / 100
+    : 0;
+  const weighted = typeof candidate.weighted === 'number' && Number.isFinite(candidate.weighted)
+    ? Math.round(candidate.weighted * 100) / 100
+    : 0;
+
+  return { raw, weighted } satisfies WeightedMetric;
+};
+
+const normalizeTurnComposite = (entry: unknown): TurnComposite | null => {
+  if (!entry || typeof entry !== 'object') {
+    return null;
+  }
+
+  const candidate = entry as Partial<TurnComposite> & {
+    plays?: unknown;
+    focus?: unknown;
+    main?: unknown;
+    runnersUp?: unknown;
+    metrics?: unknown;
+  };
+
+  const round = typeof candidate.round === 'number' && Number.isFinite(candidate.round)
+    ? Math.max(0, Math.floor(candidate.round))
+    : null;
+  const turn = typeof candidate.turn === 'number' && Number.isFinite(candidate.turn)
+    ? Math.max(0, Math.floor(candidate.turn))
+    : null;
+  const tone = candidate.tone === 'truth' || candidate.tone === 'government' || candidate.tone === 'draw'
+    ? candidate.tone
+    : null;
+
+  if (round == null || turn == null || tone == null) {
+    return null;
+  }
+
+  const playsRaw = Array.isArray(candidate.plays) ? candidate.plays : [];
+  const plays = playsRaw
+    .map(normalizePlayedLite)
+    .filter((item): item is PlayedLite => item !== null);
+
+  if (!plays.length) {
+    return null;
+  }
+
+  const focusRaw = Array.isArray(candidate.focus) ? candidate.focus : [];
+  const focus = focusRaw
+    .map(normalizePlayedLite)
+    .filter((item): item is PlayedLite => item !== null);
+
+  const main = candidate.main ? normalizeArticleBlock(candidate.main) : null;
+  const runnersUpRaw = Array.isArray(candidate.runnersUp) ? candidate.runnersUp : [];
+  const runnersUp = runnersUpRaw
+    .map(normalizeArticleBlock)
+    .filter((item): item is ArticleBlock => item !== null);
+
+  const metricsCandidate = (candidate.metrics ?? {}) as Partial<TurnCompositeMetrics> & {
+    truth?: WeightedMetric;
+    ip?: WeightedMetric;
+    captures?: WeightedMetric;
+    damage?: WeightedMetric;
+  };
+
+  const cards = typeof metricsCandidate.cards === 'number' && Number.isFinite(metricsCandidate.cards)
+    ? Math.max(0, Math.floor(metricsCandidate.cards))
+    : focus.length || plays.length;
+
+  const typeBonus = typeof metricsCandidate.typeBonus === 'number' && Number.isFinite(metricsCandidate.typeBonus)
+    ? Math.round(metricsCandidate.typeBonus * 100) / 100
+    : 0;
+  const total = typeof metricsCandidate.total === 'number' && Number.isFinite(metricsCandidate.total)
+    ? Math.round(metricsCandidate.total * 100) / 100
+    : 0;
+
+  const metrics: TurnCompositeMetrics = {
+    cards,
+    truth: normalizeWeightedMetric(metricsCandidate.truth),
+    ip: normalizeWeightedMetric(metricsCandidate.ip),
+    captures: normalizeWeightedMetric(metricsCandidate.captures),
+    damage: normalizeWeightedMetric(metricsCandidate.damage),
+    typeBonus,
+    total,
+  } satisfies TurnCompositeMetrics;
+
+  const signature = typeof candidate.signature === 'string' && candidate.signature.trim().length > 0
+    ? candidate.signature.trim()
+    : null;
+  const seed = typeof candidate.seed === 'number' && Number.isFinite(candidate.seed)
+    ? candidate.seed >>> 0
+    : null;
+
+  return {
+    round,
+    turn,
+    plays,
+    focus,
+    tone,
+    main,
+    runnersUp,
+    metrics,
+    signature,
+    seed,
+  } satisfies TurnComposite;
+};
+
 const emitEditorToastMessages = (messages: string[]): void => {
   if (!messages.length || typeof window === 'undefined') {
     return;
@@ -534,13 +700,11 @@ const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): Ga
     turn: prev.turn,
     plays: buffer,
   };
-
-  const totals = summarize([turnLog]);
-  const summaryHeadline = `Turn ${prev.turn} recap: Truth plays ${totals.truth.plays}, Government plays ${totals.government.plays}`;
-  const headlineLog = [...next.headlineLog, summaryHeadline];
+  const evaluationSeed = `${seedPrefix}:${prev.round}:${prev.turn}`;
+  const composite = composeTurn(turnLog, { seed: evaluationSeed });
+  const headlineLog = composite ? [...next.headlineLog, composite] : [...next.headlineLog];
 
   let extraExtraFeed = next.extraExtraFeed;
-  const evaluationSeed = `${seedPrefix}:${prev.round}:${prev.turn}`;
   const evaluation = evaluateExtraExtra(buffer, { seed: evaluationSeed });
 
   if (evaluation.trigger) {
@@ -5747,7 +5911,9 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           aiEditor: savedAiEditorId ?? null,
           aiBanterCooldown: normalizedAiBanterCooldown ?? createInitialAiBanterCooldown(),
           headlineLog: Array.isArray((saveData as { headlineLog?: unknown }).headlineLog)
-            ? ((saveData as { headlineLog: string[] }).headlineLog ?? []).filter(entry => typeof entry === 'string')
+            ? ((saveData as { headlineLog: unknown[] }).headlineLog ?? [])
+                .map(normalizeTurnComposite)
+                .filter((entry): entry is TurnComposite => entry !== null)
             : [],
           extraExtraFeed: Array.isArray((saveData as { extraExtraFeed?: unknown }).extraExtraFeed)
             ? ((saveData as { extraExtraFeed: unknown[] }).extraExtraFeed ?? [])

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import * as actualFrontendNewsPools from '../../src/news/newsPools';
 import type { Card, GameState } from '../../src/mvp/validator';
-import type { TurnLog, PlayedLite } from '../../src/news/headlineEngine';
+import type { TurnLog, PlayedLite } from '../../src/news/types';
 
 const stubPools = {
   mastheads: ['Test Masthead'],
@@ -152,9 +152,13 @@ describe('extra extra integration', () => {
     const { state: endedState } = endTurn(state, []);
 
     expect(endedState.extraExtraFeed).toEqual([expectedArticle]);
-    expect(endedState.headlineLog).toEqual([
-      'Turn 1 recap: Truth plays 3, Government plays 0',
-    ]);
+    expect(endedState.headlineLog).toHaveLength(1);
+    expect(endedState.headlineLog[0]).toMatchObject({
+      round: 1,
+      turn: 1,
+      plays: expect.any(Array),
+      main: expect.objectContaining({ hed: expect.any(String) }),
+    });
     expect(endedState.truth).toBe(53);
     expect(endedState.extraExtraFeed[0]?.tone).toBe(expectedArticle.tone);
   });
@@ -237,9 +241,13 @@ describe('extra extra integration', () => {
 
       expect(endedState.extraExtraFeed).toEqual([expectedArticle]);
       expect(endedState.extraExtraFeed[0]?.hed).toContain('[WIRE DELAY]');
-      expect(endedState.headlineLog).toEqual([
-        'Turn 1 recap: Truth plays 3, Government plays 0',
-      ]);
+      expect(endedState.headlineLog).toHaveLength(1);
+      expect(endedState.headlineLog[0]).toMatchObject({
+        round: 1,
+        turn: 1,
+        plays: expect.any(Array),
+        main: expect.objectContaining({ hed: expect.any(String) }),
+      });
       expect(endedState.truth).toBe(53);
       expect(warnings.length).toBeGreaterThan(0);
     } finally {
@@ -317,8 +325,12 @@ describe('extra extra integration', () => {
     expect(endedState.extraExtraFeed).toEqual([expectedArticle]);
     expect(endedState.extraExtraFeed[0]?.tone).toBe(expectedArticle.tone);
     expect(endedState.truth).toBe(47);
-    expect(endedState.headlineLog).toEqual([
-      'Turn 1 recap: Truth plays 3, Government plays 3',
-    ]);
+    expect(endedState.headlineLog).toHaveLength(1);
+    expect(endedState.headlineLog[0]).toMatchObject({
+      round: 1,
+      turn: 1,
+      plays: expect.any(Array),
+      main: expect.objectContaining({ hed: expect.any(String) }),
+    });
   });
 });

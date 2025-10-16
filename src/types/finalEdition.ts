@@ -1,4 +1,4 @@
-import type { ArticleBlock } from '@/news/headlineEngine';
+import type { ArticleBlock } from '@/news/types';
 import type { ParanormalSighting } from '@/types/paranormal';
 import type { ArcProgressSummary } from './campaign';
 

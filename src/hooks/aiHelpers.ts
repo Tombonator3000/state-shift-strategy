@@ -2,7 +2,7 @@ import { emitBanter, defaultBanterUi, getCardPlayTrigger } from '@/ai/banter/ban
 import type { TurnPlay } from '@/game/combo.types';
 import { trackCharacterAppearance, type RecurringCharacterState } from '@/game/recurringCharacters';
 import type { PlayerId } from '@/mvp/validator';
-import type { PlayedLite } from '@/news/headlineEngine';
+import type { PlayedLite } from '@/news/types';
 import type { GameCard, Rarity } from '@/rules/mvp';
 import { featureFlags } from '@/state/featureFlags';
 import {

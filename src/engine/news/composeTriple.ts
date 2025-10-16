@@ -1,4 +1,4 @@
-import type { ArticleBlock as ExtraArticleBlock } from '@/news/headlineEngine';
+import type { ArticleBlock as ExtraArticleBlock } from '@/news/types';
 
 export type ArticleBlock = ExtraArticleBlock;
 

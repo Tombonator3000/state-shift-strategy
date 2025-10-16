@@ -1,4 +1,4 @@
-import type { ArticleBlock } from '@/news/headlineEngine';
+import type { ArticleBlock } from '@/news/types';
 import { cn } from '@/lib/utils';
 
 interface ExtraFeedProps {
