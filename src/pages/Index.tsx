@@ -1215,6 +1215,7 @@ const Index = () => {
           playHistory: gameState.playHistory,
           currentEvents: gameState.currentEvents ?? [],
           extraExtraFeed: gameState.extraExtraFeed,
+          headlineLog: gameState.headlineLog,
           recurringCharacters: gameState.recurringCharacters,
         },
         winner,
@@ -3452,6 +3453,8 @@ const Index = () => {
           hotspotDirector={hotspotDirector}
           activeHotspot={gameState.activeHotspot}
           recurringCharacters={gameState.recurringCharacters}
+          headlineLog={gameState.headlineLog}
+          extraExtraFeed={gameState.extraExtraFeed}
         />
       )}
     </>

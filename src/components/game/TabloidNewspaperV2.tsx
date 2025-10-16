@@ -1,16 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Card as UICard } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import CardImage from '@/components/game/CardImage';
 import { ExtraStamp } from '@/components/newspaper/ExtraStamp';
 import { loadNewspaperData, pick, shuffle, type NewspaperData } from '@/lib/newspaperData';
-import { generateIssue, type NarrativeIssue, type PlayedCardInput } from '@/engine/newspaper/IssueGenerator';
-import { combineArticles, type CombinedArticle } from '@/engine/newspaper/ArticleCombiner';
 import type { TabloidNewspaperProps } from './TabloidNewspaperLegacy';
 import type { HotspotExtraArticle } from '@/systems/paranormalHotspots';
-import type { Card } from '@/types';
 import type { PlayedCardMeta } from '@/engine/news/mainStory';
 import { formatComboReward, getLastComboSummary } from '@/game/comboEngine';
 import { buildRoundContext, formatTruthDelta } from './tabloidRoundUtils';
@@ -29,16 +26,10 @@ import {
   NewspaperSection,
 } from './newspaperLayout';
 import { useTabloidWeather, getFallbackTabloidWeather } from '@/system/weather/useTabloidWeather';
+import type { ArticleBlock, TurnComposite } from '@/news/types';
 
 const PRIMARY_MASTHEAD = 'PARANOID TIMES';
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
-const FRONT_PAGE_FALLBACK_HEADLINE = 'SPECIAL EDITION: PRINTING GREMLINS AT WORK';
-const FRONT_PAGE_FALLBACK_SUBHEAD = 'Article vault temporarily unavailable — dispatch desk investigating.';
-
-const newspaperDebugFlag = String(import.meta.env.VITE_NEWSPAPER_DEBUG ?? '').toLowerCase();
-const SHOW_NEWSPAPER_DEBUG =
-  import.meta.env.DEV && (newspaperDebugFlag === 'true' || newspaperDebugFlag === '1');
-
 const FALLBACK_DATA: NewspaperData = {
   mastheads: ['THE PARANOID TIMES'],
   ads: ['All advertising temporarily redacted.'],
@@ -320,6 +311,8 @@ const TabloidNewspaperV2 = ({
   activeHotspot,
   frontPageTriplet,
   recurringCharacters,
+  headlineLog = [],
+  extraExtraFeed: _extraExtraFeed = [],
 }: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState(PRIMARY_MASTHEAD);
@@ -327,10 +320,7 @@ const TabloidNewspaperV2 = ({
   const [isMastheadReady, setIsMastheadReady] = useState(false);
 
   const dataset = data ?? FALLBACK_DATA;
-  const [issue, setIssue] = useState<NarrativeIssue | null>(null);
-  const [combinedFrontPage, setCombinedFrontPage] = useState<CombinedArticle | null>(null);
-  const [isCombiningFrontPage, setIsCombiningFrontPage] = useState(false);
-  const [combinedFrontPageError, setCombinedFrontPageError] = useState<string | null>(null);
+  void _extraExtraFeed;
   const audio = useAudioContext();
   const [highlightedSightingId, setHighlightedSightingId] = useState<string | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -342,6 +332,22 @@ const TabloidNewspaperV2 = ({
   const glitchResetTimerRef = useRef<number | null>(null);
   const altMastheadsRef = useRef<string[]>([]);
   const { weatherLine: tabloidWeatherLine } = useTabloidWeather();
+
+  const headlineEntries = useMemo(
+    () => (Array.isArray(headlineLog) ? headlineLog.filter((entry): entry is TurnComposite => Boolean(entry)) : []),
+    [headlineLog],
+  );
+
+  const latestComposite = useMemo(() => {
+    if (!headlineEntries.length) {
+      return null;
+    }
+    return headlineEntries[headlineEntries.length - 1] ?? null;
+  }, [headlineEntries]);
+
+  const heroArticleBlock = latestComposite?.main ?? null;
+  const runnerArticles = latestComposite?.runnersUp ?? [];
+  const heroFocusPlays = latestComposite?.focus ?? [];
 
   const agendaPullQuotes = useMemo(() => {
     if (!agendaMoments?.length) {
@@ -598,18 +604,6 @@ const TabloidNewspaperV2 = ({
     [playedCards],
   );
 
-  const narrativePlayedCards = useMemo<PlayedCardInput[]>(
-    () =>
-      playedCards.map(entry => ({
-        card: entry.card as Card,
-        player: entry.player,
-        targetState: entry.targetState ?? null,
-        truthDelta: entry.truthDelta,
-        capturedStates: entry.capturedStates ?? [],
-      })),
-    [playedCards],
-  );
-
   const gameStateSnapshot = useMemo(
     () => ({
       statesControlled: controlledStates?.length ?? 0,
@@ -619,7 +613,7 @@ const TabloidNewspaperV2 = ({
       ip: ip ?? 0,
       turn: turn ?? 0,
       playerFaction: faction,
-      cardsPlayedCount: narrativePlayedCards.length,
+      cardsPlayedCount: playedCards.length,
       currentScore: score ?? truth,
       controlledStates: controlledStates ?? [],
       recurringCharacters: recurringCharacters ?? undefined,
@@ -632,19 +626,9 @@ const TabloidNewspaperV2 = ({
       turn,
       faction,
       score,
-      narrativePlayedCards,
+      playedCards,
       recurringCharacters,
     ],
-  );
-
-  const playerNarrativeCards = useMemo(
-    () => narrativePlayedCards.filter(entry => entry.player === 'human'),
-    [narrativePlayedCards],
-  );
-
-  const opponentNarrativeCards = useMemo(
-    () => narrativePlayedCards.filter(entry => entry.player === 'ai'),
-    [narrativePlayedCards],
   );
 
   const frontPageCards = useMemo<PlayedCardMeta[]>(() => {
@@ -657,7 +641,7 @@ const TabloidNewspaperV2 = ({
       }));
     }
 
-    return playerNarrativeCards.slice(0, 3)
+    return playerCards.slice(0, 3)
       .map(entry => {
         const rawType = String(entry.card.type ?? '').toUpperCase();
         if (rawType !== 'ATTACK' && rawType !== 'MEDIA' && rawType !== 'ZONE') {
@@ -672,7 +656,7 @@ const TabloidNewspaperV2 = ({
         } satisfies PlayedCardMeta;
       })
       .filter((meta): meta is PlayedCardMeta => Boolean(meta));
-  }, [frontPageTriplet, playerNarrativeCards]);
+  }, [frontPageTriplet, playerCards]);
 
   const hasExtraExtra = useMemo(() => {
     if (!Array.isArray(frontPageTriplet) || frontPageTriplet.length !== 3) {
@@ -722,196 +706,15 @@ const TabloidNewspaperV2 = ({
 
   const eventsTruthDelta = useMemo(() => computeEventTruthDelta(events), [events]);
 
-  const frontPageArticles = issue?.generatedStory?.articles ?? [];
-  const frontPageNameById = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const article of frontPageArticles) {
-      if (article.cardId) {
-        map.set(article.cardId, article.cardName);
-      }
-    }
-    return map;
-  }, [frontPageArticles]);
-
-  const combinedFrontPageParagraphs = useMemo(() => {
-    if (!combinedFrontPage?.body) {
-      return [] as string[];
-    }
-    return combinedFrontPage.body
-      .split(/\n\s*\n/)
-      .map(paragraph => paragraph.trim())
-      .filter(Boolean);
-  }, [combinedFrontPage]);
-
-  const combinedFrontPageSources = useMemo(() => {
-    if (!combinedFrontPage) {
-      return [] as string[];
-    }
-    return combinedFrontPage.sourceArticles.map(id => frontPageNameById.get(id) ?? id);
-  }, [combinedFrontPage, frontPageNameById]);
-
-  const combinedFrontPageBadgeLabel = useMemo(() => {
-    if (!combinedFrontPage) {
-      return null;
-    }
-    if (combinedFrontPage.faction === 'government') {
-      return 'Official Spin';
-    }
-    if (combinedFrontPage.faction === 'mixed') {
-      return 'Mixed Signal';
-    }
-    return 'Truth Coil';
-  }, [combinedFrontPage]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const activeDataset = dataset;
-
-    const run = async () => {
-      try {
-        const generated = await generateIssue({
-          dataset: activeDataset,
-          playedCards: narrativePlayedCards,
-          eventsTruthDelta,
-          comboTruthDelta,
-          comboSummary: comboSummary ?? null,
-          agendaIssueId: agendaIssue?.id,
-          agendaIssueLabel: agendaIssue?.label ?? null,
-          gameState: gameStateSnapshot,
-        });
-        if (!cancelled) {
-          setIssue(generated);
-        }
-      } catch (error) {
-        console.warn('Failed to generate narrative issue', error);
-        if (!cancelled) {
-          setIssue(null);
-        }
-      }
-    };
-
-    run();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    dataset,
-    narrativePlayedCards,
-    eventsTruthDelta,
-    comboTruthDelta,
-    comboSummary,
-    agendaIssue?.id,
-    agendaIssue?.label,
-    gameStateSnapshot,
-  ]);
-
-  useEffect(() => {
-    const articles = issue?.generatedStory?.articles ?? [];
-    const cardIds = articles
-      .map(article => article.cardId)
-      .filter((id): id is string => typeof id === 'string' && id.trim().length > 0);
-    const uniqueCardIds = Array.from(new Set(cardIds));
-
-    if (uniqueCardIds.length < 2) {
-      setCombinedFrontPage(null);
-      setCombinedFrontPageError(null);
-      setIsCombiningFrontPage(false);
-      return;
-    }
-
-    const mainTone = issue?.generatedStory?.main?.tone;
-    const fallbackFaction = issue?.generatedStory?.cards?.[0]?.faction === 'GOV' ? 'government' : 'truth';
-    const toneChoice = (mainTone ?? fallbackFaction) === 'government' ? 'official' : 'investigative';
-
-    let cancelled = false;
-
-    setIsCombiningFrontPage(true);
-    setCombinedFrontPageError(null);
-
-    (async () => {
-      try {
-        const combined = await combineArticles({
-          cardIds: uniqueCardIds,
-          combineMethod: 'ai',
-          tone: toneChoice,
-        });
-
-        if (cancelled) {
-          return;
-        }
-
-        if (combined) {
-          setCombinedFrontPage(combined);
-          setCombinedFrontPageError(null);
-        } else {
-          setCombinedFrontPage(null);
-          setCombinedFrontPageError('Vault refused to merge dossiers.');
-        }
-      } catch (error) {
-        if (cancelled) {
-          return;
-        }
-
-        console.warn('Failed to synthesize combined front page story', error);
-        setCombinedFrontPage(null);
-        setCombinedFrontPageError('Signal to AI desk jammed.');
-      } finally {
-        if (!cancelled) {
-          setIsCombiningFrontPage(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [issue?.generatedStory?.articles, issue?.generatedStory?.cards, issue?.generatedStory?.main?.tone]);
-
-  useEffect(() => {
-    if (!SHOW_NEWSPAPER_DEBUG) {
-      return;
-    }
-    const debug = issue?.generatedStory?.main?.debug;
-    if (!debug) {
-      return;
-    }
-    if (typeof console === 'undefined') {
-      return;
-    }
-
-    const groupLabel = `[Newspaper][MainStory] template=${debug.templateId}`;
-    const canGroup = typeof console.groupCollapsed === 'function';
-    if (canGroup) {
-      console.groupCollapsed(groupLabel);
-    } else {
-      console.log(groupLabel);
-    }
-
-    console.log('Subject:', debug.subject);
-    console.log('Common tags:', debug.commonTags);
-
-    if (debug.parts.length > 0) {
-      console.log('Template parts:', debug.parts);
-    } else {
-      console.log('No template parts recorded.');
-    }
-
-    if (canGroup) {
-      console.groupEnd();
-    }
-  }, [issue]);
-
   const narrativeContext = useMemo(
-    () => buildRoundContext(playerNarrativeCards, opponentNarrativeCards, eventsTruthDelta, comboTruthDelta),
-    [playerNarrativeCards, opponentNarrativeCards, eventsTruthDelta, comboTruthDelta],
+    () => buildRoundContext(playerCards, opponentCards, eventsTruthDelta, comboTruthDelta),
+    [playerCards, opponentCards, eventsTruthDelta, comboTruthDelta],
   );
 
-  const heroArticle = issue?.hero ?? null;
-  const heroEvent = heroArticle ? null : (events[0] ?? null);
+  const heroEvent = heroArticleBlock ? null : (events[0] ?? null);
 
   const heroFallback = useMemo(() => {
-    if (heroArticle || heroEvent) {
+    if (heroArticleBlock || heroEvent) {
       return null;
     }
     return composeHeroFallback({
@@ -921,70 +724,113 @@ const TabloidNewspaperV2 = ({
       comboReport: comboReport ? { entries: comboReport.entries } : null,
       comboOwnerLabel,
     });
-  }, [comboOwnerLabel, comboReport, faction, heroArticle, heroEvent, narrativeContext.capturedStates, narrativeContext.truthDeltaTotal]);
+  }, [comboOwnerLabel, comboReport, faction, heroArticleBlock, heroEvent, narrativeContext.capturedStates, narrativeContext.truthDeltaTotal]);
 
-  const heroHeadline = heroArticle
-    ? heroArticle.headline
-    : (() => {
-        if (heroEvent) {
-          const base = (heroEvent.headline ?? heroEvent.title ?? 'UNIDENTIFIED INCIDENT').toUpperCase();
-          const effectsLabel = formatEventEffects(heroEvent.effects);
-          return effectsLabel ? `${base} (${effectsLabel})` : base;
-        }
-        const defaultHeadline = faction === 'truth'
-          ? 'COALITION OPS HOLD PATTERN'
-          : 'DIRECTORATE ENVOYS MAINTAIN WATCH';
-        return heroFallback?.headline ?? defaultHeadline;
-      })();
+  const heroHeadline = heroArticleBlock?.hed
+    ?? (() => {
+      if (heroEvent) {
+        const base = (heroEvent.headline ?? heroEvent.title ?? 'UNIDENTIFIED INCIDENT').toUpperCase();
+        const effectsLabel = formatEventEffects(heroEvent.effects);
+        return effectsLabel ? `${base} (${effectsLabel})` : base;
+      }
+      const defaultHeadline = faction === 'truth'
+        ? 'COALITION OPS HOLD PATTERN'
+        : 'DIRECTORATE ENVOYS MAINTAIN WATCH';
+      return heroFallback?.headline ?? defaultHeadline;
+    })();
 
-  const heroSubhead = heroArticle
-    ? heroArticle.deck
-    : heroEvent?.content ?? heroFallback?.subhead ?? 'Developing situation under intense scrutiny.';
+  const heroSubhead = heroArticleBlock?.dek
+    ?? heroEvent?.content
+    ?? heroFallback?.subhead
+    ?? 'Developing situation under intense scrutiny.';
 
-  const heroBody = heroArticle?.paragraphs ?? (
-    heroEvent
-      ? [heroEvent.content ?? 'Witness reports remain fragmentary; authorities maintain deliberate silence.']
-      : heroFallback?.body ?? [
-          'Coalition networks report steady intel flow with no escalations requiring immediate action.',
-          'Field agents rotate through rest cycles as analysts maintain quiet watch on signal integrity.',
-        ]
-  );
+  const heroBody = useMemo(() => {
+    if (heroArticleBlock?.body && heroArticleBlock.body.length > 0) {
+      return heroArticleBlock.body;
+    }
+    if (heroArticleBlock?.bullets.length) {
+      return heroArticleBlock.bullets;
+    }
+    if (heroEvent) {
+      return [heroEvent.content ?? 'Witness reports remain fragmentary; authorities maintain deliberate silence.'];
+    }
+    return heroFallback?.body ?? [
+      'Coalition networks report steady intel flow with no escalations requiring immediate action.',
+      'Field agents rotate through rest cycles as analysts maintain quiet watch on signal integrity.',
+    ];
+  }, [heroArticleBlock, heroEvent, heroFallback]);
 
-  const heroIsEvent = Boolean(heroEvent);
+  const heroIsEvent = !heroArticleBlock && Boolean(heroEvent);
   const heroIsFilesOnTheLoose = heroEvent?.id === 'deepfile_dump_crochet_forum';
-  const heroTypeLabel = heroArticle?.typeLabel
-    ?? (heroEvent ? `[${(heroEvent.type ?? 'Event').toUpperCase()}]` : comboReport ? '[PLAYER HIGHLIGHT]' : '[STATUS BRIEF]');
-  const heroTarget = heroArticle?.stateLabel ?? (heroEvent ? null : comboOwnerLabel ?? null);
-  const heroCaptured = heroArticle?.capturedStates ?? [];
-  const heroTags = heroArticle?.tags
-    ?? (heroEvent
+  const heroTypeLabel = heroArticleBlock?.kicker
+    ?? (latestComposite
+      ? `TURN ${latestComposite.turn} DISPATCH`
+      : heroEvent
+        ? `[${(heroEvent.type ?? 'Event').toUpperCase()}]`
+        : comboReport
+          ? '[PLAYER HIGHLIGHT]'
+          : '[STATUS BRIEF]');
+  const heroTarget = heroFocusPlays.length
+    ? `Focus: ${heroFocusPlays.slice(0, 2).map(play => play.name).join(' • ')}`
+    : heroEvent
+      ? null
+      : comboOwnerLabel ?? null;
+  const heroTags = heroFocusPlays.length
+    ? heroFocusPlays.slice(0, 3).map(play => {
+        const typeLabel = play.type.charAt(0) + play.type.slice(1).toLowerCase();
+        return `${typeLabel}`;
+      })
+    : heroEvent
       ? []
       : heroFallback?.tags
-        ?? (comboReport ? comboReport.entries.slice(0, 3).map(entry => entry.name).filter(Boolean) : []));
-  const heroTruthImpact = heroArticle?.truthDeltaLabel ?? null;
-  const heroIpImpact = heroArticle?.ipDeltaLabel ?? null;
-  const heroPressureImpact = heroArticle?.pressureDeltaLabel ?? null;
-  const heroArtHint = heroArticle?.artHint ?? null;
-  const heroTriggerChance = heroEvent?.triggerChance ?? null;
-  const heroConditionalChance = heroEvent?.conditionalChance ?? null;
-  const comboNarrative = issue?.comboArticle ?? null;
+        ?? (comboReport ? comboReport.entries.slice(0, 3).map(entry => entry.name).filter(Boolean) : []);
+  const heroPrimaryCardId = heroFocusPlays[0]?.id ?? null;
+
+  const comboNarrative = useMemo(() => {
+    if (!comboReport || comboReport.entries.length === 0) {
+      return null;
+    }
+    const magnitude = comboReport.entries.length;
+    const tags = comboReport.entries.map(entry => entry.name).filter(Boolean);
+    const primary = comboReport.entries[0];
+    const headline = primary?.fxText
+      ?? primary?.description
+      ?? primary?.name
+      ?? 'Combo operatives execute synchronized maneuver.';
+    const deck = primary?.reward
+      ? `Reward: ${primary.reward}`
+      : comboOwnerLabel
+        ? `${comboOwnerLabel} chains anomalies together.`
+        : 'Chain reaction logged by newsroom analysts.';
+    return {
+      magnitude,
+      tags: tags.length ? tags : ['Combo Sequence'],
+      headline,
+      deck,
+    };
+  }, [comboOwnerLabel, comboReport]);
   const bylinePool = dataset.bylines && dataset.bylines.length ? dataset.bylines : FALLBACK_DATA.bylines;
   const sourcePool = dataset.sources && dataset.sources.length ? dataset.sources : FALLBACK_DATA.sources;
-  const byline = issue?.byline ?? pick(bylinePool, FALLBACK_DATA.bylines?.[0] ?? 'By: Anonymous Insider');
-  const sourceLine = issue?.sourceLine ?? pick(sourcePool, FALLBACK_DATA.sources?.[0] ?? 'Source: Redacted Dossier');
-  const breakingStamp = issue?.stamps.breaking ?? null;
-  const classifiedStamp = issue?.stamps.classified ?? null;
+  const byline = heroArticleBlock?.byline ?? pick(bylinePool, FALLBACK_DATA.bylines?.[0] ?? 'By: Anonymous Insider');
+  const sourceLine = heroArticleBlock?.source ?? pick(sourcePool, FALLBACK_DATA.sources?.[0] ?? 'Source: Redacted Dossier');
+  const stampPool = dataset.stamps ?? FALLBACK_DATA.stamps ?? { breaking: [], classified: [] };
+  const breakingStamp = heroArticleBlock
+    ? pick(stampPool.breaking ?? [], FALLBACK_DATA.stamps?.breaking?.[0] ?? 'BREAKING')
+    : null;
+  const classifiedStamp = heroArticleBlock && heroArticleBlock.tone !== 'truth'
+    ? pick(stampPool.classified ?? [], FALLBACK_DATA.stamps?.classified?.[0] ?? 'CLASSIFIED')
+    : null;
 
-  const ads = issue?.supplements.ads ?? (() => {
+  const ads = useMemo(() => {
     const pool = dataset.ads ?? FALLBACK_DATA.ads;
     if (!pool.length) {
       return FALLBACK_DATA.ads;
     }
     const desired = pool.length < 3 ? pool.length : 3 + (Math.random() < 0.5 ? 0 : 1);
     return shuffle(pool).slice(0, desired);
-  })();
+  }, [dataset.ads]);
 
-  const conspiracies = issue?.supplements.conspiracies ?? (() => {
+  const conspiracies = useMemo(() => {
     const pool = dataset.conspiracyCorner ?? FALLBACK_DATA.conspiracyCorner ?? [];
     if (!pool.length) {
       return FALLBACK_DATA.conspiracyCorner ?? [];
@@ -997,14 +843,12 @@ const TabloidNewspaperV2 = ({
     const min = Math.min(shuffled.length, 4);
     const desired = min === max ? max : Math.floor(Math.random() * (max - min + 1)) + min;
     return shuffled.slice(0, desired);
-  })();
+  }, [dataset.conspiracyCorner]);
 
-  const datasetWeatherLine =
-    issue?.supplements.weather
-    ?? pick(
-      dataset.weather ?? FALLBACK_DATA.weather ?? [],
-      FALLBACK_DATA.weather?.[0] ?? getFallbackTabloidWeather(),
-    );
+  const datasetWeatherLine = pick(
+    dataset.weather ?? FALLBACK_DATA.weather ?? [],
+    FALLBACK_DATA.weather?.[0] ?? getFallbackTabloidWeather(),
+  );
 
   const weatherLine =
     tabloidWeatherLine && tabloidWeatherLine !== getFallbackTabloidWeather()
@@ -1178,55 +1022,6 @@ const TabloidNewspaperV2 = ({
     onArcProgress(arcProgressSummaries);
   }, [arcProgressSummaries, onArcProgress]);
 
-  const playerStorySummaries = useMemo(() => {
-    const stories = issue?.playerArticles ?? [];
-    return stories.map(story => ({
-      kind: 'card' as const,
-      id: story.id,
-      cardId: story.cardId,
-      headline: story.headline,
-      subhead: story.deck,
-      summary: story.paragraphs[0] ?? '',
-      typeLabel: story.typeLabel,
-      player: story.player,
-      truthDeltaLabel: story.truthDeltaLabel,
-      stateLabel: story.stateLabel,
-      capturedStates: story.capturedStates,
-      tags: story.tags,
-      artHint: story.artHint,
-      triggerChance: undefined,
-      conditionalChance: undefined,
-    }));
-  }, [issue?.playerArticles]);
-
-  const secondaryStories = useMemo(() => {
-    if (playerStorySummaries.length >= 2) {
-      return playerStorySummaries.slice(0, 2);
-    }
-    const needed = 2 - playerStorySummaries.length;
-    return [...playerStorySummaries, ...eventStories.slice(0, needed)];
-  }, [playerStorySummaries, eventStories]);
-
-  const oppositionStories = useMemo(() => {
-    const stories = issue?.oppositionArticles ?? [];
-    return stories.map(story => ({
-      kind: 'card' as const,
-      id: story.id,
-      cardId: story.cardId,
-      headline: story.headline,
-      subhead: story.deck,
-      summary: story.paragraphs[0] ?? '',
-      typeLabel: story.typeLabel,
-      truthDeltaLabel: story.truthDeltaLabel,
-      stateLabel: story.stateLabel,
-      tags: story.tags,
-      artHint: story.artHint,
-      player: story.player,
-      triggerChance: undefined,
-      conditionalChance: undefined,
-    }));
-  }, [issue?.oppositionArticles]);
-
   const displayMasthead = glitchText ?? masthead;
   const truthProgress = Math.max(0, Math.min(100, Math.round(truth)));
   const truthDeltaLabel = formatTruthDelta(narrativeContext.truthDeltaTotal);
@@ -1359,9 +1154,9 @@ const TabloidNewspaperV2 = ({
 
                 {/* Main Story Image */}
                 <div className="relative overflow-hidden rounded-md border border-newspaper-border bg-newspaper-header/20">
-                  {heroArticle?.cardId ? (
+                  {heroPrimaryCardId ? (
                     <CardImage
-                      cardId={heroArticle.cardId}
+                      cardId={heroPrimaryCardId}
                       fit="contain"
                       className="w-full aspect-[4/3] max-h-64"
                     />
@@ -1401,50 +1196,53 @@ const TabloidNewspaperV2 = ({
 
             {/* COLUMN 2: Stats & Secondary Headlines */}
             <aside className="space-y-4">
-              {/* Front Page Collation */}
-              {(isCombiningFrontPage || combinedFrontPage || combinedFrontPageError) && (
+              {/* Runner-Up Dispatches */}
+              {runnerArticles.length > 0 ? (
                 <section className="rounded-md border border-newspaper-border bg-white/75 p-4 shadow-sm">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <h3 className="text-sm font-black uppercase tracking-wide text-newspaper-text">
-                      Newsroom Collation
+                      Runner-Up Dispatches
                     </h3>
-                    {isCombiningFrontPage ? (
-                      <span className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        Synthesizing
-                      </span>
-                    ) : combinedFrontPageBadgeLabel ? (
+                    {latestComposite ? (
                       <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-newspaper-text/50">
-                        {combinedFrontPageBadgeLabel}
+                        Turn {latestComposite.round}-{latestComposite.turn}
                       </span>
                     ) : null}
                   </div>
-
-                  {combinedFrontPage ? (
-                    <>
-                      <p className="text-[11px] uppercase tracking-wide text-newspaper-text/60">
-                        {combinedFrontPageSources.length
-                          ? `Merged dossiers: ${combinedFrontPageSources.join(' • ')}`
-                          : `Merged dossiers: ${combinedFrontPage.sourceArticles.length}`}
-                      </p>
-                      <h4 className="mt-2 text-base font-semibold leading-snug text-newspaper-text">
-                        {combinedFrontPage.headline}
-                      </h4>
-                      <p className="text-xs italic text-newspaper-text/70">{combinedFrontPage.subhead}</p>
-                      <div className="mt-3 space-y-2 text-sm leading-relaxed text-newspaper-text/80">
-                        {combinedFrontPageParagraphs.map((paragraph, index) => (
-                          <p key={index}>{paragraph}</p>
-                        ))}
-                      </div>
-                      <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-newspaper-text/50">
-                        {combinedFrontPage.byline}
-                      </p>
-                    </>
-                  ) : combinedFrontPageError ? (
-                    <p className="text-xs italic text-newspaper-text/60">{combinedFrontPageError}</p>
-                  ) : null}
+                  <div className="space-y-3">
+                    {runnerArticles.slice(0, 3).map((article, index) => (
+                      <article
+                        key={`${article.hed}-${index}`}
+                        className="border-b border-dashed border-newspaper-border/60 pb-3 last:border-0 last:pb-0"
+                      >
+                        <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.28em] text-newspaper-text/55">
+                          <span>{article.kicker ?? `Field Report ${index + 1}`}</span>
+                          <span>{article.tone.toUpperCase()}</span>
+                        </div>
+                        <h4 className="mt-1 text-base font-semibold leading-snug text-newspaper-text">
+                          {article.hed}
+                        </h4>
+                        {article.dek ? (
+                          <p className="text-xs italic text-newspaper-text/70">{article.dek}</p>
+                        ) : null}
+                        {article.bullets.length ? (
+                          <ul className="mt-2 space-y-1 text-xs leading-relaxed text-newspaper-text/75">
+                            {article.bullets.slice(0, 3).map((bullet, bulletIndex) => (
+                              <li key={`${bulletIndex}-${bullet.slice(0, 32)}`} className="list-disc pl-4">
+                                {bullet}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                        <footer className="mt-3 text-[10px] font-semibold uppercase tracking-[0.28em] text-newspaper-text/50">
+                          <div>{article.byline}</div>
+                          <div>{article.source}</div>
+                        </footer>
+                      </article>
+                    ))}
+                  </div>
                 </section>
-              )}
+              ) : null}
 
               {/* Combo Dispatch */}
               {comboNarrative ? (
@@ -1462,25 +1260,6 @@ const TabloidNewspaperV2 = ({
                 </section>
               ) : null}
 
-              {/* Opposition Plays */}
-              {oppositionStories.length ? (
-                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                  <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-newspaper-text">Opposition Network</h3>
-                  <div className="space-y-3">
-                    {oppositionStories.slice(0, 3).map(story => (
-                      <div key={story.id} className="border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0">
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                            <span>{story.typeLabel}</span>
-                          </div>
-                          <p className="font-semibold leading-snug text-sm">{story.headline}</p>
-                          <p className="text-xs italic text-newspaper-text/70">{story.subhead}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
             </aside>
 
             {/* COLUMN 3: Event Wire + Ads + Extras */}

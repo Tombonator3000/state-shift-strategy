@@ -21,6 +21,7 @@ import type {
 } from '@/types/finalEdition';
 import { getCharacterArc, getCharacterArcStage } from '@/data/characterArcs';
 import { extractArticleParagraphs, sanitizeFrontPageText } from '@/news/finalFrontPageComposer';
+import { finalizeEdition } from '@/news/finalizeEdition';
 
 export const getFactionDisplayName = (faction: 'truth' | 'government'): string => {
   return faction === 'truth' ? 'Truth Network' : 'Shadow Government';
@@ -523,10 +524,6 @@ const summarizeAgenda = (
   } satisfies AgendaSummary;
 };
 
-interface ComposeFrontPageArticleOptions extends VictorySubheadContext {
-  articles: ArticleBlock[];
-}
-
 const sanitizeLine = (value: string | null | undefined): string | null => {
   if (!value) {
     return null;
@@ -536,69 +533,10 @@ const sanitizeLine = (value: string | null | undefined): string | null => {
   return trimmed.length > 0 ? trimmed : null;
 };
 
-export const composeFrontPageArticle = ({
-  articles,
-  winner,
-  victoryType,
-  rounds,
-  finalTruth,
-}: ComposeFrontPageArticleOptions): FrontPageArticle => {
-  const tone: ArticleBlock['tone'] = winner === 'draw' ? 'draw' : winner;
-
-  const fallbackHeadline = formatVictoryHeadline({ winner, victoryType });
-  const fallbackDek = formatVictorySubhead({ winner, victoryType, rounds, finalTruth });
-  const fallbackKicker = getOutcomeSummary({ winner, victoryType });
-
-  const orderedArticles = Array.isArray(articles) ? [...articles].reverse() : [];
-
-  const preferred = orderedArticles.find(article => {
-    const hed = sanitizeLine(article?.hed ?? null);
-    const dek = sanitizeLine(article?.dek ?? null);
-    if (!hed || !dek) {
-      return false;
-    }
-    return article.tone === tone;
-  })
-    ?? orderedArticles.find(article => sanitizeLine(article?.hed ?? null) && sanitizeLine(article?.dek ?? null));
-
-  if (!preferred) {
-    return {
-      tone,
-      hed: fallbackHeadline,
-      dek: fallbackDek,
-      kicker: fallbackKicker,
-    } satisfies FrontPageArticle;
-  }
-
-  const hed = sanitizeLine(preferred.hed) ?? fallbackHeadline;
-  const dek = sanitizeLine(preferred.dek) ?? fallbackDek;
-  const kicker = sanitizeLine(preferred.kicker) ?? fallbackKicker;
-  const byline = sanitizeLine(preferred.byline);
-  const source = sanitizeLine(preferred.source);
-
-  const article: FrontPageArticle = {
-    tone,
-    hed,
-    dek,
-  };
-
-  if (kicker) {
-    article.kicker = kicker;
-  }
-  if (byline) {
-    article.byline = byline;
-  }
-  if (source) {
-    article.source = source;
-  }
-
-  return article;
-};
-
 export interface BuildFinalEditionOptions {
   state: Pick<
     GameState,
-    'round' | 'truth' | 'ip' | 'aiIP' | 'states' | 'faction' | 'playHistory' | 'extraExtraFeed' | 'recurringCharacters'
+    'round' | 'truth' | 'ip' | 'aiIP' | 'states' | 'faction' | 'playHistory' | 'extraExtraFeed' | 'recurringCharacters' | 'headlineLog'
   > & {
     currentEvents?: GameEvent[];
   };
@@ -664,13 +602,60 @@ export const buildFinalEdition = ({
   ).length;
 
   const finalTruth = Math.round(state.truth);
-  const frontPage = composeFrontPageArticle({
-    articles: state.extraExtraFeed,
-    winner,
-    victoryType,
-    rounds: state.round,
-    finalTruth,
+  const rankedArticles = finalizeEdition({
+    headlineLog: state.headlineLog,
+    bulletins: state.extraExtraFeed,
   });
+
+  const tone: ArticleBlock['tone'] = winner === 'draw' ? 'draw' : winner;
+  const fallbackHeadline = formatVictoryHeadline({ winner, victoryType });
+  const fallbackDek = formatVictorySubhead({ winner, victoryType, rounds: state.round, finalTruth });
+  const fallbackKicker = getOutcomeSummary({ winner, victoryType });
+
+  const preferredFrontPage = rankedArticles.find(article => {
+    const hed = sanitizeLine(article.hed);
+    const dek = sanitizeLine(article.dek);
+    if (!hed || !dek) {
+      return false;
+    }
+    return article.tone === tone;
+  })
+    ?? rankedArticles.find(article => sanitizeLine(article.hed) && sanitizeLine(article.dek));
+
+  const frontPage: FrontPageArticle = (() => {
+    if (!preferredFrontPage) {
+      return {
+        tone,
+        hed: fallbackHeadline,
+        dek: fallbackDek,
+        kicker: fallbackKicker,
+      } satisfies FrontPageArticle;
+    }
+
+    const hed = sanitizeLine(preferredFrontPage.hed) ?? fallbackHeadline;
+    const dek = sanitizeLine(preferredFrontPage.dek) ?? fallbackDek;
+    const kicker = sanitizeLine(preferredFrontPage.kicker) ?? fallbackKicker;
+    const byline = sanitizeLine(preferredFrontPage.byline);
+    const source = sanitizeLine(preferredFrontPage.source);
+
+    const article: FrontPageArticle = {
+      tone,
+      hed,
+      dek,
+    } satisfies FrontPageArticle;
+
+    if (kicker) {
+      article.kicker = kicker;
+    }
+    if (byline) {
+      article.byline = byline;
+    }
+    if (source) {
+      article.source = source;
+    }
+
+    return article;
+  })();
 
   return {
     winner,
@@ -690,7 +675,7 @@ export const buildFinalEdition = ({
     topEvents,
     comboHighlights,
     sightings: [...paranormalSightings],
-    extraExtraFeed: [...state.extraExtraFeed],
+    extraExtraFeed: rankedArticles,
     frontPage,
     recordedAt: timestamp,
     recurringCharacterEpilogues,
