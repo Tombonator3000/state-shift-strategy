@@ -4,7 +4,7 @@ import type { ReactTestRendererJSON } from 'react-test-renderer';
 
 import { composeFinalFrontPage } from '@/news/finalFrontPageComposer';
 import type { GameOverReport } from '@/types/finalEdition';
-import type { ArticleBlock } from '@/news/headlineEngine';
+import type { ArticleBlock } from '@/news/types';
 
 const ensureLocalStorage = () => {
   if (typeof globalThis.localStorage !== 'undefined') {

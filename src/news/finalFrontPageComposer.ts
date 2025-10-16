@@ -1,4 +1,4 @@
-import type { ArticleBlock } from '@/news/headlineEngine';
+import type { ArticleBlock } from '@/news/types';
 import templatesJson from '@/news/finalFrontPageTemplates.json';
 
 export interface FrontPageTemplateFormat {

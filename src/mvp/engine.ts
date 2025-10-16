@@ -7,7 +7,8 @@ import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/ga
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import { RelicEngine } from '@/expansions/tabloidRelics/RelicEngine';
 import { summarize, generateExtraExtra, evaluateExtraExtra } from '@/news/headlineEngine';
-import type { PlayedLite, TurnLog } from '@/news/headlineEngine';
+import { composeTurn } from '@/news/composeTurn';
+import type { PlayedLite, TurnLog, TurnComposite } from '@/news/types';
 import { cloneGameState } from './validator';
 import { auditGameState } from './gameStateAudit';
 import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
@@ -842,11 +843,11 @@ export function endTurn(
       turn: turnNumber,
       plays: bufferPlays,
     };
-    const totals = summarize([turnLogEntry]);
-    const summaryHeadline = `Turn ${turnNumber} recap: Truth plays ${totals.truth.plays}, Government plays ${totals.government.plays}`;
-    headlineLog = [...headlineLog, summaryHeadline];
-
     const evaluationSeed = `mvp:${currentId}:${turnNumber}`;
+    const composite = composeTurn(turnLogEntry, { seed: evaluationSeed });
+    if (composite) {
+      headlineLog = [...headlineLog, composite];
+    }
     const evaluation = evaluateExtraExtra(bufferPlays, { seed: evaluationSeed });
 
     if (evaluation.trigger) {

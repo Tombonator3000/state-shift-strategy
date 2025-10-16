@@ -11,7 +11,7 @@ import {
   type NewspaperTone,
   getNewspaperBadgeClass,
 } from './newspaperLayout';
-import type { ArticleBlock } from '@/news/headlineEngine';
+import type { ArticleBlock } from '@/news/types';
 import type { GameOverReport, FinalEditionEventHighlight, MVPReport } from '@/types/finalEdition';
 import {
   formatVictoryHeadline,

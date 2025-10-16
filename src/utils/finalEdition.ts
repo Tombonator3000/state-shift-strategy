@@ -5,7 +5,7 @@ import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import { getArticleForCard } from '@/data/cardArticles/articleDatabase';
 import type { CardPlayRecord, GameState } from '@/hooks/gameStateTypes';
 import type { GameCard } from '@/rules/mvp';
-import type { ArticleBlock } from '@/news/headlineEngine';
+import type { ArticleBlock } from '@/news/types';
 import type { ArcProgressSummary } from '@/types/campaign';
 import type { ParanormalSighting } from '@/types/paranormal';
 import type {

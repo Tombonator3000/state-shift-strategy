@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import * as actualFrontendNewsPools from '../../src/news/newsPools';
 import * as actualEngineNewsPools from '../../src/engine/news/newsPools';
-import type { TurnLog, TurnTotals, PlayedLite } from '../../src/news/headlineEngine';
+import type { TurnLog, TurnTotals, PlayedLite } from '../../src/news/types';
 
 const stubPools = {
   mastheads: ['Test Masthead'],
