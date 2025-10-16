@@ -35,6 +35,7 @@ const CANDIDATE_PATHS = [
 ];
 
 let cachedBank: ArticleBank | null = null;
+let loadingPromise: Promise<ArticleBank> | null = null;
 
 const factionSchema = z.preprocess(
   value => {
@@ -149,6 +150,10 @@ const buildArticleBank = (payload: unknown): ArticleBank => {
   return bank;
 };
 
+const fallbackArticleBank: ArticleBank = buildArticleBank(fallbackArticleJson as unknown);
+
+cachedBank = fallbackArticleBank;
+
 const fetchCanonical = async (): Promise<unknown | null> => {
   if (typeof fetch !== 'function') {
     return null;
@@ -170,17 +175,31 @@ const fetchCanonical = async (): Promise<unknown | null> => {
 export const getArticleBankIfReady = (): ArticleBank | null => cachedBank;
 
 export const clearArticleBankCache = (): void => {
-  cachedBank = null;
+  cachedBank = fallbackArticleBank;
+  loadingPromise = null;
 };
 
 export async function loadArticleBank(): Promise<ArticleBank> {
-  if (cachedBank) {
+  if (cachedBank && cachedBank !== fallbackArticleBank) {
     return cachedBank;
   }
 
-  const payload = (await fetchCanonical()) ?? (fallbackArticleJson as unknown);
-  cachedBank = buildArticleBank(payload);
-  return cachedBank;
+  if (loadingPromise) {
+    return loadingPromise;
+  }
+
+  loadingPromise = (async () => {
+    const payload = await fetchCanonical();
+    if (payload) {
+      cachedBank = buildArticleBank(payload);
+    } else {
+      cachedBank = fallbackArticleBank;
+    }
+    loadingPromise = null;
+    return cachedBank;
+  })();
+
+  return loadingPromise;
 }
 
 export const getArticleById = (id: string, bank: ArticleBank | null = cachedBank): CardArticle | null => {
@@ -189,3 +208,9 @@ export const getArticleById = (id: string, bank: ArticleBank | null = cachedBank
   }
   return bank?.get(id) ?? null;
 };
+
+if (typeof window !== 'undefined' && typeof fetch === 'function') {
+  void loadArticleBank().catch(error => {
+    console.warn('[article-bank] initial load failed', error);
+  });
+}
