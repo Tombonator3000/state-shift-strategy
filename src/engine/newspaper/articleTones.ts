@@ -1,4 +1,4 @@
-import type { CardArticle } from '@/engine/news/articleBank';
+import type { CardArticle } from '@/news/articleBank';
 
 export const ARTICLE_TONES = [
   'STRAIGHT_NEWS',

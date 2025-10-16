@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 
 import { composeTurn, TURN_METRIC_WEIGHTS } from '../../src/news/composeTurn';
 import type { TurnLog } from '../../src/news/types';
-import type { ArticleBlock as CardArticle } from '../../src/engine/news/newsPools';
+import type { CardArticle } from '../../src/news/articleBank';
 
 const createCardArticle = (id: string, overrides: Partial<CardArticle> = {}): CardArticle => ({
   id,
@@ -42,12 +42,13 @@ describe('composeTurn', () => {
     expect(composite?.focus.map(entry => entry.id)).toEqual(['alpha', 'bravo', 'charlie']);
     expect(composite?.runnersUp).toHaveLength(1);
     expect(composite?.runnersUp[0]?.hed).toBe('DELTA Headline');
-    expect(composite?.runnersUp[0]?.bullets[0]).toContain('impact score 5.3');
+    expect(composite?.runnersUp[0]?.bullets[0]).toContain('Delta dossier');
     expect(composite?.main?.hed).toBe('ALPHA Headline + BRAVO Headline + CHARLIE Headline');
     expect(composite?.main?.imagePrompt).toBe('Bravo prompt');
     expect(composite?.main?.body).toEqual([
       'Alpha Broadcast: ALPHA dossier',
-      'Charlie Sweep: CHARLIE dossier',
+      'Bravo Raid: BRAVO dossier',
+      'Charlie Sweep: Charlie dossier',
     ]);
     expect(composite?.tone).toBe('truth');
     expect(composite?.signature).toBe('alpha,bravo,charlie');

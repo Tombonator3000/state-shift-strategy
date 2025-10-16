@@ -1,4 +1,4 @@
-import type { CardArticle } from './articleBank';
+import type { CardArticle } from '@/news/articleBank';
 
 export type PlayedCardMeta = {
   id: string;

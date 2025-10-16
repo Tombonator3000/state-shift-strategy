@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import CardImage from '@/components/game/CardImage';
 import type { GameOverReport, ReportArticleExcerpt } from '@/types/finalEdition';
 import { generateSensationalistHeadline } from '@/utils/sensationalistHeadlines';
-import { loadArticleBank, type CardArticle } from '@/engine/news/articleBank';
+import { getArticleById, loadArticleBank, type CardArticle } from '@/news/articleBank';
 import { extractArticleParagraphs, sanitizeFrontPageText } from '@/news/finalFrontPageComposer';
 import { useEffect, useMemo, useState } from 'react';
 import '@/styles/newspaperLayout.css';
@@ -174,10 +174,10 @@ const NewspaperFrontPage = ({ report, onNavigateToPage }: NewspaperFrontPageProp
     loadArticleBank().then(bank => {
       if (cancelled) return;
       if (report.mvp?.cardId) {
-        setMvpArticle(bank.getById(report.mvp.cardId));
+        setMvpArticle(getArticleById(report.mvp.cardId, bank));
       }
       if (report.runnerUp?.cardId) {
-        setRunnerUpArticle(bank.getById(report.runnerUp.cardId));
+        setRunnerUpArticle(getArticleById(report.runnerUp.cardId, bank));
       }
     }).catch(err => {
       console.error('Failed to load articles for headline:', err);

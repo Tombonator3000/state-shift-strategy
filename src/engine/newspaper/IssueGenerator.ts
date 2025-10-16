@@ -2,7 +2,12 @@ import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { NewspaperData } from '@/lib/newspaperData';
 import type { Card } from '@/types';
 import { loadCardLexicon } from './CardLexicon';
-import { loadArticleBank, type CardArticle as ArticleBankCardArticle } from '@/engine/news/articleBank';
+import {
+  loadArticleBank,
+  type ArticleBank,
+  type CardArticle as ArticleBankCardArticle,
+  getArticleById,
+} from '@/news/articleBank';
 import { substituteArticleVariables, type GameStateContext } from './articleVariables';
 import { generateMainStory, type PlayedCardMeta, type GeneratedStory as MainGeneratedStory } from '@/engine/news/mainStory';
 import { deriveFrontPageSubhead } from '@/engine/news/frontPageSubhead';
@@ -521,13 +526,13 @@ const getArticleOrFallback = (
   story: CardStory,
   targetName: string | null,
   capturedNames: string[],
-  bank: Awaited<ReturnType<typeof loadArticleBank>> | null,
+  bank: ArticleBank | null,
   recurringState: Record<string, CharacterStageState> | undefined,
 ): { article: ResolvedCardArticle; origin: ArticleResolutionOrigin } => {
   const cardId = entry.card.id;
   const faction = resolveFaction(entry.card.faction);
 
-  const fromBank = bank?.getById?.(cardId) ?? null;
+  const fromBank = getArticleById(cardId, bank);
   const bankArticle = fromBank ? normaliseArticleRecord(fromBank, cardId, faction) : null;
   const staticArticleRecord = getStaticArticleForCard(cardId);
   const staticArticle = staticArticleRecord
@@ -690,7 +695,7 @@ const buildGameStateContext = (
 
 export async function generateIssue(input: IssueGeneratorInput): Promise<NarrativeIssue> {
   const lexicon = await loadCardLexicon();
-  let articleBank: Awaited<ReturnType<typeof loadArticleBank>> | null = null;
+  let articleBank: ArticleBank | null = null;
 
   try {
     articleBank = await loadArticleBank();
@@ -871,10 +876,10 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     .filter((meta): meta is PlayedCardMeta => Boolean(meta));
 
   const mainStory: MainGeneratedStory | null = frontPageCards.length === 3
-    ? generateMainStory(frontPageCards, id => articleBank?.getById?.(id) ?? null)
+    ? generateMainStory(frontPageCards, id => getArticleById(id, articleBank))
     : null;
 
-  const articleBankReady = Boolean(articleBank?.hasArticles?.());
+  const articleBankReady = Boolean(articleBank && articleBank.size > 0);
   const frontPageFaction = frontPageCards[0]?.faction === 'GOV' ? 'government' : 'truth';
   const truthDeltaLabel = formatTruthDeltaLabel(context.truthDeltaTotal);
   const comboOwnerLabel = input.comboSummary

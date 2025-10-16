@@ -1,5 +1,5 @@
 import type { GameOverReport, FrontPageArticle } from '@/types/finalEdition';
-import type { CardArticle } from '@/engine/news/articleBank';
+import type { CardArticle } from '@/news/articleBank';
 
 interface HeadlineContext {
   winner: GameOverReport['winner'];

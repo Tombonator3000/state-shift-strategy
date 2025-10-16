@@ -60,12 +60,13 @@ mock.module('@/engine/newspaper/CardLexicon', () => ({
   }),
 }));
 
-mock.module('@/engine/news/articleBank', () => ({
-  loadArticleBank: async () => ({
-    getById: () => stagedPlaceholderArticle,
-    hasArticles: () => true,
-  }),
-}));
+mock.module('@/news/articleBank', () => {
+  const bank = new Map([[stagedPlaceholderArticle.id, stagedPlaceholderArticle]]);
+  return {
+    loadArticleBank: async () => bank,
+    getArticleById: (id: string) => bank.get(id) ?? null,
+  };
+});
 
 const loadGenerator = () => import('../IssueGenerator');
 
