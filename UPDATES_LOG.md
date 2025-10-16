@@ -18,8 +18,8 @@ This document provides a chronological record of gameplay-impacting changes merg
   - `docs/paranoid_times_analysis_and_roadmap.md`
   - `docs/analysis/paranoid-times-gap-analysis.md`
   - `docs/gameplay-loop-overview.md`
-  - `UPDATES_LOG.md`
 - Summary: Consolidated every roadmap thread into the central planning doc, reorganised goals by timeframe and pillar, trimmed the duplicate timelines from the analysis dossiers, and updated cross-references so contributors consult the unified plan.
+
 
 ## 2025-10-22 – Menu playlist honors selected track
 - Timestamp: 2025-10-22T12:56:38Z
@@ -56,6 +56,14 @@ m the options panel persist instead of resetting to the default playlist.
 - Shifted newspaper systems to the shared `src/news/articleBank.ts` Map loader and aligned IssueGenerator, composeTurn, and headline previews with the new API.
 - Added regression coverage for canonical cards and tone normalization while updating UI consumers to the Map-based article lookups.
 - Files: `src/news/articleBank.ts`, `src/engine/newspaper/IssueGenerator.ts`, `src/news/composeTurn.ts`, `src/news/headlineEngine.ts`, `src/components/news/NewspaperFrontPage.tsx`, `src/ui/newspaper/FrontPage.tsx`, `src/utils/sensationalistHeadlines.ts`, `__tests__/news/articleBank.test.ts`, `__tests__/news/headlineEngine.test.ts`, `__tests__/news/composeTurn.test.ts`, `src/engine/newspaper/__tests__/IssueGenerator.staticArticles.test.ts`, `src/engine/newspaper/__tests__/IssueGenerator.recurringCharacters.test.ts`, `src/components/game/__tests__/TabloidNewspaperV2.frontPage.test.tsx.disabled`, `src/engine/newspaper/__tests__/IssueGenerator.safety.test.ts.disabled`.
+
+## 2025-10-16 – Article bank preloads turn composer data
+- Timestamp: 2025-10-16T00:00:00Z
+- Files:
+  - `src/news/articleBank.ts`
+  - `UPDATES_LOG.md`
+- Summary: Seeded the shared article bank cache with the bundled fallback file and triggered an initial async refresh so composeTurn and Extra Extra immediately receive per-card headlines and tags instead of empty placeholders.
+
 ## 2025-10-21 – Article overlay stays open until dismissed
 - Timestamp: 2025-10-21T12:00:00Z
 - Files:
