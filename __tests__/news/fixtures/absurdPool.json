@@ -1,0 +1,44 @@
+{
+  "articles": [
+    {
+      "id": "TRUTH-A",
+      "faction": "truth",
+      "tags": ["florida-man", "swamp", "truth", "broadcast"],
+      "headline": "Florida Man Hijacks Swamp Signal",
+      "subhead": "Witness says Florida Man reroutes swamp radio into resistance bulletin.",
+      "byline": "By: Pool Reporter",
+      "body": "A Florida man turned a swamp walkie-talkie into a midnight broadcast and now the gators take attendance.",
+      "imagePrompt": "retro newspaper illustration of florida man pirating swamp radio signals"
+    },
+    {
+      "id": "TRUTH-B",
+      "faction": "truth",
+      "tags": ["ufo", "truth", "night-watch"],
+      "headline": "Neighbors Spot UFO Above Municipal Water Tower",
+      "subhead": "Mutual aid channels reroute the lights into tonight's timeline.",
+      "byline": "By: Night Watch Stringer",
+      "body": "Residents triangulated the UFO reflection using mason jars and pirate antennas.",
+      "imagePrompt": "grainy photo collage of UFO lights above a water tower"
+    },
+    {
+      "id": "GOV-A",
+      "faction": "government",
+      "tags": ["ufo", "government", "disinformation"],
+      "headline": "Agency Brief Labels UFO Incident Refraction Error",
+      "subhead": "Clerks told to stamp out the flying saucer story before breakfast.",
+      "byline": "By: Compliance Desk",
+      "body": "A flurry of memos insists the unidentified craft was a stubborn porch light.",
+      "imagePrompt": "official memo with UFO doodle crossed out"
+    },
+    {
+      "id": "GOV-B",
+      "faction": "government",
+      "tags": ["ghost", "government", "containment"],
+      "headline": "Night Watch Files Ghost Report Under HVAC Maintenance",
+      "subhead": "Supervisors blame pipes and lock the basement.",
+      "byline": "By: Infrastructure Liaison",
+      "body": "The haunting is now a scheduled ventilation purge with extra forms attached.",
+      "imagePrompt": "sterile office hallway with a blurry ghost behind frosted glass"
+    }
+  ]
+}
