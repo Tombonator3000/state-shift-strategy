@@ -40,6 +40,14 @@ m the options panel persist instead of resetting to the default playlist.
   - `src/types/finalEdition.ts`
   - `__tests__/utils/finalEdition.test.ts`
 - Summary: Front page and inside spread now render full MVP and runner-up copy pulled from the card article bank, fall back to existing report highlights when no article exists, and the game-over report captures sanitized paragraphs for downstream UIs with regression coverage for both pathways.
+
+## 2025-10-17 – Gameplay improvement status audit logged
+- Timestamp: 2025-10-17T14:05:00Z
+- Files:
+  - `docs/gameplay-improvements-progress.md`
+  - `UPDATES_LOG.md`
+- Summary: Captured the real implementation status of the 40-point gameplay improvement plan, documented which fixes are complete, partial, or missing, and outlined concrete next steps so engineering can prioritize the remaining roadmap work.
+
 ## 2025-10-16 – Tabloid overlay consumes stored composites
 - Timestamp: 2025-10-16T18:10:00Z
 - Files:
