@@ -1,4 +1,6 @@
 // USA States Database for Shadow Government Game
+import type { CardEffects } from '@/rules/mvp';
+
 export interface StateData {
   id: string;          // FIPS code or abbreviation
   name: string;
@@ -6,6 +8,10 @@ export interface StateData {
   baseIP: number;      // Base IP generation per turn
   defense: number;     // Difficulty to capture (1-5)
   population: 'low' | 'medium' | 'high' | 'mega'; // Affects various mechanics
+  stateBonus?: {       // Phase 2: Passive bonus for controlling this state
+    effects: CardEffects;
+    label: string;
+  };
 }
 
 // Extended state interface for runtime game state

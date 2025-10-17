@@ -474,246 +474,76 @@ const cryptidCombos: ComboDefinition[] = [
     reward: { truth: 1, log: 'Bigfoot croons backup for Elvis — tabloids erupt.' },
     fxText: 'Cryptid tour sells out.'
   },
+];
+
+// Phase 2: Card-type synergy combos for strategic depth
+const phase2Combos: ComboDefinition[] = [
   {
-    id: 'cryptid_batboy_florida_ticket',
-    name: 'Bat Boy for President',
-    description: 'Pair Bat Boy with Florida Man chaos during a single turn.',
-    category: 'hybrid',
-    priority: 138,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', nameIncludesAny: ['bat boy'] },
-        { kind: 'card', nameIncludesAny: ['florida man'] },
-      ],
-    },
-    reward: { ip: 1, log: 'Bat Boy & Florida Man ticket drains the directorate’s patience.' },
-    fxText: 'Campaign trail detonates in real time.'
+    id: 'phase2_media_blitz',
+    name: 'Media Blitz',
+    description: 'Play 2 MEDIA cards to overwhelm the narrative',
+    category: 'count',
+    priority: 85,
+    enabledByDefault: true,
+    trigger: { kind: 'count', type: 'MEDIA', count: 2, operator: '>=' },
+    reward: { truth: 2, log: '📰 MEDIA BLITZ! Multiple narratives overwhelm the airwaves! +2% Truth' },
+    fxText: 'MEDIA BLITZ'
   },
   {
-    id: 'cryptid_cornfield_abduction',
-    name: 'Cornfield Abduction',
-    description: 'Field a Cornfield site alongside any UFO or alien play.',
-    category: 'hybrid',
-    priority: 136,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', nameIncludesAny: ['cornfield'] },
-        { kind: 'card', nameIncludesAny: ['ufo', 'alien', 'saucer', 'abduction'] },
-      ],
-    },
-    reward: { truth: 1, log: 'County fair eyewitnesses flood the tip line after a cornfield saucer drop.' },
-    fxText: 'Tractor beams lace the midway.'
+    id: 'phase2_coordinated_strike',
+    name: 'Coordinated Strike',
+    description: 'Play 2 ATTACK cards for extra damage',
+    category: 'count',
+    priority: 85,
+    enabledByDefault: true,
+    trigger: { kind: 'count', type: 'ATTACK', count: 2, operator: '>=' },
+    reward: { ip: 2, log: '⚔️ COORDINATED STRIKE! Simultaneous operations deal extra damage! +2 IP Bonus' },
+    fxText: 'COORDINATED STRIKE'
   },
   {
-    id: 'cryptid_mothman_media_surge',
-    name: 'Mothman Prophecy',
-    description: 'Let Mothman take the stage alongside another MEDIA blitz.',
-    category: 'hybrid',
-    priority: 134,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', nameIncludesAny: ['mothman'] },
-        { kind: 'card', type: 'MEDIA', excludeNamePatterns: ['mothman'] },
-      ],
-    },
-    reward: { truth: 2, log: 'Mothman omen doubles the broadcast swing toward the truth.' },
-    fxText: 'Omen streaks across the signal.'
+    id: 'phase2_ground_campaign',
+    name: 'Ground Campaign',
+    description: 'Play 3 ZONE cards for widespread pressure',
+    category: 'count',
+    priority: 86,
+    enabledByDefault: true,
+    trigger: { kind: 'count', type: 'ZONE', count: 3, operator: '>=' },
+    reward: { ip: 3, log: '🗺️ GROUND CAMPAIGN! Widespread pressure across multiple states! +3 IP Bonus' },
+    fxText: 'GROUND CAMPAIGN'
   },
   {
-    id: 'cryptid_florida_occupation',
-    name: 'Florida Occupation',
-    description: 'Combine a Florida Man stunt with any Zone occupation.',
-    category: 'hybrid',
-    priority: 133,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', nameIncludesAny: ['florida man'] },
-        { kind: 'card', type: 'ZONE', faction: 'truth' },
-      ],
-    },
-    reward: { ip: 1, log: 'Flip-flops on marble floors nudge agency budgets off-balance.' },
-    fxText: 'Citrus-scented sit-in holds the statehouse.'
+    id: 'phase2_efficiency_expert',
+    name: 'Efficiency Expert',
+    description: 'Play 4+ low-cost cards for maximum efficiency',
+    category: 'threshold',
+    priority: 79,
+    enabledByDefault: true,
+    trigger: { kind: 'threshold', metric: 'lowCostCount', value: 4 },
+    reward: { ip: 2, log: '💰 EFFICIENCY EXPERT! Maximum impact, minimum cost! +2 IP Bonus' },
+    fxText: 'EFFICIENCY EXPERT'
   },
   {
-    id: 'cryptid_witness_parade',
-    name: 'Witness Parade',
-    description: 'Play two or more cards themed around witnesses, photos, or selfies in one turn.',
-    category: 'hybrid',
-    priority: 132,
-    trigger: {
-      kind: 'card',
-      count: 2,
-      nameIncludesAny: ['witness', 'photo', 'selfie', 'eyewitness', 'snapshot'],
-    },
-    reward: { truth: 2, log: 'Witness parade overwhelms the newsroom with undeniable proof.' },
-    fxText: 'Every lens catches something impossible.'
+    id: 'phase2_power_play',
+    name: 'Power Play',
+    description: 'Play 2+ high-cost cards to dominate',
+    category: 'threshold',
+    priority: 83,
+    enabledByDefault: true,
+    trigger: { kind: 'threshold', metric: 'highCostCount', value: 2 },
+    reward: { ip: 3, truth: 1, log: '💎 POWER PLAY! Heavy hitters dominate the field! +3 IP, +1% Truth' },
+    fxText: 'POWER PLAY'
   },
   {
-    id: 'cryptid_congress',
-    name: 'Cryptid Congress',
-    description: 'Seat Bigfoot, Nessie, and Chupacabra in the same roundtable.',
-    category: 'hybrid',
-    priority: 145,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', nameIncludesAny: ['bigfoot'] },
-        { kind: 'card', nameIncludesAny: ['ness', 'loch', 'tessie', 'lake monster'] },
-        { kind: 'card', nameIncludesAny: ['chupacabra'] },
-      ],
-    },
-    reward: { ip: 2, log: 'Shadow congress gavels in and squeezes Directorate logistics.' },
-    fxText: 'Secret cryptid caucus hammers out policy.'
-  },
-  {
-    id: 'cryptid_batboy_graduation',
-    name: 'Bat Boy Graduation',
-    description: 'Graduate Bat Boy with saucer support while government media tries to bury it.',
-    category: 'hybrid',
-    priority: 137,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', nameIncludesAny: ['bat boy'] },
-        { kind: 'card', nameIncludesAny: ['ufo', 'alien', 'saucer'] },
-        { kind: 'card', faction: 'government', type: 'MEDIA', nameIncludesAny: ['cover', 'deny', 'official', 'brief', 'press', 'statement'] },
-      ],
-    },
-    reward: { truth: 2, log: 'Bat Boy walks despite the cover-up — commencement footage leaks everywhere.' },
-    fxText: 'Cap toss defies the redactions.'
-  },
-  {
-    id: 'cryptid_elvis_shrine_special',
-    name: 'Elvis Shrine Special',
-    description: 'Pair an Elvis sighting with haunted retail or roadside shrines.',
-    category: 'hybrid',
-    priority: 131,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', nameIncludesAny: ['elvis'] },
-        { kind: 'card', type: 'ZONE', nameIncludesAny: ['walmart', 'roadside', 'shrine', 'haunted'] },
-      ],
-    },
-    reward: { truth: 1, ip: 1, log: 'Elvis shrine hums to life — believers gain buzz and budget.' },
-    fxText: 'Neon altar thrums under the moonlight.'
-  },
-  {
-    id: 'cryptid_mothership_karaoke',
-    name: 'Mothership Karaoke',
-    description: 'Host Elvis and Florida Man aboard any UFO or mothership card.',
-    category: 'hybrid',
-    priority: 139,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', nameIncludesAny: ['ufo', 'alien', 'saucer', 'mothership'] },
-        { kind: 'card', nameIncludesAny: ['elvis'] },
-        { kind: 'card', nameIncludesAny: ['florida man'] },
-      ],
-    },
-    reward: { truth: 1, ip: 1, log: 'Mothership karaoke night hands out encores and intel alike.' },
-    fxText: 'Zero-gravity mic drop.'
-  },
-  {
-    id: 'cryptid_loch_ness_selfie',
-    name: 'Loch Ness Selfie',
-    description: 'Snap a selfie or photo alongside any Nessie or lake monster play.',
-    category: 'hybrid',
-    priority: 130,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', nameIncludesAny: ['ness', 'loch', 'tessie', 'lake monster'] },
-        { kind: 'card', type: 'MEDIA', nameIncludesAny: ['selfie', 'photo', 'snapshot', 'camera'] },
-      ],
-    },
-    reward: { truth: 2, log: 'Viral Nessie selfie melts the skeptic hotline.' },
-    fxText: 'Grainy silhouette storms the feeds.'
-  },
-  {
-    id: 'cryptid_chupacabra_milk_run',
-    name: 'Chupacabra Milk Run',
-    description: 'Unleash Chupacabra alongside dairy, ranch, or livestock locations.',
-    category: 'hybrid',
-    priority: 129,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', nameIncludesAny: ['chupacabra'] },
-        { kind: 'card', nameIncludesAny: ['cow', 'cattle', 'dairy', 'farm', 'ranch', 'livestock'] },
-      ],
-    },
-    reward: { ip: 1, log: 'Chupacabra raid siphons more budget from containment crews.' },
-    fxText: 'Milking hours go red alert.'
-  },
-  {
-    id: 'cryptid_haunted_road_trip',
-    name: 'Haunted Road Trip',
-    description: 'Send Bigfoot, Bat Boy, and Mothman on the same itinerary.',
-    category: 'hybrid',
-    priority: 141,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', nameIncludesAny: ['bigfoot'] },
-        { kind: 'card', nameIncludesAny: ['bat boy'] },
-        { kind: 'card', nameIncludesAny: ['mothman'] },
-      ],
-    },
-    reward: { truth: 1, ip: 1, log: 'Cryptid caravan sighting sends belief soaring and budgets scrambling.' },
-    fxText: 'Highway 66 erupts in flashbulbs.'
-  },
-  {
-    id: 'cryptid_foia_gone_wild',
-    name: 'FOIA Gone Wild',
-    description: 'Pit a government FOIA strike against a truth-side disclosure in one turn.',
-    category: 'hybrid',
-    priority: 128,
-    trigger: {
-      kind: 'hybrid',
-      triggers: [
-        { kind: 'card', faction: 'government', type: 'ATTACK', nameIncludesAny: ['foia', 'redact', 'redaction', 'file', 'dossier'] },
-        { kind: 'card', faction: 'truth', nameIncludesAny: ['reveal', 'disclosure', 'expose', 'leak', 'release'] },
-      ],
-    },
-    reward: { truth: 1, ip: 1, log: 'FOIA deluge and leak combine to torch the cover story.' },
-    fxText: 'Black bars flee the paperwork.'
-  },
-  {
-    id: 'cryptid_festival_of_fear',
-    name: 'Festival of Fear',
-    description: 'Play three or more Halloween-flavored zones in a single turn.',
-    category: 'hybrid',
-    priority: 127,
-    trigger: {
-      kind: 'card',
-      type: 'ZONE',
-      count: 3,
-      nameIncludesAny: ['festival', 'haunted', 'halloween', 'spook', 'pumpkin', 'fear', 'carnival', 'midnight', 'ghost'],
-    },
-    reward: { ip: 2, log: 'Festival of Fear cranks local panic into fresh leverage.' },
-    fxText: 'Carnival of screams blankets the map.'
-  },
-  {
-    id: 'cryptid_tabloid_megahit',
-    name: 'Tabloid Megahit',
-    description: 'Publish three or more Truth MEDIA scoops during one turn.',
-    category: 'hybrid',
-    priority: 126,
-    trigger: {
-      kind: 'card',
-      type: 'MEDIA',
-      faction: 'truth',
-      count: 3,
-    },
-    reward: { truth: 2, log: 'Tabloid megahit rockets belief into the stratosphere.' },
-    fxText: 'Front pages burn across the nation.'
-  },
+    id: 'phase2_territorial_expansion',
+    name: 'Territorial Expansion',
+    description: 'Target 5+ unique states in one turn',
+    category: 'state',
+    priority: 88,
+    enabledByDefault: true,
+    trigger: { kind: 'state', uniqueStatesCount: 5, cardType: 'ANY' },
+    reward: { ip: 4, truth: 1, log: '🌍 TERRITORIAL EXPANSION! Widespread operations across the map! +4 IP, +1% Truth' },
+    fxText: 'TERRITORIAL EXPANSION'
+  }
 ];
 
 export const COMBO_DEFINITIONS: ComboDefinition[] = [
@@ -723,12 +553,13 @@ export const COMBO_DEFINITIONS: ComboDefinition[] = [
   ...stateCombos,
   ...hybridCombos,
   ...cryptidCombos,
+  ...phase2Combos,
 ];
 
 export const DEFAULT_COMBO_SETTINGS: ComboSettings = {
   enabled: true,
   fxEnabled: true,
-  maxCombosPerTurn: 2,
+  maxCombosPerTurn: 10,
   comboToggles: Object.fromEntries(COMBO_DEFINITIONS.map(def => [def.id, def.enabledByDefault ?? true])),
   rng: Math.random,
 };

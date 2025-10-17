@@ -25,6 +25,32 @@ export interface CardEffects {
     then?: CardEffects;
     else?: CardEffects;
   };
+  // Phase 2 conditional effects
+  ifFewerStates?: {
+    threshold: number;
+    then: CardEffects;
+    else?: CardEffects;
+  };
+  ifMoreStates?: {
+    threshold: number;
+    then: CardEffects;
+    else?: CardEffects;
+  };
+  ifTruthAbove?: {
+    threshold: number;
+    then: CardEffects;
+    else?: CardEffects;
+  };
+  ifTruthBelow?: {
+    threshold: number;
+    then: CardEffects;
+    else?: CardEffects;
+  };
+  pressureToAllContested?: number;
+  pressurePerControlledState?: { max?: number };
+  truthPerControlledState?: { max?: number };
+  preventHighCostCards?: { threshold: number; duration: number };
+  defenseToAllStates?: number;
 }
 
 export interface CardTarget {
