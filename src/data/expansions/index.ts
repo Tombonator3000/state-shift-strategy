@@ -31,7 +31,7 @@ const normalizeCard = (card: GameCard, tag: string): GameCard => {
   }
 
   if (DEV && !validation.ok) {
-    console.warn(`[EXPANSION:${tag}] ${card.id} validation issues`, validation.issues);
+    console.warn(`[EXPANSION:${tag}] ${card.id} validation issues`, validation.errors);
   }
 
   return { ...repaired };

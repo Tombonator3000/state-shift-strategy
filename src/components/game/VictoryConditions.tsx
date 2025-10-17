@@ -16,6 +16,20 @@ export const VictoryConditions: React.FC<VictoryConditionsProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
+  // Calculate progress towards each condition
+  const stateProgress = (controlledStates / 10) * 100;
+  const truthProgress = truth;
+  const ipProgress = (ip / 200) * 100;
+
+  // Determine which condition is closest
+  const progressMetrics = [
+    { type: 'states', value: stateProgress, label: 'States' },
+    { type: 'truth', value: truth >= 50 ? truthProgress : 100 - truthProgress, label: 'Truth' }
+  ];
+  const closestCondition = progressMetrics.reduce((prev, curr) => 
+    curr.value > prev.value ? curr : prev
+  );
+
   return (
     <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border">
       <div 
@@ -34,18 +48,66 @@ export const VictoryConditions: React.FC<VictoryConditionsProps> = ({
         <div className="mt-2">
           {isMobile ? (
             <div className="text-xs font-mono">
-              States: {controlledStates}/10 | Truth: {truth}% | IP: {ip}/200
+              States: {controlledStates}/10 | Truth: {truth}% | IP: {ip}
             </div>
           ) : (
-            <div className="text-xs space-y-1 font-mono">
-              <div>• Control 10 states</div>
-              <div>• Reach 200 IP</div>
-              <div>• Truth ≥95% / ≤5%</div>
-              <div className="border-t border-newspaper-bg/30 pt-1 mt-1">
-                <div className="text-center text-xs">States: {controlledStates}/10</div>
-                <div className="text-center text-xs">Truth: {truth}%</div>
-                <div className="text-center text-xs">IP: {ip}/200</div>
+            <div className="text-xs space-y-2 font-mono">
+              {/* Primary Victory Paths */}
+              <div className="border-b border-newspaper-bg/20 pb-2">
+                <div className="font-bold mb-1">PRIMARY PATHS:</div>
+                
+                {/* States Progress */}
+                <div className="mb-1">
+                  <div className="flex justify-between items-center">
+                    <span className={closestCondition.type === 'states' ? 'font-bold' : ''}>
+                      • Control 10 states
+                    </span>
+                    <span className={closestCondition.type === 'states' ? 'font-bold' : ''}>
+                      {controlledStates}/10
+                    </span>
+                  </div>
+                  <div className="w-full bg-newspaper-bg/20 h-1 mt-0.5">
+                    <div 
+                      className="bg-newspaper-bg h-1 transition-all"
+                      style={{ width: `${Math.min(100, stateProgress)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Truth Progress */}
+                <div>
+                  <div className="flex justify-between items-center">
+                    <span className={closestCondition.type === 'truth' ? 'font-bold' : ''}>
+                      • Truth ≥95% / ≤5%
+                    </span>
+                    <span className={closestCondition.type === 'truth' ? 'font-bold' : ''}>
+                      {truth}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-newspaper-bg/20 h-1 mt-0.5">
+                    <div 
+                      className="bg-newspaper-bg h-1 transition-all"
+                      style={{ 
+                        width: `${truth >= 50 ? truthProgress : 100 - truthProgress}%`,
+                        marginLeft: truth < 50 ? 'auto' : '0'
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
+
+              {/* Secondary Metrics */}
+              <div className="text-[10px] opacity-70">
+                <div className="font-bold mb-0.5">TIE-BREAKER:</div>
+                <div>IP: {ip}/200 (Economic dominance)</div>
+              </div>
+
+              {/* Closest to Victory Indicator */}
+              {closestCondition.value > 50 && (
+                <div className="text-[10px] font-bold pt-1 border-t border-newspaper-bg/20">
+                  ⚠ Closest: {closestCondition.label} ({Math.round(closestCondition.value)}%)
+                </div>
+              )}
             </div>
           )}
         </div>

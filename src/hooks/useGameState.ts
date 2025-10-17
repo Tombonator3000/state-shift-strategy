@@ -94,7 +94,7 @@ import { clearNewsBuffer, getNewsTriplet, pushToNewsBuffer } from '@/state/game/
 import { summarize, generateExtraExtra, evaluateExtraExtra } from '@/news/headlineEngine';
 import { composeTurn } from '@/news/composeTurn';
 import { loadNewsPools } from '@/news/newsPools';
-import type { ArticleBlock, TurnLog, PlayedLite, TurnComposite, WeightedMetric } from '@/news/types';
+import type { ArticleBlock, TurnLog, PlayedLite, TurnComposite, WeightedMetric, TurnCompositeMetrics } from '@/news/types';
 import { initNewsPools } from '@/engine/news/newsPools';
 import type { GameOverReport } from '@/types/finalEdition';
 import { emitBanter, defaultBanterUi, getCardPlayTrigger } from '@/ai/banter/banterEngine';

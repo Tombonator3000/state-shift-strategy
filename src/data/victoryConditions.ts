@@ -255,7 +255,7 @@ export const BASE_VICTORY_CONDITIONS: VictoryCondition[] = [
     id: 'truth_high',
     name: 'Truth Awakening',
     description: 'Truth ≥ 95% (Truth Seekers)',
-    priority: 2,
+    priority: 1,
     faction: 'truth',
     checkCondition: (gameState: any) => {
       return gameState.truth >= 95;
@@ -268,7 +268,7 @@ export const BASE_VICTORY_CONDITIONS: VictoryCondition[] = [
     id: 'truth_low',
     name: 'Information Suppression',
     description: 'Truth ≤ 5% (Government)',
-    priority: 2,
+    priority: 1,
     faction: 'government',
     checkCondition: (gameState: any) => {
       return gameState.truth <= 5;
@@ -279,33 +279,33 @@ export const BASE_VICTORY_CONDITIONS: VictoryCondition[] = [
     }
   },
 
-  // Priority 3: IP Victory
-  {
-    id: 'ip_victory',
-    name: 'Resource Dominance',
-    description: 'Accumulate 200 IP',
-    priority: 3,
-    faction: 'both',
-    checkCondition: (gameState: any) => {
-      return gameState.ip >= 200;
-    },
-    getProgress: (gameState: any) => {
-      return Math.max(0, Math.min(100, (gameState.ip / 200) * 100));
-    }
-  },
-
-  // Priority 4: State Control
+  // Priority 2: State Control
   {
     id: 'state_control',
     name: 'Territorial Control',
     description: 'Control 10 states',
-    priority: 4,
+    priority: 2,
     faction: 'both',
     checkCondition: (gameState: any) => {
       return gameState.controlledStates.length >= 10;
     },
     getProgress: (gameState: any) => {
       return Math.max(0, Math.min(100, (gameState.controlledStates.length / 10) * 100));
+    }
+  },
+
+  // Priority 10: IP Victory (Demoted - Tie-breaker only)
+  {
+    id: 'ip_victory',
+    name: 'Resource Dominance',
+    description: 'Accumulate 200 IP (Rarely Achieved)',
+    priority: 10,
+    faction: 'both',
+    checkCondition: (gameState: any) => {
+      return gameState.ip >= 200;
+    },
+    getProgress: (gameState: any) => {
+      return Math.max(0, Math.min(100, (gameState.ip / 200) * 100));
     }
   }
 ];
