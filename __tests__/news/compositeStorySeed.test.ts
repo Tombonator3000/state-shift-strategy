@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import { composeCompositeStory } from '@/systems/news/absurdComposer';
-import { computeCompositeStorySeed } from '@/utils/compositeStory';
+import { computeCompositeStorySeed, filterPlayableArticleIds } from '@/utils/compositeStory';
 
 describe('composite story seeding', () => {
   it('generates deterministic stories for the same turn and article set regardless of order', () => {
@@ -21,5 +21,17 @@ describe('composite story seeding', () => {
     const storyB = composeCompositeStory(shuffled, 'truth', seedB);
 
     expect(storyA).toEqual(storyB);
+  });
+});
+
+describe('filterPlayableArticleIds', () => {
+  it('normalizes fallback MVP card ids to canonical article ids', () => {
+    const ids = ['truth-media-mvp', ' gov-zone-mvp ', 'TRUTH-002'];
+    expect(filterPlayableArticleIds(ids)).toEqual(['TRUTH-001', 'GOV-007', 'TRUTH-002']);
+  });
+
+  it('drops empty entries but preserves unknown ids for composer fallbacks', () => {
+    const ids = ['alpha', null, undefined, ' ', '0', 'alpha'];
+    expect(filterPlayableArticleIds(ids)).toEqual(['alpha']);
   });
 });

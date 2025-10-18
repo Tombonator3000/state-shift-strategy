@@ -29,6 +29,14 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Summary: Ensured the main menu only initializes its music once when the intro hands off control so player-selected tracks fro
 m the options panel persist instead of resetting to the default playlist.
 
+## 2025-10-18 – Composite headlines now mirror played cards
+- Timestamp: 2025-10-18T12:57:00Z
+- Files:
+  - `src/utils/compositeStory.ts`
+  - `__tests__/news/compositeStorySeed.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Added card-to-article id normalization so seeded composite headlines pull real article records for fallback MVP cards instead of falling back to generic tags, and covered the mapping with focused tests.
+
 ## 2025-10-18 – Final edition borrows live card articles for MVP coverage
 - Timestamp: 2025-10-18T09:45:00Z
 - Files:

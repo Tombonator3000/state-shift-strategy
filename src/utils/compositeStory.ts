@@ -42,7 +42,51 @@ export const resolveCompositeFaction = (
   return humanFaction === 'truth' ? 'government' : 'truth';
 };
 
-export const filterPlayableArticleIds = (ids: Array<string | null | undefined>): string[] =>
-  ids
-    .map(id => (typeof id === 'string' ? id.trim() : ''))
-    .filter(id => id && id !== '0');
+const CARD_ID_ALIASES: Record<string, string> = {
+  'truth-media-mvp': 'TRUTH-001',
+  'truth-attack-mvp': 'TRUTH-005',
+  'truth-zone-mvp': 'TRUTH-007',
+  'gov-media-mvp': 'GOV-001',
+  'gov-attack-mvp': 'GOV-003',
+  'gov-zone-mvp': 'GOV-007',
+};
+
+const normalizeCompositeArticleId = (rawId: string | null | undefined): string | null => {
+  if (typeof rawId !== 'string') {
+    return null;
+  }
+
+  const trimmed = rawId.trim();
+  if (!trimmed || trimmed === '0') {
+    return null;
+  }
+
+  const alias = CARD_ID_ALIASES[trimmed.toLowerCase()];
+  if (alias) {
+    return alias;
+  }
+
+  const hyphenNormalized = trimmed.replace(/_/g, '-');
+  const upper = hyphenNormalized.toUpperCase();
+  if (/^(TRUTH|GOV)-/.test(upper)) {
+    return upper;
+  }
+
+  return hyphenNormalized;
+};
+
+export const filterPlayableArticleIds = (ids: Array<string | null | undefined>): string[] => {
+  const seen = new Set<string>();
+  const results: string[] = [];
+
+  for (const rawId of ids) {
+    const normalized = normalizeCompositeArticleId(rawId);
+    if (!normalized || seen.has(normalized)) {
+      continue;
+    }
+    seen.add(normalized);
+    results.push(normalized);
+  }
+
+  return results;
+};
