@@ -716,3 +716,26 @@ m the options panel persist instead of resetting to the default playlist.
 
 ## 2025-10-05 – Planned discard feature
 - Track the upcoming discard mechanic update so we remember to document its implementation details when the feature ships.
+## 2024-06-15 – Deterministic composite headlines seed Extra Extra feed
+- Timestamp: 2024-06-15T00:00:00Z
+- Files:
+  - `src/hooks/gameStateTypes.ts`
+  - `src/hooks/useGameState.ts`
+  - `src/hooks/comboAdapter.ts`
+  - `src/mvp/engine.ts`
+  - `src/mvp/validator.ts`
+  - `src/data/enhancedAIStrategy.ts`
+  - `src/news/finalizeEdition.ts`
+  - `src/news/types.ts`
+  - `src/types/news.ts`
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `src/components/game/TabloidNewspaperLegacy.tsx`
+  - `src/utils/compositeStory.ts`
+  - `src/news/composeTurn.ts`
+  - `__tests__/integration/extraExtra.test.ts`
+  - `__tests__/integration/gameplayScreen.test.tsx`
+  - `__tests__/news/compositeStorySeed.test.ts`
+  - `__tests__/utils/finalEdition.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Replaced the old turn headline generator with seeded composite stories, pushed discriminated Extra Extra entries for composite, article, and bulletin updates, refit MVP validators and analytics to the new types, and refreshed integration coverage to confirm deterministic story seeding at end of turn.
+

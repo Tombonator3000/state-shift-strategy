@@ -55,25 +55,3 @@ export interface WeightedMetric {
   weighted: number;
 }
 
-export interface TurnCompositeMetrics {
-  cards: number;
-  truth: WeightedMetric;
-  ip: WeightedMetric;
-  captures: WeightedMetric;
-  damage: WeightedMetric;
-  typeBonus: number;
-  total: number;
-}
-
-export interface TurnComposite {
-  round: number;
-  turn: number;
-  plays: PlayedLite[];
-  focus: PlayedLite[];
-  tone: ArticleTone;
-  main: ArticleBlock | null;
-  runnersUp: ArticleBlock[];
-  metrics: TurnCompositeMetrics;
-  signature: string | null;
-  seed: number | null;
-}

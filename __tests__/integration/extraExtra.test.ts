@@ -66,6 +66,8 @@ mock.module('@/game/comboEngine', () => ({
 
 const loadMvpEngine = () => import('../../src/mvp/engine');
 const loadHeadlineEngine = () => import('../../src/news/headlineEngine');
+const loadCompositeUtils = () => import('../../src/utils/compositeStory');
+const loadCompositeComposer = () => import('../../src/systems/news/absurdComposer');
 
 beforeEach(() => {
   getPoolsMock.mockReset();
@@ -89,6 +91,8 @@ describe('extra extra integration', () => {
   it('appends a headline + subhead after three plays in a turn', async () => {
     const { playCard, endTurn } = await loadMvpEngine();
     const { summarize, generateExtraExtra, evaluateExtraExtra } = await loadHeadlineEngine();
+    const { computeCompositeStorySeed, resolveCompositeFaction, filterPlayableArticleIds } = await loadCompositeUtils();
+    const { composeCompositeStory } = await loadCompositeComposer();
 
     const cards = [
       createCard('alpha', 'truth', 2),
@@ -149,18 +153,26 @@ describe('extra extra integration', () => {
     const totals = summarize([focusLog]);
     const expectedArticle = generateExtraExtra('mvp:P1:1', [focusLog], totals, evaluation);
 
+    const playedArticleIds = filterPlayableArticleIds(state.turnBuffer.map(play => play.id));
+    const storySeed = computeCompositeStorySeed({
+      baseSeed: 0,
+      round: state.turn,
+      turn: state.turn,
+      actor: 'human',
+      ids: playedArticleIds,
+    });
+    const faction = resolveCompositeFaction('truth', 'human');
+    const expectedStory = composeCompositeStory(playedArticleIds, faction, storySeed);
+
     const { state: endedState } = endTurn(state, []);
 
-    expect(endedState.extraExtraFeed).toEqual([expectedArticle]);
-    expect(endedState.headlineLog).toHaveLength(1);
-    expect(endedState.headlineLog[0]).toMatchObject({
-      round: 1,
-      turn: 1,
-      plays: expect.any(Array),
-      main: expect.objectContaining({ hed: expect.any(String) }),
-    });
+    expect(endedState.extraExtraFeed).toEqual([
+      { kind: 'composite', data: expectedStory },
+      { kind: 'article', data: expectedArticle },
+    ]);
+    expect(endedState.headlineLog).toEqual([expectedStory]);
     expect(endedState.truth).toBe(53);
-    expect(endedState.extraExtraFeed[0]?.tone).toBe(expectedArticle.tone);
+    expect(endedState.extraExtraFeed[1]?.data.tone).toBe(expectedArticle.tone);
   });
 
   it('falls back to a placeholder headline when pools are unavailable', async () => {
@@ -177,6 +189,8 @@ describe('extra extra integration', () => {
     try {
       const { playCard, endTurn } = await loadMvpEngine();
       const { summarize, generateExtraExtra, evaluateExtraExtra } = await loadHeadlineEngine();
+      const { computeCompositeStorySeed, resolveCompositeFaction, filterPlayableArticleIds } = await loadCompositeUtils();
+      const { composeCompositeStory } = await loadCompositeComposer();
 
       const cards = [
         createCard('delta', 'truth', 2),
@@ -237,17 +251,25 @@ describe('extra extra integration', () => {
       const totals = summarize([focusLog]);
       const expectedArticle = generateExtraExtra('mvp:P1:1', [focusLog], totals, evaluation);
 
+      const playedArticleIds = filterPlayableArticleIds(state.turnBuffer.map(play => play.id));
+      const storySeed = computeCompositeStorySeed({
+        baseSeed: 0,
+        round: state.turn,
+        turn: state.turn,
+        actor: 'human',
+        ids: playedArticleIds,
+      });
+      const faction = resolveCompositeFaction('truth', 'human');
+      const expectedStory = composeCompositeStory(playedArticleIds, faction, storySeed);
+
       const { state: endedState } = endTurn(state, []);
 
-      expect(endedState.extraExtraFeed).toEqual([expectedArticle]);
-      expect(endedState.extraExtraFeed[0]?.hed).toContain('[WIRE DELAY]');
-      expect(endedState.headlineLog).toHaveLength(1);
-      expect(endedState.headlineLog[0]).toMatchObject({
-        round: 1,
-        turn: 1,
-        plays: expect.any(Array),
-        main: expect.objectContaining({ hed: expect.any(String) }),
-      });
+      expect(endedState.extraExtraFeed).toEqual([
+        { kind: 'composite', data: expectedStory },
+        { kind: 'article', data: expectedArticle },
+      ]);
+      expect(endedState.extraExtraFeed[1]?.data.hed).toContain('[WIRE DELAY]');
+      expect(endedState.headlineLog).toEqual([expectedStory]);
       expect(endedState.truth).toBe(53);
       expect(warnings.length).toBeGreaterThan(0);
     } finally {
@@ -258,6 +280,8 @@ describe('extra extra integration', () => {
   it('awards extra extra to the faction with the highest-value triple play', async () => {
     const { endTurn } = await loadMvpEngine();
     const { summarize, generateExtraExtra, evaluateExtraExtra } = await loadHeadlineEngine();
+    const { computeCompositeStorySeed, resolveCompositeFaction, filterPlayableArticleIds } = await loadCompositeUtils();
+    const { composeCompositeStory } = await loadCompositeComposer();
 
     const plays: PlayedLite[] = [
       { id: 't1', name: 'Truth Pulse', type: 'MEDIA', faction: 'truth', truth: 2 },
@@ -320,17 +344,25 @@ describe('extra extra integration', () => {
       tabloidRelicsRuntime: null,
     };
 
+    const playedArticleIds = filterPlayableArticleIds(state.turnBuffer.map(play => play.id));
+    const storySeed = computeCompositeStorySeed({
+      baseSeed: 0,
+      round: state.turn,
+      turn: state.turn,
+      actor: 'human',
+      ids: playedArticleIds,
+    });
+    const faction = resolveCompositeFaction('truth', 'human');
+    const expectedStory = composeCompositeStory(playedArticleIds, faction, storySeed);
+
     const { state: endedState } = endTurn(state, []);
 
-    expect(endedState.extraExtraFeed).toEqual([expectedArticle]);
-    expect(endedState.extraExtraFeed[0]?.tone).toBe(expectedArticle.tone);
+    expect(endedState.extraExtraFeed).toEqual([
+      { kind: 'composite', data: expectedStory },
+      { kind: 'article', data: expectedArticle },
+    ]);
+    expect(endedState.extraExtraFeed[1]?.data.tone).toBe(expectedArticle.tone);
     expect(endedState.truth).toBe(47);
-    expect(endedState.headlineLog).toHaveLength(1);
-    expect(endedState.headlineLog[0]).toMatchObject({
-      round: 1,
-      turn: 1,
-      plays: expect.any(Array),
-      main: expect.objectContaining({ hed: expect.any(String) }),
-    });
+    expect(endedState.headlineLog).toEqual([expectedStory]);
   });
 });

@@ -139,7 +139,7 @@ beforeEach(() => {
     });
 
     const report = buildFinalEdition({
-      state: { ...baseState, extraExtraFeed: [bulletin] },
+      state: { ...baseState, extraExtraFeed: [{ kind: 'article', data: bulletin }] },
       winner: 'truth',
       victoryType: 'truth',
     });
