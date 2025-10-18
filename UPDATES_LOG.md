@@ -2,6 +2,13 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-26 – Restore Lovable preview builds
+- Timestamp: 2025-10-26T00:00:00Z
+- Files:
+  - `vite.config.ts`
+- Summary: Reordered the Vite alias configuration so the Lovable public asset shortcut resolves correctly during production
+  builds, restoring the hosted preview that previously failed while trying to load the article database bundle.
+
 ## 2025-10-25 – Composite turn edition headlines go live
 - Timestamp: 2025-10-25T02:50:00Z
 - Files:

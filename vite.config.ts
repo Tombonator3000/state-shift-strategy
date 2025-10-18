@@ -22,10 +22,16 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [react(), shouldEnableLovableTagger && componentTagger()].filter(Boolean),
     resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-        "@/public": path.resolve(__dirname, "./public"),
-      },
+      alias: [
+        {
+          find: "@/public",
+          replacement: path.resolve(__dirname, "./public"),
+        },
+        {
+          find: "@",
+          replacement: path.resolve(__dirname, "./src"),
+        },
+      ],
     },
   };
 });
