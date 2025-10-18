@@ -152,7 +152,7 @@ const chooseImagePrompt = (
 ): string | undefined => {
   const prioritizedTags: string[] = [
     ...SUBJECT_PRIORITY.filter(tag => tags.includes(tag)),
-    ...tags.filter(tag => !SUBJECT_PRIORITY.includes(tag)),
+    ...tags.filter(tag => !(SUBJECT_PRIORITY as readonly string[]).includes(tag)),
   ];
 
   for (const tag of prioritizedTags) {

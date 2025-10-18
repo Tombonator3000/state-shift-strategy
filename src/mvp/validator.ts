@@ -599,7 +599,7 @@ export function cloneGameState(state: GameState): GameState {
     byline: 'Composite Desk',
     body: [...entry.body],
     ...(entry.imagePrompt ? { imagePrompt: entry.imagePrompt } : {}),
-    sources: entry.sources.map(source => ({
+    sources: entry.sources.map((source: any) => ({
       id: source.id,
       headline: source.headline,
       ...(source.subhead ? { subhead: source.subhead } : {}),
