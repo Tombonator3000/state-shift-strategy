@@ -1,4 +1,4 @@
-import articleDatabase from '@/public/data/paranoid_times_card_articles_ALL.json';
+import fallbackArticleDatabase from '../../../paranoid_times_card_articles_ALL.json' assert { type: 'json' };
 import type { CompositeSourceReference, CompositeStory } from '@/types/news';
 
 type ArticleFaction = 'truth' | 'government';
@@ -18,7 +18,7 @@ interface ArticleDatabaseFile {
   articles: ArticleRecord[];
 }
 
-const database = articleDatabase as ArticleDatabaseFile;
+const database = fallbackArticleDatabase as ArticleDatabaseFile;
 const defaultPool = database.articles ?? [];
 
 const SUBJECT_PRIORITY = ['florida-man', 'ufo', 'bigfoot', 'ghost'] as const;
