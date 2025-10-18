@@ -7,8 +7,10 @@ import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/ga
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import { RelicEngine } from '@/expansions/tabloidRelics/RelicEngine';
 import { summarize, generateExtraExtra, evaluateExtraExtra } from '@/news/headlineEngine';
-import { composeTurn } from '@/news/composeTurn';
-import type { PlayedLite, TurnLog, TurnComposite } from '@/news/types';
+import { composeCompositeStory } from '@/systems/news/absurdComposer';
+import type { PlayedLite, TurnLog } from '@/news/types';
+import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
+import { computeCompositeStorySeed, resolveCompositeFaction, filterPlayableArticleIds } from '@/utils/compositeStory';
 import { cloneGameState } from './validator';
 import { auditGameState } from './gameStateAudit';
 import type { Card, EffectsATTACK, EffectsMEDIA, EffectsZONE, GameState, PlayerState } from './validator';
@@ -834,8 +836,8 @@ export function endTurn(
   const nextPlayer = otherPlayer(currentId);
 
   const bufferPlays = cloned.turnBuffer;
-  let headlineLog = cloned.headlineLog;
-  let extraExtraFeed = cloned.extraExtraFeed;
+  let headlineLog: CompositeStory[] = [...cloned.headlineLog];
+  let extraExtraFeed: ExtraExtraFeedEntry[] = [...cloned.extraExtraFeed];
 
   if (bufferPlays.length > 0) {
     const turnLogEntry: TurnLog = {
@@ -844,10 +846,24 @@ export function endTurn(
       plays: bufferPlays,
     };
     const evaluationSeed = `mvp:${currentId}:${turnNumber}`;
-    const composite = composeTurn(turnLogEntry, { seed: evaluationSeed });
-    if (composite) {
-      headlineLog = [...headlineLog, composite];
+    const actorLabel: 'human' | 'ai' = currentId === 'P1' ? 'human' : 'ai';
+    const playedArticleIds = filterPlayableArticleIds(bufferPlays.map(play => play.id));
+
+    if (playedArticleIds.length > 0) {
+      const storySeed = computeCompositeStorySeed({
+        baseSeed: 0,
+        round: turnLogEntry.round,
+        turn: turnLogEntry.turn,
+        actor: actorLabel,
+        ids: playedArticleIds,
+      });
+      const humanFaction = cloned.players.P1.faction === 'truth' ? 'truth' : 'government';
+      const faction = resolveCompositeFaction(humanFaction, actorLabel);
+      const story = composeCompositeStory(playedArticleIds, faction, storySeed);
+      headlineLog = [...headlineLog, story];
+      extraExtraFeed = [...extraExtraFeed, { kind: 'composite', data: story }];
     }
+
     const evaluation = evaluateExtraExtra(bufferPlays, { seed: evaluationSeed });
 
     if (evaluation.trigger) {
@@ -855,7 +871,7 @@ export function endTurn(
       const focusTotals = summarize([focusLog]);
       const article = generateExtraExtra(`mvp:${currentId}:${turnNumber}`, [focusLog], focusTotals, evaluation);
 
-      extraExtraFeed = [...extraExtraFeed, article];
+      extraExtraFeed = [...extraExtraFeed, { kind: 'article', data: article }];
 
       if (evaluation.truthDelta !== 0) {
         const truthOwner = cloned.players.P1.faction === 'truth' ? 'P1' : 'P2';

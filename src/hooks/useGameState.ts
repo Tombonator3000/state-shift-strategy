@@ -92,9 +92,11 @@ import { assignStateBonuses } from '@/game/stateBonuses';
 import { applyStateBonusAssignmentToState } from './stateBonusAssignment';
 import { clearNewsBuffer, getNewsTriplet, pushToNewsBuffer } from '@/state/game/roundNewsBuffer';
 import { summarize, generateExtraExtra, evaluateExtraExtra } from '@/news/headlineEngine';
-import { composeTurn } from '@/news/composeTurn';
+import { composeCompositeStory } from '@/systems/news/absurdComposer';
 import { loadNewsPools } from '@/news/newsPools';
-import type { ArticleBlock, TurnLog, PlayedLite, TurnComposite, WeightedMetric, TurnCompositeMetrics } from '@/news/types';
+import type { ArticleBlock, TurnLog, PlayedLite } from '@/news/types';
+import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
+import { computeCompositeStorySeed, resolveCompositeFaction, filterPlayableArticleIds } from '@/utils/compositeStory';
 import { initNewsPools } from '@/engine/news/newsPools';
 import type { GameOverReport } from '@/types/finalEdition';
 import { emitBanter, defaultBanterUi, getCardPlayTrigger } from '@/ai/banter/banterEngine';
@@ -524,116 +526,229 @@ const normalizePlayedLite = (value: unknown): PlayedLite | null => {
   return normalized;
 };
 
-const normalizeWeightedMetric = (value: unknown): WeightedMetric => {
-  if (!value || typeof value !== 'object') {
-    return { raw: 0, weighted: 0 } satisfies WeightedMetric;
+const sanitizeCompositeText = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null;
   }
-
-  const candidate = value as Partial<WeightedMetric>;
-  const raw = typeof candidate.raw === 'number' && Number.isFinite(candidate.raw)
-    ? Math.round(candidate.raw * 100) / 100
-    : 0;
-  const weighted = typeof candidate.weighted === 'number' && Number.isFinite(candidate.weighted)
-    ? Math.round(candidate.weighted * 100) / 100
-    : 0;
-
-  return { raw, weighted } satisfies WeightedMetric;
+  const cleaned = value.replace(/\s+/g, ' ').trim();
+  return cleaned.length > 0 ? cleaned : null;
 };
 
-const normalizeTurnComposite = (entry: unknown): TurnComposite | null => {
+const uniqueStrings = (values: string[]): string[] => {
+  const seen = new Set<string>();
+  const results: string[] = [];
+  for (const value of values) {
+    if (!seen.has(value)) {
+      seen.add(value);
+      results.push(value);
+    }
+  }
+  return results;
+};
+
+const normalizeCompositeSources = (value: unknown): CompositeStory['sources'] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const sources: CompositeStory['sources'] = [];
+  const seen = new Set<string>();
+
+  for (const entry of value) {
+    if (!entry || typeof entry !== 'object') {
+      continue;
+    }
+
+    const candidate = entry as Partial<CompositeStory['sources'][number]> & {
+      id?: unknown;
+      headline?: unknown;
+      subhead?: unknown;
+    };
+
+    const id = typeof candidate.id === 'string' ? candidate.id.trim() : '';
+    const headline = sanitizeCompositeText(candidate.headline);
+    const subhead = sanitizeCompositeText(candidate.subhead) ?? undefined;
+
+    if (!id || !headline || seen.has(id)) {
+      continue;
+    }
+
+    sources.push(subhead ? { id, headline, subhead } : { id, headline });
+    seen.add(id);
+  }
+
+  return sources;
+};
+
+const buildLegacyCompositeStory = (entry: unknown): CompositeStory | null => {
   if (!entry || typeof entry !== 'object') {
     return null;
   }
 
-  const candidate = entry as Partial<TurnComposite> & {
-    plays?: unknown;
-    focus?: unknown;
+  const candidate = entry as {
+    tone?: unknown;
     main?: unknown;
-    runnersUp?: unknown;
-    metrics?: unknown;
+    focus?: unknown;
+    plays?: unknown;
   };
 
-  const round = typeof candidate.round === 'number' && Number.isFinite(candidate.round)
-    ? Math.max(0, Math.floor(candidate.round))
-    : null;
-  const turn = typeof candidate.turn === 'number' && Number.isFinite(candidate.turn)
-    ? Math.max(0, Math.floor(candidate.turn))
-    : null;
-  const tone = candidate.tone === 'truth' || candidate.tone === 'government' || candidate.tone === 'draw'
-    ? candidate.tone
-    : null;
-
-  if (round == null || turn == null || tone == null) {
+  const mainArticle = candidate.main ? normalizeArticleBlock(candidate.main) : null;
+  if (!mainArticle) {
     return null;
   }
 
-  const playsRaw = Array.isArray(candidate.plays) ? candidate.plays : [];
-  const plays = playsRaw
+  const focusRaw = Array.isArray(candidate.focus)
+    ? candidate.focus
+    : Array.isArray(candidate.plays)
+      ? candidate.plays
+      : [];
+  const focusPlays = focusRaw
     .map(normalizePlayedLite)
     .filter((item): item is PlayedLite => item !== null);
 
-  if (!plays.length) {
-    return null;
+  let tone: CompositeStory['tone'] = candidate.tone === 'government' ? 'government' : 'truth';
+  if (candidate.tone === 'truth') {
+    tone = 'truth';
+  } else if (candidate.tone !== 'government' && focusPlays.length > 0) {
+    const truthCount = focusPlays.filter(play => play.faction === 'truth').length;
+    const governmentCount = focusPlays.filter(play => play.faction === 'government').length;
+    tone = governmentCount > truthCount ? 'government' : 'truth';
   }
 
-  const focusRaw = Array.isArray(candidate.focus) ? candidate.focus : [];
-  const focus = focusRaw
-    .map(normalizePlayedLite)
-    .filter((item): item is PlayedLite => item !== null);
+  const headline = sanitizeCompositeText(mainArticle.hed) ?? 'Composite Desk files encrypted brief.';
+  const subhead = sanitizeCompositeText(mainArticle.dek)
+    ?? 'Legacy composite entry retained from archive.';
 
-  const main = candidate.main ? normalizeArticleBlock(candidate.main) : null;
-  const runnersUpRaw = Array.isArray(candidate.runnersUp) ? candidate.runnersUp : [];
-  const runnersUp = runnersUpRaw
-    .map(normalizeArticleBlock)
-    .filter((item): item is ArticleBlock => item !== null);
+  const bodySource = Array.isArray(mainArticle.body) ? mainArticle.body : [];
+  const normalizedBody = bodySource
+    .map(sanitizeCompositeText)
+    .filter((line): line is string => Boolean(line));
 
-  const metricsCandidate = (candidate.metrics ?? {}) as Partial<TurnCompositeMetrics> & {
-    truth?: WeightedMetric;
-    ip?: WeightedMetric;
-    captures?: WeightedMetric;
-    damage?: WeightedMetric;
-  };
+  if (!normalizedBody.length) {
+    const bulletLines = (mainArticle.bullets ?? [])
+      .map(sanitizeCompositeText)
+      .filter((line): line is string => Boolean(line));
+    normalizedBody.push(...bulletLines);
+  }
 
-  const cards = typeof metricsCandidate.cards === 'number' && Number.isFinite(metricsCandidate.cards)
-    ? Math.max(0, Math.floor(metricsCandidate.cards))
-    : focus.length || plays.length;
+  if (!normalizedBody.length) {
+    normalizedBody.push(subhead, 'Composite desk recounts the turn via archival shorthand.');
+  }
 
-  const typeBonus = typeof metricsCandidate.typeBonus === 'number' && Number.isFinite(metricsCandidate.typeBonus)
-    ? Math.round(metricsCandidate.typeBonus * 100) / 100
-    : 0;
-  const total = typeof metricsCandidate.total === 'number' && Number.isFinite(metricsCandidate.total)
-    ? Math.round(metricsCandidate.total * 100) / 100
-    : 0;
+  const tags = uniqueStrings(
+    focusPlays.map(play => play.type.toLowerCase()),
+  );
 
-  const metrics: TurnCompositeMetrics = {
-    cards,
-    truth: normalizeWeightedMetric(metricsCandidate.truth),
-    ip: normalizeWeightedMetric(metricsCandidate.ip),
-    captures: normalizeWeightedMetric(metricsCandidate.captures),
-    damage: normalizeWeightedMetric(metricsCandidate.damage),
-    typeBonus,
-    total,
-  } satisfies TurnCompositeMetrics;
+  const sources = focusPlays.map(play => ({
+    id: play.id,
+    headline: play.name,
+    subhead: `Focus ${play.type.toLowerCase()}`,
+  }));
 
-  const signature = typeof candidate.signature === 'string' && candidate.signature.trim().length > 0
-    ? candidate.signature.trim()
-    : null;
-  const seed = typeof candidate.seed === 'number' && Number.isFinite(candidate.seed)
-    ? candidate.seed >>> 0
-    : null;
-
-  return {
-    round,
-    turn,
-    plays,
-    focus,
+  const story: CompositeStory = {
     tone,
-    main,
-    runnersUp,
-    metrics,
-    signature,
-    seed,
-  } satisfies TurnComposite;
+    tags,
+    headline,
+    subhead,
+    byline: 'Composite Desk',
+    body: normalizedBody,
+    sources,
+  };
+
+  const imagePrompt = sanitizeCompositeText(mainArticle.imagePrompt);
+  if (imagePrompt) {
+    story.imagePrompt = imagePrompt;
+  }
+
+  return story;
+};
+
+const normalizeCompositeStory = (entry: unknown): CompositeStory | null => {
+  if (!entry || typeof entry !== 'object') {
+    return null;
+  }
+
+  const candidate = entry as Partial<CompositeStory> & {
+    tags?: unknown;
+    body?: unknown;
+    sources?: unknown;
+    imagePrompt?: unknown;
+  };
+
+  if ('headline' in candidate && 'body' in candidate) {
+    const tone = candidate.tone === 'truth' || candidate.tone === 'government'
+      ? candidate.tone
+      : null;
+    const headline = sanitizeCompositeText(candidate.headline);
+
+    if (!tone || !headline) {
+      return buildLegacyCompositeStory(entry);
+    }
+
+    const tagsRaw = Array.isArray(candidate.tags) ? candidate.tags : [];
+    const tags = uniqueStrings(
+      tagsRaw
+        .map(sanitizeCompositeText)
+        .filter((tag): tag is string => Boolean(tag)),
+    );
+
+    const subhead = sanitizeCompositeText(candidate.subhead) ?? '';
+    const bodyRaw = Array.isArray(candidate.body) ? candidate.body : [];
+    const body = bodyRaw
+      .map(sanitizeCompositeText)
+      .filter((line): line is string => Boolean(line));
+
+    if (!body.length && subhead) {
+      body.push(subhead);
+    }
+
+    if (!body.length) {
+      body.push('Composite desk archives summarize the turn.');
+    }
+
+    const sources = normalizeCompositeSources(candidate.sources);
+
+    const story: CompositeStory = {
+      tone,
+      tags,
+      headline,
+      subhead,
+      byline: 'Composite Desk',
+      body,
+      sources,
+    };
+
+    const imagePrompt = sanitizeCompositeText(candidate.imagePrompt);
+    if (imagePrompt) {
+      story.imagePrompt = imagePrompt;
+    }
+
+    return story;
+  }
+
+  return buildLegacyCompositeStory(entry);
+};
+
+const normalizeExtraExtraEntry = (entry: unknown): ExtraExtraFeedEntry | null => {
+  if (entry && typeof entry === 'object') {
+    const candidate = entry as { kind?: unknown; data?: unknown };
+
+    if (candidate.kind === 'composite') {
+      const story = normalizeCompositeStory(candidate.data);
+      return story ? { kind: 'composite', data: story } : null;
+    }
+
+    if (candidate.kind === 'article' || candidate.kind === 'bulletin') {
+      const article = normalizeArticleBlock(candidate.data);
+      if (article) {
+        return { kind: candidate.kind, data: article } as ExtraExtraFeedEntry;
+      }
+      return null;
+    }
+  }
+
+  const article = normalizeArticleBlock(entry);
+  return article ? { kind: 'article', data: article } : null;
 };
 
 const emitEditorToastMessages = (messages: string[]): void => {
@@ -689,7 +804,7 @@ const resolveFactionOwner = (
   return playerIsTruth ? 'ai' : 'human';
 };
 
-const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): GameState => {
+  const applyTurnNews = (prev: GameState, next: GameState, actor: 'human' | 'ai'): GameState => {
   const buffer = prev.turnBuffer ?? [];
   if (buffer.length === 0) {
     return next.turnBuffer.length === 0 ? next : { ...next, turnBuffer: [] };
@@ -700,11 +815,26 @@ const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): Ga
     turn: prev.turn,
     plays: buffer,
   };
-  const evaluationSeed = `${seedPrefix}:${prev.round}:${prev.turn}`;
-  const composite = composeTurn(turnLog, { seed: evaluationSeed });
-  const headlineLog = composite ? [...next.headlineLog, composite] : [...next.headlineLog];
+    const evaluationSeed = `${actor}:${prev.round}:${prev.turn}`;
+    const baseSeed = Number.isFinite(prev.stateRoundSeed) ? prev.stateRoundSeed : 0;
+    const playedArticleIds = filterPlayableArticleIds(buffer.map(entry => entry.id));
 
-  let extraExtraFeed = next.extraExtraFeed;
+    let headlineLog = [...next.headlineLog];
+    let extraExtraFeed = [...next.extraExtraFeed];
+
+    if (playedArticleIds.length > 0) {
+      const storySeed = computeCompositeStorySeed({
+        baseSeed,
+        round: prev.round,
+        turn: prev.turn,
+        actor,
+        ids: playedArticleIds,
+      });
+      const faction = resolveCompositeFaction(prev.faction, actor);
+      const story = composeCompositeStory(playedArticleIds, faction, storySeed);
+      headlineLog = [...headlineLog, story];
+      extraExtraFeed = [...extraExtraFeed, { kind: 'composite', data: story }];
+    }
   const evaluation = evaluateExtraExtra(buffer, { seed: evaluationSeed });
 
   if (evaluation.trigger) {
@@ -718,7 +848,7 @@ const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): Ga
 
     const focusLog: TurnLog = { ...turnLog, plays: evaluation.focusPlays };
     const focusTotals = summarize([focusLog]);
-    const article = generateExtraExtra(`${seedPrefix}:${prev.round}:${prev.turn}`, [focusLog], focusTotals, evaluation);
+    const article = generateExtraExtra(`${actor}:${prev.round}:${prev.turn}`, [focusLog], focusTotals, evaluation);
 
     if (typeof window !== 'undefined') {
       const winningFactionName = evaluation.winningFaction === 'truth' ? 'Truth' : 'Government';
@@ -726,7 +856,8 @@ const applyTurnNews = (prev: GameState, next: GameState, seedPrefix: string): Ga
       (window as typeof window & { uiExtraExtraToast?: (message: string) => void }).uiExtraExtraToast?.(toastMessage);
     }
 
-    extraExtraFeed = [...extraExtraFeed, article];
+    const articleEntry: ExtraExtraFeedEntry = { kind: 'article', data: article };
+    extraExtraFeed = [...extraExtraFeed, articleEntry];
     
     console.info('📋 EXTRA EXTRA Article Added:', {
       totalArticles: extraExtraFeed.length,
@@ -5912,13 +6043,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           aiBanterCooldown: normalizedAiBanterCooldown ?? createInitialAiBanterCooldown(),
           headlineLog: Array.isArray((saveData as { headlineLog?: unknown }).headlineLog)
             ? ((saveData as { headlineLog: unknown[] }).headlineLog ?? [])
-                .map(normalizeTurnComposite)
-                .filter((entry): entry is TurnComposite => entry !== null)
+                .map(normalizeCompositeStory)
+                .filter((entry): entry is CompositeStory => entry !== null)
             : [],
           extraExtraFeed: Array.isArray((saveData as { extraExtraFeed?: unknown }).extraExtraFeed)
             ? ((saveData as { extraExtraFeed: unknown[] }).extraExtraFeed ?? [])
-                .map(normalizeArticleBlock)
-                .filter((entry): entry is ArticleBlock => entry !== null)
+                .map(normalizeExtraExtraEntry)
+                .filter((entry): entry is ExtraExtraFeedEntry => entry !== null)
             : [],
           recurringCharacters: normalizedRecurringCharacters,
           winner: (saveData as { winner?: unknown }).winner === 'truth'

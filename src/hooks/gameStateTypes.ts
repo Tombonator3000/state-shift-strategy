@@ -1,7 +1,8 @@
 import type { GameCard } from '@/rules/mvp';
 import type { OvertimeConfig } from '@/data/victoryConditions';
 import type { PlayedCardMetaLite } from '@/state/game/roundNewsBuffer';
-import type { ArticleBlock, PlayedLite, TurnComposite } from '@/news/types';
+import type { ArticleBlock, PlayedLite } from '@/news/types';
+import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
 import type { EventManager, GameEvent, ParanormalHotspotPayload } from '@/data/eventDatabase';
 import type { SecretAgenda } from '@/data/agendaDatabase';
 import type { AgendaIssueState } from '@/data/agendaIssues';
@@ -96,8 +97,8 @@ export interface GameState {
   eventManager?: EventManager;
   showNewspaper: boolean;
   log: string[];
-  headlineLog: TurnComposite[];
-  extraExtraFeed: ArticleBlock[];
+  headlineLog: CompositeStory[];
+  extraExtraFeed: ExtraExtraFeedEntry[];
   agendaIssue: AgendaIssueState;
   agendaIssueCounters: Record<string, number>;
   agendaRoundCounters: Record<string, number>;

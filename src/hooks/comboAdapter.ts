@@ -3,7 +3,8 @@ import type { ComboEvaluation } from '@/game/combo.types';
 import type { GameState as EngineGameState, PlayerId, PlayerState as EnginePlayerState } from '@/mvp/validator';
 
 import type { GameState } from './gameStateTypes';
-import type { TurnComposite } from '@/news/types';
+import type { ArticleBlock } from '@/news/types';
+import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
 
 const HUMAN_PLAYER: PlayerId = 'P1';
 const AI_PLAYER: PlayerId = 'P2';
@@ -73,46 +74,34 @@ export interface ComboAdapterResult {
   fxMessages: string[];
 }
 
-const cloneCompositeArticle = (article: TurnComposite['main']): TurnComposite['main'] => {
-  if (!article) {
-    return null;
-  }
-  return {
-    tone: article.tone,
-    hed: article.hed,
-    dek: article.dek,
-    bullets: [...article.bullets],
-    byline: article.byline,
-    source: article.source,
-    ...(article.body ? { body: [...article.body] } : {}),
-    ...(article.imagePrompt ? { imagePrompt: article.imagePrompt } : {}),
-    ...(article.kicker ? { kicker: article.kicker } : {}),
-    ...(article.stinger ? { stinger: article.stinger } : {}),
-    ...(article.templateId ? { templateId: article.templateId } : {}),
-    ...(article.comboId ? { comboId: article.comboId } : {}),
-  };
-};
-
-const cloneTurnComposite = (entry: TurnComposite): TurnComposite => ({
-  round: entry.round,
-  turn: entry.turn,
-  plays: entry.plays.map(play => ({ ...play })),
-  focus: entry.focus.map(play => ({ ...play })),
-  tone: entry.tone,
-  main: cloneCompositeArticle(entry.main),
-  runnersUp: entry.runnersUp.map(article => cloneCompositeArticle(article)!).filter((article): article is NonNullable<TurnComposite['main']> => article != null),
-  metrics: {
-    cards: entry.metrics.cards,
-    truth: { ...entry.metrics.truth },
-    ip: { ...entry.metrics.ip },
-    captures: { ...entry.metrics.captures },
-    damage: { ...entry.metrics.damage },
-    typeBonus: entry.metrics.typeBonus,
-    total: entry.metrics.total,
-  },
-  signature: entry.signature,
-  seed: entry.seed,
+const cloneArticleBlock = (article: ArticleBlock): ArticleBlock => ({
+  ...article,
+  bullets: [...article.bullets],
+  ...(article.body ? { body: [...article.body] } : {}),
 });
+
+const cloneCompositeStory = (story: CompositeStory): CompositeStory => ({
+  tone: story.tone,
+  tags: [...story.tags],
+  headline: story.headline,
+  subhead: story.subhead,
+  byline: 'Composite Desk',
+  body: [...story.body],
+  ...(story.imagePrompt ? { imagePrompt: story.imagePrompt } : {}),
+  sources: story.sources.map(source => ({
+    id: source.id,
+    headline: source.headline,
+    ...(source.subhead ? { subhead: source.subhead } : {}),
+  })),
+});
+
+const cloneExtraExtraEntry = (entry: ExtraExtraFeedEntry): ExtraExtraFeedEntry => {
+  if (entry.kind === 'composite') {
+    return { kind: 'composite', data: cloneCompositeStory(entry.data) };
+  }
+
+  return { kind: entry.kind, data: cloneArticleBlock(entry.data) } as ExtraExtraFeedEntry;
+};
 
 export const evaluateCombosForTurn = (
   state: GameState,
@@ -141,11 +130,8 @@ export const evaluateCombosForTurn = (
       metadata: (play as any).metadata ? { ...(play as any).metadata } : undefined,
     })),
     log: [...state.log],
-    headlineLog: state.headlineLog.map(cloneTurnComposite),
-    extraExtraFeed: state.extraExtraFeed.map(article => ({
-      ...article,
-      bullets: [...article.bullets],
-    })),
+    headlineLog: state.headlineLog.map(cloneCompositeStory),
+    extraExtraFeed: state.extraExtraFeed.map(cloneExtraExtraEntry),
     winner: state.winner as any,
     victoryType: state.victoryType as any,
     finalEdition: state.finalEdition ?? null,

@@ -1,7 +1,8 @@
 import type { Faction, GameCard, MVPCardType, Rarity } from '@/rules/mvp';
 import type { EditorId } from '@/game/editors';
 import type { TurnPlay } from '@/game/combo.types';
-import type { ArticleBlock, PlayedLite, TurnComposite } from '@/news/types';
+import type { ArticleBlock, PlayedLite } from '@/news/types';
+import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
 import type { TabloidRelicRuntimeState } from '@/expansions/tabloidRelics/RelicTypes';
 import { expectedCost, MVP_CARD_TYPES } from '@/rules/mvp';
 
@@ -54,8 +55,8 @@ export type GameState = {
   playsThisTurn: number;
   turnPlays: TurnPlay[];
   log: string[];
-  headlineLog: TurnComposite[];
-  extraExtraFeed: ArticleBlock[];
+  headlineLog: CompositeStory[];
+  extraExtraFeed: ExtraExtraFeedEntry[];
   turnBuffer: PlayedLite[];
   winner: PlayerId | 'draw' | null;
   victoryType: 'states' | 'truth' | 'ip' | null;
@@ -590,45 +591,34 @@ export function cloneGameState(state: GameState): GameState {
 
   const cloneArticleStrict = (article: ArticleBlock): ArticleBlock => cloneArticle(article)!;
 
-  const cloneComposite = (entry: TurnComposite): TurnComposite => ({
-    round: entry.round,
-    turn: entry.turn,
-    plays: entry.plays.map(play => ({ ...play })),
-    focus: entry.focus.map(play => ({ ...play })),
+  const cloneCompositeStory = (entry: CompositeStory): CompositeStory => ({
     tone: entry.tone,
-    main: cloneArticle(entry.main),
-    runnersUp: entry.runnersUp.map(cloneArticleStrict),
-    metrics: {
-      cards: entry.metrics.cards,
-      truth: { ...entry.metrics.truth },
-      ip: { ...entry.metrics.ip },
-      captures: { ...entry.metrics.captures },
-      damage: { ...entry.metrics.damage },
-      typeBonus: entry.metrics.typeBonus,
-      total: entry.metrics.total,
-    },
-    signature: entry.signature,
-    seed: entry.seed,
+    tags: [...entry.tags],
+    headline: entry.headline,
+    subhead: entry.subhead,
+    byline: 'Composite Desk',
+    body: [...entry.body],
+    ...(entry.imagePrompt ? { imagePrompt: entry.imagePrompt } : {}),
+    sources: entry.sources.map(source => ({
+      id: source.id,
+      headline: source.headline,
+      ...(source.subhead ? { subhead: source.subhead } : {}),
+    })),
   });
+
+  const cloneExtraExtraEntry = (entry: ExtraExtraFeedEntry): ExtraExtraFeedEntry => {
+    if (entry.kind === 'composite') {
+      return { kind: 'composite', data: cloneCompositeStory(entry.data) };
+    }
+
+    return { kind: entry.kind, data: cloneArticleStrict(entry.data) } as ExtraExtraFeedEntry;
+  };
 
   return {
     ...state,
     log: [...state.log],
-    headlineLog: state.headlineLog.map(cloneComposite),
-    extraExtraFeed: state.extraExtraFeed.map(article => ({
-      tone: article.tone,
-      hed: article.hed,
-      dek: article.dek,
-      bullets: [...article.bullets],
-      byline: article.byline,
-      source: article.source,
-      ...(article.body ? { body: [...article.body] } : {}),
-      ...(article.imagePrompt ? { imagePrompt: article.imagePrompt } : {}),
-      ...(article.kicker ? { kicker: article.kicker } : {}),
-      ...(article.stinger ? { stinger: article.stinger } : {}),
-      ...(article.templateId ? { templateId: article.templateId } : {}),
-      ...(article.comboId ? { comboId: article.comboId } : {}),
-    })),
+    headlineLog: state.headlineLog.map(cloneCompositeStory),
+    extraExtraFeed: state.extraExtraFeed.map(cloneExtraExtraEntry),
     turnBuffer: state.turnBuffer.map(play => ({ ...play })),
     turnPlays: state.turnPlays.map(play => ({
       ...play,

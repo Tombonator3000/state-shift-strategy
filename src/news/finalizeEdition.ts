@@ -1,8 +1,9 @@
-import type { ArticleBlock, TurnComposite } from './types';
+import type { ArticleBlock } from './types';
+import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
 
 interface FinalizeEditionOptions {
-  headlineLog?: TurnComposite[];
-  bulletins?: ArticleBlock[];
+  headlineLog?: CompositeStory[];
+  bulletins?: ExtraExtraFeedEntry[];
 }
 
 const sanitize = (value: string | null | undefined): string => {
@@ -17,63 +18,81 @@ const ensureBullets = (article: ArticleBlock): string[] => {
   return fallback ? [fallback] : ['No summary available.'];
 };
 
-const normalizeCompositeArticle = (entry: TurnComposite): ArticleBlock | null => {
-  if (!entry.main) {
-    return null;
-  }
+const normalizeCompositeArticle = (entry: CompositeStory, index: number): ArticleBlock => {
+  const hed = sanitize(entry.headline) || 'Composite desk files encrypted brief.';
+  const dek = sanitize(entry.subhead)
+    || 'Turn log stitched from operative maneuvers and redacted dispatches.';
+  const baseBody = entry.body.map(line => sanitize(line)).filter(Boolean);
+  const sourceLines = entry.sources.map(source => sanitize(source.headline)).filter(Boolean);
+  const bullets = ensureBullets({
+    tone: entry.tone,
+    hed,
+    dek,
+    bullets: baseBody.length ? baseBody.slice(0, 3) : sourceLines.slice(0, 3),
+    byline: 'Composite Desk',
+    source: 'Composite Desk Archives',
+  });
 
-  const base = entry.main;
+  const kickerTags = entry.tags.length ? entry.tags.join(' • ') : `Composite File ${index + 1}`;
+
   return {
-    ...base,
-    tone: base.tone ?? entry.tone,
-    hed: sanitize(base.hed) || 'Composite desk files encrypted brief.',
-    dek:
-      sanitize(base.dek)
-      || 'Turn log stitched from operative maneuvers and redacted dispatches.',
-    bullets: ensureBullets(base),
-    byline: sanitize(base.byline) || 'By: Composite Desk',
-    source: sanitize(base.source) || 'Source: Composite Turn Desk',
-    kicker: sanitize(base.kicker) || `Turn ${entry.turn} Dispatch`,
-    body: Array.isArray(base.body) ? [...base.body] : base.body,
+    tone: entry.tone,
+    hed,
+    dek,
+    bullets,
+    byline: 'By: Composite Desk',
+    source: 'Source: Composite Story Engine',
+    kicker: kickerTags,
+    body: baseBody.length ? baseBody : undefined,
   } satisfies ArticleBlock;
 };
 
-const normalizeBulletin = (article: ArticleBlock): ArticleBlock => ({
-  ...article,
-  hed: sanitize(article.hed) || 'Headline withheld for operational security.',
-  dek:
-    sanitize(article.dek)
-    || 'Field operatives report classified developments behind the curtain.',
-  bullets: ensureBullets(article),
-  byline: sanitize(article.byline) || 'By: Extra Extra Desk',
-  source: sanitize(article.source) || 'Source: Field Operatives',
-  kicker: sanitize(article.kicker) || 'Extra Extra Bulletin',
-  body: Array.isArray(article.body) ? [...article.body] : article.body,
-});
+const normalizeBulletin = (entry: ExtraExtraFeedEntry, index: number): ArticleBlock | null => {
+  if (entry.kind === 'composite') {
+    return normalizeCompositeArticle(entry.data, index);
+  }
+
+  const article = entry.data;
+  return {
+    ...article,
+    hed: sanitize(article.hed) || 'Headline withheld for operational security.',
+    dek:
+      sanitize(article.dek)
+      || 'Field operatives report classified developments behind the curtain.',
+    bullets: ensureBullets(article),
+    byline: sanitize(article.byline) || 'By: Extra Extra Desk',
+    source: sanitize(article.source) || 'Source: Field Operatives',
+    kicker: sanitize(article.kicker) || 'Extra Extra Bulletin',
+    body: Array.isArray(article.body) ? [...article.body] : article.body,
+  } satisfies ArticleBlock;
+};
 
 export const finalizeEdition = ({
   headlineLog = [],
   bulletins = [],
 }: FinalizeEditionOptions): ArticleBlock[] => {
-  const compositeEntries = headlineLog
+  const compositeEntries = headlineLog.map((entry, index) => {
+    const article = normalizeCompositeArticle(entry, index);
+    const tagScore = entry.tags.length * 10;
+    const score = 2000 + tagScore - index;
+    const timestamp = index / 100;
+    return { article, score, timestamp };
+  });
+
+  const bulletinEntries = bulletins
     .map((entry, index) => {
-      const article = normalizeCompositeArticle(entry);
-      if (!article) {
+      if (entry.kind !== 'article' && entry.kind !== 'bulletin') {
         return null;
       }
-      const metricScore = entry.metrics?.total ?? 0;
-      const score = Math.round(metricScore * 100) + entry.round * 10 + entry.turn;
-      const timestamp = entry.round * 1000 + entry.turn + index / 100;
-      return { article, score, timestamp };
+      const normalized = normalizeBulletin(entry, index);
+      if (!normalized) {
+        return null;
+      }
+      const score = 1000 + index;
+      const timestamp = 1_000_000 + index;
+      return { article: normalized, score, timestamp };
     })
     .filter((value): value is { article: ArticleBlock; score: number; timestamp: number } => Boolean(value));
-
-  const bulletinEntries = bulletins.map((article, index) => {
-    const normalized = normalizeBulletin(article);
-    const score = 1000 + index;
-    const timestamp = 1_000_000 + index;
-    return { article: normalized, score, timestamp };
-  });
 
   const combined = [...bulletinEntries, ...compositeEntries]
     .sort((a, b) => {

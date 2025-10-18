@@ -15,7 +15,8 @@ import type { ArcProgressSummary } from '@/types/campaign';
 import type { HotspotDirector, WeightedHotspotCandidate } from '@/systems/paranormalHotspots';
 import { loadNewspaperData, pick, type NewspaperData } from '@/lib/newspaperData';
 import type { CharacterStageState } from '@/game/recurringCharacterArticles';
-import type { ArticleBlock, TurnComposite } from '@/news/types';
+import type { ArticleBlock } from '@/news/types';
+import type { CompositeStory } from '@/types/news';
 
 export interface TabloidPlayedCard {
   card: GameCard;
@@ -45,7 +46,7 @@ export interface TabloidNewspaperProps {
   activeHotspot?: WeightedHotspotCandidate | null;
   frontPageTriplet?: PlayedCardMeta[] | null;
   recurringCharacters?: Record<string, CharacterStageState>;
-  headlineLog?: TurnComposite[];
+  headlineLog?: CompositeStory[];
   extraExtraFeed?: ArticleBlock[];
 }
 

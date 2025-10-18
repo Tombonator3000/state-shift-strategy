@@ -26,7 +26,8 @@ import {
   NewspaperSection,
 } from './newspaperLayout';
 import { useTabloidWeather, getFallbackTabloidWeather } from '@/system/weather/useTabloidWeather';
-import type { ArticleBlock, TurnComposite } from '@/news/types';
+import type { ArticleBlock } from '@/news/types';
+import type { CompositeStory } from '@/types/news';
 
 const PRIMARY_MASTHEAD = 'PARANOID TIMES';
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
@@ -334,7 +335,7 @@ const TabloidNewspaperV2 = ({
   const { weatherLine: tabloidWeatherLine } = useTabloidWeather();
 
   const headlineEntries = useMemo(
-    () => (Array.isArray(headlineLog) ? headlineLog.filter((entry): entry is TurnComposite => Boolean(entry)) : []),
+    () => (Array.isArray(headlineLog) ? headlineLog.filter((entry): entry is CompositeStory => Boolean(entry)) : []),
     [headlineLog],
   );
 
@@ -345,9 +346,49 @@ const TabloidNewspaperV2 = ({
     return headlineEntries[headlineEntries.length - 1] ?? null;
   }, [headlineEntries]);
 
-  const heroArticleBlock = latestComposite?.main ?? null;
-  const runnerArticles = latestComposite?.runnersUp ?? [];
-  const heroFocusPlays = latestComposite?.focus ?? [];
+  const heroArticleBlock = useMemo(() => {
+    if (!latestComposite) {
+      return null;
+    }
+    const bullets = latestComposite.body.length
+      ? latestComposite.body.slice(0, 3)
+      : [latestComposite.subhead].filter(Boolean);
+    const sourceLine = latestComposite.sources.length
+      ? `Sources: ${latestComposite.sources.map(source => source.headline).join(' • ')}`
+      : 'Source: Composite Desk';
+    const kicker = latestComposite.tags.length
+      ? latestComposite.tags.join(' • ')
+      : 'Composite Dispatch';
+    const article: ArticleBlock = {
+      tone: latestComposite.tone,
+      hed: latestComposite.headline,
+      dek: latestComposite.subhead,
+      bullets: bullets.length ? bullets : ['Composite desk archives the turn.'],
+      byline: 'By: Composite Desk',
+      source: sourceLine,
+      body: latestComposite.body.length ? [...latestComposite.body] : undefined,
+      kicker,
+      imagePrompt: latestComposite.imagePrompt,
+    };
+    return article;
+  }, [latestComposite]);
+
+  const runnerArticles = useMemo(() => {
+    if (!latestComposite) {
+      return [] as ArticleBlock[];
+    }
+    return latestComposite.sources.map((source, index) => ({
+      tone: latestComposite.tone,
+      hed: source.headline,
+      dek: source.subhead ?? `Archive reference ${index + 1}`,
+      bullets: [source.headline],
+      byline: 'By: Composite Desk',
+      source: `Source ID: ${source.id}`,
+    }));
+  }, [latestComposite]);
+
+  const heroSourceHeadlines = latestComposite?.sources ?? [];
+  const heroStoryTags = latestComposite?.tags ?? [];
 
   const agendaPullQuotes = useMemo(() => {
     if (!agendaMoments?.length) {
@@ -764,27 +805,26 @@ const TabloidNewspaperV2 = ({
   const heroIsFilesOnTheLoose = heroEvent?.id === 'deepfile_dump_crochet_forum';
   const heroTypeLabel = heroArticleBlock?.kicker
     ?? (latestComposite
-      ? `TURN ${latestComposite.turn} DISPATCH`
+      ? '[COMPOSITE DISPATCH]'
       : heroEvent
         ? `[${(heroEvent.type ?? 'Event').toUpperCase()}]`
         : comboReport
           ? '[PLAYER HIGHLIGHT]'
           : '[STATUS BRIEF]');
-  const heroTarget = heroFocusPlays.length
-    ? `Focus: ${heroFocusPlays.slice(0, 2).map(play => play.name).join(' • ')}`
-    : heroEvent
-      ? null
-      : comboOwnerLabel ?? null;
-  const heroTags = heroFocusPlays.length
-    ? heroFocusPlays.slice(0, 3).map(play => {
-        const typeLabel = play.type.charAt(0) + play.type.slice(1).toLowerCase();
-        return `${typeLabel}`;
-      })
+  const heroTarget = heroSourceHeadlines.length
+    ? `Sources: ${heroSourceHeadlines.slice(0, 2).map(source => source.headline).join(' • ')}`
+    : heroStoryTags.length
+      ? `Tags: ${heroStoryTags.slice(0, 2).join(' • ')}`
+      : heroEvent
+        ? null
+        : comboOwnerLabel ?? null;
+  const heroTags = heroStoryTags.length
+    ? heroStoryTags.slice(0, 3)
     : heroEvent
       ? []
       : heroFallback?.tags
         ?? (comboReport ? comboReport.entries.slice(0, 3).map(entry => entry.name).filter(Boolean) : []);
-  const heroPrimaryCardId = heroFocusPlays[0]?.id ?? null;
+  const heroPrimaryCardId = null;
 
   const comboNarrative = useMemo(() => {
     if (!comboReport || comboReport.entries.length === 0) {
@@ -1205,7 +1245,7 @@ const TabloidNewspaperV2 = ({
                     </h3>
                     {latestComposite ? (
                       <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-newspaper-text/50">
-                        Turn {latestComposite.round}-{latestComposite.turn}
+                        Composite Story
                       </span>
                     ) : null}
                   </div>

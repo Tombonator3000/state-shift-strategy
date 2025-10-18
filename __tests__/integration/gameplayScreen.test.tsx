@@ -3,7 +3,8 @@ import { dispatchBreakingNews } from '@/lib/newsEventHelpers';
 import type { GameCard } from '@/rules/mvp';
 import { buildFinalEdition as buildGameOverReport } from '@/utils/finalEdition';
 import type { GameState } from '@/hooks/gameStateTypes';
-import type { ArticleBlock, TurnComposite } from '@/news/types';
+import type { ArticleBlock } from '@/news/types';
+import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
 import { Window } from 'happy-dom';
 
 let render: typeof import('@testing-library/react').render;
@@ -159,34 +160,18 @@ describe('gameplay screen integrations', () => {
   });
 
   it('builds final edition feed from headline log and bulletins', () => {
-    const composite: TurnComposite = {
-      round: 2,
-      turn: 3,
-      plays: [],
-      focus: [],
+    const composite: CompositeStory = {
       tone: 'truth',
-      main: {
-        tone: 'truth',
-        hed: 'Signal Lock Achieved',
-        dek: 'Operatives intercept clandestine broadcast.',
-        bullets: ['Operatives intercept clandestine broadcast.'],
-        byline: 'By: Composite Desk',
-        source: 'Source: Dispatch Relay',
-        kicker: 'Turn 3 Dispatch',
-      },
-      runnersUp: [],
-      metrics: {
-        cards: 3,
-        truth: { raw: 6, weighted: 3 },
-        ip: { raw: 2, weighted: 1 },
-        captures: { raw: 0, weighted: 0 },
-        damage: { raw: 0, weighted: 0 },
-        typeBonus: 1,
-        total: 5,
-      },
-      signature: 'alpha,beta,gamma',
-      seed: 123,
-    } satisfies TurnComposite;
+      tags: ['Signal', 'Intercept'],
+      headline: 'Signal Lock Achieved',
+      subhead: 'Operatives intercept clandestine broadcast.',
+      byline: 'Composite Desk',
+      body: ['Operatives intercept clandestine broadcast.', 'Broadcast decrypted and archived.'],
+      sources: [
+        { id: 'alpha', headline: 'Alpha Relay' },
+        { id: 'beta', headline: 'Beta Transmission' },
+      ],
+    } satisfies CompositeStory;
 
     const bulletin: ArticleBlock = {
       tone: 'government',
@@ -197,6 +182,8 @@ describe('gameplay screen integrations', () => {
       source: 'Source: Control Wire',
       kicker: 'Extra Extra Bulletin',
     } satisfies ArticleBlock;
+
+    const extraExtraEntry: ExtraExtraFeedEntry = { kind: 'article', data: bulletin };
 
     const state: Pick<
       GameState,
@@ -226,7 +213,7 @@ describe('gameplay screen integrations', () => {
       ],
       faction: 'truth',
       playHistory: [],
-      extraExtraFeed: [bulletin],
+      extraExtraFeed: [extraExtraEntry],
       recurringCharacters: {},
       headlineLog: [composite],
       currentEvents: [],
@@ -244,8 +231,8 @@ describe('gameplay screen integrations', () => {
     });
 
     expect(report.extraExtraFeed).toHaveLength(2);
-    expect(report.extraExtraFeed[0].hed).toBe('Legacy Bulletin');
-    expect(report.extraExtraFeed[1].hed).toBe('Signal Lock Achieved');
+    expect(report.extraExtraFeed[0].hed).toBe('Signal Lock Achieved');
+    expect(report.extraExtraFeed[1].hed).toBe('Legacy Bulletin');
     expect(report.frontPage?.hed).toBe('Signal Lock Achieved');
     expect(report.frontPage?.tone).toBe('truth');
   });

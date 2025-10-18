@@ -4,7 +4,8 @@ import type { TurnPlay } from '@/game/combo.types';
 import { CARD_DATABASE } from './cardDatabase';
 import { mergeBiasModifiers, type BiasModifiers } from '@/ai/difficulty';
 import { getAiTuningConfig, type AiTuningConfig } from './aiTuning';
-import type { ArticleBlock, TurnComposite } from '@/news/types';
+import type { ArticleBlock } from '@/news/types';
+import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
 import type { SecretAgenda } from './agendaDatabase';
 import {
   createAiStrategist,
@@ -59,26 +60,28 @@ const cloneArticleBlock = (article: ArticleBlock | null): ArticleBlock | null =>
   } satisfies ArticleBlock;
 };
 
-const cloneTurnCompositeEntry = (entry: TurnComposite): TurnComposite => ({
-  round: entry.round,
-  turn: entry.turn,
-  plays: entry.plays.map(play => ({ ...play })),
-  focus: entry.focus.map(play => ({ ...play })),
+const cloneCompositeStoryEntry = (entry: CompositeStory): CompositeStory => ({
   tone: entry.tone,
-  main: cloneArticleBlock(entry.main),
-  runnersUp: entry.runnersUp.map(article => cloneArticleBlock(article)!).filter((article): article is ArticleBlock => article != null),
-  metrics: {
-    cards: entry.metrics.cards,
-    truth: { ...entry.metrics.truth },
-    ip: { ...entry.metrics.ip },
-    captures: { ...entry.metrics.captures },
-    damage: { ...entry.metrics.damage },
-    typeBonus: entry.metrics.typeBonus,
-    total: entry.metrics.total,
-  },
-  signature: entry.signature,
-  seed: entry.seed,
+  tags: [...entry.tags],
+  headline: entry.headline,
+  subhead: entry.subhead,
+  byline: 'Composite Desk',
+  body: [...entry.body],
+  ...(entry.imagePrompt ? { imagePrompt: entry.imagePrompt } : {}),
+  sources: entry.sources.map(source => ({
+    id: source.id,
+    headline: source.headline,
+    ...(source.subhead ? { subhead: source.subhead } : {}),
+  })),
 });
+
+const cloneExtraExtraEntry = (entry: ExtraExtraFeedEntry): ExtraExtraFeedEntry => {
+  if (entry.kind === 'composite') {
+    return { kind: 'composite', data: cloneCompositeStoryEntry(entry.data) };
+  }
+
+  return { kind: entry.kind, data: cloneArticleBlock(entry.data)! } as ExtraExtraFeedEntry;
+};
 
 interface BluffRecord {
   turn: number;
@@ -1750,13 +1753,10 @@ export class EnhancedAIStrategist implements AIStrategist {
       aiControlledStates,
       log: Array.isArray(gameState.log) ? [...gameState.log] : [],
       headlineLog: Array.isArray(gameState.headlineLog)
-        ? gameState.headlineLog.map(cloneTurnCompositeEntry)
+        ? gameState.headlineLog.map(cloneCompositeStoryEntry)
         : [],
       extraExtraFeed: Array.isArray(gameState.extraExtraFeed)
-        ? gameState.extraExtraFeed.map(article => ({
-            ...article,
-            bullets: Array.isArray(article.bullets) ? [...article.bullets] : [],
-          }))
+        ? gameState.extraExtraFeed.map(cloneExtraExtraEntry)
         : [],
       turnPlays: Array.isArray(gameState.turnPlays)
         ? gameState.turnPlays.map((play: TurnPlay) => ({

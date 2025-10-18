@@ -1,3 +1,5 @@
+import type { ArticleBlock } from '@/news/types';
+
 export type CompositeStoryTone = 'truth' | 'government';
 
 export interface CompositeSourceReference {
@@ -16,3 +18,23 @@ export interface CompositeStory {
   imagePrompt?: string;
   sources: CompositeSourceReference[];
 }
+
+export type ExtraExtraArticleEntry = {
+  kind: 'article';
+  data: ArticleBlock;
+};
+
+export type ExtraExtraBulletinEntry = {
+  kind: 'bulletin';
+  data: ArticleBlock;
+};
+
+export type ExtraExtraCompositeEntry = {
+  kind: 'composite';
+  data: CompositeStory;
+};
+
+export type ExtraExtraFeedEntry =
+  | ExtraExtraArticleEntry
+  | ExtraExtraBulletinEntry
+  | ExtraExtraCompositeEntry;
