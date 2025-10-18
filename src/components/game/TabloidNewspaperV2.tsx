@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import CardImage from '@/components/game/CardImage';
 import { ExtraStamp } from '@/components/newspaper/ExtraStamp';
+import TurnEdition from '@/components/newspaper/TurnEdition';
 import { loadNewspaperData, pick, shuffle, type NewspaperData } from '@/lib/newspaperData';
 import type { TabloidNewspaperProps } from './TabloidNewspaperLegacy';
 import type { HotspotExtraArticle } from '@/systems/paranormalHotspots';
@@ -26,8 +27,7 @@ import {
   NewspaperSection,
 } from './newspaperLayout';
 import { useTabloidWeather, getFallbackTabloidWeather } from '@/system/weather/useTabloidWeather';
-import type { ArticleBlock } from '@/news/types';
-import type { CompositeStory } from '@/types/news';
+import type { CompositeStory, ExtraExtraCompositeEntry, ExtraExtraFeedEntry } from '@/types/news';
 
 const PRIMARY_MASTHEAD = 'PARANOID TIMES';
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
@@ -64,6 +64,60 @@ const SIGHTING_BADGE_VARIANTS: Record<ParanormalSighting['category'], string> = 
   'truth-meltdown': 'border-rose-500 text-rose-500',
   cryptid: 'border-emerald-500 text-emerald-500',
   hotspot: 'border-purple-500 text-purple-500'
+};
+
+const isCompositeStory = (entry: unknown): entry is CompositeStory => {
+  if (!entry || typeof entry !== 'object') {
+    return false;
+  }
+
+  const candidate = entry as CompositeStory & {
+    tone?: unknown;
+    headline?: unknown;
+    subhead?: unknown;
+    body?: unknown;
+    tags?: unknown;
+    sources?: unknown;
+  };
+
+  if (candidate.tone !== 'truth' && candidate.tone !== 'government') {
+    return false;
+  }
+
+  if (typeof candidate.headline !== 'string' || typeof candidate.subhead !== 'string') {
+    return false;
+  }
+
+  if (!Array.isArray(candidate.body) || !Array.isArray(candidate.tags) || !Array.isArray(candidate.sources)) {
+    return false;
+  }
+
+  return true;
+};
+
+const isCompositeFeedEntry = (entry: unknown): entry is ExtraExtraCompositeEntry => {
+  if (!entry || typeof entry !== 'object') {
+    return false;
+  }
+
+  const candidate = entry as { kind?: unknown; data?: unknown };
+  if (candidate.kind !== 'composite') {
+    return false;
+  }
+
+  return isCompositeStory(candidate.data);
+};
+
+const extractCompositeStory = (entry: unknown): CompositeStory | null => {
+  if (isCompositeStory(entry)) {
+    return entry;
+  }
+
+  if (isCompositeFeedEntry(entry)) {
+    return entry.data;
+  }
+
+  return null;
 };
 
 const sanitizeMastheadPool = (pool?: string[]): string[] => {
@@ -313,7 +367,7 @@ const TabloidNewspaperV2 = ({
   frontPageTriplet,
   recurringCharacters,
   headlineLog = [],
-  extraExtraFeed: _extraExtraFeed = [],
+  extraExtraFeed = [],
 }: TabloidNewspaperProps) => {
   const [data, setData] = useState<NewspaperData | null>(null);
   const [masthead, setMasthead] = useState(PRIMARY_MASTHEAD);
@@ -321,7 +375,6 @@ const TabloidNewspaperV2 = ({
   const [isMastheadReady, setIsMastheadReady] = useState(false);
 
   const dataset = data ?? FALLBACK_DATA;
-  void _extraExtraFeed;
   const audio = useAudioContext();
   const [highlightedSightingId, setHighlightedSightingId] = useState<string | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -334,57 +387,68 @@ const TabloidNewspaperV2 = ({
   const altMastheadsRef = useRef<string[]>([]);
   const { weatherLine: tabloidWeatherLine } = useTabloidWeather();
 
-  const headlineEntries = useMemo(
-    () => (Array.isArray(headlineLog) ? headlineLog.filter((entry): entry is CompositeStory => Boolean(entry)) : []),
-    [headlineLog],
-  );
+  const compositeStories = useMemo(() => {
+    const stories: CompositeStory[] = [];
+    const seen = new Set<string>();
+    const addStory = (story: CompositeStory | null) => {
+      if (!story) {
+        return;
+      }
+      const key = `${story.headline}::${story.subhead}`;
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      stories.push(story);
+    };
+
+    if (Array.isArray(headlineLog)) {
+      for (const entry of headlineLog as Array<CompositeStory | ExtraExtraFeedEntry>) {
+        addStory(extractCompositeStory(entry));
+      }
+    }
+
+    if (Array.isArray(extraExtraFeed)) {
+      for (const entry of extraExtraFeed as ExtraExtraFeedEntry[]) {
+        addStory(extractCompositeStory(entry));
+      }
+    }
+
+    return stories;
+  }, [extraExtraFeed, headlineLog]);
 
   const latestComposite = useMemo(() => {
-    if (!headlineEntries.length) {
+    if (!compositeStories.length) {
       return null;
     }
-    return headlineEntries[headlineEntries.length - 1] ?? null;
-  }, [headlineEntries]);
+    return compositeStories[compositeStories.length - 1] ?? null;
+  }, [compositeStories]);
 
-  const heroArticleBlock = useMemo(() => {
+  const runnerDispatches = useMemo(() => {
     if (!latestComposite) {
-      return null;
+      return [] as Array<{
+        id: string;
+        headline: string;
+        subhead?: string;
+        summary: string;
+        tone: CompositeStory['tone'];
+      }>;
     }
-    const bullets = latestComposite.body.length
-      ? latestComposite.body.slice(0, 3)
+
+    const paragraphs = latestComposite.body.length
+      ? latestComposite.body
       : [latestComposite.subhead].filter(Boolean);
-    const sourceLine = latestComposite.sources.length
-      ? `Sources: ${latestComposite.sources.map(source => source.headline).join(' • ')}`
-      : 'Source: Composite Desk';
-    const kicker = latestComposite.tags.length
-      ? latestComposite.tags.join(' • ')
-      : 'Composite Dispatch';
-    const article: ArticleBlock = {
-      tone: latestComposite.tone,
-      hed: latestComposite.headline,
-      dek: latestComposite.subhead,
-      bullets: bullets.length ? bullets : ['Composite desk archives the turn.'],
-      byline: 'By: Composite Desk',
-      source: sourceLine,
-      body: latestComposite.body.length ? [...latestComposite.body] : undefined,
-      kicker,
-      imagePrompt: latestComposite.imagePrompt,
-    };
-    return article;
-  }, [latestComposite]);
 
-  const runnerArticles = useMemo(() => {
-    if (!latestComposite) {
-      return [] as ArticleBlock[];
-    }
-    return latestComposite.sources.map((source, index) => ({
-      tone: latestComposite.tone,
-      hed: source.headline,
-      dek: source.subhead ?? `Archive reference ${index + 1}`,
-      bullets: [source.headline],
-      byline: 'By: Composite Desk',
-      source: `Source ID: ${source.id}`,
-    }));
+    return latestComposite.sources.map((source, index) => {
+      const summary = paragraphs[index % paragraphs.length] ?? paragraphs[0] ?? 'Composite desk archives the turn.';
+      return {
+        id: source.id,
+        headline: source.headline || `Composite Source ${index + 1}`,
+        subhead: source.subhead,
+        summary,
+        tone: latestComposite.tone,
+      };
+    });
   }, [latestComposite]);
 
   const heroSourceHeadlines = latestComposite?.sources ?? [];
@@ -752,10 +816,10 @@ const TabloidNewspaperV2 = ({
     [playerCards, opponentCards, eventsTruthDelta, comboTruthDelta],
   );
 
-  const heroEvent = heroArticleBlock ? null : (events[0] ?? null);
+  const heroEvent = latestComposite ? null : (events[0] ?? null);
 
   const heroFallback = useMemo(() => {
-    if (heroArticleBlock || heroEvent) {
+    if (latestComposite || heroEvent) {
       return null;
     }
     return composeHeroFallback({
@@ -765,32 +829,34 @@ const TabloidNewspaperV2 = ({
       comboReport: comboReport ? { entries: comboReport.entries } : null,
       comboOwnerLabel,
     });
-  }, [comboOwnerLabel, comboReport, faction, heroArticleBlock, heroEvent, narrativeContext.capturedStates, narrativeContext.truthDeltaTotal]);
+  }, [comboOwnerLabel, comboReport, faction, heroEvent, latestComposite, narrativeContext.capturedStates, narrativeContext.truthDeltaTotal]);
 
-  const heroHeadline = heroArticleBlock?.hed
-    ?? (() => {
-      if (heroEvent) {
-        const base = (heroEvent.headline ?? heroEvent.title ?? 'UNIDENTIFIED INCIDENT').toUpperCase();
-        const effectsLabel = formatEventEffects(heroEvent.effects);
-        return effectsLabel ? `${base} (${effectsLabel})` : base;
-      }
-      const defaultHeadline = faction === 'truth'
-        ? 'COALITION OPS HOLD PATTERN'
-        : 'DIRECTORATE ENVOYS MAINTAIN WATCH';
-      return heroFallback?.headline ?? defaultHeadline;
-    })();
+  const heroHeadline = latestComposite
+    ? latestComposite.headline
+    : (() => {
+        if (heroEvent) {
+          const base = (heroEvent.headline ?? heroEvent.title ?? 'UNIDENTIFIED INCIDENT').toUpperCase();
+          const effectsLabel = formatEventEffects(heroEvent.effects);
+          return effectsLabel ? `${base} (${effectsLabel})` : base;
+        }
+        const defaultHeadline = faction === 'truth'
+          ? 'COALITION OPS HOLD PATTERN'
+          : 'DIRECTORATE ENVOYS MAINTAIN WATCH';
+        return heroFallback?.headline ?? defaultHeadline;
+      })();
 
-  const heroSubhead = heroArticleBlock?.dek
-    ?? heroEvent?.content
-    ?? heroFallback?.subhead
-    ?? 'Developing situation under intense scrutiny.';
+  const heroSubhead = latestComposite
+    ? latestComposite.subhead
+    : heroEvent?.content
+      ?? heroFallback?.subhead
+      ?? 'Developing situation under intense scrutiny.';
 
   const heroBody = useMemo(() => {
-    if (heroArticleBlock?.body && heroArticleBlock.body.length > 0) {
-      return heroArticleBlock.body;
-    }
-    if (heroArticleBlock?.bullets.length) {
-      return heroArticleBlock.bullets;
+    if (latestComposite) {
+      if (latestComposite.body.length) {
+        return latestComposite.body;
+      }
+      return [latestComposite.subhead];
     }
     if (heroEvent) {
       return [heroEvent.content ?? 'Witness reports remain fragmentary; authorities maintain deliberate silence.'];
@@ -799,26 +865,29 @@ const TabloidNewspaperV2 = ({
       'Coalition networks report steady intel flow with no escalations requiring immediate action.',
       'Field agents rotate through rest cycles as analysts maintain quiet watch on signal integrity.',
     ];
-  }, [heroArticleBlock, heroEvent, heroFallback]);
+  }, [heroEvent, heroFallback, latestComposite]);
 
-  const heroIsEvent = !heroArticleBlock && Boolean(heroEvent);
+  const heroIsEvent = !latestComposite && Boolean(heroEvent);
   const heroIsFilesOnTheLoose = heroEvent?.id === 'deepfile_dump_crochet_forum';
-  const heroTypeLabel = heroArticleBlock?.kicker
-    ?? (latestComposite
-      ? '[COMPOSITE DISPATCH]'
-      : heroEvent
-        ? `[${(heroEvent.type ?? 'Event').toUpperCase()}]`
-        : comboReport
-          ? '[PLAYER HIGHLIGHT]'
-          : '[STATUS BRIEF]');
-  const heroTarget = heroSourceHeadlines.length
-    ? `Sources: ${heroSourceHeadlines.slice(0, 2).map(source => source.headline).join(' • ')}`
-    : heroStoryTags.length
-      ? `Tags: ${heroStoryTags.slice(0, 2).join(' • ')}`
+  const heroTypeLabel = latestComposite
+    ? '[COMPOSITE DISPATCH]'
+    : heroEvent
+      ? `[${(heroEvent.type ?? 'Event').toUpperCase()}]`
+      : comboReport
+        ? '[PLAYER HIGHLIGHT]'
+        : '[STATUS BRIEF]';
+  const heroTarget = latestComposite
+    ? (heroSourceHeadlines.length
+      ? `Sources: ${heroSourceHeadlines.slice(0, 2).map(source => source.headline).join(' • ')}`
+      : heroStoryTags.length
+        ? `Tags: ${heroStoryTags.slice(0, 2).join(' • ')}`
+        : null)
+    : heroFallback?.tags?.length
+      ? `Tags: ${heroFallback.tags.slice(0, 2).join(' • ')}`
       : heroEvent
         ? null
         : comboOwnerLabel ?? null;
-  const heroTags = heroStoryTags.length
+  const heroTags = latestComposite
     ? heroStoryTags.slice(0, 3)
     : heroEvent
       ? []
@@ -851,13 +920,21 @@ const TabloidNewspaperV2 = ({
   }, [comboOwnerLabel, comboReport]);
   const bylinePool = dataset.bylines && dataset.bylines.length ? dataset.bylines : FALLBACK_DATA.bylines;
   const sourcePool = dataset.sources && dataset.sources.length ? dataset.sources : FALLBACK_DATA.sources;
-  const byline = heroArticleBlock?.byline ?? pick(bylinePool, FALLBACK_DATA.bylines?.[0] ?? 'By: Anonymous Insider');
-  const sourceLine = heroArticleBlock?.source ?? pick(sourcePool, FALLBACK_DATA.sources?.[0] ?? 'Source: Redacted Dossier');
+  const byline = latestComposite
+    ? 'By: Composite Desk'
+    : pick(bylinePool, FALLBACK_DATA.bylines?.[0] ?? 'By: Anonymous Insider');
+  const sourceLine = latestComposite
+    ? (heroSourceHeadlines.length
+      ? `Sources: ${heroSourceHeadlines.map(source => source.headline).join(' • ')}`
+      : 'Sources withheld pending clearance.')
+    : pick(sourcePool, FALLBACK_DATA.sources?.[0] ?? 'Source: Redacted Dossier');
   const stampPool = dataset.stamps ?? FALLBACK_DATA.stamps ?? { breaking: [], classified: [] };
-  const breakingStamp = heroArticleBlock
-    ? pick(stampPool.breaking ?? [], FALLBACK_DATA.stamps?.breaking?.[0] ?? 'BREAKING')
-    : null;
-  const classifiedStamp = heroArticleBlock && heroArticleBlock.tone !== 'truth'
+  const breakingStamp = latestComposite
+    ? null
+    : heroEvent
+      ? pick(stampPool.breaking ?? [], FALLBACK_DATA.stamps?.breaking?.[0] ?? 'BREAKING')
+      : null;
+  const classifiedStamp = latestComposite && latestComposite.tone !== 'truth'
     ? pick(stampPool.classified ?? [], FALLBACK_DATA.stamps?.classified?.[0] ?? 'CLASSIFIED')
     : null;
 
@@ -1156,88 +1233,94 @@ const TabloidNewspaperV2 = ({
           <div className="grid gap-4 lg:grid-cols-[2fr_1.5fr_1.5fr]">
             {/* COLUMN 1: Main Story + Image */}
             <article className="space-y-4 rounded-md border border-newspaper-border bg-white/80 p-6 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
-                <span className={cn(NEWSPAPER_BADGE_CLASS, 'rounded-full px-2 py-1 text-[11px] tracking-wide text-newspaper-text')}>
-                  {heroTypeLabel}
-                </span>
-                {heroTarget ? (
-                  <span className="rounded-full border border-dashed border-newspaper-border px-2 py-1">{heroTarget}</span>
-                ) : null}
-              </div>
-
-              <div className="space-y-4">
-                <h2
-                  className={`text-3xl font-black leading-tight sm:text-4xl ${
-                    heroIsEvent ? 'text-secret-red' : 'text-newspaper-headline'
-                  } ${
-                    heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_20px_rgba(248,113,113,0.65)]' : ''
-                  }`}
-                >
-                  {heroHeadline}
-                </h2>
-                <p
-                  className={`text-lg font-semibold italic ${
-                    heroIsEvent
-                      ? heroIsFilesOnTheLoose
-                        ? 'text-secret-red drop-shadow-[0_0_12px_rgba(248,113,113,0.55)]'
-                        : 'text-secret-red/80'
-                      : 'text-newspaper-text/80'
-                  } ${heroIsFilesOnTheLoose ? 'animate-pulse' : ''}`}
-                >
-                  {heroSubhead}
-                </p>
-                
-                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/70">
-                  <span>{byline}</span>
-                  <span>{sourceLine}</span>
-                </div>
-
-                {/* Main Story Image */}
-                <div className="relative overflow-hidden rounded-md border border-newspaper-border bg-newspaper-header/20">
-                  {heroPrimaryCardId ? (
-                    <CardImage
-                      cardId={heroPrimaryCardId}
-                      fit="contain"
-                      className="w-full aspect-[4/3] max-h-64"
-                    />
-                  ) : (
-                    <div className="flex aspect-[4/3] w-full max-h-64 items-center justify-center text-sm font-semibold uppercase tracking-wide text-newspaper-text/60">
-                      Archival footage pending clearance.
-                    </div>
-                  )}
-                  {classifiedStamp ? (
-                    <div className="stamp stamp--classified absolute right-3 top-3">{classifiedStamp}</div>
-                  ) : null}
-                </div>
-
-                <div
-                  className={`space-y-4 text-sm leading-relaxed ${
-                    heroIsEvent ? 'text-secret-red/90' : ''
-                  } ${
-                    heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_14px_rgba(248,113,113,0.4)]' : ''
-                  }`}
-                >
-                  {heroBody.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))}
-                </div>
-
-                {heroTags.length ? (
-                  <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
-                    {heroTags.slice(0, 3).map(tag => (
-                      <span key={tag} className="rounded border border-newspaper-border px-2 py-0.5">
-                        {tag}
-                      </span>
-                    ))}
+              {latestComposite ? (
+                <TurnEdition story={latestComposite} />
+              ) : (
+                <>
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
+                    <span className={cn(NEWSPAPER_BADGE_CLASS, 'rounded-full px-2 py-1 text-[11px] tracking-wide text-newspaper-text')}>
+                      {heroTypeLabel}
+                    </span>
+                    {heroTarget ? (
+                      <span className="rounded-full border border-dashed border-newspaper-border px-2 py-1">{heroTarget}</span>
+                    ) : null}
                   </div>
-                ) : null}
-              </div>
+
+                  <div className="space-y-4">
+                    <h2
+                      className={`text-3xl font-black leading-tight sm:text-4xl ${
+                        heroIsEvent ? 'text-secret-red' : 'text-newspaper-headline'
+                      } ${
+                        heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_20px_rgba(248,113,113,0.65)]' : ''
+                      }`}
+                    >
+                      {heroHeadline}
+                    </h2>
+                    <p
+                      className={`text-lg font-semibold italic ${
+                        heroIsEvent
+                          ? heroIsFilesOnTheLoose
+                            ? 'text-secret-red drop-shadow-[0_0_12px_rgba(248,113,113,0.55)]'
+                            : 'text-secret-red/80'
+                          : 'text-newspaper-text/80'
+                      } ${heroIsFilesOnTheLoose ? 'animate-pulse' : ''}`}
+                    >
+                      {heroSubhead}
+                    </p>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/70">
+                      <span>{byline}</span>
+                      <span>{sourceLine}</span>
+                    </div>
+
+                    {/* Main Story Image */}
+                    <div className="relative overflow-hidden rounded-md border border-newspaper-border bg-newspaper-header/20">
+                      {heroPrimaryCardId ? (
+                        <CardImage
+                          cardId={heroPrimaryCardId}
+                          fit="contain"
+                          className="w-full aspect-[4/3] max-h-64"
+                        />
+                      ) : (
+                        <div className="flex aspect-[4/3] w-full max-h-64 items-center justify-center text-sm font-semibold uppercase tracking-wide text-newspaper-text/60">
+                          Archival footage pending clearance.
+                        </div>
+                      )}
+                      {classifiedStamp ? (
+                        <div className="stamp stamp--classified absolute right-3 top-3">{classifiedStamp}</div>
+                      ) : null}
+                    </div>
+
+                    <div
+                      className={`space-y-4 text-sm leading-relaxed ${
+                        heroIsEvent ? 'text-secret-red/90' : ''
+                      } ${
+                        heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_14px_rgba(248,113,113,0.4)]' : ''
+                      }`}
+                    >
+                      {heroBody.map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
+                    </div>
+
+                    {heroTags.length ? (
+                      <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
+                        {heroTags.slice(0, 3).map(tag => (
+                          <span key={tag} className="rounded border border-newspaper-border px-2 py-0.5">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </>
+              )}
             </article>
 
             {/* COLUMN 2: Stats & Secondary Headlines */}
             <aside className="space-y-4">
               {/* Runner-Up Dispatches */}
-              {runnerArticles.length > 0 ? (
+              {runnerDispatches.length > 0 ? (
                 <section className="rounded-md border border-newspaper-border bg-white/75 p-4 shadow-sm">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <h3 className="text-sm font-black uppercase tracking-wide text-newspaper-text">
@@ -1250,33 +1333,27 @@ const TabloidNewspaperV2 = ({
                     ) : null}
                   </div>
                   <div className="space-y-3">
-                    {runnerArticles.slice(0, 3).map((article, index) => (
+                    {runnerDispatches.slice(0, 3).map((dispatch, index) => (
                       <article
-                        key={`${article.hed}-${index}`}
+                        key={`${dispatch.id}-${index}`}
                         className="border-b border-dashed border-newspaper-border/60 pb-3 last:border-0 last:pb-0"
                       >
                         <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.28em] text-newspaper-text/55">
-                          <span>{article.kicker ?? `Field Report ${index + 1}`}</span>
-                          <span>{article.tone.toUpperCase()}</span>
+                          <span>{`Archive Source ${index + 1}`}</span>
+                          <span>{dispatch.tone.toUpperCase()}</span>
                         </div>
                         <h4 className="mt-1 text-base font-semibold leading-snug text-newspaper-text">
-                          {article.hed}
+                          {dispatch.headline}
                         </h4>
-                        {article.dek ? (
-                          <p className="text-xs italic text-newspaper-text/70">{article.dek}</p>
+                        {dispatch.subhead ? (
+                          <p className="text-xs italic text-newspaper-text/70">{dispatch.subhead}</p>
                         ) : null}
-                        {article.bullets.length ? (
-                          <ul className="mt-2 space-y-1 text-xs leading-relaxed text-newspaper-text/75">
-                            {article.bullets.slice(0, 3).map((bullet, bulletIndex) => (
-                              <li key={`${bulletIndex}-${bullet.slice(0, 32)}`} className="list-disc pl-4">
-                                {bullet}
-                              </li>
-                            ))}
-                          </ul>
-                        ) : null}
+                        <p className="mt-2 text-xs leading-relaxed text-newspaper-text/75">
+                          {dispatch.summary}
+                        </p>
                         <footer className="mt-3 text-[10px] font-semibold uppercase tracking-[0.28em] text-newspaper-text/50">
-                          <div>{article.byline}</div>
-                          <div>{article.source}</div>
+                          <div>By: Composite Desk</div>
+                          <div>Ref: {dispatch.id}</div>
                         </footer>
                       </article>
                     ))}

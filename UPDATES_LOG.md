@@ -2,6 +2,16 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-25 – Composite turn edition headlines go live
+- Timestamp: 2025-10-25T02:50:00Z
+- Files:
+  - `src/components/newspaper/TurnEdition.tsx`
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `src/components/game/TabloidNewspaperLegacy.tsx`
+  - `__tests__/newspaper/TurnEdition.test.tsx`
+  - `components.json`
+- Summary: Introduced a dedicated TurnEdition hero component that renders composite stories with faction connectors, updated the tabloid newspaper to consume `{ kind: 'composite' }` feed entries instead of legacy article blocks, and added targeted tests ensuring tone-specific presentation and image prompt fallbacks behave correctly.
+
 ## 2025-10-24 – Article combiner powers live newsroom column
 - Timestamp: 2025-10-24T11:30:00Z
 - Files:

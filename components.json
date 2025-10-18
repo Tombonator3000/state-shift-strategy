@@ -21,6 +21,10 @@
     "ParapediaPanel": {
       "path": "src/components/game/parapedia/ParapediaPanel.tsx",
       "description": "Truth Bureau knowledge vault with atlas navigation, search, and state dossiers."
+    },
+    "TurnEdition": {
+      "path": "src/components/newspaper/TurnEdition.tsx",
+      "description": "Composite story hero layout with faction connectors, sources, and archival image prompt support."
     }
   }
 }

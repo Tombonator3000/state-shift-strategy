@@ -16,7 +16,7 @@ import type { HotspotDirector, WeightedHotspotCandidate } from '@/systems/parano
 import { loadNewspaperData, pick, type NewspaperData } from '@/lib/newspaperData';
 import type { CharacterStageState } from '@/game/recurringCharacterArticles';
 import type { ArticleBlock } from '@/news/types';
-import type { CompositeStory } from '@/types/news';
+import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
 
 export interface TabloidPlayedCard {
   card: GameCard;
@@ -46,8 +46,8 @@ export interface TabloidNewspaperProps {
   activeHotspot?: WeightedHotspotCandidate | null;
   frontPageTriplet?: PlayedCardMeta[] | null;
   recurringCharacters?: Record<string, CharacterStageState>;
-  headlineLog?: CompositeStory[];
-  extraExtraFeed?: ArticleBlock[];
+  headlineLog?: Array<CompositeStory | ExtraExtraFeedEntry>;
+  extraExtraFeed?: ExtraExtraFeedEntry[];
 }
 
 interface Article {
