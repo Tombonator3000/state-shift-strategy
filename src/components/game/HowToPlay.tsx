@@ -15,7 +15,7 @@ import {
   MVP_RULES_SECTIONS,
   MVP_RULES_TITLE,
 } from '@/content/mvpRules';
-import { WhatIsParanoidTimes } from '@/components/game/WhatIsParanoidTimes';
+import WhatIsParanoidTimes from '@/components/WhatIsParanoidTimes';
 
 interface HowToPlayProps {
   onClose: () => void;
