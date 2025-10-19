@@ -46,6 +46,14 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Summary: Ensured the main menu only initializes its music once when the intro hands off control so player-selected tracks fro
 m the options panel persist instead of resetting to the default playlist.
 
+## 2025-10-19 – Accordion briefing modernizes How-to-Play
+- Timestamp: 2025-10-19T13:17:05Z
+- Files:
+  - `src/components/game/HowToPlay.tsx`
+  - `src/components/game/WhatIsParanoidTimes.tsx`
+  - `components.json`
+- Summary: Rebuilt the How-to-Play overlay around a pulp-styled accordion that introduces the Paranoid Times newsroom fantasy before expanding into the MVP ruleset, added a dedicated intro component, and cataloged the new surface for designers.
+
 ## 2025-10-18 – Final edition borrows live card articles for MVP coverage
 - Timestamp: 2025-10-18T09:45:00Z
 - Files:

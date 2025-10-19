@@ -2,6 +2,12 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import {
   MVP_COMBO_OVERVIEW,
@@ -9,26 +15,44 @@ import {
   MVP_RULES_SECTIONS,
   MVP_RULES_TITLE,
 } from '@/content/mvpRules';
+import { WhatIsParanoidTimes } from '@/components/game/WhatIsParanoidTimes';
 
 interface HowToPlayProps {
   onClose: () => void;
 }
 
 const HowToPlay = ({ onClose }: HowToPlayProps) => {
+  const [activeItem, setActiveItem] = useState<string>('intro');
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const updateScrollButtons = useCallback(() => {
+    if (activeItem !== 'rules') {
+      setCanScrollUp(false);
+      setCanScrollDown(false);
+      return;
+    }
+
     const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
-    if (!viewport) return;
+    if (!viewport) {
+      setCanScrollUp(false);
+      setCanScrollDown(false);
+      return;
+    }
 
     const { scrollTop, scrollHeight, clientHeight } = viewport;
     setCanScrollUp(scrollTop > 0);
     setCanScrollDown(scrollTop + clientHeight < scrollHeight - 2);
-  }, []);
+  }, [activeItem]);
 
   useEffect(() => {
+    if (activeItem !== 'rules') {
+      setCanScrollUp(false);
+      setCanScrollDown(false);
+      return;
+    }
+
     const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
     if (!viewport) return;
 
@@ -45,9 +69,11 @@ const HowToPlay = ({ onClose }: HowToPlayProps) => {
       viewport.removeEventListener('scroll', updateScrollButtons);
       resizeObserver?.disconnect();
     };
-  }, [updateScrollButtons]);
+  }, [activeItem, updateScrollButtons]);
 
   const scrollTo = (direction: 'up' | 'down') => {
+    if (activeItem !== 'rules') return;
+
     const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
     if (!viewport) return;
 
@@ -109,137 +135,165 @@ const HowToPlay = ({ onClose }: HowToPlayProps) => {
           </div>
         </div>
 
-        <div className="relative flex-1">
-          <ScrollArea
-            ref={scrollAreaRef}
-            className="h-[calc(90vh-200px)] w-full"
+        <div className="relative flex-1 overflow-hidden">
+          <Accordion
+            type="single"
+            collapsible
+            value={activeItem || undefined}
+            onValueChange={(value) => setActiveItem(value || '')}
+            className="w-full"
           >
-            <div className="p-6 prose prose-sm max-w-none space-y-6">
-              <h1 className="text-3xl font-bold text-newspaper-text mb-2 font-mono border-b-2 border-newspaper-text pb-2">
-                {MVP_RULES_TITLE}
-              </h1>
+            <AccordionItem value="intro" className="border-b-2 border-newspaper-text">
+              <AccordionTrigger className="px-6 text-left text-xl font-bold font-mono uppercase tracking-[0.3em] text-newspaper-text bg-newspaper-text/10 hover:bg-newspaper-text/20 data-[state=open]:bg-newspaper-text/20">
+                What is the Paranoid Times?
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pt-4 pb-6 bg-newspaper-text/5">
+                <ScrollArea className="h-[calc(90vh-240px)] pr-2">
+                  <div className="pb-2">
+                    <WhatIsParanoidTimes />
+                  </div>
+                </ScrollArea>
+              </AccordionContent>
+            </AccordionItem>
 
-              {MVP_RULES_SECTIONS.map((section) => (
-                <section key={section.title} className="space-y-3">
-                  <h2 className="text-2xl font-bold text-newspaper-text font-mono">
-                    {section.title}
-                  </h2>
-                  {section.description && (
-                    <p className="text-newspaper-text/80 leading-relaxed">
-                      {section.description}
-                    </p>
-                  )}
-                  {section.bullets && (
-                    <ul className="space-y-2 text-newspaper-text">
-                      {section.bullets.map((bullet) => (
-                        <li key={bullet} className="pl-4 relative">
-                          <span className="absolute left-0 text-newspaper-text/70">•</span>
-                          <span className="leading-relaxed">{bullet}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
-              ))}
+            <AccordionItem value="rules" className="border-b-0 border-newspaper-text">
+              <AccordionTrigger className="px-6 text-left text-xl font-bold font-mono uppercase tracking-[0.3em] text-newspaper-text bg-newspaper-text/10 hover:bg-newspaper-text/20 data-[state=open]:bg-newspaper-text/20">
+                MVP Operations Protocol
+              </AccordionTrigger>
+              <AccordionContent className="px-0 pb-0">
+                <ScrollArea
+                  ref={scrollAreaRef}
+                  className="h-[calc(90vh-240px)] w-full"
+                >
+                  <div className="p-6 prose prose-sm max-w-none space-y-6">
+                    <h1 className="text-3xl font-bold text-newspaper-text mb-2 font-mono border-b-2 border-newspaper-text pb-2">
+                      {MVP_RULES_TITLE}
+                    </h1>
 
-              <section className="space-y-3">
-                <h2 className="text-2xl font-bold text-newspaper-text font-mono">
-                  Cost Benchmarks by Rarity
-                </h2>
-                <p className="text-newspaper-text/80 leading-relaxed">
-                  MVP cards follow fixed IP costs and baseline effects. Use this table to spot curve breakers before they reach the battlefield.
-                </p>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-sm">
-                    <thead>
-                      <tr className="bg-newspaper-text/10">
-                        <th className="border border-newspaper-text/30 px-3 py-2 font-mono">Rarity</th>
-                        <th className="border border-newspaper-text/30 px-3 py-2 font-mono">ATTACK</th>
-                        <th className="border border-newspaper-text/30 px-3 py-2 font-mono">MEDIA</th>
-                        <th className="border border-newspaper-text/30 px-3 py-2 font-mono">ZONE</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {MVP_COST_TABLE_ROWS.map((row) => (
-                        <tr key={row.rarity}>
-                          <td className="border border-newspaper-text/30 px-3 py-2 font-semibold uppercase">
-                            {row.rarity}
-                          </td>
-                          <td className="border border-newspaper-text/30 px-3 py-2">
-                            <div className="font-semibold">{row.attack.effect}</div>
-                            <div className="text-xs text-newspaper-text/70">Cost {row.attack.cost}</div>
-                          </td>
-                          <td className="border border-newspaper-text/30 px-3 py-2">
-                            <div className="font-semibold">{row.media.effect}</div>
-                            <div className="text-xs text-newspaper-text/70">Cost {row.media.cost}</div>
-                          </td>
-                          <td className="border border-newspaper-text/30 px-3 py-2">
-                            <div className="font-semibold">{row.zone.effect}</div>
-                            <div className="text-xs text-newspaper-text/70">Cost {row.zone.cost}</div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
+                    {MVP_RULES_SECTIONS.map((section) => (
+                      <section key={section.title} className="space-y-3">
+                        <h2 className="text-2xl font-bold text-newspaper-text font-mono">
+                          {section.title}
+                        </h2>
+                        {section.description && (
+                          <p className="text-newspaper-text/80 leading-relaxed">
+                            {section.description}
+                          </p>
+                        )}
+                        {section.bullets && (
+                          <ul className="space-y-2 text-newspaper-text">
+                            {section.bullets.map((bullet) => (
+                              <li key={bullet} className="pl-4 relative">
+                                <span className="absolute left-0 text-newspaper-text/70">•</span>
+                                <span className="leading-relaxed">{bullet}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </section>
+                    ))}
 
-              <section className="space-y-3">
-                <h2 className="text-2xl font-bold text-newspaper-text font-mono">
-                  Combo Catalogue
-                </h2>
-                <p className="text-newspaper-text/80 leading-relaxed">
-                  Combos award extra resources when you meet their turn-based requirements. Each entry below shows the reward payload and any caps that limit repeated payouts. Mix and match to build the turn that fits your strategy.
-                </p>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {MVP_COMBO_OVERVIEW.map(group => (
-                    <div
-                      key={group.category}
-                      className="border border-newspaper-text/30 bg-newspaper-text/5 p-3 rounded"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xl font-semibold text-newspaper-text font-mono uppercase">
-                          {group.category} Combos
-                        </h3>
-                        <span className="text-xs font-semibold text-newspaper-text/70">
-                          {group.combos.length} listed
-                        </span>
+                    <section className="space-y-3">
+                      <h2 className="text-2xl font-bold text-newspaper-text font-mono">
+                        Cost Benchmarks by Rarity
+                      </h2>
+                      <p className="text-newspaper-text/80 leading-relaxed">
+                        MVP cards follow fixed IP costs and baseline effects. Use this table to spot curve breakers before they reach the battlefield.
+                      </p>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-sm">
+                          <thead>
+                            <tr className="bg-newspaper-text/10">
+                              <th className="border border-newspaper-text/30 px-3 py-2 font-mono">Rarity</th>
+                              <th className="border border-newspaper-text/30 px-3 py-2 font-mono">ATTACK</th>
+                              <th className="border border-newspaper-text/30 px-3 py-2 font-mono">MEDIA</th>
+                              <th className="border border-newspaper-text/30 px-3 py-2 font-mono">ZONE</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {MVP_COST_TABLE_ROWS.map((row) => (
+                              <tr key={row.rarity}>
+                                <td className="border border-newspaper-text/30 px-3 py-2 font-semibold uppercase">
+                                  {row.rarity}
+                                </td>
+                                <td className="border border-newspaper-text/30 px-3 py-2">
+                                  <div className="font-semibold">{row.attack.effect}</div>
+                                  <div className="text-xs text-newspaper-text/70">Cost {row.attack.cost}</div>
+                                </td>
+                                <td className="border border-newspaper-text/30 px-3 py-2">
+                                  <div className="font-semibold">{row.media.effect}</div>
+                                  <div className="text-xs text-newspaper-text/70">Cost {row.media.cost}</div>
+                                </td>
+                                <td className="border border-newspaper-text/30 px-3 py-2">
+                                  <div className="font-semibold">{row.zone.effect}</div>
+                                  <div className="text-xs text-newspaper-text/70">Cost {row.zone.cost}</div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                      <div className="space-y-3 text-sm">
-                        {group.combos.map(combo => {
-                          const rewardText = combo.reward.replace(/[()]/g, '').trim();
-                          return (
-                            <div key={combo.id} className="border-t border-dashed border-newspaper-text/30 pt-2 first:border-t-0 first:pt-0">
-                              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                                <span className="font-semibold text-newspaper-text">{combo.name}</span>
-                                {rewardText && (
-                                  <span className="text-xs font-mono text-newspaper-text/70">
-                                    Reward: {rewardText}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-newspaper-text/80 text-xs leading-relaxed mt-1">
-                                {combo.description}
-                              </p>
-                              {(combo.cap || combo.fxText) && (
-                                <div className="mt-1 flex flex-wrap gap-2 text-[11px] text-newspaper-text/60">
-                                  {combo.cap ? <span>Cap: {combo.cap}</span> : null}
-                                  {combo.fxText ? <span className="italic">FX: {combo.fxText}</span> : null}
-                                </div>
-                              )}
+                    </section>
+
+                    <section className="space-y-3">
+                      <h2 className="text-2xl font-bold text-newspaper-text font-mono">
+                        Combo Catalogue
+                      </h2>
+                      <p className="text-newspaper-text/80 leading-relaxed">
+                        Combos award extra resources when you meet their turn-based requirements. Each entry below shows the reward payload and any caps that limit repeated payouts. Mix and match to build the turn that fits your strategy.
+                      </p>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {MVP_COMBO_OVERVIEW.map(group => (
+                          <div
+                            key={group.category}
+                            className="border border-newspaper-text/30 bg-newspaper-text/5 p-3 rounded"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="text-xl font-semibold text-newspaper-text font-mono uppercase">
+                                {group.category} Combos
+                              </h3>
+                              <span className="text-xs font-semibold text-newspaper-text/70">
+                                {group.combos.length} listed
+                              </span>
                             </div>
-                          );
-                        })}
+                            <div className="space-y-3 text-sm">
+                              {group.combos.map(combo => {
+                                const rewardText = combo.reward.replace(/[()]/g, '').trim();
+                                return (
+                                  <div key={combo.id} className="border-t border-dashed border-newspaper-text/30 pt-2 first:border-t-0 first:pt-0">
+                                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                                      <span className="font-semibold text-newspaper-text">{combo.name}</span>
+                                      {rewardText && (
+                                        <span className="text-xs font-mono text-newspaper-text/70">
+                                          Reward: {rewardText}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-newspaper-text/80 text-xs leading-relaxed mt-1">
+                                      {combo.description}
+                                    </p>
+                                    {(combo.cap || combo.fxText) && (
+                                      <div className="mt-1 flex flex-wrap gap-2 text-[11px] text-newspaper-text/60">
+                                        {combo.cap ? <span>Cap: {combo.cap}</span> : null}
+                                        {combo.fxText ? <span className="italic">FX: {combo.fxText}</span> : null}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </div>
-          </ScrollArea>
+                    </section>
+                  </div>
+                </ScrollArea>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
           {/* Scroll controls */}
-          {canScrollUp && (
+          {activeItem === 'rules' && canScrollUp && (
             <Button
               onClick={() => scrollTo('up')}
               className="absolute top-4 right-4 bg-newspaper-text/20 hover:bg-newspaper-text/30 text-newspaper-text border border-newspaper-text"
@@ -249,7 +303,7 @@ const HowToPlay = ({ onClose }: HowToPlayProps) => {
             </Button>
           )}
 
-          {canScrollDown && (
+          {activeItem === 'rules' && canScrollDown && (
             <Button
               onClick={() => scrollTo('down')}
               className="absolute bottom-4 right-4 bg-newspaper-text/20 hover:bg-newspaper-text/30 text-newspaper-text border border-newspaper-text"
