@@ -2,6 +2,14 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-27 – Orientation article enters shared components
+- Timestamp: 2025-10-27T09:00:00Z
+- Files:
+  - `src/components/WhatIsParanoidTimes.tsx`
+  - `src/components/game/HowToPlay.tsx`
+  - `components.json`
+- Summary: Moved the Paranoid Times orientation copy into a shared article component with diegetic prose markup, rewired the How-to-Play accordion to consume the new surface, and updated the component catalog so design tooling tracks the relocation.
+
 ## 2025-10-26 – Restore Lovable preview builds
 - Timestamp: 2025-10-26T00:00:00Z
 - Files:
