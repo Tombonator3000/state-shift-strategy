@@ -16,6 +16,7 @@ import type { EditorDef, EditorId } from '@/expansions/editors/EditorsEngine';
 import type { TabloidRelicRuntimeState } from '@/expansions/tabloidRelics/RelicTypes';
 import type { GameOverReport } from '@/types/finalEdition';
 import type { RecurringCharacterProgress } from '@/game/recurringCharacters';
+import type { CampaignMission } from '@/data/campaign';
 
 export interface CardPlayRecord {
   card: GameCard;
@@ -162,6 +163,8 @@ export interface GameState {
   economicGoal?: number;
   matchContext?: Record<string, unknown> | null;
   overtimeConfig?: OvertimeConfig;
+  campaignMode?: boolean;
+  activeMission?: CampaignMission;
 }
 
 export interface GameEditorRuntimeState {
