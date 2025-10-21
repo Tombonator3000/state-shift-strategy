@@ -1,0 +1,378 @@
+{
+  "id": "cryptids-midnight-fieldguide",
+  "name": "Cryptids Expansion: Midnight Field Guide",
+  "description": "Twenty lore-rich cryptid cards for Truth and Government forces locking horns over monster sightings.",
+  "version": "1.0.0",
+  "author": "Paranoid Times Narrative Desk",
+  "cards": [
+    {
+      "id": "CRYPTID-TRUTH-SPCL-001",
+      "faction": "truth",
+      "name": "Mothman Mutual Aid Hotline",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2,
+        "ifFewerStates": {
+          "threshold": 0,
+          "then": { "pressureDelta": 1 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "+2% Truth. If you're behind on states, add +1 Pressure anywhere.",
+      "flavor": "Call center reroutes through the Paranoid Times midnight desk for emergency winged omens.",
+      "tags": ["cryptids", "truth", "media"]
+    },
+    {
+      "id": "CRYPTID-TRUTH-SPCL-002",
+      "faction": "truth",
+      "name": "Chupacabra Stakeout Meetup",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "cost": 5,
+      "effects": {
+        "pressureDelta": 2,
+        "ifTruthAbove": {
+          "threshold": 55,
+          "then": { "pressureDelta": 1 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "+2 Pressure. If Truth ≥ 55%, add +1 more Pressure.",
+      "flavor": "Florida Man supplies goats; Maria Chen supplies night-vision rosaries.",
+      "tags": ["cryptids", "truth", "zone"]
+    },
+    {
+      "id": "CRYPTID-TRUTH-SPCL-003",
+      "faction": "truth",
+      "name": "Loch Ness Livestream",
+      "type": "MEDIA",
+      "rarity": "rare",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3,
+        "ifTruthAbove": {
+          "threshold": 60,
+          "then": { "draw": 1 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "+3% Truth. If Truth ≥ 60%, draw 1 card.",
+      "flavor": "Streaming kit borrows sonar from the Denver Airport maintenance bay.",
+      "tags": ["cryptids", "truth", "media"]
+    },
+    {
+      "id": "CRYPTID-TRUTH-SPCL-004",
+      "faction": "truth",
+      "name": "Sasquatch Doorbell Cam Cooperative",
+      "type": "ZONE",
+      "rarity": "common",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1,
+        "pressurePerControlledState": { "max": 2 }
+      },
+      "extId": "cryptids",
+      "text": "+1 Pressure plus +1 per state you control (max +2).",
+      "flavor": "Elvis repurposes smart doorbells into Sasquatch recognition arrays.",
+      "tags": ["cryptids", "truth", "zone"]
+    },
+    {
+      "id": "CRYPTID-TRUTH-SPCL-005",
+      "faction": "truth",
+      "name": "Jersey Devil Flyers",
+      "type": "ATTACK",
+      "rarity": "common",
+      "cost": 2,
+      "effects": {
+        "ipDelta": { "opponent": 1 },
+        "ifFewerStates": {
+          "threshold": 0,
+          "then": { "ipDelta": { "opponent": 1 } }
+        }
+      },
+      "extId": "cryptids",
+      "text": "Opponent −1 IP. If you're behind on states, opponent loses 1 additional IP.",
+      "flavor": "Print run flagged by the Bureau of Uncanny Printing before dawn.",
+      "tags": ["cryptids", "truth", "attack"]
+    },
+    {
+      "id": "CRYPTID-TRUTH-SPCL-006",
+      "faction": "truth",
+      "name": "Thunderbird Skywriting Crew",
+      "type": "MEDIA",
+      "rarity": "rare",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3,
+        "ifMoreStates": {
+          "threshold": 6,
+          "then": { "pressureDelta": 2 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "+3% Truth. If you control 6+ states, add +2 Pressure anywhere.",
+      "flavor": "Bat Boy handles pyrotechnics while the TruthMeter™ logs each contrail.",
+      "tags": ["cryptids", "truth", "media"]
+    },
+    {
+      "id": "CRYPTID-TRUTH-SPCL-007",
+      "faction": "truth",
+      "name": "Flatwoods EMF Revival",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2,
+        "ifTruthBelow": {
+          "threshold": 45,
+          "then": { "draw": 1 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "+2% Truth. If Truth ≤ 45%, draw 1 card.",
+      "flavor": "Pastor Rex hands out EMF hymnals tuned by Hamtrak technicians.",
+      "tags": ["cryptids", "truth", "media"]
+    },
+    {
+      "id": "CRYPTID-TRUTH-SPCL-008",
+      "faction": "truth",
+      "name": "Lizardman Bayou Radio",
+      "type": "MEDIA",
+      "rarity": "common",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1,
+        "ifFewerStates": {
+          "threshold": 0,
+          "then": { "truthDelta": 1 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "+1% Truth. If you're behind on states, gain +1% Truth again.",
+      "flavor": "Swamp transmitters run on Doomsday Beans™ biodiesel.",
+      "tags": ["cryptids", "truth", "media"]
+    },
+    {
+      "id": "CRYPTID-TRUTH-SPCL-009",
+      "faction": "truth",
+      "name": "International Bat Boy Congress",
+      "type": "ZONE",
+      "rarity": "rare",
+      "cost": 6,
+      "effects": {
+        "pressureDelta": 3,
+        "defenseToAllStates": 1
+      },
+      "extId": "cryptids",
+      "text": "+3 Pressure and all your states gain +1 Defense.",
+      "flavor": "Delegates issue ultraviolet parchment resolutions to every safe house.",
+      "tags": ["cryptids", "truth", "zone"]
+    },
+    {
+      "id": "CRYPTID-TRUTH-SPCL-010",
+      "faction": "truth",
+      "name": "TruthMeter™ Monster Census",
+      "type": "MEDIA",
+      "rarity": "legendary",
+      "cost": 6,
+      "effects": {
+        "truthDelta": 2,
+        "truthPerControlledState": { "max": 6 },
+        "ifTruthAbove": {
+          "threshold": 65,
+          "then": { "draw": 1 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "+2% Truth plus +1% per state you control (max +6%). If Truth ≥ 65%, draw 1 card.",
+      "flavor": "TruthMeter™ drones sweep national parks for unreported footprints.",
+      "tags": ["cryptids", "truth", "legendary"]
+    },
+    {
+      "id": "CRYPTID-GOV-SPCL-001",
+      "faction": "government",
+      "name": "Department of Myth Management",
+      "type": "MEDIA",
+      "rarity": "rare",
+      "cost": 5,
+      "effects": {
+        "truthDelta": -3,
+        "ifTruthAbove": {
+          "threshold": 60,
+          "then": { "ipDelta": { "opponent": 1 } }
+        }
+      },
+      "extId": "cryptids",
+      "text": "−3% Truth. If Truth ≥ 60%, opponent loses 1 IP.",
+      "flavor": "Karen Walsh files another denial into Project Avalon archives.",
+      "tags": ["cryptids", "government", "media"]
+    },
+    {
+      "id": "CRYPTID-GOV-SPCL-002",
+      "faction": "government",
+      "name": "Operation Silver Net",
+      "type": "ATTACK",
+      "rarity": "rare",
+      "cost": 4,
+      "effects": {
+        "ipDelta": { "opponent": 2 },
+        "ifMoreStates": {
+          "threshold": 6,
+          "then": { "ipDelta": { "opponent": 1 } }
+        }
+      },
+      "extId": "cryptids",
+      "text": "Opponent −2 IP. If you control 6+ states, opponent loses 1 additional IP.",
+      "flavor": "General Thompson syncs drone nets with Denver Airport satellites.",
+      "tags": ["cryptids", "government", "attack"]
+    },
+    {
+      "id": "CRYPTID-GOV-SPCL-003",
+      "faction": "government",
+      "name": "Friendly Cryptid Curfew",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "cost": 5,
+      "effects": {
+        "pressureDelta": 2,
+        "defenseToAllStates": 1
+      },
+      "extId": "cryptids",
+      "text": "+2 Pressure and all your states gain +1 Defense.",
+      "flavor": "Curfew alerts ping through the Domestic Anomaly PA system.",
+      "tags": ["cryptids", "government", "zone"]
+    },
+    {
+      "id": "CRYPTID-GOV-SPCL-004",
+      "faction": "government",
+      "name": "Lair Rezoning Committee",
+      "type": "ZONE",
+      "rarity": "common",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1,
+        "pressurePerControlledState": { "max": 2 }
+      },
+      "extId": "cryptids",
+      "text": "+1 Pressure plus +1 per state you control (max +2).",
+      "flavor": "Minutes note: 'Chupacabra relocation to Business Park D pending.'",
+      "tags": ["cryptids", "government", "zone"]
+    },
+    {
+      "id": "CRYPTID-GOV-SPCL-005",
+      "faction": "government",
+      "name": "Tourism Denial Brochure",
+      "type": "MEDIA",
+      "rarity": "common",
+      "cost": 3,
+      "effects": {
+        "truthDelta": -1,
+        "ifTruthAbove": {
+          "threshold": 55,
+          "then": { "truthDelta": -1 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "−1% Truth. If Truth ≥ 55%, reduce Truth by 1% more.",
+      "flavor": "Printed with ink straight from the Bureau of Narrative Correction.",
+      "tags": ["cryptids", "government", "media"]
+    },
+    {
+      "id": "CRYPTID-GOV-SPCL-006",
+      "faction": "government",
+      "name": "Suppression Memo: Lake Monster",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "cost": 4,
+      "effects": {
+        "truthDelta": -2,
+        "ifMoreStates": {
+          "threshold": 5,
+          "then": { "discardOpponent": 1 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "−2% Truth. If you control 5+ states, opponent discards 1 card.",
+      "flavor": "Memo suggests renaming Nessie to 'Glacial Anomaly 12b.'",
+      "tags": ["cryptids", "government", "media"]
+    },
+    {
+      "id": "CRYPTID-GOV-SPCL-007",
+      "faction": "government",
+      "name": "Containment Subsidy Program",
+      "type": "ATTACK",
+      "rarity": "uncommon",
+      "cost": 3,
+      "effects": {
+        "ipDelta": { "opponent": 2 },
+        "ifTruthAbove": {
+          "threshold": 65,
+          "then": { "ipDelta": { "opponent": 1 } }
+        }
+      },
+      "extId": "cryptids",
+      "text": "Opponent −2 IP. If Truth ≥ 65%, opponent loses 1 additional IP.",
+      "flavor": "Participants receive tax credits denominated in black-budget bonds.",
+      "tags": ["cryptids", "government", "attack"]
+    },
+    {
+      "id": "CRYPTID-GOV-SPCL-008",
+      "faction": "government",
+      "name": "Drone Fog Deployment",
+      "type": "ZONE",
+      "rarity": "rare",
+      "cost": 6,
+      "effects": {
+        "pressureDelta": 3,
+        "ifTruthAbove": {
+          "threshold": 65,
+          "then": { "pressureDelta": 1 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "+3 Pressure. If Truth ≥ 65%, add +1 more Pressure.",
+      "flavor": "Atmospheric Cover Unit calibrates cloaking mist to TruthMeter™ blind spots.",
+      "tags": ["cryptids", "government", "zone"]
+    },
+    {
+      "id": "CRYPTID-GOV-SPCL-009",
+      "faction": "government",
+      "name": "Redacted Ranger Briefing",
+      "type": "MEDIA",
+      "rarity": "common",
+      "cost": 3,
+      "effects": {
+        "truthDelta": -1,
+        "ifMoreStates": {
+          "threshold": 4,
+          "then": { "pressureDelta": 1 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "−1% Truth. If you control 4+ states, add +1 Pressure anywhere.",
+      "flavor": "Briefing binder arrives with 47 pages missing and one silver bullet.",
+      "tags": ["cryptids", "government", "media"]
+    },
+    {
+      "id": "CRYPTID-GOV-SPCL-010",
+      "faction": "government",
+      "name": "Total Information Awareness: Cryptid Annex",
+      "type": "MEDIA",
+      "rarity": "legendary",
+      "cost": 6,
+      "effects": {
+        "truthDelta": -4,
+        "ifMoreStates": {
+          "threshold": 6,
+          "then": { "discardOpponent": 1 }
+        }
+      },
+      "extId": "cryptids",
+      "text": "−4% Truth. If you control 6+ states, opponent discards 1 card.",
+      "flavor": "Adds sensor feeds from Project Blue Brook to the master database.",
+      "tags": ["cryptids", "government", "legendary"]
+    }
+  ]
+}

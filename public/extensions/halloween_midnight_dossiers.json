@@ -1,0 +1,377 @@
+{
+  "id": "halloween-midnight-dossiers",
+  "name": "Halloween Spooktacular: Midnight Dossiers",
+  "description": "Curated Halloween special cards blending Paranoid Times lore with seasonal conspiracies.",
+  "version": "1.0.0",
+  "author": "Paranoid Times Narrative Desk",
+  "cards": [
+    {
+      "id": "HALLO-TRUTH-SPCL-001",
+      "faction": "truth",
+      "name": "Bat Boy's Midnight Canvass",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "cost": 5,
+      "effects": {
+        "pressureDelta": 2,
+        "ifFewerStates": {
+          "threshold": 0,
+          "then": { "defenseToAllStates": 1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "+2 Pressure. If you're behind on state control, all your states gain +1 Defense.",
+      "flavor": "Bat Boy autographs voter rolls with ultraviolet ink from the Paranoid Times printroom.",
+      "tags": ["halloween", "truth", "special"]
+    },
+    {
+      "id": "HALLO-TRUTH-SPCL-002",
+      "faction": "truth",
+      "name": "Elvis Broadcasts from the Corn Maze",
+      "type": "MEDIA",
+      "rarity": "rare",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3,
+        "ifTruthAbove": {
+          "threshold": 55,
+          "then": { "draw": 1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "+3% Truth. If Truth ≥ 55%, draw 1 card.",
+      "flavor": "Elvis tunes the TruthMeter™ to 'harvest moon' and croons classified setlists.",
+      "tags": ["halloween", "truth", "media"]
+    },
+    {
+      "id": "HALLO-TRUTH-SPCL-003",
+      "faction": "truth",
+      "name": "FOIA Séance Hotline",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2,
+        "ifTruthBelow": {
+          "threshold": 40,
+          "then": { "pressureDelta": 1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "+2% Truth. If Truth ≤ 40%, add +1 Pressure in any state.",
+      "flavor": "Maria Chen patches in spectral operators through the Hamtrak switchboard.",
+      "tags": ["halloween", "truth", "media"]
+    },
+    {
+      "id": "HALLO-TRUTH-SPCL-004",
+      "faction": "truth",
+      "name": "Pumpkin Spice EMF Sweep",
+      "type": "ZONE",
+      "rarity": "common",
+      "cost": 4,
+      "effects": {
+        "pressureDelta": 1,
+        "pressurePerControlledState": { "max": 2 }
+      },
+      "extId": "halloween",
+      "text": "+1 Pressure plus +1 per state you control (max +2).",
+      "flavor": "Garage CSI rigs latte frothers as EMF sniffers—mint condition.",
+      "tags": ["halloween", "truth", "zone"]
+    },
+    {
+      "id": "HALLO-TRUTH-SPCL-005",
+      "faction": "truth",
+      "name": "Haunted Ham Radio League",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "cost": 4,
+      "effects": {
+        "truthDelta": 2,
+        "ifMoreStates": {
+          "threshold": 5,
+          "then": { "draw": 1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "+2% Truth. If you control 5+ states, draw 1 card.",
+      "flavor": "Pastor Rex runs carrier pigeons and Channel 13.13 simultaneously.",
+      "tags": ["halloween", "truth", "media"]
+    },
+    {
+      "id": "HALLO-TRUTH-SPCL-006",
+      "faction": "truth",
+      "name": "Crypt Keeper Canvassing Kit",
+      "type": "ATTACK",
+      "rarity": "rare",
+      "cost": 4,
+      "effects": {
+        "ipDelta": { "opponent": 2 },
+        "ifTruthAbove": {
+          "threshold": 60,
+          "then": { "ipDelta": { "opponent": 1 } }
+        }
+      },
+      "extId": "halloween",
+      "text": "Opponent −2 IP. If Truth ≥ 60%, opponent loses 1 additional IP.",
+      "flavor": "Starter kit ships with glow-in-the-dark affidavits and Bat Boy door hangers.",
+      "tags": ["halloween", "truth", "attack"]
+    },
+    {
+      "id": "HALLO-TRUTH-SPCL-007",
+      "faction": "truth",
+      "name": "Pumpkin Patch Polygraph Party",
+      "type": "MEDIA",
+      "rarity": "common",
+      "cost": 3,
+      "effects": {
+        "truthDelta": 1,
+        "ifTruthBelow": {
+          "threshold": 35,
+          "then": { "draw": 1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "+1% Truth. If Truth ≤ 35%, draw 1 card.",
+      "flavor": "TruthMeter™ wristbands flash whenever the scarecrow lies.",
+      "tags": ["halloween", "truth", "media"]
+    },
+    {
+      "id": "HALLO-TRUTH-SPCL-008",
+      "faction": "truth",
+      "name": "Ghost Tour Door Knockers",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "cost": 5,
+      "effects": {
+        "pressureDelta": 2,
+        "pressureToAllContested": 1
+      },
+      "extId": "halloween",
+      "text": "+2 Pressure in a state and +1 Pressure to every contested state.",
+      "flavor": "Neighborhood Watch (For UFOs) repurposes lanterns as disclosure beacons.",
+      "tags": ["halloween", "truth", "zone"]
+    },
+    {
+      "id": "HALLO-TRUTH-SPCL-009",
+      "faction": "truth",
+      "name": "Pastor Rex's Exorcism Tent",
+      "type": "MEDIA",
+      "rarity": "rare",
+      "cost": 5,
+      "effects": {
+        "truthDelta": 3,
+        "ifFewerStates": {
+          "threshold": 0,
+          "then": { "pressureDelta": 2 }
+        }
+      },
+      "extId": "halloween",
+      "text": "+3% Truth. If you're behind on states, add +2 Pressure anywhere.",
+      "flavor": "Blessed mics banish lies faster than the Department of Seasonal Repression can draft memos.",
+      "tags": ["halloween", "truth", "media"]
+    },
+    {
+      "id": "HALLO-TRUTH-SPCL-010",
+      "faction": "truth",
+      "name": "TruthMeter™ Lantern Parade",
+      "type": "ZONE",
+      "rarity": "legendary",
+      "cost": 7,
+      "effects": {
+        "pressureDelta": 3,
+        "truthPerControlledState": { "max": 4 }
+      },
+      "extId": "halloween",
+      "text": "+3 Pressure and +1% Truth per state you control (max +4%).",
+      "flavor": "Maria Chen syncs every lantern to the Paranoid Times seismic rumormill.",
+      "tags": ["halloween", "truth", "legendary"]
+    },
+    {
+      "id": "HALLO-GOV-SPCL-001",
+      "faction": "government",
+      "name": "Office of Seasonal Repression",
+      "type": "MEDIA",
+      "rarity": "rare",
+      "cost": 5,
+      "effects": {
+        "truthDelta": -3,
+        "ifTruthAbove": {
+          "threshold": 60,
+          "then": { "discardOpponent": 1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "−3% Truth. If Truth ≥ 60%, opponent discards 1 card.",
+      "flavor": "Deputy Director Walsh files candy confiscations under Annex 31-Boo.",
+      "tags": ["halloween", "government", "media"]
+    },
+    {
+      "id": "HALLO-GOV-SPCL-002",
+      "faction": "government",
+      "name": "Pumpkin Spice Cover-Up Division",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "cost": 4,
+      "effects": {
+        "truthDelta": -2,
+        "ifMoreStates": {
+          "threshold": 5,
+          "then": { "truthDelta": -1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "−2% Truth. If you control 5+ states, reduce Truth by 1% more.",
+      "flavor": "Classification Czar Pierce stamps the latte foam with [REDACTED].",
+      "tags": ["halloween", "government", "media"]
+    },
+    {
+      "id": "HALLO-GOV-SPCL-003",
+      "faction": "government",
+      "name": "Voluntary Curfew for the Undead",
+      "type": "ZONE",
+      "rarity": "uncommon",
+      "cost": 5,
+      "effects": {
+        "pressureDelta": 2,
+        "defenseToAllStates": 1
+      },
+      "extId": "halloween",
+      "text": "+2 Pressure and all your states gain +1 Defense.",
+      "flavor": "Compliance drones croon lullabies from the Department of Nightlife Normalization.",
+      "tags": ["halloween", "government", "zone"]
+    },
+    {
+      "id": "HALLO-GOV-SPCL-004",
+      "faction": "government",
+      "name": "Haunted Hearing Adjournment",
+      "type": "MEDIA",
+      "rarity": "common",
+      "cost": 3,
+      "effects": {
+        "truthDelta": -1,
+        "ifTruthBelow": {
+          "threshold": 30,
+          "then": { "draw": 1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "−1% Truth. If Truth ≤ 30%, draw 1 card.",
+      "flavor": "Minutes prepared in triplicate, candles billed to the Containment Annex.",
+      "tags": ["halloween", "government", "media"]
+    },
+    {
+      "id": "HALLO-GOV-SPCL-005",
+      "faction": "government",
+      "name": "Pumpkin Spice Riot Insurance",
+      "type": "ATTACK",
+      "rarity": "common",
+      "cost": 2,
+      "effects": {
+        "ipDelta": { "opponent": 1 },
+        "ifTruthAbove": {
+          "threshold": 55,
+          "then": { "ipDelta": { "opponent": 1 } }
+        }
+      },
+      "extId": "halloween",
+      "text": "Opponent −1 IP. If Truth ≥ 55%, opponent loses 1 additional IP.",
+      "flavor": "Actuaries fold riot-ready pumpkins into the Continuity of Government coverage binder.",
+      "tags": ["halloween", "government", "attack"]
+    },
+    {
+      "id": "HALLO-GOV-SPCL-006",
+      "faction": "government",
+      "name": "Containment Order: Bat Boy",
+      "type": "ZONE",
+      "rarity": "rare",
+      "cost": 6,
+      "effects": {
+        "pressureDelta": 3,
+        "ifTruthAbove": {
+          "threshold": 65,
+          "then": { "pressureDelta": 1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "+3 Pressure. If Truth ≥ 65%, add +1 more Pressure.",
+      "flavor": "Agent Smitherson requisitions silver-plated NDAs before dawn.",
+      "tags": ["halloween", "government", "zone"]
+    },
+    {
+      "id": "HALLO-GOV-SPCL-007",
+      "faction": "government",
+      "name": "Emergency Candy Recall",
+      "type": "MEDIA",
+      "rarity": "uncommon",
+      "cost": 4,
+      "effects": {
+        "truthDelta": -2,
+        "ifFewerStates": {
+          "threshold": 0,
+          "then": { "ipDelta": { "opponent": 1 } }
+        }
+      },
+      "extId": "halloween",
+      "text": "−2% Truth. If you're behind on states, opponent loses 1 IP.",
+      "flavor": "General Thompson reclassifies nougat as contraband biomatter.",
+      "tags": ["halloween", "government", "media"]
+    },
+    {
+      "id": "HALLO-GOV-SPCL-008",
+      "faction": "government",
+      "name": "Skeletonized Logistics Corps",
+      "type": "ATTACK",
+      "rarity": "rare",
+      "cost": 4,
+      "effects": {
+        "ipDelta": { "opponent": 2 },
+        "ifMoreStates": {
+          "threshold": 6,
+          "then": { "pressureDelta": 1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "Opponent −2 IP. If you control 6+ states, add +1 Pressure anywhere.",
+      "flavor": "Autonomous forklifts run on black-budget ectoplasm.",
+      "tags": ["halloween", "government", "attack"]
+    },
+    {
+      "id": "HALLO-GOV-SPCL-009",
+      "faction": "government",
+      "name": "Black Budget Ghost Trap",
+      "type": "MEDIA",
+      "rarity": "legendary",
+      "cost": 6,
+      "effects": {
+        "truthDelta": -4,
+        "ifMoreStates": {
+          "threshold": 6,
+          "then": { "discardOpponent": 1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "−4% Truth. If you control 6+ states, opponent discards 1 card.",
+      "flavor": "Prototype cobbled from Project Specter receipts and Denver Airport wiring.",
+      "tags": ["halloween", "government", "legendary"]
+    },
+    {
+      "id": "HALLO-GOV-SPCL-010",
+      "faction": "government",
+      "name": "Memo: Replace Fog with Classified Mist",
+      "type": "MEDIA",
+      "rarity": "common",
+      "cost": 3,
+      "effects": {
+        "truthDelta": -1,
+        "ifMoreStates": {
+          "threshold": 4,
+          "then": { "pressureDelta": 1 }
+        }
+      },
+      "extId": "halloween",
+      "text": "−1% Truth. If you control 4+ states, add +1 Pressure anywhere.",
+      "flavor": "Directive scribbled on Department of Atmospheric Cover letterhead.",
+      "tags": ["halloween", "government", "media"]
+    }
+  ]
+}
