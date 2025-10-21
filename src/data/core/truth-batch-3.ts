@@ -3,7 +3,7 @@ import type { GameCard } from '@/rules/mvp';
 export const truthBatch3: GameCard[] = [
   {
     "id": "TRUTH-101",
-    "name": "The Lone Gunmen",
+    "name": "Maria Chen's Lone Gun Uplink",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "rare",
@@ -14,11 +14,11 @@ export const truthBatch3: GameCard[] = [
         "opponentPercent": 0.12
       }
     },
-    "flavor": "Three hackers, zero hygiene, one friend on the inside."
+    "flavor": "Spliced three declassified walkie-talkies into one confession."
   },
   {
     "id": "TRUTH-102",
-    "name": "Open-Records Taskforce",
+    "name": "Rex & Rosa's FOIA Cookout",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -29,11 +29,11 @@ export const truthBatch3: GameCard[] = [
       },
       "revealSecretAgenda": true
     },
-    "flavor": "If it's stamped 'secret', it's stapled to our to-do list."
+    "flavor": "Freedom burgers flipped with subpoenas as spatulas."
   },
   {
     "id": "TRUTH-103",
-    "name": "Grassroots Press Co-Op",
+    "name": "Bat Boy's Basement Press Guild",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -43,11 +43,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "Ink by the people, for the people."
+    "flavor": "Credential requires tracing your wingspan on the wall."
   },
   {
     "id": "TRUTH-104",
-    "name": "Citizen Forensics Lab",
+    "name": "Agent Smitherson's Kitchen CSI",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "rare",
@@ -58,11 +58,11 @@ export const truthBatch3: GameCard[] = [
         "opponentPercent": 0.1
       }
     },
-    "flavor": "Microscopes donated, miracles improvised."
+    "flavor": "Blacklight powered by a microwave he \"borrowed\" from Quantico."
   },
   {
     "id": "TRUTH-105",
-    "name": "Truth Meter Calibrator",
+    "name": "Pastor Rex's Truth Meter Revival",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -70,11 +70,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Batteries not included. Lies excluded."
+    "flavor": "Congregation tithes AA batteries from the Area 51 gift shop."
   },
   {
     "id": "TRUTH-106",
-    "name": "Tinfoil Supply Chain",
+    "name": "Tina Foil's DIY Supply Run",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -82,11 +82,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Industrial-grade hats for industrial-sized cover-ups."
+    "flavor": "Receipts stamped CLASSIFIED: bulk cranial shielding."
   },
   {
     "id": "TRUTH-107",
-    "name": "Elvis Works the Night Shift",
+    "name": "Elvis Patrols the Loading Dock",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -94,11 +94,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Punches in with a glittery glove."
+    "flavor": "Security badge laminated over a 1977 backstage pass."
   },
   {
     "id": "TRUTH-108",
-    "name": "Bat Boy Delivers Breaking News",
+    "name": "Bat Boy Screams the Nightly Ledger",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "rare",
@@ -107,11 +107,11 @@ export const truthBatch3: GameCard[] = [
       "truthDelta": 3,
       "revealSecretAgenda": true
     },
-    "flavor": "Screams in AP style."
+    "flavor": "Punctuation provided by precisely aimed sonar bursts."
   },
   {
     "id": "TRUTH-109",
-    "name": "Pastor Rex Calls Out the Lizard Cabal",
+    "name": "Pastor Rex vs. the Lizard HOA",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -119,11 +119,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Tail between their legs, allegedly."
+    "flavor": "He sprinkles holy water over their reptile humidifiers."
   },
   {
     "id": "TRUTH-110",
-    "name": "Florida Man Finds Government Device",
+    "name": "Florida Man's Covert Gadget Cooler",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "common",
@@ -133,11 +133,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 1
       }
     },
-    "flavor": "He used it to open soda first."
+    "flavor": "Stored next to bait shrimp—still humming MK-ULTRA tunes."
   },
   {
     "id": "TRUTH-111",
-    "name": "MIB Slip Up on Live TV",
+    "name": "Dolores Streams the MIB Slip",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "rare",
@@ -145,11 +145,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Blink and you'll still see it."
+    "flavor": "Frame 23 clearly shows the neuralyzer labeled \"prop\"."
   },
   {
     "id": "TRUTH-112",
-    "name": "Elvis Joins a Book Club",
+    "name": "Elvis Hosts Classified Book Club",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -157,11 +157,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Reads only paperbacks—no fingerprints."
+    "flavor": "Fingerless gloves prevent prints, not gossip."
   },
   {
     "id": "TRUTH-113",
-    "name": "Agent Smitherson's Conscience",
+    "name": "Smitherson's Midnight CC Storm",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "rare",
@@ -169,11 +169,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "He anonymously CC'd everyone."
+    "flavor": "Blind-copied twelve senators and Bat Boy for luck."
   },
   {
     "id": "TRUTH-114",
-    "name": "Blurry Mothman Dashcam",
+    "name": "Trucker Dale's Blurry Mothman Dashcam",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "common",
@@ -181,11 +181,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "Wingspan: entire windshield."
+    "flavor": "Wing dust still clogging the defroster."
   },
   {
     "id": "TRUTH-115",
-    "name": "Ghost Jury Finds the Truth",
+    "name": "Ghost Jury Retries Watergate",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -193,11 +193,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Verdict echoes for eternity."
+    "flavor": "Spectral stenographer types in Morse to stay impartial."
   },
   {
     "id": "TRUTH-116",
-    "name": "Elvis Edits the Front Page",
+    "name": "Elvis Rewrites the Front Page",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "rare",
@@ -205,11 +205,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Headline: 'Love Me Tender, Tell Me Everything'."
+    "flavor": "Headline ink smells like Graceland jet fuel."
   },
   {
     "id": "TRUTH-117",
-    "name": "Local Kid Interviews a Gray",
+    "name": "Darla's Backyard Gray Interview",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "common",
@@ -217,11 +217,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 1
     },
-    "flavor": "First question: favorite ice cream?"
+    "flavor": "She traded Capri Suns for disclosure coordinates."
   },
   {
     "id": "TRUTH-118",
-    "name": "Bat Boy Launches a Zine",
+    "name": "Bat Boy's Xeroxed Revolution",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -229,11 +229,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Stapled with bravado."
+    "flavor": "Staples forged from confiscated Langley paperclips."
   },
   {
     "id": "TRUTH-119",
-    "name": "Psychic Predicts File Drop",
+    "name": "Madame Oracle Schedules the Leak",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -243,11 +243,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "Knew you'd play this."
+    "flavor": "Calendar circled in ectoplasm and precedent."
   },
   {
     "id": "TRUTH-120",
-    "name": "Desert Billboards of Truth",
+    "name": "Pastor Rex's Desert Billboard Choir",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -255,11 +255,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Text too big to redact."
+    "flavor": "Reflective paint mixed with Area 51 runway dust."
   },
   {
     "id": "TRUTH-121",
-    "name": "Bat Boy Community Center",
+    "name": "Bat Boy's Community Screech Hub",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -267,11 +267,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "After-school programs for aspiring screamers."
+    "flavor": "Mandatory orientation covers echolocation etiquette."
   },
   {
     "id": "TRUTH-122",
-    "name": "Elvis Roadside Chapel",
+    "name": "Elvis' Roadside Disclosure Chapel",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -279,11 +279,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Vows exchanged, lies annulled."
+    "flavor": "Ring bearer carries manila folders, not rings."
   },
   {
     "id": "TRUTH-123",
-    "name": "Skywatcher Ridge",
+    "name": "Maria Chen's Skywatcher Stakeout",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -291,11 +291,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Bring blankets, witness meteors and memos."
+    "flavor": "Thermos includes coordinates scribbled by retired pilots."
   },
   {
     "id": "TRUTH-124",
-    "name": "Conspiracy Coffee Roasters",
+    "name": "Maria's Conspiracy Coffee Roast",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -303,11 +303,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Single-origin skepticism."
+    "flavor": "Beans aged in repurposed evidence lockers."
   },
   {
     "id": "TRUTH-125",
-    "name": "Haunted Library Stacks",
+    "name": "Bat Boy Haunts the Stacks",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "rare",
@@ -315,11 +315,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Shhh… the books whisper back."
+    "flavor": "Specters re-shelve MK-ULTRA manuals nightly."
   },
   {
     "id": "TRUTH-126",
-    "name": "Community Scanner Net",
+    "name": "Maria's Scanner Net Co-Op",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -327,11 +327,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Airwaves have nothing to hide."
+    "flavor": "Antenna disguised as lawn flamingo triangulates cover stories."
   },
   {
     "id": "TRUTH-127",
-    "name": "Cryptid Petting Zoo",
+    "name": "Bat Boy's Cryptid Petting Zoo",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "rare",
@@ -339,11 +339,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Waiver includes claws and clauses."
+    "flavor": "Liability waivers notarized in invisible ink."
   },
   {
     "id": "TRUTH-128",
-    "name": "College Radio Conspiracy Hour",
+    "name": "DJ Q-Ray's Conspiracy Hour",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -351,11 +351,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Playlists of leaks and licks."
+    "flavor": "Mixing board powered by salvaged Roswell capacitors."
   },
   {
     "id": "TRUTH-129",
-    "name": "Elvis Tribute Casino Lounge",
+    "name": "Elvis' Casino Starlight Briefing",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "rare",
@@ -363,11 +363,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "House always wins—unless truth shows up."
+    "flavor": "Slot machine pays out in burner phones."
   },
   {
     "id": "TRUTH-130",
-    "name": "Public-Access TV Studio",
+    "name": "Florida Man's Public-Access Uprising",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -375,11 +375,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Tonight on 'Open Secrets': everything."
+    "flavor": "Cue cards laminated with tinfoil for reception."
   },
   {
     "id": "TRUTH-131",
-    "name": "Haunted National Park",
+    "name": "Ranger Opal's Haunted Trail Briefing",
     "faction": "truth",
     "type": "ZONE",
     "rarity": "rare",
@@ -387,11 +387,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "Leave only footprints; hear many more."
+    "flavor": "Park maps highlight portals and snack stands alike."
   },
   {
     "id": "TRUTH-132",
-    "name": "Data Breach Whistle",
+    "name": "Smitherson's Leaking Desk Whistle",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -401,11 +401,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "The loudest tiny whistle ever printed."
+    "flavor": "Chrome plated and engraved \"Property of Project Sunfall\"."
   },
   {
     "id": "TRUTH-133",
-    "name": "Press Conference Ambush",
+    "name": "Maria's Press Conference Ambush",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -415,11 +415,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "First question, final answer."
+    "flavor": "Tie dyed with subpoena ink stains."
   },
   {
     "id": "TRUTH-134",
-    "name": "FOIA Lightning Round",
+    "name": "FOIA Lightning with Pastor Rex",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "rare",
@@ -429,11 +429,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 3
       }
     },
-    "flavor": "Redaction ink runs in the rain."
+    "flavor": "Answers timed by a confiscated DARPA egg timer."
   },
   {
     "id": "TRUTH-135",
-    "name": "Infiltrate the Briefing",
+    "name": "Elvis Photobombs the Briefing",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -443,11 +443,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "Credentials printed on recycled secrets."
+    "flavor": "Camera flash reveals reptilian pupils blinking sideways."
   },
   {
     "id": "TRUTH-136",
-    "name": "Crowdsourced Fact Storm",
+    "name": "Florida Man's Fact Storm Thread",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -457,11 +457,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "1,000 comments, one conclusion."
+    "flavor": "Fridge magnets track every confirmed cover-up."
   },
   {
     "id": "TRUTH-137",
-    "name": "Operation Spotlight",
+    "name": "Operation Spotlight: Bat Boy Live",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "rare",
@@ -472,11 +472,11 @@ export const truthBatch3: GameCard[] = [
       },
       "discardOpponent": 1
     },
-    "flavor": "Stage lights melt alibis."
+    "flavor": "Stage rigging stamped \"Confiscated from Propaganda Bureau\"."
   },
   {
     "id": "TRUTH-138",
-    "name": "Emergency Broadcast Override",
+    "name": "Maria Hijacks the Airwaves",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -486,11 +486,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "We interrupt your regularly scheduled denial."
+    "flavor": "Signal piggybacks on an abandoned weather balloon."
   },
   {
     "id": "TRUTH-139",
-    "name": "Street Reporter Blitz",
+    "name": "Florida Man's Sidewalk News Stampede",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -500,11 +500,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "Microphones swarm like bees."
+    "flavor": "Microphones taped to pool noodles for reach."
   },
   {
     "id": "TRUTH-140",
-    "name": "Subpoena Surprise",
+    "name": "Tabloid Subpoena Flashmob",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "rare",
@@ -514,11 +514,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 3
       }
     },
-    "flavor": "Signed by Judge Public Opinion."
+    "flavor": "Process servers wear Mothman hoodies to stay incognito."
   },
   {
     "id": "TRUTH-141",
-    "name": "Elvis Press Pass",
+    "name": "Elvis' Holographic Press Pass",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -528,11 +528,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "Laminate of destiny."
+    "flavor": "Barcode scans as \"ALIVE\" at three agencies."
   },
   {
     "id": "TRUTH-142",
-    "name": "Flash-Truth Rally",
+    "name": "Bat Boy's Flash-Truth Rally",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -542,11 +542,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "Chants harmonize with sirens."
+    "flavor": "Glow sticks double as anti-hypnosis wands."
   },
   {
     "id": "TRUTH-143",
-    "name": "Phone Tree Counterintel",
+    "name": "Grandma Jo's Phone Tree Intel",
     "faction": "truth",
     "type": "ATTACK",
     "rarity": "common",
@@ -556,11 +556,11 @@ export const truthBatch3: GameCard[] = [
         "opponent": 1
       }
     },
-    "flavor": "Ring once if it's a cover-up."
+    "flavor": "Three rings means bring antivenom again."
   },
   {
     "id": "TRUTH-144",
-    "name": "Ghost Patrol",
+    "name": "Ghost Patrol vs. Black Budget",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -568,11 +568,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Boo! Also, bookkeeping."
+    "flavor": "EMF meters calibrated with leftover proton packs."
   },
   {
     "id": "TRUTH-145",
-    "name": "Public Records Shield",
+    "name": "Agent Smitherson's Records Shield",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -580,11 +580,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Stapled, stamped, safe."
+    "flavor": "Clipboard lined with confiscated stealth fabric."
   },
   {
     "id": "TRUTH-146",
-    "name": "Witness Hotline",
+    "name": "Pastor Rex's Witness Hotline",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -592,11 +592,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Press 1 to spill, press 2 to bill."
+    "flavor": "Hold music plays reversed government hymnals."
   },
   {
     "id": "TRUTH-147",
-    "name": "Mothership Cover",
+    "name": "Mothership Insurance Collective",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -604,11 +604,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 2
     },
-    "flavor": "Umbrella policy: extraterrestrial."
+    "flavor": "Policy number spelled in crop circle coordinates."
   },
   {
     "id": "TRUTH-148",
-    "name": "Tabloid Legal Eagles",
+    "name": "Bat Boy Esq. & the Legal Eagles",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "rare",
@@ -616,11 +616,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 3
     },
-    "flavor": "Objection sustained, publicity gained."
+    "flavor": "Briefs filed on pink paper \"to unsettle the cabal.\""
   },
   {
     "id": "TRUTH-149",
-    "name": "Bigfoot Senate Campaign",
+    "name": "Senator Bigfoot 2024 Campaign",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "legendary",
@@ -628,11 +628,11 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 4
     },
-    "flavor": "A platform of planks and footprints."
+    "flavor": "Stump speeches require size 23 podium footprints."
   },
   {
     "id": "TRUTH-150",
-    "name": "Elvis: The Immortal King",
+    "name": "Elvis: Eternal Disclosure Tour",
     "faction": "truth",
     "type": "MEDIA",
     "rarity": "legendary",
@@ -640,6 +640,6 @@ export const truthBatch3: GameCard[] = [
     "effects": {
       "truthDelta": 4
     },
-    "flavor": "Long live the King—and the headline."
+    "flavor": "Encore syncs classified slides to guitar solos."
   }
 ];
