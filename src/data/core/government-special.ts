@@ -8,7 +8,7 @@ import type { GameCard } from '@/rules/mvp';
 export const governmentSpecialCards: GameCard[] = [
   {
     id: "GOV-SPECIAL-001",
-    name: "Damage Control Protocol",
+    name: "Deputy Walsh's Calm Clarifier",
     faction: "government",
     type: "MEDIA",
     rarity: "rare",
@@ -20,11 +20,11 @@ export const governmentSpecialCards: GameCard[] = [
         else: { truthDelta: -2 }
       }
     },
-    flavor: "Emergency protocols authorized."
+    flavor: "Memo 47-B: \"All anomalies downgraded to clerical typos.\""
   },
   {
     id: "GOV-SPECIAL-002",
-    name: "Consolidation Sweep",
+    name: "General Thompson's Territory Audit",
     faction: "government",
     type: "ATTACK",
     rarity: "rare",
@@ -36,11 +36,11 @@ export const governmentSpecialCards: GameCard[] = [
         else: { ipDelta: { opponent: -3 } }
       }
     },
-    flavor: "Power consolidates itself."
+    flavor: "He circles rebellious counties in patriotic highlighter No. 5."
   },
   {
     id: "GOV-SPECIAL-003",
-    name: "Narrative Control",
+    name: "Agent Smitherson's Press Harmonizer",
     faction: "government",
     type: "MEDIA",
     rarity: "uncommon",
@@ -52,11 +52,11 @@ export const governmentSpecialCards: GameCard[] = [
         then: { discardOpponent: 1 }
       }
     },
-    flavor: "Control the story, control reality."
+    flavor: "\"Suggested talking points\" arrive with pre-checked consent boxes."
   },
   {
     id: "GOV-SPECIAL-004",
-    name: "Suppression Network",
+    name: "Lizard Liaison's Quiet Grid",
     faction: "government",
     type: "ZONE",
     rarity: "uncommon",
@@ -65,11 +65,11 @@ export const governmentSpecialCards: GameCard[] = [
       pressureDelta: 1,
       defenseToAllStates: 1
     },
-    flavor: "Every position reinforces the others."
+    flavor: "Stamped \"routine lighting upgrade\"; tail-signed in green ink."
   },
   {
     id: "GOV-SPECIAL-005",
-    name: "Bureaucratic Tangle",
+    name: "Intern Vega's Lost Forms",
     faction: "government",
     type: "ATTACK",
     rarity: "common",
@@ -77,11 +77,11 @@ export const governmentSpecialCards: GameCard[] = [
     effects: {
       preventHighCostCards: { threshold: 5, duration: 1 }
     },
-    flavor: "Red tape stops everything."
+    flavor: "Any request over five credits vanishes into Vault 404-B."
   },
   {
     id: "GOV-SPECIAL-006",
-    name: "Deep State Leverage",
+    name: "Czar Pierce's Favor Ledger",
     faction: "government",
     type: "ATTACK",
     rarity: "uncommon",
@@ -93,11 +93,11 @@ export const governmentSpecialCards: GameCard[] = [
         else: { ipDelta: { opponent: -2 } }
       }
     },
-    flavor: "The machine runs on influence."
+    flavor: "Column A lists senators; Column B lists photos nobody saw."
   },
   {
     id: "GOV-SPECIAL-007",
-    name: "Media Blackout",
+    name: "Night Division's Media Nightfall",
     faction: "government",
     type: "MEDIA",
     rarity: "rare",
@@ -109,11 +109,11 @@ export const governmentSpecialCards: GameCard[] = [
         else: { truthDelta: -3 }
       }
     },
-    flavor: "When truth spreads too far, cut all channels."
+    flavor: "Timer set to 02:17; every anchor gets decaf and a blindfold."
   },
   {
     id: "GOV-SPECIAL-008",
-    name: "Fortified Position",
+    name: "Denver Bunker Hospitality Suite",
     faction: "government",
     type: "ZONE",
     rarity: "uncommon",
@@ -122,11 +122,11 @@ export const governmentSpecialCards: GameCard[] = [
       pressureDelta: 2,
       defenseToAllStates: 1
     },
-    flavor: "Every stronghold becomes a fortress."
+    flavor: "\"Guest amenities\" include leaded tap water and zero windows."
   },
   {
     id: "GOV-SPECIAL-009",
-    name: "Overwhelming Force",
+    name: "Operation Gentle Avalanche",
     faction: "government",
     type: "ATTACK",
     rarity: "rare",
@@ -138,11 +138,11 @@ export const governmentSpecialCards: GameCard[] = [
         then: { ipDelta: { opponent: -2 } }
       }
     },
-    flavor: "The strong devour the weak."
+    flavor: "Volunteers initial the tank treads before rolling out."
   },
   {
     id: "GOV-SPECIAL-010",
-    name: "Total Information Awareness",
+    name: "Panopticon Budget Justification",
     faction: "government",
     type: "MEDIA",
     rarity: "legendary",
@@ -151,7 +151,7 @@ export const governmentSpecialCards: GameCard[] = [
       truthDelta: -2,
       truthPerControlledState: { max: -8 }
     },
-    flavor: "Every controlled state becomes a surveillance hub."
+    flavor: "Line item 77B: \"civic wellness sensors\" wired into every lamppost."
   }
 ];
 

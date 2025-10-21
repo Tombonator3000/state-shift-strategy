@@ -2,6 +2,13 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-30 – Special decks embrace lore figures
+- Timestamp: 2025-10-30T12:00:00Z
+- Files:
+  - `src/data/core/truth-special.ts`
+  - `src/data/core/government-special.ts`
+- Summary: Renamed multiple Truth and Government specials to spotlight recurring faction icons, injected absurdist flavor beats drawn from the lore bible, and aligned both decks with the updated card style manual guidelines.
+
 ## 2025-10-29 – Expansion specials gain curated lore
 - Timestamp: 2025-10-29T09:15:00Z
 - Files:
