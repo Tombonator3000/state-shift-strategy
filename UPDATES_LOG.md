@@ -54,6 +54,14 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Summary: Ensured the main menu only initializes its music once when the intro hands off control so player-selected tracks fro
 m the options panel persist instead of resetting to the default playlist.
 
+## 2025-10-19 – Added “What Is The Paranoid Times?” panel
+- Timestamp: 2025-10-19T18:42:00Z
+- Files:
+  - `src/components/game/HowToPlay.tsx`
+  - `src/components/WhatIsParanoidTimes.tsx`
+  - `components.json`
+- Summary: Landed a dedicated primer panel that spells out the Paranoid Times mythos, rerouted the How-to-Play briefing to surface it alongside onboarding beats, and refreshed the component catalog so designers track the new lore hook.
+
 ## 2025-10-19 – Accordion briefing modernizes How-to-Play
 - Timestamp: 2025-10-19T13:17:05Z
 - Files:
