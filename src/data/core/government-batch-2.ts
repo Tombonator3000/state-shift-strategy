@@ -133,7 +133,7 @@ export const governmentBatch2: GameCard[] = [
   },
   {
     "id": "GOV-061",
-    "name": "Department of Denials",
+    "name": "Courtesy Denial Assurance Desk",
     "faction": "government",
     "type": "ATTACK",
     "rarity": "common",
@@ -142,7 +142,8 @@ export const governmentBatch2: GameCard[] = [
       "ipDelta": {
         "opponent": 1
       }
-    }
+    },
+    "flavor": "Karen Walsh thanks you for misremembering classified reality tonight."
   },
   {
     "id": "GOV-062",
@@ -213,7 +214,7 @@ export const governmentBatch2: GameCard[] = [
   },
   {
     "id": "GOV-067",
-    "name": "Spin Control Office",
+    "name": "Narrative Wellness Wing",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -221,11 +222,11 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "truthDelta": -2
     },
-    "flavor": "The narrative never rests."
+    "flavor": "Interns rehearse condolences for conspiracies scheduled next quarter."
   },
   {
     "id": "GOV-068",
-    "name": "Crash Retrieval Zone",
+    "name": "Weather Balloon Recovery Loft",
     "faction": "government",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -233,11 +234,11 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Shiny wreckage becomes classified instantly."
+    "flavor": "Agent Smitherson rebrands saucer debris as morale sculpture again."
   },
   {
     "id": "GOV-069",
-    "name": "Closed Session",
+    "name": "Transparency Timeout Hearing",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "common",
@@ -245,11 +246,11 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "truthDelta": -1
     },
-    "flavor": "All cameras off, all lies on."
+    "flavor": "Door seals at 11:11; democracy holds its breath."
   },
   {
     "id": "GOV-070",
-    "name": "Psych Ops Lab",
+    "name": "Cognitive Wellness Annex",
     "faction": "government",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -257,11 +258,11 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Testing slogans on rats and voters alike."
+    "flavor": "Marcus tests slogans on volunteers, rats, and one senator."
   },
   {
     "id": "GOV-071",
-    "name": "Red Phone Network",
+    "name": "Courtesy Hotline Thirteen",
     "faction": "government",
     "type": "ATTACK",
     "rarity": "rare",
@@ -272,11 +273,11 @@ export const governmentBatch2: GameCard[] = [
       },
       "revealSecretAgenda": true
     },
-    "flavor": "One ring controls all."
+    "flavor": "General Marcus Thompson keeps it off-hook to cancel sunlight."
   },
   {
     "id": "GOV-072",
-    "name": "Containment Zone",
+    "name": "Neighborhood Calm Perimeter",
     "faction": "government",
     "type": "ZONE",
     "rarity": "common",
@@ -284,11 +285,11 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "pressureDelta": 1
     },
-    "flavor": "Cones, tape, and classified tape."
+    "flavor": "Cones placed every 23 feet, courtesy of Panic Department."
   },
   {
     "id": "GOV-073",
-    "name": "Obfuscation Bureau",
+    "name": "Clarity Optimization Taskforce",
     "faction": "government",
     "type": "ATTACK",
     "rarity": "common",
@@ -298,11 +299,11 @@ export const governmentBatch2: GameCard[] = [
         "opponent": 1
       }
     },
-    "flavor": "The truth hurts, but pays well."
+    "flavor": "Donald Pierce files truth under 'Seasonal Allergies' again."
   },
   {
     "id": "GOV-074",
-    "name": "FOIA Shredder Room",
+    "name": "Transparency Processing Basement",
     "faction": "government",
     "type": "ZONE",
     "rarity": "common",
@@ -310,11 +311,11 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "pressureDelta": 1
     },
-    "flavor": "The shredder is always hungry."
+    "flavor": "Karen Walsh feeds FOIA sparks into office fireplace."
   },
   {
     "id": "GOV-075",
-    "name": "National Guard Rollout",
+    "name": "Community Assurance Mobilization",
     "faction": "government",
     "type": "ATTACK",
     "rarity": "common",
@@ -324,11 +325,11 @@ export const governmentBatch2: GameCard[] = [
         "opponent": 1
       }
     },
-    "flavor": "Nothing to see, nothing to seize."
+    "flavor": "Same block, same dawn, different riot rehearsal checklist."
   },
   {
     "id": "GOV-076",
-    "name": "Redaction Vault",
+    "name": "Sunlight Mitigation Vault",
     "faction": "government",
     "type": "ZONE",
     "rarity": "rare",
@@ -336,11 +337,11 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "pressureDelta": 3
     },
-    "flavor": "█████████ everywhere."
+    "flavor": "Seven blackout layers, thirty-seven mysteriously missing witnesses."
   },
   {
     "id": "GOV-077",
-    "name": "Satellite Uplink",
+    "name": "Skyward Signal Alignment Suite",
     "faction": "government",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -348,11 +349,11 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Every ping is patriotism."
+    "flavor": "Ping cadence matches Bat Boy's bedtime, per memo."
   },
   {
     "id": "GOV-078",
-    "name": "Political Lobby",
+    "name": "Civic Relationship Atrium",
     "faction": "government",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -362,11 +363,11 @@ export const governmentBatch2: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "Bribes are the sincerest form of flattery."
+    "flavor": "Lobbyists queue, Agent Smitherson sanitizes the briefcases."
   },
   {
     "id": "GOV-079",
-    "name": "Crisis Management Zone",
+    "name": "Calm Scenario Coordination Room",
     "faction": "government",
     "type": "ZONE",
     "rarity": "common",
@@ -374,7 +375,7 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "pressureDelta": 1
     },
-    "flavor": "Every crisis needs a committee."
+    "flavor": "Crisis actors rehearse apologies while drones circle."
   },
   {
     "id": "GOV-080",
@@ -440,7 +441,7 @@ export const governmentBatch2: GameCard[] = [
   },
   {
     "id": "GOV-085",
-    "name": "Front Organization",
+    "name": "Community Outreach Shell LLC",
     "faction": "government",
     "type": "ZONE",
     "rarity": "common",
@@ -448,11 +449,11 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "pressureDelta": 1
     },
-    "flavor": "Looks legit, smells classified."
+    "flavor": "Registered to Karen Walsh's tabby; invoices routed offshore."
   },
   {
     "id": "GOV-086",
-    "name": "Controlled Media Outlet",
+    "name": "Balanced Perspective Studio",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "common",
@@ -460,11 +461,11 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "truthDelta": -1
     },
-    "flavor": "Your news, their loss."
+    "flavor": "Scripts faxed hourly from Continuity Bunker Annex C."
   },
   {
     "id": "GOV-087",
-    "name": "Continuity of Message",
+    "name": "Message Consistency Retreat",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "common",
@@ -472,11 +473,11 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "truthDelta": -1
     },
-    "flavor": "We repeat until it becomes history."
+    "flavor": "Twelve-mantra playlist, zero exits until polling flips."
   },
   {
     "id": "GOV-088",
-    "name": "Surplus MRAP Parade",
+    "name": "Neighborhood Safety Showcase",
     "faction": "government",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -486,11 +487,11 @@ export const governmentBatch2: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "Intimidation is a safety feature."
+    "flavor": "Thirteen MRAPs, two balloon arches, one growl."
   },
   {
     "id": "GOV-089",
-    "name": "Continuity Servers",
+    "name": "Patriot Backup Cathedral",
     "faction": "government",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -498,7 +499,7 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Backups for backups."
+    "flavor": "Three redundant fibers hum hymns to continuity."
   },
   {
     "id": "GOV-090",
@@ -514,7 +515,7 @@ export const governmentBatch2: GameCard[] = [
   },
   {
     "id": "GOV-091",
-    "name": "Compliance Audit",
+    "name": "Courtesy Compliance Fire Drill",
     "faction": "government",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -524,7 +525,7 @@ export const governmentBatch2: GameCard[] = [
         "opponent": 2
       }
     },
-    "flavor": "Forms first, outrage later."
+    "flavor": "Donald Pierce grades screams on a nine-step rubric."
   },
   {
     "id": "GOV-092",
@@ -540,7 +541,7 @@ export const governmentBatch2: GameCard[] = [
   },
   {
     "id": "GOV-093",
-    "name": "Perimeter Cameras",
+    "name": "Hospitality Surveillance Garland",
     "faction": "government",
     "type": "ZONE",
     "rarity": "common",
@@ -548,7 +549,7 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "pressureDelta": 1
     },
-    "flavor": "The red light means 'welcome'."
+    "flavor": "Blink twice; the welcome packet flags treason."
   },
   {
     "id": "GOV-094",
@@ -566,7 +567,7 @@ export const governmentBatch2: GameCard[] = [
   },
   {
     "id": "GOV-095",
-    "name": "Data Fusion Hub",
+    "name": "Citizen Convenience Data Loft",
     "faction": "government",
     "type": "ZONE",
     "rarity": "uncommon",
@@ -574,7 +575,7 @@ export const governmentBatch2: GameCard[] = [
     "effects": {
       "pressureDelta": 2
     },
-    "flavor": "Interoperability is when everyone watches you together."
+    "flavor": "Smitherson's interns map your heartbeat to vending choices."
   },
   {
     "id": "GOV-096",
