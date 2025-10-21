@@ -3,7 +3,7 @@ import type { GameCard } from '@/rules/mvp';
 export const governmentBatch1: GameCard[] = [
   {
     "id": "GOV-001",
-    "name": "Routine Training Exercise",
+    "name": "Weather Balloon Maneuvers",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "common",
@@ -11,12 +11,12 @@ export const governmentBatch1: GameCard[] = [
     "effects": {
       "truthDelta": -1
     },
-    "flavorTruth": "Just another military exercise, nothing to see here.",
-    "flavorGov": "Standard operational readiness training as scheduled."
+    "flavorTruth": "Officially: meteorology. Unofficially: [REDACTED].",
+    "flavorGov": "Standard atmospheric research. Please disperse."
   },
   {
     "id": "GOV-002",
-    "name": "Redacted Press Briefing",
+    "name": "Heavily Redacted Press Briefing",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -30,7 +30,7 @@ export const governmentBatch1: GameCard[] = [
   },
   {
     "id": "GOV-003",
-    "name": "Continuity of Government Protocol",
+    "name": "Democracy Backup Drive",
     "faction": "government",
     "type": "ATTACK",
     "rarity": "uncommon",
@@ -47,7 +47,7 @@ export const governmentBatch1: GameCard[] = [
   },
   {
     "id": "GOV-004",
-    "name": "Classified Briefing Room",
+    "name": "Triple-Classified Briefing Room",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "common",
@@ -59,7 +59,7 @@ export const governmentBatch1: GameCard[] = [
   },
   {
     "id": "GOV-005",
-    "name": "FOIA Slow-Walk",
+    "name": "FOIA Speed Bump Maze",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "common",
@@ -67,11 +67,11 @@ export const governmentBatch1: GameCard[] = [
     "effects": {
       "truthDelta": -1
     },
-    "flavor": "Your transparency request is very important to us."
+    "flavor": "Your transparency request is aging like fine wine."
   },
   {
     "id": "GOV-006",
-    "name": "Operation Mockingbird II",
+    "name": "Operation Mockingbird II: Electric Boogaloo",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "rare",
@@ -151,7 +151,7 @@ export const governmentBatch1: GameCard[] = [
   },
   {
     "id": "GOV-012",
-    "name": "Crisis Actor Auditions",
+    "name": "Crisis Actor Cattle Call",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "common",
@@ -159,7 +159,7 @@ export const governmentBatch1: GameCard[] = [
     "effects": {
       "truthDelta": -1
     },
-    "flavor": "Please cry on lines two and three."
+    "flavor": "Please cry on cue. Bring headshot. NDA mandatory."
   },
   {
     "id": "GOV-013",
@@ -212,7 +212,7 @@ export const governmentBatch1: GameCard[] = [
         "opponent": 1
       }
     },
-    "flavor": "We can neither confirm nor deny that we denied."
+    "flavor": "We can neither confirm nor deny denying this."
   },
   {
     "id": "GOV-017",
@@ -266,7 +266,7 @@ export const governmentBatch1: GameCard[] = [
   },
   {
     "id": "GOV-021",
-    "name": "National Security Letter",
+    "name": "Friendly National Security Letter",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "uncommon",
@@ -274,11 +274,11 @@ export const governmentBatch1: GameCard[] = [
     "effects": {
       "truthDelta": -2
     },
-    "flavor": "Gag orders pair well with coffee."
+    "flavor": "Gag orders pair well with morning coffee."
   },
   {
     "id": "GOV-022",
-    "name": "Ghost Budget Annex",
+    "name": "Totally Transparent Black Budget",
     "faction": "government",
     "type": "ATTACK",
     "rarity": "rare",
@@ -288,7 +288,7 @@ export const governmentBatch1: GameCard[] = [
         "opponent": 3
       }
     },
-    "flavor": "Zeroes are patriotic."
+    "flavor": "Zeroes are patriotic. So are [REDACTED]."
   },
   {
     "id": "GOV-023",
@@ -368,7 +368,7 @@ export const governmentBatch1: GameCard[] = [
   },
   {
     "id": "GOV-029",
-    "name": "Declassification, Eventually",
+    "name": "Declassification (Pending: 2177)",
     "faction": "government",
     "type": "MEDIA",
     "rarity": "common",
@@ -376,7 +376,7 @@ export const governmentBatch1: GameCard[] = [
     "effects": {
       "truthDelta": -1
     },
-    "flavor": "History will vindicate page 47."
+    "flavor": "History will vindicate page 47... eventually."
   },
   {
     "id": "GOV-030",

@@ -8,7 +8,7 @@ import type { GameCard } from '@/rules/mvp';
 export const truthSpecialCards: GameCard[] = [
   {
     id: "TRUTH-SPECIAL-001",
-    name: "Whistleblower Leak",
+    name: "Anonymous Parking Garage Tip-Off",
     faction: "truth",
     type: "MEDIA",
     rarity: "rare",
@@ -20,11 +20,11 @@ export const truthSpecialCards: GameCard[] = [
         else: { truthDelta: 2 }
       }
     },
-    flavor: "When power concentrates, leaks multiply."
+    flavor: "Meet me where the pigeons gather. Bring photocopies."
   },
   {
     id: "TRUTH-SPECIAL-002",
-    name: "Underdog Rally",
+    name: "Bigfoot Voter Registration Drive",
     faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
@@ -36,7 +36,7 @@ export const truthSpecialCards: GameCard[] = [
         else: { pressureDelta: 2 }
       }
     },
-    flavor: "Nothing unites truth seekers like oppression."
+    flavor: "Finally, representation for the cryptid-American community."
   },
   {
     id: "TRUTH-SPECIAL-003",
@@ -56,7 +56,7 @@ export const truthSpecialCards: GameCard[] = [
   },
   {
     id: "TRUTH-SPECIAL-004",
-    name: "Community Network",
+    name: "Neighborhood Watch (For UFOs)",
     faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
@@ -64,7 +64,7 @@ export const truthSpecialCards: GameCard[] = [
     effects: {
       pressureToAllContested: 1
     },
-    flavor: "The network grows everywhere."
+    flavor: "Carol saw three last week. Carl saw four. Nobody called."
   },
   {
     id: "TRUTH-SPECIAL-005",
@@ -80,7 +80,7 @@ export const truthSpecialCards: GameCard[] = [
   },
   {
     id: "TRUTH-SPECIAL-006",
-    name: "Grassroots Movement",
+    name: "Tinfoil Hat Supply Co-Op",
     faction: "truth",
     type: "ZONE",
     rarity: "common",
@@ -92,7 +92,7 @@ export const truthSpecialCards: GameCard[] = [
         then: { truthDelta: 1 }
       }
     },
-    flavor: "Power to the people, one state at a time."
+    flavor: "Bulk discounts for prepper communes. Rolled or crumpled available."
   },
   {
     id: "TRUTH-SPECIAL-007",
