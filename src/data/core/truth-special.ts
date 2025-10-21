@@ -40,7 +40,7 @@ export const truthSpecialCards: GameCard[] = [
   },
   {
     id: "TRUTH-SPECIAL-003",
-    name: "Exposure Chain",
+    name: "Maria Chen's Exposure Relay",
     faction: "truth",
     type: "MEDIA",
     rarity: "rare",
@@ -52,7 +52,7 @@ export const truthSpecialCards: GameCard[] = [
         then: { draw: 1 }
       }
     },
-    flavor: "Truth begets more truth."
+    flavor: "She schedules seventeen ham radios to leak at once."
   },
   {
     id: "TRUTH-SPECIAL-004",
@@ -68,7 +68,7 @@ export const truthSpecialCards: GameCard[] = [
   },
   {
     id: "TRUTH-SPECIAL-005",
-    name: "Viral Evidence",
+    name: "Bat Boy Syndicates Evidence",
     faction: "truth",
     type: "MEDIA",
     rarity: "common",
@@ -76,7 +76,7 @@ export const truthSpecialCards: GameCard[] = [
     effects: {
       truthPerControlledState: { max: 5 }
     },
-    flavor: "Every territory amplifies the signal."
+    flavor: "He bundles the footage with autograph vouchers for mayors."
   },
   {
     id: "TRUTH-SPECIAL-006",
@@ -96,7 +96,7 @@ export const truthSpecialCards: GameCard[] = [
   },
   {
     id: "TRUTH-SPECIAL-007",
-    name: "Critical Mass Event",
+    name: "Elvis Declares Critical Mass",
     faction: "truth",
     type: "MEDIA",
     rarity: "rare",
@@ -108,11 +108,11 @@ export const truthSpecialCards: GameCard[] = [
         else: { truthDelta: 3 }
       }
     },
-    flavor: "When the dam breaks, the flood follows."
+    flavor: "He taps the mic; seventeen newsroom lights pop in sequence."
   },
   {
     id: "TRUTH-SPECIAL-008",
-    name: "Coordinated Disclosure",
+    name: "Pastor Rex's Fifty-State Sermon",
     faction: "truth",
     type: "ZONE",
     rarity: "uncommon",
@@ -121,7 +121,7 @@ export const truthSpecialCards: GameCard[] = [
       pressureDelta: 2,
       pressurePerControlledState: { max: 3 }
     },
-    flavor: "Every controlled state becomes a broadcast tower."
+    flavor: "Each controlled capitol gets communion wafers and classified slides."
   },
   {
     id: "TRUTH-SPECIAL-009",
@@ -141,7 +141,7 @@ export const truthSpecialCards: GameCard[] = [
   },
   {
     id: "TRUTH-SPECIAL-010",
-    name: "Truth Cascade",
+    name: "Florida Man's Domino Broadcast",
     faction: "truth",
     type: "MEDIA",
     rarity: "legendary",
@@ -150,7 +150,7 @@ export const truthSpecialCards: GameCard[] = [
       truthDelta: 2,
       truthPerControlledState: { max: 8 }
     },
-    flavor: "Each liberated state becomes a beacon of truth."
+    flavor: "At 2:17 AM, citrus-scented sirens cue from every beacon."
   }
 ];
 
