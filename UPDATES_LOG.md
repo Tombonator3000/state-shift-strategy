@@ -2,6 +2,13 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-28 – Card satire log and style manual published
+- Timestamp: 2025-10-28T08:30:00Z
+- Files:
+  - `CARD_SATIRE_LOG.md`
+  - `CARD_STYLE_MANUAL.md`
+- Summary: Documented the satirical card canon with a dedicated changelog and roadmap, paired it with a comprehensive style manual covering formulas, examples, and tonal guardrails so future entries stay aligned with Paranoid Times lore.
+
 ## 2025-10-27 – Orientation article enters shared components
 - Timestamp: 2025-10-27T09:00:00Z
 - Files:
