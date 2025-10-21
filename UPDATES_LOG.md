@@ -2,6 +2,15 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-29 – Expansion specials gain curated lore
+- Timestamp: 2025-10-29T09:15:00Z
+- Files:
+  - `public/extensions/halloween_midnight_dossiers.json`
+  - `public/extensions/cryptids_midnight_fieldguide.json`
+  - `public/extensions/index.json`
+  - `public/extensions/manifest.json`
+- Summary: Authored forty Halloween and Cryptids faction specials with lore-rich flavor, wired their JSON packs into the public extension index, and ensured both expansions deliver balanced, conspiratorial effects for Truth and Government alike.
+
 ## 2025-10-28 – Card satire log and style manual published
 - Timestamp: 2025-10-28T08:30:00Z
 - Files:
