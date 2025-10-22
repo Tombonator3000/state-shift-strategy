@@ -6,21 +6,28 @@ import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storag
 const STORAGE_KEY = 'paranoid-times-campaign-progress';
 
 export function useCampaignProgress() {
-  const [progress, setProgress] = useState<CampaignProgress>(() => {
+  const [progress, setProgress] = useState<CampaignProgress>(getInitialCampaignProgress);
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  useEffect(() => {
     const saved = safeGetLocalStorageItem(STORAGE_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        setProgress(JSON.parse(saved));
       } catch {
-        return getInitialCampaignProgress();
+        setProgress(getInitialCampaignProgress());
       }
     }
-    return getInitialCampaignProgress();
-  });
+    setHasHydrated(true);
+  }, []);
 
   useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
     safeSetLocalStorageItem(STORAGE_KEY, JSON.stringify(progress));
-  }, [progress]);
+  }, [hasHydrated, progress]);
 
   const completeMission = (missionId: string, victory: boolean) => {
     setProgress(prev => {
