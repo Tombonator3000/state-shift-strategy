@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import type { CampaignProgress } from '@/data/campaign';
 import { getInitialCampaignProgress } from '@/data/campaign';
+import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
 
 const STORAGE_KEY = 'paranoid-times-campaign-progress';
 
 export function useCampaignProgress() {
   const [progress, setProgress] = useState<CampaignProgress>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = safeGetLocalStorageItem(STORAGE_KEY);
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -18,7 +19,7 @@ export function useCampaignProgress() {
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    safeSetLocalStorageItem(STORAGE_KEY, JSON.stringify(progress));
   }, [progress]);
 
   const completeMission = (missionId: string, victory: boolean) => {
