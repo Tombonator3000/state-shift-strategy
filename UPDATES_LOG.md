@@ -2,6 +2,12 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-01 – Campaign progress hydration preserves saves
+- Timestamp: 2025-11-01T09:45:00Z
+- Files:
+  - `src/hooks/useCampaignProgress.ts`
+- Summary: Deferred campaign progress writes until after the client reads existing storage so SSR renders stop overwriting prior saves before hydration.
+
 ## 2025-10-31 – Campaign progress storage hardening
 - Timestamp: 2025-10-31T00:00:00Z
 - Files:
