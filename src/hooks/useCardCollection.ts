@@ -11,6 +11,8 @@ interface CardCollectionData {
 
 const STORAGE_KEY = 'shadowgov-card-collection';
 
+let hasLoggedEmptyCardDatabaseWarning = false;
+
 export const useCardCollection = () => {
   const [collection, setCollection] = useState<CardCollectionData>({
     discoveredCards: new Set(),
@@ -87,10 +89,26 @@ export const useCardCollection = () => {
   };
 
   const getCollectionStats = () => {
+    const totalCards = CARD_DATABASE.length;
+
+    if (totalCards === 0) {
+      if (!hasLoggedEmptyCardDatabaseWarning && typeof console !== 'undefined' && typeof console.warn === 'function') {
+        console.warn('[card-collection] Card database is empty; returning 0% completion.');
+        hasLoggedEmptyCardDatabaseWarning = true;
+      }
+
+      return {
+        totalCards,
+        discoveredCards: collection.discoveredCards.size,
+        completionPercentage: 0,
+        totalPlays: Array.from(collection.playedCards.values()).reduce((sum, count) => sum + count, 0)
+      };
+    }
+
     return {
-      totalCards: CARD_DATABASE.length,
+      totalCards,
       discoveredCards: collection.discoveredCards.size,
-      completionPercentage: Math.round((collection.discoveredCards.size / CARD_DATABASE.length) * 100),
+      completionPercentage: Math.round((collection.discoveredCards.size / totalCards) * 100),
       totalPlays: Array.from(collection.playedCards.values()).reduce((sum, count) => sum + count, 0)
     };
   };

@@ -2,6 +2,13 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-02 – Card collection guards empty database
+- Timestamp: 2025-11-02T00:00:00Z
+- Files:
+  - `src/hooks/useCardCollection.ts`
+  - `__tests__/hooks/useCardCollection.test.ts`
+- Summary: Hardened the collection stats hook to return a finite 0% completion rate when no cards are loaded, emit a console warning for UI fallbacks, and added regression coverage so future data migrations never resurrect the divide-by-zero edge case.
+
 ## 2025-11-01 – Campaign progress immutability guard
 - Timestamp: 2025-11-01T00:00:00Z
 - Files:
