@@ -216,6 +216,7 @@ const normalizeClashOutcome = (
 
   const entry = value as ClashLike;
   const ids = collectCandidateIds(entry);
+  const hasExplicitTargets = ids.length > 0;
   const outcomeText = toTrimmedStringOrNull(entry.outcome)
     ?? toTrimmedStringOrNull(entry.result)
     ?? toTrimmedStringOrNull(entry.status);
@@ -227,8 +228,8 @@ const normalizeClashOutcome = (
 
   return {
     appliesToCard: (cardId: string) => {
-      if (!ids.length) {
-        return true;
+      if (!hasExplicitTargets) {
+        return false;
       }
       return ids.includes(cardId);
     },
