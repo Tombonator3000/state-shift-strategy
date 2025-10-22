@@ -21,6 +21,8 @@ import {
 } from '@/data/cardArticles/articleDatabase';
 import { selectArticleForCharacter, type CharacterStageState } from '@/game/recurringCharacterArticles';
 import { resolveRecurringCharacterId } from '@/game/recurringCharacters';
+import { generateProceduralArticle } from './proceduralArticleGenerator';
+import { enhanceArticle } from './articleEnhancer';
 
 export interface PlayedCardInput {
   card: Card;
@@ -530,6 +532,7 @@ const getArticleOrFallback = (
   capturedNames: string[],
   bank: ArticleBank | null,
   recurringState: Record<string, CharacterStageState> | undefined,
+  gameState?: IssueGeneratorGameStateSnapshot,
 ): { article: ResolvedCardArticle; origin: ArticleResolutionOrigin } => {
   const cardId = entry.card.id;
   const faction = resolveFaction(entry.card.faction);
@@ -558,20 +561,83 @@ const getArticleOrFallback = (
 
   const curated = resolveRecurring(staticArticle ?? null);
   if (curated) {
-    return { article: curated, origin: 'static' };
+    // Enhance static articles for more humor
+    const enhanced = enhanceArticle(
+      { headline: curated.headline, subhead: curated.subhead, body: curated.body },
+      faction === 'truth',
+      { truth: gameState?.truth, turn: gameState?.turn, targetState: targetName ?? undefined }
+    );
+    return {
+      article: { ...curated, ...enhanced },
+      origin: 'static',
+    };
   }
 
   const stagedBank = resolveRecurring(bankArticle ?? null);
   if (stagedBank) {
-    return { article: stagedBank, origin: 'bank' };
+    // Enhance bank articles
+    const enhanced = enhanceArticle(
+      { headline: stagedBank.headline, subhead: stagedBank.subhead, body: stagedBank.body },
+      faction === 'truth',
+      { truth: gameState?.truth, turn: gameState?.turn, targetState: targetName ?? undefined }
+    );
+    return {
+      article: { ...stagedBank, ...enhanced },
+      origin: 'bank',
+    };
   }
 
   if (staticArticle) {
-    return { article: staticArticle, origin: 'static' };
+    // Enhance static articles
+    const enhanced = enhanceArticle(
+      { headline: staticArticle.headline, subhead: staticArticle.subhead, body: staticArticle.body },
+      faction === 'truth',
+      { truth: gameState?.truth, turn: gameState?.turn, targetState: targetName ?? undefined }
+    );
+    return {
+      article: { ...staticArticle, ...enhanced },
+      origin: 'static',
+    };
   }
 
+  // Generate procedural tabloid-style article instead of generic placeholder
+  const procedural = generateProceduralArticle({
+    card: entry.card,
+    player: entry.player,
+    targetState: targetName ?? undefined,
+    truthDelta: entry.truthDelta,
+    gameState: {
+      truth: gameState?.truth,
+      turn: gameState?.turn,
+      controlledStates: gameState?.controlledStates,
+    },
+  });
+
+  const cardTags = Array.isArray((entry.card as { tags?: string[] }).tags)
+    ? ((entry.card as { tags?: string[] }).tags as string[])
+    : [];
+  const storyTags = Array.isArray(story.tags) ? story.tags : [];
+  const tags = uniqueStrings([...cardTags, ...storyTags, ...procedural.tags]);
+  const states = uniqueStrings([targetName, ...capturedNames]);
+
   return {
-    article: createGenericArticle(entry, story, targetName, capturedNames),
+    article: {
+      id: cardId,
+      cardId,
+      faction,
+      tone: faction,
+      tags,
+      headline: procedural.headline,
+      subhead: procedural.subhead,
+      byline: procedural.byline,
+      body: procedural.body,
+      imagePrompt: procedural.imagePrompt,
+      statesMentioned: states.length ? states : undefined,
+      recurringCharacter: null,
+      followUpHooks: [],
+      articleVariant: null,
+      preferredTone: null,
+    } satisfies ResolvedCardArticle,
     origin: 'generated',
   };
 };
@@ -855,6 +921,7 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
       capturedNames,
       articleBank,
       input.gameState?.recurringCharacters,
+      input.gameState,
     );
     const tonedArticle = applyToneIfAvailable(entry, resolvedArticle);
     return buildGeneratedStoryArticle(entry, tonedArticle, gameStateContext, {
