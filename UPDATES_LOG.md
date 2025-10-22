@@ -2,6 +2,12 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-31 – Campaign progress storage hardening
+- Timestamp: 2025-10-31T00:00:00Z
+- Files:
+  - `src/hooks/useCampaignProgress.ts`
+- Summary: Hardened the campaign progress hook against missing `window.localStorage`, preserving JSON fallback behavior so progress tracking no-ops gracefully in SSR and test environments.
+
 ## 2025-10-30 – Special decks embrace lore figures
 - Timestamp: 2025-10-30T12:00:00Z
 - Files:
