@@ -24,9 +24,10 @@ export function useCampaignProgress() {
 
   const completeMission = (missionId: string, victory: boolean) => {
     setProgress(prev => {
-      const completedMissions = prev.completedMissions.includes(missionId)
-        ? [...prev.completedMissions]
-        : [...prev.completedMissions, missionId];
+      const completedMissions = [...prev.completedMissions];
+      if (victory && !completedMissions.includes(missionId)) {
+        completedMissions.push(missionId);
+      }
 
       const unlockedCards = [...prev.unlockedCards];
       const unlockedPersonas = [...prev.unlockedPersonas];
