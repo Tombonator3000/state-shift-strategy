@@ -30,6 +30,7 @@ import { buildEditionEvents } from './eventEdition';
 import { getStartingHandSize, type DrawMode, type CardDrawState } from '@/data/cardDrawingSystem';
 import { useAchievements } from '@/contexts/AchievementContext';
 import { resolveCardMVP, type CardPlayResolution, type CardHotspotResolution } from '@/systems/cardResolution';
+import type { PlayResult } from '@/hooks/useCardAnimation';
 import { useStateEvents } from '@/hooks/useStateEvents';
 import { applyTruthDelta, type TruthActorId } from '@/utils/truth';
 import type { Difficulty } from '@/ai';
@@ -3746,364 +3747,406 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     }
   }, [achievements, resolveCardEffects, triggerCapturedStateEvents]);
 
-  const playCardAnimated = useCallback(async (
-    cardId: string,
-    animateCard: (cardId: string, card: any, options?: any) => Promise<any>,
-    explicitTargetState?: string,
-  ) => {
-    const card = gameState.hand.find(c => c.id === cardId);
-    if (!card || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
-      return;
-    }
-
-    achievements.onCardPlayed(cardId, card.type, card.rarity);
-
-    const targetState = explicitTargetState ?? gameState.targetState ?? null;
-    let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
-    let pendingTurnPlays: ReturnType<typeof createTurnPlayEntries> | null = null;
-    let pendingResolvedCard: GameCard | null = null;
-    let pendingScandalEffects: EditorPendingScandalEffect[] | null = null;
-    const pendingEditorToasts: string[] = [];
-
-    setGameState(prev => {
-      if (prev.animating) {
-        return prev;
+  const playCardAnimated = useCallback(
+    async (
+      cardId: string,
+      animateCard: (
+        cardId: string,
+        card: GameCard,
+        options?: {
+          targetState?: string | null;
+          onResolve?: (card: GameCard) => Promise<void>;
+          onComplete?: () => void;
+          countered?: boolean;
+        },
+      ) => Promise<PlayResult>,
+      explicitTargetState?: string,
+    ): Promise<PlayResult> => {
+      const card = gameState.hand.find(c => c.id === cardId);
+      if (!card || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
+        return { cancelled: true, countered: false };
       }
 
-      const cardTags = Array.isArray((card as { tags?: string[] }).tags)
-        ? ((card as { tags: string[] }).tags)
-        : [];
-      const recurringState: RecurringCharacterState = { ...prev.recurringCharacters };
-      const recurringTracking = trackCharacterAppearance(card.name, cardTags, prev.round, recurringState);
+      achievements.onCardPlayed(cardId, card.type, card.rarity);
 
-      const baseCost = applyStateCombinationCostModifiers(
-        card.cost,
-        card.type,
-        'human',
-        prev.stateCombinationEffects,
-      );
-
-      const runtimeSnapshot = prev.editorRuntime ? { ...prev.editorRuntime } : null;
-      const playContext: EditorPlayCardHookContext = {
-        state: prev,
-        runtime: runtimeSnapshot,
-        card,
-        cardKind: card.type,
-        cost: baseCost,
-        truthDelta: 0,
-        ipDelta: 0,
-        aiIpDelta: 0,
-        pendingScandals: [],
-        logEntries: [],
-        toastMessages: [],
-        fxMessages: [],
-      };
-
-      applyEditorPlayCardAdjustments(playContext);
-
-      let costReductionApplied = 0;
-      if (
-        recurringTracking.character &&
-        typeof recurringTracking.bonus.costReduction === 'number' &&
-        recurringTracking.bonus.costReduction !== 0
-      ) {
-        const priorCost = playContext.cost;
-        playContext.cost = Math.max(0, playContext.cost - recurringTracking.bonus.costReduction);
-        const normalizedPrior = Math.max(0, Math.trunc(priorCost));
-        const normalizedAfter = Math.max(0, Math.trunc(playContext.cost));
-        costReductionApplied = Math.max(0, normalizedPrior - normalizedAfter);
-      }
-
-      const effectiveCost = Math.max(0, Math.trunc(playContext.cost));
-      if (prev.ip < effectiveCost) {
-        return prev;
-      }
-
-      const resolvedCard = effectiveCost === card.cost ? card : { ...card, cost: effectiveCost };
-      pendingResolvedCard = resolvedCard;
-
-      let resolution = resolveCardEffects(prev, resolvedCard, targetState);
-
-      const adjustmentLogs: string[] = [];
-      if (playContext.truthDelta !== 0) {
-        const truthMutation = { truth: resolution.truth, log: [] as string[] };
-        applyTruthDelta(truthMutation, playContext.truthDelta, 'human');
-        resolution.truth = truthMutation.truth;
-        if (truthMutation.log.length > 0) {
-          adjustmentLogs.push(...truthMutation.log);
-        }
-      }
-
-      if (playContext.ipDelta !== 0) {
-        resolution.ip = Math.max(0, resolution.ip + playContext.ipDelta);
-      }
-
-      if (playContext.aiIpDelta !== 0) {
-        resolution.aiIP = Math.max(0, resolution.aiIP + playContext.aiIpDelta);
-      }
-
-      if (adjustmentLogs.length > 0 || playContext.logEntries.length > 0) {
-        resolution.logEntries = [
-          ...(resolution.logEntries ?? []),
-          ...adjustmentLogs,
-          ...playContext.logEntries,
-        ];
-      }
-
-      if (recurringTracking.character) {
-        const recurringLogs: string[] = [];
-        if (costReductionApplied > 0) {
-          recurringLogs.push(
-            `Recurring cameo: ${recurringTracking.character.name} waives ${costReductionApplied} IP in hush tithes.`,
-          );
-        }
-        if (typeof recurringTracking.bonus.truthDelta === 'number' && recurringTracking.bonus.truthDelta !== 0) {
-          const truthMutation = { truth: resolution.truth, log: [] as string[] };
-          applyTruthDelta(truthMutation, recurringTracking.bonus.truthDelta, 'human');
-          resolution.truth = truthMutation.truth;
-          if (truthMutation.log.length > 0) {
-            recurringLogs.push(...truthMutation.log);
-          }
-          const truthLabel = recurringTracking.bonus.truthDelta > 0
-            ? `+${recurringTracking.bonus.truthDelta}`
-            : `${recurringTracking.bonus.truthDelta}`;
-          recurringLogs.push(
-            `Recurring cameo: ${recurringTracking.character.name} stokes the broadcast (${truthLabel}% Truth).`,
-          );
-        }
-        if (typeof recurringTracking.bonus.ipDelta === 'number' && recurringTracking.bonus.ipDelta !== 0) {
-          resolution.ip = Math.max(0, resolution.ip + recurringTracking.bonus.ipDelta);
-          const ipLabel = recurringTracking.bonus.ipDelta > 0
-            ? `+${recurringTracking.bonus.ipDelta}`
-            : `${recurringTracking.bonus.ipDelta}`;
-          recurringLogs.push(
-            `Recurring cameo bankroll: ${ipLabel} IP rerouted by ${recurringTracking.character.name}.`,
-          );
-        }
-        if (recurringTracking.stageArc) {
-          recurringLogs.push(
-            `Where Are They Now: ${recurringTracking.character.name} enters "${recurringTracking.stageArc.label}" orbit.`,
-          );
-        }
-        if (recurringTracking.milestone) {
-          recurringLogs.push(`Milestone achieved — ${recurringTracking.milestone.label}.`);
-        }
-        if (recurringLogs.length > 0) {
-          resolution.logEntries = [...(resolution.logEntries ?? []), ...recurringLogs];
-        }
-      }
-
-      if (playContext.toastMessages.length > 0) {
-        pendingEditorToasts.push(...playContext.toastMessages);
-      }
-      if (playContext.fxMessages.length > 0) {
-        pendingEditorToasts.push(...playContext.fxMessages);
-      }
-
-      const updatedHotspots = { ...prev.paranormalHotspots };
-      if (resolution.resolvedHotspots) {
-        for (const abbr of resolution.resolvedHotspots) {
-          delete updatedHotspots[abbr];
-        }
-      }
-      let nextActiveHotspot = prev.activeHotspot;
-      if (resolution.hotspotResolutions) {
-        for (const resolved of resolution.hotspotResolutions) {
-          if (activeHotspotMatchesResolution(nextActiveHotspot, resolved)) {
-            nextActiveHotspot = null;
-          }
-          queueHotspotResolveToast(buildResolvedHotspotToast(resolved));
-        }
-      }
-      const counterSnapshot = applyAgendaCardCounters(prev, 'human', resolvedCard);
-      pendingRecord = createPlayedCardRecord({
-        card: resolvedCard,
-        player: 'human',
-        faction: prev.faction,
-        targetState,
-        resolution,
-        previousTruth: prev.truth,
-        previousIp: prev.ip,
-        previousAiIP: prev.aiIP,
-        round: prev.round,
-        turn: prev.turn,
-      });
-      pendingTurnPlays = createTurnPlayEntries({
-        state: prev,
-        card: resolvedCard,
-        owner: 'human',
-        targetState,
-        resolution,
-      });
-
-      const mergedStates = mergeStateEventHistories(prev.states, resolution.states);
-
-      const editorRuntimePatch = playContext.runtimePatch
-        ? normalizeEditorRuntimeState({ ...(runtimeSnapshot ?? {}), ...playContext.runtimePatch })
-        : undefined;
-      const nextEditorRuntime = editorRuntimePatch ?? runtimeSnapshot ?? prev.editorRuntime ?? null;
-
-      pendingScandalEffects = playContext.pendingScandals.length > 0 ? [...playContext.pendingScandals] : null;
-
-      const nextState: GameState = {
-        ...prev,
-        animating: true,
-        ip: resolution.ip,
-        aiIP: resolution.aiIP,
-        truth: resolution.truth,
-        states: mergedStates,
-        controlledStates: resolution.controlledStates,
-        aiControlledStates: resolution.aiControlledStates,
-        targetState: resolution.targetState,
-        selectedCard: resolution.selectedCard,
-        log: [...prev.log, ...resolution.logEntries],
-        agendaIssueCounters: counterSnapshot.issueCounters,
-        agendaRoundCounters: counterSnapshot.roundCounters,
-        paranormalHotspots: updatedHotspots,
-        activeHotspot: nextActiveHotspot,
-        editorRuntime: nextEditorRuntime ?? null,
-        recurringCharacters: recurringTracking.character ? recurringState : prev.recurringCharacters,
-      };
-
-      const stateWithReveal = resolution.aiSecretAgendaRevealed
-        ? revealAiSecretAgenda(nextState, { type: 'card', name: resolvedCard.name })
-        : nextState;
-
-      const resultState = updateSecretAgendaProgress(stateWithReveal);
-      triggerCapturedStateEvents(resolution, resultState);
-      return resultState;
-    });
-
-    if (pendingEditorToasts.length > 0) {
-      emitEditorToastMessages(pendingEditorToasts);
-      pendingEditorToasts.length = 0;
-    }
-
-    try {
-      await animateCard(cardId, card, {
-        targetState,
-        onResolve: async () => Promise.resolve(),
-      });
+      const targetState = explicitTargetState ?? gameState.targetState ?? null;
+      let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
+      let pendingTurnPlays: ReturnType<typeof createTurnPlayEntries> | null = null;
+      let pendingResolvedCard: GameCard | null = null;
+      let pendingScandalEffects: EditorPendingScandalEffect[] | null = null;
+      const pendingEditorToasts: string[] = [];
+      let wasCountered = false;
 
       setGameState(prev => {
-        const record = pendingRecord ?? {
-          card: pendingResolvedCard ?? card,
-          player: 'human' as const,
-          faction: prev.faction,
-          targetState: targetState ?? null,
+        if (prev.animating) {
+          return prev;
+        }
+
+        const cardTags = Array.isArray((card as { tags?: string[] }).tags)
+          ? ((card as { tags: string[] }).tags)
+          : [];
+        const recurringState: RecurringCharacterState = { ...prev.recurringCharacters };
+        const recurringTracking = trackCharacterAppearance(card.name, cardTags, prev.round, recurringState);
+
+        const baseCost = applyStateCombinationCostModifiers(
+          card.cost,
+          card.type,
+          'human',
+          prev.stateCombinationEffects,
+        );
+
+        const runtimeSnapshot = prev.editorRuntime ? { ...prev.editorRuntime } : null;
+        const playContext: EditorPlayCardHookContext = {
+          state: prev,
+          runtime: runtimeSnapshot,
+          card,
+          cardKind: card.type,
+          cost: baseCost,
           truthDelta: 0,
           ipDelta: 0,
           aiIpDelta: 0,
-          capturedStates: [],
-          capturedStateIds: [],
-          damageDealt: 0,
-          round: prev.round,
-          turn: prev.turn,
-          timestamp: Date.now(),
+          pendingScandals: [],
           logEntries: [],
-        };
-        const highlight = toPlayedLite(record);
-
-        let nextState: GameState = {
-          ...prev,
-          hand: prev.hand.filter(c => c.id !== cardId),
-          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-          cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
-          playHistory: [...prev.playHistory, record],
-          turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
-          turnBuffer: highlight ? [...prev.turnBuffer, highlight] : prev.turnBuffer,
-          selectedCard: null,
-          targetState: null,
-          animating: false,
+          toastMessages: [],
+          fxMessages: [],
         };
 
-        if (pendingScandalEffects && pendingScandalEffects.length > 0) {
-          const scandalOutcome = applyEditorPendingScandalEffects({
-            effects: pendingScandalEffects,
-            playerHand: nextState.hand,
-            aiHand: nextState.aiHand,
-            logEntries: nextState.log,
-          });
-          nextState = {
-            ...nextState,
-            hand: scandalOutcome.playerHand,
-            aiHand: scandalOutcome.aiHand,
-            log: scandalOutcome.logEntries,
-          };
-          if (scandalOutcome.toastMessages.length > 0) {
-            pendingEditorToasts.push(...scandalOutcome.toastMessages);
-          }
-          pendingScandalEffects = null;
+        applyEditorPlayCardAdjustments(playContext);
+
+        let costReductionApplied = 0;
+        if (
+          recurringTracking.character &&
+          typeof recurringTracking.bonus.costReduction === 'number' &&
+          recurringTracking.bonus.costReduction !== 0
+        ) {
+          const priorCost = playContext.cost;
+          playContext.cost = Math.max(0, playContext.cost - recurringTracking.bonus.costReduction);
+          const normalizedPrior = Math.max(0, Math.trunc(priorCost));
+          const normalizedAfter = Math.max(0, Math.trunc(playContext.cost));
+          costReductionApplied = Math.max(0, normalizedPrior - normalizedAfter);
         }
 
-        return updateSecretAgendaProgress(nextState);
+        const effectiveCost = Math.max(0, Math.trunc(playContext.cost));
+        if (prev.ip < effectiveCost) {
+          return prev;
+        }
+
+        const resolvedCard = effectiveCost === card.cost ? card : { ...card, cost: effectiveCost };
+        pendingResolvedCard = resolvedCard;
+
+        let resolution = resolveCardEffects(prev, resolvedCard, targetState);
+        wasCountered = Boolean(resolution.countered);
+
+        if (wasCountered) {
+          const logEntries = resolution.logEntries ?? [];
+          pendingRecord = createPlayedCardRecord({
+            card: resolvedCard,
+            player: 'human',
+            faction: prev.faction,
+            targetState,
+            resolution,
+            previousTruth: prev.truth,
+            previousIp: prev.ip,
+            previousAiIP: prev.aiIP,
+            round: prev.round,
+            turn: prev.turn,
+          });
+          pendingTurnPlays = [];
+          const updatedLog = logEntries.length > 0 ? [...prev.log, ...logEntries] : prev.log;
+          return {
+            ...prev,
+            animating: true,
+            log: updatedLog,
+            selectedCard: null,
+            targetState: null,
+          };
+        }
+
+        const adjustmentLogs: string[] = [];
+        if (playContext.truthDelta !== 0) {
+          const truthMutation = { truth: resolution.truth, log: [] as string[] };
+          applyTruthDelta(truthMutation, playContext.truthDelta, 'human');
+          resolution.truth = truthMutation.truth;
+          if (truthMutation.log.length > 0) {
+            adjustmentLogs.push(...truthMutation.log);
+          }
+        }
+
+        if (playContext.ipDelta !== 0) {
+          resolution.ip = Math.max(0, resolution.ip + playContext.ipDelta);
+        }
+
+        if (playContext.aiIpDelta !== 0) {
+          resolution.aiIP = Math.max(0, resolution.aiIP + playContext.aiIpDelta);
+        }
+
+        if (adjustmentLogs.length > 0 || playContext.logEntries.length > 0) {
+          resolution.logEntries = [
+            ...(resolution.logEntries ?? []),
+            ...adjustmentLogs,
+            ...playContext.logEntries,
+          ];
+        }
+
+        if (recurringTracking.character) {
+          const recurringLogs: string[] = [];
+          if (costReductionApplied > 0) {
+            recurringLogs.push(
+              `Recurring cameo: ${recurringTracking.character.name} waives ${costReductionApplied} IP in hush tithes.`,
+            );
+          }
+          if (typeof recurringTracking.bonus.truthDelta === 'number' && recurringTracking.bonus.truthDelta !== 0) {
+            const truthMutation = { truth: resolution.truth, log: [] as string[] };
+            applyTruthDelta(truthMutation, recurringTracking.bonus.truthDelta, 'human');
+            resolution.truth = truthMutation.truth;
+            if (truthMutation.log.length > 0) {
+              recurringLogs.push(...truthMutation.log);
+            }
+            const truthLabel = recurringTracking.bonus.truthDelta > 0
+              ? `+${recurringTracking.bonus.truthDelta}`
+              : `${recurringTracking.bonus.truthDelta}`;
+            recurringLogs.push(
+              `Recurring cameo: ${recurringTracking.character.name} stokes the broadcast (${truthLabel}% Truth).`,
+            );
+          }
+          if (typeof recurringTracking.bonus.ipDelta === 'number' && recurringTracking.bonus.ipDelta !== 0) {
+            resolution.ip = Math.max(0, resolution.ip + recurringTracking.bonus.ipDelta);
+            const ipLabel = recurringTracking.bonus.ipDelta > 0
+              ? `+${recurringTracking.bonus.ipDelta}`
+              : `${recurringTracking.bonus.ipDelta}`;
+            recurringLogs.push(
+              `Recurring cameo bankroll: ${ipLabel} IP rerouted by ${recurringTracking.character.name}.`,
+            );
+          }
+          if (recurringTracking.stageArc) {
+            recurringLogs.push(
+              `Where Are They Now: ${recurringTracking.character.name} enters "${recurringTracking.stageArc.label}" orbit.`,
+            );
+          }
+          if (recurringTracking.milestone) {
+            recurringLogs.push(`Milestone achieved — ${recurringTracking.milestone.label}.`);
+          }
+          if (recurringLogs.length > 0) {
+            resolution.logEntries = [...(resolution.logEntries ?? []), ...recurringLogs];
+          }
+        }
+
+        if (playContext.toastMessages.length > 0) {
+          pendingEditorToasts.push(...playContext.toastMessages);
+        }
+        if (playContext.fxMessages.length > 0) {
+          pendingEditorToasts.push(...playContext.fxMessages);
+        }
+
+        const updatedHotspots = { ...prev.paranormalHotspots };
+        if (resolution.resolvedHotspots) {
+          for (const abbr of resolution.resolvedHotspots) {
+            delete updatedHotspots[abbr];
+          }
+        }
+        let nextActiveHotspot = prev.activeHotspot;
+        if (resolution.hotspotResolutions) {
+          for (const resolved of resolution.hotspotResolutions) {
+            if (activeHotspotMatchesResolution(nextActiveHotspot, resolved)) {
+              nextActiveHotspot = null;
+            }
+            queueHotspotResolveToast(buildResolvedHotspotToast(resolved));
+          }
+        }
+        const counterSnapshot = applyAgendaCardCounters(prev, 'human', resolvedCard);
+        pendingRecord = createPlayedCardRecord({
+          card: resolvedCard,
+          player: 'human',
+          faction: prev.faction,
+          targetState,
+          resolution,
+          previousTruth: prev.truth,
+          previousIp: prev.ip,
+          previousAiIP: prev.aiIP,
+          round: prev.round,
+          turn: prev.turn,
+        });
+        pendingTurnPlays = createTurnPlayEntries({
+          state: prev,
+          card: resolvedCard,
+          owner: 'human',
+          targetState,
+          resolution,
+        });
+
+        const mergedStates = mergeStateEventHistories(prev.states, resolution.states);
+
+        const editorRuntimePatch = playContext.runtimePatch
+          ? normalizeEditorRuntimeState({ ...(runtimeSnapshot ?? {}), ...playContext.runtimePatch })
+          : undefined;
+        const nextEditorRuntime = editorRuntimePatch ?? runtimeSnapshot ?? prev.editorRuntime ?? null;
+
+        pendingScandalEffects = playContext.pendingScandals.length > 0 ? [...playContext.pendingScandals] : null;
+
+        const nextState: GameState = {
+          ...prev,
+          animating: true,
+          ip: resolution.ip,
+          aiIP: resolution.aiIP,
+          truth: resolution.truth,
+          states: mergedStates,
+          controlledStates: resolution.controlledStates,
+          aiControlledStates: resolution.aiControlledStates,
+          targetState: resolution.targetState,
+          selectedCard: resolution.selectedCard,
+          log: [...prev.log, ...resolution.logEntries],
+          agendaIssueCounters: counterSnapshot.issueCounters,
+          agendaRoundCounters: counterSnapshot.roundCounters,
+          paranormalHotspots: updatedHotspots,
+          activeHotspot: nextActiveHotspot,
+          editorRuntime: nextEditorRuntime ?? null,
+          recurringCharacters: recurringTracking.character ? recurringState : prev.recurringCharacters,
+        };
+
+        const stateWithReveal = resolution.aiSecretAgendaRevealed
+          ? revealAiSecretAgenda(nextState, { type: 'card', name: resolvedCard.name })
+          : nextState;
+
+        const resultState = updateSecretAgendaProgress(stateWithReveal);
+        triggerCapturedStateEvents(resolution, resultState);
+        return resultState;
       });
 
       if (pendingEditorToasts.length > 0) {
         emitEditorToastMessages(pendingEditorToasts);
         pendingEditorToasts.length = 0;
       }
-    } catch (error) {
-      console.error('Card animation failed:', error);
-      setGameState(prev => {
-        const record = pendingRecord ?? {
-          card: pendingResolvedCard ?? card,
-          player: 'human' as const,
-          faction: prev.faction,
-          targetState: targetState ?? null,
-          truthDelta: 0,
-          ipDelta: 0,
-          aiIpDelta: 0,
-          capturedStates: [],
-          capturedStateIds: [],
-          damageDealt: 0,
-          round: prev.round,
-          turn: prev.turn,
-          timestamp: Date.now(),
-          logEntries: [],
-        };
-        const highlight = toPlayedLite(record);
 
-        let nextState: GameState = {
-          ...prev,
-          hand: prev.hand.filter(c => c.id !== cardId),
-          cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
-          cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
-          playHistory: [...prev.playHistory, record],
-          turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
-          turnBuffer: highlight ? [...prev.turnBuffer, highlight] : prev.turnBuffer,
-          selectedCard: null,
-          targetState: null,
-          animating: false,
-        };
+      try {
+        const playResult = await animateCard(cardId, card, {
+          targetState,
+          onResolve: async () => Promise.resolve(),
+          countered: wasCountered,
+        });
 
-        if (pendingScandalEffects && pendingScandalEffects.length > 0) {
-          const scandalOutcome = applyEditorPendingScandalEffects({
-            effects: pendingScandalEffects,
-            playerHand: nextState.hand,
-            aiHand: nextState.aiHand,
-            logEntries: nextState.log,
-          });
-          nextState = {
-            ...nextState,
-            hand: scandalOutcome.playerHand,
-            aiHand: scandalOutcome.aiHand,
-            log: scandalOutcome.logEntries,
+        setGameState(prev => {
+          const record = pendingRecord ?? {
+            card: pendingResolvedCard ?? card,
+            player: 'human' as const,
+            faction: prev.faction,
+            targetState: targetState ?? null,
+            truthDelta: 0,
+            ipDelta: 0,
+            aiIpDelta: 0,
+            capturedStates: [],
+            capturedStateIds: [],
+            damageDealt: 0,
+            round: prev.round,
+            turn: prev.turn,
+            timestamp: Date.now(),
+            logEntries: [],
           };
-          if (scandalOutcome.toastMessages.length > 0) {
-            pendingEditorToasts.push(...scandalOutcome.toastMessages);
+          const highlight = toPlayedLite(record);
+
+          let nextState: GameState = {
+            ...prev,
+            hand: prev.hand.filter(c => c.id !== cardId),
+            cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+            cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
+            playHistory: [...prev.playHistory, record],
+            turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
+            turnBuffer: highlight ? [...prev.turnBuffer, highlight] : prev.turnBuffer,
+            selectedCard: null,
+            targetState: null,
+            animating: false,
+          };
+
+          if (pendingScandalEffects && pendingScandalEffects.length > 0) {
+            const scandalOutcome = applyEditorPendingScandalEffects({
+              effects: pendingScandalEffects,
+              playerHand: nextState.hand,
+              aiHand: nextState.aiHand,
+              logEntries: nextState.log,
+            });
+            nextState = {
+              ...nextState,
+              hand: scandalOutcome.playerHand,
+              aiHand: scandalOutcome.aiHand,
+              log: scandalOutcome.logEntries,
+            };
+            if (scandalOutcome.toastMessages.length > 0) {
+              pendingEditorToasts.push(...scandalOutcome.toastMessages);
+            }
+            pendingScandalEffects = null;
           }
-          pendingScandalEffects = null;
+
+          return updateSecretAgendaProgress(nextState);
+        });
+
+        if (pendingEditorToasts.length > 0) {
+          emitEditorToastMessages(pendingEditorToasts);
+          pendingEditorToasts.length = 0;
         }
 
-        return updateSecretAgendaProgress(nextState);
-      });
+        return playResult;
+      } catch (error) {
+        console.error('Card animation failed:', error);
+        setGameState(prev => {
+          const record = pendingRecord ?? {
+            card: pendingResolvedCard ?? card,
+            player: 'human' as const,
+            faction: prev.faction,
+            targetState: targetState ?? null,
+            truthDelta: 0,
+            ipDelta: 0,
+            aiIpDelta: 0,
+            capturedStates: [],
+            capturedStateIds: [],
+            damageDealt: 0,
+            round: prev.round,
+            turn: prev.turn,
+            timestamp: Date.now(),
+            logEntries: [],
+          };
+          const highlight = toPlayedLite(record);
 
-      if (pendingEditorToasts.length > 0) {
-        emitEditorToastMessages(pendingEditorToasts);
+          let nextState: GameState = {
+            ...prev,
+            hand: prev.hand.filter(c => c.id !== cardId),
+            cardsPlayedThisTurn: prev.cardsPlayedThisTurn + 1,
+            cardsPlayedThisRound: [...prev.cardsPlayedThisRound, record],
+            playHistory: [...prev.playHistory, record],
+            turnPlays: [...prev.turnPlays, ...(pendingTurnPlays ?? [])],
+            turnBuffer: highlight ? [...prev.turnBuffer, highlight] : prev.turnBuffer,
+            selectedCard: null,
+            targetState: null,
+            animating: false,
+          };
+
+          if (pendingScandalEffects && pendingScandalEffects.length > 0) {
+            const scandalOutcome = applyEditorPendingScandalEffects({
+              effects: pendingScandalEffects,
+              playerHand: nextState.hand,
+              aiHand: nextState.aiHand,
+              logEntries: nextState.log,
+            });
+            nextState = {
+              ...nextState,
+              hand: scandalOutcome.playerHand,
+              aiHand: scandalOutcome.aiHand,
+              log: scandalOutcome.logEntries,
+            };
+            if (scandalOutcome.toastMessages.length > 0) {
+              pendingEditorToasts.push(...scandalOutcome.toastMessages);
+            }
+            pendingScandalEffects = null;
+          }
+
+          return updateSecretAgendaProgress(nextState);
+        });
+
+        if (pendingEditorToasts.length > 0) {
+          emitEditorToastMessages(pendingEditorToasts);
+        }
+
+        return { cancelled: false, countered: wasCountered };
       }
-    }
-  }, [achievements, resolveCardEffects, triggerCapturedStateEvents, gameState]);
+    }, [achievements, resolveCardEffects, triggerCapturedStateEvents, gameState]);
 
 
   const selectCard = useCallback((cardId: string | null) => {

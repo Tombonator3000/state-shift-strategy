@@ -97,6 +97,16 @@ This document provides a chronological record of gameplay-impacting changes merg
 - Summary: Ensured the main menu only initializes its music once when the intro hands off control so player-selected tracks fro
 m the options panel persist instead of resetting to the default playlist.
 
+## 2025-10-22 – Countered plays skip resolution effects
+- Timestamp: 2025-10-22T14:42:46Z
+- Files:
+  - `src/systems/cardResolution.ts`
+  - `src/hooks/useGameState.ts`
+  - `src/hooks/useCardAnimation.ts`
+  - `src/pages/Index.tsx`
+  - `__tests__/systems/cardResolution.counter.test.ts`
+- Summary: Surfaced the engine's counter flag through card resolution, animation, and the gameplay UI so countered plays bypass state mutations, trigger the counter shake, and gained regression coverage to ensure blocked cards no longer apply their effects.
+
 ## 2025-10-19 – Added “What Is The Paranoid Times?” panel
 - Timestamp: 2025-10-19T18:42:00Z
 - Files:

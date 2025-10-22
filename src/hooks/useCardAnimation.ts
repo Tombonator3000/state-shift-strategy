@@ -9,7 +9,7 @@ interface AnimationRect {
   height: number;
 }
 
-interface PlayResult {
+export interface PlayResult {
   cancelled: boolean;
   countered: boolean;
 }
@@ -18,6 +18,7 @@ interface AnimationOptions {
   targetState?: string;
   onResolve?: (card: GameCard) => Promise<void>;
   onComplete?: () => void;
+  countered?: boolean;
 }
 
 export const useCardAnimation = () => {
@@ -318,8 +319,7 @@ export const useCardAnimation = () => {
         highlightState(options.targetState);
       }
 
-      // Simulate reaction window (simplified for now)
-      const countered = false; // TODO: Implement actual counter logic
+      const countered = options.countered === true;
 
       if (countered) {
         await smallShake(clone);
