@@ -2323,40 +2323,43 @@ const Index = () => {
       }
 
       // Use animated card play
-      await playCardAnimated(cardId, animatePlayCard, resolvedTargetStateId);
+      const playResult = await playCardAnimated(cardId, animatePlayCard, resolvedTargetStateId);
+      const wasCountered = playResult?.countered ?? false;
 
       setPendingDiscards(prev => (prev.length ? prev.filter(id => id !== cardId) : prev));
 
       // Track card in collection
       recordCardPlay(cardId);
-      
-      // Enhanced visual effects for successful card play
-      let effectPosition = VisualEffectsCoordinator.getScreenCenter();
-      const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
-      if (cardElement) {
-        effectPosition = VisualEffectsCoordinator.getElementCenter(cardElement);
 
-        if (card.faction === 'government' && card.type === 'ATTACK') {
-          VisualEffectsCoordinator.triggerGovernmentRedaction(effectPosition);
+      if (!wasCountered) {
+        // Enhanced visual effects for successful card play
+        let effectPosition = VisualEffectsCoordinator.getScreenCenter();
+        const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+        if (cardElement) {
+          effectPosition = VisualEffectsCoordinator.getElementCenter(cardElement);
+
+          if (card.faction === 'government' && card.type === 'ATTACK') {
+            VisualEffectsCoordinator.triggerGovernmentRedaction(effectPosition);
+          }
+
+          // Show floating number for IP cost
+          if (card.cost > 0) {
+            VisualEffectsCoordinator.showFloatingNumber(-card.cost, 'ip', {
+              x: effectPosition.x - 30,
+              y: effectPosition.y - 20
+            });
+          }
         }
 
-        // Show floating number for IP cost
-        if (card.cost > 0) {
-          VisualEffectsCoordinator.showFloatingNumber(-card.cost, 'ip', {
-            x: effectPosition.x - 30,
-            y: effectPosition.y - 20
-          });
+        const contextualEffect = determineCardContextualEffect(card);
+        if (contextualEffect) {
+          VisualEffectsCoordinator.triggerContextualEffect(contextualEffect, card.name, effectPosition);
         }
-      }
 
-      const contextualEffect = determineCardContextualEffect(card);
-      if (contextualEffect) {
-        VisualEffectsCoordinator.triggerContextualEffect(contextualEffect, card.name, effectPosition);
-      }
-
-      if (card.faction === 'truth' && card.type === 'MEDIA') {
-        VisualEffectsCoordinator.triggerTruthFlash(effectPosition);
-        audio.playSFX('flash');
+        if (card.faction === 'truth' && card.type === 'MEDIA') {
+          VisualEffectsCoordinator.triggerTruthFlash(effectPosition);
+          audio.playSFX('flash');
+        }
       }
 
       toast.success(`✅ ${card.name} deployed successfully!`, {

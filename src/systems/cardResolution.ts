@@ -115,10 +115,189 @@ export interface CardPlayResolution {
   aiSecretAgendaRevealed?: boolean;
   resolvedHotspots?: string[];
   hotspotResolutions?: CardHotspotResolution[];
+  countered?: boolean;
 }
 
 const PLAYER_ID: PlayerId = 'P1';
 const AI_ID: PlayerId = 'P2';
+
+type ClashLike = {
+  targetCardId?: unknown;
+  cardId?: unknown;
+  cardIds?: unknown;
+  targetCardIds?: unknown;
+  card?: unknown;
+  target?: unknown;
+  outcome?: unknown;
+  result?: unknown;
+  status?: unknown;
+  countered?: unknown;
+  message?: unknown;
+  log?: unknown;
+  text?: unknown;
+  reason?: unknown;
+  summary?: unknown;
+  detail?: unknown;
+};
+
+const toTrimmedStringOrNull = (value: unknown): string | null => {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  return null;
+};
+
+const collectCandidateIds = (entry: ClashLike): string[] => {
+  const ids: string[] = [];
+  const pushId = (candidate: unknown) => {
+    const resolved = toTrimmedStringOrNull(candidate);
+    if (resolved) {
+      ids.push(resolved);
+    }
+  };
+
+  pushId(entry.targetCardId);
+  pushId(entry.cardId);
+
+  if (Array.isArray(entry.cardIds)) {
+    for (const id of entry.cardIds as unknown[]) {
+      pushId(id);
+    }
+  }
+
+  if (Array.isArray(entry.targetCardIds)) {
+    for (const id of entry.targetCardIds as unknown[]) {
+      pushId(id);
+    }
+  }
+
+  if (entry.card && typeof entry.card === 'object') {
+    const payload = entry.card as { id?: unknown };
+    pushId(payload.id);
+  }
+
+  if (entry.target && typeof entry.target === 'object') {
+    const payload = entry.target as { id?: unknown };
+    pushId(payload.id);
+  } else if (typeof entry.target === 'string') {
+    pushId(entry.target);
+  }
+
+  return ids;
+};
+
+const extractCounterMessage = (entry: ClashLike): string | null => {
+  const fields: unknown[] = [
+    entry.message,
+    entry.log,
+    entry.text,
+    entry.reason,
+    entry.summary,
+    entry.detail,
+  ];
+
+  for (const field of fields) {
+    const message = toTrimmedStringOrNull(field);
+    if (message) {
+      return message;
+    }
+  }
+
+  return null;
+};
+
+const normalizeClashOutcome = (
+  value: unknown,
+): { appliesToCard: (cardId: string) => boolean; countered: boolean; message?: string } | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const entry = value as ClashLike;
+  const ids = collectCandidateIds(entry);
+  const outcomeText = toTrimmedStringOrNull(entry.outcome)
+    ?? toTrimmedStringOrNull(entry.result)
+    ?? toTrimmedStringOrNull(entry.status);
+  const countered = Boolean(
+    entry.countered === true ||
+      (outcomeText ? outcomeText.toLowerCase() === 'countered' : false),
+  );
+  const message = extractCounterMessage(entry) ?? undefined;
+
+  return {
+    appliesToCard: (cardId: string) => {
+      if (!ids.length) {
+        return true;
+      }
+      return ids.includes(cardId);
+    },
+    countered,
+    message,
+  };
+};
+
+const detectCounterOutcome = (
+  snapshot: GameSnapshot,
+  card: GameCard,
+): { countered: boolean; message?: string } => {
+  const probes: unknown[] = [];
+  const enrichedSnapshot = snapshot as GameSnapshot & {
+    clash?: unknown;
+    matchContext?: Record<string, unknown> | null;
+  };
+
+  if (enrichedSnapshot.clash) {
+    probes.push(enrichedSnapshot.clash);
+  }
+
+  const matchContext = enrichedSnapshot.matchContext;
+  if (matchContext && typeof matchContext === 'object') {
+    if (matchContext.clash) {
+      probes.push(matchContext.clash);
+    }
+
+    const pending = matchContext.pendingCounters;
+    if (Array.isArray(pending)) {
+      probes.push(...pending);
+    }
+
+    const counteredCards = matchContext.counteredCards;
+    if (Array.isArray(counteredCards)) {
+      const normalized = counteredCards
+        .map(entry => toTrimmedStringOrNull(entry))
+        .filter((entry): entry is string => Boolean(entry));
+      if (normalized.includes(card.id)) {
+        const message = toTrimmedStringOrNull(matchContext.counteredMessage);
+        return { countered: true, message: message ?? undefined };
+      }
+    }
+
+    const counterMap = matchContext.counterMap;
+    if (counterMap && typeof counterMap === 'object') {
+      const lookup = (counterMap as Record<string, unknown>)[card.id];
+      if (lookup) {
+        probes.push(lookup);
+      }
+    }
+  }
+
+  for (const probe of probes) {
+    const normalized = normalizeClashOutcome(probe);
+    if (!normalized) {
+      continue;
+    }
+    if (!normalized.appliesToCard(card.id)) {
+      continue;
+    }
+    if (!normalized.countered) {
+      continue;
+    }
+    return { countered: true, message: normalized.message };
+  }
+
+  return { countered: false };
+};
 
 const resolvePlayerEditorId = (snapshot: GameSnapshot): string | null => {
   const enriched = snapshot as GameSnapshot & {
@@ -328,6 +507,29 @@ export function resolveCardMVP(
   achievements: AchievementTracker = defaultAchievementTracker,
   mediaOptions: MediaResolutionOptions = {},
 ): CardPlayResolution {
+  const counterOutcome = detectCounterOutcome(gameState, card);
+  if (counterOutcome.countered) {
+    const baseStates = gameState.states.map(state => ({ ...state }));
+    const baseControlled = Array.from(gameState.controlledStates);
+    const baseAiControlled = Array.from(gameState.aiControlledStates ?? []);
+    const logEntry = counterOutcome.message
+      ?? `${card.name} was countered before its effects could resolve.`;
+    return {
+      ip: gameState.ip,
+      aiIP: gameState.aiIP,
+      truth: gameState.truth,
+      states: baseStates,
+      controlledStates: baseControlled,
+      aiControlledStates: baseAiControlled,
+      capturedStateIds: [],
+      targetState: null,
+      selectedCard: null,
+      logEntries: [logEntry],
+      damageDealt: 0,
+      countered: true,
+    };
+  }
+
   const engineLog: string[] = [];
   const engineState = toEngineState(gameState, engineLog);
   const ownerId = actor === 'human' ? PLAYER_ID : AI_ID;
