@@ -209,6 +209,7 @@ const extractCounterMessage = (entry: ClashLike): string | null => {
 
 const normalizeClashOutcome = (
   value: unknown,
+  fallbackCardId?: string,
 ): { appliesToCard: (cardId: string) => boolean; countered: boolean; message?: string } | null => {
   if (!value || typeof value !== 'object') {
     return null;
@@ -228,10 +229,10 @@ const normalizeClashOutcome = (
 
   return {
     appliesToCard: (cardId: string) => {
-      if (!hasExplicitTargets) {
-        return false;
+      if (hasExplicitTargets) {
+        return ids.includes(cardId);
       }
-      return ids.includes(cardId);
+      return fallbackCardId ? fallbackCardId === cardId : false;
     },
     countered,
     message,
@@ -242,25 +243,27 @@ const detectCounterOutcome = (
   snapshot: GameSnapshot,
   card: GameCard,
 ): { countered: boolean; message?: string } => {
-  const probes: unknown[] = [];
+  const probes: Array<{ value: unknown; fallbackCardId?: string }> = [];
   const enrichedSnapshot = snapshot as GameSnapshot & {
     clash?: unknown;
     matchContext?: Record<string, unknown> | null;
   };
 
   if (enrichedSnapshot.clash) {
-    probes.push(enrichedSnapshot.clash);
+    probes.push({ value: enrichedSnapshot.clash });
   }
 
   const matchContext = enrichedSnapshot.matchContext;
   if (matchContext && typeof matchContext === 'object') {
     if (matchContext.clash) {
-      probes.push(matchContext.clash);
+      probes.push({ value: matchContext.clash });
     }
 
     const pending = matchContext.pendingCounters;
     if (Array.isArray(pending)) {
-      probes.push(...pending);
+      for (const entry of pending) {
+        probes.push({ value: entry });
+      }
     }
 
     const counteredCards = matchContext.counteredCards;
@@ -278,13 +281,13 @@ const detectCounterOutcome = (
     if (counterMap && typeof counterMap === 'object') {
       const lookup = (counterMap as Record<string, unknown>)[card.id];
       if (lookup) {
-        probes.push(lookup);
+        probes.push({ value: lookup, fallbackCardId: card.id });
       }
     }
   }
 
   for (const probe of probes) {
-    const normalized = normalizeClashOutcome(probe);
+    const normalized = normalizeClashOutcome(probe.value, probe.fallbackCardId);
     if (!normalized) {
       continue;
     }
