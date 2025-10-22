@@ -2,6 +2,13 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-03 – Bruksanvisning for nye korttemaer publisert
+- Timestamp: 2025-11-03T09:00:00Z
+- Files:
+  - `docs/new-card-theme-manual.md`
+  - `UPDATES_LOG.md`
+- Summary: La til en trinn-for-trinn bruksanvisning med kodeeksempler for å lage nye korttemaer, inkludert kobling til utvidelser, avisartikler og kunstkrav så hele pipeline kan følges uten å miste Paranoid Times-tonen.
+
 ## 2025-10-22 – Hotspot director primed at startup
 - Timestamp: 2025-10-22T00:00:00Z
 - Files:
