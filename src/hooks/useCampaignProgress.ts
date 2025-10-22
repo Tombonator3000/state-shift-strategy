@@ -24,23 +24,28 @@ export function useCampaignProgress() {
 
   const completeMission = (missionId: string, victory: boolean) => {
     setProgress(prev => {
-      const newProgress = { ...prev };
-      
-      if (victory) {
-        if (!newProgress.completedMissions.includes(missionId)) {
-          newProgress.completedMissions.push(missionId);
-        }
-        newProgress.victoryCount += 1;
-        
-        // Unlock next mission
-        newProgress.currentMission = Math.max(
-          newProgress.currentMission,
-          newProgress.completedMissions.length + 1
-        );
-      } else {
-        newProgress.defeatCount += 1;
-      }
-      
+      const completedMissions = prev.completedMissions.includes(missionId)
+        ? [...prev.completedMissions]
+        : [...prev.completedMissions, missionId];
+
+      const unlockedCards = [...prev.unlockedCards];
+      const unlockedPersonas = [...prev.unlockedPersonas];
+
+      const victoryCount = victory ? prev.victoryCount + 1 : prev.victoryCount;
+      const defeatCount = victory ? prev.defeatCount : prev.defeatCount + 1;
+      const currentMission = victory
+        ? Math.max(prev.currentMission, completedMissions.length + 1)
+        : prev.currentMission;
+
+      const newProgress: CampaignProgress = {
+        completedMissions,
+        unlockedCards,
+        unlockedPersonas,
+        victoryCount,
+        defeatCount,
+        currentMission,
+      };
+
       return newProgress;
     });
   };

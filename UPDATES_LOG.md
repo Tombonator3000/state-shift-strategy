@@ -2,6 +2,13 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-01 – Campaign progress immutability guard
+- Timestamp: 2025-11-01T00:00:00Z
+- Files:
+  - `src/hooks/useCampaignProgress.ts`
+  - `__tests__/hooks/useCampaignProgress.test.ts`
+- Summary: Ensured campaign mission completion clones its nested arrays before persisting so repeated victories never mutate prior state snapshots, and added regression coverage to lock in the immutable behavior.
+
 ## 2025-10-31 – Campaign progress storage hardening
 - Timestamp: 2025-10-31T00:00:00Z
 - Files:
