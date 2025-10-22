@@ -2,6 +2,12 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-02 – Campaign defeat handling fix
+- Timestamp: 2025-11-02T00:00:00Z
+- Files:
+  - `src/hooks/useCampaignProgress.ts`
+- Summary: Restored the campaign mission tracker so defeats no longer register as completions, preserving mission gating and unlock pacing after the immutability refactor.
+
 ## 2025-11-01 – Campaign progress immutability guard
 - Timestamp: 2025-11-01T00:00:00Z
 - Files:
