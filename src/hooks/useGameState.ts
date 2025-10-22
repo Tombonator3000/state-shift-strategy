@@ -2723,6 +2723,13 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const { triggerStateEvent, resetStateEvents } = useStateEvents();
 
   useEffect(() => {
+    hotspotDirector.initialize();
+    return () => {
+      hotspotDirector.teardown();
+    };
+  }, [hotspotDirector]);
+
+  useEffect(() => {
     let isActive = true;
 
     loadNewsPools().catch(error => {

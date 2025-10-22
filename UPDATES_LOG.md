@@ -2,6 +2,14 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-22 – Hotspot director primed at startup
+- Timestamp: 2025-10-22T00:00:00Z
+- Files:
+  - `src/systems/paranormalHotspots.ts`
+  - `src/hooks/useGameState.ts`
+  - `src/systems/__tests__/hotspotDirector.initialize.test.ts`
+- Summary: Primed the paranormal hotspot director caches, added lifecycle tick orchestration, wired initialization/teardown into the game-state hook, and added regression coverage to verify spawn pacing.
+
 ## 2025-11-02 – Card collection guards empty database
 - Timestamp: 2025-11-02T00:00:00Z
 - Files:

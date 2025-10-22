@@ -56,11 +56,35 @@ type HotspotCatalog = typeof hotspotsCatalog;
 type HotspotConfig = typeof hotspotsConfig;
 type CryptidHomeState = typeof cryptidHomeStates;
 
+type HotspotLifecycleStage = 'spawn' | 'animate' | 'glow' | 'resolve';
+
 interface CryptidSignatureRecord {
   stateName: string;
   abbreviation?: string;
   name: string;
   slug: string;
+}
+
+interface PrecomputedCatalogCandidate {
+  entry: CatalogEntry;
+  stateAbbr: string;
+  stateId: string;
+  kind: HotspotKind;
+  baseWeight: number;
+  baseTags: string[];
+  expansionTag?: string;
+  icon?: string;
+  stateNameFromEntry?: string;
+}
+
+export interface HotspotInitializationSnapshot {
+  initialized: boolean;
+  spawnRate: number;
+  cryptidHomeCount: number;
+  candidateCount: number;
+  cachedWeightEntries: number;
+  lifecycleIntervalMs: number;
+  lastLifecycleStage: HotspotLifecycleStage | null;
 }
 
 const STATE_NAME_TO_ABBR = new Map<string, string>();
@@ -524,6 +548,26 @@ export class HotspotDirector {
 
   private cryptidHomeLookup: Map<string, CryptidSignatureRecord> | null = null;
 
+  private initialized = false;
+
+  private resolvedSpawnRate = 0;
+
+  private spawnWeightCache: Map<string, number> = new Map();
+
+  private catalogCandidates: PrecomputedCatalogCandidate[] = [];
+
+  private catalogCandidatesByState: Map<string, PrecomputedCatalogCandidate[]> = new Map();
+
+  private lifecycleInterval: ReturnType<typeof setInterval> | null = null;
+
+  private lifecycleIntervalMs = 0;
+
+  private lifecycleStageIndex = 0;
+
+  private lastLifecycleDetail: { stage: HotspotLifecycleStage; timestamp: number } | null = null;
+
+  private static readonly LIFECYCLE_SEQUENCE: readonly HotspotLifecycleStage[] = ['spawn', 'animate', 'glow', 'resolve'];
+
   constructor(
     catalog: HotspotCatalog = hotspotsCatalog,
     config: HotspotConfig = hotspotsConfig,
@@ -537,7 +581,69 @@ export class HotspotDirector {
   }
 
   initialize(): void {
-    // TODO: Hydrate working sets, indexes, and orchestration timers.
+    if (this.initialized) {
+      return;
+    }
+
+    this.resolvedSpawnRate = this.getSpawnRate();
+    this.precomputeCatalogCandidates();
+    this.resolveCryptidLookup();
+
+    this.lifecycleStageIndex = 0;
+    this.lifecycleIntervalMs = this.computeLifecycleIntervalMs(this.resolvedSpawnRate);
+    this.emitLifecycleTick();
+
+    if (typeof window !== 'undefined' && typeof window.setInterval === 'function') {
+      this.lifecycleInterval = window.setInterval(() => {
+        this.emitLifecycleTick();
+      }, this.lifecycleIntervalMs);
+    }
+
+    const shouldLog = typeof console !== 'undefined'
+      && typeof console.info === 'function'
+      && (typeof process === 'undefined' || process?.env?.NODE_ENV !== 'test');
+
+    if (shouldLog) {
+      console.info(
+        `[HotspotDirector] Initialized with ${this.catalogCandidates.length} candidates `
+        + `(${this.spawnWeightCache.size} cached weights, spawnRate=${this.resolvedSpawnRate.toFixed(2)})`,
+      );
+    }
+
+    this.initialized = true;
+  }
+
+  teardown(): void {
+    if (this.lifecycleInterval) {
+      clearInterval(this.lifecycleInterval);
+      this.lifecycleInterval = null;
+    }
+
+    this.initialized = false;
+    this.resolvedSpawnRate = 0;
+    this.spawnWeightCache.clear();
+    this.catalogCandidates = [];
+    this.catalogCandidatesByState.clear();
+    this.lifecycleIntervalMs = 0;
+    this.lifecycleStageIndex = 0;
+    this.lastLifecycleDetail = null;
+    this.cryptidHomeLookup = null;
+  }
+
+  isInitialized(): boolean {
+    return this.initialized;
+  }
+
+  getInitializationSnapshot(): HotspotInitializationSnapshot {
+    return {
+      initialized: this.initialized,
+      spawnRate: this.initialized ? this.resolvedSpawnRate : this.getSpawnRate(),
+      cryptidHomeCount: this.cryptidHomeLookup?.size ?? 0,
+      candidateCount: this.catalogCandidates.length,
+      cachedWeightEntries: this.spawnWeightCache.size,
+      lifecycleIntervalMs: this.lifecycleIntervalMs,
+      lastLifecycleStage: this.lastLifecycleDetail?.stage ?? null,
+    } satisfies HotspotInitializationSnapshot;
   }
 
   getCatalog(): HotspotCatalog {
@@ -567,6 +673,32 @@ export class HotspotDirector {
     }
 
     return 0.2;
+  }
+
+  private computeLifecycleIntervalMs(spawnRate: number): number {
+    const clamped = Math.min(Math.max(spawnRate, 0), 0.95);
+    const baseCycleMs = 4000;
+    const normalized = 1 - clamped;
+    const interval = Math.round(baseCycleMs * normalized / HotspotDirector.LIFECYCLE_SEQUENCE.length);
+    return Math.max(750, interval);
+  }
+
+  private emitLifecycleTick(): void {
+    const stage = HotspotDirector.LIFECYCLE_SEQUENCE[this.lifecycleStageIndex];
+    const timestamp = Date.now();
+    this.lastLifecycleDetail = { stage, timestamp };
+
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('paranormalHotspotLifecycle', {
+        detail: {
+          stage,
+          timestamp,
+          spawnRate: this.resolvedSpawnRate,
+        },
+      }));
+    }
+
+    this.lifecycleStageIndex = (this.lifecycleStageIndex + 1) % HotspotDirector.LIFECYCLE_SEQUENCE.length;
   }
 
   private ensureStringTags(tags: unknown): string[] {
@@ -843,6 +975,69 @@ export class HotspotDirector {
     return uiConfig;
   }
 
+  private resolveEntryStateId(entry: CatalogEntry, fallbackAbbr: string): string {
+    const rawStateId = (entry as { stateId?: unknown }).stateId;
+    if (typeof rawStateId === 'string' && rawStateId.trim().length > 0) {
+      return rawStateId.trim();
+    }
+    if (typeof rawStateId === 'number' && Number.isFinite(rawStateId)) {
+      return rawStateId.toString();
+    }
+    return fallbackAbbr;
+  }
+
+  private precomputeCatalogCandidates(): void {
+    this.catalogCandidates = [];
+    this.catalogCandidatesByState.clear();
+    this.spawnWeightCache.clear();
+
+    const catalogEntries = Array.isArray(this.catalog?.hotspots) ? this.catalog.hotspots : [];
+
+    for (const entry of catalogEntries) {
+      const stateAbbr = this.resolveEntryStateAbbreviation(entry);
+      if (!stateAbbr) {
+        continue;
+      }
+
+      const uppercaseAbbr = stateAbbr.toUpperCase();
+      const stateId = this.resolveEntryStateId(entry, uppercaseAbbr);
+      const kind = this.resolveCatalogKind(entry);
+      const baseWeight = this.computeBaseWeight(stateId, uppercaseAbbr, kind);
+      if (!baseWeight || baseWeight <= 0) {
+        continue;
+      }
+
+      const baseTags = this.ensureStringTags((entry as { tags?: unknown }).tags);
+      const expansionTag = this.resolveCatalogExpansion(entry);
+      const icon = typeof (entry as { icon?: unknown }).icon === 'string'
+        ? ((entry as { icon: string }).icon)
+        : undefined;
+      const stateNameFromEntry = typeof (entry as { stateName?: unknown }).stateName === 'string'
+        ? ((entry as { stateName: string }).stateName.trim())
+        : undefined;
+
+      const candidate: PrecomputedCatalogCandidate = {
+        entry,
+        stateAbbr: uppercaseAbbr,
+        stateId,
+        kind,
+        baseWeight,
+        baseTags,
+        expansionTag,
+        icon,
+        stateNameFromEntry,
+      };
+
+      this.catalogCandidates.push(candidate);
+      const existing = this.catalogCandidatesByState.get(uppercaseAbbr) ?? [];
+      existing.push(candidate);
+      this.catalogCandidatesByState.set(uppercaseAbbr, existing);
+
+      const cacheKey = this.getSpawnCacheKey(stateId, uppercaseAbbr, kind);
+      this.spawnWeightCache.set(cacheKey, baseWeight);
+    }
+  }
+
   private getBadgeClass(kind: HotspotKind | string | undefined): string {
     const normalized = typeof kind === 'string' ? kind.toLowerCase() : '';
     if (normalized && this.uiConfig.badges[normalized]) {
@@ -996,7 +1191,13 @@ export class HotspotDirector {
     return lookup;
   }
 
-  private getBaseWeight(stateId: string, stateAbbr: string, kind: HotspotKind): number {
+  private getSpawnCacheKey(stateId: string, stateAbbr: string, kind: HotspotKind): string {
+    const idPart = stateId.trim().toUpperCase();
+    const abbrPart = stateAbbr.trim().toUpperCase();
+    return `${idPart || abbrPart || 'UNK'}::${kind}`;
+  }
+
+  private computeBaseWeight(stateId: string, stateAbbr: string, kind: HotspotKind): number {
     const { baseWeights } = this.spawnConfig;
     const kindKey = (kind ?? 'normal').toLowerCase() as SpawnKindKey;
 
@@ -1015,6 +1216,18 @@ export class HotspotDirector {
     const defaultWeight = resolveWeight(baseWeights.default);
 
     return abbrWeight ?? idWeight ?? defaultWeight ?? 1;
+  }
+
+  private getBaseWeight(stateId: string, stateAbbr: string, kind: HotspotKind): number {
+    const cacheKey = this.getSpawnCacheKey(stateId, stateAbbr, kind);
+    const cached = this.spawnWeightCache.get(cacheKey);
+    if (typeof cached === 'number') {
+      return cached;
+    }
+
+    const computed = this.computeBaseWeight(stateId, stateAbbr, kind);
+    this.spawnWeightCache.set(cacheKey, computed);
+    return computed;
   }
 
   private applyExpansionModifiers(
@@ -1111,9 +1324,14 @@ export class HotspotDirector {
     gameState: Pick<GameState, 'states' | 'paranormalHotspots'>,
     options: HotspotSpawnOptions = {},
   ): WeightedHotspotCandidate | null {
+    if (!this.initialized) {
+      this.initialize();
+    }
+
     const { enabledExpansions = [], rng = Math.random, excludeStates = [] } = options;
+    const spawnRate = this.initialized ? this.resolvedSpawnRate : this.getSpawnRate();
     const spawnRoll = rng();
-    if (spawnRoll >= this.getSpawnRate()) {
+    if (spawnRoll >= spawnRate) {
       return null;
     }
 
@@ -1141,11 +1359,12 @@ export class HotspotDirector {
       stateLookup.set(abbr, state);
     }
 
-    const catalogEntries = Array.isArray(this.catalog?.hotspots) ? this.catalog.hotspots : [];
-
     const candidates: Array<{
       state: GameState['states'][number];
       entry: CatalogEntry;
+      stateId: string;
+      stateAbbr: string;
+      stateNameFromEntry?: string;
       weight: number;
       breakdown: HotspotWeightBreakdown;
       tags: string[];
@@ -1154,103 +1373,108 @@ export class HotspotDirector {
       kind: HotspotKind;
     }> = [];
 
-    for (const entry of catalogEntries) {
-      const stateAbbr = this.resolveEntryStateAbbreviation(entry);
-      if (!stateAbbr) {
-        continue;
-      }
-
+    for (const [stateAbbr, state] of stateLookup.entries()) {
       if (exclusionSet.has(stateAbbr) || activeHotspots.has(stateAbbr)) {
         continue;
       }
 
-      const state = stateLookup.get(stateAbbr);
-      if (!state) {
+      const catalogCandidates = this.catalogCandidatesByState.get(stateAbbr);
+      if (!catalogCandidates || catalogCandidates.length === 0) {
         continue;
       }
 
-      const catalogExpansion = this.resolveCatalogExpansion(entry);
-      if (catalogExpansion && !enabledSet.has(catalogExpansion)) {
-        continue;
+      for (const candidate of catalogCandidates) {
+        const {
+          entry,
+          kind,
+          baseWeight,
+          baseTags,
+          expansionTag: precomputedExpansion,
+          icon: precomputedIcon,
+          stateId: candidateStateId,
+          stateNameFromEntry,
+        } = candidate;
+
+        if (precomputedExpansion && !enabledSet.has(precomputedExpansion)) {
+          continue;
+        }
+
+        const breakdown: HotspotWeightBreakdown = {
+          base: baseWeight,
+          catalog: 0,
+          type: 0,
+          expansion: 0,
+          cryptid: 0,
+        };
+
+        let totalWeight = baseWeight;
+
+        const catalogMultiplier = this.getCatalogWeightMultiplier(entry);
+        const weightAfterCatalog = totalWeight * catalogMultiplier;
+        breakdown.catalog = weightAfterCatalog - totalWeight;
+        totalWeight = weightAfterCatalog;
+
+        const typeMultiplier = this.getTypeMultiplier(kind);
+        const weightAfterType = totalWeight * typeMultiplier;
+        breakdown.type = weightAfterType - totalWeight;
+        totalWeight = weightAfterType;
+
+        const expansionResult = this.applyExpansionModifiers(totalWeight, stateAbbr, enabledSet);
+        breakdown.expansion = expansionResult.bonus;
+        totalWeight = expansionResult.weight;
+
+        let tags = [...baseTags];
+        if (expansionResult.tags.length > 0) {
+          tags = [...tags, ...expansionResult.tags];
+        }
+
+        const stateNameCandidate = typeof state.name === 'string' ? state.name.trim() : '';
+        const entryStateNameCandidate = stateNameFromEntry ?? '';
+        const resolvedStateName = stateNameCandidate || entryStateNameCandidate || undefined;
+        const cryptidSlug = this.resolveCryptidSlug(tags);
+        const cryptidResult = this.applyCryptidBoost(
+          stateAbbr,
+          resolvedStateName,
+          cryptidSlug,
+          totalWeight,
+        );
+        breakdown.cryptid = cryptidResult.bonus;
+        totalWeight = cryptidResult.weight;
+        if (cryptidResult.tag) {
+          tags = [...tags, cryptidResult.tag];
+        }
+
+        if (!totalWeight || totalWeight <= 0) {
+          continue;
+        }
+
+        const normalizedTags = Array.from(new Set(['auto-spawn', ...tags]));
+        const resolvedExpansionTag = precomputedExpansion ?? this.resolveExpansionTag(normalizedTags);
+        const icon = deriveHotspotIcon({
+          icon: precomputedIcon,
+          tags: normalizedTags,
+          expansionTag: resolvedExpansionTag,
+          kind,
+        });
+
+        const resolvedStateId = typeof state.id === 'string' && state.id.trim().length > 0
+          ? state.id
+          : candidateStateId;
+
+        candidates.push({
+          state,
+          entry,
+          stateId: resolvedStateId,
+          stateAbbr,
+          stateNameFromEntry: entryStateNameCandidate,
+          weight: totalWeight,
+          breakdown,
+          tags: normalizedTags,
+          expansionTag: resolvedExpansionTag,
+          icon,
+          kind,
+        });
       }
-
-      const kind = this.resolveCatalogKind(entry);
-      const stateId = (state.id ?? stateAbbr).toString();
-      const baseWeight = this.getBaseWeight(stateId, stateAbbr, kind);
-      if (!baseWeight || baseWeight <= 0) {
-        continue;
-      }
-      const breakdown: HotspotWeightBreakdown = {
-        base: baseWeight,
-        catalog: 0,
-        type: 0,
-        expansion: 0,
-        cryptid: 0,
-      };
-
-      let totalWeight = baseWeight;
-
-      const catalogMultiplier = this.getCatalogWeightMultiplier(entry);
-      const weightAfterCatalog = totalWeight * catalogMultiplier;
-      breakdown.catalog = weightAfterCatalog - totalWeight;
-      totalWeight = weightAfterCatalog;
-
-      const typeMultiplier = this.getTypeMultiplier(kind);
-      const weightAfterType = totalWeight * typeMultiplier;
-      breakdown.type = weightAfterType - totalWeight;
-      totalWeight = weightAfterType;
-
-      const expansionResult = this.applyExpansionModifiers(totalWeight, stateAbbr, enabledSet);
-      breakdown.expansion = expansionResult.bonus;
-      totalWeight = expansionResult.weight;
-
-      let tags = this.ensureStringTags((entry as { tags?: unknown }).tags);
-      if (expansionResult.tags.length > 0) {
-        tags = [...tags, ...expansionResult.tags];
-      }
-
-      const cryptidSlug = this.resolveCryptidSlug(tags);
-      const stateNameCandidate = typeof state.name === 'string' ? state.name.trim() : '';
-      const entryStateNameCandidate = typeof (entry as { stateName?: unknown }).stateName === 'string'
-        ? ((entry as { stateName: string }).stateName.trim())
-        : '';
-      const resolvedStateName = stateNameCandidate || entryStateNameCandidate || undefined;
-
-      const cryptidResult = this.applyCryptidBoost(
-        stateAbbr,
-        resolvedStateName,
-        cryptidSlug,
-        totalWeight,
-      );
-      breakdown.cryptid = cryptidResult.bonus;
-      totalWeight = cryptidResult.weight;
-      if (cryptidResult.tag) {
-        tags = [...tags, cryptidResult.tag];
-      }
-
-      if (!totalWeight || totalWeight <= 0) {
-        continue;
-      }
-
-      const normalizedTags = Array.from(new Set(['auto-spawn', ...tags]));
-      const resolvedExpansionTag = catalogExpansion ?? this.resolveExpansionTag(normalizedTags);
-      const icon = deriveHotspotIcon({
-        icon: (entry as { icon?: unknown }).icon as string | undefined,
-        tags: normalizedTags,
-        expansionTag: resolvedExpansionTag,
-        kind,
-      });
-
-      candidates.push({
-        state,
-        entry,
-        weight: totalWeight,
-        breakdown,
-        tags: normalizedTags,
-        expansionTag: resolvedExpansionTag,
-        icon,
-        kind,
-      });
     }
 
     if (candidates.length === 0) {
@@ -1269,21 +1493,34 @@ export class HotspotDirector {
       }
     }
 
-    const { state, entry, breakdown, weight, tags, expansionTag, icon, kind } = selected;
-    const stateAbbr = state.abbreviation?.toUpperCase?.() ?? this.resolveEntryStateAbbreviation(entry) ?? '';
-    const rawStateId = state.id ?? (entry as { stateId?: unknown }).stateId ?? stateAbbr;
-    const stateId = typeof rawStateId === 'string' ? rawStateId : String(rawStateId ?? stateAbbr);
-    const stateName = (state.name ?? (entry as { stateName?: unknown }).stateName ?? stateAbbr).toString();
+    const {
+      state,
+      entry,
+      stateId: selectedStateId,
+      stateAbbr,
+      stateNameFromEntry,
+      breakdown,
+      weight,
+      tags,
+      expansionTag,
+      icon,
+      kind,
+    } = selected;
+    const fallbackAbbr = state.abbreviation?.toUpperCase?.() ?? stateAbbr;
+    const stateId = typeof selectedStateId === 'string'
+      ? selectedStateId
+      : String(selectedStateId ?? fallbackAbbr);
+    const stateName = (state.name ?? stateNameFromEntry ?? fallbackAbbr).toString();
 
     const baseId = typeof (entry as { id?: unknown }).id === 'string' && (entry as { id: string }).id.trim().length > 0
       ? (entry as { id: string }).id.trim()
-      : `auto:${stateAbbr}`;
+      : `auto:${fallbackAbbr}`;
     const hotspotId = `${baseId}:${round}:${Date.now()}`;
 
     const enabledList = Array.from(enabledSet);
     const truthOutcome = resolveHotspot(stateId, 'truth', {
       stateId,
-      stateAbbreviation: stateAbbr,
+      stateAbbreviation: fallbackAbbr,
       enabledExpansions: enabledList,
       hotspotKind: kind,
     });
@@ -1312,11 +1549,12 @@ export class HotspotDirector {
       expansionTag,
       stateId,
       stateName,
-      stateAbbreviation: stateAbbr,
+      stateAbbreviation: fallbackAbbr,
       totalWeight: weight,
       weightBreakdown: breakdown,
       truthDelta: truthOutcome.truthDelta,
       truthRewardHint,
     } satisfies WeightedHotspotCandidate;
+
   }
 }
