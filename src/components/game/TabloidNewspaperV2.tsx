@@ -28,6 +28,16 @@ import {
 } from './newspaperLayout';
 import { useTabloidWeather, getFallbackTabloidWeather } from '@/system/weather/useTabloidWeather';
 import type { CompositeStory, ExtraExtraCompositeEntry, ExtraExtraFeedEntry } from '@/types/news';
+import { NewspaperPageFlip } from '@/components/newspaper/NewspaperPageFlip';
+import { ExpandableArticle } from '@/components/newspaper/ExpandableArticle';
+import { MultiColumnArticle } from '@/components/newspaper/MultiColumnArticle';
+import { NewspaperTexture } from '@/components/newspaper/NewspaperTexture';
+import { ClassifiedAds } from '@/components/newspaper/ClassifiedAds';
+import { LettersToEditor } from '@/components/newspaper/LettersToEditor';
+import { ComicStrip } from '@/components/newspaper/ComicStrip';
+import { NewspaperHoroscope } from '@/components/newspaper/NewspaperHoroscope';
+import { newspaperSounds } from '@/lib/newspaperSounds';
+import { NewspaperReturn } from './TabloidNewspaperV2Return';
 
 const PRIMARY_MASTHEAD = 'PARANOID TIMES';
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
@@ -1143,367 +1153,67 @@ const TabloidNewspaperV2 = ({
   const truthProgress = Math.max(0, Math.min(100, Math.round(truth)));
   const truthDeltaLabel = formatTruthDelta(narrativeContext.truthDeltaTotal);
 
+  // Build interactive newspaper pages
+  const newspaperPages = useMemo(() => {
+    const { buildNewspaperPages } = require('./TabloidNewspaperV2Pages');
+    return buildNewspaperPages({
+      heroHeadline,
+      heroSubhead,
+      heroBody,
+      heroTags,
+      byline,
+      sourceLine,
+      truthProgress,
+      truthDeltaLabel,
+      playerCards,
+      opponentCards,
+      narrativeContext,
+      events,
+      runnerDispatches,
+      eventStories,
+      comboNarrative,
+      hotspotExtraArticle,
+      ads,
+      conspiracies,
+      weatherLine,
+      formattedAgendaQuotes,
+      campaignArcGroups,
+    });
+  }, [
+    heroHeadline,
+    heroSubhead,
+    heroBody,
+    heroTags,
+    byline,
+    sourceLine,
+    truthProgress,
+    truthDeltaLabel,
+    playerCards,
+    opponentCards,
+    narrativeContext,
+    events,
+    runnerDispatches,
+    eventStories,
+    comboNarrative,
+    hotspotExtraArticle,
+    ads,
+    conspiracies,
+    weatherLine,
+    formattedAgendaQuotes,
+    campaignArcGroups,
+  ]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <UICard className={NEWSPAPER_CARD_CLASS}>
-        <header className={cn(NEWSPAPER_HEADER_CLASS, 'overflow-hidden')}>
-          {breakingStamp ? (
-            <div className="stamp stamp--breaking absolute left-6 top-4 z-10">{breakingStamp}</div>
-          ) : null}
-          {hasExtraExtra && (
-            <ExtraStamp
-              className="top-4 right-20 md:top-6 md:right-24"
-              size="md"
-            />
-          )}
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close newspaper"
-            className="absolute right-4 top-4 z-10 rounded-full border-2 border-newspaper-text/40 bg-newspaper-bg/40 p-1 text-newspaper-text transition hover:bg-newspaper-bg"
-          >
-            <X className="h-5 w-5" />
-          </button>
-          <div
-            className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle,_rgba(15,23,42,0.12)_1px,transparent_1px)] [background-size:6px_6px] mix-blend-multiply"
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-white/45 via-transparent to-white/10"
-            aria-hidden="true"
-          />
-          <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center gap-3 text-center">
-            <div className="flex flex-wrap items-center justify-center gap-3 text-[11px] font-semibold uppercase tracking-[0.32em] text-newspaper-text/70">
-              <span>Global Edition</span>
-              <span className="hidden h-3 w-px bg-newspaper-text/30 sm:block" aria-hidden="true" />
-              <span>Joint Spin Bureau</span>
-              <span className="hidden h-3 w-px bg-newspaper-text/30 sm:block" aria-hidden="true" />
-              <span>Est. 1947</span>
-            </div>
-            <div className="flex w-full flex-col items-center gap-2">
-              <p
-                className={`relative font-serif text-4xl font-black uppercase tracking-[0.12em] text-newspaper-text sm:text-5xl ${glitchText ? 'glitch' : ''}`}
-                data-text={displayMasthead}
-              >
-                {displayMasthead}
-              </p>
-              <div className="h-px w-16 bg-newspaper-text/40 sm:w-24" aria-hidden="true" />
-            </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-newspaper-text/70">
-              Equal-Opportunity Propaganda for Loyalists & Leaksters
-            </p>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-newspaper-text/55">
-              Edition courtesy of the{' '}
-              {faction === 'truth' ? 'Truth Coalition Whisper Network' : 'State Narrative Directorate'}
-            </p>
-            {agendaIssue ? (
-              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-newspaper-text/45">
-                Spotlight: {agendaIssue.label}
-              </p>
-            ) : null}
-          </div>
-        </header>
-
-        <div className={NEWSPAPER_BODY_CLASS}>
-          {/* Truth Index Bar */}
-          <NewspaperSection className="mb-4 bg-white/80 px-4 py-3 text-newspaper-text">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="font-semibold uppercase tracking-wide">Truth Index</span>
-                <div className="w-36">
-                  <Progress value={truthProgress} className="h-2 bg-white/40" />
-                </div>
-                <span className="font-mono text-xs">{truthProgress}%</span>
-                {truthDeltaLabel ? (
-                  <span className="rounded border border-newspaper-border px-2 py-1 text-[11px] font-semibold uppercase tracking-wide">
-                    {truthDeltaLabel}
-                  </span>
-                ) : null}
-              </div>
-              <div className="flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/70">
-                <span>Your Cards: {playerCards.length}</span>
-                <span>Opposition: {opponentCards.length}</span>
-                <span>Captured: {narrativeContext.capturedStates.length || '—'}</span>
-                <span>Events: {events.length || '—'}</span>
-              </div>
-            </div>
-          </NewspaperSection>
-
-          {/* 3-Column Layout: Main Story + Stats/Secondary + Sidebar */}
-          <div className="grid gap-4 lg:grid-cols-[2fr_1.5fr_1.5fr]">
-            {/* COLUMN 1: Main Story + Image */}
-            <article className="space-y-4 rounded-md border border-newspaper-border bg-white/80 p-6 shadow-sm">
-              {latestComposite ? (
-                <TurnEdition story={latestComposite} />
-              ) : (
-                <>
-                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-newspaper-text/70">
-                    <span className={cn(NEWSPAPER_BADGE_CLASS, 'rounded-full px-2 py-1 text-[11px] tracking-wide text-newspaper-text')}>
-                      {heroTypeLabel}
-                    </span>
-                    {heroTarget ? (
-                      <span className="rounded-full border border-dashed border-newspaper-border px-2 py-1">{heroTarget}</span>
-                    ) : null}
-                  </div>
-
-                  <div className="space-y-4">
-                    <h2
-                      className={`text-3xl font-black leading-tight sm:text-4xl ${
-                        heroIsEvent ? 'text-secret-red' : 'text-newspaper-headline'
-                      } ${
-                        heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_20px_rgba(248,113,113,0.65)]' : ''
-                      }`}
-                    >
-                      {heroHeadline}
-                    </h2>
-                    <p
-                      className={`text-lg font-semibold italic ${
-                        heroIsEvent
-                          ? heroIsFilesOnTheLoose
-                            ? 'text-secret-red drop-shadow-[0_0_12px_rgba(248,113,113,0.55)]'
-                            : 'text-secret-red/80'
-                          : 'text-newspaper-text/80'
-                      } ${heroIsFilesOnTheLoose ? 'animate-pulse' : ''}`}
-                    >
-                      {heroSubhead}
-                    </p>
-
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/70">
-                      <span>{byline}</span>
-                      <span>{sourceLine}</span>
-                    </div>
-
-                    {/* Main Story Image */}
-                    <div className="relative overflow-hidden rounded-md border border-newspaper-border bg-newspaper-header/20">
-                      {heroPrimaryCardId ? (
-                        <CardImage
-                          cardId={heroPrimaryCardId}
-                          fit="contain"
-                          className="w-full aspect-[4/3] max-h-64"
-                        />
-                      ) : (
-                        <div className="flex aspect-[4/3] w-full max-h-64 items-center justify-center text-sm font-semibold uppercase tracking-wide text-newspaper-text/60">
-                          Archival footage pending clearance.
-                        </div>
-                      )}
-                      {classifiedStamp ? (
-                        <div className="stamp stamp--classified absolute right-3 top-3">{classifiedStamp}</div>
-                      ) : null}
-                    </div>
-
-                    <div
-                      className={`space-y-4 text-sm leading-relaxed ${
-                        heroIsEvent ? 'text-secret-red/90' : ''
-                      } ${
-                        heroIsFilesOnTheLoose ? 'animate-pulse drop-shadow-[0_0_14px_rgba(248,113,113,0.4)]' : ''
-                      }`}
-                    >
-                      {heroBody.map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
-                      ))}
-                    </div>
-
-                    {heroTags.length ? (
-                      <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-newspaper-text/60">
-                        {heroTags.slice(0, 3).map(tag => (
-                          <span key={tag} className="rounded border border-newspaper-border px-2 py-0.5">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                </>
-              )}
-            </article>
-
-            {/* COLUMN 2: Stats & Secondary Headlines */}
-            <aside className="space-y-4">
-              {/* Runner-Up Dispatches */}
-              {runnerDispatches.length > 0 ? (
-                <section className="rounded-md border border-newspaper-border bg-white/75 p-4 shadow-sm">
-                  <div className="mb-2 flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-black uppercase tracking-wide text-newspaper-text">
-                      Runner-Up Dispatches
-                    </h3>
-                    {latestComposite ? (
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-newspaper-text/50">
-                        Composite Story
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="space-y-3">
-                    {runnerDispatches.slice(0, 3).map((dispatch, index) => (
-                      <article
-                        key={`${dispatch.id}-${index}`}
-                        className="border-b border-dashed border-newspaper-border/60 pb-3 last:border-0 last:pb-0"
-                      >
-                        <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.28em] text-newspaper-text/55">
-                          <span>{`Archive Source ${index + 1}`}</span>
-                          <span>{dispatch.tone.toUpperCase()}</span>
-                        </div>
-                        <h4 className="mt-1 text-base font-semibold leading-snug text-newspaper-text">
-                          {dispatch.headline}
-                        </h4>
-                        {dispatch.subhead ? (
-                          <p className="text-xs italic text-newspaper-text/70">{dispatch.subhead}</p>
-                        ) : null}
-                        <p className="mt-2 text-xs leading-relaxed text-newspaper-text/75">
-                          {dispatch.summary}
-                        </p>
-                        <footer className="mt-3 text-[10px] font-semibold uppercase tracking-[0.28em] text-newspaper-text/50">
-                          <div>By: Composite Desk</div>
-                          <div>Ref: {dispatch.id}</div>
-                        </footer>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-
-              {/* Combo Dispatch */}
-              {comboNarrative ? (
-                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                  <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">
-                    Combo Dispatch
-                  </h3>
-                  <div className="text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/60">
-                    Chain: {comboNarrative.magnitude} · {comboNarrative.tags.join(' • ')}
-                  </div>
-                  <h4 className="mt-2 text-base font-semibold leading-snug text-newspaper-text">
-                    {comboNarrative.headline}
-                  </h4>
-                  <p className="text-xs italic text-newspaper-text/70">{comboNarrative.deck}</p>
-                </section>
-              ) : null}
-
-            </aside>
-
-            {/* COLUMN 3: Event Wire + Ads + Extras */}
-            <aside className="space-y-4">
-              {/* Event Wire */}
-              {eventStories.length ? (
-                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                  <h3 className="mb-3 border-b-2 border-secret-red pb-2 text-sm font-black uppercase tracking-wide text-secret-red">Event Wire</h3>
-                  <div className="space-y-3 text-sm text-secret-red/90">
-                    {eventStories.slice(0, 3).map(story => {
-                      const isFilesOnTheLoose = story.id === 'deepfile_dump_crochet_forum';
-                      return (
-                        <div
-                          key={story.id}
-                          className={`border-b border-dashed border-newspaper-border/60 pb-2 last:border-0 last:pb-0 ${
-                            isFilesOnTheLoose
-                              ? 'rounded-md bg-white/95 px-3 py-2 shadow-[0_0_20px_rgba(248,113,113,0.35)] ring-2 ring-secret-red/60'
-                              : ''
-                          }`}
-                        >
-                          <div
-                            className={`text-[11px] font-semibold uppercase tracking-wide ${
-                              isFilesOnTheLoose
-                                ? 'text-secret-red animate-pulse drop-shadow-[0_0_10px_rgba(248,113,113,0.65)]'
-                                : 'text-secret-red/80'
-                            }`}
-                          >
-                            {story.typeLabel}
-                          </div>
-                          <p
-                            className={`font-semibold leading-snug text-secret-red ${
-                              isFilesOnTheLoose
-                                ? 'animate-pulse drop-shadow-[0_0_16px_rgba(248,113,113,0.6)]'
-                                : ''
-                            }`}
-                          >
-                            {story.headline}
-                          </p>
-                          <p
-                            className={`text-xs italic ${
-                              isFilesOnTheLoose
-                                ? 'text-secret-red animate-pulse drop-shadow-[0_0_12px_rgba(248,113,113,0.5)]'
-                                : 'text-secret-red/80'
-                            }`}
-                          >
-                            {story.subhead}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              ) : null}
-
-              {/* Sponsored Messages (Ads) */}
-              <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-newspaper-text">Sponsored Messages</h3>
-                <div className="space-y-2">
-                  {ads.slice(0, 3).map((ad, index) => (
-                    <div
-                      key={`${ad}-${index}`}
-                      className="rounded border border-dashed border-newspaper-border/60 bg-white/60 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-newspaper-text"
-                    >
-                      {ad}
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* Conspiracy Corner */}
-              {conspiracies.length ? (
-                <section className="rounded-md border border-newspaper-border bg-white/75 p-4 shadow-sm">
-                  <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-newspaper-text">Conspiracy Corner</h3>
-                  <ul className="space-y-2 text-xs leading-relaxed">
-                    {conspiracies.slice(0, 4).map((item, index) => (
-                      <li key={`${item}-${index}`} className="before:mr-2 before:text-newspaper-text before:content-['•']">
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
-
-              {/* Weather Desk */}
-              <section className="rounded-md border border-newspaper-border bg-white/75 p-4 shadow-sm">
-                <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-newspaper-text">Weather Desk</h3>
-                <p className="text-xs leading-relaxed">{weatherLine}</p>
-              </section>
-
-              {/* Agenda Moments */}
-              {formattedAgendaQuotes.length ? (
-                <section className="rounded-md border border-newspaper-border bg-white/70 p-4 shadow-sm">
-                  <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-newspaper-text">Agenda Moments</h3>
-                  <div className="space-y-3">
-                    {formattedAgendaQuotes.map(quote => (
-                      <div
-                        key={quote.id}
-                        className="rounded border border-dashed border-newspaper-border/60 bg-white/60 p-3 text-xs"
-                      >
-                        <div className="font-semibold uppercase tracking-wide text-newspaper-text/70">{quote.title}</div>
-                        <p className="mt-1 font-semibold leading-snug">{quote.headline}</p>
-                        <p className="mt-1 text-newspaper-text/70">{quote.stageLabel}: {quote.progressLabel}</p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-            </aside>
-          </div>
-        </div>
-
-        <footer className="border-t-4 border-newspaper-border bg-newspaper-header/90 px-6 py-4">
-          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-            <p className="text-xs font-semibold uppercase tracking-wide text-newspaper-bg/80">
-              {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })} · Printed on recycled leak fragments
-            </p>
-            <Button
-              variant="secondary"
-              onClick={onClose}
-              className="font-black uppercase tracking-wide"
-            >
-              Continue the Operation
-            </Button>
-          </div>
-        </footer>
-      </UICard>
-    </div>
+    <NewspaperReturn
+      onClose={onClose}
+      displayMasthead={displayMasthead}
+      glitchText={glitchText}
+      faction={faction}
+      hasExtraExtra={hasExtraExtra}
+      breakingStamp={breakingStamp}
+      agendaIssue={agendaIssue}
+      newspaperPages={newspaperPages}
+    />
   );
 };
 
