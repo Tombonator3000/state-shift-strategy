@@ -2,6 +2,12 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-04 – Tabloid newspaper uses static page builder import
+- Timestamp: 2025-11-04T00:00:00Z
+- Files:
+  - `src/components/game/TabloidNewspaperV2.tsx`
+- Summary: Replaced the dynamic require with a top-level import for the V2 tabloid newspaper page builder so the component plays nicely with bundlers and memoization without runtime module lookups.
+
 ## 2025-11-03 – Bruksanvisning for nye korttemaer publisert
 - Timestamp: 2025-11-03T09:00:00Z
 - Files:
