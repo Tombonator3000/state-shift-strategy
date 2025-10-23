@@ -38,6 +38,7 @@ import { ComicStrip } from '@/components/newspaper/ComicStrip';
 import { NewspaperHoroscope } from '@/components/newspaper/NewspaperHoroscope';
 import { newspaperSounds } from '@/lib/newspaperSounds';
 import { NewspaperReturn } from './TabloidNewspaperV2Return';
+import { buildNewspaperPages } from './TabloidNewspaperV2Pages';
 
 const PRIMARY_MASTHEAD = 'PARANOID TIMES';
 const GLITCH_OPTIONS = ['PAGE NOT FOUND', '░░░ERROR░░░', '▓▓▓SIGNAL LOST▓▓▓', '404 TRUTH NOT FOUND'];
@@ -1155,7 +1156,6 @@ const TabloidNewspaperV2 = ({
 
   // Build interactive newspaper pages
   const newspaperPages = useMemo(() => {
-    const { buildNewspaperPages } = require('./TabloidNewspaperV2Pages');
     return buildNewspaperPages({
       heroHeadline,
       heroSubhead,
