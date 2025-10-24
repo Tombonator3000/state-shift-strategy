@@ -261,14 +261,58 @@ function generateImagePrompt(context: ArticleContext): string {
   }
 }
 
+const sanitizeTag = (value: string): string => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+  const dashed = trimmed.replace(/\s+/g, '-');
+  const cleaned = dashed.replace(/[^a-z0-9-]/gi, '');
+  const collapsed = cleaned.replace(/-{2,}/g, '-').replace(/^-+|-+$/g, '');
+  return collapsed.toLowerCase();
+};
+
+const ensureHashTag = (value: string): string => {
+  if (!value) {
+    return value;
+  }
+  return value.startsWith('#') ? value : `#${value}`;
+};
+
+const normalizeCardTags = (tags: Card['tags']): string[] => {
+  if (!Array.isArray(tags)) {
+    return [];
+  }
+
+  const normalized: string[] = [];
+  const seen = new Set<string>();
+
+  for (const tag of tags) {
+    if (typeof tag !== 'string') {
+      continue;
+    }
+    const sanitized = sanitizeTag(tag);
+    if (!sanitized) {
+      continue;
+    }
+    const hashed = ensureHashTag(sanitized);
+    if (hashed && !seen.has(hashed)) {
+      seen.add(hashed);
+      normalized.push(hashed);
+    }
+  }
+
+  return normalized;
+};
+
 function generateTags(context: ArticleContext): string[] {
   const isTruth = context.card.faction === 'truth';
   const cardType = context.card.type?.toLowerCase() || '';
-  
+
   const baseTags = isTruth
     ? ['leaked', 'exposed', 'viral', 'conspiracy']
     : ['official', 'classified', 'dismissed', 'routine'];
-  
+
   const typeTags = cardType.includes('attack')
     ? ['attack', 'scandal']
     : cardType.includes('media')
@@ -276,8 +320,33 @@ function generateTags(context: ArticleContext): string[] {
     : cardType.includes('zone')
     ? ['grassroots', 'local']
     : [];
-  
-  return [...pickMultiple(baseTags, 2), ...typeTags].slice(0, 4);
+
+  const prioritized = normalizeCardTags(context.card.tags);
+  const result: string[] = [];
+  const seen = new Set<string>();
+
+  for (const tag of prioritized) {
+    if (result.length >= 4) break;
+    if (seen.has(tag)) continue;
+    seen.add(tag);
+    result.push(tag);
+  }
+
+  if (result.length < 4) {
+    const fallbacks = [...typeTags, ...pickMultiple(baseTags, 2)];
+    for (const tag of fallbacks) {
+      if (result.length >= 4) {
+        break;
+      }
+      if (seen.has(tag)) {
+        continue;
+      }
+      seen.add(tag);
+      result.push(tag);
+    }
+  }
+
+  return result;
 }
 
 export function generateProceduralArticle(context: ArticleContext): GeneratedArticle {
