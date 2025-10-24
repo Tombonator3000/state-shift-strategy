@@ -24,7 +24,7 @@
     "name": "Elvis in Exile",
     "faction": "truth",
     "quote": "Thank you, thank you very much.",
-    "bonuses": { "startCards": ["VEGAS_UFO_WEDDING"] },
+    "bonuses": { "startCards": ["TRUTH-005"] },
     "tradeoffs": { "deckSizeDelta": -1 },
     "aiPersonality": "showman",
     "banterPack": "truth_elvis"

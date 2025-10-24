@@ -2,6 +2,12 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-07 – Elvis deck loads Vegas conspiracy scoop
+- Timestamp: 2025-11-07T00:00:00Z
+- Files:
+  - `src/data/editors.json`
+  - `UPDATES_LOG.md`
+- Summary: Repointed Elvis in Exile's starting card to the canonical TRUTH-005 record so the editor spawns with the proper Vegas UFO Wedding scoop and surfaces the lore-correct title in the UI.
 ## 2025-11-07 – Procedural articles embrace moon hoax and hotline chaos
 - Timestamp: 2025-11-07T00:00:00Z
 - Files:
