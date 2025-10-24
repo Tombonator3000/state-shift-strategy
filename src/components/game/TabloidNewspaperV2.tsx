@@ -1156,6 +1156,14 @@ const TabloidNewspaperV2 = ({
 
   // Build interactive newspaper pages
   const newspaperPages = useMemo(() => {
+    // Transform hotspot article to match expected format
+    const transformedHotspotArticle = hotspotExtraArticle ? {
+      headline: hotspotExtraArticle.headline,
+      subhead: hotspotExtraArticle.badgeLabel,
+      body: [hotspotExtraArticle.blurb],
+      tags: [hotspotExtraArticle.kind, hotspotExtraArticle.stateName].filter(Boolean),
+    } : null;
+
     return buildNewspaperPages({
       heroHeadline,
       heroSubhead,
@@ -1172,7 +1180,7 @@ const TabloidNewspaperV2 = ({
       runnerDispatches,
       eventStories,
       comboNarrative,
-      hotspotExtraArticle,
+      hotspotExtraArticle: transformedHotspotArticle,
       ads,
       conspiracies,
       weatherLine,
