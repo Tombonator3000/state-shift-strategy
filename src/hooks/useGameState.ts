@@ -129,6 +129,7 @@ interface EditorTurnStartHookContext {
   readonly state: GameState;
   readonly runtime: GameEditorRuntimeState | null;
   bonusCardDraw: number;
+  ipDelta: number;
   pendingScandals: EditorPendingScandalEffect[];
   logEntries: string[];
   toastMessages: string[];
@@ -144,6 +145,7 @@ interface EditorPlayCardHookContext {
   truthDelta: number;
   ipDelta: number;
   aiIpDelta: number;
+  pressureDelta: number;
   pendingScandals: EditorPendingScandalEffect[];
   logEntries: string[];
   toastMessages: string[];
@@ -1066,6 +1068,12 @@ const applyEditorTurnStartAdjustments = (context: EditorTurnStartHookContext): v
     context.logEntries.push(`${editor.name} grants +${adjustments.roundOneDrawBonus} opening draw.`);
   }
 
+  if (adjustments.ipIncomePerTurn !== 0) {
+    context.ipDelta += adjustments.ipIncomePerTurn;
+    context.logEntries.push(`${editor.name} provides ${adjustments.ipIncomePerTurn > 0 ? '+' : ''}${adjustments.ipIncomePerTurn} IP income.`);
+    context.toastMessages.push(`Editor: ${adjustments.ipIncomePerTurn > 0 ? '+' : ''}${adjustments.ipIncomePerTurn} IP`);
+  }
+
   if (adjustments.scandalChance > 0 && adjustments.scandalEffect === 'randomDiscard:1') {
     if (Math.random() < adjustments.scandalChance) {
       context.pendingScandals.push({
@@ -1100,6 +1108,12 @@ const applyEditorPlayCardAdjustments = (context: EditorPlayCardHookContext): voi
     context.cost += adjustments.attackIpCostDelta;
     context.logEntries.push(`${editor.name} adjusts attack IP cost by ${adjustments.attackIpCostDelta > 0 ? '+' : ''}${adjustments.attackIpCostDelta}.`);
     context.toastMessages.push(`Editor: ${adjustments.attackIpCostDelta > 0 ? '+' : ''}${adjustments.attackIpCostDelta} IP cost`);
+  }
+
+  if (context.cardKind === 'ZONE' && adjustments.zonePressureBonus !== 0) {
+    context.pressureDelta += adjustments.zonePressureBonus;
+    context.logEntries.push(`${editor.name} adds ${adjustments.zonePressureBonus > 0 ? '+' : ''}${adjustments.zonePressureBonus} zone pressure.`);
+    context.toastMessages.push(`Editor: ${adjustments.zonePressureBonus > 0 ? '+' : ''}${adjustments.zonePressureBonus} pressure`);
   }
 };
 
@@ -3514,6 +3528,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         truthDelta: 0,
         ipDelta: 0,
         aiIpDelta: 0,
+        pressureDelta: 0,
         pendingScandals: [],
         logEntries: [],
         toastMessages: [],
@@ -3563,6 +3578,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       if (playContext.aiIpDelta !== 0) {
         resolution.aiIP = Math.max(0, resolution.aiIP + playContext.aiIpDelta);
+      }
+
+      if (playContext.pressureDelta !== 0 && targetState && card.type === 'ZONE') {
+        resolution.states = resolution.states.map(state => {
+          if (state.abbreviation === targetState || state.id === targetState) {
+            return {
+              ...state,
+              pressurePlayer: Math.max(0, state.pressurePlayer + playContext.pressureDelta),
+              pressure: Math.max(0, state.pressure + playContext.pressureDelta),
+            };
+          }
+          return state;
+        });
       }
 
       if (adjustmentLogs.length > 0 || playContext.logEntries.length > 0) {
@@ -3812,6 +3840,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           truthDelta: 0,
           ipDelta: 0,
           aiIpDelta: 0,
+          pressureDelta: 0,
           pendingScandals: [],
           logEntries: [],
           toastMessages: [],
@@ -5106,12 +5135,15 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         },
         runtime: runtimeSnapshot,
         bonusCardDraw: 0,
+        ipDelta: 0,
         pendingScandals: [],
         logEntries: [],
         toastMessages: [],
       };
 
       applyEditorTurnStartAdjustments(turnStartContext);
+
+      const adjustedIp = Math.max(0, relicIp + turnStartContext.ipDelta);
 
       const hookBonusDraw = Math.max(0, turnStartContext.bonusCardDraw);
       const baseBonusCardDraw = Math.max(0, prev.pendingCardDraw ?? 0);
@@ -5254,7 +5286,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         paranormalHotspots: hotspotsAfterHotspot,
         editorRuntime: nextEditorRuntime ?? null,
         truth: relicTruth,
-        ip: relicIp,
+        ip: adjustedIp,
         aiIP: relicAiIp,
         tabloidRelicsRuntime: relicRuntime,
       };
