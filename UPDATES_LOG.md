@@ -2,6 +2,14 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-06 – Newspaper generator reacts to card themes
+- Timestamp: 2025-11-06T00:00:00Z
+- Files:
+  - `ARTICLE_GENERATOR_GUIDE.md`
+  - `src/engine/newspaper/proceduralArticleGenerator.ts`
+  - `src/engine/newspaper/__tests__/proceduralArticleGenerator.test.ts`
+- Summary: Added tag-aware word banks for cryptid, broadcast, and operation cards so procedural copy leans into the right conspiratorial flavor, refreshed documentation, and locked in tests that prove the new themes surface in generated articles.
+
 ## 2025-11-05 – Restored canonical news tags to engine cache
 - Timestamp: 2025-11-05T00:00:00Z
 - Files:

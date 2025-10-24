@@ -80,6 +80,16 @@ Give everyone weird, specific credentials:
 - "Agent X (Retired)"
 - "Classification Czar Donald Pierce"
 
+## Tag-driven Themes
+
+Procedural pieces now scan the triggering card's tags (normalized in `proceduralArticleGenerator.ts`) and, when a recognized theme surfaces, swap into bespoke word banks:
+
+- **Cryptid tags** (`#cryptid`, `cryptid sighting`, etc.) lean into field journals and tranquilizer denials with verbs like "TRACKS" and euphemisms such as "authorized wildlife mitigation protocol".
+- **Broadcast tags** (`#broadcast`, `shortwave-signal`) pull from pirate radio lore, invoking numbers stations, uplink hijacks, and maintenance doublespeak like "routine broadcast quality assurance".
+- **Operation tags** (`#operation`, `project nightfall`) highlight codenamed dossiers, cover identities, and bureaucratic phrases like "strategic reclassification initiative".
+
+If no themed tags are present, the generator falls back to the legacy cryptid/location/conspiracy pools and the standard government euphemisms described below.
+
 ## Word Banks
 
 ### Locations

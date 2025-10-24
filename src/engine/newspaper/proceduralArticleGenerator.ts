@@ -64,6 +64,8 @@ const CONSPIRACY_GROUPS = [
   'Trilateral Commission', 'Committee of 300', 'Dulce Warriors'
 ];
 
+const DEFAULT_TRUTH_SUBJECTS = [...CRYPTIDS, ...LOCATIONS, ...CONSPIRACY_GROUPS];
+
 const BYLINES_TRUTH = [
   'By: Anonymous Parking Garage Source',
   'By: Marcus Webb, Cryptid Correspondent',
@@ -125,9 +127,12 @@ function pickMultiple<T>(arr: T[], count: number): T[] {
 }
 
 function generateTruthHeadline(context: ArticleContext): string {
-  const verb = pick(TRUTH_ACTION_VERBS);
+  const theme = deriveTheme(context.card.tags);
+  const verbPool = theme?.truthVerbs?.length ? theme.truthVerbs : TRUTH_ACTION_VERBS;
+  const subjectPool = theme?.truthSubjects?.length ? theme.truthSubjects : DEFAULT_TRUTH_SUBJECTS;
+  const verb = pick(verbPool);
   const cardName = context.card.name.toUpperCase();
-  const subject = pick([...CRYPTIDS, ...LOCATIONS, ...CONSPIRACY_GROUPS]);
+  const subject = pick(subjectPool);
   
   const templates = [
     `${verb} ${subject}—${cardName} FILES LEAK NATIONWIDE`,
@@ -142,8 +147,11 @@ function generateTruthHeadline(context: ArticleContext): string {
 }
 
 function generateGovHeadline(context: ArticleContext): string {
-  const verb = pick(GOV_ACTION_VERBS);
-  const euphemism = pick(GOV_EUPHEMISMS);
+  const theme = deriveTheme(context.card.tags);
+  const verbPool = theme?.govVerbs?.length ? theme.govVerbs : GOV_ACTION_VERBS;
+  const euphemismPool = theme?.govEuphemisms?.length ? theme.govEuphemisms : GOV_EUPHEMISMS;
+  const verb = pick(verbPool);
+  const euphemism = pick(euphemismPool);
   const cardName = context.card.name.toUpperCase();
   
   const templates = [
@@ -159,8 +167,10 @@ function generateGovHeadline(context: ArticleContext): string {
 }
 
 function generateTruthSubhead(context: ArticleContext): string {
+  const theme = deriveTheme(context.card.tags);
   const witness = pick(WITNESSES);
-  const detail = pick(SPECIFIC_DETAILS);
+  const detailPool = theme?.truthDetails?.length ? theme.truthDetails : SPECIFIC_DETAILS;
+  const detail = pick(detailPool);
   
   const templates = [
     `Eyewitness reports "exactly what conspiracy theorists said"—${detail}`,
@@ -175,7 +185,9 @@ function generateTruthSubhead(context: ArticleContext): string {
 }
 
 function generateGovSubhead(context: ArticleContext): string {
-  const euphemism = pick(GOV_EUPHEMISMS);
+  const theme = deriveTheme(context.card.tags);
+  const euphemismPool = theme?.govEuphemisms?.length ? theme.govEuphemisms : GOV_EUPHEMISMS;
+  const euphemism = pick(euphemismPool);
   
   const templates = [
     `Officials assure public this is completely normal ${euphemism}`,
@@ -190,10 +202,13 @@ function generateGovSubhead(context: ArticleContext): string {
 }
 
 function generateTruthBody(context: ArticleContext): string {
+  const theme = deriveTheme(context.card.tags);
   const cardName = context.card.name;
   const witness = pick(WITNESSES);
-  const detail = pick(SPECIFIC_DETAILS);
-  const subject = pick([...CRYPTIDS, ...LOCATIONS, ...CONSPIRACY_GROUPS]);
+  const detailPool = theme?.truthDetails?.length ? theme.truthDetails : SPECIFIC_DETAILS;
+  const subjectPool = theme?.truthSubjects?.length ? theme.truthSubjects : DEFAULT_TRUTH_SUBJECTS;
+  const detail = pick(detailPool);
+  const subject = pick(subjectPool);
   const expert = `Dr. ${pick(['Helena Frost', 'Marcus Webb', 'Patricia Chen', 'Raymond Foster'])}`;
   
   const truthValue = context.gameState?.truth || 50;
@@ -215,17 +230,20 @@ function generateTruthBody(context: ArticleContext): string {
 }
 
 function generateGovBody(context: ArticleContext): string {
+  const theme = deriveTheme(context.card.tags);
   const cardName = context.card.name;
-  const euphemism = pick(GOV_EUPHEMISMS);
-  const euphemism2 = pick(GOV_EUPHEMISMS);
+  const euphemismPool = theme?.govEuphemisms?.length ? theme.govEuphemisms : GOV_EUPHEMISMS;
+  const euphemism = pick(euphemismPool);
+  const euphemism2 = pick(euphemismPool);
+  const detail = theme?.govDetails?.length ? pick(theme.govDetails) : '';
   const official = `${pick(['Director', 'Deputy Director', 'Coordinator', 'Administrator'])} ${pick(['Karen Walsh', 'Marcus Thompson', 'Donald Pierce', 'Patricia Ng'])}`;
-  
+
   const paragraphs = [
-    `The Department of Normalcy issued a comprehensive 847-page report today addressing public concerns about ${cardName}, conclusively determining it qualifies as a standard ${euphemism} requiring no further citizen attention.`,
-    
+    `The Department of Normalcy issued a comprehensive 847-page report today addressing public concerns about ${cardName}, conclusively determining it qualifies as a standard ${euphemism}${detail ? ` tied to ${detail}` : ''} requiring no further citizen attention.`,
+
     `"We appreciate community vigilance," stated ${official} at a mandatory press briefing. "However, speculation regarding ${cardName} serves no constructive purpose. Our analysis demonstrates this is textbook ${euphemism}, occurring approximately never and unlikely to repeat. All documentation supports this conclusion, which is why we've classified the documentation."`,
-    
-    `The report notably dedicates 347 pages to explaining why certain questions should not be asked, 289 pages to redacted appendices, and a final chapter titled "Why This Report Itself Should Not Raise Questions."`,
+
+    `The report notably dedicates 347 pages to explaining why certain questions should not be asked, 289 pages to redacted appendices, and a final chapter titled "Why This Report Itself Should Not Raise Questions.${detail ? `" A sealed appendix further catalogues ${detail}."` : '"' }`,
     
     `Citizens who witnessed events related to ${cardName} are invited to attend voluntary memory alignment workshops at convenient government facilities. Attendance is optional but strongly encouraged. Light refreshments will be served. Names will not be taken down but will be remembered institutionally.`,
     
@@ -303,6 +321,132 @@ const normalizeCardTags = (tags: Card['tags']): string[] => {
   }
 
   return normalized;
+};
+
+interface ThemeConfig {
+  key: string;
+  matchers: string[];
+  truthVerbs?: string[];
+  truthSubjects?: string[];
+  truthDetails?: string[];
+  govVerbs?: string[];
+  govEuphemisms?: string[];
+  govDetails?: string[];
+}
+
+const TAG_THEMES: ThemeConfig[] = [
+  {
+    key: 'cryptid',
+    matchers: ['cryptid', 'cryptids', 'monster', 'beast'],
+    truthVerbs: ['TRACKS', 'PHOTOGRAPHS', 'CATALOGS', 'DECRYPTS TRAIL OF'],
+    truthSubjects: [
+      'APPALACHIAN HOWLER',
+      'BLACK HILLS SPECTER',
+      'MOSS-COVERED FOOTPRINT DOSSIER',
+      'GLOW-IN-THE-DARK CHUPAFILE',
+    ],
+    truthDetails: [
+      'inside a misty pine barrens watchtower',
+      'beneath the ranger outpost that hums at 3:17 AM',
+      'after following bioluminescent tracks behind the diner',
+      'during an unauthorized midnight stakeout in the swamp gas marsh',
+    ],
+    govVerbs: ['TRANQUILIZES', 'QUARANTINES', 'RELOCATES', 'TAGGED'],
+    govEuphemisms: [
+      'authorized wildlife mitigation protocol',
+      'routine cryptozoological census',
+      'standard fauna relocation',
+      'controlled habitat enrichment activity',
+    ],
+    govDetails: [
+      'a restricted wildlife containment perimeter behind the forestry lab',
+      'an overnight relocation convoy with blackout tarps',
+      'a tranquilizer report filed under agricultural sciences',
+    ],
+  },
+  {
+    key: 'broadcast',
+    matchers: ['broadcast', 'signal', 'radio', 'airwave'],
+    truthVerbs: ['HIJACKS', 'BEAMS', 'JAMS', 'OVERRIDES'],
+    truthSubjects: [
+      'NUMBERS STATION 77',
+      'MOON-BOUNCE RELAY ARRAY',
+      'SHORTWAVE NODE SIGMA',
+      'SATELLITE UPLINK RABBIT-HOLE',
+    ],
+    truthDetails: [
+      'over frequency 7.77 MHz',
+      'from a decommissioned cold war transmitter',
+      'after decoding a pirate radio burst at 2:03 AM',
+      'inside the emergency broadcast bunker nobody admits exists',
+    ],
+    govVerbs: ['RECALIBRATES', 'SCRAMBLES', 'REPROGRAMS', 'SILENCES'],
+    govEuphemisms: [
+      'routine broadcast quality assurance',
+      'authorized frequency harmonization',
+      'scheduled transmission hygiene',
+      'temporary signal normalization event',
+    ],
+    govDetails: [
+      'a spectrum-management drill centered on frequency 7.77 MHz',
+      'a benign signal scrub of the coastal relay dishes',
+      'an uplink reboot carried out by anonymous contractors',
+    ],
+  },
+  {
+    key: 'operation',
+    matchers: ['operation', 'operations', 'op', 'project', 'directive'],
+    truthVerbs: ['BLOWS COVER ON', 'DECLASSIFIES', 'UNMASKS', 'DECRYPTS'],
+    truthSubjects: [
+      'OPERATION NIGHTLINGER',
+      'PROJECT THUNDERGLASS',
+      'DIRECTIVE RAVENVAULT',
+      'OP MEMO BLUE VELVET',
+    ],
+    truthDetails: [
+      'within a sealed war-room debrief',
+      'during a 0400 hours emergency tabletop',
+      'inside the sub-basement briefing vault',
+      'after a courier dropped a mislabeled dossier in the lobby',
+    ],
+    govVerbs: ['DECOMMISSIONS', 'REASSIGNS', 'RENUMBERS', 'RETITLES'],
+    govEuphemisms: [
+      'strategic reclassification initiative',
+      'legacy paperwork sunset',
+      'authorized codename rotation',
+      'internal continuity rehearsal',
+    ],
+    govDetails: [
+      'a binder swap conducted in the windowless logistics wing',
+      'an interagency tabletop exercise with no observers',
+      'a schedule alignment meeting that allegedly never happened',
+    ],
+  },
+];
+
+const deriveTheme = (tags: Card['tags']): ThemeConfig | undefined => {
+  const normalized = normalizeCardTags(tags).map(tag => tag.replace(/^#/, ''));
+  const plainSanitized = Array.isArray(tags)
+    ? tags
+        .filter((tag): tag is string => typeof tag === 'string')
+        .map(tag => sanitizeTag(tag))
+        .filter(Boolean)
+    : [];
+
+  const searchable = new Set([...normalized, ...plainSanitized]);
+
+  for (const theme of TAG_THEMES) {
+    for (const candidate of searchable) {
+      if (!candidate) {
+        continue;
+      }
+      if (theme.matchers.some(matcher => candidate.includes(matcher))) {
+        return theme;
+      }
+    }
+  }
+
+  return undefined;
 };
 
 function generateTags(context: ArticleContext): string[] {
