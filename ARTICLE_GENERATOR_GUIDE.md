@@ -87,6 +87,9 @@ Procedural pieces now scan the triggering card's tags (normalized in `procedural
 - **Cryptid tags** (`#cryptid`, `cryptid sighting`, etc.) lean into field journals and tranquilizer denials with verbs like "TRACKS" and euphemisms such as "authorized wildlife mitigation protocol".
 - **Broadcast tags** (`#broadcast`, `shortwave-signal`) pull from pirate radio lore, invoking numbers stations, uplink hijacks, and maintenance doublespeak like "routine broadcast quality assurance".
 - **Operation tags** (`#operation`, `project nightfall`) highlight codenamed dossiers, cover identities, and bureaucratic phrases like "strategic reclassification initiative".
+- **Moon-hoax tags** (`#moon-landing-hoax`, `apollo`, `lunar coverup`) lean into studio backlot revelations, suspicious flags, and Elvis side-eyeing the stage lighting.
+- **Psychic hotline tags** (`#psychic-hotline`, `remote viewing`, `telepath`) route through switchboard occultism, headset seances, and hold-music weaponization.
+- **Time-loop tourism tags** (`#time-loop`, `chrononaut`, `temporal tourism`) emphasize repeated itineraries, deja vu customs desks, and official memos caught in rewind.
 
 If no themed tags are present, the generator falls back to the legacy cryptid/location/conspiracy pools and the standard government euphemisms described below.
 

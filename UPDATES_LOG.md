@@ -8,6 +8,13 @@ This document provides a chronological record of gameplay-impacting changes merg
   - `src/data/editors.json`
   - `UPDATES_LOG.md`
 - Summary: Repointed Elvis in Exile's starting card to the canonical TRUTH-005 record so the editor spawns with the proper Vegas UFO Wedding scoop and surfaces the lore-correct title in the UI.
+## 2025-11-07 – Procedural articles embrace moon hoax and hotline chaos
+- Timestamp: 2025-11-07T00:00:00Z
+- Files:
+  - `ARTICLE_GENERATOR_GUIDE.md`
+  - `src/engine/newspaper/proceduralArticleGenerator.ts`
+  - `src/engine/newspaper/__tests__/proceduralArticleGenerator.test.ts`
+- Summary: Expanded every word bank with Florida-man mayhem, Elvis/Bat Boy cameos, and red-tape doublespeak, introduced moon-hoax, psychic hotline, and time-loop tag themes, and locked in snapshots that prove the tabloid tone stays feral.
 
 ## 2025-11-06 – Newspaper generator reacts to card themes
 - Timestamp: 2025-11-06T00:00:00Z
