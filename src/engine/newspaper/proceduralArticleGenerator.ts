@@ -272,13 +272,6 @@ const sanitizeTag = (value: string): string => {
   return collapsed.toLowerCase();
 };
 
-const ensureHashTag = (value: string): string => {
-  if (!value) {
-    return value;
-  }
-  return value.startsWith('#') ? value : `#${value}`;
-};
-
 const normalizeCardTags = (tags: Card['tags']): string[] => {
   if (!Array.isArray(tags)) {
     return [];
@@ -295,10 +288,9 @@ const normalizeCardTags = (tags: Card['tags']): string[] => {
     if (!sanitized) {
       continue;
     }
-    const hashed = ensureHashTag(sanitized);
-    if (hashed && !seen.has(hashed)) {
-      seen.add(hashed);
-      normalized.push(hashed);
+    if (!seen.has(sanitized)) {
+      seen.add(sanitized);
+      normalized.push(sanitized);
     }
   }
 

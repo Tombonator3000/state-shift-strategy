@@ -19,9 +19,9 @@ describe('generateProceduralArticle tags', () => {
       player: 'human',
     });
 
-    expect(article.tags.slice(0, 2)).toEqual(['#signal-boost', '#contact-protocol']);
+    expect(article.tags.slice(0, 2)).toEqual(['signal-boost', 'contact-protocol']);
     expect(article.tags).toEqual(
-      expect.arrayContaining(['#signal-boost', '#contact-protocol', 'media', 'coverage'])
+      expect.arrayContaining(['signal-boost', 'contact-protocol', 'media', 'coverage'])
     );
   });
 
