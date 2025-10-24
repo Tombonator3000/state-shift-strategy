@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import perCardArticlesJson from './paranoid_times_card_articles_ALL.json' assert { type: 'json' };
+import canonicalArticlesJson from '../../../public/data/paranoid_times_card_articles_ALL.json' assert { type: 'json' };
 import comboBankJson from './story_combos.json' assert { type: 'json' };
 import tripleBankJson from './extra_extra_triple_bank.json' assert { type: 'json' };
 
@@ -79,6 +80,7 @@ let cachedTripleBank: TripleTemplateBank | null = null;
 
 const buildPerCardArticleCache = (): Map<string, ArticleBlock> => {
   const parsed = perCardArticleSchema.parse(perCardArticlesJson);
+  runTagParityCheck(parsed);
   const map = new Map<string, ArticleBlock>();
 
   for (const entry of parsed.articles) {
@@ -240,6 +242,88 @@ const ensureTripleBank = (): TripleTemplateBank => {
 const normaliseTag = (tag: string): string => tag.trim().toLowerCase().replace(/\s+/g, '-');
 
 const unique = <T,>(values: T[]): T[] => Array.from(new Set(values));
+
+const normaliseTagList = (input: unknown): string[] => {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+  return unique(
+    input
+      .map(value => (typeof value === 'string' ? value : ''))
+      .filter(Boolean)
+      .map(normaliseTag),
+  ).sort();
+};
+
+type PerCardArticlePayload = z.infer<typeof perCardArticleSchema>;
+
+const canonicalArticleSchema = z.object({
+  id: z.string().min(1),
+  tags: z.array(z.string()).default([]),
+});
+
+const canonicalArticleFileSchema = z.object({
+  articles: z.array(canonicalArticleSchema).default([]),
+});
+
+const buildCanonicalTagMap = (): Map<string, string[]> | null => {
+  const parsed = canonicalArticleFileSchema.safeParse(canonicalArticlesJson);
+  if (!parsed.success) {
+    console.warn('[news-pools] Failed to parse canonical article tags', parsed.error);
+    return null;
+  }
+  const map = new Map<string, string[]>();
+  for (const article of parsed.data.articles) {
+    map.set(article.id, normaliseTagList(article.tags));
+  }
+  return map;
+};
+
+const runTagParityCheck = (() => {
+  let executed = false;
+  let canonicalTagMap: Map<string, string[]> | null = null;
+  return (payload: PerCardArticlePayload): void => {
+    if (executed) {
+      return;
+    }
+    executed = true;
+    if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'production') {
+      return;
+    }
+
+    canonicalTagMap ??= buildCanonicalTagMap();
+    if (!canonicalTagMap || canonicalTagMap.size === 0) {
+      return;
+    }
+
+    const divergences: string[] = [];
+    for (const article of payload.articles) {
+      const canonicalTags = canonicalTagMap.get(article.id);
+      if (!canonicalTags) {
+        continue;
+      }
+      const cachedTags = normaliseTagList(article.tags);
+      if (!areTagListsEqual(cachedTags, canonicalTags)) {
+        divergences.push(
+          `${article.id}: cached=[${cachedTags.join(', ')}] canonical=[${canonicalTags.join(', ')}]`,
+        );
+      }
+    }
+
+    if (divergences.length > 0) {
+      throw new Error(
+        `newsPools cached tag regression detected. Ensure the generated cache copies canonical tags.\n${divergences.join('\n')}`,
+      );
+    }
+  };
+})();
+
+const areTagListsEqual = (a: string[], b: string[]): boolean => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  return a.every((value, index) => value === b[index]);
+};
 
 const perCardArticleSchema = z.object({
   schemaVersion: z.number().optional(),

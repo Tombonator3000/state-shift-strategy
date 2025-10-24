@@ -2,6 +2,16 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-05 – Restored canonical news tags to engine cache
+- Timestamp: 2025-11-05T00:00:00Z
+- Files:
+  - `paranoid_times_card_articles_ALL.json`
+  - `public/data/paranoid_times_card_articles_ALL.json`
+  - `src/engine/news/paranoid_times_card_articles_ALL.json`
+  - `src/engine/news/newsPools.ts`
+  - `tools/generate-card-articles.mjs`
+- Summary: Updated the article generator to reuse canonical tag metadata, regenerated the news cache to include the full UFO and cryptid taxonomy, and added a safeguard that compares cached tags to the public dataset.
+
 ## 2025-11-04 – Tabloid newspaper uses static page builder import
 - Timestamp: 2025-11-04T00:00:00Z
 - Files:

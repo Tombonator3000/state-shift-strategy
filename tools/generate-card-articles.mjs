@@ -8,11 +8,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 
+const ENGINE_OUTPUT_PATH = path.join(ROOT, 'src/engine/news/paranoid_times_card_articles_ALL.json');
 const OUTPUT_PATHS = [
   path.join(ROOT, 'paranoid_times_card_articles_ALL.json'),
-  path.join(ROOT, 'src/engine/paranoid_times_card_articles_ALL.json'),
+  ENGINE_OUTPUT_PATH,
   path.join(ROOT, 'public/data/paranoid_times_card_articles_ALL.json'),
 ];
+const CANONICAL_PATH = path.join(ROOT, 'public/data/paranoid_times_card_articles_ALL.json');
 
 const CARD_SOURCES = [
   { path: 'src/data/core/core_truth_MVP_balanced.json', key: 'core-truth' },
@@ -779,6 +781,7 @@ async function loadCards() {
 }
 
 async function generate() {
+  const canonicalTags = await loadCanonicalTags();
   const cards = await loadCards();
   const seen = new Set();
   const articles = cards.map(card => {
@@ -788,7 +791,7 @@ async function generate() {
     seen.add(card.id);
     const base =
       card.faction === 'truth' ? createTruthArticle(card) : createGovernmentArticle(card);
-    const tags = dedupeTags(card.tags, card.type.toLowerCase());
+    const tags = canonicalTags.get(card.id) ?? dedupeTags(card.tags, card.type.toLowerCase());
     return {
       id: card.id,
       faction: card.faction,
@@ -813,7 +816,8 @@ async function generate() {
   };
 
   for (const outputPath of OUTPUT_PATHS) {
-    await writeFile(outputPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+    const data = outputPath === ENGINE_OUTPUT_PATH ? toEnginePayload(payload) : payload;
+    await writeFile(outputPath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
   }
 
   console.log(`Generated ${articles.length} articles across ${OUTPUT_PATHS.length} outputs.`);
@@ -823,3 +827,42 @@ generate().catch(error => {
   console.error(error);
   process.exitCode = 1;
 });
+
+async function loadCanonicalTags() {
+  try {
+    const raw = await readFile(CANONICAL_PATH, 'utf8');
+    const payload = JSON.parse(raw);
+    const articles = Array.isArray(payload?.articles) ? payload.articles : [];
+    const map = new Map();
+    for (const article of articles) {
+      if (!article || typeof article !== 'object') {
+        continue;
+      }
+      if (typeof article.id !== 'string') {
+        continue;
+      }
+      if (!Array.isArray(article.tags)) {
+        continue;
+      }
+      map.set(article.id, [...article.tags]);
+    }
+    return map;
+  } catch (error) {
+    console.warn('Unable to load canonical tags, falling back to card metadata.', error);
+    return new Map();
+  }
+}
+
+function toEnginePayload(payload) {
+  return {
+    ...payload,
+    articles: payload.articles.map(article => {
+      const { faction, ...rest } = article;
+      const tone = typeof faction === 'string' ? faction : 'truth';
+      return {
+        tone,
+        ...rest,
+      };
+    }),
+  };
+}
