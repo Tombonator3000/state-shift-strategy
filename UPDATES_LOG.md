@@ -101,6 +101,13 @@ This document provides a chronological record of gameplay-impacting changes merg
   - `components.json`
 - Summary: Introduced a dedicated TurnEdition hero component that renders composite stories with faction connectors, updated the tabloid newspaper to consume `{ kind: 'composite' }` feed entries instead of legacy article blocks, and added targeted tests ensuring tone-specific presentation and image prompt fallbacks behave correctly.
 
+## 2025-10-24 – Procedural newspaper honors card tag metadata
+- Timestamp: 2025-10-24T23:59:59Z
+- Files:
+  - `src/engine/newspaper/proceduralArticleGenerator.ts`
+  - `src/engine/newspaper/__tests__/proceduralArticleGenerator.test.ts`
+- Summary: Wired the procedural article generator to honor card-supplied tags, normalizing them to lexicon-style hashtags and ensuring coverage from newspaper regression tests.
+
 ## 2025-10-24 – Article combiner powers live newsroom column
 - Timestamp: 2025-10-24T11:30:00Z
 - Files:
