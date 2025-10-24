@@ -326,6 +326,110 @@ function pickMultiple<T>(arr: T[], count: number): T[] {
   return shuffled.slice(0, count);
 }
 
+function shuffle<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+type ParagraphTemplate<Ctx> = (context: Ctx) => string;
+
+const normalizeSegment = (value: string): string => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+  const withoutQuotes = trimmed
+    .replace(/^["'`“”\[\]()>•-]+/g, '')
+    .replace(/["'`“”\[\]()<>{}:;]+$/g, '');
+  return withoutQuotes.replace(/\s+/g, ' ').toLowerCase();
+};
+
+const extractSentenceTokens = (paragraph: string): string[] => {
+  const matches = paragraph.match(/[^.!?\n]+[.!?]/g);
+  if (matches && matches.length > 0) {
+    return matches.map(normalizeSegment).filter(Boolean);
+  }
+
+  return paragraph
+    .split(/\n+/)
+    .map(normalizeSegment)
+    .filter(Boolean);
+};
+
+const normalizeParagraph = (paragraph: string): string => paragraph.replace(/\s+/g, ' ').trim().toLowerCase();
+
+function pickDistinct<T>(arr: T[], avoid: T[]): T {
+  const filtered = arr.filter(item => !avoid.includes(item));
+  if (filtered.length === 0) {
+    return pick(arr);
+  }
+  return pick(filtered);
+}
+
+function pickUniqueParagraph<Ctx>(
+  templates: ParagraphTemplate<Ctx>[],
+  context: Ctx,
+  seenParagraphs: Set<string>,
+  seenSentences: Set<string>,
+): string | null {
+  for (const template of shuffle(templates)) {
+    const paragraph = template(context).trim();
+    if (!paragraph) {
+      continue;
+    }
+
+    const normalizedParagraph = normalizeParagraph(paragraph);
+    if (seenParagraphs.has(normalizedParagraph)) {
+      continue;
+    }
+
+    const sentences = extractSentenceTokens(paragraph);
+    if (sentences.some(sentence => seenSentences.has(sentence))) {
+      continue;
+    }
+
+    seenParagraphs.add(normalizedParagraph);
+    for (const sentence of sentences) {
+      seenSentences.add(sentence);
+    }
+    return paragraph;
+  }
+
+  for (const template of templates) {
+    const paragraph = template(context).trim();
+    if (!paragraph) {
+      continue;
+    }
+    const normalizedParagraph = normalizeParagraph(paragraph);
+    if (!seenParagraphs.has(normalizedParagraph)) {
+      seenParagraphs.add(normalizedParagraph);
+      for (const sentence of extractSentenceTokens(paragraph)) {
+        seenSentences.add(sentence);
+      }
+      return paragraph;
+    }
+  }
+
+  return null;
+}
+
+function maybePickEmbellishment<Ctx>(
+  templates: ParagraphTemplate<Ctx>[],
+  context: Ctx,
+  seenParagraphs: Set<string>,
+  seenSentences: Set<string>,
+  probability: number,
+): string | null {
+  if (Math.random() >= probability) {
+    return null;
+  }
+  return pickUniqueParagraph(templates, context, seenParagraphs, seenSentences);
+}
+
 function generateTruthHeadline(context: ArticleContext): string {
   const theme = deriveTheme(context.card.tags);
   const verbPool = theme?.truthVerbs?.length ? theme.truthVerbs : TRUTH_ACTION_VERBS;
@@ -401,55 +505,479 @@ function generateGovSubhead(context: ArticleContext): string {
   return pick(templates);
 }
 
+interface TruthBodyContextData {
+  cardName: string;
+  subject: string;
+  detailPrimary: string;
+  detailSecondary: string;
+  location: string;
+  alternateLocation: string;
+  witness: string;
+  secondaryWitness: string;
+  quoteWitness: string;
+  expert: string;
+  factionLabel: string;
+  opposingFaction: string;
+  targetState: string;
+  truthDelta: number;
+  truthDeltaLabel: string;
+  truthValue: number;
+  truthPercent: number;
+  truthTrend: string;
+  turn?: number;
+  controlledSummary?: string | null;
+  rumorLines: string[];
+  footnoteId: string;
+}
+
 function generateTruthBody(context: ArticleContext): string {
   const theme = deriveTheme(context.card.tags);
   const cardName = context.card.name;
-  const witness = pick(WITNESSES);
   const detailPool = theme?.truthDetails?.length ? theme.truthDetails : SPECIFIC_DETAILS;
   const subjectPool = theme?.truthSubjects?.length ? theme.truthSubjects : DEFAULT_TRUTH_SUBJECTS;
-  const detail = pick(detailPool);
+  const detailPrimary = pick(detailPool);
+  const detailSecondary = pickDistinct(detailPool, [detailPrimary]);
   const subject = pick(subjectPool);
-  const expert = `Dr. ${pick(['Helena Frost', 'Marcus Webb', 'Patricia Chen', 'Raymond Foster'])}`;
-  
-  const truthValue = context.gameState?.truth || 50;
-  const trend = truthValue > 50 ? 'surging' : 'climbing';
-  
-  const paragraphs = [
-    `Leaked documents obtained ${detail} reveal explosive details about ${cardName}, confirming what conspiracy researchers have suspected for years: the connection to ${subject} is undeniable and extensively documented.`,
-    
-    `"I've spent twenty years investigating this," said ${expert}, an independent researcher who was recently asked to leave three different conferences. "The ${cardName} evidence doesn't just suggest a conspiracy—it proves one. The documentation is meticulous. Almost like they wanted to get caught."`,
-    
-    `A ${witness} first posted the materials online at ${detail}, leading to immediate viral spread across seventeen platforms before coordinated takedown attempts began. "I watched the downloads hit a million before my internet mysteriously cut out," the source said by phone from an undisclosed location. "They're scrambling."`,
-    
-    `Government response has been notably aggressive, with three press conferences scheduled, canceled, and rescheduled before officials settled on a brief emailed statement reading simply: "These reports are unsubstantiated and also classified."`,
-    
-    `Public awareness is ${trend}, with truth-seeking networks reporting ${Math.round(truthValue)}% of surveyed citizens now questioning official narratives. "The paradigm is shifting," noted researcher ${expert}. "People are ready to know what's behind ${cardName}."`,
+  const location = pick(LOCATIONS);
+  const alternateLocation = pickDistinct(LOCATIONS, [location]);
+  const witness = pick(WITNESSES);
+  const secondaryWitness = pickDistinct(WITNESSES, [witness]);
+  const quoteWitness = pickDistinct(WITNESSES, [witness, secondaryWitness]);
+  const expert = `Dr. ${pick(['Helena Frost', 'Marcus Webb', 'Patricia Chen', 'Raymond Foster', 'Nikhil Reyes'])}`;
+  const factionLabel = pick([
+    'Truthline Observers',
+    'Paranoid Times Field Bureau',
+    'Citizen Signal Corps',
+    'Counter-Narrative Cartographers',
+  ]);
+  const opposingFaction = pick([
+    'Containment Bureau',
+    'Department of Normalcy',
+    'Official Story Taskforce',
+    'Continuity Stabilization Wing',
+  ]);
+  const targetState = context.targetState || 'the broadcast grid';
+  const truthValue = context.gameState?.truth ?? 50;
+  const truthPercent = Math.round(truthValue);
+  const truthTrend = truthValue >= 65 ? 'surging' : truthValue >= 50 ? 'climbing' : 'rebuilding';
+  const truthDelta = context.truthDelta ?? 0;
+  const truthDeltaLabel =
+    truthDelta === 0
+      ? 'steady truth current humming through the network'
+      : truthDelta > 0
+      ? `+${truthDelta} truth surge rattling officials`
+      : `${truthDelta} truth dip that only sharpened resolve`;
+  const turn = context.gameState?.turn;
+  const controlledSummary = context.gameState?.controlledStates?.length
+    ? context.gameState.controlledStates.slice(0, 2).join(', ')
+    : null;
+  const footnoteId = `${turn ?? '??'}-${Math.abs(truthDelta) || '0'}`;
+
+  const truthContext: TruthBodyContextData = {
+    cardName,
+    subject,
+    detailPrimary,
+    detailSecondary,
+    location,
+    alternateLocation,
+    witness,
+    secondaryWitness,
+    quoteWitness,
+    expert,
+    factionLabel,
+    opposingFaction,
+    targetState,
+    truthDelta,
+    truthDeltaLabel,
+    truthValue,
+    truthPercent,
+    truthTrend,
+    turn,
+    controlledSummary,
+    rumorLines: [],
+    footnoteId,
+  };
+
+  const truthRumorFactories: Array<(ctx: TruthBodyContextData) => string> = [
+    ctx => `rumor ping: ${ctx.detailPrimary} download shows ${ctx.subject} signatures climbing ${ctx.truthPercent}%`,
+    ctx => `rumor ping: ${ctx.targetState} scanners report ${ctx.truthDeltaLabel}`,
+    ctx => `rumor ping: ${ctx.opposingFaction} scrub team rerouted packets through ${ctx.alternateLocation}`,
+    ctx => `rumor ping: ${ctx.secondaryWitness} logged duplicate memos at ${ctx.location}`,
+    ctx => `rumor ping: ${ctx.cardName} metadata pings align with ${ctx.factionLabel} field notes`,
   ];
-  
+
+  const seededRumors = pickMultiple(truthRumorFactories, Math.min(3, truthRumorFactories.length)).map(factory =>
+    factory(truthContext),
+  );
+  const uniqueRumors = Array.from(new Set(seededRumors));
+  for (const factory of truthRumorFactories) {
+    if (uniqueRumors.length >= 3) {
+      break;
+    }
+    const rumor = factory(truthContext);
+    if (!uniqueRumors.includes(rumor)) {
+      uniqueRumors.push(rumor);
+    }
+  }
+  truthContext.rumorLines = uniqueRumors.slice(0, 3);
+
+  const hookTemplates: ParagraphTemplate<TruthBodyContextData>[] = [
+    ctx =>
+      `Encrypted drop from ${ctx.detailPrimary} hit ${ctx.factionLabel}'s secure board while alarms glitched over ${ctx.location}. The leak names ${ctx.cardName} as the keystone linking ${ctx.subject} to ${ctx.targetState}.`,
+    ctx =>
+      `${ctx.witness} broadcast from ${ctx.location} declaring ${ctx.cardName} is not rumor but rehearsal footage for ${ctx.subject}. Files timestamped ${ctx.detailPrimary} show ${ctx.opposingFaction} denial stamps already peeling.`,
+    ctx =>
+      `${ctx.factionLabel} trackers woke to ${ctx.cardName} dossiers spiraling out of ${ctx.targetState}. Every page references ${ctx.subject} in handwriting matching ${ctx.secondaryWitness}'s earlier testimony.`,
+    ctx =>
+      `Signal techs traced ${ctx.cardName} chatter to ${ctx.alternateLocation}, where ${ctx.witness} captured midnight sirens before the feed cut ${ctx.detailPrimary}. The subject line simply read: ${ctx.subject}.`,
+  ];
+
+  const midStoryTemplates: ParagraphTemplate<TruthBodyContextData>[] = [
+    ctx =>
+      `Field archivists from ${ctx.factionLabel} reconstructed the timeline, confirming ${ctx.cardName} entered circulation ${ctx.detailSecondary}. ${ctx.secondaryWitness} logged the upload while ${ctx.opposingFaction} routed everyone through a "routine" drill.`,
+    ctx =>
+      `${ctx.expert} told the Paranoid Times that ${ctx.cardName} carries a resonance identical to previous ${ctx.subject} sightings. "We mapped the harmonics across ${ctx.location}; it is literally humming the truth," the expert insisted.`,
+    ctx =>
+      `Witness nodes in ${ctx.targetState} cross-checked the dossier and found margin scribbles referencing ${ctx.detailSecondary}. The handwriting matches a prior ${ctx.opposingFaction} memo accidentally faxed to ${ctx.factionLabel}.`,
+  ];
+
+  const twistTemplates: ParagraphTemplate<TruthBodyContextData>[] = [
+    ctx =>
+      `Mid-story twist: ${ctx.secondaryWitness} intercepted a counter-briefing from ${ctx.opposingFaction} claiming ${ctx.cardName} is a ${ctx.subject} "creative writing exercise." Metadata shows the file compiled ${ctx.detailSecondary}, nine minutes before the leak surfaced.`,
+    ctx =>
+      `${ctx.factionLabel} analysts discovered a mirrored annex under ${ctx.alternateLocation}; inside were rehearsal tapes labeled ${ctx.cardName}. One frame shows ${ctx.cardName} stamped "Destroy after turn ${ctx.turn ?? '??'}"—but the footage survived.`,
+    ctx =>
+      `A courier disguised as ${ctx.quoteWitness} delivered a suitcase of negatives to ${ctx.targetState}. Each photo shows ${ctx.cardName} staged beside ${ctx.subject} equipment while ${ctx.opposingFaction} logos blur in the background.`,
+  ];
+
+  const reactionTemplates: ParagraphTemplate<TruthBodyContextData>[] = [
+    ctx =>
+      `${ctx.factionLabel} dashboards now register ${ctx.truthPercent}% belief spikes across ${ctx.controlledSummary ?? 'the independent broadcast grid'}, marking a ${ctx.truthDeltaLabel}. "The paradigm tilt is measurable," ${ctx.expert} reported.`,
+    ctx =>
+      `Citizens occupying ${ctx.controlledSummary ?? 'autonomous watchposts'} uploaded synchronized chants spelling ${ctx.cardName}. ${ctx.witness} described the moment: "The static cleared and every radio repeated ${ctx.subject}."`,
+    ctx =>
+      `Truthline moderators issued a caution that ${ctx.opposingFaction} is staging calm-down tours through ${ctx.location}. Volunteers responded by projecting ${ctx.cardName} timelines on courthouse walls anyway.`,
+  ];
+
+  const kickerTemplates: ParagraphTemplate<TruthBodyContextData>[] = [
+    ctx =>
+      `[FOOTNOTE ${ctx.footnoteId}]: ${ctx.cardName} audit trails remain mirrored across ${ctx.targetState}; scrub attempts traced back to ${ctx.opposingFaction} node ${ctx.alternateLocation}.`,
+    ctx =>
+      `[FOOTNOTE ${ctx.footnoteId}]: ${ctx.subject} references recur every ${ctx.truthValue.toFixed(1)} minutes in ${ctx.cardName} logs. Archivists archived the archive in triplicate.`,
+    ctx =>
+      `[FOOTNOTE ${ctx.footnoteId}]: ${ctx.factionLabel} tags this anomaly "Do Not Forget" until ${ctx.turn ?? 'the timeline resets'}.`,
+  ];
+
+  const truthQuoteTemplates: Array<ParagraphTemplate<TruthBodyContextData>> = [
+    ctx => `> "${ctx.cardName} hums louder whenever ${ctx.subject} is mentioned," whispered ${ctx.quoteWitness}.`,
+    ctx => `> "They told us ${ctx.targetState} was quiet. Then the monitors spelled ${ctx.cardName}," confessed ${ctx.quoteWitness}.`,
+    ctx => `> "${ctx.opposingFaction} asked me to forget ${ctx.detailPrimary}. I recorded everything," ${ctx.quoteWitness} added.`,
+  ];
+
+  const truthAsideTemplates: Array<ParagraphTemplate<TruthBodyContextData>> = [
+    ctx => `[REDACTED ASIDE: ${ctx.opposingFaction} quietly requisitioned ${ctx.cardName} props from ${ctx.location}. Return date: never.]`,
+    ctx => `[REDACTED ASIDE: ${ctx.factionLabel} flagged ${ctx.subject} for emergency teach-ins across ${ctx.targetState}. Attendance optional, but bring foil.]`,
+    ctx => `[REDACTED ASIDE: ${ctx.detailSecondary} remains under investigation; ${ctx.expert} insists the timestamp loops every ${ctx.truthValue.toFixed(1)} minutes.]`,
+  ];
+
+  const rumorListTemplate: ParagraphTemplate<TruthBodyContextData> = ctx =>
+    `Rumor Mill Pings:\n${ctx.rumorLines.map(line => `- ${line}`).join('\n')}`;
+
+  const embellishmentTemplates: ParagraphTemplate<TruthBodyContextData>[] = [
+    ...truthQuoteTemplates,
+    ...truthAsideTemplates,
+    rumorListTemplate,
+  ];
+
+  const seenParagraphs = new Set<string>();
+  const seenSentences = new Set<string>();
+  const paragraphs: string[] = [];
+
+  const pushFrom = (templates: ParagraphTemplate<TruthBodyContextData>[]) => {
+    const paragraph = pickUniqueParagraph(templates, truthContext, seenParagraphs, seenSentences);
+    if (paragraph) {
+      paragraphs.push(paragraph);
+    }
+  };
+
+  pushFrom(hookTemplates);
+  pushFrom(midStoryTemplates);
+
+  const embellishmentMid = maybePickEmbellishment(
+    embellishmentTemplates,
+    truthContext,
+    seenParagraphs,
+    seenSentences,
+    0.7,
+  );
+  if (embellishmentMid) {
+    paragraphs.push(embellishmentMid);
+  }
+
+  pushFrom(twistTemplates);
+  pushFrom(reactionTemplates);
+
+  const embellishmentLate = maybePickEmbellishment(
+    embellishmentTemplates,
+    truthContext,
+    seenParagraphs,
+    seenSentences,
+    0.4,
+  );
+  if (embellishmentLate) {
+    paragraphs.push(embellishmentLate);
+  }
+
+  const kicker = pickUniqueParagraph(kickerTemplates, truthContext, seenParagraphs, seenSentences);
+  if (kicker) {
+    paragraphs.push(kicker);
+  }
+
   return paragraphs.join('\n\n');
+}
+
+interface GovBodyContextData {
+  cardName: string;
+  euphemismPrimary: string;
+  euphemismSecondary: string;
+  euphemismTertiary: string;
+  detailPrimary: string;
+  detailSecondary: string;
+  location: string;
+  alternateLocation: string;
+  official: string;
+  deputy: string;
+  agencyLabel: string;
+  factionName: string;
+  targetState: string;
+  witness: string;
+  truthValue: number;
+  truthPercent: number;
+  truthDelta: number;
+  truthDeltaLabel: string;
+  complianceProgram: string;
+  rumorLines: string[];
+  footnoteId: string;
+  turn?: number;
 }
 
 function generateGovBody(context: ArticleContext): string {
   const theme = deriveTheme(context.card.tags);
   const cardName = context.card.name;
   const euphemismPool = theme?.govEuphemisms?.length ? theme.govEuphemisms : GOV_EUPHEMISMS;
-  const euphemism = pick(euphemismPool);
-  const euphemism2 = pick(euphemismPool);
-  const detail = theme?.govDetails?.length ? pick(theme.govDetails) : '';
-  const official = `${pick(['Director', 'Deputy Director', 'Coordinator', 'Administrator'])} ${pick(['Karen Walsh', 'Marcus Thompson', 'Donald Pierce', 'Patricia Ng'])}`;
-
-  const paragraphs = [
-    `The Department of Normalcy issued a comprehensive 847-page report today addressing public concerns about ${cardName}, conclusively determining it qualifies as a standard ${euphemism}${detail ? ` tied to ${detail}` : ''} requiring no further citizen attention.`,
-
-    `"We appreciate community vigilance," stated ${official} at a mandatory press briefing. "However, speculation regarding ${cardName} serves no constructive purpose. Our analysis demonstrates this is textbook ${euphemism}, occurring approximately never and unlikely to repeat. All documentation supports this conclusion, which is why we've classified the documentation."`,
-
-    `The report notably dedicates 347 pages to explaining why certain questions should not be asked, 289 pages to redacted appendices, and a final chapter titled "Why This Report Itself Should Not Raise Questions.${detail ? `" A sealed appendix further catalogues ${detail}."` : '"' }`,
-    
-    `Citizens who witnessed events related to ${cardName} are invited to attend voluntary memory alignment workshops at convenient government facilities. Attendance is optional but strongly encouraged. Light refreshments will be served. Names will not be taken down but will be remembered institutionally.`,
-    
-    `When pressed on inconsistencies between eyewitness accounts and official conclusions, ${official} clarified: "Eyewitnesses experience stress. Stress causes misperception. Misperception is itself a form of ${euphemism2}. The circle of explanation is logically complete. This press conference is now concluded. Please exit in an orderly fashion and avoid discussing what was said here."`,
+  const euphemismPrimary = pick(euphemismPool);
+  const euphemismSecondary = pickDistinct(euphemismPool, [euphemismPrimary]);
+  const euphemismTertiary = pickDistinct(euphemismPool, [euphemismPrimary, euphemismSecondary]);
+  const fallbackGovDetails = [
+    'a compliance rehearsal still underway',
+    'an unrelated atmospheric paperwork exercise',
+    'a controlled rumor fatigue drill',
+    'a voluntary calmness symposium',
   ];
-  
+  const govDetailPool = theme?.govDetails?.length ? theme.govDetails : fallbackGovDetails;
+  const detailPrimary = pick(govDetailPool);
+  const detailSecondary = pickDistinct(govDetailPool, [detailPrimary]);
+  const location = pick(LOCATIONS);
+  const alternateLocation = pickDistinct(LOCATIONS, [location]);
+  const official = `${pick(['Director', 'Deputy Director', 'Coordinator', 'Administrator', 'Assistant Undersecretary'])} ${pick([
+    'Karen Walsh',
+    'Marcus Thompson',
+    'Donald Pierce',
+    'Patricia Ng',
+    'Rosa Valdez',
+  ])}`;
+  const deputy = `${pick(['Acting Liaison', 'Senior Compliance Officer', 'Briefing Coach', 'Deputy Narrator'])} ${pick([
+    'Elaine Brooks',
+    'Victor Lang',
+    'Holly Tran',
+    'Samuel Ortiz',
+  ])}`;
+  const agencyLabel = pick([
+    'Department of Normalcy',
+    'Containment Bureau',
+    'Office of Plausible Events',
+    'Continuity Stabilization Wing',
+  ]);
+  const factionName = context.card.faction ? context.card.faction.toUpperCase() : 'GOVERNMENT';
+  const targetState = context.targetState || 'all relevant jurisdictions';
+  const witness = pick(WITNESSES);
+  const truthValue = context.gameState?.truth ?? 50;
+  const truthPercent = Math.round(truthValue);
+  const truthDelta = context.truthDelta ?? 0;
+  const truthDeltaLabel =
+    truthDelta === 0
+      ? 'no measurable deviation in public calm index'
+      : truthDelta > 0
+      ? `containment drift of +${truthDelta}`
+      : `containment improvement of ${truthDelta}`;
+  const complianceProgram = pick([
+    'mandatory calmness webinar',
+    'voluntary memory realignment',
+    'preventative rumor fatigue clinic',
+    'authorized narrative meditation session',
+  ]);
+  const turn = context.gameState?.turn;
+  const footnoteId = `${turn ?? '??'}-${cardName.replace(/\s+/g, '').slice(0, 4).toUpperCase() || 'CARD'}`;
+
+  const govContext: GovBodyContextData = {
+    cardName,
+    euphemismPrimary,
+    euphemismSecondary,
+    euphemismTertiary,
+    detailPrimary,
+    detailSecondary,
+    location,
+    alternateLocation,
+    official,
+    deputy,
+    agencyLabel,
+    factionName,
+    targetState,
+    witness,
+    truthValue,
+    truthPercent,
+    truthDelta,
+    truthDeltaLabel,
+    complianceProgram,
+    rumorLines: [],
+    footnoteId,
+    turn,
+  };
+
+  const govRumorFactories: Array<(ctx: GovBodyContextData) => string> = [
+    ctx => `clarification memo: ${ctx.agencyLabel} recorded ${ctx.truthDeltaLabel}`,
+    ctx => `clarification memo: ${ctx.complianceProgram} scheduled at ${ctx.location}`,
+    ctx => `clarification memo: ${ctx.deputy} filed ${ctx.cardName} under ${ctx.euphemismSecondary}`,
+    ctx => `clarification memo: chatter about ${ctx.cardName} redirected to ${ctx.alternateLocation}`,
+    ctx => `clarification memo: ${ctx.factionName} monitors guarantee ${ctx.targetState} remains routine`,
+  ];
+
+  const seededClarifications = pickMultiple(
+    govRumorFactories,
+    Math.min(3, govRumorFactories.length),
+  ).map(factory => factory(govContext));
+  const uniqueClarifications = Array.from(new Set(seededClarifications));
+  for (const factory of govRumorFactories) {
+    if (uniqueClarifications.length >= 3) {
+      break;
+    }
+    const item = factory(govContext);
+    if (!uniqueClarifications.includes(item)) {
+      uniqueClarifications.push(item);
+    }
+  }
+  govContext.rumorLines = uniqueClarifications.slice(0, 3);
+
+  const hookTemplates: ParagraphTemplate<GovBodyContextData>[] = [
+    ctx =>
+      `${ctx.agencyLabel} assures ${ctx.targetState} residents that ${ctx.cardName} qualifies as ${ctx.euphemismPrimary}. ${ctx.official} thanked citizens for their enthusiasm and reminded them to recycle speculation responsibly.`,
+    ctx =>
+      `In a dawn bulletin, ${ctx.agencyLabel} labeled ${ctx.cardName} a textbook case of ${ctx.euphemismPrimary}, complete with commemorative binder clips. ${ctx.deputy} described the situation as "professionally boring."`,
+    ctx =>
+      `Press liaisons for ${ctx.factionName} distributed talking points declaring ${ctx.cardName} "well within ${ctx.euphemismPrimary} tolerances." Flyers were posted across ${ctx.location} before sunrise.`,
+  ];
+
+  const midStoryTemplates: ParagraphTemplate<GovBodyContextData>[] = [
+    ctx =>
+      `Official documentation cites ${ctx.detailPrimary} as the only noteworthy development. "It sounds dramatic, but in practice it's ${ctx.euphemismSecondary}," ${ctx.official} repeated while unveiling a pie chart showing nothing.`,
+    ctx =>
+      `${ctx.agencyLabel} archivists condensed 312 pages of public inquiries into a single footnote marked ${ctx.euphemismSecondary}. The filing was witnessed by ${ctx.deputy}, who encouraged citizens to attend ${ctx.complianceProgram}.`,
+    ctx =>
+      `A classified addendum references ${ctx.detailSecondary}, but the text is entirely black bars. "Redaction is a form of reassurance," explained ${ctx.official} while nodding at the empty screens.`,
+  ];
+
+  const twistTemplates: ParagraphTemplate<GovBodyContextData>[] = [
+    ctx =>
+      `Mid-story twist: rumor monitors detected ${ctx.witness} repeating "${ctx.cardName}" near ${ctx.alternateLocation}. Agents promptly issued ${ctx.euphemismTertiary} pamphlets and escorted the witness to a guided calm walk.`,
+    ctx =>
+      `An anonymous memo alleged ${ctx.cardName} interfaces with ${ctx.targetState}. ${ctx.agencyLabel} traced the memo to an overcaffeinated intern and filed it under ${ctx.euphemismTertiary}.`,
+    ctx =>
+      `${ctx.deputy} confirmed that surveillance footage showing ${ctx.cardName} at ${ctx.location} was actually rehearsal for ${ctx.detailPrimary}. The video has been looped over calming elevator music for public review.`,
+  ];
+
+  const reactionTemplates: ParagraphTemplate<GovBodyContextData>[] = [
+    ctx =>
+      `Community management teams report ${ctx.truthPercent}% of citizens remain serenely informed. "The remaining ${100 - ctx.truthPercent}% are enrolled in ${ctx.complianceProgram}," ${ctx.official} noted with a reassuring smile.`,
+    ctx =>
+      `${ctx.agencyLabel} deployed portable suggestion boxes across ${ctx.targetState} for anyone experiencing "unauthorized curiosity" about ${ctx.cardName}. Submissions will be answered within five to seven fiscal quarters.`,
+    ctx =>
+      `Public calm alerts read ${ctx.truthDeltaLabel}; still, ${ctx.deputy} reminded everyone that repeating ${ctx.cardName} three times voids your complimentary tote bag.`,
+  ];
+
+  const kickerTemplates: ParagraphTemplate<GovBodyContextData>[] = [
+    ctx =>
+      `[AUTHORIZED FOOTNOTE ${ctx.footnoteId}]: ${ctx.cardName} remains cataloged as ${ctx.euphemismPrimary}. Unscheduled curiosity should be logged with ${ctx.agencyLabel}.`,
+    ctx =>
+      `[AUTHORIZED FOOTNOTE ${ctx.footnoteId}]: ${ctx.factionName} retains discretion to update terminology to ${ctx.euphemismSecondary} pending further calmness.`,
+    ctx =>
+      `[AUTHORIZED FOOTNOTE ${ctx.footnoteId}]: Citizens referencing ${ctx.detailPrimary} must first attend ${ctx.complianceProgram}.`,
+  ];
+
+  const quoteTemplates: Array<ParagraphTemplate<GovBodyContextData>> = [
+    ctx => `> "Everything about ${ctx.cardName} is gloriously ${ctx.euphemismPrimary}," promised ${ctx.official}.`,
+    ctx => `> "We adore public enthusiasm, but please RSVP for ${ctx.complianceProgram} first," sighed ${ctx.deputy}.`,
+    ctx => `> "Rumors are just data that forgot to attend orientation," explained ${ctx.official}.`,
+  ];
+
+  const asideTemplates: Array<ParagraphTemplate<GovBodyContextData>> = [
+    ctx => `[REDACTED ADDENDUM: ${ctx.agencyLabel} purchased additional shredders for ${ctx.detailSecondary}.]`,
+    ctx => `[REDACTED ADDENDUM: ${ctx.factionName} analysts found the ${ctx.witness} account "spirited" but ultimately ${ctx.euphemismTertiary}.]`,
+    ctx => `[REDACTED ADDENDUM: Audio from ${ctx.location} now plays whale sounds to discourage speculation.]`,
+  ];
+
+  const clarificationTemplate: ParagraphTemplate<GovBodyContextData> = ctx =>
+    `Authorized Clarifications:\n${ctx.rumorLines.map(line => `- ${line}`).join('\n')}`;
+
+  const embellishmentTemplates: ParagraphTemplate<GovBodyContextData>[] = [
+    ...quoteTemplates,
+    ...asideTemplates,
+    clarificationTemplate,
+  ];
+
+  const seenParagraphs = new Set<string>();
+  const seenSentences = new Set<string>();
+  const paragraphs: string[] = [];
+
+  const pushFrom = (templates: ParagraphTemplate<GovBodyContextData>[]) => {
+    const paragraph = pickUniqueParagraph(templates, govContext, seenParagraphs, seenSentences);
+    if (paragraph) {
+      paragraphs.push(paragraph);
+    }
+  };
+
+  pushFrom(hookTemplates);
+  pushFrom(midStoryTemplates);
+
+  const embellishmentMid = maybePickEmbellishment(
+    embellishmentTemplates,
+    govContext,
+    seenParagraphs,
+    seenSentences,
+    0.6,
+  );
+  if (embellishmentMid) {
+    paragraphs.push(embellishmentMid);
+  }
+
+  pushFrom(twistTemplates);
+  pushFrom(reactionTemplates);
+
+  const embellishmentLate = maybePickEmbellishment(
+    embellishmentTemplates,
+    govContext,
+    seenParagraphs,
+    seenSentences,
+    0.35,
+  );
+  if (embellishmentLate) {
+    paragraphs.push(embellishmentLate);
+  }
+
+  const kicker = pickUniqueParagraph(kickerTemplates, govContext, seenParagraphs, seenSentences);
+  if (kicker) {
+    paragraphs.push(kicker);
+  }
+
   return paragraphs.join('\n\n');
 }
 

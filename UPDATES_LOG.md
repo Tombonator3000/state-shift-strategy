@@ -124,6 +124,13 @@ This document provides a chronological record of gameplay-impacting changes merg
   - `src/engine/newspaper/__tests__/proceduralArticleGenerator.test.ts`
 - Summary: Wired the procedural article generator to honor card-supplied tags, normalizing them to lexicon-style hashtags and ensuring coverage from newspaper regression tests.
 
+## 2025-10-24 – Tabloid bodies sprout quotes, clarifications, rumor mills
+- Timestamp: 2025-10-24T22:20:25Z
+- Files:
+  - `src/engine/newspaper/proceduralArticleGenerator.ts`
+  - `__tests__/newspaper/proceduralArticleGenerator.test.ts`
+- Summary: Refactored article body assembly into hook, twist, and kicker pools with seeded embellishments, layered in optional pull quotes, redacted asides, and rumor bullet lists keyed to witnesses and faction context, and added deterministic tests exercising both embellished and minimal outputs.
+
 ## 2025-10-24 – Article combiner powers live newsroom column
 - Timestamp: 2025-10-24T11:30:00Z
 - Files:
