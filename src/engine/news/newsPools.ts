@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import perCardArticlesJson from './paranoid_times_card_articles_ALL.json' assert { type: 'json' };
-import canonicalArticlesJson from '../../../public/data/paranoid_times_card_articles_ALL.json' assert { type: 'json' };
 import comboBankJson from './story_combos.json' assert { type: 'json' };
 import tripleBankJson from './extra_extra_triple_bank.json' assert { type: 'json' };
 
@@ -266,55 +265,87 @@ const canonicalArticleFileSchema = z.object({
   articles: z.array(canonicalArticleSchema).default([]),
 });
 
-const buildCanonicalTagMap = (): Map<string, string[]> | null => {
-  const parsed = canonicalArticleFileSchema.safeParse(canonicalArticlesJson);
-  if (!parsed.success) {
-    console.warn('[news-pools] Failed to parse canonical article tags', parsed.error);
-    return null;
+const isProdBuild = (() => {
+  if (typeof import.meta !== 'undefined' && typeof import.meta.env !== 'undefined') {
+    return Boolean(import.meta.env.PROD);
   }
-  const map = new Map<string, string[]>();
-  for (const article of parsed.data.articles) {
-    map.set(article.id, normaliseTagList(article.tags));
+  if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
+    return process.env.NODE_ENV === 'production';
   }
-  return map;
-};
+  return false;
+})();
+
+const loadCanonicalTagMap: () => Promise<Map<string, string[]> | null> = isProdBuild
+  ? async () => null
+  : async () => {
+      try {
+        const canonicalArticlesModule = (await import(
+          '../../../public/data/paranoid_times_card_articles_ALL.json',
+          { assert: { type: 'json' } },
+        )) as { default: unknown };
+        const canonicalArticlesJson = canonicalArticlesModule?.default ?? canonicalArticlesModule;
+        const parsed = canonicalArticleFileSchema.safeParse(canonicalArticlesJson);
+        if (!parsed.success) {
+          console.warn('[news-pools] Failed to parse canonical article tags', parsed.error);
+          return null;
+        }
+
+        const map = new Map<string, string[]>();
+        for (const article of parsed.data.articles) {
+          map.set(article.id, normaliseTagList(article.tags));
+        }
+        return map;
+      } catch (error) {
+        console.warn('[news-pools] Failed to load canonical article tags', error);
+        return null;
+      }
+    };
 
 const runTagParityCheck = (() => {
   let executed = false;
-  let canonicalTagMap: Map<string, string[]> | null = null;
+  let canonicalTagMapPromise: Promise<Map<string, string[]> | null> | null = null;
   return (payload: PerCardArticlePayload): void => {
     if (executed) {
       return;
     }
     executed = true;
-    if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'production') {
+    if (isProdBuild) {
       return;
     }
 
-    canonicalTagMap ??= buildCanonicalTagMap();
-    if (!canonicalTagMap || canonicalTagMap.size === 0) {
-      return;
-    }
+    canonicalTagMapPromise ??= loadCanonicalTagMap();
 
-    const divergences: string[] = [];
-    for (const article of payload.articles) {
-      const canonicalTags = canonicalTagMap.get(article.id);
-      if (!canonicalTags) {
-        continue;
-      }
-      const cachedTags = normaliseTagList(article.tags);
-      if (!areTagListsEqual(cachedTags, canonicalTags)) {
-        divergences.push(
-          `${article.id}: cached=[${cachedTags.join(', ')}] canonical=[${canonicalTags.join(', ')}]`,
-        );
-      }
-    }
+    canonicalTagMapPromise
+      .then(canonicalTagMap => {
+        if (!canonicalTagMap || canonicalTagMap.size === 0) {
+          return;
+        }
 
-    if (divergences.length > 0) {
-      throw new Error(
-        `newsPools cached tag regression detected. Ensure the generated cache copies canonical tags.\n${divergences.join('\n')}`,
-      );
-    }
+        const divergences: string[] = [];
+        for (const article of payload.articles) {
+          const canonicalTags = canonicalTagMap.get(article.id);
+          if (!canonicalTags) {
+            continue;
+          }
+          const cachedTags = normaliseTagList(article.tags);
+          if (!areTagListsEqual(cachedTags, canonicalTags)) {
+            divergences.push(
+              `${article.id}: cached=[${cachedTags.join(', ')}] canonical=[${canonicalTags.join(', ')}]`,
+            );
+          }
+        }
+
+        if (divergences.length > 0) {
+          throw new Error(
+            `newsPools cached tag regression detected. Ensure the generated cache copies canonical tags.\n${divergences.join('\n')}`,
+          );
+        }
+      })
+      .catch(error => {
+        setTimeout(() => {
+          throw error;
+        }, 0);
+      });
   };
 })();
 
