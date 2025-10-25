@@ -136,6 +136,13 @@ Articles adapt to:
 - Card type (attack/media/zone)
 - Faction (truth/government)
 
+### Contextual Hooks in Headlines, Bodies, and Tags
+- When the generator receives a `targetState`, it shouts it out in the headline suffix and seeds the tag list with a `#state-{name}` marker.
+- `truthDelta` now renders as a "truth index" or "calm index" burst that surfaces in headlines, subheads, and rumor callouts.
+- `gameState.turn` is spelled out ("Turn 5 bulletin") so the copy anchors the moment in the campaign timeline.
+- Controlled territories (`gameState.controlledStates`) power callouts such as "cells across OHIO & PENNSYLVANIA" and add `#cell-{state}` tags; larger networks tack on a `#cell-network-{count}` badge.
+- Tags weave these contextual shards ahead of the usual card tags so issue dashboards and filters can key off the same story beats players just triggered.
+
 ## Tips for Adding Content
 
 ### Good Headlines

@@ -430,6 +430,164 @@ function maybePickEmbellishment<Ctx>(
   return pickUniqueParagraph(templates, context, seenParagraphs, seenSentences);
 }
 
+const formatStateList = (states?: string[]): string | null => {
+  if (!states || states.length === 0) {
+    return null;
+  }
+
+  const unique = Array.from(
+    new Set(
+      states
+        .map(state => (typeof state === 'string' ? state.trim() : ''))
+        .filter((state): state is string => Boolean(state)),
+    ),
+  );
+
+  if (unique.length === 0) {
+    return null;
+  }
+
+  const upper = unique.map(state => state.toUpperCase());
+
+  if (upper.length === 1) {
+    return upper[0];
+  }
+
+  if (upper.length === 2) {
+    return `${upper[0]} & ${upper[1]}`;
+  }
+
+  return `${upper[0]}, ${upper[1]} +${upper.length - 2} MORE`;
+};
+
+const formatTurnLabel = (turn?: number): string | null => {
+  if (typeof turn !== 'number' || !Number.isFinite(turn)) {
+    return null;
+  }
+  return `Turn ${turn}`;
+};
+
+const formatTruthDeltaHeadline = (truthDelta?: number): string | null => {
+  if (typeof truthDelta !== 'number' || Number.isNaN(truthDelta)) {
+    return null;
+  }
+
+  if (truthDelta === 0) {
+    return 'TRUTH INDEX HOLDS';
+  }
+
+  return truthDelta > 0 ? `TRUTH INDEX +${truthDelta}` : `TRUTH INDEX ${truthDelta}`;
+};
+
+const buildTruthHeadlineSuffix = (context: ArticleContext): string => {
+  const segments: string[] = [];
+
+  const truthDeltaFragment = formatTruthDeltaHeadline(context.truthDelta);
+  if (truthDeltaFragment) {
+    segments.push(truthDeltaFragment);
+  }
+
+  if (context.targetState) {
+    segments.push(context.targetState.toUpperCase());
+  }
+
+  const turnFragment = formatTurnLabel(context.gameState?.turn)?.toUpperCase();
+  if (turnFragment) {
+    segments.push(turnFragment);
+  }
+
+  const controlledFragment = formatStateList(context.gameState?.controlledStates);
+  if (controlledFragment) {
+    segments.push(`CELLS HOLD ${controlledFragment}`);
+  }
+
+  return segments.length > 0 ? ` — ${segments.join(' • ')}` : '';
+};
+
+const buildGovHeadlineSuffix = (context: ArticleContext): string => {
+  const segments: string[] = [];
+
+  const turnFragment = formatTurnLabel(context.gameState?.turn)?.toUpperCase();
+  if (turnFragment) {
+    segments.push(`${turnFragment} BULLETIN`);
+  }
+
+  if (context.targetState) {
+    segments.push(`${context.targetState.toUpperCase()} REASSURED`);
+  }
+
+  const calmIndexFragment = formatTruthDeltaHeadline(context.truthDelta)?.replace(
+    'TRUTH INDEX',
+    'CALM INDEX',
+  );
+  if (calmIndexFragment) {
+    segments.push(calmIndexFragment);
+  }
+
+  const coverageFragment = formatStateList(context.gameState?.controlledStates);
+  if (coverageFragment) {
+    segments.push(`COVERAGE ${coverageFragment}`);
+  }
+
+  return segments.length > 0 ? ` — ${segments.join(' • ')}` : '';
+};
+
+const buildTruthSubheadContext = (context: ArticleContext): string | null => {
+  const fragments: string[] = [];
+
+  const truthDeltaFragment = formatTruthDeltaHeadline(context.truthDelta)?.replace(
+    'TRUTH INDEX',
+    'truth index',
+  );
+  if (truthDeltaFragment) {
+    fragments.push(truthDeltaFragment.toLowerCase());
+  }
+
+  if (context.targetState) {
+    fragments.push(`spikes in ${context.targetState}`);
+  }
+
+  const turnFragment = formatTurnLabel(context.gameState?.turn);
+  if (turnFragment) {
+    fragments.push(`on ${turnFragment.toLowerCase()}`);
+  }
+
+  const controlledFragment = formatStateList(context.gameState?.controlledStates);
+  if (controlledFragment) {
+    fragments.push(`cells holding ${controlledFragment}`);
+  }
+
+  return fragments.length > 0 ? fragments.join(' • ') : null;
+};
+
+const buildGovSubheadContext = (context: ArticleContext): string | null => {
+  const fragments: string[] = [];
+
+  const turnFragment = formatTurnLabel(context.gameState?.turn);
+  if (turnFragment) {
+    fragments.push(`${turnFragment.toLowerCase()} briefing`);
+  }
+
+  if (context.targetState) {
+    fragments.push(`${context.targetState} remains compliant`);
+  }
+
+  const calmIndexFragment = formatTruthDeltaHeadline(context.truthDelta)?.replace(
+    'TRUTH INDEX',
+    'calm index',
+  );
+  if (calmIndexFragment) {
+    fragments.push(calmIndexFragment.toLowerCase());
+  }
+
+  const coverageFragment = formatStateList(context.gameState?.controlledStates);
+  if (coverageFragment) {
+    fragments.push(`coverage extends to ${coverageFragment.toLowerCase()}`);
+  }
+
+  return fragments.length > 0 ? fragments.join(' • ') : null;
+};
+
 function generateTruthHeadline(context: ArticleContext): string {
   const theme = deriveTheme(context.card.tags);
   const verbPool = theme?.truthVerbs?.length ? theme.truthVerbs : TRUTH_ACTION_VERBS;
@@ -437,16 +595,17 @@ function generateTruthHeadline(context: ArticleContext): string {
   const verb = pick(verbPool);
   const cardName = context.card.name.toUpperCase();
   const subject = pick(subjectPool);
-  
+  const contextSuffix = buildTruthHeadlineSuffix(context);
+
   const templates = [
-    `${verb} ${subject}—${cardName} FILES LEAK NATIONWIDE`,
-    `${cardName} ${verb} ${subject} CONNECTION • OFFICIALS PANIC`,
-    `BREAKING: ${cardName} PROVES ${subject} EXISTS • GOVERNMENT SCRAMBLES`,
-    `${subject} SCANDAL: ${cardName} DOCUMENTS GO VIRAL`,
-    `${cardName} ${verb} • ${subject} COVERUP COLLAPSES`,
-    `LEAKED: ${cardName} SHOWS ${subject} "VERY REAL" SAYS EXPERT`,
+    `${verb} ${subject}—${cardName} FILES LEAK NATIONWIDE${contextSuffix}`,
+    `${cardName} ${verb} ${subject} CONNECTION • OFFICIALS PANIC${contextSuffix}`,
+    `BREAKING: ${cardName} PROVES ${subject} EXISTS • GOVERNMENT SCRAMBLES${contextSuffix}`,
+    `${subject} SCANDAL: ${cardName} DOCUMENTS GO VIRAL${contextSuffix}`,
+    `${cardName} ${verb} • ${subject} COVERUP COLLAPSES${contextSuffix}`,
+    `LEAKED: ${cardName} SHOWS ${subject} "VERY REAL" SAYS EXPERT${contextSuffix}`,
   ];
-  
+
   return pick(templates);
 }
 
@@ -457,16 +616,17 @@ function generateGovHeadline(context: ArticleContext): string {
   const verb = pick(verbPool);
   const euphemism = pick(euphemismPool);
   const cardName = context.card.name.toUpperCase();
-  
+  const contextSuffix = buildGovHeadlineSuffix(context);
+
   const templates = [
-    `${cardName} DESIGNATED AS "${euphemism}"—NOTHING TO SEE HERE`,
-    `OFFICIAL: ${cardName} MERELY ${euphemism}`,
-    `${cardName} ${verb} • "${euphemism}" EXPLAINS ALL`,
-    `INTERNAL MEMO: ${cardName} CLASSIFIED AS ${euphemism}`,
-    `${cardName} INCIDENT RESOLVED—CITIZENS REMINDED TO REMAIN CALM`,
-    `${verb}: ${cardName} DESIGNATED ${euphemism} PER PROTOCOL`,
+    `${cardName} DESIGNATED AS "${euphemism}"—NOTHING TO SEE HERE${contextSuffix}`,
+    `OFFICIAL: ${cardName} MERELY ${euphemism}${contextSuffix}`,
+    `${cardName} ${verb} • "${euphemism}" EXPLAINS ALL${contextSuffix}`,
+    `INTERNAL MEMO: ${cardName} CLASSIFIED AS ${euphemism}${contextSuffix}`,
+    `${cardName} INCIDENT RESOLVED—CITIZENS REMINDED TO REMAIN CALM${contextSuffix}`,
+    `${verb}: ${cardName} DESIGNATED ${euphemism} PER PROTOCOL${contextSuffix}`,
   ];
-  
+
   return pick(templates);
 }
 
@@ -475,7 +635,8 @@ function generateTruthSubhead(context: ArticleContext): string {
   const witness = pick(WITNESSES);
   const detailPool = theme?.truthDetails?.length ? theme.truthDetails : SPECIFIC_DETAILS;
   const detail = pick(detailPool);
-  
+  const contextFragment = buildTruthSubheadContext(context);
+
   const templates = [
     `Eyewitness reports "exactly what conspiracy theorists said"—${detail}`,
     `${witness} confirms: "It's worse than we thought"`,
@@ -485,14 +646,16 @@ function generateTruthSubhead(context: ArticleContext): string {
     `Officials refuse comment; ${witness} won't stop talking`,
   ];
   
-  return pick(templates);
+  const base = pick(templates);
+  return contextFragment ? `${base} — ${contextFragment}` : base;
 }
 
 function generateGovSubhead(context: ArticleContext): string {
   const theme = deriveTheme(context.card.tags);
   const euphemismPool = theme?.govEuphemisms?.length ? theme.govEuphemisms : GOV_EUPHEMISMS;
   const euphemism = pick(euphemismPool);
-  
+  const contextFragment = buildGovSubheadContext(context);
+
   const templates = [
     `Officials assure public this is completely normal ${euphemism}`,
     `Spokesperson: "Move along, definitely ${euphemism}"`,
@@ -501,8 +664,9 @@ function generateGovSubhead(context: ArticleContext): string {
     `Statement released: "${euphemism}—case conclusively closed"`,
     `Department confirms this falls within acceptable parameters of ${euphemism}`,
   ];
-  
-  return pick(templates);
+
+  const base = pick(templates);
+  return contextFragment ? `${base} — ${contextFragment}` : base;
 }
 
 interface TruthBodyContextData {
@@ -525,7 +689,9 @@ interface TruthBodyContextData {
   truthPercent: number;
   truthTrend: string;
   turn?: number;
+  turnLabel?: string | null;
   controlledSummary?: string | null;
+  controlledDescriptor: string;
   rumorLines: string[];
   footnoteId: string;
 }
@@ -568,9 +734,11 @@ function generateTruthBody(context: ArticleContext): string {
       ? `+${truthDelta} truth surge rattling officials`
       : `${truthDelta} truth dip that only sharpened resolve`;
   const turn = context.gameState?.turn;
-  const controlledSummary = context.gameState?.controlledStates?.length
-    ? context.gameState.controlledStates.slice(0, 2).join(', ')
-    : null;
+  const turnLabel = formatTurnLabel(turn);
+  const controlledSummary = formatStateList(context.gameState?.controlledStates);
+  const controlledDescriptor = controlledSummary
+    ? `cells across ${controlledSummary}`
+    : 'the independent broadcast grid';
   const footnoteId = `${turn ?? '??'}-${Math.abs(truthDelta) || '0'}`;
 
   const truthContext: TruthBodyContextData = {
@@ -593,17 +761,26 @@ function generateTruthBody(context: ArticleContext): string {
     truthPercent,
     truthTrend,
     turn,
+    turnLabel,
     controlledSummary,
+    controlledDescriptor,
     rumorLines: [],
     footnoteId,
   };
 
   const truthRumorFactories: Array<(ctx: TruthBodyContextData) => string> = [
     ctx => `rumor ping: ${ctx.detailPrimary} download shows ${ctx.subject} signatures climbing ${ctx.truthPercent}%`,
-    ctx => `rumor ping: ${ctx.targetState} scanners report ${ctx.truthDeltaLabel}`,
+    ctx =>
+      `rumor ping: ${ctx.targetState} scanners report ${ctx.truthDeltaLabel} ${
+        ctx.turnLabel ? `during ${ctx.turnLabel.toLowerCase()}` : 'tonight'
+      }`,
     ctx => `rumor ping: ${ctx.opposingFaction} scrub team rerouted packets through ${ctx.alternateLocation}`,
     ctx => `rumor ping: ${ctx.secondaryWitness} logged duplicate memos at ${ctx.location}`,
     ctx => `rumor ping: ${ctx.cardName} metadata pings align with ${ctx.factionLabel} field notes`,
+    ctx =>
+      ctx.controlledSummary
+        ? `rumor ping: cells across ${ctx.controlledSummary} synced uplinks`
+        : `rumor ping: independent relays synced uplinks`,
   ];
 
   const seededRumors = pickMultiple(truthRumorFactories, Math.min(3, truthRumorFactories.length)).map(factory =>
@@ -623,13 +800,13 @@ function generateTruthBody(context: ArticleContext): string {
 
   const hookTemplates: ParagraphTemplate<TruthBodyContextData>[] = [
     ctx =>
-      `Encrypted drop from ${ctx.detailPrimary} hit ${ctx.factionLabel}'s secure board while alarms glitched over ${ctx.location}. The leak names ${ctx.cardName} as the keystone linking ${ctx.subject} to ${ctx.targetState}.`,
+      `${ctx.turnLabel ? `${ctx.turnLabel} encrypted drop` : 'Encrypted drop'} from ${ctx.detailPrimary} hit ${ctx.factionLabel}'s secure board while alarms glitched over ${ctx.location}. The leak names ${ctx.cardName} as the keystone linking ${ctx.subject} to ${ctx.targetState}.`,
     ctx =>
-      `${ctx.witness} broadcast from ${ctx.location} declaring ${ctx.cardName} is not rumor but rehearsal footage for ${ctx.subject}. Files timestamped ${ctx.detailPrimary} show ${ctx.opposingFaction} denial stamps already peeling.`,
+      `${ctx.witness} broadcast from ${ctx.location} declaring ${ctx.cardName} is not rumor but rehearsal footage for ${ctx.subject}. Files timestamped ${ctx.detailPrimary} show ${ctx.opposingFaction} denial stamps already peeling as ${ctx.turnLabel ? ctx.turnLabel.toLowerCase() : 'night shift'} monitors flashed red.`,
     ctx =>
-      `${ctx.factionLabel} trackers woke to ${ctx.cardName} dossiers spiraling out of ${ctx.targetState}. Every page references ${ctx.subject} in handwriting matching ${ctx.secondaryWitness}'s earlier testimony.`,
+      `${ctx.factionLabel} trackers woke to ${ctx.cardName} dossiers spiraling out of ${ctx.targetState}. Every page references ${ctx.subject} in handwriting matching ${ctx.secondaryWitness}'s earlier testimony while ${ctx.controlledDescriptor} pulsed green.`,
     ctx =>
-      `Signal techs traced ${ctx.cardName} chatter to ${ctx.alternateLocation}, where ${ctx.witness} captured midnight sirens before the feed cut ${ctx.detailPrimary}. The subject line simply read: ${ctx.subject}.`,
+      `Signal techs traced ${ctx.cardName} chatter to ${ctx.alternateLocation}, where ${ctx.witness} captured midnight sirens before the feed cut ${ctx.detailPrimary}. The subject line simply read: ${ctx.subject}, annotated ${ctx.truthDeltaLabel}.`,
   ];
 
   const midStoryTemplates: ParagraphTemplate<TruthBodyContextData>[] = [
@@ -652,9 +829,9 @@ function generateTruthBody(context: ArticleContext): string {
 
   const reactionTemplates: ParagraphTemplate<TruthBodyContextData>[] = [
     ctx =>
-      `${ctx.factionLabel} dashboards now register ${ctx.truthPercent}% belief spikes across ${ctx.controlledSummary ?? 'the independent broadcast grid'}, marking a ${ctx.truthDeltaLabel}. "The paradigm tilt is measurable," ${ctx.expert} reported.`,
+      `${ctx.turnLabel ? `${ctx.turnLabel} dashboards` : `${ctx.factionLabel} dashboards`} now register ${ctx.truthPercent}% belief spikes across ${ctx.controlledSummary ?? 'the independent broadcast grid'}, marking a ${ctx.truthDeltaLabel}. "The paradigm tilt is measurable," ${ctx.expert} reported.`,
     ctx =>
-      `Citizens occupying ${ctx.controlledSummary ?? 'autonomous watchposts'} uploaded synchronized chants spelling ${ctx.cardName}. ${ctx.witness} described the moment: "The static cleared and every radio repeated ${ctx.subject}."`,
+      `Citizens occupying ${ctx.controlledSummary ?? 'autonomous watchposts'} uploaded synchronized chants spelling ${ctx.cardName}. ${ctx.witness} described the moment: "${ctx.turnLabel ? `${ctx.turnLabel.toLowerCase()} feeds` : 'The static'} cleared and every radio repeated ${ctx.subject}."`,
     ctx =>
       `Truthline moderators issued a caution that ${ctx.opposingFaction} is staging calm-down tours through ${ctx.location}. Volunteers responded by projecting ${ctx.cardName} timelines on courthouse walls anyway.`,
   ];
@@ -759,6 +936,9 @@ interface GovBodyContextData {
   rumorLines: string[];
   footnoteId: string;
   turn?: number;
+  turnLabel?: string | null;
+  controlledSummary?: string | null;
+  controlledDescriptor: string;
 }
 
 function generateGovBody(context: ArticleContext): string {
@@ -817,6 +997,11 @@ function generateGovBody(context: ArticleContext): string {
     'authorized narrative meditation session',
   ]);
   const turn = context.gameState?.turn;
+  const turnLabel = formatTurnLabel(turn);
+  const controlledSummary = formatStateList(context.gameState?.controlledStates);
+  const controlledDescriptor = controlledSummary
+    ? `coverage across ${controlledSummary}`
+    : 'all authorized jurisdictions';
   const footnoteId = `${turn ?? '??'}-${cardName.replace(/\s+/g, '').slice(0, 4).toUpperCase() || 'CARD'}`;
 
   const govContext: GovBodyContextData = {
@@ -842,14 +1027,23 @@ function generateGovBody(context: ArticleContext): string {
     rumorLines: [],
     footnoteId,
     turn,
+    turnLabel,
+    controlledSummary,
+    controlledDescriptor,
   };
 
   const govRumorFactories: Array<(ctx: GovBodyContextData) => string> = [
     ctx => `clarification memo: ${ctx.agencyLabel} recorded ${ctx.truthDeltaLabel}`,
-    ctx => `clarification memo: ${ctx.complianceProgram} scheduled at ${ctx.location}`,
+    ctx =>
+      `clarification memo: ${ctx.complianceProgram} scheduled at ${ctx.location} for ${ctx.turnLabel ? ctx.turnLabel.toLowerCase() : 'ongoing'} attendance`,
     ctx => `clarification memo: ${ctx.deputy} filed ${ctx.cardName} under ${ctx.euphemismSecondary}`,
     ctx => `clarification memo: chatter about ${ctx.cardName} redirected to ${ctx.alternateLocation}`,
-    ctx => `clarification memo: ${ctx.factionName} monitors guarantee ${ctx.targetState} remains routine`,
+    ctx =>
+      `clarification memo: ${ctx.factionName} monitors guarantee ${ctx.targetState} remains routine across ${ctx.controlledSummary ?? 'all sectors'}`,
+    ctx =>
+      ctx.turnLabel
+        ? `clarification memo: ${ctx.turnLabel} status board shows ${ctx.controlledDescriptor}`
+        : `clarification memo: status board shows ${ctx.controlledDescriptor}`,
   ];
 
   const seededClarifications = pickMultiple(
@@ -870,11 +1064,11 @@ function generateGovBody(context: ArticleContext): string {
 
   const hookTemplates: ParagraphTemplate<GovBodyContextData>[] = [
     ctx =>
-      `${ctx.agencyLabel} assures ${ctx.targetState} residents that ${ctx.cardName} qualifies as ${ctx.euphemismPrimary}. ${ctx.official} thanked citizens for their enthusiasm and reminded them to recycle speculation responsibly.`,
+      `${ctx.turnLabel ? `${ctx.turnLabel} bulletin` : 'Bulletin'} from ${ctx.agencyLabel} assures ${ctx.targetState} residents that ${ctx.cardName} qualifies as ${ctx.euphemismPrimary}. ${ctx.official} thanked citizens for their enthusiasm and reminded them to recycle speculation responsibly across ${ctx.controlledSummary ?? 'authorized jurisdictions'}.`,
     ctx =>
-      `In a dawn bulletin, ${ctx.agencyLabel} labeled ${ctx.cardName} a textbook case of ${ctx.euphemismPrimary}, complete with commemorative binder clips. ${ctx.deputy} described the situation as "professionally boring."`,
+      `In a ${ctx.turnLabel ? ctx.turnLabel.toLowerCase() : 'dawn'} briefing, ${ctx.agencyLabel} labeled ${ctx.cardName} a textbook case of ${ctx.euphemismPrimary}, complete with commemorative binder clips. ${ctx.deputy} described the situation as "professionally boring."`,
     ctx =>
-      `Press liaisons for ${ctx.factionName} distributed talking points declaring ${ctx.cardName} "well within ${ctx.euphemismPrimary} tolerances." Flyers were posted across ${ctx.location} before sunrise.`,
+      `Press liaisons for ${ctx.factionName} distributed talking points declaring ${ctx.cardName} "well within ${ctx.euphemismPrimary} tolerances." Flyers were posted across ${ctx.location} before sunrise to reassure ${ctx.controlledDescriptor}.`,
   ];
 
   const midStoryTemplates: ParagraphTemplate<GovBodyContextData>[] = [
@@ -897,11 +1091,11 @@ function generateGovBody(context: ArticleContext): string {
 
   const reactionTemplates: ParagraphTemplate<GovBodyContextData>[] = [
     ctx =>
-      `Community management teams report ${ctx.truthPercent}% of citizens remain serenely informed. "The remaining ${100 - ctx.truthPercent}% are enrolled in ${ctx.complianceProgram}," ${ctx.official} noted with a reassuring smile.`,
+      `${ctx.turnLabel ? `${ctx.turnLabel} community check` : 'Community management teams'} report ${ctx.truthPercent}% of citizens remain serenely informed. "The remaining ${100 - ctx.truthPercent}% are enrolled in ${ctx.complianceProgram}," ${ctx.official} noted with a reassuring smile.`,
     ctx =>
-      `${ctx.agencyLabel} deployed portable suggestion boxes across ${ctx.targetState} for anyone experiencing "unauthorized curiosity" about ${ctx.cardName}. Submissions will be answered within five to seven fiscal quarters.`,
+      `${ctx.agencyLabel} deployed portable suggestion boxes across ${ctx.targetState} and ${ctx.controlledDescriptor} for anyone experiencing "unauthorized curiosity" about ${ctx.cardName}. Submissions will be answered within five to seven fiscal quarters.`,
     ctx =>
-      `Public calm alerts read ${ctx.truthDeltaLabel}; still, ${ctx.deputy} reminded everyone that repeating ${ctx.cardName} three times voids your complimentary tote bag.`,
+      `Public calm alerts read ${ctx.truthDeltaLabel}; still, ${ctx.deputy} reminded everyone that repeating ${ctx.cardName} three times voids your complimentary tote bag before ${ctx.controlledSummary ?? 'routine monitors'} cycle to ${ctx.turnLabel ? ctx.turnLabel.toLowerCase() : 'the next'} shift.`,
   ];
 
   const kickerTemplates: ParagraphTemplate<GovBodyContextData>[] = [
@@ -1264,6 +1458,62 @@ const deriveTheme = (tags: Card['tags']): ThemeConfig | undefined => {
   return undefined;
 };
 
+const buildContextTags = (context: ArticleContext): string[] => {
+  const tags: string[] = [];
+
+  const pushTag = (raw?: string | null) => {
+    if (!raw) {
+      return;
+    }
+    const sanitized = sanitizeTag(raw);
+    if (!sanitized) {
+      return;
+    }
+    const hashed = ensureHashTag(sanitized);
+    if (hashed) {
+      tags.push(hashed);
+    }
+  };
+
+  if (context.targetState) {
+    pushTag(`state-${context.targetState}`);
+  }
+
+  const turn = context.gameState?.turn;
+  if (typeof turn === 'number' && Number.isFinite(turn)) {
+    pushTag(`turn-${turn}`);
+  }
+
+  const truthDelta = context.truthDelta;
+  if (typeof truthDelta === 'number' && !Number.isNaN(truthDelta)) {
+    if (truthDelta === 0) {
+      pushTag('truth-hold');
+    } else if (truthDelta > 0) {
+      pushTag(`truth-surge-${truthDelta}`);
+    } else {
+      pushTag(`truth-dip-${Math.abs(truthDelta)}`);
+    }
+  }
+
+  const controlledStates = Array.from(
+    new Set(
+      (context.gameState?.controlledStates || [])
+        .map(state => (typeof state === 'string' ? state.trim() : ''))
+        .filter((state): state is string => Boolean(state)),
+    ),
+  );
+
+  for (const state of controlledStates.slice(0, 2)) {
+    pushTag(`cell-${state}`);
+  }
+
+  if (controlledStates.length > 2) {
+    pushTag(`cell-network-${controlledStates.length}`);
+  }
+
+  return tags;
+};
+
 function generateTags(context: ArticleContext): string[] {
   const isTruth = context.card.faction === 'truth';
   const cardType = context.card.type?.toLowerCase() || '';
@@ -1280,7 +1530,8 @@ function generateTags(context: ArticleContext): string[] {
     ? ['grassroots', 'local']
     : [];
 
-  const prioritized = normalizeCardTags(context.card.tags);
+  const contextTags = buildContextTags(context);
+  const prioritized = [...contextTags, ...normalizeCardTags(context.card.tags)];
   const result: string[] = [];
   const seen = new Set<string>();
 

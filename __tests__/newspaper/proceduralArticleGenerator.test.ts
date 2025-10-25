@@ -128,3 +128,51 @@ describe('proceduralArticleGenerator body assembly', () => {
     expect(new Set(tokens).size).toBe(tokens.length);
   });
 });
+
+describe('proceduralArticleGenerator contextual hooks', () => {
+  it('threads turn, delta, and territory info through truth faction articles', () => {
+    useSeededRandom(17);
+
+    const article = generateProceduralArticle({
+      card: createCard({ name: 'Ohio Frequency Breach' }),
+      player: 'human',
+      targetState: 'Ohio',
+      truthDelta: 3,
+      gameState: { truth: 71, turn: 5, controlledStates: ['Ohio', 'Pennsylvania', 'Michigan'] },
+    });
+
+    expect(article.headline).toContain('TRUTH INDEX +3');
+    expect(article.headline).toContain('OHIO');
+    expect(article.headline).toContain('TURN 5');
+    expect(article.subhead.toLowerCase()).toContain('cells holding');
+    expect(article.subhead.toLowerCase()).toContain('turn 5');
+    expect(article.body.toLowerCase()).toMatch(/turn 5/);
+    expect(article.body).toMatch(/cells? across/i);
+    expect(article.tags).toEqual(
+      expect.arrayContaining(['#state-ohio', '#turn-5', '#truth-surge-3', '#cell-ohio']),
+    );
+  });
+
+  it('announces calm metrics and jurisdictions for government rebuttals', () => {
+    useSeededRandom(22);
+
+    const article = generateProceduralArticle({
+      card: createCard({ faction: 'government', name: 'Containment Audit 47-B' }),
+      player: 'ai',
+      targetState: 'Ohio',
+      truthDelta: -2,
+      gameState: { truth: 45, turn: 8, controlledStates: ['Ohio', 'Indiana'] },
+    });
+
+    expect(article.headline).toContain('CALM INDEX -2');
+    expect(article.headline).toContain('OHIO');
+    expect(article.headline).toContain('TURN 8');
+    expect(article.subhead.toLowerCase()).toContain('turn 8');
+    expect(article.subhead.toLowerCase()).toContain('coverage extends');
+    expect(article.body.toLowerCase()).toMatch(/turn 8/);
+    expect(article.body.toLowerCase()).toMatch(/coverage across/);
+    expect(article.tags).toEqual(
+      expect.arrayContaining(['#state-ohio', '#turn-8', '#truth-dip-2', '#cell-ohio']),
+    );
+  });
+});
