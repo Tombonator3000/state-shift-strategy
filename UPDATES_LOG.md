@@ -2,6 +2,15 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-08 – Headlines track the truth surge timeline
+- Timestamp: 2025-11-08T00:00:00Z
+- Files:
+  - `ARTICLE_GENERATOR_GUIDE.md`
+  - `src/engine/newspaper/proceduralArticleGenerator.ts`
+  - `__tests__/newspaper/proceduralArticleGenerator.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Wired target-state, truth-delta, turn, and controlled-territory details into procedural headlines, subheads, bodies, and tag stacks, refreshed the guide with the new narrative hooks, and added regression tests proving the contextual flavor renders when data is present.
+
 ## 2025-11-07 – Elvis deck loads Vegas conspiracy scoop
 - Timestamp: 2025-11-07T00:00:00Z
 - Files:
