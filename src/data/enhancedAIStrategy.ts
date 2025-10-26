@@ -1838,7 +1838,10 @@ export class EnhancedAIStrategist implements AIStrategist {
       faction: gameState.faction ?? 'truth',
       states,
       playerEditorId: gameState.playerEditor ?? gameState.editorId ?? null,
+      playerEditor: gameState.playerEditor ?? gameState.editorId ?? null,
+      editorId: gameState.editorId ?? null,
       aiEditorId: gameState.aiEditor ?? null,
+      aiEditor: gameState.aiEditor ?? null,
     };
   }
 

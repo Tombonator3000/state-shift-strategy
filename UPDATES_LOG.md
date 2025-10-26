@@ -133,6 +133,15 @@ This document provides a chronological record of gameplay-impacting changes merg
   - `components.json`
 - Summary: Moved the Paranoid Times orientation copy into a shared article component with diegetic prose markup, rewired the How-to-Play accordion to consume the new surface, and updated the component catalog so design tooling tracks the relocation.
 
+## 2025-10-26 – Card resolution honors editor fallbacks
+- Timestamp: 2025-10-26T23:30:00Z
+- Files:
+  - `src/systems/cardResolution.ts`
+  - `src/data/enhancedAIStrategy.ts`
+  - `src/mvp/__tests__/engine.editors.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Patched the MVP resolver to derive both player and AI editor bindings from legacy snapshot fields, updated AI strategy helpers to preserve those identifiers, and restored editor regression coverage to verify Fox Muldrunk truth swings and Florida Man discards fire under the new pipeline.
+
 ## 2025-10-26 – Tabloid hero card ID redeclaration removed
 - Timestamp: 2025-10-26T19:21:39Z
 - Files:
