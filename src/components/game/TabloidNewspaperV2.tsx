@@ -774,6 +774,28 @@ const TabloidNewspaperV2 = ({
       .filter((meta): meta is PlayedCardMeta => Boolean(meta));
   }, [frontPageTriplet, playerCards]);
 
+  const {
+    id: heroPrimaryCardId,
+    name: heroPrimaryCardName,
+    faction: heroPrimaryCardFaction,
+  } = useMemo(() => {
+    const heroCard = frontPageCards[0];
+
+    if (!heroCard) {
+      return {
+        id: null as string | null,
+        name: null as string | null,
+        faction: null as string | null,
+      };
+    }
+
+    return {
+      id: heroCard.id ?? null,
+      name: heroCard.name ?? null,
+      faction: heroCard.faction ?? null,
+    };
+  }, [frontPageCards]);
+
   const hasExtraExtra = useMemo(() => {
     if (!Array.isArray(frontPageTriplet) || frontPageTriplet.length !== 3) {
       return false;
@@ -1169,6 +1191,9 @@ const TabloidNewspaperV2 = ({
       heroSubhead,
       heroBody,
       heroTags,
+      heroPrimaryCardId,
+      heroPrimaryCardName,
+      heroPrimaryCardFaction,
       byline,
       sourceLine,
       truthProgress,
@@ -1209,6 +1234,7 @@ const TabloidNewspaperV2 = ({
     weatherLine,
     formattedAgendaQuotes,
     campaignArcGroups,
+    frontPageCards,
   ]);
 
   return (

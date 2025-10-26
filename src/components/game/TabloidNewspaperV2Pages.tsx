@@ -12,16 +12,20 @@ import { ClassifiedAds } from '@/components/newspaper/ClassifiedAds';
 import { LettersToEditor } from '@/components/newspaper/LettersToEditor';
 import { ComicStrip } from '@/components/newspaper/ComicStrip';
 import { NewspaperHoroscope } from '@/components/newspaper/NewspaperHoroscope';
+import CardImage from '@/components/game/CardImage';
 import { NewspaperSection } from './newspaperLayout';
 import { formatTruthDelta } from './tabloidRoundUtils';
 import type { ArticleData } from '@/components/newspaper/InteractiveNewspaperPage';
 import { cn } from '@/lib/utils';
 
-interface PageBuilderData {
+export interface PageBuilderData {
   heroHeadline: string;
   heroSubhead: string;
   heroBody: string[];
   heroTags: string[];
+  heroPrimaryCardId: string | null;
+  heroPrimaryCardName: string | null;
+  heroPrimaryCardFaction: string | null;
   byline: string;
   sourceLine: string;
   truthProgress: number;
@@ -96,6 +100,28 @@ export const buildNewspaperPages = (data: PageBuilderData): React.ReactNode[] =>
   const pages: React.ReactNode[] = [];
 
   // PAGE 1: FRONT PAGE - Hero story with Truth Index
+  const heroCardCaptionParts = [
+    data.heroPrimaryCardName,
+    data.heroPrimaryCardFaction ? `${data.heroPrimaryCardFaction} faction` : null,
+  ].filter((value): value is string => Boolean(value?.trim()));
+
+  const heroCardImage = data.heroPrimaryCardId
+    ? (
+        <figure className="flex w-full flex-col items-center gap-2 md:items-start">
+          <CardImage
+            cardId={data.heroPrimaryCardId}
+            fit="cover"
+            className="h-56 w-full max-w-[240px] rounded border border-newspaper-border bg-white shadow-sm md:h-64"
+          />
+          {heroCardCaptionParts.length > 0 && (
+            <figcaption className="text-center text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/70 md:text-left">
+              {heroCardCaptionParts.join(' • ')}
+            </figcaption>
+          )}
+        </figure>
+      )
+    : undefined;
+
   const frontPage = (
     <NewspaperTexture key="page-1" intensity="medium" aged className="p-6 min-h-[600px]">
       {/* Truth Index Bar */}
@@ -127,6 +153,8 @@ export const buildNewspaperPages = (data: PageBuilderData): React.ReactNode[] =>
         subhead={data.heroSubhead}
         content={data.heroBody}
         byline={data.byline}
+        image={heroCardImage}
+        imagePosition={heroCardImage ? 'left' : 'top'}
         columns={2}
         className="mb-4"
       />

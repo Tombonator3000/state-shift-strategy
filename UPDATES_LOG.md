@@ -2,6 +2,16 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-10 – Front page hero card art anchors lead story
+- Timestamp: 2025-11-10T00:00:00Z
+- Files:
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `src/components/game/TabloidNewspaperV2Pages.tsx`
+  - `src/components/newspaper/MultiColumnArticle.tsx`
+  - `__tests__/game/TabloidNewspaperV2Pages.test.tsx`
+  - `UPDATES_LOG.md`
+- Summary: Routed the front-page builder to pick a flagship card, feed its art and faction caption into the hero article layout, tuned the column component for mobile-first stacking, and added regression coverage proving the surveillance-paranoia lever only fires when hero metadata exists.
+
 ## 2025-11-09 – Hero fallback prints rumor-rich paragraphs
 - Timestamp: 2025-11-09T00:00:00Z
 - Files:

@@ -54,15 +54,15 @@ export const MultiColumnArticle = ({
 
       <div className={cn(
         "flex gap-4",
-        imagePosition === 'left' && "flex-row",
-        imagePosition === 'right' && "flex-row-reverse",
+        imagePosition === 'left' && "flex-col md:flex-row",
+        imagePosition === 'right' && "flex-col md:flex-row-reverse",
         imagePosition === 'top' && "flex-col"
       )}>
         {image && (
           <div className={cn(
             "flex-shrink-0",
             imagePosition === 'top' && "w-full mb-4",
-            (imagePosition === 'left' || imagePosition === 'right') && "w-1/3"
+            (imagePosition === 'left' || imagePosition === 'right') && "w-full md:w-1/3 md:min-w-[200px]"
           )}>
             {image}
           </div>
