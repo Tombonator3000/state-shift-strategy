@@ -928,6 +928,16 @@ export function endTurn(
 
   tickPersistentEffects(finalState, nextPlayer, Math.random);
 
+  const postTickWin = winCheck(finalState);
+  const resolvedWinResult = postTickWin.winner
+    ? postTickWin
+    : finalState.winner
+    ? {
+        winner: finalState.winner,
+        reason: finalState.victoryType ?? undefined,
+      }
+    : null;
+
   const summary: EndTurnSummary = {
     player: currentId,
     turn: turnNumber,
@@ -939,7 +949,7 @@ export function endTurn(
     },
     captureEvents,
     logEntries: turnLog,
-    winCheck: winResult.winner ? winResult : null,
+    winCheck: resolvedWinResult,
   };
 
   auditGameState(finalState);
