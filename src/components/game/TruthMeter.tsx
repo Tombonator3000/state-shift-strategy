@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { areParanormalEffectsEnabled } from '@/state/settings';
+import { TRUTH_HIGH_THRESHOLD, TRUTH_LOW_THRESHOLD } from '@/constants/truthThresholds';
 
 interface TruthMeterProps {
   value: number; // 0-100
@@ -30,22 +31,24 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
+  const isTruthSurge = value >= TRUTH_HIGH_THRESHOLD;
+  const isTruthCollapse = value <= TRUTH_LOW_THRESHOLD;
+
   useEffect(() => {
     if (prefersReducedMotion) {
       setMeltdownActive(false);
       return;
     }
 
-    const isExtreme = value >= 95 || value <= 5;
-    setMeltdownActive(isExtreme);
-  }, [value, prefersReducedMotion]);
+    setMeltdownActive(isTruthSurge || isTruthCollapse);
+  }, [value, prefersReducedMotion, isTruthSurge, isTruthCollapse]);
 
   useEffect(() => {
     if (!containerRef.current) {
       return;
     }
 
-    const mode: 'surge' | 'collapse' | null = value >= 95 ? 'surge' : value <= 5 ? 'collapse' : null;
+    const mode: 'surge' | 'collapse' | null = isTruthSurge ? 'surge' : isTruthCollapse ? 'collapse' : null;
 
     if (!mode) {
       lastBroadcastRef.current = null;
@@ -85,13 +88,13 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
     });
   }, [value, faction, prefersReducedMotion]);
   const getColor = () => {
-    if (value >= 95) return 'bg-truth-red';
-    if (value <= 5) return 'bg-government-blue';
-    return 'bg-gradient-to-r from-government-blue to-truth-red';
+    if (isTruthSurge) return 'bg-truth-red';
+    if (isTruthCollapse) return 'bg-government-blue';
+    return 'bg-gradient-to-r from-government-blue via-yellow-500 to-truth-red';
   };
 
   const getGlowEffect = () => {
-    if (value >= 95 || value <= 5) {
+    if (isTruthSurge || isTruthCollapse) {
       return 'animate-truth-pulse';
     }
     return '';
@@ -100,7 +103,7 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
   const getLabel = () => {
     if (faction === "Truth") {
       // Truth faction perspective - higher % = more enlightened
-      if (value >= 95) return 'MAXIMUM WOKE';
+      if (isTruthSurge) return 'MAXIMUM WOKE';
       if (value >= 90) return 'FULLY AWAKENED';
       if (value >= 80) return 'REDPILLED';
       if (value >= 70) return 'QUESTIONING';
@@ -111,7 +114,7 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
       return 'BRAIN DEAD';
     } else {
       // Government faction perspective - higher % = more dangerous
-      if (value >= 95) return 'MAXIMUM PANIC';
+      if (isTruthSurge) return 'MAXIMUM PANIC';
       if (value >= 90) return 'CODE RED';
       if (value >= 80) return 'CONTAINMENT BREACH';
       if (value >= 70) return 'CONSPIRACY DETECTED';
@@ -125,11 +128,11 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
 
   const getStatusMessage = () => {
     if (faction === "Truth") {
-      if (value >= 95) return '👁️ THE VEIL IS LIFTED 👁️';
-      if (value <= 5) return '😴 THEY LIVE, WE SLEEP 😴';
+      if (isTruthSurge) return '👁️ THE VEIL IS LIFTED 👁️';
+      if (isTruthCollapse) return '😴 THEY LIVE, WE SLEEP 😴';
     } else {
-      if (value >= 95) return '🚨 NARRATIVE COLLAPSE 🚨';
-      if (value <= 5) return '✅ OPERATION SUCCESS ✅';
+      if (isTruthSurge) return '🚨 NARRATIVE COLLAPSE 🚨';
+      if (isTruthCollapse) return '✅ OPERATION SUCCESS ✅';
     }
     return null;
   };
@@ -144,11 +147,7 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
       <div className={`relative w-40 ${getGlowEffect()}`}>
         <div className="relative h-4 bg-black rounded border border-secret-red/50 overflow-hidden">
           <div
-            className={`absolute top-0 left-0 h-full transition-all duration-500 ${
-              value >= 95 ? 'bg-truth-red' :
-              value <= 5 ? 'bg-government-blue' :
-              'bg-gradient-to-r from-government-blue via-yellow-500 to-truth-red'
-            }`}
+            className={`absolute top-0 left-0 h-full transition-all duration-500 ${getColor()}`}
             style={{ width: `${value}%` }}
           />
 
@@ -169,13 +168,19 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
         )}
 
         {/* Critical thresholds with labels */}
-        <div className="absolute -bottom-2 left-[5%] transform -translate-x-1/2">
+        <div
+          className="absolute -bottom-2 transform -translate-x-1/2"
+          style={{ left: `${TRUTH_LOW_THRESHOLD}%` }}
+        >
           <div className="w-0.5 h-2 bg-government-blue"></div>
-          <div className="text-xs font-mono text-government-blue mt-1">5%</div>
+          <div className="text-xs font-mono text-government-blue mt-1">{TRUTH_LOW_THRESHOLD}%</div>
         </div>
-        <div className="absolute -bottom-2 left-[95%] transform -translate-x-1/2">
+        <div
+          className="absolute -bottom-2 transform -translate-x-1/2"
+          style={{ left: `${TRUTH_HIGH_THRESHOLD}%` }}
+        >
           <div className="w-0.5 h-2 bg-truth-red"></div>
-          <div className="text-xs font-mono text-truth-red mt-1">95%</div>
+          <div className="text-xs font-mono text-truth-red mt-1">{TRUTH_HIGH_THRESHOLD}%</div>
         </div>
       </div>
       
@@ -184,8 +189,8 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
           {value}%
         </div>
         <div className={`text-xs font-mono text-center ${
-          value >= 95 ? 'text-truth-red' :
-          value <= 5 ? 'text-government-blue' :
+          isTruthSurge ? 'text-truth-red' :
+          isTruthCollapse ? 'text-government-blue' :
           'text-yellow-500'
         }`}>
           {getLabel()}
@@ -195,7 +200,7 @@ const TruthMeter = ({ value, faction = "Truth" }: TruthMeterProps) => {
       {/* Status indicators with glitch effects */}
       {getStatusMessage() && (
         <div className={`text-xs font-mono animate-glitch ${
-          value >= 95 ? 'text-truth-red' : 'text-government-blue'
+          isTruthSurge ? 'text-truth-red' : 'text-government-blue'
         }`}>
           {getStatusMessage()}
         </div>

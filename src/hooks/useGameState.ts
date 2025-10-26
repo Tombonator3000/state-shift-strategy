@@ -33,6 +33,10 @@ import { resolveCardMVP, type CardPlayResolution, type CardHotspotResolution } f
 import type { PlayResult } from '@/hooks/useCardAnimation';
 import { useStateEvents } from '@/hooks/useStateEvents';
 import { applyTruthDelta, type TruthActorId } from '@/utils/truth';
+import {
+  DEFAULT_TRUTH_HIGH_THRESHOLD,
+  DEFAULT_TRUTH_LOW_THRESHOLD,
+} from '@/constants/truthThresholds';
 import type { Difficulty } from '@/ai';
 import type { DifficultyTier } from '@/ai/difficulty';
 import { getDifficulty } from '@/state/settings';
@@ -106,8 +110,6 @@ const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefin
 
 const HAND_LIMIT = 5;
 
-const DEFAULT_TRUTH_HIGH_THRESHOLD = 90;
-const DEFAULT_TRUTH_LOW_THRESHOLD = 10;
 const DEFAULT_ECONOMIC_GOAL = 200;
 
 type AgendaOwner = 'human' | 'ai';
@@ -5466,11 +5468,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     let victoryType = '';
     let playerWon = false;
 
+    const truthHighThreshold = state.truthHighThreshold ?? DEFAULT_TRUTH_HIGH_THRESHOLD;
+    const truthLowThreshold = state.truthLowThreshold ?? DEFAULT_TRUTH_LOW_THRESHOLD;
+
     // Truth-based victories
-    if (state.truth >= 95 && state.faction === 'truth') {
+    if (state.truth >= truthHighThreshold && state.faction === 'truth') {
       victoryType = 'truth_high';
       playerWon = true;
-    } else if (state.truth <= 5 && state.faction === 'government') {
+    } else if (state.truth <= truthLowThreshold && state.faction === 'government') {
       victoryType = 'truth_low';
       playerWon = true;
     }

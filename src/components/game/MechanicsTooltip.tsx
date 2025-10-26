@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { HelpCircle, Target, Zap, Shield, TrendingUp } from 'lucide-react';
+import { TRUTH_HIGH_THRESHOLD } from '@/constants/truthThresholds';
 
 interface MechanicsTooltipProps {
   children: React.ReactNode;
@@ -31,7 +32,7 @@ const MechanicsTooltip = ({ children, mechanic, customContent }: MechanicsToolti
         title: '🔍 Truth Meter',
         icon: <TrendingUp size={16} />,
         description: 'Truth represents public awareness of the conspiracy. Higher truth makes cards more effective.',
-        example: 'At 95% truth, you win the game!',
+        example: `At ${TRUTH_HIGH_THRESHOLD}% truth, you win the game!`,
         tips: ['Play truth-boosting cards', 'AI will try to suppress truth', 'Truth affects card costs']
       },
       ip: {

@@ -1,4 +1,5 @@
 import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
+import { TRUTH_HIGH_THRESHOLD, TRUTH_LOW_THRESHOLD } from '@/constants/truthThresholds';
 
 const TUTORIAL_STORAGE_KEY = 'shadow_government_tutorial_progress';
 
@@ -56,7 +57,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'truth_meter',
         title: 'Truth Level Monitor',
-        description: 'This meter shows public awareness. Truth Seekers push toward 95% Truth, Government suppresses toward 5%. Crossing those thresholds triggers victory checks and fuels certain agendas.',
+        description: `This meter shows public awareness. Truth Seekers push toward ${TRUTH_HIGH_THRESHOLD}% Truth, Government suppresses toward ${TRUTH_LOW_THRESHOLD}%. Crossing those thresholds triggers victory checks and fuels certain agendas.`,
         targetElement: '.truth-meter',
         position: 'right',
         delay: 4000
@@ -141,7 +142,7 @@ export const TUTORIAL_SEQUENCES: TutorialSequence[] = [
       {
         id: 'victory_conditions',
         title: 'Path to Victory',
-        description: 'Victory checks run in priority order: 1) spike the Truth meter to ≥95% (Truth) or ≤5% (Government), 2) bank 200 IP, 3) control 10 states. Secret Agendas now fuel that Truth surge based on difficulty—plan around the swing before the AI does.',
+        description: `Victory checks run in priority order: 1) spike the Truth meter to ≥${TRUTH_HIGH_THRESHOLD}% (Truth) or ≤${TRUTH_LOW_THRESHOLD}% (Government), 2) bank 200 IP, 3) control 10 states. Secret Agendas now fuel that Truth surge based on difficulty—plan around the swing before the AI does.`,
         position: 'center',
         delay: 4000
       }

@@ -18,6 +18,7 @@ import { AI_EDITORS } from '@/ai/editors';
 import EnhancedBalancingDashboard from '@/components/game/EnhancedBalancingDashboard';
 import Options from '@/components/game/Options';
 import { useGameState } from '@/hooks/useGameState';
+import { TRUTH_HIGH_THRESHOLD, TRUTH_LOW_THRESHOLD } from '@/constants/truthThresholds';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { useCardAnimation } from '@/hooks/useCardAnimation';
 import CardAnimationLayer from '@/components/game/CardAnimationLayer';
@@ -1175,10 +1176,10 @@ const Index = () => {
     let victoryType: 'states' | 'ip' | 'truth' | null = null;
 
     // Truth-based victories (check both player and AI)
-    if (gameState.truth >= 95) {
+    if (gameState.truth >= TRUTH_HIGH_THRESHOLD) {
       winner = gameState.faction === 'truth' ? 'truth' : 'government';
       victoryType = 'truth';
-    } else if (gameState.truth <= 5) {
+    } else if (gameState.truth <= TRUTH_LOW_THRESHOLD) {
       winner = gameState.faction === 'government' ? 'government' : 'truth';
       victoryType = 'truth';
     }
@@ -2707,7 +2708,7 @@ const Index = () => {
           <ul className="space-y-1 font-mono">
             <li>• Control 10 states</li>
             <li>• Reach 200 IP</li>
-            <li>• Truth ≥95% / ≤5%</li>
+            <li>• Truth ≥{TRUTH_HIGH_THRESHOLD}% / ≤{TRUTH_LOW_THRESHOLD}%</li>
           </ul>
           <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
             <div className="rounded border border-newspaper-border/40 bg-newspaper-bg/30 px-2 py-1">

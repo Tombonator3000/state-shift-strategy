@@ -2,6 +2,25 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-26 – Victory thresholds retuned to a 90/10 split
+- Timestamp: 2025-10-26T00:00:00Z
+- Files:
+  - `src/constants/truthThresholds.ts`
+  - `src/hooks/useGameState.ts`
+  - `src/mvp/engine.ts`
+  - `src/data/victoryConditions.ts`
+  - `src/data/enhancedAIStrategy.ts`
+  - `src/data/achievementSystem.ts`
+  - `src/data/tutorialSystem.ts`
+  - `src/content/mvpRules.ts`
+  - `src/components/game/MechanicsTooltip.tsx`
+  - `src/components/game/InteractiveOnboarding.tsx`
+  - `src/components/game/VictoryConditions.tsx`
+  - `src/components/game/TruthMeter.tsx`
+  - `src/pages/Index.tsx`
+  - `UPDATES_LOG.md`
+- Summary: Centralized the truth victory thresholds behind shared 90/10 constants, wired core engine checks, AI evaluations, achievements, tutorials, and UI messaging to read from them, and refreshed the Truth Meter visuals so the new breakpoints animate and label correctly.
+
 ## 2025-11-11 – Hybrid, trap, and persistent cards join the arsenal
 - Timestamp: 2025-11-11T00:00:00Z
 - Files:

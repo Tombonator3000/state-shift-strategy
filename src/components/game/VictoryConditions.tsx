@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { TRUTH_HIGH_THRESHOLD, TRUTH_LOW_THRESHOLD } from '@/constants/truthThresholds';
 
 interface VictoryConditionsProps {
   controlledStates: number;
@@ -78,7 +79,7 @@ export const VictoryConditions: React.FC<VictoryConditionsProps> = ({
                 <div>
                   <div className="flex justify-between items-center">
                     <span className={closestCondition.type === 'truth' ? 'font-bold' : ''}>
-                      • Truth ≥95% / ≤5%
+                      • Truth ≥{TRUTH_HIGH_THRESHOLD}% / ≤{TRUTH_LOW_THRESHOLD}%
                     </span>
                     <span className={closestCondition.type === 'truth' ? 'font-bold' : ''}>
                       {truth}%
