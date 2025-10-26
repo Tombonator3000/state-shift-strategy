@@ -7,6 +7,7 @@ import { getAiTuningConfig, type AiTuningConfig } from './aiTuning';
 import type { ArticleBlock } from '@/news/types';
 import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
 import type { SecretAgenda } from './agendaDatabase';
+import { TRUTH_HIGH_THRESHOLD, TRUTH_LOW_THRESHOLD } from '@/constants/truthThresholds';
 import {
   createAiStrategist,
   type AIStrategist,
@@ -1867,8 +1868,8 @@ export class EnhancedAIStrategist implements AIStrategist {
     let playerTruthWin = false;
 
     if (aiFaction === 'government') {
-      aiTruthWin = truth <= 5;
-      playerTruthWin = truth >= 95;
+      aiTruthWin = truth <= TRUTH_LOW_THRESHOLD;
+      playerTruthWin = truth >= TRUTH_HIGH_THRESHOLD;
       if (truth <= 0) {
         aiTruthWin = true;
       }
@@ -1876,8 +1877,8 @@ export class EnhancedAIStrategist implements AIStrategist {
         playerTruthWin = true;
       }
     } else {
-      aiTruthWin = truth >= 95;
-      playerTruthWin = truth <= 5;
+      aiTruthWin = truth >= TRUTH_HIGH_THRESHOLD;
+      playerTruthWin = truth <= TRUTH_LOW_THRESHOLD;
       if (truth >= 100) {
         aiTruthWin = true;
       }

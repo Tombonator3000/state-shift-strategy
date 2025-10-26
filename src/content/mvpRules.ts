@@ -3,6 +3,7 @@ import { MVP_COST_TABLE, MVP_CARD_TYPES } from '@/rules/mvp';
 import { COMBO_DEFINITIONS } from '@/game/combo.config';
 import { formatComboReward } from '@/game/comboEngine';
 import type { ComboCategory } from '@/game/combo.types';
+import { TRUTH_HIGH_THRESHOLD, TRUTH_LOW_THRESHOLD } from '@/constants/truthThresholds';
 
 export interface MvpRulesSection {
   title: string;
@@ -46,7 +47,7 @@ export const MVP_RULES_SECTIONS: MvpRulesSection[] = [
     title: 'Objective',
     bullets: [
       'Control 10 states to secure the map.',
-      'Truth faction wins at ≥ 95% Truth; Government faction wins at ≤ 5% Truth.',
+      `Truth faction wins at ≥ ${TRUTH_HIGH_THRESHOLD}% Truth; Government faction wins at ≤ ${TRUTH_LOW_THRESHOLD}% Truth.`,
       'Reach 300 Influence Points (IP) to overrun your rival’s resources.',
       'Each faction begins with a secret agenda that stays hidden; watch for cards or tabloid events that can expose the AI’s plan.',
     ],

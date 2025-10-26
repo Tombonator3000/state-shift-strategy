@@ -1,6 +1,8 @@
 // Victory Conditions System for Shadow Government
 // Handles all win/loss conditions with proper evaluation timing and tie-breaking
 
+import { TRUTH_HIGH_THRESHOLD, TRUTH_LOW_THRESHOLD } from '@/constants/truthThresholds';
+
 // GameCard interface for type safety
 export interface GameCard {
   id: string;
@@ -254,11 +256,11 @@ export const BASE_VICTORY_CONDITIONS: VictoryCondition[] = [
   {
     id: 'truth_high',
     name: 'Truth Awakening',
-    description: 'Truth ≥ 95% (Truth Seekers)',
+    description: `Truth ≥ ${TRUTH_HIGH_THRESHOLD}% (Truth Seekers)`,
     priority: 1,
     faction: 'truth',
     checkCondition: (gameState: any) => {
-      return gameState.truth >= 95;
+      return gameState.truth >= TRUTH_HIGH_THRESHOLD;
     },
     getProgress: (gameState: any) => {
       return Math.max(0, Math.min(100, gameState.truth));
@@ -267,11 +269,11 @@ export const BASE_VICTORY_CONDITIONS: VictoryCondition[] = [
   {
     id: 'truth_low',
     name: 'Information Suppression',
-    description: 'Truth ≤ 5% (Government)',
+    description: `Truth ≤ ${TRUTH_LOW_THRESHOLD}% (Government)`,
     priority: 1,
     faction: 'government',
     checkCondition: (gameState: any) => {
-      return gameState.truth <= 5;
+      return gameState.truth <= TRUTH_LOW_THRESHOLD;
     },
     getProgress: (gameState: any) => {
       // For government, progress goes up as truth goes down

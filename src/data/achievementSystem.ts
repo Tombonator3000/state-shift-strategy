@@ -1,4 +1,5 @@
 import type { ComboCategory, ComboEvaluation } from '@/game/combo.types';
+import { TRUTH_HIGH_THRESHOLD, TRUTH_LOW_THRESHOLD } from '@/constants/truthThresholds';
 
 export interface Achievement {
   id: string;
@@ -43,7 +44,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'truth_victory',
     name: 'Truth Revealed',
-    description: 'Win by achieving 95%+ Truth as Truth Seekers',
+    description: `Win by achieving ${TRUTH_HIGH_THRESHOLD}%+ Truth as Truth Seekers`,
     category: 'victory',
     rarity: 'uncommon',
     icon: '💡',
@@ -59,7 +60,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'suppression_victory',
     name: 'Information Control',
-    description: 'Win by reducing Truth to 5% or below as Government',
+    description: `Win by reducing Truth to ${TRUTH_LOW_THRESHOLD}% or below as Government`,
     category: 'victory',
     rarity: 'uncommon',
     icon: '🔒',
@@ -307,27 +308,27 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'truth_extremist',
     name: 'Truth Extremist',
-    description: 'Reach 95%+ Truth level',
+    description: `Reach ${TRUTH_HIGH_THRESHOLD}%+ Truth level`,
     category: 'challenge',
     rarity: 'rare',
     icon: '🔆',
     points: 35,
     requirements: {
       type: 'single',
-      conditions: [{ key: 'max_truth_reached', value: 95, operator: '>=' }]
+      conditions: [{ key: 'max_truth_reached', value: TRUTH_HIGH_THRESHOLD, operator: '>=' }]
     }
   },
   {
     id: 'information_blackout',
     name: 'Information Blackout',
-    description: 'Reduce Truth to 5% or below',
+    description: `Reduce Truth to ${TRUTH_LOW_THRESHOLD}% or below`,
     category: 'challenge',
     rarity: 'rare',
     icon: '🌑',
     points: 35,
     requirements: {
       type: 'single',
-      conditions: [{ key: 'min_truth_reached', value: 5, operator: '<=' }]
+      conditions: [{ key: 'min_truth_reached', value: TRUTH_LOW_THRESHOLD, operator: '<=' }]
     }
   },
   {

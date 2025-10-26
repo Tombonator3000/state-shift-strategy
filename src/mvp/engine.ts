@@ -25,6 +25,7 @@ import {
   type EditorDefinition,
 } from '@/game/editors';
 import { calculateHybridCost } from '@/game/newCardTypes';
+import { TRUTH_HIGH_THRESHOLD, TRUTH_LOW_THRESHOLD } from '@/constants/truthThresholds';
 
 const otherPlayer = (id: PlayerId): PlayerId => (id === 'P1' ? 'P2' : 'P1');
 
@@ -974,12 +975,12 @@ export function winCheck(
     return recordVictory('P2', 'states');
   }
 
-  if (state.truth >= 95) {
+  if (state.truth >= TRUTH_HIGH_THRESHOLD) {
     const truthPlayer = players.P1.faction === 'truth' ? 'P1' : 'P2';
     return recordVictory(truthPlayer, 'truth');
   }
 
-  if (state.truth <= 5) {
+  if (state.truth <= TRUTH_LOW_THRESHOLD) {
     const governmentPlayer = players.P1.faction === 'government' ? 'P1' : 'P2';
     return recordVictory(governmentPlayer, 'truth');
   }
