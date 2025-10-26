@@ -133,6 +133,14 @@ This document provides a chronological record of gameplay-impacting changes merg
   - `components.json`
 - Summary: Moved the Paranoid Times orientation copy into a shared article component with diegetic prose markup, rewired the How-to-Play accordion to consume the new surface, and updated the component catalog so design tooling tracks the relocation.
 
+## 2025-10-26 – Tabloid hero card ID redeclaration removed
+- Timestamp: 2025-10-26T19:21:39Z
+- Files:
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `UPDATES_LOG.md`
+- Summary: Cleared the duplicate heroPrimaryCardId declaration so the newspaper composer compiles, letting Lovable rebuild the
+  conspiratorial preview spread without choking on the lead story metadata guard.
+
 ## 2025-10-26 – Restore Lovable preview builds
 - Timestamp: 2025-10-26T00:00:00Z
 - Files:
