@@ -1,10 +1,16 @@
-import type { Faction, GameCard, MVPCardType, Rarity } from '@/rules/mvp';
+import type { CardEffects, Faction, GameCard, MVPCardType, Rarity } from '@/rules/mvp';
 import type { EditorId } from '@/game/editors';
 import type { TurnPlay } from '@/game/combo.types';
 import type { ArticleBlock, PlayedLite } from '@/news/types';
 import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
 import type { TabloidRelicRuntimeState } from '@/expansions/tabloidRelics/RelicTypes';
 import { expectedCost, MVP_CARD_TYPES } from '@/rules/mvp';
+import type {
+  HybridCardConfig,
+  HybridCardCondition,
+  PersistentCardConfig,
+  TrapCardConfig,
+} from '@/game/newCardTypes';
 
 type BaseEffects = {
   revealSecretAgenda?: boolean;
@@ -23,10 +29,23 @@ export type EffectsZONE = {
   pressureDelta: number;
 } & BaseEffects;
 
+export type EffectsHYBRID = CardEffects;
+export type EffectsTRAP = CardEffects;
+export type EffectsPERSISTENT = CardEffects;
+
 export type MVPGameCard = GameCard & {
   rarity: Rarity;
   type: MVPCardType;
-  effects: EffectsATTACK | EffectsMEDIA | EffectsZONE;
+  effects:
+    | EffectsATTACK
+    | EffectsMEDIA
+    | EffectsZONE
+    | EffectsHYBRID
+    | EffectsTRAP
+    | EffectsPERSISTENT;
+  hybridConfig?: HybridCardConfig;
+  trapConfig?: TrapCardConfig;
+  persistentConfig?: PersistentCardConfig;
 };
 
 export type Card = MVPGameCard;
@@ -45,6 +64,27 @@ export type PlayerState = {
   activeEditorId?: EditorId | null;
 };
 
+export interface TrapRuntimeState {
+  owner: PlayerId;
+  cardId: string;
+  cardName: string;
+  triggerOn: TrapCardConfig['triggerOn'];
+  effects: CardEffects;
+  label: string;
+  revealMessage: string;
+}
+
+export interface PersistentRuntimeState {
+  owner: PlayerId;
+  cardId: string;
+  cardName: string;
+  remaining: number;
+  perTurnEffect: CardEffects;
+  onExpire?: CardEffects;
+  label: string;
+  icon?: string;
+}
+
 export type GameState = {
   turn: number;
   currentPlayer: PlayerId;
@@ -58,6 +98,8 @@ export type GameState = {
   headlineLog: CompositeStory[];
   extraExtraFeed: ExtraExtraFeedEntry[];
   turnBuffer: PlayedLite[];
+  traps: TrapRuntimeState[];
+  persistentEffects: PersistentRuntimeState[];
   winner: PlayerId | 'draw' | null;
   victoryType: 'states' | 'truth' | 'ip' | null;
   finalEdition?: unknown | null;
@@ -301,6 +343,340 @@ const sanitizeZoneEffects = (
   return zone;
 };
 
+const sanitizeGenericCardEffects = (
+  rawEffects: unknown,
+  changes: string[],
+  warnings: string[],
+): CardEffects => {
+  if (typeof rawEffects !== 'object' || rawEffects === null) {
+    if (typeof rawEffects !== 'undefined') {
+      warnings.push('card effects must be an object; removing invalid value');
+    }
+    return {};
+  }
+
+  const source = rawEffects as Record<string, unknown>;
+  const effects: CardEffects = {};
+
+  if (source.revealSecretAgenda) {
+    effects.revealSecretAgenda = true;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(source, 'truthDelta')) {
+    const truthDelta = toNumber(source.truthDelta);
+    if (truthDelta === null) {
+      warnings.push('truthDelta must be numeric; removing invalid value');
+    } else {
+      effects.truthDelta = Math.trunc(truthDelta);
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(source, 'pressureDelta')) {
+    const pressureDelta = toNumber(source.pressureDelta);
+    if (pressureDelta === null) {
+      warnings.push('pressureDelta must be numeric; removing invalid value');
+    } else {
+      effects.pressureDelta = pressureDelta;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(source, 'pressureToAllContested')) {
+    const value = toNumber(source.pressureToAllContested);
+    if (value === null) {
+      warnings.push('pressureToAllContested must be numeric; removing invalid value');
+    } else {
+      effects.pressureToAllContested = Math.trunc(value);
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(source, 'zoneDefense')) {
+    const value = toNumber(source.zoneDefense);
+    if (value === null) {
+      warnings.push('zoneDefense must be numeric; removing invalid value');
+    } else {
+      effects.zoneDefense = Math.trunc(value);
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(source, 'reduceFactor')) {
+    const value = toNumber(source.reduceFactor);
+    if (value === null) {
+      warnings.push('reduceFactor must be numeric; removing invalid value');
+    } else {
+      effects.reduceFactor = value;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(source, 'ipDelta')) {
+    const ipDelta = source.ipDelta;
+    if (typeof ipDelta === 'number') {
+      effects.ipDelta = { opponent: clampInteger(ipDelta, -99, 99) };
+      changes.push('normalized ipDelta number to opponent field');
+    } else if (typeof ipDelta === 'object' && ipDelta !== null) {
+      const payload = ipDelta as Record<string, unknown>;
+      const normalized: CardEffects['ipDelta'] = {};
+
+      if (Object.prototype.hasOwnProperty.call(payload, 'self')) {
+        const value = toNumber(payload.self);
+        if (value === null) {
+          warnings.push('ipDelta.self must be numeric; removing invalid value');
+        } else {
+          normalized.self = Math.trunc(value);
+        }
+      }
+
+      if (Object.prototype.hasOwnProperty.call(payload, 'opponent')) {
+        const value = toNumber(payload.opponent);
+        if (value === null) {
+          warnings.push('ipDelta.opponent must be numeric; removing invalid value');
+        } else {
+          normalized.opponent = Math.trunc(value);
+        }
+      }
+
+      if (Object.prototype.hasOwnProperty.call(payload, 'opponentPercent')) {
+        const value = toNumber(payload.opponentPercent);
+        if (value === null) {
+          warnings.push('ipDelta.opponentPercent must be numeric; removing invalid value');
+        } else {
+          normalized.opponentPercent = clampFraction(value, 0, 1);
+        }
+      }
+
+      if (Object.keys(normalized).length > 0) {
+        effects.ipDelta = normalized;
+      }
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(source, 'draw')) {
+    const value = toNumber(source.draw);
+    if (value === null) {
+      warnings.push('draw must be numeric; removing invalid value');
+    } else {
+      effects.draw = clampInteger(value, 0, 9);
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(source, 'discardOpponent')) {
+    const value = toNumber(source.discardOpponent);
+    if (value === null) {
+      warnings.push('discardOpponent must be numeric; removing invalid value');
+    } else {
+      effects.discardOpponent = clampInteger(value, 0, 9);
+    }
+  }
+
+  const objectKeys: (keyof CardEffects)[] = [
+    'conditional',
+    'ifFewerStates',
+    'ifMoreStates',
+    'ifTruthAbove',
+    'ifTruthBelow',
+    'pressurePerControlledState',
+    'truthPerControlledState',
+    'preventHighCostCards',
+    'defenseToAllStates',
+  ];
+
+  for (const key of objectKeys) {
+    const value = source[key as string];
+    if (typeof value === 'object' && value !== null) {
+      effects[key] = value as never;
+    }
+  }
+
+  return effects;
+};
+
+const allowedHybridTypes = new Set<HybridCardCondition['type']>([
+  'truth',
+  'states_controlled',
+  'ip',
+  'turn',
+]);
+
+const allowedHybridOperators = new Set<HybridCardCondition['operator']>(['>=', '<=', '==', '>', '<']);
+
+const sanitizeHybridCondition = (
+  rawCondition: unknown,
+  index: number,
+  changes: string[],
+  errors: string[],
+): HybridCardCondition => {
+  const source =
+    typeof rawCondition === 'object' && rawCondition !== null
+      ? (rawCondition as Record<string, unknown>)
+      : {};
+
+  const typeText = toTrimmedString(source.type)?.toLowerCase();
+  const normalizedType = allowedHybridTypes.has(typeText as HybridCardCondition['type'])
+    ? (typeText as HybridCardCondition['type'])
+    : 'truth';
+  if (!allowedHybridTypes.has(typeText as HybridCardCondition['type'])) {
+    errors.push(
+      `hybrid condition ${index} has invalid type "${source.type ?? 'unknown'}"; defaulting to 'truth'`,
+    );
+  }
+
+  const operatorText = toTrimmedString(source.operator) ?? '>=';
+  const normalizedOperator = allowedHybridOperators.has(operatorText as HybridCardCondition['operator'])
+    ? (operatorText as HybridCardCondition['operator'])
+    : '>=';
+  if (!allowedHybridOperators.has(operatorText as HybridCardCondition['operator'])) {
+    errors.push(
+      `hybrid condition ${index} has invalid operator "${source.operator ?? 'unknown'}"; defaulting to '>='`,
+    );
+  }
+
+  const value = toNumber(source.value);
+  const costModifier = toNumber(source.costModifier);
+  if (value === null) {
+    errors.push(`hybrid condition ${index} missing numeric value; defaulting to 0`);
+  }
+  if (costModifier === null) {
+    errors.push(`hybrid condition ${index} missing costModifier; defaulting to 0`);
+  }
+
+  const label = toTrimmedString(source.label) ?? `Condition ${index + 1}`;
+  if (!toTrimmedString(source.label)) {
+    changes.push(`added default label for hybrid condition ${index + 1}`);
+  }
+
+  return {
+    type: normalizedType,
+    operator: normalizedOperator,
+    value: value ?? 0,
+    costModifier: costModifier ?? 0,
+    label,
+  } satisfies HybridCardCondition;
+};
+
+const sanitizeHybridConfig = (
+  rawConfig: unknown,
+  rarity: Rarity,
+  changes: string[],
+  errors: string[],
+  warnings: string[],
+): HybridCardConfig => {
+  const source =
+    typeof rawConfig === 'object' && rawConfig !== null
+      ? (rawConfig as Record<string, unknown>)
+      : {};
+
+  const baseCostValue = toNumber(source.baseCost);
+  if (baseCostValue === null) {
+    errors.push('hybrid cards require baseCost; using expected rarity cost');
+  }
+
+  const baseCost = baseCostValue ?? expectedCost('HYBRID', rarity);
+
+  const conditionsSource = Array.isArray(source.conditions) ? source.conditions : [];
+  if (!Array.isArray(source.conditions)) {
+    warnings.push('hybrid cards expect an array of conditions; defaulting to empty array');
+  }
+  const conditions = conditionsSource.map((condition, index) =>
+    sanitizeHybridCondition(condition, index, changes, errors),
+  );
+
+  return {
+    baseCost,
+    conditions,
+  } satisfies HybridCardConfig;
+};
+
+const allowedTrapTriggers: TrapCardConfig['triggerOn'][] = [
+  'opponent_attack',
+  'opponent_media',
+  'opponent_zone',
+  'state_capture',
+  'any_card',
+];
+
+const sanitizeTrapConfig = (
+  rawConfig: unknown,
+  changes: string[],
+  errors: string[],
+  warnings: string[],
+): TrapCardConfig => {
+  const source =
+    typeof rawConfig === 'object' && rawConfig !== null
+      ? (rawConfig as Record<string, unknown>)
+      : {};
+
+  const triggerRaw = toTrimmedString(source.triggerOn)?.toLowerCase();
+  const trigger = allowedTrapTriggers.includes(triggerRaw as TrapCardConfig['triggerOn'])
+    ? (triggerRaw as TrapCardConfig['triggerOn'])
+    : 'any_card';
+  if (!allowedTrapTriggers.includes(triggerRaw as TrapCardConfig['triggerOn'])) {
+    errors.push(
+      `invalid trap trigger "${source.triggerOn ?? 'unknown'}"; defaulting to 'any_card'`,
+    );
+  }
+
+  const label = toTrimmedString(source.label) ?? 'Trap';
+  if (!toTrimmedString(source.label)) {
+    changes.push('added default trap label');
+  }
+
+  const revealMessage = toTrimmedString(source.revealMessage) ?? 'Trap triggered!';
+  if (!toTrimmedString(source.revealMessage)) {
+    changes.push('added default trap reveal message');
+  }
+
+  const effects = sanitizeGenericCardEffects(source.effects, changes, warnings);
+
+  return {
+    triggerOn: trigger,
+    effects,
+    label,
+    revealMessage,
+  } satisfies TrapCardConfig;
+};
+
+const sanitizePersistentConfig = (
+  rawConfig: unknown,
+  changes: string[],
+  errors: string[],
+  warnings: string[],
+): PersistentCardConfig => {
+  const source =
+    typeof rawConfig === 'object' && rawConfig !== null
+      ? (rawConfig as Record<string, unknown>)
+      : {};
+
+  const durationRaw = toNumber(source.duration);
+  if (durationRaw === null || durationRaw <= 0) {
+    errors.push('persistent cards require duration > 0; defaulting to 1');
+  }
+  const duration = clampInteger(durationRaw ?? 1, 1, 12);
+
+  const perTurnEffect = sanitizeGenericCardEffects(source.perTurnEffect, changes, warnings);
+  if (Object.keys(perTurnEffect).length === 0) {
+    warnings.push('persistent cards without perTurnEffect will have no impact');
+  }
+
+  let onExpire: CardEffects | undefined;
+  if (Object.prototype.hasOwnProperty.call(source, 'onExpire')) {
+    onExpire = sanitizeGenericCardEffects(source.onExpire, changes, warnings);
+  }
+
+  const label = toTrimmedString(source.label) ?? 'Persistent Effect';
+  if (!toTrimmedString(source.label)) {
+    changes.push('added default persistent label');
+  }
+
+  const icon = toTrimmedString(source.icon) ?? undefined;
+
+  return {
+    duration,
+    perTurnEffect,
+    onExpire,
+    label,
+    ...(icon ? { icon } : {}),
+  } satisfies PersistentCardConfig;
+};
+
 const normalizeFlavor = (value: unknown): string | undefined => {
   const text = toTrimmedString(value);
   return text ?? undefined;
@@ -420,11 +796,42 @@ export function repairToMVP(raw: unknown): MVPRepairResult {
   const rarity = toRarity(source.rarity, changes);
 
   const warnings: string[] = [];
-  let effects: EffectsATTACK | EffectsMEDIA | EffectsZONE;
+  let effects: MVPGameCard['effects'];
+  let hybridConfig: HybridCardConfig | undefined;
+  let trapConfig: TrapCardConfig | undefined;
+  let persistentConfig: PersistentCardConfig | undefined;
+
   if (type === 'ATTACK') {
     effects = sanitizeAttackEffects(source.effects, changes, warnings);
   } else if (type === 'MEDIA') {
     effects = sanitizeMediaEffects(source.effects, changes, warnings);
+  } else if (type === 'ZONE') {
+    effects = sanitizeZoneEffects(source.effects, changes, warnings);
+  } else if (type === 'HYBRID') {
+    effects = sanitizeGenericCardEffects(source.effects, changes, warnings);
+    hybridConfig = sanitizeHybridConfig(
+      (source.hybridConfig ?? source.hybrid) as unknown,
+      rarity,
+      changes,
+      errors,
+      warnings,
+    );
+  } else if (type === 'TRAP') {
+    effects = sanitizeGenericCardEffects(source.effects, changes, warnings);
+    trapConfig = sanitizeTrapConfig(
+      (source.trapConfig ?? source.trap) as unknown,
+      changes,
+      errors,
+      warnings,
+    );
+  } else if (type === 'PERSISTENT') {
+    effects = sanitizeGenericCardEffects(source.effects, changes, warnings);
+    persistentConfig = sanitizePersistentConfig(
+      (source.persistentConfig ?? source.persistent) as unknown,
+      changes,
+      errors,
+      warnings,
+    );
   } else {
     effects = sanitizeZoneEffects(source.effects, changes, warnings);
   }
@@ -443,15 +850,30 @@ export function repairToMVP(raw: unknown): MVPRepairResult {
     changes.push('removed deprecated text field');
   }
 
+  let cost = expectedCost(type, rarity);
+  if (type === 'HYBRID' && hybridConfig) {
+    cost = hybridConfig.baseCost;
+  }
+
   const card: MVPGameCard = {
     id,
     name,
     faction,
     type,
     rarity,
-    cost: expectedCost(type, rarity),
+    cost,
     effects,
   };
+
+  if (hybridConfig) {
+    card.hybridConfig = hybridConfig;
+  }
+  if (trapConfig) {
+    card.trapConfig = trapConfig;
+  }
+  if (persistentConfig) {
+    card.persistentConfig = persistentConfig;
+  }
 
   if (flavor) {
     card.flavor = flavor;
@@ -470,7 +892,10 @@ export function repairToMVP(raw: unknown): MVPRepairResult {
     card.extId = source.extId.trim();
   }
 
-  const autoText = createMvpText(type, effects);
+  const autoText =
+    type === 'ATTACK' || type === 'MEDIA' || type === 'ZONE'
+      ? createMvpText(type, effects as EffectsATTACK | EffectsMEDIA | EffectsZONE)
+      : undefined;
   if (autoText) {
     card.text = autoText;
   }
@@ -493,7 +918,13 @@ export function validateCardMVP(card: MVPGameCard): { ok: boolean; errors: strin
     validationErrors.push(`invalid rarity: ${card.rarity}`);
   }
 
-  if (ALLOWED_TYPES.includes(card.type) && ALLOWED_RARITIES.includes(card.rarity)) {
+  if (card.type === 'HYBRID') {
+    if (!card.hybridConfig) {
+      validationErrors.push('HYBRID cards require hybridConfig');
+    } else if (card.cost !== card.hybridConfig.baseCost) {
+      validationErrors.push(`HYBRID cost should match baseCost ${card.hybridConfig.baseCost}`);
+    }
+  } else if (ALLOWED_TYPES.includes(card.type) && ALLOWED_RARITIES.includes(card.rarity)) {
     const expected = expectedCost(card.type, card.rarity);
     if (card.cost !== expected) {
       validationErrors.push(`cost should be ${expected}`);
@@ -537,6 +968,33 @@ export function validateCardMVP(card: MVPGameCard): { ok: boolean; errors: strin
       }
       if (!card.target || card.target.scope !== 'state') {
         validationErrors.push('ZONE cards require state target');
+      }
+      break;
+    }
+    case 'HYBRID': {
+      const config = card.hybridConfig;
+      if (!config) {
+        validationErrors.push('HYBRID cards require hybridConfig');
+      } else {
+        if (config.conditions.length === 0) {
+          validationErrors.push('HYBRID cards require at least one cost condition');
+        }
+      }
+      break;
+    }
+    case 'TRAP': {
+      const config = card.trapConfig;
+      if (!config) {
+        validationErrors.push('TRAP cards require trapConfig');
+      }
+      break;
+    }
+    case 'PERSISTENT': {
+      const config = card.persistentConfig;
+      if (!config) {
+        validationErrors.push('PERSISTENT cards require persistentConfig');
+      } else if (config.duration <= 0) {
+        validationErrors.push('persistentConfig.duration must be > 0');
       }
       break;
     }
@@ -623,6 +1081,15 @@ export function cloneGameState(state: GameState): GameState {
     turnPlays: state.turnPlays.map(play => ({
       ...play,
       metadata: play.metadata ? { ...play.metadata } : undefined,
+    })),
+    traps: (state.traps ?? []).map(trap => ({
+      ...trap,
+      effects: { ...(trap.effects ?? {}) },
+    })),
+    persistentEffects: (state.persistentEffects ?? []).map(effect => ({
+      ...effect,
+      perTurnEffect: { ...(effect.perTurnEffect ?? {}) },
+      ...(effect.onExpire ? { onExpire: { ...effect.onExpire } } : {}),
     })),
     players: {
       P1: clonePlayer(state.players.P1),

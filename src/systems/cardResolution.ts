@@ -492,6 +492,8 @@ const toEngineState = (
     log,
     headlineLog: [],
     extraExtraFeed: [],
+    traps: [],
+    persistentEffects: [],
     winner: null,
     victoryType: null,
     finalEdition: null,

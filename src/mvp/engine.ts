@@ -1,6 +1,6 @@
 declare const window: any;
 
-import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
+import { applyEffectsMvp, tickPersistentEffects, type PlayerId } from '@/engine/applyEffects-mvp';
 import { getEditor as getAiEditor } from '@/ai/editors';
 import { applyComboRewards, evaluateCombos, getComboSettings, formatComboReward } from '@/game/comboEngine';
 import type { ComboEvaluation, ComboOptions, ComboSummary, TurnPlay } from '@/game/combo.types';
@@ -24,6 +24,7 @@ import {
   type EditorAggregatedEffects,
   type EditorDefinition,
 } from '@/game/editors';
+import { calculateHybridCost } from '@/game/newCardTypes';
 
 const otherPlayer = (id: PlayerId): PlayerId => (id === 'P1' ? 'P2' : 'P1');
 
@@ -40,9 +41,20 @@ const getActiveEditorEffects = (state: GameState, who: PlayerId): EditorAggregat
   getEditorAggregatedEffects(getActiveEditor(state, who) ?? undefined);
 
 const getEffectiveCardCost = (state: GameState, playerId: PlayerId, card: Card): number => {
+  if (card.type === 'HYBRID' && card.hybridConfig) {
+    const { cost } = calculateHybridCost(card.hybridConfig, {
+      truth: state.truth,
+      statesControlled: state.players[playerId]?.states.length ?? 0,
+      ip: state.players[playerId]?.ip ?? 0,
+      turn: state.turn,
+    });
+    return cost;
+  }
+
   if (card.type !== 'ATTACK') {
     return card.cost;
   }
+
   const effects = getActiveEditorEffects(state, playerId);
   const delta = effects.attackCostDelta ?? 0;
   if (!delta) {
@@ -569,7 +581,17 @@ export function playCard(
     throw new Error(eligibility.reason ?? 'cannot-play');
   }
 
-  const effectiveCost = eligibility.cost ?? getEffectiveCardCost(cloned, currentId, card);
+  let effectiveCost = eligibility.cost ?? getEffectiveCardCost(cloned, currentId, card);
+  let hybridCostInfo: { cost: number; appliedConditions: string[] } | null = null;
+  if (card.type === 'HYBRID' && card.hybridConfig) {
+    hybridCostInfo = calculateHybridCost(card.hybridConfig, {
+      truth: cloned.truth,
+      statesControlled: player.states.length,
+      ip: player.ip,
+      turn: cloned.turn,
+    });
+    effectiveCost = hybridCostInfo.cost;
+  }
 
   const newHand = [...player.hand];
   newHand.splice(cardIndex, 1);
@@ -593,6 +615,14 @@ export function playCard(
         .filter(tag => tag.length > 0)
     : [];
 
+  const playMetadata: Record<string, unknown> = {};
+  if (hybridCostInfo) {
+    playMetadata.hybridCost = hybridCostInfo.cost;
+    if (hybridCostInfo.appliedConditions.length > 0) {
+      playMetadata.hybridConditions = hybridCostInfo.appliedConditions;
+    }
+  }
+
   const playEntry: TurnPlay = {
     sequence: cloned.turnPlays.length,
     stage: 'play',
@@ -605,6 +635,7 @@ export function playCard(
     targetStateId,
     cardFaction,
     cardTags,
+    metadata: Object.keys(playMetadata).length > 0 ? playMetadata : undefined,
   };
 
   const liteEntry = createPlayedLiteEntry(player, card);
@@ -894,6 +925,8 @@ export function endTurn(
     winner: winResult.winner ?? null,
     victoryType: winResult.reason ?? null,
   };
+
+  tickPersistentEffects(finalState, nextPlayer, Math.random);
 
   const summary: EndTurnSummary = {
     player: currentId,

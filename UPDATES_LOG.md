@@ -2,6 +2,18 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-11 – Hybrid, trap, and persistent cards join the arsenal
+- Timestamp: 2025-11-11T00:00:00Z
+- Files:
+  - `src/rules/mvp.ts`
+  - `src/mvp/validator.ts`
+  - `src/engine/applyEffects-mvp.ts`
+  - `src/mvp/engine.ts`
+  - `src/systems/cardResolution.ts`
+  - `__tests__/mvp/newCardTypes.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Expanded the MVP ruleset to recognize hybrid cost scheming, ambush traps, and per-turn persistent effects, taught the engine to recalc hybrid prices, defer trap payloads, and tick long-haul modifiers, then locked in scenario coverage so the new paranoia levers stay functional.
+
 ## 2025-11-10 – Front page hero card art anchors lead story
 - Timestamp: 2025-11-10T00:00:00Z
 - Files:

@@ -1,5 +1,11 @@
+import type {
+  HybridCardConfig,
+  PersistentCardConfig,
+  TrapCardConfig,
+} from '@/game/newCardTypes';
+
 export type Faction = 'truth' | 'government' | 'Truth' | 'Government';
-export const MVP_CARD_TYPES = ['ATTACK', 'MEDIA', 'ZONE'] as const;
+export const MVP_CARD_TYPES = ['ATTACK', 'MEDIA', 'ZONE', 'HYBRID', 'TRAP', 'PERSISTENT'] as const;
 export type MVPCardType = (typeof MVP_CARD_TYPES)[number];
 export type CardType = MVPCardType | 'DEFENSIVE';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'legendary';
@@ -74,6 +80,9 @@ export interface GameCard {
   extId?: string;
   tags?: string[];
   stateBonuses?: Record<string, CardStateBonusDefinition>;
+  hybridConfig?: HybridCardConfig;
+  trapConfig?: TrapCardConfig;
+  persistentConfig?: PersistentCardConfig;
 }
 
 export type CardStateBonusDefinition =
@@ -87,6 +96,9 @@ export const MVP_COST_TABLE: Record<MVPCardType, Record<Rarity, number>> = {
   ATTACK: { common: 2, uncommon: 3, rare: 4, legendary: 5 },
   MEDIA: { common: 3, uncommon: 4, rare: 5, legendary: 6 },
   ZONE: { common: 4, uncommon: 5, rare: 6, legendary: 7 },
+  HYBRID: { common: 3, uncommon: 4, rare: 5, legendary: 6 },
+  TRAP: { common: 2, uncommon: 3, rare: 4, legendary: 5 },
+  PERSISTENT: { common: 3, uncommon: 4, rare: 5, legendary: 6 },
 };
 
 export function expectedCost(type: CardType, rarity: Rarity): number {
