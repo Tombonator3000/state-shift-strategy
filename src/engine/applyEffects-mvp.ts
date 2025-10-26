@@ -3,6 +3,7 @@ declare const window: any;
 import { computeMediaTruthDelta_MVP, warnIfMediaScaling, type MediaResolutionOptions } from '@/mvp/media';
 import { applyTruthDelta } from '@/utils/truth';
 import { getEditor as getAiEditor } from '@/ai/editors';
+import type { CardEffects } from '@/rules/mvp';
 import type {
   Card,
   EffectsATTACK,
@@ -54,6 +55,229 @@ export function discardRandom(
   } satisfies PlayerState;
 }
 
+const applyIpDelta = (
+  state: GameState,
+  owner: PlayerId,
+  target: PlayerId,
+  delta: number,
+  sourceLabel: string,
+) => {
+  if (!delta) {
+    return;
+  }
+  const before = state.players[target].ip;
+  const after = clampIP(before + delta);
+  state.players[target].ip = after;
+  const applied = after - before;
+  if (applied !== 0) {
+    const tag = target === owner ? 'self' : 'opponent';
+    state.log.push(`${sourceLabel}: ${tag} IP ${applied >= 0 ? '+' : ''}${applied}`);
+    if (typeof window !== 'undefined' && (window as any).uiToastIp) {
+      (window as any).uiToastIp(target, applied);
+    }
+  }
+};
+
+const drawCards = (state: GameState, who: PlayerId, count: number) => {
+  if (count <= 0) {
+    return;
+  }
+  const target = state.players[who];
+  const deck = [...target.deck];
+  const hand = [...target.hand];
+  const discard = [...target.discard];
+
+  let remaining = Math.min(count, 9);
+  while (remaining > 0 && deck.length > 0) {
+    hand.push(deck.shift()!);
+    remaining -= 1;
+  }
+
+  state.players[who] = { ...target, deck, hand, discard } satisfies PlayerState;
+};
+
+export function applyCardEffectsPayload(
+  state: GameState,
+  owner: PlayerId,
+  effects: CardEffects | undefined,
+  rng: () => number,
+  sourceLabel = 'Effect',
+): void {
+  if (!effects) {
+    return;
+  }
+
+  const opponent = otherPlayer(owner);
+
+  if (typeof effects.truthDelta === 'number' && !Number.isNaN(effects.truthDelta)) {
+    applyTruthDelta(state, effects.truthDelta, owner);
+    state.log.push(
+      `${sourceLabel}: Truth ${effects.truthDelta >= 0 ? '+' : ''}${effects.truthDelta}`,
+    );
+  }
+
+  if (effects.ipDelta) {
+    const { ipDelta } = effects;
+    if (typeof ipDelta.self === 'number' && !Number.isNaN(ipDelta.self)) {
+      applyIpDelta(state, owner, owner, Math.trunc(ipDelta.self), sourceLabel);
+    }
+    if (typeof ipDelta.opponent === 'number' && !Number.isNaN(ipDelta.opponent)) {
+      applyIpDelta(state, owner, opponent, Math.trunc(ipDelta.opponent), sourceLabel);
+    }
+    if (typeof ipDelta.opponentPercent === 'number' && ipDelta.opponentPercent !== 0) {
+      const before = state.players[opponent].ip;
+      const percentDelta = Math.floor(before * ipDelta.opponentPercent);
+      if (percentDelta !== 0) {
+        applyIpDelta(state, owner, opponent, percentDelta, `${sourceLabel} (percent)`);
+      }
+    }
+  }
+
+  if (typeof effects.draw === 'number' && effects.draw > 0) {
+    drawCards(state, owner, effects.draw);
+    state.log.push(`${sourceLabel}: drew ${effects.draw}`);
+  }
+
+  if (typeof effects.discardOpponent === 'number' && effects.discardOpponent > 0) {
+    discardRandom(state, opponent, effects.discardOpponent, rng);
+    state.log.push(`${sourceLabel}: forced opponent discard ${effects.discardOpponent}`);
+  }
+
+  if (effects.revealSecretAgenda) {
+    state.log.push(`${sourceLabel}: Revealed secret agenda`);
+  }
+}
+
+const registerTrap = (state: GameState, owner: PlayerId, card: Card) => {
+  const config = card.trapConfig;
+  if (!config) {
+    state.log.push(`${card.name}: missing trap configuration`);
+    return;
+  }
+
+  state.traps = [
+    ...state.traps,
+    {
+      owner,
+      cardId: card.id,
+      cardName: card.name,
+      triggerOn: config.triggerOn,
+      effects: { ...(config.effects ?? {}) },
+      label: config.label,
+      revealMessage: config.revealMessage,
+    },
+  ];
+
+  state.log.push(`${card.name}: Trap armed (${config.label})`);
+};
+
+const registerPersistentEffect = (state: GameState, owner: PlayerId, card: Card) => {
+  const config = card.persistentConfig;
+  if (!config) {
+    state.log.push(`${card.name}: missing persistent configuration`);
+    return;
+  }
+
+  state.persistentEffects = [
+    ...state.persistentEffects,
+    {
+      owner,
+      cardId: card.id,
+      cardName: card.name,
+      remaining: config.duration,
+      perTurnEffect: { ...(config.perTurnEffect ?? {}) },
+      onExpire: config.onExpire ? { ...config.onExpire } : undefined,
+      label: config.label,
+      icon: config.icon,
+    },
+  ];
+
+  state.log.push(
+    `${card.name}: Persistent effect active for ${config.duration} turn${
+      config.duration === 1 ? '' : 's'
+    }`,
+  );
+};
+
+type TrapTriggerEvent =
+  | { kind: 'card_play'; owner: PlayerId; cardType: Card['type']; targetStateId?: string }
+  | { kind: 'state_capture'; owner: PlayerId; stateId: string };
+
+const shouldTriggerTrap = (trapTrigger: string, event: TrapTriggerEvent): boolean => {
+  if (event.kind === 'card_play') {
+    switch (trapTrigger) {
+      case 'any_card':
+        return true;
+      case 'opponent_attack':
+        return event.cardType === 'ATTACK';
+      case 'opponent_media':
+        return event.cardType === 'MEDIA';
+      case 'opponent_zone':
+        return event.cardType === 'ZONE';
+      default:
+        return false;
+    }
+  }
+  if (event.kind === 'state_capture') {
+    return trapTrigger === 'state_capture';
+  }
+  return false;
+};
+
+const triggerTraps = (state: GameState, event: TrapTriggerEvent, rng: () => number) => {
+  if (state.traps.length === 0) {
+    return;
+  }
+
+  const remaining: GameState['traps'] = [];
+  for (const trap of state.traps) {
+    if (trap.owner === event.owner) {
+      remaining.push(trap);
+      continue;
+    }
+    if (!shouldTriggerTrap(trap.triggerOn, event)) {
+      remaining.push(trap);
+      continue;
+    }
+
+    state.log.push(`${trap.label}: ${trap.revealMessage}`);
+    applyCardEffectsPayload(state, trap.owner, trap.effects, rng, trap.label);
+  }
+  state.traps = remaining;
+};
+
+export const tickPersistentEffects = (
+  state: GameState,
+  owner: PlayerId,
+  rng: () => number,
+) => {
+  if (state.persistentEffects.length === 0) {
+    return;
+  }
+
+  const remaining: GameState['persistentEffects'] = [];
+  for (const effect of state.persistentEffects) {
+    if (effect.owner !== owner) {
+      remaining.push(effect);
+      continue;
+    }
+
+    applyCardEffectsPayload(state, owner, effect.perTurnEffect, rng, effect.label);
+    const nextRemaining = effect.remaining - 1;
+    if (nextRemaining <= 0) {
+      if (effect.onExpire && Object.keys(effect.onExpire).length > 0) {
+        applyCardEffectsPayload(state, owner, effect.onExpire, rng, `${effect.label} (expire)`);
+      }
+      state.log.push(`${effect.label}: expired`);
+    } else {
+      remaining.push({ ...effect, remaining: nextRemaining });
+      state.log.push(`${effect.label}: ${nextRemaining} turn${nextRemaining === 1 ? '' : 's'} remaining`);
+    }
+  }
+
+  state.persistentEffects = remaining;
+};
+
 function applyAttackEffect(
   state: GameState,
   owner: PlayerId,
@@ -100,6 +324,7 @@ function applyZoneEffect(
   owner: PlayerId,
   effects: EffectsZONE,
   targetStateId: string,
+  rng: () => number,
 ) {
   const opponent = otherPlayer(owner);
   const currentPressure = state.pressureByState[targetStateId] ?? { P1: 0, P2: 0 };
@@ -160,6 +385,10 @@ function applyZoneEffect(
   if (captured && typeof window !== 'undefined' && (window as any).uiFlashState) {
     (window as any).uiFlashState(targetStateId, owner);
   }
+
+  if (captured) {
+    triggerTraps(state, { kind: 'state_capture', owner, stateId: targetStateId }, rng);
+  }
 }
 
 export function applyEffectsMvp(
@@ -171,6 +400,29 @@ export function applyEffectsMvp(
   rng: () => number = Math.random,
 ): GameState {
   ensureAiEditorSelected(state);
+  if (!Array.isArray(state.traps)) {
+    state.traps = [];
+  }
+  if (!Array.isArray(state.persistentEffects)) {
+    state.persistentEffects = [];
+  }
+  triggerTraps(state, { kind: 'card_play', owner, cardType: card.type, targetStateId }, rng);
+
+  if (card.type === 'TRAP') {
+    registerTrap(state, owner, card);
+    return state;
+  }
+
+  if (card.type === 'PERSISTENT') {
+    registerPersistentEffect(state, owner, card);
+    return state;
+  }
+
+  if (card.type === 'HYBRID') {
+    applyCardEffectsPayload(state, owner, card.effects as CardEffects, rng, card.name);
+    return state;
+  }
+
   if (card.type === 'ATTACK') {
     applyAttackEffect(state, owner, card.effects as EffectsATTACK, rng);
     return state;
@@ -282,7 +534,7 @@ export function applyEffectsMvp(
       }
     }
 
-    applyZoneEffect(state, owner, { ...zoneEffects, pressureDelta }, targetStateId);
+    applyZoneEffect(state, owner, { ...zoneEffects, pressureDelta }, targetStateId, rng);
     return state;
   }
 
