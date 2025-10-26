@@ -926,8 +926,6 @@ const TabloidNewspaperV2 = ({
       ? []
       : heroFallback?.tags
         ?? (comboReport ? comboReport.entries.slice(0, 3).map(entry => entry.name).filter(Boolean) : []);
-  const heroPrimaryCardId = null;
-
   const comboNarrative = useMemo(() => {
     if (!comboReport || comboReport.entries.length === 0) {
       return null;
