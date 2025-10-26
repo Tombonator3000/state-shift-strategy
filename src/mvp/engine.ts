@@ -928,14 +928,14 @@ export function endTurn(
 
   tickPersistentEffects(finalState, nextPlayer, Math.random);
 
-  const postTickWin = winCheck(finalState);
-  const resolvedWinResult = postTickWin.winner
-    ? postTickWin
-    : finalState.winner
+  const postTickWin = finalState.winner === null ? winCheck(finalState) : null;
+  const resolvedWinResult = finalState.winner !== null
     ? {
         winner: finalState.winner,
         reason: finalState.victoryType ?? undefined,
       }
+    : postTickWin?.winner
+    ? postTickWin
     : null;
 
   const summary: EndTurnSummary = {
