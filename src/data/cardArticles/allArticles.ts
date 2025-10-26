@@ -3,6 +3,7 @@ import { truthArticles } from './truthArticles';
 import { governmentArticles } from './governmentArticles';
 import { expansionArticles } from './expansionArticles';
 import { cryptidArticleVariants } from './cryptidVariants';
+import { specialCardsArticles } from './specialCardsArticles';
 
 /**
  * Combined article database for all factions
@@ -13,7 +14,8 @@ export const ALL_CARD_ARTICLES: CardArticle[] = [
   ...truthArticles,
   ...governmentArticles,
   ...expansionArticles,
-  ...cryptidArticleVariants
+  ...cryptidArticleVariants,
+  ...specialCardsArticles
 ];
 
 export function getArticleByCardId(cardId: string): CardArticle | null {
