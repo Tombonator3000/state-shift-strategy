@@ -83,7 +83,10 @@ export interface GameSnapshot {
   states: StateForResolution[];
   stateCombinationEffects?: StateCombinationEffects;
   playerEditorId?: EditorId | null;
+  playerEditor?: EditorId | null;
+  editorId?: EditorId | null;
   aiEditorId?: EditorId | null;
+  aiEditor?: EditorId | null;
 }
 
 export interface CardHotspotResolution {
@@ -309,6 +312,15 @@ const resolvePlayerEditorId = (snapshot: GameSnapshot): string | null => {
   return typeof candidate === 'string' && candidate.length > 0 ? candidate : null;
 };
 
+const resolveAiEditorId = (snapshot: GameSnapshot): string | null => {
+  const enriched = snapshot as GameSnapshot & {
+    aiEditorId?: EditorId | null;
+    aiEditor?: EditorId | null;
+  };
+  const candidate = enriched.aiEditorId ?? enriched.aiEditor ?? null;
+  return typeof candidate === 'string' && candidate.length > 0 ? candidate : null;
+};
+
 const queueBanterForTrigger = (snapshot: GameSnapshot, trigger: TriggerKey) => {
   const editorId = resolvePlayerEditorId(snapshot);
   if (!editorId) {
@@ -459,7 +471,7 @@ const toEngineState = (
         discard: [],
         ip: snapshot.ip,
         states: Array.from(normalizedPlayerStates),
-        activeEditorId: snapshot.playerEditorId ?? null,
+        activeEditorId: resolvePlayerEditorId(snapshot),
       },
       [AI_ID]: {
         id: AI_ID,
@@ -469,7 +481,7 @@ const toEngineState = (
         discard: [],
         ip: snapshot.aiIP,
         states: Array.from(normalizedAiStates),
-        activeEditorId: snapshot.aiEditorId ?? null,
+        activeEditorId: resolveAiEditorId(snapshot),
       },
     },
     pressureByState,

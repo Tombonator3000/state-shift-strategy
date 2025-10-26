@@ -1,7 +1,9 @@
 import { startTurn, canPlay, playCard } from '@/mvp/engine';
 import { applyEffectsMvp } from '@/engine/applyEffects-mvp';
 import { gatherEditorSetupAdjustments } from '@/expansions/editors/EditorsEngine';
-import { getEditorAggregatedEffects, type EditorDefinition } from '@/game/editors';
+import { RelicEngine } from '@/expansions/tabloidRelics/RelicEngine';
+import * as Editors from '@/game/editors';
+import { resolveCardMVP, type GameSnapshot, type StateForResolution } from '@/systems/cardResolution';
 import type { Card, GameState } from '@/mvp/validator';
 
 type PartialState = Partial<GameState> & {
@@ -68,33 +70,89 @@ const createState = (overrides: PartialState = {}): GameState => {
   };
 };
 
+const createSnapshot = (overrides: Partial<GameSnapshot> = {}): GameSnapshot => {
+  const baseState: StateForResolution = {
+    id: 'CA',
+    name: 'California',
+    abbreviation: 'CA',
+    baseIP: 3,
+    baseDefense: 1,
+    defense: 1,
+    pressure: 0,
+    pressurePlayer: 0,
+    pressureAi: 0,
+    contested: false,
+    owner: 'player',
+    occupierCardId: null,
+    occupierCardName: null,
+    occupierLabel: null,
+    occupierIcon: null,
+    occupierUpdatedAt: undefined,
+    paranormalHotspot: undefined,
+    paranormalHotspotHistory: [],
+    stateEventBonus: undefined,
+    stateEventHistory: [],
+  };
+
+  return {
+    truth: 50,
+    ip: 5,
+    aiIP: 5,
+    hand: [],
+    aiHand: [],
+    controlledStates: [],
+    aiControlledStates: [],
+    round: 1,
+    turn: 1,
+    faction: 'truth',
+    states: [baseState],
+    stateCombinationEffects: undefined,
+    ...overrides,
+  };
+};
+
 describe('editor runtime modifiers', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it('applies Fox Muldrunk media truth bonus', () => {
+  it('applies Fox Muldrunk media truth bonus during card resolution fallback', () => {
     const mediaCard = createCard({
       id: 'media-1',
       type: 'MEDIA',
       cost: 2,
       effects: { truthDelta: 2 },
     });
-    const state = createState({
-      truth: 50,
-      players: {
-        P1: {
-          hand: [mediaCard],
-          activeEditorId: 'editor_muldrunk',
-        },
-      },
+    const snapshot = createSnapshot({
+      hand: [mediaCard],
+      playerEditor: 'editor_muldrunk',
+      playerEditorId: null,
     });
 
-    const beforeTruth = state.truth;
-    applyEffectsMvp(state, 'P1', mediaCard);
+    const result = resolveCardMVP(snapshot, mediaCard, null, 'human');
 
-    expect(state.truth - beforeTruth).toBe(3);
-    expect(state.log.some(entry => entry.includes('Fox Muldrunk'))).toBe(true);
+    expect(result.truth).toBe(53);
+    expect(result.logEntries.some(entry => entry.includes('Fox Muldrunk'))).toBe(true);
+  });
+
+  it('applies Fox Muldrunk media modifier for AI snapshots exposing only aiEditor', () => {
+    const mediaCard = createCard({
+      id: 'media-2',
+      type: 'MEDIA',
+      cost: 2,
+      effects: { truthDelta: 2 },
+    });
+    const snapshot = createSnapshot({
+      hand: [],
+      aiHand: [mediaCard],
+      aiEditor: 'editor_muldrunk',
+      aiEditorId: null,
+    });
+
+    const result = resolveCardMVP(snapshot, mediaCard, null, 'ai');
+
+    expect(result.truth).toBe(49);
+    expect(result.logEntries.some(entry => entry.includes('Fox Muldrunk'))).toBe(true);
   });
 
   it('increases attack cost for Hunter S. Tabloid', () => {
@@ -128,23 +186,44 @@ describe('editor runtime modifiers', () => {
       createCard({ id: 'c1', type: 'MEDIA', effects: { truthDelta: 1 } }),
       createCard({ id: 'c2', type: 'MEDIA', effects: { truthDelta: 1 } }),
     ];
+    const deck = [
+      createCard({ id: 'd1', type: 'MEDIA', effects: { truthDelta: 0 } }),
+      createCard({ id: 'd2', type: 'MEDIA', effects: { truthDelta: 0 } }),
+      createCard({ id: 'd3', type: 'MEDIA', effects: { truthDelta: 0 } }),
+      createCard({ id: 'd4', type: 'MEDIA', effects: { truthDelta: 0 } }),
+    ];
     const state = createState({
       players: {
         P1: {
           hand,
-          deck: [],
+          deck,
           discard: [],
           activeEditorId: 'editor_floridaman',
         },
       },
     });
 
-    jest.spyOn(Math, 'random').mockReturnValue(0.05);
+    jest
+      .spyOn(RelicEngine, 'applyRoundStart')
+      .mockReturnValue({
+        runtime: null,
+        truth: state.truth,
+        ip: state.players.P1.ip,
+        aiIp: state.players.P2.ip,
+        bonusCardDraw: 0,
+        logEntries: [],
+        truthDelta: 0,
+        ipDelta: 0,
+        aiIpDelta: 0,
+      } as any);
+
+    jest.spyOn(Math, 'random').mockReturnValue(0);
 
     const updated = startTurn(state);
 
-    expect(updated.players.P1.hand.length).toBe(1);
-    expect(updated.players.P1.discard.length).toBe(1);
+    const discardIds = updated.players.P1.discard.map(card => card.id);
+    expect(discardIds.some(id => id === 'c1' || id === 'c2')).toBe(true);
+    expect(updated.players.P1.hand.length).toBe(5);
     expect(updated.log.some(entry => entry.includes('Florida Man'))).toBe(true);
   });
 
@@ -217,13 +296,13 @@ describe('editor runtime modifiers', () => {
   });
 
   it('stabilizes setup for editors without bonus blocks', () => {
-    const dossier: EditorDefinition = {
+    const dossier: Editors.EditorDefinition = {
       id: 'editor_minimalist',
       name: 'Minimalist Scribe',
       faction: 'truth',
     };
 
-    const aggregated = getEditorAggregatedEffects(dossier);
+    const aggregated = Editors.getEditorAggregatedEffects(dossier);
     expect(aggregated).toMatchObject({
       startIpDelta: 0,
       deckSizeDelta: 0,
