@@ -119,25 +119,87 @@ export const composeHeroFallback = ({
   }
 
   const body: string[] = [];
+
   if (uniqueStates.length) {
     const list = joinList(uniqueStates.slice(0, 4));
-    body.push(`${subjectNarrative} confirm fresh control over ${list}, filing dossiers for the archive.`);
+    if (faction === 'truth') {
+      body.push(
+        `Coalition stringers swear ${list} just flipped live on the scanner wall, and someone stapled a rumor slip saying "totally not lizard-run" before it got redacted.`
+      );
+    } else {
+      body.push(
+        `Directorate envoys log ${list} as "stabilized," though the memo arrives 80% redacted and the surviving line winks about "routine hypnotic briefings."`
+      );
+    }
+  } else {
+    body.push(
+      faction === 'truth'
+        ? 'No new map pins yet, but a courier left a coffee-ringed rumor clipping claiming the next state already rehearsed its liberation cheers.'
+        : 'Territory charts stay tidy; an internal memo (redacted in advance) warns staff to rehearse victory statements just in case a state defects on camera.'
+    );
   }
 
+  const truthMagnitude = Math.abs(truthDeltaTotal);
+  const truthDirection = truthDeltaTotal > 0 ? 'surge' : truthDeltaTotal < 0 ? 'slump' : 'plateau';
   if (truthSwing) {
-    body.push(truthSwing.replace(/\.$/, '') + '.');
+    const swingLine = truthSwing.replace(/\.$/, '');
+    if (faction === 'truth') {
+      body.push(
+        `${swingLine}; the Paranoid Times rumor desk circled the number ${truthMagnitude} three times and added "ALIENS DID MATH" in glitter pen.`
+      );
+    } else {
+      body.push(
+        `${swingLine}; the compliance chief appended a footnote insisting the ${truthDirection} is "within bureaucratically acceptable paranormal variance."`
+      );
+    }
   } else {
-    body.push('Truth auditors flag no dramatic fluctuation, but the watch floor keeps the consoles warm.');
+    body.push(
+      faction === 'truth'
+        ? 'No fresh truth spike registered, so our tipster mailed a blank page labeled "THIS IS THE PROOF."'
+        : 'Truth monitors show a polite plateau, prompting the deputy director to issue a memo forbidding celebratory blinking.'
+    );
   }
 
   if (comboNames.length) {
-    const owner = comboOwnerLabel ?? 'The combo console';
+    const owner = comboOwnerLabel ?? (faction === 'truth' ? 'The combo cabal' : 'Operations desk');
     const highlight = comboNames.slice(0, 3);
-    body.push(`${owner} celebrate chain reactions: ${highlight.join(' • ')}.`);
+    const rewardMention = comboRewards.length
+      ? `Reward chits dispensed: ${comboRewards.map(reward => `«${reward}»`).join(', ')}.`
+      : 'Reward ledger says "classified icing."';
+    if (faction === 'truth') {
+      body.push(
+        `${owner} bragged about chain reactions — ${highlight.join(' • ')} — before whispering that the vending machine started preaching after the payout. ${rewardMention}`
+      );
+    } else {
+      body.push(
+        `${owner} filed combo form ${highlight.join(' / ')} and stapled a smiling lizard doodle beside the reward line. ${rewardMention}`
+      );
+    }
+  } else {
+    body.push(
+      faction === 'truth'
+        ? 'Combo grid sat idle, so the rumor channel replayed last night’s pirate broadcast about a jackpot hidden in the director’s espresso machine.'
+        : 'No combo paperwork processed; an internal quip suggests the reward cabinet only opens for agents who laugh at the director’s joke twice.'
+    );
   }
 
-  if (!body.length) {
-    body.push('Operatives cycle surveillance duties and await the next anomaly ping.');
+  const rumorAnchor = uniqueStates[0] ?? (comboNames[0] ?? (faction === 'truth' ? 'hotline' : 'briefing room'));
+  if (faction === 'truth') {
+    body.push(
+      `Anon fax from ${rumorAnchor} claims a captured state archivist slipped us a microfiche titled "Definitely Not A Cover Story," but half the slides were replaced by doodles of Bat Boy in a trench coat.`
+    );
+  } else {
+    body.push(
+      `Security whispered that ${rumorAnchor} submitted an insider quip: "If anyone asks about the anomaly, tell them it was morale training" — the rest of the joke was dutifully blacked out.`
+    );
+  }
+
+  while (body.length < 3) {
+    body.push(
+      faction === 'truth'
+        ? 'Paranoid Times interns swear they heard humming behind the archive door, but the official note reads "probably the fridge."'
+        : 'Audit clerks add a boilerplate reminder: "All inexplicable noises are to be logged as HVAC triumphs until further notice."'
+    );
   }
 
   const tags = comboNames.length ? comboNames : uniqueStates;

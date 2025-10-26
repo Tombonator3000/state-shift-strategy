@@ -2,6 +2,14 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-09 – Hero fallback prints rumor-rich paragraphs
+- Timestamp: 2025-11-09T00:00:00Z
+- Files:
+  - `src/components/game/heroFallback.ts`
+  - `__tests__/game/heroFallback.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Rewired the hero fallback copy to guarantee three lore-hungry paragraphs packed with redacted memos, rumor slips, and combo reward jokes, then added focused coverage proving the new beats surface for both factions.
+
 ## 2025-11-08 – Headlines track the truth surge timeline
 - Timestamp: 2025-11-08T00:00:00Z
 - Files:
