@@ -2,6 +2,14 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-11-12 – Empire info popover shows morale & victory intel
+- Timestamp: 2025-11-12T00:00:00Z
+- Files:
+  - `src/components/game/EmpireInfoButton.tsx`
+  - `src/pages/Index.tsx`
+  - `UPDATES_LOG.md`
+- Summary: Added a neon "Empire Info" control that opens a dossier-styled popover combining morale outlook gauges and military/economic/cultural victory progress, and wired the masthead button to surface the existing Player Hub from within the new overlay.
+
 ## 2025-10-27 – Preview command now rebuilds before serving
 - Timestamp: 2025-10-27T00:00:00Z
 - Files:

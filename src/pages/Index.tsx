@@ -31,8 +31,9 @@ import ContextualHelp from '@/components/game/ContextualHelp';
 import InteractiveOnboarding from '@/components/game/InteractiveOnboarding';
 import MechanicsTooltip from '@/components/game/MechanicsTooltip';
 import PlayerHubOverlay, { type PlayerStateIntel } from '@/components/game/PlayerHubOverlay';
+import EmpireInfoButton from '@/components/game/EmpireInfoButton';
 import NewCardsPresentation from '@/components/game/NewCardsPresentation';
-import { Maximize, Menu, Minimize, UserCircle2 } from 'lucide-react';
+import { Maximize, Menu, Minimize } from 'lucide-react';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import { planDiscardOutcome } from '@/utils/discardPlanner';
@@ -2507,7 +2508,12 @@ const Index = () => {
   );
 
   const playerAgenda = gameState.secretAgenda;
+  const playerControlledStateCount = gameState.controlledStates.length;
   const aiControlledStates = gameState.states.filter(s => s.owner === 'ai').length;
+  const neutralStateCount = gameState.states.filter(s => s.owner === 'neutral').length;
+  const contestedStateCount = gameState.states.filter(s => s.contested).length;
+  const totalStateCount = gameState.states.length || 50;
+  const playerCardsPlayedThisRound = gameState.cardsPlayedThisRound.filter(play => play.player === 'human').length;
   const aiAgenda = gameState.aiSecretAgenda;
   const aiObjectiveProgress = aiAgenda
     ? Math.min(100, (aiAgenda.progress / aiAgenda.target) * 100)
@@ -2958,18 +2964,27 @@ const Index = () => {
           >
             ⚖️
           </button>
-          <button
-            type="button"
-            onClick={() => {
+          <EmpireInfoButton
+            faction={(gameState.faction ?? 'truth') as 'truth' | 'government'}
+            playerStates={playerControlledStateCount}
+            aiStates={aiControlledStates}
+            neutralStates={neutralStateCount}
+            contestedStates={contestedStateCount}
+            totalStates={totalStateCount}
+            truth={gameState.truth}
+            truthMomentum={gameState.truthMomentum ?? null}
+            ip={gameState.ip}
+            aiIp={gameState.aiIP}
+            cardsPlayedThisRound={playerCardsPlayedThisRound}
+            intelCount={intelArchiveEntries.length}
+            round={gameState.round}
+            onRequestHub={() => {
               setPlayerHubSource('game');
               setShowPlayerHub(true);
               audio.playSFX('click');
             }}
-            className={mastheadButtonClass}
-            title="Player Hub"
-          >
-            <UserCircle2 className="h-4 w-4" />
-          </button>
+            className="h-9 px-4"
+          />
           <button
             type="button"
             onClick={() => {
