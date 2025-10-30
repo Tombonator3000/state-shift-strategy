@@ -2,6 +2,13 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2025-10-30 – Removed global paper overlay background effect
+- Timestamp: 2025-10-30T00:00:00Z
+- Files:
+  - `index.html`
+  - `src/index.css`
+- Summary: Deleted the paper overlay element and its styling so the app background no longer renders the global wave and grid artifacts across every route.
+
 ## 2025-10-27 – Preview command now rebuilds before serving
 - Timestamp: 2025-10-27T00:00:00Z
 - Files:
