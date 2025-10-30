@@ -10,6 +10,7 @@
     "lint": "eslint . && npm run lint:exports",
     "lint:exports": "ts-prune --project tsconfig.json",
     "test": "bun test --coverage --coverage-reporter=text",
+    "prepreview": "npm run build",
     "preview": "vite preview",
     "predev": "node scripts/generate-extension-index.mjs || bun scripts/generate-extension-index.mjs",
     "prebuild": "node scripts/generate-extension-index.mjs || bun scripts/generate-extension-index.mjs",
