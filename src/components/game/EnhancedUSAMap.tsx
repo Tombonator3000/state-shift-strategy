@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,8 @@ import { AlertTriangle, Target, Shield } from 'lucide-react';
 import { VisualEffectsCoordinator } from '@/utils/visualEffects';
 import { areMapVfxEnabled, areParanormalEffectsEnabled } from '@/state/settings';
 import { getHotspotIdleMessage } from '@/state/useGameLog';
+import type { FeatureCollection } from 'geojson';
+import usStatesTopology from '@/assets/data/usStatesTopo.json';
 
 const uppercaseOrFallback = (value?: string | null, fallback = 'UNKNOWN'): string => (value ?? fallback).toUpperCase();
 import type {
@@ -231,7 +233,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [geoData, setGeoData] = useState<any>(null);
+  const [geoData, setGeoData] = useState<FeatureCollection | null>(null);
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const lastPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -395,33 +397,66 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     return { left, top };
   };
 
-  useEffect(() => {
-    const loadUSData = async () => {
-      try {
-        const response = await fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
-        const topology = await response.json();
-        const geojson = topojson.feature(topology, topology.objects.states);
-        setGeoData(geojson);
-      } catch (error) {
-        console.error('Failed to load US map data:', error);
-        // Fallback mock data
-        setGeoData({
-          type: 'FeatureCollection',
-          features: states.map(state => ({
-            type: 'Feature',
-            id: state.id,
-            properties: { name: state.name, STUSPS: state.abbreviation },
-            geometry: {
-              type: 'Polygon',
-              coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]
-            }
-          }))
-        });
+  const staticGeoData = useMemo<FeatureCollection | null>(() => {
+    try {
+      const topology = usStatesTopology as any;
+      const statesObject = topology.objects?.states;
+      if (!statesObject) {
+        console.error('Failed to locate state topology for EnhancedUSAMap.');
+        return null;
       }
-    };
 
-    loadUSData();
-  }, [states]);
+      const geojson = topojson.feature(topology, statesObject);
+      if (geojson.type !== 'FeatureCollection') {
+        console.error('Unexpected topology format for EnhancedUSAMap.');
+        return null;
+      }
+
+      return geojson as FeatureCollection;
+    } catch (error) {
+      console.error('Failed to parse static US map data for EnhancedUSAMap:', error);
+      return null;
+    }
+  }, []);
+
+  const lacksStateMetadata = useMemo(
+    () => states.length > 0 && states.every(state => !state.abbreviation && !state.id),
+    [states]
+  );
+
+  const fallbackGeoData = useMemo<FeatureCollection | null>(() => {
+    if (!lacksStateMetadata) {
+      return null;
+    }
+
+    return {
+      type: 'FeatureCollection',
+      features: states.map(state => ({
+        type: 'Feature',
+        id: state.abbreviation ?? state.id,
+        properties: {
+          name: state.name,
+          STUSPS: state.abbreviation ?? state.id
+        },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]
+        }
+      }))
+    } as FeatureCollection;
+  }, [lacksStateMetadata, states]);
+
+  const activeGeoData = useMemo<FeatureCollection | null>(() => {
+    if (staticGeoData && !lacksStateMetadata) {
+      return staticGeoData;
+    }
+
+    return fallbackGeoData;
+  }, [fallbackGeoData, lacksStateMetadata, staticGeoData]);
+
+  useEffect(() => {
+    setGeoData(activeGeoData);
+  }, [activeGeoData]);
 
   useEffect(() => {
     const handleGovernmentZoneTarget = (event: CustomEvent<{ active: boolean; cardId?: string; cardName?: string; stateId?: string; mode?: 'select' | 'lock' | 'complete'; }>) => {
