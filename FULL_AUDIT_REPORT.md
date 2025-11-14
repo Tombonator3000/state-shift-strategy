@@ -55,7 +55,7 @@ The game has a solid foundation with sophisticated mechanics and professional Re
 
 **Issues:**
 - Redundant `deck.length === 0` check
-- If `shuffleCards` returns empty array, loop continues indefinitely
+- If `shuffleCards` returns an empty array, loop continues indefinitely
 - No iteration limit
 
 **Recommendation:** Add max iteration counter (e.g., 1000) and proper validation
@@ -94,8 +94,8 @@ The game has a solid foundation with sophisticated mechanics and professional Re
 
 ### 6. Test Coverage Deficit
 **Severity:** CRITICAL
-**Current Coverage:** ~7.9% (32 active tests / 406 source files)
-**Disabled Tests:** 62 test files
+**Active Test Files:** 32 out of 406 source files (~7.9% test file ratio)
+**Disabled Tests:** 63 test files
 
 **Untested Critical Systems:**
 - Win condition logic - NOT TESTED
@@ -204,8 +204,8 @@ The game has a solid foundation with sophisticated mechanics and professional Re
 - `src/lib/decks/expansions.ts:204` - Could fail if `CORE_FLOOR = 1`
 
 #### 5. Array Access Without Checks (MEDIUM)
-- `src/systems/news/absurdComposer.ts:224` - `sources[0].headline` assumes non-empty array
-- `src/ui/UiOverlays.tsx:263` - `breakingHeadlines[0]` no empty check
+- `src/systems/news/absurdComposer.ts:224` - `sources[0].headline` assumes a non-empty array
+- `src/ui/UiOverlays.tsx:263` - `breakingHeadlines[0]` has no empty check
 
 ---
 
@@ -288,7 +288,7 @@ All JSON.parse calls lack runtime validation:
 
 3. **Redundant Deck Checks** (`src/hooks/useGameState.ts:2429-2444`)
    - Pattern indicates potential infinite loop
-   - `generateWeightedDeck` returning empty should throw error
+   - `generateWeightedDeck` returning an empty deck should throw an error
 
 ### Test Coverage Gaps
 
@@ -338,7 +338,7 @@ All JSON.parse calls lack runtime validation:
 - **Other Tests:** 18 files
 
 ### Code Metrics
-- **Total Lines of Code:** ~250,000+ lines
+- **Total Lines of Code:** 250,000+ lines
 - **Largest Files:**
   - useGameState.ts: 6,219 lines (226KB)
   - Index.tsx: 3,467 lines (125KB)
@@ -366,7 +366,7 @@ All JSON.parse calls lack runtime validation:
 
 2. **Fix Infinite Loop Risk**
    - Add max iteration limit to card drawing loop
-   - Validate shuffleCards always returns non-empty when discard available
+   - Validate shuffleCards always returns a non-empty array when discard is available
 
 3. **Add Error Handling to Scripts**
    - Wrap all JSON.parse calls in try-catch
@@ -541,7 +541,7 @@ The Paranoid Times game demonstrates sophisticated game design and professional 
 - Good test structure (where tests exist)
 
 **Critical Weaknesses:**
-- 62 disabled tests representing massive technical debt
+- 63 disabled tests representing massive technical debt
 - TypeScript strict mode disabled, allowing type safety issues
 - No tests for win conditions or core turn flow
 - Large files causing performance issues
