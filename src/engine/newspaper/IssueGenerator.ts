@@ -23,6 +23,12 @@ import { selectArticleForCharacter, type CharacterStageState } from '@/game/recu
 import { resolveRecurringCharacterId } from '@/game/recurringCharacters';
 import { generateProceduralArticle } from './proceduralArticleGenerator';
 import { enhanceArticle } from './articleEnhancer';
+import {
+  composeSmartNarrative,
+  detectThematicCombo,
+  type CardPlayContext,
+  type NarrativeOutput,
+} from '@/engine/news/smartNarrativeComposer';
 
 export interface PlayedCardInput {
   card: Card;
@@ -60,9 +66,22 @@ export interface GeneratedStoryArticle {
   isFallback: boolean;
 }
 
+export interface SmartNarrativeArticle {
+  headline: string;
+  subhead: string;
+  body: string[];
+  byline: string;
+  tone: 'truth' | 'government' | 'mixed';
+  imagePrompt: string;
+  tags: string[];
+  comboName: string | null;
+  cardCount: number;
+}
+
 export interface FrontPagePackage {
   cards: PlayedCardMeta[];
   main: MainGeneratedStory | null;
+  smartNarrative: SmartNarrativeArticle | null;
   articles: GeneratedStoryArticle[];
   fallbackHeadline: string;
   fallbackSubhead: string;
@@ -948,6 +967,35 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     ? generateMainStory(frontPageCards, id => getArticleById(id, articleBank))
     : null;
 
+  // Generate smart narrative for multi-card plays
+  let smartNarrative: SmartNarrativeArticle | null = null;
+  if (selectedCards.length >= 2) {
+    const cardContexts: CardPlayContext[] = selectedCards.map(entry => ({
+      card: entry.card,
+      player: entry.player,
+      truthDelta: entry.truthDelta,
+      targetState: entry.targetState ?? undefined,
+      capturedStates: entry.capturedStates,
+    }));
+
+    const narrativeOutput = composeSmartNarrative(cardContexts);
+    const thematicCombo = detectThematicCombo(cardContexts);
+
+    if (narrativeOutput) {
+      smartNarrative = {
+        headline: narrativeOutput.headline,
+        subhead: narrativeOutput.subhead,
+        body: narrativeOutput.body,
+        byline: narrativeOutput.byline,
+        tone: narrativeOutput.tone,
+        imagePrompt: narrativeOutput.imagePrompt,
+        tags: [...narrativeOutput.tags, ...thematicCombo.bonusTags],
+        comboName: thematicCombo.comboName,
+        cardCount: selectedCards.length,
+      };
+    }
+  }
+
   const articleBankReady = Boolean(articleBank && articleBank.size > 0);
   const frontPageFaction = frontPageCards[0]?.faction === 'GOV' ? 'government' : 'truth';
   const truthDeltaLabel = formatTruthDeltaLabel(context.truthDeltaTotal);
@@ -976,6 +1024,7 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
   const generatedStory: FrontPagePackage = {
     cards: frontPageCards,
     main: mainStory,
+    smartNarrative,
     articles: generatedArticles,
     fallbackHeadline: FALLBACK_FRONT_PAGE_HEADLINE,
     fallbackSubhead,
