@@ -417,7 +417,7 @@
         "requiresStateEvent": true,
         "minCards": 1
       },
-      "headline": "STATE GOES STRANGE — BONUS CASCADES INTO TONIGHT’S EDITION",
+      "headline": "STATE GOES STRANGE — BONUS CASCADES INTO TONIGHT'S EDITION",
       "subhead": "Weather blames ley lines again.",
       "byline": "By: Regional Weird Desk",
       "body": [
@@ -434,6 +434,260 @@
         "map",
         "combo"
       ]
+    },
+    {
+      "comboId": "cmb-alien-government-clash",
+      "priority": 92,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["alien", "ufo", "extraterrestrial"],
+        "opponentIds": ["GOV-001", "GOV-002", "GOV-003", "GOV-004", "GOV-005"],
+        "minCards": 2
+      },
+      "headline": "ALIEN EVIDENCE SPARKS GOVERNMENT SCRAMBLE — CONTAINMENT PROTOCOLS ACTIVATED",
+      "subhead": "Multiple agencies deploy damage control; witnesses report 'men in sedans' canvassing neighborhoods.",
+      "byline": "By: Extraterrestrial Affairs Correspondent",
+      "body": [
+        "Tonight's celestial revelations collided head-on with bureaucratic machinery as evidence and containment fought for dominance.",
+        "Witnesses describe coordinated response vehicles arriving before the sighting was even reported.",
+        "Officials maintain 'routine training exercise' position while amateur astronomers stream contrary footage."
+      ],
+      "imagePrompt": "{style}, night sky with lights, black sedans, official badges, conflicting press conferences",
+      "effects": {
+        "truthBuzz": 2,
+        "ipSpin": -1
+      },
+      "tags": ["alien", "clash", "truth-vs-gov"]
+    },
+    {
+      "comboId": "cmb-double-cryptid",
+      "priority": 88,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["cryptid", "bigfoot", "mothman", "jersey-devil", "chupacabra", "loveland-frogman"],
+        "minCards": 2,
+        "factions": ["truth"]
+      },
+      "headline": "CRYPTID CONVERGENCE: MULTIPLE CREATURES SPOTTED IN SAME REGION",
+      "subhead": "Researchers theorize 'migration pattern' or 'territorial dispute' as sightings multiply.",
+      "byline": "By: Cryptozoology Field Unit",
+      "body": [
+        "In an unprecedented development, multiple cryptid species have been documented in overlapping territory.",
+        "Trail cameras captured what appears to be inter-species communication near abandoned ranger station.",
+        "Wildlife officials insist it's 'bears and owls' despite footage clearly showing neither bears nor owls."
+      ],
+      "imagePrompt": "{style}, forest clearing, multiple blurry figures, trail camera timestamp, moonlight",
+      "effects": {
+        "truthBuzz": 3
+      },
+      "tags": ["cryptid", "convergence", "truth-combo"]
+    },
+    {
+      "comboId": "cmb-media-attack-blitz",
+      "priority": 75,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["media", "broadcast", "viral"],
+        "minCards": 2
+      },
+      "headline": "MEDIA BLITZ OVERWHELMS OFFICIAL CHANNELS — TRUTH GOES VIRAL",
+      "subhead": "Streaming platforms crash as citizen journalists outpace approved narratives.",
+      "byline": "By: Digital Frontlines Bureau",
+      "body": [
+        "A coordinated wave of broadcasts, livestreams, and social posts created a perfect storm of disclosure.",
+        "Traditional media outlets struggled to keep pace as amateur footage dominated every platform.",
+        "Officials called emergency press conference that was immediately fact-checked in real-time by viewers."
+      ],
+      "imagePrompt": "{style}, multiple screens, phone recordings, overwhelmed news desk, viral counters",
+      "effects": {
+        "truthBuzz": 2,
+        "ipSpin": 1
+      },
+      "tags": ["media", "viral", "truth-combo"]
+    },
+    {
+      "comboId": "cmb-zone-control-sweep",
+      "priority": 72,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["zone", "territory", "pressure"],
+        "minCards": 2
+      },
+      "headline": "TERRITORIAL SHIFT: MULTIPLE ZONES FLIP IN COORDINATED WAVE",
+      "subhead": "Cartographers scramble to update maps as influence cascades across state lines.",
+      "byline": "By: Regional Control Monitor",
+      "body": [
+        "A strategic deployment of zone cards has redrawn the influence map in dramatic fashion.",
+        "Local operatives report unprecedented coordination between ground teams and information campaigns.",
+        "Officials in affected areas request additional resources while publicly maintaining 'business as usual.'"
+      ],
+      "imagePrompt": "{style}, US map with pushpins moving, control room, multiple monitors, urgent atmosphere",
+      "effects": {
+        "truthBuzz": 1,
+        "ipSpin": 2
+      },
+      "tags": ["zone", "territorial", "combo"]
+    },
+    {
+      "comboId": "cmb-ghost-disclosure",
+      "priority": 85,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["ghost", "haunted", "paranormal", "spirit"],
+        "minCards": 2,
+        "factions": ["truth"]
+      },
+      "headline": "PARANORMAL EVIDENCE GOES PUBLIC — GHOST HUNTERS VINDICATED",
+      "subhead": "Scientific equipment registers anomalies officials cannot explain away.",
+      "byline": "By: Paranormal Investigation Unit",
+      "body": [
+        "Multiple independent teams captured identical readings at separate locations, ruling out equipment error.",
+        "Thermal imaging, EMF detectors, and audio recordings all corroborate eyewitness testimony.",
+        "Skeptics Association releases statement blaming 'mass hysteria' despite having no alternative explanation."
+      ],
+      "imagePrompt": "{style}, investigation equipment, thermal readings, spooked researchers, cold breath visible",
+      "effects": {
+        "truthBuzz": 2
+      },
+      "tags": ["ghost", "paranormal", "truth-combo"]
+    },
+    {
+      "comboId": "cmb-government-double-down",
+      "priority": 80,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["coverup", "redaction", "classified", "bureaucracy"],
+        "minCards": 2,
+        "factions": ["government"]
+      },
+      "headline": "ADMINISTRATION DOUBLES DOWN — NEW CLASSIFICATION LEVELS ANNOUNCED",
+      "subhead": "Records previously marked 'Classified' now upgraded to 'Ultra-Classified-Plus.'",
+      "byline": "By: Security Clearance Correspondent",
+      "body": [
+        "In response to recent disclosures, officials announced the creation of three new secrecy tiers.",
+        "Documents will now require clearance levels named after gemstones, then extinct animals, then theoretical particles.",
+        "FOIA officers report 'unprecedented' backlog as everything before 1847 is retrospectively reclassified."
+      ],
+      "imagePrompt": "{style}, filing cabinets, new classification stamps, overwhelmed clerks, shredder smoke",
+      "effects": {
+        "truthBuzz": -2,
+        "ipSpin": 2
+      },
+      "tags": ["coverup", "bureaucracy", "government-combo"]
+    },
+    {
+      "comboId": "cmb-whistleblower-wave",
+      "priority": 90,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["whistleblower", "leak", "disclosure", "expose"],
+        "minCards": 2,
+        "factions": ["truth"]
+      },
+      "headline": "WHISTLEBLOWER WAVE CRASHES CONTAINMENT — SOURCES MULTIPLY HOURLY",
+      "subhead": "Anonymous tips overwhelm secure channels; drop boxes report 'unprecedented activity.'",
+      "byline": "By: Protected Source Network",
+      "body": [
+        "What began as a single leak has become a coordinated deluge of insider documentation.",
+        "Sources report 'now or never' sentiment spreading through previously silent departments.",
+        "Legal teams on both sides prepare for what analysts call 'the most documented scandal in history.'"
+      ],
+      "imagePrompt": "{style}, overflowing inbox, multiple anonymous envelopes, secure phone ringing, night desk chaos",
+      "effects": {
+        "truthBuzz": 4,
+        "ipSpin": -1
+      },
+      "tags": ["whistleblower", "disclosure", "truth-combo"]
+    },
+    {
+      "comboId": "cmb-truth-triple-surge",
+      "priority": 65,
+      "exclusive": false,
+      "when": {
+        "minCards": 3,
+        "factions": ["truth", "truth", "truth"]
+      },
+      "headline": "TRIPLE TRUTH SURGE — DISCLOSURE AVALANCHE BURIES DENIAL DESK",
+      "subhead": "Three coordinated revelations create 'perfect storm' of public awareness.",
+      "byline": "By: Truth Coalition Central",
+      "body": [
+        "Tonight's unprecedented three-card truth deployment has overwhelmed damage control capacity.",
+        "Each revelation built upon the last, creating a narrative even mainstream outlets couldn't ignore.",
+        "Officials reportedly 'out of talking points' as the truth meter approaches critical levels."
+      ],
+      "imagePrompt": "{style}, truth meter spiking, multiple headlines, overwhelmed spokesman, cameras flashing",
+      "effects": {
+        "truthBuzz": 5
+      },
+      "tags": ["truth-surge", "triple", "truth-combo"]
+    },
+    {
+      "comboId": "cmb-government-lockdown-triple",
+      "priority": 65,
+      "exclusive": false,
+      "when": {
+        "minCards": 3,
+        "factions": ["government", "government", "government"]
+      },
+      "headline": "TOTAL INFORMATION LOCKDOWN — TRIPLE PROTOCOL ACTIVATED",
+      "subhead": "All channels synchronized; citizens advised to await official guidance.",
+      "byline": "By: Unified Communications Bureau",
+      "body": [
+        "A coordinated three-tier response has established complete narrative control across all sectors.",
+        "Press credentials temporarily suspended for 'recalibration of approved terminology.'",
+        "Public reminded that confusion is normal and clarity will be provided through proper channels."
+      ],
+      "imagePrompt": "{style}, synchronized briefing rooms, identical spokespersons, approved message graphics",
+      "effects": {
+        "truthBuzz": -3,
+        "ipSpin": 3
+      },
+      "tags": ["lockdown", "triple", "government-combo"]
+    },
+    {
+      "comboId": "cmb-attack-sequence",
+      "priority": 70,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["attack", "expose", "raid"],
+        "minCards": 2
+      },
+      "headline": "COORDINATED EXPOSURE CAMPAIGN LANDS MULTIPLE HITS",
+      "subhead": "Synchronized revelations leave no time for damage control between impacts.",
+      "byline": "By: Tactical Disclosure Unit",
+      "body": [
+        "A carefully timed sequence of exposés has created overlapping crises for official narratives.",
+        "Before one denial could be crafted, the next revelation was already trending.",
+        "Analysts describe the technique as 'informational carpet bombing' of unprecedented precision."
+      ],
+      "imagePrompt": "{style}, multiple headlines dropping, overwhelmed press room, phones ringing, chaos",
+      "effects": {
+        "truthBuzz": 3,
+        "ipSpin": -1
+      },
+      "tags": ["attack", "coordinated", "combo"]
+    },
+    {
+      "comboId": "cmb-mixed-narrative-battle",
+      "priority": 60,
+      "exclusive": false,
+      "when": {
+        "minCards": 2
+      },
+      "headline": "NARRATIVE BATTLEFIELD: COMPETING STORIES FIGHT FOR HEADLINES",
+      "subhead": "Truth and containment forces clash in tonight's information warfare.",
+      "byline": "By: Composite Wire Service",
+      "body": [
+        "Tonight's edition features the rare spectacle of opposing narratives in direct combat.",
+        "For every revelation, a counter-narrative emerged; for every cover-up, a leak appeared.",
+        "Viewers are advised to trust their instincts and verify everything through independent channels."
+      ],
+      "imagePrompt": "{style}, split screen, opposing podiums, confused audience, dueling graphics",
+      "effects": {
+        "truthBuzz": 0,
+        "ipSpin": 0
+      },
+      "tags": ["mixed", "battle", "combo"]
     }
   ]
 }
