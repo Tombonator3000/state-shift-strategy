@@ -3,9 +3,13 @@
  *
  * Creates coherent newspaper articles when multiple cards are played together,
  * combining their themes, factions, and effects into unified narratives.
+ *
+ * Now enhanced to pull from existing card articles to create richer,
+ * interconnected newspaper stories based on played card combinations.
  */
 
 import type { Card } from '@/types';
+import { getArticleForCard, type CardArticle } from '@/data/cardArticles/articleDatabase';
 
 export interface CardPlayContext {
   card: Card;
@@ -92,6 +96,104 @@ const CONNECTORS = {
   additive: ['AND', 'PLUS', 'ALONGSIDE', 'COMBINED WITH', 'TOGETHER WITH'],
   contrast: ['BUT', 'YET', 'HOWEVER', 'DESPITE', 'ALTHOUGH'],
   sequential: ['THEN', 'NEXT', 'FOLLOWING', 'SUBSEQUENTLY', 'THEREAFTER']
+};
+
+// ============================================================================
+// ARTICLE-ENRICHED CONTEXT
+// ============================================================================
+
+interface EnrichedCardContext extends CardPlayContext {
+  article: CardArticle | null;
+}
+
+/**
+ * Enrich card play contexts with their pre-written articles
+ */
+const enrichWithArticles = (cards: CardPlayContext[]): EnrichedCardContext[] => {
+  return cards.map(ctx => ({
+    ...ctx,
+    article: getArticleForCard(ctx.card.id),
+  }));
+};
+
+/**
+ * Extract follow-up hooks from all card articles for story continuity
+ */
+const collectFollowUpHooks = (enriched: EnrichedCardContext[]): string[] => {
+  const hooks: string[] = [];
+  for (const ctx of enriched) {
+    if (ctx.article?.followUpHooks?.length) {
+      hooks.push(...ctx.article.followUpHooks);
+    }
+  }
+  return hooks;
+};
+
+/**
+ * Get all states mentioned across card articles
+ */
+const collectMentionedStates = (enriched: EnrichedCardContext[]): string[] => {
+  const states = new Set<string>();
+  for (const ctx of enriched) {
+    if (ctx.article?.statesMentioned?.length) {
+      for (const state of ctx.article.statesMentioned) {
+        states.add(state);
+      }
+    }
+    if (ctx.targetState) {
+      states.add(ctx.targetState);
+    }
+  }
+  return Array.from(states);
+};
+
+/**
+ * Get recurring characters from card articles
+ */
+const collectRecurringCharacters = (enriched: EnrichedCardContext[]): string[] => {
+  const characters = new Set<string>();
+  for (const ctx of enriched) {
+    if (ctx.article?.recurringCharacter) {
+      characters.add(ctx.article.recurringCharacter);
+    }
+  }
+  return Array.from(characters);
+};
+
+/**
+ * Extract key phrases from article headlines for combination
+ */
+const extractHeadlinePhrases = (enriched: EnrichedCardContext[]): string[] => {
+  const phrases: string[] = [];
+  for (const ctx of enriched) {
+    if (ctx.article?.headline) {
+      // Extract the most dramatic phrase from the headline
+      const headline = ctx.article.headline;
+      // Split on common headline separators
+      const parts = headline.split(/[—–:;]/);
+      if (parts.length > 0) {
+        phrases.push(parts[0].trim());
+      }
+    }
+  }
+  return phrases;
+};
+
+/**
+ * Extract byline sources for crediting combined stories
+ */
+const extractBylineSources = (enriched: EnrichedCardContext[]): string[] => {
+  const sources: string[] = [];
+  for (const ctx of enriched) {
+    if (ctx.article?.byline) {
+      // Extract the reporter name from "By: Name, Desk"
+      const match = ctx.article.byline.match(/By[:\s]+([^,]+)/i);
+      if (match) {
+        sources.push(match[1].trim());
+      }
+    }
+  }
+  return sources;
 };
 
 const SUBHEAD_TEMPLATES = {
@@ -318,6 +420,61 @@ const WWN_HEADLINE_TEMPLATES = {
   ]
 };
 
+// Article-enriched headline templates that combine actual card article headlines
+const ARTICLE_COMBO_HEADLINE_TEMPLATES = {
+  connection: [
+    'EXCLUSIVE: {phrase1} LINKED TO {phrase2}',
+    'BOMBSHELL: {phrase1} — NOW CONNECTED TO {phrase2}',
+    'DEVELOPING: {phrase1} AS {phrase2}',
+    'INVESTIGATION REVEALS: {phrase1} AND {phrase2}',
+  ],
+  state_focus: [
+    '{state} ROCKED AS {phrase1}',
+    'CHAOS IN {state}: {phrase1} WHILE {phrase2}',
+    '{state} AUTHORITIES BAFFLED: {phrase1}',
+    'EXCLUSIVE FROM {state}: {phrase1}',
+  ],
+  character_link: [
+    '{character} CONFIRMS: {phrase1}',
+    '{character} BREAKS SILENCE ON {phrase1}',
+    'SOURCES SAY {character} WITNESSED {phrase1}',
+    '{character} "NOT SURPRISED" BY {phrase1}',
+  ],
+};
+
+// Templates for weaving article content into combined body paragraphs
+const ARTICLE_WEAVE_TEMPLATES = {
+  opener: [
+    'In a stunning development that connects {card1} to {card2}, sources confirm that events are now "spiraling in ways nobody predicted."',
+    'What started with {card1} has now expanded to include {card2}, leaving investigators scrambling to connect the dots.',
+    'The connection between {card1} and {card2} became undeniable when witnesses came forward with corroborating accounts.',
+    'Multiple sources have confirmed a link between {card1} and the {card2} situation, with implications that reach far beyond initial reports.',
+  ],
+  hookWeave: [
+    'Meanwhile, {hook} — a development that experts say "changes everything we thought we knew."',
+    'In a related twist, {hook}. Officials declined to comment on the timing.',
+    'Sources close to the investigation revealed that {hook}, though the full significance remains unclear.',
+    'Adding to the intrigue: {hook}. Local witnesses are "not even surprised anymore."',
+  ],
+  stateReference: [
+    'The situation in {state} has taken a dramatic turn as these events converged.',
+    'Residents of {state} are bracing for impact as the story unfolds across their region.',
+    '{state} authorities were unavailable for comment, though an intern was spotted shredding documents.',
+    'The {state} connection adds another layer to an already byzantine situation.',
+  ],
+  characterQuote: [
+    '"{character}" emerged as a key figure, reportedly seen at multiple locations connected to the events.',
+    'When reached for comment, {character} only replied: "I told you so. I\'ve been telling everyone so."',
+    'Sources say {character} has been "unusually quiet" since the news broke — which regulars say is "extremely suspicious."',
+  ],
+  closer: [
+    'The full implications of these connected events remain unclear, but one thing is certain: someone owes someone else an apology.',
+    'Experts advise the public to "stay vigilant" and "maybe start that podcast you\'ve been thinking about."',
+    'More details are expected as authorities sort through what one official called "the most complicated filing cabinet situation in years."',
+    'Citizens are encouraged to screenshot everything, trust their instincts, and update their conspiracy boards accordingly.',
+  ],
+};
+
 function generateHeadline(cards: CardPlayContext[], tone: 'truth' | 'government' | 'mixed'): string {
   const seed = cards.map(c => c.card.id).join('|');
   const names = cards.map(c => c.card.name.toUpperCase());
@@ -466,6 +623,155 @@ function generateEffectDescriptions(cards: CardPlayContext[], tone: 'truth' | 'g
 }
 
 // ============================================================================
+// ARTICLE-ENRICHED GENERATION
+// ============================================================================
+
+/**
+ * Generate a headline that combines actual article content from played cards
+ */
+function generateArticleEnrichedHeadline(
+  enriched: EnrichedCardContext[],
+  tone: 'truth' | 'government' | 'mixed'
+): string | null {
+  const seed = enriched.map(c => c.card.id).join('|');
+  const phrases = extractHeadlinePhrases(enriched);
+  const states = collectMentionedStates(enriched);
+  const characters = collectRecurringCharacters(enriched);
+
+  // Need at least 2 article phrases to create an enriched headline
+  if (phrases.length < 2) {
+    return null;
+  }
+
+  // Try state-focused headline if we have states
+  if (states.length > 0 && phrases.length >= 1) {
+    const template = pick(ARTICLE_COMBO_HEADLINE_TEMPLATES.state_focus, seed + 'state');
+    return template
+      .replace('{state}', states[0].toUpperCase())
+      .replace('{phrase1}', phrases[0])
+      .replace('{phrase2}', phrases[1] ?? '');
+  }
+
+  // Try character-linked headline if we have a recurring character
+  if (characters.length > 0 && phrases.length >= 1) {
+    const template = pick(ARTICLE_COMBO_HEADLINE_TEMPLATES.character_link, seed + 'char');
+    return template
+      .replace('{character}', characters[0].toUpperCase())
+      .replace('{phrase1}', phrases[0]);
+  }
+
+  // Default to connection headline
+  const template = pick(ARTICLE_COMBO_HEADLINE_TEMPLATES.connection, seed + 'conn');
+  return template
+    .replace('{phrase1}', phrases[0])
+    .replace('{phrase2}', phrases[1] ?? phrases[0]);
+}
+
+/**
+ * Generate body paragraphs that weave together actual article content
+ */
+function generateArticleEnrichedBody(
+  enriched: EnrichedCardContext[],
+  tone: 'truth' | 'government' | 'mixed'
+): string[] | null {
+  const seed = enriched.map(c => c.card.id).join('|');
+  const hooks = collectFollowUpHooks(enriched);
+  const states = collectMentionedStates(enriched);
+  const characters = collectRecurringCharacters(enriched);
+
+  // Need at least some article content to enrich
+  if (hooks.length === 0 && states.length === 0 && characters.length === 0) {
+    return null;
+  }
+
+  const paragraphs: string[] = [];
+
+  // Opening - connect the cards
+  const card1 = enriched[0]?.card.name ?? 'the first development';
+  const card2 = enriched[1]?.card.name ?? 'subsequent events';
+  const openingTemplate = pick(ARTICLE_WEAVE_TEMPLATES.opener, seed + 'open');
+  paragraphs.push(
+    openingTemplate
+      .replace('{card1}', card1)
+      .replace('{card2}', card2)
+  );
+
+  // Add state reference if available
+  if (states.length > 0) {
+    const stateTemplate = pick(ARTICLE_WEAVE_TEMPLATES.stateReference, seed + 'state');
+    paragraphs.push(stateTemplate.replace('{state}', states[0]));
+  }
+
+  // Weave in follow-up hooks from the articles (these create continuity!)
+  for (let i = 0; i < Math.min(hooks.length, 2); i++) {
+    const hookTemplate = pick(ARTICLE_WEAVE_TEMPLATES.hookWeave, seed + `hook${i}`);
+    paragraphs.push(hookTemplate.replace('{hook}', hooks[i].toLowerCase()));
+  }
+
+  // Add character reference if available
+  if (characters.length > 0) {
+    const charTemplate = pick(ARTICLE_WEAVE_TEMPLATES.characterQuote, seed + 'char');
+    paragraphs.push(charTemplate.replace('{character}', characters[0]));
+  }
+
+  // Closing
+  const closingTemplate = pick(ARTICLE_WEAVE_TEMPLATES.closer, seed + 'close');
+  paragraphs.push(closingTemplate);
+
+  return paragraphs;
+}
+
+/**
+ * Generate a byline that credits article sources
+ */
+function generateArticleEnrichedByline(
+  enriched: EnrichedCardContext[],
+  tone: 'truth' | 'government' | 'mixed'
+): string | null {
+  const sources = extractBylineSources(enriched);
+
+  if (sources.length === 0) {
+    return null;
+  }
+
+  if (sources.length === 1) {
+    return `By: ${sources[0]}, Multi-Beat Correspondent`;
+  }
+
+  if (sources.length === 2) {
+    return `By: ${sources[0]} and ${sources[1]}, Joint Investigation`;
+  }
+
+  return `By: ${sources[0]} et al., Cross-Desk Collaboration`;
+}
+
+/**
+ * Generate subhead from article content
+ */
+function generateArticleEnrichedSubhead(
+  enriched: EnrichedCardContext[],
+  tone: 'truth' | 'government' | 'mixed'
+): string | null {
+  const seed = enriched.map(c => c.card.id).join('|');
+
+  // Try to use an article's subhead directly, with a twist
+  for (const ctx of enriched) {
+    if (ctx.article?.subhead) {
+      const modifiers = [
+        'Meanwhile, in related news:',
+        'Sources confirm:',
+        'Developing story:',
+        'Update:',
+        'Breaking:',
+      ];
+      return `${pick(modifiers, seed + 'mod')} ${ctx.article.subhead}`;
+    }
+  }
+
+  return null;
+}
+
+// ============================================================================
 // IMAGE PROMPT GENERATION
 // ============================================================================
 
@@ -515,11 +821,15 @@ function generateImagePrompt(cards: CardPlayContext[], tone: 'truth' | 'governme
 
 /**
  * Generate a smart narrative article from multiple played cards
+ *
+ * Enhanced to pull from existing card articles when available,
+ * combining their content into cohesive multi-card narratives.
  */
 export function composeSmartNarrative(
   cards: CardPlayContext[],
   options?: {
     forceNarrative?: boolean;
+    preferArticleContent?: boolean;
   }
 ): NarrativeOutput | null {
   if (!cards || cards.length < 2) {
@@ -529,7 +839,13 @@ export function composeSmartNarrative(
   const tone = determineTone(cards);
   const seed = cards.map(c => c.card.id).join('|');
 
-  const bylines = {
+  // Enrich cards with their pre-written articles
+  const enriched = enrichWithArticles(cards);
+
+  // Check if we have article content to work with
+  const hasArticleContent = enriched.some(ctx => ctx.article !== null);
+
+  const fallbackBylines = {
     truth: [
       'By: Gary (Real Name Withheld By Request, But It\'s Gary)',
       'By: A Guy Who "Just Knows Things"',
@@ -560,11 +876,44 @@ export function composeSmartNarrative(
     ]
   };
 
+  // Try article-enriched generation first if we have article content
+  if (hasArticleContent) {
+    const enrichedHeadline = generateArticleEnrichedHeadline(enriched, tone);
+    const enrichedSubhead = generateArticleEnrichedSubhead(enriched, tone);
+    const enrichedBody = generateArticleEnrichedBody(enriched, tone);
+    const enrichedByline = generateArticleEnrichedByline(enriched, tone);
+
+    // Use enriched content if available, fall back to template-based
+    const headline = enrichedHeadline ?? generateHeadline(cards, tone);
+    const subhead = enrichedSubhead ?? generateSubhead(cards, tone);
+    const body = enrichedBody ?? generateBody(cards, tone);
+    const byline = enrichedByline ?? pick(fallbackBylines[tone], seed + 'byline');
+
+    // Collect additional tags from articles
+    const articleTags: string[] = [];
+    for (const ctx of enriched) {
+      if (ctx.article?.tags) {
+        articleTags.push(...ctx.article.tags);
+      }
+    }
+
+    return {
+      headline,
+      subhead,
+      body,
+      byline,
+      tone,
+      imagePrompt: generateImagePrompt(cards, tone),
+      tags: [...new Set([...getMostRelevantTags(cards), ...articleTags, `${cards.length}-card-combo`, tone])]
+    };
+  }
+
+  // Fall back to template-based generation
   return {
     headline: generateHeadline(cards, tone),
     subhead: generateSubhead(cards, tone),
     body: generateBody(cards, tone),
-    byline: pick(bylines[tone], seed + 'byline'),
+    byline: pick(fallbackBylines[tone], seed + 'byline'),
     tone,
     imagePrompt: generateImagePrompt(cards, tone),
     tags: [...getMostRelevantTags(cards), `${cards.length}-card-combo`, tone]
