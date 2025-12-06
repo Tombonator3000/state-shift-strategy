@@ -33,51 +33,58 @@ export interface NarrativeOutput {
 
 const TRUTH_ACTION_VERBS = {
   primary: [
-    'EXPOSES', 'UNMASKS', 'REVEALS', 'BLOWS LID OFF', 'BROADCASTS',
-    'LEAKS', 'DOCUMENTS', 'STREAMS LIVE', 'CAPTURES ON FILM', 'WITNESSES'
+    'CATCHES', 'PHOTOGRAPHS', 'LIVE-STREAMS', 'FAXES PROOF OF',
+    'BLURTS OUT LOCATION OF', 'ACCIDENTALLY REVEALS', 'POSTS COORDINATES TO',
+    'DRUNK-TEXTS EVIDENCE OF', 'SHOUTS AT 3 AM ABOUT', 'GRAFFITIS TRUTH ABOUT'
   ],
   secondary: [
-    'CONFIRMS', 'CORROBORATES', 'AMPLIFIES', 'SPREADS', 'VALIDATES',
-    'ESCALATES', 'PROVES', 'DEMONSTRATES', 'VERIFIES', 'AUTHENTICATES'
+    'BRINGS CASSEROLE TO', 'HIGH-FIVES', 'SHARES LUNCH WITH',
+    'CONFIRMS SUSPICIONS ABOUT', 'NOTARIZES CLAIMS ABOUT', 'CARPOOLS WITH',
+    'ACCIDENTALLY CC\'S PRESS ON', 'BUMPER-STICKERS TRUTH ABOUT'
   ],
   consequence: [
-    'OFFICIALS SCRAMBLE', 'COVER-UP CRUMBLES', 'DENIAL FAILS',
-    'WITNESSES MULTIPLY', 'FOOTAGE GOES VIRAL', 'TRUTH METER SPIKES',
-    'REALITY SHIFTS', 'NARRATIVE COLLAPSES', 'SPIN DOCTORS PANIC'
+    '"HOLY MOLY" SAYS WITNESS', 'DINER PATRONS APPLAUD', 'ANONYMOUS SOURCE DROPS MIC',
+    'GRANDMOTHER FAINTS TWICE', 'BINGO NIGHT CANCELED', 'POTLUCK RUINED',
+    'LOCAL SHERIFF "NEEDS A MINUTE"', 'CAT REFUSES TO COMMENT',
+    'MAYOR LOCKS SELF IN BATHROOM', 'CHURCH BELLS RING UNPROMPTED'
   ]
 };
 
 const GOV_ACTION_VERBS = {
   primary: [
-    'CONTAINS', 'CLASSIFIES', 'REDIRECTS', 'NEUTRALIZES', 'DOWNPLAYS',
-    'SEALS', 'ARCHIVES', 'PROCESSES', 'MANAGES', 'COORDINATES'
+    'POLITELY IGNORES', 'FILES UNDER "MISCELLANEOUS"', 'SCHEDULES MEETING ABOUT',
+    'FORMS COMMITTEE TO INVESTIGATE', 'SENDS STRONGLY-WORDED MEMO REGARDING',
+    'LOSES PAPERWORK ON', 'RECLASSIFIES AS "BIRD"', 'BLAMES WEATHER BALLOON FOR'
   ],
   secondary: [
-    'REINFORCES', 'STABILIZES', 'IMPLEMENTS', 'DEPLOYS', 'ACTIVATES',
-    'MOBILIZES', 'INITIATES', 'EXECUTES', 'ADMINISTERS', 'FACILITATES'
+    'STAPLES DISCLAIMER TO', 'ASSIGNS INTERN TO', 'CREATES POWERPOINT ABOUT',
+    'SCHEDULES FOLLOW-UP MEETING ON', 'DISTRIBUTES PAMPHLET EXPLAINING AWAY',
+    'HOLDS PRESS CONFERENCE DENYING', 'PUTS ON HOLD INDEFINITELY'
   ],
   consequence: [
-    'SITUATION NORMALIZED', 'NOTHING TO SEE HERE', 'ALL ACCORDING TO PROTOCOL',
-    'MATTER RESOLVED', 'INQUIRY CONCLUDED', 'RECORDS SEALED',
-    'PRESS BRIEFING POSTPONED', 'ROUTINE OPERATION COMPLETE'
+    '"DEFINITELY SWAMP GAS" INSISTS SPOKESMAN', 'PRESS BRIEFING ENDS IN TEARS',
+    'INTERN PROMOTED TO FALL GUY', 'SHREDDER WORKING OVERTIME',
+    'BUDGET MYSTERIOUSLY INCREASED', 'COFFEE MACHINE UNPLUGGED "FOR SAFETY"',
+    'ALL WITNESSES OFFERED "VACATION"', 'WEBSITE CONVENIENTLY CRASHES',
+    'SPOKESPERSON DEVELOPS SUDDEN COUGH', 'FILE CABINET CATCHES FIRE (UNRELATED)'
   ]
 };
 
 const THEME_KEYWORDS: Record<string, string[]> = {
-  ufo: ['saucer', 'lights in sky', 'unidentified craft', 'aerial phenomenon', 'mothership'],
-  alien: ['grey entities', 'extraterrestrial', 'visitors', 'beings', 'specimens'],
-  cryptid: ['creature', 'beast', 'entity', 'specimen', 'anomaly'],
-  bigfoot: ['sasquatch', 'forest giant', 'hairy biped', 'woodland entity'],
-  mothman: ['winged omen', 'red eyes', 'bridge harbinger', 'prophetic entity'],
-  ghost: ['spirit', 'ectoplasm', 'apparition', 'poltergeist', 'haunting'],
-  elvis: ['the King', 'rhinestone pilot', 'velvet visitor', 'jumpsuit sighting'],
-  'florida-man': ['swamp oracle', 'gator whisperer', 'everglades operative'],
-  coverup: ['redaction', 'classified folder', 'sealed records', 'black bars'],
-  bureaucracy: ['forms in triplicate', 'processing queue', 'interdepartmental memo'],
-  disclosure: ['leaked documents', 'whistleblower', 'FOIA dump', 'exposed files'],
-  media: ['broadcast', 'signal', 'transmission', 'channel', 'feed'],
-  attack: ['strike', 'operation', 'raid', 'offensive', 'mission'],
-  zone: ['territory', 'region', 'district', 'sector', 'perimeter']
+  ufo: ['flying pie tin', 'suspicious frisbee', 'glowing hubcap', 'cosmic pizza delivery', 'discount flying saucer'],
+  alien: ['grey accountant', 'space tourist', 'interstellar census-taker', 'cosmic Uber driver', 'E.T.\'s weird cousin'],
+  cryptid: ['mystery meat on legs', 'forest bachelor', 'woodland dropout', 'nature\'s mistake', 'evolutionary typo'],
+  bigfoot: ['forest hobo', '8-foot bachelor', 'nature\'s bouncer', 'woodland Chewbacca', 'hiking trail influencer'],
+  mothman: ['bridge goth', 'winged drama queen', 'prophecy pigeon', 'doom butterfly', 'omen with benefits'],
+  ghost: ['transparent freeloader', 'see-through squatter', 'spectral roommate', 'afterlife loiterer', 'dead guy with grudge'],
+  elvis: ['sequined legend', 'velvet survivor', 'jumpsuit philosopher', 'peanut butter mystic', 'undead crooner'],
+  'florida-man': ['swamp scholar', 'gator diplomat', 'hurricane whisperer', 'retirement home escapee', 'bath salts sommelier'],
+  coverup: ['black marker festival', 'redaction party', 'paper funeral', 'truth shredding', 'fact incinerator'],
+  bureaucracy: ['form 47-B nightmare', 'paperwork purgatory', 'stamp collector\'s fever dream', 'meeting about meetings'],
+  disclosure: ['truth grenade', 'fact bomb', 'honesty nuke', 'accountability missile', 'transparency torpedo'],
+  media: ['static prophecy', 'signal scramble', 'frequency fiasco', 'broadcast bonanza', 'antenna awakening'],
+  attack: ['information assault', 'truth offensive', 'fact raid', 'reality strike', 'narrative nuke'],
+  zone: ['weird hotspot', 'strange district', 'anomaly acres', 'conspiracy corner', 'oddity zone']
 };
 
 const CONNECTORS = {
@@ -89,91 +96,98 @@ const CONNECTORS = {
 
 const SUBHEAD_TEMPLATES = {
   truth: [
-    'Multiple witnesses corroborate {theme1} claims as {theme2} evidence surfaces',
-    'Officials deny {theme1} connection to {theme2} despite mounting evidence',
-    'Amateur footage captures {theme1} moments before {theme2} incident',
-    'Truth meter spikes as {theme1} and {theme2} converge in unprecedented event',
-    'Eyewitnesses describe {theme1} phenomena coinciding with {theme2} activity'
+    '"I knew it!" screams man who has said that about everything since 1987',
+    'Walmart parking lot witness: "It was definitely real, I was only on my third energy drink"',
+    'Local conspiracy theorist vindicated, refuses to stop saying "I told you so"',
+    'Anonymous source provides {theme1} evidence; demands payment in beef jerky',
+    'Grainy footage shows {theme1} near {theme2}; experts agree it\'s "probably not a cat"',
+    '{theme1} truther community celebrates; still can\'t agree on literally anything else',
+    'Denny\'s night manager confirms {theme1} sighting: "I\'ve seen weirder at 3 AM"',
+    'Retired mailman breaks 47-year silence on {theme1}; wife "not surprised, he talks to birds"'
   ],
   government: [
-    'Multi-agency coordination ensures {theme1} and {theme2} matters remain classified',
-    'Spokesperson cites {theme1} as unrelated to {theme2} investigations',
-    'Security protocols activated following {theme1} and {theme2} developments',
-    'Press credentials revoked after {theme1} questions trigger {theme2} review',
-    'Administrative procedures normalize {theme1} while {theme2} files archived'
+    'Spokesperson accidentally uses air quotes around "definitely normal"',
+    'Press release contains 47 uses of the word "routine" in 3 paragraphs',
+    'Official statement: "We are confident that {theme1} is just {theme2}, somehow"',
+    'Government website updated; new 404 error suspiciously detailed',
+    'Pentagon spokeswoman sighs audibly 17 times during briefing on {theme1}',
+    'Internal memo leaked: "Whoever filed {theme1} under \'swamp gas\' is getting promoted"',
+    'Press pool offered complimentary memory-erasing pamphlets after {theme1} briefing',
+    'Officials deny {theme1} connection to {theme2}; provide no alternative explanation'
   ],
   mixed: [
-    'Conflicting reports emerge as {theme1} clashes with {theme2} narrative',
-    'Dueling press conferences address {theme1} and {theme2} simultaneously',
-    'Citizens document {theme1} while officials redirect to {theme2}',
-    'Truth and containment collide over {theme1} and {theme2} revelations',
-    'Spin meets substance as {theme1} and {theme2} dominate headlines'
+    'Witnesses describe {theme1}; government describes "completely different {theme2}"',
+    'Truth seekers and officials agree on one thing: they don\'t agree on anything',
+    '{theme1} believers and {theme2} deniers hold competing rallies in same parking lot',
+    'Local news covers both sides; manages to confuse everyone equally',
+    'Government issues denial; denial needs its own denial by 3 PM',
+    'Narrative so confused that both sides accidentally argue same point twice'
   ]
 };
 
 const BODY_SENTENCE_TEMPLATES = {
   opening: {
     truth: [
-      'Tonight\'s unprecedented convergence began when {card1} triggered a cascade of revelations.',
-      'Multiple sources confirm that {card1} set off a chain reaction of disclosures.',
-      'The evening\'s events started with {card1}, quickly escalating beyond official containment.',
-      'Witnesses report {card1} as the catalyst for what followed.',
-      'Amateur investigators traced the night\'s chaos back to {card1}.'
+      'The evening took a turn when a local man, who asked to remain anonymous but wore a name tag reading "Gary," witnessed {card1} near the Waffle House on Route 9.',
+      'It all started at approximately 3:47 AM when {card1} emerged from circumstances that can only be described as "deeply suspicious" by everyone present.',
+      'Sources confirm the incident began when someone\'s cousin\'s neighbor\'s psychic predicted {card1} would happen, and wouldn\'t you know it.',
+      'A partially-retired cryptozoologist with "impeccable vibes" first documented {card1} while waiting for his burrito at a gas station.',
+      'The chain of events was set in motion when {card1} materialized in front of 23 witnesses, all of whom immediately began arguing about what they saw.'
     ],
     government: [
-      'A coordinated response was initiated following developments related to {card1}.',
-      'Official channels activated standard protocols after {card1} was logged.',
-      'Multi-departmental resources were deployed in response to {card1}.',
-      'The administration\'s measured response to {card1} proceeded as scheduled.',
-      'Briefings were updated to reflect the {card1} situation.'
+      'The Department of Definitely Real Explanations issued a 47-page response to {card1}, citing "atmospheric conditions" 312 times.',
+      'Officials were quick to categorize {card1} as a "standard occurrence" despite no one being able to find it in any standard.',
+      'A hastily assembled committee convened at 2 AM to address {card1}. Coffee consumption described as "aggressive."',
+      'Government spokesperson cleared throat nervously 14 times before explaining that {card1} was "basically a bird."',
+      'The official response to {card1} was delayed by 6 hours due to the paper shredder being "mysteriously overworked."'
     ]
   },
   middle: {
     truth: [
-      'The situation intensified when {card2} added credibility to earlier claims.',
-      'Footage of {card2} circulated rapidly, corroborating eyewitness accounts.',
-      '{card2} provided the smoking gun that skeptics had demanded.',
-      'Social media erupted as {card2} validated citizen journalism.',
-      'The {card2} development connected dots that officials had insisted were unrelated.'
+      'Things escalated when {card2} was confirmed by a retired Air Force pilot who "just couldn\'t take the lying anymore, Brenda."',
+      'The {card2} evidence was corroborated by 47 separate blurry photographs, a voice memo, and one very detailed crayon drawing.',
+      '{card2} arrived just as skeptics were preparing their "I told you it was nothing" tweets, forcing mass deletion.',
+      'A second witness emerged to describe {card2}, adding that they "weren\'t even drunk this time" and their "dog also saw it."',
+      'The situation intensified when local podcaster confirmed {card2} from his basement studio slash mom\'s laundry room.'
     ],
     government: [
-      'Additional measures were implemented once {card2} entered the equation.',
-      'Resource allocation was adjusted to address {card2} variables.',
-      '{card2} necessitated expanded talking points across all channels.',
-      'The {card2} factor was incorporated into revised public guidance.',
-      'Contingency plans for {card2} scenarios were activated seamlessly.'
+      'Following {card2}, officials upgraded the situation from "nothing" to "definitely still nothing, but now with more paperwork."',
+      'The {card2} development prompted an emergency meeting that was immediately downgraded to a "casual chat" for optics.',
+      'Additional resources were allocated to {card2} containment, mostly consisting of "very stern looks" and extra staples.',
+      'Agency representatives practiced their {card2} denial in front of mirrors for approximately 4 hours before the presser.',
+      'The {card2} file was relocated three times in one hour, each time to a filing cabinet with a more ambiguous label.'
     ]
   },
   climax: {
     truth: [
-      'Everything changed when {card3} delivered undeniable proof.',
-      'The {card3} revelation forced even mainstream outlets to acknowledge the pattern.',
-      '{card3} sealed the narrative, leaving no room for official denial.',
-      'By the time {card3} hit the wires, the cover story was already unraveling.',
-      'The triple-point convergence peaked with {card3}, overwhelming damage control.'
+      'The situation reached peak chaos when {card3} was broadcast live on seven different streaming platforms, two of which were supposed to be cooking shows.',
+      '{card3} delivered the final blow when it appeared on camera just as the government spokesperson was saying "this kind of thing never happens."',
+      'By the time {card3} occurred, the coverup had more holes than a cheese-themed doily at a mouse convention.',
+      'The {card3} confirmation came via a fax machine that had been unplugged since 1997, raising additional questions.',
+      '{card3} sealed the deal when it was independently verified by a grandmother, her book club, and one very judgmental parrot.'
     ],
     government: [
-      'The {card3} component allowed for comprehensive narrative synchronization.',
-      'With {card3} addressed, the official position achieved optimal clarity.',
-      '{card3} implementation completed the planned operational arc.',
-      'The inclusion of {card3} ensured consistent messaging across all briefings.',
-      'Final coordination involving {card3} brought the matter to scheduled resolution.'
+      'With {card3} now public, officials released a statement noting that all previous statements were "directionally accurate in spirit."',
+      'The {card3} situation was resolved via emergency PowerPoint, which sources describe as "23 slides of increasingly desperate clip art."',
+      'Following {card3}, the official narrative achieved what analysts call "complete and utter narrative spaghetti."',
+      '{card3} prompted the spokesperson to invent an entirely new euphemism: "alternative spatial conditions."',
+      'The final briefing on {card3} concluded with the phrase "we\'ll get back to you" repeated seven times in varying tones.'
     ]
   },
   closing: {
     truth: [
-      'Citizens are advised to trust their eyes and back up all footage.',
-      'More revelations expected as the truth continues to leak through official walls.',
-      'The paranoid were proven right again—stay tuned and stay skeptical.',
-      'Tonight\'s events mark a turning point. The old narratives are crumbling.',
-      'Experts predict this is only the beginning. Reality has entered the chat.'
+      'Witnesses are advised to screenshot everything, trust no one, and maybe call their mothers because she was right about the government.',
+      'More information expected as soon as someone\'s cousin finishes uploading the footage over their spotty rural WiFi.',
+      'Experts unanimously agree that this changes everything, except for what they disagree on, which is also everything.',
+      'Citizens are encouraged to remain vigilant, stock up on tinfoil, and update their emergency podcast subscriptions.',
+      'The truth, it seems, is not only out there—it\'s in the Denny\'s parking lot and it wants to talk to the manager.'
     ],
     government: [
-      'Citizens are reminded that official channels remain the authoritative source.',
-      'Further updates will be provided through approved media partners.',
-      'The matter is considered resolved pending routine follow-up procedures.',
-      'Public cooperation in maintaining operational security is appreciated.',
-      'Normal activities may resume. Thank you for your patience and compliance.'
+      'Citizens are reminded that normalcy is mandatory and questioning is available by appointment only, between 2-3 PM on alternate Thursdays.',
+      'Further information will be provided once it has been properly "contextualized" by the Department of Careful Wording.',
+      'The matter is considered closed. Any lingering questions should be directed to the nearest suggestion box (shredder).',
+      'Officials thank the public for their "enthusiastic compliance" and remind everyone that curiosity killed the cat, and the cat\'s file is classified.',
+      'Refreshments were served. The incident never happened. Have a pleasant evening.'
     ]
   }
 };
@@ -261,50 +275,92 @@ const getMostRelevantTags = (cards: CardPlayContext[]): string[] => {
 // HEADLINE GENERATION
 // ============================================================================
 
+// Weekly World News-style headline templates that combine cards in absurd ways
+const WWN_HEADLINE_TEMPLATES = {
+  truth2: [
+    '{name1} SPOTTED HAVING LUNCH WITH {name2} — WAFFLE HOUSE EMPLOYEES "NOT SURPRISED"',
+    '{name1} CONFIRMS {name2} IS REAL: "I HAVE THE RECEIPTS AND A POLAROID"',
+    'BREAKING: {name1} AND {name2} SEEN CARPOOLING TO SECRET LOCATION',
+    '{name1} BRINGS {name2} TO THANKSGIVING DINNER — GRANDMA "HANDLING IT WELL"',
+    '{name1} REVEALS {name2} CONNECTION: DINER PATRONS DEMAND ANSWERS, PIE',
+    'LOCAL MAN WITNESSES {name1} AND {name2} — WAS "ONLY ON THIRD ENERGY DRINK"',
+    '{name1} INTRODUCES {name2} TO BOOK CLUB — TUESDAY MEETINGS "FOREVER CHANGED"',
+    '{name1} & {name2} CAUGHT ON TRAIL CAM — BOTH MAKING "QUESTIONABLE FASHION CHOICES"'
+  ],
+  truth3: [
+    '{name1}, {name2}, AND {name3} HOLD SUMMIT AT IHOP — SYRUP TREATY EXPECTED',
+    'TRIPLE THREAT: {name1} LINKS {name2} TO {name3} — "IT ALL MAKES SENSE NOW," CLAIMS MAN',
+    '{name1} • {name2} • {name3}: CONSPIRACY BINGO CARD NOW COMPLETE',
+    'WITNESSES REPORT {name1}, {name2}, AND {name3} "ALL IN THE SAME PARKING LOT"',
+    '{name1} CONFIRMS {name2} KNEW ABOUT {name3} — PODCAST HOSTS VINDICATED',
+    'THE TRIFECTA: {name1} MEETS {name2} RE: {name3} — WORLD "NOT READY"'
+  ],
+  gov2: [
+    '{name1} INCIDENT "RESOLVED" — {name2} JUST SWAMP GAS, SAYS VERY TIRED SPOKESMAN',
+    'OFFICIALS: {name1} AND {name2} "COMPLETELY UNRELATED" — FILE CABINET DISAGREES',
+    '{name1} INVESTIGATION CLOSED; {name2} BLAMED ON "ATMOSPHERIC PAPERWORK"',
+    'MEMO: {name1} NOW CLASSIFIED AS "{name2}" — INTERN RESPONSIBLE PROMOTED',
+    '{name1} PRESS BRIEFING INTERRUPTED BY {name2} — COFFEE BREAK EXTENDED INDEFINITELY',
+    'PENTAGON: {name1} IS "{name2}, BUT NORMAL" — AIR QUOTES USED 47 TIMES'
+  ],
+  gov3: [
+    'TRIPLE DENIAL: {name1}, {name2}, {name3} ALL "ROUTINE" — DEFINITION OF ROUTINE EXPANDED',
+    '{name1} + {name2} + {name3} = "NOTHING TO SEE HERE," SAYS SWEATING OFFICIAL',
+    'COMMITTEE FORMED TO EXPLAIN {name1}, {name2}, AND {name3} — MEETING SCHEDULED FOR NEVER',
+    'CLASSIFIED UPDATE: {name1}, {name2}, {name3} NOW OFFICIALLY "BIRDS"'
+  ],
+  mixed: [
+    '{truth} VS {gov}: PARKING LOT SHOWDOWN DRAWS CROWD, LAWN CHAIRS',
+    '{truth} CLASHES WITH {gov} — BOTH CLAIM OTHER STARTED IT',
+    'CHAOS: {truth} EXPOSES {gov} — GOVERNMENT RESPONSE: "NUH-UH"',
+    '{truth} AND {gov} IN STANDOFF — DENNY\'S BOOTH REMAINS TENSE',
+    '{truth} CONTRADICTS {gov}: LOCAL NEWS "EQUALLY CONFUSED BY BOTH"'
+  ]
+};
+
 function generateHeadline(cards: CardPlayContext[], tone: 'truth' | 'government' | 'mixed'): string {
   const seed = cards.map(c => c.card.id).join('|');
   const names = cards.map(c => c.card.name.toUpperCase());
-  const types = cards.map(c => c.card.type);
 
   if (tone === 'truth') {
-    const mainVerb = pick(TRUTH_ACTION_VERBS.primary, seed + 'main');
-    const connector = pick(CONNECTORS.causal, seed + 'conn');
-    const consequence = pick(TRUTH_ACTION_VERBS.consequence, seed + 'conseq');
-
     if (cards.length === 2) {
-      return `${names[0]} ${mainVerb} ${connector} ${names[1]} ${pick(TRUTH_ACTION_VERBS.secondary, seed + 'sec')} — ${consequence}`;
+      const template = pick(WWN_HEADLINE_TEMPLATES.truth2, seed);
+      return template.replace('{name1}', names[0]).replace('{name2}', names[1]);
     } else if (cards.length === 3) {
-      const secondVerb = pick(TRUTH_ACTION_VERBS.secondary, seed + 'sec');
-      return `${names[0]} ${mainVerb} • ${names[1]} ${secondVerb} • ${names[2]} ${pick(TRUTH_ACTION_VERBS.secondary, seed + 'third')} — ${consequence}`;
+      const template = pick(WWN_HEADLINE_TEMPLATES.truth3, seed);
+      return template
+        .replace('{name1}', names[0])
+        .replace('{name2}', names[1])
+        .replace('{name3}', names[2]);
     }
-
-    return `${names.join(' + ')}: ${mainVerb} — ${consequence}`;
+    const consequence = pick(TRUTH_ACTION_VERBS.consequence, seed + 'conseq');
+    return `${names.join(' & ')}: ${consequence}`;
   }
 
   if (tone === 'government') {
-    const mainVerb = pick(GOV_ACTION_VERBS.primary, seed + 'main');
-    const consequence = pick(GOV_ACTION_VERBS.consequence, seed + 'conseq');
-
     if (cards.length === 2) {
-      return `${names[0]} ${mainVerb} • ${names[1]} ${pick(GOV_ACTION_VERBS.secondary, seed + 'sec')} — ${consequence}`;
+      const template = pick(WWN_HEADLINE_TEMPLATES.gov2, seed);
+      return template.replace('{name1}', names[0]).replace('{name2}', names[1]);
     } else if (cards.length === 3) {
-      return `TRIPLE PROTOCOL: ${names[0]} • ${names[1]} • ${names[2]} — ${consequence}`;
+      const template = pick(WWN_HEADLINE_TEMPLATES.gov3, seed);
+      return template
+        .replace('{name1}', names[0])
+        .replace('{name2}', names[1])
+        .replace('{name3}', names[2]);
     }
-
-    return `ADMINISTRATIVE NOTICE: ${names.join(' • ')} — ${consequence}`;
+    const consequence = pick(GOV_ACTION_VERBS.consequence, seed + 'conseq');
+    return `OFFICIAL NOTICE: ${names.join(' • ')} — ${consequence}`;
   }
 
-  // Mixed tone - narrative clash
+  // Mixed tone - truth vs government clash
   const truthCards = cards.filter(c => !c.card.faction.toLowerCase().includes('gov'));
   const govCards = cards.filter(c => c.card.faction.toLowerCase().includes('gov'));
 
   const truthName = truthCards[0]?.card.name.toUpperCase() ?? 'DISCLOSURE';
   const govName = govCards[0]?.card.name.toUpperCase() ?? 'CONTAINMENT';
 
-  const clashVerbs = ['VS', 'CLASHES WITH', 'BATTLES', 'CONFRONTS', 'CHALLENGES'];
-  const clash = pick(clashVerbs, seed + 'clash');
-
-  return `${truthName} ${clash} ${govName} — DUELING NARRATIVES ROCK THE NATION`;
+  const template = pick(WWN_HEADLINE_TEMPLATES.mixed, seed);
+  return template.replace('{truth}', truthName).replace('{gov}', govName);
 }
 
 // ============================================================================
@@ -475,25 +531,32 @@ export function composeSmartNarrative(
 
   const bylines = {
     truth: [
-      'By: Anonymous Insider',
-      'By: Citizen Journalist Network',
-      'By: Night Desk Truth Squad',
-      'By: Leaked Source Collective',
-      'By: Amateur Investigation Unit'
+      'By: Gary (Real Name Withheld By Request, But It\'s Gary)',
+      'By: A Guy Who "Just Knows Things"',
+      'By: Night Shift Denny\'s Correspondent',
+      'By: Someone\'s Uncle Who Works At The Government',
+      'By: Retired Postman With "Impeccable Vibes"',
+      'By: Anonymous Source (His Name Is Probably Dave)',
+      'By: Conspiracy Corner, Your Mom\'s Basement Branch',
+      'By: Local Podcaster, Episode 847: "We Were Right"'
     ],
     government: [
-      'By: Official Spokesperson',
-      'By: Public Affairs Division',
-      'By: Approved Media Liaison',
-      'By: Communications Bureau',
-      'By: Press Pool (Vetted)'
+      'By: Spokesperson Who Practiced This In The Mirror',
+      'By: Department Of Plausible Deniability',
+      'By: The Intern Who Drew The Short Straw',
+      'By: Committee For Explaining Things (Badly)',
+      'By: Bureau Of "That\'s Classified, Next Question"',
+      'By: Official Narrative Maintenance Division',
+      'By: Approved Media Liaison (Coffee IV Drip)',
+      'By: Public Affairs (Send Help)'
     ],
     mixed: [
-      'By: Conflicting Sources',
-      'By: Dueling Desks',
-      'By: Composite Wire Service',
-      'By: Multiple Contributors',
-      'By: Split Editorial Board'
+      'By: Two Reporters Who Can\'t Agree On Anything',
+      'By: Editorial Board (Currently Arguing)',
+      'By: Sources Who Disagree About What "Sources" Means',
+      'By: Joint Chaos Task Force',
+      'By: Confused Wire Service Amalgamation',
+      'By: Multiple Contributors (Don\'t Get Them Started)'
     ]
   };
 

@@ -131,7 +131,11 @@ describe('SmartNarrativeComposer', () => {
                        headlineLower.includes('clash') ||
                        headlineLower.includes('battle') ||
                        headlineLower.includes('confront') ||
-                       headlineLower.includes('duel');
+                       headlineLower.includes('duel') ||
+                       headlineLower.includes('standoff') ||
+                       headlineLower.includes('contradicts') ||
+                       headlineLower.includes('exposes') ||
+                       headlineLower.includes('chaos');
       expect(hasClash).toBe(true);
     });
 
