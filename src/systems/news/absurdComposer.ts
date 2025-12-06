@@ -30,6 +30,24 @@ const BYLINE: CompositeStory['byline'] = 'Composite Desk';
 const TRUTH_CONNECTORS = ['uncovers', 'broadcasts', 'amplifies', 'decrypts'] as const;
 const GOVERNMENT_CONNECTORS = ['suppresses', 'redacts', 'obscures', 'counterspins'] as const;
 
+// Combo headline templates that combine two article headlines
+const TRUTH_COMBO_HEADLINE_PATTERNS = [
+  '{headline1} — MEANWHILE, {headline2}',
+  '{headline1} AS {headline2}',
+  'DOUBLE EXPOSURE: {headline1} LINKS TO {headline2}',
+  '{headline1}; COALITION CONFIRMS {headline2}',
+  'TRUTHLINE SPECIAL: {headline1} SPARKS {headline2}',
+] as const;
+
+const GOVERNMENT_COMBO_HEADLINE_PATTERNS = [
+  '{headline1} — OFFICIALS DENY {headline2}',
+  '{headline1} AS BUREAU SUPPRESSES {headline2}',
+  'CLASSIFIED MEMO: {headline1} OVERSHADOWS {headline2}',
+  '{headline1}; DIRECTORATE INVESTIGATING {headline2}',
+  'CONTAINMENT SPECIAL: {headline1} DISTRACTS FROM {headline2}',
+] as const;
+
+// Fallback to template-based when no articles have headlines
 const TRUTH_HEADLINE_PATTERNS = [
   'Truthline observers {connector} {subject} {qualifier}',
   'Underground bulletin {connector} {subject} {qualifier}',
@@ -255,6 +273,119 @@ const buildStoryBody = (
   return [opener, sourceParagraph, closer];
 };
 
+/**
+ * Build headline using actual article headlines when available
+ * Combines headlines from played cards for a more authentic tabloid feel
+ */
+const buildCompositeHeadline = (
+  articles: ArticleRecord[],
+  faction: ArticleFaction,
+  rng: () => number,
+  fallbackHeadline: string,
+): string => {
+  // Filter articles that have good headlines (not empty)
+  const articlesWithHeadlines = articles.filter(
+    article => article.headline && article.headline.trim().length > 5
+  );
+
+  if (articlesWithHeadlines.length === 0) {
+    return fallbackHeadline;
+  }
+
+  // If we have just one article with a headline, use it directly
+  if (articlesWithHeadlines.length === 1) {
+    return articlesWithHeadlines[0].headline;
+  }
+
+  // Combine two headlines for a dramatic composite effect
+  const comboTemplates = faction === 'truth'
+    ? TRUTH_COMBO_HEADLINE_PATTERNS
+    : GOVERNMENT_COMBO_HEADLINE_PATTERNS;
+
+  const template = pick(rng, comboTemplates, comboTemplates[0]);
+
+  // Pick the two most interesting headlines (shuffle for variety)
+  const shuffled = [...articlesWithHeadlines].sort(() => rng() - 0.5);
+  const headline1 = shuffled[0].headline.replace(/!+$/, ''); // Remove trailing exclamation marks for combo
+  const headline2 = shuffled[1]?.headline.replace(/!+$/, '') ?? shuffled[0].headline;
+
+  return template
+    .replace('{headline1}', headline1)
+    .replace('{headline2}', headline2);
+};
+
+/**
+ * Build subhead using actual article subheads when available
+ */
+const buildCompositeSubhead = (
+  articles: ArticleRecord[],
+  fallbackSubhead: string,
+  rng: () => number,
+): string => {
+  const articlesWithSubheads = articles.filter(
+    article => article.subhead && article.subhead.trim().length > 10
+  );
+
+  if (articlesWithSubheads.length === 0) {
+    return fallbackSubhead;
+  }
+
+  // Pick a random subhead from available articles
+  return pick(rng, articlesWithSubheads, articlesWithSubheads[0]).subhead;
+};
+
+/**
+ * Build body using actual article content when available
+ * Weaves together excerpts from multiple card articles
+ */
+const buildEnrichedBody = (
+  articles: ArticleRecord[],
+  faction: ArticleFaction,
+  connector: string,
+  subjectLabel: string,
+  secondaryLabel: string,
+  sources: CompositeSourceReference[],
+  rng: () => number,
+): string[] => {
+  const articlesWithBody = articles.filter(
+    article => article.body && article.body.trim().length > 20
+  );
+
+  // If no articles have body content, fall back to template-based
+  if (articlesWithBody.length === 0) {
+    return buildStoryBody(faction, connector, subjectLabel, secondaryLabel, sources, rng);
+  }
+
+  const paragraphs: string[] = [];
+
+  // Use the first article's body as the opener (take first sentence or two)
+  const primaryBody = articlesWithBody[0].body;
+  const primarySentences = primaryBody.split(/\.\s+/).filter(s => s.trim().length > 10);
+  if (primarySentences.length > 0) {
+    paragraphs.push(primarySentences.slice(0, 2).join('. ') + '.');
+  }
+
+  // Add the source paragraph
+  const sourceParagraph = buildSourceParagraph(faction, subjectLabel, sources);
+  paragraphs.push(sourceParagraph);
+
+  // Add content from additional articles if available
+  if (articlesWithBody.length > 1) {
+    const secondaryBody = articlesWithBody[1].body;
+    const secondarySentences = secondaryBody.split(/\.\s+/).filter(s => s.trim().length > 10);
+    if (secondarySentences.length > 0) {
+      paragraphs.push(secondarySentences.slice(0, 2).join('. ') + '.');
+    }
+  }
+
+  // Add a closing line from the template system
+  const closerTemplates =
+    faction === 'truth' ? TRUTH_BODY_CLOSERS : GOVERNMENT_BODY_CLOSERS;
+  paragraphs.push(pick(rng, closerTemplates, closerTemplates[0]));
+
+  return paragraphs;
+};
+
 const composeFromArticles = (
   articles: ArticleRecord[],
   faction: ArticleFaction,
@@ -275,6 +406,7 @@ const composeFromArticles = (
   const connectors = faction === 'truth' ? TRUTH_CONNECTORS : GOVERNMENT_CONNECTORS;
   const connector = pick(rng, connectors, connectors[0]);
 
+  // Build template-based fallback headline (used if no article headlines available)
   const headlineTemplates =
     faction === 'truth' ? TRUTH_HEADLINE_PATTERNS : GOVERNMENT_HEADLINE_PATTERNS;
   const qualifierBases = faction === 'truth' ? TRUTH_QUALIFIERS : GOVERNMENT_QUALIFIERS;
@@ -289,18 +421,27 @@ const composeFromArticles = (
     subject: subjectLabel,
     qualifier,
   });
-  const headline = headlineFormat(pick(rng, headlineTemplates, headlineTemplates[0]));
+  const fallbackHeadline = headlineFormat(pick(rng, headlineTemplates, headlineTemplates[0]));
 
+  // Use actual article headlines when available
+  const headline = buildCompositeHeadline(articles, faction, rng, fallbackHeadline);
+
+  // Build template-based fallback subhead
   const subheadTemplates =
     faction === 'truth' ? TRUTH_SUBHEAD_PATTERNS : GOVERNMENT_SUBHEAD_PATTERNS;
   const subheadFormat = createTemplateFormatter({
     connector,
     subject: subjectLabel,
   });
-  const subhead = subheadFormat(pick(rng, subheadTemplates, subheadTemplates[0]));
+  const fallbackSubhead = subheadFormat(pick(rng, subheadTemplates, subheadTemplates[0]));
+
+  // Use actual article subheads when available
+  const subhead = buildCompositeSubhead(articles, fallbackSubhead, rng);
 
   const imagePrompt = chooseImagePrompt(articles, tags);
-  const body = buildStoryBody(faction, connector, subjectLabel, secondaryLabel, sources, rng);
+
+  // Use enriched body that pulls from actual article content
+  const body = buildEnrichedBody(articles, faction, connector, subjectLabel, secondaryLabel, sources, rng);
 
   return {
     tone: faction,
