@@ -123,23 +123,23 @@ export const buildNewspaperPages = (data: PageBuilderData): React.ReactNode[] =>
     : undefined;
 
   const frontPage = (
-    <NewspaperTexture key="page-1" intensity="medium" aged className="p-6 min-h-[600px]">
+    <NewspaperTexture key="page-1" intensity="medium" aged className="p-3 sm:p-6 min-h-[400px] sm:min-h-[600px] overflow-y-auto">
       {/* Truth Index Bar */}
-      <NewspaperSection className="mb-6 bg-white/90 px-4 py-3 text-newspaper-text rounded shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="font-semibold uppercase tracking-wide text-sm">Truth Index</span>
-            <div className="w-36">
+      <NewspaperSection className="mb-3 sm:mb-6 bg-white/90 px-2 sm:px-4 py-2 sm:py-3 text-newspaper-text rounded shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className="font-semibold uppercase tracking-wide text-xs sm:text-sm">Truth Index</span>
+            <div className="w-24 sm:w-36">
               <Progress value={data.truthProgress} className="h-2 bg-white/40" />
             </div>
             <span className="font-mono text-xs">{data.truthProgress}%</span>
             {data.truthDeltaLabel && (
-              <span className="rounded border border-newspaper-border px-2 py-1 text-[11px] font-semibold uppercase tracking-wide">
+              <span className="rounded border border-newspaper-border px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide">
                 {data.truthDeltaLabel}
               </span>
             )}
           </div>
-          <div className="flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/70">
+          <div className="flex flex-wrap gap-2 sm:gap-3 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-newspaper-text/70">
             <span>Your Cards: {data.playerCards.length}</span>
             <span>Opposition: {data.opponentCards.length}</span>
             <span>Captured: {data.narrativeContext.capturedStates.length || '—'}</span>
@@ -156,16 +156,16 @@ export const buildNewspaperPages = (data: PageBuilderData): React.ReactNode[] =>
         image={heroCardImage}
         imagePosition={heroCardImage ? 'left' : 'top'}
         columns={2}
-        className="mb-4"
+        className="mb-2 sm:mb-4"
       />
 
       {/* Tags */}
       {data.heroTags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-4">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-4">
           {data.heroTags.slice(0, 4).map(tag => (
             <span
               key={tag}
-              className="rounded border border-newspaper-border bg-white/70 px-3 py-1 text-xs uppercase tracking-wide text-newspaper-text/70"
+              className="rounded border border-newspaper-border bg-white/70 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs uppercase tracking-wide text-newspaper-text/70"
             >
               {tag}
             </span>
@@ -218,8 +218,8 @@ export const buildNewspaperPages = (data: PageBuilderData): React.ReactNode[] =>
 
   if (insideArticles.length > 0) {
     const insidePage = (
-      <NewspaperTexture key="page-2" intensity="light" className="p-6 min-h-[600px]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <NewspaperTexture key="page-2" intensity="light" className="p-3 sm:p-6 min-h-[400px] sm:min-h-[600px] overflow-y-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           {insideArticles.map((article, i) => (
             <ExpandableArticle
               key={i}
@@ -235,17 +235,17 @@ export const buildNewspaperPages = (data: PageBuilderData): React.ReactNode[] =>
 
   // PAGE 3: FEATURES - Comics, horoscope, letters, hotspot article
   const featuresPage = (
-    <NewspaperTexture key="page-3" intensity="light" className="p-6 min-h-[600px]">
-      <div className="space-y-6">
+    <NewspaperTexture key="page-3" intensity="light" className="p-3 sm:p-6 min-h-[400px] sm:min-h-[600px] overflow-y-auto">
+      <div className="space-y-4 sm:space-y-6">
         <ComicStrip />
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           <NewspaperHoroscope />
           <LettersToEditor count={4} />
         </div>
 
         {data.hotspotExtraArticle && (
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <ExpandableArticle
               headline={data.hotspotExtraArticle.headline}
               subhead={data.hotspotExtraArticle.subhead}
@@ -262,8 +262,8 @@ export const buildNewspaperPages = (data: PageBuilderData): React.ReactNode[] =>
 
   // PAGE 4: BACK PAGE - Classifieds, conspiracy corner, weather, agenda
   const backPage = (
-    <NewspaperTexture key="page-4" intensity="heavy" aged className="p-6 min-h-[600px]">
-      <div className="space-y-6">
+    <NewspaperTexture key="page-4" intensity="heavy" aged className="p-3 sm:p-6 min-h-[400px] sm:min-h-[600px] overflow-y-auto">
+      <div className="space-y-4 sm:space-y-6">
         <ClassifiedAds count={8} includePersonals />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

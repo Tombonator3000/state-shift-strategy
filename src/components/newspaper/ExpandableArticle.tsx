@@ -55,7 +55,7 @@ export const ExpandableArticle = ({
     <motion.article
       layout
       className={cn(
-        "border-2 border-foreground/20 bg-background p-4 cursor-pointer transition-all hover:shadow-lg hover:border-foreground/40",
+        "border-2 border-foreground/20 bg-background p-2 sm:p-4 cursor-pointer transition-all hover:shadow-lg hover:border-foreground/40",
         isExpanded && "shadow-xl border-foreground/60",
         className
       )}
@@ -63,30 +63,30 @@ export const ExpandableArticle = ({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
+      <div className="flex items-start justify-between gap-2 sm:gap-4">
+        <div className="flex-1 min-w-0">
           <motion.h3
             layout
-            className="font-black text-xl mb-2 leading-tight uppercase"
+            className="font-black text-base sm:text-lg md:text-xl mb-1 sm:mb-2 leading-tight uppercase break-words hyphens-auto"
             style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}
           >
             {headline}
           </motion.h3>
 
           {subhead && (
-            <motion.p layout className="text-sm font-semibold mb-2 text-muted-foreground">
+            <motion.p layout className="text-xs sm:text-sm font-semibold mb-1 sm:mb-2 text-muted-foreground break-words">
               {subhead}
             </motion.p>
           )}
 
           {byline && (
-            <motion.p layout className="text-xs italic mb-3 text-muted-foreground">
+            <motion.p layout className="text-[10px] sm:text-xs italic mb-2 sm:mb-3 text-muted-foreground">
               {byline}
             </motion.p>
           )}
 
-          <motion.div layout className="text-sm leading-relaxed">
-            <p className="mb-2">{preview}</p>
+          <motion.div layout className="text-xs sm:text-sm leading-relaxed">
+            <p className="mb-1 sm:mb-2 break-words">{preview}</p>
 
             <AnimatePresence>
               {isExpanded && (
@@ -99,7 +99,7 @@ export const ExpandableArticle = ({
                 >
                   <div className="pt-2 border-t border-foreground/20 mt-2">
                     {fullContent.split('\n\n').map((paragraph, i) => (
-                      <p key={i} className="mb-3 last:mb-0">
+                      <p key={i} className="mb-2 sm:mb-3 last:mb-0 break-words">
                         {paragraph}
                       </p>
                     ))}
@@ -111,16 +111,16 @@ export const ExpandableArticle = ({
 
           <motion.div
             layout
-            className="flex items-center gap-2 mt-3 text-xs font-bold text-primary"
+            className="flex items-center gap-1 sm:gap-2 mt-2 sm:mt-3 text-[10px] sm:text-xs font-bold text-primary"
           >
             {isExpanded ? (
               <>
-                <ChevronUp className="w-4 h-4" />
+                <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
                 Read Less
               </>
             ) : (
               <>
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                 Read Full Story
               </>
             )}
