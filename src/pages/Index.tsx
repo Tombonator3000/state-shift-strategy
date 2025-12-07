@@ -2915,7 +2915,7 @@ const Index = () => {
 
   const mastheadContent = (
     <div
-      className="flex h-full items-center gap-4 border-b-4 border-newspaper-border px-2 sm:px-4"
+      className="masthead-stripe flex h-full items-center gap-4 border-b-4 border-newspaper-border px-2 sm:px-4"
       style={{ background: "var(--paper)" }}
     >
       <div className="flex items-center gap-3">
@@ -2983,7 +2983,7 @@ const Index = () => {
           </button>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto text-[11px] font-mono text-newspaper-text/80">
-          <div className="flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
+          <div className="round-indicator flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm">
             <span className="font-bold uppercase tracking-wide">Round</span>
             <span>{gameState.turn}</span>
           </div>
@@ -3148,7 +3148,7 @@ const Index = () => {
       <div className="flex min-h-0 flex-1 flex-col gap-4">
         <div className="flex min-h-[320px] flex-1 flex-col gap-4 md:flex-row">
           <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
-            <div className="relative flex-1">
+            <div className="map-scanlines relative flex-1">
               <EnhancedUSAMap
                 states={gameState.states}
                 onStateClick={handleStateClick}
@@ -3175,9 +3175,9 @@ const Index = () => {
 
   const rightPaneContent = (
     <TooltipProvider delayDuration={150}>
-      <aside className="h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
+      <aside className="newsroom-desk h-full min-h-0 min-w-0 flex flex-col rounded border-2 border-newspaper-border bg-newspaper-text text-newspaper-bg shadow-lg">
         <header className="relative flex items-center justify-between gap-2 border-b border-newspaper-border/60 bg-[image:var(--halftone-blue)] bg-[length:6px_6px] bg-repeat px-4 py-3">
-          <h3 className="text-xs font-black uppercase tracking-[0.5em]">NEWSROOM DESK</h3>
+          <h3 className="section-header text-xs font-black uppercase tracking-[0.5em]">NEWSROOM DESK</h3>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
