@@ -134,11 +134,17 @@
 
 .ad-card:hover,
 .ad-card:focus-visible {
-  transform: translate(-1px, -1px);
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.ad-card:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--ink);
 }
 
 .ad-card:focus-visible {
-  outline: 3px solid #000;
+  outline: 3px solid #c00;
   outline-offset: 2px;
 }
 
@@ -149,6 +155,26 @@
   align-items: flex-start;
   text-align: left;
   padding: 0.85rem 1rem;
+  border: 3px solid var(--ink);
+  background: #fff;
+  box-shadow: 3px 3px 0 var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tabloid-menu-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.tabloid-menu-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.tabloid-menu-btn:focus-visible {
+  outline: 3px solid #c00;
+  outline-offset: 2px;
 }
 
 .menu-masthead {
@@ -204,13 +230,91 @@
 
 .continue-btn {
   display: inline-block;
-  padding: 10px 16px;
+  padding: 12px 20px;
   border: 3px solid var(--ink);
   background: #fff;
-  box-shadow: 2px 2px 0 var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: clamp(16px, 3vw, 20px);
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.continue-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.continue-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.continue-btn:focus-visible {
+  outline: 3px solid #c00;
+  outline-offset: 2px;
+}
+
+/* Enhanced primary action button */
+.action-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 14px 24px;
+  background: #c00;
+  color: #fff;
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: clamp(14px, 2.5vw, 18px);
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-btn-primary:hover {
+  background: #a00;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.action-btn-primary:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* Secondary outline button */
+.action-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 12px 20px;
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: clamp(12px, 2vw, 16px);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.action-btn-secondary:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 600px) {

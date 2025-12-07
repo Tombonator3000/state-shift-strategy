@@ -894,6 +894,176 @@ All colors MUST be HSL.
     height: 300px;
   }
 
+  /* === Readable Strikethrough System ===
+   * Red strikethrough that doesn't obscure text - uses offset positioning
+   */
+  .strikethrough-readable {
+    position: relative;
+    text-decoration: none;
+  }
+
+  .strikethrough-readable::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(50% + 0.15em); /* Offset below center to not cover text */
+    height: 2px;
+    background: hsl(var(--truth-red));
+    opacity: 0.75;
+    pointer-events: none;
+    transform: rotate(-0.5deg); /* Slight angle for newspaper feel */
+  }
+
+  /* Alternative: strikethrough with text shadow for contrast */
+  .strikethrough-contrast {
+    position: relative;
+    text-decoration: line-through;
+    text-decoration-color: hsl(var(--truth-red) / 0.85);
+    text-decoration-thickness: 2px;
+    text-shadow:
+      1px 1px 0 hsl(var(--background)),
+      -1px -1px 0 hsl(var(--background)),
+      1px -1px 0 hsl(var(--background)),
+      -1px 1px 0 hsl(var(--background));
+  }
+
+  /* Transparent strikethrough that shows text through */
+  .strikethrough-transparent {
+    position: relative;
+    text-decoration: none;
+  }
+
+  .strikethrough-transparent::after {
+    content: '';
+    position: absolute;
+    left: -2px;
+    right: -2px;
+    top: 50%;
+    height: 3px;
+    background: hsl(var(--truth-red) / 0.45);
+    pointer-events: none;
+    transform: translateY(-50%);
+    border-radius: 1px;
+  }
+
+  /* Wavy strikethrough for more newspaper feel */
+  .strikethrough-wavy {
+    text-decoration: line-through wavy;
+    text-decoration-color: hsl(var(--truth-red) / 0.7);
+    text-decoration-thickness: 1.5px;
+  }
+
+  /* === Newspaper-Styled Button System === */
+  .newspaper-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-family: 'Oswald', 'Bebas Neue', Impact, sans-serif;
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    border: 3px solid hsl(var(--foreground));
+    box-shadow: 4px 4px 0 hsl(var(--foreground));
+    cursor: pointer;
+    transition: all 0.15s ease;
+    overflow: hidden;
+  }
+
+  .newspaper-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 hsl(var(--foreground));
+  }
+
+  .newspaper-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 hsl(var(--foreground));
+  }
+
+  .newspaper-btn:focus-visible {
+    outline: 3px solid hsl(var(--truth-red));
+    outline-offset: 2px;
+  }
+
+  /* Primary newspaper button (red accent) */
+  .newspaper-btn-primary {
+    background: hsl(var(--truth-red));
+    color: white;
+    border-color: hsl(0 0% 10%);
+    box-shadow: 4px 4px 0 hsl(0 0% 10%);
+  }
+
+  .newspaper-btn-primary:hover {
+    background: hsl(0 85% 45%);
+    box-shadow: 6px 6px 0 hsl(0 0% 10%);
+  }
+
+  .newspaper-btn-primary:active {
+    box-shadow: 2px 2px 0 hsl(0 0% 10%);
+  }
+
+  /* Secondary newspaper button (outline style) */
+  .newspaper-btn-secondary {
+    background: transparent;
+    color: hsl(var(--foreground));
+    border: 2px solid hsl(var(--foreground));
+    box-shadow: 3px 3px 0 hsl(var(--foreground) / 0.3);
+  }
+
+  .newspaper-btn-secondary:hover {
+    background: hsl(var(--foreground) / 0.05);
+    box-shadow: 5px 5px 0 hsl(var(--foreground) / 0.3);
+  }
+
+  /* Stamp-style button */
+  .newspaper-btn-stamp {
+    background: hsl(var(--truth-red));
+    color: white;
+    border: 3px solid white;
+    border-radius: 4px;
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--truth-red)),
+      3px 3px 0 hsl(0 0% 10%);
+    transform: rotate(-1deg);
+  }
+
+  .newspaper-btn-stamp:hover {
+    transform: rotate(-1deg) translate(-2px, -2px);
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--truth-red)),
+      5px 5px 0 hsl(0 0% 10%);
+  }
+
+  /* Tab-style newspaper button */
+  .newspaper-btn-tab {
+    padding: 0.5rem 1rem;
+    background: hsl(var(--muted));
+    color: hsl(var(--foreground));
+    border: 2px solid hsl(var(--border));
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    box-shadow: none;
+    margin-bottom: -2px;
+  }
+
+  .newspaper-btn-tab:hover {
+    background: hsl(var(--background));
+    transform: none;
+    box-shadow: none;
+  }
+
+  .newspaper-btn-tab.active {
+    background: hsl(var(--background));
+    border-color: hsl(var(--foreground));
+    z-index: 1;
+  }
+
   /* Micro-interaction Enhancements */
   .micro-bounce:hover {
     animation: micro-bounce 0.6s ease-in-out;
