@@ -3883,6 +3883,11 @@ html, body, #root {
   position: relative;
 }
 
+.masthead-stripe > * {
+  position: relative;
+  z-index: 1;
+}
+
 .masthead-stripe::after {
   content: "";
   position: absolute;
@@ -3897,6 +3902,8 @@ html, body, #root {
     hsl(0 85% 45%) 100%
   );
   box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+  z-index: 0;
+  pointer-events: none;
 }
 
 /* Enhanced header badges with color pops */
