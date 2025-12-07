@@ -55,12 +55,15 @@ export function BreakingNewsTicker({ className }: BreakingNewsTickerProps) {
   return (
     <Card
       className={cn(
-        "fixed top-4 left-1/2 -translate-x-1/2 z-40 max-w-2xl w-full",
+        "fixed left-1/2 -translate-x-1/2 z-40 max-w-2xl w-[calc(100%-2rem)]",
         "bg-destructive/90 text-destructive-foreground backdrop-blur-sm",
         "border-2 border-destructive-foreground/20 shadow-lg",
         "animate-in slide-in-from-top duration-500",
         className
       )}
+      style={{
+        top: "calc(var(--safe-top, 0px) + var(--masthead-h, 64px) + 0.5rem)",
+      }}
     >
       <div className="p-2 flex items-center gap-3">
         <div className="flex-shrink-0">
