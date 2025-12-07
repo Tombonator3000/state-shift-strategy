@@ -5,13 +5,13 @@ import { cn } from '@/lib/utils';
 export type NewspaperTone = 'default' | 'victory';
 
 export const NEWSPAPER_CARD_CLASS =
-  'ink-smudge relative flex h-full max-h-[90vh] w-full max-w-[min(95vw,1280px)] flex-col overflow-hidden border-4 border-newspaper-border bg-newspaper-bg text-newspaper-text shadow-2xl';
+  'ink-smudge relative flex h-full max-h-[90vh] w-full max-w-[min(95vw,1280px)] flex-col overflow-hidden border-2 sm:border-4 border-newspaper-border bg-newspaper-bg text-newspaper-text shadow-2xl';
 
 export const NEWSPAPER_HEADER_CLASS =
-  'relative border-b-4 border-double border-newspaper-border bg-newspaper-header/90 px-6 py-5';
+  'relative border-b-2 sm:border-b-4 border-double border-newspaper-border bg-newspaper-header/90 px-3 py-3 sm:px-6 sm:py-5';
 
 export const NEWSPAPER_BODY_CLASS =
-  'flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 xl:px-5 xl:py-5';
+  'flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-5 md:px-6 md:py-6 xl:px-5 xl:py-5';
 
 export const NEWSPAPER_SECTION_CLASS =
   'rounded-md border border-newspaper-border bg-white/80 shadow-sm';

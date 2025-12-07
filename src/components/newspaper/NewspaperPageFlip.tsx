@@ -99,19 +99,19 @@ export const NewspaperPageFlip = ({ pages, onPageChange, enableSound = true }: N
       </AnimatePresence>
 
       {/* Page Navigation */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 z-10">
+      <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 sm:gap-4 z-10 w-[calc(100%-1rem)] sm:w-auto justify-center">
         <Button
           variant="outline"
           size="sm"
           onClick={prevPage}
           disabled={currentPage === 0}
-          className="bg-background/90 backdrop-blur"
+          className="bg-background/90 backdrop-blur px-2 sm:px-3"
         >
-          <ChevronLeft className="w-4 h-4 mr-1" />
-          Previous
+          <ChevronLeft className="w-4 h-4 sm:mr-1" />
+          <span className="hidden sm:inline">Previous</span>
         </Button>
 
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 sm:gap-2">
           {pages.map((_, index) => (
             <button
               key={index}
@@ -119,7 +119,7 @@ export const NewspaperPageFlip = ({ pages, onPageChange, enableSound = true }: N
               className={cn(
                 "w-2 h-2 rounded-full transition-all",
                 index === currentPage
-                  ? "bg-foreground w-8"
+                  ? "bg-foreground w-6 sm:w-8"
                   : "bg-foreground/30 hover:bg-foreground/60"
               )}
               aria-label={`Go to page ${index + 1}`}
@@ -132,15 +132,15 @@ export const NewspaperPageFlip = ({ pages, onPageChange, enableSound = true }: N
           size="sm"
           onClick={nextPage}
           disabled={currentPage === pages.length - 1}
-          className="bg-background/90 backdrop-blur"
+          className="bg-background/90 backdrop-blur px-2 sm:px-3"
         >
-          Next
-          <ChevronRight className="w-4 h-4 ml-1" />
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight className="w-4 h-4 sm:ml-1" />
         </Button>
       </div>
 
       {/* Page Number */}
-      <div className="absolute top-4 right-4 text-sm font-mono text-muted-foreground">
+      <div className="absolute top-2 sm:top-4 right-2 sm:right-4 text-xs sm:text-sm font-mono text-muted-foreground">
         Page {currentPage + 1} of {pages.length}
       </div>
     </div>
