@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Newspaper, Trophy, Sparkles } from 'lucide-react';
+import { Newspaper, Trophy, Skull, Scale } from 'lucide-react';
 import EndCredits from '@/components/game/EndCredits';
 import FinalEditionLayout from '@/components/game/FinalEditionLayout';
 import GameOverEditionLayout from '@/components/game/GameOverEditionLayout';
@@ -48,12 +48,19 @@ const TabloidVictoryScreen = ({
   }
 
   const isVictory = report.winner === report.playerFaction;
-  const layoutVariant = isVictory ? 'victory' : 'default';
-  const bannerLabel = report.winner === 'draw'
+  const isStalemate = report.winner === 'draw';
+  const isDefeat = !isVictory && !isStalemate;
+  const layoutVariant = isStalemate ? 'stalemate' : isVictory ? 'victory' : 'defeat';
+  const bannerLabel = isStalemate
     ? 'Stalemate'
     : isVictory
       ? 'Victory'
       : 'Defeat';
+  const bannerIcon = isStalemate
+    ? <Scale className="h-6 w-6" />
+    : isVictory
+      ? <Trophy className="h-6 w-6" />
+      : <Skull className="h-6 w-6" />;
   const victoryDetail = victoryType
     ? getVictoryConditionLabel(victoryType).toUpperCase()
     : report.victoryType
@@ -71,25 +78,41 @@ const TabloidVictoryScreen = ({
 
   const readEditionButtonClass = isVictory
     ? 'border border-emerald-200/80 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 text-emerald-950 font-semibold shadow-[0_18px_48px_rgba(16,185,129,0.35)] transition-colors hover:from-emerald-300 hover:via-emerald-400 hover:to-emerald-500 hover:text-emerald-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200'
-    : 'border border-newspaper-border bg-newspaper-bg/90 text-newspaper-text transition hover:bg-white/80 hover:text-newspaper-headline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60';
+    : isDefeat
+      ? 'border border-red-200/80 bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-red-50 font-semibold shadow-[0_18px_48px_rgba(220,38,38,0.35)] transition-colors hover:from-red-400 hover:via-red-500 hover:to-red-600 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200'
+      : isStalemate
+        ? 'border border-amber-200/80 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-amber-950 font-semibold shadow-[0_18px_48px_rgba(245,158,11,0.35)] transition-colors hover:from-amber-300 hover:via-amber-400 hover:to-amber-500 hover:text-amber-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200'
+        : 'border border-newspaper-border bg-newspaper-bg/90 text-newspaper-text transition hover:bg-white/80 hover:text-newspaper-headline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60';
 
   const archiveButtonClass = isVictory
     ? 'border border-dashed border-emerald-200/70 bg-emerald-500/15 text-emerald-100 transition-colors hover:bg-emerald-400/20 hover:text-emerald-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200 disabled:border-emerald-200/40 disabled:bg-emerald-500/10 disabled:text-emerald-100/60'
-    : 'border border-dashed border-newspaper-border/70 bg-newspaper-bg/70 text-newspaper-text transition hover:bg-white/80 hover:text-newspaper-headline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60 disabled:opacity-60';
+    : isDefeat
+      ? 'border border-dashed border-red-200/70 bg-red-500/15 text-red-100 transition-colors hover:bg-red-400/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200 disabled:border-red-200/40 disabled:bg-red-500/10 disabled:text-red-100/60'
+      : isStalemate
+        ? 'border border-dashed border-amber-200/70 bg-amber-500/15 text-amber-100 transition-colors hover:bg-amber-400/20 hover:text-amber-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200 disabled:border-amber-200/40 disabled:bg-amber-500/10 disabled:text-amber-100/60'
+        : 'border border-dashed border-newspaper-border/70 bg-newspaper-bg/70 text-newspaper-text transition hover:bg-white/80 hover:text-newspaper-headline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60 disabled:opacity-60';
 
   const creditsButtonClass = isVictory
     ? 'text-emerald-100/80 transition hover:text-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200'
-    : 'text-newspaper-text/80 transition hover:text-newspaper-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60';
+    : isDefeat
+      ? 'text-red-100/80 transition hover:text-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200'
+      : isStalemate
+        ? 'text-amber-100/80 transition hover:text-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200'
+        : 'text-newspaper-text/80 transition hover:text-newspaper-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60';
 
   const menuButtonClass = isVictory
     ? 'border border-emerald-200/80 bg-emerald-500/25 text-emerald-50 transition-colors hover:bg-emerald-400/30 hover:text-emerald-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200'
-    : 'border border-newspaper-border bg-newspaper-bg/90 text-newspaper-text transition hover:bg-white/80 hover:text-newspaper-headline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60';
+    : isDefeat
+      ? 'border border-red-200/80 bg-red-500/25 text-red-50 transition-colors hover:bg-red-400/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200'
+      : isStalemate
+        ? 'border border-amber-200/80 bg-amber-500/25 text-amber-50 transition-colors hover:bg-amber-400/30 hover:text-amber-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200'
+        : 'border border-newspaper-border bg-newspaper-bg/90 text-newspaper-text transition hover:bg-white/80 hover:text-newspaper-headline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-newspaper-border/60';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-6">
       <GameOverEditionLayout
         bannerLabel={bannerLabel}
-        bannerIcon={isVictory ? <Trophy className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
+        bannerIcon={bannerIcon}
         kicker={victoryDetail}
         metaLine={`Final Campaign Report • ${editionDate}`}
         tagline={tagline}
