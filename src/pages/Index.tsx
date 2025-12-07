@@ -2910,7 +2910,7 @@ const Index = () => {
   );
 
 
-  const mastheadButtonClass = "touch-target inline-flex items-center justify-center rounded-md border border-newspaper-border bg-newspaper-text px-3 text-sm font-semibold text-newspaper-bg shadow-sm transition hover:bg-newspaper-text/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-newspaper-border focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg";
+  const mastheadButtonClass = "touch-target inline-flex items-center justify-center border-2 border-newspaper-border bg-newspaper-text px-3 py-1.5 text-sm font-bold text-newspaper-bg shadow-[2px_2px_0_hsl(var(--newspaper-border))] transition-all duration-150 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--newspaper-border))] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0_hsl(var(--newspaper-border))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-truth-red focus-visible:ring-offset-2 focus-visible:ring-offset-newspaper-bg";
   const statusBadgeClass = 'flex items-center gap-1 whitespace-nowrap rounded border border-newspaper-border bg-newspaper-text px-2 py-1 text-newspaper-bg shadow-sm';
 
   const mastheadContent = (
@@ -3269,7 +3269,7 @@ const Index = () => {
           <Button
             id="end-turn-button"
             onClick={handleEndTurn}
-            className="end-turn-button touch-target w-full border-2 border-black bg-truth-red py-3 font-black uppercase tracking-[0.4em] text-white transition duration-200 hover:bg-white hover:text-truth-red disabled:opacity-60"
+            className="end-turn-button newspaper-btn-primary touch-target w-full border-3 border-black bg-truth-red py-3 font-black uppercase tracking-[0.4em] text-white shadow-[4px_4px_0_hsl(0_0%_10%)] transition duration-200 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(0_0%_10%)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_hsl(0_0%_10%)] disabled:opacity-60 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0_hsl(0_0%_10%)]"
             disabled={isPlayerActionLocked || isEndingTurn}
           >
             {gameState.currentPlayer === 'ai' ? (
