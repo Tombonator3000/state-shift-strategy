@@ -1,13 +1,17 @@
 import React from "react";
 
-type Size = "modal" | "boardMini" | "handMini";
+type Size = "modal" | "boardMini" | "handMini" | "deskMini";
 type Props = { children: React.ReactNode; size?: Size };
 
+const SCALE_MAP: Record<Size, number> = {
+  modal: 1,
+  boardMini: 0.45,
+  handMini: 0.78,
+  deskMini: 0.55, // Compact scale for Newsroom Desk - fits more cards without scrolling
+};
+
 export default function CardFrame({ children, size = "modal" }: Props) {
-  // FINJUSTÉR SKALA HER:
-  // - boardMini: senket til 0.45 for bedre luft i "Cards in Play"
-  // - handMini: beholdt 0.78 (god lesbarhet i Your Hand)
-  const scale = size === "modal" ? 1 : size === "boardMini" ? 0.45 : 0.78;
+  const scale = SCALE_MAP[size];
 
   // Basemål MÅ matche fullkortets outer size (inkl. border)
   const BASE_W = 320;

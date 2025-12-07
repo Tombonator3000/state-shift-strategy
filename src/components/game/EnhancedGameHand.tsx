@@ -239,7 +239,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       ref={handRef}
       onPointerLeave={clearHover}
     >
-      <div className="grid w-full grid-cols-3 gap-3 justify-items-start items-start content-start">
+      <div className="grid w-full grid-cols-2 gap-2 justify-items-center items-start content-start sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {cards.length === 0 ? (
           <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
             No assets available
@@ -382,7 +382,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   card={card}
                   hideStamp
                   polaroidHover={false}
-                  size="handMini"
+                  size="deskMini"
                   className="pointer-events-none select-none"
                   frameClassName={clsx(
                     'drop-shadow-[0_12px_22px_rgba(0,0,0,0.32)] transition-transform duration-200',

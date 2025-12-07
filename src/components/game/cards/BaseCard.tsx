@@ -14,12 +14,14 @@ import {
 } from '@/lib/cardUi';
 import CardFrame from '@/ui/CardFrame';
 
-export type CardFrameSize = 'modal' | 'boardMini' | 'handMini';
+// Re-export the size type from CardFrame for consistency
+export type CardFrameSize = 'modal' | 'boardMini' | 'handMini' | 'deskMini';
 
 const SIZE_TO_SCALE: Record<CardFrameSize, number> = {
   modal: 1,
   boardMini: 0.45,
   handMini: 0.78,
+  deskMini: 0.55, // Compact scale for Newsroom Desk - fits more cards without scrolling
 };
 
 interface BaseCardProps {
