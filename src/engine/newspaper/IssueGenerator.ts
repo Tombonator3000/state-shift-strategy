@@ -195,9 +195,12 @@ const formatPressureLabel = (value: number | undefined | null): string | null =>
 
 const normalizeCardType = (value: Card['type']): PlayedCardMeta['type'] | null => {
   const upper = String(value ?? '').toUpperCase();
-  if (upper === 'ATTACK' || upper === 'MEDIA' || upper === 'ZONE') {
+  // Support all 7 card types
+  if (upper === 'ATTACK' || upper === 'MEDIA' || upper === 'ZONE' ||
+      upper === 'HYBRID' || upper === 'TRAP' || upper === 'PERSISTENT' || upper === 'DEFENSIVE') {
     return upper as PlayedCardMeta['type'];
   }
+  // Fallback matching for compound types
   if (upper.includes('ATTACK')) {
     return 'ATTACK';
   }
@@ -206,6 +209,18 @@ const normalizeCardType = (value: Card['type']): PlayedCardMeta['type'] | null =
   }
   if (upper.includes('ZONE')) {
     return 'ZONE';
+  }
+  if (upper.includes('DEFENSIVE') || upper.includes('DEFENSE')) {
+    return 'DEFENSIVE';
+  }
+  if (upper.includes('HYBRID')) {
+    return 'HYBRID';
+  }
+  if (upper.includes('TRAP')) {
+    return 'TRAP';
+  }
+  if (upper.includes('PERSISTENT')) {
+    return 'PERSISTENT';
   }
   return null;
 };
@@ -397,6 +412,19 @@ const determineTone = (entry: PlayedCardInput, article: ArticleBankCardArticle |
   }
   if (type === 'MEDIA') {
     return faction === 'government' ? 'STRAIGHT_NEWS' : 'TABLOID_SENSATIONAL';
+  }
+  // Handle new card types
+  if (type === 'DEFENSIVE') {
+    return 'CLASSIFIED_REDACTED';
+  }
+  if (type === 'TRAP') {
+    return 'HARD_HITTING_EXPOSE';
+  }
+  if (type === 'HYBRID') {
+    return faction === 'government' ? 'STRAIGHT_NEWS' : 'TABLOID_SENSATIONAL';
+  }
+  if (type === 'PERSISTENT') {
+    return 'LOCAL_COLOR';
   }
 
   return faction === 'government' ? 'STRAIGHT_NEWS' : 'TABLOID_SENSATIONAL';

@@ -56,7 +56,7 @@ describe('generateProceduralArticle thematic word banks', () => {
   const truthCard: Card = {
     id: 'cryptid-card',
     name: 'Midnight Trail Runners',
-    type: 'SCHEME',
+    type: 'TRAP',
     faction: 'truth',
     cost: 2,
     tags: ['Cryptid Watch'],
@@ -65,7 +65,7 @@ describe('generateProceduralArticle thematic word banks', () => {
   const govCard: Card = {
     id: 'op-card',
     name: 'Operation Umbra Fold',
-    type: 'OPERATION',
+    type: 'DEFENSIVE',
     faction: 'government',
     cost: 4,
     tags: ['Covert Operation'],
@@ -139,7 +139,7 @@ describe('generateProceduralArticle article structure', () => {
         card: {
           id: 'psychic-gov-card',
           name: 'Psychic Hotline Compliance Blitz',
-          type: 'OPERATION',
+          type: 'DEFENSIVE',
           faction: 'government',
           cost: 5,
           tags: ['Psychic Hotline'],
