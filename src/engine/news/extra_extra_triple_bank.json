@@ -137,6 +137,7 @@
     "mix_all_gov",
     "type_zone_capture",
     "type_attack_trade",
+    "type_media_triple",
     "generic"
   ],
   "templates": {
@@ -494,17 +495,66 @@
         "factionHint": "mixed"
       }
     ],
+    "type_media_triple": [
+      {
+        "id": "media_broadcast_surge",
+        "match": {
+          "typesAnyCount": {
+            "MEDIA": 2
+          }
+        },
+        "headline": "BROADCAST SURGE: {N1} AMPLIFIES {N2} SIGNAL",
+        "subhead": "Coordinated media deployment achieves unprecedented reach across all channels.",
+        "imagePrompt": "{style}, multiple broadcast towers, overlapping signals, screens everywhere",
+        "body": [
+          "Tonight's triple-media play sent shockwaves through every available channel.",
+          "As {N1} hit the airwaves, {N2} piggy-backed the signal to exponential effect.",
+          "Officials report 'difficulty keeping up with the narrative velocity.'"
+        ],
+        "factionHint": "mixed"
+      }
+    ],
     "generic": [
       {
-        "id": "fallback_generic",
-        "match": {},
-        "headline": "{N1} + {N2} + {N3}: STORY TRIANGLE ROCKS THE EDITION",
-        "subhead": "All signs point to 'unprecedented,' again.",
+        "id": "fallback_truth_triple",
+        "match": {
+          "factions": ["truth", "truth", "truth"]
+        },
+        "headline": "CITIZEN SCOOP TRIPLE: {N1} CONFIRMS {N2} AS {N3} BREAKS",
+        "subhead": "Independent verification cascades through truth network.",
         "imagePrompt": "{style}, newsroom chaos, stacked front pages, blinding flash",
         "body": [
-          "Three-card chain reaction produced overlapping headlines and incompatible alibis.",
-          "Our interns connected yarn between the clippings until it spelled 'yikes.'",
-          "Refresh for more as the plot refuses to sit still."
+          "Three coordinated truth plays sent the disclosure index into uncharted territory.",
+          "{N1} provided the initial spark, {N2} fanned the flames, and {N3} spread them nationwide.",
+          "Officials scramble for talking points as the narrative escapes containment."
+        ],
+        "factionHint": "truth"
+      },
+      {
+        "id": "fallback_gov_triple",
+        "match": {
+          "factions": ["government", "government", "government"]
+        },
+        "headline": "COORDINATED RESPONSE: {N1} JOINS {N2} IN CONTAINMENT PROTOCOL",
+        "subhead": "Multi-agency coordination achieves 'optimal narrative stability.'",
+        "imagePrompt": "{style}, government coordination center, multiple officials, calm efficiency",
+        "body": [
+          "Three-pronged containment measures deployed across all sectors tonight.",
+          "{N1} secured the information perimeter while {N2} handled media coordination.",
+          "{N3} ensured consistent messaging. Officials describe results as 'textbook.'"
+        ],
+        "factionHint": "government"
+      },
+      {
+        "id": "fallback_mixed_battle",
+        "match": {},
+        "headline": "DISCLOSURE VS CONTAINMENT: {N1} CLASHES WITH {N2}",
+        "subhead": "Competing narratives fight for headlines as {N3} tips the balance.",
+        "imagePrompt": "{style}, newsroom chaos, stacked front pages, blinding flash",
+        "body": [
+          "Tonight's three-card collision produced conflicting accounts and dueling press releases.",
+          "{N1} pushed for disclosure while {N2} attempted containment.",
+          "{N3} ultimately determined which narrative reached the public first."
         ],
         "factionHint": "mixed"
       }

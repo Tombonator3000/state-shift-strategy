@@ -9,6 +9,7 @@ import {
   type TripleTemplateBank,
   type TripleTemplateRule,
 } from './newsPools';
+import { composeFromCardArticles, type PlayedCardData } from './smartArticleComposer';
 
 export interface NewsCardLite {
   id: string;
@@ -543,6 +544,30 @@ export function composeTripleHeadline(
   }
 
   const selected = selectTemplateRule(bank, context);
+
+  // If we only have the generic fallback template, try smart composition first
+  if (!selected || selected.bucketId === 'generic') {
+    console.info('🧠 Attempting smart article composition...');
+
+    // Convert NewsCardLite to PlayedCardData for smart composer
+    const playedCards: PlayedCardData[] = played.map(card => ({
+      id: card.id,
+      name: card.name,
+      faction: card.faction,
+      type: card.type,
+      tags: [...card.tags],
+    }));
+
+    const smartArticle = composeFromCardArticles(playedCards, { seed: baseSeed });
+    if (smartArticle) {
+      console.info('✅ Smart Composition Success:', {
+        headline: smartArticle.hed.substring(0, 60) + '...',
+        templateId: smartArticle.templateId,
+      });
+      return smartArticle;
+    }
+  }
+
   if (!selected) {
     console.warn('⚠️ composeTripleHeadline: No matching template found');
     return null;
