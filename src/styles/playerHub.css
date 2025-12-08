@@ -302,3 +302,121 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Mobile portrait (9:16) optimization */
+@media (max-width: 480px) and (orientation: portrait) {
+  .player-hub-dossier .dossier-container {
+    padding: 0.5rem;
+    height: 100dvh;
+  }
+
+  .player-hub-dossier .dossier-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 0;
+  }
+
+  .player-hub-dossier .dossier-header__title {
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+  }
+
+  .player-hub-dossier .dossier-header__classification {
+    font-size: 0.6rem;
+    gap: 0.4rem;
+    letter-spacing: 0.03em;
+  }
+
+  .player-hub-dossier .dossier-folder-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .player-hub-dossier .dossier-folder {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+    border-radius: 0.25rem;
+  }
+
+  .player-hub-dossier .dossier-folder__label {
+    font-size: 0.65rem;
+    letter-spacing: 0.01em;
+  }
+
+  .player-hub-dossier .dossier-content {
+    padding: 0.75rem;
+    border-radius: 0.35rem;
+  }
+
+  .player-hub-dossier .dossier-file-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .player-hub-dossier .dossier-file-title {
+    font-size: 1.1rem;
+  }
+
+  .player-hub-dossier .dossier-file-code {
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+  }
+
+  .player-hub-dossier .dossier-section {
+    margin-bottom: 1rem;
+  }
+
+  .player-hub-dossier .dossier-section__title {
+    font-size: 0.9rem;
+    padding: 0.25rem 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .player-hub-dossier .dossier-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .player-hub-dossier .dossier-card {
+    padding: 0.75rem;
+    border-radius: 0.35rem;
+  }
+
+  .player-hub-dossier .file-metadata {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+  }
+
+  .player-hub-dossier .file-metadata__item {
+    font-size: 0.55rem;
+  }
+
+  .player-hub-dossier .file-metadata__label {
+    letter-spacing: 0.08em;
+    margin-bottom: 0.15rem;
+  }
+
+  .player-hub-dossier .redacted-line {
+    border-radius: 1px;
+  }
+
+  .player-hub-dossier .redacted-block {
+    padding: 0.35rem 0.75rem;
+    margin: 0.75rem 0;
+  }
+
+  .player-hub-dossier .redacted-block::after {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+  }
+}

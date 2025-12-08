@@ -415,3 +415,214 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Mobile portrait (9:16) optimization */
+@media (max-width: 480px) and (orientation: portrait) {
+  .newspaper-front-page {
+    min-height: 100dvh;
+  }
+
+  .newspaper-masthead {
+    padding: 0.5rem 0.75rem;
+    border-bottom-width: 4px;
+  }
+
+  .masthead-top {
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.25rem;
+  }
+
+  .masthead-title {
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
+    letter-spacing: 0.05em;
+  }
+
+  .masthead-tagline {
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    margin-top: 0.25rem;
+    padding-top: 0.25rem;
+    border-top-width: 1px;
+  }
+
+  .hero-image-container {
+    height: clamp(220px, 40dvh, 350px);
+    border-top-width: 4px;
+    border-bottom-width: 4px;
+  }
+
+  .headline-overlay {
+    padding: 1rem 0.75rem;
+    border-left-width: 4px;
+    border-right-width: 4px;
+    border-bottom-width: 2px;
+  }
+
+  .main-headline {
+    font-size: clamp(1.25rem, 5vw, 2rem);
+    margin-bottom: 0.75rem;
+    line-height: 1;
+  }
+
+  .main-headline.victory,
+  .main-headline.defeat {
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.12);
+  }
+
+  .headline-bullets {
+    margin-top: 0.75rem;
+    border-top-width: 2px;
+    padding-top: 0.5rem;
+  }
+
+  .bullet-point {
+    font-size: clamp(0.75rem, 2.5vw, 1rem);
+    margin: 0.25rem 0;
+    line-height: 1.35;
+  }
+
+  .main-story-section {
+    padding: 1rem 0.75rem;
+    border-left-width: 4px;
+    border-right-width: 4px;
+    border-bottom-width: 3px;
+  }
+
+  .main-story-grid {
+    gap: 0.75rem;
+  }
+
+  .main-story-panel {
+    padding: 0.75rem;
+    border-width: 2px;
+    gap: 0.5rem;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  .main-story-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+  }
+
+  .main-story-card-name {
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    letter-spacing: 0.03em;
+  }
+
+  .main-story-hed {
+    font-size: clamp(1rem, 3.5vw, 1.25rem);
+    line-height: 1.15;
+  }
+
+  .main-story-subhead {
+    font-size: clamp(0.75rem, 2vw, 0.9rem);
+  }
+
+  .main-story-paragraph {
+    font-size: clamp(0.75rem, 2vw, 0.85rem);
+    line-height: 1.4;
+  }
+
+  .page-jumps {
+    padding: 0.75rem;
+    border-bottom-width: 3px;
+  }
+
+  .page-jump-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-jump-buttons {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .page-jump-button {
+    width: clamp(70px, 20vw, 95px);
+    height: clamp(70px, 20vw, 95px);
+    border-width: 2px;
+    font-size: clamp(9px, 2vw, 11px);
+    padding: 0.25rem;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+  }
+
+  .page-jump-button.victory,
+  .page-jump-button.defeat {
+    border-width: 2px;
+  }
+
+  .jump-label {
+    font-size: clamp(7px, 1.8vw, 9px);
+    margin-top: 0.15rem;
+  }
+
+  .newspaper-footer {
+    padding: 0.5rem 0.75rem;
+    border-left-width: 4px;
+    border-right-width: 4px;
+    border-bottom-width: 4px;
+  }
+
+  .footer-headline {
+    font-size: clamp(0.65rem, 2vw, 0.8rem);
+    line-height: 1.35;
+  }
+
+  .newspaper-page {
+    height: 100dvh;
+  }
+
+  .newspaper-inside-masthead {
+    padding: 0.35rem 0.75rem;
+    border-bottom-width: 2px;
+    font-size: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .newspaper-article-column {
+    border-width: 2px;
+    padding: 0.75rem;
+  }
+
+  .newspaper-stat-box {
+    border-width: 2px;
+    padding: 0.5rem;
+  }
+
+  .newspaper-divider {
+    height: 2px;
+    margin: 0.5rem 0;
+  }
+
+  .newspaper-subheading {
+    font-size: clamp(0.9rem, 3.5vw, 1.15rem);
+    margin: 0.5rem 0;
+    border-bottom-width: 2px;
+    padding-bottom: 0.25rem;
+    letter-spacing: 0.04em;
+  }
+
+  .newspaper-body-text {
+    font-size: clamp(0.75rem, 2vw, 0.85rem);
+    line-height: 1.35;
+  }
+
+  .newspaper-caption {
+    font-size: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .newspaper-content-grid {
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .newspaper-two-col,
+  .newspaper-three-col {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}

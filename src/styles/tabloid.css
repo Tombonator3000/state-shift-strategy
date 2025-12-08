@@ -330,3 +330,120 @@
     font-size: 16px;
   }
 }
+
+/* Mobile portrait (9:16) optimization */
+@media (max-width: 480px) and (orientation: portrait) {
+  .tabloid-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 0.35rem;
+  }
+
+  .masthead {
+    font-size: clamp(24px, 5.5vw, 40px);
+    padding: 6px 4px;
+    border-bottom-width: 2px;
+  }
+
+  .subhead {
+    font-size: clamp(10px, 2.5vw, 14px);
+    padding: 3px 6px;
+    margin: 3px 0 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .tabloid-card {
+    border-width: 2px;
+    box-shadow: 1.5px 1.5px 0 var(--ink);
+  }
+
+  .card-headline {
+    font-size: clamp(12px, 3.5vw, 18px);
+    padding: 3px 6px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    box-shadow: 1.5px 1.5px 0 var(--ink);
+  }
+
+  .tabloid-card .redact {
+    height: 22%;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 -1px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  .tabloid-card .redact::after {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+  }
+
+  .sidebar {
+    gap: 6px;
+  }
+
+  .ad-card {
+    border-width: 2px;
+    padding: 6px 8px;
+    font-size: 12px;
+    box-shadow: 1.5px 1.5px 0 var(--ink);
+  }
+
+  .ad-card.small {
+    font-size: 14px;
+    padding: 5px 7px;
+  }
+
+  .tabloid-menu-btn {
+    padding: 0.5rem 0.65rem;
+    border-width: 2px;
+    box-shadow: 2px 2px 0 var(--ink);
+    gap: 0.2rem;
+  }
+
+  .menu-masthead {
+    font-size: 0.5rem;
+    letter-spacing: 0.05em;
+    padding-bottom: 0.15rem;
+  }
+
+  .menu-headline {
+    font-size: 0.8rem;
+    line-height: 1.15;
+  }
+
+  .menu-subhead {
+    font-size: 0.6rem;
+    line-height: 1.25;
+  }
+
+  .ticker {
+    margin-top: 6px;
+    border-top-width: 2px;
+    padding: 6px 0;
+  }
+
+  .continue-btn {
+    padding: 8px 14px;
+    border-width: 2px;
+    box-shadow: 2.5px 2.5px 0 var(--ink);
+    font-size: clamp(12px, 3vw, 16px);
+    letter-spacing: 0.06em;
+  }
+
+  .action-btn-primary {
+    padding: 8px 14px;
+    border-width: 2px;
+    box-shadow: 2.5px 2.5px 0 var(--ink);
+    font-size: clamp(11px, 2.5vw, 14px);
+    letter-spacing: 0.08em;
+    gap: 0.35rem;
+  }
+
+  .action-btn-secondary {
+    padding: 6px 12px;
+    border-width: 1.5px;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15);
+    font-size: clamp(10px, 2vw, 13px);
+    letter-spacing: 0.06em;
+    gap: 0.3rem;
+  }
+}
