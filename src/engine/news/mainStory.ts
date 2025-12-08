@@ -3,7 +3,7 @@ import type { CardArticle } from '@/news/articleBank';
 export type PlayedCardMeta = {
   id: string;
   name: string;
-  type: 'ATTACK' | 'MEDIA' | 'ZONE';
+  type: 'ATTACK' | 'MEDIA' | 'ZONE' | 'HYBRID' | 'TRAP' | 'PERSISTENT' | 'DEFENSIVE';
   faction: 'TRUTH' | 'GOV';
 };
 
@@ -22,6 +22,10 @@ const TRUTH_VERBS = {
   ATTACK: ['EXPOSES', 'BUSTS', 'LEAKS', 'BLOWS LID OFF', 'IGNITES', 'BREAKS'],
   MEDIA: ['GOES VIRAL', 'BROADCASTS', 'TRENDING', 'LEAKS TO PUBLIC', 'STREAMS LIVE'],
   ZONE: ['ERUPTS IN', 'SWEEPS ACROSS', 'HAUNTS', 'OVERWHELMS', 'INVADES'],
+  DEFENSIVE: ['FORTIFIES', 'SHIELDS', 'BUNKERS DOWN', 'LOCKS DOWN', 'SECURES'],
+  HYBRID: ['UNLEASHES', 'DEPLOYS', 'ACTIVATES', 'TRIGGERS', 'INITIATES'],
+  TRAP: ['SPRINGS', 'CATCHES', 'ENSNARES', 'AMBUSHES', 'TRAPS'],
+  PERSISTENT: ['MAINTAINS', 'SUSTAINS', 'CONTINUES', 'PERSISTS WITH', 'UPHOLDS'],
 } as const;
 
 const TRUTH_CONNECTORS = [
