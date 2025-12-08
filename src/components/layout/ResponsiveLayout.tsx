@@ -12,9 +12,11 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
 
   return (
     <div
-      className="app-shell flex h-screen min-h-0 flex-col"
+      className="app-shell flex min-h-0 flex-col"
       style={{
         paddingTop: "var(--safe-top)",
+        height: "100dvh",
+        minHeight: "100dvh",
       }}
     >
       {/* Masthead */}
@@ -37,21 +39,22 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
             paddingRight: "var(--safe-right)",
           }}
         >
-          <div className="app-scroll h-full p-2 sm:p-3 lg:p-4">
+          <div className="app-scroll h-full p-1.5 sm:p-2 md:p-3 lg:p-4">
             <div
               className={clsx(
-                "grid h-full min-h-0 gap-3",
+                "grid h-full min-h-0",
+                "gap-2 sm:gap-2.5 md:gap-3",
                 "grid-cols-1",
-                hasRightPane && "lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_480px]"
+                hasRightPane && "lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] 2xl:grid-cols-[1fr_480px]"
               )}
             >
               <main className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-                <div className="flex h-full min-h-0 min-w-0 flex-col overflow-y-auto">
+                <div className="flex h-full min-h-0 min-w-0 flex-col overflow-y-auto overflow-x-hidden">
                   {leftPane}
                 </div>
               </main>
               {hasRightPane && (
-                <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">{rightPane}</div>
+                <div className="hidden lg:flex h-full min-h-0 min-w-0 flex-col overflow-hidden">{rightPane}</div>
               )}
             </div>
           </div>
