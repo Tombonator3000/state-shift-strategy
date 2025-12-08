@@ -688,6 +688,125 @@
         "ipSpin": 0
       },
       "tags": ["mixed", "battle", "combo"]
+    },
+    {
+      "comboId": "cmb-gov-zone-attack-media",
+      "priority": 85,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["zone", "attack", "media", "bureaucracy", "coverup"],
+        "minCards": 3,
+        "factions": ["government"]
+      },
+      "headline": "COORDINATED CONTAINMENT: ZONE LOCKDOWN + ATTACK + MEDIA BLACKOUT",
+      "subhead": "Multi-pronged government response achieves 'optimal narrative stability.'",
+      "byline": "By: Interagency Coordination Desk",
+      "body": [
+        "A synchronized three-phase containment protocol deployed across affected sectors tonight.",
+        "Zone assets secured the perimeter while attack teams neutralized information sources.",
+        "Media coordination ensured consistent messaging. Officials describe results as 'textbook.'"
+      ],
+      "imagePrompt": "{style}, government control room, multiple monitors, coordinated teams, efficient atmosphere",
+      "effects": {
+        "truthBuzz": -3,
+        "ipSpin": 3
+      },
+      "tags": ["government-combo", "coordination", "containment"]
+    },
+    {
+      "comboId": "cmb-truth-media-viral",
+      "priority": 82,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["media", "viral", "broadcast", "podcast", "stream"],
+        "minCards": 2,
+        "factions": ["truth"]
+      },
+      "headline": "VIRAL TRUTH CASCADE: MULTIPLE BROADCASTS OVERWHELM SUPPRESSION",
+      "subhead": "Citizen journalism network achieves simultaneous breakthrough on all platforms.",
+      "byline": "By: Digital Truth Coalition",
+      "body": [
+        "Independent streams converged tonight in what analysts call a 'coordinated authenticity event.'",
+        "Before official responses could be formulated, the footage had already been archived worldwide.",
+        "Truth index spiked across all monitored demographics. Damage control teams report 'unprecedented volume.'"
+      ],
+      "imagePrompt": "{style}, multiple phone screens, viral counters, livestream chaos, excited faces",
+      "effects": {
+        "truthBuzz": 4,
+        "ipSpin": -1
+      },
+      "tags": ["truth-combo", "viral", "media"]
+    },
+    {
+      "comboId": "cmb-truth-attack-expose",
+      "priority": 80,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["attack", "expose", "leak", "raid", "scandal"],
+        "minCards": 2,
+        "factions": ["truth"]
+      },
+      "headline": "DOUBLE EXPOSURE: ATTACK CARDS SHRED OFFICIAL NARRATIVE",
+      "subhead": "Coordinated revelations leave no room for plausible denial.",
+      "byline": "By: Investigative Truth Unit",
+      "body": [
+        "Tonight's synchronized attack deployment caught containment teams completely off-guard.",
+        "Each revelation built upon the last, creating an undeniable pattern of disclosure.",
+        "Officials scrambled for talking points while the evidence continued to accumulate."
+      ],
+      "imagePrompt": "{style}, documents flying, exposed secrets, overwhelmed officials, camera flashes",
+      "effects": {
+        "truthBuzz": 3,
+        "ipSpin": -2
+      },
+      "tags": ["truth-combo", "attack", "expose"]
+    },
+    {
+      "comboId": "cmb-gov-bureaucracy-lock",
+      "priority": 78,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["bureaucracy", "paperwork", "classified", "redaction", "protocol"],
+        "minCards": 2,
+        "factions": ["government"]
+      },
+      "headline": "BUREAUCRATIC LOCKDOWN: PAPERWORK AVALANCHE BURIES CURIOSITY",
+      "subhead": "New filing requirements effectively neutralize independent inquiry.",
+      "byline": "By: Administrative Compliance Bureau",
+      "body": [
+        "Citizens attempting to investigate tonight's events face seventeen new form requirements.",
+        "Processing time for information requests extended to 'when appropriate.'",
+        "Officials assure the public that transparency remains a core value, pending review."
+      ],
+      "imagePrompt": "{style}, overflowing filing cabinets, stamp-wielding clerks, confused citizens, endless forms",
+      "effects": {
+        "truthBuzz": -2,
+        "ipSpin": 2
+      },
+      "tags": ["government-combo", "bureaucracy", "containment"]
+    },
+    {
+      "comboId": "cmb-zone-pressure-surge",
+      "priority": 75,
+      "exclusive": false,
+      "when": {
+        "anyTags": ["zone", "territory", "pressure", "grassroots", "local"],
+        "minCards": 2
+      },
+      "headline": "TERRITORIAL WAVE: MULTIPLE ZONES SHIFT IN COORDINATED PUSH",
+      "subhead": "Ground game proves decisive as influence cascades across state lines.",
+      "byline": "By: Regional Control Monitor",
+      "body": [
+        "A strategic deployment of zone pressure created ripple effects across multiple territories.",
+        "Local operatives report unprecedented coordination between ground teams.",
+        "Cartographers scramble to update influence maps as the situation develops."
+      ],
+      "imagePrompt": "{style}, US map with shifting colors, pushpins moving, urgent atmosphere",
+      "effects": {
+        "truthBuzz": 1,
+        "ipSpin": 2
+      },
+      "tags": ["combo", "zone", "territorial"]
     }
   ]
 }
