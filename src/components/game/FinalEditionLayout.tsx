@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { ExtraStamp } from '@/components/newspaper/ExtraStamp';
+import { Trophy, Skull, Scale } from 'lucide-react';
 import {
   NEWSPAPER_META_CLASS,
   NEWSPAPER_SECTION_HEADING_CLASS,
@@ -229,13 +230,46 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
   const editionDate = new Date(report.recordedAt).toLocaleDateString();
   const showExtraStamp = report.victoryType === 'agenda' && report.winner !== 'draw';
 
-  const tone: NewspaperTone = playerOutcome === 'Victory' ? 'victory' : 'default';
+  const isVictory = playerOutcome === 'Victory';
+  const isDefeat = playerOutcome === 'Defeat';
+  const isStalemate = playerOutcome === 'Stalemate';
+  const tone: NewspaperTone = isVictory ? 'victory' : 'default';
+
+  // Outcome-specific classes for defeat and stalemate styling
+  const outcomeIcon = isStalemate
+    ? <Scale className="h-8 w-8" />
+    : isVictory
+      ? <Trophy className="h-8 w-8" />
+      : <Skull className="h-8 w-8" />;
+  const outcomeBannerClass = isVictory
+    ? 'border-emerald-400/60 bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 text-emerald-50'
+    : isDefeat
+      ? 'border-red-400/60 bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-red-50'
+      : 'border-amber-400/60 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-amber-50';
+  const outcomeIconClass = isVictory
+    ? 'text-emerald-200 drop-shadow-[0_0_20px_rgba(52,211,153,0.6)]'
+    : isDefeat
+      ? 'text-red-200 drop-shadow-[0_0_20px_rgba(248,113,113,0.6)]'
+      : 'text-amber-200 drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]';
+  const outcomeLabelClass = isVictory
+    ? 'text-emerald-50 drop-shadow-[0_4px_16px_rgba(16,185,129,0.5)]'
+    : isDefeat
+      ? 'text-red-50 drop-shadow-[0_4px_16px_rgba(220,38,38,0.5)]'
+      : 'text-amber-50 drop-shadow-[0_4px_16px_rgba(245,158,11,0.5)]';
+  const outcomeSubtextClass = isVictory
+    ? 'text-emerald-100/90'
+    : isDefeat
+      ? 'text-red-100/90'
+      : 'text-amber-100/90';
   const badgeClass = getNewspaperBadgeClass(tone);
   const sectionHeadingClass = cn(
     NEWSPAPER_SECTION_HEADING_CLASS,
     tone === 'victory' ? 'text-victory-foreground/75' : undefined,
   );
-  const metaClass = cn(NEWSPAPER_META_CLASS, tone === 'victory' ? 'text-victory-foreground/70' : undefined);
+  const metaClass = cn(
+    NEWSPAPER_META_CLASS,
+    isVictory ? 'text-victory-foreground/70' : isDefeat ? 'text-red-200/70' : isStalemate ? 'text-amber-200/70' : undefined,
+  );
   const accentHeadlineClass =
     tone === 'victory'
       ? 'text-victory-accent drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
@@ -243,15 +277,27 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
   const primaryBodyClass = tone === 'victory' ? 'text-victory-foreground/85' : 'text-newspaper-text/80';
   const mutedBodyClass = tone === 'victory' ? 'text-victory-foreground/75' : 'text-newspaper-text/70';
   const subtleBodyClass = tone === 'victory' ? 'text-victory-foreground/65' : 'text-newspaper-text/60';
-  const statLabelClass = tone === 'victory' ? 'text-victory-foreground/75' : 'text-newspaper-text/70';
-  const statTileClass =
-    tone === 'victory'
-      ? 'rounded border border-victory-foreground/35 bg-gradient-to-br from-victory-start/82 via-victory-mid/78 to-victory-end/82 p-3 text-victory-foreground shadow-[0_12px_30px_rgba(0,0,0,0.35)]'
-      : 'rounded border border-dashed border-newspaper-border/60 bg-newspaper-bg/70 p-3';
-  const statValueClass =
-    tone === 'victory'
-      ? 'mt-1 text-2xl font-black tracking-tight text-victory-accent drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
-      : 'mt-1 text-2xl font-black tracking-tight text-newspaper-headline';
+  const statLabelClass = isVictory
+    ? 'text-victory-foreground/75'
+    : isDefeat
+      ? 'text-red-200/75'
+      : isStalemate
+        ? 'text-amber-200/75'
+        : 'text-newspaper-text/70';
+  const statTileClass = isVictory
+    ? 'rounded border border-victory-foreground/35 bg-gradient-to-br from-victory-start/82 via-victory-mid/78 to-victory-end/82 p-3 text-victory-foreground shadow-[0_12px_30px_rgba(0,0,0,0.35)]'
+    : isDefeat
+      ? 'rounded border border-red-400/35 bg-gradient-to-br from-red-900/82 via-red-800/78 to-red-900/82 p-3 text-red-100 shadow-[0_12px_30px_rgba(0,0,0,0.35)]'
+      : isStalemate
+        ? 'rounded border border-amber-400/35 bg-gradient-to-br from-amber-800/82 via-amber-700/78 to-amber-800/82 p-3 text-amber-100 shadow-[0_12px_30px_rgba(0,0,0,0.35)]'
+        : 'rounded border border-dashed border-newspaper-border/60 bg-newspaper-bg/70 p-3';
+  const statValueClass = isVictory
+    ? 'mt-1 text-2xl font-black tracking-tight text-victory-accent drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
+    : isDefeat
+      ? 'mt-1 text-2xl font-black tracking-tight text-red-300 drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
+      : isStalemate
+        ? 'mt-1 text-2xl font-black tracking-tight text-amber-300 drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
+        : 'mt-1 text-2xl font-black tracking-tight text-newspaper-headline';
   const bulletinArticles = report.extraExtraFeed.slice(-4).reverse();
   const latestExtraExtra = report.extraExtraFeed.length > 0 
     ? report.extraExtraFeed[report.extraExtraFeed.length - 1] 
@@ -267,23 +313,38 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
       ? 'rounded-md border border-dashed border-victory-foreground/40 bg-victory-foreground/10 p-3 shadow-[0_10px_28px_rgba(0,0,0,0.3)]'
       : 'rounded-md border border-dashed border-newspaper-border/60 bg-newspaper-bg/70 p-3';
   const progressTrackClass = tone === 'victory' ? 'mt-2 h-1.5 bg-victory-foreground/20' : 'mt-2 h-1.5 bg-newspaper-header/30';
-  const heroSkyClass =
-    tone === 'victory'
-      ? 'bg-gradient-to-br from-victory-start/85 via-victory-mid/78 to-victory-end/90'
-      : 'bg-gradient-to-br from-newspaper-header/95 via-newspaper-bg/92 to-newspaper-header/95';
-  const heroPrimaryBandClass = tone === 'victory' ? 'bg-victory-accent/90' : 'bg-newspaper-headline/90';
-  const heroSecondaryBandClass = tone === 'victory' ? 'bg-victory-foreground/70' : 'bg-newspaper-border/70';
+  const heroSkyClass = isVictory
+    ? 'bg-gradient-to-br from-victory-start/85 via-victory-mid/78 to-victory-end/90'
+    : isDefeat
+      ? 'bg-gradient-to-br from-red-900/85 via-red-800/78 to-red-900/90'
+      : isStalemate
+        ? 'bg-gradient-to-br from-amber-800/85 via-amber-700/78 to-amber-800/90'
+        : 'bg-gradient-to-br from-newspaper-header/95 via-newspaper-bg/92 to-newspaper-header/95';
+  const heroPrimaryBandClass = isVictory
+    ? 'bg-victory-accent/90'
+    : isDefeat
+      ? 'bg-red-500/90'
+      : isStalemate
+        ? 'bg-amber-400/90'
+        : 'bg-newspaper-headline/90';
+  const heroSecondaryBandClass = isVictory
+    ? 'bg-victory-foreground/70'
+    : isDefeat
+      ? 'bg-red-300/70'
+      : isStalemate
+        ? 'bg-amber-200/70'
+        : 'bg-newspaper-border/70';
   const heroBadgeRowClass = cn(
     'flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em]',
-    tone === 'victory' ? 'text-victory-foreground/85' : 'text-newspaper-text/70',
+    isVictory ? 'text-victory-foreground/85' : isDefeat ? 'text-red-100/85' : isStalemate ? 'text-amber-100/85' : 'text-newspaper-text/70',
   );
   const heroHeadlineClass = cn(
     'text-5xl font-black uppercase leading-[0.92] tracking-[0.04em] drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)] sm:text-6xl lg:text-7xl',
-    accentHeadlineClass,
+    isVictory ? accentHeadlineClass : isDefeat ? 'text-red-100' : isStalemate ? 'text-amber-100' : accentHeadlineClass,
   );
   const heroSubheadClass = cn(
     'mt-2 max-w-xl text-2xl font-extrabold uppercase tracking-[0.14em] sm:text-4xl sm:tracking-[0.1em]',
-    tone === 'victory' ? 'text-victory-foreground' : 'text-newspaper-headline',
+    isVictory ? 'text-victory-foreground' : isDefeat ? 'text-red-200' : isStalemate ? 'text-amber-200' : 'text-newspaper-headline',
   );
   const heroKickerClass = cn('mt-3 text-xs font-semibold uppercase tracking-[0.38em]', subtleBodyClass);
   const heroStatsGridClass = cn(
@@ -399,11 +460,14 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
                         Breaking Combo News
                       </Badge>
                     )}
-                    {playerOutcome !== 'Stalemate' ? (
-                      <Badge className={cn(badgeClass, 'rounded-full px-3 py-1 tracking-[0.32em]')}>
-                        {playerOutcome}
-                      </Badge>
-                    ) : null}
+                    <Badge className={cn(
+                      'rounded-full px-3 py-1 tracking-[0.32em] font-bold',
+                      isVictory && 'bg-emerald-500 text-emerald-50 border-emerald-400',
+                      isDefeat && 'bg-red-600 text-red-50 border-red-500',
+                      isStalemate && 'bg-amber-500 text-amber-50 border-amber-400',
+                    )}>
+                      {playerOutcome}
+                    </Badge>
                     <Badge className={cn(badgeClass, 'rounded-full px-3 py-1 tracking-[0.32em]')}>
                       {victoryConditionLabel}
                     </Badge>
@@ -475,6 +539,25 @@ const FinalEditionLayout = ({ report }: FinalEditionLayoutProps) => {
           </div>
         </div>
       </NewspaperSection>
+
+      {/* Prominent Outcome Banner */}
+      <div className={cn(
+        'relative overflow-hidden rounded-xl border-2 px-6 py-5 shadow-lg',
+        outcomeBannerClass,
+      )}>
+        <div className="flex items-center justify-center gap-4">
+          <span className={outcomeIconClass}>{outcomeIcon}</span>
+          <div className="text-center">
+            <h2 className={cn('text-3xl font-black uppercase tracking-[0.2em] sm:text-4xl', outcomeLabelClass)}>
+              {playerOutcome}
+            </h2>
+            <p className={cn('mt-1 text-sm font-semibold uppercase tracking-[0.25em]', outcomeSubtextClass)}>
+              {victoryConditionLabel} • {playerFactionLabel}
+            </p>
+          </div>
+          <span className={outcomeIconClass}>{outcomeIcon}</span>
+        </div>
+      </div>
 
       <nav aria-label="Front Page Jump" className={frontPageJumpStripClass}>
         <span className={frontPageJumpLabelClass}>Front Page Jump</span>
