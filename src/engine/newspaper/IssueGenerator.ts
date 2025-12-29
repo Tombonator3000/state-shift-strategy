@@ -808,156 +808,130 @@ const buildGameStateContext = (
   } satisfies GameStateContext;
 };
 
-export async function generateIssue(input: IssueGeneratorInput): Promise<NarrativeIssue> {
-  const lexicon = await loadCardLexicon();
-  let articleBank: ArticleBank | null = null;
+// ============================================================================
+// Article Metadata Types and Helpers
+// ============================================================================
 
-  try {
-    articleBank = await loadArticleBank();
-  } catch (error) {
-    console.error('Failed to load article bank for newspaper issue:', error);
-    articleBank = null;
-  }
+interface ArticleMeta {
+  entry: PlayedCardInput;
+  article: NarrativeArticle;
+  truthMagnitude: number;
+  statusSignals: number;
+  capturedCount: number;
+  randomWeight: number;
+}
 
-  const sanitizedPlayedCards = sanitizePlayedCards(input.playedCards);
-
-  const playerCards = sanitizedPlayedCards.filter(entry => entry.player === 'human');
-  const opponentCards = sanitizedPlayedCards.filter(entry => entry.player === 'ai');
-
-  const heroCard = chooseHeroCard(playerCards);
-
-  type ArticleMeta = {
-    entry: PlayedCardInput;
-    article: NarrativeArticle;
-    truthMagnitude: number;
-    statusSignals: number;
-    capturedCount: number;
-    randomWeight: number;
+interface CardLexiconEntry {
+  effects: {
+    truthDelta?: number | null;
+    ipOpponent?: number | null;
+    pressureDelta?: number | null;
   };
+}
 
-  const buildArticleMeta = (entry: PlayedCardInput): ArticleMeta => {
-    const cardLexicon = lexicon[entry.card.id] ?? null;
-    const targetName = resolveStateName(entry.targetState);
-    const capturedNames = resolveCapturedStateNames(entry.capturedStates);
-    const truth = entry.truthDelta ?? cardLexicon?.effects.truthDelta ?? null;
-    const ip = cardLexicon?.effects.ipOpponent ?? null;
-    const pressure = cardLexicon?.effects.pressureDelta ?? null;
+type CardLexicon = Record<string, CardLexiconEntry | null>;
 
-    const story = composeCardStory({
-      card: entry.card,
-      lexicon: cardLexicon,
-      player: entry.player,
-      truthDelta: truth ?? undefined,
-      ipDeltaOpponent: ip ?? undefined,
-      pressureDelta: pressure ?? undefined,
-      targetStateName: targetName ?? undefined,
-      capturedStateNames: capturedNames,
-      issueId: input.agendaIssueId,
-    });
-    const article = mapCardToArticle(entry, story, truth, ip, pressure, targetName, capturedNames);
+const buildArticleMeta = (
+  entry: PlayedCardInput,
+  lexicon: CardLexicon,
+  agendaIssueId?: AgendaIssueId,
+): ArticleMeta => {
+  const cardLexicon = lexicon[entry.card.id] ?? null;
+  const targetName = resolveStateName(entry.targetState);
+  const capturedNames = resolveCapturedStateNames(entry.capturedStates);
+  const truth = entry.truthDelta ?? cardLexicon?.effects.truthDelta ?? null;
+  const ip = cardLexicon?.effects.ipOpponent ?? null;
+  const pressure = cardLexicon?.effects.pressureDelta ?? null;
 
-    const truthMagnitude = typeof truth === 'number' && !Number.isNaN(truth) ? Math.abs(truth) : 0;
-    const ipMagnitude = typeof ip === 'number' && !Number.isNaN(ip) ? Math.abs(ip) : 0;
-    const pressureMagnitude = typeof pressure === 'number' && !Number.isNaN(pressure)
-      ? Math.abs(pressure)
-      : 0;
-    const statusSignals =
-      capturedNames.length +
-      (targetName ? 1 : 0) +
-      (ipMagnitude > 0 ? 1 : 0) +
-      (pressureMagnitude > 0 ? 1 : 0);
-
-    return {
-      entry,
-      article,
-      truthMagnitude,
-      statusSignals,
-      capturedCount: capturedNames.length,
-      randomWeight: Math.random(),
-    } satisfies ArticleMeta;
-  };
-
-  const playerMetas = playerCards.map(buildArticleMeta);
-  const oppositionMetas = opponentCards.map(buildArticleMeta);
-
-  const playerArticles = playerMetas.map(meta => meta.article);
-  const oppositionArticles = oppositionMetas.map(meta => meta.article);
-
-  const heroMeta = heroCard
-    ? playerMetas.find(meta => meta.entry.card.id === heroCard.card.id) ?? null
-    : null;
-  const heroArticle = heroMeta?.article ?? null;
-  const heroCardId = heroMeta?.entry.card.id ?? null;
-  const remainingPlayerArticles = heroArticle
-    ? playerArticles.filter(article => article.cardId !== heroArticle.cardId)
-    : playerArticles;
-
-  const context = buildRoundContext(
-    playerCards,
-    opponentCards,
-    input.eventsTruthDelta ?? 0,
-    input.comboTruthDelta ?? 0,
-  );
-
-  const gameStateContext = buildGameStateContext(input, sanitizedPlayedCards, playerCards);
-
-  const capturedStateNames = Array.from(
-    new Set(playerCards.flatMap(entry => resolveCapturedStateNames(entry.capturedStates)).filter(Boolean)),
-  );
-
-  const breakingStamp = shouldStampBreaking(context)
-    ? pickOrNull(input.dataset.stamps?.breaking)
-    : null;
-
-  const classifiedStamp = Math.random() < 0.3 ? pickOrNull(input.dataset.stamps?.classified) : null;
-
-  const comboArticle = input.comboSummary ? composeComboStory(input.comboSummary) : null;
-
-  const byline = pick(input.dataset.bylines, FALLBACK_BYLINE);
-  const sourceLine = pick(input.dataset.sources, FALLBACK_SOURCE);
-
-  const supplements = {
-    ads: collectAds(input.dataset),
-    conspiracies: collectConspiracies(input.dataset),
-    weather: collectWeather(input.dataset),
-  };
-
-  const prioritizedMetas = [...playerMetas].sort((a, b) => {
-    if (b.capturedCount !== a.capturedCount) {
-      return b.capturedCount - a.capturedCount;
-    }
-    if (b.statusSignals !== a.statusSignals) {
-      return b.statusSignals - a.statusSignals;
-    }
-    if (b.truthMagnitude !== a.truthMagnitude) {
-      return b.truthMagnitude - a.truthMagnitude;
-    }
-    if (b.randomWeight !== a.randomWeight) {
-      return b.randomWeight - a.randomWeight;
-    }
-    return 0;
+  const story = composeCardStory({
+    card: entry.card,
+    lexicon: cardLexicon,
+    player: entry.player,
+    truthDelta: truth ?? undefined,
+    ipDeltaOpponent: ip ?? undefined,
+    pressureDelta: pressure ?? undefined,
+    targetStateName: targetName ?? undefined,
+    capturedStateNames: capturedNames,
+    issueId: agendaIssueId,
   });
+  const article = mapCardToArticle(entry, story, truth, ip, pressure, targetName, capturedNames);
 
-  const maxFrontPageArticles = heroCardId
+  const truthMagnitude = typeof truth === 'number' && !Number.isNaN(truth) ? Math.abs(truth) : 0;
+  const ipMagnitude = typeof ip === 'number' && !Number.isNaN(ip) ? Math.abs(ip) : 0;
+  const pressureMagnitude = typeof pressure === 'number' && !Number.isNaN(pressure)
+    ? Math.abs(pressure)
+    : 0;
+  const statusSignals =
+    capturedNames.length +
+    (targetName ? 1 : 0) +
+    (ipMagnitude > 0 ? 1 : 0) +
+    (pressureMagnitude > 0 ? 1 : 0);
+
+  return {
+    entry,
+    article,
+    truthMagnitude,
+    statusSignals,
+    capturedCount: capturedNames.length,
+    randomWeight: Math.random(),
+  };
+};
+
+// ============================================================================
+// Front Page Selection
+// ============================================================================
+
+const compareArticleMetas = (a: ArticleMeta, b: ArticleMeta): number => {
+  if (b.capturedCount !== a.capturedCount) {
+    return b.capturedCount - a.capturedCount;
+  }
+  if (b.statusSignals !== a.statusSignals) {
+    return b.statusSignals - a.statusSignals;
+  }
+  if (b.truthMagnitude !== a.truthMagnitude) {
+    return b.truthMagnitude - a.truthMagnitude;
+  }
+  if (b.randomWeight !== a.randomWeight) {
+    return b.randomWeight - a.randomWeight;
+  }
+  return 0;
+};
+
+const selectFrontPageMetas = (
+  playerMetas: ArticleMeta[],
+  heroCardId: string | null,
+): ArticleMeta[] => {
+  const prioritized = [...playerMetas].sort(compareArticleMetas);
+
+  const maxArticles = heroCardId
     ? Math.min(3, Math.max(playerMetas.length - 1, 0))
     : Math.min(3, playerMetas.length);
 
-  const frontPageSelection: ArticleMeta[] = [];
-
-  for (const meta of prioritizedMetas) {
+  const selection: ArticleMeta[] = [];
+  for (const meta of prioritized) {
     if (heroCardId && meta.entry.card.id === heroCardId) {
       continue;
     }
-    if (frontPageSelection.length >= maxFrontPageArticles) {
+    if (selection.length >= maxArticles) {
       break;
     }
-    frontPageSelection.push(meta);
+    selection.push(meta);
   }
 
-  const selectedMetas = frontPageSelection;
+  return selection;
+};
 
-  const selectedCards = selectedMetas.map(meta => meta.entry);
-  const generatedArticles = selectedMetas.map(meta => {
+// ============================================================================
+// Generated Article Building
+// ============================================================================
+
+const generateArticlesFromMetas = (
+  metas: ArticleMeta[],
+  articleBank: ArticleBank | null,
+  gameStateContext: GameStateContext,
+  gameState?: IssueGeneratorGameStateSnapshot,
+): GeneratedStoryArticle[] => {
+  return metas.map(meta => {
     const entry = meta.entry;
     const targetName = resolveStateName(entry.targetState);
     const capturedNames = resolveCapturedStateNames(entry.capturedStates);
@@ -967,16 +941,61 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
       targetName,
       capturedNames,
       articleBank,
-      input.gameState?.recurringCharacters,
-      input.gameState,
+      gameState?.recurringCharacters,
+      gameState,
     );
     const tonedArticle = applyToneIfAvailable(entry, resolvedArticle);
     return buildGeneratedStoryArticle(entry, tonedArticle, gameStateContext, {
       isFallback: origin === 'generated',
     });
   });
+};
 
-  const frontPageCards: PlayedCardMeta[] = selectedCards
+// ============================================================================
+// Smart Narrative Building
+// ============================================================================
+
+const buildSmartNarrativeFromCards = (
+  selectedCards: PlayedCardInput[],
+): SmartNarrativeArticle | null => {
+  if (selectedCards.length < 2) {
+    return null;
+  }
+
+  const cardContexts: CardPlayContext[] = selectedCards.map(entry => ({
+    card: entry.card,
+    player: entry.player,
+    truthDelta: entry.truthDelta,
+    targetState: entry.targetState ?? undefined,
+    capturedStates: entry.capturedStates,
+  }));
+
+  const narrativeOutput = composeSmartNarrative(cardContexts);
+  if (!narrativeOutput) {
+    return null;
+  }
+
+  const thematicCombo = detectThematicCombo(cardContexts);
+
+  return {
+    headline: narrativeOutput.headline,
+    subhead: narrativeOutput.subhead,
+    body: narrativeOutput.body,
+    byline: narrativeOutput.byline,
+    tone: narrativeOutput.tone,
+    imagePrompt: narrativeOutput.imagePrompt,
+    tags: [...narrativeOutput.tags, ...thematicCombo.bonusTags],
+    comboName: thematicCombo.comboName,
+    cardCount: selectedCards.length,
+  };
+};
+
+// ============================================================================
+// Front Page Cards Building
+// ============================================================================
+
+const buildFrontPageCards = (selectedCards: PlayedCardInput[]): PlayedCardMeta[] => {
+  return selectedCards
     .map(entry => {
       const type = normalizeCardType(entry.card.type);
       if (!type) {
@@ -990,39 +1009,29 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
       } satisfies PlayedCardMeta;
     })
     .filter((meta): meta is PlayedCardMeta => Boolean(meta));
+};
+
+// ============================================================================
+// Front Page Package Building
+// ============================================================================
+
+interface FrontPageContext {
+  frontPageCards: PlayedCardMeta[];
+  generatedArticles: GeneratedStoryArticle[];
+  smartNarrative: SmartNarrativeArticle | null;
+  articleBank: ArticleBank | null;
+  context: NarrativeContext;
+  input: IssueGeneratorInput;
+  capturedStateNames: string[];
+  comboArticle: ComboStory | null;
+}
+
+const buildFrontPagePackage = (ctx: FrontPageContext): FrontPagePackage => {
+  const { frontPageCards, generatedArticles, smartNarrative, articleBank, context, input, capturedStateNames, comboArticle } = ctx;
 
   const mainStory: MainGeneratedStory | null = frontPageCards.length === 3
     ? generateMainStory(frontPageCards, id => getArticleById(id, articleBank))
     : null;
-
-  // Generate smart narrative for multi-card plays
-  let smartNarrative: SmartNarrativeArticle | null = null;
-  if (selectedCards.length >= 2) {
-    const cardContexts: CardPlayContext[] = selectedCards.map(entry => ({
-      card: entry.card,
-      player: entry.player,
-      truthDelta: entry.truthDelta,
-      targetState: entry.targetState ?? undefined,
-      capturedStates: entry.capturedStates,
-    }));
-
-    const narrativeOutput = composeSmartNarrative(cardContexts);
-    const thematicCombo = detectThematicCombo(cardContexts);
-
-    if (narrativeOutput) {
-      smartNarrative = {
-        headline: narrativeOutput.headline,
-        subhead: narrativeOutput.subhead,
-        body: narrativeOutput.body,
-        byline: narrativeOutput.byline,
-        tone: narrativeOutput.tone,
-        imagePrompt: narrativeOutput.imagePrompt,
-        tags: [...narrativeOutput.tags, ...thematicCombo.bonusTags],
-        comboName: thematicCombo.comboName,
-        cardCount: selectedCards.length,
-      };
-    }
-  }
 
   const articleBankReady = Boolean(articleBank && articleBank.size > 0);
   const frontPageFaction = frontPageCards[0]?.faction === 'GOV' ? 'government' : 'truth';
@@ -1032,6 +1041,7 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
       ? 'Directorate envoys'
       : 'Coalition operatives'
     : null;
+
   const fallbackSubhead = deriveFrontPageSubhead({
     datasetSubheads: input.dataset.subheads,
     fallback: FALLBACK_FRONT_PAGE_SUBHEAD,
@@ -1049,7 +1059,7 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     faction: frontPageFaction,
   });
 
-  const generatedStory: FrontPagePackage = {
+  return {
     cards: frontPageCards,
     main: mainStory,
     smartNarrative,
@@ -1057,17 +1067,154 @@ export async function generateIssue(input: IssueGeneratorInput): Promise<Narrati
     fallbackHeadline: FALLBACK_FRONT_PAGE_HEADLINE,
     fallbackSubhead,
     articleBankReady,
-  } satisfies FrontPagePackage;
+  };
+};
+
+// ============================================================================
+// Issue Supplements Collection
+// ============================================================================
+
+interface IssueSupplements {
+  ads: string[];
+  conspiracies: string[];
+  weather: string;
+}
+
+const collectIssueSupplements = (dataset: NewspaperData): IssueSupplements => ({
+  ads: collectAds(dataset),
+  conspiracies: collectConspiracies(dataset),
+  weather: collectWeather(dataset),
+});
+
+// ============================================================================
+// Main Issue Generator
+// ============================================================================
+
+export async function generateIssue(input: IssueGeneratorInput): Promise<NarrativeIssue> {
+  // Load external data sources
+  const lexicon = await loadCardLexicon();
+  const articleBank = await loadArticleBankSafe();
+
+  // Prepare and categorize played cards
+  const sanitizedPlayedCards = sanitizePlayedCards(input.playedCards);
+  const playerCards = sanitizedPlayedCards.filter(entry => entry.player === 'human');
+  const opponentCards = sanitizedPlayedCards.filter(entry => entry.player === 'ai');
+
+  // Build article metadata for all cards
+  const playerMetas = playerCards.map(entry => buildArticleMeta(entry, lexicon, input.agendaIssueId));
+  const oppositionMetas = opponentCards.map(entry => buildArticleMeta(entry, lexicon, input.agendaIssueId));
+
+  // Extract articles and identify hero
+  const { heroArticle, heroCardId, remainingPlayerArticles, oppositionArticles } = extractHeroAndArticles(
+    playerMetas,
+    oppositionMetas,
+    playerCards,
+  );
+
+  // Build contexts for article generation
+  const context = buildRoundContext(playerCards, opponentCards, input.eventsTruthDelta ?? 0, input.comboTruthDelta ?? 0);
+  const gameStateContext = buildGameStateContext(input, sanitizedPlayedCards, playerCards);
+
+  // Select and generate front page content
+  const selectedMetas = selectFrontPageMetas(playerMetas, heroCardId);
+  const selectedCards = selectedMetas.map(meta => meta.entry);
+  const generatedArticles = generateArticlesFromMetas(selectedMetas, articleBank, gameStateContext, input.gameState);
+  const frontPageCards = buildFrontPageCards(selectedCards);
+  const smartNarrative = buildSmartNarrativeFromCards(selectedCards);
+
+  // Collect captured state names for subhead generation
+  const capturedStateNames = Array.from(
+    new Set(playerCards.flatMap(entry => resolveCapturedStateNames(entry.capturedStates)).filter(Boolean)),
+  );
+
+  // Generate combo article if applicable
+  const comboArticle = input.comboSummary ? composeComboStory(input.comboSummary) : null;
+
+  // Build front page package
+  const generatedStory = buildFrontPagePackage({
+    frontPageCards,
+    generatedArticles,
+    smartNarrative,
+    articleBank,
+    context,
+    input,
+    capturedStateNames,
+    comboArticle,
+  });
+
+  // Collect stamps, supplements, and bylines
+  const stamps = collectStamps(context, input.dataset);
+  const supplements = collectIssueSupplements(input.dataset);
+  const byline = pick(input.dataset.bylines, FALLBACK_BYLINE);
+  const sourceLine = pick(input.dataset.sources, FALLBACK_SOURCE);
 
   return {
-    hero: heroArticle ?? null,
+    hero: heroArticle,
     playerArticles: remainingPlayerArticles,
     oppositionArticles,
     comboArticle,
     byline,
     sourceLine,
-    stamps: { breaking: breakingStamp, classified: classifiedStamp },
+    stamps,
     supplements,
     generatedStory,
-  } satisfies NarrativeIssue;
+  };
+}
+
+// ============================================================================
+// Helper Functions for generateIssue
+// ============================================================================
+
+async function loadArticleBankSafe(): Promise<ArticleBank | null> {
+  try {
+    return await loadArticleBank();
+  } catch (error) {
+    console.error('Failed to load article bank for newspaper issue:', error);
+    return null;
+  }
+}
+
+interface HeroAndArticlesResult {
+  heroArticle: NarrativeArticle | null;
+  heroCardId: string | null;
+  remainingPlayerArticles: NarrativeArticle[];
+  oppositionArticles: NarrativeArticle[];
+}
+
+function extractHeroAndArticles(
+  playerMetas: ArticleMeta[],
+  oppositionMetas: ArticleMeta[],
+  playerCards: PlayedCardInput[],
+): HeroAndArticlesResult {
+  const heroCard = chooseHeroCard(playerCards);
+  const playerArticles = playerMetas.map(meta => meta.article);
+  const oppositionArticles = oppositionMetas.map(meta => meta.article);
+
+  const heroMeta = heroCard
+    ? playerMetas.find(meta => meta.entry.card.id === heroCard.card.id) ?? null
+    : null;
+  const heroArticle = heroMeta?.article ?? null;
+  const heroCardId = heroMeta?.entry.card.id ?? null;
+
+  const remainingPlayerArticles = heroArticle
+    ? playerArticles.filter(article => article.cardId !== heroArticle.cardId)
+    : playerArticles;
+
+  return { heroArticle, heroCardId, remainingPlayerArticles, oppositionArticles };
+}
+
+interface IssueStamps {
+  breaking: string | null;
+  classified: string | null;
+}
+
+function collectStamps(context: NarrativeContext, dataset: NewspaperData): IssueStamps {
+  const breakingStamp = shouldStampBreaking(context)
+    ? pickOrNull(dataset.stamps?.breaking)
+    : null;
+  const classifiedStamp = Math.random() < 0.3
+    ? pickOrNull(dataset.stamps?.classified)
+    : null;
+
+  return { breaking: breakingStamp, classified: classifiedStamp };
 }
