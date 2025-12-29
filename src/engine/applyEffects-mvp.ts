@@ -19,6 +19,42 @@ export type PlayerId = 'P1' | 'P2';
 
 const otherPlayer = (id: PlayerId): PlayerId => (id === 'P1' ? 'P2' : 'P1');
 
+/**
+ * Gets AI editor effective modifiers for a player if applicable.
+ * Returns null if AI editors are disabled, player is not AI, or no editor is active.
+ */
+function getAiEditorMods(
+  state: GameState,
+  owner: PlayerId,
+): { mediaTruthDelta?: number; zonePressureBonus?: number } | null {
+  try {
+    const expansions = (state as any)?.expansions;
+    if (!(expansions?.aiEditors ?? true)) {
+      return null;
+    }
+
+    const ownerState = (state.players as unknown as Record<string, any>)?.[owner];
+    if (!ownerState?.isAI) {
+      return null;
+    }
+
+    const activeId = ownerState?.activeEditor ?? ownerState?.activeEditorId;
+    if (!activeId) {
+      return null;
+    }
+
+    const editor = getAiEditor(activeId as any);
+    if (!editor) {
+      return null;
+    }
+
+    const difficulty = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
+    return resolveEffectiveMods(editor, difficulty);
+  } catch {
+    return null;
+  }
+}
+
 export function clampIP(value: number): number {
   if (!Number.isFinite(value)) {
     return 0;
@@ -391,6 +427,94 @@ function applyZoneEffect(
   }
 }
 
+function applyMediaEffect(
+  state: GameState,
+  owner: PlayerId,
+  card: Card,
+  opts: MediaResolutionOptions,
+): void {
+  const baseDelta = computeMediaTruthDelta_MVP(state.players[owner], card, opts);
+  const multiplier = typeof opts.truthMultiplier === 'number' && opts.truthMultiplier > 0
+    ? opts.truthMultiplier
+    : 1;
+
+  let delta = baseDelta;
+
+  // Apply AI editor truth modifier
+  const aiMods = getAiEditorMods(state, owner);
+  if (aiMods?.mediaTruthDelta) {
+    state.truth += aiMods.mediaTruthDelta;
+  }
+
+  // Apply multiplier scaling
+  if (multiplier !== 1 && baseDelta !== 0) {
+    const scaled = Math.round(Math.abs(baseDelta) * multiplier);
+    delta = baseDelta >= 0 ? scaled : -scaled;
+  }
+
+  // Warn about media scaling issues
+  warnIfMediaScaling(card, multiplier === 1 ? delta : baseDelta);
+
+  // Apply player editor truth modifier
+  const editor = lookupEditorById(state.players[owner]?.activeEditorId ?? undefined);
+  if (editor) {
+    const effects = getEditorAggregatedEffects(editor);
+    if (effects.mediaTruthModifier) {
+      delta += effects.mediaTruthModifier;
+      state.log.push(
+        `${owner} ${editor.name} adjusts MEDIA truth by ${effects.mediaTruthModifier > 0 ? '+' : ''}${effects.mediaTruthModifier}.`,
+      );
+    }
+  }
+
+  applyTruthDelta(state, delta, owner);
+
+  // Log multiplier bonus if applicable
+  if (multiplier !== 1 && baseDelta !== 0) {
+    const bonus = delta - baseDelta;
+    if (bonus !== 0) {
+      const formattedMultiplier = Number.isInteger(multiplier)
+        ? multiplier.toFixed(0)
+        : multiplier.toFixed(2).replace(/\.0+$|0+$/, '');
+      const sourceLabel = opts.truthMultiplierSource ?? 'State combination';
+      state.log.push(
+        `${sourceLabel} amplifies MEDIA truth swing by ${bonus > 0 ? '+' : ''}${bonus} (x${formattedMultiplier})`,
+      );
+    }
+  }
+}
+
+function computeZonePressureDelta(
+  state: GameState,
+  owner: PlayerId,
+  basePressureDelta: number,
+): number {
+  let pressureDelta = basePressureDelta;
+
+  // Apply AI editor zone pressure bonus
+  const aiMods = getAiEditorMods(state, owner);
+  if (aiMods?.zonePressureBonus) {
+    pressureDelta += aiMods.zonePressureBonus;
+  }
+
+  // Apply player editor zone pressure bonus
+  const editor = lookupEditorById(state.players[owner]?.activeEditorId ?? undefined);
+  if (editor) {
+    const effects = getEditorAggregatedEffects(editor);
+    if (effects.zonePressureBonus) {
+      const adjusted = Math.max(0, pressureDelta + effects.zonePressureBonus);
+      if (adjusted !== pressureDelta) {
+        pressureDelta = adjusted;
+        state.log.push(
+          `${owner} ${editor.name} adjusts ZONE pressure by ${effects.zonePressureBonus > 0 ? '+' : ''}${effects.zonePressureBonus}.`,
+        );
+      }
+    }
+  }
+
+  return pressureDelta;
+}
+
 export function applyEffectsMvp(
   state: GameState,
   owner: PlayerId,
@@ -429,67 +553,7 @@ export function applyEffectsMvp(
   }
 
   if (card.type === 'MEDIA') {
-    const baseDelta = computeMediaTruthDelta_MVP(state.players[owner], card, opts);
-    const multiplier = typeof opts.truthMultiplier === 'number' && opts.truthMultiplier > 0
-      ? opts.truthMultiplier
-      : 1;
-    let delta = baseDelta;
-    try {
-      if ((state as any)?.expansions?.aiEditors ?? true) {
-        const playersAny = state.players as unknown as Record<string, any>;
-        const ownerState = playersAny?.[owner];
-        const isAiOwner = Boolean(ownerState?.isAI);
-        if (isAiOwner) {
-          const ai = ownerState ?? null;
-          const activeId = ai?.activeEditor ?? ai?.activeEditorId;
-          if (activeId) {
-            const editor = getAiEditor(activeId as any);
-            if (editor) {
-              const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
-              const eff = resolveEffectiveMods(editor, diff);
-              state.truth += eff.mediaTruthDelta ?? 0;
-            }
-          }
-        }
-      }
-    } catch {}
-    if (multiplier !== 1 && baseDelta !== 0) {
-      const scaled = Math.round(Math.abs(baseDelta) * multiplier);
-      delta = baseDelta >= 0 ? scaled : -scaled;
-    }
-
-    if (multiplier === 1) {
-      warnIfMediaScaling(card, delta);
-    } else {
-      warnIfMediaScaling(card, baseDelta);
-    }
-
-    const editor = lookupEditorById(state.players[owner]?.activeEditorId ?? undefined);
-    if (editor) {
-      const effects = getEditorAggregatedEffects(editor);
-      if (effects.mediaTruthModifier) {
-        delta += effects.mediaTruthModifier;
-        state.log.push(
-          `${owner} ${editor.name} adjusts MEDIA truth by ${effects.mediaTruthModifier > 0 ? '+' : ''}${effects.mediaTruthModifier}.`,
-        );
-      }
-    }
-
-    applyTruthDelta(state, delta, owner);
-
-    if (multiplier !== 1 && baseDelta !== 0) {
-      const bonus = delta - baseDelta;
-      if (bonus !== 0) {
-        const formattedMultiplier = Number.isInteger(multiplier)
-          ? multiplier.toFixed(0)
-          : multiplier.toFixed(2).replace(/\.0+$|0+$/, '');
-        const sourceLabel = opts.truthMultiplierSource ?? 'State combination';
-        state.log.push(
-          `${sourceLabel} amplifies MEDIA truth swing by ${bonus > 0 ? '+' : ''}${bonus} (x${formattedMultiplier})`,
-        );
-      }
-    }
-
+    applyMediaEffect(state, owner, card, opts);
     return state;
   }
 
@@ -498,42 +562,8 @@ export function applyEffectsMvp(
       throw new Error('ZONE card requires a target state');
     }
 
-    const editor = lookupEditorById(state.players[owner]?.activeEditorId ?? undefined);
     const zoneEffects = card.effects as EffectsZONE;
-    let pressureDelta = zoneEffects.pressureDelta;
-    try {
-      if ((state as any)?.expansions?.aiEditors ?? true) {
-        const playersAny = state.players as unknown as Record<string, any>;
-        const ownerState = playersAny?.[owner];
-        const isAiOwner = Boolean(ownerState?.isAI);
-        if (isAiOwner) {
-          const ai = ownerState ?? null;
-          const activeId = ai?.activeEditor ?? ai?.activeEditorId;
-          if (activeId) {
-            const editor = getAiEditor(activeId as any);
-            if (editor) {
-              const diff = ((state as any)?.options?.difficulty ?? 'NORMAL') as any;
-              const eff = resolveEffectiveMods(editor, diff);
-              pressureDelta += eff.zonePressureBonus ?? 0;
-            }
-          }
-        }
-      }
-    } catch {}
-
-    if (editor) {
-      const effects = getEditorAggregatedEffects(editor);
-      if (effects.zonePressureBonus) {
-        const adjusted = Math.max(0, pressureDelta + effects.zonePressureBonus);
-        if (adjusted !== pressureDelta) {
-          pressureDelta = adjusted;
-          state.log.push(
-            `${owner} ${editor.name} adjusts ZONE pressure by ${effects.zonePressureBonus > 0 ? '+' : ''}${effects.zonePressureBonus}.`,
-          );
-        }
-      }
-    }
-
+    const pressureDelta = computeZonePressureDelta(state, owner, zoneEffects.pressureDelta);
     applyZoneEffect(state, owner, { ...zoneEffects, pressureDelta }, targetStateId, rng);
     return state;
   }
