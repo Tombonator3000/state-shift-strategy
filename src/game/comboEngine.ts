@@ -210,6 +210,123 @@ function inferFactionFromId(cardId?: string): 'truth' | 'government' | undefined
   return undefined;
 }
 
+/**
+ * Normalized criteria for card matching.
+ * Pre-processes trigger fields into efficient lookup structures.
+ */
+interface CardMatchCriteria {
+  requiredType: string | undefined;
+  requiredFaction: string | undefined;
+  requiredIds: Set<string>;
+  bannedIds: Set<string>;
+  anyTags: string[];
+  allTags: string[];
+  bannedTags: Set<string>;
+  anyNames: string[];
+  allNames: string[];
+  bannedNames: string[];
+}
+
+/**
+ * Creates normalized matching criteria from a card trigger.
+ */
+function buildCardMatchCriteria(
+  trigger: Extract<ComboTrigger, { kind: 'card' }>,
+): CardMatchCriteria {
+  return {
+    requiredType: trigger.type && trigger.type !== 'ANY' ? trigger.type : undefined,
+    requiredFaction: trigger.faction && trigger.faction !== 'any' ? trigger.faction : undefined,
+    requiredIds: new Set(normaliseList(trigger.cardIds)),
+    bannedIds: new Set(normaliseList(trigger.excludeCardIds)),
+    anyTags: normaliseList(trigger.tagsAny),
+    allTags: normaliseList(trigger.tagsAll),
+    bannedTags: new Set(normaliseList(trigger.excludeTags)),
+    anyNames: normaliseList(trigger.nameIncludesAny),
+    allNames: normaliseList(trigger.nameIncludesAll),
+    bannedNames: normaliseList(trigger.excludeNamePatterns),
+  };
+}
+
+/** Checks if play matches the required card type. */
+function matchesCardType(play: TurnPlay, requiredType: string | undefined): boolean {
+  return !requiredType || play.cardType === requiredType;
+}
+
+/** Checks if play matches the required faction. */
+function matchesCardFaction(play: TurnPlay, requiredFaction: string | undefined): boolean {
+  if (!requiredFaction) return true;
+  const factionValue = play.cardFaction ?? inferFactionFromId(play.cardId);
+  return factionValue === requiredFaction;
+}
+
+/** Checks if card ID passes include/exclude filters. */
+function matchesCardIdFilters(
+  cardId: string,
+  requiredIds: Set<string>,
+  bannedIds: Set<string>,
+): boolean {
+  if (bannedIds.size > 0 && bannedIds.has(cardId)) return false;
+  if (requiredIds.size > 0 && (!cardId || !requiredIds.has(cardId))) return false;
+  return true;
+}
+
+/** Checks if card tags pass any/all/exclude filters. */
+function matchesTagFilters(
+  tags: string[],
+  anyTags: string[],
+  allTags: string[],
+  bannedTags: Set<string>,
+): boolean {
+  if (bannedTags.size > 0 && tags.some(tag => bannedTags.has(tag))) return false;
+  if (allTags.length > 0 && !allTags.every(tag => tags.includes(tag))) return false;
+  if (anyTags.length > 0 && !anyTags.some(tag => tags.includes(tag))) return false;
+  return true;
+}
+
+/** Checks if card name passes any/all/exclude pattern filters. */
+function matchesNameFilters(
+  name: string,
+  anyNames: string[],
+  allNames: string[],
+  bannedNames: string[],
+): boolean {
+  if (bannedNames.length > 0 && bannedNames.some(part => name.includes(part))) return false;
+  if (allNames.length > 0 && !allNames.every(part => name.includes(part))) return false;
+  if (anyNames.length > 0 && !anyNames.some(part => name.includes(part))) return false;
+  return true;
+}
+
+/** Checks if a play matches all card criteria. */
+function playMatchesCriteria(play: TurnPlay, criteria: CardMatchCriteria): boolean {
+  if (!matchesCardType(play, criteria.requiredType)) return false;
+  if (!matchesCardFaction(play, criteria.requiredFaction)) return false;
+
+  const cardId = (play.cardId ?? '').toLowerCase();
+  if (!matchesCardIdFilters(cardId, criteria.requiredIds, criteria.bannedIds)) return false;
+
+  const tags = Array.isArray(play.cardTags) ? play.cardTags : [];
+  if (!matchesTagFilters(tags, criteria.anyTags, criteria.allTags, criteria.bannedTags)) return false;
+
+  const name = (play.cardName ?? '').toLowerCase();
+  if (!matchesNameFilters(name, criteria.anyNames, criteria.allNames, criteria.bannedNames)) return false;
+
+  return true;
+}
+
+/** Evaluates count against operator threshold. */
+function evaluateCountOperator(
+  total: number,
+  count: number,
+  operator: '>=' | '<=' | '==',
+): boolean {
+  switch (operator) {
+    case '>=': return total >= count;
+    case '<=': return total <= count;
+    case '==': return total === count;
+    default: return total >= count;
+  }
+}
+
 interface TriggerMatchResult {
   success: boolean;
   matchedPlays: TurnPlay[];
@@ -413,92 +530,20 @@ function matchState(
   return { success: candidates.length > 0, matchedPlays: candidates };
 }
 
+/**
+ * Matches plays against card-specific trigger criteria.
+ * Filters by type, faction, card IDs, tags, and name patterns.
+ */
 function matchCard(
   trigger: Extract<ComboTrigger, { kind: 'card' }>,
   plays: TurnPlay[],
 ): TriggerMatchResult {
-  const {
-    count = 1,
-    operator = '>=',
-    type,
-    faction,
-    cardIds,
-    excludeCardIds,
-    tagsAny,
-    tagsAll,
-    excludeTags,
-    nameIncludesAny,
-    nameIncludesAll,
-    excludeNamePatterns,
-  } = trigger;
+  const { count = 1, operator = '>=' } = trigger;
+  const criteria = buildCardMatchCriteria(trigger);
 
-  const requiredType = type && type !== 'ANY' ? type : undefined;
-  const requiredFaction = faction && faction !== 'any' ? faction : undefined;
-  const requiredIds = new Set(normaliseList(cardIds));
-  const bannedIds = new Set(normaliseList(excludeCardIds));
-  const anyTags = normaliseList(tagsAny);
-  const allTags = normaliseList(tagsAll);
-  const bannedTags = new Set(normaliseList(excludeTags));
-  const anyNames = normaliseList(nameIncludesAny);
-  const allNames = normaliseList(nameIncludesAll);
-  const bannedNames = normaliseList(excludeNamePatterns);
-
-  const matched: TurnPlay[] = [];
-
-  for (const play of plays) {
-    if (requiredType && play.cardType !== requiredType) {
-      continue;
-    }
-
-    if (requiredFaction) {
-      const factionValue = play.cardFaction ?? inferFactionFromId(play.cardId);
-      if (factionValue !== requiredFaction) {
-        continue;
-      }
-    }
-
-    const cardId = (play.cardId ?? '').toLowerCase();
-    if (bannedIds.size > 0 && bannedIds.has(cardId)) {
-      continue;
-    }
-    if (requiredIds.size > 0 && (!cardId || !requiredIds.has(cardId))) {
-      continue;
-    }
-
-    const tags = Array.isArray(play.cardTags) ? play.cardTags : [];
-    if (bannedTags.size > 0 && tags.some(tag => bannedTags.has(tag))) {
-      continue;
-    }
-    if (allTags.length > 0 && !allTags.every(tag => tags.includes(tag))) {
-      continue;
-    }
-    if (anyTags.length > 0 && !anyTags.some(tag => tags.includes(tag))) {
-      continue;
-    }
-
-    const name = (play.cardName ?? '').toLowerCase();
-    if (bannedNames.length > 0 && bannedNames.some(part => name.includes(part))) {
-      continue;
-    }
-    if (allNames.length > 0 && !allNames.every(part => name.includes(part))) {
-      continue;
-    }
-    if (anyNames.length > 0 && !anyNames.some(part => name.includes(part))) {
-      continue;
-    }
-
-    matched.push(play);
-  }
-
+  const matched = plays.filter(play => playMatchesCriteria(play, criteria));
   const total = matched.length;
-  let success = false;
-  if (operator === '>=') {
-    success = total >= count;
-  } else if (operator === '<=') {
-    success = total <= count;
-  } else {
-    success = total === count;
-  }
+  const success = evaluateCountOperator(total, count, operator);
 
   return {
     success,
