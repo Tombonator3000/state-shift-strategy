@@ -1,6 +1,7 @@
 import { useCallback, useRef } from 'react';
 import type { GameCard } from '@/rules/mvp';
 import { useScreenShake } from '@/components/effects/ScreenShake';
+import { getAssetPath } from '@/lib/assets';
 
 interface AnimationRect {
   x: number;
@@ -220,7 +221,7 @@ export const useCardAnimation = () => {
           <h4 class="font-bold text-sm font-mono text-center">${cardData.name || 'Unknown'}</h4>
         </div>
         <div class="h-32 border-y overflow-hidden">
-          <img src="/lovable-uploads/e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png" alt="Card art" class="w-full h-full object-cover" />
+          <img src="${getAssetPath('/lovable-uploads/e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png')}" alt="Card art" class="w-full h-full object-cover" />
         </div>
         <div class="p-3 space-y-2">
           <div class="flex justify-center">

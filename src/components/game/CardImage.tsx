@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { isExtensionCard, getCardExtensionInfo } from '@/data/extensionIntegration';
 import { AVAILABLE_CARD_ART } from '@/data/cardArtManifest';
+import { getAssetPath } from '@/lib/assets';
 
 interface CardImageProps {
   cardId: string;
@@ -20,42 +21,42 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'co
     // Primary: extension metadata
     if (isExtensionCard(cardId)) {
       const extensionInfo = getCardExtensionInfo(cardId);
-      
+
       // CRYPTIDS extension temp image
       if (extensionInfo?.id?.toLowerCase().includes('cryptids')) {
-        return '/lovable-uploads/c290a92b-014a-4427-8dd2-a78b76dd986e.png';
+        return getAssetPath('/lovable-uploads/c290a92b-014a-4427-8dd2-a78b76dd986e.png');
       }
-      
-      // Halloween Spooktacular extension temp image  
+
+      // Halloween Spooktacular extension temp image
       if (extensionInfo?.id?.toLowerCase().includes('halloween_spooktacular')) {
-        return '/card-art/halloween_spooktacular-Temp-Image.png';
+        return getAssetPath('/card-art/halloween_spooktacular-Temp-Image.png');
       }
     }
 
     // Fallback: card id naming conventions for extensions
     if (cardId.toLowerCase().startsWith('hallo-')) {
-      return '/card-art/halloween_spooktacular-Temp-Image.png';
+      return getAssetPath('/card-art/halloween_spooktacular-Temp-Image.png');
     }
-    
+
     // CRYPTIDS cards have various prefixes like gov_, truth_ from the extension
-    if (cardId.toLowerCase().includes('bigfoot') || 
-        cardId.toLowerCase().includes('mothman') || 
+    if (cardId.toLowerCase().includes('bigfoot') ||
+        cardId.toLowerCase().includes('mothman') ||
         cardId.toLowerCase().includes('chupacabra') ||
         cardId.toLowerCase().includes('cryptid') ||
         cardId.toLowerCase().includes('men_in_black') ||
         cardId.toLowerCase().includes('area_51') ||
         cardId.toLowerCase().includes('roswell')) {
-      return '/lovable-uploads/c290a92b-014a-4427-8dd2-a78b76dd986e.png';
+      return getAssetPath('/lovable-uploads/c290a92b-014a-4427-8dd2-a78b76dd986e.png');
     }
 
     // Default PARANOID TIMES placeholder
-    return '/lovable-uploads/e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png';
+    return getAssetPath('/lovable-uploads/e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png');
   };
 
   const fallbackImagePath = getFallbackImagePath();
   const imagePath = imageError || !canLoadDirect
     ? fallbackImagePath
-    : `/card-art/${cardId}.${imageExtension}`;
+    : getAssetPath(`/card-art/${cardId}.${imageExtension}`);
 
   useEffect(() => {
     const hasArt = AVAILABLE_CARD_ART.has(cardId);

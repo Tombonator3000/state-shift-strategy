@@ -3,6 +3,7 @@ import type { EditorId } from '@/expansions/editors/EditorsEngine';
 import { randomGovHeadline, randomTruthHeadline } from '@/ui/tabloid/headlines';
 import { WeatherBadge } from '@/ui/start/WeatherBadge';
 import { loadNewspaperData, pick } from '@/lib/newspaperData';
+import { getAssetPath } from '@/lib/assets';
 import '@/styles/tabloid.css';
 
 type StartScreenProps = {
@@ -137,7 +138,7 @@ const StartScreen = ({
           onClick={() => handleFactionSelect('government')}
           aria-label="Choose Government faction"
         >
-          <img src="/assets/start/start-gov.jpeg" alt="Government" loading="eager" />
+          <img src={getAssetPath('/assets/start/start-gov.jpeg')} alt="Government" loading="eager" />
 
           <div className="redact" aria-hidden="true"></div>
           <div className="card-headline">{govHeadline}</div>
@@ -149,7 +150,7 @@ const StartScreen = ({
           onClick={() => handleFactionSelect('truth')}
           aria-label="Choose Truth Seekers faction"
         >
-          <img src="/assets/start/start-truth.jpeg" alt="Truth Seekers" loading="eager" />
+          <img src={getAssetPath('/assets/start/start-truth.jpeg')} alt="Truth Seekers" loading="eager" />
 
           <div className="redact" aria-hidden="true"></div>
           <div className="card-headline">{truthHeadline}</div>
