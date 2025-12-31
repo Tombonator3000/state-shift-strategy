@@ -17,6 +17,16 @@ import UiOverlays from "./ui/UiOverlays";
 
 const queryClient = new QueryClient();
 
+// Determine basename for React Router based on deployment environment
+// GitHub Pages uses /state-shift-strategy/, Lovable uses /
+const getBasename = () => {
+  // Check if we're on GitHub Pages by looking at hostname
+  if (window.location.hostname.includes('github.io')) {
+    return '/state-shift-strategy';
+  }
+  return '/';
+};
+
 const App = () => {
   useEffect(() => {
     // Initialize extensions on app startup
@@ -30,7 +40,7 @@ const App = () => {
           <AchievementProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
+            <BrowserRouter basename={getBasename()}>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/dev/effects" element={<EffectSystemDashboard />} />
