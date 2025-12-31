@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { getAssetPath } from '@/lib/assets';
 
 interface TabloidFlashOverlayProps {
   x: number;
@@ -37,9 +38,9 @@ interface PolaroidFragment {
 
 const FLASH_DURATION = 1600;
 const polaroidSources = [
-  '/placeholder-event.png',
-  '/card-art/GOV-006.jpg',
-  '/card-art/GOV-011.jpg'
+  getAssetPath('/placeholder-event.png'),
+  getAssetPath('/card-art/GOV-006.jpg'),
+  getAssetPath('/card-art/GOV-011.jpg')
 ];
 
 const TabloidFlashOverlay: React.FC<TabloidFlashOverlayProps> = ({ x, y, onComplete }) => {

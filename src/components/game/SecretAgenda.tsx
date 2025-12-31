@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
 import { SecretAgenda as AgendaType } from '@/data/agendaDatabase';
+import { getAssetPath } from '@/lib/assets';
 
 interface SecretAgendaProps {
   agenda: AgendaType & {
@@ -228,7 +229,7 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
             </div>
             {agenda.artCue?.icon && (
               <img
-                src={agenda.artCue.icon}
+                src={getAssetPath(agenda.artCue.icon)}
                 alt={agenda.artCue.alt ?? 'Clearance stamp'}
                 className="h-10 w-10 opacity-70"
                 loading="lazy"
@@ -283,7 +284,7 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
           </div>
           {agenda.artCue?.icon && (
             <img
-              src={agenda.artCue.icon}
+              src={getAssetPath(agenda.artCue.icon)}
               alt={agenda.artCue.alt ?? 'Tabloid accent graphic'}
               className="h-12 w-12 drop-shadow-[0_0_12px_rgba(248,113,113,0.65)]"
               loading="lazy"
@@ -345,7 +346,7 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
               isGovernmentAgenda ? 'opacity-25 mix-blend-multiply' : 'opacity-30 mix-blend-screen'
             }`}
             style={{
-              backgroundImage: `url(${agenda.artCue.texture})`,
+              backgroundImage: `url(${getAssetPath(agenda.artCue.texture)})`,
               backgroundSize: isGovernmentAgenda ? '220px' : '180px',
               backgroundRepeat: 'repeat'
             }}
@@ -418,7 +419,7 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
         <div
           className={`absolute inset-0 pointer-events-none ${isGovernmentAgenda ? 'opacity-25 mix-blend-multiply' : 'opacity-30 mix-blend-screen'}`}
           style={{
-            backgroundImage: `url(${agenda.artCue.texture})`,
+            backgroundImage: `url(${getAssetPath(agenda.artCue.texture)})`,
             backgroundSize: isGovernmentAgenda ? '240px' : '200px',
             backgroundRepeat: 'repeat'
           }}
@@ -468,7 +469,7 @@ const SecretAgenda = ({ agenda, isPlayer = true }: SecretAgendaProps) => {
                   </div>
                   {agenda.artCue?.icon && (
                     <img
-                      src={agenda.artCue.icon}
+                      src={getAssetPath(agenda.artCue.icon)}
                       alt={agenda.artCue.alt ?? 'Clearance stamp'}
                       className="h-16 w-16 opacity-80"
                       loading="lazy"
