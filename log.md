@@ -798,3 +798,240 @@ Compatible with all modern browsers and IE11+.
 ## Conclusion
 
 GitHub Pages 404 errors have been resolved with a comprehensive SPA routing solution. The implementation adds minimal overhead, maintains backward compatibility with Lovable deployment, and follows industry best practices for hosting React SPAs on GitHub Pages. The site will be fully functional once the PR is merged and GitHub Pages is enabled in repository settings.
+
+---
+
+# Graphics Path Resolution for GitHub Pages
+
+**Date:** 2025-12-31
+**Session:** claude/fix-graphics-paths-HxfQ9
+**Agent:** Claude Code
+
+## Problem Statement
+
+After implementing dual hosting (Lovable + GitHub Pages) with proper SPA routing, images and graphics were not loading on the GitHub Pages deployment at `https://tombonator3000.github.io/state-shift-strategy/`.
+
+### Root Cause
+
+The codebase used hardcoded absolute paths for images:
+- `/assets/start/start-gov.jpeg`
+- `/card-art/GOV-001.jpg`
+- `/lovable-uploads/placeholder.png`
+
+On GitHub Pages with base path `/state-shift-strategy/`, these paths resolved incorrectly:
+- ❌ `https://tombonator3000.github.io/assets/...` (404)
+- ✅ Should be: `https://tombonator3000.github.io/state-shift-strategy/assets/...`
+
+**Why this happened:** Vite's `base` configuration (in `vite.config.ts`) only affects build-time asset references in HTML. Runtime JavaScript/JSX path references are NOT automatically rewritten.
+
+## Solution Implementation
+
+### 1. Created Asset Path Helper
+
+**File:** `src/lib/assets.ts`
+
+```typescript
+/**
+ * Get the full asset path with correct base URL
+ * @param path - Path relative to public folder (should start with /)
+ * @returns Full path with base URL prefix
+ */
+export function getAssetPath(path: string): string {
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${import.meta.env.BASE_URL}${cleanPath}`;
+}
+```
+
+**How it works:**
+- Uses Vite's `import.meta.env.BASE_URL` which contains the configured base path
+- Lovable/local: `BASE_URL = '/'` → returns `/assets/image.jpg`
+- GitHub Pages: `BASE_URL = '/state-shift-strategy/'` → returns `/state-shift-strategy/assets/image.jpg`
+
+### 2. Updated All Image References
+
+Updated 6 files to use `getAssetPath()` for all image paths:
+
+#### StartScreen.tsx (src/ui/start/StartScreen.tsx)
+```typescript
+// Before:
+<img src="/assets/start/start-gov.jpeg" />
+
+// After:
+import { getAssetPath } from '@/lib/assets';
+<img src={getAssetPath('/assets/start/start-gov.jpeg')} />
+```
+
+**Images fixed:**
+- Government faction start image
+- Truth Seekers faction start image
+
+#### CardImage.tsx (src/components/game/CardImage.tsx)
+```typescript
+// Before:
+const imagePath = `/card-art/${cardId}.${extension}`;
+return '/lovable-uploads/placeholder.png';
+
+// After:
+import { getAssetPath } from '@/lib/assets';
+const imagePath = getAssetPath(`/card-art/${cardId}.${extension}`);
+return getAssetPath('/lovable-uploads/placeholder.png');
+```
+
+**Images fixed:**
+- All card art images (`/card-art/*.jpg`, `/card-art/*.png`)
+- Extension fallback images (CRYPTIDS, Halloween)
+- Default placeholder image
+
+#### SecretAgenda.tsx (src/components/game/SecretAgenda.tsx)
+```typescript
+// Before:
+<img src={agenda.artCue.icon} />
+backgroundImage: `url(${agenda.artCue.texture})`
+
+// After:
+import { getAssetPath } from '@/lib/assets';
+<img src={getAssetPath(agenda.artCue.icon)} />
+backgroundImage: `url(${getAssetPath(agenda.artCue.texture)})`
+```
+
+**Images fixed:**
+- Agenda card icons (dossier stamps, tabloid flash graphics)
+- Background textures (halftone patterns, fiber textures)
+
+#### TabloidFlashOverlay.tsx (src/components/effects/TabloidFlashOverlay.tsx)
+```typescript
+// Before:
+const polaroidSources = [
+  '/placeholder-event.png',
+  '/card-art/GOV-006.jpg'
+];
+
+// After:
+import { getAssetPath } from '@/lib/assets';
+const polaroidSources = [
+  getAssetPath('/placeholder-event.png'),
+  getAssetPath('/card-art/GOV-006.jpg')
+];
+```
+
+**Images fixed:**
+- Polaroid flash effect images
+
+#### useCardAnimation.ts (src/hooks/useCardAnimation.ts)
+```typescript
+// Before (in template string):
+<img src="/lovable-uploads/placeholder.png" />
+
+// After:
+import { getAssetPath } from '@/lib/assets';
+<img src="${getAssetPath('/lovable-uploads/placeholder.png')}" />
+```
+
+**Images fixed:**
+- Played card animation placeholder
+
+## Files Changed
+
+| File | Purpose | Changes |
+|------|---------|---------|
+| `src/lib/assets.ts` | **New** | Asset path helper function |
+| `src/ui/start/StartScreen.tsx` | Start screen | 2 faction images |
+| `src/components/game/CardImage.tsx` | Card display | Card art + fallbacks |
+| `src/components/game/SecretAgenda.tsx` | Agenda cards | Icons + textures |
+| `src/components/effects/TabloidFlashOverlay.tsx` | Flash effects | Polaroid images |
+| `src/hooks/useCardAnimation.ts` | Card animations | Placeholder image |
+
+## Verification
+
+### Build Test
+```bash
+GITHUB_PAGES=true npm run build
+# ✓ Built in 18.95s
+```
+
+### Asset Path Verification
+```bash
+grep -E "(href|src)=" dist/index.html
+```
+
+**Results:**
+```html
+<script type="module" crossorigin src="/state-shift-strategy/assets/index-Bb2tNqDG.js"></script>
+<link rel="stylesheet" crossorigin href="/state-shift-strategy/assets/index-CrRNtCVL.css">
+```
+
+✅ Build-time assets have correct base path
+
+### Runtime Assets Verification
+- All images in `public/assets/`, `public/card-art/`, and `public/lovable-uploads/` copied to `dist/`
+- No hardcoded paths remaining in source files
+- `getAssetPath()` function uses `import.meta.env.BASE_URL` at runtime
+
+## Deployment Behavior
+
+| Environment | BASE_URL | Example Path Input | Resolved Path |
+|-------------|----------|-------------------|---------------|
+| **Lovable** | `/` | `/assets/image.jpg` | `/assets/image.jpg` |
+| **GitHub Pages** | `/state-shift-strategy/` | `/assets/image.jpg` | `/state-shift-strategy/assets/image.jpg` |
+| **Local Dev** | `/` | `/assets/image.jpg` | `/assets/image.jpg` |
+
+## Benefits
+
+1. **Single Codebase**: No environment-specific code or build scripts
+2. **Type-Safe**: Helper function provides consistent API
+3. **Zero Runtime Overhead**: Simple string concatenation
+4. **Backward Compatible**: Lovable deployment completely unaffected
+5. **Future-Proof**: Works for any base path configuration
+6. **DRY Principle**: Centralized path logic in one function
+
+## Testing Checklist
+
+- [x] Build succeeds with `GITHUB_PAGES=true`
+- [x] Assets copied to correct dist paths
+- [x] No hardcoded absolute paths in built files
+- [x] All image references updated
+- [x] Backward compatibility maintained (Lovable works)
+- [ ] Visual verification on live GitHub Pages deployment
+
+## Next Steps
+
+1. Merge this PR to trigger GitHub Actions deployment
+2. Verify images load correctly at `https://tombonator3000.github.io/state-shift-strategy/`
+3. Test all screens: start screen, game board, card images, effects, agendas
+4. If issues persist, check browser console for 404 errors and investigate specific paths
+
+## Technical Notes
+
+### Why Not Use Import Statements?
+
+```typescript
+// This approach requires bundler configuration:
+import startGovImage from '@/public/assets/start/start-gov.jpeg';
+<img src={startGovImage} />
+```
+
+**Drawbacks:**
+- Requires explicit imports for every image
+- Can't construct paths dynamically (e.g., card art based on cardId)
+- More boilerplate code
+- Larger bundle size (all images bundled)
+
+**Our approach:**
+- Dynamic path construction: `getAssetPath(\`/card-art/\${cardId}.jpg\`)`
+- Images stay in `public/` folder (served separately)
+- Minimal code changes
+- Same behavior as before, just with base path prefix
+
+### Alternative Approaches Considered
+
+1. **Hash Router**: Changes URL structure, not SEO-friendly
+2. **Environment Variables**: Requires build-time substitution, harder to maintain
+3. **Webpack Aliases**: Vite doesn't use webpack, would need plugin
+4. **Public Path Plugin**: Overkill for this use case
+
+The `getAssetPath()` helper is the simplest, most maintainable solution.
+
+## Conclusion
+
+Graphics path resolution for GitHub Pages has been fixed with a minimal, elegant solution. The `getAssetPath()` helper function uses Vite's built-in `BASE_URL` environment variable to automatically prefix all asset paths with the correct base path. This ensures images load correctly on both Lovable (base `/`) and GitHub Pages (base `/state-shift-strategy/`) from the same codebase.
+
