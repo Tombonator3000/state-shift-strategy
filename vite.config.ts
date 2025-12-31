@@ -11,7 +11,12 @@ export default defineConfig(({ mode }) => {
   const shouldEnableLovableTagger =
     mode === "development" && process.env.ENABLE_LOVABLE_TAGGER === "true";
 
+  // Use GitHub Pages base path in production when deployed to GitHub Pages
+  // In Lovable or local dev, base will be '/'
+  const base = process.env.GITHUB_PAGES === 'true' ? '/state-shift-strategy/' : '/';
+
   return {
+    base,
     server: {
       host: "0.0.0.0",
       port: resolvedPort,
