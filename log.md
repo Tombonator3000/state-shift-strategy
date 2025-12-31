@@ -1035,3 +1035,200 @@ The `getAssetPath()` helper is the simplest, most maintainable solution.
 
 Graphics path resolution for GitHub Pages has been fixed with a minimal, elegant solution. The `getAssetPath()` helper function uses Vite's built-in `BASE_URL` environment variable to automatically prefix all asset paths with the correct base path. This ensures images load correctly on both Lovable (base `/`) and GitHub Pages (base `/state-shift-strategy/`) from the same codebase.
 
+---
+
+# Halloween & Cryptids Expansion Status Check
+
+**Date:** 2025-12-31
+**Session:** claude/check-expansions-status-J65OO
+**Agent:** Claude Code
+
+## Task
+
+Sjekk hva som har skjedd med expansions: halloween og cryptids. Er de med???
+
+## Investigation Summary
+
+Conducted comprehensive audit of Halloween and Cryptids expansion status in the codebase.
+
+### ✅ Status: BEGGE EXPANSIONS ER MED OG AKTIVE
+
+## Findings
+
+### 1. Halloween Expansion
+
+**Location:** `/public/extensions/`
+
+**Files:**
+- `halloween_spooktacular_with_temp_image.json` (4177 lines, 200 cards)
+- `halloween_midnight_dossiers.json` (377 lines)
+
+**Registration:**
+- ✅ Listed in `/public/extensions/manifest.json`
+- ✅ Listed in `/public/extensions/index.json`
+- ✅ In FALLBACK_FILES list (`src/lib/expansions/discover.ts:10`)
+
+**Card Details:**
+```json
+{
+  "id": "halloween_spooktacular",
+  "name": "Halloween Spooktacular",
+  "version": "1.0.0",
+  "author": "ShadowGov Team",
+  "description": "Halloween Spooktacular — MVP-compliant pack",
+  "factions": ["government"],
+  "count": 200,
+  "cards": [...]
+}
+```
+
+**Example Cards:**
+- `hallo-gov-graveyard-flyer-protocol-001` - "Graveyard Flyer Protocol"
+- `hallo-gov-spider-scare-incident-002` - "Spider Scare Incident"
+- `hallo-gov-cauldron-whispers-incident-003` - "Cauldron Whispers Incident"
+
+**Art:**
+- Temp image: `/public/card-art/halloween_spooktacular-Temp-Image.png`
+- Fallback logic in `CardImage.tsx:31-38` handles halloween cards
+
+### 2. Cryptids Expansion
+
+**Location:** `/public/extensions/`
+
+**Files:**
+- `cryptids.json` (6008 lines, 300 cards)
+- `cryptids_midnight_fieldguide.json` (378 lines)
+
+**Registration:**
+- ✅ Listed in `/public/extensions/manifest.json`
+- ✅ Listed in `/public/extensions/index.json`
+- ✅ In FALLBACK_FILES list (`src/lib/expansions/discover.ts:10`)
+
+**Card Details:**
+```json
+{
+  "id": "cryptids",
+  "name": "Cryptids",
+  "version": "2.0.0",
+  "schemaVersion": 2,
+  "author": "ShadowGov Team aka a drunk AI with one angry prompter",
+  "description": "State monsters & cover-ups with home-state bonuses. v2.",
+  "factions": ["government", "truth"],
+  "count": 300,
+  "cards": [...]
+}
+```
+
+**Example Cards:**
+- `CRY-TS-001` - "Cryptid Field Research" (ZONE, truth, 5 cost)
+- `CRY-TS-002` - "Ultra Disclosure Protocol" (MEDIA, truth, 6 cost)
+- `CRY-TS-003` - "Bigfoot Expedition" (ZONE, truth, 5 cost)
+
+**Art:**
+- Temp image: `/lovable-uploads/c290a92b-014a-4427-8dd2-a78b76dd986e.png`
+- Fallback logic in `CardImage.tsx:26-50` handles cryptid cards
+- Keyword detection: bigfoot, mothman, chupacabra, cryptid, men_in_black, area_51, roswell
+
+### 3. Discovery System
+
+**How Expansions Are Loaded:**
+
+```typescript
+// src/lib/expansions/discover.ts
+const FALLBACK_FILES = [
+  'cryptids.json',
+  'halloween_spooktacular_with_temp_image.json'
+];
+```
+
+**Discovery Flow:**
+1. Check `/extensions/index.json` → ✅ Found both
+2. Check `/extensions/manifest.json` → ✅ Found both
+3. Fallback to FALLBACK_FILES → ✅ Both included
+4. Parse each file and validate cards
+5. Merge with builtin expansions
+6. Cache for performance
+
+**Integration Points:**
+- `src/data/extensionSystem.ts` - Extension manager
+- `src/data/extensionIntegration.ts` - Integration layer
+- `src/lib/expansions/discover.ts` - Discovery engine
+- `src/components/game/CardImage.tsx` - Image fallback handling
+
+### 4. Orphaned Files (NOT IN USE)
+
+Found legacy TypeScript versions that are **NOT LOADED**:
+
+- `src/data/expansions/halloween_MVP.ts` (3088 lines) - ❌ Not imported anywhere
+- `src/data/expansions/cryptids_MVP.ts` (4519 lines) - ❌ Not imported anywhere
+
+**Why they exist:**
+- Likely historical artifacts from migration to JSON-based system
+- Both export `default cards` but no imports found
+- Safe to archive or delete
+
+**Current builtin expansions** (`src/data/expansions/builtin.ts`):
+- `truth-new`: Truth Vanguard Initiative
+- `gov-new`: Government Countermeasures Bureau
+
+Halloween and Cryptids are **NOT builtin**, they are **discovered extensions**.
+
+### 5. Card Art Handling
+
+**CardImage.tsx fallback logic:**
+
+```typescript
+// CRYPTIDS extension temp image
+if (extensionInfo?.id?.toLowerCase().includes('cryptids')) {
+  return getAssetPath('/lovable-uploads/c290a92b-014a-4427-8dd2-a78b76dd986e.png');
+}
+
+// Halloween Spooktacular extension temp image
+if (extensionInfo?.id?.toLowerCase().includes('halloween_spooktacular')) {
+  return getAssetPath('/card-art/halloween_spooktacular-Temp-Image.png');
+}
+```
+
+**Keyword-based fallback:**
+- Halloween: Cards starting with `hallo-`
+- Cryptids: Cards containing bigfoot, mothman, chupacabra, cryptid, etc.
+
+## Statistics
+
+| Expansion | Files | Cards | Lines | Version | Factions |
+|-----------|-------|-------|-------|---------|----------|
+| **Cryptids** | 2 | 300 | 6008 + 378 | 2.0.0 | gov, truth |
+| **Halloween** | 2 | 200 | 4177 + 377 | 1.0.0 | government |
+| **Total** | 4 | 500 | 10,940 | - | - |
+
+## Verification Commands
+
+```bash
+# Check manifest registration
+jq '.files' /home/user/state-shift-strategy/public/extensions/manifest.json
+
+# Count cards
+jq '.cards | length' /home/user/state-shift-strategy/public/extensions/cryptids.json
+jq '.cards | length' /home/user/state-shift-strategy/public/extensions/halloween_spooktacular_with_temp_image.json
+
+# Check card counts match metadata
+jq '.count' /home/user/state-shift-strategy/public/extensions/cryptids.json  # Returns: 300
+jq '.count' /home/user/state-shift-strategy/public/extensions/halloween_spooktacular_with_temp_image.json  # Returns: 200
+```
+
+## Conclusion
+
+**✅ BEGGE EXPANSIONS ER FULLT FUNKSJONELLE**
+
+- Halloween og Cryptids er registrert i extension systemet
+- Alle filer er på plass i `/public/extensions/`
+- Discovery system laster dem automatisk
+- CardImage har fallback-bilder for begge
+- Totalt 500 nye kort tilgjengelig (300 cryptids + 200 halloween)
+
+**Ingen action nødvendig** - systemet fungerer som det skal.
+
+**Orphaned files** kan slettes hvis ønskelig:
+- `src/data/expansions/halloween_MVP.ts`
+- `src/data/expansions/cryptids_MVP.ts`
+
