@@ -222,6 +222,21 @@ const StartScreen = ({
             </span>
             <small className="menu-subhead">Money Trail Investigation</small>
           </button>
+          <a
+            href="https://tombonator3000.github.io/conspiracy-canvas/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ad-card tabloid-menu-btn"
+            onMouseEnter={() => setHoveredButton('game-link')}
+            onMouseLeave={() => setHoveredButton(null)}
+            onClick={playClick}
+          >
+            <span className="menu-masthead">🎮 ALTERNATE REALITY</span>
+            <span className="menu-headline">
+              {glitchText['game-link'] || 'PLAY CONSPIRACY CANVAS!'}
+            </span>
+            <small className="menu-subhead">Another Investigation Awaits • Click to Enter</small>
+          </a>
           <WeatherBadge />
         </aside>
       </div>

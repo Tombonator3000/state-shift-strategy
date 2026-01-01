@@ -1,5 +1,84 @@
 # Article Combiner System - Technical Log
 
+---
+
+# Game Link Addition
+
+**Date:** 2026-01-01
+**Session:** claude/add-game-link-wTlD5
+**Agent:** Claude Code
+
+## Task
+
+Add a link to Conspiracy Canvas game on the start screen.
+
+## Implementation
+
+Added a new menu button in the start screen sidebar that links to the Conspiracy Canvas game:
+- **URL:** https://tombonator3000.github.io/conspiracy-canvas/
+- **Location:** StartScreen.tsx sidebar, between Credits button and WeatherBadge
+- **Styling:** Matches existing tabloid menu button style
+- **Behavior:** Opens in new tab with appropriate security attributes
+
+### Button Details
+
+```jsx
+<a
+  href="https://tombonator3000.github.io/conspiracy-canvas/"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="ad-card tabloid-menu-btn"
+  onMouseEnter={() => setHoveredButton('game-link')}
+  onMouseLeave={() => setHoveredButton(null)}
+  onClick={playClick}
+>
+  <span className="menu-masthead">🎮 ALTERNATE REALITY</span>
+  <span className="menu-headline">
+    {glitchText['game-link'] || 'PLAY CONSPIRACY CANVAS!'}
+  </span>
+  <small className="menu-subhead">Another Investigation Awaits • Click to Enter</small>
+</a>
+```
+
+### Features
+
+1. **External Link:** Opens Conspiracy Canvas game in new tab
+2. **Security:** Uses `rel="noopener noreferrer"` for security best practices
+3. **Hover Effects:** Integrates with existing hover state management
+4. **Sound Effects:** Plays click sound like other menu buttons
+5. **Glitch Effect:** Participates in the paranoid glitch text system
+6. **Responsive:** Uses same responsive tabloid card styling as other buttons
+
+## Files Modified
+
+1. **Modified:** `src/ui/start/StartScreen.tsx`
+   - Added new anchor element styled as tabloid menu button
+   - Linked to Conspiracy Canvas game
+   - Positioned between Credits and WeatherBadge
+
+## Verification
+
+Build test:
+```bash
+npm run build
+✓ Built successfully in 18.31s
+```
+
+## User Experience
+
+Players will now see a new menu option on the start screen:
+- **Masthead:** 🎮 ALTERNATE REALITY
+- **Headline:** PLAY CONSPIRACY CANVAS!
+- **Subhead:** Another Investigation Awaits • Click to Enter
+
+The button maintains the paranoid tabloid aesthetic and includes:
+- Random glitch text effects
+- Hover state changes
+- Click sound feedback
+- Seamless visual integration with existing UI
+
+---
+
 ## Overview
 The Article Combiner system merges multiple card articles into a single cohesive news story using AI or template-based methods.
 
