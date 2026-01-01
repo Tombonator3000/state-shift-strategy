@@ -1232,3 +1232,208 @@ jq '.count' /home/user/state-shift-strategy/public/extensions/halloween_spooktac
 - `src/data/expansions/halloween_MVP.ts`
 - `src/data/expansions/cryptids_MVP.ts`
 
+---
+
+# Missing Expansions in UI - Bug Fix
+
+**Date:** 2026-01-01
+**Session:** claude/add-missing-expansions-tosqV
+**Agent:** Claude Code
+
+## Problem Statement
+
+User reported that Halloween and Cryptids expansions were completely missing from the options in the UI, despite the files existing in `/public/extensions/` and being properly registered.
+
+## Investigation
+
+### Root Cause Analysis
+
+The screenshot showed only 2 expansions detected:
+- Government Countermeasures Bureau (20 cards)
+- Truth Vanguard Initiative (20 cards)
+
+These are the **builtin** expansions from `src/data/expansions/builtin.ts`.
+
+**Why Halloween and Cryptids were missing:**
+
+1. **ManageExpansions.tsx** (line 15) imported `EXPANSION_MANIFEST` directly:
+   ```typescript
+   import { EXPANSION_MANIFEST } from '@/data/expansions';
+   ```
+
+2. **EXPANSION_MANIFEST** is initialized as an **empty array** (line 20 in `src/data/expansions/index.ts`):
+   ```typescript
+   const manifest: ExpansionPack[] = [];
+   export const EXPANSION_MANIFEST = manifest;
+   ```
+
+3. **ManageExpansions.tsx NEVER called** `ensureExpansionManifest()` or `discoverExpansions()`
+   - Therefore, the manifest remained empty
+   - Only builtin expansions were shown
+
+4. **ExpansionControl.tsx** (the other expansion UI component) DID call `discoverExpansions()` and would show all expansions correctly
+
+### Files Analysis
+
+✅ **Files exist and are properly registered:**
+- `/public/extensions/cryptids.json` (176 KB, 300 cards)
+- `/public/extensions/halloween_spooktacular_with_temp_image.json` (103 KB, 200 cards)
+- Both listed in `/public/extensions/manifest.json` and `index.json`
+
+❌ **ManageExpansions.tsx was not loading them**
+
+## Solution Implementation
+
+### Changes to ManageExpansions.tsx
+
+**1. Updated imports** (line 15):
+```typescript
+// Before:
+import { EXPANSION_MANIFEST } from '@/data/expansions';
+
+// After:
+import { ensureExpansionManifest, type ExpansionPack } from '@/data/expansions';
+```
+
+**2. Added state to store manifest** (line 177):
+```typescript
+const [expansionManifest, setExpansionManifest] = useState<ExpansionPack[]>([]);
+```
+
+**3. Added useEffect to load manifest** (line 201-212):
+```typescript
+useEffect(() => {
+  const loadManifest = async () => {
+    try {
+      const manifest = await ensureExpansionManifest();
+      setExpansionManifest(manifest);
+      setExpansionCounts(summarizeExpansionCards(expansionCards, manifest));
+    } catch (error) {
+      console.error('Failed to load expansion manifest:', error);
+    }
+  };
+  void loadManifest();
+}, [expansionCards]);
+```
+
+**4. Updated summarizeExpansionCards** to accept manifest parameter (line 75):
+```typescript
+// Before:
+const summarizeExpansionCards = (cards: GameCard[]): Record<string, number> => {
+  const expansionIdSet = getExpansionIdSet();
+  // ...
+};
+
+// After:
+const summarizeExpansionCards = (cards: GameCard[], manifest: ExpansionPack[]): Record<string, number> => {
+  const expansionIdSet = new Set(manifest.map(pack => pack.id));
+  // ...
+};
+```
+
+**5. Updated all calls to summarizeExpansionCards** to pass manifest:
+- Line 234: in `subscribeToExpansionChanges` callback
+- Line 394: in `handleExpansionToggle` success handler
+- Line 408: in `handleExpansionToggle` error handler
+
+**6. Updated expansionDetails useMemo** (line 258-265):
+```typescript
+const expansionDetails = useMemo<ExpansionDetail[]>(
+  () =>
+    expansionManifest.map(pack => ({
+      pack,
+      enabled: enabledExpansions.includes(pack.id),
+      loadedCount: expansionCounts[pack.id] ?? 0,
+    })),
+  [expansionManifest, enabledExpansions, expansionCounts],
+);
+```
+
+**7. Updated getSetTitle callback** (line 371-377):
+```typescript
+const getSetTitle = useCallback((setId: string) => {
+  if (setId === 'core') {
+    return 'Core Set';
+  }
+  const pack = expansionManifest.find(p => p.id === setId);
+  return pack?.title ?? setId;
+}, [expansionManifest]);
+```
+
+**8. Updated ExpansionDetail interface** (line 88-92):
+```typescript
+interface ExpansionDetail {
+  pack: ExpansionPack;  // Changed from (typeof EXPANSION_MANIFEST)[number]
+  enabled: boolean;
+  loadedCount: number;
+}
+```
+
+## Expected Results
+
+After this fix, **ManageExpansions.tsx** will now:
+
+1. ✅ Call `ensureExpansionManifest()` on component mount
+2. ✅ Discover and load Halloween and Cryptids expansions from `/public/extensions/`
+3. ✅ Show **4 detected expansions** instead of 2:
+   - Core Deck (always loaded)
+   - Government Countermeasures Bureau (20 cards)
+   - Truth Vanguard Initiative (20 cards)
+   - **Cryptids (300 cards)** ← NOW VISIBLE
+   - **Halloween Spooktacular (200 cards)** ← NOW VISIBLE
+
+4. ✅ Allow users to enable/disable Halloween and Cryptids packs
+5. ✅ Include enabled expansion cards in deck building
+
+## Verification Steps
+
+1. Navigate to Expansion Control Room in the UI
+2. Verify "4 detected" is shown instead of "2 detected"
+3. Verify Halloween Spooktacular and Cryptids appear in the expansion list
+4. Toggle them on/off and verify cards are loaded correctly
+5. Check deck preview to confirm expansion cards are included when enabled
+
+## Technical Notes
+
+### Why This Happened
+
+- `EXPANSION_MANIFEST` is a **module-level constant** that starts empty
+- It only gets populated when `refreshExpansionManifest()` or `ensureExpansionManifest()` is called
+- **ExpansionControl.tsx** calls `discoverExpansions()` → ✅ Works
+- **ManageExpansions.tsx** imported the empty static constant → ❌ Broken
+
+### The Fix
+
+Make ManageExpansions.tsx **dynamic** like ExpansionControl.tsx:
+- Load manifest at runtime using `ensureExpansionManifest()`
+- Store in component state
+- Re-render when manifest changes
+
+### Alternative Approaches Considered
+
+1. **Pre-populate EXPANSION_MANIFEST at module load:**
+   - Would require top-level await (not supported everywhere)
+   - Could cause race conditions
+
+2. **Make EXPANSION_MANIFEST reactive:**
+   - Would require a global state management system
+   - Overkill for this use case
+
+3. **Use ExpansionControl.tsx instead:**
+   - Would require UI redesign
+   - ManageExpansions.tsx has different layout/features
+
+The chosen approach (dynamic loading in component) is the cleanest and most maintainable.
+
+## Files Modified
+
+1. **Modified:** `src/components/game/ManageExpansions.tsx`
+   - Changed imports to use `ensureExpansionManifest`
+   - Added state for expansionManifest
+   - Added useEffect to load manifest
+   - Updated all EXPANSION_MANIFEST references to use state
+   - Updated function signatures to accept manifest parameter
+
+## Conclusion
+
+The missing expansions issue has been resolved. **ManageExpansions.tsx** now properly discovers and displays all expansions including Halloween (200 cards) and Cryptids (300 cards), bringing the total available expansion cards to 500+ when enabled.

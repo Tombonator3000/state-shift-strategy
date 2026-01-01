@@ -12,7 +12,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import type { GameCard } from '@/rules/mvp';
 import { getCoreCards } from '@/data/cardDatabase';
 import { normalizeFaction } from '@/data/mvpAnalysisUtils';
-import { EXPANSION_MANIFEST } from '@/data/expansions';
+import { ensureExpansionManifest, type ExpansionPack } from '@/data/expansions';
 import {
   getExpansionCardsSnapshot,
   getStoredExpansionIds,
@@ -72,11 +72,9 @@ const computeStats = (cards: GameCard[]): StatBlock => {
   };
 };
 
-const getExpansionIdSet = () => new Set(EXPANSION_MANIFEST.map(pack => pack.id));
-
-const summarizeExpansionCards = (cards: GameCard[]): Record<string, number> => {
+const summarizeExpansionCards = (cards: GameCard[], manifest: ExpansionPack[]): Record<string, number> => {
   const counts: Record<string, number> = {};
-  const expansionIdSet = getExpansionIdSet();
+  const expansionIdSet = new Set(manifest.map(pack => pack.id));
   cards.forEach(card => {
     const extId = card.extId ?? (card as { _setId?: string })._setId;
     if (!extId || !expansionIdSet.has(extId)) {
@@ -88,7 +86,7 @@ const summarizeExpansionCards = (cards: GameCard[]): Record<string, number> => {
 };
 
 interface ExpansionDetail {
-  pack: (typeof EXPANSION_MANIFEST)[number];
+  pack: ExpansionPack;
   enabled: boolean;
   loadedCount: number;
 }
@@ -174,11 +172,10 @@ const ExpansionPanel = ({ detail, onToggle, isUpdating }: ExpansionPanelProps) =
 
 const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
   const [coreCards] = useState<GameCard[]>(() => getCoreCards());
+  const [expansionManifest, setExpansionManifest] = useState<ExpansionPack[]>([]);
   const [enabledExpansions, setEnabledExpansions] = useState<string[]>(() => getStoredExpansionIds());
   const [expansionCards, setExpansionCards] = useState<GameCard[]>(() => getExpansionCardsSnapshot());
-  const [expansionCounts, setExpansionCounts] = useState<Record<string, number>>(() =>
-    summarizeExpansionCards(getExpansionCardsSnapshot()),
-  );
+  const [expansionCounts, setExpansionCounts] = useState<Record<string, number>>({});
   const [pendingUpdates, setPendingUpdates] = useState<Record<string, boolean>>({});
   const [updateError, setUpdateError] = useState<string | null>(null);
 
@@ -201,6 +198,19 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
     getSimulationRef.current = getSimulation;
   }, [getSimulation]);
 
+  useEffect(() => {
+    const loadManifest = async () => {
+      try {
+        const manifest = await ensureExpansionManifest();
+        setExpansionManifest(manifest);
+        setExpansionCounts(summarizeExpansionCards(expansionCards, manifest));
+      } catch (error) {
+        console.error('Failed to load expansion manifest:', error);
+      }
+    };
+    void loadManifest();
+  }, [expansionCards]);
+
   const [simulationResults, setSimulationResults] = useState<SimulationResult | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
 
@@ -221,10 +231,10 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
     const unsubscribe = subscribeToExpansionChanges(({ ids, cards }) => {
       setEnabledExpansions(ids);
       setExpansionCards(cards);
-      setExpansionCounts(summarizeExpansionCards(cards));
+      setExpansionCounts(summarizeExpansionCards(cards, expansionManifest));
     });
     return () => unsubscribe();
-  }, []);
+  }, [expansionManifest]);
 
   useEffect(() => {
     if (distributionLoading) {
@@ -247,12 +257,12 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
 
   const expansionDetails = useMemo<ExpansionDetail[]>(
     () =>
-      EXPANSION_MANIFEST.map(pack => ({
+      expansionManifest.map(pack => ({
         pack,
         enabled: enabledExpansions.includes(pack.id),
         loadedCount: expansionCounts[pack.id] ?? 0,
       })),
-    [enabledExpansions, expansionCounts],
+    [expansionManifest, enabledExpansions, expansionCounts],
   );
 
   type ActiveSet = {
@@ -362,9 +372,9 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
     if (setId === 'core') {
       return 'Core Set';
     }
-    const manifest = EXPANSION_MANIFEST.find(pack => pack.id === setId);
-    return manifest?.title ?? setId;
-  }, []);
+    const pack = expansionManifest.find(p => p.id === setId);
+    return pack?.title ?? setId;
+  }, [expansionManifest]);
 
   const handleExpansionToggle = async (expansionId: string) => {
     setUpdateError(null);
@@ -381,7 +391,7 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
     try {
       const cards = await updateEnabledExpansions(nextIds);
       setExpansionCards(cards);
-      setExpansionCounts(summarizeExpansionCards(cards));
+      setExpansionCounts(summarizeExpansionCards(cards, expansionManifest));
 
       if (!isCurrentlyEnabled && wasEmpty && settings.mode === 'core-only') {
         setMode('balanced');
@@ -395,7 +405,7 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
       const storedCards = getExpansionCardsSnapshot();
       setEnabledExpansions(storedIds);
       setExpansionCards(storedCards);
-      setExpansionCounts(summarizeExpansionCards(storedCards));
+      setExpansionCounts(summarizeExpansionCards(storedCards, expansionManifest));
     } finally {
       setPendingUpdates(prev => {
         const next = { ...prev };
