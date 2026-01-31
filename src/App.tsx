@@ -14,6 +14,7 @@ import ArticleCombinerPage from "./pages/ArticleCombinerPage";
 import { initializeExtensionsOnStartup } from './data/extensionIntegration';
 import { AchievementProvider } from './contexts/AchievementContext';
 import UiOverlays from "./ui/UiOverlays";
+import { PWAPrompt, OfflineIndicator } from "./components/pwa/PWAPrompt";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,8 @@ const App = () => {
               </Routes>
             </BrowserRouter>
             <UiOverlays />
+            <PWAPrompt />
+            <OfflineIndicator />
           </AchievementProvider>
         </AudioProvider>
       </TooltipProvider>

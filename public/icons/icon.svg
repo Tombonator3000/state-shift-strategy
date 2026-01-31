@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#0f0f1a"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c4a000"/>
+      <stop offset="100%" style="stop-color:#8b7300"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bg)" rx="80"/>
+  <!-- Newspaper fold effect -->
+  <path d="M40 120 L472 120 L472 432 L40 432 Z" fill="#f5f5dc" opacity="0.95"/>
+  <path d="M40 120 L472 120 L472 130 L40 130 Z" fill="#d4d4a0"/>
+  <!-- All-seeing eye -->
+  <ellipse cx="256" cy="276" rx="140" ry="90" fill="none" stroke="url(#glow)" stroke-width="12"/>
+  <circle cx="256" cy="276" r="50" fill="url(#glow)"/>
+  <circle cx="256" cy="276" r="25" fill="#1a1a2e"/>
+  <!-- Rays -->
+  <g stroke="url(#glow)" stroke-width="4" opacity="0.6">
+    <line x1="256" y1="160" x2="256" y2="130"/>
+    <line x1="330" y1="190" x2="355" y2="165"/>
+    <line x1="182" y1="190" x2="157" y2="165"/>
+    <line x1="370" y1="276" x2="400" y2="276"/>
+    <line x1="142" y1="276" x2="112" y2="276"/>
+  </g>
+  <!-- Title banner -->
+  <rect x="60" y="390" width="392" height="35" fill="#8b0000"/>
+  <text x="256" y="415" font-family="Arial Black, sans-serif" font-size="22" fill="#f5f5dc" text-anchor="middle" font-weight="bold">PARANOID TIMES</text>
+</svg>
