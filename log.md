@@ -1,3 +1,241 @@
+# PWA Offline Support Implementation
+
+**Date:** 2026-01-31
+**Session:** claude/offline-pwa-support-1lsjN
+**Agent:** Claude Code
+
+## Task
+
+Implementere Progressive Web App (PWA) støtte med offline-funksjonalitet og installerbarhet for Paranoid Times.
+
+## Overview
+
+Implementert fullstendig PWA-støtte som gjør spillet installerbart som en app og spillbart offline. Brukere kan nå laste ned spillet til hjemskjermen på mobil og desktop, og spille uten internettforbindelse.
+
+## Changes Made
+
+### 1. PWA Dependencies
+
+**Installed:**
+- `vite-plugin-pwa` - Vite plugin for PWA generering
+- `workbox-window` - Service worker management
+- `sharp` - Image processing for icon generation
+
+### 2. App Icons
+
+**Created:** `/public/icons/`
+
+Generated multiple icon sizes for different platforms:
+- `icon-72.png` through `icon-512.png` - Standard icons
+- `icon-maskable-192.png`, `icon-maskable-512.png` - Android maskable icons
+- `apple-touch-icon.png` - iOS home screen icon
+- `favicon-16x16.png`, `favicon-32x32.png` - Favicon alternatives
+- `icon.svg` - Source SVG with Paranoid Times branding
+
+**Icon Design:**
+- Dark theme (#1a1a2e background)
+- Gold accent color (#c4a000)
+- All-seeing eye motif (conspiracy theme)
+- "PARANOID TIMES" banner
+
+### 3. Web App Manifest
+
+**File:** `vite.config.ts` (generated to `manifest.webmanifest`)
+
+```json
+{
+  "name": "Paranoid Times - State Shift Strategy",
+  "short_name": "Paranoid Times",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#c4a000",
+  "start_url": "/",
+  "scope": "/"
+}
+```
+
+Dynamic base path for GitHub Pages (`/state-shift-strategy/`).
+
+### 4. Service Worker Configuration
+
+**File:** `vite.config.ts`
+
+```typescript
+VitePWA({
+  registerType: 'autoUpdate',
+  workbox: {
+    globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg,webp,woff,woff2,mp3,json}'],
+    maximumFileSizeToCacheInBytes: 100 * 1024 * 1024, // 100MB
+    runtimeCaching: [
+      // Google Fonts - CacheFirst, 1 year
+      // Images - CacheFirst, 30 days, 500 entries
+      // Audio - CacheFirst, 30 days, 50 entries
+    ]
+  }
+})
+```
+
+**Cached Resources:**
+- All JS, CSS, HTML files
+- Images (PNG, JPG, SVG, WebP)
+- Audio files (MP3)
+- Card art, expansion JSON files
+- Google Fonts
+
+**Precache:** ~500 files (~104 MB) for complete offline play
+
+### 5. HTML Meta Tags
+
+**File:** `index.html`
+
+Added PWA-specific meta tags:
+- `theme-color` - Browser chrome color
+- `apple-mobile-web-app-capable` - iOS fullscreen
+- `apple-mobile-web-app-status-bar-style` - iOS status bar
+- Apple touch icon links
+- MS Tile configuration
+
+### 6. PWA UI Components
+
+**Created:** `src/hooks/usePWA.ts`
+
+React hook for PWA state management:
+- `isInstallable` - Can show install prompt
+- `isInstalled` - Running as installed app
+- `isOnline` - Network status
+- `needsUpdate` - New version available
+- `install()` - Trigger install prompt
+- `update()` - Apply pending update
+
+**Created:** `src/components/pwa/PWAPrompt.tsx`
+
+UI components:
+- **Install Prompt** - Appears after 5 seconds if installable
+- **Update Available** - Notification for new versions
+- **Offline Indicator** - Status badge when offline
+
+### 7. Supporting Files
+
+- `public/browserconfig.xml` - Windows tile configuration
+- `public/offline.html` - Themed offline fallback page
+- `scripts/generate-pwa-icons.mjs` - Icon generation script
+
+## Technical Details
+
+### Service Worker Strategy
+
+| Resource Type | Strategy | Cache Duration | Max Entries |
+|--------------|----------|----------------|-------------|
+| App Shell | Precache | Permanent | All |
+| Google Fonts | CacheFirst | 1 year | 10 |
+| Images | CacheFirst | 30 days | 500 |
+| Audio | CacheFirst | 30 days | 50 |
+| API calls | NetworkFirst | - | - |
+
+### Offline Capabilities
+
+When offline, the following works:
+- ✅ Full game play (vs AI)
+- ✅ All card images
+- ✅ Sound effects and music
+- ✅ Expansion cards (Cryptids, Halloween)
+- ✅ Game state persistence (localStorage)
+- ❌ Online multiplayer (requires network)
+- ❌ AI article combining (requires API)
+
+### Install Flow
+
+1. User visits site
+2. Service worker registers and precaches assets
+3. After 5 seconds, install prompt appears (if supported)
+4. User clicks "Install App"
+5. Browser shows native install dialog
+6. App added to home screen/app launcher
+7. Future visits launch in standalone mode
+
+### Update Flow
+
+1. Service worker checks for updates periodically
+2. New version found → downloaded in background
+3. "Update Available" notification shown
+4. User clicks "Update Now"
+5. Page reloads with new version
+
+## Deployment Compatibility
+
+| Platform | PWA Install | Offline | Notes |
+|----------|-------------|---------|-------|
+| Chrome (Desktop) | ✅ | ✅ | Full support |
+| Edge (Desktop) | ✅ | ✅ | Full support |
+| Safari (macOS) | ⚠️ | ✅ | Limited install UI |
+| Chrome (Android) | ✅ | ✅ | Add to Home Screen |
+| Safari (iOS) | ✅ | ✅ | Add to Home Screen |
+| Firefox | ❌ | ✅ | No install, but offline works |
+
+## Files Created/Modified
+
+### Created
+1. `public/icons/icon.svg` - Source icon design
+2. `public/icons/*.png` - Generated PNG icons (13 files)
+3. `public/manifest.json` - Static manifest (fallback)
+4. `public/browserconfig.xml` - Windows tiles config
+5. `public/offline.html` - Offline fallback page
+6. `src/hooks/usePWA.ts` - PWA React hook
+7. `src/components/pwa/PWAPrompt.tsx` - PWA UI components
+8. `scripts/generate-pwa-icons.mjs` - Icon generator
+
+### Modified
+1. `vite.config.ts` - Added VitePWA plugin
+2. `index.html` - Added PWA meta tags
+3. `src/index.css` - Added PWA animations
+4. `src/App.tsx` - Integrated PWA components
+5. `package.json` - Added dependencies
+
+## Build Output
+
+```
+PWA v1.2.0
+mode      generateSW
+precache  500 entries (106038.41 KiB)
+files generated
+  dist/sw.js
+  dist/workbox-1d305bb8.js
+  dist/manifest.webmanifest
+  dist/registerSW.js
+```
+
+## Testing
+
+### Local Testing
+```bash
+npm run build
+npm run preview
+# Open http://localhost:4173
+# Check DevTools > Application > Manifest
+# Check DevTools > Application > Service Workers
+```
+
+### PWA Checklist
+- ✅ Valid manifest.webmanifest
+- ✅ Service worker registered
+- ✅ Icons for all required sizes
+- ✅ Installable on Chrome/Edge
+- ✅ Works offline after first load
+- ✅ Theme color applied
+- ✅ Standalone display mode
+
+## Conclusion
+
+Paranoid Times is now a fully installable Progressive Web App. Users can:
+1. Install it to their home screen on mobile or desktop
+2. Play the game completely offline
+3. Receive automatic updates when connected
+4. Enjoy native-app-like experience
+
+The implementation uses industry-standard tools (Workbox, vite-plugin-pwa) and follows PWA best practices for maximum compatibility across browsers and platforms.
+
+---
+
 # Article Combiner System - Technical Log
 
 ## Overview

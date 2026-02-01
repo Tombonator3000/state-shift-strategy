@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - Paranoid Times</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Oswald', 'Arial Narrow', sans-serif;
+      background-color: #1a1a2e;
+      color: #f5f5dc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 500px;
+      background: linear-gradient(to bottom, #2a2a3e, #1a1a2e);
+      border: 3px solid #c4a000;
+      border-radius: 10px;
+      padding: 40px;
+      box-shadow: 0 0 30px rgba(196, 160, 0, 0.3);
+    }
+
+    .icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.95); }
+    }
+
+    h1 {
+      font-family: 'Bebas Neue', 'Impact', sans-serif;
+      font-size: 2.5rem;
+      color: #c4a000;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #888;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+
+    p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: #ccc;
+    }
+
+    .status {
+      background: rgba(196, 160, 0, 0.1);
+      border: 1px dashed #c4a000;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    .retry-btn {
+      background: linear-gradient(to bottom, #c4a000, #8b7300);
+      color: #1a1a2e;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      font-family: 'Oswald', sans-serif;
+    }
+
+    .retry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(196, 160, 0, 0.4);
+    }
+
+    .retry-btn:active {
+      transform: translateY(0);
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .stamp {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: #8b0000;
+      font-size: 1.5rem;
+      font-weight: bold;
+      transform: rotate(15deg);
+      border: 3px solid #8b0000;
+      padding: 5px 15px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="stamp">CLASSIFIED</div>
+
+  <div class="container">
+    <div class="icon">📡</div>
+
+    <h1>Signal Lost</h1>
+    <p class="subtitle">"They" might be jamming your connection...</p>
+
+    <p>
+      You appear to be offline. The truth cannot reach you through the static.
+    </p>
+
+    <div class="status">
+      <strong>STATUS:</strong> Network unavailable<br>
+      <strong>THEORY:</strong> Electromagnetic interference detected
+    </div>
+
+    <p>
+      Don't worry - if you've visited before, the game should work offline.
+      Try reloading or check your connection.
+    </p>
+
+    <button class="retry-btn" onclick="window.location.reload()">
+      Retry Connection
+    </button>
+
+    <div class="footer">
+      <p>Paranoid Times - State Shift Strategy</p>
+      <p>The truth is still out there...</p>
+    </div>
+  </div>
+
+  <script>
+    // Auto-retry when connection is restored
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>
