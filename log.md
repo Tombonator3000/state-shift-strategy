@@ -1,3 +1,102 @@
+# Refactor Complex Code: endTurn in engine.ts
+
+**Date:** 2026-02-10
+**Session:** claude/refactor-complex-code-6J0Qq
+**Agent:** Claude Code (Opus 4.6)
+
+## Task
+
+Refactor complex code — find a function or component that's overly complex and refactor it for clarity while maintaining the same behavior.
+
+## Analysis
+
+Explored the full codebase to find the most complex functions. Top candidates ranked by complexity:
+
+| Rank | File | Function/Component | Lines | Issue |
+|------|------|-------------------|-------|-------|
+| 1 | `src/hooks/useGameState.ts` | useGameState/endTurn | 3,465+ | Extreme nesting, 652 control flow stmts |
+| 2 | `src/pages/Index.tsx` | Index | 3,310 | Monolithic component, mixed concerns |
+| 3 | `src/mvp/validator.ts` | repairToMVP | 144 | Deep nesting, type switches |
+| 4 | **`src/mvp/engine.ts`** | **endTurn** | **216** | **7+ responsibilities in one function** |
+| 5 | `src/components/game/EnhancedUSAMap.tsx` | EnhancedUSAMap | 1,890 | Mixed imperative/declarative |
+
+## Target Selected: `endTurn()` in `src/mvp/engine.ts`
+
+**Why:** The function is 216 lines handling 7+ distinct concerns (capture events, discards, combos, FX callbacks, win checking, newspaper headlines, state assembly). It's substantial enough to demonstrate meaningful refactoring but scoped enough to safely complete in one session without breaking the game engine's public API.
+
+## Before: One 216-line monolith
+
+```
+endTurn()
+├── Capture event collection (lines 748-764)
+├── Discard processing + IP cost calculation (lines 766-813)
+├── Combo evaluation + rewards + FX callbacks (lines 815-859)
+├── Log merge (lines 861-864)
+├── Win check (line 866)
+├── Newspaper headline generation (lines 870-915)
+├── Final state assembly (lines 917-928)
+├── Persistent effects tick (line 930)
+├── Summary build (lines 932-944)
+└── Audit (line 946)
+```
+
+## After: 4 focused helpers + clean orchestrator
+
+### Extracted Functions
+
+1. **`collectCaptureEvents(turnPlays, currentId)`**
+   - Single responsibility: scan resolved plays for state captures
+   - Returns `{ captureEvents, captureLog }`
+
+2. **`processDiscards(player, discardIds)`**
+   - Single responsibility: move cards from hand to discard, calculate escalating IP cost
+   - Returns `{ newHand, newDiscard, discarded, ipCost }`
+   - Has its own `DiscardResult` interface
+
+3. **`processTurnCombos(gameState, currentId, turnNumber, options)`**
+   - Single responsibility: evaluate combos, apply rewards, fire callbacks and FX
+   - Returns `{ rewardedState, comboSummary, comboLog }`
+   - Has its own `ComboProcessResult` interface
+
+4. **`generateTurnHeadlines(gameState, currentId, turnNumber, stateToMutate)`**
+   - Single responsibility: generate composite stories and extra-extra articles
+   - Returns `{ headlineLog, extraExtraFeed }`
+   - Has its own `HeadlineResult` interface
+
+### Refactored `endTurn()`
+
+Now a clear 8-step orchestrator with numbered comments:
+```
+endTurn()
+├── 1. Collect capture events     → collectCaptureEvents()
+├── 2. Process discards           → processDiscards()
+├── 3. Evaluate and apply combos  → processTurnCombos()
+├── 4. Merge turn log
+├── 5. Check win conditions       → winCheck()
+├── 6. Generate headlines         → generateTurnHeadlines()
+├── 7. Assemble final state
+└── 8. Build summary
+```
+
+## Verification
+
+```
+TypeScript: ✓ no errors (npx tsc --noEmit)
+Vite build: ✓ built in 16.40s
+PWA:        ✓ 500 entries precached
+Bundle:     6,050 KB main chunk (unchanged)
+```
+
+## Files Modified
+
+1. **`src/mvp/engine.ts`** — Extracted 4 helper functions, refactored endTurn into orchestrator
+
+## Behavioral Changes
+
+**None.** The refactoring is purely structural. The same operations happen in the same order. The public API (`endTurn` signature, `EndTurnResult` return type, `EndTurnSummary` shape) is completely unchanged. Callers in `src/ai/policy.ts` and `src/pages/Index.tsx` require zero changes.
+
+---
+
 # Online Multiplayer Implementation
 
 **Date:** 2026-02-10
