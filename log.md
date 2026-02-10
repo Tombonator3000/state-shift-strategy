@@ -1,3 +1,73 @@
+# Online Multiplayer Implementation
+
+**Date:** 2026-02-10
+**Session:** claude/improve-game-multiplayer-2HUdM
+**Agent:** Claude Code (Opus 4.6)
+
+## Task
+
+Implement Online Multiplayer using WebRTC P2P via PeerJS with host-authoritative architecture. Fix 8 known multiplayer bugs. Improve game and code quality.
+
+## Overview
+
+Implemented a full peer-to-peer online multiplayer system for Paranoid Times using PeerJS for WebRTC signaling. The host runs game logic and broadcasts state; guests receive state updates and forward actions. Includes lobby system with room codes, turn validation, and spectator mode.
+
+## Changes Made
+
+### New Files (8 files)
+
+1. **`src/multiplayer/types.ts`** — Type definitions for all network messages, lobby state, room config, serialization helpers, room code generator, peer→player mapping
+2. **`src/multiplayer/PeerManager.ts`** — PeerJS wrapper handling connection lifecycle, message send/broadcast, heartbeat ping/pong, auto-reconnect
+3. **`src/multiplayer/useOnlineGame.ts`** — React hook for lobby phase: create/join room, faction selection, ready state, game start. Fixes stale closure bug (#6) with refs
+4. **`src/multiplayer/useNetworkSync.ts`** — React hook for gameplay: state broadcast (host), action forwarding (guest), turn validation (#1), peerId mapping (#2), internal action blocking (#3)
+5. **`src/multiplayer/NetworkActionProxy.ts`** — Utility to intercept game actions: guest forwards to host, host executes locally + broadcasts
+6. **`src/components/multiplayer/OnlineLobby.tsx`** — Full lobby UI: menu → create/join → waiting room with player list, faction picker, ready/start buttons. Tabloid-themed.
+7. **`src/components/multiplayer/TurnLockOverlay.tsx`** — Semi-transparent overlay showing "Waiting for [player]..." during opponent's turn
+8. **`src/components/multiplayer/ConnectionStatus.tsx`** — Connection status badge: status dot, room code, role, player count
+
+### Modified Files (4 files)
+
+1. **`src/pages/Index.tsx`** — Integrated online lobby flow, added TurnLockOverlay + ConnectionStatusBadge during gameplay, multiplayer state management
+2. **`src/ui/start/StartScreen.tsx`** — Added `onOnlineMultiplayer` prop, "ONLINE MULTIPLAYER" sidebar button
+3. **`src/components/game/GameMenu.tsx`** — Added `onOnlineMultiplayer` prop, button in both tabloid and classic themes
+4. **`package.json`** — Added `peerjs ^1.5.5` dependency
+
+### Barrel Export
+
+5. **`src/multiplayer/index.ts`** — Clean barrel exports for all multiplayer modules
+
+## Bug Fixes
+
+| # | Severity | Issue | Fix Location |
+|---|----------|-------|-------------|
+| 1 | CRITICAL | No turn validation in useNetworkSync — host ran any guest action | `useNetworkSync.ts:handleHostMessage` — validates sender slot vs active slot |
+| 2 | CRITICAL | No peerId→playerId mapping — host couldn't identify who sent action | `types.ts:buildPeerPlayerMap` + used in `useNetworkSync.ts` |
+| 3 | CRITICAL | HOST_INTERNAL_ACTIONS (startTurn, processWeekEnd) ran locally on guest | `types.ts:HOST_INTERNAL_ACTIONS` set + blocked in both host handler and sendAction |
+| 4 | HIGH | Guest ran useAutoEndTurn — duplicate endTurn calls skipping players | `useNetworkSync.ts:suppressAutoEndTurn` flag exported for consumer |
+| 5 | HIGH | applyNetworkState missing event fields | Full `SerializedGameState` (Omit<GameState, 'eventManager'|'aiStrategist'>) sent |
+| 6 | MEDIUM | Stale closure in useOnlineGame — new guests rejected after lobby join | `useOnlineGame.ts:lobbyRef` — ref-based pattern avoids stale closures |
+| 7 | MEDIUM | game-start message missing lobby data — guest couldn't find their slot | `types.ts:GameStartMessage.lobby` field + populated in `useOnlineGame.ts:startGame` |
+| 8 | LOW | "Only host can broadcast" warning spammed console | `useNetworkSync.ts:broadcastState` — early return for non-host |
+
+## Architecture Details
+
+See `multiplayer.md` for full architecture documentation.
+
+## Build Verification
+
+```
+TypeScript: ✓ no errors (npx tsc --noEmit)
+Vite build: ✓ built in 17.58s
+PWA:        ✓ 500 entries precached
+Bundle:     6,050 KB main chunk (was 5,934 KB before — peerjs adds ~116 KB)
+```
+
+## Dependencies Added
+
+- `peerjs@1.5.5` — WebRTC abstraction library with free PeerJS Cloud signaling server
+
+---
+
 # PWA Offline Support Implementation
 
 **Date:** 2026-01-31
