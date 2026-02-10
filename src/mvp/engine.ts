@@ -732,20 +732,15 @@ export function resolve(
   };
 }
 
-export function endTurn(
-  state: GameState,
-  discards: string[],
-  options: EndTurnOptions = {},
-): EndTurnResult {
-  const cloned = cloneGameState(state);
-  const currentId = cloned.currentPlayer;
-  const player = cloned.players[currentId];
-  const turnNumber = cloned.turn;
-
+/** Collect state-capture messages from resolved plays this turn. */
+function collectCaptureEvents(
+  turnPlays: TurnPlay[],
+  currentId: PlayerId,
+): { captureEvents: string[]; captureLog: string[] } {
   const captureEvents: string[] = [];
-  const turnLog: string[] = [];
+  const captureLog: string[] = [];
 
-  for (const play of cloned.turnPlays) {
+  for (const play of turnPlays) {
     if (play.stage !== 'resolve' || play.owner !== currentId) {
       continue;
     }
@@ -758,13 +753,25 @@ export function endTurn(
       for (const stateId of states) {
         const message = `Captured ${stateId}`;
         captureEvents.push(message);
-        turnLog.push(message);
+        captureLog.push(message);
       }
     }
   }
 
+  return { captureEvents, captureLog };
+}
+
+interface DiscardResult {
+  newHand: Card[];
+  newDiscard: Card[];
+  discarded: number;
+  ipCost: number;
+}
+
+/** Move requested cards from hand to discard pile, calculating escalating IP cost for extra discards. */
+function processDiscards(player: PlayerState, discardIds: string[]): DiscardResult {
   const discardCounts = new Map<string, number>();
-  for (const id of discards) {
+  for (const id of discardIds) {
     discardCounts.set(id, (discardCounts.get(id) ?? 0) + 1);
   }
 
@@ -784,54 +791,52 @@ export function endTurn(
   }
 
   const extraDiscards = Math.max(0, discarded - 1);
-  const ipCost = (() => {
-    if (extraDiscards === 0) {
-      return 0;
-    }
+  let ipCost = 0;
+  if (extraDiscards > 0) {
     const firstCost = 10; // Cost of the 2nd discard (first extra card)
     const step = 5; // Additional cost added for each subsequent extra discard
     // Arithmetic series sum: n/2 * (2a1 + (n - 1) * d)
-    return (extraDiscards * (2 * firstCost + (extraDiscards - 1) * step)) / 2;
-  })();
-  const updatedIP = Math.max(0, player.ip - ipCost);
+    ipCost = (extraDiscards * (2 * firstCost + (extraDiscards - 1) * step)) / 2;
+  }
 
-  const updatedPlayer: PlayerState = {
-    ...player,
-    hand: newHand,
-    discard: newDiscard,
-    ip: updatedIP,
-  };
+  return { newHand, newDiscard, discarded, ipCost };
+}
 
-  cloned.players = {
-    ...cloned.players,
-    [currentId]: updatedPlayer,
-  };
+interface ComboProcessResult {
+  rewardedState: GameState;
+  comboSummary: ComboSummary;
+  comboLog: string[];
+}
 
-  const discardMessage = `Discarded ${discarded} card${discarded === 1 ? '' : 's'}${
-    ipCost > 0 ? ` (paid ${ipCost} IP)` : ''
-  }`;
-  turnLog.push(discardMessage.trim());
+/** Evaluate combos for the turn, apply rewards, fire callbacks and FX. */
+function processTurnCombos(
+  gameState: GameState,
+  currentId: PlayerId,
+  turnNumber: number,
+  options: EndTurnOptions,
+): ComboProcessResult {
+  const comboLog: string[] = [];
+  const comboEvaluation = evaluateCombos(gameState, currentId, options.combo);
+  const playerFaction = gameState.players[currentId]?.faction === 'government' ? 'government' : 'truth';
 
-  const comboEvaluation = evaluateCombos(cloned, currentId, options.combo);
-  const comboPlayerFaction = cloned.players[currentId]?.faction === 'government' ? 'government' : 'truth';
   const comboSummary: ComboSummary = {
     ...comboEvaluation,
     player: currentId,
-    playerFaction: comboPlayerFaction,
+    playerFaction,
     turn: turnNumber,
   };
 
   if (comboEvaluation.results.length > 0) {
     const summaryText = comboEvaluation.results
       .map(result => {
-        const rewardText = formatComboReward(result.appliedReward, { faction: comboPlayerFaction });
+        const rewardText = formatComboReward(result.appliedReward, { faction: playerFaction });
         return rewardText ? `${result.definition.name} ${rewardText}` : result.definition.name;
       })
       .join('; ');
-    turnLog.push(`Combos triggered: ${summaryText}`);
+    comboLog.push(`Combos triggered: ${summaryText}`);
   }
 
-  const rewardedState = applyComboRewards(cloned, currentId, comboEvaluation);
+  const rewardedState = applyComboRewards(gameState, currentId, comboEvaluation);
 
   const callbacks = options.combo?.fxCallbacks;
   for (const result of comboEvaluation.results) {
@@ -850,7 +855,7 @@ export function endTurn(
     for (const result of comboEvaluation.results) {
       callbacks?.onComboFx?.(result);
       if (typeof window !== 'undefined' && typeof (window as any).uiComboToast === 'function') {
-        const rewardText = formatComboReward(result.appliedReward, { faction: comboPlayerFaction });
+        const rewardText = formatComboReward(result.appliedReward, { faction: playerFaction });
         (window as any).uiComboToast(
           rewardText ? `${result.definition.name} ${rewardText}` : result.definition.name,
         );
@@ -858,62 +863,115 @@ export function endTurn(
     }
   }
 
+  return { rewardedState, comboSummary, comboLog };
+}
+
+interface HeadlineResult {
+  headlineLog: CompositeStory[];
+  extraExtraFeed: ExtraExtraFeedEntry[];
+}
+
+/** Generate composite newspaper stories and extra-extra articles from this turn's plays. */
+function generateTurnHeadlines(
+  gameState: GameState,
+  currentId: PlayerId,
+  turnNumber: number,
+  stateToMutate: GameState,
+): HeadlineResult {
+  const headlineLog: CompositeStory[] = [...gameState.headlineLog];
+  const extraExtraFeed: ExtraExtraFeedEntry[] = [...gameState.extraExtraFeed];
+  const bufferPlays = gameState.turnBuffer;
+
+  if (bufferPlays.length === 0) {
+    return { headlineLog, extraExtraFeed };
+  }
+
+  const turnLogEntry: TurnLog = {
+    round: gameState.turn,
+    turn: turnNumber,
+    plays: bufferPlays,
+  };
+  const evaluationSeed = `mvp:${currentId}:${turnNumber}`;
+  const actorLabel: 'human' | 'ai' = currentId === 'P1' ? 'human' : 'ai';
+  const playedArticleIds = filterPlayableArticleIds(bufferPlays.map(play => play.id));
+
+  if (playedArticleIds.length > 0) {
+    const storySeed = computeCompositeStorySeed({
+      baseSeed: 0,
+      round: turnLogEntry.round,
+      turn: turnLogEntry.turn,
+      actor: actorLabel,
+      ids: playedArticleIds,
+    });
+    const humanFaction = gameState.players.P1.faction === 'truth' ? 'truth' : 'government';
+    const faction = resolveCompositeFaction(humanFaction, actorLabel);
+    const story = composeCompositeStory(playedArticleIds, faction, storySeed);
+    headlineLog.push(story);
+    extraExtraFeed.push({ kind: 'composite', data: story });
+  }
+
+  const evaluation = evaluateExtraExtra(bufferPlays, { seed: evaluationSeed });
+
+  if (evaluation.trigger) {
+    const focusLog: TurnLog = { ...turnLogEntry, plays: evaluation.focusPlays };
+    const focusTotals = summarize([focusLog]);
+    const article = generateExtraExtra(`mvp:${currentId}:${turnNumber}`, [focusLog], focusTotals, evaluation);
+    extraExtraFeed.push({ kind: 'article', data: article });
+
+    if (evaluation.truthDelta !== 0) {
+      const truthOwner = gameState.players.P1.faction === 'truth' ? 'P1' : 'P2';
+      const governmentOwner = gameState.players.P1.faction === 'government' ? 'P1' : 'P2';
+      const actor = evaluation.winningFaction === 'truth' ? truthOwner : governmentOwner;
+      applyTruthDelta(stateToMutate, evaluation.truthDelta, actor);
+    }
+  }
+
+  return { headlineLog, extraExtraFeed };
+}
+
+export function endTurn(
+  state: GameState,
+  discards: string[],
+  options: EndTurnOptions = {},
+): EndTurnResult {
+  const cloned = cloneGameState(state);
+  const currentId = cloned.currentPlayer;
+  const player = cloned.players[currentId];
+  const turnNumber = cloned.turn;
+
+  // 1. Collect capture events from resolved plays
+  const { captureEvents, captureLog } = collectCaptureEvents(cloned.turnPlays, currentId);
+  const turnLog: string[] = [...captureLog];
+
+  // 2. Process discards and apply IP cost
+  const { newHand, newDiscard, discarded, ipCost } = processDiscards(player, discards);
+  cloned.players = {
+    ...cloned.players,
+    [currentId]: { ...player, hand: newHand, discard: newDiscard, ip: Math.max(0, player.ip - ipCost) },
+  };
+  const discardMessage = `Discarded ${discarded} card${discarded === 1 ? '' : 's'}${
+    ipCost > 0 ? ` (paid ${ipCost} IP)` : ''
+  }`;
+  turnLog.push(discardMessage.trim());
+
+  // 3. Evaluate and apply combos
+  const { rewardedState, comboSummary, comboLog } = processTurnCombos(cloned, currentId, turnNumber, options);
+  turnLog.push(...comboLog);
+
+  // 4. Merge turn log into game state
   const logEnhancedState: GameState = {
     ...rewardedState,
     log: [...rewardedState.log, ...turnLog],
   };
 
+  // 5. Check win conditions
   const winResult = winCheck(logEnhancedState);
 
+  // 6. Generate newspaper headlines from buffered plays
+  const { headlineLog, extraExtraFeed } = generateTurnHeadlines(cloned, currentId, turnNumber, logEnhancedState);
+
+  // 7. Assemble final state for next turn
   const nextPlayer = otherPlayer(currentId);
-
-  const bufferPlays = cloned.turnBuffer;
-  let headlineLog: CompositeStory[] = [...cloned.headlineLog];
-  let extraExtraFeed: ExtraExtraFeedEntry[] = [...cloned.extraExtraFeed];
-
-  if (bufferPlays.length > 0) {
-    const turnLogEntry: TurnLog = {
-      round: cloned.turn,
-      turn: turnNumber,
-      plays: bufferPlays,
-    };
-    const evaluationSeed = `mvp:${currentId}:${turnNumber}`;
-    const actorLabel: 'human' | 'ai' = currentId === 'P1' ? 'human' : 'ai';
-    const playedArticleIds = filterPlayableArticleIds(bufferPlays.map(play => play.id));
-
-    if (playedArticleIds.length > 0) {
-      const storySeed = computeCompositeStorySeed({
-        baseSeed: 0,
-        round: turnLogEntry.round,
-        turn: turnLogEntry.turn,
-        actor: actorLabel,
-        ids: playedArticleIds,
-      });
-      const humanFaction = cloned.players.P1.faction === 'truth' ? 'truth' : 'government';
-      const faction = resolveCompositeFaction(humanFaction, actorLabel);
-      const story = composeCompositeStory(playedArticleIds, faction, storySeed);
-      headlineLog = [...headlineLog, story];
-      extraExtraFeed = [...extraExtraFeed, { kind: 'composite', data: story }];
-    }
-
-    const evaluation = evaluateExtraExtra(bufferPlays, { seed: evaluationSeed });
-
-    if (evaluation.trigger) {
-      const focusLog: TurnLog = { ...turnLogEntry, plays: evaluation.focusPlays };
-      const focusTotals = summarize([focusLog]);
-      const article = generateExtraExtra(`mvp:${currentId}:${turnNumber}`, [focusLog], focusTotals, evaluation);
-
-      extraExtraFeed = [...extraExtraFeed, { kind: 'article', data: article }];
-
-      if (evaluation.truthDelta !== 0) {
-        const truthOwner = cloned.players.P1.faction === 'truth' ? 'P1' : 'P2';
-        const governmentOwner = cloned.players.P1.faction === 'government' ? 'P1' : 'P2';
-        const actor = evaluation.winningFaction === 'truth' ? truthOwner : governmentOwner;
-        applyTruthDelta(logEnhancedState, evaluation.truthDelta, actor);
-      }
-    }
-  }
-
   const finalState: GameState = {
     ...logEnhancedState,
     currentPlayer: nextPlayer,
@@ -928,7 +986,9 @@ export function endTurn(
   };
 
   tickPersistentEffects(finalState, nextPlayer, Math.random);
+  auditGameState(finalState);
 
+  // 8. Build summary
   const summary: EndTurnSummary = {
     player: currentId,
     turn: turnNumber,
@@ -942,8 +1002,6 @@ export function endTurn(
     logEntries: turnLog,
     winCheck: winResult.winner ? winResult : null,
   };
-
-  auditGameState(finalState);
 
   return { state: finalState, summary };
 }
