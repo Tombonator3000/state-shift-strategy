@@ -16,6 +16,7 @@ type StartScreenProps = {
   onOptions: () => void;
   onCredits: () => void;
   onCardCollection: () => void;
+  onOnlineMultiplayer?: () => void;
   onLoadGame?: () => boolean;
   getSaveInfo?: () => { turn?: number } | undefined;
   audio?: { playSFX?: (key: string) => void };
@@ -29,6 +30,7 @@ const StartScreen = ({
   onOptions,
   onCredits,
   onCardCollection,
+  onOnlineMultiplayer,
   onLoadGame,
   getSaveInfo,
   audio,
@@ -222,6 +224,19 @@ const StartScreen = ({
             </span>
             <small className="menu-subhead">Money Trail Investigation</small>
           </button>
+          {onOnlineMultiplayer && (
+            <button
+              type="button"
+              className="ad-card tabloid-menu-btn"
+              onClick={handleArticleAction(onOnlineMultiplayer)}
+            >
+              <span className="menu-masthead">ONLINE MULTIPLAYER</span>
+              <span className="menu-headline">
+                SECURE P2P COMM CHANNEL OPENED!
+              </span>
+              <small className="menu-subhead">Challenge a real operative — no server needed</small>
+            </button>
+          )}
           <WeatherBadge />
         </aside>
       </div>

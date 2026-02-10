@@ -25,11 +25,12 @@ interface GameMenuProps {
   onBackToMainMenu?: () => void;
   onSaveGame?: () => boolean;
   onShowCardCollection?: () => void;
+  onOnlineMultiplayer?: () => void;
   getSaveInfo?: () => any;
   onLoadGame?: () => boolean;
 }
 
-const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSaveGame, onShowCardCollection, getSaveInfo, onLoadGame }: GameMenuProps) => {
+const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSaveGame, onShowCardCollection, onOnlineMultiplayer, getSaveInfo, onLoadGame }: GameMenuProps) => {
   const [uiTheme] = useUiTheme();
   const [glitching, setGlitching] = useState(false);
   const [redactedText, setRedactedText] = useState('SHADOW GOVERNMENT');
@@ -368,6 +369,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
         onOptions={() => setShowOptions(true)}
         onCredits={() => setShowCredits(true)}
         onCardCollection={handleShowCollection}
+        onOnlineMultiplayer={onOnlineMultiplayer}
         onLoadGame={onLoadGame}
         getSaveInfo={getSaveInfo}
         audio={audio}
@@ -517,8 +519,8 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
             >
               📚 CARD COLLECTION
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full py-4 text-lg border-2 border-newspaper-text text-newspaper-text hover:bg-newspaper-text/10"
               onClick={() => {
                 console.log('Options button clicked in GameMenu');
@@ -529,6 +531,18 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
             >
               OPTIONS
             </Button>
+            {onOnlineMultiplayer && (
+              <Button
+                onClick={() => {
+                  audio?.playSFX?.('click');
+                  onOnlineMultiplayer();
+                }}
+                variant="outline"
+                className="w-full py-4 text-lg border-2 border-green-600 text-green-600 hover:bg-green-600/10 md:col-span-2"
+              >
+                ONLINE MULTIPLAYER
+              </Button>
+            )}
           </div>
         </div>
 

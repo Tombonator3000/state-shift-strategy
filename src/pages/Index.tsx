@@ -96,6 +96,10 @@ import {
   newsForCombo,
   newsForTurnEnd,
 } from '@/lib/newsEventHelpers';
+import { useOnlineGame, serializeGameState, type LobbyState, type PlayerRole, type SerializedGameState } from '@/multiplayer';
+import { OnlineLobby } from '@/components/multiplayer/OnlineLobby';
+import { TurnLockOverlay } from '@/components/multiplayer/TurnLockOverlay';
+import { ConnectionStatusBadge } from '@/components/multiplayer/ConnectionStatus';
 
 type ContextualEffectType = Parameters<typeof VisualEffectsCoordinator.triggerContextualEffect>[0];
 
@@ -252,6 +256,10 @@ type DropEvaluation =
 const Index = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
+  const [showOnlineLobby, setShowOnlineLobby] = useState(false);
+  const [isOnlineGame, setIsOnlineGame] = useState(false);
+  const [onlineRole, setOnlineRole] = useState<PlayerRole | null>(null);
+  const [onlineLobbyData, setOnlineLobbyData] = useState<LobbyState | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showBalancing, setShowBalancing] = useState(false);
   const [balancingInitialView, setBalancingInitialView] = useState<'analysis' | 'dev-tools'>('analysis');
@@ -332,6 +340,7 @@ const Index = () => {
     registerParanormalSighting,
     hotspotDirector,
   } = useGameState();
+  const onlineGame = useOnlineGame();
   const audio = useAudioContext();
   const { setMenuMusic } = audio;
   const { animatePlayCard, isAnimating } = useCardAnimation();
@@ -2159,6 +2168,67 @@ const Index = () => {
     }
   };
 
+  // -----------------------------------------------------------------------
+  // Online Multiplayer: Start handler
+  // -----------------------------------------------------------------------
+
+  const handleOnlineMultiplayer = useCallback(() => {
+    setShowOnlineLobby(true);
+    setShowMenu(false);
+    audio.playSFX('click');
+  }, [audio]);
+
+  const handleOnlineGameStart = useCallback(async (
+    hostFaction: 'government' | 'truth',
+    _guestFaction: 'government' | 'truth',
+  ) => {
+    // Host starts the game — init with host's faction
+    const faction = onlineGame.role === 'host' ? hostFaction : _guestFaction;
+    setIsOnlineGame(true);
+    setOnlineRole(onlineGame.role);
+    setOnlineLobbyData(onlineGame.lobby);
+
+    // Init game for the host (guest will receive state via network)
+    if (onlineGame.role === 'host') {
+      await initGame(faction);
+      // Broadcast the initial state to guests
+      const serialized = serializeGameState(gameState);
+      onlineGame.startGame(serialized);
+    }
+
+    setShowOnlineLobby(false);
+    setShowMenu(false);
+    setShowIntro(false);
+    audio.setGameplayMusic(faction);
+    audio.playSFX('click');
+  }, [onlineGame, initGame, gameState, audio]);
+
+  const handleOnlineLobbyBack = useCallback(() => {
+    onlineGame.leaveRoom();
+    setShowOnlineLobby(false);
+    setShowMenu(true);
+    setIsOnlineGame(false);
+    setOnlineRole(null);
+    setOnlineLobbyData(null);
+  }, [onlineGame]);
+
+  // Determine if it's this player's turn in online mode
+  const isOnlineLocalTurn = useMemo(() => {
+    if (!isOnlineGame || !onlineRole) return true; // Single player is always local
+    // Host plays as 'human', guest plays as 'ai' in game engine terms
+    if (onlineRole === 'host') {
+      return gameState.currentPlayer === 'human';
+    }
+    return gameState.currentPlayer === 'ai';
+  }, [isOnlineGame, onlineRole, gameState.currentPlayer]);
+
+  const onlineTurnPlayerName = useMemo(() => {
+    if (!isOnlineGame || !onlineLobbyData) return '';
+    const activeSlot = gameState.currentPlayer === 'human' ? 0 : 1;
+    const player = onlineLobbyData.players.find(p => p.slot === activeSlot);
+    return player?.name ?? 'Unknown';
+  }, [isOnlineGame, onlineLobbyData, gameState.currentPlayer]);
+
   const handleZoneCardSelect = (cardId: string) => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (card?.type === 'ZONE') {
@@ -2651,9 +2721,19 @@ const Index = () => {
     );
   }
 
+  if (showOnlineLobby) {
+    return (
+      <OnlineLobby
+        onlineGame={onlineGame}
+        onStartGame={handleOnlineGameStart}
+        onBack={handleOnlineLobbyBack}
+      />
+    );
+  }
+
   if (showMenu) {
-    return <GameMenu 
-      onStartGame={startNewGame} 
+    return <GameMenu
+      onStartGame={startNewGame}
       onFactionHover={(faction) => {
         // Play light hover sound effect instead of changing music
         if (faction) {
@@ -2666,6 +2746,7 @@ const Index = () => {
         setShowPlayerHub(true);
         audio.playSFX('click');
       }}
+      onOnlineMultiplayer={handleOnlineMultiplayer}
       onBackToMainMenu={() => {
         setShowMenu(true);
         // Reset any game state if needed
@@ -3289,6 +3370,23 @@ const Index = () => {
   return (
     <>
       <BreakingNewsTicker />
+      {/* Online Multiplayer: Turn lock overlay + connection status */}
+      {isOnlineGame && !isOnlineLocalTurn && (
+        <TurnLockOverlay
+          currentPlayerName={onlineTurnPlayerName}
+          visible={!isOnlineLocalTurn}
+        />
+      )}
+      {isOnlineGame && onlineGame.connectionStatus && onlineGame.roomCode && onlineRole && (
+        <div className="fixed top-2 right-2 z-[60]">
+          <ConnectionStatusBadge
+            status={onlineGame.connectionStatus}
+            roomCode={onlineGame.roomCode}
+            role={onlineRole}
+            playerCount={onlineGame.lobby?.players.length ?? 1}
+          />
+        </div>
+      )}
       <ResponsiveLayout
         masthead={mastheadContent}
         leftPane={leftPaneContent}
