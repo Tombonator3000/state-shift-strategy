@@ -1844,3 +1844,17 @@ The chosen approach (dynamic loading in component) is the cleanest and most main
 ## Conclusion
 
 The missing expansions issue has been resolved. **ManageExpansions.tsx** now properly discovers and displays all expansions including Halloween (200 cards) and Cryptids (300 cards), bringing the total available expansion cards to 500+ when enabled.
+
+---
+
+# Oppgave 2: Finn feil og mangler
+
+**Date:** 2026-04-12
+**Session:** claude/game-dev-documentation-s8M2K
+**Agent:** Claude Code (Opus 4.6)
+
+## Task
+
+Systematisk gjennomgang av hele kodebasen for å finne feil, mangler, og kvalitetsproblemer. Inkluderer TypeScript-kompilering, tester, linting, og strukturell kodegjennomgang.
+
+## Status: Innledende research — venter på avklaring fra bruker
