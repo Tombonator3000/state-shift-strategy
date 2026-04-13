@@ -196,5 +196,35 @@ export default defineConfig(({ mode }) => {
         },
       ],
     },
+    build: {
+      // Split heavy third-party libs out of the main bundle so the initial
+      // download stays smaller and the vendor chunk can be cached
+      // independently from app code.
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes("node_modules")) {
+              return undefined;
+            }
+            if (id.includes("react-dom")) return "vendor-react";
+            if (/[\\/]node_modules[\\/]react[\\/]/.test(id)) return "vendor-react";
+            if (id.includes("scheduler")) return "vendor-react";
+            if (id.includes("@radix-ui")) return "vendor-radix";
+            if (id.includes("lucide-react")) return "vendor-icons";
+            if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
+            if (
+              id.includes("@tanstack") ||
+              id.includes("react-hook-form") ||
+              id.includes("zod") ||
+              id.includes("react-router")
+            ) {
+              return "vendor-app";
+            }
+            if (id.includes("peerjs")) return "vendor-peerjs";
+            return undefined;
+          },
+        },
+      },
+    },
   };
 });

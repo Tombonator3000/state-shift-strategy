@@ -1,31 +1,10 @@
-import { afterEach, beforeAll, describe, expect, it } from 'bun:test';
-import { Window } from 'happy-dom';
+// NOTE: happy-dom is installed on globalThis BEFORE any test module evaluates
+// via the bun:test preload (see __tests__/__setup__/preload.ts referenced from
+// bunfig.toml). That ordering matters because @testing-library/react reads
+// document/window at module init time.
+import { afterEach, describe, expect, it } from 'bun:test';
+import { cleanup, render, screen } from '@testing-library/react';
 import type { CompositeStory } from '@/types/news';
-
-const happyWindow = new Window();
-const globalRecord = globalThis as typeof globalThis & Record<string, unknown>;
-const propagateKeys = Object.getOwnPropertyNames(happyWindow).filter(key => !(key in globalRecord));
-for (const key of propagateKeys) {
-  globalRecord[key] = (happyWindow as Record<string, unknown>)[key];
-}
-
-const globalWithDom = globalThis as typeof globalThis & {
-  window: Window;
-  document: typeof happyWindow.document;
-  navigator: typeof happyWindow.navigator;
-  HTMLElement: typeof happyWindow.HTMLElement;
-  Node: typeof happyWindow.Node;
-};
-
-globalWithDom.window = happyWindow;
-globalWithDom.document = happyWindow.document;
-globalWithDom.navigator = happyWindow.navigator;
-globalWithDom.HTMLElement = happyWindow.HTMLElement;
-globalWithDom.Node = happyWindow.Node;
-
-let render: typeof import('@testing-library/react').render;
-let screen: typeof import('@testing-library/react').screen;
-let cleanup: typeof import('@testing-library/react').cleanup;
 
 const createStory = (overrides: Partial<CompositeStory> = {}): CompositeStory => ({
   tone: 'truth',
@@ -42,11 +21,6 @@ const createStory = (overrides: Partial<CompositeStory> = {}): CompositeStory =>
     { id: 'source-b', headline: 'Neighborhood scouts file proof' },
   ],
   ...overrides,
-});
-
-beforeAll(async () => {
-  const testingLibrary = await import('@testing-library/react');
-  ({ render, screen, cleanup } = testingLibrary);
 });
 
 afterEach(() => {

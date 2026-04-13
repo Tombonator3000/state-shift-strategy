@@ -8,7 +8,7 @@ import {
   type EnhancedCardAnalysis,
 } from '@/data/enhancedCardBalancing';
 import { MVP_COST_TABLE_ROWS, MVP_RULES_SECTIONS } from '@/content/mvpRules';
-import { CARD_DATABASE_CORE } from '@/data/core';
+import { getCoreCards, loadCardPool } from '@/data/cardDatabase';
 import { EXPANSION_MANIFEST } from '@/data/expansions';
 import {
   getEnabledExpansionIdsSnapshot,
@@ -248,9 +248,29 @@ const EnhancedBalancingDashboard = ({
     [activeTypes],
   );
 
+  const [coreCardPool, setCoreCardPool] = useState<GameCard[]>(() => getCoreCards());
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadCardPool()
+      .then(() => {
+        if (!cancelled) {
+          setCoreCardPool(getCoreCards());
+        }
+      })
+      .catch(() => {
+        // Keep the synchronous fallback set already in state if the async
+        // collector fails — the dashboard remains usable with whatever the
+        // database resolved to.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const filteredCoreCards = useMemo(
-    () => filterByTypes(CARD_DATABASE_CORE as GameCard[]),
-    [filterByTypes],
+    () => filterByTypes(coreCardPool),
+    [filterByTypes, coreCardPool],
   );
 
   const filteredExpansionCards = useMemo(

@@ -437,7 +437,7 @@ export const applyAiCardPlay = (
   const recurringState: RecurringCharacterState = { ...prev.recurringCharacters };
   const recurringTracking = trackCharacterAppearance(resolvedCard.name, cardTags, prev.round, recurringState);
 
-  let resolution = resolveCardMVP(prev, resolvedCard, targetState ?? null, 'ai', achievements);
+  const resolution = resolveCardMVP(prev, resolvedCard, targetState ?? null, 'ai', achievements);
   const playerEditorId = prev.playerEditor ?? prev.editorId ?? null;
   if (playerEditorId) {
     const category = normalizeCardCategory(resolvedCard.type);

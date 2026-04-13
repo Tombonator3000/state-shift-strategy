@@ -343,13 +343,6 @@ export function computeTurnIpIncome(
 
 export function startTurn(state: GameState): GameState {
   const cloned = cloneGameState(state);
-  try {
-    void import('@/game/aiEditorBinding')
-      .then(module => {
-        module.ensureAiEditorSelected?.(cloned);
-      })
-      .catch(() => {});
-  } catch {}
   ensureAiEditorSelected(cloned);
   const currentId = cloned.currentPlayer;
   const me = cloned.players[currentId];

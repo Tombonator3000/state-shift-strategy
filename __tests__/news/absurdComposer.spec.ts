@@ -19,9 +19,46 @@ describe('absurd composite composer', () => {
     expect(story.sources).toHaveLength(2);
   });
 
-  test('threads faction connectors through copy', () => {
-    const truthStory = composeWithFixture(['TRUTH-A'], 'truth', 88);
-    const governmentStory = composeWithFixture(['GOV-A', 'GOV-B'], 'government', 88);
+  test('threads faction connectors through copy when articles lack content', () => {
+    // When articles have real headlines/bodies, the composer prefers that
+    // copy over template-generated text. To exercise the connector/template
+    // fallback path we build stub articles with empty headlines and bodies.
+    const stubPool: FixtureArticle[] = [
+      {
+        id: 'STUB-TRUTH-A',
+        faction: 'truth',
+        tags: ['florida-man', 'swamp', 'truth', 'broadcast'],
+        headline: '',
+        subhead: '',
+        byline: '',
+        body: '',
+        imagePrompt: '',
+      },
+      {
+        id: 'STUB-GOV-A',
+        faction: 'government',
+        tags: ['ufo', 'government', 'disinformation'],
+        headline: '',
+        subhead: '',
+        byline: '',
+        body: '',
+        imagePrompt: '',
+      },
+      {
+        id: 'STUB-GOV-B',
+        faction: 'government',
+        tags: ['ghost', 'government', 'containment'],
+        headline: '',
+        subhead: '',
+        byline: '',
+        body: '',
+        imagePrompt: '',
+      },
+    ];
+    const composeStub = createComposerWithPool(stubPool);
+
+    const truthStory = composeStub(['STUB-TRUTH-A'], 'truth', 88);
+    const governmentStory = composeStub(['STUB-GOV-A', 'STUB-GOV-B'], 'government', 88);
 
     expect(truthStory.headline).toMatch(/uncovers|broadcasts|amplifies|decrypts/);
     expect(governmentStory.headline).toMatch(/suppresses|redacts|obscures|counterspins/);

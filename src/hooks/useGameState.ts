@@ -3328,17 +3328,17 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const aiDeckSize = Math.max(handSize, baseAiDeckSize);
 
     let newDeck = generateWeightedDeck(playerDeckSize, faction);
-    let aiDeckSource = generateWeightedDeck(aiDeckSize, aiFaction);
+    const aiDeckSource = generateWeightedDeck(aiDeckSize, aiFaction);
 
     if (addedCards.length > 0) {
       newDeck = [...addedCards, ...newDeck];
     }
 
-    let startingHand = newDeck.slice(0, handSize);
-    let remainingDeck = newDeck.slice(handSize);
+    const startingHand = newDeck.slice(0, handSize);
+    const remainingDeck = newDeck.slice(handSize);
 
-    let aiStartingHand = aiDeckSource.slice(0, handSize);
-    let aiRemainingDeck = aiDeckSource.slice(handSize);
+    const aiStartingHand = aiDeckSource.slice(0, handSize);
+    const aiRemainingDeck = aiDeckSource.slice(handSize);
 
     const runtimeToPersist = editorRuntime ? normalizeEditorRuntimeState(editorRuntime) ?? undefined : undefined;
     const playerEditorId = resolvedEditor?.id ?? requestedEditorId ?? null;
@@ -3562,7 +3562,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       achievements.onCardPlayed(cardId, card.type, card.rarity);
 
       const targetState = targetOverride ?? prev.targetState ?? null;
-      let resolution = resolveCardEffects(prev, resolvedCard, targetState);
+      const resolution = resolveCardEffects(prev, resolvedCard, targetState);
 
       const adjustmentLogs: string[] = [];
       if (playContext.truthDelta !== 0) {
@@ -3872,7 +3872,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const resolvedCard = effectiveCost === card.cost ? card : { ...card, cost: effectiveCost };
         pendingResolvedCard = resolvedCard;
 
-        let resolution = resolveCardEffects(prev, resolvedCard, targetState);
+        const resolution = resolveCardEffects(prev, resolvedCard, targetState);
         wasCountered = Boolean(resolution.countered);
 
         if (wasCountered) {
@@ -4335,7 +4335,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
         prev.eventManager?.updateTurn(prev.turn);
 
-        let eventEffectLog: string[] = [...hotspotLogs];
+        const eventEffectLog: string[] = [...hotspotLogs];
         let truthModifier = 0;
         let ipModifier = 0;
         let bonusCardDraw = 0;

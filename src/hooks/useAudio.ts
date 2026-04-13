@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { SFX_MANIFEST } from '@/assets/audio/sfxManifest';
+import { SFX_MANIFEST, loadProceduralSfx } from '@/assets/audio/sfxManifest';
 import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
 
 interface AudioConfig {
@@ -400,9 +400,18 @@ export const useAudio = () => {
     loadMusicTracks();
 
     // Create sound effects with fallback handling - use existing files for paranormal effects
-    // Load SFX asynchronously with error handling
+    // Load SFX asynchronously with error handling. The procedural paranormal
+    // SFX module is ~5 MB of base64 data URIs, so it's pulled in via dynamic
+    // import to keep it out of the main bundle.
     const loadSFX = async () => {
-      const loadPromises = Object.entries(SFX_MANIFEST).map(async ([key, src]) => {
+      const proceduralPromise = loadProceduralSfx().catch(error => {
+        console.warn('🎵 Procedural SFX chunk failed to load', error);
+        return {} as Record<string, string>;
+      });
+
+      const fileEntries = Object.entries(SFX_MANIFEST) as Array<[string, string]>;
+
+      const loadPromises = fileEntries.map(async ([key, src]) => {
         const audio = await loadAudioTrack(src);
         if (audio) {
           const baseSfxVolume = config.muted ? 0 : config.volume * config.sfxVolume;
@@ -416,8 +425,24 @@ export const useAudio = () => {
           sfxRefs.current[key] = silentAudio;
         }
       });
-      
+
       await Promise.all(loadPromises);
+
+      const proceduralSources = await proceduralPromise;
+      const proceduralPromises = Object.entries(proceduralSources).map(async ([key, src]) => {
+        const audio = await loadAudioTrack(src);
+        if (audio) {
+          const baseSfxVolume = config.muted ? 0 : config.volume * config.sfxVolume;
+          audio.volume = baseSfxVolume;
+          sfxRefs.current[key] = audio;
+        } else {
+          const silentAudio = new Audio();
+          silentAudio.volume = 0;
+          sfxRefs.current[key] = silentAudio;
+        }
+      });
+      await Promise.all(proceduralPromises);
+
       console.log('🎵 SFX loaded:', Object.keys(sfxRefs.current).length, 'sounds');
       setAudioStatus('Ready');
     };

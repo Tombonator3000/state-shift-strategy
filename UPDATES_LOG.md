@@ -2,6 +2,22 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2026-04-13 – Faster initial load via lazy SFX and vendor chunk splits
+- Timestamp: 2026-04-13T00:00:00Z
+- Files:
+  - `vite.config.ts`
+  - `src/assets/audio/sfxManifest.ts`
+  - `src/hooks/useAudio.ts`
+  - `src/components/game/EnhancedBalancingDashboard.tsx`
+  - `src/mvp/engine.ts`
+  - `eslint.config.js`
+  - `bunfig.toml`
+  - `__tests__/__setup__/preload.ts`
+  - `CLAUDE.md`
+  - `log.md`
+  - `UPDATES_LOG.md`
+- Summary: Procedural paranormal SFX now load lazily after the first render, and vendor libraries (React, Radix, Lucide, Recharts, TanStack/zod/router, PeerJS) are split into independently cacheable chunks. Initial gzip payload dropped from ~1.66 MB to ~1.20 MB. Test infrastructure was hardened with a shared preload that stashes real module bindings, eliminating cross-file `mock.module` pollution; full suite now passes 120/120.
+
 ## 2025-10-27 – Preview command now rebuilds before serving
 - Timestamp: 2025-10-27T00:00:00Z
 - Files:
