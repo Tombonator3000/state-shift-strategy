@@ -30,7 +30,7 @@ describe('SmartNarrativeComposer', () => {
       const cards: CardPlayContext[] = [
         {
           card: createMockCard({
-            id: 'TRUTH-001',
+            id: 'TEST-TRUTH-UFO-001',
             name: 'UFO Sighting',
             type: 'MEDIA',
             faction: 'truth',
@@ -41,7 +41,7 @@ describe('SmartNarrativeComposer', () => {
         },
         {
           card: createMockCard({
-            id: 'TRUTH-002',
+            id: 'TEST-TRUTH-WIT-002',
             name: 'Witness Report',
             type: 'ATTACK',
             faction: 'truth',
@@ -66,7 +66,7 @@ describe('SmartNarrativeComposer', () => {
       const cards: CardPlayContext[] = [
         {
           card: createMockCard({
-            id: 'GOV-001',
+            id: 'TEST-GOV-BLACK-001',
             name: 'Press Blackout',
             type: 'MEDIA',
             faction: 'government',
@@ -77,7 +77,7 @@ describe('SmartNarrativeComposer', () => {
         },
         {
           card: createMockCard({
-            id: 'GOV-002',
+            id: 'TEST-GOV-DENIAL-002',
             name: 'Official Denial',
             type: 'ATTACK',
             faction: 'government',
@@ -99,7 +99,7 @@ describe('SmartNarrativeComposer', () => {
       const cards: CardPlayContext[] = [
         {
           card: createMockCard({
-            id: 'TRUTH-001',
+            id: 'TEST-TRUTH-LEAK-001',
             name: 'Leaked Documents',
             type: 'ATTACK',
             faction: 'truth',
@@ -110,7 +110,7 @@ describe('SmartNarrativeComposer', () => {
         },
         {
           card: createMockCard({
-            id: 'GOV-001',
+            id: 'TEST-GOV-DAMAGE-001',
             name: 'Damage Control',
             type: 'MEDIA',
             faction: 'government',
@@ -332,7 +332,7 @@ describe('SmartNarrativeComposer', () => {
       const cards: CardPlayContext[] = [
         {
           card: createMockCard({
-            id: 'TRUTH-001',
+            id: 'TEST-TRUTH-BIG-001',
             name: 'Big Reveal',
             type: 'MEDIA',
             faction: 'truth',
@@ -342,7 +342,7 @@ describe('SmartNarrativeComposer', () => {
         },
         {
           card: createMockCard({
-            id: 'TRUTH-002',
+            id: 'TEST-TRUTH-MORE-002',
             name: 'Another Reveal',
             type: 'ATTACK',
             faction: 'truth',

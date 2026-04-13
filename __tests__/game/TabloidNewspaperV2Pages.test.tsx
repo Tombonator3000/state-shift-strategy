@@ -1,31 +1,10 @@
-import { afterEach, beforeAll, describe, expect, it } from 'bun:test';
-import { Window } from 'happy-dom';
+// happy-dom globals are installed via the bun:test preload (see
+// __tests__/__setup__/preload.ts referenced from bunfig.toml). Re-installing a
+// fresh Window here would invalidate the document/window already captured by
+// @testing-library/react during its module init.
+import { afterEach, describe, expect, it } from 'bun:test';
+import { cleanup, render, screen } from '@testing-library/react';
 import type { PageBuilderData } from '@/components/game/TabloidNewspaperV2Pages';
-
-const happyWindow = new Window();
-const globalRecord = globalThis as typeof globalThis & Record<string, unknown>;
-const propagateKeys = Object.getOwnPropertyNames(happyWindow).filter(key => !(key in globalRecord));
-for (const key of propagateKeys) {
-  globalRecord[key] = (happyWindow as Record<string, unknown>)[key];
-}
-
-const globalWithDom = globalThis as typeof globalThis & {
-  window: Window;
-  document: typeof happyWindow.document;
-  navigator: typeof happyWindow.navigator;
-  HTMLElement: typeof happyWindow.HTMLElement;
-  Node: typeof happyWindow.Node;
-};
-
-globalWithDom.window = happyWindow;
-globalWithDom.document = happyWindow.document;
-globalWithDom.navigator = happyWindow.navigator;
-globalWithDom.HTMLElement = happyWindow.HTMLElement;
-globalWithDom.Node = happyWindow.Node;
-
-let render: typeof import('@testing-library/react').render;
-let screen: typeof import('@testing-library/react').screen;
-let cleanup: typeof import('@testing-library/react').cleanup;
 
 const createPageData = (overrides: Partial<PageBuilderData> = {}): PageBuilderData => ({
   heroHeadline: 'Shadow networks sync the midnight briefing',
@@ -56,11 +35,6 @@ const createPageData = (overrides: Partial<PageBuilderData> = {}): PageBuilderDa
   formattedAgendaQuotes: [],
   campaignArcGroups: [],
   ...overrides,
-});
-
-beforeAll(async () => {
-  const testingLibrary = await import('@testing-library/react');
-  ({ render, screen, cleanup } = testingLibrary);
 });
 
 afterEach(() => {

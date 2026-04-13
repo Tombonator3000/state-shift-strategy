@@ -1,19 +1,7 @@
-import { describe, expect, it, mock } from 'bun:test';
+// happy-dom globals come from the bun:test preload (see
+// __tests__/__setup__/preload.ts referenced from bunfig.toml).
+import { describe, expect, it, mock, spyOn } from 'bun:test';
 import { renderHook } from '@testing-library/react';
-import { Window as HappyDOMWindow } from 'happy-dom';
-
-type MutableGlobal = typeof globalThis & {
-  window?: Window & typeof globalThis;
-  document?: Document;
-  navigator?: Navigator;
-};
-
-const happyDom = new HappyDOMWindow();
-const mutableGlobal = globalThis as MutableGlobal;
-
-mutableGlobal.window = happyDom as unknown as Window & typeof globalThis;
-mutableGlobal.document = happyDom.document;
-mutableGlobal.navigator = happyDom.navigator;
 
 mock.module('@/data/cardDatabase', () => ({
   CARD_DATABASE: []
@@ -21,7 +9,7 @@ mock.module('@/data/cardDatabase', () => ({
 
 describe('useCardCollection', () => {
   it('returns a finite completion percentage and logs a warning when the database is empty', async () => {
-    const warnSpy = mock.spy(console, 'warn');
+    const warnSpy = spyOn(console, 'warn');
 
     const { useCardCollection } = await import('../../src/hooks/useCardCollection');
     const { result } = renderHook(() => useCardCollection());

@@ -1858,3 +1858,158 @@ The missing expansions issue has been resolved. **ManageExpansions.tsx** now pro
 Systematisk gjennomgang av hele kodebasen for å finne feil, mangler, og kvalitetsproblemer. Inkluderer TypeScript-kompilering, tester, linting, og strukturell kodegjennomgang.
 
 ## Status: Innledende research — venter på avklaring fra bruker
+
+---
+
+## Oppgave 2 — Resultat (2026-04-13, fortsatt på samme branch)
+
+Bruker bekreftet: (1) sjekk alt, (2) fiks underveis, (3) ingen kjente problemer,
+(4) bygg nå, (5) se på optimalisering. Følgende ble identifisert og rettet.
+
+### Funn 1 — Test-runneren manglet `node_modules`
+
+`npm install` (1013 pakker) ble kjørt for å låse opp ESLint og bun:test.
+
+### Funn 2 — Bun-tester delte ikke `happy-dom`-globaler riktig
+
+Flere `@testing-library/react`-baserte tester opprettet en *ny* `happy-dom`
+`Window` per fil og overskrev `globalThis.document` etter at testbiblioteket
+allerede hadde grepet referansen ved modul-init. Resultat: `render()` skrev
+til ett DOM-tre, `screen` queried et annet → empty `<body />`.
+
+**Rettet** ved å:
+- Legge til `__tests__/__setup__/preload.ts` (referert fra `bunfig.toml`) som
+  installerer happy-dom én gang FØR alle testfiler evalueres, samt en minimal
+  `localStorage`-shim for moduler som leser persistent storage på import-tid
+  (`src/data/extensionSystem.ts`).
+- Fjerne lokal happy-dom-installasjon fra:
+  `__tests__/newspaper/TurnEdition.test.tsx`,
+  `__tests__/game/TabloidNewspaperV2Pages.test.tsx`,
+  `__tests__/hooks/useCampaignProgress.test.ts`,
+  `__tests__/hooks/useCardCollection.test.ts`,
+  `__tests__/integration/gameplayScreen.test.tsx`.
+- Skifte `__tests__/game/CardCollectionContent.test.ts` fra
+  `react-test-renderer` (krasjet på shadcn `Select`-portaler i happy-dom DOM)
+  til `@testing-library/react`.
+
+### Funn 3 — `mock.module()` lekket på tvers av testfiler
+
+Bun's `mock.module()` registrerer modul-mocker *globalt* og kan ikke
+restaureres fra `afterAll` (det re-evaluerer ikke andre filers statiske
+import). `__tests__/integration/extraExtra.test.ts` mocket
+`@/engine/applyEffects-mvp` og `@/game/comboEngine` som no-ops, og
+`__tests__/game/CardCollectionContent.test.ts` mocket
+`@/hooks/useCardCollection` med en stubbet "1 card"-respons. Begge lekket inn
+i `src/mvp/__tests__/engine.editors.test.ts`,
+`__tests__/game/newCardTypes.test.ts`,
+`__tests__/hooks/useCardCollection.test.ts` og maskerte ekte motor- og
+hook-logikk (`Fox Muldrunk`, `Bat Boy Jr.`, Hybrid/Trap/Persistent-kort,
+`useCardCollection` tom-database).
+
+**Rettet** med følgende mønster:
+1. Preload (`__tests__/__setup__/preload.ts`) plukker ut funksjons-referansene
+   fra de virkelige modulene FØR noen testfil får anledning til å mocke dem,
+   og legger dem på `globalThis.__TEST_REAL_MODULES__`.
+2. Hvert testfilet som trenger å mocke samme modul installerer en
+   *delegerende* mock som kun avviker fra original-implementasjonen mens en
+   intern `useStub`-toggle står på `true`. Toggle skrus på i `beforeEach` og
+   av i `afterAll`, så søsker-tester får ekte modul.
+3. Funksjons-referansene må kopieres ut av modulnamespace (`{ ...module }`),
+   ikke leses som live binding — ellers ender vi i uendelig rekursjon når
+   stubben kaller "real" som peker tilbake til seg selv.
+
+Tester før: 14 fail / 7 errors. Tester etter: **120 pass / 0 fail / 0 errors**.
+
+### Funn 4 — `news-pools`-stub kollisjon i komposisjons-tester
+
+`smartNarrativeComposer.test.ts` brukte kort-IDer (`TRUTH-001`, `GOV-001`,
+`TRUTH-LEAK-001` osv.) som finnes i `CARD_ARTICLE_DATABASE`. Den anrikede
+generatoren tok over og brukte artikkel-innhold (Bigfoot etc.) i stedet for
+malen med kort-navn. Erstattet med unike test-IDer
+(`TEST-TRUTH-UFO-001` osv.).
+
+Tilsvarende fikk `__tests__/news/absurdComposer.spec.ts` ('threads faction
+connectors through copy') stubbet artikler med tomme felt for å tvinge
+composer ned i mal-fallback-stien.
+
+### Funn 5 — `mock.spy` finnes ikke i bun:test
+
+`__tests__/hooks/useCardCollection.test.ts` brukte `mock.spy()` (Jest API).
+Skiftet til `spyOn` importert fra `bun:test`.
+
+### Funn 6 — ESLint-parser-stack-overflow på prosedyrelyd
+
+`src/assets/audio/paranormalSfx.ts` (6993 linjer base64 data-URI'er, ~5 MB
+streng-konkatinering) får TypeScript-ESLint-parseren til å sprenge stacken.
+Lagt filen til `eslint.config.js`-`ignores`.
+
+### Funn 7 — To "dynamic-import-also-statically-imported" advarsler
+
+1. `src/mvp/engine.ts` importerte `@/game/aiEditorBinding` *både* statisk
+   (linje 20) og dynamisk i `startTurn` (linje 347). Den dynamiske
+   `import().then(…)` ga ingen verdi — modulet er allerede i samme chunk.
+   Slettet det dødt-ekvivalente blokken.
+2. `src/components/game/EnhancedBalancingDashboard.tsx` importerte
+   `CARD_DATABASE_CORE` direkte fra `@/data/core`, mens `cardDatabase.ts`
+   *også* dynamisk importerte samme modul. Endret dashbord til å bruke
+   `getCoreCards()` + `loadCardPool()` fra `cardDatabase` slik at
+   `data/core`-chunken faktisk kan splittes ut.
+
+### Funn 8 — Bundle-størrelse 6.05 MB
+
+Bygg-output (før): `dist/assets/index-*.js  6,050.46 kB │ gzip 1,659.32 kB`.
+
+Tiltak:
+- **Lazy-load prosedyre-SFX:** `paranormalSfx.ts` (~5 MB base64) ble
+  statisk importert via `sfxManifest.ts` → endret til `loadProceduralSfx()`
+  som dynamisk importerer modulet inne i `useAudio`. Resultat: egen
+  `paranormalSfx-*.js` chunk på 670 kB (484 kB gzip).
+- **`manualChunks` for vendor-libs:** `vendor-react`, `vendor-radix`,
+  `vendor-icons`, `vendor-charts`, `vendor-app`, `vendor-peerjs`. Hver kan
+  caches uavhengig av app-kode.
+
+Bygg-output (etter):
+```
+vendor-react   164.66 kB │  54.04 kB gzip
+vendor-radix   117.69 kB │  36.42 kB gzip
+vendor-app      96.83 kB │  25.84 kB gzip
+vendor-peerjs   88.16 kB │  24.10 kB gzip
+vendor-icons    24.03 kB │   5.16 kB gzip
+vendor-charts   22.17 kB │   8.55 kB gzip
+data/core      112.00 kB │  24.14 kB gzip   (lazy)
+paranormalSfx  670.66 kB │ 484.62 kB gzip   (lazy)
+index          4,753.82 kB │ 991.40 kB gzip
+```
+
+Totalt initial gzip-load: fra ~1.66 MB til ~1.20 MB (≈ 28 % mindre) med samme
+funksjonalitet og bedre cache-granularitet.
+
+### Funn 9 — ESLint auto-fix
+
+`eslint . --fix` ryddet 9 `prefer-const`-overtredelser i `src/hooks/aiHelpers.ts`
+og `src/hooks/useGameState.ts` (variabler erklært `let` men aldri reassignet).
+
+### Gjenstående (ikke kritisk)
+
+- 445 `@typescript-eslint/no-explicit-any`-feil — kosmetisk; krever stor
+  type-pass.
+- 34 `react-hooks/exhaustive-deps`-advarsler — bør gjennomgås for ekte
+  reactivity-feil.
+- 19 `react-refresh/only-export-components`-advarsler — kun dev-tooling.
+- Hovedbundle fortsatt 4.75 MB (991 kB gzip). Flere optimaliseringer er
+  mulige (kort-data + headline-engine kunne lazy-lastes, men det krever
+  betydelig refaktor av startup-flyten).
+
+### Build-helse — endelig sjekk
+
+```
+$ npx tsc --noEmit       → exit 0
+$ npx eslint .           → 498 problems (445 errors, 53 warnings)
+                           [alle gjenstående er @typescript-eslint/no-explicit-any
+                            + dev-tool-advarsler — ingen kompileringsblokkere]
+$ bun test               → 120 pass / 0 fail / 0 errors / 468 expect calls
+$ npm run build          → ✓ built in 19s
+```
+
+## Status: Ferdig
+

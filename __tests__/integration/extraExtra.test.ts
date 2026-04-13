@@ -1,7 +1,26 @@
-import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { afterAll, beforeEach, describe, expect, it, mock } from 'bun:test';
 import * as actualFrontendNewsPools from '../../src/news/newsPools';
 import type { Card, GameState } from '../../src/mvp/validator';
 import type { TurnLog, PlayedLite } from '../../src/news/types';
+import type * as ApplyEffectsModule from '../../src/engine/applyEffects-mvp';
+import type * as ComboEngineModule from '../../src/game/comboEngine';
+
+// The preload (bunfig.toml -> __tests__/__setup__/preload.ts) stashes the
+// genuine modules on globalThis BEFORE any test file installs bun:test module
+// mocks. We pull them back here so our delegating mock can fall through to the
+// real implementations once the toggle flips off — without that, mock.module
+// pollution from this file would silently neutralise applyEffectsMvp /
+// comboEngine in every later test file.
+const TEST_REAL_MODULES = (globalThis as typeof globalThis & {
+  __TEST_REAL_MODULES__?: { applyEffectsMvp: typeof ApplyEffectsModule; comboEngine: typeof ComboEngineModule };
+}).__TEST_REAL_MODULES__;
+
+if (!TEST_REAL_MODULES) {
+  throw new Error('Test preload did not stash real modules. Check bunfig.toml preload setup.');
+}
+
+const realApplyEffectsMvp = TEST_REAL_MODULES.applyEffectsMvp;
+const realComboEngine = TEST_REAL_MODULES.comboEngine;
 
 const stubPools = {
   mastheads: ['Test Masthead'],
@@ -53,16 +72,43 @@ mock.module('@/news/newsPools', () => ({
   getPoolsIfReady: getPoolsIfReadyMock,
 }));
 
+// bun:test's `mock.module` registrations persist for the entire test process —
+// re-mocking with the original module from `afterAll` does not re-trigger
+// resolution in test files that have already been evaluated. To avoid
+// polluting other test files (notably src/mvp/__tests__/engine.editors.test.ts
+// and __tests__/game/newCardTypes.test.ts) we install a controllable bypass:
+// the mock factory delegates to the real module (captured by the bun:test
+// preload) unless the toggle is enabled, and the toggle is only enabled while
+// this file's tests are running.
+let useApplyEffectsStub = false;
+let useComboEngineStub = false;
+
 mock.module('@/engine/applyEffects-mvp', () => ({
-  applyEffectsMvp: (state: GameState) => state,
+  ...realApplyEffectsMvp,
+  applyEffectsMvp: (...args: Parameters<typeof realApplyEffectsMvp.applyEffectsMvp>) =>
+    useApplyEffectsStub ? args[0] : realApplyEffectsMvp.applyEffectsMvp(...args),
+  tickPersistentEffects: (...args: Parameters<typeof realApplyEffectsMvp.tickPersistentEffects>) =>
+    useApplyEffectsStub ? undefined : realApplyEffectsMvp.tickPersistentEffects(...args),
 }));
 
 mock.module('@/game/comboEngine', () => ({
-  applyComboRewards: (state: GameState) => state,
-  evaluateCombos: () => ({ results: [], totalReward: {}, logs: [] }),
-  getComboSettings: () => ({ enabled: false, fxEnabled: false, comboToggles: {}, maxCombosPerTurn: 0 }),
-  formatComboReward: () => '',
+  ...realComboEngine,
+  applyComboRewards: (...args: Parameters<typeof realComboEngine.applyComboRewards>) =>
+    useComboEngineStub ? args[0] : realComboEngine.applyComboRewards(...args),
+  evaluateCombos: (...args: Parameters<typeof realComboEngine.evaluateCombos>) =>
+    useComboEngineStub ? { results: [], totalReward: {}, logs: [] } : realComboEngine.evaluateCombos(...args),
+  getComboSettings: (...args: Parameters<typeof realComboEngine.getComboSettings>) =>
+    useComboEngineStub
+      ? { enabled: false, fxEnabled: false, comboToggles: {}, maxCombosPerTurn: 0 }
+      : realComboEngine.getComboSettings(...args),
+  formatComboReward: (...args: Parameters<typeof realComboEngine.formatComboReward>) =>
+    useComboEngineStub ? '' : realComboEngine.formatComboReward(...args),
 }));
+
+afterAll(() => {
+  useApplyEffectsStub = false;
+  useComboEngineStub = false;
+});
 
 const loadMvpEngine = () => import('../../src/mvp/engine');
 const loadHeadlineEngine = () => import('../../src/news/headlineEngine');
@@ -74,6 +120,8 @@ beforeEach(() => {
   getPoolsIfReadyMock.mockReset();
   getPoolsMock.mockImplementation(() => stubPools);
   getPoolsIfReadyMock.mockImplementation(() => stubPools);
+  useApplyEffectsStub = true;
+  useComboEngineStub = true;
 });
 
 const createCard = (id: string, faction: 'truth' | 'government', truthDelta: number): Card => ({

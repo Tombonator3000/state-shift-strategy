@@ -5,7 +5,12 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  {
+    // Auto-generated assets (procedural SFX data URIs etc.) and the build
+    // output are skipped — the SFX file in particular is large enough to blow
+    // the parser stack with a "Maximum call stack size exceeded" error.
+    ignores: ["dist", "src/assets/audio/paranormalSfx.ts"],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],

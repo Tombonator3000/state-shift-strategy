@@ -1,75 +1,31 @@
-import { beforeAll, describe, it, expect, mock } from 'bun:test';
+// happy-dom + localStorage globals come from the bun:test preload (see
+// __tests__/__setup__/preload.ts referenced from bunfig.toml). Re-installing
+// here would invalidate the document/window @testing-library/react captured at
+// module init.
+import { describe, it, expect, mock } from 'bun:test';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { dispatchBreakingNews } from '@/lib/newsEventHelpers';
 import type { GameCard } from '@/rules/mvp';
 import { buildFinalEdition as buildGameOverReport } from '@/utils/finalEdition';
 import type { GameState } from '@/hooks/gameStateTypes';
 import type { ArticleBlock } from '@/news/types';
 import type { CompositeStory, ExtraExtraFeedEntry } from '@/types/news';
-import { Window } from 'happy-dom';
-
-let render: typeof import('@testing-library/react').render;
-let screen: typeof import('@testing-library/react').screen;
-let act: typeof import('@testing-library/react').act;
-let fireEvent: typeof import('@testing-library/react').fireEvent;
-
-const happyWindow = new Window();
-const windowRecord = happyWindow as unknown as Record<string, unknown>;
-const globalRecord = globalThis as typeof globalThis & Record<string, unknown>;
-const propagateKeys = Object.getOwnPropertyNames(happyWindow).filter(key => !(key in globalRecord));
-for (const key of propagateKeys) {
-  globalRecord[key] = windowRecord[key];
-}
-
-const globalWithDom = globalThis as typeof globalThis & {
-  window: Window;
-  document: typeof happyWindow.document;
-  navigator: typeof happyWindow.navigator;
-  HTMLElement: typeof happyWindow.HTMLElement;
-  Node: typeof happyWindow.Node;
-};
-
-globalWithDom.window = happyWindow;
-globalWithDom.document = happyWindow.document;
-globalWithDom.navigator = happyWindow.navigator;
-globalWithDom.HTMLElement = happyWindow.HTMLElement;
-globalWithDom.Node = happyWindow.Node;
-
-const createStorage = () => {
-  const store = new Map<string, string>();
-  return {
-    getItem(key: string) {
-      return store.has(key) ? store.get(key)! : null;
-    },
-    setItem(key: string, value: string) {
-      store.set(key, String(value));
-    },
-    removeItem(key: string) {
-      store.delete(key);
-    },
-    clear() {
-      store.clear();
-    },
-    key(index: number) {
-      return Array.from(store.keys())[index] ?? null;
-    },
-    get length() {
-      return store.size;
-    },
-  } satisfies Storage;
-};
 
 const globalWithStorage = globalThis as typeof globalThis & {
-  localStorage: Storage;
   sessionStorage: Storage;
 };
 
-globalWithStorage.localStorage = createStorage();
-globalWithStorage.sessionStorage = createStorage();
-
-beforeAll(async () => {
-  const testingLibrary = await import('@testing-library/react');
-  ({ render, screen, act, fireEvent } = testingLibrary);
-});
+if (typeof globalWithStorage.sessionStorage === 'undefined') {
+  const store = new Map<string, string>();
+  globalWithStorage.sessionStorage = {
+    getItem: (key: string) => (store.has(key) ? store.get(key)! : null),
+    setItem: (key: string, value: string) => { store.set(key, String(value)); },
+    removeItem: (key: string) => { store.delete(key); },
+    clear: () => { store.clear(); },
+    key: (index: number) => Array.from(store.keys())[index] ?? null,
+    get length() { return store.size; },
+  } satisfies Storage;
+}
 
 describe('gameplay screen integrations', () => {
   it('surfaces breaking news from dispatched events', async () => {

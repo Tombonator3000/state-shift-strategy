@@ -1,5 +1,4 @@
-import { UFO_ELVIS_SFX, CRYPTID_RUMBLE_SFX, RADIO_STATIC_SFX } from './paranormalSfx';
-
+// File-backed SFX (real audio files served from /public/audio).
 export const SFX_MANIFEST = {
   cardPlay: '/audio/card-play.mp3',
   flash: '/audio/card-play.mp3',
@@ -14,11 +13,26 @@ export const SFX_MANIFEST = {
   typewriter: '/audio/typewriter.mp3',
   lightClick: '/audio/click.mp3',
   error: '/audio/click.mp3',
-  'ufo-elvis': UFO_ELVIS_SFX,
-  'cryptid-rumble': CRYPTID_RUMBLE_SFX,
-  'radio-static': RADIO_STATIC_SFX,
 } as const;
 
-export type SfxKey = keyof typeof SFX_MANIFEST;
+// Procedural paranormal SFX live in a ~5 MB base64 module — keep them out of
+// the main bundle and only fetch the chunk when the audio system actually
+// initialises. Returns a map of key → data URI.
+export const PROCEDURAL_SFX_KEYS = ['ufo-elvis', 'cryptid-rumble', 'radio-static'] as const;
+export type ProceduralSfxKey = (typeof PROCEDURAL_SFX_KEYS)[number];
 
-export const SFX_KEYS = Object.keys(SFX_MANIFEST) as SfxKey[];
+export const loadProceduralSfx = async (): Promise<Record<ProceduralSfxKey, string>> => {
+  const module = await import('./paranormalSfx');
+  return {
+    'ufo-elvis': module.UFO_ELVIS_SFX,
+    'cryptid-rumble': module.CRYPTID_RUMBLE_SFX,
+    'radio-static': module.RADIO_STATIC_SFX,
+  };
+};
+
+export type SfxKey = keyof typeof SFX_MANIFEST | ProceduralSfxKey;
+
+export const SFX_KEYS: SfxKey[] = [
+  ...(Object.keys(SFX_MANIFEST) as Array<keyof typeof SFX_MANIFEST>),
+  ...PROCEDURAL_SFX_KEYS,
+];
