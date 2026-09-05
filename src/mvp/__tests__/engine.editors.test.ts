@@ -6,8 +6,8 @@ import * as Editors from '@/game/editors';
 import { resolveCardMVP, type GameSnapshot, type StateForResolution } from '@/systems/cardResolution';
 import type { Card, GameState } from '@/mvp/validator';
 
-type PartialState = Partial<GameState> & {
-  players?: Partial<GameState['players']>;
+type PartialState = Omit<Partial<GameState>, 'players'> & {
+  players?: { [Id in keyof GameState['players']]?: Partial<GameState['players'][Id]> };
 };
 
 const createCard = (overrides: Partial<Card>): Card => ({
@@ -47,6 +47,8 @@ const createState = (overrides: PartialState = {}): GameState => {
   };
 
   return {
+    traps: [],
+    persistentEffects: [],
     turn: 1,
     currentPlayer: 'P1',
     truth: 50,

@@ -15,7 +15,7 @@ export interface TurnPlay {
   targetStateId?: string;
   cardFaction?: 'truth' | 'government';
   cardTags?: string[];
-  metadata?: Record<string, number | string | undefined>;
+  metadata?: Record<string, number | string | string[] | undefined>;
 }
 
 export type ComboCategory = 'sequence' | 'count' | 'threshold' | 'state' | 'hybrid';

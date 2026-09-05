@@ -1,7 +1,7 @@
 import { getStateByAbbreviation, getStateById } from '@/data/usaStates';
 import type { NewspaperData } from '@/lib/newspaperData';
 import type { Card } from '@/types';
-import { loadCardLexicon } from './CardLexicon';
+import { loadCardLexicon, type CardLexicon } from './CardLexicon';
 import {
   loadArticleBank,
   type ArticleBank,
@@ -820,16 +820,6 @@ interface ArticleMeta {
   capturedCount: number;
   randomWeight: number;
 }
-
-interface CardLexiconEntry {
-  effects: {
-    truthDelta?: number | null;
-    ipOpponent?: number | null;
-    pressureDelta?: number | null;
-  };
-}
-
-type CardLexicon = Record<string, CardLexiconEntry | null>;
 
 const buildArticleMeta = (
   entry: PlayedCardInput,

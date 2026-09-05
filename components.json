@@ -29,6 +29,18 @@
     "WhatIsParanoidTimes": {
       "path": "src/components/WhatIsParanoidTimes.tsx",
       "description": "Accordion primer introducing the Paranoid Times newsroom fantasy for the How to Play manual."
+    },
+    "ResponsiveLayout": {
+      "path": "src/components/layout/ResponsiveLayout.tsx",
+      "description": "Newspaper gameplay shell with desktop map/hand columns and a visible scrolling mobile hand."
+    },
+    "EnhancedGameHand": {
+      "path": "src/components/game/EnhancedGameHand.tsx",
+      "description": "Readable card captions, separate discard buttons, touch scrolling and card-detail deployment."
+    },
+    "VictoryConditions": {
+      "path": "src/components/game/VictoryConditions.tsx",
+      "description": "Faction-aware victory targets with keyboard-operable disclosure and labelled progress bars."
     }
   }
 }

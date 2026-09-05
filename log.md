@@ -1,3 +1,110 @@
+# 2026-09-05T20:25:15Z — Push avvist av automatisk godkjenningskontroll
+
+Kodecommit: `02bf91e`. Ekstern push ble avvist fordi kontrollen ikke godtok
+repooppdraget som publiseringsautorisasjon; den etterspurte også eierskap/privatstatus.
+Ingen alternativ skrivevei forsøkt, ingen PR opprettet. Lokal PR-tekst er ferdig.
+Endrede filer: `log.md`, `UPDATES_LOG.md`,
+`docs/analysis/gauntlet-2026-09-05/README.md`,
+`docs/analysis/gauntlet-2026-09-05/changes.md`,
+`docs/analysis/gauntlet-2026-09-05/evidence/results.json`;
+ny fil: `docs/analysis/gauntlet-2026-09-05/pull-request.md`.
+Ingen produktkode endret etter verifisering.
+
+---
+
+# 2026-09-05 — Gauntlet: spillflyt, seier, kort og opprydding
+
+Timestamp: 2026-09-05T20:22:41Z. Gren `fix/gauntlet-flow-2026-09-05`, baseline `8241c24`.
+Status: **unmerged reparasjonsmilepæl**, ikke publisert. Sekvensiell selv-review.
+
+Oppdraget fulgte repo/historie → baseline → små rettelser → tester → korrigering.
+Retter Truth-vinner, IP-regeldrift, tur-/animasjonsvern, discard-budsjett, mobilhånd,
+lesbarhet og utvidet kortvalidering. Seks ubrukte komponenter og gammel seierskode er
+fjernet. Gammel roadmap er arkivert og den aktive planen er oppdatert.
+
+Verifisering: ren npm ci, app-typecheck og bygg PASS; `bun test` 138 pass / 0 fail.
+Den obligatoriske coverage-kommandoen har exit 1 både på originalen og nå; lint har
+439 feil / 51 varsler mot originalens 444 / 53. Krav beholdt. Visuell nettleserreise og
+60 fps UNVERIFIED etter eksplisitt nettleserpolicy-blokkering. Konseptbilder er ikke
+runtime-bevis. Ingen uavhengige agenter/testere er brukt.
+
+[Full rapport](docs/analysis/gauntlet-2026-09-05/README.md) · [Videre plan](docs/roadmap.md).
+
+Filer:
+- `M` `AGENTS.md`
+- `M` `FULL_AUDIT_REPORT.md`
+- `M` `README.md`
+- `M` `UPDATES_LOG.md`
+- `M` `__tests__/discardPlanner.test.ts`
+- `A` `__tests__/game/extendedCardValidation.test.ts`
+- `A` `__tests__/game/victoryRules.test.ts`
+- `A` `__tests__/hooks/playerTurnGuards.test.tsx`
+- `M` `components.json`
+- `A` `docs/_archive/roadmap-2025-10-11.md`
+- `A` `docs/analysis/gauntlet-2026-09-05/README.md`
+- `A` `docs/analysis/gauntlet-2026-09-05/changes.md`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/baseline-build.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/baseline-install.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/baseline-lint.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/baseline-tests-coverage.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/baseline-typecheck.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/build.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/clean-install.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/iteration2-failed-test.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/lint.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/results.json`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/tested-source-sha256.json`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/tests-coverage.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/tests-summary.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/tests.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/typecheck.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/unused-exports.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/visuals/briefs.md`
+- `A` `docs/analysis/gauntlet-2026-09-05/visuals/desktop-concept-v1.png`
+- `A` `docs/analysis/gauntlet-2026-09-05/visuals/mobile-concept-v1.png`
+- `M` `docs/paranoid_times_analysis_and_roadmap.md`
+- `M` `docs/roadmap.md`
+- `M` `docs/unused-functions-audit.md`
+- `M` `log.md`
+- `M` `package-lock.json`
+- `M` `package.json`
+- `M` `src/components/dev/CardEffectValidator.tsx`
+- `M` `src/components/game/CardDetailOverlay.tsx`
+- `M` `src/components/game/EffectTestPanel.tsx`
+- `M` `src/components/game/EnhancedBalancingDashboard.tsx`
+- `M` `src/components/game/EnhancedGameHand.tsx`
+- `D` `src/components/game/EnhancedHUD.tsx`
+- `D` `src/components/game/GameHand.tsx`
+- `D` `src/components/game/GameMap.tsx`
+- `D` `src/components/game/Newspaper.tsx`
+- `D` `src/components/game/StartScreenTabloid.tsx`
+- `D` `src/components/game/USAMap.tsx`
+- `M` `src/components/game/VictoryConditions.tsx`
+- `M` `src/components/layout/ResponsiveLayout.tsx`
+- `M` `src/content/mvpRules.ts`
+- `M` `src/data/__tests__/builtinExpansions.test.ts`
+- `M` `src/engine/news/__tests__/smartNarrativeComposer.test.ts`
+- `M` `src/engine/newspaper/IssueGenerator.ts`
+- `M` `src/engine/newspaper/StoryBanks.ts`
+- `M` `src/engine/newspaper/__tests__/IssueGenerator.recurringCharacters.test.ts`
+- `M` `src/game/combo.types.ts`
+- `A` `src/game/victoryRules.ts`
+- `M` `src/hooks/comboAdapter.ts`
+- `A` `src/hooks/playerActionWindow.ts`
+- `M` `src/hooks/useGameState.ts`
+- `M` `src/lib/cardUi.ts`
+- `M` `src/mvp/__tests__/engine.editors.test.ts`
+- `M` `src/mvp/engine.ts`
+- `M` `src/pages/Index.tsx`
+- `A` `src/styles/gameplay-layout.css`
+- `M` `src/systems/__tests__/hotspotDirector.initialize.test.ts`
+- `M` `src/systems/paranormalHotspots.ts`
+- `M` `src/test/effectSystemValidation.ts`
+- `M` `src/utils/discardPlanner.ts`
+- `M` `src/utils/validate-mvp.ts`
+
+---
+
 # Refactor Complex Code: endTurn in engine.ts
 
 **Date:** 2026-02-10

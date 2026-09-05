@@ -5,7 +5,7 @@
  * when multiple cards are played together.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'bun:test';
 import {
   composeSmartNarrative,
   detectThematicCombo,

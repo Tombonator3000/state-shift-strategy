@@ -1,4 +1,4 @@
-import type { GameCard, Rarity as MVPRarity } from '@/rules/mvp';
+import { MVP_CARD_TYPES, type GameCard, type Rarity as MVPRarity } from '@/rules/mvp';
 
 export type NormalizedFaction = 'truth' | 'government';
 export type NormalizedRarity = MVPRarity;
@@ -18,11 +18,11 @@ export const normalizeRarity = (rarity?: GameCard['rarity']): NormalizedRarity =
   return 'common';
 };
 
-export const normalizeCardType = (type?: GameCard['type']): 'ATTACK' | 'MEDIA' | 'ZONE' => {
+export const normalizeCardType = (type?: GameCard['type']): GameCard['type'] => {
   if (!type) return 'MEDIA';
   const normalized = type.toString().toUpperCase();
-  if (normalized === 'ATTACK' || normalized === 'ZONE') {
-    return normalized;
+  if (normalized === 'DEFENSIVE' || MVP_CARD_TYPES.some(type => type === normalized)) {
+    return normalized as GameCard['type'];
   }
   return 'MEDIA';
 };

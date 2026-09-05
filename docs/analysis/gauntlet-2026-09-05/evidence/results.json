@@ -1,0 +1,72 @@
+{
+  "baseline_commit": "8241c244e7ef5388dfca68059953cdf2573bba88",
+  "branch": "fix/gauntlet-flow-2026-09-05",
+  "verified_at_utc": "2026-09-05T20:21:34.308833+00:00",
+  "runtime": {
+    "node": "24.19.0",
+    "bun": "1.4.2",
+    "react": "18.3.1",
+    "typescript": "5.8.3",
+    "vite": "5.4.19",
+    "framer-motion": "12.23.21"
+  },
+  "checks": {
+    "npm ci": {
+      "status": "PASS",
+      "exit_code": 0
+    },
+    "npm run typecheck": {
+      "status": "PASS",
+      "exit_code": 0,
+      "baseline_errors": 26
+    },
+    "bun test": {
+      "status": "PASS",
+      "exit_code": 0,
+      "passed": 138,
+      "failed": 0,
+      "assertions": 531,
+      "files": 36
+    },
+    "bun test --coverage --coverage-reporter=text": {
+      "status": "FAIL",
+      "exit_code": 1,
+      "baseline_exit_code": 1,
+      "reason": "Existing per-file coverage thresholds not met; all assertions pass. Requirements unchanged."
+    },
+    "npm run lint": {
+      "status": "FAIL",
+      "exit_code": 1,
+      "errors": 439,
+      "warnings": 51,
+      "baseline_errors": 444,
+      "baseline_warnings": 53
+    },
+    "npm run lint:exports": {
+      "status": "PASS",
+      "exit_code": 0,
+      "meaning": "Candidate report produced; not an unused-code-free guarantee."
+    },
+    "npm run build": {
+      "status": "PASS",
+      "exit_code": 0,
+      "vite_build_seconds": 10.05,
+      "precache_entries": 508,
+      "precache_kib": 106145.53
+    },
+    "runtime_visual": {
+      "status": "UNVERIFIED",
+      "reason": "Cloud browser URL policy blocked preview."
+    },
+    "60fps": {
+      "status": "UNVERIFIED",
+      "reason": "No target-device measurements."
+    }
+  },
+  "product_commit": "02bf91ec6597d0ce1128dad7bb6b7df79c119304",
+  "delivery": {
+    "status": "BLOCKED",
+    "reason": "Automatic approval review rejected git push; explicit publication authorization requested.",
+    "pull_request_created": false
+  }
+}

@@ -1,3 +1,5 @@
+> Historical snapshot. Current status: [2026-09-05 Gauntlet](analysis/gauntlet-2026-09-05/README.md). Earlier completion claims are not current verification.
+
 # The Paranoid Times – Comprehensive Analysis and Development Roadmap
 
 ## Introduction  

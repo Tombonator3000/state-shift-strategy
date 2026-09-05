@@ -1,86 +1,55 @@
-# Paranoid Times Development Roadmap
+# Paranoid Times – forbedringsplan
 
-**Last Updated:** 2025-10-11
-**Version:** 1.2
+Oppdatert 2026-09-05. Dette er den aktive planen. Den tidligere planen er bevart i
+[arkivet](_archive/roadmap-2025-10-11.md). Status gjelder arbeid på en egen gren; ingen merge eller publisering er utført.
 
-This roadmap is the single source of truth for how we evolve gameplay mechanics, expand narrative content, and stand up live operations for The Paranoid Times. It preserves the game's conspiratorial swagger while spelling out the engineering hooks needed to build each beat.
+## Mål og spillopplevelse
 
----
+Spilleren leder Truth Seekers eller Government. Hver tur brukes opptil tre kort til å
+endre Truth, motstanderens IP eller presset i delstater. Redaktører, kombinasjoner,
+relikvier og hendelser påvirker utfallet. Avisen forteller hva handlingene faktisk
+førte til, før neste tur. Målet er tydelige valg og konsekvenser, med spillets tørre,
+paranoide avishumor intakt.
 
-## QA Snapshot — 2025-10-11
+Standardseier: Truth ≥90 gir Truth-seier; Truth ≤10 gir Government-seier. Deretter
+kontrolleres 200 IP og 10 delstater. Scenarioenes terskler skal følges der de er satt.
+Reglene i `src/game/victoryRules.ts` og `src/constants/truthThresholds.ts` er felles
+referanse for denne seiersvurderingen.
 
-- **Article coverage:** Offline fallback only exposes six MVP placeholder cards; static articles still missing for the broader core/expansion set because the extension loader requires `localStorage` and browser-style fetch URLs. Follow-up: provide server-friendly loaders or CLI mocks so coverage checks exercise the full catalogue.【5ec001†L1-L72】
-- **Fallback behaviour:** `getArticleOrFallback` now generates toned copy when neither the remote bank nor static TypeScript modules provide text, keeping front pages populated even under network failures.【5ec001†L23-L71】
-- **Recurring arcs:** Stage progression works in unit tests, but runtime validation is blocked by the limited MVP dataset. Need an integration harness that can load the real character catalogue outside the browser sandbox.【8073aa†L82-L100】【5ec001†L61-L72】
-- **Performance:** Manual run confirmed issue builds complete in ~130 ms with toned fallback articles, meeting the ≤200 ms target even on degraded data sources.【5ec001†L23-L71】
-- **Environment caveat:** Multiple loaders (extension system, article bank, card lexicon) still assume browser globals. They emit warnings and drop to MVP data during Node-based QA, obscuring true coverage and tone mix. Track replacement work so CI runs have full fidelity.【5ec001†L1-L72】【541e2d†L1-L72】
+## Gjennomført i denne grenen
 
----
+- Rettet feil vinner ved Truth-tersklene og forskjellen mellom 200/300 IP i spill og simulering.
+- Sperret kortspill utenfor egen handlingsfase, samtidige spill og turavslutning under kortanimasjon.
+- Sikret at avvist spill ikke forbruker kort, og at en gammel animasjon ikke endrer en ny kamp.
+- Rettet discard-budsjettet; ett gratis kort, deretter 10/15/20 IP. Kort som ikke kan betales, beholdes.
+- Gjort hånden og turknappen tilgjengelig i mobil-layouten, gitt kortene mer plass og egne lesbare handlinger.
+- Forklart ZONE-mål, turstatus og fraksjonens seiersmål. Touch sveiper hånden; trykk åpner kortet. Mus kan fortsatt dra.
+- Rettet innlasting/validering og hovedkortvisning for HYBRID/TRAP/PERSISTENT.
+- Reparert npm-låsefil og TypeScript-feil; fjernet seks ubrukte komponenter og en ubrukt seiersfunksjon.
+- Arkivert gammel plan, merket gamle revisjoner og samlet etterprøvbar logg.
 
-## Short-Term Improvements (1–2 sprints)
+Dette er en reparasjonsmilepæl med automatiske kontroller, ikke en ferdig godkjent
+visuell versjon. [Gauntlet-rapporten](analysis/gauntlet-2026-09-05/README.md) viser åpne porter.
 
-### Mechanics & Systems
-- **Unify win thresholds and pressure resets** so every surface matches the 90%/10% Truth conditions and automatic state reset rules; audit `DESIGN_DOC_MVP.md`, in-game copy, and `src/mvp/engine.ts` to remove conflicting text.【0f4749†L25-L74】
-- **Prototype scaling ATTACK math** by adding percentage-based siphons and temporary IP inflation effects in `src/engine/applyEffects-mvp.ts`, then regression-test via automated turn simulations to keep snowball states in check.【e2022d†L35-L55】
-- **Introduce lightweight keywords** such as *Expose* and *Sabotage* within the existing validator so we can layer conditional bonuses without rewriting the whole rules engine (`src/mvp/validator.ts`).【e2022d†L35-L42】
-- **Ship a basic deck builder** that lets each faction curate subsets of cards, unlocking player agency before heavier subtheme work lands. Wire the UI to existing card data modules so no bespoke schema is required.【b35bab†L105-L118】
-- **Harden combo instrumentation** by extending the Node-safe loaders described in the QA snapshot; make sure the combo logger feeds both the deck builder preview and automated streak tracking.
+## Prioritert videre arbeid
 
-### Content & Narrative
-- **Rebalance Truth faction rarity spread** by promoting select Uncommon ZONE cards to Common in `src/data/cards/**`, smoothing early-game pressure curves.【b35bab†L73-L118】
-- **Flavor edit pass** to patch typos, inject fresher jokes, and backfill missing blurbs without breaking faction voice; lean on the humor bible and keep redacted footnotes where context needs a wink.【b35bab†L119-L188】
-- **Targeted article coverage fixes**: draft priority templates for the six MVP cards currently uncovered and point the loader toward `src/data/articles/` once the server-friendly pipeline is in place.【0f4749†L120-L163】
+| Prioritet | Avgrenset oppgave | Ferdig når | Avhengighet |
+|---|---|---|---|
+| P0 – neste | Kjør ekte spillerreise på desktop og mobil | Start begge fraksjoner, spill MEDIA/ATTACK/ZONE, kast etter tre spill, avslutt tur, les avis, la AI svare, lagre/last, nå seier/tap og start på nytt. Dokumenter med uredigerte skjermbilder. | Nettleser som kan åpne bygget |
+| P0 | Godkjenn responsiv layout og innganger | 390×844, 768×1024 og 1440×900: kort/End Turn nås, ingen sideveis sidescroll eller overlapping; tastatur, dialogfokus og touch fungerer; 200 % zoom og redusert bevegelse prøves. | Samme bygg som spillerreisen |
+| P1 | Test ekte kort- og artikkelkatalog | Filbasert testlasting av alle aktive ekspansjoner og statiske artikler; ingen stille sekskorts-fallback i dekningstesten; ID-er, bilder og artikkeloppslag kontrolleres. | Bevar dagens kilde/generert-forhold |
+| P1 | Sammenlign live-spill og simuleringsmotor | Samme deterministiske sekvens gir samme IP, Truth, eierskap, agenda og avis. Prioriter HYBRID-pris, TRAP-tidspunkt og PERSISTENT-varighet. | Katalogfixture og små adaptersammenligninger |
+| P1 | Rydd lint-gjeld og inaktive tester | Reduser dagens lint- og dekningsfeil i avgrensede moduler uten å slå av reglene. Hver av de 63 `.disabled`-testene får beslutning: aktiver med reell verdi, erstatt eller slett med begrunnelse. | Baseline og faktisk importgraf |
+| P1 | Sett PR-kontroller i CI | Ren `npm ci`, app-typecheck, Bun-tester og bygg må kjøre på PR. Lint skal vise kjent gjeld tydelig til den kan blokke på null feil. | Verifiser runtime-versjoner og eksisterende Pages-workflow |
+| P2 | Mål og forbedre lasting/ytelse | Profilér før endring. Reduser initialt innhold og ~104 MiB PWA-precache uten å miste offline-funksjon eller avisarkiv; dokumenter kald/varm lasting. | Ekte produksjonsbygg og valgt målenhet |
+| P2 | 60 fps under representativ spilling | Etter oppvarming: ca. to minutter med kart, kort, effekter og aviser. Registrer enhet, oppløsning, snitt, p95/p99 og lange stopp. Foreløpige mål: p95 ≤16,67 ms, p99 <20 ms med oppgitt måleusikkerhet. | Samme visuelle innstillinger som godkjennes |
+| P2 | Fullfør grafisk konsistens | Samme teksthierarki, fraksjonsfarger, korttyper og fokusmarkering i samling, nye kort, detaljvisning og mobil. Faktiske korttekster er redigerbar UI. | Skjermbilder og brukerreise |
+| P3 | Verifiser nettspill separat | To faktiske klienter, synkronisert tur/eierskap, gjenoppretting og frakobling. Ingen påstand om ferdig nettspill før dette er demonstrert. | Egen avgrenset nettspilltest |
+| P3 | Utvid fortellingen etter stabilisering | Statiske artikler følger faktisk spilte kort; tilbakevendende figurer og redaktører har konsistent stemme og fremdrift. Nye varianter dekker påviste hull. | Full katalogdekning og humormalen |
 
-### Live Ops & Player Support
-- **In-game How-To foldout** that surfaces turn structure, win conditions, and keyword glossaries using the existing overlay system; double as a tutorial for new deck-builder toggles.【b35bab†L99-L118】
-- **Daily-first-win / streak trackers** piggybacking on the combo log, giving players a gentle reason to log in without building the full Evidence Locker yet.【e2022d†L35-L55】
-- **UI polish sprint** covering font hierarchy, faction color cues, hover tooltips, and subtle glitch/redaction transitions so moment-to-moment play reads clearly while staying conspiratorial.【b35bab†L95-L118】
+## Arbeidsregel for hver oppgave
 
----
-
-## Mid-Term Build-Out (Quarter Horizon)
-
-### Mechanics & Systems
-- **Tag-driven combo web:** roll out the two-card mini-combos (Elvis + Alien Wedding, Men in Black + FOIA, etc.) plus state bonuses for cryptids and icons; implement detection in `src/hooks/useGameState.ts` with data living in `src/engine/combos/` so designers can extend it without touching logic.【0f4749†L30-L72】
-- **New card archetypes** – Hybrid, Trap, and Persistent cards – by expanding `CardType` and layering stateful effect tracking in the game state. Include UI affordances so players can inspect armed traps and ticking timers.【0f4749†L73-L118】
-- **State mutators and chain bonuses** that reward regional control; store chain definitions in a dedicated config and surface map badges to telegraph active conspiracies.【0f4749†L119-L163】
-- **Faction subthemes & deck-building depth:** design regional or tag-based packages (e.g., Gulf Coast storm chasers, Bureaucratic deep files) so curated decks feel distinct, mirroring class identity in genre benchmarks.【e2022d†L55-L68】
-
-### Content & Narrative
-- **Card-specific article banks** housed in `src/data/articles/` that reference actual match context, with the loader prioritizing bespoke stories before falling back to procedural text.【0f4749†L164-L209】
-- **Dynamic variable substitution** (`{STATES_CONTROLLED}`, `{TRUTH_PERCENTAGE}`, etc.) via a new helper in `src/engine/news/articleVariables.ts`, ensuring every headline reacts to live game data.【0f4749†L210-L241】
-- **Recurring character arcs** that remember Pastor Rex, Agent Smitherson, Florida Man, and Bat Boy sightings across a match, unlocking evolving bylines and endgame epilogues.【0f4749†L242-L268】
-- **Art & VFX uplift**: commission monochrome collage treatments for rares/legendaries, add Truth meter blooms, and sprinkle screen glitches keyed to major Truth swings.【b35bab†L141-L188】
-
-### Live Ops & Community
-- **Campaign & scenario dossier** (“Tabloid Investigations”) delivering scripted match briefs, special rules, and rewards using the dynamic newspaper as narrative connective tissue.【b35bab†L131-L140】【e2022d†L68-L77】
-- **Parodic AI personas** with difficulty tiers and quippy chatter, ensuring solo players face opponents beyond the MVP baseline.【b35bab†L131-L140】
-- **Async multiplayer prototype** (play-by-mail flow, turn notifications) to validate server persistence without full synchronous netcode.【b35bab†L131-L140】
-- **Progression & cosmetics roadmap** drafting a seasonal reward track with collectible newspaper frames, variant mastheads, and conspiracy stickers.【b35bab†L149-L188】【e2022d†L68-L77】
-- **Content editor / modding toolkit** documenting the JSON pipeline and optionally shipping an in-game editor so community sets stay lore-aligned while multiplying content.【b35bab†L149-L188】
-
----
-
-## Long-Term Vision (6–12 months)
-
-### Mechanics & Systems
-- **Advanced modding & local play**: deliver a scenario editor, hotseat/LAN support, and eventually cross-platform hooks so conspirators can gather offline or on alternate devices.【b35bab†L189-L212】
-- **Evolving mechanics cadence**: schedule quarterly keyword drops, state map variants, and balance passes so the meta never calcifies, matching industry live-service pace.【e2022d†L77-L90】
-
-### Content & Narrative
-- **Narrative PvE arc** that strings campaign episodes into a branching “Special Investigation” storyline with unique headlines, leveraging the dynamic article system to recap choices.【b35bab†L189-L212】【e2022d†L77-L84】
-- **Topical mini-expansions** reacting to real-world headlines, using the article bank tooling to spin timely satire without breaking balance.【b35bab†L189-L212】
-- **Newspaper chronicle exporter** so completed matches save as shareable broadsheets—perfect for social conspiracies and community tournaments.【b35bab†L189-L212】
-
-### Live Ops & Community
-- **Competitive ecosystem** with ranked ladders, seasonal tournaments, spectator tools, and replay capture so truthers and shadow operatives can broadcast their scandals.【b35bab†L189-L212】【e2022d†L77-L90】
-- **Community hub** featuring deck sharing, fan expansion repositories, and ratings to keep the most devious plots circulating.【b35bab†L189-L212】
-- **Live narrative events** (global modifiers, community goals) coordinated with the live-ops calendar to keep every quarter feeling like a fresh leak from the timeline.【b35bab†L189-L212】【e2022d†L77-L90】
-- **Persistent progression (“Evidence Locker”)** that tracks conspiratorial accolades, titles, and collectibles across seasons, giving veterans tangible proof of their meddling.【b35bab†L189-L212】
-
----
-
-## Recently Completed
-
-- ✅ **Phase 1: Build fix** — Removed the deprecated `baseUrl` option from `tsconfig.node.json` while retaining modern `paths` resolution for TypeScript 5 compatibility.【0f4749†L15-L24】
-
+Definer → inspiser baseline → implementer → kjør → vurder → rett → lagre checkpoint.
+En test på en isolert hjelper beviser ikke hele spillerreisen. En konsepttegning
+beviser ikke fungerende grafikk. Bruk PASS, FAIL og UNVERIFIED; før videre ideer hit,
+og logg endrede filer og faktisk verifisering i `log.md`.

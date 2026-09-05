@@ -45,11 +45,14 @@ const TabloidCardDetail: React.FC<CardDetailOverlayProps> = ({
 
   const displayType = normalizeTabloidCardType(card.type);
   const ActionIcon = displayType === 'ZONE' ? Target : displayType === 'ATTACK' ? Zap : Megaphone;
-  const discardButtonDisabled = disabled || !onToggleDiscard || !discardEnabled;
+  const discardButtonDisabled = !onToggleDiscard || !discardEnabled;
   const shouldShowDiscardControl = !!onToggleDiscard && discardEnabled;
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${card.name} details`}
       className="fixed inset-0 bg-black/85 flex items-center justify-center z-[9999] p-4"
       onClick={onClose}
       {...(isMobile ? swipeHandlers : {})}
@@ -214,11 +217,14 @@ const LegacyCardDetail: React.FC<CardDetailOverlayProps> = ({
   const faction = getLegacyFaction(card);
   const displayType = normalizeLegacyCardType(card.type);
   const flavorText = getFlavorText(card) ?? 'No intelligence available.';
-  const discardButtonDisabled = disabled || !onToggleDiscard || !discardEnabled;
+  const discardButtonDisabled = !onToggleDiscard || !discardEnabled;
   const shouldShowDiscardControl = !!onToggleDiscard && discardEnabled;
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${card.name} details`}
       className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4"
       onClick={onClose}
       {...(isMobile ? swipeHandlers : {})}

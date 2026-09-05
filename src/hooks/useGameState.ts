@@ -1,3 +1,5 @@
+import { isHumanActionWindow } from './playerActionWindow';
+import { ECONOMIC_VICTORY_IP } from '@/game/victoryRules';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE, getRandomCards } from '@/data/cardDatabase';
@@ -110,7 +112,7 @@ const omitClashKey = (key: string, value: unknown) => (key === 'clash' ? undefin
 
 const HAND_LIMIT = 5;
 
-const DEFAULT_ECONOMIC_GOAL = 200;
+const DEFAULT_ECONOMIC_GOAL = ECONOMIC_VICTORY_IP;
 
 type AgendaOwner = 'human' | 'ai';
 
@@ -3221,6 +3223,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
   const aiWrapupPendingRef = useRef(false);
   const newspaperRevealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameSessionRef = useRef(0);
+  const humanPlayInFlightRef = useRef<{ session: number } | null>(null);
 
   useEffect(
     () => () => {
@@ -3503,7 +3506,7 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const pendingEditorToasts: string[] = [];
     setGameState(prev => {
       const card = prev.hand.find(c => c.id === cardId);
-      if (!card || prev.cardsPlayedThisTurn >= 3 || prev.animating) {
+      if (!card || !isHumanActionWindow(prev) || prev.cardsPlayedThisTurn >= 3 || humanPlayInFlightRef.current?.session === gameSessionRef.current) {
         return prev;
       }
 
@@ -3799,14 +3802,17 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       ) => Promise<PlayResult>,
       explicitTargetState?: string,
     ): Promise<PlayResult> => {
-      const card = gameState.hand.find(c => c.id === cardId);
-      if (!card || gameState.cardsPlayedThisTurn >= 3 || gameState.animating) {
+      const snapshot = gameStateRef.current;
+      const session = gameSessionRef.current;
+      const card = snapshot.hand.find(c => c.id === cardId);
+      if (!card || !isHumanActionWindow(snapshot) || snapshot.cardsPlayedThisTurn >= 3 || humanPlayInFlightRef.current?.session === session) {
         return { cancelled: true, countered: false };
       }
 
-      achievements.onCardPlayed(cardId, card.type, card.rarity);
+      const operation = { session };
+      humanPlayInFlightRef.current = operation;
 
-      const targetState = explicitTargetState ?? gameState.targetState ?? null;
+      const targetState = explicitTargetState ?? snapshot.targetState ?? null;
       let pendingRecord: ReturnType<typeof createPlayedCardRecord> | null = null;
       let pendingTurnPlays: ReturnType<typeof createTurnPlayEntries> | null = null;
       let pendingResolvedCard: GameCard | null = null;
@@ -3814,8 +3820,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
       const pendingEditorToasts: string[] = [];
       let wasCountered = false;
 
-      setGameState(prev => {
-        if (prev.animating) {
+      const resolvePlay = (prev: GameState): GameState => {
+        if (session !== gameSessionRef.current || !isHumanActionWindow(prev) || prev.cardsPlayedThisTurn >= 3 || !prev.hand.some(entry => entry.id === cardId)) {
           return prev;
         }
 
@@ -4048,21 +4054,29 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         const resultState = updateSecretAgendaProgress(stateWithReveal);
         triggerCapturedStateEvents(resolution, resultState);
         return resultState;
-      });
-
-      if (pendingEditorToasts.length > 0) {
-        emitEditorToastMessages(pendingEditorToasts);
-        pendingEditorToasts.length = 0;
-      }
-
+      };
       try {
+        // Resolve once before awaiting presentation. React may defer state updaters.
+        const resolvedState = resolvePlay(snapshot);
+        if (!pendingRecord) return { cancelled: true, countered: false };
+        gameStateRef.current = resolvedState;
+        setGameState(resolvedState);
+
+        if (pendingEditorToasts.length > 0) {
+          emitEditorToastMessages(pendingEditorToasts);
+          pendingEditorToasts.length = 0;
+        }
+
         const playResult = await animateCard(cardId, card, {
           targetState,
           onResolve: async () => Promise.resolve(),
           countered: wasCountered,
         });
 
+        if (session !== gameSessionRef.current || !pendingRecord) return { cancelled: true, countered: false };
+        achievements.onCardPlayed(cardId, card.type, card.rarity);
         setGameState(prev => {
+          if (session !== gameSessionRef.current || !prev.hand.some(entry => entry.id === cardId)) return prev;
           const record = pendingRecord ?? {
             card: pendingResolvedCard ?? card,
             player: 'human' as const,
@@ -4121,10 +4135,14 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
           pendingEditorToasts.length = 0;
         }
 
-        return playResult;
+        // Effects were committed before presentation; an interrupted animation cannot undo the play.
+        return { ...playResult, cancelled: false, countered: wasCountered };
       } catch (error) {
         console.error('Card animation failed:', error);
+        if (session !== gameSessionRef.current || !pendingRecord) return { cancelled: true, countered: false };
+        achievements.onCardPlayed(cardId, card.type, card.rarity);
         setGameState(prev => {
+          if (session !== gameSessionRef.current || !prev.hand.some(entry => entry.id === cardId)) return prev;
           const record = pendingRecord ?? {
             card: pendingResolvedCard ?? card,
             player: 'human' as const,
@@ -4183,8 +4201,10 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         }
 
         return { cancelled: false, countered: wasCountered };
+      } finally {
+        if (humanPlayInFlightRef.current === operation) humanPlayInFlightRef.current = null;
       }
-    }, [achievements, resolveCardEffects, triggerCapturedStateEvents, gameState]);
+    }, [achievements, resolveCardEffects, triggerCapturedStateEvents]);
 
 
   const selectCard = useCallback((cardId: string | null) => {
@@ -4221,7 +4241,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     const sessionGuard = gameSessionRef.current;
 
     setGameState(prev => {
-      if (prev.isGameOver) return prev;
+      if (prev.isGameOver || prev.animating || humanPlayInFlightRef.current?.session === gameSessionRef.current) return prev;
+      if (prev.phase !== 'action' && prev.phase !== 'ai_turn') return prev;
 
       const isHumanTurn = prev.currentPlayer === 'human';
       const normalizedDiscards = Array.isArray(plannedDiscards)
@@ -4230,11 +4251,11 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const humanDiscardOutcome =
         isHumanTurn && normalizedDiscards.length > 0
-          ? planDiscardOutcome(prev.hand, prev.discardPile ?? [], normalizedDiscards)
+          ? planDiscardOutcome(prev.hand, prev.discardPile ?? [], normalizedDiscards, prev.ip)
           : null;
       const aiDiscardOutcome =
         !isHumanTurn && normalizedDiscards.length > 0
-          ? planDiscardOutcome(prev.aiHand, prev.aiDiscardPile ?? [], normalizedDiscards)
+          ? planDiscardOutcome(prev.aiHand, prev.aiDiscardPile ?? [], normalizedDiscards, prev.aiIP)
           : null;
 
       const handAfterDiscards = humanDiscardOutcome ? humanDiscardOutcome.remainingHand : prev.hand;
@@ -5463,95 +5484,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
 
 
-  const checkVictoryConditions = useCallback((state: GameState) => {
-    // Check for victory conditions and update achievements
-    let victoryType = '';
-    let playerWon = false;
-
-    const truthHighThreshold = state.truthHighThreshold ?? DEFAULT_TRUTH_HIGH_THRESHOLD;
-    const truthLowThreshold = state.truthLowThreshold ?? DEFAULT_TRUTH_LOW_THRESHOLD;
-
-    // Truth-based victories
-    if (state.truth >= truthHighThreshold && state.faction === 'truth') {
-      victoryType = 'truth_high';
-      playerWon = true;
-    } else if (state.truth <= truthLowThreshold && state.faction === 'government') {
-      victoryType = 'truth_low';
-      playerWon = true;
-    }
-    // Territorial victory (10+ states)
-    else if (state.controlledStates.length >= 10) {
-      victoryType = 'territorial';
-      playerWon = true;
-    }
-    // Economic victory (300+ IP)
-    else if (state.ip >= 300) {
-      victoryType = 'economic';
-      playerWon = true;
-    }
-    // Secret agenda completion
-    else if (state.secretAgenda?.completed) {
-      victoryType = 'agenda';
-      playerWon = true;
-    }
-    // AI victory conditions (similar checks for AI)
-    else if (state.aiIP >= 300 || state.controlledStates.filter(s => state.states.find(st => st.abbreviation === s)?.owner === 'ai').length >= 10) {
-      playerWon = false;
-    }
-
-    // If victory condition met, track in achievements
-    if (victoryType && playerWon) {
-      achievements.onGameEnd(true, victoryType, {
-        turns: state.turn,
-        finalIP: state.ip,
-        finalTruth: state.truth,
-        statesControlled: state.controlledStates.length
-      });
-    } else if (!playerWon && (state.aiIP >= 300 || state.truth <= 0 || state.truth >= 100)) {
-      achievements.onGameEnd(false, 'defeat', {
-        turns: state.turn,
-        finalIP: state.ip,
-        finalTruth: state.truth,
-        statesControlled: state.controlledStates.length
-      });
-    }
-
-    const aiOwnedStateCount = state.states.filter(stateEntry => stateEntry.owner === 'ai').length;
-    const playerVictoryAchieved = Boolean(victoryType && playerWon);
-    const aiVictoryAchieved =
-      !playerWon && (state.aiIP >= 300 || state.truth <= 0 || state.truth >= 100 || aiOwnedStateCount >= 10);
-    const activeEditorId = state.playerEditor ?? state.editorId ?? undefined;
-
-    if ((playerVictoryAchieved || aiVictoryAchieved) && activeEditorId) {
-      const resolvedVictoryType = playerVictoryAchieved
-        ? victoryType || 'player_unknown'
-        : state.aiIP >= 300
-        ? 'ai_ip'
-        : state.truth <= 0
-        ? 'truth_min'
-        : state.truth >= 100
-        ? 'truth_max'
-        : aiOwnedStateCount >= 10
-        ? 'ai_states'
-        : 'ai_unknown';
-
-      dispatchEditorTelemetry({
-        editorId: activeEditorId,
-        faction: state.faction,
-        outcome: playerWon ? 'win' : 'loss',
-        playerWon,
-        victoryType: resolvedVictoryType,
-        turn: state.turn,
-        round: state.round,
-        finalTruth: state.truth,
-        finalIp: state.ip,
-        aiIp: state.aiIP,
-        timestamp: Date.now(),
-      });
-    }
-
-    return { victoryType, playerWon };
-  }, [achievements]);
   const saveGame = useCallback(() => {
     const saveData = {
       ...gameState,
@@ -6213,7 +6145,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
     loadGame,
     getSaveInfo,
     deleteSave,
-    checkVictoryConditions,
     registerParanormalSighting,
     hotspotDirector,
   };

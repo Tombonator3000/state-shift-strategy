@@ -1,0 +1,739 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> vite_react_shadcn_ts@0.0.0 lint:exports
+> ts-prune --project tsconfig.app.json
+
+src/App.tsx:64 - default
+src/ai/difficulty.ts:34 - satisfies (used in module)
+src/ai/difficulty.ts:34 - Record (used in module)
+src/ai/editors.ts:6 - DifficultyTier (used in module)
+src/ai/editors.ts:7 - AIPersonality (used in module)
+src/ai/editors.ts:61 - EDITOR_IDS
+src/ai/index.ts:2 - chooseTurnActions
+src/ai/index.ts:3 - ChooseTurnActionsParams
+src/ai/index.ts:4 - PlannedCardAction
+src/ai/index.ts:5 - TurnSequencePlan
+src/ai/index.ts:7 - evaluate
+src/ai/index.ts:9 - AI_PRESETS
+src/ai/index.ts:10 - mergeBiasModifiers
+src/ai/index.ts:11 - AiConfig
+src/ai/index.ts:12 - BiasModifiers
+src/ai/index.ts:13 - Difficulty
+src/ai/policy.ts:226 - legacyChooseTurnActions
+src/ai/policy.ts:469 - Action (used in module)
+src/content/mvpRules.ts:9 - MvpRulesSection (used in module)
+src/content/mvpRules.ts:15 - MvpComboSummaryEntry (used in module)
+src/content/mvpRules.ts:24 - MvpComboOverview (used in module)
+src/content/mvpRules.ts:29 - MvpCostTableRow (used in module)
+src/content/mvpRules.ts:36 - MVP_RARITIES (used in module)
+src/data/agendaDatabase.ts:3 - AgendaStage (used in module)
+src/data/agendaDatabase.ts:11 - AgendaProgressReport (used in module)
+src/data/agendaDatabase.ts:289 - AGENDA_DATABASE (used in module)
+src/data/agendaDatabase.ts:1374 - AgendaSelectionOptions (used in module)
+src/data/agendaDatabase.ts:1433 - getAgendasByDifficulty
+src/data/agendaIssues.ts:7 - AgendaIssueDefinition (used in module)
+src/data/agendaIssues.ts:221 - AGENDA_ISSUES (used in module)
+src/data/agendaIssues.ts:227 - getAgendaIssueById (used in module)
+src/data/agendaIssues.ts:282 - ensureAgendaIssueState (used in module)
+src/data/aiFactory.ts:20 - ROLLOUT_BUDGET_MULTIPLIER (used in module)
+src/data/aiFactory.ts:29 - toEnhancedProfile (used in module)
+src/data/aiFactory.ts:46 - CreateStrategistOptions (used in module)
+src/data/aiPersonas.ts:4 - AIPersona (used in module)
+src/data/aiPersonas.ts:31 - AI_PERSONAS (used in module)
+src/data/aiPersonas.ts:224 - getPersonaByDifficulty
+src/data/aiPersonas.ts:235 - getRandomBanter
+src/data/aiStrategy.ts:48 - AI_PERSONALITIES (used in module)
+src/data/aiStrategy.ts:978 - AiStrategistOverrides (used in module)
+src/data/aiTuning.ts:224 - setAiTuningConfig
+src/data/aiTuning.ts:228 - mergeAiTuningConfig
+src/data/aiTuning.ts:216 - DEFAULT_AI_TUNING (used in module)
+src/data/campaign.ts:50 - CAMPAIGN_MISSIONS (used in module)
+src/data/campaign.ts:279 - getMissionById
+src/data/campaign.ts:283 - getMissionByNumber
+src/data/campaign.ts:287 - getNextMission
+src/data/campaign.ts:291 - isMissionUnlocked
+src/data/cardBalancing.ts:137 - analyzeCardBalance (used in module)
+src/data/cardBalancing.ts:171 - generateBalanceReport
+src/data/cardBalancing.ts:13 - CardBalance (used in module)
+src/data/cardBalancing.ts:27 - BalanceReport (used in module)
+src/data/cardBalancing.ts:39 - CardMetrics (used in module)
+src/data/cardBalancing.ts:51 - CardBalancer
+src/data/cardDatabase.ts:236 - generateRandomDeck
+src/data/cardDrawingSystem.ts:144 - shouldOfferMulligan
+src/data/cardDrawingSystem.ts:156 - analyzeDrawingPerformance
+src/data/cardDrawingSystem.ts:3 - DrawModeConfig (used in module)
+src/data/cardDrawingSystem.ts:149 - DrawingStats (used in module)
+src/data/characterArcs.ts:3 - CharacterArcStageTemplate (used in module)
+src/data/characterArcs.ts:10 - CharacterArcTemplate (used in module)
+src/data/characterArcs.ts:15 - CharacterArcLibrary (used in module)
+src/data/characterArcs.ts:17 - CHARACTER_ARCS (used in module)
+src/data/characterArcs.ts:46 - default
+src/data/enhancedCardBalancing.ts:224 - analyzeCardBalanceEnhanced
+src/data/enhancedCardBalancing.ts:229 - runBalanceSimulationEnhanced
+src/data/enhancedCardBalancing.ts:28 - EnhancedBalanceReport (used in module)
+src/data/enhancedCardBalancing.ts:41 - SimulationReport (used in module)
+src/data/enhancedCardBalancing.ts:61 - EnhancedCardBalancer (used in module)
+src/data/eventDatabase.ts:1711 - STATE_EVENTS_DATABASE (used in module)
+src/data/extensionSystem.ts:7 - ExtensionCard (used in module)
+src/data/extensionSystem.ts:23 - EnabledExtension (used in module)
+src/data/extensionSystem.ts:35 - ExtensionManager (used in module)
+src/data/factionBalanceAnalyzer.ts:303 - lintCardBalance
+src/data/factionBalanceAnalyzer.ts:14 - NetUtilityScore (used in module)
+src/data/factionBalanceAnalyzer.ts:23 - CardAnalysisResult (used in module)
+src/data/factionBalanceAnalyzer.ts:42 - BalanceReport (used in module)
+src/data/factionBalanceAnalyzer.ts:53 - SimulationResult (used in module)
+src/data/factionBalanceAnalyzer.ts:63 - FactionBalanceAnalyzer (used in module)
+src/data/factionBalanceAnalyzer.ts:320 - default
+src/data/gameModifiers.ts:3 - GameModifier (used in module)
+src/data/gameModifiers.ts:45 - GAME_MODIFIERS (used in module)
+src/data/gameModifiers.ts:228 - DailyChallenge (used in module)
+src/data/gameModifiers.ts:237 - generateDailyChallenge
+src/data/gameModifiers.ts:290 - applyModifiersToGameState
+src/data/gameModifiers.ts:328 - getModifierById
+src/data/gameModifiers.ts:332 - getModifiersByCategory
+src/data/patchApplication.ts:18 - PatchStep (used in module)
+src/data/patchApplication.ts:27 - PatchCard (used in module)
+src/data/patchApplication.ts:39 - PatchHeader (used in module)
+src/data/patchApplication.ts:66 - PatchApplicationChange (used in module)
+src/data/stateCombinations.ts:26 - DEFAULT_STATE_COMBINATION_EFFECTS (used in module)
+src/data/stateCombinations.ts:42 - STATE_COMBINATIONS (used in module)
+src/data/stateCombinations.ts:326 - CombinationDefenseState (used in module)
+src/data/stateThemedPools.ts:3 - StateTag (used in module)
+src/data/stateThemedPools.ts:30 - StateThemedPool (used in module)
+src/data/stateThemedPools.ts:1290 - STATE_TAG_LOOKUP (used in module)
+src/data/stateThemedPools.ts:1301 - resolvePoolForState
+src/data/tutorialSystem.ts:6 - TutorialStep (used in module)
+src/data/usaStates.ts:18 - EnhancedStateData
+src/data/usaStates.ts:108 - getStatesByPopulation
+src/data/usaStates.ts:143 - buildOccupierLabel (used in module)
+src/data/usaStates.ts:165 - clearStateOccupation
+src/data/victoryConditions.ts:162 - evaluateOvertimeOutcome (used in module)
+src/data/victoryConditions.ts:561 - createVictoryManager
+src/data/victoryConditions.ts:7 - GameCard
+src/data/victoryConditions.ts:27 - VictoryCondition (used in module)
+src/data/victoryConditions.ts:45 - OvertimeOutcome (used in module)
+src/data/victoryConditions.ts:204 - VictoryResult (used in module)
+src/data/victoryConditions.ts:213 - VictoryModifier (used in module)
+src/data/victoryConditions.ts:221 - BASE_VICTORY_CONDITIONS (used in module)
+src/data/victoryConditions.ts:315 - VictoryManager (used in module)
+src/data/victoryConditions.ts:607 - default
+src/data/weightedCardDistribution.ts:5 - DISTRIBUTION_STORAGE_KEY (used in module)
+src/data/weightedCardDistribution.ts:35 - MVP_TYPE_WEIGHTS (used in module)
+src/data/weightedCardDistribution.ts:140 - SetWeights (used in module)
+src/data/weightedCardDistribution.ts:183 - DistributionExpansionContext (used in module)
+src/engine/applyEffects-mvp.ts:65 - discardRandom (used in module)
+src/engine/applyEffects-mvp.ts:135 - applyCardEffectsPayload (used in module)
+src/game/combo.types.ts:4 - TurnPlayStage (used in module)
+src/game/combo.types.ts:23 - SequenceTrigger (used in module)
+src/game/combo.types.ts:29 - CountTrigger (used in module)
+src/game/combo.types.ts:37 - ThresholdMetric (used in module)
+src/game/combo.types.ts:47 - ThresholdTrigger (used in module)
+src/game/combo.types.ts:53 - StateTrigger (used in module)
+src/game/combo.types.ts:61 - HybridTrigger (used in module)
+src/game/combo.types.ts:67 - CardMatchTrigger (used in module)
+src/game/combo.types.ts:135 - ComboFXCallbacks (used in module)
+src/game/comboEngine.ts:70 - getComboRng
+src/game/comboEngine.ts:604 - FormatComboRewardOptions (used in module)
+src/game/editorImages.ts:3 - brollUrl
+src/game/editors.ts:5 - EditorFaction (used in module)
+src/game/editors.ts:41 - EDITORS
+src/game/editors.ts:43 - EDITOR_INDEX (used in module)
+src/game/editors.ts:52 - getEditorsByFaction
+src/game/editors.ts:208 - describeEditorEffectConfig (used in module)
+src/game/newCardTypes.ts:10 - ExtendedCardType
+src/game/newCardTypes.ts:43 - HYBRID_CARD_EXAMPLES (used in module)
+src/game/newCardTypes.ts:85 - TRAP_CARD_EXAMPLES (used in module)
+src/game/newCardTypes.ts:115 - PERSISTENT_CARD_EXAMPLES (used in module)
+src/game/newCardTypes.ts:216 - default
+src/game/recurringCharacters.ts:7 - CharacterArc (used in module)
+src/game/recurringCharacters.ts:54 - CharacterAppearanceResult (used in module)
+src/game/recurringCharacters.ts:63 - RECURRING_CHARACTERS (used in module)
+src/game/stateBonuses.ts:26 - StateBonusConfig (used in module)
+src/game/stateBonuses.ts:37 - STATE_BONUS_CONFIGS (used in module)
+src/game/stateBonuses.ts:323 - AssignStateBonusesParams (used in module)
+src/game/stateBonuses.ts:754 - default
+src/game/twoCardCombos.ts:172 - default
+src/hooks/aiHelpers.ts:56 - extractCapturedStates (used in module)
+src/hooks/aiHelpers.ts:363 - AiCardPlayResult (used in module)
+src/hooks/aiTurnActions.ts:5 - ProcessAiActionsOptions (used in module)
+src/hooks/comboAdapter.ts:67 - ComboAdapterResult (used in module)
+src/hooks/eventEdition.ts:3 - EditionEventSnapshot (used in module)
+src/hooks/stateEventHistory.ts:7 - STATE_EVENT_HISTORY_LIMIT (used in module)
+src/hooks/stateEventHistory.ts:8 - STATE_HOTSPOT_HISTORY_LIMIT (used in module)
+src/hooks/use-toast.ts:71 - reducer (used in module)
+src/hooks/useCampaignProgress.ts:8 - useCampaignProgress
+src/hooks/useCardDrawing.ts:5 - DrawingSettings (used in module)
+src/hooks/useCardDrawing.ts:9 - useCardDrawing
+src/hooks/useGameState.ts:1193 - AssignSecretAgendaOptions (used in module)
+src/hooks/useGameState.ts:1199 - assignSecretAgendaToState (used in module)
+src/hooks/useGameState.ts:1478 - reconcileStateBonusOwnership (used in module)
+src/hooks/useGameState.ts:1962 - __test_createDirectorHotspotEntries
+src/hooks/useGameState.ts:2503 - updateSecretAgendaProgress (used in module)
+src/hooks/useHapticFeedback.ts:3 - HapticType (used in module)
+src/hooks/useIntelArchive.ts:176 - default
+src/hooks/useParapediaEntries.ts:5 - ParapediaSearchFilters (used in module)
+src/hooks/useParapediaEntries.ts:113 - useParapediaCategories
+src/hooks/usePressureSystem.ts:11 - usePressureSystem
+src/hooks/useStateEvents.ts:7 - StateEventTrigger (used in module)
+src/hooks/useSwipeGestures.ts:3 - SwipeGestureHandlers (used in module)
+src/lib/cardUi.ts:3 - NormalizedFaction (used in module)
+src/lib/cardUi.ts:4 - NormalizedRarity (used in module)
+src/lib/cardUi.ts:6 - normalizeFaction (used in module)
+src/lib/cardUi.ts:12 - normalizeRarity (used in module)
+src/lib/cardUi.ts:47 - RARITY_EMOJI (used in module)
+src/lib/cardUi.ts:62 - normalizeFlavorText (used in module)
+src/lib/newsEventHelpers.ts:6 - NewsEventType (used in module)
+src/lib/newspaperData.ts:140 - weightedPick
+src/lib/ui-scale.ts:2 - MIN_UI_SCALE (used in module)
+src/lib/ui-scale.ts:3 - MAX_UI_SCALE (used in module)
+src/multiplayer/index.ts:1 - PeerManager
+src/multiplayer/index.ts:2 - useOnlineGame
+src/multiplayer/index.ts:3 - useNetworkSync
+src/multiplayer/index.ts:4 - createNetworkActionProxy
+src/multiplayer/index.ts:6 - generateRoomCode
+src/multiplayer/index.ts:7 - serializeGameState
+src/multiplayer/index.ts:8 - buildPeerPlayerMap
+src/multiplayer/index.ts:9 - HOST_INTERNAL_ACTIONS
+src/multiplayer/index.ts:12 - NetworkMessage
+src/multiplayer/index.ts:13 - LobbyState
+src/multiplayer/index.ts:14 - LobbyPlayer
+src/multiplayer/index.ts:15 - RoomConfig
+src/multiplayer/index.ts:16 - PlayerRole
+src/multiplayer/index.ts:17 - PlayerSlot
+src/multiplayer/index.ts:18 - ConnectionStatus
+src/multiplayer/index.ts:19 - SerializedGameState
+src/multiplayer/index.ts:20 - MultiplayerSession
+src/multiplayer/index.ts:21 - GameActionKind
+src/multiplayer/NetworkActionProxy.ts:13 - ActionInterceptor
+src/multiplayer/NetworkActionProxy.ts:18 - NetworkActionProxyConfig (used in module)
+src/multiplayer/PeerManager.ts:18 - PeerEventHandler (used in module)
+src/multiplayer/types.ts:80 - LobbyJoinMessage (used in module)
+src/multiplayer/types.ts:86 - LobbyUpdateMessage (used in module)
+src/multiplayer/types.ts:91 - LobbyReadyMessage (used in module)
+src/multiplayer/types.ts:97 - LobbyFactionMessage (used in module)
+src/multiplayer/types.ts:105 - GameStartMessage (used in module)
+src/multiplayer/types.ts:112 - GameStateMessage (used in module)
+src/multiplayer/types.ts:139 - GameActionAckMessage (used in module)
+src/multiplayer/types.ts:148 - PingMessage (used in module)
+src/multiplayer/types.ts:153 - PongMessage (used in module)
+src/multiplayer/types.ts:158 - PlayerDisconnectedMessage (used in module)
+src/multiplayer/types.ts:164 - ErrorMessage (used in module)
+src/multiplayer/useNetworkSync.ts:39 - UseNetworkSyncOptions (used in module)
+src/multiplayer/useNetworkSync.ts:52 - UseNetworkSyncReturn (used in module)
+src/mvp/gameStateAudit.ts:3 - GameStateAuditFinding (used in module)
+src/mvp/gameStateAudit.ts:8 - GameStateAuditError (used in module)
+src/mvp/index.ts:1 - USE_MVP_RULES
+src/mvp/index.ts:104 - expectedCost
+src/mvp/index.ts:7 - Faction
+src/mvp/index.ts:8 - MVP_CARD_TYPES
+src/mvp/index.ts:9 - MVPCardType
+src/mvp/index.ts:10 - CardType
+src/mvp/index.ts:11 - Rarity
+src/mvp/index.ts:13 - CardEffects
+src/mvp/index.ts:62 - CardTarget
+src/mvp/index.ts:67 - GameCard
+src/mvp/index.ts:88 - CardStateBonusDefinition
+src/mvp/index.ts:95 - MVP_COST_TABLE
+src/mvp/index.ts:763 - repairToMVP
+src/mvp/index.ts:906 - validateCardMVP
+src/mvp/index.ts:1010 - clonePlayer
+src/mvp/index.ts:1020 - cloneGameState
+src/mvp/index.ts:19 - EffectsATTACK
+src/mvp/index.ts:24 - EffectsMEDIA
+src/mvp/index.ts:28 - EffectsZONE
+src/mvp/index.ts:32 - EffectsHYBRID
+src/mvp/index.ts:33 - EffectsTRAP
+src/mvp/index.ts:34 - EffectsPERSISTENT
+src/mvp/index.ts:36 - MVPGameCard
+src/mvp/index.ts:51 - Card
+src/mvp/index.ts:53 - PlayerId
+src/mvp/index.ts:55 - PlayerState
+src/mvp/index.ts:67 - TrapRuntimeState
+src/mvp/index.ts:77 - PersistentRuntimeState
+src/mvp/index.ts:88 - GameState
+src/mvp/index.ts:109 - ALLOWED_FACTIONS
+src/mvp/index.ts:110 - ALLOWED_TYPES
+src/mvp/index.ts:111 - ALLOWED_RARITIES
+src/mvp/index.ts:757 - MVPRepairResult
+src/mvp/index.ts:317 - computeTurnIpIncome
+src/mvp/index.ts:345 - startTurn
+src/mvp/index.ts:508 - canPlay
+src/mvp/index.ts:557 - playCard
+src/mvp/index.ts:652 - resolve
+src/mvp/index.ts:920 - endTurn
+src/mvp/index.ts:997 - winCheck
+src/mvp/index.ts:33 - getActiveEditor
+src/mvp/index.ts:146 - WinResult
+src/mvp/index.ts:148 - EndTurnOptions
+src/mvp/index.ts:152 - EndTurnSummary
+src/mvp/index.ts:166 - EndTurnResult
+src/mvp/index.ts:171 - IpMaintenanceSettings
+src/mvp/index.ts:176 - IpIncomeBreakdown
+src/mvp/index.ts:187 - StateIncomeContribution
+src/mvp/index.ts:194 - DEFAULT_IP_MAINTENANCE
+src/mvp/index.ts:199 - CatchUpSettings
+src/mvp/index.ts:206 - DEFAULT_CATCH_UP_SETTINGS
+src/mvp/index.ts:213 - CatchUpEvaluation
+src/mvp/index.ts:232 - evaluateCatchUpAdjustments
+src/mvp/media.ts:10 - MediaActor (used in module)
+src/news/articleBank.ts:6 - CardArticleTone (used in module)
+src/news/articleBank.ts:172 - clearArticleBankCache
+src/news/finalFrontPageComposer.ts:4 - FrontPageTemplateFormat (used in module)
+src/news/finalFrontPageComposer.ts:10 - FrontPageTemplateData (used in module)
+src/news/finalFrontPageComposer.ts:17 - FrontPageBulletin (used in module)
+src/news/finalFrontPageComposer.ts:23 - SanitizedFrontPageBulletin (used in module)
+src/news/finalFrontPageComposer.ts:34 - FrontPageComposition (used in module)
+src/news/finalFrontPageComposer.ts:46 - ComposeFrontPageOptions (used in module)
+src/news/finalFrontPageComposer.ts:189 - getFinalFrontPageTemplates (used in module)
+src/news/finalFrontPageComposer.ts:280 - sanitizeFrontPageBulletin
+src/news/finalFrontPageComposer.ts:326 - composeFinalFrontPage
+src/news/finalFrontPageComposer.ts:381 - getLegacyFrontPageFallback
+src/news/finalizeEdition.ts:120 - FinalizeEditionOptions (used in module)
+src/news/headlineEngine.ts:44 - ExtraExtraOutcome (used in module)
+src/news/headlineEngine.ts:389 - hashSeed (used in module)
+src/news/headlineEngine.ts:401 - mulberry32 (used in module)
+src/news/headlineEngine.ts:573 - dominantFromTotals (used in module)
+src/news/headlineEngine.ts:592 - buildBullets (used in module)
+src/news/headlineEngine.ts:683 - buildHed (used in module)
+src/news/newsPools.ts:3 - NewsPools (used in module)
+src/news/newsPools.ts:78 - areNewsPoolsReady
+src/news/types.ts:3 - ArticleTone (used in module)
+src/news/types.ts:53 - WeightedMetric
+src/pages/CardTest.tsx:145 - default
+src/pages/DevValidation.tsx:17 - default
+src/scripts/applyBalanceUpdates.ts:490 - updates (used in module)
+src/scripts/fixZoneCards.ts:6 - convertZoneCardEffects
+src/scripts/fixZoneCards.ts:76 - generateReplacementPatterns
+src/state/featureFlags.ts:3 - FeatureFlags (used in module)
+src/state/useGameLog.ts:37 - formatHotspotSpawnLog (used in module)
+src/state/useGameLog.ts:54 - useGameLog
+src/systems/CardEffectValidator.ts:11 - validateCard
+src/systems/CardEffectValidator.ts:15 - validateCards (used in module)
+src/systems/CardEffectValidator.ts:19 - createValidationReport
+src/systems/CardEffectValidator.ts:9 - ValidationResult (used in module)
+src/systems/CardEffectValidator.ts:9 - ValidationSummary (used in module)
+src/systems/cardResolution.ts:830 - resolveCardEffects
+src/systems/cardResolution.ts:332 - CardActor (used in module)
+src/systems/cardResolution.ts:839 - recordParanormalHotspotResolution (used in module)
+src/systems/CardTextGenerator.ts:381 - ValidationIssue (used in module)
+src/systems/CardTextGenerator.ts:389 - ValidationResult (used in module)
+src/systems/paranormalHotspots.ts:8 - HotspotWeightBreakdown (used in module)
+src/systems/paranormalHotspots.ts:80 - HotspotInitializationSnapshot (used in module)
+src/systems/paranormalHotspots.ts:174 - ResolveHotspotOptions (used in module)
+src/systems/paranormalHotspots.ts:219 - __setTestEnabledExpansions
+src/systems/paranormalHotspots.ts:446 - HotspotSpawnOptions (used in module)
+src/systems/paranormalHotspots.ts:471 - DEFAULT_HOTSPOT_ICON
+src/systems/stateBonuses.ts:91 - getActiveStateBonuses (used in module)
+src/systems/stateBonuses.ts:140 - getActiveRegionalBonuses (used in module)
+src/systems/stateBonuses.ts:150 - applyStateBonuses
+src/systems/stateBonuses.ts:202 - calculateCardCost
+src/systems/stateBonuses.ts:9 - StateBonus (used in module)
+src/systems/stateBonuses.ts:18 - STATE_BONUSES (used in module)
+src/systems/stateBonuses.ts:98 - RegionalBonus (used in module)
+src/systems/stateBonuses.ts:106 - REGIONAL_BONUSES (used in module)
+src/test/effectSystemValidation.ts:8 - validateFixedEffectSystem (used in module)
+src/types/campaign.ts:1 - ArcResolution (used in module)
+src/types/campaign.ts:3 - ArcProgressSummaryEvent (used in module)
+src/types/campaign.ts:11 - ArcProgressStatus (used in module)
+src/types/cardEffects.ts:72 - Faction
+src/types/cardEffects.ts:72 - CardType
+src/types/cardEffects.ts:75 - EffectResult (used in module)
+src/types/cardEffects.ts:109 - EffectGameState
+src/types/enhancedCardEffects.ts:6 - TriggerCondition (used in module)
+src/types/enhancedCardEffects.ts:28 - MovementEffect (used in module)
+src/types/enhancedCardEffects.ts:44 - StateTargetingEffect (used in module)
+src/types/enhancedCardEffects.ts:61 - ReplacementEffect (used in module)
+src/types/enhancedCardEffects.ts:75 - DeckManipulation (used in module)
+src/types/enhancedCardEffects.ts:91 - HandSizeEffect (used in module)
+src/types/enhancedCardEffects.ts:145 - EnhancedCard
+src/types/enhancedCardEffects.ts:172 - EnhancedGameContext
+src/types/finalEdition.ts:89 - FinalEditionReport (used in module)
+src/types/index.ts:1 - Card
+src/types/news.ts:22 - ExtraExtraArticleEntry (used in module)
+src/types/news.ts:27 - ExtraExtraBulletinEntry (used in module)
+src/types/paranormal.ts:1 - SightingCategory (used in module)
+src/types/paranormal.ts:3 - ParanormalSightingMetadata (used in module)
+src/ui/hotspots.toasts.ts:49 - queueHotspotSpawnToast
+src/utils/broadsheet.ts:1 - BroadsheetRarity (used in module)
+src/utils/broadsheet.ts:22 - broadsheetRarityClassMap
+src/utils/bulkFlavorTextFixer.ts:2 - fixFlavorTextIssues (used in module)
+src/utils/cardEffectMigration.ts:11 - CardEffectMigrator
+src/utils/compositeStory.ts:13 - CompositeSeedParams (used in module)
+src/utils/discardPlanner.ts:3 - DiscardPlanOutcome (used in module)
+src/utils/discardPlanner.ts:100 - previewDiscardCost
+src/utils/errorHandler.ts:99 - safeAsync
+src/utils/errorHandler.ts:118 - safeSync
+src/utils/finalEdition.ts:34 - VictoryHeadlineContext (used in module)
+src/utils/finalEdition.ts:39 - VictorySubheadContext (used in module)
+src/utils/finalEdition.ts:536 - BuildFinalEditionOptions (used in module)
+src/utils/missionModifiers.ts:7 - applyMissionStartingConditions
+src/utils/missionModifiers.ts:54 - applyMissionModifiers
+src/utils/missionModifiers.ts:104 - checkMissionVictory
+src/utils/missionModifiers.ts:142 - checkMissionDefeat
+src/utils/missionModifiers.ts:182 - applyTruthCap
+src/utils/patchWildlifeAdvisory.ts:10 - patchWildlifeAdvisory
+src/utils/patchWildlifeAdvisory.ts:4 - WildlifeAdvisoryPatchResult (used in module)
+src/utils/storage.ts:1 - SafeStorageOptions (used in module)
+src/utils/truth.ts:10 - clampTruth (used in module)
+src/utils/truth.ts:5 - TruthMutable (used in module)
+src/utils/validate-mvp.ts:9 - EFFECT_WHITELIST (used in module)
+src/utils/validate-mvp.ts:25 - ValidationIssue (used in module)
+src/utils/visualEffects.ts:6 - EffectPosition (used in module)
+src/ai/banter/banterEngine.ts:19 - BanterUi (used in module)
+src/ai/banter/index.ts:3 - BanterBank (used in module)
+src/ai/banter/triggerController.ts:3 - BanterTriggerRateLimit (used in module)
+src/ai/banter/triggerController.ts:8 - BanterTriggerRequest (used in module)
+src/ai/banter/triggerController.ts:13 - BanterTriggerBlockReason (used in module)
+src/ai/banter/triggerController.ts:15 - BanterTriggerResult (used in module)
+src/ai/banter/triggerController.ts:51 - createEmptyCooldownState
+src/ai/banter/triggerController.ts:53 - tryConsumeBanterTrigger
+src/assets/audio/sfxManifest.ts:21 - PROCEDURAL_SFX_KEYS (used in module)
+src/assets/audio/sfxManifest.ts:22 - ProceduralSfxKey (used in module)
+src/assets/audio/sfxManifest.ts:33 - SfxKey (used in module)
+src/components/effects/BreakingNewsTicker.tsx:73 - default
+src/components/effects/TabloidVictoryScreen.tsx:167 - default
+src/components/game/AchievementPanel.tsx:880 - default
+src/components/game/CardEffectTooltip.tsx:9 - getCardEffectDescription (used in module)
+src/components/game/CardEffectTooltip.tsx:36 - default
+src/components/game/CardPreviewOverlay.tsx:71 - default
+src/components/game/DistributionSettingsButton.tsx:6 - DistributionSettingsButton
+src/components/game/EnhancedExpansionManager.tsx:490 - default
+src/components/game/EnhancedUSAMap.tsx:89 - StateHotspotDetailsProps (used in module)
+src/components/game/EnhancedUSAMap.tsx:95 - StateHotspotDetails (used in module)
+src/components/game/heroFallback.ts:3 - HeroComboEntry (used in module)
+src/components/game/heroFallback.ts:8 - HeroComboReport (used in module)
+src/components/game/heroFallback.ts:12 - HeroFallbackInput (used in module)
+src/components/game/heroFallback.ts:20 - HeroFallbackContent (used in module)
+src/components/game/ManageExpansions.tsx:993 - default
+src/components/game/newspaperLayout.tsx:16 - NEWSPAPER_SECTION_CLASS (used in module)
+src/components/game/newspaperLayout.tsx:34 - getNewspaperSectionClass (used in module)
+src/components/game/newspaperLayout.tsx:46 - NewspaperSectionProps (used in module)
+src/components/game/ParanormalHotspotAnimatedIcon.tsx:4 - HotspotKind (used in module)
+src/components/game/ParanormalHotspotAnimatedIcon.tsx:15 - ParanormalHotspotAnimatedIcon
+src/components/game/ParanormalHotspotAnimatedIcon.tsx:205 - ParanormalHotspotAnimationStyles
+src/components/game/ParapediaPanel.tsx:167 - default
+src/components/game/PatchApplicator.tsx:483 - default
+src/components/game/SaveGameManager.tsx:173 - default
+src/components/game/SecretAgendaModal.tsx:22 - SecretAgendaModal (used in module)
+src/components/game/SecretAgendaModal.tsx:122 - default
+src/components/game/StateCombinationsPanel.tsx:192 - default
+src/components/game/TabloidNewspaper.tsx:15 - TabloidNewspaperProps (used in module)
+src/components/game/TabloidNewspaper.tsx:15 - TabloidPlayedCard (used in module)
+src/components/game/TabloidNewspaperV2Pages.tsx:21 - PageBuilderData (used in module)
+src/components/game/TruthMeter.tsx:212 - default
+src/components/game/TutorialOverlay.tsx:476 - default
+src/components/game/ZoneTargetingHelper.tsx:20 - default
+src/components/gameplay/StrategyHelper.tsx:105 - StrategyHelper
+src/components/gameplay/StrategyHelper.tsx:9 - StrategyInsights (used in module)
+src/components/gameplay/StrategyHelper.tsx:15 - StrategyHelperProps (used in module)
+src/components/layout/FoldoutOverlayPanel.tsx:12 - default
+src/components/news/ExtraFeed.tsx:94 - default
+src/components/newspaper/BreakingNewsTicker.tsx:101 - dispatchBreakingNews
+src/components/newspaper/InteractiveNewspaperPage.tsx:47 - InteractiveNewspaperPage
+src/components/ui/alert-dialog.tsx:93 - AlertDialog (used in module)
+src/components/ui/alert-dialog.tsx:94 - AlertDialogPortal (used in module)
+src/components/ui/alert-dialog.tsx:95 - AlertDialogOverlay (used in module)
+src/components/ui/alert-dialog.tsx:96 - AlertDialogTrigger (used in module)
+src/components/ui/alert-dialog.tsx:97 - AlertDialogContent (used in module)
+src/components/ui/alert-dialog.tsx:98 - AlertDialogHeader (used in module)
+src/components/ui/alert-dialog.tsx:99 - AlertDialogFooter (used in module)
+src/components/ui/alert-dialog.tsx:100 - AlertDialogTitle (used in module)
+src/components/ui/alert-dialog.tsx:101 - AlertDialogDescription (used in module)
+src/components/ui/alert-dialog.tsx:102 - AlertDialogAction (used in module)
+src/components/ui/alert-dialog.tsx:103 - AlertDialogCancel (used in module)
+src/components/ui/aspect-ratio.tsx:5 - AspectRatio (used in module)
+src/components/ui/avatar.tsx:38 - Avatar (used in module)
+src/components/ui/avatar.tsx:38 - AvatarImage (used in module)
+src/components/ui/avatar.tsx:38 - AvatarFallback (used in module)
+src/components/ui/badge.tsx:23 - BadgeProps (used in module)
+src/components/ui/badge.tsx:29 - badgeVariants (used in module)
+src/components/ui/breadcrumb.tsx:83 - Breadcrumb (used in module)
+src/components/ui/breadcrumb.tsx:84 - BreadcrumbList (used in module)
+src/components/ui/breadcrumb.tsx:85 - BreadcrumbItem (used in module)
+src/components/ui/breadcrumb.tsx:86 - BreadcrumbLink (used in module)
+src/components/ui/breadcrumb.tsx:87 - BreadcrumbPage (used in module)
+src/components/ui/breadcrumb.tsx:88 - BreadcrumbSeparator (used in module)
+src/components/ui/breadcrumb.tsx:89 - BreadcrumbEllipsis (used in module)
+src/components/ui/calendar.tsx:8 - CalendarProps (used in module)
+src/components/ui/calendar.tsx:54 - Calendar (used in module)
+src/components/ui/card.tsx:43 - CardFooter (used in module)
+src/components/ui/carousel.tsx:224 - CarouselApi (used in module)
+src/components/ui/carousel.tsx:224 - Carousel (used in module)
+src/components/ui/carousel.tsx:224 - CarouselContent (used in module)
+src/components/ui/carousel.tsx:224 - CarouselItem (used in module)
+src/components/ui/carousel.tsx:224 - CarouselPrevious (used in module)
+src/components/ui/carousel.tsx:224 - CarouselNext (used in module)
+src/components/ui/chart.tsx:9 - ChartConfig (used in module)
+src/components/ui/chart.tsx:303 - ChartContainer (used in module)
+src/components/ui/chart.tsx:303 - ChartTooltip (used in module)
+src/components/ui/chart.tsx:303 - ChartTooltipContent (used in module)
+src/components/ui/chart.tsx:303 - ChartLegend (used in module)
+src/components/ui/chart.tsx:303 - ChartLegendContent (used in module)
+src/components/ui/chart.tsx:303 - ChartStyle (used in module)
+src/components/ui/command.tsx:123 - Command (used in module)
+src/components/ui/command.tsx:124 - CommandDialog (used in module)
+src/components/ui/command.tsx:125 - CommandInput (used in module)
+src/components/ui/command.tsx:126 - CommandList (used in module)
+src/components/ui/command.tsx:127 - CommandEmpty (used in module)
+src/components/ui/command.tsx:128 - CommandGroup (used in module)
+src/components/ui/command.tsx:129 - CommandItem (used in module)
+src/components/ui/command.tsx:130 - CommandShortcut (used in module)
+src/components/ui/command.tsx:131 - CommandSeparator (used in module)
+src/components/ui/context-menu.tsx:163 - ContextMenu (used in module)
+src/components/ui/context-menu.tsx:164 - ContextMenuTrigger (used in module)
+src/components/ui/context-menu.tsx:165 - ContextMenuContent (used in module)
+src/components/ui/context-menu.tsx:166 - ContextMenuItem (used in module)
+src/components/ui/context-menu.tsx:167 - ContextMenuCheckboxItem (used in module)
+src/components/ui/context-menu.tsx:168 - ContextMenuRadioItem (used in module)
+src/components/ui/context-menu.tsx:169 - ContextMenuLabel (used in module)
+src/components/ui/context-menu.tsx:170 - ContextMenuSeparator (used in module)
+src/components/ui/context-menu.tsx:171 - ContextMenuShortcut (used in module)
+src/components/ui/context-menu.tsx:172 - ContextMenuGroup (used in module)
+src/components/ui/context-menu.tsx:173 - ContextMenuPortal (used in module)
+src/components/ui/context-menu.tsx:174 - ContextMenuSub (used in module)
+src/components/ui/context-menu.tsx:175 - ContextMenuSubContent (used in module)
+src/components/ui/context-menu.tsx:176 - ContextMenuSubTrigger (used in module)
+src/components/ui/context-menu.tsx:177 - ContextMenuRadioGroup (used in module)
+src/components/ui/dialog.tsx:86 - DialogPortal (used in module)
+src/components/ui/dialog.tsx:87 - DialogOverlay (used in module)
+src/components/ui/dialog.tsx:88 - DialogClose (used in module)
+src/components/ui/dialog.tsx:89 - DialogTrigger (used in module)
+src/components/ui/dialog.tsx:92 - DialogFooter (used in module)
+src/components/ui/drawer.tsx:77 - Drawer (used in module)
+src/components/ui/drawer.tsx:78 - DrawerPortal (used in module)
+src/components/ui/drawer.tsx:79 - DrawerOverlay (used in module)
+src/components/ui/drawer.tsx:80 - DrawerTrigger (used in module)
+src/components/ui/drawer.tsx:81 - DrawerClose (used in module)
+src/components/ui/drawer.tsx:82 - DrawerContent (used in module)
+src/components/ui/drawer.tsx:83 - DrawerHeader (used in module)
+src/components/ui/drawer.tsx:84 - DrawerFooter (used in module)
+src/components/ui/drawer.tsx:85 - DrawerTitle (used in module)
+src/components/ui/drawer.tsx:86 - DrawerDescription (used in module)
+src/components/ui/dropdown-menu.tsx:164 - DropdownMenu (used in module)
+src/components/ui/dropdown-menu.tsx:165 - DropdownMenuTrigger (used in module)
+src/components/ui/dropdown-menu.tsx:166 - DropdownMenuContent (used in module)
+src/components/ui/dropdown-menu.tsx:167 - DropdownMenuItem (used in module)
+src/components/ui/dropdown-menu.tsx:168 - DropdownMenuCheckboxItem (used in module)
+src/components/ui/dropdown-menu.tsx:169 - DropdownMenuRadioItem (used in module)
+src/components/ui/dropdown-menu.tsx:170 - DropdownMenuLabel (used in module)
+src/components/ui/dropdown-menu.tsx:171 - DropdownMenuSeparator (used in module)
+src/components/ui/dropdown-menu.tsx:172 - DropdownMenuShortcut (used in module)
+src/components/ui/dropdown-menu.tsx:173 - DropdownMenuGroup (used in module)
+src/components/ui/dropdown-menu.tsx:174 - DropdownMenuPortal (used in module)
+src/components/ui/dropdown-menu.tsx:175 - DropdownMenuSub (used in module)
+src/components/ui/dropdown-menu.tsx:176 - DropdownMenuSubContent (used in module)
+src/components/ui/dropdown-menu.tsx:177 - DropdownMenuSubTrigger (used in module)
+src/components/ui/dropdown-menu.tsx:178 - DropdownMenuRadioGroup (used in module)
+src/components/ui/form.tsx:129 - useFormField (used in module)
+src/components/ui/form.tsx:129 - Form (used in module)
+src/components/ui/form.tsx:129 - FormItem (used in module)
+src/components/ui/form.tsx:129 - FormLabel (used in module)
+src/components/ui/form.tsx:129 - FormControl (used in module)
+src/components/ui/form.tsx:129 - FormDescription (used in module)
+src/components/ui/form.tsx:129 - FormMessage (used in module)
+src/components/ui/form.tsx:129 - FormField (used in module)
+src/components/ui/hover-card.tsx:27 - HoverCard (used in module)
+src/components/ui/hover-card.tsx:27 - HoverCardTrigger (used in module)
+src/components/ui/hover-card.tsx:27 - HoverCardContent (used in module)
+src/components/ui/input-otp.tsx:61 - InputOTP (used in module)
+src/components/ui/input-otp.tsx:61 - InputOTPGroup (used in module)
+src/components/ui/input-otp.tsx:61 - InputOTPSlot (used in module)
+src/components/ui/input-otp.tsx:61 - InputOTPSeparator (used in module)
+src/components/ui/menubar.tsx:191 - Menubar (used in module)
+src/components/ui/menubar.tsx:192 - MenubarMenu (used in module)
+src/components/ui/menubar.tsx:193 - MenubarTrigger (used in module)
+src/components/ui/menubar.tsx:194 - MenubarContent (used in module)
+src/components/ui/menubar.tsx:195 - MenubarItem (used in module)
+src/components/ui/menubar.tsx:196 - MenubarSeparator (used in module)
+src/components/ui/menubar.tsx:197 - MenubarLabel (used in module)
+src/components/ui/menubar.tsx:198 - MenubarCheckboxItem (used in module)
+src/components/ui/menubar.tsx:199 - MenubarRadioGroup (used in module)
+src/components/ui/menubar.tsx:200 - MenubarRadioItem (used in module)
+src/components/ui/menubar.tsx:201 - MenubarPortal (used in module)
+src/components/ui/menubar.tsx:202 - MenubarSubContent (used in module)
+src/components/ui/menubar.tsx:203 - MenubarSubTrigger (used in module)
+src/components/ui/menubar.tsx:204 - MenubarGroup (used in module)
+src/components/ui/menubar.tsx:205 - MenubarSub (used in module)
+src/components/ui/menubar.tsx:206 - MenubarShortcut (used in module)
+src/components/ui/navigation-menu.tsx:111 - navigationMenuTriggerStyle (used in module)
+src/components/ui/navigation-menu.tsx:112 - NavigationMenu (used in module)
+src/components/ui/navigation-menu.tsx:113 - NavigationMenuList (used in module)
+src/components/ui/navigation-menu.tsx:114 - NavigationMenuItem (used in module)
+src/components/ui/navigation-menu.tsx:115 - NavigationMenuContent (used in module)
+src/components/ui/navigation-menu.tsx:116 - NavigationMenuTrigger (used in module)
+src/components/ui/navigation-menu.tsx:117 - NavigationMenuLink (used in module)
+src/components/ui/navigation-menu.tsx:118 - NavigationMenuIndicator (used in module)
+src/components/ui/navigation-menu.tsx:119 - NavigationMenuViewport (used in module)
+src/components/ui/OngoingEffectsDisplay.tsx:104 - default
+src/components/ui/pagination.tsx:74 - Pagination (used in module)
+src/components/ui/pagination.tsx:75 - PaginationContent (used in module)
+src/components/ui/pagination.tsx:76 - PaginationEllipsis (used in module)
+src/components/ui/pagination.tsx:77 - PaginationItem (used in module)
+src/components/ui/pagination.tsx:78 - PaginationLink (used in module)
+src/components/ui/pagination.tsx:79 - PaginationNext (used in module)
+src/components/ui/pagination.tsx:80 - PaginationPrevious (used in module)
+src/components/ui/resizable.tsx:37 - ResizablePanelGroup (used in module)
+src/components/ui/resizable.tsx:37 - ResizablePanel (used in module)
+src/components/ui/resizable.tsx:37 - ResizableHandle (used in module)
+src/components/ui/scroll-area.tsx:38 - ScrollBar (used in module)
+src/components/ui/select.tsx:134 - SelectGroup (used in module)
+src/components/ui/select.tsx:138 - SelectLabel (used in module)
+src/components/ui/select.tsx:140 - SelectSeparator (used in module)
+src/components/ui/select.tsx:141 - SelectScrollUpButton (used in module)
+src/components/ui/select.tsx:142 - SelectScrollDownButton (used in module)
+src/components/ui/sheet.tsx:98 - SheetClose (used in module)
+src/components/ui/sheet.tsx:100 - SheetDescription (used in module)
+src/components/ui/sheet.tsx:101 - SheetFooter (used in module)
+src/components/ui/sheet.tsx:102 - SheetHeader (used in module)
+src/components/ui/sheet.tsx:103 - SheetOverlay (used in module)
+src/components/ui/sheet.tsx:104 - SheetPortal (used in module)
+src/components/ui/sheet.tsx:105 - SheetTitle (used in module)
+src/components/ui/sidebar.tsx:613 - Sidebar (used in module)
+src/components/ui/sidebar.tsx:614 - SidebarContent (used in module)
+src/components/ui/sidebar.tsx:615 - SidebarFooter (used in module)
+src/components/ui/sidebar.tsx:616 - SidebarGroup (used in module)
+src/components/ui/sidebar.tsx:617 - SidebarGroupAction (used in module)
+src/components/ui/sidebar.tsx:618 - SidebarGroupContent (used in module)
+src/components/ui/sidebar.tsx:619 - SidebarGroupLabel (used in module)
+src/components/ui/sidebar.tsx:620 - SidebarHeader (used in module)
+src/components/ui/sidebar.tsx:621 - SidebarInput (used in module)
+src/components/ui/sidebar.tsx:622 - SidebarInset (used in module)
+src/components/ui/sidebar.tsx:623 - SidebarMenu (used in module)
+src/components/ui/sidebar.tsx:624 - SidebarMenuAction (used in module)
+src/components/ui/sidebar.tsx:625 - SidebarMenuBadge (used in module)
+src/components/ui/sidebar.tsx:626 - SidebarMenuButton (used in module)
+src/components/ui/sidebar.tsx:627 - SidebarMenuItem (used in module)
+src/components/ui/sidebar.tsx:628 - SidebarMenuSkeleton (used in module)
+src/components/ui/sidebar.tsx:629 - SidebarMenuSub (used in module)
+src/components/ui/sidebar.tsx:630 - SidebarMenuSubButton (used in module)
+src/components/ui/sidebar.tsx:631 - SidebarMenuSubItem (used in module)
+src/components/ui/sidebar.tsx:632 - SidebarProvider (used in module)
+src/components/ui/sidebar.tsx:633 - SidebarRail (used in module)
+src/components/ui/sidebar.tsx:634 - SidebarSeparator (used in module)
+src/components/ui/sidebar.tsx:635 - SidebarTrigger (used in module)
+src/components/ui/sidebar.tsx:636 - useSidebar (used in module)
+src/components/ui/table.tsx:72 - Table (used in module)
+src/components/ui/table.tsx:72 - TableHeader (used in module)
+src/components/ui/table.tsx:72 - TableBody (used in module)
+src/components/ui/table.tsx:72 - TableFooter (used in module)
+src/components/ui/table.tsx:72 - TableHead (used in module)
+src/components/ui/table.tsx:72 - TableRow (used in module)
+src/components/ui/table.tsx:72 - TableCell (used in module)
+src/components/ui/table.tsx:72 - TableCaption (used in module)
+src/components/ui/textarea.tsx:5 - TextareaProps (used in module)
+src/components/ui/toast.tsx:110 - ToastAction (used in module)
+src/components/ui/toggle-group.tsx:49 - ToggleGroup (used in module)
+src/components/ui/toggle-group.tsx:49 - ToggleGroupItem (used in module)
+src/components/ui/toggle.tsx:37 - Toggle (used in module)
+src/components/ui/use-toast.ts:3 - useToast (used in module)
+src/components/ui/use-toast.ts:3 - toast (used in module)
+src/data/cardArticles/allArticles.ts:29 - getArticlesByTag
+src/data/cardArticles/articleDatabase.ts:55 - clearArticleCache
+src/data/cardArticles/articleDatabase.ts:62 - getArticlesByFaction (used in module)
+src/data/cardArticles/articleDatabase.ts:69 - getArticlesByState (used in module)
+src/data/cardArticles/articleDatabase.ts:76 - getArticlesByCharacter (used in module)
+src/data/cardArticles/articleDatabase.ts:28 - CardArticleCacheEntry (used in module)
+src/data/cardArticles/articleDatabase.ts:30 - CardArticleLookup
+src/data/cardArticles/articleDatabase.ts:80 - default
+src/data/cardArticles/cryptidVariants.ts:201 - getVariantArticle
+src/data/cardArticles/cryptidVariants.ts:209 - getAllVariants (used in module)
+src/data/cardArticles/cryptidVariants.ts:216 - hasVariants
+src/data/core/comeback-cards.ts:5 - COMEBACK_CARDS
+src/data/core/government-batch-1.ts:3 - governmentBatch1
+src/data/core/government-batch-2.ts:3 - governmentBatch2
+src/data/core/government-batch-3.ts:3 - governmentBatch3
+src/data/core/government-batch-4.ts:3 - governmentBatch4
+src/data/core/government-special.ts:8 - governmentSpecialCards (used in module)
+src/data/core/government-special.ts:158 - default
+src/data/core/index.ts:57 - CARD_DATABASE_CORE (used in module)
+src/data/core/index.ts:59 - default (used in module)
+src/data/core/truth-batch-1.ts:3 - truthBatch1
+src/data/core/truth-batch-2.ts:3 - truthBatch2
+src/data/core/truth-batch-3.ts:3 - truthBatch3
+src/data/core/truth-batch-4.ts:3 - truthBatch4
+src/data/core/truth-special.ts:8 - truthSpecialCards (used in module)
+src/data/core/truth-special.ts:157 - default
+src/data/expansions/builtin.ts:5 - BuiltinExpansionSource (used in module)
+src/data/expansions/cryptids_MVP.ts:4519 - default
+src/data/expansions/features.ts:4 - TABLOID_RELICS_EXPANSION_ID
+src/data/expansions/features.ts:11 - StoredExpansionFeaturePrefs (used in module)
+src/data/expansions/features.ts:35 - loadExpansionFeaturesFromStorage
+src/data/expansions/halloween_MVP.ts:3088 - default
+src/data/expansions/index.ts:6 - ExpansionPack (used in module)
+src/data/expansions/index.ts:79 - getExpansionManifest
+src/data/expansions/index.ts:150 - getCachedExpansionCards
+src/data/expansions/state.ts:148 - refreshExpansionCards
+src/data/parapedia/paranormalAtlas.ts:1 - ParapediaSignalLevel (used in module)
+src/data/parapedia/paranormalAtlas.ts:3 - ParapediaReference (used in module)
+src/data/parapedia/paranormalAtlas.ts:11 - ParapediaTimelineEvent (used in module)
+src/data/parapedia/paranormalAtlas.ts:46 - ParapediaAtlas (used in module)
+src/data/parapedia/paranormalAtlas.ts:425 - satisfies
+src/data/parapedia/paranormalAtlas.ts:427 - ParapediaAtlasType
+src/data/parapedia/paranormalAtlas.ts:429 - getParapediaCategories
+src/engine/news/frontPageSubhead.ts:3 - FrontPageSubheadCombo (used in module)
+src/engine/news/newsPools.ts:419 - loadPerCardArticles (used in module)
+src/engine/news/newsPools.ts:423 - loadComboBank (used in module)
+src/engine/news/newsPools.ts:427 - loadTripleBank (used in module)
+src/engine/news/newsPools.ts:39 - TripleTemplateMatch (used in module)
+src/engine/news/smartArticleComposer.ts:456 - composeSmartArticle (used in module)
+src/engine/news/smartArticleComposer.ts:744 - default (used in module)
+src/engine/news/templates.ts:1 - TRUTH_VERB_LIBRARY (used in module)
+src/engine/news/templates.ts:7 - GOV_HEADLINE_PHRASES (used in module)
+src/engine/news/templates.ts:14 - TruthHeadlineVerb
+src/engine/news/templates.ts:15 - GovHeadlinePhrase
+src/engine/newspaper/ArticleCombiner.ts:169 - findRelatedArticles
+src/engine/newspaper/articleEnhancer.ts:77 - enhanceHeadline (used in module)
+src/engine/newspaper/articleEnhancer.ts:92 - enhanceSubhead (used in module)
+src/engine/newspaper/articleEnhancer.ts:104 - enhanceBody (used in module)
+src/engine/newspaper/articleTones.ts:13 - ToneTransform (used in module)
+src/engine/newspaper/articleTones.ts:92 - TONE_TRANSFORMS (used in module)
+src/engine/newspaper/CardLexicon.ts:271 - getCardLexiconSync
+src/engine/newspaper/CardLexicon.ts:275 - rememberCardLexicon
+src/engine/newspaper/CardLexicon.ts:279 - randomGagTag
+src/engine/newspaper/CardLexicon.ts:5 - NarrativeEffectProfile (used in module)
+src/engine/newspaper/CardLexicon.ts:11 - RawNarrativeCardRecord (used in module)
+src/engine/newspaper/CardLexicon.ts:24 - NarrativeDatabase (used in module)
+src/engine/newspaper/StoryBanks.ts:3 - BodySentencePools (used in module)
+src/engine/newspaper/StoryBanks.ts:5 - BodySentenceTemplate (used in module)
+src/engine/newspaper/StoryBanks.ts:135 - satisfies (used in module)
+src/engine/newspaper/StoryBanks.ts:136 - Record (used in module)
+src/engine/newspaper/StoryBanks.ts:447 - string (used in module)
+src/engine/newspaper/StoryBanks.ts:447 -  (used in module)
+src/engine/newspaper/StoryComposer.ts:290 - CardStoryInput (used in module)
+src/engine/newspaper/StoryComposer.ts:302 - CardStoryVerbDebug (used in module)
+src/engine/newspaper/StoryComposer.ts:308 - CardStoryDebug (used in module)
+src/expansions/editors/EditorsDraft.tsx:5 - EditorsDraftProps (used in module)
+src/expansions/editors/EditorsDraft.tsx:9 - EditorsDraft (used in module)
+src/expansions/editors/EditorsDraft.tsx:29 - default
+src/expansions/editors/EditorsEngine.ts:20 - ResolveEditorOptions (used in module)
+src/expansions/editors/EditorsEngine.ts:29 - getEditorById (used in module)
+src/expansions/editors/EditorsEngine.ts:43 - forEachEditorEffect (used in module)
+src/expansions/editors/EditorsEngine.ts:55 - EditorSetupAdjustments (used in module)
+src/expansions/editors/EditorsEngine.ts:90 - EditorTurnStartAdjustments (used in module)
+src/expansions/editors/EditorsEngine.ts:111 - EditorPlayCardAdjustments (used in module)
+src/expansions/editors/EditorsTypes.ts:3 - EditorEffect
+src/expansions/editors/EditorsUI.tsx:13 - EDITORS_EXPANSION_ID (used in module)
+src/expansions/editors/EditorsUI.tsx:24 - EditorsUIProps (used in module)
+src/expansions/editors/EditorsUI.tsx:362 - EditorsUI
+src/expansions/tabloidRelics/RelicIcons.tsx:17 - RELIC_ICONS (used in module)
+src/expansions/tabloidRelics/RelicTypes.ts:6 - RelicTrigger (used in module)
+src/expansions/tabloidRelics/RelicTypes.ts:22 - RelicClampAxis (used in module)
+src/expansions/tabloidRelics/RelicTypes.ts:27 - RelicClampDefinition (used in module)
+src/expansions/tabloidRelics/RelicTypes.ts:33 - RelicEffectDefinition (used in module)
+src/expansions/tabloidRelics/RelicTypes.ts:40 - RelicAmplifyConfig (used in module)
+src/expansions/tabloidRelics/RelicTypes.ts:85 - RelicHostState (used in module)
+src/expansions/tabloidRelics/RelicUI.tsx:22 - FalloutOverlayProps (used in module)
+src/expansions/tabloidRelics/RelicUI.tsx:28 - FalloutOverlay (used in module)
+src/game/hooks/useRules.ts:33 - useRules
+src/lib/decks/generator.ts:42 - generateMixedDeck
+src/lib/decks/generator.ts:8 - DeckBuildResult (used in module)
+src/systems/news/absurdComposer.ts:6 - ArticleRecord (used in module)
+src/systems/news/absurdComposer.ts:458 - createComposerWithPool (used in module)
+src/tools/balancing/mvp-metrics.ts:9 - MvpMetrics (used in module)
+src/ui/newspaper/FrontPage.tsx:25 - FrontPageProps (used in module)
+src/ui/newspaper/FrontPage.tsx:246 - default
+src/components/game/cards/BaseCard.tsx:18 - CardFrameSize (used in module)
+src/components/game/cards/BaseCard.tsx:38 - BaseCard (used in module)
+src/data/core/_archive/truth-batch-5.ts:6 - CORE_BATCH_TRUTH_5
+src/data/core/_archive/truth-batch-6.ts:6 - CORE_BATCH_TRUTH_6
+src/data/core/_archive/truth-batch-7.ts:6 - CORE_BATCH_TRUTH_7

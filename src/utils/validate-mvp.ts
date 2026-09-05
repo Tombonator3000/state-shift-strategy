@@ -1,10 +1,12 @@
 import type { GameCard, MVPCardType, Rarity } from '@/rules/mvp';
 import { MVP_CARD_TYPES, expectedCost } from '@/rules/mvp';
+import { validateCardMVP, type Card as EngineCard } from '@/mvp/validator';
 
 const MVP_FACTIONS = ['truth', 'government'] as const;
 const MVP_RARITIES: readonly Rarity[] = ['common', 'uncommon', 'rare', 'legendary'];
 
-export const EFFECT_WHITELIST: Record<MVPCardType, ReadonlySet<string>> = {
+// The three core types use flat effects. Extended types use their own configuration validator.
+export const EFFECT_WHITELIST: Partial<Record<MVPCardType, ReadonlySet<string>>> = {
   ATTACK: new Set(['ipDelta', 'discardOpponent']),
   MEDIA: new Set(['truthDelta']),
   ZONE: new Set(['pressureDelta']),
@@ -105,6 +107,39 @@ export function validateMvpCard(card: GameCard): ValidationResult {
   const faction = normalizeFaction(card.faction);
   const type = normalizeType(card.type);
   const rarity = normalizeRarity(card.rarity);
+
+  if (type === 'HYBRID' || type === 'TRAP' || type === 'PERSISTENT') {
+    let validation: ReturnType<typeof validateCardMVP>;
+    try {
+      validation = validateCardMVP({ ...card, type, faction, rarity } as EngineCard);
+    } catch {
+      validation = { ok: false, errors: ['Malformed extended card configuration.'] };
+    }
+    const expected = type === 'HYBRID' ? card.hybridConfig?.baseCost : rarity && expectedCost(type, rarity);
+    const costOk = Number.isFinite(card.cost) && card.cost >= 0 && card.cost === expected;
+    const ok = validation.ok && costOk;
+    return {
+      cardId: card.id,
+      cardName: card.name ?? 'Unnamed Card',
+      cardType: card.type,
+      rarity: card.rarity,
+      faction: card.faction,
+      ok,
+      issues: [
+        ...validation.errors.map(message => ({ code: 'invalid-effect-value' as const, message })),
+        ...(!costOk ? [{ code: 'invalid-cost' as const, message: `Invalid cost for ${type}. Expected ${expected ?? 'a valid configuration'}.` }] : []),
+      ],
+      checks: {
+        factionOk: faction !== null,
+        typeOk: true,
+        rarityOk: rarity !== null,
+        effectWhitelistOk: true,
+        effectValuesOk: validation.ok,
+        targetOk: true,
+        costOk,
+      },
+    };
+  }
 
   const factionOk = faction !== null;
   if (!factionOk) {

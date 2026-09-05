@@ -202,6 +202,9 @@ const EnhancedBalancingDashboard = ({
     MEDIA: true,
     ZONE: true,
     DEFENSIVE: true,
+    HYBRID: true,
+    TRAP: true,
+    PERSISTENT: true,
   });
   const [activeView, setActiveView] = useState<'analysis' | 'dev-tools'>(initialView);
   const eventViewerRef = useRef<EventViewerHandle>(null);

@@ -111,6 +111,8 @@ export const evaluateCombosForTurn = (
   const opponentId = otherPlayer(playerId);
 
   const engineState: EngineGameState = {
+    traps: [],
+    persistentEffects: [],
     turn: state.turn,
     currentPlayer: playerId,
     truth: state.truth,

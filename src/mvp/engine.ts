@@ -1,3 +1,4 @@
+import { evaluateStandardVictory } from '@/game/victoryRules';
 declare const window: any;
 
 import { applyEffectsMvp, tickPersistentEffects, type PlayerId } from '@/engine/applyEffects-mvp';
@@ -609,7 +610,7 @@ export function playCard(
         .filter(tag => tag.length > 0)
     : [];
 
-  const playMetadata: Record<string, unknown> = {};
+  const playMetadata: NonNullable<TurnPlay['metadata']> = {};
   if (hybridCostInfo) {
     playMetadata.hybridCost = hybridCostInfo.cost;
     if (hybridCostInfo.appliedConditions.length > 0) {
@@ -771,25 +772,19 @@ function processDiscards(player: PlayerState, discardIds: string[]): DiscardResu
   const newHand: Card[] = [];
   const newDiscard = [...player.discard];
   let discarded = 0;
+  let ipCost = 0;
 
   for (const card of player.hand) {
     const count = discardCounts.get(card.id) ?? 0;
-    if (count > 0) {
+    const nextCost = discarded === 0 ? 0 : 10 + (discarded - 1) * 5;
+    if (count > 0 && ipCost + nextCost <= player.ip) {
+      ipCost += nextCost;
       discardCounts.set(card.id, count - 1);
       newDiscard.push(card);
       discarded += 1;
     } else {
       newHand.push(card);
     }
-  }
-
-  const extraDiscards = Math.max(0, discarded - 1);
-  let ipCost = 0;
-  if (extraDiscards > 0) {
-    const firstCost = 10; // Cost of the 2nd discard (first extra card)
-    const step = 5; // Additional cost added for each subsequent extra discard
-    // Arithmetic series sum: n/2 * (2a1 + (n - 1) * d)
-    ipCost = (extraDiscards * (2 * firstCost + (extraDiscards - 1) * step)) / 2;
   }
 
   return { newHand, newDiscard, discarded, ipCost };
@@ -1018,30 +1013,16 @@ export function winCheck(
     }
   };
 
-  const { players } = state;
-  if (players.P1.states.length >= 10) {
-    return recordVictory('P1', 'states');
-  }
-  if (players.P2.states.length >= 10) {
-    return recordVictory('P2', 'states');
-  }
-
-  if (state.truth >= TRUTH_HIGH_THRESHOLD) {
-    const truthPlayer = players.P1.faction === 'truth' ? 'P1' : 'P2';
-    return recordVictory(truthPlayer, 'truth');
-  }
-
-  if (state.truth <= TRUTH_LOW_THRESHOLD) {
-    const governmentPlayer = players.P1.faction === 'government' ? 'P1' : 'P2';
-    return recordVictory(governmentPlayer, 'truth');
-  }
-
-  if (players.P1.ip >= 300) {
-    return recordVictory('P1', 'ip');
-  }
-  if (players.P2.ip >= 300) {
-    return recordVictory('P2', 'ip');
-  }
+  const result = evaluateStandardVictory({
+    truth: state.truth,
+    contenders: (['P1', 'P2'] as const).map(id => ({
+      id,
+      faction: state.players[id].faction,
+      ip: state.players[id].ip,
+      states: new Set(state.players[id].states).size,
+    })),
+  });
+  if (result) return recordVictory(result.winner, result.victoryType);
 
   clearVictory();
   return {};

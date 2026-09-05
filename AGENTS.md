@@ -37,8 +37,15 @@ This guidance applies to the entire repository. If any directory later introduce
 - Keep escalation moments interactive (choices, resource spends) so the player feels they *author* the conspiracy reveal.
 
 ## Mandatory checks before sending changes
+- `npm run typecheck` (checks `tsconfig.app.json`; the root solution has no source files)
+- `npm run build`
 - `npm run lint`
 - `bun test --coverage --coverage-reporter=text`
+
+- Report baseline failures separately from regressions. Never call a blocked browser or unmeasured fps gate PASS.
+- Follow `docs/roadmap.md` and the latest Gauntlet report; use `src/game/victoryRules.ts` for standard victory evaluation.
+- Compare live-hook and simulation behavior when changing rules. Keep the static article banks and referenced legacy adapters.
+- Confirm callers before removal; disabled tests and generated assets need explicit disposition.
 
 ## Tooling notes
 - `scripts/generate-extension-index.mjs` runs automatically via the `predev` and `prebuild` npm lifecycle hooks.
