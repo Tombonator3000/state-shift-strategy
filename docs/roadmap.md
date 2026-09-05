@@ -1,7 +1,7 @@
 # Paranoid Times – forbedringsplan
 
 Oppdatert 2026-09-05. Dette er den aktive planen. Den tidligere planen er bevart i
-[arkivet](_archive/roadmap-2025-10-11.md). Status gjelder arbeid på en egen gren; ingen merge eller publisering er utført.
+[arkivet](_archive/roadmap-2025-10-11.md). Status gjelder [draft-PR #800](https://github.com/Tombonator3000/state-shift-strategy/pull/800). Grenen er publisert; ingen merge eller utrulling av spillet er utført.
 
 ## Mål og spillopplevelse
 

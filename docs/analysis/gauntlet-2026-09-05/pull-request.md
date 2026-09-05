@@ -1,9 +1,10 @@
-# Draft PR proposal
+# Draft PR #800
 
 Title: Repair victory rules, turn flow and responsive hand; record Gauntlet findings
 Base: main
 Head: fix/gauntlet-flow-2026-09-05
 Draft: true
+URL: https://github.com/Tombonator3000/state-shift-strategy/pull/800
 
 The game could award the human faction a Truth victory at either threshold, accept
 conflicting card/turn actions, hide the hand on mobile, and discard unaffordable

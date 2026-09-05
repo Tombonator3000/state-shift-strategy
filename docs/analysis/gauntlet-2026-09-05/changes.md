@@ -96,3 +96,8 @@ Se README i samme mappe for baseline, sløyfer, resultater og gjenværende risik
 Product commit: `02bf91e`. Remote push rejected by automatic approval review.
 Prepared `pull-request.md`; updated this manifest, the report, `results.json`,
 `log.md` and `UPDATES_LOG.md` to record the block. No product code changed.
+
+## Published draft — 2026-09-05T20:32:30Z
+
+[PR #800](https://github.com/Tombonator3000/state-shift-strategy/pull/800) created after explicit authorization. No merge.
+Documentation-only delivery update: `log.md`, `UPDATES_LOG.md`, `docs/roadmap.md`, `docs/analysis/gauntlet-2026-09-05/README.md`, `docs/analysis/gauntlet-2026-09-05/changes.md`, `docs/analysis/gauntlet-2026-09-05/pull-request.md`, `docs/analysis/gauntlet-2026-09-05/evidence/results.json`.

@@ -65,8 +65,16 @@
   },
   "product_commit": "02bf91ec6597d0ce1128dad7bb6b7df79c119304",
   "delivery": {
-    "status": "BLOCKED",
-    "reason": "Automatic approval review rejected git push; explicit publication authorization requested.",
-    "pull_request_created": false
+    "status": "PUBLISHED_DRAFT",
+    "authorized_at_utc": "2026-09-05T20:32:30Z",
+    "pull_request_created": true,
+    "pull_request_url": "https://github.com/Tombonator3000/state-shift-strategy/pull/800",
+    "pull_request_number": 800,
+    "draft": true,
+    "merged": false,
+    "remote_delivery_commit": "fbf50ab798b2a144b21c81f3d25f31c7baed7456",
+    "verified_tree": "1ac41847db4f6dc617f13aa13edc7693293ad744",
+    "local_checkpoint": "a4fafb6",
+    "note": "Explicit authorization resolved prior approval block; GitHub connector used because shell push had no credentials. Exact tree match; only delivery documentation changed afterward."
   }
 }

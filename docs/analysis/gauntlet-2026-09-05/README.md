@@ -1,5 +1,7 @@
 # Gauntlet – reparasjon av Paranoid Times
 
+**Levering:** [Draft-PR #800](https://github.com/Tombonator3000/state-shift-strategy/pull/800) er opprettet etter eksplisitt tillatelse til push og draft-PR. Ingen merge. Den tidligere publiseringsblokkeringen nedenfor er historikk.
+
 Dato: 2026-09-05. Baseline: `8241c244e7ef5388dfca68059953cdf2573bba88` på `main`.
 Gren: `fix/gauntlet-flow-2026-09-05`. Selv-review utført sekvensielt; ingen uavhengige
 agenter eller eksterne spilltestere er brukt. Se [endringsmanifestet](changes.md) for eksakte filer.
@@ -193,3 +195,14 @@ publisering/opprettelse av gren; eierskap/privatstatus ble også oppgitt som uve
 av kontrollen. Ingen alternativ skrivevei er forsøkt etter avslaget. Ingen PR er
 opprettet. [Draft-PR-teksten](pull-request.md) er klar; eksplisitt tillatelse til push
 og draft-PR er siste avhengighet. Ingen merge er foreslått.
+
+## Publisering fullført — 2026-09-05T20:32:30Z
+
+Brukeren godkjente eksplisitt push og draft-PR. GitHub-tilkoblingen bekreftet
+`push`-tilgang til riktig repo. Direkte git-push manglet terminalinnlogging; den
+autoriserte GitHub-tilkoblingen overførte de samme filene. Alle 66 beholdte/endrede
+filer i endringssettet fikk samme blob-hash som lokalt; seks slettinger ble bevart.
+Hele treet `1ac41847db4f6dc617f13aa13edc7693293ad744` var identisk med lokal
+checkpoint `a4fafb6`. Remote leveransecommit: `fbf50ab798b2a144b21c81f3d25f31c7baed7456`.
+[PR #800](https://github.com/Tombonator3000/state-shift-strategy/pull/800) er draft og unmerged. Dette checkpointet oppdaterer bare dokumentasjon.
+Filer: `log.md`, `UPDATES_LOG.md`, `docs/roadmap.md`, `docs/analysis/gauntlet-2026-09-05/README.md`, `docs/analysis/gauntlet-2026-09-05/changes.md`, `docs/analysis/gauntlet-2026-09-05/pull-request.md`, `docs/analysis/gauntlet-2026-09-05/evidence/results.json`. Produktmanifestet og testresultatene er uendret.

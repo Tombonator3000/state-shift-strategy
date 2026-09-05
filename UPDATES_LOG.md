@@ -2,6 +2,13 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## Unmerged — 2026-09-05T20:32:30Z: draft PR #800 published
+
+Explicit user authorization received. [Draft PR #800](https://github.com/Tombonator3000/state-shift-strategy/pull/800) now contains the
+verified repair checkpoint. Exact source tree matches local `a4fafb6`; no merge
+or production deployment. Previous publication block is resolved. No product changes.
+Files: `log.md`, `UPDATES_LOG.md`, `docs/roadmap.md`, `docs/analysis/gauntlet-2026-09-05/README.md`, `docs/analysis/gauntlet-2026-09-05/changes.md`, `docs/analysis/gauntlet-2026-09-05/pull-request.md`, `docs/analysis/gauntlet-2026-09-05/evidence/results.json`.
+
 ## Unmerged — 2026-09-05T20:25:15Z: delivery blocked
 
 Automatic approval review rejected the remote branch push as lacking publication
