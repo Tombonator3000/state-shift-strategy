@@ -1,118 +1,61 @@
-import React, { useState } from 'react';
+import { useId, useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { TRUTH_HIGH_THRESHOLD, TRUTH_LOW_THRESHOLD } from '@/constants/truthThresholds';
+import { ECONOMIC_VICTORY_IP, TERRITORIAL_VICTORY_STATES } from '@/game/victoryRules';
 
 interface VictoryConditionsProps {
   controlledStates: number;
   truth: number;
   ip: number;
+  faction?: 'truth' | 'government';
+  economicGoal?: number;
+  truthHigh?: number;
+  truthLow?: number;
   isMobile?: boolean;
 }
 
-export const VictoryConditions: React.FC<VictoryConditionsProps> = ({
-  controlledStates,
-  truth,
-  ip,
-  isMobile = false
-}) => {
+export const VictoryConditions = ({
+  controlledStates, truth, ip, faction = 'truth',
+  economicGoal = ECONOMIC_VICTORY_IP,
+  truthHigh = TRUTH_HIGH_THRESHOLD, truthLow = TRUTH_LOW_THRESHOLD,
+  isMobile = false,
+}: VictoryConditionsProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
-
-  // Calculate progress towards each condition
-  const stateProgress = (controlledStates / 10) * 100;
-  const truthProgress = truth;
-  const ipProgress = (ip / 200) * 100;
-
-  // Determine which condition is closest
-  const progressMetrics = [
-    { type: 'states', value: stateProgress, label: 'States' },
-    { type: 'truth', value: truth >= 50 ? truthProgress : 100 - truthProgress, label: 'Truth' }
+  const contentId = useId();
+  const truthTarget = faction === 'truth' ? truthHigh : truthLow;
+  const truthProgress = faction === 'truth'
+    ? (truth - 50) / Math.max(1, truthTarget - 50) * 100
+    : (50 - truth) / Math.max(1, 50 - truthTarget) * 100;
+  const paths = [
+    { label: faction === 'truth' ? `Raise Truth to ${truthTarget}%` : `Lower Truth to ${truthTarget}%`, value: `${Math.round(truth)}%`, progress: truthProgress },
+    { label: `Bank ${economicGoal} IP`, value: `${ip} / ${economicGoal}`, progress: ip / economicGoal * 100 },
+    { label: `Control ${TERRITORIAL_VICTORY_STATES} states`, value: `${controlledStates} / ${TERRITORIAL_VICTORY_STATES}`, progress: controlledStates / TERRITORIAL_VICTORY_STATES * 100 },
   ];
-  const closestCondition = progressMetrics.reduce((prev, curr) => 
-    curr.value > prev.value ? curr : prev
-  );
 
   return (
-    <div className="bg-newspaper-text text-newspaper-bg p-2 mb-3 border border-newspaper-border">
-      <div 
-        className="flex items-center justify-between cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <h3 className="font-bold text-xs text-center flex-1">VICTORY CONDITIONS</h3>
-        {isExpanded ? (
-          <ChevronUp className="w-3 h-3 ml-1" />
-        ) : (
-          <ChevronDown className="w-3 h-3 ml-1" />
-        )}
-      </div>
-      
+    <section className={`bg-newspaper-text text-newspaper-bg border border-newspaper-border ${isMobile ? 'p-3' : 'p-4'}`}>
+      <button type="button" className="flex min-h-11 w-full items-center justify-between gap-3 text-left font-bold text-sm" aria-expanded={isExpanded} aria-controls={contentId} onClick={() => setIsExpanded(value => !value)}>
+        VICTORY CONDITIONS
+        {isExpanded ? <ChevronUp aria-hidden className="h-4 w-4" /> : <ChevronDown aria-hidden className="h-4 w-4" />}
+      </button>
       {isExpanded && (
-        <div className="mt-2">
-          {isMobile ? (
-            <div className="text-xs font-mono">
-              States: {controlledStates}/10 | Truth: {truth}% | IP: {ip}
-            </div>
-          ) : (
-            <div className="text-xs space-y-2 font-mono">
-              {/* Primary Victory Paths */}
-              <div className="border-b border-newspaper-bg/20 pb-2">
-                <div className="font-bold mb-1">PRIMARY PATHS:</div>
-                
-                {/* States Progress */}
-                <div className="mb-1">
-                  <div className="flex justify-between items-center">
-                    <span className={closestCondition.type === 'states' ? 'font-bold' : ''}>
-                      • Control 10 states
-                    </span>
-                    <span className={closestCondition.type === 'states' ? 'font-bold' : ''}>
-                      {controlledStates}/10
-                    </span>
-                  </div>
-                  <div className="w-full bg-newspaper-bg/20 h-1 mt-0.5">
-                    <div 
-                      className="bg-newspaper-bg h-1 transition-all"
-                      style={{ width: `${Math.min(100, stateProgress)}%` }}
-                    />
-                  </div>
+        <div id={contentId} className="space-y-4 pt-2 text-sm">
+          <p>Complete any one path. Truth takes priority, then IP, then states.</p>
+          {paths.map(path => {
+            const progress = Math.max(0, Math.min(100, path.progress));
+            return (
+              <div key={path.label}>
+                <div className="flex flex-wrap justify-between gap-x-3 gap-y-1">
+                  <span>{path.label}</span><span className="font-mono tabular-nums">{path.value}</span>
                 </div>
-
-                {/* Truth Progress */}
-                <div>
-                  <div className="flex justify-between items-center">
-                    <span className={closestCondition.type === 'truth' ? 'font-bold' : ''}>
-                      • Truth ≥{TRUTH_HIGH_THRESHOLD}% / ≤{TRUTH_LOW_THRESHOLD}%
-                    </span>
-                    <span className={closestCondition.type === 'truth' ? 'font-bold' : ''}>
-                      {truth}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-newspaper-bg/20 h-1 mt-0.5">
-                    <div 
-                      className="bg-newspaper-bg h-1 transition-all"
-                      style={{ 
-                        width: `${truth >= 50 ? truthProgress : 100 - truthProgress}%`,
-                        marginLeft: truth < 50 ? 'auto' : '0'
-                      }}
-                    />
-                  </div>
+                <div role="progressbar" aria-label={path.label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)} aria-valuetext={path.value} className="mt-2 h-1.5 bg-newspaper-bg/20">
+                  <div className="h-full bg-newspaper-bg" style={{ width: `${progress}%` }} />
                 </div>
               </div>
-
-              {/* Secondary Metrics */}
-              <div className="text-[10px] opacity-70">
-                <div className="font-bold mb-0.5">TIE-BREAKER:</div>
-                <div>IP: {ip}/200 (Economic dominance)</div>
-              </div>
-
-              {/* Closest to Victory Indicator */}
-              {closestCondition.value > 50 && (
-                <div className="text-[10px] font-bold pt-1 border-t border-newspaper-bg/20">
-                  ⚠ Closest: {closestCondition.label} ({Math.round(closestCondition.value)}%)
-                </div>
-              )}
-            </div>
-          )}
+            );
+          })}
         </div>
       )}
-    </div>
+    </section>
   );
 };

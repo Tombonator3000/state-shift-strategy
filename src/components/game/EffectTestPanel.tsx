@@ -32,6 +32,8 @@ const EffectTestPanel: React.FC = () => {
 
   const engineLog: string[] = [];
   const engineState: EngineGameState = {
+    traps: [],
+    persistentEffects: [],
     turn: gameState.turn,
     currentPlayer: 'P1',
     truth: gameState.truth,

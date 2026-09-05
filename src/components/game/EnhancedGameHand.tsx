@@ -16,7 +16,7 @@ import { getArticleForCard } from '@/data/cardArticles/articleDatabase';
 
 interface EnhancedGameHandProps {
   cards: GameCard[];
-  onPlayCard: (cardId: string) => void;
+  onPlayCard: (cardId: string) => void | Promise<void>;
   disabled?: boolean;
   selectedCard?: string | null;
   onSelectCard?: (cardId: string) => void;
@@ -90,7 +90,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 
   const handlePlayCard = async (cardId: string) => {
     const card = cards.find(c => c.id === cardId);
-    if (!card) return;
+    if (!card || disabled || playingCard || loadingCard) return;
     
     if (!canAffordCard(card)) {
       audio.playSFX('lightClick'); // Error sound - light click
@@ -109,7 +109,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     
     
     try {
-      onPlayCard(cardId);
+      await onPlayCard(cardId);
       triggerHaptic('success');
     } catch (error) {
       triggerHaptic('error');
@@ -126,7 +126,8 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
   const canAffordCard = (card: GameCard) => currentIP >= card.cost;
 
   const handleCardPointerDown = (event: React.PointerEvent<HTMLButtonElement>, card: GameCard) => {
-    if (disabled) return;
+    // Touch scrolls the hand; tap a card to inspect and choose its target.
+    if (disabled || event.pointerType === 'touch') return;
     if (event.pointerType === 'mouse' && event.button !== 0) {
       return;
     }
@@ -239,7 +240,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       ref={handRef}
       onPointerLeave={clearHover}
     >
-      <div className="grid w-full grid-cols-2 gap-2 justify-items-center items-start content-start sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="newsroom-hand-grid w-full">
         {cards.length === 0 ? (
           <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
             No assets available
@@ -252,7 +253,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
             const canAfford = canAffordCard(card);
             const displayType = normalizeCardType(card.type);
             const isQueuedForDiscard = discardQueueSet.has(card.id);
-            const discardToggleDisabled = disabled || !discardEnabled || !onToggleDiscard;
+            const discardToggleDisabled = !discardEnabled || !onToggleDiscard || Boolean(loadingCard || playingCard);
 
             const overlay = (
               <>
@@ -317,11 +318,12 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
             const isDraggingThisCard = draggingCardId === card.id;
 
             return (
+              <div className="newsroom-card-slot relative" key={`${card.id}-${index}`}>
               <button
-                key={`${card.id}-${index}`}
                 type="button"
+                aria-label={`Inspect ${card.name}, ${card.cost} IP`}
                 className={clsx(
-                  'newsroom-card-wrapper card-entrance group/card relative flex w-full items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 touch-pan-y',
+                  'newsroom-card-wrapper card-entrance group/card relative flex w-full items-start justify-center bg-transparent p-0 text-left transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 touch-auto',
                   !canAfford && !disabled && 'cursor-not-allowed opacity-60 saturate-50',
                   disabled && 'cursor-default'
                 )}
@@ -394,14 +396,19 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                   )}
                   overlay={overlay}
                 />
+              </button>
+              <div className="mt-3 flex items-start justify-between gap-2">
+                <p className="newsroom-card-caption text-sm font-semibold leading-snug text-white">{card.name}</p>
+                <span className="shrink-0 text-sm font-bold text-amber-200">{card.cost} IP</span>
+              </div>
                 {onToggleDiscard && (
-                  <span
-                    role="button"
-                    tabIndex={discardToggleDisabled ? -1 : 0}
+                  <button
+                    type="button"
+                    disabled={discardToggleDisabled}
                     aria-pressed={isQueuedForDiscard}
                     aria-label={isQueuedForDiscard ? 'Remove from discard queue' : 'Queue card for discard'}
                     className={clsx(
-                      'absolute left-2 bottom-2 z-30 flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-[0.55rem] font-mono uppercase tracking-[0.25em] text-white shadow-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400',
+                      'mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded border border-white/30 bg-black/40 px-3 py-2 text-sm font-medium text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400',
                       discardToggleDisabled && 'cursor-not-allowed opacity-40',
                       !discardToggleDisabled && 'cursor-pointer hover:bg-orange-400 hover:text-black'
                     )}
@@ -415,24 +422,12 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                       triggerHaptic(isQueuedForDiscard ? 'light' : 'selection');
                       onToggleDiscard(card.id);
                     }}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        if (discardToggleDisabled) {
-                          return;
-                        }
-                        audio.playSFX('click');
-                        triggerHaptic(isQueuedForDiscard ? 'light' : 'selection');
-                        onToggleDiscard(card.id);
-                      }
-                    }}
                   >
                     <Trash2 className="h-3 w-3" />
-                    {isQueuedForDiscard ? 'Queued' : 'Queue'}
-                  </span>
+                    {isQueuedForDiscard ? 'Undo discard' : 'Discard at turn end'}
+                  </button>
                 )}
-              </button>
+              </div>
             );
           })
         )}
@@ -450,7 +445,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           }}
           onPlayCard={() => {
             const card = examinedCardData;
-            if (!card) return;
+            if (!card || disabled || playingCard || loadingCard) return;
 
             if (!canAffordCard(card)) {
               triggerHaptic('error');

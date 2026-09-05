@@ -558,7 +558,7 @@ export class HotspotDirector {
 
   private catalogCandidatesByState: Map<string, PrecomputedCatalogCandidate[]> = new Map();
 
-  private lifecycleInterval: ReturnType<typeof setInterval> | null = null;
+  private lifecycleInterval: number | null = null;
 
   private lifecycleIntervalMs = 0;
 
@@ -1009,9 +1009,8 @@ export class HotspotDirector {
 
       const baseTags = this.ensureStringTags((entry as { tags?: unknown }).tags);
       const expansionTag = this.resolveCatalogExpansion(entry);
-      const icon = typeof (entry as { icon?: unknown }).icon === 'string'
-        ? ((entry as { icon: string }).icon)
-        : undefined;
+      const rawIcon = (entry as { icon?: unknown }).icon;
+      const icon = typeof rawIcon === 'string' ? rawIcon : undefined;
       const stateNameFromEntry = typeof (entry as { stateName?: unknown }).stateName === 'string'
         ? ((entry as { stateName: string }).stateName.trim())
         : undefined;

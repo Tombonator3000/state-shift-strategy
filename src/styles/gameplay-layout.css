@@ -1,0 +1,60 @@
+/* One mounted hand at every width: mobile must never hide the turn controls. */
+.newsroom-hand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
+  gap: 16px 12px;
+  align-items: start;
+}
+
+.newsroom-card-slot { min-width: 0; }
+.newsroom-card-caption { min-height: 3em; }
+.gameplay-masthead .masthead-stripe { gap: 12px; }
+.gameplay-masthead .masthead-stripe > div { min-width: 0; }
+
+@media (max-width: 1023px) {
+  .app-shell.gameplay-shell {
+    height: auto !important;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .gameplay-masthead {
+    height: auto !important;
+    min-height: 96px;
+  }
+
+  .gameplay-masthead .masthead-stripe {
+    flex-wrap: wrap;
+    height: auto;
+    padding-block: 10px;
+  }
+
+  .gameplay-masthead .masthead-stripe > div:last-child {
+    flex-basis: 100%;
+    gap: 8px;
+  }
+
+  .gameplay-masthead .masthead-stripe > div:last-child > div:first-child {
+    justify-content: flex-start;
+  }
+
+  .gameplay-scroll.app-scroll,
+  .gameplay-grid,
+  .gameplay-board,
+  .gameplay-board-content,
+  .gameplay-hand { height: auto; overflow: visible; }
+
+  .gameplay-scroll.app-scroll { padding-bottom: max(16px, var(--safe-bottom)); }
+  .gameplay-board { min-height: 300px; }
+  .gameplay-hand .newsroom-desk { height: auto; }
+  .newsroom-hand-scroll { overflow-x: auto; overflow-y: hidden; }
+  .newsroom-hand-grid { display: flex; width: max-content; gap: 14px; padding-bottom: 8px; }
+  .newsroom-card-slot { width: 176px; flex: 0 0 176px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gameplay-shell .card-entrance,
+  .gameplay-shell .animate-pulse,
+  .gameplay-shell .animate-spin { animation: none !important; }
+  .gameplay-shell .newsroom-card-wrapper { transition: none; }
+}

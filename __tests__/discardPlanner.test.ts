@@ -14,6 +14,14 @@ const createCard = (id: string, overrides: Partial<GameCard> = {}): GameCard => 
 });
 
 describe('planDiscardOutcome', () => {
+  it('retains unaffordable cards after IP is spent, and permits the first free discard at zero IP', () => {
+    const hand = ['a', 'b', 'c'].map(id => createCard(id));
+    expect(planDiscardOutcome(hand, [], ['a', 'b', 'c'], 0).discardedCount).toBe(1);
+    const plan = planDiscardOutcome(hand, [], ['a', 'b', 'c'], 24);
+    expect(plan.discardedCount).toBe(2);
+    expect(plan.ipCost).toBe(10);
+    expect(plan.remainingHand.map(card => card.id)).toEqual(['c']);
+  });
   it('moves multiple queued cards to the discard pile and charges escalating IP', () => {
     const hand = [createCard('alpha'), createCard('bravo'), createCard('charlie')];
     const discardPile = [createCard('legacy')];

@@ -118,10 +118,8 @@ describe('generateIssue recurring character integration', () => {
         recurringCharacters: {
           pastor_rex: {
             appearances: 5,
-            lastRound: 6,
             currentStage: 2,
             lastArticleVariant: 'pastor_rex_stage_2',
-            milestones: ["Rex's Prophecy Fulfilled"],
           },
         },
       },

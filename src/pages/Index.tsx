@@ -36,6 +36,8 @@ import { Maximize, Menu, Minimize, UserCircle2 } from 'lucide-react';
 import { useCardCollection } from '@/hooks/useCardCollection';
 import { useSynergyDetection } from '@/hooks/useSynergyDetection';
 import { planDiscardOutcome } from '@/utils/discardPlanner';
+import { isHumanActionWindow } from '@/hooks/playerActionWindow';
+import { evaluateStandardVictory } from '@/game/victoryRules';
 import {
   safeGetLocalStorageItem,
   safeRemoveLocalStorageItem,
@@ -354,8 +356,8 @@ const Index = () => {
     [openPreview]
   );
   const discardPreview = useMemo(
-    () => planDiscardOutcome(gameState.hand, gameState.discardPile ?? [], pendingDiscards),
-    [gameState.hand, gameState.discardPile, pendingDiscards]
+    () => planDiscardOutcome(gameState.hand, gameState.discardPile ?? [], pendingDiscards, gameState.ip),
+    [gameState.hand, gameState.discardPile, pendingDiscards, gameState.ip]
   );
   const queuedDiscardNames = useMemo(
     () =>
@@ -1181,36 +1183,18 @@ const Index = () => {
       return;
     }
 
-    let winner: 'government' | 'truth' | 'draw' | null = null;
-    let victoryType: 'states' | 'ip' | 'truth' | null = null;
-
-    // Truth-based victories (check both player and AI)
-    if (gameState.truth >= TRUTH_HIGH_THRESHOLD) {
-      winner = gameState.faction === 'truth' ? 'truth' : 'government';
-      victoryType = 'truth';
-    } else if (gameState.truth <= TRUTH_LOW_THRESHOLD) {
-      winner = gameState.faction === 'government' ? 'government' : 'truth';
-      victoryType = 'truth';
-    }
-    // IP victories
-    else if (gameState.ip >= 200) {
-      winner = gameState.faction;
-      victoryType = 'ip';
-    } else if (gameState.aiIP >= 200) {
-      winner = gameState.faction === 'government' ? 'truth' : 'government';
-      victoryType = 'ip';
-    }
-    // State control victories
-    else if (gameState.controlledStates.length >= 10) {
-      winner = gameState.faction;
-      victoryType = 'states';
-    } else {
-      const aiControlledStates = gameState.states.filter(state => state.owner === 'ai').length;
-      if (aiControlledStates >= 10) {
-        winner = gameState.faction === 'government' ? 'truth' : 'government';
-        victoryType = 'states';
-      }
-    }
+    const victory = evaluateStandardVictory({
+      truth: gameState.truth,
+      truthHigh: gameState.truthHighThreshold,
+      truthLow: gameState.truthLowThreshold,
+      economicGoal: gameState.economicGoal,
+      contenders: [
+        { id: gameState.faction, faction: gameState.faction, ip: gameState.ip, states: gameState.states.filter(state => state.owner === 'player').length },
+        { id: gameState.faction === 'truth' ? 'government' as const : 'truth' as const, faction: gameState.faction === 'truth' ? 'government' : 'truth', ip: gameState.aiIP, states: gameState.states.filter(state => state.owner === 'ai').length },
+      ],
+    });
+    const winner = victory?.winner;
+    const victoryType = victory?.victoryType;
 
     if (winner && victoryType) {
       const comboSummary = getLastComboSummary();
@@ -1279,6 +1263,9 @@ const Index = () => {
     gameState.phase,
     gameState.aiTurnInProgress,
     gameState.truth,
+    gameState.truthHighThreshold,
+    gameState.truthLowThreshold,
+    gameState.economicGoal,
     gameState.faction,
     gameState.ip,
     gameState.aiIP,
@@ -1987,7 +1974,7 @@ const Index = () => {
   }, [audio]);
 
   const handleEndTurn = useCallback(() => {
-    if (isEndingTurn) {
+    if (isEndingTurn || !isHumanActionWindow(gameState)) {
       return;
     }
 
@@ -2018,6 +2005,7 @@ const Index = () => {
   }, [
     audio,
     discardPreview,
+    gameState,
     endTurn,
     isEndingTurn,
     pendingDiscards,
@@ -2026,11 +2014,15 @@ const Index = () => {
   // Update Index.tsx to use enhanced components and add keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (showMenu || showIntro || showInGameOptions || showHowToPlay) return;
+      if (e.defaultPrevented || e.repeat || showMenu || showIntro || showInGameOptions || showHowToPlay) return;
+      const target = e.target;
+      if (target instanceof Element && target.closest('input, textarea, select, button, a, [contenteditable]:not([contenteditable="false"]), [role="dialog"], [role="alertdialog"]')) return;
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
+      if (!isHumanActionWindow(gameState)) return;
 
       // Number keys for playing cards (1-9)
       const cardNumber = parseInt(e.key);
-      if (cardNumber >= 1 && cardNumber <= 9 && gameState.hand[cardNumber - 1]) {
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && cardNumber >= 1 && cardNumber <= 9 && gameState.hand[cardNumber - 1]) {
         const card = gameState.hand[cardNumber - 1];
         handlePlayCard(card.id);
         return;
@@ -2077,9 +2069,7 @@ const Index = () => {
     showIntro,
     showInGameOptions,
     showHowToPlay,
-    gameState.phase,
-    gameState.animating,
-    gameState.hand,
+    gameState,
     audio,
     isEndingTurn,
     handleEndTurn,
@@ -2270,13 +2260,18 @@ const Index = () => {
   };
 
   const handleSelectCard = (cardId: string) => {
+    if (!isHumanActionWindow(gameState) || gameState.cardsPlayedThisTurn >= 3) return;
+    selectTargetState(null);
     selectCard(cardId);
+    if (gameState.hand.find(card => card.id === cardId)?.type === 'ZONE' && window.innerWidth < 1024) {
+      document.getElementById('game-map-board')?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    }
     audio.playSFX('hover');
   };
 
   const handlePlayCard = async (cardId: string, targetStateArg?: string) => {
     const card = gameState.hand.find(c => c.id === cardId);
-    if (!card || isAnimating()) return;
+    if (!card || isAnimating() || loadingCard || isEndingTurn || !isHumanActionWindow(gameState)) return;
 
     if (!(card.faction === 'government' && card.type === 'ZONE')) {
       VisualEffectsCoordinator.triggerGovernmentZoneTarget({ active: false, mode: 'complete' });
@@ -2304,7 +2299,7 @@ const Index = () => {
 
     // If it's a ZONE card that requires targeting
     if (card.type === 'ZONE' && !gameState.targetState && !targetStateArg) {
-      selectCard(cardId);
+      handleSelectCard(cardId);
       audio.playSFX('hover');
       toast('🎯 Zone card selected - click a state to target it!', {
         duration: 4000,
@@ -2395,7 +2390,8 @@ const Index = () => {
 
       // Use animated card play
       const playResult = await playCardAnimated(cardId, animatePlayCard, resolvedTargetStateId);
-      const wasCountered = playResult?.countered ?? false;
+      if (playResult.cancelled) return;
+      const wasCountered = playResult.countered;
 
       setPendingDiscards(prev => (prev.length ? prev.filter(id => id !== cardId) : prev));
 
@@ -2433,7 +2429,7 @@ const Index = () => {
         }
       }
 
-      toast.success(`✅ ${card.name} deployed successfully!`, {
+      toast.success(wasCountered ? `${card.name} was countered.` : `${card.name} deployed.`, {
         duration: 2000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
       });
@@ -2554,26 +2550,28 @@ const Index = () => {
   }, [showIntro, showMenu, setMenuMusic]);
 
   const isPlayerActionLocked =
-    gameState.phase !== 'action' || gameState.animating || gameState.currentPlayer !== 'human';
+    !isHumanActionWindow(gameState) || isEndingTurn;
   const handInteractionDisabled = isPlayerActionLocked || gameState.cardsPlayedThisTurn >= 3;
   const canQueueDiscards =
-    !handInteractionDisabled &&
-    gameState.currentPlayer === 'human' &&
-    gameState.phase === 'action' &&
-    !gameState.animating;
+    !isPlayerActionLocked;
   const handleToggleDiscard = useCallback(
     (cardId: string) => {
       if (!canQueueDiscards) {
         return;
       }
-      setPendingDiscards(prev => {
-        if (prev.includes(cardId)) {
-          return prev.filter(id => id !== cardId);
-        }
-        return [...prev, cardId];
-      });
+      if (pendingDiscards.includes(cardId)) {
+        setPendingDiscards(prev => prev.filter(id => id !== cardId));
+        return;
+      }
+      const requested = [...pendingDiscards, cardId];
+      const cost = planDiscardOutcome(gameState.hand, gameState.discardPile ?? [], requested).ipCost;
+      if (cost > gameState.ip) {
+        toast.error(`Discard queue needs ${cost} IP. You have ${gameState.ip} IP.`);
+        return;
+      }
+      setPendingDiscards(requested);
     },
-    [canQueueDiscards]
+    [canQueueDiscards, pendingDiscards, gameState.hand, gameState.discardPile, gameState.ip]
   );
 
   const playerAgenda = gameState.secretAgenda;
@@ -2812,6 +2810,10 @@ const Index = () => {
           controlledStates={gameState.controlledStates.length}
           truth={gameState.truth}
           ip={gameState.ip}
+          faction={gameState.faction}
+          economicGoal={gameState.economicGoal}
+          truthHigh={gameState.truthHighThreshold}
+          truthLow={gameState.truthLowThreshold}
           isMobile
         />
       ),
@@ -3221,15 +3223,16 @@ const Index = () => {
 
   const leftPaneContent = (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <div className="space-y-4 md:hidden">
-        {statusPanelConfigs.map(panel => (
-          <div key={`${panel.id}-mobile`}>{panel.mobile()}</div>
-        ))}
-      </div>
       <div className="flex min-h-0 flex-1 flex-col gap-4">
         <div className="flex min-h-[320px] flex-1 flex-col gap-4 md:flex-row">
           <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
-            <div className="map-scanlines relative flex-1">
+            <div id="game-map-board" className="map-scanlines relative flex-1">
+              {gameState.selectedCard && gameState.hand.find(card => card.id === gameState.selectedCard)?.type === 'ZONE' && (
+                <div role="status" className="flex items-center justify-between gap-3 border-b-2 border-black bg-amber-100 p-3 text-sm text-black">
+                  <span>Choose an unowned or rival state for your ZONE card.</span>
+                  <Button variant="outline" onClick={() => { selectCard(null); selectTargetState(null); }}>Cancel</Button>
+                </div>
+              )}
               <EnhancedUSAMap
                 states={gameState.states}
                 onStateClick={handleStateClick}
@@ -3326,7 +3329,7 @@ const Index = () => {
             </TooltipContent>
           </Tooltip>
         </header>
-        <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
+        <div className="newsroom-hand-scroll flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
           <EnhancedGameHand
             cards={gameState.hand}
             onPlayCard={handlePlayCard}
@@ -3347,6 +3350,12 @@ const Index = () => {
           />
         </div>
         <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
+          <p role="status" className="mb-3 text-sm leading-relaxed">
+            {gameState.currentPlayer === 'ai'
+              ? 'The rival newsroom is preparing its response.'
+              : `${gameState.cardsPlayedThisTurn}/3 cards played · ${gameState.ip} IP available`}
+            {gameState.currentPlayer === 'human' && <span className="block text-white/75">{gameState.cardsPlayedThisTurn >= 3 ? 'Queue any discards, then go to press.' : 'Inspect a card to deploy it, or end your turn.'}</span>}
+          </p>
           <Button
             id="end-turn-button"
             onClick={handleEndTurn}

@@ -1,0 +1,731 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> vite_react_shadcn_ts@0.0.0 lint
+> eslint . && npm run lint:exports
+
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/scripts/checkArticleCoverage.ts
+  35:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  36:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  37:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  38:63  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/scripts/findMissingArticles.ts
+  37:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  38:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  39:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/dev/CardEffectValidator.tsx
+  105:6   warning  React Hook useMemo has missing dependencies: 'testGameState.aiControlledStates', 'testGameState.aiIP', 'testGameState.controlledStates', 'testGameState.faction', 'testGameState.ip', 'testGameState.truth', and 'testGameState.turn'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  195:39  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/effects/FloatingNumbers.tsx
+  77:6  warning  React Hook useEffect has a missing dependency: 'getSmartPosition'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/effects/RedactionSweep.tsx
+  37:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/AchievementPanel.tsx
+  108:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  415:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  416:74  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/CardCollection.tsx
+  117:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:79  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/CardDetailOverlay.tsx
+  22:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/CardEffectTooltip.tsx
+  9:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/DistributionSettings.tsx
+   29:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  128:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  143:88  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/EnhancedExpansionManager.tsx
+  32:6  warning  React Hook useEffect has a missing dependency: 'loadAllExtensions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/EnhancedNewspaper.tsx
+  122:6  warning  React Hook useCallback has unnecessary dependencies: 'ip', 'round', and 'truth'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/EnhancedUSAMap.tsx
+    60:9   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+    70:11  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+   402:44  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+   635:40  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+  1111:26  warning  The ref value 'tooltipStableRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'tooltipStableRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  1115:6   warning  React Hook useEffect has missing dependencies: 'audio' and 'getStateOwnerClass'. Either include them or remove the dependency array                                                                                                                                              react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/FactionSelectTabloid.tsx
+  11:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/GameMenu.tsx
+  24:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/InGameOptions.tsx
+  16:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/InteractiveOnboarding.tsx
+  24:15  error    Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  86:6   warning  React Hook useEffect has a missing dependency: 'onboardingSteps'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/Newspaper.tsx
+  237:61  warning  React Hook useMemo has unnecessary dependencies: 'events' and 'playedCards'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/Options.tsx
+  319:6  warning  React Hook useEffect has a missing dependency: 'audio'. Either include it or remove the dependency array                         react-hooks/exhaustive-deps
+  342:6  warning  React Hook useEffect has a missing dependency: 'audio'. Either include it or remove the dependency array                         react-hooks/exhaustive-deps
+  368:5  warning  React Hook useCallback has an unnecessary dependency: 'audio.availableTracks'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/ParanormalHotspotAnimatedIcon.tsx
+  47:9  error  Unexpected lexical declaration in case block  no-case-declarations
+  56:9  error  Unexpected lexical declaration in case block  no-case-declarations
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/ParapediaPanel.tsx
+  153:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  156:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/PlayerHubMapView.tsx
+   79:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  187:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/PlayerHubOverlay.tsx
+  481:72  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  494:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  497:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/SaveGameManager.tsx
+  8:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/StartScreenTabloid.tsx
+  13:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  14:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/TabloidNewspaperLegacy.tsx
+  197:39  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+  322:61  warning  React Hook useMemo has unnecessary dependencies: 'events' and 'playedCards'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/TabloidNewspaperV2.tsx
+   812:61  warning  React Hook useMemo has unnecessary dependencies: 'events' and 'playedCards'. Either exclude them or remove the dependency array                                            react-hooks/exhaustive-deps
+  1213:6   warning  React Hook useMemo has missing dependencies: 'heroPrimaryCardFaction', 'heroPrimaryCardId', and 'heroPrimaryCardName'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/TabloidNewspaperV2Pages.tsx
+  36:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/TruthMeter.tsx
+  89:6  warning  React Hook useEffect has missing dependencies: 'isTruthCollapse' and 'isTruthSurge'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/TutorialOverlay.tsx
+  418:81  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  419:85  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  426:74  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/USAMap.tsx
+   20:11  error    Unexpected any. Specify a different type                                                                  @typescript-eslint/no-explicit-any
+   28:42  error    Unexpected any. Specify a different type                                                                  @typescript-eslint/no-explicit-any
+  125:40  error    Unexpected any. Specify a different type                                                                  @typescript-eslint/no-explicit-any
+  175:6   warning  React Hook useEffect has a missing dependency: 'audio'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/newspaperLayout.tsx
+  34:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  40:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/game/parapedia/ParapediaPanel.tsx
+  103:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  106:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/gameplay/StrategyHelper.tsx
+  21:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/newspaper/ArticleCombinerDemo.tsx
+  35:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  52:89  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/newspaper/BreakingNewsTicker.tsx
+   47:48  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+   48:64  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  101:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/newspaper/NewspaperPageFlip.tsx
+  21:65  error    Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+  58:6   warning  React Hook useEffect has missing dependencies: 'nextPage' and 'prevPage'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/ui/badge.tsx
+  29:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/ui/button.tsx
+  47:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/ui/command.tsx
+  24:11  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/ui/form.tsx
+  129:10  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/ui/navigation-menu.tsx
+  111:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/ui/sidebar.tsx
+  636:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/ui/sonner.tsx
+  27:19  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/ui/textarea.tsx
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/components/ui/toggle.tsx
+  37:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/contexts/AchievementContext.tsx
+   14:60  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+   17:21  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+   18:22  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+   25:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+   81:79  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  103:41  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/contexts/AudioContext.tsx
+  34:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/achievementSystem.ts
+  694:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  770:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  860:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  968:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  969:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/agendaDatabase.ts
+   34:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   43:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  105:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  126:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  142:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  144:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  148:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  149:92  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  156:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  157:92  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  164:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  165:69  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  170:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  175:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  177:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  178:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  206:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  207:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  208:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  221:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/aiStrategy.ts
+  158:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  159:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  160:68  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  247:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  264:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  268:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  283:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  288:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  301:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  337:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  396:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  416:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  543:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  544:65  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  598:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  660:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  669:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  692:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  700:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  717:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  805:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  839:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  885:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  901:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  919:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  934:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  967:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  968:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  969:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  970:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  971:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  972:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  975:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/aiTuning.ts
+  193:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  193:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  193:69  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  195:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  195:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  218:69  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  218:77  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  225:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  225:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  229:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  229:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  229:70  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  230:74  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  230:82  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/cardArticles/expansionArticles.ts
+  197:98  error  Unnecessary escape character: \'  no-useless-escape
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/cardDatabase.ts
+  6:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/core/index.ts
+   3:1   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  19:25  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  19:62  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  37:59  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/enhancedAIStrategy.ts
+   107:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   384:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   419:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   424:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   428:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   433:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   437:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   441:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   453:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   485:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   506:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   557:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   600:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   643:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   670:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   816:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   928:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   979:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1022:82  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1070:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1122:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1169:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1215:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1311:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1344:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1349:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1391:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1407:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1409:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1452:73  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1480:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1505:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1508:63  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1509:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1556:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1559:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1579:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1610:63  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1628:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1650:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1650:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1693:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1725:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1730:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1730:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1731:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1738:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1739:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1744:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1745:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1747:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1795:80  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1806:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1807:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1820:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1821:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1826:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1827:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1850:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1850:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1854:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1855:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1856:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1896:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1907:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1908:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1934:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/eventDatabase.ts
+  4813:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  4874:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  4906:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  5016:90  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  5018:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  5087:74  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/expansions/index.ts
+  23:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/extensionSystem.ts
+    1:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+    2:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   33:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  128:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  152:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  178:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  179:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  184:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  185:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  187:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  188:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  194:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  213:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  214:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  219:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  221:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  222:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  228:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  239:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  248:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  275:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/gameModifiers.ts
+  291:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  293:4   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  316:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/patchApplication.ts
+  131:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/usaStates.ts
+  154:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  165:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/victoryConditions.ts
+   21:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   23:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   33:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   34:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   56:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   94:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  129:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  162:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  228:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  229:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  246:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  249:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  262:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  265:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  275:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  278:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  291:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  294:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  306:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  309:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  347:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  350:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  352:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  354:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  356:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  358:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  360:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  372:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  431:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  488:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  500:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  515:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  524:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  534:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  555:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/data/weightedCardDistribution.ts
+  47:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  48:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  58:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  65:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  66:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/engine/applyEffects-mvp.ts
+    1:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   31:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   36:68  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   46:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   51:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   51:77  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  111:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  340:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  341:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  421:63  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  422:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/engine/news/__tests__/smartNarrativeComposer.test.ts
+   38:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   49:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   74:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  162:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  174:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  217:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  227:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  248:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  258:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  278:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  288:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  308:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  318:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/engine/news/newsPools.ts
+  213:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  214:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/engine/news/smartNarrativeComposer.ts
+  318:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  319:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/engine/newspaper/CardLexicon.ts
+  211:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  211:93  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/engine/newspaper/IssueGenerator.ts
+  241:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/engine/newspaper/StoryBanks.ts
+  1714:6  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2365:6  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/engine/newspaper/proceduralArticleGenerator.ts
+  346:22  error  Unnecessary escape character: \[  no-useless-escape
+  347:21  error  Unnecessary escape character: \[  no-useless-escape
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/expansions/editors/EditorsUI.tsx
+   13:10  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  304:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  353:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/expansions/tabloidRelics/RelicIcons.tsx
+  17:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  45:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/game/aiEditorBinding.ts
+   5:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   9:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  12:72  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/game/recurringCharacterArticles.ts
+  7:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/hooks/comboAdapter.ts
+  126:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  126:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  135:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  136:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/hooks/stateEventHistory.ts
+  52:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/hooks/useAudio.ts
+  458:22  warning  The ref value 'nextMusicRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'nextMusicRef.current' to a variable inside the effect, and use that variable in the cleanup function        react-hooks/exhaustive-deps
+  460:33  warning  The ref value 'musicTracks.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'musicTracks.current' to a variable inside the effect, and use that variable in the cleanup function          react-hooks/exhaustive-deps
+  463:29  warning  The ref value 'sfxRefs.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'sfxRefs.current' to a variable inside the effect, and use that variable in the cleanup function                  react-hooks/exhaustive-deps
+  467:39  warning  The ref value 'fadeIntervalRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'fadeIntervalRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  470:6   warning  React Hook useEffect has missing dependencies: 'config.muted', 'config.sfxVolume', 'config.volume', and 'tracksLoaded'. Either include them or remove the dependency array                                                                                                     react-hooks/exhaustive-deps
+  599:6   warning  React Hook useCallback has unnecessary dependencies: 'config.musicVolume' and 'config.volume'. Either exclude them or remove the dependency array                                                                                                                              react-hooks/exhaustive-deps
+  730:6   warning  React Hook useCallback has a missing dependency: 'isPlaying'. Either include it or remove the dependency array                                                                                                                                                                 react-hooks/exhaustive-deps
+  884:6   warning  React Hook useCallback has a missing dependency: 'config.musicEnabled'. Either include it or remove the dependency array                                                                                                                                                       react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/hooks/useCardAnimation.ts
+  361:6  warning  React Hook useCallback has missing dependencies: 'flyToPlayedPile', 'shake', and 'tweenTransform'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/hooks/useGameState.ts
+   764:39   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  3195:93   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  3373:93   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  4195:6    warning  React Hook useCallback has an unnecessary dependency: 'hotspotDirector'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+  4990:37   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  5083:9    error    Unsafe usage of ReturnStatement                                                                                            no-unsafe-finally
+  5393:22   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  5398:22   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  5399:39   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  5708:49   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  5708:112  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  5709:26   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  5711:55   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  5711:124  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  5712:49   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  5869:103  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  5924:41   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  6033:23   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  6033:54   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  6034:37   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  6034:67   error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  6098:103  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  6163:6    warning  React Hook useCallback has a missing dependency: 'aiDifficulty'. Either include it or remove the dependency array          react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/hooks/useParapediaEntries.ts
+  58:32   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  59:58   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  59:102  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/hooks/usePressureSystem.ts
+  35:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/hooks/useStateEvents.ts
+  31:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/multiplayer/useNetworkSync.ts
+  154:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  271:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  283:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/mvp/__tests__/engine.editors.test.ts
+  218:12  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/mvp/engine.ts
+    1:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  374:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  375:70  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  377:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  379:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  379:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  382:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  382:77  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  383:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  391:11  error  Empty block statement                     no-empty
+  524:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  525:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  526:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  526:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  529:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  529:77  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  530:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  538:11  error  Empty block statement                     no-empty
+  850:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  852:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/mvp/media.ts
+  40:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/mvp/validator.ts
+   113:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1060:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/pages/DatabaseRecovery.tsx
+  55:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/pages/EffectSystemDashboard.tsx
+  201:87  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  239:83  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/pages/Index.tsx
+   784:6   warning  React Hook useMemo has a missing dependency: 'gameState'. Either include it or remove the dependency array                                                                                                     react-hooks/exhaustive-deps
+  1275:6   warning  React Hook useEffect has missing dependencies: 'gameState.extraExtraFeed', 'gameState.headlineLog', 'gameState.recurringCharacters', and 'gameState.turn'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  1342:6   warning  React Hook useEffect has a missing dependency: 'gameState.playHistory.length'. Either include it or remove the dependency array                                                                                react-hooks/exhaustive-deps
+  1411:70  error    Unexpected any. Specify a different type                                                                                                                                                                       @typescript-eslint/no-explicit-any
+  1921:6   warning  React Hook useEffect has a missing dependency: 'discoverCard'. Either include it or remove the dependency array                                                                                                react-hooks/exhaustive-deps
+  2075:6   warning  React Hook useEffect has missing dependencies: 'handleLoadGame', 'handlePlayCard', 'handleSaveGame', and 'toggleFullscreen'. Either include them or remove the dependency array                                react-hooks/exhaustive-deps
+  2277:9   warning  The 'handlePlayCard' function makes the dependencies of useCallback Hook (at line 2500) change on every render. To fix this, wrap the definition of 'handlePlayCard' in its own useCallback() Hook             react-hooks/exhaustive-deps
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/scripts/fixZoneCards.ts
+  11:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/state/featureFlags.ts
+  40:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/systems/CardTextGenerator.ts
+  168:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/systems/cardResolution.ts
+  820:70  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/systems/paranormalHotspots.ts
+  425:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/test/effectSystemValidation.ts
+  90:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/tools/CardDatabaseRecovery.ts
+  103:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/tools/CardEffectAnalyzer.ts
+  235:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  251:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/tools/CardFixGenerator.ts
+   12:19  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+   95:9   error  Unexpected lexical declaration in case block  no-case-declarations
+  112:9   error  Unexpected lexical declaration in case block  no-case-declarations
+  134:9   error  Unexpected lexical declaration in case block  no-case-declarations
+  164:9   error  Unexpected lexical declaration in case block  no-case-declarations
+  186:52  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  196:55  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  204:58  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  212:58  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  244:14  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/tools/ExtensionEffectMigrator.ts
+   12:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   34:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   52:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  155:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  182:70  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/types/enhancedCardEffects.ts
+  177:9   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  178:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  188:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/ui/UiOverlays.tsx
+  11:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/utils/audioGenerator.ts
+  7:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/utils/bulkFlavorTextFixer.ts
+  28:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/utils/cardEffectMigration.ts
+   28:81  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  114:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  146:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/utils/errorHandler.ts
+   8:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  49:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  59:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  69:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/utils/fixCryptidsExtension.ts
+  19:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/utils/patchWildlifeAdvisory.ts
+  10:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/src/utils/truth.ts
+   1:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  32:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/tailwind.config.ts
+  247:13  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  247:45  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+/workspace/scratch/6df1e768df7a/state-shift-strategy/tools/ai-simulation.ts
+  426:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  589:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  589:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  685:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 497 problems (444 errors, 53 warnings)
+

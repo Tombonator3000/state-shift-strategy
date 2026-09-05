@@ -1,3 +1,5 @@
+> Historical snapshot. Current status: [2026-09-05 Gauntlet](docs/analysis/gauntlet-2026-09-05/README.md). Earlier completion claims are not current verification.
+
 # PARANOID TIMES - FULL AUDIT REPORT
 **Generated:** 2025-11-13
 **Codebase:** State Shift Strategy (Paranoid Times Card Game)

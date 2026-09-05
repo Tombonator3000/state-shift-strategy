@@ -25,6 +25,8 @@ export function validateFixedEffectSystem() {
     
     const log: string[] = [];
     const engineState: EngineGameState = {
+      traps: [],
+      persistentEffects: [],
       turn: 1,
       currentPlayer: 'P1',
       truth: 50,

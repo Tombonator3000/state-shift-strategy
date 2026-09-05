@@ -19,6 +19,7 @@ export const planDiscardOutcome = (
   hand: GameCard[],
   discardPile: GameCard[],
   discards: string[],
+  availableIp = Number.POSITIVE_INFINITY,
 ): DiscardPlanOutcome => {
   const plannedIds = normalizeDiscards(discards);
   if (plannedIds.length === 0) {
@@ -41,10 +42,14 @@ export const planDiscardOutcome = (
   const remainingHand: GameCard[] = [];
   const updatedDiscardPile: GameCard[] = [...discardPile];
   const discardedCards: GameCard[] = [];
+  let spent = 0;
+  const budget = Number.isNaN(availableIp) ? 0 : Math.max(0, availableIp);
 
   for (const card of hand) {
     const count = discardCounts.get(card.id) ?? 0;
-    if (count > 0) {
+    const nextCost = discardedCards.length === 0 ? 0 : FIRST_EXTRA_DISCARD_COST + (discardedCards.length - 1) * ADDITIONAL_DISCARD_STEP;
+    if (count > 0 && spent + nextCost <= budget) {
+      spent += nextCost;
       discardCounts.set(card.id, count - 1);
       discardedCards.push(card);
       updatedDiscardPile.push(card);

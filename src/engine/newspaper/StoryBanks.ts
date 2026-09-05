@@ -16,6 +16,9 @@ const sentenceTemplate = (blueprint: string, pools: BodySentencePools): BodySent
 
 export const verbs = {
   "headline": {
+    "HYBRID": ["FILES TWO CONTRADICTORY REPORTS", "CROSSES DEPARTMENTAL WIRES"],
+    "TRAP": ["SEALS THE EVIDENCE DRAWER", "WAITS BEHIND THE REDACTION"],
+    "PERSISTENT": ["RENEWS THE EMERGENCY MEMO", "KEEPS THE SWITCHBOARD BUZZING"],
     "ATTACK": [
       "BURNS COVER STORY",
       "CRASHES SECURITY DRILL",

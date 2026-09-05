@@ -2,6 +2,106 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## Unmerged — 2026-09-05T20:32:30Z: draft PR #800 published
+
+Explicit user authorization received. [Draft PR #800](https://github.com/Tombonator3000/state-shift-strategy/pull/800) now contains the
+verified repair checkpoint. Exact source tree matches local `a4fafb6`; no merge
+or production deployment. Previous publication block is resolved. No product changes.
+Files: `log.md`, `UPDATES_LOG.md`, `docs/roadmap.md`, `docs/analysis/gauntlet-2026-09-05/README.md`, `docs/analysis/gauntlet-2026-09-05/changes.md`, `docs/analysis/gauntlet-2026-09-05/pull-request.md`, `docs/analysis/gauntlet-2026-09-05/evidence/results.json`.
+
+## Unmerged — 2026-09-05T20:25:15Z: delivery blocked
+
+Automatic approval review rejected the remote branch push as lacking publication
+authorization. No alternate write attempted; draft PR text is prepared locally.
+Files: `log.md`, `UPDATES_LOG.md`, `docs/analysis/gauntlet-2026-09-05/README.md`,
+`docs/analysis/gauntlet-2026-09-05/changes.md`,
+`docs/analysis/gauntlet-2026-09-05/evidence/results.json`,
+`docs/analysis/gauntlet-2026-09-05/pull-request.md`. No product changes.
+
+## Unmerged — 2026-09-05: Gauntlet gameplay repairs and cleanup
+
+- Timestamp: 2026-09-05T20:22:41Z
+- Branch: `fix/gauntlet-flow-2026-09-05` (no merge date claimed).
+- Correct Truth winner and 200-IP parity; guard player actions/animation sessions;
+  enforce discard budgets; restore mobile hand; improve readable controls and victory
+  explanations; repair extended-card validation and app types; remove confirmed unused UI.
+- Validation: npm ci / app typecheck / build pass; 138 tests pass. Coverage and lint
+  gates remain failing as documented; visual runtime and 60 fps remain unverified.
+- [Report and evidence](docs/analysis/gauntlet-2026-09-05/README.md).
+- Files (A added, M modified, D deleted):
+
+- `M` `AGENTS.md`
+- `M` `FULL_AUDIT_REPORT.md`
+- `M` `README.md`
+- `M` `UPDATES_LOG.md`
+- `M` `__tests__/discardPlanner.test.ts`
+- `A` `__tests__/game/extendedCardValidation.test.ts`
+- `A` `__tests__/game/victoryRules.test.ts`
+- `A` `__tests__/hooks/playerTurnGuards.test.tsx`
+- `M` `components.json`
+- `A` `docs/_archive/roadmap-2025-10-11.md`
+- `A` `docs/analysis/gauntlet-2026-09-05/README.md`
+- `A` `docs/analysis/gauntlet-2026-09-05/changes.md`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/baseline-build.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/baseline-install.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/baseline-lint.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/baseline-tests-coverage.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/baseline-typecheck.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/build.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/clean-install.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/iteration2-failed-test.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/lint.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/results.json`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/tested-source-sha256.json`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/tests-coverage.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/tests-summary.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/tests.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/typecheck.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/evidence/unused-exports.log`
+- `A` `docs/analysis/gauntlet-2026-09-05/visuals/briefs.md`
+- `A` `docs/analysis/gauntlet-2026-09-05/visuals/desktop-concept-v1.png`
+- `A` `docs/analysis/gauntlet-2026-09-05/visuals/mobile-concept-v1.png`
+- `M` `docs/paranoid_times_analysis_and_roadmap.md`
+- `M` `docs/roadmap.md`
+- `M` `docs/unused-functions-audit.md`
+- `M` `log.md`
+- `M` `package-lock.json`
+- `M` `package.json`
+- `M` `src/components/dev/CardEffectValidator.tsx`
+- `M` `src/components/game/CardDetailOverlay.tsx`
+- `M` `src/components/game/EffectTestPanel.tsx`
+- `M` `src/components/game/EnhancedBalancingDashboard.tsx`
+- `M` `src/components/game/EnhancedGameHand.tsx`
+- `D` `src/components/game/EnhancedHUD.tsx`
+- `D` `src/components/game/GameHand.tsx`
+- `D` `src/components/game/GameMap.tsx`
+- `D` `src/components/game/Newspaper.tsx`
+- `D` `src/components/game/StartScreenTabloid.tsx`
+- `D` `src/components/game/USAMap.tsx`
+- `M` `src/components/game/VictoryConditions.tsx`
+- `M` `src/components/layout/ResponsiveLayout.tsx`
+- `M` `src/content/mvpRules.ts`
+- `M` `src/data/__tests__/builtinExpansions.test.ts`
+- `M` `src/engine/news/__tests__/smartNarrativeComposer.test.ts`
+- `M` `src/engine/newspaper/IssueGenerator.ts`
+- `M` `src/engine/newspaper/StoryBanks.ts`
+- `M` `src/engine/newspaper/__tests__/IssueGenerator.recurringCharacters.test.ts`
+- `M` `src/game/combo.types.ts`
+- `A` `src/game/victoryRules.ts`
+- `M` `src/hooks/comboAdapter.ts`
+- `A` `src/hooks/playerActionWindow.ts`
+- `M` `src/hooks/useGameState.ts`
+- `M` `src/lib/cardUi.ts`
+- `M` `src/mvp/__tests__/engine.editors.test.ts`
+- `M` `src/mvp/engine.ts`
+- `M` `src/pages/Index.tsx`
+- `A` `src/styles/gameplay-layout.css`
+- `M` `src/systems/__tests__/hotspotDirector.initialize.test.ts`
+- `M` `src/systems/paranormalHotspots.ts`
+- `M` `src/test/effectSystemValidation.ts`
+- `M` `src/utils/discardPlanner.ts`
+- `M` `src/utils/validate-mvp.ts`
+
 ## 2026-04-13 – Faster initial load via lazy SFX and vendor chunk splits
 - Timestamp: 2026-04-13T00:00:00Z
 - Files:
@@ -17,482 +117,6 @@ This document provides a chronological record of gameplay-impacting changes merg
   - `log.md`
   - `UPDATES_LOG.md`
 - Summary: Procedural paranormal SFX now load lazily after the first render, and vendor libraries (React, Radix, Lucide, Recharts, TanStack/zod/router, PeerJS) are split into independently cacheable chunks. Initial gzip payload dropped from ~1.66 MB to ~1.20 MB. Test infrastructure was hardened with a shared preload that stashes real module bindings, eliminating cross-file `mock.module` pollution; full suite now passes 120/120.
-
-## 2025-10-27 – Preview command now rebuilds before serving
-- Timestamp: 2025-10-27T00:00:00Z
-- Files:
-  - `package.json`
-  - `UPDATES_LOG.md`
-
-## 2025-10-26 – Victory thresholds retuned to a 90/10 split
-- Timestamp: 2025-10-26T00:00:00Z
-- Files:
-  - `src/constants/truthThresholds.ts`
-  - `src/hooks/useGameState.ts`
-  - `src/mvp/engine.ts`
-  - `src/data/victoryConditions.ts`
-  - `src/data/enhancedAIStrategy.ts`
-  - `src/data/achievementSystem.ts`
-  - `src/data/tutorialSystem.ts`
-  - `src/content/mvpRules.ts`
-  - `src/components/game/MechanicsTooltip.tsx`
-  - `src/components/game/InteractiveOnboarding.tsx`
-  - `src/components/game/VictoryConditions.tsx`
-  - `src/components/game/TruthMeter.tsx`
-  - `src/pages/Index.tsx`
-  - `UPDATES_LOG.md`
-- Summary: Centralized the truth victory thresholds behind shared 90/10 constants, wired core engine checks, AI evaluations, achievements, tutorials, and UI messaging to read from them, and refreshed the Truth Meter visuals so the new breakpoints animate and label correctly.
-
-## 2025-11-11 – Hybrid, trap, and persistent cards join the arsenal
-- Timestamp: 2025-11-11T00:00:00Z
-- Files:
-  - `src/rules/mvp.ts`
-  - `src/mvp/validator.ts`
-  - `src/engine/applyEffects-mvp.ts`
-  - `src/mvp/engine.ts`
-  - `src/systems/cardResolution.ts`
-  - `__tests__/mvp/newCardTypes.test.ts`
-  - `UPDATES_LOG.md`
-- Summary: Expanded the MVP ruleset to recognize hybrid cost scheming, ambush traps, and per-turn persistent effects, taught the engine to recalc hybrid prices, defer trap payloads, and tick long-haul modifiers, then locked in scenario coverage so the new paranoia levers stay functional.
-
-## 2025-11-10 – Front page hero card art anchors lead story
-- Timestamp: 2025-11-10T00:00:00Z
-- Files:
-  - `src/components/game/TabloidNewspaperV2.tsx`
-  - `src/components/game/TabloidNewspaperV2Pages.tsx`
-  - `src/components/newspaper/MultiColumnArticle.tsx`
-  - `__tests__/game/TabloidNewspaperV2Pages.test.tsx`
-  - `UPDATES_LOG.md`
-- Summary: Routed the front-page builder to pick a flagship card, feed its art and faction caption into the hero article layout, tuned the column component for mobile-first stacking, and added regression coverage proving the surveillance-paranoia lever only fires when hero metadata exists.
-
-## 2025-11-09 – Hero fallback prints rumor-rich paragraphs
-- Timestamp: 2025-11-09T00:00:00Z
-- Files:
-  - `src/components/game/heroFallback.ts`
-  - `__tests__/game/heroFallback.test.ts`
-  - `UPDATES_LOG.md`
-- Summary: Rewired the hero fallback copy to guarantee three lore-hungry paragraphs packed with redacted memos, rumor slips, and combo reward jokes, then added focused coverage proving the new beats surface for both factions.
-
-## 2025-11-08 – Headlines track the truth surge timeline
-- Timestamp: 2025-11-08T00:00:00Z
-- Files:
-  - `ARTICLE_GENERATOR_GUIDE.md`
-  - `src/engine/newspaper/proceduralArticleGenerator.ts`
-  - `__tests__/newspaper/proceduralArticleGenerator.test.ts`
-  - `UPDATES_LOG.md`
-- Summary: Wired target-state, truth-delta, turn, and controlled-territory details into procedural headlines, subheads, bodies, and tag stacks, refreshed the guide with the new narrative hooks, and added regression tests proving the contextual flavor renders when data is present.
-
-## 2025-11-07 – Elvis deck loads Vegas conspiracy scoop
-- Timestamp: 2025-11-07T00:00:00Z
-- Files:
-  - `src/data/editors.json`
-  - `UPDATES_LOG.md`
-- Summary: Repointed Elvis in Exile's starting card to the canonical TRUTH-005 record so the editor spawns with the proper Vegas UFO Wedding scoop and surfaces the lore-correct title in the UI.
-## 2025-11-07 – Procedural articles embrace moon hoax and hotline chaos
-- Timestamp: 2025-11-07T00:00:00Z
-- Files:
-  - `ARTICLE_GENERATOR_GUIDE.md`
-  - `src/engine/newspaper/proceduralArticleGenerator.ts`
-  - `src/engine/newspaper/__tests__/proceduralArticleGenerator.test.ts`
-- Summary: Expanded every word bank with Florida-man mayhem, Elvis/Bat Boy cameos, and red-tape doublespeak, introduced moon-hoax, psychic hotline, and time-loop tag themes, and locked in snapshots that prove the tabloid tone stays feral.
-
-## 2025-11-06 – Newspaper generator reacts to card themes
-- Timestamp: 2025-11-06T00:00:00Z
-- Files:
-  - `ARTICLE_GENERATOR_GUIDE.md`
-  - `src/engine/newspaper/proceduralArticleGenerator.ts`
-  - `src/engine/newspaper/__tests__/proceduralArticleGenerator.test.ts`
-- Summary: Added tag-aware word banks for cryptid, broadcast, and operation cards so procedural copy leans into the right conspiratorial flavor, refreshed documentation, and locked in tests that prove the new themes surface in generated articles.
-
-## 2025-11-05 – Restored canonical news tags to engine cache
-- Timestamp: 2025-11-05T00:00:00Z
-- Files:
-  - `paranoid_times_card_articles_ALL.json`
-  - `public/data/paranoid_times_card_articles_ALL.json`
-  - `src/engine/news/paranoid_times_card_articles_ALL.json`
-  - `src/engine/news/newsPools.ts`
-  - `tools/generate-card-articles.mjs`
-- Summary: Updated the article generator to reuse canonical tag metadata, regenerated the news cache to include the full UFO and cryptid taxonomy, and added a safeguard that compares cached tags to the public dataset.
-
-## 2025-11-04 – Tabloid newspaper uses static page builder import
-- Timestamp: 2025-11-04T00:00:00Z
-- Files:
-  - `src/components/game/TabloidNewspaperV2.tsx`
-- Summary: Replaced the dynamic require with a top-level import for the V2 tabloid newspaper page builder so the component plays nicely with bundlers and memoization without runtime module lookups.
-
-## 2025-11-03 – Bruksanvisning for nye korttemaer publisert
-- Timestamp: 2025-11-03T09:00:00Z
-- Files:
-  - `docs/new-card-theme-manual.md`
-  - `UPDATES_LOG.md`
-- Summary: La til en trinn-for-trinn bruksanvisning med kodeeksempler for å lage nye korttemaer, inkludert kobling til utvidelser, avisartikler og kunstkrav så hele pipeline kan følges uten å miste Paranoid Times-tonen.
-
-## 2025-10-22 – Hotspot director primed at startup
-- Timestamp: 2025-10-22T00:00:00Z
-- Files:
-  - `src/systems/paranormalHotspots.ts`
-  - `src/hooks/useGameState.ts`
-  - `src/systems/__tests__/hotspotDirector.initialize.test.ts`
-- Summary: Primed the paranormal hotspot director caches, added lifecycle tick orchestration, wired initialization/teardown into the game-state hook, and added regression coverage to verify spawn pacing.
-
-## 2025-11-02 – Card collection guards empty database
-- Timestamp: 2025-11-02T00:00:00Z
-- Files:
-  - `src/hooks/useCardCollection.ts`
-  - `__tests__/hooks/useCardCollection.test.ts`
-- Summary: Hardened the collection stats hook to return a finite 0% completion rate when no cards are loaded, emit a console warning for UI fallbacks, and added regression coverage so future data migrations never resurrect the divide-by-zero edge case.
-
-## 2025-11-01 – Campaign progress immutability guard
-- Timestamp: 2025-11-01T00:00:00Z
-- Files:
-  - `src/hooks/useCampaignProgress.ts`
-  - `__tests__/hooks/useCampaignProgress.test.ts`
-- Summary: Ensured campaign mission completion clones its nested arrays before persisting so repeated victories never mutate prior state snapshots, and added regression coverage to lock in the immutable behavior.
-
-## 2025-10-31 – Campaign progress storage hardening
-- Timestamp: 2025-10-31T00:00:00Z
-- Files:
-  - `src/hooks/useCampaignProgress.ts`
-- Summary: Hardened the campaign progress hook against missing `window.localStorage`, preserving JSON fallback behavior so progress tracking no-ops gracefully in SSR and test environments.
-
-## 2025-10-30 – Special decks embrace lore figures
-- Timestamp: 2025-10-30T12:00:00Z
-- Files:
-  - `src/data/core/truth-special.ts`
-  - `src/data/core/government-special.ts`
-- Summary: Renamed multiple Truth and Government specials to spotlight recurring faction icons, injected absurdist flavor beats drawn from the lore bible, and aligned both decks with the updated card style manual guidelines.
-
-## 2025-10-29 – Expansion specials gain curated lore
-- Timestamp: 2025-10-29T09:15:00Z
-- Files:
-  - `public/extensions/halloween_midnight_dossiers.json`
-  - `public/extensions/cryptids_midnight_fieldguide.json`
-  - `public/extensions/index.json`
-  - `public/extensions/manifest.json`
-- Summary: Authored forty Halloween and Cryptids faction specials with lore-rich flavor, wired their JSON packs into the public extension index, and ensured both expansions deliver balanced, conspiratorial effects for Truth and Government alike.
-
-## 2025-10-28 – Card satire log and style manual published
-- Timestamp: 2025-10-28T08:30:00Z
-- Files:
-  - `CARD_SATIRE_LOG.md`
-  - `CARD_STYLE_MANUAL.md`
-- Summary: Documented the satirical card canon with a dedicated changelog and roadmap, paired it with a comprehensive style manual covering formulas, examples, and tonal guardrails so future entries stay aligned with Paranoid Times lore.
-
-## 2025-10-27 – Orientation article enters shared components
-- Timestamp: 2025-10-27T09:00:00Z
-- Files:
-  - `src/components/WhatIsParanoidTimes.tsx`
-  - `src/components/game/HowToPlay.tsx`
-  - `components.json`
-- Summary: Moved the Paranoid Times orientation copy into a shared article component with diegetic prose markup, rewired the How-to-Play accordion to consume the new surface, and updated the component catalog so design tooling tracks the relocation.
-
-## 2025-10-26 – Card resolution honors editor fallbacks
-- Timestamp: 2025-10-26T23:30:00Z
-- Files:
-  - `src/systems/cardResolution.ts`
-  - `src/data/enhancedAIStrategy.ts`
-  - `src/mvp/__tests__/engine.editors.test.ts`
-  - `UPDATES_LOG.md`
-- Summary: Patched the MVP resolver to derive both player and AI editor bindings from legacy snapshot fields, updated AI strategy helpers to preserve those identifiers, and restored editor regression coverage to verify Fox Muldrunk truth swings and Florida Man discards fire under the new pipeline.
-
-## 2025-10-26 – Tabloid hero card ID redeclaration removed
-- Timestamp: 2025-10-26T19:21:39Z
-- Files:
-  - `src/components/game/TabloidNewspaperV2.tsx`
-  - `UPDATES_LOG.md`
-- Summary: Cleared the duplicate heroPrimaryCardId declaration so the newspaper composer compiles, letting Lovable rebuild the
-  conspiratorial preview spread without choking on the lead story metadata guard.
-
-## 2025-10-26 – Restore Lovable preview builds
-- Timestamp: 2025-10-26T00:00:00Z
-- Files:
-  - `vite.config.ts`
-- Summary: Reordered the Vite alias configuration so the Lovable public asset shortcut resolves correctly during production
-  builds, restoring the hosted preview that previously failed while trying to load the article database bundle.
-
-## 2025-10-25 – Composite turn edition headlines go live
-- Timestamp: 2025-10-25T02:50:00Z
-- Files:
-  - `src/components/newspaper/TurnEdition.tsx`
-  - `src/components/game/TabloidNewspaperV2.tsx`
-  - `src/components/game/TabloidNewspaperLegacy.tsx`
-  - `__tests__/newspaper/TurnEdition.test.tsx`
-  - `components.json`
-- Summary: Introduced a dedicated TurnEdition hero component that renders composite stories with faction connectors, updated the tabloid newspaper to consume `{ kind: 'composite' }` feed entries instead of legacy article blocks, and added targeted tests ensuring tone-specific presentation and image prompt fallbacks behave correctly.
-
-## 2025-10-24 – Procedural newspaper honors card tag metadata
-- Timestamp: 2025-10-24T23:59:59Z
-- Files:
-  - `src/engine/newspaper/proceduralArticleGenerator.ts`
-  - `src/engine/newspaper/__tests__/proceduralArticleGenerator.test.ts`
-- Summary: Wired the procedural article generator to honor card-supplied tags, normalizing them to lexicon-style hashtags and ensuring coverage from newspaper regression tests.
-
-## 2025-10-24 – Tabloid bodies sprout quotes, clarifications, rumor mills
-- Timestamp: 2025-10-24T22:20:25Z
-- Files:
-  - `src/engine/newspaper/proceduralArticleGenerator.ts`
-  - `__tests__/newspaper/proceduralArticleGenerator.test.ts`
-- Summary: Refactored article body assembly into hook, twist, and kicker pools with seeded embellishments, layered in optional pull quotes, redacted asides, and rumor bullet lists keyed to witnesses and faction context, and added deterministic tests exercising both embellished and minimal outputs.
-
-## 2025-10-24 – Article combiner powers live newsroom column
-- Timestamp: 2025-10-24T11:30:00Z
-- Files:
-  - `src/components/game/TabloidNewspaperV2.tsx`
-  - `docs/ARTICLE_COMBINER.md`
-  - `UPDATES_LOG.md`
-- Summary: Wired the in-game Tabloid newspaper to call the article combiner for a new Newsroom Collation column that fuses two or more front-page dossiers, added faction-aware badges and loading feedback, and documented how the live integration mirrors the dev demo.
-
-
-## 2025-10-23 – Unified roadmap now authoritative
-- Timestamp: 2025-10-23T10:15:00Z
-- Files:
-  - `docs/roadmap.md`
-  - `docs/paranoid_times_analysis_and_roadmap.md`
-  - `docs/analysis/paranoid-times-gap-analysis.md`
-  - `docs/gameplay-loop-overview.md`
-  - `UPDATES_LOG.md`
-- Summary: Consolidated every roadmap thread into the central planning doc, reorganised goals by timeframe and pillar, trimmed the duplicate timelines from the analysis dossiers, and updated cross-references so contributors consult the unified plan.
-
-## 2025-10-22 – Menu playlist honors selected track
-- Timestamp: 2025-10-22T12:56:38Z
-- Files:
-  - `src/pages/Index.tsx`
-  - `UPDATES_LOG.md`
-- Summary: Ensured the main menu only initializes its music once when the intro hands off control so player-selected tracks fro
-m the options panel persist instead of resetting to the default playlist.
-
-## 2025-10-22 – Countered plays skip resolution effects
-- Timestamp: 2025-10-22T14:42:46Z
-- Files:
-  - `src/systems/cardResolution.ts`
-  - `src/hooks/useGameState.ts`
-  - `src/hooks/useCardAnimation.ts`
-  - `src/pages/Index.tsx`
-  - `__tests__/systems/cardResolution.counter.test.ts`
-- Summary: Surfaced the engine's counter flag through card resolution, animation, and the gameplay UI so countered plays bypass state mutations, trigger the counter shake, and gained regression coverage to ensure blocked cards no longer apply their effects.
-
-## 2025-10-19 – Added “What Is The Paranoid Times?” panel
-- Timestamp: 2025-10-19T18:42:00Z
-- Files:
-  - `src/components/game/HowToPlay.tsx`
-  - `src/components/WhatIsParanoidTimes.tsx`
-  - `components.json`
-- Summary: Landed a dedicated primer panel that spells out the Paranoid Times mythos, rerouted the How-to-Play briefing to surface it alongside onboarding beats, and refreshed the component catalog so designers track the new lore hook.
-
-## 2025-10-19 – Accordion briefing modernizes How-to-Play
-- Timestamp: 2025-10-19T13:17:05Z
-- Files:
-  - `src/components/game/HowToPlay.tsx`
-  - `src/components/game/WhatIsParanoidTimes.tsx`
-  - `components.json`
-- Summary: Rebuilt the How-to-Play overlay around a pulp-styled accordion that introduces the Paranoid Times newsroom fantasy before expanding into the MVP ruleset, added a dedicated intro component, and cataloged the new surface for designers.
-
-## 2025-10-18 – Final edition borrows live card articles for MVP coverage
-- Timestamp: 2025-10-18T09:45:00Z
-- Files:
-  - `src/components/news/NewspaperFrontPage.tsx`
-  - `src/components/news/NewspaperInsidePages.tsx`
-  - `src/styles/newspaperLayout.css`
-  - `src/utils/finalEdition.ts`
-  - `src/news/finalFrontPageComposer.ts`
-  - `src/types/finalEdition.ts`
-  - `__tests__/utils/finalEdition.test.ts`
-- Summary: Front page and inside spread now render full MVP and runner-up copy pulled from the card article bank, fall back to existing report highlights when no article exists, and the game-over report captures sanitized paragraphs for downstream UIs with regression coverage for both pathways.
-
-## 2025-10-17 – Gameplay improvement status audit logged
-- Timestamp: 2025-10-17T14:05:00Z
-- Files:
-  - `docs/gameplay-improvements-progress.md`
-  - `UPDATES_LOG.md`
-- Summary: Captured the real implementation status of the 40-point gameplay improvement plan, documented which fixes are complete, partial, or missing, and outlined concrete next steps so engineering can prioritize the remaining roadmap work.
-
-## 2025-10-16 – Tabloid overlay consumes stored composites
-- Timestamp: 2025-10-16T18:10:00Z
-- Files:
-  - `src/components/game/TabloidNewspaperV2.tsx`
-  - `src/components/game/TabloidNewspaperLegacy.tsx`
-  - `src/news/finalizeEdition.ts`
-  - `src/utils/finalEdition.ts`
-  - `src/pages/Index.tsx`
-  - `__tests__/integration/gameplayScreen.test.tsx`
-  - `__tests__/integration/extraExtra.test.ts`
-- Summary: Refactored the nightly tabloid to read the latest turn composite and runners-up directly from saved state, introduced a final-edition helper that ranks composites alongside bulletins, updated overlays to consume the ranked feed, and extended integration coverage for per-turn headlines and Extra Extra updates.
-
-## 2025-10-16T10:15:08+00:00 – Migrated article bank to shared loader
-- Shifted newspaper systems to the shared `src/news/articleBank.ts` Map loader and aligned IssueGenerator, composeTurn, and headline previews with the new API.
-- Added regression coverage for canonical cards and tone normalization while updating UI consumers to the Map-based article lookups.
-- Files: `src/news/articleBank.ts`, `src/engine/newspaper/IssueGenerator.ts`, `src/news/composeTurn.ts`, `src/news/headlineEngine.ts`, `src/components/news/NewspaperFrontPage.tsx`, `src/ui/newspaper/FrontPage.tsx`, `src/utils/sensationalistHeadlines.ts`, `__tests__/news/articleBank.test.ts`, `__tests__/news/headlineEngine.test.ts`, `__tests__/news/composeTurn.test.ts`, `src/engine/newspaper/__tests__/IssueGenerator.staticArticles.test.ts`, `src/engine/newspaper/__tests__/IssueGenerator.recurringCharacters.test.ts`, `src/components/game/__tests__/TabloidNewspaperV2.frontPage.test.tsx.disabled`, `src/engine/newspaper/__tests__/IssueGenerator.safety.test.ts.disabled`.
-## 2025-10-21 – Article overlay stays open until dismissed
-- Timestamp: 2025-10-21T12:00:00Z
-- Files:
-  - `src/components/game/EnhancedGameHand.tsx`
-  - `src/pages/Index.tsx`
-  - `docs/INTEGRATION_GUIDE.md`
-- Summary: Locked the hand hover handlers so the newsroom article overlay no longer clears itself when the pointer leaves, removed the hover-to-open wiring from the gameplay screen, and extended the QA checklist to cover long-read stability for the article preview.
-
-## 2025-10-17 – Strategy insights migrate to help overlay
-- Timestamp: 2025-10-17T08:45:00Z
-- Files:
-  - `src/components/game/ContextualHelp.tsx`
-  - `src/components/gameplay/StrategyHelper.tsx`
-  - `src/pages/Index.tsx`
-  - `__tests__/integration/gameplayScreen.test.tsx`
-- Summary: Routed the strategy insight engine into the contextual help drawer, removed the standalone panel from the main layout, and updated integration coverage to confirm insights surface when agents open the overlay.
-
-## 2025-10-16 – Newsroom previews and ticker integration
-- Timestamp: 2025-10-16T09:00:00Z
-- Files:
-  - `src/pages/Index.tsx`
-  - `src/components/newspaper/BreakingNewsTicker.tsx`
-  - `src/components/game/ExtraEditionNewspaper.tsx`
-  - `src/components/newspaper/EnhancedFinalEdition.tsx`
-  - `src/components/game/CardAnimationLayer.tsx`
-  - `src/utils/visualEffects.ts`
-  - `__tests__/integration/gameplayScreen.test.tsx`
-- Summary: Routed hover previews through the newsroom article overlay, promoted the breaking-news ticker to a global event feed, upgraded the final-edition layout, and added integration coverage for the new UI flows.
-
-## 2025-10-10 – End-turn newspaper now prints curated card articles
-- Timestamp: 2025-10-10T12:28:15Z
-- Files:
-  - `src/engine/newspaper/IssueGenerator.ts`
-  - `src/engine/newspaper/__tests__/IssueGenerator.staticArticles.test.ts`
-  - `UPDATES_LOG.md`
-- Summary: Reordered the newspaper article resolver so the curated card copy used in the article preview overlay appears in the between-turn newspaper, added regression coverage to lock in the new priority, and documented the change.
-
-## 2025-10-10 – Article previews now require explicit activation
-- Timestamp: 2025-10-10T11:22:50Z
-- Files:
-  - `src/components/game/EnhancedGameHand.tsx`
-  - `src/components/game/CardDetailOverlay.tsx`
-  - `src/components/newspaper/ArticlePreviewOverlay.tsx`
-  - `src/pages/Index.tsx`
-  - `docs/INTEGRATION_GUIDE.md`
-  - `UPDATES_LOG.md`
-- Summary: Rewired the newsroom article overlay to launch from a Read Article action instead of hover, locked hover exits from clearing the preview while it is open, added Escape-key support to the overlay, and documented manual QA steps to confirm the preview remains readable until dismissed.
-
-## 2025-10-10 – Start menu radio previews for every broadcast
-- Timestamp: 2025-10-10T11:14:39Z
-- Files:
-  - `src/components/game/Options.tsx`
-- Summary: Refreshed the options screen so players can audition government, truth, end credits, and theme playlists right from the start menu with quick-select buttons and clearer playlist labels.
-
-## 2025-10-10 – Safeguarded hotspot source labels on the map
-- Timestamp: 2025-10-10T10:50:57Z
-- Files:
-  - `src/components/game/EnhancedUSAMap.tsx`
-- Summary: Hardened the enhanced USA map overlay so hotspot sources and event factions default to an "UNKNOWN" tag instead of crashing when saved data lacks a faction string.
-
-## 2025-10-15 – Built-in expansions join MVP rotation
-- 09:18 UTC – Wired the builtin expansion manifest so Truth Vanguard and Government Countermeasures decks import through the MVP normalizer. Files: `src/data/expansions/index.ts`, `src/data/expansions/builtin.ts`, `src/lib/expansions/discover.ts`.
-- 09:18 UTC – Realigned expansion article IDs and UI summaries so new packs display correctly in management panels. Files: `src/data/cardArticles/expansionArticles.ts`, `src/components/game/ManageExpansions.tsx`.
-- 09:18 UTC – Added regression coverage to confirm the builtin packs validate cleanly and feed random draws. Files: `src/data/__tests__/builtinExpansions.test.ts`.
-## 2025-10-15 – Recurring character persistence and staged epilogues
-- Timestamp: 2025-10-15T14:30:00Z
-- Files:
-  - `src/components/game/TabloidNewspaperLegacy.tsx`
-  - `src/components/game/TabloidNewspaperV2.tsx`
-  - `src/components/news/NewspaperInsidePages.tsx`
-  - `src/components/newspaper/EnhancedFinalEdition.tsx`
-  - `src/data/characterArcs.json`
-  - `src/data/characterArcs.ts`
-  - `src/engine/newspaper/IssueGenerator.ts`
-  - `src/engine/newspaper/__tests__/IssueGenerator.recurringCharacters.test.ts`
-  - `src/game/__tests__/recurringCharacterArticles.test.ts`
-  - `src/game/__tests__/recurringCharacters.test.ts`
-  - `src/game/recurringCharacterArticles.ts`
-  - `src/game/recurringCharacters.ts`
-  - `src/hooks/aiHelpers.ts`
-  - `src/hooks/gameStateTypes.ts`
-  - `src/hooks/useGameState.ts`
-  - `src/pages/Index.tsx`
-  - `src/types/finalEdition.ts`
-  - `src/utils/finalEdition.ts`
-  - `UPDATES_LOG.md`
-- Summary: Persisted recurring character progression through saves, fed staged appearances into newspaper generation, and surfaced “Where Are They Now?” epilogues in final editions.
-
-## 2025-10-14 – State-themed bonus engine
-- Implemented a seeded `assignStateBonuses` pipeline that drafts weighted regional effects, logs per-state anomalies, and feeds matching newspaper events for the round.
-- Wired round start to apply state bonuses, refresh state event history for UI badges, and surface card-level `stateBonuses` metadata in strategy helpers.
-
-## 2025-10-13 – Extra Extra stamp honors true triple headlines
-- Updated the newspaper overlay so the Extra Extra masthead stamp appears only when a faction lands a legitimate triple headline with a shared front-page trio.
-- Ensured faction mismatches or filler fallbacks no longer surface the Extra Extra branding, keeping the tabloid's flair tied to real combo victories.
-
-## 2025-10-12 – Extra Extra toast mirrors headline wins
-- Triggered the Extra Extra toast alongside article generation, reusing the logged winning faction and headline so players get an immediate pop-up summary.
-- Added a window guard so the notification hook remains safe to call during Storybook or server-side rendering where no DOM exists.
-
-## 2025-10-11 – Truth faction archive completed
-- Authored and imported narrative articles for Truth cards `TRUTH-001` through `TRUTH-200`, giving every legacy card a bespoke Paranoid Times report.
-- Added a generation script for the tail-end entries so future lore passes can iterate without hand-editing 100+ records.
-- Refreshed the coverage dashboard to confirm Truth now has zero gaps while Government remains the next writing focus.
-
-## 2025-10-11 – Article cache + fallback guardrails
-- Implemented cached lookups for `CARD_ARTICLE_DATABASE` so repeated issue generation avoids full scans and tolerates missing IDs with null memoization.
-- Wired `IssueGenerator` to request `getArticleOrFallback`, blending remote bank data, static TypeScript articles, and generated copy when gaps remain.
-- QA sweep confirmed variable substitution, tone transforms, and <200 ms issue builds under fallback data; flagged remaining coverage gaps in MVP card set and environment-only loaders for follow-up.
-
-## 2025-10-10 – Editor banter anchors below the masthead
-- Repositioned the editor banter toast feed so it materializes beneath the Paranoid Times masthead instead of hovering near the
-  bottom HUD, making quips unmissable during high-alert turns.
-- Locked the overlay to the safe-area offsets so handheld agents still see the editor's whispers tucked under the newsroom mast
-  head badge.
-
-## 2025-10-10 – Newspaper tone transforms
-- Added placeholder-safe tone transforms and an `applyTone` helper so newspaper copy can shift between straight news, tabloid, local color, exposé, and classified styles.
-- Extended card article metadata with `preferredTone` overrides and updated the issue generator to select and apply tones before front-page rendering.
-
-## 2025-10-09 – Recurring Character Story Arc Variants
-- Added story arc metadata and stage progression tracking for Pastor Rex, Agent Smitherson, Florida Man, Bat Boy, Maria Chen, and Coach Terry Hammond.
-- Tagged stage-specific article variants across truth and expansion coverage, authoring new pieces to ensure at least three appearances per character.
-- Implemented a selector that advances recurring character stages after each article use, enabling narrative escalation in the newspaper system.
-
-## 2025-10-09 – Dynamic Newspaper Variable Injection
-- Added `GameStateContext` templating so generated headlines and bodies swap in live turn, score, IP, and faction data.
-- Plumbed Tabloid newsroom UI to forward round metrics into the issue generator for accurate article context.
-- Annotated eleven Paranoid Times articles with `{TURN_NUMBER}`, `{STATES_CONTROLLED}`, `{IP_REMAINING}`, and related placeholders to validate substitution.
-
-## 2025-10-09 – Expansion Newspaper Batch & Coverage Audit
-- Added ten missing Truth faction articles (TRUTH-009 through TRUTH-020) and forty expansion-era features spanning every US state.
-- Authored new `expansionArticles.ts` covering TRUTH-NEW and GOV-NEW cards with balanced recurring-character ratios and crossover hooks.
-- Consolidated all article sources via `ALL_CARD_ARTICLES` and published `docs/cardArticles/article-coverage.md` to document remaining ID gaps.
-
-## 2025-01-09 – Phase 5: UI/UX Enhancements Complete
-- **Article Preview Overlay:** Created full-screen article preview with newspaper-style layout, scrollable content, and related information display
-- **Breaking News Ticker:** Implemented real-time news ticker at top of screen showing card plays, captures, and game events with auto-dismiss
-- **Strategy Helper:** Added smart assistant showing combo opportunities, state bonuses, and tactical suggestions based on current hand
-- **Enhanced Final Edition:** Complete newspaper redesign with MVP article, runner-up story, state-by-state results, Extra Extra callouts, classified ads, and letters to the editor
-- **News Event System:** Created helper library for dispatching breaking news during gameplay with templates for card plays, captures, combos, and turn events
-- **Card Preview Hook:** Custom React hook for managing article preview state across components
-- **Components Created:**
-  - `src/components/newspaper/ArticlePreviewOverlay.tsx` - Full article preview modal
-  - `src/components/newspaper/BreakingNewsTicker.tsx` - Real-time news ticker
-  - `src/components/gameplay/StrategyHelper.tsx` - Tactical assistance panel
-  - `src/components/newspaper/EnhancedFinalEdition.tsx` - Multi-section final newspaper
-  - `src/hooks/useCardPreview.ts` - Preview state management hook
-  - `src/lib/newsEventHelpers.ts` - News event dispatch utilities
-
-## 2025-01-09 – Gameplay & Content Expansion (Phases 2-4 Complete)
-- **Article Database:** Created card-specific newspaper articles with coherent narratives, recurring characters, and follow-up hooks for 5 existing cards (Bigfoot, Elvis, Pastor Rex, Bat Boy, UFO Football Game)
-- **40 New Cards:** Added 20 Truth faction and 20 Government faction expansion cards with full effects, flavor text, and strategic depth
-- **Two-Card Combos:** Implemented 10 mini-combo definitions (Elvis + Alien Wedding, Bigfoot + Mothman, UFO + Weather Balloon, etc.)
-- **State-Specific Bonuses:** Cards now get thematic bonuses in appropriate states (Roswell cards in New Mexico, Elvis in Tennessee, Bigfoot in Washington, etc.)
-- **Recurring Characters:** Added character tracking system for Pastor Rex, Agent Smitherson, Florida Man, Bat Boy, Darlene Hobbs, and Coach Terry Hammond
-- **New Card Types:** Defined HYBRID (dynamic cost), TRAP (face-down triggers), and PERSISTENT (multi-turn effects) card mechanics
-- **Files Created:**
-  - `src/data/cardArticles/articleDatabase.ts` - Article database with query helpers
-  - `src/data/expansion/newTruthCards.json` - 20 new Truth cards
-  - `src/data/expansion/newGovernmentCards.json` - 20 new Government cards
-  - `src/game/twoCardCombos.ts` - Mini-combo definitions
-  - `src/game/stateBonuses.ts` - State-specific bonus system
-  - `src/game/recurringCharacters.ts` - Character tracking
-  - `src/game/newCardTypes.ts` - Advanced card type definitions
-- **Roadmap:** Comprehensive 6-phase development plan saved to `docs/roadmap.md`
-
-## 2025-01-09 – Phase 1: TypeScript build configuration modernized
-- Removed deprecated `baseUrl` option from `tsconfig.node.json` that was causing TS5102 build errors.
-- Retained modern `paths` configuration for proper module resolution with @ imports.
-- Created comprehensive development roadmap (`docs/roadmap.md`) outlining 6-phase improvement plan for gameplay mechanics, card content, and newspaper article quality.
 
 ## 2025-12-08 – Credits go full projector paranoia
 - Swapped the endgame overlay for a full-screen cinema roll packed with in-universe easter eggs, department gags, and paranoid stingers.
@@ -514,25 +138,6 @@ m the options panel persist instead of resetting to the default playlist.
 - Introduced a curated ParaPedia dataset with state dossiers, featured quotes, and reference trails so leaksters can trace every anomaly from the hub.
 - Upgraded the ParaPedia panel with atlas navigation, codex search, and state-specific detail views driven by the new hook layer.
 
-## 2025-10-09 – Player Hub gains backtrack control
-- Added a Back button to the Player Hub dossier header so agents can slip out of the archive without relying on the tiny kill-switch.
-- Styled the control to stay faithful to the classified parchment palette whether agents fly Truth colors or government badges.
-## 2025-10-09 – Player Hub dossier metadata stripped out
-- Removed the case file metadata banner so the Player Hub reserves more real estate for active dossiers and lore feeds.
-- Kept the faction stamp treatment so agents still clock whether they're rifling through leaked or cleared records at a glance.
-
-## 2025-10-09 – Cryptid hotspots now echo local legends
-- Rewrote the cryptid hotspot summaries so each state briefing references the folklore dossiers—Altie coils along the Altamaha, Chessie corrals Chesapeake patrols, and Jackalope permits go feral in souvenir rows.
-- Grounded the new copy in the expansion readme to keep the Paranoid Times lore web dense while giving operators state-specific paranoia levers.
-
-## 2025-10-09 – Classified dossier overlay retired during reveals
-- Retired the typewriter dossier pop-up that blanketed the map when conspiracies flipped so players can keep reading the board state during dramatic reveals.
-- Documented the change in the contextual effect switch to prevent future overlays from eclipsing mission interactions.
-
-## 2025-10-09 – Cryptid idle reports rotate onto the map
-- Replaced the generic paranormal sweep idle message with rotation through Fangoria-sourced state cryptid briefings so the USA map and event log stay steeped in regional folklore even when hotspots are dormant.
-- Expanded the idle report roster with Appendix C homestate dossiers and tuned the fallback copy to reference the Cryptids expansion field guide when the feed hiccups.
-
 ## 2025-12-03 – ParaPedia knowledge vault opens
 - Truth agents now land on a dedicated ParaPedia tab inside the Player Hub, complete with lore-forward metrics and a leak-fed
   recap reel.
@@ -547,33 +152,6 @@ m the options panel persist instead of resetting to the default playlist.
 - Fixed a missing `useCallback` import in the enhanced tabloid newspaper so the bundle no longer throws a reference error when resolving end-of-turn events.
 - Verified the newsroom edition overlay renders without blinking to a white screen after AI or player turns conclude.
 
-## 2025-10-09 – Banter toasts surface editor quips
-- Wired the banter engine into a dedicated HUD toast lane so editors' conspiratorial asides flare on screen instead of hiding in console logs.
-- Added a public window helper for banter toasts, mirroring combo behavior so other systems can drop sly transmissions into the overlay.
-
-## 2025-10-09 – ParaPedia dossier cleared for all agents
-- Opened the ParaPedia knowledge vault to government operatives so both factions can access the paranormal atlas from the Player Hub.
-- Updated the dossier navigation to surface the ParaPedia tab alongside existing folders regardless of faction alignment.
-
-## 2025-10-09 – Tabloid front page hero goes full broadsheet
-- Rebuilt the Final Edition hero into a split-column tabloid spread with oversized type, accent stripes, and a full-bleed art well that honors victory tones.
-- Upgraded MVP card handling so the front page art now escalates to a dramatic border treatment and gracefully falls back to runner-up footage when needed.
-
-## 2025-10-09 – Map scouting untethered from zoom locks
-- Added padded panning bounds so agents can right-drag the US map at any zoom level, keeping recon smooth even when fully zoomed in or out.
-- Confirmed context-menu suppression still works so long-press sleuthing never trips a browser pop-up mid-investigation.
-
-## 2025-10-09 – Paranoid Times masthead joins the spin wars
-- Rebuilt the live edition masthead with a halftone wash, serif title, and equal-opportunity propaganda copy for loyalists and leaksters alike.
-- Updated the final report layout to trade the ShadowGov stamp for the new joint spin bureau branding so both factions share the same sardonic headline wrapper.
-
-## 2025-10-09 – Completed Fangoria + NAC ingestion
-- Rebuilt Appendix C with all fifty state creatures, region notes, and explicit ops hooks drawn from Fangoria’s survey.
-- Authored a 57-entry NorthAmericanCryptids field guide so designers have ready deck hooks for every listed monster.
-
-## 2025-10-09 – Cataloged cryptid intel for expansion docs
-- Expanded the Cryptids expansion README with state-by-state lore harvested from Fangoria, plus play hooks for each hometown monster.
-- Imported the northamericancryptids.com bestiary into a new field guide section so designers can wire in regionally accurate ops beats.
 ## 2025-11-30 – Editor dossiers display real portraits
 - Desk editor dossiers now pull their case file photos from `/public/images/editors`, replacing the placeholder blocks.
 - The selection modal and preview cards render those portraits directly so newsroom briefings feel grounded in the conspiracy canon.
@@ -650,22 +228,631 @@ m the options panel persist instead of resetting to the default playlist.
 - Added canonical editor profiles with difficulty tiers, personalities, and runtime modifiers so AI selection stays coherent.
 - Introduced difficulty multipliers, recommendation helpers, image URL utilities, and banter loaders for every roster member.
 
+## 2025-11-11 – Hybrid, trap, and persistent cards join the arsenal
+- Timestamp: 2025-11-11T00:00:00Z
+- Files:
+  - `src/rules/mvp.ts`
+  - `src/mvp/validator.ts`
+  - `src/engine/applyEffects-mvp.ts`
+  - `src/mvp/engine.ts`
+  - `src/systems/cardResolution.ts`
+  - `__tests__/mvp/newCardTypes.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Expanded the MVP ruleset to recognize hybrid cost scheming, ambush traps, and per-turn persistent effects, taught the engine to recalc hybrid prices, defer trap payloads, and tick long-haul modifiers, then locked in scenario coverage so the new paranoia levers stay functional.
+
 ## 2025-11-11 – Editors comment on plays and captures
 - Introduced a banter engine with rate limits so player editors react to card plays, state flips, and match outcomes without flooding the log.
 - Added a temporary console fallback while waiting on a dedicated toast surface for editor chatter.
+
+## 2025-11-10 – Front page hero card art anchors lead story
+- Timestamp: 2025-11-10T00:00:00Z
+- Files:
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `src/components/game/TabloidNewspaperV2Pages.tsx`
+  - `src/components/newspaper/MultiColumnArticle.tsx`
+  - `__tests__/game/TabloidNewspaperV2Pages.test.tsx`
+  - `UPDATES_LOG.md`
+- Summary: Routed the front-page builder to pick a flagship card, feed its art and faction caption into the hero article layout, tuned the column component for mobile-first stacking, and added regression coverage proving the surveillance-paranoia lever only fires when hero metadata exists.
 
 ## 2025-11-10 – Paranoid flavor realignment across pools
 - Refreshed state pool, agenda issue, and hotspot flavor to emphasize conspiracy levers over food motifs and documented paranoia intents inline.
 - Updated copy-driven fixtures to remove culinary phrasing and reflagged QR loyalty checks, maritime leaks, and dimensional portals.
 
+## 2025-11-09 – Hero fallback prints rumor-rich paragraphs
+- Timestamp: 2025-11-09T00:00:00Z
+- Files:
+  - `src/components/game/heroFallback.ts`
+  - `__tests__/game/heroFallback.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Rewired the hero fallback copy to guarantee three lore-hungry paragraphs packed with redacted memos, rumor slips, and combo reward jokes, then added focused coverage proving the new beats surface for both factions.
+
 ## 2025-11-09 – Rebalance Extra Extra trio scoring
 - Extra Extra now compares full trio impact totals (truth, IP, captures, damage) so a coordinated newsroom push can defeat a lone government haymaker.
 - Deterministic tie breakers fall back to the existing truth-delta safeguards, keeping deadlocks aligned with the draw flow while preserving dispatch selection.
+
+## 2025-11-08 – Headlines track the truth surge timeline
+- Timestamp: 2025-11-08T00:00:00Z
+- Files:
+  - `ARTICLE_GENERATOR_GUIDE.md`
+  - `src/engine/newspaper/proceduralArticleGenerator.ts`
+  - `__tests__/newspaper/proceduralArticleGenerator.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Wired target-state, truth-delta, turn, and controlled-territory details into procedural headlines, subheads, bodies, and tag stacks, refreshed the guide with the new narrative hooks, and added regression tests proving the contextual flavor renders when data is present.
 
 ## 2025-11-08 – Separate hero dispatch from front page rotation
 - Decouple the hero briefing from the dispatch carousel so the generated front page only features non-hero headlines while backfilling up to three supporting stories.
 - Added regression coverage ensuring TabloidNewspaperV2 renders unique hero headlines against the dispatch list.
 - Confirmed hero dispatch absences fall back to redacted copy instead of duplicating the main headline.
+
+## 2025-11-07 – Elvis deck loads Vegas conspiracy scoop
+- Timestamp: 2025-11-07T00:00:00Z
+- Files:
+  - `src/data/editors.json`
+  - `UPDATES_LOG.md`
+- Summary: Repointed Elvis in Exile's starting card to the canonical TRUTH-005 record so the editor spawns with the proper Vegas UFO Wedding scoop and surfaces the lore-correct title in the UI.
+## 2025-11-07 – Procedural articles embrace moon hoax and hotline chaos
+- Timestamp: 2025-11-07T00:00:00Z
+- Files:
+  - `ARTICLE_GENERATOR_GUIDE.md`
+  - `src/engine/newspaper/proceduralArticleGenerator.ts`
+  - `src/engine/newspaper/__tests__/proceduralArticleGenerator.test.ts`
+- Summary: Expanded every word bank with Florida-man mayhem, Elvis/Bat Boy cameos, and red-tape doublespeak, introduced moon-hoax, psychic hotline, and time-loop tag themes, and locked in snapshots that prove the tabloid tone stays feral.
+
+## 2025-11-07 – Mouse-native map navigation
+- Let agents zoom the USA map with the scroll wheel instead of hunting the UI buttons.
+- Hold the right mouse button to drag and pan the conspiracy overlay like a proper blacksite analyst.
+
+## 2025-11-06 – Newspaper generator reacts to card themes
+- Timestamp: 2025-11-06T00:00:00Z
+- Files:
+  - `ARTICLE_GENERATOR_GUIDE.md`
+  - `src/engine/newspaper/proceduralArticleGenerator.ts`
+  - `src/engine/newspaper/__tests__/proceduralArticleGenerator.test.ts`
+- Summary: Added tag-aware word banks for cryptid, broadcast, and operation cards so procedural copy leans into the right conspiratorial flavor, refreshed documentation, and locked in tests that prove the new themes surface in generated articles.
+
+## 2025-11-06 – Restore fixed Newsroom Desk grid
+- Remove the collapsible MinimizedHand overlay so the Newsroom Desk stays permanently expanded.
+- Keep the original three-card row layout in the desk by leaning solely on the full-sized hand view.
+
+## 2025-11-05 – Restored canonical news tags to engine cache
+- Timestamp: 2025-11-05T00:00:00Z
+- Files:
+  - `paranoid_times_card_articles_ALL.json`
+  - `public/data/paranoid_times_card_articles_ALL.json`
+  - `src/engine/news/paranoid_times_card_articles_ALL.json`
+  - `src/engine/news/newsPools.ts`
+  - `tools/generate-card-articles.mjs`
+- Summary: Updated the article generator to reuse canonical tag metadata, regenerated the news cache to include the full UFO and cryptid taxonomy, and added a safeguard that compares cached tags to the public dataset.
+
+## 2025-11-05 – Right-size board minis and retone played dock
+- Board mini card frames now render at 45% scale to keep played-card layouts breathing and prevent clipping.
+- Opponent slots lean into a blue halftone while the player stack stays red, with section headers picking up matching tones.
+
+## 2025-11-04 – Tabloid newspaper uses static page builder import
+- Timestamp: 2025-11-04T00:00:00Z
+- Files:
+  - `src/components/game/TabloidNewspaperV2.tsx`
+- Summary: Replaced the dynamic require with a top-level import for the V2 tabloid newspaper page builder so the component plays nicely with bundlers and memoization without runtime module lookups.
+
+## 2025-11-04 – Align tooltip truth deltas with faction perspective
+- USA map tooltips now flip truth gain/loss signage for government players across hotspot history, active bonuses, and anomaly logs.
+
+## 2025-11-03 – Bruksanvisning for nye korttemaer publisert
+- Timestamp: 2025-11-03T09:00:00Z
+- Files:
+  - `docs/new-card-theme-manual.md`
+  - `UPDATES_LOG.md`
+- Summary: La til en trinn-for-trinn bruksanvisning med kodeeksempler for å lage nye korttemaer, inkludert kobling til utvidelser, avisartikler og kunstkrav så hele pipeline kan følges uten å miste Paranoid Times-tonen.
+
+## 2025-11-03 – Reset map tooltip state during redraws
+- Clear pending tooltip timeouts and hovered state when the USA map SVG rebuilds so refreshed state data no longer leaves ghost tooltips hanging over the board.
+
+## 2025-11-02 – Card collection guards empty database
+- Timestamp: 2025-11-02T00:00:00Z
+- Files:
+  - `src/hooks/useCardCollection.ts`
+  - `__tests__/hooks/useCardCollection.test.ts`
+- Summary: Hardened the collection stats hook to return a finite 0% completion rate when no cards are loaded, emit a console warning for UI fallbacks, and added regression coverage so future data migrations never resurrect the divide-by-zero edge case.
+
+## 2025-11-02 – Hue-shift the Truth Index feedback
+- Progress bars now shift from red at 0% to deep indigo at 100%, clamping undefined inputs to the midpoint so every overlay broadcasts a clear heat reading.
+- Tabloid Truth Index wrappers lean on a translucent white track to keep the new gradient legible against the broadsheet texture, with documentation for designers in the technical overview.
+
+## 2025-11-01 – Campaign progress immutability guard
+- Timestamp: 2025-11-01T00:00:00Z
+- Files:
+  - `src/hooks/useCampaignProgress.ts`
+  - `__tests__/hooks/useCampaignProgress.test.ts`
+- Summary: Ensured campaign mission completion clones its nested arrays before persisting so repeated victories never mutate prior state snapshots, and added regression coverage to lock in the immutable behavior.
+
+## 2025-11-01 – Mirror relic truth polarity by host faction
+- Tabloid relic truth pulses now invert for government-controlled hosts while preserving clamp guards.
+- Added round-start logging for the signed truth delta along with regression coverage for faction parity.
+
+## 2025-10-31 – Campaign progress storage hardening
+- Timestamp: 2025-10-31T00:00:00Z
+- Files:
+  - `src/hooks/useCampaignProgress.ts`
+- Summary: Hardened the campaign progress hook against missing `window.localStorage`, preserving JSON fallback behavior so progress tracking no-ops gracefully in SSR and test environments.
+
+## 2025-10-31 – Guard editor effect descriptions
+- Hardened the editor effect descriptor so dossiers without optional blocks no longer crash when summarizing start cards on the index page.
+- Synced the expansion wrapper to pass through nullable configs, ensuring runtime callers never dereference missing effect data.
+
+## 2025-10-30 – Special decks embrace lore figures
+- Timestamp: 2025-10-30T12:00:00Z
+- Files:
+  - `src/data/core/truth-special.ts`
+  - `src/data/core/government-special.ts`
+- Summary: Renamed multiple Truth and Government specials to spotlight recurring faction icons, injected absurdist flavor beats drawn from the lore bible, and aligned both decks with the updated card style manual guidelines.
+
+## 2025-10-30 – Fix desk editor summary crash
+- Updated the campaign HUD’s editor summary to read bonuses, tradeoffs, and modifiers from the dossier configs so the start-card descriptors always receive a valid effect block.
+- Surfaced modifier bullet points and preferred dossier quotes to keep the popover copy consistent after the data model shift.
+
+## 2025-10-29 – Expansion specials gain curated lore
+- Timestamp: 2025-10-29T09:15:00Z
+- Files:
+  - `public/extensions/halloween_midnight_dossiers.json`
+  - `public/extensions/cryptids_midnight_fieldguide.json`
+  - `public/extensions/index.json`
+  - `public/extensions/manifest.json`
+- Summary: Authored forty Halloween and Cryptids faction specials with lore-rich flavor, wired their JSON packs into the public extension index, and ensured both expansions deliver balanced, conspiratorial effects for Truth and Government alike.
+
+## 2025-10-29 – Prevent minimalist dossiers from crashing setup
+- Hardened the editor effect merger to clone default values when bonuses, tradeoffs, or modifiers are missing so start-card lookups stay safe.
+- Normalized the setup adjustment helper and added regression coverage to ensure `initGame` proceeds cleanly when a dossier omits those blocks.
+
+## 2025-10-28 – Card satire log and style manual published
+- Timestamp: 2025-10-28T08:30:00Z
+- Files:
+  - `CARD_SATIRE_LOG.md`
+  - `CARD_STYLE_MANUAL.md`
+- Summary: Documented the satirical card canon with a dedicated changelog and roadmap, paired it with a comprehensive style manual covering formulas, examples, and tonal guardrails so future entries stay aligned with Paranoid Times lore.
+
+## 2025-10-28 – Stabilize editor start-card dossiers
+- Patched the editor effect aggregation and setup adjustments to tolerate dossiers missing `startCards`, preventing crash loops
+  when launching a run with minimalist government handlers.
+
+## 2025-10-27 – Preview command now rebuilds before serving
+- Timestamp: 2025-10-27T00:00:00Z
+- Files:
+  - `package.json`
+  - `UPDATES_LOG.md`
+
+## 2025-10-27 – Orientation article enters shared components
+- Timestamp: 2025-10-27T09:00:00Z
+- Files:
+  - `src/components/WhatIsParanoidTimes.tsx`
+  - `src/components/game/HowToPlay.tsx`
+  - `components.json`
+- Summary: Moved the Paranoid Times orientation copy into a shared article component with diegetic prose markup, rewired the How-to-Play accordion to consume the new surface, and updated the component catalog so design tooling tracks the relocation.
+
+## 2025-10-27 – Harden editor start-card dossiers
+- Guarded the editor effect merger so dossiers without explicit start-card arrays no longer crash the run phase when ops flip
+  between classified profiles.
+
+## 2025-10-26 – Victory thresholds retuned to a 90/10 split
+- Timestamp: 2025-10-26T00:00:00Z
+- Files:
+  - `src/constants/truthThresholds.ts`
+  - `src/hooks/useGameState.ts`
+  - `src/mvp/engine.ts`
+  - `src/data/victoryConditions.ts`
+  - `src/data/enhancedAIStrategy.ts`
+  - `src/data/achievementSystem.ts`
+  - `src/data/tutorialSystem.ts`
+  - `src/content/mvpRules.ts`
+  - `src/components/game/MechanicsTooltip.tsx`
+  - `src/components/game/InteractiveOnboarding.tsx`
+  - `src/components/game/VictoryConditions.tsx`
+  - `src/components/game/TruthMeter.tsx`
+  - `src/pages/Index.tsx`
+  - `UPDATES_LOG.md`
+- Summary: Centralized the truth victory thresholds behind shared 90/10 constants, wired core engine checks, AI evaluations, achievements, tutorials, and UI messaging to read from them, and refreshed the Truth Meter visuals so the new breakpoints animate and label correctly.
+
+## 2025-10-26 – Card resolution honors editor fallbacks
+- Timestamp: 2025-10-26T23:30:00Z
+- Files:
+  - `src/systems/cardResolution.ts`
+  - `src/data/enhancedAIStrategy.ts`
+  - `src/mvp/__tests__/engine.editors.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Patched the MVP resolver to derive both player and AI editor bindings from legacy snapshot fields, updated AI strategy helpers to preserve those identifiers, and restored editor regression coverage to verify Fox Muldrunk truth swings and Florida Man discards fire under the new pipeline.
+
+## 2025-10-26 – Tabloid hero card ID redeclaration removed
+- Timestamp: 2025-10-26T19:21:39Z
+- Files:
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `UPDATES_LOG.md`
+- Summary: Cleared the duplicate heroPrimaryCardId declaration so the newspaper composer compiles, letting Lovable rebuild the
+  conspiratorial preview spread without choking on the lead story metadata guard.
+
+## 2025-10-26 – Restore Lovable preview builds
+- Timestamp: 2025-10-26T00:00:00Z
+- Files:
+  - `vite.config.ts`
+- Summary: Reordered the Vite alias configuration so the Lovable public asset shortcut resolves correctly during production
+  builds, restoring the hosted preview that previously failed while trying to load the article database bundle.
+
+## 2025-10-26 – Wire Desk Editors into MVP runtime
+- Replaced the temporary editor roster with faction-specific dossiers in `src/data/editors.json`, updated the selector UI to
+  filter by faction, surface quotes and tradeoffs, and persist the chosen editor via the hardened storage helpers.
+- Patched the MVP engine and effect pipeline so editor bonuses now adjust turn income, attack costs, MEDIA truth swings, and
+  ZONE pressure in live games, with new tests covering signature cases.
+
+## 2025-10-25 – Composite turn edition headlines go live
+- Timestamp: 2025-10-25T02:50:00Z
+- Files:
+  - `src/components/newspaper/TurnEdition.tsx`
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `src/components/game/TabloidNewspaperLegacy.tsx`
+  - `__tests__/newspaper/TurnEdition.test.tsx`
+  - `components.json`
+- Summary: Introduced a dedicated TurnEdition hero component that renders composite stories with faction connectors, updated the tabloid newspaper to consume `{ kind: 'composite' }` feed entries instead of legacy article blocks, and added targeted tests ensuring tone-specific presentation and image prompt fallbacks behave correctly.
+
+## 2025-10-25 – Restore broadsheet rarity badges
+- Centralized the broadsheet rarity tone helper so achievement and card archives share the same palette without runtime errors.
+- Confirmed the broadsheet card catalogue loads without the missing `getBroadsheetRarityTone` reference.
+
+## 2025-10-24 – Procedural newspaper honors card tag metadata
+- Timestamp: 2025-10-24T23:59:59Z
+- Files:
+  - `src/engine/newspaper/proceduralArticleGenerator.ts`
+  - `src/engine/newspaper/__tests__/proceduralArticleGenerator.test.ts`
+- Summary: Wired the procedural article generator to honor card-supplied tags, normalizing them to lexicon-style hashtags and ensuring coverage from newspaper regression tests.
+
+## 2025-10-24 – Tabloid bodies sprout quotes, clarifications, rumor mills
+- Timestamp: 2025-10-24T22:20:25Z
+- Files:
+  - `src/engine/newspaper/proceduralArticleGenerator.ts`
+  - `__tests__/newspaper/proceduralArticleGenerator.test.ts`
+- Summary: Refactored article body assembly into hook, twist, and kicker pools with seeded embellishments, layered in optional pull quotes, redacted asides, and rumor bullet lists keyed to witnesses and faction context, and added deterministic tests exercising both embellished and minimal outputs.
+
+## 2025-10-24 – Article combiner powers live newsroom column
+- Timestamp: 2025-10-24T11:30:00Z
+- Files:
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `docs/ARTICLE_COMBINER.md`
+  - `UPDATES_LOG.md`
+- Summary: Wired the in-game Tabloid newspaper to call the article combiner for a new Newsroom Collation column that fuses two or more front-page dossiers, added faction-aware badges and loading feedback, and documented how the live integration mirrors the dev demo.
+
+
+## 2025-10-24 – Dress the editor dossiers for assignment
+- Restyled the editor selection flow as an opened case file—complete with photo placeholders—so players feel like they are
+  thumbing through a classified suspect folder before launch.
+- Recolored actions and dossier cards to lean into the Paranoid Times manila-folder aesthetic while keeping mechanics unchanged.
+
+## 2025-10-23 – Unified roadmap now authoritative
+- Timestamp: 2025-10-23T10:15:00Z
+- Files:
+  - `docs/roadmap.md`
+  - `docs/paranoid_times_analysis_and_roadmap.md`
+  - `docs/analysis/paranoid-times-gap-analysis.md`
+  - `docs/gameplay-loop-overview.md`
+  - `UPDATES_LOG.md`
+- Summary: Consolidated every roadmap thread into the central planning doc, reorganised goals by timeframe and pillar, trimmed the duplicate timelines from the analysis dossiers, and updated cross-references so contributors consult the unified plan.
+
+## 2025-10-23 – Track rival editors across campaigns
+- Game state now persists separate player and AI editor assignments (plus AI banter cooldowns) so new runs and resume flows remember newsroom loadouts.
+- Legacy saves hydrate with faction-aware AI editors—falling back to The Redactor on easy—to keep campaign starts consistent after the split.
+
+## 2025-10-22 – Hotspot director primed at startup
+- Timestamp: 2025-10-22T00:00:00Z
+- Files:
+  - `src/systems/paranormalHotspots.ts`
+  - `src/hooks/useGameState.ts`
+  - `src/systems/__tests__/hotspotDirector.initialize.test.ts`
+- Summary: Primed the paranormal hotspot director caches, added lifecycle tick orchestration, wired initialization/teardown into the game-state hook, and added regression coverage to verify spawn pacing.
+
+## 2025-10-22 – Menu playlist honors selected track
+- Timestamp: 2025-10-22T12:56:38Z
+- Files:
+  - `src/pages/Index.tsx`
+  - `UPDATES_LOG.md`
+- Summary: Ensured the main menu only initializes its music once when the intro hands off control so player-selected tracks fro
+m the options panel persist instead of resetting to the default playlist.
+
+## 2025-10-22 – Countered plays skip resolution effects
+- Timestamp: 2025-10-22T14:42:46Z
+- Files:
+  - `src/systems/cardResolution.ts`
+  - `src/hooks/useGameState.ts`
+  - `src/hooks/useCardAnimation.ts`
+  - `src/pages/Index.tsx`
+  - `__tests__/systems/cardResolution.counter.test.ts`
+- Summary: Surfaced the engine's counter flag through card resolution, animation, and the gameplay UI so countered plays bypass state mutations, trigger the counter shake, and gained regression coverage to ensure blocked cards no longer apply their effects.
+
+## 2025-10-22 – Safeguard the evidence archive controls
+- Split the evidence archive filter reset from the full archive wipe so players only delete entries when they deliberately hit the new clear-archive control.
+- Styled the destructive action as a red-alert button in both classic and broadsheet layouts to telegraph its impact.
+
+## 2025-10-21 – Article overlay stays open until dismissed
+- Timestamp: 2025-10-21T12:00:00Z
+- Files:
+  - `src/components/game/EnhancedGameHand.tsx`
+  - `src/pages/Index.tsx`
+  - `docs/INTEGRATION_GUIDE.md`
+- Summary: Locked the hand hover handlers so the newsroom article overlay no longer clears itself when the pointer leaves, removed the hover-to-open wiring from the gameplay screen, and extended the QA checklist to cover long-read stability for the article preview.
+
+## 2025-10-21 – Tabloidize the Player Hub intel desks
+- Finished broadsheet variants for tutorials, evidence, press archives, and the state intel board so every hub tab now reads like a Paranoid Times spread.
+- Unified archive filters, badges, and ticker data to match the new typewriter-and-ink styling while preserving existing default layouts.
+
+## 2025-10-20 – Plot the Player Hub tabloid takeover
+- Drafted a broadsheet-style blueprint for re-skinning the Player Hub so every tab reads like a leaked Paranoid Times edition, complete with masthead shell, kicker/dek templates, and tab-specific print treatments.
+- Outlined phased implementation tasks covering asset delivery, layout refactors, and atmospheric flourishes to guide art, frontend, audio, and QA contributors.
+
+## 2025-10-19 – Added “What Is The Paranoid Times?” panel
+- Timestamp: 2025-10-19T18:42:00Z
+- Files:
+  - `src/components/game/HowToPlay.tsx`
+  - `src/components/WhatIsParanoidTimes.tsx`
+  - `components.json`
+- Summary: Landed a dedicated primer panel that spells out the Paranoid Times mythos, rerouted the How-to-Play briefing to surface it alongside onboarding beats, and refreshed the component catalog so designers track the new lore hook.
+
+## 2025-10-19 – Accordion briefing modernizes How-to-Play
+- Timestamp: 2025-10-19T13:17:05Z
+- Files:
+  - `src/components/game/HowToPlay.tsx`
+  - `src/components/game/WhatIsParanoidTimes.tsx`
+  - `components.json`
+- Summary: Rebuilt the How-to-Play overlay around a pulp-styled accordion that introduces the Paranoid Times newsroom fantasy before expanding into the MVP ruleset, added a dedicated intro component, and cataloged the new surface for designers.
+
+## 2025-10-19 – Harden relic runtime rehydration
+- Sanitize tabloid relic runtime data before applying round effects so corrupted saves or old runtime payloads no longer crash when a new round starts.
+
+## 2025-10-18 – Final edition borrows live card articles for MVP coverage
+- Timestamp: 2025-10-18T09:45:00Z
+- Files:
+  - `src/components/news/NewspaperFrontPage.tsx`
+  - `src/components/news/NewspaperInsidePages.tsx`
+  - `src/styles/newspaperLayout.css`
+  - `src/utils/finalEdition.ts`
+  - `src/news/finalFrontPageComposer.ts`
+  - `src/types/finalEdition.ts`
+  - `__tests__/utils/finalEdition.test.ts`
+- Summary: Front page and inside spread now render full MVP and runner-up copy pulled from the card article bank, fall back to existing report highlights when no article exists, and the game-over report captures sanitized paragraphs for downstream UIs with regression coverage for both pathways.
+
+## 2025-10-18 – Rig extra extra showdowns
+- End-of-turn bulletins now spotlight the faction with the strongest triple-play, granting a faction-sensitive ±3% Truth swing and crowning their cards as the Extra Extra main story.
+- Added deterministic tiebreakers and regression coverage so rival triple-plays resolve cleanly even when both sides flood the presses.
+
+## 2025-10-17 – Gameplay improvement status audit logged
+- Timestamp: 2025-10-17T14:05:00Z
+- Files:
+  - `docs/gameplay-improvements-progress.md`
+  - `UPDATES_LOG.md`
+- Summary: Captured the real implementation status of the 40-point gameplay improvement plan, documented which fixes are complete, partial, or missing, and outlined concrete next steps so engineering can prioritize the remaining roadmap work.
+
+## 2025-10-17 – Strategy insights migrate to help overlay
+- Timestamp: 2025-10-17T08:45:00Z
+- Files:
+  - `src/components/game/ContextualHelp.tsx`
+  - `src/components/gameplay/StrategyHelper.tsx`
+  - `src/pages/Index.tsx`
+  - `__tests__/integration/gameplayScreen.test.tsx`
+- Summary: Routed the strategy insight engine into the contextual help drawer, removed the standalone panel from the main layout, and updated integration coverage to confirm insights surface when agents open the overlay.
+
+## 2025-10-17 – Sync real-world weather with tabloids
+- Replaced the start screen weather badge with live, conspiratorial forecasts sourced from the player's location (with caching for repeat visits).
+- Routed the end-of-turn newspaper weather column through the same live feed so evening editions echo the player's local conditions.
+
+## 2025-10-16 – Tabloid overlay consumes stored composites
+- Timestamp: 2025-10-16T18:10:00Z
+- Files:
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `src/components/game/TabloidNewspaperLegacy.tsx`
+  - `src/news/finalizeEdition.ts`
+  - `src/utils/finalEdition.ts`
+  - `src/pages/Index.tsx`
+  - `__tests__/integration/gameplayScreen.test.tsx`
+  - `__tests__/integration/extraExtra.test.ts`
+- Summary: Refactored the nightly tabloid to read the latest turn composite and runners-up directly from saved state, introduced a final-edition helper that ranks composites alongside bulletins, updated overlays to consume the ranked feed, and extended integration coverage for per-turn headlines and Extra Extra updates.
+
+## 2025-10-16T10:15:08+00:00 – Migrated article bank to shared loader
+- Shifted newspaper systems to the shared `src/news/articleBank.ts` Map loader and aligned IssueGenerator, composeTurn, and headline previews with the new API.
+- Added regression coverage for canonical cards and tone normalization while updating UI consumers to the Map-based article lookups.
+- Files: `src/news/articleBank.ts`, `src/engine/newspaper/IssueGenerator.ts`, `src/news/composeTurn.ts`, `src/news/headlineEngine.ts`, `src/components/news/NewspaperFrontPage.tsx`, `src/ui/newspaper/FrontPage.tsx`, `src/utils/sensationalistHeadlines.ts`, `__tests__/news/articleBank.test.ts`, `__tests__/news/headlineEngine.test.ts`, `__tests__/news/composeTurn.test.ts`, `src/engine/newspaper/__tests__/IssueGenerator.staticArticles.test.ts`, `src/engine/newspaper/__tests__/IssueGenerator.recurringCharacters.test.ts`, `src/components/game/__tests__/TabloidNewspaperV2.frontPage.test.tsx.disabled`, `src/engine/newspaper/__tests__/IssueGenerator.safety.test.ts.disabled`.
+## 2025-10-16 – Newsroom previews and ticker integration
+- Timestamp: 2025-10-16T09:00:00Z
+- Files:
+  - `src/pages/Index.tsx`
+  - `src/components/newspaper/BreakingNewsTicker.tsx`
+  - `src/components/game/ExtraEditionNewspaper.tsx`
+  - `src/components/newspaper/EnhancedFinalEdition.tsx`
+  - `src/components/game/CardAnimationLayer.tsx`
+  - `src/utils/visualEffects.ts`
+  - `__tests__/integration/gameplayScreen.test.tsx`
+- Summary: Routed hover previews through the newsroom article overlay, promoted the breaking-news ticker to a global event feed, upgraded the final-edition layout, and added integration coverage for the new UI flows.
+
+## 2025-10-16 – Synkroniser spilloppsett med MVP-loop
+- Publiserte en bordklar gameplay-loop-guide med oppsett, modulvalg og sjekklister for MVP-reglene.
+- Fremhevet sammenhengen mellom catch-up/maintenance-modulene og standard tursekvens slik at digitale prototyper speiler bordspillet.
+
+## 2025-10-16 – Synchronize newspaper narrative systems
+- Routed the tabloid issue generator and front page widget through a shared newspaper dataset and prefetched story payload so copy stays consistent without duplicate fetches.
+- Enriched fallback hero stories with captured states, truth swings, and combo highlights, and extended article metadata with optional lore hooks for future writers.
+
+## 2025-10-15 – Built-in expansions join MVP rotation
+- 09:18 UTC – Wired the builtin expansion manifest so Truth Vanguard and Government Countermeasures decks import through the MVP normalizer. Files: `src/data/expansions/index.ts`, `src/data/expansions/builtin.ts`, `src/lib/expansions/discover.ts`.
+- 09:18 UTC – Realigned expansion article IDs and UI summaries so new packs display correctly in management panels. Files: `src/data/cardArticles/expansionArticles.ts`, `src/components/game/ManageExpansions.tsx`.
+- 09:18 UTC – Added regression coverage to confirm the builtin packs validate cleanly and feed random draws. Files: `src/data/__tests__/builtinExpansions.test.ts`.
+## 2025-10-15 – Recurring character persistence and staged epilogues
+- Timestamp: 2025-10-15T14:30:00Z
+- Files:
+  - `src/components/game/TabloidNewspaperLegacy.tsx`
+  - `src/components/game/TabloidNewspaperV2.tsx`
+  - `src/components/news/NewspaperInsidePages.tsx`
+  - `src/components/newspaper/EnhancedFinalEdition.tsx`
+  - `src/data/characterArcs.json`
+  - `src/data/characterArcs.ts`
+  - `src/engine/newspaper/IssueGenerator.ts`
+  - `src/engine/newspaper/__tests__/IssueGenerator.recurringCharacters.test.ts`
+  - `src/game/__tests__/recurringCharacterArticles.test.ts`
+  - `src/game/__tests__/recurringCharacters.test.ts`
+  - `src/game/recurringCharacterArticles.ts`
+  - `src/game/recurringCharacters.ts`
+  - `src/hooks/aiHelpers.ts`
+  - `src/hooks/gameStateTypes.ts`
+  - `src/hooks/useGameState.ts`
+  - `src/pages/Index.tsx`
+  - `src/types/finalEdition.ts`
+  - `src/utils/finalEdition.ts`
+  - `UPDATES_LOG.md`
+- Summary: Persisted recurring character progression through saves, fed staged appearances into newspaper generation, and surfaced “Where Are They Now?” epilogues in final editions.
+
+## 2025-10-15 – Align lore ops with conspiratorial canon
+- Publish a Paranoid Times world lore quickstart, card template, and anomaly naming guide to harmonize future writing sprints.
+- Enforce tone-safe lint rules and introduce a lore cross-linking prototype so non-diegetic jokes and continuity gaps surface fast.
+
+## 2025-10-14 – State-themed bonus engine
+- Implemented a seeded `assignStateBonuses` pipeline that drafts weighted regional effects, logs per-state anomalies, and feeds matching newspaper events for the round.
+- Wired round start to apply state bonuses, refresh state event history for UI badges, and surface card-level `stateBonuses` metadata in strategy helpers.
+
+## 2025-10-14 – Restore paranormal sighting flavor pools
+- Reintroduce missing tagline templates for synergy, broadcast, cryptid, and hotspot events so sightings no longer crash.
+- Wire templates into the index page with a resilient filler to keep paranormal notifications descriptive.
+
+## 2025-10-13 – Extra Extra stamp honors true triple headlines
+- Updated the newspaper overlay so the Extra Extra masthead stamp appears only when a faction lands a legitimate triple headline with a shared front-page trio.
+- Ensured faction mismatches or filler fallbacks no longer surface the Extra Extra branding, keeping the tabloid's flair tied to real combo victories.
+
+## 2025-10-13 – Stabilize AI triple-play headlines
+- Allow the Extra! Extra! generator and final edition builder to emit deterministic `[WIRE DELAY]` placeholders when news pools are still loading.
+- Kick off news pool loading from the game state hook and add regression coverage so three-card turns no longer crash while assets hydrate.
+
+## 2025-10-12 – Extra Extra toast mirrors headline wins
+- Triggered the Extra Extra toast alongside article generation, reusing the logged winning faction and headline so players get an immediate pop-up summary.
+- Added a window guard so the notification hook remains safe to call during Storybook or server-side rendering where no DOM exists.
+
+## 2025-10-12 – Harden press archive persistence
+- Switch the press archive hook to the safe storage helpers so localStorage errors no longer crash the hub.
+- Add regression coverage that verifies the archive stays empty when storage access fails.
+
+## 2025-10-11 – Truth faction archive completed
+- Authored and imported narrative articles for Truth cards `TRUTH-001` through `TRUTH-200`, giving every legacy card a bespoke Paranoid Times report.
+- Added a generation script for the tail-end entries so future lore passes can iterate without hand-editing 100+ records.
+- Refreshed the coverage dashboard to confirm Truth now has zero gaps while Government remains the next writing focus.
+
+## 2025-10-11 – Article cache + fallback guardrails
+- Implemented cached lookups for `CARD_ARTICLE_DATABASE` so repeated issue generation avoids full scans and tolerates missing IDs with null memoization.
+- Wired `IssueGenerator` to request `getArticleOrFallback`, blending remote bank data, static TypeScript articles, and generated copy when gaps remain.
+- QA sweep confirmed variable substitution, tone transforms, and <200 ms issue builds under fallback data; flagged remaining coverage gaps in MVP card set and environment-only loaders for follow-up.
+
+## 2025-10-11 – Stabilize AI turn wrap-up
+- Keep the AI turn progress flag active until the scheduled hand-off completes so the planner no longer loops.
+- Add regression coverage to confirm control returns to the player after the wrap-up timeout resolves.
+
+## 2025-10-10 – End-turn newspaper now prints curated card articles
+- Timestamp: 2025-10-10T12:28:15Z
+- Files:
+  - `src/engine/newspaper/IssueGenerator.ts`
+  - `src/engine/newspaper/__tests__/IssueGenerator.staticArticles.test.ts`
+  - `UPDATES_LOG.md`
+- Summary: Reordered the newspaper article resolver so the curated card copy used in the article preview overlay appears in the between-turn newspaper, added regression coverage to lock in the new priority, and documented the change.
+
+## 2025-10-10 – Article previews now require explicit activation
+- Timestamp: 2025-10-10T11:22:50Z
+- Files:
+  - `src/components/game/EnhancedGameHand.tsx`
+  - `src/components/game/CardDetailOverlay.tsx`
+  - `src/components/newspaper/ArticlePreviewOverlay.tsx`
+  - `src/pages/Index.tsx`
+  - `docs/INTEGRATION_GUIDE.md`
+  - `UPDATES_LOG.md`
+- Summary: Rewired the newsroom article overlay to launch from a Read Article action instead of hover, locked hover exits from clearing the preview while it is open, added Escape-key support to the overlay, and documented manual QA steps to confirm the preview remains readable until dismissed.
+
+## 2025-10-10 – Start menu radio previews for every broadcast
+- Timestamp: 2025-10-10T11:14:39Z
+- Files:
+  - `src/components/game/Options.tsx`
+- Summary: Refreshed the options screen so players can audition government, truth, end credits, and theme playlists right from the start menu with quick-select buttons and clearer playlist labels.
+
+## 2025-10-10 – Safeguarded hotspot source labels on the map
+- Timestamp: 2025-10-10T10:50:57Z
+- Files:
+  - `src/components/game/EnhancedUSAMap.tsx`
+- Summary: Hardened the enhanced USA map overlay so hotspot sources and event factions default to an "UNKNOWN" tag instead of crashing when saved data lacks a faction string.
+
+## 2025-10-10 – Editor banter anchors below the masthead
+- Repositioned the editor banter toast feed so it materializes beneath the Paranoid Times masthead instead of hovering near the
+  bottom HUD, making quips unmissable during high-alert turns.
+- Locked the overlay to the safe-area offsets so handheld agents still see the editor's whispers tucked under the newsroom mast
+  head badge.
+
+## 2025-10-10 – Newspaper tone transforms
+- Added placeholder-safe tone transforms and an `applyTone` helper so newspaper copy can shift between straight news, tabloid, local color, exposé, and classified styles.
+- Extended card article metadata with `preferredTone` overrides and updated the issue generator to select and apply tones before front-page rendering.
+
+## 2025-10-10 – Harden press archive imports
+- Normalize archived victory reports to ensure legendary deployments always load as arrays and avoid Player Hub crashes when old saves are opened.
+- Guard Player Hub archive and final edition readers against malformed legendary data so future saves remain resilient.
+
+## 2025-10-09 – Recurring Character Story Arc Variants
+- Added story arc metadata and stage progression tracking for Pastor Rex, Agent Smitherson, Florida Man, Bat Boy, Maria Chen, and Coach Terry Hammond.
+- Tagged stage-specific article variants across truth and expansion coverage, authoring new pieces to ensure at least three appearances per character.
+- Implemented a selector that advances recurring character stages after each article use, enabling narrative escalation in the newspaper system.
+
+## 2025-10-09 – Dynamic Newspaper Variable Injection
+- Added `GameStateContext` templating so generated headlines and bodies swap in live turn, score, IP, and faction data.
+- Plumbed Tabloid newsroom UI to forward round metrics into the issue generator for accurate article context.
+- Annotated eleven Paranoid Times articles with `{TURN_NUMBER}`, `{STATES_CONTROLLED}`, `{IP_REMAINING}`, and related placeholders to validate substitution.
+
+## 2025-10-09 – Expansion Newspaper Batch & Coverage Audit
+- Added ten missing Truth faction articles (TRUTH-009 through TRUTH-020) and forty expansion-era features spanning every US state.
+- Authored new `expansionArticles.ts` covering TRUTH-NEW and GOV-NEW cards with balanced recurring-character ratios and crossover hooks.
+- Consolidated all article sources via `ALL_CARD_ARTICLES` and published `docs/cardArticles/article-coverage.md` to document remaining ID gaps.
+
+## 2025-10-09 – Player Hub gains backtrack control
+- Added a Back button to the Player Hub dossier header so agents can slip out of the archive without relying on the tiny kill-switch.
+- Styled the control to stay faithful to the classified parchment palette whether agents fly Truth colors or government badges.
+## 2025-10-09 – Player Hub dossier metadata stripped out
+- Removed the case file metadata banner so the Player Hub reserves more real estate for active dossiers and lore feeds.
+- Kept the faction stamp treatment so agents still clock whether they're rifling through leaked or cleared records at a glance.
+
+## 2025-10-09 – Cryptid hotspots now echo local legends
+- Rewrote the cryptid hotspot summaries so each state briefing references the folklore dossiers—Altie coils along the Altamaha, Chessie corrals Chesapeake patrols, and Jackalope permits go feral in souvenir rows.
+- Grounded the new copy in the expansion readme to keep the Paranoid Times lore web dense while giving operators state-specific paranoia levers.
+
+## 2025-10-09 – Classified dossier overlay retired during reveals
+- Retired the typewriter dossier pop-up that blanketed the map when conspiracies flipped so players can keep reading the board state during dramatic reveals.
+- Documented the change in the contextual effect switch to prevent future overlays from eclipsing mission interactions.
+
+## 2025-10-09 – Cryptid idle reports rotate onto the map
+- Replaced the generic paranormal sweep idle message with rotation through Fangoria-sourced state cryptid briefings so the USA map and event log stay steeped in regional folklore even when hotspots are dormant.
+- Expanded the idle report roster with Appendix C homestate dossiers and tuned the fallback copy to reference the Cryptids expansion field guide when the feed hiccups.
+
+## 2025-10-09 – Banter toasts surface editor quips
+- Wired the banter engine into a dedicated HUD toast lane so editors' conspiratorial asides flare on screen instead of hiding in console logs.
+- Added a public window helper for banter toasts, mirroring combo behavior so other systems can drop sly transmissions into the overlay.
+
+## 2025-10-09 – ParaPedia dossier cleared for all agents
+- Opened the ParaPedia knowledge vault to government operatives so both factions can access the paranormal atlas from the Player Hub.
+- Updated the dossier navigation to surface the ParaPedia tab alongside existing folders regardless of faction alignment.
+
+## 2025-10-09 – Tabloid front page hero goes full broadsheet
+- Rebuilt the Final Edition hero into a split-column tabloid spread with oversized type, accent stripes, and a full-bleed art well that honors victory tones.
+- Upgraded MVP card handling so the front page art now escalates to a dramatic border treatment and gracefully falls back to runner-up footage when needed.
+
+## 2025-10-09 – Map scouting untethered from zoom locks
+- Added padded panning bounds so agents can right-drag the US map at any zoom level, keeping recon smooth even when fully zoomed in or out.
+- Confirmed context-menu suppression still works so long-press sleuthing never trips a browser pop-up mid-investigation.
+
+## 2025-10-09 – Paranoid Times masthead joins the spin wars
+- Rebuilt the live edition masthead with a halftone wash, serif title, and equal-opportunity propaganda copy for loyalists and leaksters alike.
+- Updated the final report layout to trade the ShadowGov stamp for the new joint spin bureau branding so both factions share the same sardonic headline wrapper.
+
+## 2025-10-09 – Completed Fangoria + NAC ingestion
+- Rebuilt Appendix C with all fifty state creatures, region notes, and explicit ops hooks drawn from Fangoria’s survey.
+- Authored a 57-entry NorthAmericanCryptids field guide so designers have ready deck hooks for every listed monster.
+
+## 2025-10-09 – Cataloged cryptid intel for expansion docs
+- Expanded the Cryptids expansion README with state-by-state lore harvested from Fangoria, plus play hooks for each hometown monster.
+- Imported the northamericancryptids.com bestiary into a new field guide section so designers can wire in regionally accurate ops beats.
+## 2025-10-09 – Reprioritize front page coverage
+- Teach the newspaper issue generator to spotlight captured states, major truth swings, and rotating highlights on the dispatch archive.
+- Keep hero articles in sync with the front-page package so combo main stories continue to render correctly.
 
 ## 2025-10-08 – Truth main story subhead retuned
 - Replaced the snack-quality aside in truth main stories with a reality-anchor status update to keep front page copy conspiratorially grounded.
@@ -691,72 +878,23 @@ m the options panel persist instead of resetting to the default playlist.
 - Published shared difficulty multipliers, recommendation helpers, and banter bank loader typings to anchor AI selection.
 - Stubbed banter JSONs plus image placeholders for every editor to keep future art hooks wired in.
 
+## 2025-10-08 – Gate Extra Extra coverage behind triple plays
+- Removed the standing “Extra Extra Dispatch” column from the turn newspaper so the bonus headline only appears when a faction actually lands three plays.
+- Hid the final edition bulletin module whenever no triple-play articles were filed to avoid implying a bonus that never triggered.
+
+## 2025-10-08 – Diversify generated card articles
+- Expand card article generator pools with new tag-aware headlines, subheads, and body segments to reduce repetition.
+- Compose longer faction articles by layering tag-specific follow-ups, escalations, and closers for each card.
+
+## 2025-10-08 – Enable touch-friendly card deployment
+- Added pointer-aware drag-and-drop controls to the newsroom desk so tablet operatives can sling cards directly onto the U.S. map.
+- Highlighted valid state targets, previewed the lifted card in-flight, and surfaced error toasts when drops hit protected territory.
+
 ## 2025-10-07 – Normalize AI state control audits
 - Hardened the MVP resolver to strip duplicate control flags before auditing so AI rollouts never claim the same state as both factions.
 
 ## 2025-10-07 – Block context menus during map pans
 - Right-click panning on the USA map now suppresses the browser context menu so conspirators can glide without interruptions.
-
-## 2025-11-07 – Mouse-native map navigation
-- Let agents zoom the USA map with the scroll wheel instead of hunting the UI buttons.
-- Hold the right mouse button to drag and pan the conspiracy overlay like a proper blacksite analyst.
-
-## 2025-11-06 – Restore fixed Newsroom Desk grid
-- Remove the collapsible MinimizedHand overlay so the Newsroom Desk stays permanently expanded.
-- Keep the original three-card row layout in the desk by leaning solely on the full-sized hand view.
-
-## 2025-11-05 – Right-size board minis and retone played dock
-- Board mini card frames now render at 45% scale to keep played-card layouts breathing and prevent clipping.
-- Opponent slots lean into a blue halftone while the player stack stays red, with section headers picking up matching tones.
-
-## 2025-11-04 – Align tooltip truth deltas with faction perspective
-- USA map tooltips now flip truth gain/loss signage for government players across hotspot history, active bonuses, and anomaly logs.
-
-## 2025-11-03 – Reset map tooltip state during redraws
-- Clear pending tooltip timeouts and hovered state when the USA map SVG rebuilds so refreshed state data no longer leaves ghost tooltips hanging over the board.
-
-## 2025-11-02 – Hue-shift the Truth Index feedback
-- Progress bars now shift from red at 0% to deep indigo at 100%, clamping undefined inputs to the midpoint so every overlay broadcasts a clear heat reading.
-- Tabloid Truth Index wrappers lean on a translucent white track to keep the new gradient legible against the broadsheet texture, with documentation for designers in the technical overview.
-
-## 2025-11-01 – Mirror relic truth polarity by host faction
-- Tabloid relic truth pulses now invert for government-controlled hosts while preserving clamp guards.
-- Added round-start logging for the signed truth delta along with regression coverage for faction parity.
-
-## 2025-10-31 – Guard editor effect descriptions
-- Hardened the editor effect descriptor so dossiers without optional blocks no longer crash when summarizing start cards on the index page.
-- Synced the expansion wrapper to pass through nullable configs, ensuring runtime callers never dereference missing effect data.
-
-## 2025-10-30 – Fix desk editor summary crash
-- Updated the campaign HUD’s editor summary to read bonuses, tradeoffs, and modifiers from the dossier configs so the start-card descriptors always receive a valid effect block.
-- Surfaced modifier bullet points and preferred dossier quotes to keep the popover copy consistent after the data model shift.
-
-## 2025-10-29 – Prevent minimalist dossiers from crashing setup
-- Hardened the editor effect merger to clone default values when bonuses, tradeoffs, or modifiers are missing so start-card lookups stay safe.
-- Normalized the setup adjustment helper and added regression coverage to ensure `initGame` proceeds cleanly when a dossier omits those blocks.
-
-## 2025-10-28 – Stabilize editor start-card dossiers
-- Patched the editor effect aggregation and setup adjustments to tolerate dossiers missing `startCards`, preventing crash loops
-  when launching a run with minimalist government handlers.
-
-## 2025-10-27 – Harden editor start-card dossiers
-- Guarded the editor effect merger so dossiers without explicit start-card arrays no longer crash the run phase when ops flip
-  between classified profiles.
-
-## 2025-10-26 – Wire Desk Editors into MVP runtime
-- Replaced the temporary editor roster with faction-specific dossiers in `src/data/editors.json`, updated the selector UI to
-  filter by faction, surface quotes and tradeoffs, and persist the chosen editor via the hardened storage helpers.
-- Patched the MVP engine and effect pipeline so editor bonuses now adjust turn income, attack costs, MEDIA truth swings, and
-  ZONE pressure in live games, with new tests covering signature cases.
-
-## 2025-10-25 – Restore broadsheet rarity badges
-- Centralized the broadsheet rarity tone helper so achievement and card archives share the same palette without runtime errors.
-- Confirmed the broadsheet card catalogue loads without the missing `getBroadsheetRarityTone` reference.
-
-## 2025-10-24 – Dress the editor dossiers for assignment
-- Restyled the editor selection flow as an opened case file—complete with photo placeholders—so players feel like they are
-  thumbing through a classified suspect folder before launch.
-- Recolored actions and dossier cards to lean into the Paranoid Times manila-folder aesthetic while keeping mechanics unchanged.
 
 ## 2025-10-07 – Stabilize USA map framing and zoom
 - Locked the USA map stage to its full aspect ratio so viewport changes no longer squeeze the SVG or hide coasts mid-turn.
@@ -774,100 +912,25 @@ m the options panel persist instead of resetting to the default playlist.
 - Added a seeded triple-headline composer that braids the turn’s first three plays into a main story using combo rules, holiday buckets, and a generic fallback so every trigger prints a bespoke lead.
 - Hooked turn resolution and the MVP simulator into the new pools, preserving truth-delta math while logging the composed template or combo for debugging.
 
-## 2025-10-06 – Restore card collection scroll rigging
-- Patched the broadsheet card collection overlay to import its shadcn scroll wrapper so the panel renders without tripping a `ScrollArea` reference error.
-- Verified the catalogue view no longer blanks out when the government archivists unroll their dossiers mid-session.
-
 ## 2025-10-07 – Document Extra Extra win logic for players
 - Expanded the How to Play briefing with a rundown of the Extra Extra showdown rules so operatives know how triple-card turns award Truth swings and headlines.
 - Highlighted how the newsroom calculates winners, resolves ties, and pushes the Truth meter to keep players watching the paper between turns.
+
+## 2025-10-07 – Chronicle agenda signals in hub
+- Route the live agenda moment feed into the Player Hub overlay and surface a chronological timeline of stages and outcomes.
+- Add status filters, timeline styling, and empty-state messaging to help players review agenda advances, setbacks, and completions at a glance.
+
+## 2025-10-06 – Restore card collection scroll rigging
+- Patched the broadsheet card collection overlay to import its shadcn scroll wrapper so the panel renders without tripping a `ScrollArea` reference error.
+- Verified the catalogue view no longer blanks out when the government archivists unroll their dossiers mid-session.
 
 ## 2025-10-06 – Rewire AI difficulties and editor bias
 - Replaced the retired TOP_SECRET_PLUS tier with the new INSANE difficulty, updating presets, UI labels, and save normalization so the option flows stay coherent.
 - Routed each editor profile’s combo and income bias scalars into the enhanced strategist and planner, letting targeting, income forecasts, and combo scoring honor newsroom tuning.
 
-## 2025-10-23 – Track rival editors across campaigns
-- Game state now persists separate player and AI editor assignments (plus AI banter cooldowns) so new runs and resume flows remember newsroom loadouts.
-- Legacy saves hydrate with faction-aware AI editors—falling back to The Redactor on easy—to keep campaign starts consistent after the split.
-
-## 2025-10-22 – Safeguard the evidence archive controls
-- Split the evidence archive filter reset from the full archive wipe so players only delete entries when they deliberately hit the new clear-archive control.
-- Styled the destructive action as a red-alert button in both classic and broadsheet layouts to telegraph its impact.
-
 ## 2025-10-06 – Float the discard toggle on card overlays
 - Removed the orange queue discard button and replaced it with a floating trash icon anchored to the card edge for quicker access.
 - Highlight the icon when a discard is queued so players see the state directly on the card art.
-
-## 2025-10-21 – Tabloidize the Player Hub intel desks
-- Finished broadsheet variants for tutorials, evidence, press archives, and the state intel board so every hub tab now reads like a Paranoid Times spread.
-- Unified archive filters, badges, and ticker data to match the new typewriter-and-ink styling while preserving existing default layouts.
-
-## 2025-10-20 – Plot the Player Hub tabloid takeover
-- Drafted a broadsheet-style blueprint for re-skinning the Player Hub so every tab reads like a leaked Paranoid Times edition, complete with masthead shell, kicker/dek templates, and tab-specific print treatments.
-- Outlined phased implementation tasks covering asset delivery, layout refactors, and atmospheric flourishes to guide art, frontend, audio, and QA contributors.
-
-## 2025-10-19 – Harden relic runtime rehydration
-- Sanitize tabloid relic runtime data before applying round effects so corrupted saves or old runtime payloads no longer crash when a new round starts.
-
-## 2025-10-18 – Rig extra extra showdowns
-- End-of-turn bulletins now spotlight the faction with the strongest triple-play, granting a faction-sensitive ±3% Truth swing and crowning their cards as the Extra Extra main story.
-- Added deterministic tiebreakers and regression coverage so rival triple-plays resolve cleanly even when both sides flood the presses.
-
-## 2025-10-17 – Sync real-world weather with tabloids
-- Replaced the start screen weather badge with live, conspiratorial forecasts sourced from the player's location (with caching for repeat visits).
-- Routed the end-of-turn newspaper weather column through the same live feed so evening editions echo the player's local conditions.
-
-## 2025-10-16 – Synkroniser spilloppsett med MVP-loop
-- Publiserte en bordklar gameplay-loop-guide med oppsett, modulvalg og sjekklister for MVP-reglene.
-- Fremhevet sammenhengen mellom catch-up/maintenance-modulene og standard tursekvens slik at digitale prototyper speiler bordspillet.
-
-## 2025-10-16 – Synchronize newspaper narrative systems
-- Routed the tabloid issue generator and front page widget through a shared newspaper dataset and prefetched story payload so copy stays consistent without duplicate fetches.
-- Enriched fallback hero stories with captured states, truth swings, and combo highlights, and extended article metadata with optional lore hooks for future writers.
-
-## 2025-10-15 – Align lore ops with conspiratorial canon
-- Publish a Paranoid Times world lore quickstart, card template, and anomaly naming guide to harmonize future writing sprints.
-- Enforce tone-safe lint rules and introduce a lore cross-linking prototype so non-diegetic jokes and continuity gaps surface fast.
-
-## 2025-10-14 – Restore paranormal sighting flavor pools
-- Reintroduce missing tagline templates for synergy, broadcast, cryptid, and hotspot events so sightings no longer crash.
-- Wire templates into the index page with a resilient filler to keep paranormal notifications descriptive.
-
-## 2025-10-13 – Stabilize AI triple-play headlines
-- Allow the Extra! Extra! generator and final edition builder to emit deterministic `[WIRE DELAY]` placeholders when news pools are still loading.
-- Kick off news pool loading from the game state hook and add regression coverage so three-card turns no longer crash while assets hydrate.
-
-## 2025-10-12 – Harden press archive persistence
-- Switch the press archive hook to the safe storage helpers so localStorage errors no longer crash the hub.
-- Add regression coverage that verifies the archive stays empty when storage access fails.
-
-## 2025-10-11 – Stabilize AI turn wrap-up
-- Keep the AI turn progress flag active until the scheduled hand-off completes so the planner no longer loops.
-- Add regression coverage to confirm control returns to the player after the wrap-up timeout resolves.
-
-## 2025-10-10 – Harden press archive imports
-- Normalize archived victory reports to ensure legendary deployments always load as arrays and avoid Player Hub crashes when old saves are opened.
-- Guard Player Hub archive and final edition readers against malformed legendary data so future saves remain resilient.
-
-## 2025-10-09 – Reprioritize front page coverage
-- Teach the newspaper issue generator to spotlight captured states, major truth swings, and rotating highlights on the dispatch archive.
-- Keep hero articles in sync with the front-page package so combo main stories continue to render correctly.
-
-## 2025-10-08 – Gate Extra Extra coverage behind triple plays
-- Removed the standing “Extra Extra Dispatch” column from the turn newspaper so the bonus headline only appears when a faction actually lands three plays.
-- Hid the final edition bulletin module whenever no triple-play articles were filed to avoid implying a bonus that never triggered.
-
-## 2025-10-08 – Diversify generated card articles
-- Expand card article generator pools with new tag-aware headlines, subheads, and body segments to reduce repetition.
-- Compose longer faction articles by layering tag-specific follow-ups, escalations, and closers for each card.
-
-## 2025-10-08 – Enable touch-friendly card deployment
-- Added pointer-aware drag-and-drop controls to the newsroom desk so tablet operatives can sling cards directly onto the U.S. map.
-- Highlighted valid state targets, previewed the lifted card in-flight, and surfaced error toasts when drops hit protected territory.
-
-## 2025-10-07 – Chronicle agenda signals in hub
-- Route the live agenda moment feed into the Player Hub overlay and surface a chronological timeline of stages and outcomes.
-- Add status filters, timeline styling, and empty-state messaging to help players review agenda advances, setbacks, and completions at a glance.
 
 ## 2025-10-06 – Stabilize Extra Extra truth swings
 - Ensure the Extra Extra truth adjustment looks at the active UI factions when legacy MVP player data is missing so post-turn articles no longer crash.
@@ -974,6 +1037,43 @@ m the options panel persist instead of resetting to the default playlist.
 
 ## 2025-10-05 – Planned discard feature
 - Track the upcoming discard mechanic update so we remember to document its implementation details when the feature ships.
+## 2025-01-09 – Phase 5: UI/UX Enhancements Complete
+- **Article Preview Overlay:** Created full-screen article preview with newspaper-style layout, scrollable content, and related information display
+- **Breaking News Ticker:** Implemented real-time news ticker at top of screen showing card plays, captures, and game events with auto-dismiss
+- **Strategy Helper:** Added smart assistant showing combo opportunities, state bonuses, and tactical suggestions based on current hand
+- **Enhanced Final Edition:** Complete newspaper redesign with MVP article, runner-up story, state-by-state results, Extra Extra callouts, classified ads, and letters to the editor
+- **News Event System:** Created helper library for dispatching breaking news during gameplay with templates for card plays, captures, combos, and turn events
+- **Card Preview Hook:** Custom React hook for managing article preview state across components
+- **Components Created:**
+  - `src/components/newspaper/ArticlePreviewOverlay.tsx` - Full article preview modal
+  - `src/components/newspaper/BreakingNewsTicker.tsx` - Real-time news ticker
+  - `src/components/gameplay/StrategyHelper.tsx` - Tactical assistance panel
+  - `src/components/newspaper/EnhancedFinalEdition.tsx` - Multi-section final newspaper
+  - `src/hooks/useCardPreview.ts` - Preview state management hook
+  - `src/lib/newsEventHelpers.ts` - News event dispatch utilities
+
+## 2025-01-09 – Gameplay & Content Expansion (Phases 2-4 Complete)
+- **Article Database:** Created card-specific newspaper articles with coherent narratives, recurring characters, and follow-up hooks for 5 existing cards (Bigfoot, Elvis, Pastor Rex, Bat Boy, UFO Football Game)
+- **40 New Cards:** Added 20 Truth faction and 20 Government faction expansion cards with full effects, flavor text, and strategic depth
+- **Two-Card Combos:** Implemented 10 mini-combo definitions (Elvis + Alien Wedding, Bigfoot + Mothman, UFO + Weather Balloon, etc.)
+- **State-Specific Bonuses:** Cards now get thematic bonuses in appropriate states (Roswell cards in New Mexico, Elvis in Tennessee, Bigfoot in Washington, etc.)
+- **Recurring Characters:** Added character tracking system for Pastor Rex, Agent Smitherson, Florida Man, Bat Boy, Darlene Hobbs, and Coach Terry Hammond
+- **New Card Types:** Defined HYBRID (dynamic cost), TRAP (face-down triggers), and PERSISTENT (multi-turn effects) card mechanics
+- **Files Created:**
+  - `src/data/cardArticles/articleDatabase.ts` - Article database with query helpers
+  - `src/data/expansion/newTruthCards.json` - 20 new Truth cards
+  - `src/data/expansion/newGovernmentCards.json` - 20 new Government cards
+  - `src/game/twoCardCombos.ts` - Mini-combo definitions
+  - `src/game/stateBonuses.ts` - State-specific bonus system
+  - `src/game/recurringCharacters.ts` - Character tracking
+  - `src/game/newCardTypes.ts` - Advanced card type definitions
+- **Roadmap:** Comprehensive 6-phase development plan saved to `docs/roadmap.md`
+
+## 2025-01-09 – Phase 1: TypeScript build configuration modernized
+- Removed deprecated `baseUrl` option from `tsconfig.node.json` that was causing TS5102 build errors.
+- Retained modern `paths` configuration for proper module resolution with @ imports.
+- Created comprehensive development roadmap (`docs/roadmap.md`) outlining 6-phase improvement plan for gameplay mechanics, card content, and newspaper article quality.
+
 ## 2024-06-15 – Deterministic composite headlines seed Extra Extra feed
 - Timestamp: 2024-06-15T00:00:00Z
 - Files:

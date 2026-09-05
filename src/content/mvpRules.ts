@@ -4,6 +4,7 @@ import { COMBO_DEFINITIONS } from '@/game/combo.config';
 import { formatComboReward } from '@/game/comboEngine';
 import type { ComboCategory } from '@/game/combo.types';
 import { TRUTH_HIGH_THRESHOLD, TRUTH_LOW_THRESHOLD } from '@/constants/truthThresholds';
+import { ECONOMIC_VICTORY_IP } from '@/game/victoryRules';
 
 export interface MvpRulesSection {
   title: string;
@@ -38,9 +39,12 @@ const effectSummary: Record<MVPCardType, string> = {
   ATTACK: 'Take IP directly from the opponent. Optionally force discards at higher rarities.',
   MEDIA: 'Shift national Truth toward your faction’s objective.',
   ZONE: 'Build Pressure in a targeted state to claim control.',
+  HYBRID: 'Combine effects; conditions on the card can change its cost.',
+  TRAP: 'Arm a response that triggers when its stated condition occurs.',
+  PERSISTENT: 'Apply the listed effect over several turns until it expires.',
 };
 
-export const MVP_RULES_TITLE = 'How to Play ShadowGov (MVP Rules)';
+export const MVP_RULES_TITLE = 'How to Play Paranoid Times';
 
 export const MVP_RULES_SECTIONS: MvpRulesSection[] = [
   {
@@ -48,7 +52,8 @@ export const MVP_RULES_SECTIONS: MvpRulesSection[] = [
     bullets: [
       'Control 10 states to secure the map.',
       `Truth faction wins at ≥ ${TRUTH_HIGH_THRESHOLD}% Truth; Government faction wins at ≤ ${TRUTH_LOW_THRESHOLD}% Truth.`,
-      'Reach 300 Influence Points (IP) to overrun your rival’s resources.',
+      `Reach ${ECONOMIC_VICTORY_IP} Influence Points (IP) to win through economic dominance.`,
+      'If multiple conditions trigger together, Truth takes priority, then IP, then state control.',
       'Each faction begins with a secret agenda that stays hidden; watch for cards or tabloid events that can expose the AI’s plan.',
     ],
   },

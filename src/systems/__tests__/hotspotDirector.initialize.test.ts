@@ -1,13 +1,22 @@
 import { HotspotDirector } from '@/systems/paranormalHotspots';
+import type { GameState } from '@/hooks/gameStateTypes';
 import { USA_STATES } from '@/data/usaStates';
 
-const createGameState = () => ({
+const createGameState = (): Pick<GameState, 'states' | 'paranormalHotspots'> => ({
   states: USA_STATES.map(state => ({
     id: state.id,
     name: state.name,
     abbreviation: state.abbreviation,
     defense: state.defense,
     baseDefense: state.defense,
+    baseIP: state.baseIP,
+    pressure: 0,
+    pressurePlayer: 0,
+    pressureAi: 0,
+    owner: 'neutral',
+    contested: false,
+    stateEventHistory: [],
+    roundEvents: [],
     paranormalHotspot: undefined,
     paranormalHotspotHistory: [],
   })),

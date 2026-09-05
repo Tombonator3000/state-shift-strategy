@@ -47,6 +47,8 @@ const CardEffectValidatorPanel: React.FC = () => {
 
     const engineLog: string[] = [];
     const engineState: EngineGameState = {
+      traps: [],
+      persistentEffects: [],
       turn: testGameState.turn,
       currentPlayer: 'P1',
       truth: testGameState.truth,

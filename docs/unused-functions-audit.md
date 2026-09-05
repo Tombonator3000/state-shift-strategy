@@ -1,3 +1,7 @@
+> Historical snapshot. Current status: [2026-09-05 Gauntlet](analysis/gauntlet-2026-09-05/README.md). Earlier completion claims are not current verification.
+
+> Correction: the commands below targeted the root solution config (`files: []`). Their empty output did not establish that no unused code existed. Use `npm run lint:exports` and confirm callers.
+
 # Unused Function Audit
 
 ## Overview

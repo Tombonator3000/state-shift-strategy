@@ -1,91 +1,55 @@
-# Welcome to your Lovable project
+# Paranoid Times — State Shift Strategy
 
-## Project info
+Et satirisk kortstrategispill der Truth Seekers og Government kjemper om nyhetsbildet,
+Influence Points og amerikanske delstater. React-grensesnittet er en spillbar avis:
+velg kort, se konsekvensene på kartet, gå i trykken og les motstanderens svar.
+Spillets eksisterende engelske kort- og avistekst er beholdt.
 
-**URL**: https://lovable.dev/projects/fa2f38e2-5939-4c65-a945-2c0f8029da84
+- [Aktiv forbedringsplan](docs/roadmap.md)
+- [Gauntlet: funn, tester og åpne porter](docs/analysis/gauntlet-2026-09-05/README.md)
+- [Spilldesign](DESIGN_DOC_MVP.md), [teknisk oversikt](docs/TECHNICAL_README.md)
+- [Arbeidslogg](log.md), [endringshistorikk](UPDATES_LOG.md)
 
-**Technical overview**: See [docs/TECHNICAL_README.md](docs/TECHNICAL_README.md) for gameplay rules, data pipelines, and audio integration notes.
+## Kjør lokalt
 
-**Change history**: Review [UPDATES_LOG.md](UPDATES_LOG.md) for a dated summary of gameplay-impacting updates.
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/fa2f38e2-5939-4c65-a945-2c0f8029da84) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Testmiljø for denne reparasjonen: Node 24.19.0, npm-låst installasjon og Bun 1.4.2.
+Bun brukes til tester; `package-lock.json` er installasjonsgrunnlaget.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+git clone https://github.com/Tombonator3000/state-shift-strategy.git
+cd state-shift-strategy
+npm ci
 npm run dev
 ```
 
-> **Note on Lovable tooling**
->
-> The Lovable component tagger is disabled for local development to avoid the repeated 404/CORS errors reported by the hosted
-> service. If you need the integration, launch Vite with `ENABLE_LOVABLE_TAGGER=true npm run dev` to opt back in.
+Åpne adressen Vite skriver ut. For produksjonsbygg: `npm run build`, deretter
+`npm run preview`. `predev` og `prebuild` oppdaterer ekspansjonsindeksen automatisk.
 
-**Edit a file directly in GitHub**
+```sh
+npm run typecheck
+bun test --coverage --coverage-reporter=text
+npm run build
+npm run lint
+npm run lint:exports
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+`typecheck` peker på `tsconfig.app.json`. Et bart `tsc --noEmit` bruker en tom
+solution-konfigurasjon og er ikke bevis på at appen er typekontrollert. Eksportanalysen
+er en kandidatrapport, ikke automatisk tillatelse til å slette filer. Lint har kjent
+gjeld; se Gauntlet-rapporten for målt baseline og gjenværende feil.
 
-**Use GitHub Codespaces**
+## Redigering og publisering
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Kildeprosjektet er også knyttet til [Lovable](https://lovable.dev/projects/fa2f38e2-5939-4c65-a945-2c0f8029da84).
+Den eksisterende GitHub Pages-workflowen bygger og publiserer ved push til `main`.
+Arbeid på en egen gren og gjennomgå PR før merge. Denne reparasjonen publiserer ikke spillet.
+Lovable-taggeren er valgfri: `ENABLE_LOVABLE_TAGGER=true npm run dev`.
 
 ## Card art assets
 
 Custom artwork for cards should be stored in `public/card-art/` with filenames that match the card ID. The game first looks for a
 `<cardId>.jpg` image and then for `<cardId>.png`. If neither file is present the UI will automatically fall back to the existing
 placeholder illustrations.
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/fa2f38e2-5939-4c65-a945-2c0f8029da84) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
 
 ## Unified AI configuration & debugging
 
@@ -94,4 +58,4 @@ The new unified AI stack uses the enhanced strategist pipeline that powers both 
 - Instantiate the AI with `AIFactory.createStrategist(difficulty)`. This returns an enhanced strategist wired to the latest `AI_PRESETS` for `easy`, `medium`, `hard`, and `insane` modes. For lower-level experiments you can also call `createAiStrategist` directly from `@/data/aiStrategy` to obtain the normalized baseline heuristics.
 - Turn planning flows through `chooseTurnActions` in `@/ai/enhancedController`. Pass the live game state and strategist to receive a ranked list of card plays plus short-form `sequenceDetails` suitable for logging.
 - Strategy logging defaults to concise one-line summaries. Set the `featureFlags.aiVerboseStrategyLog` flag (see `@/state/featureFlags`) to include the full adaptive context, synergy notes, and evaluation breakdowns in the game log when debugging complex situations.
-- All supported difficulties—`EASY`, `NORMAL`, `HARD`, and `INSANE`—are exercised via `bun test`. The `src/ai/__tests__/unifiedAiPlanning.test.ts` suite simulates turns to ensure at least one legal card is played and that the generated strategy messages stay brief. Run `bun test` after tweaking presets or heuristics to confirm the AI still behaves as expected.
+- The planning scenario at `src/ai/__tests__/unifiedAiPlanning.test.ts.disabled` is currently disabled. It is not evidence that all difficulties are covered by the active test run; restore a deterministic real-engine test before making that claim.

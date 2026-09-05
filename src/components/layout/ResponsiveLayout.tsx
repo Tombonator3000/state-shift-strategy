@@ -1,5 +1,6 @@
 import React from "react";
 import clsx from "clsx";
+import '@/styles/gameplay-layout.css';
 
 type Props = {
   masthead?: React.ReactNode;
@@ -12,7 +13,7 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
 
   return (
     <div
-      className="app-shell flex min-h-0 flex-col"
+      className="app-shell gameplay-shell flex min-h-0 flex-col"
       style={{
         paddingTop: "var(--safe-top)",
         height: "100dvh",
@@ -21,7 +22,7 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
     >
       {/* Masthead */}
       <header
-        className="shrink-0"
+        className="gameplay-masthead shrink-0"
         style={{
           height: "var(--masthead-h)",
           background: "var(--paper)",
@@ -39,22 +40,22 @@ export default function ResponsiveLayout({ masthead, leftPane, rightPane }: Prop
             paddingRight: "var(--safe-right)",
           }}
         >
-          <div className="app-scroll h-full p-1.5 sm:p-2 md:p-3 lg:p-4">
+          <div className="app-scroll gameplay-scroll h-full p-1.5 sm:p-2 md:p-3 lg:p-4">
             <div
               className={clsx(
-                "grid h-full min-h-0",
+                "gameplay-grid grid h-full min-h-0",
                 "gap-2 sm:gap-2.5 md:gap-3",
                 "grid-cols-1",
-                hasRightPane && "lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] 2xl:grid-cols-[1fr_480px]"
+                hasRightPane && "lg:grid-cols-[minmax(0,1fr)_416px] xl:grid-cols-[minmax(0,1fr)_448px] 2xl:grid-cols-[minmax(0,1fr)_480px]"
               )}
             >
-              <main className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-                <div className="flex h-full min-h-0 min-w-0 flex-col overflow-y-auto overflow-x-hidden">
+              <main className="gameplay-board flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+                <div className="gameplay-board-content flex h-full min-h-0 min-w-0 flex-col overflow-y-auto overflow-x-hidden">
                   {leftPane}
                 </div>
               </main>
               {hasRightPane && (
-                <div className="hidden lg:flex h-full min-h-0 min-w-0 flex-col overflow-hidden">{rightPane}</div>
+                <div className="gameplay-hand flex h-full min-h-0 min-w-0 flex-col overflow-hidden">{rightPane}</div>
               )}
             </div>
           </div>
