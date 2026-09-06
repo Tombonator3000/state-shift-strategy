@@ -4,7 +4,9 @@ Oppdatert 2026-09-06. Dette er den aktive planen. Den tidligere planen er bevart
 [arkivet](_archive/roadmap-2025-10-11.md). [PR #800](https://github.com/Tombonator3000/state-shift-strategy/pull/800)
 ble merged 2026-09-05 kl. 23:45:53 UTC. [PR #801](https://github.com/Tombonator3000/state-shift-strategy/pull/801)
 ble merget 2026-09-06 kl. 00:13:38 UTC etter brukerens merge-instruksjon.
-Oppstarts- og katalogrettelser klargjøres på `fix/startup-and-catalog-2026-09-06`.
+Oppstarts- og katalogrettelsene er merget i [PR #802](https://github.com/Tombonator3000/state-shift-strategy/pull/802)
+2026-09-06T00:35:43Z. PR-kontrollene for typer/tester/bygg og Pages-publiseringen består.
+Lint/dekning og ekte nettleserreise har fortsatt statusen som er beskrevet nedenfor.
 
 ## Mål og spillopplevelse
 

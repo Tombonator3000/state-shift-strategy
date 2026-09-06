@@ -3,7 +3,12 @@
 PR #801 er merget på brukerens instruksjon, kl. 00:13:38 UTC, som
 `4e929c063bf7422bfa377b6da2f9318ccc26c43f`. Dette er neste avgrensede rettelse
 fra den commiten, på `fix/startup-and-catalog-2026-09-06`.
-Status ved denne checkpointen: lokalt verifisert, klar for PR-kontroll og ønsket merge.
+Status: [PR #802](https://github.com/Tombonator3000/state-shift-strategy/pull/802)
+er merget 2026-09-06T00:35:43Z som `30821063777f5bdb15097dff14ea3bf9919d3de9`.
+[GitHub Actions](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34001628048) bekrefter ren installasjon, app-typer, alle 168 tester og bygg
+på kildecommit `2ae251048a97486f7fdea835143b2a0aab300ef3`. Lint/dekning feiler som dokumentert.
+[GitHub Pages-jobben](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34001700918) har også fullført bygg og publisering
+av merge-commiten. Dette er publiseringsbevis, ikke en visuell spillerreise.
 
 ## Påviste feil og rettelser
 
@@ -42,7 +47,8 @@ filtrerer også ID-ene slik at lagrede valg ikke kan omgå sperren.
 
 ## Verifisering
 
-Miljø: Node 24.19.0, npm 11.9.0, Bun 1.4.2 fra eksisterende npm-låst installasjon.
+Lokalt/PR-CI: Node 24.19.0, npm 11.9.0, Bun 1.4.2. CI bekrefter ren `npm ci`
+med 1015 pakker. Den eksisterende Pages-jobben bygger separat med Node 20.
 Bun ble kjørt med `npm exec --yes --package=bun@1.4.2 -- bun ...`.
 
 | Kontroll | Resultat |
@@ -55,6 +61,9 @@ Bun ble kjørt med `npm exec --yes --package=bun@1.4.2 -- bun ...`.
 | `npm run lint` | FAIL, 410 feil / 51 varsler; før 438 / 51 |
 | `bun test --coverage --coverage-reporter=text` | FAIL, exit 1; 168 tester består, totalsammendrag 64,29 % funksjoner / 71,20 % linjer |
 | Ekte nettleser, touch, offline, zoom og fps | UNVERIFIED; forrige tillatte preview ble avvist med `ERR_BLOCKED_BY_CLIENT` |
+
+CI viser samme 410 lint-feil / 51 varsler. CI-dekning: 64,68 % funksjoner /
+71,44 % linjer, fortsatt exit 1; artefakt `lint-and-coverage-34001628048` er lastet opp.
 
 Lint-/dekningsregler er uendret. `npm run lint` stopper ved ESLint-feilen og kjører
 derfor ikke den etterfølgende eksportanalysen. De 63 inaktive testfilene er fortsatt

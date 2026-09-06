@@ -1,7 +1,8 @@
 # Endrede filer
 
 Timestamp: 2026-09-06T00:32:40Z. Base: `4e929c063bf7422bfa377b6da2f9318ccc26c43f`.
-Status: klar for PR-kontroll og ønsket merge.
+Status: merget i PR #802, 2026-09-06T00:35:43Z, som `30821063777f5bdb15097dff14ea3bf9919d3de9`.
+Dokumentasjonscheckpoint 2026-09-06T00:37:33Z: bare merge-/CI-/publiseringsstatus i `UPDATES_LOG.md`, `log.md`, `docs/roadmap.md`, `docs/analysis/gauntlet-2026-09-06-startup/README.md`, `docs/analysis/gauntlet-2026-09-06-startup/changes.md`, `docs/analysis/gauntlet-2026-09-06-startup/evidence/results.json`.
 
 - `M` `.github/workflows/game-checks.yml`
 - `M` `CLAUDE.md`

@@ -104,8 +104,13 @@
     "merged_at": "2026-09-06T00:13:38Z"
   },
   "delivery": {
-    "branch": "fix/startup-and-catalog-2026-09-06",
-    "status": "local_verified_pending_pr_checks_and_requested_merge"
+    "status": "merged",
+    "pr": 802,
+    "url": "https://github.com/Tombonator3000/state-shift-strategy/pull/802",
+    "source_commit": "2ae251048a97486f7fdea835143b2a0aab300ef3",
+    "source_tree": "986fcb7aa8e035acf815eda95403ac825936a075",
+    "merge_commit": "30821063777f5bdb15097dff14ea3bf9919d3de9",
+    "merged_at": "2026-09-06T00:35:43Z"
   },
   "logs": {
     "archive": "check-logs.tar.gz",
@@ -133,5 +138,53 @@
   "intermediate_failures": {
     "iteration1-catalog.log": "2 failed expectations: initial assumption that all 540 external cards were supported; actual definitions require explicit quarantine of 40 unsupported cards.",
     "iteration2-typecheck.log": "Faction union mismatch in new normalization; fixed before final checks."
+  },
+  "ci": {
+    "source_commit": "2ae251048a97486f7fdea835143b2a0aab300ef3",
+    "run_id": 34001628048,
+    "url": "https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34001628048",
+    "game": "success",
+    "tests": {
+      "pass": 168,
+      "fail": 0,
+      "assertions": 622,
+      "files": 41
+    },
+    "install": "success",
+    "typecheck": "success",
+    "build": "success",
+    "lint": {
+      "status": "failure",
+      "errors": 410,
+      "warnings": 51
+    },
+    "coverage": {
+      "status": "failure",
+      "functions_percent": 64.68,
+      "lines_percent": 71.44
+    },
+    "artifact": "lint-and-coverage-34001628048",
+    "artifact_id": 9979654715
+  },
+  "deployment": {
+    "status": "success",
+    "source_commit": "30821063777f5bdb15097dff14ea3bf9919d3de9",
+    "run_id": 34001700918,
+    "url": "https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34001700918",
+    "build_job_id": 101401601341,
+    "deploy_job_id": 101401699069,
+    "visual_tested": false
+  },
+  "documentation_checkpoint": {
+    "recorded_at": "2026-09-06T00:37:33Z",
+    "files": [
+      "UPDATES_LOG.md",
+      "log.md",
+      "docs/roadmap.md",
+      "docs/analysis/gauntlet-2026-09-06-startup/README.md",
+      "docs/analysis/gauntlet-2026-09-06-startup/changes.md",
+      "docs/analysis/gauntlet-2026-09-06-startup/evidence/results.json"
+    ],
+    "product_sources_unchanged": true
   }
 }

@@ -2,6 +2,59 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## 2026-09-06 — Startup recovery and real catalog merged (#802)
+
+Merge timestamp: 2026-09-06T00:35:43Z. Commit `30821063777f5bdb15097dff14ea3bf9919d3de9`.
+Merged on the user's instruction after GitHub confirmed clean installation,
+app typecheck, all 168 tests and build on source commit `2ae251048a97486f7fdea835143b2a0aab300ef3`.
+The Pages build/deploy job also succeeded. Lint remains 410 errors / 51 warnings;
+coverage fails unchanged thresholds. Real browser/mobile/offline behavior is unverified.
+
+Persistent startup feedback, bounded Pages asset loading, safe storage reads,
+424 real core cards, 500 supported external cards and explicit unavailability
+for 40 unsupported Midnight cards. No card-rule text was removed to activate them.
+Historical unmerged entries below describe earlier checkpoints.
+
+Files merged:
+- `M` `.github/workflows/game-checks.yml`
+- `M` `CLAUDE.md`
+- `M` `README.md`
+- `M` `UPDATES_LOG.md`
+- `M` `__tests__/__setup__/preload.ts`
+- `A` `__tests__/assetLoading.test.ts`
+- `A` `__tests__/extensionRecovery.test.ts`
+- `A` `__tests__/game/coreCatalog.test.ts`
+- `A` `__tests__/startup.test.tsx`
+- `M` `components.json`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/README.md`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/changes.md`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/built-assets.json`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/check-logs.tar.gz`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/results.json`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/tested-source-sha256.json`
+- `M` `docs/roadmap.md`
+- `M` `index.html`
+- `M` `log.md`
+- `A` `src/components/AppStartup.tsx`
+- `M` `src/components/expansions/ExpansionControl.tsx`
+- `M` `src/components/game/ManageExpansions.tsx`
+- `M` `src/components/pwa/PWAPrompt.tsx`
+- `M` `src/data/cardDatabase.ts`
+- `M` `src/data/core/index.ts`
+- `M` `src/data/expansions/index.ts`
+- `M` `src/data/expansions/state.ts`
+- `M` `src/data/extensionSystem.ts`
+- `M` `src/lib/assets.ts`
+- `A` `src/lib/expansions/cardValidation.ts`
+- `M` `src/lib/expansions/discover.ts`
+- `A` `src/lib/fetchAssetJson.ts`
+- `A` `src/lib/startupSettings.ts`
+- `M` `src/main.tsx`
+- `M` `src/state/settings.ts`
+- `M` `src/utils/storage.ts`
+
+Status recorded 2026-09-06T00:37:33Z; documentation-only files: `UPDATES_LOG.md`, `log.md`, `docs/roadmap.md`, `docs/analysis/gauntlet-2026-09-06-startup/README.md`, `docs/analysis/gauntlet-2026-09-06-startup/changes.md`, `docs/analysis/gauntlet-2026-09-06-startup/evidence/results.json`.
+
 ## Unmerged — 2026-09-06T00:32:40Z: startup recovery and real catalog
 
 Persistent startup/recovery status, protected storage reads, bounded JSON loading

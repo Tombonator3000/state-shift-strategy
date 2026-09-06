@@ -1,3 +1,18 @@
+# 2026-09-06T00:37:33Z — PR #802 merget og Pages-publisering bekreftet
+
+Merge skjedde 2026-09-06T00:35:43Z, commit `30821063777f5bdb15097dff14ea3bf9919d3de9`, etter brukerens instruksjon.
+GitHub CI bekrefter installasjon, typer, 168 tester og bygg på `2ae2510`.
+Lint/dekning feiler som lokalt; artefakt lastet opp. [CI](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34001628048).
+[Pages-publisering](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34001700918) består for merge-commiten.
+
+Dette notatet oppdaterer bare status og bevis. Hashene for alle 24 endrede testede
+produkt-/testfiler er kontrollert mot kildecommiten og er uendret.
+Ekte nettleserreise, offline, fps og den separate Work-cachefeilen er uverifisert.
+Merget filliste finnes i `UPDATES_LOG.md` og rapportens `changes.md`.
+Dokumentasjonsfiler endret: `UPDATES_LOG.md`, `log.md`, `docs/roadmap.md`, `docs/analysis/gauntlet-2026-09-06-startup/README.md`, `docs/analysis/gauntlet-2026-09-06-startup/changes.md`, `docs/analysis/gauntlet-2026-09-06-startup/evidence/results.json`.
+
+---
+
 # 2026-09-06T00:32:40Z — Oppstart og ekte kortkatalog reparert lokalt
 
 Gren `fix/startup-and-catalog-2026-09-06`, basert på merge #801. Rettet oppstart
