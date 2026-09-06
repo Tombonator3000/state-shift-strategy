@@ -15,7 +15,9 @@ Ny mobilflate er implementert på `feat/mobile-newsroom-2026-09-06`: fast kampst
 søkbare ZONE-mål, Map/States/Played, sveipbar hånd og én End turn-knapp. Korttypene
 får tydeligere grafikk og handlingsresultatene står igjen over hånden. Hjelp og
 opplæring er tilpasset. 174 tester består; typer/bygg består; lint 410/51 uendret.
-Publisering og visuell størrelseskontroll gjenstår i dette kildekodepunktet.
+PR #803 er merget og publisert. ZONE → AI → avis → ny tur er gjennomført i nettleser.
+Visuell kontroll fant kortskalering/fanekollisjon; rettelsen er klar med 175 tester.
+Siste størrelseskontroll av oppfølgingen gjenstår.
 [Design og verifikasjon](analysis/mobile-newsroom-2026-09-06/README.md).
 Neste praktiske kontroll: én kamp med én hånd på brukerens telefon, inkludert
 nettleserens adressefelt/sikre marger og de eksisterende effektenes ytelse.

@@ -2,14 +2,36 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
-## Unmerged — 2026-09-06T02:57:13Z: mobile newsroom redesign
+## Unmerged — 2026-09-06T03:30:54Z: mobile visual follow-up
+
+Real browser review found compact cards scaled to 85% by legacy CSS and shared
+tab utilities overriding the new navigation layout. Scoped styles fix both; play
+receipts now identify the affected IP side or ZONE target. 175 tests pass, types
+and Pages build pass. Existing lint/debt remains. Final rendering awaits deploy.
+
+Files prepared:
+- `UPDATES_LOG.md`
+- `__tests__/game/mobileBattle.test.tsx`
+- `docs/analysis/mobile-newsroom-2026-09-06/README.md`
+- `docs/analysis/mobile-newsroom-2026-09-06/evidence/check-logs.tar.gz`
+- `docs/analysis/mobile-newsroom-2026-09-06/evidence/results.json`
+- `docs/analysis/mobile-newsroom-2026-09-06/evidence/tested-source-sha256.json`
+- `docs/roadmap.md`
+- `log.md`
+- `src/components/game/mobile/MobileBattleLayout.tsx`
+- `src/styles/mobile-battle.css`
+
+## 2026-09-06 — Mobile newsroom redesign merged (#803)
+
+Merge timestamp: 2026-09-06T03:23:02Z. Commit `6fd26bd7984e4719552fd7492993407f29773f6d`.
+GitHub app checks and Pages deployment passed.
 
 User-requested mobile layout, compact cards, searchable state targets, persistent
 play results and accessible menus. Existing rules and card art are preserved.
 174 tests pass; typecheck/build pass; lint 410 errors / 51 warnings unchanged.
-Coverage exits 1 against existing thresholds. New visual inspection awaits deploy.
+Coverage exits 1 against existing thresholds. Browser inspection found a legacy card-scale and tab cascade issue; the follow-up fixes these.
 
-Files prepared:
+Files merged:
 - `UPDATES_LOG.md`
 - `__tests__/game/mobileBattle.test.tsx`
 - `components.json`

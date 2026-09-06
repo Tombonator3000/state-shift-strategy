@@ -1,3 +1,16 @@
+# 2026-09-06T03:30:01Z — Mobilflyt verifisert, visuell oppfølging
+
+PR #803 merget 2026-09-06T03:23:02Z (`6fd26bd`). GitHub og Pages fullført.
+I nettleseren: valgt ZONE fra kortdetaljer, truffet Texas, endret hånd/IP, latt AI
+spille tre kort og fått avis. 390×844, 360×640 og 844×390 har nåbar End turn uten
+sideveis sidescroll. Visuell inspeksjon fant gammel 0.85-skalering og fanestiler som
+overstyrte ny CSS. Oppfølgingen fjerner dette og viser IP-/målresultat i kvitteringen.
+175 tester / 0 feil / 652 assertions. Typer og Pages-bygg består, lint 410/51 uendret.
+Nye kildefiler: `src/styles/mobile-battle.css`, `src/components/game/mobile/MobileBattleLayout.tsx`,
+`__tests__/game/mobileBattle.test.tsx`. Rapport, resultatfiler, roadmap og oppdateringslogg følger.
+
+---
+
 # 2026-09-06T02:56:25Z — Ny mobilflate klar for PR
 
 Brukeren bekrefter at mobilspillet fungerer og ber om bedre layout, grafikk og effekter.

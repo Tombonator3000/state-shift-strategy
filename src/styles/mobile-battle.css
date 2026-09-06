@@ -19,7 +19,7 @@
   isolation: isolate;
 }
 .mobile-battle *, .mobile-battle-sheet * { box-sizing: border-box; }
-.mobile-battle button, .mobile-battle input { font: inherit; }
+.mobile-battle button, .mobile-battle input { font-family: inherit; }
 .mobile-battle button:focus-visible, .mobile-battle input:focus-visible { outline: 3px solid #cf950b; outline-offset: 2px; }
 .mobile-battle button:disabled { cursor: not-allowed; }
 .mobile-battle-header { background: var(--mb-paper); border-bottom: 1px solid var(--mb-rule); }
@@ -44,26 +44,26 @@
 .mobile-truth-track > span { display: block; height: 100%; background: #277c74; transition: width .45s ease-out; }
 .mobile-battle-board { display: flex; min-height: 0; overflow: hidden; background: #e4e8e2; }
 .mobile-board-tabs { display: flex; flex-direction: column; width: 100%; min-height: 0; }
-.mobile-board-nav { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 44px; flex-shrink: 0; padding: 0 9px; border-radius: 0; border-bottom: 1px solid #c2ccc4; background: #dce3dc; color: #45594e; }
-.mobile-board-nav > button { min-height: 44px; gap: 6px; border-radius: 0; padding: 0 4px; border-bottom: 3px solid transparent; font-size: 12px; font-weight: 700; }
-.mobile-board-nav > button[data-state=active] { color: #173d33; border-bottom-color: #197268; background: transparent; box-shadow: none; }
+.mobile-battle .mobile-board-nav { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 44px; flex-shrink: 0; padding: 0 9px; border-radius: 0; border-bottom: 1px solid #c2ccc4; background: #dce3dc; color: #45594e; }
+.mobile-battle .mobile-board-nav > button { min-height: 44px; gap: 6px; border-radius: 0; padding: 0 4px; border-bottom: 3px solid transparent; font-size: 12px; font-weight: 700; }
+.mobile-battle .mobile-board-nav > button[data-state=active] { color: #173d33; border-bottom-color: #197268; background: transparent; box-shadow: none; }
 .mobile-tab-count { display: grid; place-items: center; min-width: 16px; height: 16px; border-radius: 50%; background: #c5d3c8; font-size: 10px; }
-.mobile-map-panel, .mobile-states-panel, .mobile-played-panel { flex: 1; min-height: 0; margin: 0; overflow: auto; overscroll-behavior: contain; }
-.mobile-map-panel[hidden], .mobile-map-panel[data-state=inactive] { display: none; }
-.mobile-map-panel { position: relative; background: radial-gradient(ellipse at 45% 40%, #f1f1e9, #cedbd2); }
+.mobile-battle .mobile-map-panel, .mobile-battle .mobile-states-panel, .mobile-battle .mobile-played-panel { flex: 1; min-height: 0; margin: 0; overflow: auto; overscroll-behavior: contain; }
+.mobile-battle .mobile-map-panel[hidden], .mobile-battle .mobile-map-panel[data-state=inactive] { display: none; }
+.mobile-battle .mobile-map-panel { position: relative; background: radial-gradient(ellipse at 45% 40%, #f1f1e9, #cedbd2); }
 .mobile-map-legend { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; min-height: 28px; padding: 4px 12px; background: #e5ece3f0; font-size: 10px; }
 .mobile-map-legend > span::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #989d94; margin-right: 4px; }
 .mobile-map-legend .mobile-legend-you::before { background: var(--mb-accent); }
 .mobile-map-legend .mobile-legend-rival::before { background: var(--mb-rival); }
 .mobile-map-legend .mobile-legend-contested::before { background: #cf872e; }
 .mobile-map-hint { margin: 0; padding: 3px 12px 8px; text-align: center; color: #46594e; font-size: 10px; }
-.mobile-map-panel #game-map-board { min-height: 0; }
-.mobile-map-panel #game-map-board > div > .relative { background: transparent; }
-.mobile-map-panel #game-map-board > div > div:first-child { padding: 0 5px; background: transparent; border: 0; box-shadow: none; }
-.mobile-map-panel #us-map-stage { min-height: 185px; border: 0; border-radius: 0; background: transparent; }
-.mobile-map-panel #us-map-stage button { min-width: 44px; min-height: 44px; }
-.mobile-map-panel #us-map-stage > div { top: 0; right: 6px; }
-.mobile-map-panel #us-map { filter: drop-shadow(0 4px 2px #28432d20); }
+.mobile-battle .mobile-map-panel #game-map-board { min-height: 0; }
+.mobile-battle .mobile-map-panel #game-map-board > div > .relative { background: transparent; }
+.mobile-battle .mobile-map-panel #game-map-board > div > div:first-child { padding: 0 5px; background: transparent; border: 0; box-shadow: none; }
+.mobile-battle .mobile-map-panel #us-map-stage { min-height: 185px; border: 0; border-radius: 0; background: transparent; }
+.mobile-battle .mobile-map-panel #us-map-stage button { min-width: 44px; min-height: 44px; }
+.mobile-battle .mobile-map-panel #us-map-stage > div { top: 0; right: 6px; }
+.mobile-battle .mobile-map-panel #us-map { filter: drop-shadow(0 4px 2px #28432d20); }
 .mobile-battle[data-faction=truth] .state-path.truth,
 .mobile-battle[data-faction=government] .state-path.government { fill: var(--mb-accent); }
 .mobile-battle[data-faction=truth] .state-path.government,
@@ -75,7 +75,7 @@
 .mobile-target-prompt strong, .mobile-target-prompt > span > span { display: block; font-size: 12px; }
 .mobile-target-prompt > span > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
 .mobile-target-prompt button { min-height: 44px; padding: 4px 10px; border: 1px solid #aa862f; border-radius: 7px; background: #fffbeb; }
-.mobile-states-panel { display: flex; flex-direction: column; background: #f3f0e8; }
+.mobile-battle .mobile-states-panel { display: flex; flex-direction: column; background: #f3f0e8; }
 .mobile-state-search { display: block; padding: 8px 10px; flex-shrink: 0; }
 .mobile-state-search input { width: 100%; min-height: 44px; border: 1px solid #b9bfb1; border-radius: 8px; padding: 8px 12px; background: #fffdf7; color: #19262d; font-size: 14px; }
 .mobile-state-list { min-height: 0; overflow: auto; padding: 0 10px 10px; }
@@ -91,8 +91,8 @@
 .mobile-state-defense { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; }
 .mobile-state-details { padding: 8px 11px; font-size: 12px; background: #e3e9df; border-radius: 0 0 7px 7px; }
 .mobile-state-details p { margin: 5px 0 0; }
-.mobile-played-panel { padding: 12px; background: #f1ede3; }
-.mobile-played-panel h2 { margin: 0 0 10px; font: bold 18px Georgia, serif; }
+.mobile-battle .mobile-played-panel { padding: 12px; background: #f1ede3; }
+.mobile-battle .mobile-played-panel h2 { margin: 0 0 10px; font: bold 18px Georgia, serif; }
 .mobile-play-record { display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left; margin-bottom: 8px; padding: 12px; background: #fffdf6; border: 1px solid #d8d0bc; border-left: 3px solid var(--mb-accent); border-radius: 5px; }
 .mobile-play-record[data-player=ai] { border-left-color: var(--mb-rival); }
 .mobile-play-record > span { font-size: 11px; color: #5b6359; }
@@ -114,7 +114,7 @@
 .mobile-hand-rail { padding: 5px 0 2px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: #718c7d #17272c; }
 .mobile-hand-content .newsroom-hand-grid { display: flex; gap: 9px; width: max-content; padding: 0 12px 5px; }
 .mobile-hand-content .newsroom-card-slot { width: 132px; flex: 0 0 132px; scroll-snap-align: center; }
-.mobile-hand-content .newsroom-card-wrapper { display: block; opacity: 1; filter: none; border-radius: 10px; }
+.mobile-hand-content .newsroom-card-wrapper, .mobile-hand-content .newsroom-card-wrapper:hover { display: block; opacity: 1; filter: none; border-radius: 10px; transform: none; }
 .mobile-hand-card { position: relative; display: flex; flex-direction: column; width: 132px; height: 177px; overflow: hidden; background: #f7f0dd; border: 2px solid #d3c4a0; border-radius: 10px; box-shadow: 0 3px 6px #0006; color: #1c2b2b; text-align: left; transition: border-color .16s, transform .16s; }
 .mobile-hand-card[data-affordable=true] { border-color: #83b99b; }
 .mobile-hand-card[data-selected=true] { border-color: #f3cd67; transform: translateY(-2px); }
@@ -150,7 +150,7 @@
 .mobile-end-turn:disabled { border-color: #88938b; background: #a3b0a7; color: #213a2e; box-shadow: none; }
 .mobile-end-turn > svg:first-child { animation: mobile-wait-spin 1.5s linear infinite; }
 .mobile-value-change { animation: mobile-metric-tick .38s ease-out; }
-.mobile-battle-sheet { max-height: 88dvh; display: flex; flex-direction: column; overflow: hidden; border-radius: 20px 20px 0 0; padding: 23px 16px max(18px, env(safe-area-inset-bottom)); background: #f3eee2; color: #19262d; }
+.mobile-battle-sheet.mobile-battle-sheet { max-height: 88dvh; display: flex; flex-direction: column; overflow: hidden; border-radius: 20px 20px 0 0; padding: 23px 16px max(18px, env(safe-area-inset-bottom)); background: #f3eee2; color: #19262d; }
 .mobile-battle-sheet > h2 { padding-right: 35px; font-family: Georgia, serif; font-size: 24px; color: #19262d; }
 .mobile-battle-sheet > p { font-size: 12px; color: #526253; }
 .mobile-battle-sheet > button { min-height: 44px; min-width: 44px; right: 8px; top: 10px; }
