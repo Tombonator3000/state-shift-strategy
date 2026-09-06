@@ -123,7 +123,7 @@ body { background: var(--press-paper); }
 .mobile-hand-zone { border-top: 4px double var(--press-ink); background: var(--press-paper); }
 .mobile-hand-heading h2 { font: 900 19px Georgia, serif; }
 .mobile-hand-card { border-radius: 2px !important; border-color: var(--press-ink) !important; box-shadow: 2px 3px 0 #0003 !important; }
-.mobile-action-receipt { background: var(--press-ink); }
+.mobile-action-receipt { background: var(--press-ink); color: var(--press-light); }
 .mobile-end-turn { background: var(--press-red); border-radius: 2px; }
 .mobile-state-row, .mobile-state-abbr, .mobile-state-search input, .mobile-play-record { border-radius: 1px; }
 .mobile-map-panel { background: var(--press-paper); }

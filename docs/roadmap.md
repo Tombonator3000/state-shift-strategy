@@ -19,7 +19,7 @@ Full detaljstatus: [todo](design/tabloid-2026-09-06/TABLOID_TODO.md) og
 
 Live radio og kort→mål→AI→avis→ny tur er prøvd. Oppfølgingen i PR #807 retter
 rundenummeret, kartets plass og PWA-oppdateringsknappen. Publisert 360×640 målvalg,
-390×844 avis og 1280×800 komplett PC-kart er kontrollert. Siste lesbarhetspatch
+390×844 avis og 1280×800 komplett PC-kart er kontrollert. PR #808 er merget 2026-09-06T10:03:00Z. Den siste lesbarhetspatchen
 retter blek håndtekst, viser delstatsnavn og flytter mobilarkivet inn i menyen.
 203 tester består; kjent lint/dekning er fortsatt ikke grønn. T14: fysisk mobil,
 hørbar avspilling på telefon, 200% zoom og FPS er fortsatt uverifisert. Lovable

@@ -1,3 +1,14 @@
+# 2026-09-06T10:03:00Z — Lesbarhet og avisnavn merget (#808)
+
+`cb187773` er siste produktmerge. 203 tester, typer og bygg består; kjent lint-
+og dekningsgjeld er oppført i QA-rapporten. Mobilhåndens tekst er mørk på papir,
+arkivet finnes i mobilmenyen, og avis/kvitteringer bruker delstatsnavn og navngitte
+vitner. Hele #806–808 følger brukerens implementerings- og merge-instruksjon.
+Lovable-editoren rapporterer identisk SHA; offentlig publisering er ennå ikke
+bekreftet. Detaljert live-status er samlet i docs/qa/tabloid-2026-09-06/README.md.
+
+---
+
 # 2026-09-06 — Live mobile and PC corrections verified (#807)
 
 Merged `7cf05b16` at 09:54:01Z. Pages workflow 34025929221 passed.

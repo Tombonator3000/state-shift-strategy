@@ -4,6 +4,62 @@ This document provides a chronological record of gameplay-impacting changes merg
 
 
 
+
+
+## 2026-09-06 — Mobile receipt contrast and final verification
+
+Verification timestamp: 2026-09-06T10:09:50+00:00. The final review found the action receipt
+needed its own light text colour after the mobile hand changed to paper. This one-line
+CSS correction keeps the played-card name and status readable on the dark receipt.
+203 tests, typecheck and production build pass; existing lint/coverage failures remain.
+The accompanying documentation records #808 publication, the successful Update Now
+reload and the open Lovable-publication/physical-device checks without claiming them passed.
+
+Files changed:
+- `UPDATES_LOG.md`
+- `log.md`
+- `docs/roadmap.md`
+- `docs/design/tabloid-2026-09-06/TABLOID_TODO.md`
+- `docs/qa/tabloid-2026-09-06/README.md`
+- `src/styles/tabloid-press.css`
+- `docs/qa/tabloid-2026-09-06/receipt-types.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/receipt-tests.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/receipt-build.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/receipt-lint.log.gz.b64`
+
+
+## 2026-09-06 — Mobile readability and named newspaper locations (#808)
+
+Merged 2026-09-06T10:03:00Z, commit `cb187773373a9c0ba9eef4b7d796db9deb2d2cd1`.
+App types/tests/build passed. 203 tests / 0 failures / 784 assertions; lint remains
+409 errors / 42 warnings and configured coverage thresholds still fail.
+
+Dark hand text now contrasts with the paper background; mobile dispatch archive
+access lives in the menu. Newspaper and dispatch locations use state names instead
+of FIPS IDs, named card witnesses appear in the article and a repeated footnote is removed.
+This continues Investigate → Uncover Contradiction → Escalate Paranoia → Resolve
+through clearer feedback and source references; no new gameplay rewards are introduced.
+
+Files merged:
+- `UPDATES_LOG.md`
+- `__tests__/game/pressDispatch.test.tsx`
+- `__tests__/game/roundEdition.test.ts`
+- `docs/qa/tabloid-2026-09-06/README.md`
+- `docs/qa/tabloid-2026-09-06/final-build.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/final-lint.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/final-tests.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/final-types.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/tabloid-mobile-target.jpg`
+- `docs/roadmap.md`
+- `log.md`
+- `src/components/newsroom/PressDispatchTray.tsx`
+- `src/components/newsroom/RoundFrontPage.tsx`
+- `src/pages/Index.tsx`
+- `src/styles/tabloid-press.css`
+- `src/systems/news/pressDispatch.ts`
+- `src/systems/news/roundEdition.ts`
+
+
 ## 2026-09-06 — Live newspaper, map and update corrections (#807)
 
 Merged 2026-09-06T09:54:01Z, commit `7cf05b16c1dcfad2831b7aa29633a66dbf16dc1d`.

@@ -88,3 +88,25 @@ the final readability patch. It also names possessive-card witnesses, avoids rep
 the same one-card footnote and moves the mobile archive control into the menu.
 203 tests pass / 0 fail / 784 assertions; types and Pages build pass. Lint remains
 409 errors / 42 warnings; configured coverage thresholds remain failing.
+
+## Final publication — #808
+
+PR #808 merged at 2026-09-06T10:03:00Z as cb187773373a9c0ba9eef4b7d796db9deb2d2cd1.
+App checks and Pages workflow 34026331903 pass. Pages serves index-DOC94eLp.js.
+The old page's Update Now button was exercised successfully and reloaded the game.
+The 390px mobile menu opens the dispatch archive, with the archive dialog receiving focus.
+Final local gates: 203 tests / 0 failures / 784 assertions / 48 files; typecheck and build
+PASS. Coverage 67.19% functions / 74.40% lines still fails configured thresholds;
+lint 409 errors / 42 warnings. No thresholds or lint rules were weakened.
+
+The connected Lovable editor reports the exact final product merge cb187773.
+Final publish request 75b780ec-fcd0-4685-bbb6-778407aa77d0 returns pending. The public
+Lovable browser still serves index-Bd9Ye6x4.js. Browser access to the private editor/preview
+requires sign-in, so production publication is NOT recorded as confirmed. This is distinct
+from source synchronization, which is confirmed across three successive merges.
+
+Remaining: physical phone audio/touch, 200% zoom, FPS and exhaustive legacy-effect
+collision testing. Theme-1 remains an empty historical file; twelve valid original tracks
+are preserved, decoded and used. Direct track switching currently replaces crossfades.
+
+Final visual correction: the paper-colour hand reset also required an explicit light text colour on the dark mobile action receipt. This one-line CSS correction was rechecked with all four mandatory commands: 203 tests and types/build pass; existing lint/coverage outcomes remain unchanged. Evidence is in receipt-*.log.gz.b64.
