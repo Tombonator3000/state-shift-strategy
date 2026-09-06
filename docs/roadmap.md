@@ -11,14 +11,17 @@ Lint/dekning og ekte nettleserreise har fortsatt statusen som er beskrevet neden
 ## Mobilredesign — 2026-09-06
 
 Brukeren bekrefter at mobilspillet fungerer, men at layouten er vanskelig å bruke.
-Ny mobilflate er implementert på `feat/mobile-newsroom-2026-09-06`: fast kampstatus,
+Ny mobilflate er merget og publisert i PR #803–805: fast kampstatus,
 søkbare ZONE-mål, Map/States/Played, sveipbar hånd og én End turn-knapp. Korttypene
 får tydeligere grafikk og handlingsresultatene står igjen over hånden. Hjelp og
-opplæring er tilpasset. 174 tester består; typer/bygg består; lint 410/51 uendret.
+opplæring er tilpasset. 175 tester består; typer/bygg består; lint 410/51 uendret.
 PR #803 er merget og publisert. ZONE → AI → avis → ny tur er gjennomført i nettleser.
-Visuell kontroll fant kortskalering/fanekollisjon; rettelsen er klar med 175 tester.
+Visuell kontroll fant kortskalering/fanekollisjon; rettelsen er merget og publisert.
 PR #804 bekrefter 132×177-kort og grid-faner. Siste rettelse skjuler inaktive
-faner helt, slik at kartet får hele området sitt; sluttkontroll gjenstår.
+faner helt, slik at kartet får hele området sitt. PR #805 er merget 2026-09-06T03:41:15Z
+og Pages-publisering består. Siste visuelle kartkontroll ble blokkert av tidsavbrudd
+i nettleserforbindelsen; den er ikke godkjent. Tidligere mobilgeometri er kontrollert
+ved 390×844, 360×640, 844×390 og 768×1024. Fysisk telefon/ytelse er fortsatt uverifisert.
 [Design og verifikasjon](analysis/mobile-newsroom-2026-09-06/README.md).
 Neste praktiske kontroll: én kamp med én hånd på brukerens telefon, inkludert
 nettleserens adressefelt/sikre marger og de eksisterende effektenes ytelse.

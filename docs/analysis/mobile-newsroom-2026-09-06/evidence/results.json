@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-09-06T03:38:58Z",
+  "recordedAt": "2026-09-06T03:46:16Z",
   "base": "268be5ac0d9fadaf7578b082e2a3bda2afaa9ec4",
   "checks": [
     {
@@ -113,10 +113,15 @@
   },
   "browser": {
     "baseline": "desktop observed 1363x936",
-    "newLayout": "PR803 portrait layout observed; CSS scale/cascade defects found and repaired in follow-up, pending new deployment",
+    "newLayout": "PR803 portrait layout observed; four viewport geometries and ZONE-to-next-turn journey verified. Later CSS fixes in PR804/805 are separately recorded.",
     "physicalDevicePerformance": "unmeasured",
     "journey": "ZONE selected through inspector, Texas targeted, hand/IP/plays updated, AI completed three plays, newspaper opened and was continued",
-    "followup": "After reload, CSS index-CJjU2Zny.css loaded: card 132x177 with transform none; tabs grid 44px high. Menu and Game settings opened. Inactive States wrapper still consumed map space; final CSS correction pending deploy."
+    "followup": "PR804 after reload loaded index-CJjU2Zny.css: card 132x177 with transform none; tabs grid 44px high. Menu and Game settings opened. Inactive States wrapper still consumed map space; PR805 corrects hidden panel layout.",
+    "finalInspection": {
+      "status": "blocked",
+      "reason": "Browser connection refresh-tabs timeouts after deployment, including on a fresh QA tab. Final PR805 map geometry and stylesheet activation were not observed.",
+      "evidence": "browser-checks.json"
+    }
   },
   "github": {
     "pr": 803,
@@ -138,5 +143,17 @@
     "appChecks": "success",
     "pagesRun": 34009263729,
     "pages": "success"
+  },
+  "finalPatch": {
+    "pr": 805,
+    "source": "670f0b9646d67da769b07d91f3bc579848bba94f",
+    "merge": "08f4ba7fcc4e4ae96f6e22a5d6f50bf80f28be21",
+    "mergedAt": "2026-09-06T03:41:15Z",
+    "ciRun": 34009539221,
+    "appChecks": "success",
+    "debtJob": "failure",
+    "pagesRun": 34009619986,
+    "pages": "success",
+    "pagesCompletedAt": "2026-09-06T03:42:12Z"
   }
 }

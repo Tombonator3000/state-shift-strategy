@@ -65,7 +65,7 @@ PR #803 was merged at 2026-09-06T03:23:02Z (`6fd26bd`) and deployed successfully
 ([CI](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34008800667),
 [Pages](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34008855526)).
 The real 390 × 844 view was visually inspected. DOM geometry confirms reachable
-End turn with no document overflow at 390 × 844, 360 × 640 and 844 × 390.
+End turn with no document overflow at 390 × 844, 360 × 640, 844 × 390 and 768 × 1024.
 A ZONE card was selected, Texas was targeted, hand/IP/remaining plays changed,
 the rival completed three cards and the newspaper opened. Its Continue action
 returned control to the player.
@@ -78,7 +78,17 @@ After one reload, the final stylesheet loaded: cards measured 132 × 177 with no
 scale transform, and the tab bar measured 44px high with grid layout. Menu and
 Game settings opened. The retained inactive States wrapper still consumed half
 the map panel: the final patch explicitly removes hidden tab panels from layout.
-Its final viewport inspection is pending deployment.
+PR #805 was merged at 2026-09-06T03:41:15Z (`08f4ba7`) and deployed successfully
+([CI](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34009539221),
+[Pages](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34009619986)).
+Core app checks passed; the separate existing lint/coverage debt job still fails.
+The final post-deployment viewport inspection could not complete: the browser
+connection repeatedly timed out, including on a fresh QA tab. Final map geometry
+and the final stylesheet's browser activation are therefore unverified. This is
+a test connection limitation, not evidence of a new game runtime failure.
+The 13 tested source hashes match the merged source. The observed viewport
+measurements are recorded with their version in `evidence/browser-checks.json`;
+they must not be presented as a final #805 visual pass.
 Screenshots were inspected directly; downloadable screenshot synchronization was
 unavailable, so there are no archived image files claimed as evidence.
 

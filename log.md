@@ -1,3 +1,22 @@
+# 2026-09-06T03:46:00Z — Mobilredesign merget og publisert, sluttstatus dokumentert
+
+PR #805 ble merget 2026-09-06T03:41:15Z (`08f4ba7fcc4e4ae96f6e22a5d6f50bf80f28be21`).
+GitHub app-kontroller består; den separate jobben for kjent lint-/dekningsgjeld feiler.
+Pages-kjøring 34009619986 er fullført med success. Alle 13 testede kildehasher er
+uendret. 175 tester / 0 feil / 652 assertions; typer og bygg består.
+
+Tidligere nettleserreise ZONE → AI → avis → egen tur består. Mobilgeometri ved
+390×844, 360×640, 844×390 og 768×1024 tilhører #803; kort/faner/meny er kontrollert
+på #804. Siste kartkontroll på #805 ble blokkert av gjentatte tidsavbrudd i
+nettleserforbindelsen, også på en ny QA-fane. Ingen visuell PASS eller fps påstås.
+
+Dette statusnotatet endrer bare `UPDATES_LOG.md`, `log.md`, `docs/roadmap.md`,
+`docs/analysis/mobile-newsroom-2026-09-06/README.md`,
+`docs/analysis/mobile-newsroom-2026-09-06/evidence/results.json` og
+`docs/analysis/mobile-newsroom-2026-09-06/evidence/browser-checks.json`.
+
+---
+
 # 2026-09-06T03:38:58Z — Siste kartpanelrettelse
 
 PR #804 er merget og publisert. Nytt stilark etter omlasting ga kort i 132×177

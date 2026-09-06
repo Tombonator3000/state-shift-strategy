@@ -1,0 +1,124 @@
+{
+  "recordedAt": "2026-09-06T03:46:16Z",
+  "method": "Published game in a same-origin iframe; selectable CSS viewport sizes. DOM geometry and screenshots inspected through the controlled browser. Not physical-device emulation.",
+  "pr803": {
+    "merge": "6fd26bd7984e4719552fd7492993407f29773f6d",
+    "viewportMeasurements": [
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "document": {
+          "scrollWidth": 390,
+          "scrollHeight": 844
+        },
+        "endTurn": {
+          "x": 241,
+          "y": 788,
+          "width": 137,
+          "height": 48,
+          "bottom": 836
+        },
+        "withinViewport": true
+      },
+      {
+        "viewport": {
+          "width": 360,
+          "height": 640
+        },
+        "document": {
+          "scrollWidth": 360,
+          "scrollHeight": 640
+        },
+        "endTurn": {
+          "x": 211,
+          "y": 584,
+          "width": 137,
+          "height": 48,
+          "bottom": 632
+        },
+        "withinViewport": true
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "document": {
+          "scrollWidth": 844,
+          "scrollHeight": 390
+        },
+        "endTurn": {
+          "x": 712.671875,
+          "y": 337,
+          "width": 121.328125,
+          "height": 48,
+          "bottom": 385
+        },
+        "withinViewport": true
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "document": {
+          "scrollWidth": 768,
+          "scrollHeight": 1024
+        },
+        "endTurn": {
+          "x": 619,
+          "y": 968,
+          "width": 137,
+          "height": 48,
+          "bottom": 1016
+        },
+        "withinViewport": true
+      }
+    ],
+    "journey": {
+      "status": "pass",
+      "observations": [
+        "Truth game: Tinfoil Hat Supply Co-Op selected through the real inspector",
+        "ZONE selection opened States; Texas found and targeted",
+        "Player IP 5 to 1, hand 5 to 4, remaining plays 3 to 2",
+        "End turn showed Rival turn and disabled Please wait",
+        "AI completed three cards; four-page newspaper opened",
+        "Continue the Operation returned to NO.02, Your turn, five cards and enabled End turn"
+      ]
+    },
+    "screenshots": "Inspected directly; image synchronization unavailable, so no archived image files are claimed."
+  },
+  "pr804": {
+    "merge": "9d4147b887a786593b300db4998bc83ab0b224ca",
+    "stylesheetObservedAfterReload": "index-CJjU2Zny.css",
+    "card": {
+      "title": "Narrative Freeze Frame",
+      "width": 132,
+      "height": 177,
+      "transform": "none"
+    },
+    "tabList": {
+      "display": "grid",
+      "width": 390,
+      "height": 44
+    },
+    "menu": "Newsroom menu and Game settings opened",
+    "defectFound": "Retained hidden States wrapper consumed flex space from the map; corrected in PR805.",
+    "unverified": "MAIN MENU navigation did not complete before browser interaction timed out."
+  },
+  "pr805": {
+    "merge": "08f4ba7fcc4e4ae96f6e22a5d6f50bf80f28be21",
+    "deployment": "success",
+    "finalVisualInspection": "blocked by browser connection timeouts",
+    "finalMapGeometry": "unverified",
+    "browserStylesheetActivation": "unverified"
+  },
+  "limitations": [
+    "No physical touch or mobile browser chrome verification",
+    "No measured frame rate",
+    "Offline, save/load and victory journey not verified by this slice",
+    "Automated tests cover attack receipts; manual attack play not claimed"
+  ]
+}

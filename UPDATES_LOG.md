@@ -2,13 +2,17 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
-## Unmerged — 2026-09-06T03:38:58Z: give the active map its full panel
+## 2026-09-06 — Active mobile map panel restored (#805)
+
+Merge timestamp: 2026-09-06T03:41:15Z. Commit `08f4ba7fcc4e4ae96f6e22a5d6f50bf80f28be21`.
+GitHub app checks and Pages deployment passed. Final post-deployment visual
+inspection is blocked by browser connection timeouts; it is not recorded as PASS.
 
 Hide retained inactive Radix tab panels so an empty States wrapper cannot take
 flex space from the map. 175 tests, typecheck and Pages build pass; existing
 lint/coverage debt is unchanged.
 
-Files prepared:
+Files merged:
 - `UPDATES_LOG.md`
 - `docs/analysis/mobile-newsroom-2026-09-06/README.md`
 - `docs/analysis/mobile-newsroom-2026-09-06/evidence/check-logs.tar.gz`
