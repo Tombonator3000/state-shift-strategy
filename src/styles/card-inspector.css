@@ -1,0 +1,118 @@
+/* Outrank shared dialog/button utilities even when index.css is bundled later. */
+.card-inspector-backdrop[data-state] {
+  z-index: 9998;
+  background: rgb(0 0 0 / 82%);
+}
+
+.card-inspector {
+  --inspector-paper: #f5f2eb;
+  --inspector-ink: #191919;
+  --inspector-accent: #a91828;
+  position: fixed;
+  inset: 50% auto auto 50%;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  width: min(44rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  border: 3px solid var(--inspector-ink);
+  border-radius: 8px;
+  background: var(--inspector-paper);
+  color: var(--inspector-ink);
+  box-shadow: 8px 8px 0 rgb(0 0 0 / 45%);
+}
+
+.card-inspector[data-faction="government"] { --inspector-accent: #17487b; }
+.card-inspector[data-ui-theme="government_classic"] {
+  --inspector-paper: hsl(var(--card));
+  --inspector-ink: hsl(var(--card-foreground));
+}
+
+.card-inspector-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 2px solid currentColor;
+}
+
+.card-inspector-kicker {
+  margin-bottom: 6px;
+  font-size: .875rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.card-inspector .card-inspector-title {
+  font-family: var(--font-headline, Georgia), serif;
+  font-size: 1.75rem;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.card-inspector .card-inspector-description { margin-top: 8px; font-size: .875rem; color: inherit; }
+.card-inspector .card-inspector-close { flex: 0 0 44px; width: 44px; height: 44px; }
+
+.card-inspector-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.card-inspector-art {
+  position: relative;
+  height: clamp(140px, 25dvh, 220px);
+  background: rgb(0 0 0 / 8%);
+  touch-action: pan-y;
+}
+
+.card-inspector-copy { padding: 20px; overflow-wrap: anywhere; }
+.card-inspector-copy section + section { margin-top: 20px; }
+.card-inspector-copy h3 { margin-bottom: 8px; font-size: .875rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+.card-inspector-copy p { font-size: 1rem; line-height: 1.55; white-space: pre-line; }
+.card-inspector-copy p + p { margin-top: 10px; }
+.card-inspector-effect { font-weight: 650; }
+.card-inspector-intelligence { border-left: 3px solid var(--inspector-accent); padding-left: 14px; }
+.card-inspector-intelligence p { font-style: italic; }
+.card-inspector-hint { margin-top: 18px; padding-top: 12px; border-top: 1px solid currentColor; }
+
+.card-inspector-footer {
+  flex: 0 0 auto;
+  padding: 14px 20px max(16px, env(safe-area-inset-bottom));
+  border-top: 2px solid currentColor;
+  background: var(--inspector-paper);
+}
+
+.card-inspector-status { margin-bottom: 10px; font-size: .875rem; line-height: 1.4; }
+.card-inspector-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.card-inspector-actions > button {
+  flex: 1 1 140px;
+  min-height: 44px;
+  height: auto;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: .875rem;
+  white-space: normal;
+}
+.card-inspector-actions .card-inspector-deploy { background: var(--inspector-accent); color: white; border: 1px solid var(--inspector-accent); }
+.card-inspector-discard[aria-pressed="true"] { background: #ffdf95; color: #392100; border-color: #8d5b0c; }
+.card-inspector :focus-visible { outline: 3px solid var(--inspector-accent); outline-offset: -3px; }
+
+@media (min-width: 640px) {
+  .card-inspector-scroll { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); align-items: start; }
+  .card-inspector-art { height: auto; aspect-ratio: 3 / 4; margin: 20px 0 20px 20px; }
+}
+
+@media (max-height: 540px) {
+  .card-inspector { overflow-y: auto; }
+  .card-inspector-scroll { flex: 0 0 auto; overflow: visible; }
+  .card-inspector-header, .card-inspector-copy, .card-inspector-footer { padding: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-inspector, .card-inspector *, .card-inspector-backdrop { animation: none !important; transition: none !important; }
+}

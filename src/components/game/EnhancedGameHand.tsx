@@ -2,7 +2,6 @@ import React, { useState, useRef, useMemo } from 'react';
 import clsx from 'clsx';
 import CardDetailOverlay from './CardDetailOverlay';
 import BaseCard from '@/components/game/cards/BaseCard';
-import { Card } from '@/components/ui/card';
 import type { GameCard, MVPCardType } from '@/rules/mvp';
 import { MVP_CARD_TYPES } from '@/rules/mvp';
 import { useAudioContext } from '@/contexts/AudioContext';
@@ -111,7 +110,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     try {
       await onPlayCard(cardId);
       triggerHaptic('success');
-    } catch (error) {
+    } catch {
       triggerHaptic('error');
       toast({
         title: "❌ Deployment Failed",
@@ -208,11 +207,12 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     }, 0);
   };
 
-  // Swipe handlers for card examination
+  // Only horizontal swipes change cards; vertical gestures scroll the dossier.
   const swipeHandlers = useSwipeGestures({
     onSwipeLeft: () => {
       if (examinedCard) {
         const currentIndex = cards.findIndex(c => c.id === examinedCard);
+        if (currentIndex < 0 || cards.length < 2) return;
         const nextIndex = (currentIndex + 1) % cards.length;
         setExaminedCard(cards[nextIndex].id);
         triggerHaptic('selection');
@@ -221,15 +221,10 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
     onSwipeRight: () => {
       if (examinedCard) {
         const currentIndex = cards.findIndex(c => c.id === examinedCard);
+        if (currentIndex < 0 || cards.length < 2) return;
         const prevIndex = currentIndex === 0 ? cards.length - 1 : currentIndex - 1;
         setExaminedCard(cards[prevIndex].id);
         triggerHaptic('selection');
-      }
-    },
-    onSwipeDown: () => {
-      if (examinedCard) {
-        setExaminedCard(null);
-        triggerHaptic('light');
       }
     }
   });
@@ -240,6 +235,12 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
       ref={handRef}
       onPointerLeave={clearHover}
     >
+      {playingCard && (
+        <div role="status" className="mb-3 flex items-center gap-2 rounded border border-white/30 bg-black/30 p-3 text-sm text-white">
+          <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+          Deploying asset…
+        </div>
+      )}
       <div className="newsroom-hand-grid w-full">
         {cards.length === 0 ? (
           <div className="col-span-full flex min-h-[160px] items-center justify-center rounded border border-dashed border-neutral-700 bg-neutral-900/60 p-6 text-sm font-mono text-white/60">
@@ -459,15 +460,10 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 
             // Zone card targeting - direct activation
             if (normalizeCardType(card.type) === 'ZONE') {
-              // Immediately activate targeting without closing modal
               audio.playSFX('click');
               triggerHaptic('medium');
+              setExaminedCard(null);
               onSelectCard?.(card.id);
-
-              // Close modal after setting up targeting
-              setTimeout(() => {
-                setExaminedCard(null);
-              }, 100);
 
             } else {
               // For all other cards, deploy immediately
@@ -479,14 +475,14 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
           }}
           isDiscardQueued={examinedIsQueued}
           onToggleDiscard={() => {
-            if (!onToggleDiscard || !examinedCardData || disabled || !discardEnabled) {
+            if (!onToggleDiscard || !examinedCardData || !discardEnabled || loadingCard || playingCard) {
               return;
             }
             audio.playSFX('click');
             triggerHaptic(examinedIsQueued ? 'light' : 'selection');
             onToggleDiscard(examinedCardData.id);
           }}
-          discardEnabled={!disabled && discardEnabled}
+          discardEnabled={discardEnabled && !loadingCard && !playingCard}
           swipeHandlers={isMobile ? swipeHandlers : undefined}
           articleAvailable={Boolean(examinedCardData && getArticleForCard(examinedCardData.id))}
           onRequestArticle={() => {
@@ -501,30 +497,6 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
         />
       )}
 
-      {/* Enhanced Card playing overlay */}
-      {playingCard && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-[9999]">
-          <Card className="p-8 text-center bg-card/90 backdrop-blur-md border-primary shadow-2xl shadow-primary/50">
-            <div className="space-y-6">
-              <div className="text-3xl font-bold text-foreground mb-2 font-mono">
-                🚀 DEPLOYING ASSET
-              </div>
-              <div className="text-lg text-muted-foreground font-mono">
-                Operation in progress...
-              </div>
-              <div className="flex items-center justify-center">
-                <Loader2 className="w-12 h-12 animate-spin text-primary" />
-              </div>
-              <div className="text-sm text-muted-foreground font-mono">
-                {(() => {
-                  const card = cards.find(c => c.id === playingCard);
-                  return card ? `"${card.name}"` : 'Unknown Asset';
-                })()}
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
     </div>
   );
 };

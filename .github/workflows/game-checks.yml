@@ -1,0 +1,98 @@
+name: Game checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: game-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  game:
+    name: App types, tests and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.19.0'
+          cache: npm
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Install from npm lockfile
+        run: npm ci
+      - name: Typecheck the app
+        run: npm run typecheck
+      - name: Run active Bun tests
+        run: bun test
+      - name: Build production assets
+        run: npm run build
+
+  debt:
+    name: Lint and coverage (known debt)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.19.0'
+          cache: npm
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Install from npm lockfile
+        run: npm ci
+      # Collect both reports, then fail the job if either gate failed.
+      # Existing lint rules and coverage thresholds remain enforced.
+      - name: Lint
+        id: lint
+        continue-on-error: true
+        run: npm run lint 2>&1 | tee lint.log
+      - name: Coverage
+        id: coverage
+        continue-on-error: true
+        run: bun test --coverage --coverage-reporter=text 2>&1 | tee coverage.log
+      - name: Report gate outcomes
+        if: always()
+        env:
+          LINT_OUTCOME: ${{ steps.lint.outcome }}
+          COVERAGE_OUTCOME: ${{ steps.coverage.outcome }}
+        run: |
+          {
+            printf '## Lint and coverage\n\n'
+            printf '| Gate | Outcome |\n|---|---|\n'
+            printf '| Lint | %s |\n' "$LINT_OUTCOME"
+            printf '| Coverage | %s |\n' "$COVERAGE_OUTCOME"
+            printf '\nKnown failures are documented in docs/analysis/gauntlet-2026-09-05-card-flow/README.md. They are not passing gates.\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-and-coverage-${{ github.run_id }}
+          path: |
+            lint.log
+            coverage.log
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Enforce both gates
+        if: always()
+        env:
+          LINT_OUTCOME: ${{ steps.lint.outcome }}
+          COVERAGE_OUTCOME: ${{ steps.coverage.outcome }}
+        run: |
+          if [ "$LINT_OUTCOME" != success ] || [ "$COVERAGE_OUTCOME" != success ]; then
+            echo '::error::Lint or coverage did not pass. See the separate gate outcomes and evidence.'
+            exit 1
+          fi

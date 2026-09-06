@@ -7,13 +7,15 @@ Spillets eksisterende engelske kort- og avistekst er beholdt.
 
 - [Aktiv forbedringsplan](docs/roadmap.md)
 - [Gauntlet: funn, tester og åpne porter](docs/analysis/gauntlet-2026-09-05/README.md)
+- [Oppfølging: kortdetaljer, discard og PR-kontroller](docs/analysis/gauntlet-2026-09-05-card-flow/README.md)
 - [Spilldesign](DESIGN_DOC_MVP.md), [teknisk oversikt](docs/TECHNICAL_README.md)
 - [Arbeidslogg](log.md), [endringshistorikk](UPDATES_LOG.md)
 
 ## Kjør lokalt
 
 Testmiljø for denne reparasjonen: Node 24.19.0, npm-låst installasjon og Bun 1.4.2.
-Bun brukes til tester; `package-lock.json` er installasjonsgrunnlaget.
+Bun brukes til tester; `package-lock.json` er eneste installasjonsgrunnlag.
+Den ekstra `bun.lock` er fjernet slik at verktøy ikke velger mellom to installasjonslåser.
 
 ```sh
 git clone https://github.com/Tombonator3000/state-shift-strategy.git
@@ -37,6 +39,10 @@ npm run lint:exports
 solution-konfigurasjon og er ikke bevis på at appen er typekontrollert. Eksportanalysen
 er en kandidatrapport, ikke automatisk tillatelse til å slette filer. Lint har kjent
 gjeld; se Gauntlet-rapporten for målt baseline og gjenværende feil.
+
+PR-er kjører `Game checks`: app-typecheck, aktive tester og produksjonsbygg i én jobb,
+lint og dekning i en separat jobb. Sistnevnte viser kjent gjeld som feil og lagrer
+begge loggene som artefakt; ingen lint-regler eller dekningskrav er slått av.
 
 ## Redigering og publisering
 

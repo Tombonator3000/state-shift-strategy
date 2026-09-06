@@ -1,0 +1,89 @@
+{
+  "verified_at": "2026-09-06T00:00:12Z",
+  "baseline_pr_head": "d7e1267b1f7c9b5f517a100f9dbcef9635e8ba10",
+  "runtime": {
+    "node": "24.19.0",
+    "npm": "11.9.0",
+    "bun": "1.4.2"
+  },
+  "checks": [
+    {
+      "check": "typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "seconds": 12.07
+    },
+    {
+      "check": "tests",
+      "command": [
+        "npm",
+        "exec",
+        "--yes",
+        "--package=bun@1.4.2",
+        "--",
+        "bun",
+        "test"
+      ],
+      "exit_code": 0,
+      "seconds": 12.77
+    },
+    {
+      "check": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "seconds": 13.72
+    },
+    {
+      "command": "bun test --coverage --coverage-reporter=text",
+      "runtime": "Bun 1.4.2 via npm exec",
+      "exit_code": 1,
+      "seconds": 11.69
+    },
+    {
+      "command": "npm run lint",
+      "exit_code": 1,
+      "seconds": 6.29
+    }
+  ],
+  "tests": {
+    "pass": 146,
+    "fail": 0,
+    "assertions": 552,
+    "files": 37,
+    "new_regressions": 8
+  },
+  "lint": {
+    "errors": 438,
+    "warnings": 51,
+    "prior_errors": 439,
+    "prior_warnings": 51
+  },
+  "coverage": {
+    "functions_percent": 59.02,
+    "lines_percent": 67.4,
+    "gate": "FAIL",
+    "thresholds_changed": false
+  },
+  "browser": {
+    "status": "UNVERIFIED",
+    "preview_server": "running before teardown",
+    "navigation_error": "net::ERR_BLOCKED_BY_CLIENT",
+    "screenshots": 0,
+    "fps_measured": false
+  },
+  "ci": {
+    "configuration": "game-checks.yml",
+    "runtime_verification": "pending publication; local equivalent commands recorded"
+  },
+  "base_commit": "512d25211d0a18a4bd38b9a435af5d4207b4ec6d",
+  "base_tree_identical_to_test_baseline": true,
+  "css_review": "Built CSS confirmed shared utility order; inspector selectors have higher specificity for backdrop, title, description and close button."
+}

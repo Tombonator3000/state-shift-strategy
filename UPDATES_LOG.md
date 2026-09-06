@@ -2,6 +2,17 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## Unmerged — 2026-09-06T00:00:12Z: card inspection and discard follow-up
+
+Readable full card text, accessible focus/Escape behavior, independent discard
+controls after the play limit, non-blocking deployment status and immediate ZONE
+target selection. A single npm install lock and explicit PR checks make validation
+reproducible and visible. Local types/build and 146 tests pass; lint and coverage
+still fail their unchanged gates. Real browser layout and fps remain unverified.
+PR #800 was merged externally during this work; these changes use a new branch.
+
+[Report, timestamp and exact file list](docs/analysis/gauntlet-2026-09-05-card-flow/changes.md).
+
 ## Unmerged — 2026-09-05T20:32:30Z: draft PR #800 published
 
 Explicit user authorization received. [Draft PR #800](https://github.com/Tombonator3000/state-shift-strategy/pull/800) now contains the
