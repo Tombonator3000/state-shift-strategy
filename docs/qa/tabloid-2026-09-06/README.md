@@ -66,3 +66,25 @@ These are recorded findings, not waived gates. Follow-up source and final live r
 will be documented after the corrective deployment.
 
 Follow-up local gates: 201 tests pass / 0 fail / 778 assertions / 48 files; typecheck and Pages build pass. Lint remains 409 errors / 42 warnings; coverage thresholds still fail. Added tests reproduce the completed-round integration and PWA activation race.
+
+## Corrected live build — #807
+
+Merged 2026-09-06T09:54:01Z as `7cf05b16c1dcfad2831b7aa29633a66dbf16dc1d`.
+App checks and Pages workflow 34025929221 pass; Pages serves index-BwzXztky.js.
+Lovable editor reports the same SHA. Publishing request b6f10eb5-b35d-45b0-8e98-61cadcb84eef
+returned pending. The public Lovable browser still showed its old bundle; private
+editor and preview require browser sign-in. Connected-tool source access is available.
+
+| Live browser check | Result |
+| --- | --- |
+| 360×640 target dialog | PASS: search, select Texas, preview +1 pressure / 4 IP, confirm; 5 IP becomes 1 |
+| 390×844 round newspaper | PASS: ROUND 1, Maria source, three rival responses; Continue returns to round 2 |
+| 1280×800 PC board | PASS: whole map fits, hand at bottom, played cards in side column |
+| PWA QA route | PASS: revisiting /qa/mobile-preview.html opens QA instead of SPA 404 |
+| Physical touch/audio, 200% zoom, FPS | Not verified |
+
+The hand label/hint contrast and raw target ID 48 in article copy are corrected in
+the final readability patch. It also names possessive-card witnesses, avoids repeating
+the same one-card footnote and moves the mobile archive control into the menu.
+203 tests pass / 0 fail / 784 assertions; types and Pages build pass. Lint remains
+409 errors / 42 warnings; configured coverage thresholds remain failing.

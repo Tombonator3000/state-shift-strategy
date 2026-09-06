@@ -32,3 +32,11 @@ describe('current round edition', () => {
     expect(edition.tone).toBe('government'); expect(edition.headline).toContain('ROUTINE'); expect(edition.outcome).toContain('-3%'); expect(edition.outcome).toContain('1 state capture'); expect(edition.records).toHaveLength(2);
   });
 });
+
+it('uses witness names and readable state names instead of engine IDs in article copy', () => {
+  const edition = composeRoundEdition([{ ...make('TRUTH-192', "Maria's Copier Jam of Destiny"), targetState: '48' }], [], 7, 'truth');
+  expect(edition.headline).toContain('MARIA');
+  expect(edition.subhead).toContain('Texas');
+  expect(edition.subhead).not.toContain('48');
+  expect(edition.body[2]).not.toContain('correct their recollection');
+});

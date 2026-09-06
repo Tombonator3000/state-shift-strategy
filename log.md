@@ -1,3 +1,16 @@
+# 2026-09-06 — Live mobile and PC corrections verified (#807)
+
+Merged `7cf05b16` at 09:54:01Z. Pages workflow 34025929221 passed.
+360×640 target preview/confirmation matches the 4 IP cost. At 390×844 the
+completed round now includes its played card and rival responses. Continue reaches
+round 2. At 1280×800 the full map fits above the hand with played cards beside it.
+Lovable source matches; public deployment remains unconfirmed after a pending response.
+Last readability patch removes raw state IDs, improves hand text contrast and moves
+mobile archive access into the menu. Tests: 203 pass, known lint/coverage debt remains.
+See UPDATES_LOG.md for merged file list and docs/qa/tabloid-2026-09-06/README.md for evidence.
+
+---
+
 # 2026-09-06 — Todo implemented and first live verification (#806)
 
 Merged `3f5fda27` at 09:44:21Z. Lovable project and GitHub main match. Pages build

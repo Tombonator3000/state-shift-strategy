@@ -3362,6 +3362,7 @@ const Index = () => {
           hand={battleHand}
           briefing={<>{renderSidebar()}{contextualHelp}</>}
           menu={close => <div className="mobile-menu-actions"><NewsroomSoundControl />
+            <button type="button" onClick={() => { close(); queueMicrotask(() => window.dispatchEvent(new Event('open-press-archive'))); }}>Press dispatch archive</button>
             <button type="button" onClick={() => { close(); setShowInGameOptions(true); audio.playSFX('click'); }}>Game settings</button>
             <button type="button" onClick={() => { close(); setPlayerHubSource('game'); setShowPlayerHub(true); audio.playSFX('click'); }}>Player hub & archive</button>
             <button type="button" onClick={() => { close(); toggleFullscreen(); }}>{isFullscreen ? 'Exit full screen' : 'Full screen'}</button>

@@ -17,12 +17,14 @@ rundebundne artikler, avisdesign og kø/arkiv for Breaking/Redacted/komboer.
 Full detaljstatus: [todo](design/tabloid-2026-09-06/TABLOID_TODO.md) og
 [QA-rapport](qa/tabloid-2026-09-06/README.md).
 
-Live radio og PC-kort→mål→AI→avis→ny tur er prøvd. Kontrollen avdekket feil
-rundenummer på avisens kildefilter og for høy PC-kartflate; oppfølgingsrettelser
-verifiseres nå sammen med PWA-oppdatering. T14 er ikke ferdig: fysisk mobil,
-hørbar avspilling på telefon, 200% zoom og målt FPS gjenstår. Enkeltstående eldre
-paranormale effekter er fortsatt utenfor den nye hovedkøen. Theme-1 er tom og
-hoppes over; 12 eksisterende spor dekodes korrekt. Lint/dekning har kjent gjeld.
+Live radio og kort→mål→AI→avis→ny tur er prøvd. Oppfølgingen i PR #807 retter
+rundenummeret, kartets plass og PWA-oppdateringsknappen. Publisert 360×640 målvalg,
+390×844 avis og 1280×800 komplett PC-kart er kontrollert. Siste lesbarhetspatch
+retter blek håndtekst, viser delstatsnavn og flytter mobilarkivet inn i menyen.
+203 tester består; kjent lint/dekning er fortsatt ikke grønn. T14: fysisk mobil,
+hørbar avspilling på telefon, 200% zoom og FPS er fortsatt uverifisert. Lovable
+har samme kilde; publiseringsverktøyet returnerer pending og offentlig ny versjon
+må fortsatt bekreftes. Enkeltstående eldre paranormale effekter er utenfor hovedkøen.
 
 ## Mobilredesign — 2026-09-06
 

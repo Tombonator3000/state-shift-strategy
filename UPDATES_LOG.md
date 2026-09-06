@@ -3,6 +3,45 @@
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
 
+
+## 2026-09-06 — Live newspaper, map and update corrections (#807)
+
+Merged 2026-09-06T09:54:01Z, commit `7cf05b16c1dcfad2831b7aa29633a66dbf16dc1d`.
+App types/tests/build and Pages workflow 34025929221 passed. Lint and coverage
+remain known failures (409 errors / 42 warnings; thresholds unchanged).
+
+The completed round is now passed to the newspaper, the PC map fits its panel with
+played cards beside it, and Update Now reloads even if its worker is already active.
+The responsive QA page is exempt from service-worker SPA fallback.
+
+Live verification: 360×640 target picker displays Texas 0 → 1 and IP 5 → 1;
+confirmation matches. At 390×844 the round-1 newspaper includes the played card
+and three AI responses; Continue returns to round 2. At 1280×800 the complete
+map fits above the hand. Physical-device audio, touch and FPS remain unverified.
+The last visual pass found pale mobile text and raw state IDs in story copy;
+these small follow-up corrections are documented separately.
+
+Files merged:
+- `UPDATES_LOG.md`
+- `__tests__/game/pwaUpdate.test.ts`
+- `__tests__/hooks/playerTurnGuards.test.tsx`
+- `docs/qa/tabloid-2026-09-06/README.md`
+- `docs/qa/tabloid-2026-09-06/audio-decode.json`
+- `docs/qa/tabloid-2026-09-06/followup-build.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/followup-lint.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/followup-tests.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/followup-types.log.gz.b64`
+- `docs/roadmap.md`
+- `log.md`
+- `src/components/game/EnhancedUSAMap.tsx`
+- `src/hooks/usePWA.ts`
+- `src/pages/Index.tsx`
+- `src/styles/tabloid-press.css`
+- `src/systems/news/roundEdition.ts`
+- `src/utils/pwaUpdate.ts`
+- `vite.config.ts`
+
+
 ## 2026-09-06 — Tabloid newsroom, pressure targeting and radio (#806)
 
 Merged 2026-09-06T09:44:21Z, commit `3f5fda27618f6053b3dfbae1f5eaf9dd6bce7fe9`.
