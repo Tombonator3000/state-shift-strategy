@@ -118,4 +118,13 @@ describe('mobile battle actions', () => {
     fireEvent.click(within(screen.getByRole('dialog', { name: 'Newsroom menu' })).getByRole('button', { name: 'Game settings' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
+
+  it('reports the affected side for attacks and the selected state for ZONE cards', () => {
+    const { rerender } = render(<Battle playedCards={[{ ...record, truthDelta: 0, aiIpDelta: -2 }]} />);
+    expect(screen.getByText('-2 rival IP')).toBeTruthy();
+    rerender(<Battle playedCards={[{ ...record, player: 'ai', truthDelta: 0, ipDelta: -2, aiIpDelta: -3 }]} />);
+    expect(screen.getByText('-2 your IP')).toBeTruthy();
+    rerender(<Battle playedCards={[{ ...record, card: zone, truthDelta: 0, targetState: 'texas' }]} />);
+    expect(screen.getByText('TX targeted')).toBeTruthy();
+  });
 });

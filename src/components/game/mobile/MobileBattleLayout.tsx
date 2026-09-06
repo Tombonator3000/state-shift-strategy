@@ -48,6 +48,14 @@ export function MobileBattleLayout(props: MobileBattleLayoutProps) {
   const rivalCount = states.filter(state => state.owner === 'ai').length;
   const remaining = Math.max(0, 3 - playsUsed);
   const latest = props.playedCards.at(-1);
+  const affectedState = states.find(state => state.id === latest?.targetState || state.abbreviation === latest?.targetState);
+  const opposingIPDelta = latest?.player === 'human' ? latest.aiIpDelta : latest?.ipDelta;
+  const receiptOutcome = !latest ? null
+    : latest.capturedStates.length ? `${latest.capturedStates.length} state${latest.capturedStates.length === 1 ? '' : 's'} captured`
+    : latest.truthDelta !== 0 ? `${signed(latest.truthDelta)}% truth`
+    : opposingIPDelta ? `${signed(opposingIPDelta)} ${latest.player === 'human' ? 'rival' : 'your'} IP`
+    : affectedState ? `${affectedState.abbreviation} targeted`
+    : null;
   const stateList = useMemo(() => states
     .filter(state => `${state.name} ${state.abbreviation}`.toLowerCase().includes(filter.toLowerCase().trim()))
     .slice().sort((a, b) => {
@@ -137,7 +145,7 @@ export function MobileBattleLayout(props: MobileBattleLayoutProps) {
 
       <section className="mobile-hand-zone" aria-label="Your hand">
         <div className="mobile-action-receipt" role="status" aria-live="polite">
-          {latest ? <span className="mobile-receipt-entry" key={`${latest.timestamp}-${props.playedCards.length}`} data-type={latest.card.type}><span>{latest.player === 'human' ? 'YOU PLAYED' : 'RIVAL PLAYED'}</span><strong>{latest.card.name}</strong>{latest.truthDelta !== 0 && <b>{signed(latest.truthDelta)}% truth</b>}</span>
+          {latest ? <span className="mobile-receipt-entry" key={`${latest.timestamp}-${props.playedCards.length}`} data-type={latest.card.type}><span>{latest.player === 'human' ? 'YOU PLAYED' : 'RIVAL PLAYED'}</span><strong>{latest.card.name}</strong>{receiptOutcome && <b>{receiptOutcome}</b>}</span>
             : <span className="mobile-receipt-entry"><span>FIRST EDITION</span><strong>Pick a card. Make the headlines.</strong></span>}
         </div>
         <div className="mobile-hand-heading"><h2>Your hand <span>{props.handCount}</span></h2><span className="mobile-play-pips" aria-label={`${remaining} of 3 card plays remaining`}>{[0, 1, 2].map(i => <i key={i} data-used={i < playsUsed} />)}<span>{remaining} plays left</span></span></div>

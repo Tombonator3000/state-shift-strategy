@@ -44,14 +44,14 @@ mechanics or narrative/card bank changes.
 
 ## Verification
 
-Six new interaction tests exercise the real hand inspector, ZONE targeting,
+Seven new interaction tests exercise the real hand inspector, ZONE targeting,
 owned-state rejection, discard after the play limit, opposing-turn locks,
 state inspection, turn end, history and briefing/menu behavior.
 
 Typecheck and both Vite builds pass. The final Pages build and typecheck cover
-the final code. All 174 tests pass (649 assertions, 42 files). Lint remains
-410 errors / 51 warnings, matching the base. Coverage is 65.02% functions /
-71.92% lines and exits 1 against unchanged thresholds. Logs are compressed in
+the final code. All 175 tests pass (652 assertions, 42 files). Lint remains
+410 errors / 51 warnings, matching the base. Coverage is 65.03% functions /
+71.93% lines and exits 1 against unchanged thresholds. Logs are compressed in
 `evidence/check-logs.tar.gz`; results and tested source hashes are alongside it.
 
 The local browser cannot connect to the local preview server in this environment.
@@ -61,8 +61,21 @@ iframe at selectable viewport sizes for repeatable visual inspection after Pages
 deployment. It changes iframe dimensions only, not browser identity or game state.
 It does not emulate device performance, mobile browser chrome or touch hardware.
 
-New viewport inspection is pending publication; this checkpoint does not mark
-mobile geometry, animation performance or browser travel as passed.
+PR #803 was merged at 2026-09-06T03:23:02Z (`6fd26bd`) and deployed successfully
+([CI](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34008800667),
+[Pages](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34008855526)).
+The real 390 × 844 view was visually inspected. DOM geometry confirms reachable
+End turn with no document overflow at 390 × 844, 360 × 640 and 844 × 390.
+A ZONE card was selected, Texas was targeted, hand/IP/remaining plays changed,
+the rival completed three cards and the newspaper opened. Its Continue action
+returned control to the player.
+
+Visual review caught two genuine defects that component tests cannot detect:
+legacy CSS scaled compact cards to 85%, and shared tab utilities overrode the
+three-column tab bar. The follow-up scopes these styles and improves the receipt
+for attacks and ZONE targets. Its final geometry check awaits deployment.
+Screenshots were inspected directly; downloadable screenshot synchronization was
+unavailable, so there are no archived image files claimed as evidence.
 
 Physical-device performance, offline behavior and the separate ChatGPT Work
 "cache exceeded" issue are not verified by this slice. Existing large bundle and

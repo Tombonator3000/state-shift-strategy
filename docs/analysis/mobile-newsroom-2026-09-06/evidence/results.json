@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-09-06T02:56:25Z",
+  "recordedAt": "2026-09-06T03:30:01Z",
   "base": "268be5ac0d9fadaf7578b082e2a3bda2afaa9ec4",
   "checks": [
     {
@@ -36,12 +36,40 @@
       "seconds": 13.74,
       "exitCode": 0,
       "log": "typecheck.log"
+    },
+    {
+      "command": "npm run build",
+      "startedAt": "2026-09-06T03:28:54.807435+00:00",
+      "seconds": 13.69,
+      "exitCode": 0,
+      "log": "visual-build-pages.log"
+    },
+    {
+      "command": "npm exec --yes --package=bun@1.4.2 -- bun test --coverage --coverage-reporter=text",
+      "startedAt": "2026-09-06T03:28:54.805982+00:00",
+      "seconds": 14.55,
+      "exitCode": 1,
+      "log": "visual-coverage.log"
+    },
+    {
+      "command": "npm run lint",
+      "startedAt": "2026-09-06T03:28:54.806792+00:00",
+      "seconds": 6.71,
+      "exitCode": 1,
+      "log": "visual-lint.log"
+    },
+    {
+      "command": "npm run typecheck",
+      "startedAt": "2026-09-06T03:28:54.805927+00:00",
+      "seconds": 12.87,
+      "exitCode": 0,
+      "log": "visual-typecheck.log"
     }
   ],
   "tests": {
-    "pass": 174,
+    "pass": 175,
     "fail": 0,
-    "assertions": 649,
+    "assertions": 652,
     "files": 42
   },
   "lint": {
@@ -50,14 +78,26 @@
     "baselineUnchanged": true
   },
   "coverage": {
-    "functions": 65.02,
-    "lines": 71.92,
+    "functions": 65.03,
+    "lines": 71.93,
     "thresholdsUnchanged": true,
     "status": "fails existing thresholds"
   },
   "browser": {
     "baseline": "desktop observed 1363x936",
-    "newLayout": "pending deployed viewport inspection",
-    "physicalDevicePerformance": "unmeasured"
+    "newLayout": "PR803 portrait layout observed; CSS scale/cascade defects found and repaired in follow-up, pending new deployment",
+    "physicalDevicePerformance": "unmeasured",
+    "journey": "ZONE selected through inspector, Texas targeted, hand/IP/plays updated, AI completed three plays, newspaper opened and was continued"
+  },
+  "github": {
+    "pr": 803,
+    "source": "b4fc7218b0cdba14a7d0afc56b06102d2e83a0d3",
+    "merge": "6fd26bd7984e4719552fd7492993407f29773f6d",
+    "mergedAt": "2026-09-06T03:23:02Z",
+    "ciRun": 34008800667,
+    "appChecks": "success",
+    "debtJob": "failure",
+    "pagesRun": 34008855526,
+    "pages": "success"
   }
 }
