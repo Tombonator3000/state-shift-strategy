@@ -66,3 +66,6 @@ export function composeRoundEdition(plays: EditionPlay[], events: GameEvent[], r
   if (focal.length && opposition.length) body.push(`The rival desk filed ${opposition.length} response${opposition.length === 1 ? '' : 's'}. Both accounts remain attached to the same case; neither newsroom has withdrawn its version.`);
   return { ...common, headline, subhead, body, caption: `${first.evidence[0].toUpperCase()}${first.evidence.slice(1)}. Illustration from the source dispatch.` };
 }
+
+// The engine advances the round counter before opening the completed round’s paper.
+export const completedRoundNumber = (incomingRound: number) => Math.max(1, incomingRound - 1);

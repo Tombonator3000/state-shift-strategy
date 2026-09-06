@@ -1,0 +1,62 @@
+[
+  {
+    "path": "public/muzak/Government-1.mp3",
+    "exit_code": 0,
+    "errors": ""
+  },
+  {
+    "path": "public/muzak/Government-2.mp3",
+    "exit_code": 0,
+    "errors": ""
+  },
+  {
+    "path": "public/muzak/Government-3.mp3",
+    "exit_code": 0,
+    "errors": ""
+  },
+  {
+    "path": "public/muzak/Government-4.mp3",
+    "exit_code": 0,
+    "errors": ""
+  },
+  {
+    "path": "public/muzak/Government-5.mp3",
+    "exit_code": 0,
+    "errors": ""
+  },
+  {
+    "path": "public/muzak/Theme-2.mp3",
+    "exit_code": 0,
+    "errors": ""
+  },
+  {
+    "path": "public/muzak/Truth-1.mp3",
+    "exit_code": 0,
+    "errors": ""
+  },
+  {
+    "path": "public/muzak/Truth-2.mp3",
+    "exit_code": 0,
+    "errors": ""
+  },
+  {
+    "path": "public/muzak/Truth-3.mp3",
+    "exit_code": 0,
+    "errors": ""
+  },
+  {
+    "path": "public/muzak/Truth-4.mp3",
+    "exit_code": 0,
+    "errors": ""
+  },
+  {
+    "path": "public/muzak/Truth-5.mp3",
+    "exit_code": 0,
+    "errors": ""
+  },
+  {
+    "path": "public/muzak/endcredits-theme.mp3",
+    "exit_code": 0,
+    "errors": ""
+  }
+]

@@ -1,3 +1,4 @@
+import { completedRoundNumber } from '@/systems/news/roundEdition';
 import { PressDispatchTray } from '@/components/newsroom/PressDispatchTray';
 import { StateTargetPicker } from '@/components/newsroom/StateTargetPicker';
 import { NewsroomSoundControl } from '@/components/newsroom/NewsroomSoundControl';
@@ -3194,28 +3195,21 @@ const Index = () => {
   );
 
   const leftPaneContent = (
-    <div className="flex h-full min-h-0 flex-col gap-4">
-      <div className="flex min-h-0 flex-1 flex-col gap-4">
-        <div className="flex min-h-[320px] flex-1 flex-col gap-4 md:flex-row">
-          <div className="relative flex min-h-[320px] flex-1 flex-col overflow-hidden rounded border-2 border-newspaper-border bg-white/80">
-            <div id="game-map-board" className="map-scanlines relative flex-1">
-              {gameState.selectedCard && gameState.hand.find(card => card.id === gameState.selectedCard)?.type === 'ZONE' && (
-                <div role="status" className="flex items-center justify-between gap-3 border-b-2 border-black bg-amber-100 p-3 text-sm text-black">
-                  <span>Choose an unowned or rival state for your ZONE card.</span>
-                  <Button variant="outline" onClick={() => { selectCard(null); selectTargetState(null); }}>Cancel</Button>
-                </div>
-              )}
-              {battleMap}
+    <div className="desktop-newsroom-board">
+      <section className="desktop-map-column">
+        <div id="game-map-board" className="map-scanlines">
+          {gameState.hand.some(card => card.id === gameState.selectedCard && requiresStateTarget(card)) && (
+            <div role="status" className="flex items-center justify-between gap-3 border-b-2 border-black bg-amber-100 p-3 text-sm text-black">
+              <span>Choose an unowned or rival state for this card.</span>
+              <Button variant="outline" onClick={() => { selectCard(null); selectTargetState(null); }}>Cancel</Button>
             </div>
-          </div>
+          )}
+          {battleMap}
         </div>
-        <div className="rounded border-2 border-newspaper-border bg-newspaper-bg shadow-sm">
-          <PlayedCardsDock
-            playedCards={gameState.cardsPlayedThisRound}
-            onInspectCard={(card) => setInspectedPlayedCard(card)}
-          />
-        </div>
-      </div>
+      </section>
+      <aside className="desktop-played-column">
+        <PlayedCardsDock playedCards={gameState.cardsPlayedThisRound} onInspectCard={card => setInspectedPlayedCard(card)} />
+      </aside>
     </div>
   );
 
@@ -3517,7 +3511,7 @@ const Index = () => {
         <TabloidNewspaper
           events={gameState.currentEvents}
           playedCards={gameState.cardsPlayedThisRound}
-          round={gameState.round}
+          round={completedRoundNumber(gameState.round)}
           faction={gameState.faction}
           truth={gameState.truth}
           turn={gameState.turn}

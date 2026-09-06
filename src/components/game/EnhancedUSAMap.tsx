@@ -1221,8 +1221,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   const viewBoxDefinition = viewBox;
 
   return (
-    <div className="relative">
-      <Card className="p-4 bg-card border-border relative">
+    <div className="press-us-map relative">
+      <Card className="press-map-frame p-4 bg-card border-border relative">
 
         <div
           id="us-map-stage"

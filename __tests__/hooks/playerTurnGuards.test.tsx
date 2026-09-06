@@ -1,3 +1,4 @@
+import { completedRoundNumber, composeRoundEdition } from '@/systems/news/roundEdition';
 import { afterEach, describe, expect, it } from 'bun:test';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { AchievementProvider } from '@/contexts/AchievementContext';
@@ -119,5 +120,22 @@ describe('pressure cards through both live APIs', () => {
       await act(async () => { expect((await result.current.playCardAnimated(zone.id, async () => ({ cancelled: false, countered: false }), target)).cancelled).toBe(true); });
       expect(result.current.gameState).toBe(before);
     }
+  });
+});
+
+describe('live completed-round newspaper contract', () => {
+  it('uses the resolved round even after the engine advances to the incoming round', () => {
+    const { result } = mount();
+    act(() => result.current.setGameState(prev => ({ ...prev, round: 7, hand: [card], ip: 10, truth: 50, phase: 'action', currentPlayer: 'human', editorRuntime: null, editorDef: null })));
+    act(() => result.current.playCard(card.id));
+    act(() => result.current.setGameState(prev => ({ ...prev, currentPlayer: 'ai', phase: 'ai_turn' })));
+    act(() => result.current.endTurn());
+    const state = result.current.gameState;
+    expect(state.round).toBe(8);
+    expect(state.phase).toBe('newspaper');
+    const edition = composeRoundEdition(state.cardsPlayedThisRound, state.currentEvents, completedRoundNumber(state.round), state.faction);
+    expect(edition.round).toBe(7);
+    expect(edition.sources.map(source => source.id)).toContain(card.id);
+    expect(edition.headline).not.toBe('NOTHING HAPPENED. OFFICIALLY.');
   });
 });

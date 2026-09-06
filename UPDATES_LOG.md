@@ -2,6 +2,80 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+
+## 2026-09-06 — Tabloid newsroom, pressure targeting and radio (#806)
+
+Merged 2026-09-06T09:44:21Z, commit `3f5fda27618f6053b3dfbae1f5eaf9dd6bce7fe9`.
+App types/tests/build and Pages deployment passed. Lint/coverage remain known failures.
+
+Implemented shared pressure targeting, single editor pressure application, a base-aware
+lazy radio, current-round article composition, newspaper-style UI and queued press
+receipts. The Lovable editor synchronized to the same merge. Pages music starts,
+pauses across scene changes and switches recordings in the real browser. Twelve
+existing MP3s also decode fully with ffmpeg; the empty Theme-1 is preserved and skipped.
+
+Post-publication inspection found the completed newspaper was passed the already
+advanced round number and the desktop map was taller than its panel. The old Update
+Now button could also do nothing after automatic worker activation. Corrections are
+being verified in the follow-up described in docs/qa/tabloid-2026-09-06/README.md.
+No physical-mobile/FPS approval is claimed.
+
+Files merged:
+- `__tests__/game/newsroomRadio.test.ts`
+- `__tests__/game/pressDispatch.test.tsx`
+- `__tests__/game/roundEdition.test.ts`
+- `__tests__/game/stateTargetPicker.test.tsx`
+- `__tests__/hooks/playerTurnGuards.test.tsx`
+- `__tests__/mvp/targetingParity.test.ts`
+- `components.json`
+- `docs/design/tabloid-2026-09-06/TABLOID_TODO.md`
+- `docs/qa/tabloid-2026-09-06/README.md`
+- `docs/qa/tabloid-2026-09-06/audio-audit.json`
+- `docs/qa/tabloid-2026-09-06/build.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/full-tests.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/lint.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/pages-build.log.gz.b64`
+- `docs/qa/tabloid-2026-09-06/types.log.gz.b64`
+- `public/muzak/README.md`
+- `src/ai/policy.ts`
+- `src/audio/NewsroomRadio.ts`
+- `src/audio/musicManifest.ts`
+- `src/components/game/CardAnimationLayer.tsx`
+- `src/components/game/CardCollectionTabloid.tsx`
+- `src/components/game/CardDetailOverlay.tsx`
+- `src/components/game/CardImage.tsx`
+- `src/components/game/EnhancedGameHand.tsx`
+- `src/components/game/EnhancedUSAMap.tsx`
+- `src/components/game/GameMenu.tsx`
+- `src/components/game/TabloidNewspaperLegacy.tsx`
+- `src/components/game/TabloidNewspaperV2.tsx`
+- `src/components/game/TabloidNewspaperV2Return.tsx`
+- `src/components/newspaper/NewspaperPageFlip.tsx`
+- `src/components/newsroom/NewsroomSoundControl.tsx`
+- `src/components/newsroom/PressDispatchTray.tsx`
+- `src/components/newsroom/RoundFrontPage.tsx`
+- `src/components/newsroom/StateTargetPicker.tsx`
+- `src/components/ui/audio-controls.tsx`
+- `src/contexts/AudioContext.tsx`
+- `src/data/aiStrategy.ts`
+- `src/engine/applyEffects-mvp.ts`
+- `src/game/stateTargeting.ts`
+- `src/hooks/aiHelpers.ts`
+- `src/hooks/useAudio.ts`
+- `src/hooks/useGameState.ts`
+- `src/main.tsx`
+- `src/mvp/engine.ts`
+- `src/pages/Index.tsx`
+- `src/styles/tabloid-press.css`
+- `src/systems/cardPlayQuote.ts`
+- `src/systems/cardResolution.ts`
+- `src/systems/news/pressDispatch.ts`
+- `src/systems/news/roundEdition.ts`
+- `src/ui/UiOverlays.tsx`
+- `src/ui/start/StartScreen.tsx`
+- `vite.config.ts`
+
+
 ## 2026-09-06 — Active mobile map panel restored (#805)
 
 Merge timestamp: 2026-09-06T03:41:15Z. Commit `08f4ba7fcc4e4ae96f6e22a5d6f50bf80f28be21`.
