@@ -2,14 +2,33 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
-## Unmerged — 2026-09-06T03:30:54Z: mobile visual follow-up
+## Unmerged — 2026-09-06T03:38:58Z: give the active map its full panel
+
+Hide retained inactive Radix tab panels so an empty States wrapper cannot take
+flex space from the map. 175 tests, typecheck and Pages build pass; existing
+lint/coverage debt is unchanged.
+
+Files prepared:
+- `UPDATES_LOG.md`
+- `docs/analysis/mobile-newsroom-2026-09-06/README.md`
+- `docs/analysis/mobile-newsroom-2026-09-06/evidence/check-logs.tar.gz`
+- `docs/analysis/mobile-newsroom-2026-09-06/evidence/results.json`
+- `docs/analysis/mobile-newsroom-2026-09-06/evidence/tested-source-sha256.json`
+- `docs/roadmap.md`
+- `log.md`
+- `src/styles/mobile-battle.css`
+
+## 2026-09-06 — Mobile card and tab styling merged (#804)
+
+Merge timestamp: 2026-09-06T03:32:49Z. Commit `9d4147b887a786593b300db4998bc83ab0b224ca`.
+GitHub app checks and Pages deployment passed.
 
 Real browser review found compact cards scaled to 85% by legacy CSS and shared
 tab utilities overriding the new navigation layout. Scoped styles fix both; play
 receipts now identify the affected IP side or ZONE target. 175 tests pass, types
-and Pages build pass. Existing lint/debt remains. Final rendering awaits deploy.
+and Pages build pass. Existing lint/debt remains. Browser confirms full-size cards and grid tabs; hidden-panel space is corrected in the next patch.
 
-Files prepared:
+Files merged:
 - `UPDATES_LOG.md`
 - `__tests__/game/mobileBattle.test.tsx`
 - `docs/analysis/mobile-newsroom-2026-09-06/README.md`

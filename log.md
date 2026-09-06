@@ -1,3 +1,13 @@
+# 2026-09-06T03:38:58Z — Siste kartpanelrettelse
+
+PR #804 er merget og publisert. Nytt stilark etter omlasting ga kort i 132×177
+uten skalering og faner i 44px grid. Meny og innstillinger åpnet. Skjult States-
+fane tok fortsatt flex-høyde fra kartet; en avgrenset CSS-regel retter dette.
+175 tester / 0 feil, typer og Pages-bygg består; lint/dekning uendret gjeld.
+Kildeendring: `src/styles/mobile-battle.css`; rapport, resultater, kildehasher og logger følger.
+
+---
+
 # 2026-09-06T03:30:01Z — Mobilflyt verifisert, visuell oppfølging
 
 PR #803 merget 2026-09-06T03:23:02Z (`6fd26bd`). GitHub og Pages fullført.
