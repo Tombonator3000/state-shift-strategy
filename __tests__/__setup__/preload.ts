@@ -2,22 +2,6 @@
 // evaluated, so @testing-library/react/dom can capture a valid document.body
 // at module init time.
 import { Window } from 'happy-dom';
-import * as realApplyEffectsMvp from '../../src/engine/applyEffects-mvp';
-import * as realComboEngine from '../../src/game/comboEngine';
-import * as realUseCardCollection from '../../src/hooks/useCardCollection';
-
-// Stash the genuine implementations BEFORE any test file gets a chance to
-// install bun:test module mocks. We capture the function references by value
-// (not the live module namespace) because ES module bindings are live —
-// reading `.applyEffectsMvp` from the namespace AFTER a mock would yield the
-// mocked function and cause infinite recursion.
-(globalThis as typeof globalThis & {
-  __TEST_REAL_MODULES__?: Record<string, unknown>;
-}).__TEST_REAL_MODULES__ = {
-  applyEffectsMvp: { ...realApplyEffectsMvp },
-  comboEngine: { ...realComboEngine },
-  useCardCollection: { ...realUseCardCollection },
-};
 
 const happyWindow = new Window();
 const globalRecord = globalThis as typeof globalThis & Record<string, unknown>;
@@ -66,3 +50,16 @@ if (typeof globalThis.localStorage === 'undefined') {
     writable: true,
   });
 }
+
+// Static imports run before the setup above. Await real modules only AFTER DOM
+// and storage exist, then capture their bindings before any test can mock them.
+const realApplyEffectsMvp = await import('../../src/engine/applyEffects-mvp');
+const realComboEngine = await import('../../src/game/comboEngine');
+const realUseCardCollection = await import('../../src/hooks/useCardCollection');
+(globalThis as typeof globalThis & {
+  __TEST_REAL_MODULES__?: Record<string, unknown>;
+}).__TEST_REAL_MODULES__ = {
+  applyEffectsMvp: { ...realApplyEffectsMvp },
+  comboEngine: { ...realComboEngine },
+  useCardCollection: { ...realUseCardCollection },
+};

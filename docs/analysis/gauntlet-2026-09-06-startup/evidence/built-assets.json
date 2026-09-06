@@ -1,0 +1,12 @@
+{
+  "kind": "static inspection, not browser runtime",
+  "checks": {
+    "pages_script_base": true,
+    "static_loading_status": true,
+    "zoom_not_disabled": true,
+    "pages_base_in_bundle": true,
+    "persistent_recovery_copy": true,
+    "no_extension_timestamp_queries": true,
+    "four_extensions_copied": true
+  }
+}

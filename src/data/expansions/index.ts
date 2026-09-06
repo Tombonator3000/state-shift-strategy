@@ -9,6 +9,8 @@ export type ExpansionPack = {
   fileName: string;
   cardCount: number;
   cards: GameCard[];
+  rejectedCardCount?: number;
+  unavailableReason?: string;
   metadata?: {
     name?: string;
     description?: string;
@@ -20,7 +22,7 @@ export type ExpansionPack = {
 const manifest: ExpansionPack[] = [];
 export const EXPANSION_MANIFEST = manifest;
 
-const DEV = typeof import.meta !== 'undefined' && (import.meta as any)?.env?.DEV;
+const DEV = import.meta.env?.DEV;
 
 const normalizeCard = (card: GameCard, tag: string): GameCard => {
   const { card: repaired, errors, changes } = repairToMVP(card);
@@ -45,12 +47,16 @@ const normalizeExpansion = (expansion: {
   version?: string;
   author?: string;
   cards: GameCard[];
+  rejectedCardCount?: number;
+  unavailableReason?: string;
 }): ExpansionPack => ({
   id: expansion.id,
   title: expansion.name,
   fileName: expansion.fileName,
   cards: expansion.cards.map(card => normalizeCard(card, expansion.id)),
   cardCount: expansion.cards.length,
+  rejectedCardCount: expansion.rejectedCardCount,
+  unavailableReason: expansion.unavailableReason,
   metadata: {
     name: expansion.name,
     description: expansion.description,
@@ -103,6 +109,8 @@ export const refreshExpansionManifest = async (): Promise<ExpansionPack[]> => {
       version: expansion.version,
       author: expansion.author,
       cards: expansion.cards as GameCard[],
+      rejectedCardCount: expansion.rejectedCardCount,
+      unavailableReason: expansion.unavailableReason,
     }),
   );
 

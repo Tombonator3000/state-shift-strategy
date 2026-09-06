@@ -250,7 +250,7 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
 
         const entries: ExpansionEntry[] = discovered.map(expansion => ({
           ...expansion,
-          enabled: Boolean(enabled[expansion.id]),
+          enabled: expansion.cards.length > 0 && Boolean(enabled[expansion.id]),
           weight:
             fromDistributionWeight(settings.setWeights[expansion.id]) ??
             (typeof weights[expansion.id] === 'number' ? weights[expansion.id] : DEFAULT_WEIGHT),
@@ -321,7 +321,7 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
     (id: string) => {
       setExpansions(prev => {
         const next = prev.map(entry =>
-          entry.id === id
+          entry.id === id && entry.cards.length > 0
             ? { ...entry, enabled: !entry.enabled }
             : entry,
         );
@@ -556,9 +556,12 @@ const ExpansionControl = ({ onClose }: ExpansionControlProps) => {
                           <div className="text-xs text-newspaper-text/70">
                             {entry.description ?? 'No description provided.'}
                           </div>
+                          {entry.unavailableReason && <p role="status" className="text-sm font-semibold text-red-800">Unavailable: {entry.unavailableReason}</p>}
+                          {!entry.unavailableReason && Boolean(entry.rejectedCardCount) && <p className="text-sm text-red-800">{entry.rejectedCardCount} cards could not be loaded.</p>}
                         </div>
                         <Switch
                           checked={entry.enabled}
+                          disabled={entry.cards.length === 0}
                           onCheckedChange={() => handleToggle(entry.id)}
                           aria-label={`Enable ${entry.name}`}
                         />

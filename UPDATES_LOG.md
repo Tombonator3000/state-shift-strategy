@@ -2,6 +2,83 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## Unmerged — 2026-09-06T00:32:40Z: startup recovery and real catalog
+
+Persistent startup/recovery status, protected storage reads, bounded JSON loading
+under the correct Pages base, and identical core catalogs in Vite and Bun.
+All 500 supported external cards load; 40 unsupported Midnight cards remain visible
+but cannot be enabled. Types, 168 tests and both builds pass. Lint is 410/51;
+coverage remains exit 1. Ready for PR checks and the user's requested merge.
+
+Files:
+- `M` `.github/workflows/game-checks.yml`
+- `M` `CLAUDE.md`
+- `M` `README.md`
+- `M` `UPDATES_LOG.md`
+- `M` `__tests__/__setup__/preload.ts`
+- `A` `__tests__/assetLoading.test.ts`
+- `A` `__tests__/extensionRecovery.test.ts`
+- `A` `__tests__/game/coreCatalog.test.ts`
+- `A` `__tests__/startup.test.tsx`
+- `M` `components.json`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/README.md`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/changes.md`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/built-assets.json`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/check-logs.tar.gz`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/results.json`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/tested-source-sha256.json`
+- `M` `docs/roadmap.md`
+- `M` `index.html`
+- `M` `log.md`
+- `A` `src/components/AppStartup.tsx`
+- `M` `src/components/expansions/ExpansionControl.tsx`
+- `M` `src/components/game/ManageExpansions.tsx`
+- `M` `src/components/pwa/PWAPrompt.tsx`
+- `M` `src/data/cardDatabase.ts`
+- `M` `src/data/core/index.ts`
+- `M` `src/data/expansions/index.ts`
+- `M` `src/data/expansions/state.ts`
+- `M` `src/data/extensionSystem.ts`
+- `M` `src/lib/assets.ts`
+- `A` `src/lib/expansions/cardValidation.ts`
+- `M` `src/lib/expansions/discover.ts`
+- `A` `src/lib/fetchAssetJson.ts`
+- `A` `src/lib/startupSettings.ts`
+- `M` `src/main.tsx`
+- `M` `src/state/settings.ts`
+- `M` `src/utils/storage.ts`
+
+## 2026-09-06 — Card inspection and discard fixes merged (#801)
+
+Merge timestamp: 2026-09-06T00:13:38Z. Commit `4e929c063bf7422bfa377b6da2f9318ccc26c43f`.
+Merged on the user's explicit instruction. GitHub's app-types/tests/build job
+passed on the final PR head; lint/coverage debt remains visible. Browser/fps
+verification is still open. The earlier unmerged entries below are historical.
+
+Files included in this merge:
+- `A` `.github/workflows/game-checks.yml`
+- `M` `README.md`
+- `M` `UPDATES_LOG.md`
+- `A` `__tests__/game/cardInspector.test.tsx`
+- `D` `bun.lock`
+- `M` `components.json`
+- `M` `docs/TECHNICAL_README.md`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/README.md`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/changes.md`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/build.log`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tests-summary.log`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/typecheck.log`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/lint.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/results.json`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tested-source-sha256.json`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tests-coverage.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tests.log.gz`
+- `M` `docs/roadmap.md`
+- `M` `log.md`
+- `M` `src/components/game/CardDetailOverlay.tsx`
+- `M` `src/components/game/EnhancedGameHand.tsx`
+- `A` `src/styles/card-inspector.css`
+
 ## Unmerged — 2026-09-06T00:03:59Z: follow-up draft PR #801 published
 
 [PR #801](https://github.com/Tombonator3000/state-shift-strategy/pull/801) contains the verified card-flow changes. GitHub Actions

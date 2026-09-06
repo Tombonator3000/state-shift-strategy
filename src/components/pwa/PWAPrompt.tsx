@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usePWA } from '@/hooks/usePWA';
+import { safeGetSessionStorageItem, safeSetSessionStorageItem } from '@/utils/storage';
 import { X, Download, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 
 export function PWAPrompt() {
@@ -40,12 +41,12 @@ export function PWAPrompt() {
     setShowInstallPrompt(false);
     setDismissed(true);
     // Remember dismissal for this session
-    sessionStorage.setItem('pwa-install-dismissed', 'true');
+    safeSetSessionStorageItem('pwa-install-dismissed', 'true');
   };
 
   // Check if was dismissed this session
   useEffect(() => {
-    if (sessionStorage.getItem('pwa-install-dismissed') === 'true') {
+    if (safeGetSessionStorageItem('pwa-install-dismissed') === 'true') {
       setDismissed(true);
     }
   }, []);

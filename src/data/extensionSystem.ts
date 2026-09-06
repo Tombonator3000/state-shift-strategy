@@ -1,8 +1,7 @@
-declare const document: any;
-declare const window: any;
-
 import type { GameCard } from '@/rules/mvp';
-import { repairToMVP, validateCardMVP } from '@/mvp/validator';
+import { fetchAssetJson } from '@/lib/fetchAssetJson';
+import { readExpansionCard } from '@/lib/expansions/cardValidation';
+import { safeGetLocalStorageItem, safeSetLocalStorageItem } from '@/utils/storage';
 
 export interface ExtensionCard extends GameCard {
   extId?: string; // Extension ID for tracking
@@ -30,7 +29,21 @@ export interface EnabledExtension {
 
 const STORAGE_KEY = 'sg_enabled_extensions';
 const PAYLOAD_STORAGE_KEY = 'sg_extension_payloads';
-const DEV = typeof import.meta !== 'undefined' && (import.meta as any)?.env?.DEV;
+type RawExtension = Omit<Extension, 'cards' | 'count' | 'description' | 'factions'> & {
+  cards: unknown[];
+  description?: unknown;
+  count?: unknown;
+  factions?: unknown;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+const isEnabledExtension = (value: unknown): value is EnabledExtension =>
+  isRecord(value) && typeof value.id === 'string' && value.id.length > 0 && typeof value.name === 'string'
+  && typeof value.version === 'string'
+  && (value.handleKey === undefined || typeof value.handleKey === 'string')
+  && (value.source === 'cdn' || value.source === 'file' || value.source === 'folder');
 
 export class ExtensionManager {
   private extensions: Map<string, Extension> = new Map();
@@ -44,9 +57,10 @@ export class ExtensionManager {
 
   private loadEnabledExtensions() {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = safeGetLocalStorageItem(STORAGE_KEY);
       if (stored) {
-        this.enabledExtensions = JSON.parse(stored);
+        const parsed: unknown = JSON.parse(stored);
+        this.enabledExtensions = Array.isArray(parsed) ? parsed.filter(isEnabledExtension) : [];
       }
     } catch (error) {
       console.warn('Failed to load enabled extensions:', error);
@@ -56,7 +70,7 @@ export class ExtensionManager {
 
   private saveEnabledExtensions() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.enabledExtensions));
+      safeSetLocalStorageItem(STORAGE_KEY, JSON.stringify(this.enabledExtensions));
     } catch (error) {
       console.warn('Failed to save enabled extensions:', error);
     }
@@ -66,12 +80,13 @@ export class ExtensionManager {
     this.persistedExtensions.clear();
 
     try {
-      const stored = localStorage.getItem(PAYLOAD_STORAGE_KEY);
+      const stored = safeGetLocalStorageItem(PAYLOAD_STORAGE_KEY);
       if (!stored) {
         return;
       }
 
-      const parsed = JSON.parse(stored) as Record<string, Extension>;
+      const parsed: unknown = JSON.parse(stored);
+      if (!isRecord(parsed)) return;
       let needsSave = false;
 
       for (const extension of Object.values(parsed)) {
@@ -95,219 +110,111 @@ export class ExtensionManager {
   private savePersistedExtensions() {
     try {
       const serialized = JSON.stringify(Object.fromEntries(this.persistedExtensions.entries()));
-      localStorage.setItem(PAYLOAD_STORAGE_KEY, serialized);
+      safeSetLocalStorageItem(PAYLOAD_STORAGE_KEY, serialized);
     } catch (error) {
       console.warn('Failed to save persisted extensions:', error);
     }
   }
 
   async scanCDNExtensions(): Promise<Extension[]> {
-    const extensions: Extension[] = [];
-    const timestamp = Date.now();
-    
+    let files = ['cryptids.json'];
     try {
-      console.log(`🔄 Scanning CDN extensions with timestamp: ${timestamp}`);
-      
-      // Try to load manifest first with cache-busting
-      const manifestResponse = await fetch(`/extensions/manifest.json?t=${timestamp}`, { 
-        headers: { 'Cache-Control': 'no-cache' }
-      });
-      
-      if (manifestResponse.ok) {
-        const manifest = (await manifestResponse.json()) as any;
-        console.log(`📋 CDN Manifest loaded:`, manifest);
-        
-        for (const file of manifest.files || []) {
-          try {
-            console.log(`📥 Loading CDN extension: ${file}`);
-            const extensionResponse = await fetch(`/extensions/${file}?t=${timestamp}`, { 
-              headers: { 'Cache-Control': 'no-cache' }
-            });
-            
-            if (extensionResponse.ok) {
-              const extension = await extensionResponse.json() as any;
-              console.log(`✅ CDN Extension loaded:`, extension.name, extension.version);
-              
-              if (this.validateExtension(extension)) {
-                extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
-                extensions.push(extension);
-              }
-            } else {
-              console.warn(`❌ Failed to load CDN extension ${file}: ${extensionResponse.status}`);
-            }
-          } catch (error) {
-            console.warn(`💥 Failed to load CDN extension ${file}:`, error);
-          }
-        }
-      } else {
-        console.warn('⚠️ CDN Manifest not found, trying fallback extensions');
-        // Try known extensions if no manifest
-        const knownExtensions = ['cryptids.json'];
-        for (const file of knownExtensions) {
-          try {
-            const response = await fetch(`/extensions/${file}?t=${timestamp}`, { 
-              headers: { 'Cache-Control': 'no-cache' }
-            });
-            if (response.ok) {
-              const extension = await response.json() as any;
-              if (this.validateExtension(extension)) {
-                extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
-                extensions.push(extension);
-              }
-            }
-          } catch (error) {
-            // Silently ignore missing files
-          }
-        }
+      const manifest = await fetchAssetJson('/extensions/manifest.json');
+      if (isRecord(manifest) && Array.isArray(manifest.files)) {
+        files = manifest.files.filter((file): file is string => typeof file === 'string');
       }
     } catch (error) {
-      console.warn('💥 CDN extension scan failed:', error);
+      console.warn('[Extensions] Manifest unavailable; checking known extensions', error);
     }
-    
-    console.log(`🎮 CDN scan complete: ${extensions.length} extensions found`);
-    return extensions;
+
+    const extensions = await Promise.all([...new Set(files)].map(async file => {
+      try {
+        const raw = await fetchAssetJson(`/extensions/${file}`);
+        return this.validateExtension(raw) ? this.sanitizeExtension(raw) : null;
+      } catch (error) {
+        console.warn(`[Extensions] Failed to load ${file}`, error);
+        return null;
+      }
+    }));
+    return extensions.filter((extension): extension is Extension => extension !== null && extension.cards.length > 0);
   }
 
   async loadFromFolderPicker(): Promise<Extension[]> {
-    return new Promise((resolve) => {
-      const input = (typeof document !== 'undefined' ? document.createElement('input') : null);
-      input.type = 'file';
-      input.webkitdirectory = true;
-      input.multiple = true;
-      
-      input.onchange = async (e: any) => {
-        const files = (e.target as any).files;
-        if (!files) return resolve([]);
-        
-        const extensions: Extension[] = [];
-        
-        for (const file of Array.from(files as any)) {
-          if ((file as any).name.endsWith('.json')) {
-            try {
-              const text = await (file as any).text();
-              const extension = JSON.parse(text) as any;
-              if (this.validateExtension(extension)) {
-                extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
-                extensions.push(extension);
-              }
-            } catch (error) {
-              console.warn(`Failed to parse ${(file as any).name}:`, error);
-            }
-          }
-        }
-        
-        resolve(extensions);
-      };
-      
-      input.click();
-    });
+    return this.pickExtensions(true);
   }
 
   async loadFromFilePicker(): Promise<Extension[]> {
-    return new Promise((resolve) => {
-      const input = (typeof document !== 'undefined' ? document.createElement('input') : null);
+    return this.pickExtensions(false);
+  }
+
+  private pickExtensions(directory: boolean): Promise<Extension[]> {
+    if (typeof document === 'undefined') return Promise.resolve([]);
+    return new Promise(resolve => {
+      const input = document.createElement('input');
       input.type = 'file';
       input.multiple = true;
       input.accept = '.json';
-      
-      input.onchange = async (e: any) => {
-        const files = (e.target as any).files;
-        if (!files) return resolve([]);
-        
+      input.webkitdirectory = directory;
+      input.oncancel = () => resolve([]);
+      input.onchange = async () => {
         const extensions: Extension[] = [];
-        
-        for (const file of Array.from(files as any)) {
+        for (const file of Array.from(input.files ?? [])) {
+          if (!file.name.toLowerCase().endsWith('.json')) continue;
           try {
-            const text = await (file as any).text();
-            const extension = JSON.parse(text) as any;
-            if (this.validateExtension(extension)) {
-              extension.cards = this.prepareExtensionCards(extension.cards, extension.id);
-              extensions.push(extension);
+            const raw: unknown = JSON.parse(await file.text());
+            if (this.validateExtension(raw)) {
+              const extension = this.sanitizeExtension(raw);
+              if (extension.cards.length > 0) extensions.push(extension);
             }
           } catch (error) {
-            console.warn(`Failed to parse ${(file as any).name}:`, error);
+            console.warn(`Failed to parse ${file.name}:`, error);
           }
         }
-        
         resolve(extensions);
       };
-      
       input.click();
     });
   }
 
-  private validateExtension(extension: any): boolean {
-    const isValid = (
-      extension &&
-      typeof extension.id === 'string' &&
-      typeof extension.name === 'string' &&
-      typeof extension.version === 'string' &&
-      typeof extension.author === 'string' &&
-      Array.isArray(extension.factions) &&
-      Array.isArray(extension.cards) &&
-      extension.cards.every((card: any) => 
-        card.id && card.faction && card.name && card.type && card.cost !== undefined
-      )
-    );
-    
-    if (!isValid) {
-      console.warn('❌ Extension validation failed:', {
-        hasId: !!extension?.id,
-        hasName: !!extension?.name,
-        hasVersion: !!extension?.version,
-        hasAuthor: !!extension?.author,
-        hasFactions: Array.isArray(extension?.factions),
-        hasCards: Array.isArray(extension?.cards),
-        cardCount: extension?.cards?.length || 0,
-        firstCardValid: extension?.cards?.[0] ? {
-          hasId: !!extension.cards[0].id,
-          hasFaction: !!extension.cards[0].faction,
-          hasName: !!extension.cards[0].name,
-          hasType: !!extension.cards[0].type,
-          hasCost: extension.cards[0].cost !== undefined
-        } : 'no cards'
-      });
-    }
-    
-    return isValid;
+  private validateExtension(extension: unknown): extension is RawExtension {
+    const valid = isRecord(extension)
+      && typeof extension.id === 'string' && extension.id.length > 0
+      && typeof extension.name === 'string'
+      && typeof extension.version === 'string'
+      && typeof extension.author === 'string'
+      && (extension.factions === undefined || (Array.isArray(extension.factions)
+        && extension.factions.every(faction => faction === 'truth' || faction === 'government')))
+      && (extension.tempImageId === undefined || typeof extension.tempImageId === 'string')
+      && Array.isArray(extension.cards)
+      && extension.cards.every(card => isRecord(card)
+        && typeof card.id === 'string' && card.id.length > 0
+        && typeof card.faction === 'string'
+        && typeof card.name === 'string' && typeof card.type === 'string'
+        && card.cost !== undefined);
+    if (!valid) console.warn('[Extensions] Invalid extension data');
+    return valid;
   }
 
-  private sanitizeExtensionCard(card: any, extensionId: string): ExtensionCard | null {
-    const source = { ...card, extId: extensionId };
-    const { card: repaired, errors, changes } = repairToMVP(source);
-    const validation = validateCardMVP(repaired);
-
-    if (DEV) {
-      if (changes.length > 0) {
-        console.info(`[EXTENSION:${extensionId}] ${repaired.id}: ${changes.join('; ')}`);
-      }
-      if (errors.length > 0) {
-        console.warn(`[EXTENSION:${extensionId}] ${repaired.id}: ${errors.join('; ')}`);
-      }
-      if (!validation.ok) {
-        console.warn(
-          `[EXTENSION:${extensionId}] ${repaired.id}: ${validation.errors.join('; ')}`,
-        );
-      }
-    }
-
-    if (!validation.ok) {
-      return null;
-    }
-
-    return { ...repaired, extId: extensionId };
+  private sanitizeExtensionCard(card: unknown, extensionId: string): ExtensionCard | null {
+    const result = readExpansionCard(card);
+    return result.card ? { ...result.card, extId: extensionId } : null;
   }
 
-  private prepareExtensionCards(cards: ExtensionCard[], extensionId: string): ExtensionCard[] {
+  private prepareExtensionCards(cards: unknown[], extensionId: string): ExtensionCard[] {
     return cards
       .map(card => this.sanitizeExtensionCard(card, extensionId))
       .filter((card): card is ExtensionCard => card !== null);
   }
 
-  private sanitizeExtension(extension: Extension): Extension {
+  private sanitizeExtension(extension: RawExtension): Extension {
+    const cards = this.prepareExtensionCards(extension.cards, extension.id);
     return {
       ...extension,
-      cards: this.prepareExtensionCards(extension.cards, extension.id)
+      description: typeof extension.description === 'string' ? extension.description : '',
+      factions: [...new Set(cards.map(card => card.faction.toLowerCase())
+        .filter((faction): faction is 'truth' | 'government' => faction === 'truth' || faction === 'government'))],
+      count: cards.length,
+      cards,
     };
   }
 

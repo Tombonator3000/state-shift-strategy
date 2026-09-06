@@ -15,6 +15,9 @@ filer i samme `bun test`-kjøring og kan ikke "resettes" av `afterAll`.
 
 For å mocke kun innenfor én fil uten å forurense andre filer:
 
+Foretrekk `spyOn` med `mockRestore` når det er tilstrekkelig. Mønsteret under
+er for eksisterende tester som trenger delegerende modul-mocker.
+
 1. **Stash ekte modul-bindinger i `__tests__/__setup__/preload.ts`** (kjøres
    via `bunfig.toml [test] preload = "__tests__/__setup__/preload.ts"`).
    Bruk **spread-kopi** (`{ ...module }`) — ES-modulbindinger er live, så
@@ -22,8 +25,9 @@ For å mocke kun innenfor én fil uten å forurense andre filer:
    noe som gir uendelig rekursjon i delegasjons-stuben.
 
    ```ts
-   import * as realApplyEffectsMvp from '../../src/engine/applyEffects-mvp';
-   (globalThis as any).__TEST_REAL_MODULES__ = {
+   // Først: installer DOM og lagring. Statiske imports kjører før oppsettet.
+   const realApplyEffectsMvp = await import('../../src/engine/applyEffects-mvp');
+   (globalThis as typeof globalThis & { __TEST_REAL_MODULES__?: Record<string, unknown> }).__TEST_REAL_MODULES__ = {
      applyEffectsMvp: { ...realApplyEffectsMvp },
      // …
    };
@@ -75,14 +79,20 @@ med `react-test-renderer` når en happy-dom `document` finnes.
 
 - `src/assets/audio/paranormalSfx.ts` (6993 linjer base64) krasjer parser
   med stack overflow → ligger i `eslint.config.js` `ignores`.
-- Eksisterende baseline: 445 `no-explicit-any`-feil og 53 advarsler — ikke
-  blokker for nye PR-er, men introduser ikke nye `any`.
+- Målt 2026-09-06: 410 feil / 51 varsler mot 438 / 51 etter PR #801.
+  Lint-porten feiler fortsatt. Ikke skjul gjelden eller introduser nye `any`.
 
 ## Sjekkliste før commit
 
 ```
-npx tsc --noEmit
-bun test
+npm run typecheck       # tsconfig.app.json; rotkonfigurasjonen er en tom solution
+bun test --coverage --coverage-reporter=text
 npm run build           # bekrefter manualChunks fortsatt OK
-npm run lint            # OK å akseptere baseline-feil over
+npm run lint            # rapporter eksisterende feil separat fra regresjoner
 ```
+
+Kildeimportene i `src/data/core/index.ts` er eksplisitte slik at Vite og Bun
+bruker de samme 424 kortene. Ikke gjeninnfør `import.meta.glob` som eneste
+testlaster: Bun falt da stille tilbake til seks nødkort. Ekspansjonstester leser
+de ekte JSON-filene: 500 støttede kort, 40 avvist med synlig begrunnelse. Se
+`docs/analysis/gauntlet-2026-09-06-startup/README.md` for avgrensningen.

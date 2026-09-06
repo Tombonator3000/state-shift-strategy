@@ -1,3 +1,89 @@
+# 2026-09-06T00:32:40Z — Oppstart og ekte kortkatalog reparert lokalt
+
+Gren `fix/startup-and-catalog-2026-09-06`, basert på merge #801. Rettet oppstart
+ved blokkert lagring, lagt inn varig status/omlasting, tidsavgrenset JSON-lastingen
+og brukt Pages-base. Felles Vite/Bun-katalog gir 424 kjernekort. 500 eksterne kort
+lastes; 40 Midnight-kort sperres synlig fordi effektene ennå ikke er implementert.
+
+168 tester / 0 feil, 622 assertions, 41 filer. Typecheck, normalbygg og Pages-bygg
+består. Lint 410 feil / 51 varsler (før 438 / 51). Dekningskommandoen exit 1;
+krav uendret. Ekte nettleser/offline/fps og ChatGPT Work-cachefeilen er uverifisert.
+Mellomresultater er bevart. Klar for PR-kontroll og merge etter brukerens instruksjon.
+
+[Rapport](docs/analysis/gauntlet-2026-09-06-startup/README.md).
+Filer:
+- `M` `.github/workflows/game-checks.yml`
+- `M` `CLAUDE.md`
+- `M` `README.md`
+- `M` `UPDATES_LOG.md`
+- `M` `__tests__/__setup__/preload.ts`
+- `A` `__tests__/assetLoading.test.ts`
+- `A` `__tests__/extensionRecovery.test.ts`
+- `A` `__tests__/game/coreCatalog.test.ts`
+- `A` `__tests__/startup.test.tsx`
+- `M` `components.json`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/README.md`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/changes.md`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/built-assets.json`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/check-logs.tar.gz`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/results.json`
+- `A` `docs/analysis/gauntlet-2026-09-06-startup/evidence/tested-source-sha256.json`
+- `M` `docs/roadmap.md`
+- `M` `index.html`
+- `M` `log.md`
+- `A` `src/components/AppStartup.tsx`
+- `M` `src/components/expansions/ExpansionControl.tsx`
+- `M` `src/components/game/ManageExpansions.tsx`
+- `M` `src/components/pwa/PWAPrompt.tsx`
+- `M` `src/data/cardDatabase.ts`
+- `M` `src/data/core/index.ts`
+- `M` `src/data/expansions/index.ts`
+- `M` `src/data/expansions/state.ts`
+- `M` `src/data/extensionSystem.ts`
+- `M` `src/lib/assets.ts`
+- `A` `src/lib/expansions/cardValidation.ts`
+- `M` `src/lib/expansions/discover.ts`
+- `A` `src/lib/fetchAssetJson.ts`
+- `A` `src/lib/startupSettings.ts`
+- `M` `src/main.tsx`
+- `M` `src/state/settings.ts`
+- `M` `src/utils/storage.ts`
+
+---
+
+# 2026-09-06T00:13:38Z — PR #801 merget
+
+Brukeren ba om merge og feilretting. PR #801 ble merget med forventet head
+`c39c08b` til `4e929c063bf7422bfa377b6da2f9318ccc26c43f`. GitHub bekreftet merge.
+App-typecheck, 146 tester og bygg bestod på PR-hodet; lint/dekning feilet som dokumentert.
+Ingen nettleser-/fps-godkjenning påstås. Tidligere unmerged-notater er historikk.
+
+Filer merget:
+- `A` `.github/workflows/game-checks.yml`
+- `M` `README.md`
+- `M` `UPDATES_LOG.md`
+- `A` `__tests__/game/cardInspector.test.tsx`
+- `D` `bun.lock`
+- `M` `components.json`
+- `M` `docs/TECHNICAL_README.md`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/README.md`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/changes.md`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/build.log`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tests-summary.log`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/typecheck.log`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/lint.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/results.json`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tested-source-sha256.json`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tests-coverage.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tests.log.gz`
+- `M` `docs/roadmap.md`
+- `M` `log.md`
+- `M` `src/components/game/CardDetailOverlay.tsx`
+- `M` `src/components/game/EnhancedGameHand.tsx`
+- `A` `src/styles/card-inspector.css`
+
+---
+
 # 2026-09-06T00:03:59Z — Oppfølging publisert i draft-PR #801
 
 [PR #801](https://github.com/Tombonator3000/state-shift-strategy/pull/801) er opprettet. Publisert kildecommit `0db0046` matcher

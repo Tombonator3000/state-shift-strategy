@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Paranoid Times - State Shift Strategy</title>
     <meta name="description" content="A conspiracy-themed card strategy game. Control the narrative, capture states, and expose the truth!" />
     <meta name="author" content="ShadowGov Team" />
@@ -61,7 +61,16 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main style="min-height:100vh;display:grid;place-items:center;background:#171717;color:#f5f2eb;padding:24px;font-family:Georgia,serif">
+        <section>
+          <h1>Paranoid Times</h1>
+          <p role="status">Opening the newsroom…</p>
+          <p>If loading stops, <a href="" style="color:inherit">reload the game</a>.</p>
+          <noscript>Enable JavaScript to play.</noscript>
+        </section>
+      </main>
+    </div>
     <div class="paper-overlay" aria-hidden="true"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
