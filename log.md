@@ -1,3 +1,16 @@
+# 2026-09-06 — Todo implemented and first live verification (#806)
+
+Merged `3f5fda27` at 09:44:21Z. Lovable project and GitHub main match. Pages build
+34025489085 succeeds. Radio Theme 2 starts; pause survives faction selection;
+Truth 2 recording selection reports actual playback. PC ZONE preview and confirmation
+charge 4 IP once (5 → 1). AI turn completes, newspaper opens, Continue returns to play.
+Live checks caught incorrect newspaper round selection, a clipped desktop map and a
+no-op Update Now action after worker auto-activation. Follow-up fixes are in progress.
+198 tests passed for #806; lint/coverage debt remains explicit. Twelve MP3s fully decode.
+Exact merged files are in UPDATES_LOG.md; QA and todo carry the remaining checks.
+
+---
+
 # 2026-09-06T08:57:16Z — Tabloidarbeidsliste og seks grafikkforslag
 
 Brukeren ber om en todo og grafikkeksempler: pressure på mobil/PC, eksisterende

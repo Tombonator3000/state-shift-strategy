@@ -115,7 +115,7 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
           // Offline fallback
           navigateFallback: 'index.html',
-          navigateFallbackDenylist: [/^\/api/, /^\/_/],
+          navigateFallbackDenylist: [/^\/api/, /^\/_/, /\/qa\//],
           runtimeCaching: [
             {
               // Cache Google Fonts

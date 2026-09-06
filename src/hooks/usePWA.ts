@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { applyPwaUpdate } from '@/utils/pwaUpdate';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -170,18 +171,8 @@ export function usePWA(): PWAState & PWAActions {
 
   // Apply SW update
   const update = useCallback(async (): Promise<void> => {
-    if (!registration?.waiting) {
-      console.warn('[PWA] No waiting service worker');
-      return;
-    }
-
     setIsUpdating(true);
-
-    // Tell the waiting SW to skip waiting and become active
-    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-
-    // Reload the page to use the new SW
-    window.location.reload();
+    await applyPwaUpdate(registration, navigator.serviceWorker, () => window.location.reload());
   }, [registration]);
 
   // Dismiss update notification

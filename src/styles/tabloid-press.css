@@ -213,3 +213,15 @@ body { background: var(--press-paper); }
 .press-art-fallback { display: grid; place-content: center; width: 100%; height: 100%; min-height: 60px; background: var(--press-paper); color: var(--press-ink); border: 4px double currentColor; text-align: center; overflow: hidden; }
 .press-art-fallback strong { color: var(--press-red); transform: rotate(-9deg); border: 3px solid currentColor; padding: 5px; font: 900 clamp(12px,2vw,25px)/1 Arial, sans-serif; }
 .press-art-fallback small { padding: 9px 0; font: 9px ui-monospace, monospace; }
+
+@media (min-width: 1024px) {
+  .desktop-newsroom-board { display: grid; grid-template-columns: minmax(0,1fr) 280px; height: 100%; min-height: 0; gap: 12px; }
+  .desktop-map-column, .desktop-map-column #game-map-board, .desktop-map-column .press-us-map, .desktop-map-column .press-map-frame { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+  .desktop-map-column .press-us-map, .desktop-map-column .press-map-frame { flex: 1; }
+  .desktop-map-column .press-map-frame { padding: 8px; border-radius: 0; background: var(--press-paper); }
+  .desktop-map-column #us-map-stage { height: 100% !important; flex: 1; border-radius: 0; }
+  .desktop-played-column { min-height: 0; overflow-y: auto; border-left: 3px double var(--press-ink); }
+  .desktop-played-column .front-page-layout { height: auto; overflow: visible; }
+  .desktop-played-column .front-page-layout > div { grid-template-columns: 1fr; }
+  .desktop-played-column section > .grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
